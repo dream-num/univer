@@ -376,7 +376,7 @@ export class FWorkbook extends FBaseInitialable {
      * // The code below registers a callback that will be triggered before invoking a command targeting the Univer sheet
      * const activeSpreadsheet = univerAPI.getActiveWorkbook();
      * activeSpreadsheet.onBeforeCommandExecute((command) => {
-     *    console.log('Command executed:', command);
+     *   console.log('Command executed:', command);
      * });
      * ```
      */
@@ -820,9 +820,9 @@ export class FWorkbook extends FBaseInitialable {
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const rangeThemeStyle = new RangeThemeStyle('MyTheme');
      * rangeThemeStyle.setSecondRowStyle({
-     *    bg: {
-     *       rgb: 'rgb(214,231,241)',
-     *    },
+     *   bg: {
+     *     rgb: 'rgb(214,231,241)',
+     *   },
      * });
      * fWorkbook.registerRangeTheme(rangeThemeStyle);
      * ```

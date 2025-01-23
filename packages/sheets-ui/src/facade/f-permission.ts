@@ -16,6 +16,9 @@
 
 import { FPermission } from '@univerjs/sheets/facade';
 
+/**
+ * @ignore
+ */
 export interface IFPermissionSheetsUIMixin {
     /**
      * Set visibility of unauthorized pop-up window

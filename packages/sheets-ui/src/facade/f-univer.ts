@@ -39,6 +39,9 @@ import { FSheetHooks } from '@univerjs/sheets/facade';
 import { CopyCommand, CutCommand, HTML_CLIPBOARD_MIME_TYPE, IClipboardInterfaceService, KeyCode, PasteCommand, PLAIN_TEXT_CLIPBOARD_MIME_TYPE, supportClipboardAPI } from '@univerjs/ui';
 import { combineLatest, filter } from 'rxjs';
 
+/**
+ * @ignore
+ */
 export interface IFUniverSheetsUIMixin {
     /**
      * Customize the column header of the spreadsheet.
@@ -245,6 +248,9 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
         this._initObserverListener(injector);
     }
 
+    /**
+     * @ignore
+     */
     // eslint-disable-next-line max-lines-per-function
     _initObserverListener(injector: Injector): void {
         const univerInstanceService = injector.get(IUniverInstanceService);

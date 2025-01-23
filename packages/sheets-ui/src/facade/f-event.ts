@@ -150,6 +150,9 @@ export const CellFEventName = {
     SelectionChanged: 'SelectionChanged',
 } as const;
 
+/**
+ * @ignore
+ */
 export interface IFSheetsUIEventNameMixin {
     /**
      * Trigger this event before the clipboard content changes.
@@ -184,10 +187,10 @@ export interface IFSheetsUIEventNameMixin {
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.Event.BeforeClipboardPaste, (param) => {
-     *  const {text, html} = param;
-     *  console.log('debugger', text, html);
-     *  // if want to cancel the clipboard paste
-     *  param.cancel = true;
+     *   const {text, html} = param;
+     *   console.log('debugger', text, html);
+     *   // if want to cancel the clipboard paste
+     *   param.cancel = true;
      * })
      * ```
      */
@@ -198,8 +201,8 @@ export interface IFSheetsUIEventNameMixin {
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.Event.ClipboardPasted, (param) => {
-     *  const {text, html} = param;
-     *  console.log('debugger', text, html); // {text: '...', html: '...'}
+     *   const {text, html} = param;
+     *   console.log('debugger', text, html); // {text: '...', html: '...'}
      * })
      * ```
      */
@@ -211,7 +214,7 @@ export interface IFSheetsUIEventNameMixin {
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.Event.BeforeSheetEditStart, (params) => {
-     *      const { worksheet, workbook, row, column, eventType, keycode, isZenEditor } = params;
+     *   const { worksheet, workbook, row, column, eventType, keycode, isZenEditor } = params;
      * });
      * ```
      */
@@ -222,7 +225,7 @@ export interface IFSheetsUIEventNameMixin {
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.Event.SheetEditStarted, (params) => {
-     *      const { worksheet, workbook, row, column, eventType, keycode, isZenEditor } = params;
+     *   const { worksheet, workbook, row, column, eventType, keycode, isZenEditor } = params;
      * });
      * ```
      */
@@ -233,7 +236,7 @@ export interface IFSheetsUIEventNameMixin {
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.Event.SheetEditChanging, (params) => {
-     *      const { worksheet, workbook, row, column, value, isZenEditor } = params;
+     *   const { worksheet, workbook, row, column, value, isZenEditor } = params;
      * });
      * ```
      */
@@ -244,7 +247,7 @@ export interface IFSheetsUIEventNameMixin {
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.Event.BeforeSheetEditEnd, (params) => {
-     *      const { worksheet, workbook, row, column, value, eventType, keycode, isZenEditor } = params;
+     *   const { worksheet, workbook, row, column, value, eventType, keycode, isZenEditor } = params;
      * });
      * ```
      */
@@ -255,7 +258,7 @@ export interface IFSheetsUIEventNameMixin {
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.Event.SheetEditEnded, (params) => {
-     *      const { worksheet, workbook, row, column, eventType, keycode, isZenEditor } = params;
+     *   const { worksheet, workbook, row, column, eventType, keycode, isZenEditor } = params;
      * });
      * ```
      */
@@ -266,7 +269,7 @@ export interface IFSheetsUIEventNameMixin {
      * @see {@link ICellEventParam}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.CellClicked, (params)=> {
+     * univerAPI.addEvent(univerAPI.Event.CellClicked, (params) => {
      *      const { worksheet, workbook, row, column, value, isZenEditor } = params;
      * });
      * ```
@@ -277,8 +280,8 @@ export interface IFSheetsUIEventNameMixin {
      * @see {@link ICellEventParam}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.CellPointerDown, (params)=> {
-     *      const { worksheet, workbook, row, column } = params;
+     * univerAPI.addEvent(univerAPI.Event.CellPointerDown, (params) => {
+     *   const { worksheet, workbook, row, column } = params;
      * });
      * ```
      */
@@ -289,8 +292,8 @@ export interface IFSheetsUIEventNameMixin {
      * @see {@link ICellEventParam}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.CellPointerUp, (params)=> {
-     *      const { worksheet, workbook, row, column } = params;
+     * univerAPI.addEvent(univerAPI.Event.CellPointerUp, (params) => {
+     *   const { worksheet, workbook, row, column } = params;
      * });
      * ```
      */
@@ -301,8 +304,8 @@ export interface IFSheetsUIEventNameMixin {
      * @see {@link ICellEventParam}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.CellHover, (params)=> {
-     *      const { worksheet, workbook, row, column } = params;
+     * univerAPI.addEvent(univerAPI.Event.CellHover, (params) => {
+     *   const { worksheet, workbook, row, column } = params;
      * });
      * ```
      */
@@ -312,8 +315,8 @@ export interface IFSheetsUIEventNameMixin {
      * @see {@link ICellEventParam}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.CellPointerMove, (params)=> {
-     *      const { worksheet, workbook, row, column } = params;
+     * univerAPI.addEvent(univerAPI.Event.CellPointerMove, (params) => {
+     *   const { worksheet, workbook, row, column } = params;
      * });
      * ```
      */
@@ -420,8 +423,8 @@ export interface IFSheetsUIEventNameMixin {
      * @see {@link ICellEventParam}
      * @example
      * ```ts
-     * univerAPI.getActiveWorkbook().addEvent(univerAPI.Event.DragOver, (params)=> {
-     *      const { worksheet, workbook, row, column } = params;
+     * univerAPI.getActiveWorkbook().addEvent(univerAPI.Event.DragOver, (params) => {
+     *   const { worksheet, workbook, row, column } = params;
      * });
      * ```
      */
@@ -432,7 +435,7 @@ export interface IFSheetsUIEventNameMixin {
      * @see {@link ICellEventParam}
      * @example
      * ```ts
-     * univerAPI.getActiveWorkbook().addEvent(univerAPI.Event.Drop, (params)=> {
+     * univerAPI.getActiveWorkbook().addEvent(univerAPI.Event.Drop, (params) => {
      *      const { worksheet, workbook, row, column } = params;
      * });
      * ```
@@ -444,8 +447,8 @@ export interface IFSheetsUIEventNameMixin {
      * @see {@link IScrollEventParam}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.Scroll, (params)=> {
-     *      const { worksheet, workbook, scrollX, scrollY } = params;
+     * univerAPI.addEvent(univerAPI.Event.Scroll, (params) => {
+     *   const { worksheet, workbook, scrollX, scrollY } = params;
      * });
      * ```
      */
@@ -457,7 +460,7 @@ export interface IFSheetsUIEventNameMixin {
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.Event.SelectionChanged, (p)=> {
-     *      const { worksheet, workbook, selections } = p;
+     *   const { worksheet, workbook, selections } = p;
      * });
      * ```
      */
@@ -469,7 +472,7 @@ export interface IFSheetsUIEventNameMixin {
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.Event.SelectionMoveStart, (p)=> {
-     *      const { worksheet, workbook, selections } = p;
+     *   const { worksheet, workbook, selections } = p;
      * });
      * ```
      */
@@ -481,7 +484,7 @@ export interface IFSheetsUIEventNameMixin {
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.Event.SelectionMoving, (p)=> {
-     *      const { worksheet, workbook, selections } = p;
+     *   const { worksheet, workbook, selections } = p;
      * });
      * ```
      */
@@ -493,7 +496,7 @@ export interface IFSheetsUIEventNameMixin {
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.Event.SelectionMoveEnd, (p)=> {
-     *      const { worksheet, workbook, selections } = p;
+     *   const { worksheet, workbook, selections } = p;
      * });
      * ```
      */
@@ -505,7 +508,7 @@ export interface IFSheetsUIEventNameMixin {
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.Event.SheetZoomChanged, (p)=> {
-     *      const { worksheet, workbook, zoom } = p;
+     *   const { worksheet, workbook, zoom } = p;
      * });
      * ```
      */
@@ -517,7 +520,7 @@ export interface IFSheetsUIEventNameMixin {
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.Event.BeforeSheetZoomChange, (p)=> {
-     *      const { worksheet, workbook, zoom } = p;
+     *   const { worksheet, workbook, zoom } = p;
      * });
      * ```
      */
@@ -529,7 +532,7 @@ export interface IFSheetsUIEventNameMixin {
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.Event.SheetSkeletonChanged, (p)=> {
-     *      const { worksheet, workbook } = p;
+     *   const { worksheet, workbook } = p;
      * });
      * ```
      */
@@ -659,6 +662,9 @@ export class FSheetsUIEventName extends FEventName implements IFSheetsUIEventNam
     }
 }
 
+/**
+ * @ignore
+ */
 export interface ISheetUIEventBase extends IEventBase {
     /**
      * The workbook instance currently being operated on. {@link FWorkbook}

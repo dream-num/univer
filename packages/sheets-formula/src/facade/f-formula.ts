@@ -23,6 +23,9 @@ import { SetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
 import { FFormula } from '@univerjs/engine-formula/facade';
 import { IRegisterFunctionService, PLUGIN_CONFIG_KEY_BASE, RegisterFunctionService } from '@univerjs/sheets-formula';
 
+/**
+ * @ignore
+ */
 export interface IFFormulaSheetsMixin {
     /**
      * Update the calculation mode of the formula.

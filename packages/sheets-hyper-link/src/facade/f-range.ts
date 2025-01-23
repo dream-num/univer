@@ -27,6 +27,9 @@ export interface ICellHyperLink {
     label: string;
 }
 
+/**
+ * @ignore
+ */
 export interface IFRangeHyperlinkMixin {
     /**
      * @deprecated use `range.setRichTextValueForCell(univerAPI.newRichText().insertLink(label, url))` instead

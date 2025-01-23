@@ -17,6 +17,9 @@
 import { SheetsHyperLinkParserService } from '@univerjs/sheets-hyper-link';
 import { FWorksheet } from '@univerjs/sheets/facade';
 
+/**
+ * @ignore
+ */
 export interface IFWorksheetHyperlinkMixin {
     /**
      * Get the url of this sheet

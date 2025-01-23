@@ -76,7 +76,9 @@ export interface IFacadeSubmenuItem {
     order?: number;
 }
 
-/** @ignore */
+/**
+ * @ignore
+ */
 type FAllMenu = FMenu | FSubmenu;
 
 /**
@@ -183,7 +185,9 @@ export class FMenu extends FMenuBase {
         }
     }
 
-    /** @ignore */
+    /**
+     * @ignore
+     */
     __getSchema(): { [key: string]: MenuSchemaType } {
         this._commandToRegister.forEach((command, id) => {
             if (!this._commandService.hasCommand(id)) {
@@ -260,7 +264,9 @@ export class FSubmenu extends FMenuBase {
         return this;
     }
 
-    /** @ignore */
+    /**
+     * @ignore
+     */
     __getSchema(): { [key: string]: MenuSchemaType } {
         const schema: { [key: string]: MenuSchemaType } = {};
         this.addSeparator();

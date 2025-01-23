@@ -26,7 +26,9 @@ import { FWorkbook } from '@univerjs/sheets/facade';
 import { type IDialogPartMethodOptions, IDialogService, type ISidebarMethodOptions, ISidebarService, KeyCode } from '@univerjs/ui';
 import { filter } from 'rxjs';
 
-/** @ignore */
+/**
+ * @ignore
+ */
 export interface IFWorkbookSheetsUIMixin {
     /**
      * Open a sidebar.

@@ -20,6 +20,9 @@ import { FEventName, FUniver, ICommandService } from '@univerjs/core';
 import { type ISortRangeCommandParams, SortRangeCommand, SortType } from '@univerjs/sheets-sort';
 import { FSheetEventName } from '@univerjs/sheets/facade';
 
+/**
+ * @ignore
+ */
 export interface IFSheetSortEventMixin {
     /**
      * This event will be emitted when a range on a worksheet is sorted.

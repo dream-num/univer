@@ -42,10 +42,10 @@ export class FDataValidation {
      * @example
      * ```typescript
      * const dataValidation = univerAPI
-     *  .getActiveWorkbook()
-     *  .getActiveWorksheet()
-     *  .getActiveRange()
-     *  .getDataValidation();
+     *   .getActiveWorkbook()
+     *   .getActiveWorksheet()
+     *   .getActiveRange()
+     *   .getDataValidation();
      * const allowsInvalid = dataValidation.getAllowInvalid();
      * ```
      */
@@ -59,10 +59,10 @@ export class FDataValidation {
      * @example
      * ```typescript
      * const dataValidation = univerAPI
-     *  .getActiveWorkbook()
-     *  .getActiveWorksheet()
-     *  .getActiveRange()
-     *  .getDataValidation();
+     *   .getActiveWorkbook()
+     *   .getActiveWorksheet()
+     *   .getActiveRange()
+     *   .getDataValidation();
      * const type = dataValidation.getCriteriaType();
      * ```
      */
@@ -76,10 +76,10 @@ export class FDataValidation {
      * @example
      * ```typescript
      * const dataValidation = univerAPI
-     *  .getActiveWorkbook()
-     *  .getActiveWorksheet()
-     *  .getActiveRange()
-     *  .getDataValidation();
+     *   .getActiveWorkbook()
+     *   .getActiveWorksheet()
+     *   .getActiveRange()
+     *   .getDataValidation();
      * const [operator, formula1, formula2] = dataValidation.getCriteriaValues();
      * ```
      */
@@ -93,10 +93,10 @@ export class FDataValidation {
      * @example
      * ```typescript
      * const dataValidation = univerAPI
-     *  .getActiveWorkbook()
-     *  .getActiveWorksheet()
-     *  .getActiveRange()
-     *  .getDataValidation();
+     *   .getActiveWorkbook()
+     *   .getActiveWorksheet()
+     *   .getActiveRange()
+     *   .getDataValidation();
      * const helpText = dataValidation.getHelpText();
      * ```
      */
@@ -110,10 +110,10 @@ export class FDataValidation {
      * @example
      * ```typescript
      * const dataValidation = univerAPI
-     *  .getActiveWorkbook()
-     *  .getActiveWorksheet()
-     *  .getActiveRange()
-     *  .getDataValidation();
+     *   .getActiveWorkbook()
+     *   .getActiveWorksheet()
+     *   .getActiveRange()
+     *   .getDataValidation();
      * const builder = dataValidation.copy();
      * const newRule = builder.setAllowInvalid(true).build();
      * ```
@@ -128,10 +128,10 @@ export class FDataValidation {
      * @example
      * ```typescript
      * const dataValidation = univerAPI
-     *  .getActiveWorkbook()
-     *  .getActiveWorksheet()
-     *  .getActiveRange()
-     *  .getDataValidation();
+     *   .getActiveWorkbook()
+     *   .getActiveWorksheet()
+     *   .getActiveRange()
+     *   .getDataValidation();
      * const isApplied = dataValidation.getApplied();
      * ```
      */
@@ -155,10 +155,10 @@ export class FDataValidation {
      * @example
      * ```typescript
      * const dataValidation = univerAPI
-     *  .getActiveWorkbook()
-     *  .getActiveWorksheet()
-     *  .getActiveRange()
-     *  .getDataValidation();
+     *   .getActiveWorkbook()
+     *   .getActiveWorksheet()
+     *   .getActiveRange()
+     *   .getDataValidation();
      * const ranges = dataValidation.getRanges();
      * ```
      */
@@ -177,10 +177,10 @@ export class FDataValidation {
      * @example
      * ```typescript
      * const dataValidation = univerAPI
-     *  .getActiveWorkbook()
-     *  .getActiveWorksheet()
-     *  .getActiveRange()
-     *  .getDataValidation();
+     *   .getActiveWorkbook()
+     *   .getActiveWorksheet()
+     *   .getActiveRange()
+     *   .getDataValidation();
      * const unitId = dataValidation.getUnitId();
      * ```
      */
@@ -194,10 +194,10 @@ export class FDataValidation {
      * @example
      * ```typescript
      * const dataValidation = univerAPI
-     *  .getActiveWorkbook()
-     *  .getActiveWorksheet()
-     *  .getActiveRange()
-     *  .getDataValidation();
+     *   .getActiveWorkbook()
+     *   .getActiveWorksheet()
+     *   .getActiveRange()
+     *   .getDataValidation();
      * const sheetId = dataValidation.getSheetId();
      * ```
      */
@@ -214,10 +214,10 @@ export class FDataValidation {
      * @example
      * ```typescript
      * const dataValidation = univerAPI
-     *  .getActiveWorkbook()
-     *  .getActiveWorksheet()
-     *  .getActiveRange()
-     *  .getDataValidation();
+     *   .getActiveWorkbook()
+     *   .getActiveWorksheet()
+     *   .getActiveRange()
+     *   .getDataValidation();
      * dataValidation.setCriteria(
      *   DataValidationType.DECIMAL,
      *   [DataValidationOperator.BETWEEN, '1', '10'],
@@ -262,10 +262,10 @@ export class FDataValidation {
      * @example
      * ```typescript
      * const dataValidation = univerAPI
-     *  .getActiveWorkbook()
-     *  .getActiveWorksheet()
-     *  .getActiveRange()
-     *  .getDataValidation();
+     *   .getActiveWorkbook()
+     *   .getActiveWorksheet()
+     *   .getActiveRange()
+     *   .getDataValidation();
      * dataValidation.setOptions({
      *   allowBlank: true,
      *   showErrorMessage: true,
@@ -302,10 +302,10 @@ export class FDataValidation {
      * @example
      * ```typescript
      * const dataValidation = univerAPI
-     *  .getActiveWorkbook()
-     *  .getActiveWorksheet()
-     *  .getActiveRange()
-     *  .getDataValidation();
+     *   .getActiveWorkbook()
+     *   .getActiveWorksheet()
+     *   .getActiveRange()
+     *   .getDataValidation();
      * const range = FRange.create('Sheet1', 'A1:B10');
      * dataValidation.setRanges([range]);
      * ```
@@ -335,10 +335,10 @@ export class FDataValidation {
      * @example
      * ```typescript
      * const dataValidation = univerAPI
-     *  .getActiveWorkbook()
-     *  .getActiveWorksheet()
-     *  .getActiveRange()
-     *  .getDataValidation();
+     *   .getActiveWorkbook()
+     *   .getActiveWorksheet()
+     *   .getActiveRange()
+     *   .getDataValidation();
      * const isDeleted = dataValidation.delete();
      * ```
      */

@@ -18,9 +18,13 @@ import type { ICellLinkContent, ISheetHyperLink } from '@univerjs/sheets-hyper-l
 import type { FWorkbook, FWorksheet } from '@univerjs/sheets/facade';
 import { FEventName, type IEventBase } from '@univerjs/core';
 
+/**
+ * @ignore
+ */
 interface IFSheetLinkEvent {
     /**
      * Event triggered before adding a link
+     *
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.Event.BeforeSheetLinkAdd, (params) => {
@@ -32,6 +36,7 @@ interface IFSheetLinkEvent {
     readonly BeforeSheetLinkAdd: 'BeforeSheetLinkAdd';
     /**
      * Event triggered before canceling a link
+     *
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.Event.BeforeSheetLinkCancel, (params) => {
@@ -43,6 +48,7 @@ interface IFSheetLinkEvent {
     readonly BeforeSheetLinkCancel: 'BeforeSheetLinkCancel';
     /**
      * Event triggered before updating a link
+     *
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.Event.BeforeSheetLinkUpdate, (params) => {

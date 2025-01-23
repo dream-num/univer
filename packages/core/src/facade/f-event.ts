@@ -23,6 +23,7 @@ import type { FDoc } from './f-doc';
 /**
  * Base interface for all event parameters
  * @interface IEventBase
+ * @ignore
  */
 export interface IEventBase {
     /** Flag to cancel the event if supported */
@@ -134,8 +135,8 @@ export class FEventName {
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.event.DocCreated, (params) => {
-     *     const { unitId, type, doc, unit } = params;
-     *     console.log('doc created', params);
+     *   const { unitId, type, doc, unit } = params;
+     *   console.log('doc created', params);
      * });
      * ```
      */
@@ -149,8 +150,8 @@ export class FEventName {
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.event.DocDisposed, (params) => {
-     *     const { unitId, unitType, snapshot } = params;
-     *     console.log('doc disposed', params);
+     *   const { unitId, unitType, snapshot } = params;
+     *   console.log('doc disposed', params);
      * });
      * ```
      */
@@ -164,8 +165,8 @@ export class FEventName {
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.event.LifeCycleChanged, (params) => {
-     *      const { stage } = params;
-     *     console.log('life cycle changed', params);
+     *   const { stage } = params;
+     *   console.log('life cycle changed', params);
      * });
      * ```
      */
@@ -179,8 +180,8 @@ export class FEventName {
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.event.Redo, (event) => {
-     *     const { params, id, type } = event;
-     *     console.log('command executed', event);
+     *   const { params, id, type } = event;
+     *   console.log('command executed', event);
      * });
      * ```
      */
@@ -194,8 +195,8 @@ export class FEventName {
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.event.Undo, (event) => {
-     *     const { params, id, type } = event;
-     *     console.log('command executed', event);
+     *   const { params, id, type } = event;
+     *   console.log('command executed', event);
      * });
      * ```
      */
@@ -209,8 +210,8 @@ export class FEventName {
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.event.BeforeRedo, (event) => {
-     *     const { params, id, type } = event;
-     *     console.log('command executed', event);
+     *   const { params, id, type } = event;
+     *   console.log('command executed', event);
      * });
      * ```
      */
@@ -224,8 +225,8 @@ export class FEventName {
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.event.BeforeUndo, (event) => {
-     *     const { params, id, type } = event;
-     *     console.log('command executed', event);
+     *   const { params, id, type } = event;
+     *   console.log('command executed', event);
      * });
      * ```
      */
@@ -239,8 +240,8 @@ export class FEventName {
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.event.CommandExecuted, (event) => {
-     *     const { params, id, type } = event;
-     *     console.log('command executed', event);
+     *   const { params, id, type } = event;
+     *   console.log('command executed', event);
      * });
      * ```
      */
@@ -254,8 +255,8 @@ export class FEventName {
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.event.BeforeCommandExecute, (event) => {
-     *     const { params, id, type } = event;
-     *     console.log('command executed', event);
+     *   const { params, id, type } = event;
+     *   console.log('command executed', event);
      * });
      * ```
      */

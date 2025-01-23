@@ -35,6 +35,9 @@ export class SheetHyperLinkBuilder {
     }
 }
 
+/**
+ * @ignore
+ */
 export interface IFWorkbookHyperlinkMixin {
     /**
      * @deprecated use `getUrl` method in `FRange` or `FWorksheet` instead.

@@ -23,6 +23,7 @@ import type { FDoc } from './f-doc';
 /**
  * Base interface for all event parameters
  * @interface IEventBase
+ * @ignore
  */
 export interface IEventBase {
     /** Flag to cancel the event if supported */

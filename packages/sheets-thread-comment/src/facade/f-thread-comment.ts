@@ -24,6 +24,7 @@ import { AddCommentCommand, DeleteCommentCommand, DeleteCommentTreeCommand, getD
 
 /**
  * An readonly class that represents a comment.
+ * @ignore
  */
 export class FTheadCommentItem {
     protected _comment: IThreadComment = {

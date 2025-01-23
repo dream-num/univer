@@ -25,14 +25,7 @@ import { FDataValidationBuilder } from './f-data-validation-builder';
 /**
  * @ignore
  */
-export class FUnvierDataValidationMixin extends FUniver {
-    /**
-     * @deprecated use `univerAPI.newDataValidation()` as instead.
-     */
-    static override newDataValidation(): FDataValidationBuilder {
-        return new FDataValidationBuilder();
-    }
-
+export interface IFUnvierDataValidationMixin {
     /**
      * Creates a new instance of FDataValidationBuilder
      * @returns {FDataValidationBuilder} A new instance of the FDataValidationBuilder class
@@ -42,7 +35,19 @@ export class FUnvierDataValidationMixin extends FUniver {
      * cell.setDataValidation(rule.requireValueInRange(range));
      * ```
      */
-    newDataValidation(): FDataValidationBuilder {
+    newDataValidation(): FDataValidationBuilder;
+}
+
+export class FUnvierDataValidationMixin extends FUniver implements IFUnvierDataValidationMixin {
+    /**
+     * @deprecated use `univerAPI.newDataValidation()` as instead.
+     * @returns {FDataValidationBuilder} A new instance of the FDataValidationBuilder class
+     */
+    static newDataValidation(): FDataValidationBuilder {
+        return new FDataValidationBuilder();
+    }
+
+    override newDataValidation(): FDataValidationBuilder {
         return new FDataValidationBuilder();
     }
 
@@ -245,11 +250,6 @@ export class FUnvierDataValidationMixin extends FUniver {
 
 FUniver.extend(FUnvierDataValidationMixin);
 declare module '@univerjs/core' {
-    /**
-     * @ignore
-     */
-    // eslint-disable-next-line ts/no-namespace
-    namespace FUniver {
-        function newDataValidation(): FDataValidationBuilder;
-    }
+    // eslint-disable-next-line ts/naming-convention
+    interface FUniver extends IFUnvierDataValidationMixin {}
 }

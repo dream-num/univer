@@ -39,6 +39,9 @@ export interface IFComponentKey {
 
 export interface IFCanvasPopup extends Omit<ICanvasPopup, 'componentKey'>, IFComponentKey { }
 
+/**
+ * @ignore
+ */
 interface IFRangeSheetsUIMixin {
     /**
      * Return this cell information, including whether it is merged and cell coordinates

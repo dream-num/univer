@@ -20,6 +20,9 @@ import { FRange } from '@univerjs/sheets/facade';
 
 export type SortColumnSpec = { column: number; ascending: boolean } | number;
 
+/**
+ * @ignore
+ */
 export interface IFRangeSort {
     /**
      * Sorts the cells in the given range, by column(s) and order specified.

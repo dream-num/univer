@@ -25,6 +25,9 @@ import { FDefinedNameBuilder } from './f-defined-name';
 import { FPermission } from './f-permission';
 import { FWorkbook } from './f-workbook';
 
+/**
+ * @ignore
+ */
 export interface IFUniverSheetsMixin {
     /**
      * @deprecated use `univerAPI.createWorkbook` instead.

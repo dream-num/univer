@@ -17,6 +17,9 @@
 import { FEnum } from '@univerjs/core';
 import { CustomFilterOperator } from '@univerjs/sheets-filter';
 
+/**
+ * @ignore
+ */
 export interface IFSheetsFilterEnumMixin {
     /** Please refer to {@link CustomFilterOperator}. */
     CustomFilterOperator: typeof CustomFilterOperator;

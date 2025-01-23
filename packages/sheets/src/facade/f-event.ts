@@ -24,6 +24,7 @@ import { FEventName } from '@univerjs/core';
 /**
  * Interface for sheet-related events
  * Provides event names for sheet creation, workbook creation, and gridline changes
+ * @ignore
  */
 export interface IFSheetEventMixin {
     /**
@@ -31,10 +32,10 @@ export interface IFSheetEventMixin {
      * @see {@link ISheetCreatedEventParams}
      * @example
      * ```ts
-     univerAPI.addEvent(univerAPI.Event.SheetCreated, (params) => {
-         const { workbook, worksheet } = params;
-         console.log('sheet created', params);
-     });
+     * univerAPI.addEvent(univerAPI.Event.SheetCreated, (params) => {
+     *   const { workbook, worksheet } = params;
+     *   console.log('sheet created', params);
+     * });
      * ```
      */
     get SheetCreated(): 'SheetCreated' ;
@@ -44,8 +45,8 @@ export interface IFSheetEventMixin {
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.Event.BeforeSheetCreate, (params) => {
-     *      const { workbook, index, sheet } = params;
-     *     console.log('before sheet create', params);
+     *   const { workbook, index, sheet } = params;
+     *   console.log('before sheet create', params);
      * });
      * ```
      */
@@ -56,8 +57,8 @@ export interface IFSheetEventMixin {
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.Event.ActiveSheetChanged, (params) => {
-     *      const { workbook, activeSheet, oldActiveSheet } = params;
-     *     console.log('before active sheet changed', params);
+     *   const { workbook, activeSheet, oldActiveSheet } = params;
+     *   console.log('before active sheet changed', params);
      * });
      * ```
      */
@@ -68,8 +69,8 @@ export interface IFSheetEventMixin {
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.Event.ActiveSheetChanged, (params) => {
-     *      const { workbook, activeSheet } = params;
-     *     console.log('after active sheet changed', params);
+     *   const { workbook, activeSheet } = params;
+     *   console.log('after active sheet changed', params);
      * });
      * ```
      */
@@ -80,8 +81,8 @@ export interface IFSheetEventMixin {
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.Event.BeforeSheetDelete, (params) => {
-     *      const { workbook, worksheetId } = params;
-     *     console.log('before sheet delete', params);
+     *   const { workbook, worksheetId } = params;
+     *   console.log('before sheet delete', params);
      * });
      * ```
      */
@@ -92,8 +93,8 @@ export interface IFSheetEventMixin {
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.Event.BeforeSheetDelete, (params) => {
-     *      const { workbook, worksheet } = params;
-     *     console.log('before sheet delete', params);
+     *   const { workbook, worksheet } = params;
+     *   console.log('before sheet delete', params);
      * });
      * ```
      */
@@ -104,8 +105,8 @@ export interface IFSheetEventMixin {
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.Event.SheetMoved, (params) => {
-     *      const { workbook, worksheet, newIndex } = params;
-     *     console.log('sheet moved', params);
+     *   const { workbook, worksheet, newIndex } = params;
+     *   console.log('sheet moved', params);
      * });
      * ```
      */
@@ -116,8 +117,8 @@ export interface IFSheetEventMixin {
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.Event.BeforeSheetMove, (params) => {
-     *      const { workbook, worksheet, newIndex, oldIndex } = params;
-     *     console.log('before sheet move', params);
+     *   const { workbook, worksheet, newIndex, oldIndex } = params;
+     *   console.log('before sheet move', params);
      * });
      * ```
      */
@@ -128,8 +129,8 @@ export interface IFSheetEventMixin {
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.Event.SheetNameChanged, (params) => {
-     *      const { workbook, worksheet, newName } = params;
-     *     console.log('sheet name changed', params);
+     *   const { workbook, worksheet, newName } = params;
+     *   console.log('sheet name changed', params);
      * });
      * ```
      */
@@ -140,8 +141,8 @@ export interface IFSheetEventMixin {
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.Event.BeforeSheetNameChange, (params) => {
-     *      const { workbook, worksheet, newName, oldName } = params;
-     *     console.log('before sheet name changed', params);
+     *   const { workbook, worksheet, newName, oldName } = params;
+     *   console.log('before sheet name changed', params);
      * });
      * ```
      */
@@ -152,8 +153,8 @@ export interface IFSheetEventMixin {
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.Event.SheetTabColorChanged, (params) => {
-     *      const { workbook, worksheet, color } = params;
-     *     console.log('sheet tab color changed', params);
+     *   const { workbook, worksheet, color } = params;
+     *   console.log('sheet tab color changed', params);
      * });
      * ```
      */
@@ -164,8 +165,8 @@ export interface IFSheetEventMixin {
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.Event.BeforeSheetTabColorChange, (params) => {
-     *      const { workbook, worksheet, color, oldColor } = params;
-     *     console.log('before sheet tab color changed', params);
+     *   const { workbook, worksheet, color, oldColor } = params;
+     *   console.log('before sheet tab color changed', params);
      * });
      * ```
      */
@@ -176,8 +177,8 @@ export interface IFSheetEventMixin {
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.Event.SheetHideChanged, (params) => {
-     *      const { workbook, worksheet } = params;
-     *     console.log('sheet hide changed', params);
+     *   const { workbook, worksheet } = params;
+     *   console.log('sheet hide changed', params);
      * });
      * ```
      */
@@ -188,8 +189,8 @@ export interface IFSheetEventMixin {
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.Event.BeforeSheetHideChange, (params) => {
-     *      const { workbook, worksheet, hide } = params;
-     *     console.log('before sheet hide changed', params);
+     *   const { workbook, worksheet, hide } = params;
+     *   console.log('before sheet hide changed', params);
      * });
      * ```
      */
@@ -200,8 +201,8 @@ export interface IFSheetEventMixin {
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.Event.WorkbookCreated, (params) => {
-     *      const { unitId, type, workbook, unit } = params;
-     *     console.log('workbook created', params);
+     *   const { unitId, type, workbook, unit } = params;
+     *   console.log('workbook created', params);
      * });
      * ```
      */
@@ -212,8 +213,8 @@ export interface IFSheetEventMixin {
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.Event.WorkbookDisposed, (params) => {
-     *      const { unitId, unitType, snapshot } = params;
-     *     console.log('unit disposed', params);
+     *   const { unitId, unitType, snapshot } = params;
+     *   console.log('unit disposed', params);
      * });
      * ```
      */
@@ -225,8 +226,8 @@ export interface IFSheetEventMixin {
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.Event.GridlineChanged, (params) => {
-     *      const { workbook, worksheet, enabled, color } = params;
-     *     console.log('gridline changed', params);
+     *   const { workbook, worksheet, enabled, color } = params;
+     *   console.log('gridline changed', params);
      * });
      * ```
      */
@@ -238,8 +239,8 @@ export interface IFSheetEventMixin {
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.Event.BeforeGridlineEnableChange, (params) => {
-     *      const { workbook, worksheet, enabled } = params;
-     *     console.log('gridline changed', params);
+     *   const { workbook, worksheet, enabled } = params;
+     *   console.log('gridline changed', params);
      * });
      * ```
      */
@@ -251,8 +252,8 @@ export interface IFSheetEventMixin {
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.Event.BeforeGridlineColorChange, (params) => {
-     *      const { workbook, worksheet, color } = params;
-     *     console.log('gridline changed', params);
+     *   const { workbook, worksheet, color } = params;
+     *   console.log('gridline changed', params);
      * });
      * ```
      */
@@ -263,7 +264,7 @@ export interface IFSheetEventMixin {
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.Event.SheetValueChanged, (p)=> {
-     *      const { workbook, effectedRanges, payload } = p;
+     *   const { workbook, effectedRanges, payload } = p;
      * });
      * ```
      */

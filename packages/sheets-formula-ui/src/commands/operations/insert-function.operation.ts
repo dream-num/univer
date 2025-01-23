@@ -135,11 +135,12 @@ export const InsertFunctionOperation: ICommand = {
                     if (startRow === endRow) {
                         // single row, insert function in the blank cell of the row
                         const blankCellColumn = findBlankCellOfRow(cellMatrix, startRow, endColumn, worksheet.getColumnCount() - 1);
+                        const newEndColumn = blankCellColumn === endColumn ? endColumn - 1 : endColumn;
                         const rangeString = serializeRange({
                             startRow,
                             endRow,
                             startColumn,
-                            endColumn: blankCellColumn - 1,
+                            endColumn: newEndColumn,
                         });
                         const formulaString = `=${value}(${rangeString})`;
 
@@ -160,10 +161,12 @@ export const InsertFunctionOperation: ICommand = {
                             maxBlankCellRow = Math.max(maxBlankCellRow, blankCellRow);
                         }
 
+                        const newEndRow = maxBlankCellRow === endRow ? endRow - 1 : endRow;
+
                         for (let c = startColumn; c <= endColumn; c++) {
                             const rangeString = serializeRange({
                                 startRow,
-                                endRow: maxBlankCellRow - 1,
+                                endRow: newEndRow,
                                 startColumn: c,
                                 endColumn: c,
                             });

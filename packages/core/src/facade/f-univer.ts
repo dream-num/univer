@@ -444,6 +444,15 @@ export class FUniver extends FBaseInitialable {
         return TextStyleValue.create(style);
     }
 
+    /**
+     * Create a new text decoration.
+     * @param decoration - The text decoration
+     * @returns {TextDecorationBuilder} The new text decoration instance
+     * @example
+     * ```ts
+     * const decoration = univerApi.newTextDecoration();
+     * ```
+     */
     newTextDecoration(decoration?: ITextDecoration): TextDecorationBuilder {
         return new TextDecorationBuilder(decoration);
     }

@@ -41,6 +41,9 @@ import { FUserManager } from './f-usermanager';
 import { FUtil } from './f-util';
 
 /**
+ * The root Facade API object to interact with Univer. Please use `newAPI` static method
+ * to create a new instance.
+ *
  * @hideconstructor
  */
 export class FUniver extends FBaseInitialable {

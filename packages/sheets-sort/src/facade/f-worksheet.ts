@@ -20,6 +20,7 @@ import { type IRange, RANGE_TYPE } from '@univerjs/core';
 import { SortRangeCommand, SortType } from '@univerjs/sheets-sort';
 import { FWorksheet } from '@univerjs/sheets/facade';
 
+/** @ignore */
 export interface IFWorksheetSort {
     /**
      * Sort the worksheet by the specified column.

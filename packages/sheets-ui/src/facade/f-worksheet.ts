@@ -23,6 +23,7 @@ import { IRenderManagerService, SHEET_VIEWPORT_KEY, sheetContentViewportKeys } f
 import { ChangeZoomRatioCommand, SetWorksheetColAutoWidthCommand, SheetScrollManagerService, SheetSkeletonManagerService, SheetsScrollRenderController } from '@univerjs/sheets-ui';
 import { FWorksheet } from '@univerjs/sheets/facade';
 
+/** @ignore */
 export interface IFWorksheetSkeletonMixin {
     /**
      * Refresh the canvas.

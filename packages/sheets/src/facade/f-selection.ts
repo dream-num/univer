@@ -24,7 +24,8 @@ import { FWorkbook } from './f-workbook';
 import { FWorksheet } from './f-worksheet';
 
 /**
- * @description Represents the active selection in the sheet.
+ * Represents the active selection in the sheet.
+ *
  * @example
  * ```ts
  * const fWorkbook = univerAPI.getActiveWorkbook()

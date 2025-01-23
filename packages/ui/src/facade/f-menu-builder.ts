@@ -76,6 +76,7 @@ export interface IFacadeSubmenuItem {
     order?: number;
 }
 
+/** @ignore */
 type FAllMenu = FMenu | FSubmenu;
 
 /**
@@ -131,9 +132,14 @@ abstract class FMenuBase extends FBase {
 }
 
 /**
- * This is a build for adding a menu to Univer. Please notice that until the `appendTo` method is called,
- * the menu item is not added to the UI. Please note that this menu cannot have submenus. If you want to
- * have submenus, please use `FSubmenu`.
+ * This is the builder for adding a menu to Univer. You shall never construct this
+ * class by yourself. Instead, call `createMenu` of {@link FUniver} to create a instance.
+ *
+ * Please notice that until the `appendTo` method is called, the menu item is not added to the UI.
+ *
+ * Please note that this menu cannot have submenus. If you want to
+ * have submenus, please use {@link FSubmenu}.
+ *
  * @hideconstructor
  */
 export class FMenu extends FMenuBase {
@@ -194,6 +200,12 @@ export class FMenu extends FMenuBase {
 }
 
 /**
+ * This is the builder for add a menu that can contains submenus to Univer. You shall
+ * never construct this class by yourself. Instead, call `createSubmenu` of {@link FUniver} to
+ * create a instance.
+ *
+ * Please notice that until the `appendTo` method is called, the menu item is not added to the UI.
+ *
  * @hideconstructor
  */
 export class FSubmenu extends FMenuBase {

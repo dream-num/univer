@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { FUniver, IDataValidationRule, IDataValidationRuleOptions } from '@univerjs/core';
+import type { IDataValidationRule, IDataValidationRuleOptions } from '@univerjs/core';
 import type { FRange } from '@univerjs/sheets/facade';
 import { DataValidationErrorStyle, DataValidationOperator, DataValidationType, generateRandomId } from '@univerjs/core';
 import { serializeRangeToRefString } from '@univerjs/engine-formula';

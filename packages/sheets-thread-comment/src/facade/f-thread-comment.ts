@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { FUniver, IDocumentBody, IRange, Workbook } from '@univerjs/core';
+import type { IDocumentBody, IRange, Workbook } from '@univerjs/core';
 import type { IAddCommentCommandParams, IBaseComment, IDeleteCommentCommandParams, IResolveCommentCommandParams, IThreadComment, IUpdateCommentCommandParams } from '@univerjs/thread-comment';
 import { generateRandomId, ICommandService, Inject, Injector, IUniverInstanceService, RichTextBuilder, RichTextValue, Tools, UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { deserializeRangeWithSheet } from '@univerjs/engine-formula';

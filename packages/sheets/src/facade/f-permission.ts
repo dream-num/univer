@@ -15,6 +15,7 @@
  */
 
 import type { RangePermissionPointConstructor, WorkbookPermissionPointConstructor, WorkSheetPermissionPointConstructor } from '@univerjs/core';
+import type { ISetWorksheetPermissionPointsMutationParams } from '@univerjs/sheets';
 import type { Observable } from 'rxjs';
 import type { FRange } from './f-range';
 import { FBase, generateRandomId, IAuthzIoService, ICommandService, Inject, Injector, IPermissionService, Rectangle } from '@univerjs/core';
@@ -220,7 +221,7 @@ export class FPermission extends FBase {
                         scope: undefined,
                     },
                 });
-                this._commandService.syncExecuteCommand(SetWorksheetPermissionPointsMutation.id, { unitId, subUnitId, rule: { unitId, subUnitId, permissionId } });
+                this._commandService.syncExecuteCommand<ISetWorksheetPermissionPointsMutationParams>(SetWorksheetPermissionPointsMutation.id, { unitId, subUnitId, rule: { unitId, subUnitId, permissionId } });
             } else {
                 permissionId = rule.permissionId;
             }

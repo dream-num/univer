@@ -295,8 +295,8 @@ export class FUniver extends FBaseInitialable {
 
     /**
      * Add an event listener
-     * @param event key of event
-     * @param callback callback when event triggered
+     * @param {string} event key of event
+     * @param {(params: IEventParamConfig[typeof event]) => void} callback callback when event triggered
      * @returns {Disposable} The Disposable instance, for remove the listener
      * @example
      * ```ts
@@ -312,8 +312,8 @@ export class FUniver extends FBaseInitialable {
 
     /**
      * Fire an event, used in internal only.
-     * @param event {string} key of event
-     * @param params {any} params of event
+     * @param {string} event key of event
+     * @param {any} params params of event
      * @returns {boolean} should cancel
      * @example
      * ```ts
@@ -330,7 +330,7 @@ export class FUniver extends FBaseInitialable {
 
     /**
      * Get the callback map corresponding to the event
-     * @param event
+     * @param {keyof IEventParamConfig} event
      * @returns {number} The number of callbacks
      */
     protected hasEventCallback(event: keyof IEventParamConfig): boolean {
@@ -368,7 +368,7 @@ export class FUniver extends FBaseInitialable {
 
     /**
      * Create a new rich text.
-     * @param data
+     * @param {IDocumentData} data
      * @returns {RichTextBuilder} The new rich text instance
      * @example
      * ```ts
@@ -381,7 +381,7 @@ export class FUniver extends FBaseInitialable {
 
     /**
      * Create a new rich text value.
-     * @param data - The rich text data
+     * @param {IDocumentData} data - The rich text data
      * @returns {RichTextValue} The new rich text value instance
      * @example
      * ```ts
@@ -394,7 +394,7 @@ export class FUniver extends FBaseInitialable {
 
     /**
      * Create a new paragraph style.
-     * @param style - The paragraph style
+     * @param {IParagraphStyle} style - The paragraph style
      * @returns {ParagraphStyleBuilder} The new paragraph style instance
      * @example
      * ```ts
@@ -407,7 +407,7 @@ export class FUniver extends FBaseInitialable {
 
     /**
      * Create a new paragraph style value.
-     * @param style - The paragraph style
+     * @param {IParagraphStyle} style - The paragraph style
      * @returns {ParagraphStyleValue} The new paragraph style value instance
      * @example
      * ```ts
@@ -420,7 +420,7 @@ export class FUniver extends FBaseInitialable {
 
     /**
      * Create a new text style.
-     * @param style - The text style
+     * @param {ITextStyle} style - The text style
      * @returns {TextStyleBuilder} The new text style instance
      * @example
      * ```ts
@@ -433,7 +433,7 @@ export class FUniver extends FBaseInitialable {
 
     /**
      * Create a new text style value.
-     * @param style - The text style
+     * @param {ITextStyle} style - The text style
      * @returns {TextStyleValue} The new text style value instance
      * @example
      * ```ts
@@ -446,7 +446,7 @@ export class FUniver extends FBaseInitialable {
 
     /**
      * Create a new text decoration.
-     * @param decoration - The text decoration
+     * @param {ITextDecoration} decoration - The text decoration
      * @returns {TextDecorationBuilder} The new text decoration instance
      * @example
      * ```ts

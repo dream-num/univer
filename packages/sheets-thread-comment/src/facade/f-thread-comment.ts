@@ -22,6 +22,9 @@ import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment';
 import { FRange } from '@univerjs/sheets/facade';
 import { AddCommentCommand, DeleteCommentCommand, DeleteCommentTreeCommand, getDT, ResolveCommentCommand, UpdateCommentCommand } from '@univerjs/thread-comment';
 
+/**
+ * An readonly class that represents a comment.
+ */
 export class FTheadCommentItem {
     protected _comment: IThreadComment = {
         id: generateRandomId(),
@@ -145,6 +148,9 @@ export class FTheadCommentItem {
     }
 }
 
+/**
+ * A builder for thread comment
+ */
 export class FTheadCommentBuilder extends FTheadCommentItem {
     static override create(comment?: IThreadComment): FTheadCommentBuilder {
         return new FTheadCommentBuilder(comment);
@@ -245,9 +251,12 @@ export class FTheadCommentBuilder extends FTheadCommentItem {
 }
 
 /**
- * @hideconstructor
+ * A class that represents a thread comment already in the sheet.
  */
 export class FThreadComment {
+    /**
+     * @ignore
+     */
     constructor(
         private readonly _thread: IThreadComment | IBaseComment,
         private readonly _parent: IThreadComment | undefined,
@@ -268,7 +277,7 @@ export class FThreadComment {
 
     /**
      * Whether the comment is a root comment
-     * @returns Whether the comment is a root comment
+     * @returns {boolean} Whether the comment is a root comment
      * @example
      * ```ts
      * const comment = univerAPI.getActiveWorkbook()
@@ -283,7 +292,7 @@ export class FThreadComment {
 
     /**
      * Get the comment data
-     * @returns The comment data
+     * @returns {IBaseComment} The comment data
      * @example
      * ```ts
      * const comment = univerAPI.getActiveWorkbook()
@@ -299,7 +308,7 @@ export class FThreadComment {
 
     /**
      * Get the replies of the comment
-     * @returns the replies of the comment
+     * @returns {FThreadComment[]} the replies of the comment
      * @example
      * ```ts
      * const comment = univerAPI.getActiveWorkbook()
@@ -317,7 +326,7 @@ export class FThreadComment {
 
     /**
      * Get the range of the comment
-     * @returns The range of the comment
+     * @returns {FRange | null} The range of the comment
      * @example
      * ```ts
      * const comment = univerAPI.getActiveWorkbook()
@@ -339,6 +348,7 @@ export class FThreadComment {
         return this._injector.createInstance(FRange, workbook, worksheet, range);
     }
 
+    // eslint-disable-next-line
     /**
      * @deprecated use `getRichText` as instead
      */
@@ -384,6 +394,7 @@ export class FThreadComment {
         );
     }
 
+    // eslint-disable-next-line
     /**
      * @deprecated use `deleteAsync` as instead.
      */
@@ -391,8 +402,8 @@ export class FThreadComment {
         return this.deleteAsync();
     }
 
+    // eslint-disable-next-line
     /**
-     * @param content
      * @deprecated use `updateAsync` as instead
      */
     async update(content: IDocumentBody): Promise<boolean> {
@@ -401,8 +412,8 @@ export class FThreadComment {
 
     /**
      * Update the comment content
-     * @param content The new content of the comment
-     * @returns success or not
+     * @param {IDocumentBody | RichTextValue} content The new content of the comment
+     * @returns {Promise<boolean>} success or not
      * @example
      * ```ts
      * const comment = univerAPI.getActiveWorkbook()
@@ -431,8 +442,8 @@ export class FThreadComment {
         return res;
     }
 
+    // eslint-disable-next-line
     /**
-     * @param resolved
      * @deprecated use `resolveAsync` as instead
      */
     resolve(resolved?: boolean): Promise<boolean> {
@@ -441,8 +452,8 @@ export class FThreadComment {
 
      /**
       * Resolve the comment
-      * @param resolved Whether the comment is resolved
-      * @returns success or not
+      * @param {boolean} resolved Whether the comment is resolved
+      * @returns {Promise<boolean>} success or not
       * @example
       * ```ts
       * const comment = univerAPI.getActiveWorkbook()
@@ -465,8 +476,8 @@ export class FThreadComment {
 
     /**
      * Reply to the comment
-     * @param comment The comment to reply to
-     * @returns success or not
+     * @param {FTheadCommentBuilder} comment The comment to reply to
+     * @returns {Promise<boolean>} success or not
      * @example
      * ```ts
      * const comment = univerAPI.getActiveWorkbook()

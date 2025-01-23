@@ -22,9 +22,10 @@ import { AddSheetDataValidationCommand, RemoveSheetAllDataValidationCommand, Rem
 import { FDataValidation } from './f-data-validation';
 import { FDataValidationBuilder } from './f-data-validation-builder';
 
+/**
+ * @ignore
+ */
 export class FUnvierDataValidationMixin extends FUniver {
-    // eslint-disable-next-line jsdoc/require-returns
-    /**
     /**
      * @deprecated use `univerAPI.newDataValidation()` as instead.
      */

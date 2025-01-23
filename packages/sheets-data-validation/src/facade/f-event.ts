@@ -158,6 +158,9 @@ export interface IBeforeSheetDataValidationDeleteAllEvent extends IEventBase {
     rules: FDataValidation[];
 }
 
+/**
+ * @ignore
+ */
 export interface IDataValidationEventParamConfig {
     SheetDataValidationChanged: ISheetDataValidationChangedEvent;
     SheetDataValidatorStatusChanged: ISheetDataValidatorStatusChangedEvent;
@@ -169,6 +172,9 @@ export interface IDataValidationEventParamConfig {
     BeforeSheetDataValidationOptionsUpdate: IBeforeSheetDataValidationOptionsUpdateEvent;
 }
 
+/**
+ * @ignore
+ */
 interface IDataValidationEvent {
     /**
      * Event fired when a rule is added, deleted, or modified
@@ -268,6 +274,9 @@ interface IDataValidationEvent {
     readonly BeforeSheetDataValidationOptionsUpdate: 'BeforeSheetDataValidationOptionsUpdate';
 }
 
+/**
+ * @ignore
+ */
 export class FDataValidationEvent implements IDataValidationEvent {
     get SheetDataValidationChanged(): 'SheetDataValidationChanged' {
         return 'SheetDataValidationChanged';
@@ -302,6 +311,9 @@ export class FDataValidationEvent implements IDataValidationEvent {
     }
 }
 
+/**
+ * @ignore
+ */
 export interface IDataValidationEventConfig {
     SheetDataValidationChanged: ISheetDataValidationChangedEvent;
     SheetDataValidatorStatusChanged: ISheetDataValidatorStatusChangedEvent;

@@ -19,6 +19,9 @@ import type { FWorkbook, FWorksheet } from '@univerjs/sheets/facade';
 import type { FTheadCommentItem, FThreadComment } from './f-thread-comment';
 import { FEventName } from '@univerjs/core';
 
+/**
+ * @ignore
+ */
 interface ICommentEventMixin {
     /**
      * Event fired after comment added
@@ -139,6 +142,9 @@ const CommentEvent: ICommentEventMixin = {
     BeforeCommentResolve: 'BeforeCommentResolve',
 } as const;
 
+/**
+ * @ignore
+ */
 export class FCommentEvent extends FEventName {
     override get CommentAdded(): 'CommentAdded' {
         return CommentEvent.CommentAdded;
@@ -300,6 +306,10 @@ export interface ISheetCommentResolveEvent extends IEventBase {
 }
 
 FEventName.extend(FCommentEvent);
+
+/**
+ * @ignore
+ */
 export interface ISheetCommentEventConfig {
     BeforeCommentAdd: IBeforeSheetCommentAddEvent;
     CommentAdded: ISheetCommentAddEvent;

@@ -25,6 +25,9 @@ import { FThreadComment } from './f-thread-comment';
 // eslint-disable-next-line ts/no-explicit-any
 type IUpdateCommandParams = any;
 
+/**
+ * @ignore
+ */
 export interface IFWorkbookThreadCommentMixin {
     /**
      * Get all comments in the current sheet
@@ -78,6 +81,9 @@ export interface IFWorkbookThreadCommentMixin {
     ): IDisposable;
 }
 
+/**
+ * @ignore
+ */
 export class FWorkbookThreadCommentMixin extends FWorkbook implements IFWorkbookThreadCommentMixin {
     declare _threadCommentModel: ThreadCommentModel;
 

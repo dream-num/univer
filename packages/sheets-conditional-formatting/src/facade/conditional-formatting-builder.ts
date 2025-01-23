@@ -22,6 +22,7 @@ import { BooleanNumber, ColorKit, Tools } from '@univerjs/core';
 import { CFNumberOperator, CFRuleType, CFSubRuleType, CFTextOperator, CFValueType, createCfId, EMPTY_ICON_TYPE, iconMap } from '@univerjs/sheets-conditional-formatting';
 
 /**
+ * @ignore
  * @hideconstructor
  */
 class ConditionalFormatRuleBaseBuilder {

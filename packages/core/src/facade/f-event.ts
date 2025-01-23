@@ -87,7 +87,11 @@ export interface ICommandEvent extends IEventBase {
  * @hideconstructor
  */
 export class FEventName {
+    /**
+     * @ignore
+     */
     static _instance: FEventName | null;
+
     static get() {
         if (this._instance) {
             return this._instance;

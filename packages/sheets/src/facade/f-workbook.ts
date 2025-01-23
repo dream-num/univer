@@ -883,6 +883,9 @@ export class FWorkbook extends FBaseInitialable {
     }
 }
 
+/**
+ * @ignore
+ */
 // eslint-disable-next-line ts/no-namespace
 export namespace FWorkbook {
     export type FontLine = _FontLine;

@@ -43,6 +43,9 @@ import { ThemeColorType } from '../types/enum/theme-color-type';
  * @hideconstructor
  */
 export class FEnum {
+    /**
+     * @ignore
+     */
     static _instance: FEnum | null;
 
     static get() {

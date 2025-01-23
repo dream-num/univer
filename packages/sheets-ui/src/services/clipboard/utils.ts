@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { ObjectMatrix } from '@univerjs/core';
-import { SetRangeValuesMutation } from '@univerjs/sheets';
 import type { ICellData, IMutationInfo, IObjectMatrixPrimitiveType, IRange, Nullable } from '@univerjs/core';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import type { IDiscreteRange } from '../../controllers/utils/range-tools';
+import { ObjectMatrix } from '@univerjs/core';
+import { SetRangeValuesMutation } from '@univerjs/sheets';
 
 /**
  *
@@ -95,13 +95,27 @@ export const getRepeatRange = (sourceRange: IRange, targetRange: IRange, isStric
     return repeatList;
 };
 
-export async function clipboardItemIsFromExcel(html: string): Promise<boolean> {
-    if (html) {
-        const regex = /<td[^>]*class=".*?xl.*?"[^>]*>.*?<\/td>/;
-        return regex.test(html);
+export function htmlIsFromExcel(html: string): boolean {
+    if (!html) {
+        return false;
     }
 
-    return false;
+    const excelMarkers = [
+        // Excel class names
+        /<td[^>]*class=".*?xl.*?"[^>]*>/i,
+        // Excel namespace
+        /xmlns:x="urn:schemas-microsoft-com:office:excel"/i,
+        // Excel ProgID
+        /ProgId="Excel.Sheet"/i,
+        // Office specific namespace
+        /xmlns:o="urn:schemas-microsoft-com:office:office"/i,
+        // Excel specific style markers
+        /@mso-|mso-excel/i,
+        // Excel workbook metadata
+        /<x:ExcelWorkbook>/i,
+    ];
+
+    return excelMarkers.some((marker) => marker.test(html));
 }
 
 export function mergeCellValues(...cellValues: IObjectMatrixPrimitiveType<Nullable<ICellData>>[]) {

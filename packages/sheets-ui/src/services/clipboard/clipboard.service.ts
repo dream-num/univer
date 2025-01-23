@@ -75,7 +75,7 @@ import { UniverPastePlugin } from './html-to-usm/paste-plugins/plugin-univer';
 import { WordPastePlugin } from './html-to-usm/paste-plugins/plugin-word';
 import { COPY_TYPE } from './type';
 import { USMToHtmlService } from './usm-to-html/convertor';
-import { clipboardItemIsFromExcel, convertTextToTable, discreteRangeContainsRange, mergeSetRangeValues, rangeIntersectWithDiscreteRange } from './utils';
+import { convertTextToTable, discreteRangeContainsRange, htmlIsFromExcel, mergeSetRangeValues, rangeIntersectWithDiscreteRange } from './utils';
 
 export const PREDEFINED_HOOK_NAME = {
     DEFAULT_COPY: 'default-copy',
@@ -259,9 +259,11 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
                 ? await item.getType(HTML_CLIPBOARD_MIME_TYPE).then((blob) => blob && blob.text())
                 : '';
 
-        const imageIndex = types.findIndex((type) => imageMimeTypeSet.has(type));
+        const isFromExcel = htmlIsFromExcel(html);
 
-        if (imageIndex !== -1) {
+        // clipboard item from excel may contain image, so we need to check if the clipboard item is from excel
+        const imageIndex = types.findIndex((type) => imageMimeTypeSet.has(type));
+        if (imageIndex !== -1 && !isFromExcel) {
             const imageMimeType = types[imageIndex]!;
             const imageBlob = await item.getType(imageMimeType);
 
@@ -277,7 +279,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
 
         if (html) {
             // Firstly see if the html content is from Excel
-            if (this._platformService.isWindows && (await clipboardItemIsFromExcel(html))) {
+            if (this._platformService.isWindows && isFromExcel) {
                 this._notificationService.show({
                     type: 'warning',
                     title: this._localeService.t('clipboard.shortCutNotify.title'),
@@ -299,8 +301,10 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         return false;
     }
 
-    legacyPaste(html?: string, text?: string, files?: File[]): Promise<boolean> {
-        if (files) {
+    async legacyPaste(html?: string, text?: string, files?: File[]): Promise<boolean> {
+        const isFromExcel = htmlIsFromExcel(html ?? '');
+
+        if (files && !isFromExcel) {
             return this._pasteFiles(files, PREDEFINED_HOOK_NAME.DEFAULT_PASTE);
         } else if (html) {
             return this._pasteHTML(html, PREDEFINED_HOOK_NAME.DEFAULT_PASTE);
@@ -314,8 +318,6 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         } else {
             return this._pasteUnrecognized();
         }
-
-        // return Promise.resolve(false);
     }
 
     rePasteWithPasteType(type: IPasteHookKeyType): boolean {

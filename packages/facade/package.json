@@ -1,7 +1,7 @@
 {
     "name": "@univerjs/facade",
     "version": "0.5.5",
-    "private": false,
+    "private": true,
     "description": "",
     "author": "DreamNum <developer@univer.ai>",
     "license": "Apache-2.0",

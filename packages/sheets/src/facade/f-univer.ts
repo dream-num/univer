@@ -108,9 +108,9 @@ export interface IFUniverSheetsMixin {
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.event.CommandExecuted, (commandInfo) => {
-     *      const target = univerAPI.getCommandSheetTarget(commandInfo);
-     *      if (!target) return;
-     *      const { workbook, worksheet } = target;
+     *   const target = univerAPI.getCommandSheetTarget(commandInfo);
+     *   if (!target) return;
+     *   const { workbook, worksheet } = target;
      * });
      * ```
      */

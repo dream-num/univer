@@ -248,6 +248,9 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
         this._initObserverListener(injector);
     }
 
+    /**
+     * @ignore
+     */
     // eslint-disable-next-line max-lines-per-function
     _initObserverListener(injector: Injector): void {
         const univerInstanceService = injector.get(IUniverInstanceService);

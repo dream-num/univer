@@ -64,8 +64,8 @@ export class FTheadCommentItem {
      * @example
      * ```ts
      * const comment = univerAPI.getActiveWorkbook()
-     *  .getSheetById(sheetId)
-     *  .getCommentById(commentId);
+     *   .getSheetById(sheetId)
+     *   .getCommentById(commentId);
      * const personId = comment.personId;
      * ```
      */
@@ -79,8 +79,8 @@ export class FTheadCommentItem {
      * @example
      * ```ts
      * const comment = univerAPI.getActiveWorkbook()
-     *  .getSheetById(sheetId)
-     *  .getCommentById(commentId);
+     *   .getSheetById(sheetId)
+     *   .getCommentById(commentId);
      * const dateTime = comment.dateTime;
      * ```
      */
@@ -94,8 +94,8 @@ export class FTheadCommentItem {
      * @example
      * ```ts
      * const comment = univerAPI.getActiveWorkbook()
-     *  .getSheetById(sheetId)
-     *  .getCommentById(commentId);
+     *   .getSheetById(sheetId)
+     *   .getCommentById(commentId);
      * const content = comment.content;
      * ```
      */
@@ -109,8 +109,8 @@ export class FTheadCommentItem {
      * @example
      * ```ts
      * const comment = univerAPI.getActiveWorkbook()
-     *  .getSheetById(sheetId)
-     *  .getCommentById(commentId);
+     *   .getSheetById(sheetId)
+     *   .getCommentById(commentId);
      * const id = comment.id;
      * ```
      */
@@ -124,8 +124,8 @@ export class FTheadCommentItem {
      * @example
      * ```ts
      * const comment = univerAPI.getActiveWorkbook()
-     *  .getSheetById(sheetId)
-     *  .getCommentById(commentId);
+     *   .getSheetById(sheetId)
+     *   .getCommentById(commentId);
      * const threadId = comment.threadId;
      * ```
      */
@@ -139,8 +139,8 @@ export class FTheadCommentItem {
      * @example
      * ```ts
      * const comment = univerAPI.getActiveWorkbook()
-     *  .getSheetById(sheetId)
-     *  .getCommentById(commentId);
+     *   .getSheetById(sheetId)
+     *   .getCommentById(commentId);
      * const newComment = comment.copy();
      * ```
      */
@@ -164,7 +164,7 @@ export class FTheadCommentBuilder extends FTheadCommentItem {
      * @example
      * ```ts
      * const comment = univerAPI.newTheadComment()
-     *  .setContent(univerAPI.newRichText().insertText('hello zhangsan'));
+     *   .setContent(univerAPI.newRichText().insertText('hello zhangsan'));
      * ```
      */
     setContent(content: IDocumentBody | RichTextValue): FTheadCommentBuilder {
@@ -183,7 +183,7 @@ export class FTheadCommentBuilder extends FTheadCommentItem {
      * @example
      * ```ts
      * const comment = univerAPI.newTheadComment()
-     *  .setPersonId('123');
+     *   .setPersonId('123');
      * ```
      */
     setPersonId(userId: string): FTheadCommentBuilder {
@@ -198,7 +198,7 @@ export class FTheadCommentBuilder extends FTheadCommentItem {
      * @example
      * ```ts
      * const comment = univerAPI.newTheadComment()
-     *  .setDateTime(new Date());
+     *   .setDateTime(new Date());
      * ```
      */
     setDateTime(date: Date): FTheadCommentBuilder {
@@ -213,7 +213,7 @@ export class FTheadCommentBuilder extends FTheadCommentItem {
      * @example
      * ```ts
      * const comment = univerAPI.newTheadComment()
-     *  .setId('123');
+     *   .setId('123');
      * ```
      */
     setId(id: string): FTheadCommentBuilder {
@@ -228,7 +228,7 @@ export class FTheadCommentBuilder extends FTheadCommentItem {
      * @example
      * ```ts
      * const comment = univerAPI.newTheadComment()
-     *  .setThreadId('123');
+     *   .setThreadId('123');
      * ```
      */
     setThreadId(threadId: string): FTheadCommentBuilder {
@@ -242,8 +242,8 @@ export class FTheadCommentBuilder extends FTheadCommentItem {
      * @example
      * ```ts
      * const comment = univerAPI.newTheadComment()
-     *  .setContent(univerAPI.newRichText().insertText('hello zhangsan'))
-     *  .build();
+     *   .setContent(univerAPI.newRichText().insertText('hello zhangsan'))
+     *   .build();
      * ```
      */
     build(): IThreadComment {
@@ -282,8 +282,8 @@ export class FThreadComment {
      * @example
      * ```ts
      * const comment = univerAPI.getActiveWorkbook()
-     *  .getSheetById(sheetId)
-     *  .getCommentById(commentId);
+     *   .getSheetById(sheetId)
+     *   .getCommentById(commentId);
      * const isRoot = comment.getIsRoot();
      * ```
      */
@@ -297,8 +297,8 @@ export class FThreadComment {
      * @example
      * ```ts
      * const comment = univerAPI.getActiveWorkbook()
-     *  .getSheetById(sheetId)
-     *  .getCommentById(commentId);
+     *   .getSheetById(sheetId)
+     *   .getCommentById(commentId);
      * const commentData = comment.getCommentData();
      * ```
      */
@@ -313,8 +313,8 @@ export class FThreadComment {
      * @example
      * ```ts
      * const comment = univerAPI.getActiveWorkbook()
-     *  .getSheetById(sheetId)
-     *  .getCommentById(commentId);
+     *   .getSheetById(sheetId)
+     *   .getCommentById(commentId);
      * const replies = comment.getReplies();
      * ```
      */
@@ -331,8 +331,8 @@ export class FThreadComment {
      * @example
      * ```ts
      * const comment = univerAPI.getActiveWorkbook()
-     *  .getSheetById(sheetId)
-     *  .getCommentById(commentId);
+     *   .getSheetById(sheetId)
+     *   .getCommentById(commentId);
      * const range = comment.getRange();
      * ```
      */
@@ -363,8 +363,8 @@ export class FThreadComment {
      * @example
      * ```ts
      * const comment = univerAPI.getActiveWorkbook()
-     *  .getSheetById(sheetId)
-     *  .getCommentById(commentId);
+     *   .getSheetById(sheetId)
+     *   .getCommentById(commentId);
      * const richText = comment.getRichText();
      * ```
      */
@@ -379,8 +379,8 @@ export class FThreadComment {
      * @example
      * ```ts
      * const comment = univerAPI.getActiveWorkbook()
-     *  .getSheetById(sheetId)
-     *  .getCommentById(commentId);
+     *   .getSheetById(sheetId)
+     *   .getCommentById(commentId);
      * const success = await comment.deleteAsync();
      * ```
      */
@@ -418,8 +418,8 @@ export class FThreadComment {
      * @example
      * ```ts
      * const comment = univerAPI.getActiveWorkbook()
-     *  .getSheetById(sheetId)
-     *  .getCommentById(commentId);
+     *   .getSheetById(sheetId)
+     *   .getCommentById(commentId);
      * const success = await comment.updateAsync(univerAPI.newRichText().insertText('hello zhangsan'));
      * ```
      */
@@ -458,8 +458,8 @@ export class FThreadComment {
       * @example
       * ```ts
       * const comment = univerAPI.getActiveWorkbook()
-      *  .getSheetById(sheetId)
-      *  .getCommentById(commentId);
+      *   .getSheetById(sheetId)
+      *   .getCommentById(commentId);
       * const success = await comment.resolveAsync(true);
       * ```
       */
@@ -482,11 +482,11 @@ export class FThreadComment {
      * @example
      * ```ts
      * const comment = univerAPI.getActiveWorkbook()
-     *  .getSheetById(sheetId)
-     *  .getCommentById(commentId);
+     *   .getSheetById(sheetId)
+     *   .getCommentById(commentId);
      *
      * const reply = univerAPI.newTheadComment()
-     *  .setContent(univerAPI.newRichText().insertText('hello zhangsan'));
+     *   .setContent(univerAPI.newRichText().insertText('hello zhangsan'));
      *
      * const success = await comment.replyAsync(reply);
      * ```

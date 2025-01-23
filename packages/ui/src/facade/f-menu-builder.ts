@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { FUniver, IAccessor } from '@univerjs/core';
+import type { IAccessor } from '@univerjs/core';
 import type { IMenuButtonItem, IMenuItem, MenuSchemaType } from '@univerjs/ui';
 import { CommandType, FBase, ICommandService, Inject, Injector, Tools } from '@univerjs/core';
 import { IMenuManagerService, MenuItemType, MenuManagerPosition, RibbonPosition, RibbonStartGroup } from '@univerjs/ui';

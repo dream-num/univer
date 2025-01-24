@@ -123,7 +123,8 @@ export class FPermission extends FBase {
             throw new Error('sheet protection cannot intersect with range protection');
         }
         const permissionId = await this._authzIoService.create({
-            objectType: UnitObject.Worksheet, worksheetObject: {
+            objectType: UnitObject.Worksheet,
+            worksheetObject: {
                 collaborators: [],
                 unitID: unitId,
                 strategies: [],
@@ -269,7 +270,8 @@ export class FPermission extends FBase {
     } | undefined> {
         // The permission ID generation here only provides the most basic permission type. If need collaborators later, need to expand this
         const permissionId = await this._authzIoService.create({
-            objectType: UnitObject.SelectRange, selectRangeObject: {
+            objectType: UnitObject.SelectRange,
+            selectRangeObject: {
                 collaborators: [],
                 unitID: unitId,
                 name: '',
@@ -397,7 +399,7 @@ export class FPermission extends FBase {
      * @param {string} unitId - The unique identifier of the workbook.
      * @param {string} subUnitId - The unique identifier of the worksheet within the workbook.
      * @param {string} ruleId - The ruleId of the range protection rule that is being updated.
-     * @param {IRange[]} ranges - The array of new ranges to be set for the range protection rule.
+     * @param {FRange[]} ranges - The array of new ranges to be set for the range protection rule.
      *
      * @example
      * ```typescript

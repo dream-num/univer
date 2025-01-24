@@ -39,6 +39,8 @@ export interface IMenuManagerService {
     appendRootMenu(source: MenuSchemaType): void;
 
     getMenuByPositionKey(position: string): IMenuSchema[];
+
+    removeMenuByKeys(keysToRemove: string[]): void;
 }
 
 export type MenuSchemaType = {
@@ -46,6 +48,10 @@ export type MenuSchemaType = {
     menuItemFactory?: (accessor: IAccessor) => IMenuItem;
 } | {
     [key: string]: MenuSchemaType;
+};
+
+const isMenuSchemaTypeObject = (value: MenuSchemaType): value is { [key: string]: MenuSchemaType } => {
+    return typeof value === 'object' && value !== null && !('order' in value) && !('menuItemFactory' in value);
 };
 
 export class MenuManagerService extends Disposable implements IMenuManagerService {
@@ -276,5 +282,21 @@ export class MenuManagerService extends Disposable implements IMenuManagerServic
         };
 
         return findKey(this._menu);
+    }
+
+    removeMenuByKeys(keysToRemove: string[]) {
+        const findAndRemove = (obj: MenuSchemaType): void => {
+            if (typeof obj !== 'object' || obj === null) return;
+
+            for (const key of Object.keys(obj)) {
+                if (keysToRemove.includes(key)) {
+                    delete obj[key as keyof MenuSchemaType];
+                    continue;
+                }
+                findAndRemove(obj[key as keyof MenuSchemaType] as MenuSchemaType);
+            }
+        };
+
+        findAndRemove(this._menu);
     }
 }

@@ -52,7 +52,7 @@ export {
     SELECTION_CONTROL_BORDER_BUFFER_WIDTH,
 } from './basics/selection';
 export { createTopMatrixFromMatrix, createTopMatrixFromRanges, findAllRectangle, rangeMerge, RangeMergeUtil } from './basics/rangeMerge';
-export { type IUniverSheetsConfig } from './controllers/config.schema';
+export { type IUniverSheetsConfig, SHEETS_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 export { MAX_CELL_PER_SHEET_KEY } from './controllers/config/config';
 export { BorderStyleManagerService, type IBorderInfo } from './services/border-style-manager.service';
 export { SheetRangeThemeService } from './services/range-theme-service';

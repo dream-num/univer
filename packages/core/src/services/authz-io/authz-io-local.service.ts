@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
-import type { IActionInfo, IAllowedRequest, IBatchAllowedResponse, ICollaborator, ICreateRequest, ICreateRequest_SelectRangeObject, IListPermPointRequest, IPermissionPoint, IPutCollaboratorsRequest, IUnitRoleKV, IUpdatePermPointRequest, UnitAction, UnitObject } from '@univerjs/protocol';
-import { ObjectScope, UnitRole, UniverType } from '@univerjs/protocol';
+import type { IActionInfo, IAllowedRequest, IBatchAllowedResponse, ICollaborator, ICreateRequest, IListPermPointRequest, IPermissionPoint, IPutCollaboratorsRequest, IUnitRoleKV, IUpdatePermPointRequest } from '@univerjs/protocol';
+import type { IUser } from '../user-manager/user-manager.service';
+import type { IAuthzIoService, ICreateInfo, IPermissionLocalData, IPermissionLocalJson, IPermissionLocalRule } from './type';
+import { ObjectScope, UnitAction, UnitObject, UnitRole } from '@univerjs/protocol';
 import { Inject } from '../../common/di';
+import { UniverInstanceType } from '../../common/unit';
 import { generateRandomId } from '../../shared/tools';
-import { IResourceManagerService } from '../resource-manager/type';
-import { UserManagerService } from '../user-manager/user-manager.service';
-import { createDefaultUser, isDevRole } from '../user-manager/const';
 
-import type { IAuthzIoService } from './type';
+import { IResourceManagerService } from '../resource-manager/type';
+import { createDefaultUser, isDevRole } from '../user-manager/const';
+import { UserManagerService } from '../user-manager/user-manager.service';
 
 /**
  * Do not use the mock implementation in a production environment as it is a minimal version.
  */
 export class AuthzIoLocalService implements IAuthzIoService {
-    private _permissionMap: Map<string, ICreateRequest_SelectRangeObject & { objectType: UnitObject }> = new Map([]);
-
-    // private _sheetPermissionPointMap: Map<string, { action: UnitAction; allowed: boolean }[]> = new Map();
+    private _permissionMap: IPermissionLocalData = new Map();
 
     constructor(
         @IResourceManagerService private _resourceManagerService: IResourceManagerService,
@@ -58,120 +58,162 @@ export class AuthzIoLocalService implements IAuthzIoService {
 
     private _initSnapshot() {
         this._resourceManagerService.registerPluginResource({
-            toJson: (_unitId: string) => {
-                const obj = [...this._permissionMap.keys()].reduce((r, k) => {
-                    const v = this._permissionMap.get(k);
-                    r[k] = v!;
-                    return r;
-                }, {} as Record<string, ICreateRequest_SelectRangeObject & { objectType: UnitObject }>);
-                return JSON.stringify(obj);
+            toJson: (unitId: string) => {
+                const unitMap = this._permissionMap.get(unitId);
+                const res: IPermissionLocalJson = {};
+                if (unitMap?.ruleMap) {
+                    res.rules = {};
+                    unitMap.ruleMap.keys().forEach((key) => {
+                        const rule = unitMap.ruleMap.get(key);
+                        if (rule) {
+                            res.rules![key] = rule;
+                        }
+                    });
+                }
+                if (unitMap?.createMap) {
+                    res.creates = {};
+                    unitMap.createMap.keys().forEach((key) => {
+                        const create = unitMap.createMap.get(key);
+                        if (create) {
+                            res.creates![key] = create;
+                        }
+                    });
+                }
+                return JSON.stringify(res);
             },
             parseJson: (json: string) => {
                 return JSON.parse(json);
             },
             pluginName: 'SHEET_AuthzIoMockService_PLUGIN',
-            businesses: [UniverType.UNIVER_SHEET, UniverType.UNIVER_DOC, UniverType.UNIVER_SLIDE],
-            onLoad: (_unitId, resource) => {
-                for (const key in resource) {
-                    this._permissionMap.set(key, resource[key]);
-                }
+            businesses: [UniverInstanceType.UNIVER_SHEET],
+            onLoad: (unitId, resource) => {
+                const { rules, creates } = resource;
+                const ruleMap = new Map();
+                Object.keys(rules).forEach((key) => {
+                    ruleMap.set(key, rules[key]);
+                });
+                const createMap = new Map();
+                Object.keys(creates).forEach((key) => {
+                    createMap.set(key, creates[key]);
+                });
+                this._permissionMap.set(unitId, {
+                    ruleMap,
+                    createMap,
+                });
             },
-            onUnLoad: () => {
-                this._permissionMap.clear();
+            onUnLoad: (unitId) => {
+                this._permissionMap.delete(unitId);
             },
         });
     }
 
     async create(config: ICreateRequest): Promise<string> {
-        return generateRandomId(8);
+        const permissionId = generateRandomId(8);
+        let rule;
+        if (config.objectType === UnitObject.SelectRange) {
+            rule = config.selectRangeObject;
+            if (!rule) {
+                throw new Error('[AuthIoService]: The rule param and type do not match');
+            }
+        } else if (config.objectType === UnitObject.Worksheet) {
+            rule = config.worksheetObject;
+            if (!rule) {
+                throw new Error('[AuthIoService]: The rule param and type do not match');
+            }
+        } else {
+            throw new Error('[AuthIoService]: Invalid objectType');
+        }
+
+        const { unitID } = rule;
+        let ruleWithUnitMap = this._permissionMap.get(unitID);
+        if (!ruleWithUnitMap) {
+            ruleWithUnitMap = {
+                ruleMap: new Map(),
+                createMap: new Map(),
+            };
+            this._permissionMap.set(unitID, ruleWithUnitMap);
+        }
+        ruleWithUnitMap.createMap.set(permissionId, {
+            objectID: permissionId,
+            objectType: config.objectType,
+            creator: this._userManagerService.getCurrentUser(),
+        });
+        ruleWithUnitMap.ruleMap.set(permissionId, rule);
+        return permissionId;
     }
 
-    async allowed(_config: IAllowedRequest): Promise<IActionInfo[]> {
+    async allowed(config: IAllowedRequest): Promise<IActionInfo[]> {
         // Because this is a mockService for handling permissions, we will not write real logic in it. We will only return an empty array to ensure that the permissions originally set by the user are not modified.
         // If you want to achieve persistence of permissions, you can modify the logic here.
+
+        const { unitID, objectID, objectType, actions } = config;
+        const ruleMap = this._permissionMap.get(unitID)?.ruleMap;
+        const createMap = this._permissionMap.get(unitID)?.createMap;
+        const rule = ruleMap?.get(objectID);
+        const create = createMap?.get(objectID);
+        const user = this._userManagerService.getCurrentUser();
+
+        if (!rule) {
+            return Promise.resolve([]);
+        }
+
+        if (objectType === UnitObject.Worksheet || objectType === UnitObject.SelectRange) {
+            return actions.map((point) => this._getActionAllowed(rule, point, user, create));
+        }
+
         return Promise.resolve([]);
     }
 
-    async batchAllowed(_config: IAllowedRequest[]): Promise<IBatchAllowedResponse['objectActions']> {
-        return Promise.resolve([]);
+    async batchAllowed(configs: IAllowedRequest[]): Promise<IBatchAllowedResponse['objectActions']> {
+        return configs.filter((config) => config.objectType === UnitObject.Worksheet || config.objectType === UnitObject.SelectRange).reduce((result, config) => {
+            const { unitID, objectID, actions } = config;
+            const permissionData = this._permissionMap.get(unitID);
+            const ruleMap = permissionData?.ruleMap;
+            const createMap = permissionData?.createMap;
+            const rule = ruleMap?.get(objectID);
+            const create = createMap?.get(objectID);
+            const user = this._userManagerService.getCurrentUser();
+
+            if (rule) {
+                const updatedConfig = {
+                    unitID,
+                    objectID,
+                    actions: actions.map((point) =>
+                        this._getActionAllowed(rule, point, user, create)
+                    ),
+                };
+
+                result.push(updatedConfig);
+            }
+            return result;
+        }, [] as IBatchAllowedResponse['objectActions']);
     }
 
-    // eslint-disable-next-line max-lines-per-function
     async list(config: IListPermPointRequest): Promise<IPermissionPoint[]> {
         const result: IPermissionPoint[] = [];
+        const unitMap = this._permissionMap.get(config.unitID);
+        const ruleMap = unitMap?.ruleMap;
+        const createMap = unitMap?.createMap;
+        const user = this._userManagerService.getCurrentUser();
         config.objectIDs.forEach((objectID) => {
-            const rule = this._permissionMap.get(objectID);
-            if (rule) {
+            const rule = ruleMap?.get(objectID);
+            const create = createMap?.get(objectID);
+            if (rule && create?.creator) {
                 const item = {
                     objectID,
                     unitID: config.unitID,
-                    objectType: rule!.objectType,
-                    name: rule!.name,
+                    objectType: create.objectType,
+                    name: '',
                     shareOn: false,
-                    shareRole: UnitRole.Owner,
+                    shareRole: UnitRole.UNRECOGNIZED,
                     shareScope: -1,
                     scope: {
                         read: ObjectScope.AllCollaborator,
                         edit: ObjectScope.AllCollaborator,
                     },
-                    creator: createDefaultUser(UnitRole.Owner),
-                    strategies: [
-                        {
-                            action: 6,
-                            role: 1,
-                        },
-                        {
-                            action: 16,
-                            role: 1,
-                        },
-                        {
-                            action: 17,
-                            role: 1,
-                        },
-                        {
-                            action: 18,
-                            role: 1,
-                        },
-                        {
-                            action: 19,
-                            role: 1,
-                        },
-                        {
-                            action: 33,
-                            role: 1,
-                        },
-                        {
-                            action: 34,
-                            role: 1,
-                        },
-                        {
-                            action: 35,
-                            role: 1,
-                        },
-                        {
-                            action: 36,
-                            role: 1,
-                        },
-                        {
-                            action: 37,
-                            role: 1,
-                        },
-                        {
-                            action: 38,
-                            role: 1,
-                        },
-                        {
-                            action: 39,
-                            role: 1,
-                        },
-                        {
-                            action: 40,
-                            role: 1,
-                        },
-                    ],
-                    actions: config.actions.map((a) => {
-                        return { action: a, allowed: this._getRole(UnitRole.Owner) || this._getRole(UnitRole.Editor) };
-                    }),
+                    creator: create.creator,
+                    strategies: [],
+                    actions: config.actions.map((action) => this._getActionAllowed(rule, action, user, create)),
                 };
                 result.push(item);
             }
@@ -215,5 +257,22 @@ export class AuthzIoLocalService implements IAuthzIoService {
 
     async putCollaborators(config: IPutCollaboratorsRequest): Promise<void> {
         return undefined;
+    }
+
+    private _getActionAllowed(rule: IPermissionLocalRule, point: UnitAction, user: IUser, create?: ICreateInfo) {
+        let allowed = false;
+
+        if (point === UnitAction.ManageCollaborator || point === UnitAction.Delete) {
+            allowed = user.userID === create?.creator?.userID;
+        } else {
+            allowed = rule?.collaborators.some((collaborator) => {
+                return collaborator.subject?.userID === user.userID && collaborator.role === UnitRole.Editor;
+            });
+        }
+
+        return {
+            action: point,
+            allowed,
+        };
     }
 }

@@ -44,7 +44,6 @@ import { combineLatest, filter } from 'rxjs';
  */
 export interface IFUniverSheetsUIMixin {
     /**
-     *
      * @deprecated use same API in FWorkSheet.
      * Customize the column header of the spreadsheet.
      * @param {IColumnsHeaderCfgParam} cfg The configuration of the column header.

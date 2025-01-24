@@ -32,6 +32,7 @@ export { ListMultipleValidator } from './validators/list-multiple-validator';
 export { deserializeListOptions, getDataValidationCellValue, serializeListOptions } from './validators/util';
 export { isLegalFormulaResult } from './utils/formula';
 export { getCellValueNumber } from './validators/decimal-validator';
+export { getTransformedFormula } from './validators/util';
 // #region - all commands
 
 export {

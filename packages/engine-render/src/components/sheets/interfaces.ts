@@ -113,6 +113,9 @@ export interface IHeaderStyleCfg {
     textAlign: CanvasTextAlign;
     textBaseline: CanvasTextBaseline;
     backgroundColor: string;
+    /**
+     * column header height
+     */
     size?: number;
 }
 
@@ -127,6 +130,10 @@ export interface IRowStyleCfg {
     textAlign: CanvasTextAlign;
     textBaseline: CanvasTextBaseline;
     backgroundColor: string;
+    /**
+     * row header width
+     */
+    size?: number;
 }
 
 export type IARowCfgObj = IHeaderStyleCfg & { text: string };

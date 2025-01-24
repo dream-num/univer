@@ -15,12 +15,12 @@
  */
 
 import type { IDisposable, IRange, Nullable } from '@univerjs/core';
-import type { IColumnsHeaderCfgParam, RenderComponentType, RenderManagerService, SpreadsheetColumnHeader, SpreadsheetSkeleton } from '@univerjs/engine-render';
+import type { IColumnsHeaderCfgParam, IRowsHeaderCfgParam, RenderComponentType, RenderManagerService, SpreadsheetColumnHeader, SpreadsheetRowHeader, SpreadsheetSkeleton } from '@univerjs/engine-render';
 
 import type { IScrollState, IViewportScrollState } from '@univerjs/sheets-ui';
 import { ICommandService, toDisposable } from '@univerjs/core';
 import { IRenderManagerService, SHEET_VIEWPORT_KEY, sheetContentViewportKeys } from '@univerjs/engine-render';
-import { ChangeZoomRatioCommand, SetWorksheetColAutoWidthCommand, SHEET_VIEW_KEY, SheetScrollManagerService, SheetSkeletonManagerService, SheetsScrollRenderController } from '@univerjs/sheets-ui';
+import { ChangeZoomRatioCommand, SetColumnHeaderHeightCommand, SetRowHeaderWidthCommand, SetWorksheetColAutoWidthCommand, SHEET_VIEW_KEY, SheetScrollManagerService, SheetSkeletonManagerService, SheetsScrollRenderController } from '@univerjs/sheets-ui';
 import { FWorksheet } from '@univerjs/sheets/facade';
 
 /**
@@ -150,15 +150,36 @@ export interface IFWorksheetSkeletonMixin {
     customizeColumnHeader(cfg: IColumnsHeaderCfgParam): void;
 
     /**
+     * Customize the row header of the spreadsheet.
+     * @param {IRowsHeaderCfgParam} cfg The configuration of the row header.
+     * @example
+     * ```typescript
+     * univerAPI.customizeRowHeader({ headerStyle: { backgroundColor: 'pink', fontSize: 9 }, rowsCfg: ['MokaII', undefined, null, { text: 'Size', textAlign: 'left' }] });
+     * ```
+     */
+    customizeRowHeader(cfg: IRowsHeaderCfgParam): void;
+
+    /**
      * Set column height for column header.
      * @param height
      * @example
      * ```ts
         const sheet = univerAPI.getActiveWorkbook().getActiveSheet();
-        sheet.setColumnHeight(100);
+        sheet.setColumnHeaderHeight(100);
      * ```
      */
-    setColumnHeight(height: number): FWorksheet;
+    setColumnHeaderHeight(height: number): FWorksheet;
+
+    /**
+     * Set column height for column header.
+     * @param width
+     * @example
+     * ```ts
+        const sheet = univerAPI.getActiveWorkbook().getActiveSheet();
+        sheet.setRowHeaderWidth(100);
+     * ```
+     */
+    setRowHeaderWidth(width: number): FWorksheet;
 
     /**
      * @deprecated use `univerAPI.addEvent(univerAPI.Event.Scroll, () => {})` instead
@@ -300,26 +321,6 @@ export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSk
         return this;
     }
 
-    override setColumnHeight(height: number): FWorksheet {
-        const activeSheet = this;
-        const unitId = this._fWorkbook.getId();
-        const renderManagerService = this._injector.get(IRenderManagerService);
-        const subUnitId = activeSheet.getSheetId();
-        const render = renderManagerService.getRenderById(unitId);
-        if (render) {
-            const skm = render.with(SheetSkeletonManagerService);
-            skm.setColumnHeaderSize(render, subUnitId, height);
-            activeSheet?.refreshCanvas();
-        }
-
-        const sheetColumn = this._getSheetRenderComponent(unitId, SHEET_VIEW_KEY.COLUMN) as SpreadsheetColumnHeader;
-        if (sheetColumn) {
-            sheetColumn.setCustomHeader({ headerStyle: { size: height } });
-            activeSheet?.refreshCanvas();
-        }
-        return this;
-    }
-
     override customizeColumnHeader(cfg: IColumnsHeaderCfgParam): void {
         const activeSheet = this;
         const unitId = this._fWorkbook.getId();
@@ -337,6 +338,67 @@ export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSk
             sheetColumn.setCustomHeader(cfg);
             activeSheet?.refreshCanvas();
         }
+    }
+
+    override customizeRowHeader(cfg: IRowsHeaderCfgParam): void {
+        // const activeSheet = this;
+        const unitId = this._fWorkbook.getId();
+        // const renderManagerService = this._injector.get(IRenderManagerService);
+        // const subUnitId = activeSheet.getSheetId();
+        // const render = renderManagerService.getRenderById(unitId);
+        const sheetRow = this._getSheetRenderComponent(unitId, SHEET_VIEW_KEY.ROW) as SpreadsheetRowHeader;
+        sheetRow.setCustomHeader(cfg);
+    }
+
+    override setColumnHeaderHeight(height: number): FWorksheet {
+        const activeSheet = this;
+        const unitId = this._fWorkbook.getId();
+        const subUnitId = activeSheet.getSheetId();
+        // const render = renderManagerService.getRenderById(unitId);
+        // if (render) {
+        //     const skm = render.with(SheetSkeletonManagerService);
+        //     skm.setColumnHeaderSize(render, subUnitId, height);
+        //     activeSheet?.refreshCanvas();
+        // }
+
+        this._commandService.executeCommand(SetColumnHeaderHeightCommand.id, {
+            unitId,
+            subUnitId,
+            size: height,
+        });
+
+        // const sheetColumn = this._getSheetRenderComponent(unitId, SHEET_VIEW_KEY.COLUMN) as SpreadsheetColumnHeader;
+        // if (sheetColumn) {
+        //     sheetColumn.setCustomHeader({ headerStyle: { size: height } });
+        // }
+        activeSheet?.refreshCanvas();
+        return this;
+    }
+
+    override setRowHeaderWidth(width: number): FWorksheet {
+        const activeSheet = this;
+        const unitId = this._fWorkbook.getId();
+        const subUnitId = activeSheet.getSheetId();
+        // const renderManagerService = this._injector.get(IRenderManagerService);
+        // const render = renderManagerService.getRenderById(unitId);
+        // if (render) {
+        //     const skm = render.with(SheetSkeletonManagerService);
+        //     skm.setRowHeaderSize(render, subUnitId, width);
+        //     activeSheet?.refreshCanvas();
+        // }
+
+        this._commandService.executeCommand(SetRowHeaderWidthCommand.id, {
+            unitId,
+            subUnitId,
+            size: width,
+        });
+
+        const sheetRow = this._getSheetRenderComponent(unitId, SHEET_VIEW_KEY.ROW) as SpreadsheetRowHeader;
+        if (sheetRow) {
+            sheetRow.setCustomHeader({ headerStyle: { size: width } });
+        }
+        activeSheet?.refreshCanvas();
+        return this;
     }
 
     /**

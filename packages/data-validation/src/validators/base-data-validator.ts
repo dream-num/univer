@@ -60,6 +60,14 @@ export interface IFormulaValidResult {
     formula2?: string;
 }
 
+export enum DataValidatorDropdownType {
+    DATE = 'date',
+    TIME = 'time',
+    DATETIME = 'datetime',
+    LIST = 'list',
+    MULTIPLE_LIST = 'multipleList',
+}
+
 export abstract class BaseDataValidator {
     abstract id: string;
     abstract title: string;
@@ -72,7 +80,7 @@ export abstract class BaseDataValidator {
 
     formulaInput: string | undefined = undefined;
     canvasRender: Nullable<IBaseDataValidationWidget> = null;
-    dropdown: string | undefined = undefined;
+    dropdownType: DataValidatorDropdownType | undefined = undefined;
     optionsInput: string | undefined = undefined;
 
     // #endregion

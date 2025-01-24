@@ -14,21 +14,25 @@
  * limitations under the License.
  */
 
-import type { IDisposable, Nullable, Workbook } from '@univerjs/core';
-import { Disposable, DisposableCollection, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { DataValidatorRegistryService } from '@univerjs/data-validation';
-import { IRenderManagerService } from '@univerjs/engine-render';
-import { type ISheetLocation, SheetsSelectionsService } from '@univerjs/sheets';
-import { SheetDataValidationModel } from '@univerjs/sheets-data-validation';
-import { SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
-import { IZenZoneService } from '@univerjs/ui';
+import type { CellValue, IDisposable, Nullable, Workbook } from '@univerjs/core';
+import type { ISetRangeValuesCommandParams, ISheetLocation } from '@univerjs/sheets';
+import type { ListValidator } from '@univerjs/sheets-data-validation';
+import type { IEditorBridgeServiceVisibleParam } from '@univerjs/sheets-ui';
+import { CellValueType, DataValidationErrorStyle, DataValidationRenderMode, dayjs, Disposable, DisposableCollection, ICommandService, Inject, IUniverInstanceService, numfmt, UniverInstanceType } from '@univerjs/core';
+import { DataValidatorDropdownType, DataValidatorRegistryService } from '@univerjs/data-validation';
+import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
+import { SetRangeValuesCommand, SheetsSelectionsService } from '@univerjs/sheets';
+import { getCellValueOrigin, getDataValidationCellValue, serializeListOptions, SheetDataValidationModel } from '@univerjs/sheets-data-validation';
+import { getPatternType } from '@univerjs/sheets-numfmt';
+import { IEditorBridgeService, SetCellEditVisibleOperation, SheetCanvasPopManagerService, SheetCellDropdownManagerService } from '@univerjs/sheets-ui';
+import { IZenZoneService, KeyCode } from '@univerjs/ui';
 import { Subject } from 'rxjs';
-import { DROP_DOWN_KEY } from '../views/components/drop-down';
+import { OpenValidationPanelOperation } from '../commands/operations/data-validation.operation';
+import { DataValidationRejectInputController } from '../controllers/dv-reject-input.controller';
 
 export interface IDropdownParam {
     location: ISheetLocation;
     onHide?: () => void;
-    componentKey: string;
     trigger?: 'editor-bridge';
 }
 
@@ -36,6 +40,38 @@ export interface IDropdownComponentProps {
     componentKey: string;
     location: ISheetLocation;
     hideFn: () => void;
+}
+
+const transformDate = (value: Nullable<CellValue>) => {
+    if (value === undefined || value === null || typeof value === 'boolean') {
+        return undefined;
+    }
+
+    if (typeof value === 'number' || !Number.isNaN(+value)) {
+        return dayjs(numfmt.format('yyyy-MM-dd HH:mm:ss', Number(value)));
+    }
+
+    const date = dayjs(value);
+    if (date.isValid()) {
+        return date;
+    }
+    return undefined;
+};
+
+function getDefaultFormat(patternType: 'datetime' | 'date' | 'time', format: string) {
+    const originPartternType = getPatternType(format);
+    if (patternType === originPartternType) {
+        return format;
+    }
+
+    switch (patternType) {
+        case 'datetime':
+            return 'yyyy-MM-dd hh:mm:ss';
+        case 'date':
+            return 'yyyy-MM-dd';
+        case 'time':
+            return 'HH:mm:ss';
+    }
 }
 
 export class DataValidationDropdownManagerService extends Disposable {
@@ -58,7 +94,12 @@ export class DataValidationDropdownManagerService extends Disposable {
         @IZenZoneService private readonly _zenZoneService: IZenZoneService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(SheetDataValidationModel) private readonly _dataValidationModel: SheetDataValidationModel,
-        @Inject(SheetsSelectionsService) private readonly _sheetsSelectionsService: SheetsSelectionsService
+        @Inject(SheetsSelectionsService) private readonly _sheetsSelectionsService: SheetsSelectionsService,
+        @Inject(SheetCellDropdownManagerService) private readonly _cellDropdownManagerService: SheetCellDropdownManagerService,
+        @Inject(SheetDataValidationModel) private readonly _sheetDataValidationModel: SheetDataValidationModel,
+        @ICommandService private readonly _commandService: ICommandService,
+        @Inject(DataValidationRejectInputController) private readonly _rejectInputController: DataValidationRejectInputController,
+        @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService
     ) {
         super();
         this._init();
@@ -98,7 +139,7 @@ export class DataValidationDropdownManagerService extends Disposable {
 
         const validator = this._dataValidatorRegistryService.getValidatorItem(rule.type);
 
-        return validator?.dropdown;
+        return validator?.dropdownType;
     }
 
     private _initSelectionChange() {
@@ -109,10 +150,10 @@ export class DataValidationDropdownManagerService extends Disposable {
         }));
     }
 
+    // eslint-disable-next-line max-lines-per-function
     showDropdown(param: IDropdownParam, closeOnOutSide = true) {
         const { location } = param;
-        const { row, col, unitId, subUnitId } = location;
-
+        const { row, col, unitId, subUnitId, workbook, worksheet } = location;
         if (this._currentPopup) {
             this._currentPopup.dispose();
         };
@@ -123,23 +164,212 @@ export class DataValidationDropdownManagerService extends Disposable {
 
         this._activeDropdown = param;
         this._activeDropdown$.next(this._activeDropdown);
-        const currentRender = this._renderManagerService.getRenderById(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
-        const popupDisposable = this._canvasPopupManagerService.attachPopupToCell(
-            row,
-            col,
-            {
-                componentKey: DROP_DOWN_KEY,
-                onClickOutside: () => {
-                    if (closeOnOutSide) {
-                        this.hideDropdown();
+
+        const rule = this._sheetDataValidationModel.getRuleByLocation(unitId, subUnitId, row, col);
+
+        if (!rule) {
+            return;
+        }
+        const validator = this._dataValidatorRegistryService.getValidatorItem(rule.type);
+
+        if (!validator?.dropdownType) {
+            return;
+        }
+
+        let popupDisposable: Nullable<IDisposable>;
+
+        const cellData = worksheet.getCell(row, col);
+
+        const handleSave = async (date: dayjs.Dayjs | undefined, targetPatternType: 'datetime' | 'date' | 'time') => {
+            if (!date) {
+                return true;
+            }
+            const newValue = date;
+            const cellData = worksheet.getCell(row, col);
+            const dateStr = newValue.format(targetPatternType === 'date' ? 'YYYY-MM-DD 00:00:00' : 'YYYY-MM-DD HH:mm:ss');
+            const serialTime = numfmt.parseDate(dateStr)?.v as number;
+            const cellStyle = workbook.getStyles().getStyleByCell(cellData);
+            const format = cellStyle?.n?.pattern ?? '';
+
+            if (
+                rule.errorStyle !== DataValidationErrorStyle.STOP ||
+                (await validator.validator({
+                    value: serialTime,
+                    unitId,
+                    subUnitId,
+                    row,
+                    column: col,
+                    worksheet,
+                    workbook,
+                    interceptValue: dateStr.replace('Z', '').replace('T', ' '),
+                    t: CellValueType.NUMBER,
+                }, rule))
+            ) {
+                await this._commandService.executeCommand(SetCellEditVisibleOperation.id, {
+                    visible: false,
+                    eventType: DeviceInputEventType.Keyboard,
+                    unitId,
+                    keycode: KeyCode.ESC,
+                } as IEditorBridgeServiceVisibleParam);
+                await this._commandService.executeCommand(SetRangeValuesCommand.id, {
+                    unitId,
+                    subUnitId,
+                    range: {
+                        startColumn: col,
+                        endColumn: col,
+                        startRow: row,
+                        endRow: row,
+                    },
+                    value: {
+                        v: serialTime,
+                        t: 2,
+                        p: null,
+                        f: null,
+                        si: null,
+                        s: {
+                            n: {
+                                pattern: getDefaultFormat(targetPatternType, format),
+                            },
+                        },
+                    },
+                });
+                return true;
+            } else {
+                this._rejectInputController.showReject(validator.getRuleFinalError(rule, { row, col, unitId, subUnitId }));
+                return false;
+            }
+        };
+
+        switch (validator.dropdownType) {
+            case DataValidatorDropdownType.DATE: {
+                const cellStr = getCellValueOrigin(worksheet.getCellRaw(row, col));
+                const originDate = transformDate(cellStr);
+                const showTime = Boolean(rule.bizInfo?.showTime);
+
+                popupDisposable = this._cellDropdownManagerService.showDropdown({
+                    location,
+                    type: 'datepicker',
+                    props: {
+                        showTime,
+                        onChange: (newValue) => handleSave(newValue, showTime ? 'datetime' : 'date'),
+                        defaultValue: originDate,
+                        patternType: 'date',
+                    },
+                });
+                break;
+            }
+
+            case DataValidatorDropdownType.TIME: {
+                const cellStr = getCellValueOrigin(worksheet.getCellRaw(row, col));
+                const originDate = transformDate(cellStr);
+
+                popupDisposable = this._cellDropdownManagerService.showDropdown({
+                    location,
+                    type: 'datepicker',
+                    props: {
+                        onChange: (newValue) => handleSave(newValue, 'time'),
+                        defaultValue: originDate,
+                        patternType: 'time',
+                    },
+                });
+                break;
+            }
+            case DataValidatorDropdownType.DATETIME: {
+                const cellStr = getCellValueOrigin(worksheet.getCellRaw(row, col));
+                const originDate = transformDate(cellStr);
+                popupDisposable = this._cellDropdownManagerService.showDropdown({
+                    location,
+                    type: 'datepicker',
+                    props: {
+                        onChange: (newValue) => handleSave(newValue, 'datetime'),
+                        defaultValue: originDate,
+                        patternType: 'datetime',
+                    },
+                });
+                break;
+            }
+
+            case DataValidatorDropdownType.LIST:
+            case DataValidatorDropdownType.MULTIPLE_LIST: {
+                const multiple = validator.dropdownType === DataValidatorDropdownType.MULTIPLE_LIST;
+                const handleSave = async (newValue: string[]) => {
+                    const str = serializeListOptions(newValue);
+                    const params: ISetRangeValuesCommandParams = {
+                        unitId,
+                        subUnitId,
+                        range: {
+                            startColumn: col,
+                            endColumn: col,
+                            startRow: row,
+                            endRow: row,
+                        },
+                        value: {
+                            v: str,
+                            p: null,
+                            f: null,
+                            si: null,
+                        },
+                    };
+
+                    if (this._editorBridgeService.isVisible()) {
+                        this._editorBridgeService.changeVisible({
+                            visible: false,
+                            keycode: KeyCode.ESC,
+                            eventType: DeviceInputEventType.Keyboard,
+                            unitId,
+                        });
                     }
-                },
-                offset: [0, 3],
-                excludeOutside: [currentRender?.engine.getCanvasElement()].filter(Boolean) as HTMLElement[],
-            },
-            unitId,
-            subUnitId
-        );
+
+                    if (this._editorBridgeService.isVisible().visible) {
+                        await this._commandService.executeCommand(SetCellEditVisibleOperation.id, {
+                            visible: false,
+                            eventType: DeviceInputEventType.Keyboard,
+                            unitId,
+                            keycode: KeyCode.ESC,
+                        } as IEditorBridgeServiceVisibleParam);
+                    }
+                    this._commandService.executeCommand(SetRangeValuesCommand.id, params);
+
+                    if (multiple) {
+                        return false;
+                    }
+
+                    return true;
+                };
+                const showColor = rule?.renderMode === DataValidationRenderMode.CUSTOM || rule?.renderMode === undefined;
+                const list = (validator as ListValidator).getListWithColor(rule, unitId, subUnitId);
+                const cellStr = getDataValidationCellValue(worksheet.getCellRaw(row, col));
+
+                const handleEdit = () => {
+                    this._commandService.executeCommand(OpenValidationPanelOperation.id, {
+                        ruleId: rule.uid,
+                    });
+                    popupDisposable?.dispose();
+                };
+
+                const options = list.map((item) => ({
+                    label: item.label,
+                    value: item.label,
+                    color: (showColor || item.color) ? item.color : 'transparent',
+                }));
+
+                popupDisposable = this._cellDropdownManagerService.showDropdown({
+                    location,
+                    type: 'list',
+                    props: {
+                        onChange: (newValue) => handleSave(newValue),
+                        options,
+                        onEdit: handleEdit,
+                        defaultValue: cellStr,
+                        multiple,
+                    },
+                });
+                break;
+            }
+
+            default:
+                break;
+        }
 
         if (!popupDisposable) {
             throw new Error('[DataValidationDropdownManagerService]: cannot show dropdown!');
@@ -184,7 +414,7 @@ export class DataValidationDropdownManagerService extends Disposable {
         }
 
         const validator = this._dataValidatorRegistryService.getValidatorItem(rule.type);
-        if (!validator || !validator.dropdown) {
+        if (!validator || !validator.dropdownType) {
             this.hideDropdown();
             return;
         }
@@ -198,8 +428,8 @@ export class DataValidationDropdownManagerService extends Disposable {
                 unitId,
                 subUnitId,
             },
-            componentKey: validator.dropdown,
             onHide,
         });
     }
 }
+

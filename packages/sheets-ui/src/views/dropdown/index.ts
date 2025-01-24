@@ -14,4 +14,21 @@
  * limitations under the License.
  */
 
-export { DataValidationPanel } from './panel';
+import { DateDropdown, type IDateDropdownProps } from './date-dropdown';
+import { type IListDropdownProps, ListDropDown } from './list-dropdown';
+
+export type ICellDropdown = {
+    type: 'datepicker';
+    props: IDateDropdownProps;
+} | {
+    type: 'list';
+    props: IListDropdownProps;
+};
+
+export { DateDropdown } from './date-dropdown';
+export { ListDropDown } from './list-dropdown';
+
+export const dropdownMap = {
+    datepicker: DateDropdown.componentKey,
+    list: ListDropDown.componentKey,
+};

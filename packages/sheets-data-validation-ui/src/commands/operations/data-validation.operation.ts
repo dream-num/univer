@@ -110,7 +110,6 @@ export const ShowDataValidationDropdown: ICommand<IShowDataValidationDropdownPar
         }
         const dataValidationDropdownManagerService = accessor.get(DataValidationDropdownManagerService);
         const { unitId, subUnitId, row, column } = params;
-
         const activeDropdown = dataValidationDropdownManagerService.activeDropdown;
         const currLoc = activeDropdown?.location;
         if (

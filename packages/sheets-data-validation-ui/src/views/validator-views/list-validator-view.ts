@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { IBaseDataValidationWidget } from '@univerjs/data-validation';
 import { DataValidationType, type Nullable } from '@univerjs/core';
-import { LIST_DROPDOWN_KEY } from '../components';
+import { DataValidatorDropdownType, type IBaseDataValidationWidget } from '@univerjs/data-validation';
 import { LIST_FORMULA_INPUT_NAME } from '../components/formula-input';
 import { ListRenderModeInput } from '../components/render-mode';
 import { DropdownWidget } from '../widgets/dropdown-widget';
@@ -25,7 +24,7 @@ import { BaseSheetDataValidatorView } from './sheet-validator-view';
 export class ListValidatorView extends BaseSheetDataValidatorView {
     override id = DataValidationType.LIST;
     override canvasRender: Nullable<IBaseDataValidationWidget> = this.injector.createInstance(DropdownWidget);
-    override dropdown: string | undefined = LIST_DROPDOWN_KEY;
+    override dropdownType: DataValidatorDropdownType | undefined = DataValidatorDropdownType.LIST;
     override optionsInput: string | undefined = ListRenderModeInput.componentKey;
     override formulaInput: string = LIST_FORMULA_INPUT_NAME;
 }

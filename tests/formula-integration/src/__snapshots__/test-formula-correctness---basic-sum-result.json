@@ -84,6 +84,10 @@
             "data": ""
         },
         {
+            "data": "{}",
+            "name": "SHEET_AuthzIoMockService_PLUGIN"
+        },
+        {
             "name": "SHEET_WORKSHEET_PROTECTION_PLUGIN",
             "data": "{}"
         },

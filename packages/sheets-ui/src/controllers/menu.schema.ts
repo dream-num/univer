@@ -102,6 +102,7 @@ import {
     ColInsertMenuItemFactory,
     InsertColAfterMenuItemFactory,
     InsertColBeforeMenuItemFactory,
+    InsertMultiRowAfterMenuItemFactory,
     InsertRangeMoveDownMenuItemFactory,
     InsertRangeMoveRightMenuItemFactory,
     InsertRowAfterMenuItemFactory,
@@ -175,6 +176,7 @@ import {
     ShowMenuItemFactory,
     // UnHideSheetMenuItemFactory,
 } from './menu/sheet.menu';
+import { InsertMultiRowAfterCommand } from '@univerjs/sheets/commands/commands/insert-row-col.command.js';
 
 export const menuSchema: MenuSchemaType = {
     [RibbonStartGroup.FORMAT]: {
@@ -600,6 +602,10 @@ export const menuSchema: MenuSchemaType = {
                 [InsertRowAfterCommand.id]: {
                     order: 1,
                     menuItemFactory: InsertRowAfterMenuItemFactory,
+                },
+                [InsertMultiRowAfterCommand.id]: {
+                    order: 2,
+                    menuItemFactory: InsertMultiRowAfterMenuItemFactory,
                 },
             },
             [RemoveRowConfirmCommand.id]: {

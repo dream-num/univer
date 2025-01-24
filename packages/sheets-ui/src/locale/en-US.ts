@@ -195,6 +195,8 @@ const locale: typeof zhCN = {
         insert: 'Insert',
         insertRow: 'Insert Row',
         insertRowBefore: 'Insert Row Before',
+        insertRowAbove: 'Insert Row Above',
+        insertRowAfter: 'Insert Row After',
         insertColumn: 'Insert Column',
         insertColumnBefore: 'Insert Column Before',
         delete: 'Delete',

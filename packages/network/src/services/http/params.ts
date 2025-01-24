@@ -35,7 +35,7 @@ export class HTTPParams {
                         .join('&');
                 }
 
-                return `${key}=${this.params![key]}`;
+                return `${key}=${value}`;
             })
             .join('&');
     }

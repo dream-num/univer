@@ -17,6 +17,9 @@
 import { FEnum } from '@univerjs/core';
 import { BindModeEnum, DataBindingNodeTypeEnum } from '@univerjs/sheets-source-binding';
 
+/**
+ * @ignore
+ */
 export interface ISourceBindingEnumMixin {
     /**
      * Represents the type of data binding node.{@link DataBindingNodeTypeEnum}

@@ -114,6 +114,9 @@ export interface ISheetRangeFilterClearedEventParams extends IEventBase {
     worksheet: FWorksheet;
 }
 
+/**
+ * @ignore
+ */
 interface ISheetRangeFilterEventParamConfig {
     SheetBeforeRangeFilter: ISheetRangeFilteredParams;
     SheetRangeFiltered: ISheetRangeFilteredParams;

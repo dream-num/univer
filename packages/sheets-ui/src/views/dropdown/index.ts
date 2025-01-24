@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import { CascaderDropdown, type ICascaderDropdownProps } from './cascader-dropdown';
+import { ColorDropdown, type IColorDropdownProps } from './color-dropdown';
 import { DateDropdown, type IDateDropdownProps } from './date-dropdown';
 import { type IListDropdownProps, ListDropDown } from './list-dropdown';
 
@@ -23,12 +25,22 @@ export type ICellDropdown = {
 } | {
     type: 'list';
     props: IListDropdownProps;
+} | {
+    type: 'color';
+    props: IColorDropdownProps;
+} | {
+    type: 'cascader';
+    props: ICascaderDropdownProps;
 };
 
+export { CascaderDropdown } from './cascader-dropdown';
+export { ColorDropdown } from './color-dropdown';
 export { DateDropdown } from './date-dropdown';
 export { ListDropDown } from './list-dropdown';
 
 export const dropdownMap = {
-    datepicker: DateDropdown.componentKey,
-    list: ListDropDown.componentKey,
+    datepicker: DateDropdown,
+    list: ListDropDown,
+    color: ColorDropdown,
+    cascader: CascaderDropdown,
 };

@@ -21,11 +21,11 @@ import React, { useContext, useMemo } from 'react';
 import { ConfigContext } from '../config-provider/ConfigProvider';
 import styles from './index.module.less';
 
-interface IOption {
+export interface ICascaderOption {
     label: string;
     value: string;
     color?: string;
-    children?: IOption[];
+    children?: ICascaderOption[];
 }
 
 export interface ICascaderListProps {
@@ -38,7 +38,7 @@ export interface ICascaderListProps {
      * The options of select
      * @default []
      */
-    options?: IOption[];
+    options?: ICascaderOption[];
 
     /**
      * The callback function that is triggered when the value is changed

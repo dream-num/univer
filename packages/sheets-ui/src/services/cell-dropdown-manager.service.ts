@@ -20,7 +20,7 @@ import type { ICellDropdown } from '../views/dropdown';
 import { Disposable, DisposableCollection, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, Inject } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { ComponentManager, IZenZoneService } from '@univerjs/ui';
-import { DateDropdown, dropdownMap, ListDropDown } from '../views/dropdown';
+import { dropdownMap } from '../views/dropdown';
 import { SheetCanvasPopManagerService } from './canvas-pop-manager.service';
 
 export type IDropdownParam = {
@@ -43,10 +43,7 @@ export class SheetCellDropdownManagerService extends Disposable {
     ) {
         super();
 
-        [
-            ListDropDown,
-            DateDropdown,
-        ].forEach((component) => {
+        Object.values(dropdownMap).forEach((component) => {
             this.disposeWithMe(this._componentManager.register(component.componentKey, component));
         });
     }
@@ -58,14 +55,14 @@ export class SheetCellDropdownManagerService extends Disposable {
             throw new Error('[SheetCellDropdownManagerService]: cannot show dropdown when zen mode is visible');
         }
 
-        const componentKey = dropdownMap[param.type];
+        const component = dropdownMap[param.type];
         const currentRender = this._renderManagerService.getRenderById(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
         const disposable = new DisposableCollection();
         const popupDisposable = this._canvasPopupManagerService.attachPopupToCell(
             row,
             col,
             {
-                componentKey,
+                componentKey: component.componentKey,
                 onClickOutside: () => {
                     if (closeOnOutSide) {
                         disposable.dispose();

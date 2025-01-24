@@ -18,7 +18,7 @@ import './global.css';
 
 export { Avatar, type IAvatarProps } from './components/avatar';
 export { Button, type ButtonSize, type ButtonType, type IButtonProps } from './components/button';
-export { CascaderList, type ICascaderListProps } from './components/cascader-list';
+export { CascaderList, type ICascaderListProps, type ICascaderOption } from './components/cascader-list';
 export { Checkbox, type ICheckboxProps } from './components/checkbox';
 export { CheckboxGroup, type ICheckboxGroupProps } from './components/checkbox-group';
 export { ColorPicker, type IColorPickerProps } from './components/color-picker';

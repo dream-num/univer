@@ -66,6 +66,8 @@ export enum DataValidatorDropdownType {
     DATETIME = 'datetime',
     LIST = 'list',
     MULTIPLE_LIST = 'multipleList',
+    COLOR = 'color',
+    CASCADE = 'cascade',
 }
 
 export abstract class BaseDataValidator {

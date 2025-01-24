@@ -154,7 +154,19 @@ export interface IFWorksheetSkeletonMixin {
      * @param {IRowsHeaderCfgParam} cfg The configuration of the row header.
      * @example
      * ```typescript
-     * univerAPI.customizeRowHeader({ headerStyle: { backgroundColor: 'pink', fontSize: 9 }, rowsCfg: ['MokaII', undefined, null, { text: 'Size', textAlign: 'left' }] });
+        univerAPI.customizeRowHeader({
+            headerStyle: {
+                backgroundColor: 'pink',
+                fontSize: 12
+            },
+            rowsCfg: {
+                0: 'MokaII',
+                3: {
+                    text: 'Size',
+                    textAlign: 'left'
+                }
+            }
+        });
      * ```
      */
     customizeRowHeader(cfg: IRowsHeaderCfgParam): void;
@@ -341,11 +353,7 @@ export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSk
     }
 
     override customizeRowHeader(cfg: IRowsHeaderCfgParam): void {
-        // const activeSheet = this;
         const unitId = this._fWorkbook.getId();
-        // const renderManagerService = this._injector.get(IRenderManagerService);
-        // const subUnitId = activeSheet.getSheetId();
-        // const render = renderManagerService.getRenderById(unitId);
         const sheetRow = this._getSheetRenderComponent(unitId, SHEET_VIEW_KEY.ROW) as SpreadsheetRowHeader;
         sheetRow.setCustomHeader(cfg);
     }
@@ -354,12 +362,6 @@ export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSk
         const activeSheet = this;
         const unitId = this._fWorkbook.getId();
         const subUnitId = activeSheet.getSheetId();
-        // const render = renderManagerService.getRenderById(unitId);
-        // if (render) {
-        //     const skm = render.with(SheetSkeletonManagerService);
-        //     skm.setColumnHeaderSize(render, subUnitId, height);
-        //     activeSheet?.refreshCanvas();
-        // }
 
         this._commandService.executeCommand(SetColumnHeaderHeightCommand.id, {
             unitId,
@@ -367,10 +369,6 @@ export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSk
             size: height,
         });
 
-        // const sheetColumn = this._getSheetRenderComponent(unitId, SHEET_VIEW_KEY.COLUMN) as SpreadsheetColumnHeader;
-        // if (sheetColumn) {
-        //     sheetColumn.setCustomHeader({ headerStyle: { size: height } });
-        // }
         activeSheet?.refreshCanvas();
         return this;
     }
@@ -379,13 +377,6 @@ export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSk
         const activeSheet = this;
         const unitId = this._fWorkbook.getId();
         const subUnitId = activeSheet.getSheetId();
-        // const renderManagerService = this._injector.get(IRenderManagerService);
-        // const render = renderManagerService.getRenderById(unitId);
-        // if (render) {
-        //     const skm = render.with(SheetSkeletonManagerService);
-        //     skm.setRowHeaderSize(render, subUnitId, width);
-        //     activeSheet?.refreshCanvas();
-        // }
 
         this._commandService.executeCommand(SetRowHeaderWidthCommand.id, {
             unitId,
@@ -416,7 +407,6 @@ export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSk
         }
 
         const { components } = render;
-
         const renderComponent = components.get(viewKey);
         if (!renderComponent) {
             throw new Error('Render component not found');

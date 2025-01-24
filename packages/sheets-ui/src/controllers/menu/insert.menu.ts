@@ -32,6 +32,9 @@ import { MenuItemType } from '@univerjs/ui';
 import { InsertRangeMoveDownConfirmCommand } from '../../commands/commands/insert-range-move-down-confirm.command';
 import { InsertRangeMoveRightConfirmCommand } from '../../commands/commands/insert-range-move-right-confirm.command';
 import { getBaseRangeMenuHidden$, getCellMenuHidden$, getCurrentRangeDisable$, getInsertAfterMenuHidden$, getInsertBeforeMenuHidden$, getObservableWithExclusiveRange$ } from './menu-util';
+import { MENU_ITEM_INPUT_COMPONENT } from '../../components/menu-item-input';
+import { InsertMultiRowAfterCommand } from '@univerjs/sheets/commands/commands/insert-row-col.command.js';
+import { Observable } from 'rxjs';
 
 export const COL_INSERT_MENU_ID = 'sheet.menu.col-insert';
 export function ColInsertMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
@@ -91,6 +94,7 @@ export function InsertRowAfterMenuItemFactory(accessor: IAccessor): IMenuButtonI
     };
 }
 
+
 export function InsertColBeforeMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: InsertColBeforeCommand.id,
@@ -132,5 +136,29 @@ export function InsertRangeMoveDownMenuItemFactory(accessor: IAccessor): IMenuBu
         icon: 'InsertCellDown',
         disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
         hidden$: getCellMenuHidden$(accessor, 'row'),
+    };
+}
+
+
+export function InsertMultiRowAfterMenuItemFactory(accessor: IAccessor): IMenuButtonItem<number> {
+    return {
+        id: InsertMultiRowAfterCommand.id,
+        type: MenuItemType.BUTTON,
+        icon: 'InsertRowBelow',
+        label: {
+            name: MENU_ITEM_INPUT_COMPONENT,
+            props: {
+                prefix: 'rightClick.insertRowAfter',
+                min: 2,
+                max: 1000,
+                suffix: 'rightClick.rowsAfter',
+            },
+        },
+        value$: new Observable<number>(subscriber => {
+            subscriber.next(1);
+            subscriber.complete();
+        }),
+        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetInsertRowPermission, WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
+        hidden$: getInsertAfterMenuHidden$(accessor, 'row'),
     };
 }

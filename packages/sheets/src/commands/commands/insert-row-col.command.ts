@@ -261,6 +261,57 @@ export const InsertRowAfterCommand: ICommand = {
     },
 };
 
+export interface IInsertMultiRowCommandParams {
+    value: number;
+}
+
+export const InsertMultiRowAfterCommand: ICommand = {
+    type: CommandType.COMMAND,
+    id: 'sheet.command.insert-multi-row-after',
+    handler: async (accessor: IAccessor, params: IInsertMultiRowCommandParams) => {
+        const selectionManagerService = accessor.get(SheetsSelectionsService);
+        const selections = selectionManagerService.getCurrentSelections()?.map((s) => s.range);
+        let range: IRange;
+
+        if (selections?.length === 1) {
+            range = selections[0];
+        } else {
+            // if there are multi selections, we can't decide which row to insert
+            // in fact, UI would hides / disables the insert row button
+            return false;
+        }
+
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const target = getSheetCommandTarget(univerInstanceService);
+        if (!target) return false;
+
+        const { worksheet, unitId, subUnitId } = target;
+        const count = range.endRow - range.startRow + 1 + params.value || 0;
+
+        const startRow = range.endRow + 1;
+        const endRow = range.endRow + count;
+        const startColumn = 0;
+        const endColumn = worksheet.getColumnCount() - 1;
+
+        const insertRowParams: IInsertRowCommandParams = {
+            unitId,
+            subUnitId,
+            direction: Direction.DOWN,
+            range: {
+                startRow,
+                endRow,
+                startColumn,
+                endColumn,
+                rangeType: RANGE_TYPE.ROW,
+            },
+            // copy styles from the row below
+            cellValue: copyRangeStyles(worksheet, startRow, endRow, startColumn, endColumn, true, range.endRow),
+        };
+
+        return accessor.get(ICommandService).executeCommand(InsertRowCommand.id, insertRowParams);
+    },
+};
+
 export interface IInsertColCommandParams {
     unitId: string;
     subUnitId: string;

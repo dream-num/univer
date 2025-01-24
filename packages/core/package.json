@@ -63,7 +63,7 @@
     },
     "dependencies": {
         "@univerjs/protocol": "0.1.43",
-        "@wendellhu/redi": "0.17.0",
+        "@wendellhu/redi": "0.17.1",
         "dayjs": "^1.11.13",
         "fast-diff": "1.3.0",
         "kdbush": "^4.0.2",

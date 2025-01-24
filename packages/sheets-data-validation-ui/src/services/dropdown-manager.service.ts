@@ -17,7 +17,7 @@
 import type { CellValue, IDisposable, Nullable, Workbook } from '@univerjs/core';
 import type { ISetRangeValuesCommandParams, ISheetLocation } from '@univerjs/sheets';
 import type { ListValidator } from '@univerjs/sheets-data-validation';
-import type { IEditorBridgeServiceVisibleParam } from '@univerjs/sheets-ui';
+import type { IDropdownParam, IEditorBridgeServiceVisibleParam } from '@univerjs/sheets-ui';
 import { CellValueType, DataValidationErrorStyle, DataValidationRenderMode, dayjs, Disposable, DisposableCollection, ICommandService, Inject, IUniverInstanceService, numfmt, UniverInstanceType } from '@univerjs/core';
 import { DataValidatorDropdownType, DataValidatorRegistryService } from '@univerjs/data-validation';
 import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
@@ -30,7 +30,7 @@ import { Subject } from 'rxjs';
 import { OpenValidationPanelOperation } from '../commands/operations/data-validation.operation';
 import { DataValidationRejectInputController } from '../controllers/dv-reject-input.controller';
 
-export interface IDropdownParam {
+export interface IDataValidationDropdownParam {
     location: ISheetLocation;
     onHide?: () => void;
     trigger?: 'editor-bridge';
@@ -75,8 +75,8 @@ function getDefaultFormat(patternType: 'datetime' | 'date' | 'time', format: str
 }
 
 export class DataValidationDropdownManagerService extends Disposable {
-    private _activeDropdown: Nullable<IDropdownParam>;
-    private _activeDropdown$ = new Subject<Nullable<IDropdownParam>>();
+    private _activeDropdown: Nullable<IDataValidationDropdownParam>;
+    private _activeDropdown$ = new Subject<Nullable<IDataValidationDropdownParam>>();
     private _currentPopup: Nullable<IDisposable> = null;
 
     activeDropdown$ = this._activeDropdown$.asObservable();
@@ -151,7 +151,7 @@ export class DataValidationDropdownManagerService extends Disposable {
     }
 
     // eslint-disable-next-line max-lines-per-function
-    showDropdown(param: IDropdownParam, closeOnOutSide = true) {
+    showDropdown(param: IDataValidationDropdownParam, closeOnOutSide = true) {
         const { location } = param;
         const { row, col, unitId, subUnitId, workbook, worksheet } = location;
         if (this._currentPopup) {
@@ -177,8 +177,6 @@ export class DataValidationDropdownManagerService extends Disposable {
         }
 
         let popupDisposable: Nullable<IDisposable>;
-
-        const cellData = worksheet.getCell(row, col);
 
         const handleSave = async (date: dayjs.Dayjs | undefined, targetPatternType: 'datetime' | 'date' | 'time') => {
             if (!date) {
@@ -240,13 +238,14 @@ export class DataValidationDropdownManagerService extends Disposable {
             }
         };
 
+        let dropdownParam: IDropdownParam;
         switch (validator.dropdownType) {
             case DataValidatorDropdownType.DATE: {
                 const cellStr = getCellValueOrigin(worksheet.getCellRaw(row, col));
                 const originDate = transformDate(cellStr);
                 const showTime = Boolean(rule.bizInfo?.showTime);
 
-                popupDisposable = this._cellDropdownManagerService.showDropdown({
+                dropdownParam = {
                     location,
                     type: 'datepicker',
                     props: {
@@ -255,7 +254,7 @@ export class DataValidationDropdownManagerService extends Disposable {
                         defaultValue: originDate,
                         patternType: 'date',
                     },
-                });
+                };
                 break;
             }
 
@@ -263,7 +262,7 @@ export class DataValidationDropdownManagerService extends Disposable {
                 const cellStr = getCellValueOrigin(worksheet.getCellRaw(row, col));
                 const originDate = transformDate(cellStr);
 
-                popupDisposable = this._cellDropdownManagerService.showDropdown({
+                dropdownParam = {
                     location,
                     type: 'datepicker',
                     props: {
@@ -271,13 +270,13 @@ export class DataValidationDropdownManagerService extends Disposable {
                         defaultValue: originDate,
                         patternType: 'time',
                     },
-                });
+                };
                 break;
             }
             case DataValidatorDropdownType.DATETIME: {
                 const cellStr = getCellValueOrigin(worksheet.getCellRaw(row, col));
                 const originDate = transformDate(cellStr);
-                popupDisposable = this._cellDropdownManagerService.showDropdown({
+                dropdownParam = {
                     location,
                     type: 'datepicker',
                     props: {
@@ -285,7 +284,7 @@ export class DataValidationDropdownManagerService extends Disposable {
                         defaultValue: originDate,
                         patternType: 'datetime',
                     },
-                });
+                };
                 break;
             }
 
@@ -353,7 +352,7 @@ export class DataValidationDropdownManagerService extends Disposable {
                     color: (showColor || item.color) ? item.color : 'transparent',
                 }));
 
-                popupDisposable = this._cellDropdownManagerService.showDropdown({
+                dropdownParam = {
                     location,
                     type: 'list',
                     props: {
@@ -363,14 +362,15 @@ export class DataValidationDropdownManagerService extends Disposable {
                         defaultValue: cellStr,
                         multiple,
                     },
-                });
+                };
                 break;
             }
 
             default:
-                break;
+                throw new Error('[DataValidationDropdownManagerService]: unknown type!');
         }
 
+        popupDisposable = this._cellDropdownManagerService.showDropdown(dropdownParam, closeOnOutSide);
         if (!popupDisposable) {
             throw new Error('[DataValidationDropdownManagerService]: cannot show dropdown!');
         }

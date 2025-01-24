@@ -18,6 +18,9 @@ import type { IImageWatermarkConfig, ITextWatermarkConfig } from '@univerjs/wate
 import { FUniver } from '@univerjs/core';
 import { IWatermarkTypeEnum, WatermarkImageBaseConfig, WatermarkService, WatermarkTextBaseConfig } from '@univerjs/watermark';
 
+/**
+ * @ignore
+ */
 export interface IFUniverWatermarkMixin {
     /**
      * Adds a watermark to the unit. Supports both text and image watermarks based on the specified type.

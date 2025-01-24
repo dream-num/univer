@@ -768,6 +768,9 @@ export interface ISheetSkeletonChangedEvent extends ISheetUIEventBase {
     effectedRanges: FRange[];
 }
 
+/**
+ * @ignore
+ */
 export interface IFSheetsUIEventParamConfig {
     BeforeClipboardChange: IBeforeClipboardChangeParam;
     ClipboardChanged: IClipboardChangedParam;

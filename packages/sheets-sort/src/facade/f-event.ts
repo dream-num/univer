@@ -71,12 +71,16 @@ export interface ISheetRangeSortParams extends IEventBase {
     sortColumn: ISortColumn[];
 }
 
+/**
+ * @ignore
+ */
 export interface ISheetRangeSortEventParamConfig {
     SheetBeforeRangeSort: ISheetRangeSortParams;
     SheetRangeSorted: ISheetRangeSortParams;
 }
 
 FEventName.extend(FSheetEventName);
+
 declare module '@univerjs/core' {
     // eslint-disable-next-line ts/naming-convention
     interface FEventName extends IFSheetSortEventMixin { }

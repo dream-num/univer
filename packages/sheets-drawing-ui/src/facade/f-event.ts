@@ -20,6 +20,9 @@ import type { FWorkbook } from '@univerjs/sheets/facade';
 import type { FOverGridImage } from './f-over-grid-image';
 import { FEventName } from '@univerjs/core';
 
+/**
+ * @ignore
+ */
 interface IFDrawingEventNameMixin {
     /**
      * Triggered before floating image insertion.
@@ -284,6 +287,9 @@ export interface IOverGridImageSelectedParam extends IEventBase {
     selectedImages: FOverGridImage[];
 }
 
+/**
+ * @ignore
+ */
 interface IFSheetsUIEventParamConfig {
     BeforeOverGridImageChange: IBeforeOverGridImageChangeParam;
     OverGridImageChanged: IOverGridImageChangedParam;

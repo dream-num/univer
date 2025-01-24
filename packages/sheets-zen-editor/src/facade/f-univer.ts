@@ -24,6 +24,9 @@ import { RichTextEditingMutation } from '@univerjs/docs';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
 import { CancelZenEditCommand, ConfirmZenEditCommand, OpenZenEditorCommand } from '@univerjs/sheets-zen-editor';
 
+/**
+ * @ignore
+ */
 export interface IFUniverSheetsZenEditorMixin {}
 
 export class FUniverSheetsZenEditorMixin extends FUniver implements IFUniverSheetsZenEditorMixin {

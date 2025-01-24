@@ -115,6 +115,9 @@ export interface IBeforeSheetLinkUpdateEvent extends IEventBase {
     payload: ICellLinkContent;
 }
 
+/**
+ * @ignore
+ */
 export interface ISheetLinkEventConfig {
     BeforeSheetLinkAdd: IBeforeSheetLinkAddEvent;
     BeforeSheetLinkCancel: IBeforeSheetLinkCancelEvent;

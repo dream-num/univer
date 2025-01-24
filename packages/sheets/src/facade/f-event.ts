@@ -535,6 +535,7 @@ export interface ISheetValueChangedEvent extends IEventBase {
 /**
  * Configuration interface for sheet-related events
  * Provides event names and their corresponding event parameter interfaces
+ * @ignore
  */
 export interface ISheetEventParamConfig {
     /** Event fired after a worksheet is created */

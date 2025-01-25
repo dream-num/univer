@@ -19,6 +19,7 @@ import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import {
     InsertColAfterCommand,
     InsertColBeforeCommand,
+    InsertMultiColsLeftCommand,
     InsertMultiRowsAboveCommand,
     InsertMultiRowsAfterCommand,
     InsertRowAfterCommand,
@@ -180,5 +181,51 @@ export function InsertMultiRowsAboveMenuItemFactory(accessor: IAccessor): IMenuB
         }),
         disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetInsertRowPermission, WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
         hidden$: getInsertAfterMenuHidden$(accessor, 'row'),
+    };
+}
+
+export function InsertMultiColsLeftMenuItemFactory(accessor: IAccessor): IMenuButtonItem<number> {
+    return {
+        id: InsertMultiColsLeftCommand.id,
+        type: MenuItemType.BUTTON,
+        icon: 'LeftInsertColumn',
+        label: {
+            name: MENU_ITEM_INPUT_COMPONENT,
+            props: {
+                prefix: 'rightClick.insertColsLeft',
+                min: 1,
+                max: 1000,
+                suffix: 'rightClick.insertColsLeftSuffix',
+            },
+        },
+        value$: new Observable<number>((subscriber) => {
+            subscriber.next(1);
+            subscriber.complete();
+        }),
+        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetInsertRowPermission, WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
+        hidden$: getInsertAfterMenuHidden$(accessor, 'col'),
+    };
+}
+
+export function InsertMultiColsRightMenuItemFactory(accessor: IAccessor): IMenuButtonItem<number> {
+    return {
+        id: InsertMultiRowsAboveCommand.id,
+        type: MenuItemType.BUTTON,
+        icon: 'RightInsertColumn',
+        label: {
+            name: MENU_ITEM_INPUT_COMPONENT,
+            props: {
+                prefix: 'rightClick.insertColsRight',
+                min: 1,
+                max: 1000,
+                suffix: 'rightClick.insertColsRightSuffix',
+            },
+        },
+        value$: new Observable<number>((subscriber) => {
+            subscriber.next(1);
+            subscriber.complete();
+        }),
+        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetInsertRowPermission, WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
+        hidden$: getInsertAfterMenuHidden$(accessor, 'col'),
     };
 }

@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/docs-hyper-link",
-    "version": "0.5.5",
+    "version": "0.6.0-alpha.0",
     "private": false,
     "description": "Univer thread comment plugin",
     "author": "DreamNum <developer@univer.ai>",

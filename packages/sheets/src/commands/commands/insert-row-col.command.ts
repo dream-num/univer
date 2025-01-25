@@ -265,9 +265,56 @@ export interface IInsertMultiRowCommandParams {
     value: number;
 }
 
-export const InsertMultiRowAfterCommand: ICommand = {
+export const InsertMultiRowsAboveCommand: ICommand = {
     type: CommandType.COMMAND,
-    id: 'sheet.command.insert-multi-row-after',
+    id: 'sheet.command.insert-multi-rows-above',
+    handler: async (accessor: IAccessor, params: IInsertMultiRowCommandParams) => {
+        const selectionManagerService = accessor.get(SheetsSelectionsService);
+        const selections = selectionManagerService.getCurrentSelections()?.map((s) => s.range);
+        let range: IRange;
+
+        if (selections?.length === 1) {
+            range = selections[0];
+        } else {
+            // if there are multi selections, we can't decide which row to insert
+            // in fact, UI would hides / disables the insert row button
+            return false;
+        }
+
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const target = getSheetCommandTarget(univerInstanceService);
+        if (!target) return false;
+
+        const { worksheet, unitId, subUnitId } = target;
+        const count = range.endRow - range.startRow + params.value || 0;
+
+        const startRow = range.startRow;
+        const endRow = range.endRow + count - 1;
+        const startColumn = 0;
+        const endColumn = worksheet.getColumnCount() - 1;
+
+        const insertRowParams: IInsertRowCommandParams = {
+            unitId,
+            subUnitId,
+            direction: Direction.UP,
+            range: {
+                startRow,
+                endRow,
+                startColumn,
+                endColumn,
+                rangeType: RANGE_TYPE.ROW,
+            },
+            // copy styles from the row above
+            cellValue: copyRangeStyles(worksheet, startRow, endRow, startColumn, endColumn, true, startRow - 1),
+        };
+
+        return accessor.get(ICommandService).executeCommand(InsertRowCommand.id, insertRowParams);
+    },
+};
+
+export const InsertMultiRowsAfterCommand: ICommand = {
+    type: CommandType.COMMAND,
+    id: 'sheet.command.insert-multi-rows-after',
     handler: async (accessor: IAccessor, params: IInsertMultiRowCommandParams) => {
         const selectionManagerService = accessor.get(SheetsSelectionsService);
         const selections = selectionManagerService.getCurrentSelections()?.map((s) => s.range);

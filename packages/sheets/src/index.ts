@@ -232,6 +232,8 @@ export {
     InsertColBeforeCommand,
     InsertColByRangeCommand,
     InsertColCommand,
+    InsertMultiRowsAboveCommand,
+    InsertMultiRowsAfterCommand,
     InsertRowAfterCommand,
     InsertRowBeforeCommand,
     InsertRowByRangeCommand,

@@ -27,6 +27,8 @@ import {
     CopySheetCommand,
     InsertColAfterCommand,
     InsertColBeforeCommand,
+    InsertMultiRowsAboveCommand,
+    InsertMultiRowsAfterCommand,
     InsertRowAfterCommand,
     InsertRowBeforeCommand,
     RemoveWorksheetMergeCommand,
@@ -102,7 +104,8 @@ import {
     ColInsertMenuItemFactory,
     InsertColAfterMenuItemFactory,
     InsertColBeforeMenuItemFactory,
-    InsertMultiRowAfterMenuItemFactory,
+    InsertMultiRowsAboveMenuItemFactory,
+    InsertMultiRowsAfterMenuItemFactory,
     InsertRangeMoveDownMenuItemFactory,
     InsertRangeMoveRightMenuItemFactory,
     InsertRowAfterMenuItemFactory,
@@ -174,9 +177,7 @@ import {
     HideSheetMenuItemFactory,
     RenameSheetMenuItemFactory,
     ShowMenuItemFactory,
-    // UnHideSheetMenuItemFactory,
 } from './menu/sheet.menu';
-import { InsertMultiRowAfterCommand } from '@univerjs/sheets/commands/commands/insert-row-col.command.js';
 
 export const menuSchema: MenuSchemaType = {
     [RibbonStartGroup.FORMAT]: {
@@ -603,9 +604,13 @@ export const menuSchema: MenuSchemaType = {
                     order: 1,
                     menuItemFactory: InsertRowAfterMenuItemFactory,
                 },
-                [InsertMultiRowAfterCommand.id]: {
+                [InsertMultiRowsAboveCommand.id]: {
                     order: 2,
-                    menuItemFactory: InsertMultiRowAfterMenuItemFactory,
+                    menuItemFactory: InsertMultiRowsAboveMenuItemFactory,
+                },
+                [InsertMultiRowsAfterCommand.id]: {
+                    order: 3,
+                    menuItemFactory: InsertMultiRowsAfterMenuItemFactory,
                 },
             },
             [RemoveRowConfirmCommand.id]: {

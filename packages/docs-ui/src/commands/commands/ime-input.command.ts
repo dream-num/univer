@@ -32,8 +32,6 @@ export interface IIMEInputCommandParams {
     isCompositionEnd: boolean;
 }
 
-const UNITS = SHEET_EDITOR_UNITS;
-
 export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
     id: 'doc.command.ime-input',
 
@@ -92,12 +90,13 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
 
         const defaultTextStyle = docMenuStyleService.getDefaultStyle();
         const styleCache = docMenuStyleService.getStyleCache();
-        const curCustomRange = getCustomRangeAtPosition(body.customRanges ?? [], startOffset + oldTextLen, UNITS.includes(unitId));
+        const curCustomRange = getCustomRangeAtPosition(body.customRanges ?? [], startOffset + oldTextLen, SHEET_EDITOR_UNITS.includes(unitId));
         const curTextRun = getTextRunAtPosition(
             body.textRuns ?? [],
             isCompositionStart ? endOffset : startOffset + oldTextLen,
             defaultTextStyle,
-            styleCache
+            styleCache,
+            SHEET_EDITOR_UNITS.includes(unitId)
         );
 
         const customDecorations = getCustomDecorationAtPosition(body.customDecorations ?? [], startOffset + oldTextLen);

@@ -286,13 +286,13 @@ export const InsertMultiRowsAboveCommand: ICommand = {
         if (!target) return false;
 
         const { worksheet, unitId, subUnitId } = target;
-        const count = range.endRow - range.startRow + params.value || 0;
+        const count = params.value || 0;
 
         const startRow = range.startRow;
-        const endRow = range.endRow + count - 1;
+        const endRow = range.startRow + count - 1;
         const startColumn = 0;
         const endColumn = worksheet.getColumnCount() - 1;
-
+        const copiedStyle = copyRangeStyles(worksheet, startRow, endRow, startColumn, endColumn, true, startRow - 1);
         const insertRowParams: IInsertRowCommandParams = {
             unitId,
             subUnitId,
@@ -305,7 +305,7 @@ export const InsertMultiRowsAboveCommand: ICommand = {
                 rangeType: RANGE_TYPE.ROW,
             },
             // copy styles from the row above
-            cellValue: copyRangeStyles(worksheet, startRow, endRow, startColumn, endColumn, true, startRow - 1),
+            cellValue: copiedStyle,
         };
 
         return accessor.get(ICommandService).executeCommand(InsertRowCommand.id, insertRowParams);

@@ -18,6 +18,7 @@ import type { Nullable } from '@univerjs/core';
 import type {
     IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { RenderComponentType } from '@univerjs/engine-render';
+import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 import {
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     EDITOR_ACTIVATED,
@@ -40,6 +41,7 @@ import { CoverContentCommand, VIEWPORT_KEY as DOC_VIEWPORT_KEY, IEditorService }
 import { DeviceInputEventType, IRenderManagerService, ScrollBar } from '@univerjs/engine-render';
 import { combineLatest, filter, takeUntil } from 'rxjs';
 import { getEditorObject } from '../../basics/editor/get-editor-object';
+import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { IFormulaEditorManagerService } from '../../services/editor/formula-editor-manager.service';
 
@@ -112,7 +114,6 @@ export class FormulaEditorController extends RxDisposable {
         }
 
         if (!this._loadedMap.has(documentComponent)) {
-            this._initialMain(unitId);
             this._loadedMap.add(documentComponent);
         }
     }
@@ -134,11 +135,14 @@ export class FormulaEditorController extends RxDisposable {
 
                 const visibleState = this._editorBridgeService.isVisible();
                 if (visibleState.visible === false) {
-                    this._editorBridgeService.changeVisible({
-                        visible: true,
-                        eventType: DeviceInputEventType.PointerDown,
-                        unitId: currentSheet?.getUnitId() ?? '',
-                    });
+                    this._commandService.syncExecuteCommand(
+                        SetCellEditVisibleOperation.id,
+                        {
+                            visible: true,
+                            eventType: DeviceInputEventType.PointerDown,
+                            unitId: currentSheet?.getUnitId() ?? '',
+                        } as IEditorBridgeServiceVisibleParam
+                    );
                 }
 
                 const content = formulaEditorDataModel?.getBody()?.dataStream;
@@ -173,38 +177,6 @@ export class FormulaEditorController extends RxDisposable {
         });
     }
 
-    private _initialMain(unitId: string) {
-        const formulaEditorDocObject = this._renderManagerService.getRenderById(unitId);
-        if (formulaEditorDocObject == null) {
-            return;
-        }
-
-        const { mainComponent: documentComponent } = formulaEditorDocObject;
-
-        if (documentComponent == null) {
-            return;
-        }
-
-        this.disposeWithMe(
-            documentComponent.onPointerDown$.subscribeEvent(() => {
-                // When clicking on the formula bar, the cell editor also needs to enter the edit state
-                const visibleState = this._editorBridgeService.isVisible();
-                if (visibleState.visible === false) {
-                    this._editorBridgeService.changeVisible({
-                        visible: true,
-                        eventType: DeviceInputEventType.PointerDown,
-                        unitId,
-                    });
-                    this._undoRedoService.clearUndoRedo(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
-                }
-
-                // Open the normal editor first, and then we mark formula editor as activated.
-                this._contextService.setContextValue(FOCUSING_FX_BAR_EDITOR, true);
-            })
-        );
-    }
-
-    // Listen to changes in the size of the formula editor container to set the size of the editor.
     private _syncEditorSize() {
         // this._univerInstanceService.
         const addFOrmulaBar$ = this._univerInstanceService.unitAdded$.pipe(filter((unit) => unit.getUnitId() === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY));

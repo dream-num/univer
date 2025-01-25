@@ -175,3 +175,9 @@ declare global {
     }
 }
 
+window.univerAPI?.addEvent(window.univerAPI.Event.BeforeSheetEditStart, (params) => {
+    const { row, column } = params;
+    if (row === 0 && column === 0) {
+        params.cancel = true;
+    }
+});

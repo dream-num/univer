@@ -57,7 +57,7 @@ export interface IEditorService {
     isSheetEditor(editorUnitId: string): boolean;
 
     blur$: Observable<unknown>;
-    blur(): void;
+    blur(force?: boolean): void;
 
     focus$: Observable<ISuccinctDocRangeParam>;
     focus(editorUnitId: string): void;
@@ -135,13 +135,16 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         return !!(editor && editor.isSheetEditor());
     }
 
-    blur() {
-        this._setFocusId(null);
+    blur(force?: boolean) {
+        const focusingEditor = this.getFocusEditor();
+        if (force) {
+            focusingEditor?.setSelectionRanges([]);
+        }
+        focusingEditor?.blur();
+
         this._contextService.setContextValue(EDITOR_ACTIVATED, false);
         this._contextService.setContextValue(FOCUSING_EDITOR_STANDALONE, false);
-
-        const focusingEditor = this.getFocusEditor();
-        focusingEditor?.blur();
+        this._setFocusId(null);
         this._blur$.next(null);
     }
 

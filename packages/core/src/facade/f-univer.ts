@@ -308,7 +308,7 @@ export class FUniver extends FBaseInitialable {
      * });
      * ```
      */
-    addEvent(event: keyof IEventParamConfig, callback: (params: IEventParamConfig[typeof event]) => void) {
+    addEvent<T extends keyof IEventParamConfig>(event: T, callback: (params: IEventParamConfig[T]) => void) {
         this._ensureEventRegistry(event).add(callback);
         return toDisposable(() => this._ensureEventRegistry(event).delete(callback));
     }

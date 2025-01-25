@@ -102,7 +102,7 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
                 if (!this._eventListend(this.Event.BeforeSheetEditStart) && !this._eventListend(this.Event.BeforeSheetEditEnd)) {
                     return;
                 }
-                const target = this.getCommandSheetTarget(commandInfo);
+                const target = this.getActiveSheet();
                 if (!target) {
                     return;
                 }

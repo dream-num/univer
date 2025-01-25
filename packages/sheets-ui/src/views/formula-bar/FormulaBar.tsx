@@ -15,7 +15,9 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import { DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, FOCUSING_FX_BAR_EDITOR, IContextService, IPermissionService, IUniverInstanceService, UniverInstanceType, useDependency, useObservable } from '@univerjs/core';
+import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
+import { DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, FOCUSING_FX_BAR_EDITOR, ICommandService, IContextService, IPermissionService, IUniverInstanceService, UniverInstanceType, useDependency, useObservable } from '@univerjs/core';
+import { IEditorService } from '@univerjs/docs-ui';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { CheckMarkSingle, CloseSingle, DropdownSingle, FxSingle } from '@univerjs/icons';
 import { RangeProtectionCache, RangeProtectionRuleModel, SheetsSelectionsService, UnitAction, WorksheetEditPermission, WorksheetProtectionRuleModel, WorksheetViewPermission } from '@univerjs/sheets';
@@ -23,6 +25,7 @@ import { ComponentContainer, ComponentManager, KeyCode, useComponentsOfPart } fr
 import clsx from 'clsx';
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { EMPTY, merge, of, switchMap } from 'rxjs';
+import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
 import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY } from '../../common/keys';
 import { useActiveWorkbook } from '../../components/hook';
 import { SheetsUIPart } from '../../consts/ui-name';
@@ -67,6 +70,7 @@ export function FormulaBar() {
     useObservable(useMemo(() => contextService.subscribeContextValue$(FOCUSING_FX_BAR_EDITOR), [contextService]));
     const isFocusFxBar = contextService.getContextValue(FOCUSING_FX_BAR_EDITOR);
     const ref = useRef<HTMLDivElement>(null);
+    const editorService = useDependency(IEditorService);
 
     useLayoutEffect(() => {
         const subscription = workbook.activeSheet$.pipe(
@@ -205,6 +209,43 @@ export function FormulaBar() {
     // TODO Is there a need to disable an editor here?
     const { viewDisable, editDisable } = disableInfo;
     const disabled = editDisable || imageDisable;
+    const shouldSkipFocus = useRef(false);
+    const commandService = useDependency(ICommandService);
+    const unitId = currentWorkbook?.getUnitId() ?? '';
+
+    const handlePointerDown = () => {
+        try {
+            // When clicking on the formula bar, the cell editor also needs to enter the edit state
+            const visibleState = editorBridgeService.isVisible();
+            if (visibleState.visible === false) {
+                commandService.syncExecuteCommand(
+                    SetCellEditVisibleOperation.id,
+                    {
+                        visible: true,
+                        eventType: DeviceInputEventType.PointerDown,
+                        unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+                    } as IEditorBridgeServiceVisibleParam
+                );
+                // undoRedoService.clearUndoRedo(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
+            }
+
+            // Open the normal editor first, and then we mark formula editor as activated.
+            contextService.setContextValue(FOCUSING_FX_BAR_EDITOR, true);
+        } catch (e) {
+            shouldSkipFocus.current = true;
+            throw e;
+        }
+    };
+
+    const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+        if (shouldSkipFocus.current) {
+            setTimeout(() => {
+                editorService.blur(true);
+            }, 30);
+        }
+        shouldSkipFocus.current = false;
+    };
+
     return (
         <div
             className={styles.formulaBox}
@@ -241,7 +282,12 @@ export function FormulaBar() {
                 </div>
 
                 <div className={styles.formulaContainer}>
-                    <div className={styles.formulaInput} ref={ref}>
+                    <div
+                        className={styles.formulaInput}
+                        onPointerDown={handlePointerDown}
+                        onPointerUp={handlePointerUp}
+                        ref={ref}
+                    >
                         {FormulaEditor && (
                             <FormulaEditor
                                 disableSelectionOnClick

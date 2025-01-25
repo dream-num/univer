@@ -73,6 +73,7 @@ export interface IFormulaEditorProps {
      */
     disableSelectionOnClick?: boolean;
     disableContextMenu?: boolean;
+    style?: React.CSSProperties;
 }
 
 const noop = () => { };
@@ -100,6 +101,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
         isSingle = true,
         disableSelectionOnClick = false,
         disableContextMenu,
+        style,
     } = props;
 
     const editorService = useDependency(IEditorService);
@@ -285,8 +287,9 @@ export function FormulaEditor(props: IFormulaEditorProps) {
         onFocus();
         focus();
     };
+
     return (
-        <div className={clsx(styles.sheetEmbeddingFormulaEditor, className)}>
+        <div style={style} className={clsx(styles.sheetEmbeddingFormulaEditor, className)}>
             <div
                 className={clsx(styles.sheetEmbeddingFormulaEditorWrap, {
                     [styles.sheetEmbeddingFormulaEditorActive]: isFocus,

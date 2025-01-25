@@ -261,14 +261,14 @@ export const InsertRowAfterCommand: ICommand = {
     },
 };
 
-export interface IInsertMultiRowCommandParams {
+export interface IInsertMultiRowsCommandParams {
     value: number;
 }
 
 export const InsertMultiRowsAboveCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.insert-multi-rows-above',
-    handler: async (accessor: IAccessor, params: IInsertMultiRowCommandParams) => {
+    handler: async (accessor: IAccessor, params: IInsertMultiRowsCommandParams) => {
         const selectionManagerService = accessor.get(SheetsSelectionsService);
         const selections = selectionManagerService.getCurrentSelections()?.map((s) => s.range);
         let range: IRange;
@@ -315,7 +315,7 @@ export const InsertMultiRowsAboveCommand: ICommand = {
 export const InsertMultiRowsAfterCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.insert-multi-rows-after',
-    handler: async (accessor: IAccessor, params: IInsertMultiRowCommandParams) => {
+    handler: async (accessor: IAccessor, params: IInsertMultiRowsCommandParams) => {
         const selectionManagerService = accessor.get(SheetsSelectionsService);
         const selections = selectionManagerService.getCurrentSelections()?.map((s) => s.range);
         let range: IRange;
@@ -333,7 +333,7 @@ export const InsertMultiRowsAfterCommand: ICommand = {
         if (!target) return false;
 
         const { worksheet, unitId, subUnitId } = target;
-        const count = range.endRow - range.startRow + 1 + params.value || 0;
+        const count = params.value || 0;
 
         const startRow = range.endRow + 1;
         const endRow = range.endRow + count;
@@ -535,6 +535,99 @@ export const InsertColAfterCommand: ICommand = {
 
         const { worksheet, unitId, subUnitId } = target;
         const count = range.endColumn - range.startColumn + 1;
+
+        const startColumn = range.endColumn + 1;
+        const endColumn = range.endColumn + count;
+        const startRow = 0;
+        const endRow = worksheet.getRowCount() - 1;
+
+        const insertColParams: IInsertColCommandParams = {
+            unitId,
+            subUnitId,
+            direction: Direction.RIGHT,
+            range: {
+                startColumn,
+                endColumn,
+                startRow,
+                endRow,
+            },
+            // copy styles from the column after
+            cellValue: copyRangeStyles(worksheet, startRow, endRow, startColumn, endColumn, false, range.endColumn),
+        };
+
+        return accessor.get(ICommandService).executeCommand(InsertColCommand.id, insertColParams);
+    },
+};
+
+export interface IInsertMultiColsCommandParams {
+    value: number;
+}
+
+export const InsertMultiColsLeftCommand: ICommand = {
+    type: CommandType.COMMAND,
+    id: 'sheet.command.insert-multi-cols-before',
+    handler: async (accessor: IAccessor, params: IInsertMultiRowsCommandParams) => {
+        const selectionManagerService = accessor.get(SheetsSelectionsService);
+        const selections = selectionManagerService.getCurrentSelections();
+        let range: IRange;
+
+        if (selections?.length === 1) {
+            range = selections[0].range;
+        } else {
+            return false;
+        }
+
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const target = getSheetCommandTarget(univerInstanceService);
+        if (!target) return false;
+
+        const { worksheet, unitId, subUnitId } = target;
+        const count = params.value || 0;
+        const startColumn = range.startColumn;
+        const endColumn = range.startColumn + count - 1;
+        const startRow = 0;
+        const endRow = worksheet.getRowCount() - 1;
+
+        const insertColParams: IInsertColCommandParams = {
+            unitId,
+            subUnitId,
+            direction: Direction.LEFT,
+            range: {
+                startColumn,
+                endColumn,
+                startRow,
+                endRow,
+                rangeType: RANGE_TYPE.COLUMN,
+            },
+
+            // copy styles from the column before
+            cellValue: copyRangeStyles(worksheet, startRow, endRow, startColumn, endColumn, false, startColumn - 1),
+        };
+
+        return accessor.get(ICommandService).executeCommand(InsertColCommand.id, insertColParams);
+    },
+};
+
+export const InsertMultiColsRightCommand: ICommand = {
+    type: CommandType.COMMAND,
+    id: 'sheet.command.insert-multi-cols-right',
+    handler: async (accessor: IAccessor, params: IInsertMultiRowsCommandParams) => {
+        const selectionManagerService = accessor.get(SheetsSelectionsService);
+        const selections = selectionManagerService.getCurrentSelections();
+        let range: IRange;
+
+        if (selections?.length === 1) {
+            range = selections[0].range;
+        } else {
+            return false;
+        }
+
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const target = getSheetCommandTarget(univerInstanceService);
+        if (!target) return false;
+
+        const { worksheet, unitId, subUnitId } = target;
+        const count = params.value || 0;
 
         const startColumn = range.endColumn + 1;
         const endColumn = range.endColumn + count;

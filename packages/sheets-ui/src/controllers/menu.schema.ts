@@ -26,6 +26,8 @@ import {
     ClearSelectionFormatCommand, CopySheetCommand,
     InsertColAfterCommand,
     InsertColBeforeCommand,
+    InsertMultiColsLeftCommand,
+    InsertMultiColsRightCommand,
     InsertMultiRowsAboveCommand,
     InsertMultiRowsAfterCommand,
     InsertRowAfterCommand,
@@ -99,6 +101,8 @@ import {
     ColInsertMenuItemFactory,
     InsertColAfterMenuItemFactory,
     InsertColBeforeMenuItemFactory,
+    InsertMultiColsLeftMenuItemFactory,
+    InsertMultiColsRightMenuItemFactory,
     InsertMultiRowsAboveMenuItemFactory,
     InsertMultiRowsAfterMenuItemFactory,
     InsertRangeMoveDownMenuItemFactory,
@@ -462,17 +466,33 @@ export const menuSchema: MenuSchemaType = {
         },
         [ContextMenuGroup.LAYOUT]: {
             order: 1,
-            [COL_INSERT_MENU_ID]: {
+            // [COL_INSERT_MENU_ID]: {
+            //     order: 0,
+            //     menuItemFactory: ColInsertMenuItemFactory,
+            //     [InsertColBeforeCommand.id]: {
+            //         order: 0,
+            //         menuItemFactory: InsertColBeforeMenuItemFactory,
+            //     },
+            //     [InsertColAfterCommand.id]: {
+            //         order: 1,
+            //         menuItemFactory: InsertColAfterMenuItemFactory,
+            //     },
+            //     [InsertMultiColsLeftCommand.id]: {
+            //         order: 2,
+            //         menuItemFactory: InsertMultiColsLeftMenuItemFactory,
+            //     },
+            //     [InsertMultiColsRightCommand.id]: {
+            //         order: 3,
+            //         menuItemFactory: InsertMultiColsRightMenuItemFactory,
+            //     },
+            // },
+            [InsertMultiColsLeftCommand.id]: {
                 order: 0,
-                menuItemFactory: ColInsertMenuItemFactory,
-                [InsertColBeforeCommand.id]: {
-                    order: 0,
-                    menuItemFactory: InsertColBeforeMenuItemFactory,
-                },
-                [InsertColAfterCommand.id]: {
-                    order: 1,
-                    menuItemFactory: InsertColAfterMenuItemFactory,
-                },
+                menuItemFactory: InsertMultiColsLeftMenuItemFactory,
+            },
+            [InsertMultiColsRightCommand.id]: {
+                order: 0,
+                menuItemFactory: InsertMultiColsRightMenuItemFactory,
             },
             [HideColConfirmCommand.id]: {
                 order: 1,
@@ -587,25 +607,33 @@ export const menuSchema: MenuSchemaType = {
         },
         [ContextMenuGroup.LAYOUT]: {
             order: 1,
-            [ROW_INSERT_MENU_ID]: {
+            // [ROW_INSERT_MENU_ID]: {
+            //     order: 0,
+            //     menuItemFactory: RowInsertMenuItemFactory,
+            //     [InsertRowBeforeCommand.id]: {
+            //         order: 0,
+            //         menuItemFactory: InsertRowBeforeMenuItemFactory,
+            //     },
+            //     [InsertRowAfterCommand.id]: {
+            //         order: 1,
+            //         menuItemFactory: InsertRowAfterMenuItemFactory,
+            //     },
+            //     [InsertMultiRowsAboveCommand.id]: {
+            //         order: 2,
+            //         menuItemFactory: InsertMultiRowsAboveMenuItemFactory,
+            //     },
+            //     [InsertMultiRowsAfterCommand.id]: {
+            //         order: 3,
+            //         menuItemFactory: InsertMultiRowsAfterMenuItemFactory,
+            //     },
+            // },
+            [InsertMultiRowsAboveCommand.id]: {
                 order: 0,
-                menuItemFactory: RowInsertMenuItemFactory,
-                [InsertRowBeforeCommand.id]: {
-                    order: 0,
-                    menuItemFactory: InsertRowBeforeMenuItemFactory,
-                },
-                [InsertRowAfterCommand.id]: {
-                    order: 1,
-                    menuItemFactory: InsertRowAfterMenuItemFactory,
-                },
-                [InsertMultiRowsAboveCommand.id]: {
-                    order: 2,
-                    menuItemFactory: InsertMultiRowsAboveMenuItemFactory,
-                },
-                [InsertMultiRowsAfterCommand.id]: {
-                    order: 3,
-                    menuItemFactory: InsertMultiRowsAfterMenuItemFactory,
-                },
+                menuItemFactory: InsertMultiRowsAboveMenuItemFactory,
+            },
+            [InsertMultiRowsAfterCommand.id]: {
+                order: 1,
+                menuItemFactory: InsertMultiRowsAfterMenuItemFactory,
             },
             [RemoveRowConfirmCommand.id]: {
                 order: 1,

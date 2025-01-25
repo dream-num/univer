@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+/**
+ * Border style types enum
+ */
 export enum BorderStyleTypes {
     NONE,
     THIN,

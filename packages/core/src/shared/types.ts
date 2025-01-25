@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+/**
+ * @ignore
+ */
 export type Nullable<T> = T | null | undefined | void;
 
 /**

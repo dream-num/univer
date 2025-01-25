@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+/**
+ * Theme color type enum
+ */
 export enum ThemeColorType {
     /**
      * TEXT

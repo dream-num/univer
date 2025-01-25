@@ -2012,8 +2012,7 @@ export class RichTextBuilder extends RichTextValue {
     }
 
     /**
-     * Inserts a new paragraph at the specified start position
-     * @param {number} start The start position of the paragraph to insert
+     * Inserts a new paragraph to the end
      * @param {ParagraphStyleBuilder} paragraphStyle The style of the paragraph to insert
      * @returns {RichTextBuilder} The current RichTextBuilder instance
      * @example

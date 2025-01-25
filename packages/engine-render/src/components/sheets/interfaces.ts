@@ -113,11 +113,14 @@ export interface IHeaderStyleCfg {
     textAlign: CanvasTextAlign;
     textBaseline: CanvasTextBaseline;
     backgroundColor: string;
+    /**
+     * column header height
+     */
     size?: number;
 }
 
 export type IAColumnCfgObj = IHeaderStyleCfg & { text: string };
-export type IAColumnCfg = undefined | null | string | Partial<IAColumnCfgObj>;
+export type IAColumnCfg = undefined | null | string | Partial<Omit<IAColumnCfgObj, 'size'>>;
 
 export interface IRowStyleCfg {
     fontFamily: string;
@@ -127,6 +130,10 @@ export interface IRowStyleCfg {
     textAlign: CanvasTextAlign;
     textBaseline: CanvasTextBaseline;
     backgroundColor: string;
+    /**
+     * row header width
+     */
+    size?: number;
 }
 
 export type IARowCfgObj = IHeaderStyleCfg & { text: string };

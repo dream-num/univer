@@ -15,12 +15,12 @@
  */
 
 import type { IDisposable, IRange, Nullable } from '@univerjs/core';
-import type { RenderManagerService, SpreadsheetSkeleton } from '@univerjs/engine-render';
+import type { IColumnsHeaderCfgParam, IRowsHeaderCfgParam, RenderComponentType, RenderManagerService, SpreadsheetColumnHeader, SpreadsheetRowHeader, SpreadsheetSkeleton } from '@univerjs/engine-render';
 
 import type { IScrollState, IViewportScrollState } from '@univerjs/sheets-ui';
 import { ICommandService, toDisposable } from '@univerjs/core';
 import { IRenderManagerService, SHEET_VIEWPORT_KEY, sheetContentViewportKeys } from '@univerjs/engine-render';
-import { ChangeZoomRatioCommand, SetWorksheetColAutoWidthCommand, SheetScrollManagerService, SheetSkeletonManagerService, SheetsScrollRenderController } from '@univerjs/sheets-ui';
+import { ChangeZoomRatioCommand, SetColumnHeaderHeightCommand, SetRowHeaderWidthCommand, SetWorksheetColAutoWidthCommand, SHEET_VIEW_KEY, SheetScrollManagerService, SheetSkeletonManagerService, SheetsScrollRenderController } from '@univerjs/sheets-ui';
 import { FWorksheet } from '@univerjs/sheets/facade';
 
 /**
@@ -118,6 +118,80 @@ export interface IFWorksheetSkeletonMixin {
      * ```
      */
     setColumnAutoWidth(columnPosition: number, numColumn: number): FWorksheet;
+
+    /**
+     * Customize the column header of the spreadsheet.
+     * @param {IColumnsHeaderCfgParam} cfg The configuration of the column header.
+     * @example
+     * ```typescript
+        const fWorkbook = univerAPI.getActiveWorkbook();
+        const fWorksheet = fWorkbook.getActiveSheet();
+        fWorksheet.customizeColumnHeader({
+            headerStyle: {
+                fontColor: '#fff',
+                backgroundColor: '#4e69ee',
+                fontSize: 9
+            },
+            columnsCfg: {
+                0: 'kuma II',
+                3: {
+                    text: 'Size',
+                    textAlign: 'left', // CanvasTextAlign
+                    fontColor: '#fff',
+                    fontSize: 12,
+                    borderColor: 'pink',
+                    backgroundColor: 'pink',
+                },
+                4: 'Wow'
+            }
+        });
+     * ```
+     */
+    customizeColumnHeader(cfg: IColumnsHeaderCfgParam): void;
+
+    /**
+     * Customize the row header of the spreadsheet.
+     * @param {IRowsHeaderCfgParam} cfg The configuration of the row header.
+     * @example
+     * ```typescript
+        univerAPI.customizeRowHeader({
+            headerStyle: {
+                backgroundColor: 'pink',
+                fontSize: 12
+            },
+            rowsCfg: {
+                0: 'MokaII',
+                3: {
+                    text: 'Size',
+                    textAlign: 'left'
+                }
+            }
+        });
+     * ```
+     */
+    customizeRowHeader(cfg: IRowsHeaderCfgParam): void;
+
+    /**
+     * Set column height for column header.
+     * @param height
+     * @example
+     * ```ts
+        const sheet = univerAPI.getActiveWorkbook().getActiveSheet();
+        sheet.setColumnHeaderHeight(100);
+     * ```
+     */
+    setColumnHeaderHeight(height: number): FWorksheet;
+
+    /**
+     * Set column height for column header.
+     * @param width
+     * @example
+     * ```ts
+        const sheet = univerAPI.getActiveWorkbook().getActiveSheet();
+        sheet.setRowHeaderWidth(100);
+     * ```
+     */
+    setRowHeaderWidth(width: number): FWorksheet;
 
     /**
      * @deprecated use `univerAPI.addEvent(univerAPI.Event.Scroll, () => {})` instead
@@ -257,6 +331,88 @@ export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSk
         });
 
         return this;
+    }
+
+    override customizeColumnHeader(cfg: IColumnsHeaderCfgParam): void {
+        const activeSheet = this;
+        const unitId = this._fWorkbook.getId();
+        const renderManagerService = this._injector.get(IRenderManagerService);
+        const subUnitId = activeSheet.getSheetId();
+        const render = renderManagerService.getRenderById(unitId);
+        if (render && cfg.headerStyle?.size) {
+            const skm = render.with(SheetSkeletonManagerService);
+            skm.setColumnHeaderSize(render, subUnitId, cfg.headerStyle?.size);
+            activeSheet?.refreshCanvas();
+        }
+
+        const sheetColumn = this._getSheetRenderComponent(unitId, SHEET_VIEW_KEY.COLUMN) as SpreadsheetColumnHeader;
+        if (sheetColumn) {
+            sheetColumn.setCustomHeader(cfg);
+            activeSheet?.refreshCanvas();
+        }
+    }
+
+    override customizeRowHeader(cfg: IRowsHeaderCfgParam): void {
+        const unitId = this._fWorkbook.getId();
+        const sheetRow = this._getSheetRenderComponent(unitId, SHEET_VIEW_KEY.ROW) as SpreadsheetRowHeader;
+        sheetRow.setCustomHeader(cfg);
+    }
+
+    override setColumnHeaderHeight(height: number): FWorksheet {
+        const activeSheet = this;
+        const unitId = this._fWorkbook.getId();
+        const subUnitId = activeSheet.getSheetId();
+
+        this._commandService.executeCommand(SetColumnHeaderHeightCommand.id, {
+            unitId,
+            subUnitId,
+            size: height,
+        });
+
+        activeSheet?.refreshCanvas();
+        return this;
+    }
+
+    override setRowHeaderWidth(width: number): FWorksheet {
+        const activeSheet = this;
+        const unitId = this._fWorkbook.getId();
+        const subUnitId = activeSheet.getSheetId();
+
+        this._commandService.executeCommand(SetRowHeaderWidthCommand.id, {
+            unitId,
+            subUnitId,
+            size: width,
+        });
+
+        const sheetRow = this._getSheetRenderComponent(unitId, SHEET_VIEW_KEY.ROW) as SpreadsheetRowHeader;
+        if (sheetRow) {
+            sheetRow.setCustomHeader({ headerStyle: { size: width } });
+        }
+        activeSheet?.refreshCanvas();
+        return this;
+    }
+
+    /**
+     * Get sheet render component from render by unitId and view key.
+     * @private
+     * @param {string} unitId The unit id of the spreadsheet.
+     * @param {SHEET_VIEW_KEY} viewKey The view key of the spreadsheet.
+     * @returns {Nullable<RenderComponentType>} The render component.
+     */
+    private _getSheetRenderComponent(unitId: string, viewKey: SHEET_VIEW_KEY): Nullable<RenderComponentType> {
+        const renderManagerService = this._injector.get(IRenderManagerService);
+        const render = renderManagerService.getRenderById(unitId);
+        if (!render) {
+            throw new Error(`Render Unit with unitId ${unitId} not found`);
+        }
+
+        const { components } = render;
+        const renderComponent = components.get(viewKey);
+        if (!renderComponent) {
+            throw new Error('Render component not found');
+        }
+
+        return renderComponent;
     }
 }
 

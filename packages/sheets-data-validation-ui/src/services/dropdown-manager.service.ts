@@ -310,15 +310,6 @@ export class DataValidationDropdownManagerService extends Disposable {
                         },
                     };
 
-                    if (this._editorBridgeService.isVisible()) {
-                        this._editorBridgeService.changeVisible({
-                            visible: false,
-                            keycode: KeyCode.ESC,
-                            eventType: DeviceInputEventType.Keyboard,
-                            unitId,
-                        });
-                    }
-
                     if (this._editorBridgeService.isVisible().visible) {
                         await this._commandService.executeCommand(SetCellEditVisibleOperation.id, {
                             visible: false,
@@ -362,6 +353,91 @@ export class DataValidationDropdownManagerService extends Disposable {
                         defaultValue: cellStr,
                         multiple,
                     },
+                };
+                break;
+            }
+            case DataValidatorDropdownType.CASCADE: {
+                const handleSave = (newValue: string[]) => {
+                    const params: ISetRangeValuesCommandParams = {
+                        unitId,
+                        subUnitId,
+                        range: {
+                            startColumn: col,
+                            endColumn: col,
+                            startRow: row,
+                            endRow: row,
+                        },
+                        value: {
+                            v: newValue.join('/'),
+                            p: null,
+                            f: null,
+                            si: null,
+                        },
+                    };
+
+                    if (this._editorBridgeService.isVisible().visible) {
+                        this._commandService.syncExecuteCommand(SetCellEditVisibleOperation.id, {
+                            visible: false,
+                            eventType: DeviceInputEventType.Keyboard,
+                            unitId,
+                            keycode: KeyCode.ESC,
+                        } as IEditorBridgeServiceVisibleParam);
+                    }
+                    this._commandService.syncExecuteCommand(SetRangeValuesCommand.id, params);
+
+                    return true;
+                };
+
+                dropdownParam = {
+                    type: 'cascader',
+                    props: {
+                        onChange: handleSave,
+                        defaultValue: getDataValidationCellValue(worksheet.getCellRaw(row, col)).split('/'),
+                        options: JSON.parse(rule.formula1 ?? '[]'),
+                    },
+                    location,
+                };
+                break;
+            }
+            case DataValidatorDropdownType.COLOR: {
+                const handleSave = (newValue: string) => {
+                    const params: ISetRangeValuesCommandParams = {
+                        unitId,
+                        subUnitId,
+                        range: {
+                            startColumn: col,
+                            endColumn: col,
+                            startRow: row,
+                            endRow: row,
+                        },
+                        value: {
+                            v: newValue,
+                            p: null,
+                            f: null,
+                            si: null,
+                        },
+                    };
+
+                    if (this._editorBridgeService.isVisible().visible) {
+                        this._commandService.syncExecuteCommand(SetCellEditVisibleOperation.id, {
+                            visible: false,
+                            eventType: DeviceInputEventType.Keyboard,
+                            unitId,
+                            keycode: KeyCode.ESC,
+                        } as IEditorBridgeServiceVisibleParam);
+                    }
+                    this._commandService.syncExecuteCommand(SetRangeValuesCommand.id, params);
+
+                    return true;
+                };
+
+                dropdownParam = {
+                    type: 'color',
+                    props: {
+                        onChange: handleSave,
+                        defaultValue: getDataValidationCellValue(worksheet.getCellRaw(row, col)),
+                    },
+                    location,
                 };
                 break;
             }

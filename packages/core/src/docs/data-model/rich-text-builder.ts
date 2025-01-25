@@ -1730,10 +1730,10 @@ export class RichTextBuilder extends RichTextValue {
      * @example
      * ```ts
      * const richText = RichTextValue.create({ body: { dataStream: 'Hello World\r\n' } });
-     * const newRichText = richText.insertText(0, 'World');
+     * const newRichText = richText.insertText('World');
      * ```
      */
-    insertText(start: string, style?: TextStyleBuilder | ITextStyle): RichTextBuilder;
+    insertText(text: string, style?: TextStyleBuilder | ITextStyle): RichTextBuilder;
     /**
      * Inserts text into the rich text builder at the specified start position
      * @param start The start position of the text to insert

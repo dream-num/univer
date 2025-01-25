@@ -245,7 +245,7 @@ const ignoreRangeThemeInterceptorFilter = (interceptor: IInterceptor<unknown, un
  * @param startColumn
  * @param endColumn
  * @param isRow
- * @param styleRowOrColumn
+ * @param sourceRangeIndex
  */
 export function copyRangeStyles(
     worksheet: Worksheet,
@@ -254,14 +254,14 @@ export function copyRangeStyles(
     startColumn: number,
     endColumn: number,
     isRow: boolean,
-    styleRowOrColumn: number
+    sourceRangeIndex: number
 ): IObjectMatrixPrimitiveType<ICellData> {
     const cellValue: IObjectMatrixPrimitiveType<ICellData> = {};
     for (let row = startRow; row <= endRow; row++) {
         for (let column = startColumn; column <= endColumn; column++) {
             const cell = isRow ?
-                worksheet.getCellWithFilteredInterceptors(styleRowOrColumn, column, IgnoreRangeThemeInterceptorKey, ignoreRangeThemeInterceptorFilter)
-                : worksheet.getCellWithFilteredInterceptors(row, styleRowOrColumn, IgnoreRangeThemeInterceptorKey, ignoreRangeThemeInterceptorFilter);
+                worksheet.getCellWithFilteredInterceptors(sourceRangeIndex, column, IgnoreRangeThemeInterceptorKey, ignoreRangeThemeInterceptorFilter)
+                : worksheet.getCellWithFilteredInterceptors(row, sourceRangeIndex, IgnoreRangeThemeInterceptorKey, ignoreRangeThemeInterceptorFilter);
 
             if (!cell || !cell.s) {
                 continue;

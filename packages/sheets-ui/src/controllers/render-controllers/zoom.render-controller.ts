@@ -22,6 +22,9 @@ import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import { getSheetObject } from '../utils/component-tools';
 
+/**
+ * Zoom render controller, registered in a render module.
+ */
 export class SheetsZoomRenderController extends Disposable implements IRenderModule {
     constructor(
         private readonly _context: IRenderContext<Workbook>,
@@ -90,6 +93,7 @@ export class SheetsZoomRenderController extends Disposable implements IRenderMod
         );
     }
 
+    private _zoom: number;
     private _initSkeletonListener() {
         this.disposeWithMe(this._sheetSkeletonManagerService.currentSkeletonBefore$.subscribe((param) => {
             if (param == null) {
@@ -101,7 +105,10 @@ export class SheetsZoomRenderController extends Disposable implements IRenderMod
             if (!worksheet) return;
 
             const zoomRatio = worksheet.getZoomRatio() || 1;
-            this._updateViewZoom(zoomRatio);
+            if (this._zoom !== zoomRatio) {
+                this._updateViewZoom(zoomRatio);
+            }
+            this._zoom = zoomRatio;
         }));
     }
 

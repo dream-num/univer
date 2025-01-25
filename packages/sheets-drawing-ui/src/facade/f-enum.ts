@@ -17,6 +17,9 @@
 import { DrawingTypeEnum, FEnum, ImageSourceType } from '@univerjs/core';
 import { SheetDrawingAnchorType } from '@univerjs/sheets-drawing';
 
+/**
+ * @ignore
+ */
 export interface IFDrawingEnumMixin {
     /** Please refer to {@link DrawingTypeEnum}. */
     DrawingType: typeof DrawingTypeEnum;

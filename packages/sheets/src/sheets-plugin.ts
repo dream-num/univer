@@ -135,6 +135,7 @@ export class UniverSheetsPlugin extends Plugin {
             [SheetInterceptorService],
             [RangeProtectionService],
             [IExclusiveRangeService],
+            [SheetPermissionInitController],
         ]);
     }
 
@@ -151,7 +152,6 @@ export class UniverSheetsPlugin extends Plugin {
     override onRendered(): void {
         touchDependencies(this._injector, [
             [INumfmtService],
-            [SheetPermissionInitController],
         ]);
     }
 

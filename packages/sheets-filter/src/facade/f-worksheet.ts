@@ -20,6 +20,9 @@ import { SheetsFilterService } from '@univerjs/sheets-filter';
 import { FWorksheet } from '@univerjs/sheets/facade';
 import { FFilter } from './f-filter';
 
+/**
+ * @ignore
+ */
 export interface IFWorksheetFilter {
     /**
      * Get the filter for the current worksheet.

@@ -51,6 +51,10 @@ exports.baseRules = {
     'command/command': 'off',
     'jsdoc/tag-lines': 'off',
 
+    // IMPORTANT: To ensure compatibility, some features of React 19 will be disabled.
+    'react/no-forward-ref': 'off',
+    'react/no-context-provider': 'off',
+
     // TODO: debatable rules
     'react/no-duplicate-key': 'warn',
     'test/prefer-lowercase-title': 'off',

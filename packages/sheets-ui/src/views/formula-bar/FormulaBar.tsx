@@ -15,14 +15,14 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import { DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, FOCUSING_FX_BAR_EDITOR, IContextService, IPermissionService, IUniverInstanceService, Rectangle, UniverInstanceType, useDependency, useObservable } from '@univerjs/core';
+import { DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, FOCUSING_FX_BAR_EDITOR, IContextService, IPermissionService, IUniverInstanceService, UniverInstanceType, useDependency, useObservable } from '@univerjs/core';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { CheckMarkSingle, CloseSingle, DropdownSingle, FxSingle } from '@univerjs/icons';
-import { RangeProtectionPermissionEditPoint, RangeProtectionRuleModel, SheetsSelectionsService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetProtectionRuleModel, WorksheetSetCellValuePermission } from '@univerjs/sheets';
+import { RangeProtectionCache, RangeProtectionRuleModel, SheetsSelectionsService, UnitAction, WorksheetEditPermission, WorksheetProtectionRuleModel, WorksheetViewPermission } from '@univerjs/sheets';
 import { ComponentContainer, ComponentManager, KeyCode, useComponentsOfPart } from '@univerjs/ui';
 import clsx from 'clsx';
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { EMPTY, merge, switchMap } from 'rxjs';
+import { EMPTY, merge, of, switchMap } from 'rxjs';
 import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY } from '../../common/keys';
 import { useActiveWorkbook } from '../../components/hook';
 import { SheetsUIPart } from '../../consts/ui-name';
@@ -48,7 +48,12 @@ export function FormulaBar() {
     const univerInstanceService = useDependency(IUniverInstanceService);
     const selectionManager = useDependency(SheetsSelectionsService);
     const permissionService = useDependency(IPermissionService);
-    const [disable, setDisable] = useState<boolean>(false);
+    const rangeProtectionCache = useDependency(RangeProtectionCache);
+
+    const [disableInfo, setDisableInfo] = useState<{ editDisable: boolean; viewDisable: boolean }>({
+        editDisable: false,
+        viewDisable: false,
+    });
     const [imageDisable, setImageDisable] = useState<boolean>(false);
     const currentWorkbook = useActiveWorkbook();
     const componentManager = useDependency(ComponentManager);
@@ -62,14 +67,6 @@ export function FormulaBar() {
     useObservable(useMemo(() => contextService.subscribeContextValue$(FOCUSING_FX_BAR_EDITOR), [contextService]));
     const isFocusFxBar = contextService.getContextValue(FOCUSING_FX_BAR_EDITOR);
     const ref = useRef<HTMLDivElement>(null);
-
-    function getPermissionIds(unitId: string, subUnitId: string): string[] {
-        return [
-            new WorkbookEditablePermission(unitId).id,
-            new WorksheetSetCellValuePermission(unitId, subUnitId).id,
-            new WorksheetEditPermission(unitId, subUnitId).id,
-        ];
-    }
 
     useLayoutEffect(() => {
         const subscription = workbook.activeSheet$.pipe(
@@ -88,25 +85,42 @@ export function FormulaBar() {
                         const subUnitId = worksheet.getSheetId();
                         const range = selectionManager.getCurrentLastSelection()?.range;
                         if (!range) return EMPTY;
+                        const primary = selectionManager.getCurrentLastSelection()?.primary;
+                        if (!primary) {
+                            return of(null);
+                        }
 
-                        const permissionIds = getPermissionIds(unitId, subUnitId);
-
-                        const selectionRanges = selectionManager.getCurrentSelections()?.map((selection) => selection.range);
-                        const permissionList = rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).filter((rule) => {
-                            return rule.ranges.some((r) => selectionRanges?.some((selectionRange) => Rectangle.intersects(r, selectionRange)));
+                        return of({
+                            unitId,
+                            subUnitId,
+                            primary,
                         });
-
-                        permissionList.forEach((p) => {
-                            permissionIds.push(new RangeProtectionPermissionEditPoint(unitId, subUnitId, p.permissionId).id);
-                        });
-
-                        return permissionService.composePermission$(permissionIds);
                     })
                 );
             })
-        ).subscribe((permissions) => {
-            if (permissions) {
-                setDisable(!permissions.every((p) => p.value));
+        ).subscribe((cellInfo) => {
+            if (cellInfo) {
+                const { unitId, subUnitId, primary } = cellInfo;
+                if (worksheetProtectionRuleModel.getRule(unitId, subUnitId)) {
+                    const editDisable = !(permissionService.getPermissionPoint(new WorksheetEditPermission(unitId, subUnitId).id)?.value ?? true);
+                    const viewDisable = !(permissionService.getPermissionPoint(new WorksheetViewPermission(unitId, subUnitId).id)?.value ?? true);
+                    setDisableInfo({
+                        viewDisable,
+                        editDisable,
+                    });
+                    return;
+                }
+                const { actualRow, actualColumn } = primary;
+                const cellInfoWithPermission = rangeProtectionCache.getCellInfo(unitId, subUnitId, actualRow, actualColumn);
+                setDisableInfo({
+                    editDisable: !(cellInfoWithPermission?.[UnitAction.Edit] ?? true),
+                    viewDisable: !(cellInfoWithPermission?.[UnitAction.View] ?? true),
+                });
+            } else {
+                setDisableInfo({
+                    viewDisable: false,
+                    editDisable: false,
+                });
             }
         });
 
@@ -188,17 +202,19 @@ export function FormulaBar() {
         formulaEditorManagerService.handleFxBtnClick(true);
     }
 
-    const disabled = disable || imageDisable;
+    // TODO Is there a need to disable an editor here?
+    const { viewDisable, editDisable } = disableInfo;
+    const disabled = editDisable || imageDisable;
     return (
         <div
             className={styles.formulaBox}
             style={{
                 height: ArrowDirection.Down === arrowDirection ? '28px' : '82px',
-                pointerEvents: disable ? 'none' : 'auto',
+                pointerEvents: editDisable ? 'none' : 'auto',
             }}
         >
             <div className={styles.nameRanges}>
-                <DefinedName disable={disable} />
+                <DefinedName disable={editDisable} />
             </div>
 
             <div className={styles.formulaBar}>
@@ -231,7 +247,7 @@ export function FormulaBar() {
                                 disableSelectionOnClick
                                 editorId={DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY}
                                 initValue=""
-                                onChange={() => {}}
+                                onChange={() => { }}
                                 isFocus={isFocusFxBar}
                                 className={styles.formulaContent}
                                 unitId={editState?.unitId}
@@ -253,7 +269,7 @@ export function FormulaBar() {
                             />
                         )}
                     </div>
-                    <div className={clsx(styles.arrowContainer, { [styles.arrowContainerDisable]: disable })} onClick={handleArrowClick}>
+                    <div className={clsx(styles.arrowContainer, { [styles.arrowContainerDisable]: editDisable })} onClick={handleArrowClick}>
                         {arrowDirection === ArrowDirection.Down
                             ? (
                                 <DropdownSingle />

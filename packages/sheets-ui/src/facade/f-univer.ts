@@ -39,8 +39,12 @@ import { FSheetHooks } from '@univerjs/sheets/facade';
 import { CopyCommand, CutCommand, HTML_CLIPBOARD_MIME_TYPE, IClipboardInterfaceService, KeyCode, PasteCommand, PLAIN_TEXT_CLIPBOARD_MIME_TYPE, supportClipboardAPI } from '@univerjs/ui';
 import { combineLatest, filter } from 'rxjs';
 
+/**
+ * @ignore
+ */
 export interface IFUniverSheetsUIMixin {
     /**
+     * @deprecated use same API in FWorkSheet.
      * Customize the column header of the spreadsheet.
      * @param {IColumnsHeaderCfgParam} cfg The configuration of the column header.
      * @example
@@ -49,7 +53,9 @@ export interface IFUniverSheetsUIMixin {
      * ```
      */
     customizeColumnHeader(cfg: IColumnsHeaderCfgParam): void;
+
     /**
+     * @deprecated use same API in FWorkSheet.
      * Customize the row header of the spreadsheet.
      * @param {IRowsHeaderCfgParam} cfg The configuration of the row header.
      * @example
@@ -58,6 +64,7 @@ export interface IFUniverSheetsUIMixin {
      * ```
      */
     customizeRowHeader(cfg: IRowsHeaderCfgParam): void;
+
     /**
      * Register sheet row header render extensions.
      * @param {string} unitId The unit id of the spreadsheet.
@@ -245,6 +252,9 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
         this._initObserverListener(injector);
     }
 
+    /**
+     * @ignore
+     */
     // eslint-disable-next-line max-lines-per-function
     _initObserverListener(injector: Injector): void {
         const univerInstanceService = injector.get(IUniverInstanceService);
@@ -583,6 +593,9 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
         });
     }
 
+    /**
+     * @ignore
+     */
     override _initialize(injector: Injector): void {
         this._initSheetUIEvent(injector);
         const commandService = injector.get(ICommandService);
@@ -811,7 +824,7 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
         const render = renderManagerService.getRenderById(unitId);
         if (render && cfg.headerStyle?.size) {
             const skm = render.with(SheetSkeletonManagerService);
-            skm.setColumnHeaderSize(subUnitId, render, cfg.headerStyle?.size);
+            skm.setColumnHeaderSize(render, subUnitId, cfg.headerStyle?.size);
             activeSheet?.refreshCanvas();
         }
 

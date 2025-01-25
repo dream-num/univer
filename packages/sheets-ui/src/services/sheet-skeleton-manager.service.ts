@@ -17,9 +17,10 @@
 import type { IRange, IRangeWithCoord, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import type { IRender, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { Disposable, Inject, Injector } from '@univerjs/core';
-import { SpreadsheetSkeleton } from '@univerjs/engine-render';
+import { SHEET_VIEWPORT_KEY, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import { SheetsSelectionsService } from '@univerjs/sheets';
 import { BehaviorSubject } from 'rxjs';
+import { SetColumnHeaderHeightCommand, SetRowHeaderWidthCommand } from '../commands/commands/headersize-changed.command';
 import { ISheetSelectionRenderService } from './selection/base-selection-render.service';
 import { attachRangeWithCoord } from './selection/util';
 
@@ -230,30 +231,76 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
         return spreadsheetSkeleton;
     }
 
-    setColumnHeaderSize(sheetId: string, render: IRender, size: number) {
+    setColumnHeaderSize(render: Nullable<IRender>, sheetId: string, size: number) {
+        if (!render) return;
         const skeleton = this.getWorksheetSkeleton(sheetId)?.skeleton;
-        if (skeleton) {
-            skeleton.columnHeaderHeight = size;
-            render.scene.getViewports()[0].top = size;
-            render.scene.getViewport('viewColumnRight')!.setViewportSize({
-                height: size,
-            });
-            render.scene.getViewport('viewColumnLeft')!.setViewportSize({
-                height: size,
-            });
-            render.scene.getViewport('viewRowBottom')!.setViewportSize({
-                top: size,
-            });
-            render.scene.getViewport('viewRowTop')!.setViewportSize({
-                top: size,
-            });
-            render.scene.getViewport('viewLeftTop')!.setViewportSize({
-                height: size,
-            });
-            const selectionService = render?.with(SheetsSelectionsService);
-            const selectionRenderService = render?.with(ISheetSelectionRenderService);
-            const currSelections = selectionService.getCurrentSelections();
-            selectionRenderService.resetSelectionsByModelData(currSelections);
+        if (!skeleton) return;
+
+        skeleton.columnHeaderHeight = size;
+        render.scene.getViewports()[0].top = size;
+        render.scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_COLUMN_RIGHT)!.setViewportSize({
+            height: size,
+        });
+        render.scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_COLUMN_LEFT)!.setViewportSize({
+            height: size,
+        });
+        render.scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_ROW_BOTTOM)!.setViewportSize({
+            top: size,
+        });
+        render.scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_ROW_TOP)!.setViewportSize({
+            top: size,
+        });
+        render.scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_LEFT_TOP)!.setViewportSize({
+            height: size,
+        });
+        const selectionService = render?.with(SheetsSelectionsService);
+        const selectionRenderService = render?.with(ISheetSelectionRenderService);
+        const currSelections = selectionService.getCurrentSelections();
+        selectionRenderService.resetSelectionsByModelData(currSelections);
+
+        const sheetSkeletonManagerParam = this.getUnitSkeleton(render.unitId, sheetId);
+        if (sheetSkeletonManagerParam) {
+            sheetSkeletonManagerParam.commandId = SetColumnHeaderHeightCommand.id;
+            this._currentSkeleton$.next(sheetSkeletonManagerParam);
+        }
+    }
+
+    setRowHeaderSize(render: Nullable<IRender>, sheetId: string, size: number) {
+        const skeleton = this.getWorksheetSkeleton(sheetId)?.skeleton;
+        if (!render) return;
+        if (!skeleton) return;
+        skeleton.rowHeaderWidth = size;
+        const originWidth = render.scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_LEFT_TOP)!.width || 46;
+        const deltaX = size - originWidth;
+
+        const originLeftOfViewMain = render.scene.getViewports()[0].left;
+        render.scene.getViewports()[0].left = originLeftOfViewMain + deltaX;
+
+        render.scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_ROW_BOTTOM)!.setViewportSize({
+            width: size,
+        });
+        render.scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_ROW_TOP)!.setViewportSize({
+            width: size,
+        });
+        render.scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_COLUMN_LEFT)!.setViewportSize({
+            left: size,
+        });
+        const prevLeft = render.scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_COLUMN_RIGHT)!.left || 0;
+        render.scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_COLUMN_RIGHT)!.setViewportSize({
+            left: prevLeft + deltaX,
+        });
+        render.scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_LEFT_TOP)!.setViewportSize({
+            width: size,
+        });
+        const selectionService = render?.with(SheetsSelectionsService);
+        const selectionRenderService = render?.with(ISheetSelectionRenderService);
+        const currSelections = selectionService.getCurrentSelections();
+        selectionRenderService.resetSelectionsByModelData(currSelections);
+
+        const sheetSkeletonManagerParam = this.getCurrent();
+        if (sheetSkeletonManagerParam) {
+            sheetSkeletonManagerParam.commandId = SetRowHeaderWidthCommand.id;
+            this._currentSkeleton$.next(sheetSkeletonManagerParam);
         }
     }
 }

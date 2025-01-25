@@ -170,6 +170,7 @@ export {
     ChangeSheetProtectionFromSheetBarCommand,
     DeleteWorksheetProtectionFormSheetBarCommand,
 } from './commands/commands/worksheet-protection.command';
+export { SetColumnHeaderHeightCommand, SetRowHeaderWidthCommand } from './commands/commands/headersize-changed.command';
 
 export { SetActivateCellEditOperation } from './commands/operations/activate-cell-edit.operation';
 export { SetCellEditVisibleArrowOperation, SetCellEditVisibleOperation, SetCellEditVisibleWithF2Operation } from './commands/operations/cell-edit.operation';

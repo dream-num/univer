@@ -31,6 +31,9 @@ export interface IFBlobSource {
     getAs(contentType: string): FBlob;
 }
 
+/**
+ * @hideconstructor
+ */
 export class FBlob extends FBase {
     constructor(
         private _blob: Nullable<Blob>,

@@ -26,6 +26,10 @@ import { FPermission } from './f-permission';
 import { FRange } from './f-range';
 import { FWorksheet } from './f-worksheet';
 
+/**
+ * Facade API object bounded to a workbook. It provides a set of methods to interact with the workbook.
+ * @hideconstructor
+ */
 export class FWorkbook extends FBaseInitialable {
     readonly id: string;
 
@@ -372,7 +376,7 @@ export class FWorkbook extends FBaseInitialable {
      * // The code below registers a callback that will be triggered before invoking a command targeting the Univer sheet
      * const activeSpreadsheet = univerAPI.getActiveWorkbook();
      * activeSpreadsheet.onBeforeCommandExecute((command) => {
-     *    console.log('Command executed:', command);
+     *   console.log('Command executed:', command);
      * });
      * ```
      */
@@ -816,9 +820,9 @@ export class FWorkbook extends FBaseInitialable {
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const rangeThemeStyle = new RangeThemeStyle('MyTheme');
      * rangeThemeStyle.setSecondRowStyle({
-     *    bg: {
-     *       rgb: 'rgb(214,231,241)',
-     *    },
+     *   bg: {
+     *     rgb: 'rgb(214,231,241)',
+     *   },
      * });
      * fWorkbook.registerRangeTheme(rangeThemeStyle);
      * ```
@@ -880,6 +884,9 @@ export class FWorkbook extends FBaseInitialable {
     }
 }
 
+/**
+ * @ignore
+ */
 // eslint-disable-next-line ts/no-namespace
 export namespace FWorkbook {
     export type FontLine = _FontLine;

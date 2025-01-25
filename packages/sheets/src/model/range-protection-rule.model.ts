@@ -66,7 +66,7 @@ export class RangeProtectionRuleModel {
 
     ruleChange$ = this._ruleChange.asObservable();
 
-    private _ruleRefresh = new Subject();
+    private _ruleRefresh = new Subject<string>();
     ruleRefresh$ = this._ruleRefresh.asObservable();
 
     ruleRefresh(id: string) {

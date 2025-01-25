@@ -24,12 +24,12 @@
         "univer-cli": "bin/index.ts"
     },
     "dependencies": {
-        "@typescript-eslint/parser": "^8.19.1",
+        "@typescript-eslint/parser": "^8.21.0",
         "@vitejs/plugin-react": "^4.3.4",
         "@vitejs/plugin-vue": "^5.2.1",
         "@vitest/coverage-istanbul": "^2.1.8",
         "autoprefixer": "^10.4.20",
-        "eslint-plugin-readable-tailwind": "^1.8.2",
+        "eslint-plugin-readable-tailwind": "^1.9.0",
         "fs-extra": "^11.2.0",
         "happy-dom": "15.0.0",
         "javascript-obfuscator": "^4.1.1",
@@ -44,8 +44,8 @@
     },
     "devDependencies": {
         "@types/fs-extra": "^11.0.4",
-        "@univerjs/icons": "^0.2.12",
-        "@univerjs/icons-svg": "^0.2.12",
-        "@univerjs/protocol": "0.1.40"
+        "@univerjs/icons": "^0.2.14",
+        "@univerjs/icons-svg": "^0.2.14",
+        "@univerjs/protocol": "0.1.43"
     }
 }

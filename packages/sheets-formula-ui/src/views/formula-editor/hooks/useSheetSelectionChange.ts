@@ -73,7 +73,7 @@ export const useSheetSelectionChange = (
     const isSelectingRef = useRef(isSelecting);
     isSelectingRef.current = isSelecting;
 
-    const scalingOptionRef = useRef<{ result: string; offset: number }>();
+    const scalingOptionRef = useRef<{ result: string; offset: number }>(undefined);
 
     useEffect(() => {
         if (refSelectionsRenderService && isNeed) {

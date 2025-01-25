@@ -18,9 +18,10 @@ import type { IDisposable } from '@univerjs/core';
 import type { IUniverUIConfig } from '../config.schema';
 import type { IUIController, IWorkbenchOptions } from './ui.controller';
 import { connectInjector, Disposable, Inject, Injector, IUniverInstanceService, LifecycleService, LifecycleStages, Optional, toDisposable, UniverInstanceType } from '@univerjs/core';
+import { render as createRoot, unmount } from '@univerjs/design';
+
 import { IRenderManagerService } from '@univerjs/engine-render';
 
-import { render as createRoot, unmount } from 'rc-util/lib/React/render';
 import React from 'react';
 import { ILayoutService } from '../../services/layout/layout.service';
 import { IMenuManagerService } from '../../services/menu/menu-manager.service';

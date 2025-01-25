@@ -40,6 +40,7 @@ import {
 } from '../../common/keys';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import { SheetsRenderService } from '../../services/sheets-render.service';
+import { FREEZE_COLUMN_HEADER_NAME, FREEZE_ROW_HEADER_NAME } from './freeze.render-controller';
 
 interface ISetWorksheetMutationParams {
     unitId: string;
@@ -238,7 +239,6 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
     private _initViewports(scene: Scene, rowHeader: { width: number }, columnHeader: { height: number }) {
         const bufferEdgeX = 100;
         const bufferEdgeY = 100;
-
         const viewMain = new Viewport(SHEET_VIEWPORT_KEY.VIEW_MAIN, scene, {
             left: rowHeader.width,
             top: columnHeader.height,
@@ -350,8 +350,8 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
             const spreadsheetRowHeader = components.get(SHEET_VIEW_KEY.ROW) as SpreadsheetRowHeader;
             const spreadsheetColumnHeader = components.get(SHEET_VIEW_KEY.COLUMN) as SpreadsheetColumnHeader;
             const spreadsheetLeftTopPlaceholder = components.get(SHEET_VIEW_KEY.LEFT_TOP) as Rect;
-            const { rowHeaderWidth, columnHeaderHeight } = spreadsheetSkeleton;
 
+            const { rowHeaderWidth, columnHeaderHeight } = spreadsheetSkeleton;
             spreadsheet?.updateSkeleton(spreadsheetSkeleton);
             spreadsheetRowHeader?.updateSkeleton(spreadsheetSkeleton);
             spreadsheetColumnHeader?.updateSkeleton(spreadsheetSkeleton);
@@ -359,6 +359,19 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
                 width: rowHeaderWidth,
                 height: columnHeaderHeight,
             });
+
+            const rowFreezeHeaderRect = this._context.scene.getObject(FREEZE_ROW_HEADER_NAME);
+            if (rowFreezeHeaderRect) {
+                rowFreezeHeaderRect.transformByState({
+                    top: columnHeaderHeight - rowFreezeHeaderRect.height,
+                });
+            }
+            const colFreezeHeaderRect = this._context.scene.getObject(FREEZE_COLUMN_HEADER_NAME);
+            if (colFreezeHeaderRect) {
+                colFreezeHeaderRect.transformByState({
+                    height: columnHeaderHeight,
+                });
+            }
         }));
     }
 

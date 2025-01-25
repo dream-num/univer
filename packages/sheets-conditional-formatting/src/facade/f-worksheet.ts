@@ -32,6 +32,9 @@ import {
 import { FWorksheet } from '@univerjs/sheets/facade';
 import { FConditionalFormattingBuilder } from './conditional-formatting-builder';
 
+/**
+ * @ignore
+ */
 export interface IFWorksheetConditionalFormattingMixin {
 
     /**

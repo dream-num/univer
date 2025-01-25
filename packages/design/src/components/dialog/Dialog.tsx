@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
+import type { ModalStyles } from 'rc-dialog/lib/IDialogPropTypes';
+import type { DraggableData, DraggableEvent, DraggableEventHandler } from 'react-draggable';
 import { CloseSingle } from '@univerjs/icons';
 import RcDialog from 'rc-dialog';
 import React, { useContext, useRef, useState } from 'react';
-import type { DraggableData, DraggableEvent, DraggableEventHandler } from 'react-draggable';
-import Draggable from 'react-draggable';
 
-import type { ModalStyles } from 'rc-dialog/lib/IDialogPropTypes';
+import Draggable from 'react-draggable';
 import { ConfigContext } from '../config-provider/ConfigProvider';
 import styles from './index.module.less';
 
@@ -172,7 +172,7 @@ export function Dialog(props: IDialogProps) {
 
     const modalRender = (modal: React.ReactNode) => {
         const [bounds, setBounds] = useState({ left: 0, top: 0, bottom: 0, right: 0 });
-        const draggleRef = useRef<HTMLDivElement>(null);
+        const draggleRef = useRef<HTMLDivElement>(null!);
 
         function handleStop(_event: MouseEvent, data: DraggableData) {
             if (preservePositionOnDestroy) {

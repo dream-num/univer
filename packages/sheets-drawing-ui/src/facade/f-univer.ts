@@ -45,7 +45,13 @@ interface IBeforeOverGridImageSelectParam extends IEventBase {
     oldSelectedImages: FOverGridImage[];
 }
 
+/**
+ * @ignore
+ */
 export class FUniverDrawingMixin extends FUniver {
+    /**
+     * @ignore
+     */
     override _initialize(injector: Injector): void {
         const commandService = injector.get(ICommandService);
         this.disposeWithMe(commandService.beforeCommandExecuted((commandInfo) => {

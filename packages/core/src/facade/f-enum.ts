@@ -39,7 +39,13 @@ import { RelativeDate } from '../types/enum/relative-date';
 import { SheetTypes } from '../types/enum/sheet-types';
 import { ThemeColorType } from '../types/enum/theme-color-type';
 
+/**
+ * @hideconstructor
+ */
 export class FEnum {
+    /**
+     * @ignore
+     */
     static _instance: FEnum | null;
 
     static get() {
@@ -52,6 +58,9 @@ export class FEnum {
         return instance;
     }
 
+    /**
+     * @ignore
+     */
     static extend(source: any): void {
         Object.getOwnPropertyNames(source.prototype).forEach((name) => {
             if (name !== 'constructor') {

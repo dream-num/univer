@@ -17,6 +17,9 @@
 import { FEnum } from '@univerjs/core';
 import { SheetSkeletonChangeType, SheetValueChangeType } from '@univerjs/sheets';
 
+/**
+ * @ignore
+ */
 export interface IFSheetsEnum {
     /**
      * Sheet value change command types. These commands affect the content or style of cells.

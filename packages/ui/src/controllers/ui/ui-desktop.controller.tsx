@@ -19,9 +19,9 @@ import type { RenderUnit } from '@univerjs/engine-render';
 import type { IUniverUIConfig } from '../config.schema';
 import type { IWorkbenchOptions } from './ui.controller';
 import { connectInjector, Disposable, Inject, Injector, isInternalEditorID, IUniverInstanceService, LifecycleService, LifecycleStages, Optional, toDisposable } from '@univerjs/core';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { render as createRoot, unmount } from '@univerjs/design';
 
-import { render as createRoot, unmount } from 'rc-util/lib/React/render';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import React from 'react';
 import { filter, take } from 'rxjs';
 import { ILayoutService } from '../../services/layout/layout.service';
@@ -29,6 +29,7 @@ import { IMenuManagerService } from '../../services/menu/menu-manager.service';
 import { BuiltInUIPart, IUIPartsService } from '../../services/parts/parts.service';
 import { FloatDom } from '../../views/components/dom/FloatDom';
 import { CanvasPopup } from '../../views/components/popup/CanvasPopup';
+import { Ribbon } from '../../views/components/ribbon/Ribbon';
 import { DesktopWorkbench } from '../../views/workbench/Workbench';
 import { menuSchema } from '../menus/menu.schema';
 
@@ -104,6 +105,7 @@ export class DesktopUIController extends Disposable {
         this.disposeWithMe(this._uiPartsService.registerComponent(BuiltInUIPart.FLOATING, () => connectInjector(CanvasPopup, this._injector)));
         // this.disposeWithMe(this._uiPartsService.registerComponent(BuiltInUIPart.CONTENT, () => connectInjector(ContentDOMPopup, this._injector)));
         this.disposeWithMe(this._uiPartsService.registerComponent(BuiltInUIPart.CONTENT, () => connectInjector(FloatDom, this._injector)));
+        this.disposeWithMe(this._uiPartsService.registerComponent(BuiltInUIPart.TOOLBAR, () => connectInjector(Ribbon, this._injector)));
     }
 }
 

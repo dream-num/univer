@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
+import type { Observable } from 'rxjs';
+import type { IMenuSelectorItem } from '../../services/menu/menu';
 import { ColorKit, LocaleService, useDependency } from '@univerjs/core';
 import React, { useEffect, useMemo, useState } from 'react';
-import { isObservable } from 'rxjs';
-import type { Observable } from 'rxjs';
 
+import { isObservable } from 'rxjs';
 import { ComponentManager } from '../../common/component-manager';
-import type { IMenuSelectorItem } from '../../services/menu/menu';
 
 export type ICustomLabelProps<T = undefined> = {
     value?: string | number | undefined;
@@ -36,7 +36,7 @@ export type ICustomLabelProps<T = undefined> = {
  * The component to render toolbar item label and menu item label.
  * @param props
  */
-export function CustomLabel(props: ICustomLabelProps): JSX.Element {
+export function CustomLabel(props: ICustomLabelProps) {
     const { title, icon, label, value, value$ } = props;
     const localeService = useDependency(LocaleService);
     const componentManager = useDependency(ComponentManager);

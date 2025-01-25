@@ -39,7 +39,7 @@ export interface IRectPopupProps {
      */
     anchorRect$: Observable<IAbsolutePosition>;
     excludeRects?: RefObject<Nullable<IAbsolutePosition[]>>;
-    direction?: 'vertical' | 'horizontal' | 'left' | 'top' | 'right' | 'left' | 'bottom' | 'bottom-center' | 'top-center';
+    direction?: 'vertical' | 'horizontal' | 'top' | 'right' | 'left' | 'bottom' | 'bottom-center' | 'top-center';
 
     hidden?: boolean;
     // #region closing behavior
@@ -119,7 +119,7 @@ function RectPopup(props: IRectPopupProps) {
         left: -9999,
     });
     const excludeRectsRef = excludeRects;
-    const anchorRectRef = useRef<IAbsolutePosition>();
+    const anchorRectRef = useRef<IAbsolutePosition | undefined>(undefined);
 
     useEffect(() => {
         const anchorRectSub = anchorRect$.subscribe((anchorRect) => {

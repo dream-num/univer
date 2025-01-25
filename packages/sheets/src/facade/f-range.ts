@@ -27,6 +27,12 @@ export type FontLine = 'none' | 'underline' | 'line-through';
 export type FontStyle = 'normal' | 'italic';
 export type FontWeight = 'normal' | 'bold';
 
+/**
+ * Represents a range of cells in a sheet. You can call methods on this Facade API object
+ * to read contents or manipulate the range.
+ *
+ * @hideconstructor
+ */
 export class FRange extends FBaseInitialable {
     constructor(
         protected readonly _workbook: Workbook,
@@ -45,9 +51,9 @@ export class FRange extends FBaseInitialable {
      * @example
      * ```ts
      * univerAPI.getActiveWorkbook()
-     *  .getActiveSheet()
-     *  .getActiveRange()
-     *  .getUnitId()
+     *   .getActiveSheet()
+     *   .getActiveRange()
+     *   .getUnitId()
      * ```
      */
     getUnitId(): string {
@@ -60,9 +66,9 @@ export class FRange extends FBaseInitialable {
      * @example
      * ```ts
      * univerAPI.getActiveWorkbook()
-     *  .getActiveSheet()
-     *  .getActiveRange()
-     *  .getSheetName()
+     *   .getActiveSheet()
+     *   .getActiveRange()
+     *   .getSheetName()
      * ```
      */
     getSheetName(): string {
@@ -75,9 +81,9 @@ export class FRange extends FBaseInitialable {
      * @example
      * ```ts
      * univerAPI.getActiveWorkbook()
-     *  .getActiveSheet()
-     *  .getActiveRange()
-     *  .getSheetId()
+     *   .getActiveSheet()
+     *   .getActiveRange()
+     *   .getSheetId()
      * ```
      */
     getSheetId(): string {
@@ -90,9 +96,9 @@ export class FRange extends FBaseInitialable {
      * @example
      * ```ts
      * univerAPI.getActiveWorkbook()
-     *  .getActiveSheet()
-     *  .getActiveRange()
-     *  .getRange()
+     *   .getActiveSheet()
+     *   .getActiveRange()
+     *   .getRange()
      * ```
      */
     getRange(): IRange {
@@ -105,9 +111,9 @@ export class FRange extends FBaseInitialable {
      * @example
      * ```ts
      * univerAPI.getActiveWorkbook()
-     *  .getActiveSheet()
-     *  .getActiveRange()
-     *  .getRow()
+     *   .getActiveSheet()
+     *   .getActiveRange()
+     *   .getRow()
      * ```
      */
     getRow(): number {
@@ -120,9 +126,9 @@ export class FRange extends FBaseInitialable {
      * @example
      * ```ts
      * univerAPI.getActiveWorkbook()
-     *  .getActiveSheet()
-     *  .getActiveRange()
-     *  .getColumn()
+     *   .getActiveSheet()
+     *   .getActiveRange()
+     *   .getColumn()
      * ```
      */
     getColumn(): number {
@@ -135,9 +141,9 @@ export class FRange extends FBaseInitialable {
      * @example
      * ```ts
      * univerAPI.getActiveWorkbook()
-     *  .getActiveSheet()
-     *  .getActiveRange()
-     *  .getWidth()
+     *   .getActiveSheet()
+     *   .getActiveRange()
+     *   .getWidth()
      * ```
      */
     getWidth(): number {
@@ -150,9 +156,9 @@ export class FRange extends FBaseInitialable {
      * @example
      * ```ts
      * univerAPI.getActiveWorkbook()
-     *  .getActiveSheet()
-     *  .getActiveRange()
-     *  .getHeight()
+     *   .getActiveSheet()
+     *   .getActiveRange()
+     *   .getHeight()
      * ```
      */
     getHeight(): number {
@@ -165,9 +171,9 @@ export class FRange extends FBaseInitialable {
      * @example
      * ```ts
      * univerAPI.getActiveWorkbook()
-     *  .getActiveSheet()
-     *  .getActiveRange()
-     *  .isMerged()
+     *   .getActiveSheet()
+     *   .getActiveRange()
+     *   .isMerged()
      * ```
      */
     isMerged(): boolean {
@@ -182,9 +188,9 @@ export class FRange extends FBaseInitialable {
      * @example
      * ```ts
      * univerAPI.getActiveWorkbook()
-     *  .getActiveSheet()
-     *  .getActiveRange()
-     *  .getCellStyleData()
+     *   .getActiveSheet()
+     *   .getActiveRange()
+     *   .getCellStyleData()
      * ```
      */
     getCellStyleData(): IStyleData | null {
@@ -203,9 +209,9 @@ export class FRange extends FBaseInitialable {
      * @example
      * ```ts
      * univerAPI.getActiveWorkbook()
-     *  .getActiveSheet()
-     *  .getActiveRange()
-     *  .getCellStyle()
+     *   .getActiveSheet()
+     *   .getActiveRange()
+     *   .getCellStyle()
      * ```
      */
     getCellStyle(): TextStyleValue | null {
@@ -219,9 +225,9 @@ export class FRange extends FBaseInitialable {
      * @example
      * ```ts
      * univerAPI.getActiveWorkbook()
-     *  .getActiveSheet()
-     *  .getActiveRange()
-     *  .getCellStyles()
+     *   .getActiveSheet()
+     *   .getActiveRange()
+     *   .getCellStyles()
      * ```
      */
     getCellStyles(): Array<Array<TextStyleValue | null>> {
@@ -240,9 +246,9 @@ export class FRange extends FBaseInitialable {
      * @example
      * ```ts
      * univerAPI.getActiveWorkbook()
-     *  .getActiveSheet()
-     *  .getActiveRange()
-     *  .getValue()
+     *   .getActiveSheet()
+     *   .getActiveRange()
+     *   .getValue()
      * ```
      */
     getValue(): CellValue | null;
@@ -254,9 +260,9 @@ export class FRange extends FBaseInitialable {
      * @example
      * ```ts
      * univerAPI.getActiveWorkbook()
-     *  .getActiveSheet()
-     *  .getActiveRange()
-     *  .getValue(true)
+     *   .getActiveSheet()
+     *   .getActiveRange()
+     *   .getValue(true)
      * ```
      */
     getValue(includeRichText: true): Nullable<CellValue | RichTextValue>;
@@ -287,9 +293,9 @@ export class FRange extends FBaseInitialable {
      * ```ts
      * // Get values with rich text if available
      * const richTextValues = univerAPI.getActiveWorkbook()
-     *  .getActiveSheet()
-     *  .getActiveRange()
-     *  .getValues(true)
+     *   .getActiveSheet()
+     *   .getActiveRange()
+     *   .getValues(true)
      * ```
      */
     getValues(includeRichText: true): (Nullable<RichTextValue | CellValue>)[][];
@@ -319,9 +325,9 @@ export class FRange extends FBaseInitialable {
      * @example
      * ```ts
      * univerAPI.getActiveWorkbook()
-     *  .getActiveSheet()
-     *  .getActiveRange()
-     *  .getCellData()
+     *   .getActiveSheet()
+     *   .getActiveRange()
+     *   .getCellData()
      * ```
      */
     getCellData(): ICellData | null {
@@ -334,9 +340,9 @@ export class FRange extends FBaseInitialable {
      * @example
      * ```ts
      * univerAPI.getActiveWorkbook()
-     *  .getActiveSheet()
-     *  .getActiveRange()
-     *  .getCellDatas()
+     *   .getActiveSheet()
+     *   .getActiveRange()
+     *   .getCellDatas()
      * ```
      */
     getCellDatas(): Nullable<ICellData>[][] {
@@ -349,9 +355,9 @@ export class FRange extends FBaseInitialable {
      * @example
      * ```ts
      * univerAPI.getActiveWorkbook()
-     *  .getActiveSheet()
-     *  .getActiveRange()
-     *  .getCellDataGrid()
+     *   .getActiveSheet()
+     *   .getActiveRange()
+     *   .getCellDataGrid()
      * ```
      */
     getCellDataGrid(): Nullable<ICellData>[][] {
@@ -376,9 +382,9 @@ export class FRange extends FBaseInitialable {
      * @example
      * ```ts
      * univerAPI.getActiveWorkbook()
-     *  .getActiveSheet()
-     *  .getActiveRange()
-     *  .getRichTextValue()
+     *   .getActiveSheet()
+     *   .getActiveRange()
+     *   .getRichTextValue()
      * ```
      */
     private getRichTextValue(): Nullable<RichTextValue> {
@@ -398,9 +404,9 @@ export class FRange extends FBaseInitialable {
      * @example
      * ```ts
      * univerAPI.getActiveWorkbook()
-     *  .getActiveSheet()
-     *  .getActiveRange()
-     *  .getRichTextValues()
+     *   .getActiveSheet()
+     *   .getActiveRange()
+     *   .getRichTextValues()
      * ```
      */
     private getRichTextValues(): Nullable<RichTextValue>[][] {
@@ -416,9 +422,9 @@ export class FRange extends FBaseInitialable {
      * @example
      * ```ts
      * univerAPI.getActiveWorkbook()
-     *  .getActiveSheet()
-     *  .getActiveRange()
-     *  .getValueAndRichTextValue()
+     *   .getActiveSheet()
+     *   .getActiveRange()
+     *   .getValueAndRichTextValue()
      * ```
      */
     private getValueAndRichTextValue(): Nullable<CellValue | RichTextValue> {
@@ -432,9 +438,9 @@ export class FRange extends FBaseInitialable {
      * @example
      * ```ts
      * univerAPI.getActiveWorkbook()
-     *  .getActiveSheet()
-     *  .getActiveRange()
-     *  .getValueAndRichTextValues()
+     *   .getActiveSheet()
+     *   .getActiveRange()
+     *   .getValueAndRichTextValues()
      * ```
      */
     getValueAndRichTextValues(): Nullable<CellValue | RichTextValue>[][] {
@@ -448,9 +454,9 @@ export class FRange extends FBaseInitialable {
      * @example
      * ```ts
      * univerAPI.getActiveWorkbook()
-     *  .getActiveSheet()
-     *  .getActiveRange()
-     *  .getFormulas()
+     *   .getActiveSheet()
+     *   .getActiveRange()
+     *   .getFormulas()
      * ```
      */
     getFormulas(): string[][] {
@@ -480,9 +486,9 @@ export class FRange extends FBaseInitialable {
      * @example
      * ```ts
      * univerAPI.getActiveWorkbook()
-     *  .getActiveSheet()
-     *  .getActiveRange()
-     *  .getWrap()
+     *   .getActiveSheet()
+     *   .getActiveRange()
+     *   .getWrap()
      * ```
      */
     getWrap(): boolean {
@@ -495,9 +501,9 @@ export class FRange extends FBaseInitialable {
      * @example
      * ```ts
      * univerAPI.getActiveWorkbook()
-     *  .getActiveSheet()
-     *  .getActiveRange()
-     *  .getWrapStrategy()
+     *   .getActiveSheet()
+     *   .getActiveRange()
+     *   .getWrapStrategy()
      * ```
      */
     getWrapStrategy(): WrapStrategy {
@@ -510,9 +516,9 @@ export class FRange extends FBaseInitialable {
      * @example
      * ```ts
      * univerAPI.getActiveWorkbook()
-     *  .getActiveSheet()
-     *  .getActiveRange()
-     *  .getHorizontalAlignment()
+     *   .getActiveSheet()
+     *   .getActiveRange()
+     *   .getHorizontalAlignment()
      * ```
      */
     getHorizontalAlignment(): string {
@@ -525,9 +531,9 @@ export class FRange extends FBaseInitialable {
      * @example
      * ```ts
      * univerAPI.getActiveWorkbook()
-     *  .getActiveSheet()
-     *  .getActiveRange()
-     *  .getVerticalAlignment()
+     *   .getActiveSheet()
+     *   .getActiveRange()
+     *   .getVerticalAlignment()
      * ```
      */
     getVerticalAlignment(): string {
@@ -540,9 +546,9 @@ export class FRange extends FBaseInitialable {
      * @returns {FRange} This range, for chaining
      * ```ts
      * univerAPI.getActiveWorkbook()
-     *  .getActiveSheet()
-     *  .getActiveRange()
-     *  .setCustomMetaData({ key: 'value' });
+     *   .getActiveSheet()
+     *   .getActiveRange()
+     *   .setCustomMetaData({ key: 'value' });
      * ```
      */
     setCustomMetaData(data: CustomData): FRange {
@@ -557,9 +563,9 @@ export class FRange extends FBaseInitialable {
      * @returns {FRange} This range, for chaining
      * ```ts
      * univerAPI.getActiveWorkbook()
-     *  .getActiveSheet()
-     *  .getActiveRange()
-     *  .setCustomMetaDatas([[{ key: 'value' }]]);
+     *   .getActiveSheet()
+     *   .getActiveRange()
+     *   .setCustomMetaDatas([[{ key: 'value' }]]);
      * ```
      */
     setCustomMetaDatas(datas: CustomData[][]): FRange {
@@ -572,9 +578,9 @@ export class FRange extends FBaseInitialable {
      * @example
      * ```
      * univerAPI.getActiveWorkbook()
-     *  .getActiveSheet()
-     *  .getActiveRange()
-     *  .getCustomMetaData()
+     *   .getActiveSheet()
+     *   .getActiveRange()
+     *   .getCustomMetaData()
      * ```
      */
     getCustomMetaData(): CustomData | null {
@@ -588,9 +594,9 @@ export class FRange extends FBaseInitialable {
      * @example
      * ```
      * univerAPI.getActiveWorkbook()
-     *  .getActiveSheet()
-     *  .getActiveRange()
-     *  .getCustomMetaDatas()
+     *   .getActiveSheet()
+     *   .getActiveRange()
+     *   .getCustomMetaDatas()
      * ```
      */
     getCustomMetaDatas(): Nullable<CustomData>[][] {
@@ -607,9 +613,9 @@ export class FRange extends FBaseInitialable {
      * @example
      * ```ts
      * univerAPI.getActiveWorkbook()
-     *  .getActiveSheet()
-     *  .getActiveRange()
-     *  .setBorder(BorderType.ALL, BorderStyleType.THIN, '#ff0000');
+     *   .getActiveSheet()
+     *   .getActiveRange()
+     *   .setBorder(BorderType.ALL, BorderStyleType.THIN, '#ff0000');
      * ```
      */
     setBorder(type: BorderType, style: BorderStyleTypes, color?: string): FRange {
@@ -634,9 +640,9 @@ export class FRange extends FBaseInitialable {
      * @example
      * ```ts
      * univerAPI.getActiveWorkbook()
-     *  .getActiveSheet()
-     *  .getActiveRange()
-     *  .setBackgroundColor('red')
+     *   .getActiveSheet()
+     *   .getActiveRange()
+     *   .setBackgroundColor('red')
      * ```
      */
     setBackgroundColor(color: string): FRange {
@@ -674,9 +680,9 @@ export class FRange extends FBaseInitialable {
      * @returns {FRange} This range, for chaining
      * ```ts
      * univerAPI.getActiveWorkbook()
-     *  .getActiveSheet()
-     *  .getActiveRange()
-     *  .setValue(1);
+     *   .getActiveSheet()
+     *   .getActiveRange()
+     *   .setValue(1);
      * ```
      */
     setValue(value: CellValue | ICellData): FRange {
@@ -702,9 +708,9 @@ export class FRange extends FBaseInitialable {
      * @returns {FRange} This range, for chaining
      * ```ts
      * univerAPI.getActiveWorkbook()
-     *  .getActiveSheet()
-     *  .getActiveRange()
-     *  .setValueForCell(1);
+     *   .getActiveSheet()
+     *   .getActiveRange()
+     *   .setValueForCell(1);
      * ```
      */
     setValueForCell(value: CellValue | ICellData): FRange {
@@ -736,9 +742,9 @@ export class FRange extends FBaseInitialable {
      * @example
      * ```
      * univerAPI.getActiveWorkbook()
-     *  .getActiveSheet()
-     *  .getActiveRange()
-     *  .setRichTextValueForCell(new RichTextValue().insertText('Hello'));
+     *   .getActiveSheet()
+     *   .getActiveRange()
+     *   .setRichTextValueForCell(new RichTextValue().insertText('Hello'));
      * ```
      */
     setRichTextValueForCell(value: RichTextValue | IDocumentData): FRange {
@@ -765,10 +771,10 @@ export class FRange extends FBaseInitialable {
      * @example
      * ```ts
      * univerAPI
-     *  .getActiveWorkbook()
-     *  .getActiveSheet()
-     *  .getActiveRange()
-     *  .setRichTextValues([[new RichTextValue().insertText('Hello')]]);
+     *   .getActiveWorkbook()
+     *   .getActiveSheet()
+     *   .getActiveRange()
+     *   .setRichTextValues([[new RichTextValue().insertText('Hello')]]);
      * ```
      */
     setRichTextValues(values: (RichTextValue | IDocumentData)[][]): FRange {
@@ -793,9 +799,9 @@ export class FRange extends FBaseInitialable {
      * @example
      * ```ts
      * univerAPI.getActiveWorkbook()
-     *  .getActiveSheet()
-     *  .getActiveRange()
-     *  .setWrap(true);
+     *   .getActiveSheet()
+     *   .getActiveRange()
+     *   .setWrap(true);
      * ```
      */
     setWrap(isWrapEnabled: boolean): FRange {
@@ -816,9 +822,9 @@ export class FRange extends FBaseInitialable {
      * @example
      * ```ts
      * univerAPI.getActiveWorkbook()
-     *  .getActiveSheet()
-     *  .getActiveRange()
-     *  .setWrapStrategy(WrapStrategy.WRAP);
+     *   .getActiveSheet()
+     *   .getActiveRange()
+     *   .setWrapStrategy(WrapStrategy.WRAP);
      * ```
      */
     setWrapStrategy(strategy: WrapStrategy): FRange {
@@ -839,9 +845,9 @@ export class FRange extends FBaseInitialable {
      * @example
      * ```ts
      * univerAPI.getActiveWorkbook()
-     *  .getActiveSheet()
-     *  .getActiveRange()
-     *  .setVerticalAlignment('top');
+     *   .getActiveSheet()
+     *   .getActiveRange()
+     *   .setVerticalAlignment('top');
      * ```
      */
     setVerticalAlignment(alignment: FVerticalAlignment): FRange {
@@ -862,9 +868,9 @@ export class FRange extends FBaseInitialable {
      * @example
      * ```ts
      * univerAPI.getActiveWorkbook()
-     *  .getActiveSheet()
-     *  .getActiveRange()
-     *  .setHorizontalAlignment('left');
+     *   .getActiveSheet()
+     *   .getActiveRange()
+     *   .setHorizontalAlignment('left');
      * ```
      */
     setHorizontalAlignment(alignment: FHorizontalAlignment): FRange {
@@ -885,9 +891,9 @@ export class FRange extends FBaseInitialable {
      * @example
      * ```ts
      * univerAPI.getActiveWorkbook()
-     *  .getActiveSheet()
-     *  .getActiveRange()
-     *  .setValues([[1, 2], [3, 4]]);
+     *   .getActiveSheet()
+     *   .getActiveRange()
+     *   .setValues([[1, 2], [3, 4]]);
      * ```
      */
     setValues(
@@ -916,9 +922,9 @@ export class FRange extends FBaseInitialable {
      * @example
      * ```ts
      * univerAPI.getActiveWorkbook()
-     *  .getActiveSheet()
-     *  .getActiveRange()
-     *  .setFontWeight('bold');
+     *   .getActiveSheet()
+     *   .getActiveRange()
+     *   .setFontWeight('bold');
      * ```
      */
     setFontWeight(fontWeight: FontWeight | null): this {
@@ -957,9 +963,9 @@ export class FRange extends FBaseInitialable {
      * @example
      * ```ts
      * univerAPI.getActiveWorkbook()
-     *  .getActiveSheet()
-     *  .getActiveRange()
-     *  .setFontStyle('italic');
+     *   .getActiveSheet()
+     *   .getActiveRange()
+     *   .setFontStyle('italic');
      * ```
      */
     setFontStyle(fontStyle: FontStyle | null): this {
@@ -998,9 +1004,9 @@ export class FRange extends FBaseInitialable {
      * @example
      * ```ts
      * univerAPI.getActiveWorkbook()
-     *  .getActiveSheet()
-     *  .getActiveRange()
-     *  .setFontLine('underline');
+     *   .getActiveSheet()
+     *   .getActiveRange()
+     *   .setFontLine('underline');
      * ```
      */
     setFontLine(fontLine: FontLine | null): this {
@@ -1035,9 +1041,9 @@ export class FRange extends FBaseInitialable {
      * @example
      * ```ts
      * univerAPI.getActiveWorkbook()
-     *  .getActiveSheet()
-     *  .getActiveRange()
-     *  .setFontLine('underline');
+     *   .getActiveSheet()
+     *   .getActiveRange()
+     *   .setFontLine('underline');
      * ```
      */
     private _setFontUnderline(value: ITextDecoration | null): void {
@@ -1082,9 +1088,9 @@ export class FRange extends FBaseInitialable {
      * @example
      * ```ts
      * univerAPI.getActiveWorkbook()
-     *  .getActiveSheet()
-     *  .getActiveRange()
-     *  .setFontFamily('Arial');
+     *   .getActiveSheet()
+     *   .getActiveRange()
+     *   .setFontFamily('Arial');
      * ```
      */
     setFontFamily(fontFamily: string | null): this {
@@ -1111,9 +1117,9 @@ export class FRange extends FBaseInitialable {
      * @example
      * ```ts
      * univerAPI.getActiveWorkbook()
-     *  .getActiveSheet()
-     *  .getActiveRange()
-     *  .setFontSize(12);
+     *   .getActiveSheet()
+     *   .getActiveRange()
+     *   .setFontSize(12);
      * ```
      */
     setFontSize(size: number | null): this {
@@ -1140,9 +1146,9 @@ export class FRange extends FBaseInitialable {
      * @example
      * ```ts
      * univerAPI.getActiveWorkbook()
-     *  .getActiveSheet()
-     *  .getActiveRange()
-     *  .setFontColor('#ff0000');
+     *   .getActiveSheet()
+     *   .getActiveRange()
+     *   .setFontColor('#ff0000');
      * ```
      */
     setFontColor(color: string | null): this {
@@ -1293,7 +1299,7 @@ export class FRange extends FBaseInitialable {
      * const fWorksheet = fWorkbook.getActiveSheet();
      * const fRange = fWorksheet.getRange('A1:B2');
      * fRange.forEach((row, col, cell) => {
-     *    console.log(row, col, cell);
+     *   console.log(row, col, cell);
      * });
      * ```
      */

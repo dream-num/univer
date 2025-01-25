@@ -25,6 +25,9 @@ import { IUndoRedoService, RedoCommand, UndoCommand } from '../services/undoredo
 import { toDisposable } from '../shared/lifecycle';
 import { FBase } from './f-base';
 
+/**
+ * @hideconstructor
+ */
 export class FHooks extends FBase {
     constructor(
         @Inject(Injector) protected readonly _injector: Injector,

@@ -21,14 +21,15 @@ import { serializeRangeToRefString } from '@univerjs/engine-formula';
 import { FDataValidation } from './f-data-validation';
 
 /**
- * Builder for data validation rules.
+ * Builder for data validation rules. use {@link FUniver} `univerAPI.newDataValidation()` to create a new builder.
  * @example
  * ```typescript
  * // Set the data validation for cell A1 to require a value from B1:B10
  * const range = FRange.create('Sheet1', 'B1:B10');
- * const rule = FUniver.newDataValidation().requireValueInRange(range).build();
+ * const rule = univerAPI.newDataValidation().requireValueInRange(range).build();
  * cell.setDataValidation(rule);
  * ```
+ * @hideconstructor
  */
 export class FDataValidationBuilder {
     private _rule: IDataValidationRule;

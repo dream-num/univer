@@ -30,7 +30,6 @@ import {
 import { IEditorService } from '@univerjs/docs-ui';
 import { serializeRange } from '@univerjs/engine-formula';
 import { DeviceInputEventType } from '@univerjs/engine-render';
-
 import {
     getCellAtRowCol,
     getSheetCommandTarget,
@@ -50,7 +49,7 @@ export interface IInsertFunctionOperationParams {
 export const InsertFunctionOperation: ICommand = {
     id: 'formula-ui.operation.insert-function',
     type: CommandType.OPERATION,
-    // eslint-disable-next-line max-lines-per-function
+    // eslint-disable-next-line
     handler: async (accessor: IAccessor, params: IInsertFunctionOperationParams) => {
         const selectionManagerService = accessor.get(SheetsSelectionsService);
         const editorService = accessor.get(IEditorService);
@@ -71,18 +70,20 @@ export const InsertFunctionOperation: ICommand = {
 
         // No match refRange situation, enter edit mode
         // In each range, first take the judgment result of the primary position (if there is no primary, take the upper left corner),
-        // If there is a range, set the formula range directly, and then set the formula id of other positions.
         // If the range cannot be found, enter the edit mode.
+        // If there is a range and range cell has no number value, set the formula range directly, and then set the formula id of other positions. The first formula range is the nearest continuous numeric cell, and other formulas are relatively offset by ID.
+        // If the range cell has number value, find the first blank cell in the row or column direction and set the formula range. The formula calculation range is the range.
         const list: IInsertFunction[] = [];
+        const listOfRangeHasNumber: IInsertFunction[] = [];
         let editRange: IRange | null = null;
         let editRow = 0;
         let editColumn = 0;
         let editFormulaRangeString = '';
 
-        // Whether or not there is a matching refRange, single range with one cell or multiple rows and columns, enter edit mode
+        // Whether or not there is a matching refRange, a single cell, or a multi-row and multi-column range with no number value, enters the edit mode
         if (
             currentSelections.length === 1 &&
-            (isSingleCell(currentSelections[0].range) || isMultiRowsColumnsRange(currentSelections[0].range))
+            (isSingleCell(currentSelections[0].range) || (isMultiRowsColumnsRange(currentSelections[0].range) && rangeHasNoNumber(cellMatrix, currentSelections[0].range)))
         ) {
             const { range, primary } = currentSelections[0];
             const row = primary?.actualRow ?? range.startRow;
@@ -98,32 +99,90 @@ export const InsertFunctionOperation: ICommand = {
                 editFormulaRangeString = serializeRange(refRange);
             }
         } else {
+            // eslint-disable-next-line
             currentSelections.some((selection) => {
                 const { range, primary } = selection;
 
-                const row = primary?.actualRow ?? range.startRow;
-                const column = primary?.actualColumn ?? range.startColumn;
+                if (rangeHasNoNumber(cellMatrix, range)) {
+                    // single row or single column and range cell has no number value
+                    const row = primary?.actualRow ?? range.startRow;
+                    const column = primary?.actualColumn ?? range.startColumn;
 
-                const refRange = findRefRange(cellMatrix, row, column);
+                    const refRange = findRefRange(cellMatrix, row, column);
 
-                if (!refRange) {
-                    editRange = range;
-                    editRow = row;
-                    editColumn = column;
-                    return true;
+                    if (!refRange) {
+                        editRange = range;
+                        editRow = row;
+                        editColumn = column;
+                        return true;
+                    }
+
+                    const rangeString = serializeRange(refRange);
+                    const formulaString = `=${value}(${rangeString})`;
+
+                    list.push({
+                        range,
+                        primary: {
+                            row,
+                            column,
+                        },
+                        formula: formulaString,
+                    });
+                } else {
+                    // range cell has number value
+                    const { startRow, startColumn, endRow, endColumn } = range;
+
+                    if (startRow === endRow) {
+                        // single row, insert function in the blank cell of the row
+                        const blankCellColumn = findBlankCellOfRow(cellMatrix, startRow, endColumn, worksheet.getColumnCount() - 1);
+                        const newEndColumn = blankCellColumn === endColumn ? endColumn - 1 : endColumn;
+                        const rangeString = serializeRange({
+                            startRow,
+                            endRow,
+                            startColumn,
+                            endColumn: newEndColumn,
+                        });
+                        const formulaString = `=${value}(${rangeString})`;
+
+                        listOfRangeHasNumber.push({
+                            range,
+                            primary: {
+                                row: startRow,
+                                column: blankCellColumn,
+                            },
+                            formula: formulaString,
+                        });
+                    } else {
+                        // single column or multi-column, insert function in the blank cell of the column
+                        let maxBlankCellRow = -1;
+
+                        for (let c = startColumn; c <= endColumn; c++) {
+                            const blankCellRow = findBlankCellOfColumn(cellMatrix, c, endRow, worksheet.getRowCount() - 1);
+                            maxBlankCellRow = Math.max(maxBlankCellRow, blankCellRow);
+                        }
+
+                        const newEndRow = maxBlankCellRow === endRow ? endRow - 1 : endRow;
+
+                        for (let c = startColumn; c <= endColumn; c++) {
+                            const rangeString = serializeRange({
+                                startRow,
+                                endRow: newEndRow,
+                                startColumn: c,
+                                endColumn: c,
+                            });
+                            const formulaString = `=${value}(${rangeString})`;
+
+                            listOfRangeHasNumber.push({
+                                range,
+                                primary: {
+                                    row: maxBlankCellRow,
+                                    column: c,
+                                },
+                                formula: formulaString,
+                            });
+                        }
+                    }
                 }
-
-                const rangeString = serializeRange(refRange);
-                const formulaString = `=${value}(${rangeString})`;
-
-                list.push({
-                    range,
-                    primary: {
-                        row,
-                        column,
-                    },
-                    formula: formulaString,
-                });
 
                 return false;
             });
@@ -166,10 +225,11 @@ export const InsertFunctionOperation: ICommand = {
             formulaEditor?.replaceText(formulaText, false);
         }
 
-        if (list.length === 0) return false;
+        if (list.length === 0 && listOfRangeHasNumber.length === 0) return false;
 
         return commandService.executeCommand(InsertFunctionCommand.id, {
             list,
+            listOfRangeHasNumber,
         });
     },
 };
@@ -274,4 +334,38 @@ export function isSingleCell(range: IRange) {
  */
 export function isMultiRowsColumnsRange(range: IRange) {
     return range.startRow !== range.endRow && range.startColumn !== range.endColumn;
+}
+
+/**
+ * Check the range has no number
+ * @param cellMatrix
+ * @param range
+ */
+export function rangeHasNoNumber(cellMatrix: ObjectMatrix<Nullable<ICellData>>, range: IRange) {
+    for (let i = range.startRow; i <= range.endRow; i++) {
+        for (let j = range.startColumn; j <= range.endColumn; j++) {
+            if (isNumberCell(cellMatrix.getValue(i, j))) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+function findBlankCellOfRow(cellMatrix: ObjectMatrix<Nullable<ICellData>>, row: number, startColumn: number, endColumn: number) {
+    for (let c = startColumn; c <= endColumn; c++) {
+        if (!cellMatrix.getValue(row, c)) {
+            return c;
+        }
+    }
+    return endColumn;
+}
+
+function findBlankCellOfColumn(cellMatrix: ObjectMatrix<Nullable<ICellData>>, column: number, startRow: number, endRow: number) {
+    for (let r = startRow; r <= endRow; r++) {
+        if (!cellMatrix.getValue(r, column)) {
+            return r;
+        }
+    }
+    return endRow;
 }

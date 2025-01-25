@@ -209,7 +209,7 @@ function createUniverInjector(parentInjector?: Injector, override?: DependencyOv
         [IContextService, { useClass: ContextService }],
         [IResourceManagerService, { useClass: ResourceManagerService, lazy: true }],
         [IResourceLoaderService, { useClass: ResourceLoaderService, lazy: true }],
-        [IAuthzIoService, { useClass: AuthzIoLocalService, lazy: true }],
+        [IAuthzIoService, { useClass: AuthzIoLocalService }],
         [IMentionIOService, { useClass: MentionIOLocalService, lazy: true }],
     ], override);
 

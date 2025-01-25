@@ -50,3 +50,4 @@ export { defaultTheme, greenTheme, themeInstance } from './themes';
 export { DraggableList, type IDraggableListProps } from './components/draggable-list';
 export { clsx } from './helper/clsx';
 export { resizeObserverCtor } from './helper/resize-observer';
+export { render, unmount } from './utils/render';

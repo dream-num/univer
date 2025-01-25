@@ -16,6 +16,9 @@
 
 import { FBase, Inject, Injector } from '@univerjs/core';
 
+/**
+ * @hideconstructor
+ */
 export class FSheetHooks extends FBase {
     constructor(
         @Inject(Injector) protected readonly _injector: Injector

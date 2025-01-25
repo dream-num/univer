@@ -32,7 +32,8 @@ interface IFacadeClearOptions {
 }
 
 /**
- * Represents a worksheet facade api instance. Which provides a set of methods to interact with the worksheet.
+ * A Facade API object bounded to a worksheet. It provides a set of methods to interact with the worksheet.
+ * @hideconstructor
  */
 export class FWorksheet extends FBaseInitialable {
     /**

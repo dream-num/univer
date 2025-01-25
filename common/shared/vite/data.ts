@@ -18,12 +18,22 @@ export const peerDepsMap = {
     react: {
         global: 'React',
         name: 'react',
-        version: '^16.9.0 || ^17.0.0 || ^18.0.0',
+        version: '>=16.9.0 || >=17 || >=18 || >=19',
+    },
+    'react/jsx-runtime': {
+        global: 'React',
+        name: 'react',
+        version: 'react',
     },
     'react-dom': {
         global: 'ReactDOM',
         name: 'react-dom',
-        version: '^16.9.0 || ^17.0.0 || ^18.0.0',
+        version: '>=16.9.0 || >=17 || >=18 || >=19',
+    },
+    'react-dom/client': {
+        global: 'ReactDOM',
+        name: 'react-dom',
+        version: 'react-dom',
     },
     rxjs: {
         global: 'rxjs',

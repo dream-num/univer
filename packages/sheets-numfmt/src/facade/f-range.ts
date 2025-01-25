@@ -18,6 +18,9 @@ import type { ISetNumfmtCommandParams } from '@univerjs/sheets-numfmt';
 import { SetNumfmtCommand } from '@univerjs/sheets-numfmt';
 import { FRange } from '@univerjs/sheets/facade';
 
+/**
+ * @ignore
+ */
 export interface IFRangeSheetsNumfmtMixin {
     // TODO@wzhudev: should separate numfmt package to two
 

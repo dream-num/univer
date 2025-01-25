@@ -17,13 +17,13 @@
 /* eslint-disable ts/no-non-null-asserted-optional-chain */
 
 import type { ICellData, Injector, IRange, IStyleData, Nullable } from '@univerjs/core';
+import type { FUniver } from '../../everything';
 import { DataValidationType, HorizontalAlign, ICommandService, IUniverInstanceService, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import { AddWorksheetMergeCommand, SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetStyleCommand, SetTextWrapCommand, SetVerticalTextAlignCommand } from '@univerjs/sheets';
 import { AddSheetDataValidationCommand } from '@univerjs/sheets-data-validation';
 import { ClearSheetsFilterCriteriaCommand, RemoveSheetFilterCommand, SetSheetFilterRangeCommand, SetSheetsFilterCriteriaCommand } from '@univerjs/sheets-filter';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { createFacadeTestBed } from '../../__tests__/create-test-bed';
-import { FUniver } from '../../everything';
 
 describe('Test FRange', () => {
     let get: Injector['get'];
@@ -612,8 +612,8 @@ describe('Test FRange', () => {
         const activeSheet = univerAPI.getActiveWorkbook()?.getActiveSheet()!;
         const range = activeSheet.getRange(0, 0, 10, 10);
         const range2 = activeSheet.getRange(11, 11, 2, 2);
-        await range.setDataValidation(FUniver.newDataValidation().requireCheckbox().build());
-        await range2?.setDataValidation(FUniver.newDataValidation().requireNumberEqualTo(1).build());
+        await range.setDataValidation(univerAPI.newDataValidation().requireCheckbox().build());
+        await range2?.setDataValidation(univerAPI.newDataValidation().requireNumberEqualTo(1).build());
         const range3 = activeSheet.getRange(0, 0, 100, 100);
 
         expect(range.getDataValidation()).toBeTruthy();

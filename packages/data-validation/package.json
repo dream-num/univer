@@ -66,10 +66,10 @@
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
         "@univerjs/core": "workspace:*",
-        "@univerjs/protocol": "0.1.40",
+        "@univerjs/protocol": "0.1.43",
         "@univerjs/sheets": "workspace:*",
         "rxjs": "^7.8.1",
-        "typescript": "^5.7.2",
+        "typescript": "^5.7.3",
         "vite": "^6.0.7",
         "vitest": "^2.1.8"
     }

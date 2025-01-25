@@ -20,6 +20,9 @@ import { SheetsDataValidationValidatorService } from '@univerjs/sheets-data-vali
 import { FWorksheet } from '@univerjs/sheets/facade';
 import { FDataValidation } from './f-data-validation';
 
+/**
+ * @ignore
+ */
 export interface IFWorksheetDataValidationMixin {
     /**
      * Get all data validation rules in current sheet.
@@ -61,6 +64,9 @@ export interface IFWorksheetDataValidationMixin {
 
 }
 
+/**
+ * @ignore
+ */
 export class FWorksheetDataValidationMixin extends FWorksheet implements IFWorksheetDataValidationMixin {
     override getDataValidations(): FDataValidation[] {
         const dataValidationModel = this._injector.get(DataValidationModel);

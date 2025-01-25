@@ -20,7 +20,11 @@ import { numfmt, Rectangle, Tools } from '../shared';
  * @ignore
  */
 export class FUtil {
+    /**
+     * @ignore
+     */
     static _instance: FUtil | null;
+
     static get() {
         if (this._instance) {
             return this._instance;

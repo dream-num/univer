@@ -232,7 +232,7 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
             return;
         }
 
-        this._commandService.executeCommand(SetCellEditVisibleOperation.id, {
+        this._commandService.syncExecuteCommand(SetCellEditVisibleOperation.id, {
             visible: true,
             eventType: DeviceInputEventType.Keyboard,
             keycode: event.which,

@@ -22,6 +22,10 @@ import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment';
 import { FRange } from '@univerjs/sheets/facade';
 import { AddCommentCommand, DeleteCommentCommand, DeleteCommentTreeCommand, getDT, ResolveCommentCommand, UpdateCommentCommand } from '@univerjs/thread-comment';
 
+/**
+ * An readonly class that represents a comment.
+ * @ignore
+ */
 export class FTheadCommentItem {
     protected _comment: IThreadComment = {
         id: generateRandomId(),
@@ -60,8 +64,8 @@ export class FTheadCommentItem {
      * @example
      * ```ts
      * const comment = univerAPI.getActiveWorkbook()
-     *  .getSheetById(sheetId)
-     *  .getCommentById(commentId);
+     *   .getSheetById(sheetId)
+     *   .getCommentById(commentId);
      * const personId = comment.personId;
      * ```
      */
@@ -75,8 +79,8 @@ export class FTheadCommentItem {
      * @example
      * ```ts
      * const comment = univerAPI.getActiveWorkbook()
-     *  .getSheetById(sheetId)
-     *  .getCommentById(commentId);
+     *   .getSheetById(sheetId)
+     *   .getCommentById(commentId);
      * const dateTime = comment.dateTime;
      * ```
      */
@@ -90,8 +94,8 @@ export class FTheadCommentItem {
      * @example
      * ```ts
      * const comment = univerAPI.getActiveWorkbook()
-     *  .getSheetById(sheetId)
-     *  .getCommentById(commentId);
+     *   .getSheetById(sheetId)
+     *   .getCommentById(commentId);
      * const content = comment.content;
      * ```
      */
@@ -105,8 +109,8 @@ export class FTheadCommentItem {
      * @example
      * ```ts
      * const comment = univerAPI.getActiveWorkbook()
-     *  .getSheetById(sheetId)
-     *  .getCommentById(commentId);
+     *   .getSheetById(sheetId)
+     *   .getCommentById(commentId);
      * const id = comment.id;
      * ```
      */
@@ -120,8 +124,8 @@ export class FTheadCommentItem {
      * @example
      * ```ts
      * const comment = univerAPI.getActiveWorkbook()
-     *  .getSheetById(sheetId)
-     *  .getCommentById(commentId);
+     *   .getSheetById(sheetId)
+     *   .getCommentById(commentId);
      * const threadId = comment.threadId;
      * ```
      */
@@ -135,8 +139,8 @@ export class FTheadCommentItem {
      * @example
      * ```ts
      * const comment = univerAPI.getActiveWorkbook()
-     *  .getSheetById(sheetId)
-     *  .getCommentById(commentId);
+     *   .getSheetById(sheetId)
+     *   .getCommentById(commentId);
      * const newComment = comment.copy();
      * ```
      */
@@ -145,6 +149,9 @@ export class FTheadCommentItem {
     }
 }
 
+/**
+ * A builder for thread comment. use {@link FUniver} `univerAPI.newTheadComment()` to create a new builder.
+ */
 export class FTheadCommentBuilder extends FTheadCommentItem {
     static override create(comment?: IThreadComment): FTheadCommentBuilder {
         return new FTheadCommentBuilder(comment);
@@ -157,7 +164,7 @@ export class FTheadCommentBuilder extends FTheadCommentItem {
      * @example
      * ```ts
      * const comment = univerAPI.newTheadComment()
-     *  .setContent(univerAPI.newRichText().insertText('hello zhangsan'));
+     *   .setContent(univerAPI.newRichText().insertText('hello zhangsan'));
      * ```
      */
     setContent(content: IDocumentBody | RichTextValue): FTheadCommentBuilder {
@@ -176,7 +183,7 @@ export class FTheadCommentBuilder extends FTheadCommentItem {
      * @example
      * ```ts
      * const comment = univerAPI.newTheadComment()
-     *  .setPersonId('123');
+     *   .setPersonId('123');
      * ```
      */
     setPersonId(userId: string): FTheadCommentBuilder {
@@ -191,7 +198,7 @@ export class FTheadCommentBuilder extends FTheadCommentItem {
      * @example
      * ```ts
      * const comment = univerAPI.newTheadComment()
-     *  .setDateTime(new Date());
+     *   .setDateTime(new Date());
      * ```
      */
     setDateTime(date: Date): FTheadCommentBuilder {
@@ -206,7 +213,7 @@ export class FTheadCommentBuilder extends FTheadCommentItem {
      * @example
      * ```ts
      * const comment = univerAPI.newTheadComment()
-     *  .setId('123');
+     *   .setId('123');
      * ```
      */
     setId(id: string): FTheadCommentBuilder {
@@ -221,7 +228,7 @@ export class FTheadCommentBuilder extends FTheadCommentItem {
      * @example
      * ```ts
      * const comment = univerAPI.newTheadComment()
-     *  .setThreadId('123');
+     *   .setThreadId('123');
      * ```
      */
     setThreadId(threadId: string): FTheadCommentBuilder {
@@ -235,8 +242,8 @@ export class FTheadCommentBuilder extends FTheadCommentItem {
      * @example
      * ```ts
      * const comment = univerAPI.newTheadComment()
-     *  .setContent(univerAPI.newRichText().insertText('hello zhangsan'))
-     *  .build();
+     *   .setContent(univerAPI.newRichText().insertText('hello zhangsan'))
+     *   .build();
      * ```
      */
     build(): IThreadComment {
@@ -245,9 +252,12 @@ export class FTheadCommentBuilder extends FTheadCommentItem {
 }
 
 /**
- * @hideconstructor
+ * A class that represents a thread comment already in the sheet.
  */
 export class FThreadComment {
+    /**
+     * @ignore
+     */
     constructor(
         private readonly _thread: IThreadComment | IBaseComment,
         private readonly _parent: IThreadComment | undefined,
@@ -268,12 +278,12 @@ export class FThreadComment {
 
     /**
      * Whether the comment is a root comment
-     * @returns Whether the comment is a root comment
+     * @returns {boolean} Whether the comment is a root comment
      * @example
      * ```ts
      * const comment = univerAPI.getActiveWorkbook()
-     *  .getSheetById(sheetId)
-     *  .getCommentById(commentId);
+     *   .getSheetById(sheetId)
+     *   .getCommentById(commentId);
      * const isRoot = comment.getIsRoot();
      * ```
      */
@@ -283,12 +293,12 @@ export class FThreadComment {
 
     /**
      * Get the comment data
-     * @returns The comment data
+     * @returns {IBaseComment} The comment data
      * @example
      * ```ts
      * const comment = univerAPI.getActiveWorkbook()
-     *  .getSheetById(sheetId)
-     *  .getCommentById(commentId);
+     *   .getSheetById(sheetId)
+     *   .getCommentById(commentId);
      * const commentData = comment.getCommentData();
      * ```
      */
@@ -299,12 +309,12 @@ export class FThreadComment {
 
     /**
      * Get the replies of the comment
-     * @returns the replies of the comment
+     * @returns {FThreadComment[]} the replies of the comment
      * @example
      * ```ts
      * const comment = univerAPI.getActiveWorkbook()
-     *  .getSheetById(sheetId)
-     *  .getCommentById(commentId);
+     *   .getSheetById(sheetId)
+     *   .getCommentById(commentId);
      * const replies = comment.getReplies();
      * ```
      */
@@ -317,12 +327,12 @@ export class FThreadComment {
 
     /**
      * Get the range of the comment
-     * @returns The range of the comment
+     * @returns {FRange | null} The range of the comment
      * @example
      * ```ts
      * const comment = univerAPI.getActiveWorkbook()
-     *  .getSheetById(sheetId)
-     *  .getCommentById(commentId);
+     *   .getSheetById(sheetId)
+     *   .getCommentById(commentId);
      * const range = comment.getRange();
      * ```
      */
@@ -339,6 +349,7 @@ export class FThreadComment {
         return this._injector.createInstance(FRange, workbook, worksheet, range);
     }
 
+    // eslint-disable-next-line
     /**
      * @deprecated use `getRichText` as instead
      */
@@ -352,8 +363,8 @@ export class FThreadComment {
      * @example
      * ```ts
      * const comment = univerAPI.getActiveWorkbook()
-     *  .getSheetById(sheetId)
-     *  .getCommentById(commentId);
+     *   .getSheetById(sheetId)
+     *   .getCommentById(commentId);
      * const richText = comment.getRichText();
      * ```
      */
@@ -368,8 +379,8 @@ export class FThreadComment {
      * @example
      * ```ts
      * const comment = univerAPI.getActiveWorkbook()
-     *  .getSheetById(sheetId)
-     *  .getCommentById(commentId);
+     *   .getSheetById(sheetId)
+     *   .getCommentById(commentId);
      * const success = await comment.deleteAsync();
      * ```
      */
@@ -384,6 +395,7 @@ export class FThreadComment {
         );
     }
 
+    // eslint-disable-next-line
     /**
      * @deprecated use `deleteAsync` as instead.
      */
@@ -391,8 +403,8 @@ export class FThreadComment {
         return this.deleteAsync();
     }
 
+    // eslint-disable-next-line
     /**
-     * @param content
      * @deprecated use `updateAsync` as instead
      */
     async update(content: IDocumentBody): Promise<boolean> {
@@ -401,13 +413,13 @@ export class FThreadComment {
 
     /**
      * Update the comment content
-     * @param content The new content of the comment
-     * @returns success or not
+     * @param {IDocumentBody | RichTextValue} content The new content of the comment
+     * @returns {Promise<boolean>} success or not
      * @example
      * ```ts
      * const comment = univerAPI.getActiveWorkbook()
-     *  .getSheetById(sheetId)
-     *  .getCommentById(commentId);
+     *   .getSheetById(sheetId)
+     *   .getCommentById(commentId);
      * const success = await comment.updateAsync(univerAPI.newRichText().insertText('hello zhangsan'));
      * ```
      */
@@ -431,8 +443,8 @@ export class FThreadComment {
         return res;
     }
 
+    // eslint-disable-next-line
     /**
-     * @param resolved
      * @deprecated use `resolveAsync` as instead
      */
     resolve(resolved?: boolean): Promise<boolean> {
@@ -441,13 +453,13 @@ export class FThreadComment {
 
      /**
       * Resolve the comment
-      * @param resolved Whether the comment is resolved
-      * @returns success or not
+      * @param {boolean} resolved Whether the comment is resolved
+      * @returns {Promise<boolean>} success or not
       * @example
       * ```ts
       * const comment = univerAPI.getActiveWorkbook()
-      *  .getSheetById(sheetId)
-      *  .getCommentById(commentId);
+      *   .getSheetById(sheetId)
+      *   .getCommentById(commentId);
       * const success = await comment.resolveAsync(true);
       * ```
       */
@@ -465,16 +477,16 @@ export class FThreadComment {
 
     /**
      * Reply to the comment
-     * @param comment The comment to reply to
-     * @returns success or not
+     * @param {FTheadCommentBuilder} comment The comment to reply to
+     * @returns {Promise<boolean>} success or not
      * @example
      * ```ts
      * const comment = univerAPI.getActiveWorkbook()
-     *  .getSheetById(sheetId)
-     *  .getCommentById(commentId);
+     *   .getSheetById(sheetId)
+     *   .getCommentById(commentId);
      *
      * const reply = univerAPI.newTheadComment()
-     *  .setContent(univerAPI.newRichText().insertText('hello zhangsan'));
+     *   .setContent(univerAPI.newRichText().insertText('hello zhangsan'));
      *
      * const success = await comment.replyAsync(reply);
      * ```

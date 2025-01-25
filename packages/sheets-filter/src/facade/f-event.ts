@@ -21,6 +21,9 @@ import { FEventName, FUniver, ICommandService } from '@univerjs/core';
 import { ClearSheetsFilterCriteriaCommand, SetSheetsFilterCriteriaCommand } from '@univerjs/sheets-filter';
 import { FSheetEventName } from '@univerjs/sheets/facade';
 
+/**
+ * @ignore
+ */
 export interface IFSheetFilterEventMixin {
     /**
      * This event will be emitted when the filter criteria on a column is changed.
@@ -111,6 +114,9 @@ export interface ISheetRangeFilterClearedEventParams extends IEventBase {
     worksheet: FWorksheet;
 }
 
+/**
+ * @ignore
+ */
 interface ISheetRangeFilterEventParamConfig {
     SheetBeforeRangeFilter: ISheetRangeFilteredParams;
     SheetRangeFiltered: ISheetRangeFilteredParams;

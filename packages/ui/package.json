@@ -78,7 +78,7 @@
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons": "^0.2.12",
+        "@univerjs/icons": "^0.2.14",
         "clsx": "^2.1.1",
         "localforage": "^1.10.0",
         "rc-notification": "^5.6.2",
@@ -96,7 +96,7 @@
         "react-dom": "18.3.1",
         "rxjs": "^7.8.1",
         "tailwindcss": "^3.4.17",
-        "typescript": "^5.7.2",
+        "typescript": "^5.7.3",
         "vite": "^6.0.7",
         "vitest": "^2.1.8",
         "vue": "^3.5.12"

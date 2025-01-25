@@ -20,6 +20,7 @@ import { FBase, Inject, Injector } from '@univerjs/core';
 import { IShortcutService } from '@univerjs/ui';
 
 /**
+ * The Facade API object to handle shortcuts in Univer
  * @hideconstructor
  */
 export class FShortcut extends FBase {
@@ -32,17 +33,44 @@ export class FShortcut extends FBase {
         super();
     }
 
-    enableShortcut(): void {
+    /**
+     * Enable shortcuts of Univer.
+     * @returns {FShortcut} The Facade API instance itself for chaining.
+     */
+    enableShortcut(): this {
         this._forceEscapeDisposable?.dispose();
         this._forceEscapeDisposable = null;
+        return this;
     }
 
-    disableShortcut(): void {
+    /**
+     * Disable shortcuts of Univer.
+     * @returns {FShortcut} The Facade API instance itself for chaining.
+     */
+    disableShortcut(): this {
         if (!this._forceEscapeDisposable) {
             this._forceEscapeDisposable = this._shortcutService.forceEscape();
         }
+
+        return this;
     }
 
+    /**
+     * Dispatch a KeyboardEvent to the shortcut service and return the matched shortcut item.
+     * @param {KeyboardEvent} e - The KeyboardEvent to dispatch.
+     * @returns {IShortcutItem<object> | undefined} The matched shortcut item.
+     *
+     * @example
+     * ```typescript
+     * const fShortcut = univerAPI.getShortcut();
+     * const pseudoEvent = new KeyboardEvent('keydown', { key: 's', ctrlKey: true });
+     * const ifShortcutItem = fShortcut.dispatchShortcutEvent(pseudoEvent);
+     * if (ifShortcutItem) {
+     *   const commandId = ifShortcutItem.id;
+     *   // Do something with the commandId.
+     * }
+     * ```
+     */
     dispatchShortcutEvent(e: KeyboardEvent): IShortcutItem<object> | undefined {
         return this._shortcutService.dispatch(e);
     }

@@ -34,6 +34,9 @@ import {
 import { FRange } from '@univerjs/sheets/facade';
 import { FConditionalFormattingBuilder } from './conditional-formatting-builder';
 
+/**
+ * @ignore
+ */
 export interface IFRangeConditionalFormattingMixin {
 
     /**

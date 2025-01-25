@@ -160,9 +160,9 @@ export class ColumnHeaderLayout extends SheetExtension {
                     case 'center':
                         return cellBound.left + (cellBound.right - cellBound.left) / 2;
                     case 'right':
-                        return cellBound.right - MIDDLE_CELL_POS_MAGIC_NUMBER;
+                        return cellBound.right - MIDDLE_CELL_POS_MAGIC_NUMBER * 3;
                     case 'left':
-                        return cellBound.left + MIDDLE_CELL_POS_MAGIC_NUMBER;
+                        return cellBound.left + MIDDLE_CELL_POS_MAGIC_NUMBER * 3;
                     default: // center
                         return cellBound.left + (cellBound.right - cellBound.left) / 2;
                 }

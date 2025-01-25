@@ -22,6 +22,9 @@ import { FFilter } from './f-filter';
 
 // TODO: add jsdoc comments for the following API
 
+/**
+ * @ignore
+ */
 export interface IFRangeFilter {
     /**
      * Create a filter for the current range. If the worksheet already has a filter, this method would return `null`.

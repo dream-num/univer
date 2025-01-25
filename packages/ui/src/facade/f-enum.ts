@@ -17,10 +17,16 @@
 import { FEnum } from '@univerjs/core';
 import { BuiltInUIPart } from '@univerjs/ui';
 
+/**
+ * @ignore
+ */
 interface IFUIEnumMixin {
     get BuiltInUIPart(): typeof BuiltInUIPart;
 }
 
+/**
+ * @ignore
+ */
 export class FUIEnum extends FEnum implements IFUIEnumMixin {
     override get BuiltInUIPart(): typeof BuiltInUIPart {
         return BuiltInUIPart;

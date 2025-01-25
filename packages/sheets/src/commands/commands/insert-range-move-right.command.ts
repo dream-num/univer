@@ -174,6 +174,6 @@ export const InsertRangeMoveRightCommand: ICommand = {
 
         return false;
     },
-    // all subsequent mutations should succeed inorder to make the whole process succeed
+    // all subsequent mutations should succeed in order to make the whole process succeed
     // Promise.all([]).then(() => true),
 };

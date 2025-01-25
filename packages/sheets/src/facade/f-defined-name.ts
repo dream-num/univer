@@ -70,8 +70,8 @@ export class FDefinedNameBuilder {
      * ```ts
      * const workbook = univerAPI.getActiveWorkbook();
      * const definedNameBuilder = univerAPI.newDefinedName()
-     *    .setName('MyDefinedName')
-     *  .build();
+     *   .setName('MyDefinedName')
+     *   .build();
      * workbook.insertDefinedNameBuilder(definedNameBuilder);
      * ```
      */
@@ -88,9 +88,9 @@ export class FDefinedNameBuilder {
      * ```ts
      * const workbook = univerAPI.getActiveWorkbook();
      * const definedNameBuilder = univerAPI.newDefinedName()
-     *  .setFormula('SUM(Sheet1!$A$1)')
-     * .setName('MyDefinedName')
-     * .build();
+     *   .setFormula('SUM(Sheet1!$A$1)')
+     *   .setName('MyDefinedName')
+     *   .build();
      * workbook.insertDefinedNameBuilder(definedNameBuilder);
      * ```
      */
@@ -107,8 +107,8 @@ export class FDefinedNameBuilder {
      * ```ts
      * const workbook = univerAPI.getActiveWorkbook();
      * const definedNameBuilder = univerAPI.newDefinedName()
-     *  .setRef('Sheet1!$A$1')
-     * .build();
+     *   .setRef('Sheet1!$A$1')
+     *   .build();
      * workbook.insertDefinedNameBuilder(definedNameBuilder);
      * ```
      */
@@ -128,8 +128,8 @@ export class FDefinedNameBuilder {
      * ```ts
      * const workbook = univerAPI.getActiveWorkbook();
      * const definedNameBuilder = univerAPI.newDefinedName()
-     *  .setRefByRange(1, 3, 2, 5)
-     * .build();
+     *   .setRefByRange(1, 3, 2, 5)
+     *   .build();
      * workbook.insertDefinedNameBuilder(definedNameBuilder);
      * ```
      */
@@ -151,8 +151,8 @@ export class FDefinedNameBuilder {
      * ```ts
      * const workbook = univerAPI.getActiveWorkbook();
      * const definedNameBuilder = univerAPI.newDefinedName()
-     *  .setComment('This is a comment')
-     * .build();
+     *   .setComment('This is a comment')
+     *   .build();
      * workbook.insertDefinedNameBuilder(definedNameBuilder);
      * ```
      */
@@ -169,8 +169,8 @@ export class FDefinedNameBuilder {
      * ```ts
      * const workbook = univerAPI.getActiveWorkbook();
      * const definedNameBuilder = univerAPI.newDefinedName()
-     *  .setHidden(true)
-     * .build();
+     *   .setHidden(true)
+     *   .build();
      * workbook.insertDefinedNameBuilder(definedNameBuilder);
      * ```
      */
@@ -186,9 +186,9 @@ export class FDefinedNameBuilder {
      * ```ts
      * const workbook = univerAPI.getActiveWorkbook();
      * const definedNameBuilder = univerAPI.newDefinedName()
-     *  .setRef('Sheet1!$A$1')
-     *  .setName('MyDefinedName')
-     *  .build();
+     *   .setRef('Sheet1!$A$1')
+     *   .setName('MyDefinedName')
+     *   .build();
      * workbook.insertDefinedNameBuilder(definedNameBuilder);
      * ```
      */

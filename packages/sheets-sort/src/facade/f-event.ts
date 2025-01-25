@@ -20,6 +20,9 @@ import { FEventName, FUniver, ICommandService } from '@univerjs/core';
 import { type ISortRangeCommandParams, SortRangeCommand, SortType } from '@univerjs/sheets-sort';
 import { FSheetEventName } from '@univerjs/sheets/facade';
 
+/**
+ * @ignore
+ */
 export interface IFSheetSortEventMixin {
     /**
      * This event will be emitted when a range on a worksheet is sorted.
@@ -68,12 +71,16 @@ export interface ISheetRangeSortParams extends IEventBase {
     sortColumn: ISortColumn[];
 }
 
+/**
+ * @ignore
+ */
 export interface ISheetRangeSortEventParamConfig {
     SheetBeforeRangeSort: ISheetRangeSortParams;
     SheetRangeSorted: ISheetRangeSortParams;
 }
 
 FEventName.extend(FSheetEventName);
+
 declare module '@univerjs/core' {
     // eslint-disable-next-line ts/naming-convention
     interface FEventName extends IFSheetSortEventMixin { }

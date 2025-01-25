@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-import type { Editor } from '@univerjs/docs-ui';
-import { Tools } from '@univerjs/core';
+import { Tools, useDependency } from '@univerjs/core';
+import { type Editor, IEditorService } from '@univerjs/docs-ui';
 import { useEvent } from '@univerjs/ui';
 
 export const useFocus = (editor?: Editor) => {
+    const editorService = useDependency(IEditorService);
     const focus = useEvent((offset?: number) => {
         if (editor) {
-            editor.focus();
+            editorService.focus(editor.getEditorId());
             const selections = [...editor.getSelectionRanges()];
             if (Tools.isDefine(offset)) {
                 editor.setSelectionRanges([{ startOffset: offset, endOffset: offset }]);

@@ -19,6 +19,9 @@ import { debounce, FUniver } from '@univerjs/core';
 import { SetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
 import { type IRegisterFunctionParams, IRegisterFunctionService, RegisterFunctionService } from '@univerjs/sheets-formula';
 
+/**
+ * @ignore
+ */
 export interface IFUniverSheetsFormulaMixin {
     /**
      * Register a function to the spreadsheet.
@@ -29,6 +32,9 @@ export interface IFUniverSheetsFormulaMixin {
     registerFunction(config: IRegisterFunctionParams): IDisposable;
 }
 
+/**
+ * @ignore
+ */
 export class FUniverSheetsFormulaMixin extends FUniver implements IFUniverSheetsFormulaMixin {
     /**
      * RegisterFunction may be executed multiple times, triggering multiple formula forced refreshes.

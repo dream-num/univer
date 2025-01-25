@@ -76,6 +76,7 @@ async function buildESM(sharedConfig: InlineConfig, options: IBuildExecuterOptio
                     entryRoot: 'src',
                     outDir: 'lib/types',
                     clearPureImport: false,
+                    exclude: ['**/__tests__/**'],
                 })
             );
         }

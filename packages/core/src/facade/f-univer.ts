@@ -41,6 +41,9 @@ import { FUserManager } from './f-usermanager';
 import { FUtil } from './f-util';
 
 /**
+ * The root Facade API object to interact with Univer. Please use `newAPI` static method
+ * to create a new instance.
+ *
  * @hideconstructor
  */
 export class FUniver extends FBaseInitialable {
@@ -295,25 +298,25 @@ export class FUniver extends FBaseInitialable {
 
     /**
      * Add an event listener
-     * @param event key of event
-     * @param callback callback when event triggered
+     * @param {string} event key of event
+     * @param {(params: IEventParamConfig[typeof event]) => void} callback callback when event triggered
      * @returns {Disposable} The Disposable instance, for remove the listener
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.event.UnitCreated, (params) => {
-     *     console.log('unit created', params);
+     *   console.log('unit created', params);
      * });
      * ```
      */
-    addEvent(event: keyof IEventParamConfig, callback: (params: IEventParamConfig[typeof event]) => void) {
+    addEvent<T extends keyof IEventParamConfig>(event: T, callback: (params: IEventParamConfig[T]) => void) {
         this._ensureEventRegistry(event).add(callback);
         return toDisposable(() => this._ensureEventRegistry(event).delete(callback));
     }
 
     /**
      * Fire an event, used in internal only.
-     * @param event {string} key of event
-     * @param params {any} params of event
+     * @param {string} event key of event
+     * @param {any} params params of event
      * @returns {boolean} should cancel
      * @example
      * ```ts
@@ -330,7 +333,7 @@ export class FUniver extends FBaseInitialable {
 
     /**
      * Get the callback map corresponding to the event
-     * @param event
+     * @param {keyof IEventParamConfig} event
      * @returns {number} The number of callbacks
      */
     protected hasEventCallback(event: keyof IEventParamConfig): boolean {
@@ -347,7 +350,7 @@ export class FUniver extends FBaseInitialable {
      * @returns {FBlob} The new blob instance
      * @example
      * ```ts
-     * const blob = univerApi.newBlob();
+     * const blob = univerAPI.newBlob();
      * ```
      */
     newBlob(): FBlob {
@@ -359,7 +362,7 @@ export class FUniver extends FBaseInitialable {
      * @returns {ColorBuilder} The new color instance
      * @example
      * ```ts
-     * const color = univerApi.newColor();
+     * const color = univerAPI.newColor();
      * ```
      */
     newColor(): ColorBuilder {
@@ -368,11 +371,11 @@ export class FUniver extends FBaseInitialable {
 
     /**
      * Create a new rich text.
-     * @param data
+     * @param {IDocumentData} data
      * @returns {RichTextBuilder} The new rich text instance
      * @example
      * ```ts
-     * const richText = univerApi.newRichText();
+     * const richText = univerAPI.newRichText();
      * ```
      */
     newRichText(data?: IDocumentData): RichTextBuilder {
@@ -381,11 +384,11 @@ export class FUniver extends FBaseInitialable {
 
     /**
      * Create a new rich text value.
-     * @param data - The rich text data
+     * @param {IDocumentData} data - The rich text data
      * @returns {RichTextValue} The new rich text value instance
      * @example
      * ```ts
-     * const richTextValue = univerApi.newRichTextValue();
+     * const richTextValue = univerAPI.newRichTextValue();
      * ```
      */
     newRichTextValue(data: IDocumentData): RichTextValue {
@@ -394,11 +397,11 @@ export class FUniver extends FBaseInitialable {
 
     /**
      * Create a new paragraph style.
-     * @param style - The paragraph style
+     * @param {IParagraphStyle} style - The paragraph style
      * @returns {ParagraphStyleBuilder} The new paragraph style instance
      * @example
      * ```ts
-     * const paragraphStyle = univerApi.newParagraphStyle();
+     * const paragraphStyle = univerAPI.newParagraphStyle();
      * ```
      */
     newParagraphStyle(style?: IParagraphStyle): ParagraphStyleBuilder {
@@ -407,11 +410,11 @@ export class FUniver extends FBaseInitialable {
 
     /**
      * Create a new paragraph style value.
-     * @param style - The paragraph style
+     * @param {IParagraphStyle} style - The paragraph style
      * @returns {ParagraphStyleValue} The new paragraph style value instance
      * @example
      * ```ts
-     * const paragraphStyleValue = univerApi.newParagraphStyleValue();
+     * const paragraphStyleValue = univerAPI.newParagraphStyleValue();
      * ```
      */
     newParagraphStyleValue(style?: IParagraphStyle): ParagraphStyleValue {
@@ -420,11 +423,11 @@ export class FUniver extends FBaseInitialable {
 
     /**
      * Create a new text style.
-     * @param style - The text style
+     * @param {ITextStyle} style - The text style
      * @returns {TextStyleBuilder} The new text style instance
      * @example
      * ```ts
-     * const textStyle = univerApi.newTextStyle();
+     * const textStyle = univerAPI.newTextStyle();
      * ```
      */
     newTextStyle(style?: ITextStyle): TextStyleBuilder {
@@ -433,17 +436,26 @@ export class FUniver extends FBaseInitialable {
 
     /**
      * Create a new text style value.
-     * @param style - The text style
+     * @param {ITextStyle} style - The text style
      * @returns {TextStyleValue} The new text style value instance
      * @example
      * ```ts
-     * const textStyleValue = univerApi.newTextStyleValue();
+     * const textStyleValue = univerAPI.newTextStyleValue();
      * ```
      */
     newTextStyleValue(style?: ITextStyle): TextStyleValue {
         return TextStyleValue.create(style);
     }
 
+    /**
+     * Create a new text decoration.
+     * @param {ITextDecoration} decoration - The text decoration
+     * @returns {TextDecorationBuilder} The new text decoration instance
+     * @example
+     * ```ts
+     * const decoration = univerAPI.newTextDecoration();
+     * ```
+     */
     newTextDecoration(decoration?: ITextDecoration): TextDecorationBuilder {
         return new TextDecorationBuilder(decoration);
     }

@@ -20,6 +20,9 @@ import type { FWorkbook, FWorksheet } from '@univerjs/sheets/facade';
 import { FUniver, ICommandService } from '@univerjs/core';
 import { CROSSHAIR_HIGHLIGHT_COLORS, DisableCrosshairHighlightOperation, EnableCrosshairHighlightOperation, SetCrosshairHighlightColorOperation, SheetsCrosshairHighlightService } from '@univerjs/sheets-crosshair-highlight';
 
+/**
+ * @ignore
+ */
 export interface IFSheetCrosshairHighlightEventMixin {
     /**
      * Triggered when the crosshair highlight is enabled or disabled.
@@ -77,6 +80,9 @@ export interface ICrosshairHighlightColorChangedEvent extends IEventBase {
     worksheet: FWorksheet;
 }
 
+/**
+ * @ignore
+ */
 export class FSheetCrosshairHighlightEventMixin implements IFSheetCrosshairHighlightEventMixin {
     get CrosshairHighlightEnabledChanged(): 'CrosshairHighlightEnabledChanged' {
         return 'CrosshairHighlightEnabledChanged';
@@ -87,11 +93,17 @@ export class FSheetCrosshairHighlightEventMixin implements IFSheetCrosshairHighl
     }
 }
 
+/**
+ * @ignore
+ */
 export interface ISheetCrosshairHighlightEventConfigs {
     CrosshairHighlightEnabledChanged: ICrosshairHighlightEnabledChangedEvent;
     CrosshairHighlightColorChanged: ICrosshairHighlightColorChangedEvent;
 }
 
+/**
+ * @ignore
+ */
 export interface IFUniverCrosshairHighlightMixin {
     /**
      * Enable or disable crosshair highlight.
@@ -141,6 +153,9 @@ export interface IFUniverCrosshairHighlightMixin {
     readonly CROSSHAIR_HIGHLIGHT_COLORS: string[];
 }
 
+/**
+ * @ignore
+ */
 export class FUniverCrosshairHighlightMixin extends FUniver implements IFUniverCrosshairHighlightMixin {
     /**
      * @ignore

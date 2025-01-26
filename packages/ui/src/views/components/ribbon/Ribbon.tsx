@@ -18,7 +18,6 @@ import type { ComponentType } from 'react';
 import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
 import { LocaleService, useDependency } from '@univerjs/core';
 import { clsx } from '@univerjs/design';
-
 import { MoreFunctionSingle } from '@univerjs/icons';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
@@ -69,28 +68,24 @@ export function Ribbon(props: IRibbonProps) {
     // resize observer
     useEffect(() => {
         const observer = new ResizeObserver((entries) => {
-            requestAnimationFrame(() => {
-                const toolbar = entries[0].target;
-                const toolbarWidth = toolbar.clientWidth;
-                const toolbarItems = Object.values(toolbarItemRefs.current);
-                const collapsedIds: string[] = [];
-                let totalWidth = 0;
+            const toolbar = entries[0].target;
+            const toolbarWidth = toolbar.clientWidth;
+            const toolbarItems = Object.values(toolbarItemRefs.current);
+            const collapsedIds: string[] = [];
+            let totalWidth = 0;
 
-                const allGroups = ribbon.find((group) => group.key === activatedTab)?.children ?? [];
-                const a = [];
+            const allGroups = ribbon.find((group) => group.key === activatedTab)?.children ?? [];
 
-                for (const { el, key } of toolbarItems) {
-                    if (!el) continue;
-                    a.push(el);
+            for (const { el, key } of toolbarItems) {
+                if (!el) continue;
 
-                    totalWidth += el.getBoundingClientRect().width + 8;
-                    if (totalWidth > toolbarWidth - 32 - 8 * (allGroups.length - 1)) {
-                        collapsedIds.push(key);
-                    }
+                totalWidth += el.getBoundingClientRect().width + 8;
+                if (totalWidth > toolbarWidth - 32 - 8 * (allGroups.length - 1)) {
+                    collapsedIds.push(key);
                 }
+            }
 
-                setCollapsedIds(collapsedIds);
-            });
+            setCollapsedIds(collapsedIds);
         });
 
         if (toolbarRef.current) {
@@ -193,7 +188,12 @@ export function Ribbon(props: IRibbonProps) {
             </header>
 
             <section role="toolbar" className={styles.toolbar}>
-                <div className={styles.toolbarContainer}>
+                <div
+                    className={`
+                      univer-mx-auto univer-box-border univer-flex univer-h-full univer-flex-1 univer-items-center
+                      univer-justify-center univer-gap-1 univer-overflow-hidden univer-px-4
+                    `}
+                >
                     {activeGroup.visibleGroups.map((groupItem) => (groupItem.children?.length || groupItem.item) && (
                         <div key={groupItem.key} className={styles.toolbarGroup}>
                             {groupItem.children
@@ -239,13 +239,11 @@ export function Ribbon(props: IRibbonProps) {
             <div
                 aria-hidden
                 ref={toolbarRef}
-                className={styles.toolbarContainer}
-                style={{
-                    position: 'absolute',
-                    top: -9999,
-                    left: 0,
-                    right: 0,
-                }}
+                className={`
+                  univer-absolute univer-left-0 univer-right-0 univer-top-[-99999px] univer-mx-auto univer-box-border
+                  univer-flex univer-h-full univer-flex-1 univer-items-center univer-justify-center univer-gap-1
+                  univer-overflow-hidden univer-px-4 univer-opacity-0
+                `}
             >
                 {fakeToolbarContent}
             </div>

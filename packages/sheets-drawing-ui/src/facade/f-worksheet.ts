@@ -15,11 +15,14 @@
  */
 
 import type { IDisposable, IFBlobSource, Nullable } from '@univerjs/core';
+import type { ISheetImage } from '@univerjs/sheets-drawing';
+import type { ICanvasFloatDom, IDOMAnchor } from '@univerjs/sheets-drawing-ui';
+import type { IFComponentKey } from '@univerjs/sheets-ui/facade';
 import type { FRange } from '@univerjs/sheets/facade';
 import { DrawingTypeEnum, ImageSourceType, toDisposable } from '@univerjs/core';
-import { ISheetDrawingService, type ISheetImage } from '@univerjs/sheets-drawing';
-import { type ICanvasFloatDom, type IDOMAnchor, InsertSheetDrawingCommand, RemoveSheetDrawingCommand, SetSheetDrawingCommand, SheetCanvasFloatDomManagerService } from '@univerjs/sheets-drawing-ui';
-import { type IFComponentKey, transformComponentKey } from '@univerjs/sheets-ui/facade';
+import { ISheetDrawingService } from '@univerjs/sheets-drawing';
+import { InsertSheetDrawingCommand, RemoveSheetDrawingCommand, SetSheetDrawingCommand, SheetCanvasFloatDomManagerService } from '@univerjs/sheets-drawing-ui';
+import { transformComponentKey } from '@univerjs/sheets-ui/facade';
 import { FWorksheet } from '@univerjs/sheets/facade';
 import { ComponentManager } from '@univerjs/ui';
 import { FOverGridImage, FOverGridImageBuilder } from './f-over-grid-image';
@@ -27,6 +30,9 @@ import { FOverGridImage, FOverGridImageBuilder } from './f-over-grid-image';
 // why omit this key? if componentKey is missing, then which component should be used?
 export interface IFICanvasFloatDom extends Omit<ICanvasFloatDom, 'componentKey' | 'unitId' | 'subUnitId'>, IFComponentKey {}
 
+/**
+ * @ignore
+ */
 export interface IFWorksheetLegacy {
     /**
      * Add a float dom to position.

@@ -79,7 +79,7 @@ export function Ribbon(props: IRibbonProps) {
             for (const { el, key } of toolbarItems) {
                 if (!el) continue;
 
-                totalWidth += el.getBoundingClientRect().width + 8;
+                totalWidth += el?.getBoundingClientRect().width + 8;
                 if (totalWidth > toolbarWidth - 32 - 8 * (allGroups.length - 1)) {
                     collapsedIds.push(key);
                 }

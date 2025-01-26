@@ -19,4 +19,3 @@ import './global.css';
 export { BaseSheetDataValidatorView } from './views/validator-views/sheet-validator-view';
 export { UniverSheetsDataValidationUIPlugin } from './plugin';
 export { UniverSheetsDataValidationMobileUIPlugin } from './mobile-plugin';
-export * from './views/components/formula-input';

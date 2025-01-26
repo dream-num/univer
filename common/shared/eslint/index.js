@@ -50,6 +50,7 @@ exports.baseRules = {
     'react/no-unstable-default-props': 'warn',
     'command/command': 'off',
     'jsdoc/tag-lines': 'off',
+    'import/consistent-type-specifier-style': 'warn',
 
     // IMPORTANT: To ensure compatibility, some features of React 19 will be disabled.
     'react/no-forward-ref': 'off',

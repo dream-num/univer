@@ -79,7 +79,7 @@ export default antfu(
             ],
         },
     }, {
-    // Not penetrating for source files
+        // Not penetrating for source files
         files: ['**/*.ts', '**/*.tsx'],
         plugins: {
             penetrating,

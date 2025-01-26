@@ -208,23 +208,21 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
         const isCustomComponent = componentManager.get(typeof label === 'string' ? label : label?.name ?? '');
 
         return (
-            <span>
-                <ToolbarButton
-                    noIcon={!icon}
-                    active={activated}
-                    disabled={disabled}
-                    onClick={() => executeCommand(props.commandId ?? props.id)}
-                    onDoubleClick={() => props.subId && executeCommand(props.subId)}
-                >
-                    {isCustomComponent
-                        ? (
-                            <CustomLabel title={title!} value={value} label={label} />
-                        )
-                        : (
-                            icon ? <CustomLabel icon={icon} /> : <CustomLabel title={title!} />
-                        )}
-                </ToolbarButton>
-            </span>
+            <ToolbarButton
+                noIcon={!icon}
+                active={activated}
+                disabled={disabled}
+                onClick={() => executeCommand(props.commandId ?? props.id)}
+                onDoubleClick={() => props.subId && executeCommand(props.subId)}
+            >
+                {isCustomComponent
+                    ? (
+                        <CustomLabel title={title!} value={value} label={label} />
+                    )
+                    : (
+                        icon ? <CustomLabel icon={icon} /> : <CustomLabel title={title!} />
+                    )}
+            </ToolbarButton>
         );
     }
 

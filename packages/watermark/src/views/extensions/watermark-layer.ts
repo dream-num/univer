@@ -16,8 +16,9 @@
 
 import type { IUser, Nullable } from '@univerjs/core';
 import type { UniverRenderingContext } from '@univerjs/engine-render';
+import type { IWatermarkConfigWithType } from '../../common/type';
 import { Layer } from '@univerjs/engine-render';
-import { type IWatermarkConfigWithType, IWatermarkTypeEnum } from '../../common/type';
+import { IWatermarkTypeEnum } from '../../common/type';
 import { renderWatermark } from '../../util';
 
 export class WatermarkLayer extends Layer {

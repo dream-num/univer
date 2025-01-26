@@ -20,6 +20,9 @@ import { Disposable, Inject, Injector, IUniverInstanceService } from '@univerjs/
 import { createInitFindReplaceState, FindBy, FindReplaceModel, FindReplaceState, IFindReplaceService } from '@univerjs/find-replace';
 import { FRange } from '@univerjs/sheets/facade';
 
+/**
+ * @ignore
+ */
 export interface IFTextFinder {
     /**
      * get all the matched range in the univer

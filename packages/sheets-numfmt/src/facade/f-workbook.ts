@@ -18,6 +18,9 @@ import type { INumfmtLocalTag } from '@univerjs/core';
 import { SheetsNumfmtCellContentController } from '@univerjs/sheets-numfmt';
 import { FWorkbook } from '@univerjs/sheets/facade';
 
+/**
+ * @ignore
+ */
 export interface IFWorkbookNumfmtMixin {
 
     /**

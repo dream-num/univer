@@ -38,7 +38,7 @@
         "@types/fs-extra": "^11.0.4",
         "@univerjs-infra/shared": "workspace:*",
         "esbuild": "^0.24.2",
-        "fs-extra": "^11.2.0",
-        "typescript": "^5.7.2"
+        "fs-extra": "^11.3.0",
+        "typescript": "^5.7.3"
     }
 }

@@ -21,6 +21,9 @@ import { InterceptCellContentPriority, INTERCEPTOR_POINT, SheetInterceptorServic
 import { DragManagerService, HoverManagerService, SetCellEditVisibleOperation } from '@univerjs/sheets-ui';
 import { FSheetHooks } from '@univerjs/sheets/facade';
 
+/**
+ * @ignore
+ */
 export interface IFSheetHooksUIMixin {
     /**
      * The onCellPointerMove event is fired when a pointer changes coordinates.

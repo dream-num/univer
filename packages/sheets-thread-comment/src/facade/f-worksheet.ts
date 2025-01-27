@@ -22,6 +22,9 @@ import { FWorksheet } from '@univerjs/sheets/facade';
 import { AddCommentCommand } from '@univerjs/thread-comment';
 import { FThreadComment } from './f-thread-comment';
 
+/**
+ * @ignore
+ */
 export interface IFWorksheetCommentMixin {
     /**
      * Get all comments in the current sheet
@@ -56,6 +59,9 @@ export interface IFWorksheetCommentMixin {
     getCommentById(commentId: string): FThreadComment | undefined;
 }
 
+/**
+ * @ignore
+ */
 export class FWorksheetCommentMixin extends FWorksheet implements IFWorksheetCommentMixin {
     override getComments(): FThreadComment[] {
         const sheetsTheadCommentModel = this._injector.get(SheetsThreadCommentModel);

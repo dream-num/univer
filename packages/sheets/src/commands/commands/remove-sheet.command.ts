@@ -34,7 +34,7 @@ import { getSheetCommandTarget } from './utils/target-util';
 
 export interface IRemoveSheetCommandParams {
     unitId?: string;
-    subUnitId?: string;
+    subUnitId: string;
 }
 
 /**

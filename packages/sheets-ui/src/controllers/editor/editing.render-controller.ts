@@ -568,6 +568,9 @@ export class EditingRenderController extends Disposable implements IRenderModule
         }
 
         const finalCell = await this._sheetInterceptorService.onWriteCell(workbook, worksheet, row, column, cellData);
+        if (finalCell === worksheet.getCellRaw(row, column)) {
+            return;
+        }
         this._commandService.executeCommand(SetRangeValuesCommand.id, {
             subUnitId: sheetId,
             unitId,

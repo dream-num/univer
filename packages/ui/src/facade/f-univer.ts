@@ -16,13 +16,16 @@
 
 import type { IDisposable } from '@univerjs/core';
 import type { IMessageProps } from '@univerjs/design';
-import type { BuiltInUIPart, IDialogPartMethodOptions, ISidebarMethodOptions } from '@univerjs/ui';
+import type { BuiltInUIPart, ComponentType, IComponentOptions, IDialogPartMethodOptions, ISidebarMethodOptions } from '@univerjs/ui';
 import type { IFacadeMenuItem, IFacadeSubmenuItem } from './f-menu-builder';
 import { connectInjector, FUniver } from '@univerjs/core';
 import { ComponentManager, CopyCommand, IDialogService, IMessageService, ISidebarService, IUIPartsService, PasteCommand } from '@univerjs/ui';
 import { FMenu, FSubmenu } from './f-menu-builder';
 import { FShortcut } from './f-shortcut';
 
+/**
+ * @ignore
+ */
 export interface IFUniverUIMixin {
     /**
      * Return the URL of the current page.
@@ -140,8 +143,21 @@ export interface IFUniverUIMixin {
      * ```
      */
     registerUIPart(key: BuiltInUIPart, component: any): IDisposable;
+
+    /**
+     * register an component.
+     * @param component
+     * @example
+     * ```ts
+     * univerAPI.registerComponent('my-comp', () => React.createElement('h1', null, 'Custom Header'));
+     * ```
+     */
+    registerComponent(name: string, component: ComponentType, options?: IComponentOptions): IDisposable;
 }
 
+/**
+ * @ignore
+ */
 export class FUniverUIMixin extends FUniver implements IFUniverUIMixin {
     override getURL(): URL {
         return new URL(window.location.href);
@@ -152,11 +168,11 @@ export class FUniverUIMixin extends FUniver implements IFUniverUIMixin {
     }
 
     override copy(): Promise<boolean> {
-        return this._commandService.executeCommand(CopyCommand.id);
+        return this._commandService.syncExecuteCommand(CopyCommand.id);
     }
 
     override paste(): Promise<boolean> {
-        return this._commandService.executeCommand(PasteCommand.id);
+        return this._commandService.syncExecuteCommand(PasteCommand.id);
     }
 
     override createMenu(menuItem: IFacadeMenuItem): FMenu {
@@ -211,6 +227,11 @@ export class FUniverUIMixin extends FUniver implements IFUniverUIMixin {
     override registerUIPart(key: BuiltInUIPart, component: any): IDisposable {
         const uiPartService = this._injector.get(IUIPartsService);
         return uiPartService.registerComponent(key, () => connectInjector(component, this._injector));
+    }
+
+    override registerComponent(name: string, component: any, options?: IComponentOptions): IDisposable {
+        const componentManager = this._injector.get(ComponentManager);
+        return this.disposeWithMe(componentManager.register(name, component, options));
     }
 }
 

@@ -17,7 +17,7 @@
 import canUseDom from 'rc-util/lib/Dom/canUseDom';
 import React, { useCallback, useEffect, useState } from 'react';
 import { AlphaSlider } from './AlphaSlider';
-import { hsvToRgb, parseRgba, rgbToHsv } from './color-conversion';
+import { hexToHsv, hsvToHex, hsvToRgb, rgbToHex } from './color-conversion';
 import { ColorInput } from './ColorInput';
 import { ColorPresets } from './ColorPresets';
 import { ColorSpectrum } from './ColorSpectrum';
@@ -30,12 +30,13 @@ const MemoizedColorInput = React.memo(ColorInput);
 const MemoizedColorPresets = React.memo(ColorPresets);
 
 export interface IColorPickerProps {
+    format?: 'hex';
     value?: string;
     showAlpha?: boolean;
     onChange?: (value: string) => void;
 }
 
-export function ColorPicker({ value = 'rgba(0,0,0,1)', showAlpha = false, onChange }: IColorPickerProps) {
+export function ColorPicker({ format = 'hex', value = '#000000', showAlpha = false, onChange }: IColorPickerProps) {
     if (!canUseDom) return null;
 
     const [hsv, setHsv] = useState<[number, number, number]>([0, 100, 100]);
@@ -47,10 +48,11 @@ export function ColorPicker({ value = 'rgba(0,0,0,1)', showAlpha = false, onChan
 
     useEffect(() => {
         try {
-            const [r, g, b, a] = parseRgba(value);
-            const [h, s, v] = rgbToHsv(r, g, b);
-            setHsv([h, s, v]);
-            setAlpha(a);
+            if (format === 'hex') {
+                const [h, s, v] = hexToHsv(value);
+                setHsv([h, s, v]);
+                setAlpha(1);
+            }
         } catch (error) {
             console.error('Invalid RGBA value:', error);
         }
@@ -62,7 +64,10 @@ export function ColorPicker({ value = 'rgba(0,0,0,1)', showAlpha = false, onChan
 
     function handleColorChanged(h: number, s: number, v: number) {
         const [r, g, b] = getRgb(h, s, v);
-        onChange?.(`rgba(${r}, ${g}, ${b}, ${alpha})`);
+        if (format === 'hex') {
+            const hex = rgbToHex(r, g, b);
+            onChange?.(hex);
+        }
     }
 
     function handleAlphaChange(a: number) {
@@ -70,7 +75,10 @@ export function ColorPicker({ value = 'rgba(0,0,0,1)', showAlpha = false, onChan
     }
 
     function handleAlphaChanged(a: number) {
-        onChange?.(`rgba(${getRgb(hsv[0], hsv[1], hsv[2]).join(', ')}, ${a})`);
+        if (format === 'hex') {
+            const hex = hsvToHex(hsv[0], hsv[1], hsv[2]);
+            onChange?.(hex);
+        }
     }
 
     return (

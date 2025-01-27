@@ -25,15 +25,29 @@ import { FThreadComment } from './f-thread-comment';
 // eslint-disable-next-line ts/no-explicit-any
 type IUpdateCommandParams = any;
 
+/**
+ * @ignore
+ */
 export interface IFWorkbookThreadCommentMixin {
     /**
      * Get all comments in the current sheet
      * @returns all comments in the current sheet
+     * @example
+     * ```ts
+     * const workbook = univerAPI.getActiveWorkbook();
+     * const comments = workbook.getComments();
+     * ```
      */
     getComments(): FThreadComment[];
 
     /**
      * Clear all comments in the current sheet
+     * @returns Whether the comments are cleared successfully.
+     * @example
+     * ```ts
+     * const workbook = univerAPI.getActiveWorkbook();
+     * const success = await workbook.clearComments();
+     * ```
      */
     clearComments(): Promise<boolean>;
 
@@ -67,9 +81,15 @@ export interface IFWorkbookThreadCommentMixin {
     ): IDisposable;
 }
 
+/**
+ * @ignore
+ */
 export class FWorkbookThreadCommentMixin extends FWorkbook implements IFWorkbookThreadCommentMixin {
     declare _threadCommentModel: ThreadCommentModel;
 
+    /**
+     * @ignore
+     */
     override _initialize(): void {
         Object.defineProperty(this, '_threadCommentModel', {
             get() {

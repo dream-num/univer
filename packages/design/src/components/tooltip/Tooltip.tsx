@@ -273,7 +273,7 @@ export function Tooltip({ visible, asChild = false, title, children, placement =
         React.Children.only(children) as React.ReactElement,
         {
             ref: triggerRef,
-        }
+        } as any
     );
 
     return (

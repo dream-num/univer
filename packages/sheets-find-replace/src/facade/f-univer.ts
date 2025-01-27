@@ -18,6 +18,9 @@ import type { IFindReplaceState } from '@univerjs/find-replace';
 import { FUniver } from '@univerjs/core';
 import { FTextFinder } from './f-text-finder';
 
+/**
+ * @ignore
+ */
 export interface IFUniverFindReplaceMixin {
     /**
      * Create a text-finder for the current univer.

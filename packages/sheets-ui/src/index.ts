@@ -111,6 +111,7 @@ export { SELECTION_SHAPE_DEPTH } from './services/selection/const';
 export { type IBaseSheetBarProps } from './views/sheet-bar/sheet-bar-tabs/SheetBarItem';
 
 // #region - all commands
+export { SetWorksheetColAutoWidthCommand } from './commands/commands/set-worksheet-auto-col-width.command';
 export { AutoClearContentCommand, AutoFillCommand } from './commands/commands/auto-fill.command';
 export {
     type ISheetPasteByShortKeyParams,
@@ -163,12 +164,13 @@ export {
     SetScrollRelativeCommand,
 } from './commands/commands/set-scroll.command';
 export { ExpandSelectionCommand, JumpOver, MoveSelectionCommand, MoveSelectionEnterAndTabCommand, SelectAllCommand } from './commands/commands/set-selection.command';
-export { ChangeZoomRatioCommand, SetZoomRatioCommand } from './commands/commands/set-zoom-ratio.command';
+export { ChangeZoomRatioCommand, type ISetZoomRatioCommandParams, SetZoomRatioCommand } from './commands/commands/set-zoom-ratio.command';
 export { ShowMenuListCommand } from './commands/commands/unhide.command';
 export {
     ChangeSheetProtectionFromSheetBarCommand,
     DeleteWorksheetProtectionFormSheetBarCommand,
 } from './commands/commands/worksheet-protection.command';
+export { SetColumnHeaderHeightCommand, SetRowHeaderWidthCommand } from './commands/commands/headersize-changed.command';
 
 export { SetActivateCellEditOperation } from './commands/operations/activate-cell-edit.operation';
 export { SetCellEditVisibleArrowOperation, SetCellEditVisibleOperation, SetCellEditVisibleWithF2Operation } from './commands/operations/cell-edit.operation';

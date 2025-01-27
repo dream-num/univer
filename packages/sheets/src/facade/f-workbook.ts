@@ -14,18 +14,22 @@
  * limitations under the License.
  */
 
-import type { CommandListener, CustomData, ICommandInfo, IDisposable, IEventParamConfig, IRange, IWorkbookData, LocaleType, Workbook } from '@univerjs/core';
+import type { CommandListener, CustomData, ICommandInfo, IDisposable, IRange, IWorkbookData, LocaleType, Workbook } from '@univerjs/core';
 import type { ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
-import type { ISetSelectionsOperationParams, ISheetCommandSharedParams, RangeThemeStyle } from '@univerjs/sheets';
+import type { IRangeThemeStyleJSON, ISetSelectionsOperationParams, ISheetCommandSharedParams } from '@univerjs/sheets';
 import type { FontLine as _FontLine } from './f-range';
-import { FBaseInitialable, FEnum, FEventName, ICommandService, ILogService, Inject, Injector, IPermissionService, IResourceLoaderService, IUniverInstanceService, LocaleService, mergeWorksheetSnapshotWithDefault, RedoCommand, Registry, toDisposable, UndoCommand, UniverInstanceType } from '@univerjs/core';
+import { FBaseInitialable, ICommandService, ILogService, Inject, Injector, IPermissionService, IResourceLoaderService, IUniverInstanceService, LocaleService, mergeWorksheetSnapshotWithDefault, RedoCommand, toDisposable, UndoCommand, UniverInstanceType } from '@univerjs/core';
 import { IDefinedNamesService } from '@univerjs/engine-formula';
-import { CopySheetCommand, getPrimaryForRange, InsertSheetCommand, RegisterWorksheetRangeThemeStyleCommand, RemoveSheetCommand, SCOPE_WORKBOOK_VALUE_DEFINED_NAME, SetDefinedNameCommand, SetSelectionsOperation, SetWorksheetActiveOperation, SetWorksheetOrderCommand, SheetRangeThemeService, SheetsSelectionsService, UnregisterWorksheetRangeThemeStyleCommand, WorkbookEditablePermission } from '@univerjs/sheets';
+import { CopySheetCommand, getPrimaryForRange, InsertSheetCommand, RangeThemeStyle, RegisterWorksheetRangeThemeStyleCommand, RemoveSheetCommand, SCOPE_WORKBOOK_VALUE_DEFINED_NAME, SetDefinedNameCommand, SetSelectionsOperation, SetWorksheetActiveOperation, SetWorksheetOrderCommand, SheetRangeThemeService, SheetsSelectionsService, UnregisterWorksheetRangeThemeStyleCommand, WorkbookEditablePermission } from '@univerjs/sheets';
 import { FDefinedName, FDefinedNameBuilder } from './f-defined-name';
 import { FPermission } from './f-permission';
 import { FRange } from './f-range';
 import { FWorksheet } from './f-worksheet';
 
+/**
+ * Facade API object bounded to a workbook. It provides a set of methods to interact with the workbook.
+ * @hideconstructor
+ */
 export class FWorkbook extends FBaseInitialable {
     readonly id: string;
 
@@ -46,70 +50,18 @@ export class FWorkbook extends FBaseInitialable {
         this.id = this._workbook.getUnitId();
     }
 
+    /**
+     * Get the Workbook instance.
+     * @returns {Workbook} The Workbook instance.
+     * @example
+     * ```ts
+     * // The code below gets the Workbook instance
+     * const activeSpreadsheet = univerAPI.getActiveWorkbook();
+     * const workbook = activeSpreadsheet.getWorkbook();
+     * ```
+     */
     getWorkbook(): Workbook {
         return this._workbook;
-    }
-
-    private _eventRegistry: Map<string, Registry<(param: any) => void>> = new Map();
-
-    private _ensureEventRegistry(event: string): Registry<(param: any) => void> {
-        if (!this._eventRegistry.has(event)) {
-            this._eventRegistry.set(event, new Registry());
-        }
-
-        return this._eventRegistry.get(event)!;
-    }
-
-    /**
-     * Add an event listener
-     * @param event key of event
-     * @param callback callback when event triggered
-     * @returns {Disposable} The Disposable instance, for remove the listener
-     * @example
-     * ```ts
-     * univerAPI.addEvent(univerAPI.event.UnitCreated, (params) => {
-     *     console.log('unit created', params);
-     * });
-     * ```
-     */
-    addEvent(event: keyof IEventParamConfig, callback: (params: IEventParamConfig[typeof event]) => void): IDisposable {
-        this._ensureEventRegistry(event).add(callback);
-        this.addUIEvent(event, callback);
-
-        return toDisposable(() => this._ensureEventRegistry(event).delete(callback));
-    }
-
-    /**
-     * Fire an event, used in internal only.
-     * @param event {string} key of event
-     * @param params {any} params of event
-     * @returns {boolean} should cancel
-     * @example
-     * ```ts
-     * this.fireEvent(univerAPI.event.UnitCreated, params);
-     * ```
-     */
-    protected fireEvent<T extends keyof IEventParamConfig>(event: T, params: IEventParamConfig[T]): boolean | undefined {
-        this._eventRegistry.get(event)?.getData().forEach((callback) => {
-            callback(params);
-        });
-
-        return params.cancel;
-    }
-
-    addUIEvent(event: keyof IEventParamConfig, _callback: (params: IEventParamConfig[typeof event]) => void): void {
-        //
-    }
-
-    get Enum(): FEnum {
-        return FEnum.get();
-    }
-
-    /**
-     * @returns {FEventName} The event name.
-     */
-    get Event(): FEventName {
-        return FEventName.get();
     }
 
     /**
@@ -143,6 +95,7 @@ export class FWorkbook extends FBaseInitialable {
     /**
      * Set the name of the workbook.
      * @param {string} name The new name of the workbook.
+     * @returns {void}
      * @example
      * ```ts
      * // The code below sets the name of the workbook
@@ -171,8 +124,14 @@ export class FWorkbook extends FBaseInitialable {
 
     /**
      * @deprecated use 'save' instead.
-     * @returns {*}  {IWorkbookData} Workbook snapshot data
+     * @returns {IWorkbookData} Workbook snapshot data
      * @memberof FWorkbook
+     * @example
+     * ```ts
+     * // The code below saves the workbook snapshot data
+     * const activeSpreadsheet = univerAPI.getActiveWorkbook();
+     * const snapshot = activeSpreadsheet.getSnapshot();
+     * ```
      */
     getSnapshot(): IWorkbookData {
         this._logService.warn('use \'save\' instead of \'getSnapshot\'');
@@ -212,10 +171,10 @@ export class FWorkbook extends FBaseInitialable {
 
     /**
      * Create a new worksheet and returns a handle to it.
-     * @param name Name of the new sheet
-     * @param rows How may rows would the new sheet have
-     * @param column How many columns would the new sheet have
-     * @returns The new created sheet
+     * @param {string} name Name of the new sheet
+     * @param {number} rows How many rows would the new sheet have
+     * @param {number} column How many columns would the new sheet have
+     * @returns {FWorksheet} The new created sheet
      * @example
      * ```ts
      * // The code below creates a new sheet
@@ -251,8 +210,8 @@ export class FWorkbook extends FBaseInitialable {
 
     /**
      * Get a worksheet by sheet id.
-     * @param sheetId The id of the sheet to get.
-     * @returns The worksheet with given sheet id
+     * @param {string} sheetId The id of the sheet to get.
+     * @returns {FWorksheet | null} The worksheet with given sheet id
      * @example
      * ```ts
      * // The code below gets a worksheet by sheet id
@@ -271,8 +230,8 @@ export class FWorkbook extends FBaseInitialable {
 
     /**
      * Get a worksheet by sheet name.
-     * @param name The name of the sheet to get.
-     * @returns The worksheet with given sheet name
+     * @param {string} name The name of the sheet to get.
+     * @returns {FWorksheet | null} The worksheet with given sheet name
      * @example
      * ```ts
      * // The code below gets a worksheet by sheet name
@@ -291,8 +250,8 @@ export class FWorkbook extends FBaseInitialable {
 
     /**
      * Sets the given worksheet to be the active worksheet in the workbook.
-     * @param sheet The worksheet to set as the active worksheet.
-     * @returns The active worksheet
+     * @param {FWorksheet | string} sheet The worksheet to set as the active worksheet.
+     * @returns {FWorksheet} The active worksheet
      * @example
      * ```ts
      * // The code below sets the given worksheet to be the active worksheet
@@ -301,20 +260,20 @@ export class FWorkbook extends FBaseInitialable {
      * activeSpreadsheet.setActiveSheet(sheet);
      * ```
      */
-    setActiveSheet(sheet: FWorksheet): FWorksheet {
+    setActiveSheet(sheet: FWorksheet | string): FWorksheet {
         this._commandService.syncExecuteCommand(SetWorksheetActiveOperation.id, {
             unitId: this.id,
-            subUnitId: sheet.getSheetId(),
+            subUnitId: typeof sheet === 'string' ? sheet : sheet.getSheetId(),
         });
 
-        return sheet;
+        return typeof sheet === 'string' ? this.getSheetBySheetId(sheet)! : sheet;
     }
 
     /**
      * Inserts a new worksheet into the workbook.
      * Using a default sheet name. The new sheet becomes the active sheet
-     * @param sheetName - (optional) The name of the new sheet
-     * @returns The new sheet
+     * @param {string} [sheetName] The name of the new sheet
+     * @returns {FWorksheet} The new sheet
      * @example
      * ```ts
      * // The code below inserts a new sheet into the workbook
@@ -350,7 +309,7 @@ export class FWorkbook extends FBaseInitialable {
 
     /**
      * Deletes the specified worksheet.
-     * @param sheet The worksheet to delete.
+     * @param {FWorksheet | string} sheet The worksheet to delete.
      * @returns {boolean} True if the worksheet was deleted, false otherwise.
      * @example
      * ```ts
@@ -360,9 +319,9 @@ export class FWorkbook extends FBaseInitialable {
      * activeSpreadsheet.deleteSheet(sheet);
      * ```
      */
-    deleteSheet(sheet: FWorksheet): boolean {
+    deleteSheet(sheet: FWorksheet | string): boolean {
         const unitId = this.id;
-        const subUnitId = sheet.getSheetId();
+        const subUnitId = typeof sheet === 'string' ? sheet : sheet.getSheetId();
         return this._commandService.syncExecuteCommand(RemoveSheetCommand.id, {
             unitId,
             subUnitId,
@@ -388,7 +347,7 @@ export class FWorkbook extends FBaseInitialable {
 
     /**
      * Redo the last undone action.
-     * @returns A promise that resolves to true if the redo was successful, false otherwise.
+     * @returns {FWorkbook} A promise that resolves to true if the redo was successful, false otherwise.
      * @example
      * ```ts
      * // The code below redoes the last undone action
@@ -411,13 +370,13 @@ export class FWorkbook extends FBaseInitialable {
     /**
      * Register a callback that will be triggered before invoking a command targeting the Univer sheet.
      * @param {onBeforeCommandExecuteCallback} callback the callback.
-     * @returns A function to dispose the listening.
+     * @returns {IDisposable} A function to dispose the listening.
      * @example
      * ```ts
      * // The code below registers a callback that will be triggered before invoking a command targeting the Univer sheet
      * const activeSpreadsheet = univerAPI.getActiveWorkbook();
      * activeSpreadsheet.onBeforeCommandExecute((command) => {
-     *    console.log('Command executed:', command);
+     *   console.log('Command executed:', command);
      * });
      * ```
      */
@@ -440,7 +399,7 @@ export class FWorkbook extends FBaseInitialable {
     /**
      * Register a callback that will be triggered when a command is invoked targeting the Univer sheet.
      * @param {onCommandExecutedCallback} callback the callback.
-     * @returns A function to dispose the listening.
+     * @returns {IDisposable} A function to dispose the listening.
      * @example
      * ```ts
      * // The code below registers a callback that will be triggered when a command is invoked targeting the Univer sheet
@@ -448,6 +407,7 @@ export class FWorkbook extends FBaseInitialable {
      * activeSpreadsheet.onCommandExecuted((command) => {
      *   console.log('Command executed:', command);
      * });
+     * ```
      */
     onCommandExecuted(callback: CommandListener): IDisposable {
         return this._commandService.onCommandExecuted((command) => {
@@ -468,7 +428,7 @@ export class FWorkbook extends FBaseInitialable {
     /**
      * Register a callback that will be triggered when the selection changes.
      * @param {onSelectionChangeCallback} callback The callback.
-     * @returns A function to dispose the listening
+     * @returns {IDisposable} A function to dispose the listening
      */
     onSelectionChange(callback: (selections: IRange[]) => void): IDisposable {
         return toDisposable(
@@ -505,7 +465,7 @@ export class FWorkbook extends FBaseInitialable {
 
     /**
      * Sets the selection region for active sheet.
-     * @param range The range to set as the active selection.
+     * @param {FRange} range The range to set as the active selection.
      * @returns {FWorkbook} FWorkbook instance
      */
     setActiveRange(range: FRange): FWorkbook {
@@ -537,7 +497,7 @@ export class FWorkbook extends FBaseInitialable {
 
     /**
      * Returns the selected range in the active sheet, or null if there is no active range.
-     * @returns the active range
+     * @returns {FRange | null} The active range
      */
     // could sheet have no active range ?
     getActiveRange(): FRange | null {
@@ -592,7 +552,6 @@ export class FWorkbook extends FBaseInitialable {
      * @returns {FWorksheet} The duplicated worksheet
      * @example
      * ```ts
-     * // The code below duplicates the active sheet
      *  const activeSpreadsheet = univerAPI.getActiveWorkbook();
      *  activeSpreadsheet.duplicateActiveSheet();
      * ```
@@ -604,7 +563,7 @@ export class FWorkbook extends FBaseInitialable {
 
     /**
      * Get the number of sheets in the workbook.
-     * @returns The number of sheets in the workbook
+     * @returns {number} The number of sheets in the workbook
      * @example
      * ```ts
      * // The code below gets the number of sheets in the workbook
@@ -804,6 +763,7 @@ export class FWorkbook extends FBaseInitialable {
     /**
      * Insert a defined name by builder param.
      * @param {ISetDefinedNameMutationParam} param The param to insert the defined name
+     * @returns {void}
      * @example
      * ```ts
      * // The code below inserts a defined name by builder param
@@ -821,6 +781,7 @@ export class FWorkbook extends FBaseInitialable {
     /**
      * Update the defined name with the given name.
      * @param {ISetDefinedNameMutationParam} param The param to insert the defined name
+     * @returns {void}
      * @example
      * ```ts
      * // The code below updates the defined name with the given name
@@ -851,16 +812,17 @@ export class FWorkbook extends FBaseInitialable {
 
     /**
      * Register a custom range theme style.
-     * @param rangeThemeStyle
+     * @param {RangeThemeStyle} rangeThemeStyle The range theme style to register
+     * @returns {void}
      * @example
      * ```ts
      * // import {RangeThemeStyle} from '@univerjs/sheets';
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const rangeThemeStyle = new RangeThemeStyle('MyTheme');
      * rangeThemeStyle.setSecondRowStyle({
-     *    bg: {
-     *       rgb: 'rgb(214,231,241)',
-     *    },
+     *   bg: {
+     *     rgb: 'rgb(214,231,241)',
+     *   },
      * });
      * fWorkbook.registerRangeTheme(rangeThemeStyle);
      * ```
@@ -874,7 +836,8 @@ export class FWorkbook extends FBaseInitialable {
 
     /**
      * Unregister a custom range theme style.
-     * @param themeName
+     * @param {string} themeName The name of the theme to unregister
+     * @returns {void}
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
@@ -886,6 +849,10 @@ export class FWorkbook extends FBaseInitialable {
             unitId: this.getId(),
             themeName,
         });
+    }
+
+    createRangeThemeStyle(themeName: string, themeStyleJson?: Omit<IRangeThemeStyleJSON, 'name'>): RangeThemeStyle {
+        return new RangeThemeStyle(themeName, themeStyleJson);
     }
 
     /**
@@ -917,6 +884,9 @@ export class FWorkbook extends FBaseInitialable {
     }
 }
 
+/**
+ * @ignore
+ */
 // eslint-disable-next-line ts/no-namespace
 export namespace FWorkbook {
     export type FontLine = _FontLine;

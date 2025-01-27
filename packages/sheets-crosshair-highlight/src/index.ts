@@ -17,7 +17,7 @@
 import './global.css';
 
 export { UniverSheetsCrosshairHighlightPlugin } from './plugin';
-export { CROSSHAIR_HIGHLIGHT_COLORS } from './services/crosshair.service';
+export { CROSSHAIR_HIGHLIGHT_COLORS, SheetsCrosshairHighlightService } from './services/crosshair.service';
 
 // #region commands
 

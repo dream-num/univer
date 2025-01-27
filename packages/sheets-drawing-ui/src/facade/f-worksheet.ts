@@ -15,24 +15,135 @@
  */
 
 import type { IDisposable, IFBlobSource, Nullable } from '@univerjs/core';
+import type { ISheetImage } from '@univerjs/sheets-drawing';
+import type { ICanvasFloatDom, IDOMAnchor } from '@univerjs/sheets-drawing-ui';
+import type { IFComponentKey } from '@univerjs/sheets-ui/facade';
+import type { FRange } from '@univerjs/sheets/facade';
 import { DrawingTypeEnum, ImageSourceType, toDisposable } from '@univerjs/core';
-import { ISheetDrawingService, type ISheetImage } from '@univerjs/sheets-drawing';
-import { type ICanvasFloatDom, InsertSheetDrawingCommand, RemoveSheetDrawingCommand, SetSheetDrawingCommand, SheetCanvasFloatDomManagerService } from '@univerjs/sheets-drawing-ui';
-import { type IFComponentKey, transformComponentKey } from '@univerjs/sheets-ui/facade';
+import { ISheetDrawingService } from '@univerjs/sheets-drawing';
+import { InsertSheetDrawingCommand, RemoveSheetDrawingCommand, SetSheetDrawingCommand, SheetCanvasFloatDomManagerService } from '@univerjs/sheets-drawing-ui';
+import { transformComponentKey } from '@univerjs/sheets-ui/facade';
 import { FWorksheet } from '@univerjs/sheets/facade';
 import { ComponentManager } from '@univerjs/ui';
 import { FOverGridImage, FOverGridImageBuilder } from './f-over-grid-image';
 
+// why omit this key? if componentKey is missing, then which component should be used?
 export interface IFICanvasFloatDom extends Omit<ICanvasFloatDom, 'componentKey' | 'unitId' | 'subUnitId'>, IFComponentKey {}
 
+/**
+ * @ignore
+ */
 export interface IFWorksheetLegacy {
     /**
      * Add a float dom to position.
      * @param layer float dom config
      * @param id float dom id, if not given will be auto generated
      * @returns float dom id and dispose function
+     * @example
+     * ```ts
+     let sheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     sheet.addFloatDomToPosition({
+            allowTransform: false,
+            initPosition: {
+                startX: 200,
+                endX: 400,
+                startY: 200,
+                endY: 400,
+            },
+            componentKey: 'ImageDemo',
+            props: {
+                a: 1,
+            },
+            data: {
+                aa: '128',
+            },
+        });
+     * ```
      */
     addFloatDomToPosition(layer: IFICanvasFloatDom, id?: string): Nullable<{
+        id: string;
+        dispose: () => void;
+    }>;
+
+    /**
+     * Add dom over range to FloatDOM, And FloatDOM is registerComponent(BuiltInUIPart.CONTENT)
+     * @param layer
+     * @param id
+     * @example
+     * ```ts
+     const sheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     const range = sheet.getRange(0, 0, 3, 3);
+     univerAPI.getActiveWorkbook().setActiveRange(range);
+     const {id, dispose } = sheet.addFloatDomToRange(range, {
+            allowTransform: false,
+            componentKey: 'RangeLoading',
+            props: {
+                a: 1,
+            },
+            data: {
+                aa: '128',
+            },
+        }, {},
+        'loadingcover'
+    )
+    setTimeout(()=> {
+        dispose();
+    }, 2000)
+
+    // another example-------------------
+    {
+     const sheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     const range = univerAPI.getActiveWorkbook().getActiveSheet().getActiveRange()
+     const {id, dispose } = sheet.addFloatDomToRange(range, {
+            allowTransform: false,
+            componentKey: 'FloatButton', // React comp key registered in ComponentManager
+            props: {
+                a: 1,
+            },
+            data: {
+                aa: '128',
+            },
+        }, {
+        width: 100,
+        height: 30,
+        marginX: '100%', // margin percent to range width, or pixel
+        marginY: '100%'
+    },
+    'AIButton') // dom id
+    }
+
+     * ```
+     */
+    addFloatDomToRange(range: FRange, layer: IFICanvasFloatDom, domLayout: IDOMAnchor, id?: string): Nullable<{
+        id: string;
+        dispose: () => void;
+    }>;
+
+    /**
+     * Add dom at column header, And FloatDOM is registerComponent(BuiltInUIPart.CONTENT)
+     * @param column
+     * @param layer
+     * @param domPos
+     * @param id
+     * @example
+     * ```ts
+    {
+     const sheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     const rs = sheet.addFloatDomToColumnHeader(3,
+            {
+                allowTransform: false,
+                componentKey: 'FloatButton', // React comp key registered in ComponentManager
+                props: {
+                    a: 1,
+                },
+            },
+            {width: 100, height: 40, marginX: 0, marginY: 0, horizonOffsetAlign: 'right'},
+            'ai-selector' // dom id
+        )
+    }
+     *```
+     */
+    addFloatDomToColumnHeader(column: number, layer: IFICanvasFloatDom, domPos: IDOMAnchor, id?: string): Nullable<{
         id: string;
         dispose: () => void;
     }>;
@@ -183,6 +294,56 @@ export class FWorksheetLegacy extends FWorksheet implements IFWorksheetLegacy {
                 dispose: (): void => {
                     disposableCollection.dispose();
                     res.dispose();
+                },
+            };
+        }
+
+        disposableCollection.dispose();
+        return null;
+    }
+
+    override addFloatDomToRange(fRange: FRange, layer: IFICanvasFloatDom, domLayout: IDOMAnchor, id?: string): Nullable<{
+        id: string;
+        dispose: () => void;
+    }> {
+        const unitId = this._workbook.getUnitId();
+        const subUnitId = this._worksheet.getSheetId();
+        const { key, disposableCollection } = transformComponentKey(layer, this._injector.get(ComponentManager));
+        const floatDomService = this._injector.get(SheetCanvasFloatDomManagerService);
+        const res = floatDomService.addFloatDomToRange(fRange.getRange(), { ...layer, componentKey: key, unitId, subUnitId }, domLayout, id);
+
+        if (res) {
+            disposableCollection.add(res.dispose);
+            return {
+                id: res.id,
+                dispose: (): void => {
+                    disposableCollection.dispose();
+                    res.dispose();
+                },
+            };
+        }
+
+        disposableCollection.dispose();
+        return null;
+    }
+
+    override addFloatDomToColumnHeader(column: number, layer: IFICanvasFloatDom, domLayout: IDOMAnchor, id?: string): Nullable<{
+        id: string;
+        dispose: () => void;
+    }> {
+        const unitId = this._workbook.getUnitId();
+        const subUnitId = this._worksheet.getSheetId();
+        const { key, disposableCollection } = transformComponentKey(layer, this._injector.get(ComponentManager));
+        const floatDomService = this._injector.get(SheetCanvasFloatDomManagerService);
+        const domRangeDispose = floatDomService.addFloatDomToColumnHeader(column, { ...layer, componentKey: key, unitId, subUnitId }, domLayout, id);
+
+        if (domRangeDispose) {
+            disposableCollection.add(domRangeDispose.dispose);
+            return {
+                id: domRangeDispose.id,
+                dispose: (): void => {
+                    disposableCollection.dispose();
+                    domRangeDispose.dispose();
                 },
             };
         }

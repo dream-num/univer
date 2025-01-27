@@ -53,6 +53,7 @@ export {
     FILE_SVG_XML_CLIPBOARD_MIME_TYPE,
     HTML_CLIPBOARD_MIME_TYPE,
     IClipboardInterfaceService,
+    imageMimeTypeSet,
     PLAIN_TEXT_CLIPBOARD_MIME_TYPE,
 } from './services/clipboard/clipboard-interface.service';
 export { IConfirmService } from './services/confirm/confirm.service';
@@ -64,7 +65,7 @@ export {
 } from './services/contextmenu/contextmenu.service';
 export { DesktopDialogService } from './services/dialog/desktop-dialog.service';
 export { IDialogService } from './services/dialog/dialog.service';
-export { CanvasFloatDomService, type IFloatDomLayout } from './services/dom/canvas-dom-layer.service';
+export { CanvasFloatDomService, type IFloatDom, type IFloatDomLayout } from './services/dom/canvas-dom-layer.service';
 export { DesktopGlobalZoneService } from './services/global-zone/desktop-global-zone.service';
 export { IGlobalZoneService } from './services/global-zone/global-zone.service';
 export { DesktopLayoutService, ILayoutService } from './services/layout/layout.service';

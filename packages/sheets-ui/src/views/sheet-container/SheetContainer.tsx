@@ -32,9 +32,10 @@ export function RenderSheetFooter() {
     const menuManagerService = useDependency(IMenuManagerService);
 
     const workbook = useActiveWorkbook();
+    if (!workbook) return null;
+
     const footerMenus = menuManagerService.getMenuByPositionKey(ContextMenuPosition.FOOTER_MENU);
 
-    if (!workbook) return null;
     return (
         <section className={styles.sheetContainer} data-range-selector>
             <SheetBar />

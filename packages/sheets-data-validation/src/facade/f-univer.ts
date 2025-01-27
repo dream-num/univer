@@ -15,26 +15,67 @@
  */
 
 import type { Injector } from '@univerjs/core';
-import type { IAddSheetDataValidationCommandParams, IRemoveSheetAllDataValidationCommandParams, IRemoveSheetDataValidationCommandParams, IUpdateSheetDataValidationOptionsCommandParams, IUpdateSheetDataValidationRangeCommandParams, IUpdateSheetDataValidationSettingCommandParams } from '@univerjs/sheets-data-validation';
-import type { IBeforeSheetDataValidationAddEvent, IBeforeSheetDataValidationCriteriaUpdateEvent, IBeforeSheetDataValidationDeleteAllEvent, IBeforeSheetDataValidationDeleteEvent, IBeforeSheetDataValidationOptionsUpdateEvent, IBeforeSheetDataValidationRangeUpdateEvent } from './f-event';
+import type {
+    IAddSheetDataValidationCommandParams,
+    IRemoveSheetAllDataValidationCommandParams,
+    IRemoveSheetDataValidationCommandParams,
+    IUpdateSheetDataValidationOptionsCommandParams,
+    IUpdateSheetDataValidationRangeCommandParams,
+    IUpdateSheetDataValidationSettingCommandParams,
+} from '@univerjs/sheets-data-validation';
+import type { IBeforeSheetDataValidationAddEvent,
+    IBeforeSheetDataValidationCriteriaUpdateEvent,
+    IBeforeSheetDataValidationDeleteAllEvent,
+    IBeforeSheetDataValidationDeleteEvent,
+    IBeforeSheetDataValidationOptionsUpdateEvent,
+    IBeforeSheetDataValidationRangeUpdateEvent,
+
+} from './f-event';
 import { CanceledError, FUniver, ICommandService } from '@univerjs/core';
-import { AddSheetDataValidationCommand, RemoveSheetAllDataValidationCommand, RemoveSheetDataValidationCommand, SheetDataValidationModel, UpdateSheetDataValidationOptionsCommand, UpdateSheetDataValidationRangeCommand, UpdateSheetDataValidationSettingCommand } from '@univerjs/sheets-data-validation';
+import {
+    AddSheetDataValidationCommand,
+    RemoveSheetAllDataValidationCommand,
+    RemoveSheetDataValidationCommand,
+    SheetDataValidationModel,
+    UpdateSheetDataValidationOptionsCommand,
+    UpdateSheetDataValidationRangeCommand,
+    UpdateSheetDataValidationSettingCommand,
+} from '@univerjs/sheets-data-validation';
 import { FDataValidation } from './f-data-validation';
 import { FDataValidationBuilder } from './f-data-validation-builder';
 
-export class FUnvierDataValidationMixin extends FUniver {
+/**
+ * @ignore
+ */
+export interface IFUnvierDataValidationMixin {
     /**
+     * Creates a new instance of FDataValidationBuilder
+     * @returns {FDataValidationBuilder} A new instance of the FDataValidationBuilder class
+     * @example
+     * ```ts
+     * const rule = FUnvier.newDataValidation();
+     * cell.setDataValidation(rule.requireValueInRange(range));
+     * ```
+     */
+    newDataValidation(): FDataValidationBuilder;
+}
+
+export class FUnvierDataValidationMixin extends FUniver implements IFUnvierDataValidationMixin {
     /**
-     * @deparecated use `univerAPI.newDataValidation()` as instead.
+     * @deprecated use `univerAPI.newDataValidation()` as instead.
+     * @returns {FDataValidationBuilder} A new instance of the FDataValidationBuilder class
      */
     static override newDataValidation(): FDataValidationBuilder {
         return new FDataValidationBuilder();
     }
 
-    newDataValidation(): FDataValidationBuilder {
+    override newDataValidation(): FDataValidationBuilder {
         return new FDataValidationBuilder();
     }
 
+    /**
+     * @ignore
+     */
     // eslint-disable-next-line max-lines-per-function
     override _initialize(injector: Injector): void {
         if (!injector.has(SheetDataValidationModel)) return;
@@ -121,6 +162,7 @@ export class FUnvierDataValidationMixin extends FUniver {
                         ruleId: params.ruleId,
                         newCriteria: params.setting,
                     };
+
                     this.fireEvent(this.Event.BeforeSheetDataValidationCriteriaUpdate, eventParams);
                     if (eventParams.cancel) {
                         throw new CanceledError();
@@ -230,8 +272,18 @@ export class FUnvierDataValidationMixin extends FUniver {
 
 FUniver.extend(FUnvierDataValidationMixin);
 declare module '@univerjs/core' {
+    /**
+     * @ignore
+     */
     // eslint-disable-next-line ts/no-namespace
     namespace FUniver {
+        /**
+         * @deprecated use `univerAPI.newDataValidation()` as instead.
+         * @returns {FDataValidationBuilder} A new instance of the FDataValidationBuilder class
+         */
         function newDataValidation(): FDataValidationBuilder;
     }
+
+    // eslint-disable-next-line ts/naming-convention
+    interface FUniver extends IFUnvierDataValidationMixin {}
 }

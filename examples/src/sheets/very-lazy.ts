@@ -29,7 +29,18 @@ const IS_E2E: boolean = !!process.env.IS_E2E;
 
 export default function getVeryLazyPlugins() {
     const plugins: Array<[PluginCtor<Plugin>] | [PluginCtor<Plugin>, unknown]> = [
-        [UniverUniscriptPlugin, {
+
+        [UniverActionRecorderPlugin],
+        [UniverSheetsHyperLinkUIPlugin],
+        [UniverSheetsSortUIPlugin],
+        [UniverSheetsCrosshairHighlightPlugin],
+        [UniverSheetsFindReplacePlugin],
+        [UniverWatermarkPlugin],
+    ];
+
+    if (!IS_E2E) {
+        plugins.push([UniverDebuggerPlugin]);
+        plugins.push([UniverUniscriptPlugin, {
             getWorkerUrl(_: string, label: string) {
                 if (label === 'json') {
                     return '/vs/language/json/json.worker.js';
@@ -45,17 +56,7 @@ export default function getVeryLazyPlugins() {
                 }
                 return '/vs/editor/editor.worker.js';
             },
-        }],
-        [UniverActionRecorderPlugin],
-        [UniverSheetsHyperLinkUIPlugin],
-        [UniverSheetsSortUIPlugin],
-        [UniverSheetsCrosshairHighlightPlugin],
-        [UniverSheetsFindReplacePlugin],
-        [UniverWatermarkPlugin],
-    ];
-
-    if (!IS_E2E) {
-        plugins.push([UniverDebuggerPlugin]);
+        }]);
     }
 
     return plugins;

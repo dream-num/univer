@@ -163,7 +163,13 @@ export class Viewport {
     private _widthOrigin: Nullable<number>;
     private _heightOrigin: Nullable<number>;
 
+    /**
+     * this._topOrigin * scaleY;
+     */
     private _top: number = 0;
+    /**
+     * this._leftOrigin * scaleX;
+     */
     private _left: number = 0;
     private _bottom: number = 0;
     private _right: number = 0;
@@ -232,7 +238,7 @@ export class Viewport {
         this._scene.addViewport(this);
         this._active = Tools.isDefine(props?.active) ? props?.active : true;
 
-        this._setViewportSize(props);
+        this.setViewportSize(props);
         this.initCacheCanvas(props);
 
         this._isWheelPreventDefaultX = props?.isWheelPreventDefaultX || false;
@@ -352,22 +358,22 @@ export class Viewport {
         return this._viewportScrollY;
     }
 
-    private set top(num: number) {
+    set top(num: number) {
         this._topOrigin = num;
         this._top = toPx(num, this._scene?.getParent()?.height);
     }
 
-    private set left(num: number) {
+    set left(num: number) {
         this._leftOrigin = num;
         this._left = toPx(num, this.scene.getParent()?.width);
     }
 
-    private set bottom(num: number) {
+    set bottom(num: number) {
         this._bottomOrigin = num;
         this._bottom = toPx(num, this.scene.getParent()?.height);
     }
 
-    private set right(num: number) {
+    set right(num: number) {
         this._rightOrigin = num;
         this._right = toPx(num, this.scene.getParent()?.width);
     }
@@ -458,7 +464,7 @@ export class Viewport {
         if (positionKeys.length === 0) {
             return;
         }
-        this._setViewportSize(position);
+        this.setViewportSize(position);
         this.resetCanvasSizeAndUpdateScroll();
     }
 
@@ -1485,7 +1491,7 @@ export class Viewport {
         }
     }
 
-    private _setViewportSize(props?: IViewProps) {
+    setViewportSize(props?: IViewProps) {
         if (Tools.isDefine(props?.top)) {
             this.top = props.top;
         }
@@ -1506,16 +1512,16 @@ export class Viewport {
             this.width = props?.width;
             this._widthOrigin = props?.width;
         } else {
-            this.width = null;
-            this._widthOrigin = null;
+            // this.width = null;
+            // this._widthOrigin = null;
         }
 
         if (Tools.isDefine(props?.height)) {
             this.height = props?.height;
             this._heightOrigin = props?.height;
         } else {
-            this.height = null;
-            this._heightOrigin = null;
+            // this.height = null;
+            // this._heightOrigin = null;
         }
     }
 }

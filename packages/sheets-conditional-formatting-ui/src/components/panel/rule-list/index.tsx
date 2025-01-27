@@ -391,7 +391,6 @@ export const RuleList = (props: IRuleListProps) => {
                                             <div
                                                 className={`
                                                   ${styles.draggableHandle}
-
                                                   draggableHandle
                                                 `}
                                                 onClick={(e) => e.stopPropagation()}

@@ -16,8 +16,10 @@
 
 /* eslint-disable max-lines-per-function */
 
-import type { Dependency, IWorkbookData, UnitModel } from '@univerjs/core';
+import type { Dependency, IWorkbookData, Nullable, UnitModel } from '@univerjs/core';
 import type { IRender } from '@univerjs/engine-render';
+import type { ICellPosWithEvent, IHoverCellPosition, IHoverRichTextInfo, IHoverRichTextPosition } from '@univerjs/sheets-ui';
+import type { IHoverHeaderPosition } from '@univerjs/sheets-ui/services/hover-manager.service.js';
 import {
     ILogService,
     Inject,
@@ -58,9 +60,10 @@ import {
 import enUS from '@univerjs/sheets-formula-ui/locale/en-US';
 import zhCN from '@univerjs/sheets-formula-ui/locale/zh-CN';
 import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment';
-import { ISheetSelectionRenderService, SheetRenderController, SheetSelectionRenderService, SheetSkeletonManagerService, SheetsRenderService } from '@univerjs/sheets-ui';
+import { DragManagerService, HoverManagerService, ISheetSelectionRenderService, SheetRenderController, SheetScrollManagerService, SheetSelectionRenderService, SheetSkeletonManagerService, SheetsRenderService } from '@univerjs/sheets-ui';
 import { IThreadCommentDataSourceService, ThreadCommentDataSourceService, ThreadCommentModel } from '@univerjs/thread-comment';
 import { IPlatformService, IShortcutService, PlatformService, ShortcutService } from '@univerjs/ui';
+import { Subject } from 'rxjs';
 import { FUniver } from '../everything';
 
 function getTestWorkbookDataDemo(): IWorkbookData {
@@ -176,10 +179,34 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
             injector.add([RangeProtectionRuleModel]);
             injector.add([WorksheetProtectionRuleModel]);
             injector.add([IDefinedNamesService, { useClass: DefinedNamesService }]);
+            // Create a mock HoverManagerService with currentCell$
+            const mockHoverManagerService = {
+                currentCell$: new Subject<Nullable<IHoverCellPosition>>().asObservable(),
+                currentRichText$: new Subject<Nullable<IHoverRichTextPosition>>().asObservable(),
+                currentClickedCell$: new Subject<IHoverRichTextInfo>().asObservable(),
+                currentDbClickedCell$: new Subject<IHoverRichTextInfo>().asObservable(),
+                currentCellPosWithEvent$: new Subject<Nullable<ICellPosWithEvent>>().asObservable(),
+                currentPointerDownCell$: new Subject<ICellPosWithEvent>().asObservable(),
+                currentPointerUpCell$: new Subject<ICellPosWithEvent>().asObservable(),
+                currentPosition$: new Subject<Nullable<IHoverCellPosition>>().asObservable(),
+                currentHoveredRowHeader$: new Subject<Nullable<IHoverHeaderPosition>>().asObservable(),
+                currentHoveredColHeader$: new Subject<Nullable<IHoverHeaderPosition>>().asObservable(),
+                currentRowHeaderClick$: new Subject<IHoverHeaderPosition>().asObservable(),
+                currentColHeaderClick$: new Subject<IHoverHeaderPosition>().asObservable(),
+                currentRowHeaderDbClick$: new Subject<IHoverHeaderPosition>().asObservable(),
+                currentColHeaderDbClick$: new Subject<IHoverHeaderPosition>().asObservable(),
+                currentRowHeaderPointerDown$: new Subject<IHoverHeaderPosition>().asObservable(),
+                currentColHeaderPointerDown$: new Subject<IHoverHeaderPosition>().asObservable(),
+                currentRowHeaderPointerUp$: new Subject<IHoverHeaderPosition>().asObservable(),
+                currentColHeaderPointerUp$: new Subject<IHoverHeaderPosition>().asObservable(),
+            };
+            injector.add([HoverManagerService, { useValue: mockHoverManagerService as unknown as HoverManagerService }]);
+            injector.add([DragManagerService, { useValue: mockHoverManagerService as unknown as DragManagerService }]);
 
             const renderManagerService = injector.get(IRenderManagerService);
             renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, [SheetSkeletonManagerService] as Dependency);
             renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, [SheetRenderController] as Dependency);
+            renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, [SheetScrollManagerService] as Dependency);
 
             // register feature modules
             ([

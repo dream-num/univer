@@ -41,16 +41,18 @@ export interface IInsertFunction {
 
 export interface IInsertFunctionCommandParams {
     list: IInsertFunction[];
+    listOfRangeHasNumber?: IInsertFunction[];
 }
 
 export const InsertFunctionCommand: ICommand = {
     id: 'formula.command.insert-function',
     type: CommandType.COMMAND,
     handler: async (accessor: IAccessor, params: IInsertFunctionCommandParams) => {
-        const { list } = params;
+        const { list, listOfRangeHasNumber } = params;
         const commandService = accessor.get(ICommandService);
         const cellMatrix = new ObjectMatrix<ICellData>();
 
+        // Insert function when the range cell has no number value
         list.forEach((item) => {
             const { range, primary, formula } = item;
             const { row, column } = primary;
@@ -71,6 +73,16 @@ export const InsertFunctionCommand: ICommand = {
                 }
             }
         });
+
+        // Insert function when the range cell has number value
+        if (listOfRangeHasNumber && listOfRangeHasNumber.length > 0) {
+            listOfRangeHasNumber.forEach((item) => {
+                const { primary, formula } = item;
+                cellMatrix.setValue(primary.row, primary.column, {
+                    f: formula,
+                });
+            });
+        }
 
         const setRangeValuesParams: ISetRangeValuesCommandParams = {
             value: cellMatrix.getData(),

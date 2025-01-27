@@ -24,6 +24,7 @@ import { FRange } from '@univerjs/sheets/facade';
 
 /**
  * This interface class provides methods to modify the filter settings of a worksheet.
+ * @hideconstructor
  */
 export class FFilter {
     constructor(

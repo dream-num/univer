@@ -16,6 +16,7 @@
 
 import type { IAccessor, IRange, Nullable, Workbook } from '@univerjs/core';
 import type { IImageData, IImageIoServiceParam } from '@univerjs/drawing';
+import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import type { ISheetLocationBase, WorkbookSelectionModel } from '@univerjs/sheets';
 import type { ISheetDrawing, ISheetDrawingPosition } from '@univerjs/sheets-drawing';
 import type { IInsertDrawingCommandParams, ISetDrawingCommandParams } from '../commands/commands/interfaces';
@@ -24,7 +25,7 @@ import { BooleanNumber, BuildTextUtils, createDocumentModelWithStyle, Disposable
 import { MessageType } from '@univerjs/design';
 import { docDrawingPositionToTransform } from '@univerjs/docs-ui';
 import { DRAWING_IMAGE_ALLOW_IMAGE_LIST, DRAWING_IMAGE_ALLOW_SIZE, DRAWING_IMAGE_COUNT_LIMIT, DRAWING_IMAGE_HEIGHT_LIMIT, DRAWING_IMAGE_WIDTH_LIMIT, getImageSize, IDrawingManagerService, IImageIoService, ImageUploadStatusType, SetDrawingSelectedOperation } from '@univerjs/drawing';
-import { type IRenderContext, IRenderManagerService, type IRenderModule } from '@univerjs/engine-render';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { SetRangeValuesCommand, SheetsSelectionsService } from '@univerjs/sheets';
 import { ISheetDrawingService } from '@univerjs/sheets-drawing';
 import { attachRangeWithCoord, ISheetSelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
@@ -136,7 +137,7 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
             return false;
         }
 
-        files.forEach(async (file) => await this._insertFloatImage(file));
+        files.forEach(async (file) => await this.insertFloatImageByFile(file));
         return true;
     }
 
@@ -153,7 +154,7 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
         return false;
     }
 
-    private async _insertFloatImage(file: File) {
+    async insertFloatImageByFile(file: File) {
         let imageParam: Nullable<IImageIoServiceParam>;
 
         try {
@@ -214,7 +215,7 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
             sheetTransform,
         };
 
-        this._commandService.executeCommand(InsertSheetDrawingCommand.id, {
+        return this._commandService.executeCommand(InsertSheetDrawingCommand.id, {
             unitId,
             drawings: [sheetDrawingParam],
         } as IInsertDrawingCommandParams);

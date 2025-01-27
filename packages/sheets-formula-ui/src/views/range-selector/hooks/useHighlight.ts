@@ -169,7 +169,6 @@ export function useDocHight(_leadingCharacter: string = '') {
         editor: Editor,
         sequenceNodes: INode[],
         isNeedResetSelection = true,
-        clearTextRun = true,
         newSelections?: ITextRange[]
     ) => {
         const data = editor.getDocumentData();
@@ -181,15 +180,15 @@ export function useDocHight(_leadingCharacter: string = '') {
         if (!body) {
             return [];
         }
+        const str = body.dataStream.slice(0, body.dataStream.length - 2);
         const cloneBody = { dataStream: '', ...data.body };
+        if (!str.startsWith(_leadingCharacter)) return [];
         if (sequenceNodes == null || sequenceNodes.length === 0) {
-            if (clearTextRun) {
-                cloneBody.textRuns = [];
-                commandService.syncExecuteCommand(ReplaceTextRunsCommand.id, {
-                    unitId: editorId,
-                    body: getBodySlice(cloneBody, 0, cloneBody.dataStream.length - 2),
-                });
-            }
+            cloneBody.textRuns = [];
+            commandService.syncExecuteCommand(ReplaceTextRunsCommand.id, {
+                unitId: editorId,
+                body: getBodySlice(cloneBody, 0, cloneBody.dataStream.length - 2),
+            });
             return [];
         } else {
             const { textRuns, refSelections } = buildTextRuns(descriptionService, colorMap, sequenceNodes);
@@ -199,7 +198,7 @@ export function useDocHight(_leadingCharacter: string = '') {
                     e.st = e.st + leadingCharacterLength;
                 });
             }
-            cloneBody.textRuns = textRuns;
+            cloneBody.textRuns = [{ st: 0, ed: 1, ts: { fs: 11 } }, ...textRuns];
             const text = sequenceNodes.reduce((pre, cur) => {
                 if (typeof cur === 'string') {
                     return `${pre}${cur}`;
@@ -218,7 +217,6 @@ export function useDocHight(_leadingCharacter: string = '') {
                     selection.endOffset = Math.max(0, Math.min(selection.endOffset, maxOffset));
                 });
             }
-
             commandService.syncExecuteCommand(ReplaceTextRunsCommand.id, {
                 unitId: editorId,
                 body: getBodySlice(cloneBody, 0, cloneBody.dataStream.length - 2),
@@ -284,6 +282,7 @@ export function buildTextRuns(descriptionService: IDescriptionService, colorMap:
                     cl: {
                         rgb: plainTextColor,
                     },
+                    fs: 11,
                 },
             });
             continue;
@@ -296,6 +295,7 @@ export function buildTextRuns(descriptionService: IDescriptionService, colorMap:
                     cl: {
                         rgb: plainTextColor,
                     },
+                    fs: 11,
                 },
             });
             continue;
@@ -336,6 +336,7 @@ export function buildTextRuns(descriptionService: IDescriptionService, colorMap:
                     cl: {
                         rgb: themeColor,
                     },
+                    fs: 11,
                 },
             });
         } else {
@@ -346,6 +347,7 @@ export function buildTextRuns(descriptionService: IDescriptionService, colorMap:
                     cl: {
                         rgb: plainTextColor,
                     },
+                    fs: 11,
                 },
             });
         }

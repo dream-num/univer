@@ -17,7 +17,7 @@
 import type { ICellData, Injector, IStyleData, Nullable, Workbook } from '@univerjs/core';
 import type { IDragCellPosition } from '../../services/drag-manager.service';
 import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
-import type { IHoverCellPosition } from '../../services/hover-manager.service';
+import type { ICellPosWithEvent, IHoverCellPosition, IHoverHeaderPosition, IHoverRichTextInfo, IHoverRichTextPosition } from '../../services/hover-manager.service';
 
 import { ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
@@ -93,7 +93,24 @@ describe('Test FSheetHooks', () => {
         dragEndCell$ = new Subject<Nullable<IDragCellPosition>>();
 
         // Create a mock HoverManagerService with currentCell$
-        mockHoverManagerService = {
+
+        const mockHoverManagerService = {
+            currentRichText$: new Subject<Nullable<IHoverRichTextPosition>>().asObservable(),
+            currentClickedCell$: new Subject<IHoverRichTextInfo>().asObservable(),
+            currentDbClickedCell$: new Subject<IHoverRichTextInfo>().asObservable(),
+            currentCellPosWithEvent$: new Subject<Nullable<ICellPosWithEvent>>().asObservable(),
+            currentPointerDownCell$: new Subject<ICellPosWithEvent>().asObservable(),
+            currentPointerUpCell$: new Subject<ICellPosWithEvent>().asObservable(),
+            currentHoveredRowHeader$: new Subject<Nullable<IHoverHeaderPosition>>().asObservable(),
+            currentHoveredColHeader$: new Subject<Nullable<IHoverHeaderPosition>>().asObservable(),
+            currentRowHeaderClick$: new Subject<IHoverHeaderPosition>().asObservable(),
+            currentColHeaderClick$: new Subject<IHoverHeaderPosition>().asObservable(),
+            currentRowHeaderDbClick$: new Subject<IHoverHeaderPosition>().asObservable(),
+            currentColHeaderDbClick$: new Subject<IHoverHeaderPosition>().asObservable(),
+            currentRowHeaderPointerDown$: new Subject<IHoverHeaderPosition>().asObservable(),
+            currentColHeaderPointerDown$: new Subject<IHoverHeaderPosition>().asObservable(),
+            currentRowHeaderPointerUp$: new Subject<IHoverHeaderPosition>().asObservable(),
+            currentColHeaderPointerUp$: new Subject<IHoverHeaderPosition>().asObservable(),
             currentCell$: hoverCurrentCell$.asObservable(),
             currentPosition$: hoverCurrentPosition$.asObservable(),
         };

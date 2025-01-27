@@ -57,7 +57,10 @@ export const MentionEditPopup = () => {
     return (
         <MentionList
             editorId={editPopup.unitId}
-            onClick={() => popupService.closeEditPopup()}
+            onClick={() => {
+                popupService.closeEditPopup();
+                editorService.focus(editPopup.unitId);
+            }}
             mentions={mentions}
             onSelect={async (mention) => {
                 await commandService.executeCommand(AddDocMentionCommand.id, {

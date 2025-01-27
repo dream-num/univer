@@ -21,6 +21,7 @@ import { ENGINE_FORMULA_CYCLE_REFERENCE_COUNT, LexerTreeBuilder, SetFormulaCalcu
 
 /**
  * This interface class provides methods to modify the behavior of the operation formula.
+ * @hideconstructor
  */
 export class FFormula extends FBase {
     constructor(
@@ -33,6 +34,9 @@ export class FFormula extends FBase {
         this._initialize();
     }
 
+    /**
+     * @ignore
+     */
     _initialize(): void {
         // do nothing
     }

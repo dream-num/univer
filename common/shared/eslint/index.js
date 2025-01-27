@@ -49,6 +49,12 @@ exports.baseRules = {
     'react/no-unstable-context-value': 'warn',
     'react/no-unstable-default-props': 'warn',
     'command/command': 'off',
+    'jsdoc/tag-lines': 'off',
+    'import/consistent-type-specifier-style': 'warn',
+
+    // IMPORTANT: To ensure compatibility, some features of React 19 will be disabled.
+    'react/no-forward-ref': 'off',
+    'react/no-context-provider': 'off',
 
     // TODO: debatable rules
     'react/no-duplicate-key': 'warn',
@@ -177,6 +183,7 @@ exports.facadePreset = () => {
             'ts/explicit-function-return-type': 'error',
             'univer/no-external-imports-in-facade': 'error',
             ...jsdoc.configs.recommended.rules,
+            'jsdoc/tag-lines': 'off',
         },
     };
 };

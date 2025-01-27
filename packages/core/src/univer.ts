@@ -63,6 +63,9 @@ export interface IUniverConfig {
     override?: DependencyOverride;
 }
 
+/**
+ * @hideconstructor
+ */
 export class Univer implements IDisposable {
     private _startedTypes = new Set<UnitType>();
     private _injector: Injector;
@@ -94,6 +97,9 @@ export class Univer implements IDisposable {
         this._init(injector);
     }
 
+    /**
+     * @ignore
+     */
     __getInjector(): Injector {
         return this._injector;
     }
@@ -209,7 +215,7 @@ function createUniverInjector(parentInjector?: Injector, override?: DependencyOv
         [IContextService, { useClass: ContextService }],
         [IResourceManagerService, { useClass: ResourceManagerService, lazy: true }],
         [IResourceLoaderService, { useClass: ResourceLoaderService, lazy: true }],
-        [IAuthzIoService, { useClass: AuthzIoLocalService, lazy: true }],
+        [IAuthzIoService, { useClass: AuthzIoLocalService }],
         [IMentionIOService, { useClass: MentionIOLocalService, lazy: true }],
     ], override);
 

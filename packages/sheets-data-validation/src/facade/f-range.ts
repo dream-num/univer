@@ -20,27 +20,60 @@ import { AddSheetDataValidationCommand, ClearRangeDataValidationCommand, SheetsD
 import { FRange } from '@univerjs/sheets/facade';
 import { FDataValidation } from './f-data-validation';
 
+/**
+ * @ignore
+ */
 export interface IFRangeDataValidationMixin {
     /**
-     * Set a data validation rule to current range.
-     * @param rule data validation rule, build by `FUniver.newDataValidation`
+     * Set a data validation rule to current range. if rule is null, clear data validation rule.
+     * @param {Nullable<FDataValidation>} rule data validation rule, build by `FUniver.newDataValidation`
      * @returns current range
+     * @example
+     * ```ts
+     * const rule = FUniver.newDataValidation().requireValueInRange(range).build();
+     * cell.setDataValidation(rule);
+     * ```
      */
-    setDataValidation(this: FRange, rule: Nullable<FDataValidation>): FRange;
+    setDataValidation(rule: Nullable<FDataValidation>): FRange;
     /**
      * Get first data validation rule in current range.
-     * @returns data validation rule
+     * @returns {Nullable<FDataValidation>} data validation rule
+     * @example
+     * ```ts
+     * const workbook = univerAPI.getActiveWorkbook();
+     * const worksheet = workbook.getActiveSheet();
+     * const dataValidation = worksheet.getActiveRange().getDataValidation();
+     * ```
      */
-    getDataValidation(this: FRange): Nullable<FDataValidation>;
+    getDataValidation(): Nullable<FDataValidation>;
 
     /**
      * Get all data validation rules in current range.
-     * @returns all data validation rules
+     * @returns {FDataValidation[]} all data validation rules
+     * @example
+     * ```ts
+     * const workbook = univerAPI.getActiveWorkbook();
+     * const worksheet = workbook.getActiveSheet();
+     * const dataValidations = worksheet.getActiveRange().getDataValidations();
+     * ```
      */
-    getDataValidations(this: FRange): FDataValidation[];
-    getValidatorStatus(): Promise<Promise<DataValidationStatus>[][]>;
+    getDataValidations(): FDataValidation[];
+    /**
+     * Get data validation validator status for current range.
+     * @returns {Promise<DataValidationStatus[][]>} matrix of validator status
+     * @example
+     * ```ts
+     * const workbook = univerAPI.getActiveWorkbook();
+     * const worksheet = workbook.getActiveSheet();
+     * const validatorStatus = worksheet.getActiveRange().getValidatorStatus();
+     * ```
+     */
+    getValidatorStatus(): Promise<DataValidationStatus[][]>;
 }
 
+/**
+ * @ignore
+ */
 export class FRangeDataValidationMixin extends FRange implements IFRangeDataValidationMixin {
     override setDataValidation(rule: Nullable<FDataValidation>): FRange {
         if (!rule) {
@@ -90,7 +123,7 @@ export class FRangeDataValidationMixin extends FRange implements IFRangeDataVali
         ).map((rule) => new FDataValidation(rule, this._worksheet, this._injector));
     }
 
-    override async getValidatorStatus(): Promise<Promise<DataValidationStatus>[][]> {
+    override async getValidatorStatus(): Promise<DataValidationStatus[][]> {
         const validatorService = this._injector.get(SheetsDataValidationValidatorService);
         return validatorService.validatorRanges(
             this._workbook.getUnitId(),

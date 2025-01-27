@@ -39,6 +39,9 @@ export interface IFComponentKey {
 
 export interface IFCanvasPopup extends Omit<ICanvasPopup, 'componentKey'>, IFComponentKey { }
 
+/**
+ * @ignore
+ */
 interface IFRangeSheetsUIMixin {
     /**
      * Return this cell information, including whether it is merged and cell coordinates
@@ -80,11 +83,21 @@ interface IFRangeSheetsUIMixin {
      * @returns The disposable object to detach the popup, if the popup is not attached, return `null`.
      * @example
     ```
+        univerAPI.getComponentManager().register(
+            'myPopup',
+            () => React.createElement('div', {
+                style: {
+                    color: 'red',
+                    fontSize: '14px'
+                }
+            }, 'Custom Popup')
+        );
+
         let sheet = univerAPI.getActiveWorkbook().getActiveSheet();
         let range = sheet.getRange(2, 2, 3, 3);
+        univerAPI.getActiveWorkbook().setActiveRange(range);
         let disposable = range.attachPopup({
-        componentKey: 'univer.sheet.cell-alert',
-        extraProps: { alert: { type: 0, title: 'This is an Info', message: 'This is an info message' } },
+            componentKey: 'myPopup'
         });
     ```
      */
@@ -102,6 +115,32 @@ interface IFRangeSheetsUIMixin {
      * ```
      */
     attachAlertPopup(alert: Omit<ICellAlert, 'location'>): IDisposable;
+    /**
+     * Attach a DOM popup to the current range.
+     * @param alert The alert to attach
+     * @returns The disposable object to detach the alert.
+     * @example
+     * ```ts
+        let sheet = univerAPI.getActiveWorkbook().getActiveSheet();
+        let range = sheet.getRange(2, 2, 3, 3);
+        univerAPI.getActiveWorkbook().setActiveRange(range);
+
+        univerAPI.getComponentManager().register(
+            'myPopup',
+            () => React.createElement('div', {
+                style: {
+                    background: 'red',
+                    fontSize: '14px'
+                }
+            }, 'Custom Popup')
+        );
+        let disposable = range.attachRangePopup({
+            componentKey: 'myPopup',
+            direction: 'top' // 'vertical' | 'horizontal' | 'top' | 'right' | 'left' | 'bottom' | 'bottom-center' | 'top-center';
+        });
+     * ```
+     */
+    attachRangePopup(popup: IFCanvasPopup): Nullable<IDisposable>;
 
     /**
      *  Highlight the range with the specified style and primary cell.
@@ -194,6 +233,40 @@ class FRangeSheetsUIMixin extends FRange implements IFRangeSheetsUIMixin {
         };
     }
 
+    /**
+     * attachDOMPopup
+     * @param popup
+     * @returns {IDisposable} disposable
+        let sheet = univerAPI.getActiveWorkbook().getActiveSheet();
+        let range = sheet.getRange(2, 2, 3, 3);
+        univerAPI.getActiveWorkbook().setActiveRange(range);
+        let disposable = range.attachDOMPopup({
+        componentKey: 'univer.sheet.single-dom-popup',
+        extraProps: { alert: { type: 0, title: 'This is an Info', message: 'This is an info message' } },
+        });
+     */
+    override attachRangePopup(popup: IFCanvasPopup): Nullable<IDisposable> {
+        popup.direction = popup.direction ?? 'top-center';
+        popup.extraProps = popup.extraProps ?? {};
+        popup.offset = popup.offset ?? [0, 0];
+
+        const { key, disposableCollection } = transformComponentKey(popup, this._injector.get(ComponentManager));
+        const sheetsPopupService = this._injector.get(SheetCanvasPopManagerService);
+        const disposePopup = sheetsPopupService.attachRangePopup(
+            this._range,
+            { ...popup, componentKey: key },
+            this.getUnitId(),
+            this._worksheet.getSheetId()
+        );
+        if (disposePopup) {
+            disposableCollection.add(disposePopup);
+            return disposableCollection;
+        }
+
+        disposableCollection.dispose();
+        return null;
+    }
+
     override highlight(style?: Nullable<Partial<ISelectionStyle>>, primary?: Nullable<ISelectionCell>): IDisposable {
         const markSelectionService = this._injector.get(IMarkSelectionService);
         const id = markSelectionService.addShape({ range: this._range, style, primary });
@@ -210,13 +283,14 @@ class FRangeSheetsUIMixin extends FRange implements IFRangeSheetsUIMixin {
 FRange.extend(FRangeSheetsUIMixin);
 declare module '@univerjs/sheets/facade' {
     // eslint-disable-next-line ts/naming-convention
-    interface FRange extends IFRangeSheetsUIMixin {}
+    interface FRange extends IFRangeSheetsUIMixin { }
 }
 
 /**
  * Transform component key
  * @param {IFComponentKey} component - The component key to transform.
  * @param {ComponentManager} componentManager - The component manager to use for registration.
+ * @returns {string} The transformed component key.
  */
 export function transformComponentKey(component: IFComponentKey, componentManager: ComponentManager): { key: string; disposableCollection: DisposableCollection } {
     const { componentKey, isVue3 } = component;

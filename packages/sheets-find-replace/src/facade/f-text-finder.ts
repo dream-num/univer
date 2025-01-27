@@ -20,6 +20,9 @@ import { Disposable, Inject, Injector, IUniverInstanceService } from '@univerjs/
 import { createInitFindReplaceState, FindBy, FindReplaceModel, FindReplaceState, IFindReplaceService } from '@univerjs/find-replace';
 import { FRange } from '@univerjs/sheets/facade';
 
+/**
+ * @ignore
+ */
 export interface IFTextFinder {
     /**
      * get all the matched range in the univer
@@ -154,6 +157,7 @@ export interface IFTextFinder {
 
 /**
  * This interface class provides methods to find and replace text in the univer.
+ * @hideconstructor
  */
 export class FTextFinder extends Disposable implements IFTextFinder {
     private readonly _state = new FindReplaceState();

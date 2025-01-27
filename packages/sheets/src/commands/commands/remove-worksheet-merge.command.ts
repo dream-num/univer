@@ -40,7 +40,7 @@ export const RemoveWorksheetMergeCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.remove-worksheet-merge',
     // eslint-disable-next-line max-lines-per-function
-    handler: async (accessor: IAccessor, params: IRemoveWorksheetMergeCommandParams) => {
+    handler: (accessor: IAccessor, params: IRemoveWorksheetMergeCommandParams) => {
         const selectionManagerService = accessor.get(SheetsSelectionsService);
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);

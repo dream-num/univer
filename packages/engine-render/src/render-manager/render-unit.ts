@@ -36,6 +36,7 @@ export interface IRender {
     isThumbNail?: boolean;
 
     with<T>(dependency: DependencyIdentifier<T>): T;
+    getRenderContext?(): IRenderContext;
 }
 
 /**
@@ -140,5 +141,8 @@ export class RenderUnit extends Disposable implements IRender {
             j.get(identifier);
         });
     }
-}
 
+    getRenderContext(): IRenderContext {
+        return this._renderContext;
+    }
+}

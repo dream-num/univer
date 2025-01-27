@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
+import { render } from '@univerjs/design';
 import React from 'react';
-import { createRoot } from 'react-dom/client';
 import pkg from '../../package.json';
 
 import './global.css';
@@ -65,24 +65,23 @@ function Examples() {
 
     return (
         <section
-            className="univer-h-full univer-flex univer-gap-6 univer-justify-center univer-flex-col univer-items-center"
+            className="univer-flex univer-h-full univer-flex-col univer-items-center univer-justify-center univer-gap-6"
         >
             <header className="univer-flex univer-items-center">
                 <img className="univer-w-24" src="/favicon.svg" alt="Univer" draggable={false} />
                 <h1 className="univer-text-slate-700">
                     <span
                         className={`
-                          univer-text-4xl
                           univer-bg-[linear-gradient(121deg,#0048ff_18.89%,#0c81ed_39.58%,#029dce_59.87%,#00bbb0_74.37%,#00c5a8_79.64%)]
-                          univer-text-transparent univer-bg-clip-text
+                          univer-bg-clip-text univer-text-4xl univer-text-transparent
                         `}
                     >
                         Univer
                     </span>
                     <sup
                         className={`
-                          univer-text-xs univer-py-0.5 univer-px-2 univer-border-solid univer-border-current
-                          univer-border univer-rounded-xl univer-relative -univer-top-1 univer-left-2
+                          univer-relative -univer-top-1 univer-left-2 univer-rounded-xl univer-border
+                          univer-border-solid univer-border-current univer-px-2 univer-py-0.5 univer-text-xs
                         `}
                     >
                         {pkg.version}
@@ -90,16 +89,15 @@ function Examples() {
                 </h1>
             </header>
 
-            <section className="univer-flex univer-flex-wrap univer-gap-6 univer-justify-center">
+            <section className="univer-flex univer-flex-wrap univer-justify-center univer-gap-6">
                 {demos.map((demo) => (
                     <a
                         key={demo.title}
                         className={`
-                          univer-bg-blue-500 univer-shadow-sm univer-transition-all univer-duration-300
-                          univer-ease-in-out univer-text-white univer-rounded-lg univer-font-medium univer-no-underline
-                          univer-py-2.5 univer-px-6
-
-                          hover:univer-bg-emerald-500 hover:univer-scale-105
+                          univer-rounded-lg univer-bg-blue-500 univer-px-6 univer-py-2.5 univer-font-medium
+                          univer-text-white univer-no-underline univer-shadow-sm univer-transition-all
+                          univer-duration-300 univer-ease-in-out
+                          hover:univer-scale-105 hover:univer-bg-emerald-500
                         `}
                         href={demo.href}
                     >
@@ -111,4 +109,4 @@ function Examples() {
     );
 }
 
-createRoot(document.getElementById('app')!).render(<Examples />);
+render(<Examples />, document.getElementById('app')!);

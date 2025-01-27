@@ -116,7 +116,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
     const [rangeDialogVisible, rangeDialogVisibleSet] = useState(false);
     const [isFocus, isFocusSet] = useState(_isFocus);
     const editorId = useMemo(() => createInternalEditorID(`${RANGE_SELECTOR_SYMBOLS}-${generateRandomId(4)}`), []);
-    const editorRef = useRef<Editor>();
+    const editorRef = useRef<Editor>(undefined);
     const editor = editorRef.current;
     const containerRef = useRef<HTMLDivElement>(null);
     const univerInstanceService = useDependency(IUniverInstanceService);

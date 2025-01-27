@@ -20,6 +20,9 @@ import { Inject, type IRange } from '@univerjs/core';
 import { SheetsHyperLinkParserService } from '@univerjs/sheets-hyper-link';
 import { FWorkbook } from '@univerjs/sheets/facade';
 
+/**
+ * @hideconstructor
+ */
 export class SheetHyperLinkBuilder {
     constructor(
         private _workbook: FWorkbook,
@@ -32,6 +35,9 @@ export class SheetHyperLinkBuilder {
     }
 }
 
+/**
+ * @ignore
+ */
 export interface IFWorkbookHyperlinkMixin {
     /**
      * @deprecated use `getUrl` method in `FRange` or `FWorksheet` instead.

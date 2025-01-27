@@ -24,6 +24,60 @@ import { BuildTextUtils } from './text-x/build-utils';
 import { TextX } from './text-x/text-x';
 import { getBodySlice } from './text-x/utils';
 
+export function normalizeBody(body: IDocumentBody) {
+    if (!body.customRanges) {
+        body.customRanges = [];
+    }
+
+    if (!body.paragraphs) {
+        body.paragraphs = [];
+        for (let i = 0; i < body.dataStream.length; i++) {
+            if (body.dataStream[i] === '\r') {
+                body.paragraphs.push({ startIndex: i });
+            }
+        }
+    }
+
+    if (!body.customBlocks) {
+        body.customBlocks = [];
+    }
+
+    if (!body.textRuns) {
+        body.textRuns = [];
+    }
+
+    if (!body.customDecorations) {
+        body.customDecorations = [];
+    }
+
+    if (!body.sectionBreaks) {
+        body.sectionBreaks = [];
+    }
+
+    if (!body.tables) {
+        body.tables = [];
+    }
+
+    return body;
+}
+
+export function normalizeData(data: IDocumentData) {
+    data.body = normalizeBody(data.body ?? { dataStream: '' });
+
+    if (!data.drawingsOrder) {
+        data.drawingsOrder = [];
+    }
+
+    if (!data.drawings) {
+        data.drawings = {};
+    }
+    if (!data.documentStyle) {
+        data.documentStyle = {};
+    }
+
+    return data;
+}
+
 /**
  * Represents a read-only font style value object.
  * This class provides access to font style properties without modification capabilities.
@@ -1466,6 +1520,10 @@ export class RichTextValue {
      * Creates a new RichTextValue instance
      * @param {IDocumentData} data The initial data for the rich text value
      * @returns {RichTextValue} A new RichTextValue instance
+     * @example
+     * ```ts
+     * const richText = RichTextValue.create({ body: { dataStream: 'Hello World\r\n' } });
+     * ```
      */
     public static create(data: IDocumentData): RichTextValue {
         return new RichTextValue(data);
@@ -1475,6 +1533,10 @@ export class RichTextValue {
      * Creates a new RichTextValue instance
      * @param {IDocumentBody} data The initial data for the rich text value
      * @returns {RichTextValue} A new RichTextValue instance
+     * @example
+     * ```ts
+     * const richText = RichTextValue.createByBody({ dataStream: 'Hello World\r\n' });
+     * ```
      */
     public static createByBody(data: IDocumentBody): RichTextValue {
         return new RichTextValue({ body: data, id: 'd', documentStyle: {} });
@@ -1484,12 +1546,17 @@ export class RichTextValue {
         if (!data.body) {
             throw new Error('Invalid document data, body is required');
         }
-        this._data = data;
+        this._data = normalizeData(data);
     }
 
     /**
      * Creates a copy of the current RichTextValue instance
      * @returns {RichTextValue} A new instance of RichTextValue with the same data
+     * @example
+     * ```ts
+     * const richText = RichTextValue.create({ body: { dataStream: 'Hello World\r\n' } });
+     * const copy = richText.copy();
+     * ```
      */
     copy(): RichTextBuilder {
         return RichTextBuilder.create(Tools.deepClone(this._data));
@@ -1500,6 +1567,11 @@ export class RichTextValue {
      * @param {number} start The start index
      * @param {number} end The end index
      * @returns {RichTextBuilder} A new instance of RichTextBuilder with the sliced data
+     * @example
+     * ```ts
+     * const richText = RichTextValue.create({ body: { dataStream: 'Hello World\r\n' } });
+     * const sliced = richText.slice(0, 5);
+     * ```
      */
     slice(start: number, end: number): RichTextBuilder {
         const { body, ...ext } = this._data;
@@ -1512,14 +1584,24 @@ export class RichTextValue {
     /**
      * Converts the current RichTextValue instance to plain text
      * @returns {string} The plain text representation of the current RichTextValue instance
+     * @example
+     * ```ts
+     * const richText = RichTextValue.create({ body: { dataStream: 'Hello World\r\n' } });
+     * const plainText = richText.toPlainText();
+     * ```
      */
     toPlainText(): string {
-        return BuildTextUtils.transform.getPlainText(this._data.body?.dataStream ?? '');
+        return BuildTextUtils.transform.getPlainText(this._data.body?.dataStream ?? '').replaceAll('\r', '\n');
     }
 
     /**
      * Gets the paragraph style of the current RichTextValue instance
      * @returns {ParagraphStyleValue} The paragraph style of the current RichTextValue instance
+     * @example
+     * ```ts
+     * const richText = RichTextValue.create({ body: { dataStream: 'Hello World\r\n' } });
+     * const style = richText.getParagraphStyle();
+     * ```
      */
     getParagraphStyle(): ParagraphStyleValue {
         return ParagraphStyleValue.create(this._data.body?.paragraphs?.[0].paragraphStyle);
@@ -1528,6 +1610,11 @@ export class RichTextValue {
     /**
      * Gets the paragraph bullet of the current RichTextValue instance
      * @returns {ParagraphBulletValue} The paragraph bullet of the current RichTextValue instance
+     * @example
+     * ```ts
+     * const richText = RichTextValue.create({ body: { dataStream: 'Hello World\r\n' } });
+     * const bullet = richText.getParagraphBullet();
+     * ```
      */
     getParagraphBullet() {
         return this._data.body?.paragraphs?.[0].bullet;
@@ -1536,6 +1623,11 @@ export class RichTextValue {
     /**
      * Gets the paragraphs of the current RichTextValue instance
      * @returns {RichTextValue[]} The paragraphs of the current RichTextValue instance
+     * @example
+     * ```ts
+     * const richText = RichTextValue.create({ body: { dataStream: 'Hello World\r\n' } });
+     * const paragraphs = richText.getParagraphs();
+     * ```
      */
     getParagraphs(): RichTextValue[] {
         const paragraphs = this._data.body?.paragraphs ?? [];
@@ -1551,6 +1643,11 @@ export class RichTextValue {
     /**
      * Gets the text runs of the current RichTextValue instance
      * @returns {TextRunValue[]} The text runs of the current RichTextValue instance
+     * @example
+     * ```ts
+     * const richText = RichTextValue.create({ body: { dataStream: 'Hello World\r\n' } });
+     * const textRuns = richText.getTextRuns();
+     * ```
      */
     getTextRuns() {
         return (this._data.body?.textRuns ?? []).map((t) => ({
@@ -1561,7 +1658,12 @@ export class RichTextValue {
 
     /**
      * Gets the links of the current RichTextValue instance
-     * @returns {LinkValue[]} The links of the current RichTextValue instance
+     * @returns {ICustomRange[]} The links of the current RichTextValue instance
+     * @example
+     * ```ts
+     * const richText = RichTextValue.create({ body: { dataStream: 'Hello World\r\n' } });
+     * const links = richText.getLinks();
+     * ```
      */
     getLinks() {
         return this._data.body?.customRanges?.filter((r) => r.rangeType === CustomRangeType.HYPERLINK) ?? [];
@@ -1570,6 +1672,11 @@ export class RichTextValue {
     /**
      * Gets the data of the current RichTextValue instance
      * @returns {IDocumentData} The data of the current RichTextValue instance
+     * @example
+     * ```ts
+     * const richText = RichTextValue.create({ body: { dataStream: 'Hello World\r\n' } });
+     * const data = richText.getData();
+     * ```
      */
     getData(): IDocumentData {
         return this._data;
@@ -1581,7 +1688,7 @@ export class RichTextValue {
  */
 export class RichTextBuilder extends RichTextValue {
     public static newEmptyData(): IDocumentData {
-        return {
+        return normalizeData({
             id: 'd',
             documentStyle: {},
             drawings: {},
@@ -1595,7 +1702,7 @@ export class RichTextBuilder extends RichTextValue {
                 tables: [],
                 sectionBreaks: [],
             },
-        };
+        });
     }
 
     /**
@@ -1622,11 +1729,11 @@ export class RichTextBuilder extends RichTextValue {
      * @returns {RichTextBuilder} The current RichTextBuilder instance
      * @example
      * ```ts
-     * const richText = RichTextValue.create({ body: { dataStream: 'Hello' } });
-     * const newRichText = richText.insertText(0, 'World');
+     * const richText = RichTextValue.create({ body: { dataStream: 'Hello World\r\n' } });
+     * const newRichText = richText.insertText('World');
      * ```
      */
-    insertText(start: string, style?: TextStyleBuilder | ITextStyle): RichTextBuilder;
+    insertText(text: string, style?: TextStyleBuilder | ITextStyle): RichTextBuilder;
     /**
      * Inserts text into the rich text builder at the specified start position
      * @param start The start position of the text to insert
@@ -1635,7 +1742,7 @@ export class RichTextBuilder extends RichTextValue {
      * @returns {RichTextBuilder} The current RichTextBuilder instance
      * @example
      * ```ts
-     * const richText = RichTextValue.create({ body: { dataStream: 'Hello' } });
+     * const richText = RichTextValue.create({ body: { dataStream: 'Hello World\r\n' } });
      * const newRichText = richText.insertText(5, 'World', { ff: 'Arial', fs: 12 });
      * ```
      */
@@ -1691,7 +1798,7 @@ export class RichTextBuilder extends RichTextValue {
      * @returns {RichTextValue | IDocumentData} The current RichTextBuilder instance
      * @example
      * ```ts
-     * const richText = RichTextValue.create({ body: { dataStream: 'Hello' } });
+     * const richText = RichTextValue.create({ body: { dataStream: 'Hello World\r\n' } });
      * const newRichText = richText.insertRichText(RichTextValue.create({ body: { dataStream: 'World' } }));
      * ```
      */
@@ -1703,7 +1810,7 @@ export class RichTextBuilder extends RichTextValue {
      * @returns {RichTextValue | IDocumentData} The current RichTextBuilder instance
      * @example
      * ```ts
-     * const richText = RichTextValue.create({ body: { dataStream: 'Hello' } });
+     * const richText = RichTextValue.create({ body: { dataStream: 'Hello World\r\n' } });
      * const newRichText = richText.insertRichText(5, RichTextValue.create({ body: { dataStream: 'World' } }));
      * ```
      */
@@ -1738,7 +1845,7 @@ export class RichTextBuilder extends RichTextValue {
      * @returns {RichTextBuilder} The current RichTextBuilder instance
      * @example
      * ```ts
-     * const richText = RichTextValue.create({ body: { dataStream: 'Hello World' } });
+     * const richText = RichTextValue.create({ body: { dataStream: 'Hello World\r\n' } });
      * const newRichText = richText.delete(5);
      * ```
      */
@@ -1750,7 +1857,7 @@ export class RichTextBuilder extends RichTextValue {
      * @returns {RichTextBuilder} The current RichTextBuilder instance
      * @example
      * ```ts
-     * const richText = RichTextValue.create({ body: { dataStream: 'Hello World' } });
+     * const richText = RichTextValue.create({ body: { dataStream: 'Hello World\r\n' } });
      * const newRichText = richText.delete(5, 5);
      * ```
      */
@@ -1773,7 +1880,7 @@ export class RichTextBuilder extends RichTextValue {
      * @returns {RichTextBuilder} The current RichTextBuilder instance
      * @example
      * ```ts
-     * const richText = RichTextValue.create({ body: { dataStream: 'Hello World' } });
+     * const richText = RichTextValue.create({ body: { dataStream: 'Hello World\r\n' } });
      * const newRichText = richText.setStyle(5, 10, { ff: 'Arial', fs: 12 });
      * ```
      */
@@ -1799,7 +1906,7 @@ export class RichTextBuilder extends RichTextValue {
      * @returns {RichTextBuilder} The current RichTextBuilder instance
      * @example
      * ```ts
-     * const richText = RichTextValue.create({ body: { dataStream: 'Hello World' } });
+     * const richText = RichTextValue.create({ body: { dataStream: 'Hello World\r\n' } });
      * const newRichText = richText.setLink(5, 10, 'https://www.example.com');
      * ```
      */
@@ -1828,7 +1935,7 @@ export class RichTextBuilder extends RichTextValue {
      * ```ts
      * const richText = RichTextValue.create({
      *      body: {
-     *          dataStream: 'Hello World',
+     *          dataStream: 'Hello World\r\n',
      *          customRanges: [
      *              {
      *                  rangeType: CustomRangeType.HYPERLINK,
@@ -1852,7 +1959,7 @@ export class RichTextBuilder extends RichTextValue {
      * ```ts
      * const richText = RichTextValue.create({
      *      body: {
-     *          dataStream: 'Hello World',
+     *          dataStream: 'Hello World\r\n',
      *          customRanges: [
      *              {
      *                  rangeType: CustomRangeType.HYPERLINK,
@@ -1905,13 +2012,12 @@ export class RichTextBuilder extends RichTextValue {
     }
 
     /**
-     * Inserts a new paragraph at the specified start position
-     * @param {number} start The start position of the paragraph to insert
+     * Inserts a new paragraph to the end
      * @param {ParagraphStyleBuilder} paragraphStyle The style of the paragraph to insert
      * @returns {RichTextBuilder} The current RichTextBuilder instance
      * @example
      * ```ts
-     * const richText = RichTextValue.create({ body: { dataStream: 'Hello World' } });
+     * const richText = RichTextValue.create({ body: { dataStream: 'Hello World\r\n' } });
      * const newRichText = richText.insertParagraph();
      * ```
      */
@@ -1923,7 +2029,7 @@ export class RichTextBuilder extends RichTextValue {
      * @returns {RichTextBuilder} The current RichTextBuilder instance
      * @example
      * ```ts
-     * const richText = RichTextValue.create({ body: { dataStream: 'Hello World' } });
+     * const richText = RichTextValue.create({ body: { dataStream: 'Hello World\r\n' } });
      * const newRichText = richText.insertParagraph(5, { ff: 'Arial', fs: 12 });
      * ```
      */

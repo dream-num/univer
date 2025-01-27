@@ -66,7 +66,10 @@ describe('Test t function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(value);
-            expect(getObjectValue(result)).toStrictEqual('');
+            expect(getObjectValue(result)).toStrictEqual([
+                ['', ' ', '中文测试', '', '', ''],
+                ['', '', '', '2-way street', '', ErrorType.NAME],
+            ]);
         });
     });
 });

@@ -78,13 +78,12 @@ export const AlphaSlider: React.FC<IAlphaSliderProps> = ({ hsv, alpha, onChange,
         <div className="univer-relative univer-w-full univer-select-none">
             {/* Chessboard background */}
             <div
-                className={`
-                  univer-absolute univer-inset-0 univer-rounded-full
-                  [background-image:linear-gradient(45deg,#E3E5EA_25%,transparent_25%),linear-gradient(-45deg,#E3E5EA_25%,transparent_25%),linear-gradient(45deg,transparent_75%,#E3E5EA_75%),linear-gradient(-45deg,transparent_75%,#E3E5EA_75%)]
-                  [background-position:0_0,0_4px,4px_-4px,-4px_0px]
-                  [background-size:8px_8px]
-                  dark:[background-image:linear-gradient(45deg,#414657_25%,transparent_25%),linear-gradient(-45deg,#414657_25%,transparent_25%),linear-gradient(45deg,transparent_75%,#414657_75%),linear-gradient(-45deg,transparent_75%,#414657_75%)]
-                `}
+                className="univer-absolute univer-inset-0 univer-rounded-full"
+                style={{
+                    backgroundImage: 'linear-gradient(45deg, #E3E5EA 25%, transparent 25%), linear-gradient(-45deg, #E3E5EA 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #E3E5EA 75%), linear-gradient(-45deg, transparent 75%, #E3E5EA 75%)',
+                    backgroundPosition: '0 0, 0 4px, 4px -4px, -4px 0',
+                    backgroundSize: '8px 8px',
+                }}
             />
             {/* Slider */}
             <div

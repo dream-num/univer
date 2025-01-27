@@ -26,8 +26,8 @@ interface IDropdownProviderProps {
 }
 
 export function DropdownProvider({ visible, children, disabled = false, onVisibleChange }: IDropdownProviderProps) {
-    const triggerRef = useRef<HTMLDivElement>(null);
-    const overlayRef = useRef<HTMLDivElement>(null);
+    const triggerRef = useRef<HTMLDivElement>(null!);
+    const overlayRef = useRef<HTMLDivElement>(null!);
 
     const [internalShow, setInternalShow] = useState(false);
     const isControlled = visible !== undefined;

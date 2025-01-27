@@ -16,7 +16,7 @@
 
 import { useDependency } from '@univerjs/core';
 
-import { DropdownOverlay, DropdownProvider, DropdownTrigger, Input } from '@univerjs/design';
+import { DropdownOverlay, DropdownProvider, DropdownTrigger } from '@univerjs/design';
 import { IDefinedNamesService } from '@univerjs/engine-formula';
 import { MoreDownSingle } from '@univerjs/icons';
 import clsx from 'clsx';
@@ -39,14 +39,24 @@ export function DefinedName({ disable }: { disable: boolean }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []); // Empty dependency array means this effect runs once on mount and clean up on unmount
 
+    // TODO: @DR-Univer: Should be implemented
+    function handleChangeSelection() {
+
+    }
+
     return (
         <div className={styles.definedName}>
-            <Input
-                className={clsx({ [styles.defineNameInputDisable]: disable })}
-                value={rangeString}
+            <input
+                className={clsx(`
+                  univer-border-none univer-absolute univer-w-full univer-h-full univer-appearance-none
+                  univer-box-border univer-px-1.5
+                  focus:univer-outline-none
+                `, {
+                    [styles.defineNameInputDisable]: disable,
+                })}
                 type="text"
-                size="small"
-                affixWrapperStyle={{ border: 'none', paddingLeft: '6px', paddingRight: '6px', height: '100%' }}
+                value={rangeString}
+                onChange={handleChangeSelection}
             />
 
             <DropdownProvider>

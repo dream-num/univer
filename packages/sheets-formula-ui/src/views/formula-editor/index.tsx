@@ -72,6 +72,8 @@ export interface IFormulaEditorProps {
      * Disable selection when click formula editor
      */
     disableSelectionOnClick?: boolean;
+    disableContextMenu?: boolean;
+    style?: React.CSSProperties;
 }
 
 const noop = () => { };
@@ -98,6 +100,8 @@ export function FormulaEditor(props: IFormulaEditorProps) {
         autoScrollbar = true,
         isSingle = true,
         disableSelectionOnClick = false,
+        disableContextMenu,
+        style,
     } = props;
 
     const editorService = useDependency(IEditorService);
@@ -115,7 +119,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
 
     const onFormulaSelectingChange = useEvent(propOnFormulaSelectingChange);
     const searchFunctionRef = useRef<HTMLElement>(null);
-    const editorRef = useRef<Editor>();
+    const editorRef = useRef<Editor>(undefined);
     const editor = editorRef.current;
     const [isFocus, isFocusSet] = useState(_isFocus);
     const formulaEditorContainerRef = useRef(null);
@@ -150,15 +154,12 @@ export function FormulaEditor(props: IFormulaEditorProps) {
         if (!editorRef.current) {
             return;
         }
-        const preText = highTextRef.current;
         highTextRef.current = text;
         const sequenceNodes = getFormulaToken(text[0] === '=' ? text.slice(1) : '');
         const ranges = highlightDoc(
             editorRef.current,
             sequenceNodes,
             isNeedResetSelection,
-            // remove equals need to remove highlight style
-            preText.slice(1) === text && preText[0] === '=',
             newSelections
         );
         refSelections.current = ranges;
@@ -173,15 +174,6 @@ export function FormulaEditor(props: IFormulaEditorProps) {
             highlight(formulaText, false, true);
         }
     }, [formulaText, isFocus, highlight]);
-
-    // useEffect(() => {
-    //     const sub = docSelectionRenderService?.onChangeByEvent$.subscribe((e) => {
-    //         const formulaText = BuildTextUtils.transform.getPlainText(document?.getBody()?.dataStream ?? '');
-    //         highlight(formulaText, false, true);
-    //     });
-
-    //     return () => sub?.unsubscribe();
-    // }, [docSelectionRenderService?.onChangeByEvent$, document, highlight]);
 
     useVerify(isFocus, onVerify, formulaText);
     const focus = useFocus(editor);
@@ -236,14 +228,16 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     }, [_isFocus, editor, focus, resetSelection, resetSelectionOnBlur]);
 
     const { checkScrollBar } = useResize(editor, isSingle, autoScrollbar);
-    useRefactorEffect(isFocus, Boolean(isSelecting && docFocusing), unitId);
+    useRefactorEffect(isFocus, Boolean(isSelecting && docFocusing), unitId, disableContextMenu);
     useLeftAndRightArrow(isFocus && moveCursor, selectingMode, editor, onMoveInEditor);
 
     const handleSelectionChange = useEvent((refString: string, offset: number, isEnd: boolean) => {
         if (!isFocusing) {
             return;
         }
-        highlight(`=${refString}`, true, isEnd, [{ startOffset: offset + 1, endOffset: offset + 1, collapsed: true }]);
+
+        const newSelections = offset !== -1 ? [{ startOffset: offset + 1, endOffset: offset + 1, collapsed: true }] : undefined;
+        highlight(`=${refString}`, true, isEnd, newSelections);
         if (isEnd) {
             focus();
             if (offset !== -1) {
@@ -256,10 +250,10 @@ export function FormulaEditor(props: IFormulaEditorProps) {
             checkScrollBar();
         }
     });
-
     useSheetSelectionChange(
         isFocus && Boolean(isSelecting && docFocusing),
         isFocus,
+        isSelecting,
         unitId,
         subUnitId,
         sequenceNodes,
@@ -293,8 +287,9 @@ export function FormulaEditor(props: IFormulaEditorProps) {
         onFocus();
         focus();
     };
+
     return (
-        <div className={clsx(styles.sheetEmbeddingFormulaEditor, className)}>
+        <div style={style} className={clsx(styles.sheetEmbeddingFormulaEditor, className)}>
             <div
                 className={clsx(styles.sheetEmbeddingFormulaEditorWrap, {
                     [styles.sheetEmbeddingFormulaEditorActive]: isFocus,

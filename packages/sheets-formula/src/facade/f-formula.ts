@@ -23,6 +23,9 @@ import { SetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
 import { FFormula } from '@univerjs/engine-formula/facade';
 import { IRegisterFunctionService, PLUGIN_CONFIG_KEY_BASE, RegisterFunctionService } from '@univerjs/sheets-formula';
 
+/**
+ * @ignore
+ */
 export interface IFFormulaSheetsMixin {
     /**
      * Update the calculation mode of the formula.
@@ -201,7 +204,7 @@ export class FFormulaSheetsMixin extends FFormula implements IFFormulaSheetsMixi
 
     /**
      * Initialize the FUniver instance.
-     * @private
+     * @ignore
      */
     override _initialize(): void {
         this._debouncedFormulaCalculation = debounce(() => {

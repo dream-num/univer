@@ -17,6 +17,9 @@
 import { ColorBuilder } from '@univerjs/core';
 import { FWorkbook } from '@univerjs/sheets/facade';
 
+/**
+ * @ignore
+ */
 export interface IFWorkbookConditionalFormattingMixin {
     /**
      * @deprecated use `univerAPI.newColor()` as instead.

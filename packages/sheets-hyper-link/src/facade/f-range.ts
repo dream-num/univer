@@ -27,21 +27,24 @@ export interface ICellHyperLink {
     label: string;
 }
 
+/**
+ * @ignore
+ */
 export interface IFRangeHyperlinkMixin {
     /**
      * @deprecated use `range.setRichTextValueForCell(univerAPI.newRichText().insertLink(label, url))` instead
      */
     setHyperLink(url: string, label?: string): Promise<boolean>;
     /**
-     * @deprecated use `range.setRichTextValueForCell(range.getRichTextValue().getLinks())` instead
+     * @deprecated use `range.setRichTextValueForCell(range.getValue(true).getLinks())` instead
      */
     getHyperLinks(): ICellHyperLink[];
     /**
-     * @deprecated use `range.setRichTextValueForCell(range.getRichTextValue().copy().updateLink(id, url))` instead
+     * @deprecated use `range.setRichTextValueForCell(range.getValue(true).copy().updateLink(id, url))` instead
      */
     updateHyperLink(id: string, url: string, label?: string): Promise<boolean>;
     /**
-     * @deprecated use `range.setRichTextValueForCell(range.getRichTextValue().copy().cancelLink(id))` instead
+     * @deprecated use `range.setRichTextValueForCell(range.getValue(true).copy().cancelLink(id))` instead
      */
     cancelHyperLink(id: string): boolean;
 
@@ -54,11 +57,6 @@ export interface IFRangeHyperlinkMixin {
 export class FRangeHyperlinkMixin extends FRange implements IFRangeHyperlinkMixin {
     // #region hyperlink
 
-    /**
-     * @param url
-     * @param label
-     * @deprecated
-     */
     override setHyperLink(url: string, label?: string): Promise<boolean> {
         const params: IAddHyperLinkCommandParams = {
             unitId: this.getUnitId(),
@@ -75,9 +73,6 @@ export class FRangeHyperlinkMixin extends FRange implements IFRangeHyperlinkMixi
         return this._commandService.executeCommand(AddHyperLinkCommand.id, params);
     }
 
-    /**
-     * @deprecated
-     */
     override getHyperLinks(): ICellHyperLink[] {
         const cellValue = this._worksheet.getCellRaw(this._range.startRow, this._range.startColumn);
         if (!cellValue?.p) {
@@ -95,12 +90,6 @@ export class FRangeHyperlinkMixin extends FRange implements IFRangeHyperlinkMixi
             })) ?? [];
     }
 
-    /**
-     * @param id
-     * @param url
-     * @param label
-     * @deprecated
-     */
     override updateHyperLink(id: string, url: string, label?: string): Promise<boolean> {
         const params: IUpdateHyperLinkCommandParams = {
             unitId: this.getUnitId(),
@@ -117,10 +106,6 @@ export class FRangeHyperlinkMixin extends FRange implements IFRangeHyperlinkMixi
         return this._commandService.executeCommand(UpdateHyperLinkCommand.id, params);
     }
 
-    /**
-     * @param id
-     * @deprecated
-     */
     override cancelHyperLink(id: string): boolean {
         const params: ICancelHyperLinkCommandParams = {
             unitId: this.getUnitId(),

@@ -21,6 +21,9 @@ import { CanceledError, FUniver, ICommandService, RichTextValue } from '@univerj
 import { AddCommentCommand, DeleteCommentCommand, ResolveCommentCommand, UpdateCommentCommand } from '@univerjs/thread-comment';
 import { FTheadCommentBuilder, FTheadCommentItem } from './f-thread-comment';
 
+/**
+ * @ignore
+ */
 export interface IFUniverCommentMixin {
     /**
      * @deprecated use `univerAPI.addEvent(univerAPI.event.CommentAdded, () => {})` as instead
@@ -53,6 +56,9 @@ export interface IFUniverCommentMixin {
     newTheadComment(): FTheadCommentBuilder;
 }
 
+/**
+ * @ignore
+ */
 export class FUniverCommentMixin extends FUniver implements IFUniverCommentMixin {
     // eslint-disable-next-line complexity
     private _handleCommentCommand(commandInfo: ICommandInfo): void {
@@ -232,6 +238,9 @@ export class FUniverCommentMixin extends FUniver implements IFUniverCommentMixin
         }
     }
 
+    /**
+     * @ignore
+     */
     override _initialize(injector: Injector): void {
         const commandService = injector.get(ICommandService);
         this.disposeWithMe(

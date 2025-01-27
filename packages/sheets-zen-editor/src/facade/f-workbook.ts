@@ -18,6 +18,9 @@ import { ICommandService } from '@univerjs/core';
 import { CancelZenEditCommand, ConfirmZenEditCommand, OpenZenEditorCommand } from '@univerjs/sheets-zen-editor';
 import { FWorkbook } from '@univerjs/sheets/facade';
 
+/**
+ * @ignore
+ */
 export interface IFWorkbookSheetsZenEditorMixin {
      /**
       * Start the zen editing process

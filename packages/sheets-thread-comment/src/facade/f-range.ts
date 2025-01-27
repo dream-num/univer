@@ -21,38 +21,89 @@ import { FRange } from '@univerjs/sheets/facade';
 import { AddCommentCommand, DeleteCommentTreeCommand, getDT } from '@univerjs/thread-comment';
 import { FTheadCommentBuilder, FThreadComment } from './f-thread-comment';
 
+/**
+ * @ignore
+ */
 export interface IFRangeCommentMixin {
     /**
      * Get the comment of the start cell in the current range.
-     * @returns The comment of the start cell in the current range. If the cell does not have a comment, return `null`.
+     * @returns {FThreadComment | null} The comment of the start cell in the current range. If the cell does not have a comment, return `null`.
+     * @example
+     * ```ts
+     * const range = univerAPI.getActiveWorkbook()
+     *  .getActiveSheet()
+     *  .getActiveRange();
+     * const comment = range.getComment();
+     * ```
      */
     getComment(): Nullable<FThreadComment>;
 
     /**
      * Get the comments in the current range.
      * @returns {FThreadComment[]} The comments in the current range.
+     * @example
+     * ```ts
+     * const range = univerAPI.getActiveWorkbook()
+     *  .getActiveSheet()
+     *  .getActiveRange();
+     * const comments = range.getComments();
+     * comments.forEach((comment) => {
+     *   console.log(comment.getContent());
+     * });
+     * ```
      */
     getComments(): FThreadComment[];
-
+    /**
+     * @deprecated use `addCommentAsync` as instead.
+     */
+    addComment(content: IDocumentBody | FTheadCommentBuilder): Promise<boolean>;
     /**
      * Add a comment to the start cell in the current range.
      * @param content The content of the comment.
      * @returns Whether the comment is added successfully.
+     * @example
+     * ```ts
+     * const range = univerAPI.getActiveWorkbook()
+     *  .getActiveSheet()
+     *  .getActiveRange();
+     *
+     * const comment = univerAPI.newTheadComment()
+     *  .setContent(univerAPI.newRichText().insertText('hello zhangsan'));
+     * const success = await range.addCommentAsync(comment);
+     * ```
      */
-    addComment(content: IDocumentBody | FTheadCommentBuilder): Promise<boolean>;
+    addCommentAsync(content: IDocumentBody | FTheadCommentBuilder): Promise<boolean>;
+
     /**
-     * Clear the comment of the start cell in the current range.
-     * @returns Whether the comment is cleared successfully.
+     * @deprecated use `clearCommentAsync` as instead.
      */
     clearComment(): Promise<boolean>;
-
+     /**
+      * Clear the comment of the start cell in the current range.
+      * @returns Whether the comment is cleared successfully.
+      */
+    clearCommentAsync(): Promise<boolean>;
+    /**
+     * @deprecated use `clearComments` as instead.
+     */
+    clearComments(): Promise<boolean>;
     /**
      * Clear all of the comments in the current range.
      * @returns Whether the comments are cleared successfully.
+     * @example
+     * ```ts
+     * const range = univerAPI.getActiveWorkbook()
+     *  .getActiveSheet()
+     *  .getActiveRange();
+     * const success = await range.clearCommentsAsync();
+     * ```
      */
-    clearComments(): Promise<boolean>;
+    clearCommentsAsync(): Promise<boolean>;
 }
 
+/**
+ * @ignore
+ */
 export class FRangeCommentMixin extends FRange implements IFRangeCommentMixin {
     override getComment(): Nullable<FThreadComment> {
         const injector = this._injector;
@@ -144,6 +195,18 @@ export class FRangeCommentMixin extends FRange implements IFRangeCommentMixin {
         const promises = comments.map((comment) => comment.deleteAsync());
 
         return Promise.all(promises).then(() => true);
+    }
+
+    override addCommentAsync(content: IDocumentBody | FTheadCommentBuilder): Promise<boolean> {
+        return this.addComment(content);
+    }
+
+    override clearCommentAsync(): Promise<boolean> {
+        return this.clearComment();
+    }
+
+    override clearCommentsAsync(): Promise<boolean> {
+        return this.clearComments();
     }
 }
 

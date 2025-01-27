@@ -35,6 +35,7 @@ export enum BuiltInUIPart {
     CUSTOM_LEFT = 'custom-left',
     CUSTOM_RIGHT = 'custom-right',
     CUSTOM_FOOTER = 'custom-footer',
+    TOOLBAR = 'toolbar',
 }
 
 export interface IUIPartsService {

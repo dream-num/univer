@@ -18,6 +18,10 @@ import type { DocumentDataModel } from '../docs';
 import { Inject, Injector } from '../common/di';
 import { FBaseInitialable } from './f-base';
 
+/**
+ * @ignore
+ * @hideconstructor
+ */
 export class FDoc extends FBaseInitialable {
     constructor(
         protected doc: DocumentDataModel,

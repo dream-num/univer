@@ -37,7 +37,7 @@ interface IBuildExecuterOptions {
 }
 
 async function buildESM(sharedConfig: InlineConfig, options: IBuildExecuterOptions) {
-    const { entry } = options;
+    const { pkg, entry } = options;
 
     return Promise.all(Object.keys(entry).map((key) => {
         const basicConfig: InlineConfig = {
@@ -68,6 +68,7 @@ async function buildESM(sharedConfig: InlineConfig, options: IBuildExecuterOptio
                     entryRoot: 'src',
                     outDir: 'lib/types',
                     clearPureImport: false,
+                    exclude: ['**/__tests__/**'],
                 })
             );
         }

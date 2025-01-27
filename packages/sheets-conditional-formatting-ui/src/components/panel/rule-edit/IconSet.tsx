@@ -108,7 +108,7 @@ interface IconGroupListProps {
     onClick: (iconType: IIconType) => void;
     iconType?: IIconType;
 };
-const IconGroupList = forwardRef<HTMLDivElement | null, IconGroupListProps>((props, ref) => {
+const IconGroupList = forwardRef<HTMLDivElement, IconGroupListProps>((props, ref) => {
     const localeService = useDependency(LocaleService);
 
     const handleClick = (iconType: IIconType) => {
@@ -554,7 +554,9 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
                     placement="bottomLeft"
                     overlay={(
                         <IconGroupList
-                            ref={(el) => !iconGroupListEl && el && setIconGroupListEl(el)}
+                            ref={(el) => {
+                                !iconGroupListEl && el && setIconGroupListEl(el);
+                            }}
                             iconType={currentIconType}
                             onClick={handleClickIconList}
                         />

@@ -24,12 +24,13 @@ export function getTextRunAtPosition(
     textRuns: ITextRun[],
     position: number,
     defaultStyle: ITextStyle,
-    cacheStyle: Nullable<ITextStyle>
+    cacheStyle: Nullable<ITextStyle>,
+    isCellEditor?: boolean
 ): ITextRun {
     const retTextRun: ITextRun = {
         st: 0,
         ed: 0,
-        ts: defaultStyle,
+        ts: isCellEditor ? {} : defaultStyle,
     };
 
     for (let i = textRuns.length - 1; i >= 0; i--) {
@@ -69,10 +70,12 @@ export function getTextRunAtPosition(
 
 export function getCustomRangeAtPosition(customRanges: ICustomRange[], position: number, extendRange?: boolean) {
     if (extendRange) {
-        return customRanges.find((customRange) => position >= customRange.startIndex && position <= customRange.endIndex + 1);
+        const range = customRanges.find((customRange) => position >= customRange.startIndex && position <= customRange.endIndex + 1);
+        return range?.wholeEntity ? null : range;
     }
 
-    return customRanges.find((customRange) => position > customRange.startIndex && position <= customRange.endIndex);
+    const range = customRanges.find((customRange) => position > customRange.startIndex && position <= customRange.endIndex);
+    return range?.wholeEntity ? null : range;
 }
 
 export function getCustomDecorationAtPosition(customDecorations: ICustomDecoration[], position: number) {

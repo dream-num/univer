@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { chromium, expect, test } from '@playwright/test';
-/* eslint-disable no-console */
 import type { Page } from '@playwright/test';
+/* eslint-disable no-console */
+import { chromium, expect, test } from '@playwright/test';
 import { sheetData as emptySheetData } from '../__testing__/emptysheet';
 import { sheetData as freezeData } from '../__testing__/freezesheet';
 import { sheetData as mergeCellData } from '../__testing__/mergecell';

@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/ui",
-    "version": "0.5.3",
+    "version": "0.6.0-alpha.0",
     "private": false,
     "description": "UniverSheet normal plugin UI manager",
     "author": "DreamNum <developer@univer.ai>",
@@ -70,15 +70,15 @@
         "build": "univer-cli build"
     },
     "peerDependencies": {
-        "react": "^16.9.0 || ^17.0.0 || ^18.0.0",
-        "react-dom": "^16.9.0 || ^17.0.0 || ^18.0.0",
+        "react": ">=16.9.0 || >=17 || >=18 || >=19",
+        "react-dom": ">=16.9.0 || >=17 || >=18 || >=19",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons": "^0.2.10",
+        "@univerjs/icons": "^0.2.14",
         "clsx": "^2.1.1",
         "localforage": "^1.10.0",
         "rc-notification": "^5.6.2",
@@ -88,17 +88,17 @@
         "vue": ">=3.0.0"
     },
     "devDependencies": {
-        "@testing-library/react": "^16.0.1",
-        "@testing-library/react-hooks": "^8.0.1",
+        "@testing-library/react": "^16.2.0",
         "@univerjs-infra/shared": "workspace:*",
-        "less": "^4.2.1",
-        "postcss": "^8.4.49",
+        "less": "^4.2.2",
+        "postcss": "^8.5.1",
         "react": "18.3.1",
         "react-dom": "18.3.1",
         "rxjs": "^7.8.1",
-        "typescript": "^5.7.2",
-        "vite": "^6.0.6",
-        "vitest": "^2.1.8",
-        "vue": "^3.5.12"
+        "tailwindcss": "^3.4.17",
+        "typescript": "^5.7.3",
+        "vite": "^6.0.11",
+        "vitest": "^3.0.4",
+        "vue": "^3.5.13"
     }
 }

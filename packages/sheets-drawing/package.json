@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-drawing",
-    "version": "0.5.3",
+    "version": "0.6.0-alpha.0",
     "private": false,
     "description": "",
     "author": "DreamNum <developer@univer.ai>",
@@ -62,8 +62,8 @@
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
         "@univerjs/sheets": "workspace:*",
-        "typescript": "^5.7.2",
-        "vite": "^6.0.6",
-        "vitest": "^2.1.8"
+        "typescript": "^5.7.3",
+        "vite": "^6.0.11",
+        "vitest": "^3.0.4"
     }
 }

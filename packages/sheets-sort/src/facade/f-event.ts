@@ -20,11 +20,13 @@ import { FEventName, FUniver, ICommandService } from '@univerjs/core';
 import { type ISortRangeCommandParams, SortRangeCommand, SortType } from '@univerjs/sheets-sort';
 import { FSheetEventName } from '@univerjs/sheets/facade';
 
+/**
+ * @ignore
+ */
 export interface IFSheetSortEventMixin {
     /**
      * This event will be emitted when a range on a worksheet is sorted.
      * Type of the event is {@link ISheetRangeSortedParams}.
-     *
      * @example
      * ```typescript
      * const callbackDisposable = univerAPI.addEvent(univerAPI.Event.SheetRangeSorted, (params) => {
@@ -39,7 +41,6 @@ export interface IFSheetSortEventMixin {
     /**
      * This event will be emitted before sorting a range on a worksheet.
      * Type of the event is {@link ISheetRangeSortParams}.
-     *
      * @example
      * ```typescript
      * const callbackDisposable = univerAPI.addEvent(univerAPI.Event.SheetBeforeRangeSort, (params) => {
@@ -70,12 +71,16 @@ export interface ISheetRangeSortParams extends IEventBase {
     sortColumn: ISortColumn[];
 }
 
+/**
+ * @ignore
+ */
 export interface ISheetRangeSortEventParamConfig {
     SheetBeforeRangeSort: ISheetRangeSortParams;
     SheetRangeSorted: ISheetRangeSortParams;
 }
 
 FEventName.extend(FSheetEventName);
+
 declare module '@univerjs/core' {
     // eslint-disable-next-line ts/naming-convention
     interface FEventName extends IFSheetSortEventMixin { }
@@ -83,6 +88,9 @@ declare module '@univerjs/core' {
 }
 
 class FUniverSheetsSortEventMixin extends FUniver {
+    /**
+     * @ignore
+     */
     override _initialize(injector: Injector): void {
         const commandService = injector.get(ICommandService);
 

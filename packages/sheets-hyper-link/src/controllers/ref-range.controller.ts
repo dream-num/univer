@@ -19,7 +19,7 @@ import type { EffectRefRangeParams } from '@univerjs/sheets';
 import type { IAddHyperLinkMutationParams } from '../commands/mutations/add-hyper-link.mutation';
 import type { IRemoveHyperLinkMutationParams } from '../commands/mutations/remove-hyper-link.mutation';
 import type { IUpdateHyperLinkMutationParams, IUpdateHyperLinkRefMutationParams } from '../commands/mutations/update-hyper-link.mutation';
-import type { ICellHyperLink } from '../types/interfaces/i-hyper-link';
+import type { ISheetHyperLink } from '../types/interfaces/i-hyper-link';
 import { Disposable, ICommandService, Inject, isValidRange, sequenceExecuteAsync, toDisposable } from '@univerjs/core';
 import { deserializeRangeWithSheet, serializeRange } from '@univerjs/engine-formula';
 import { handleCommonRangeChangeWithEffectRefCommandsSkipNoInterests, handleDefaultRangeChangeWithEffectRefCommandsSkipNoInterests, RefRangeService, SheetsSelectionsService } from '@univerjs/sheets';
@@ -46,7 +46,7 @@ export class SheetsHyperLinkRefRangeController extends Disposable {
         this._initRefRange();
     }
 
-    private _handlePositionChange = (unitId: string, subUnitId: string, link: ICellHyperLink, resultRange: Nullable<IRange>, silent: boolean) => {
+    private _handlePositionChange = (unitId: string, subUnitId: string, link: ISheetHyperLink, resultRange: Nullable<IRange>, silent: boolean) => {
         const oldRange: IRange = {
             startColumn: link.column,
             endColumn: link.column,
@@ -100,7 +100,7 @@ export class SheetsHyperLinkRefRangeController extends Disposable {
         };
     };
 
-    private _registerPosition(unitId: string, subUnitId: string, link: ICellHyperLink) {
+    private _registerPosition(unitId: string, subUnitId: string, link: ISheetHyperLink) {
         const id = link.id;
         const oldRange: IRange = {
             startColumn: link.column,
@@ -125,7 +125,7 @@ export class SheetsHyperLinkRefRangeController extends Disposable {
         this._disposableMap.set(id, this._refRangeService.registerRefRange(oldRange, handleRefRangeChange, unitId, subUnitId));
     }
 
-    private _watchPosition(unitId: string, subUnitId: string, link: ICellHyperLink) {
+    private _watchPosition(unitId: string, subUnitId: string, link: ISheetHyperLink) {
         const id = link.id;
         const oldRange: IRange = {
             startColumn: link.column,

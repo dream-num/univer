@@ -16,11 +16,17 @@
 
 import { FPermission } from '@univerjs/sheets/facade';
 
+/**
+ * @ignore
+ */
 export interface IFPermissionSheetsUIMixin {
     /**
      * Set visibility of unauthorized pop-up window
-     *
      * @param {boolean} visible
+     * @example
+     * ```ts
+     * univerAPI.getPermission().setPermissionDialogVisible(false);
+     * ```
      */
     setPermissionDialogVisible(visible: boolean): void;
 }

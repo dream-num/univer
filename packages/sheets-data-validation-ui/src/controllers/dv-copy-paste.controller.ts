@@ -15,7 +15,7 @@
  */
 
 import type { IRange, ISheetDataValidationRule, Nullable } from '@univerjs/core';
-import type { IDiscreteRange } from '@univerjs/sheets-ui';
+import type { IDiscreteRange, IPasteHookValueType } from '@univerjs/sheets-ui';
 import { Disposable, Inject, Injector, ObjectMatrix, queryObjectMatrix, Rectangle } from '@univerjs/core';
 import { DATA_VALIDATION_PLUGIN_NAME, getDataValidationDiffMutations, SheetDataValidationModel } from '@univerjs/sheets-data-validation';
 import { COPY_TYPE, getRepeatRange, ISheetClipboardService, PREDEFINED_HOOK_NAME, rangeToDiscreteRange, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
@@ -78,7 +78,7 @@ export class DataValidationCopyPasteController extends Disposable {
         copyInfo: {
             copyType: COPY_TYPE;
             copyRange?: IDiscreteRange;
-            pasteType: string;
+            pasteType: IPasteHookValueType;
             unitId: string;
             subUnitId: string;
         }
@@ -94,16 +94,14 @@ export class DataValidationCopyPasteController extends Disposable {
             return { redos: [], undos: [] };
         }
 
-        if (
-            [
-                PREDEFINED_HOOK_NAME.SPECIAL_PASTE_COL_WIDTH,
-                PREDEFINED_HOOK_NAME.SPECIAL_PASTE_VALUE,
-                PREDEFINED_HOOK_NAME.SPECIAL_PASTE_FORMAT,
-                PREDEFINED_HOOK_NAME.SPECIAL_PASTE_FORMULA,
-            ].includes(
-                copyInfo.pasteType
-            )
-        ) {
+        const specialPastes: IPasteHookValueType[] = [
+            PREDEFINED_HOOK_NAME.SPECIAL_PASTE_COL_WIDTH,
+            PREDEFINED_HOOK_NAME.SPECIAL_PASTE_VALUE,
+            PREDEFINED_HOOK_NAME.SPECIAL_PASTE_FORMAT,
+            PREDEFINED_HOOK_NAME.SPECIAL_PASTE_FORMULA,
+        ];
+
+        if (specialPastes.includes(copyInfo.pasteType)) {
             return { redos: [], undos: [] };
         }
 

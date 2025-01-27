@@ -25,7 +25,7 @@ import {
     IUniverInstanceService,
     toDisposable,
 } from '@univerjs/core';
-import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
+import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService, SetDrawingSelectedOperation } from '@univerjs/drawing';
 import { DRAWING_OBJECT_LAYER_INDEX, Group, IRenderManagerService, RENDER_CLASS_TYPE } from '@univerjs/engine-render';
 import { AlignType, SetDrawingAlignOperation } from '../commands/operations/drawing-align.operation';
 import { CloseImageCropOperation } from '../commands/operations/image-crop.operation';
@@ -663,6 +663,8 @@ export class DrawingUpdateController extends Disposable {
                     }
 
                     drawingShape.transformByState({ left, top, width, height, angle, flipX, flipY, skewX, skewY });
+
+                    scene.getTransformer()?.debounceRefreshControls();
                 });
             })
         );
@@ -793,9 +795,9 @@ export class DrawingUpdateController extends Disposable {
                     }).filter((transform) => transform != null) as ITransformState[];
 
                     if (drawings.length > 0) {
-                        this._drawingManagerService.focusDrawing(drawings);
+                        this._commandService.syncExecuteCommand(SetDrawingSelectedOperation.id, drawings);
                     } else {
-                        this._drawingManagerService.focusDrawing(null);
+                        this._commandService.syncExecuteCommand(SetDrawingSelectedOperation.id, []);
                     }
                 })
             )

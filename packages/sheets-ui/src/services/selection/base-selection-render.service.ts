@@ -85,6 +85,8 @@ export interface ISheetSelectionRenderService {
     setSingleSelectionEnabled(enabled: boolean): void;
 
     refreshSelectionMoveEnd(): void;
+
+    resetSelectionsByModelData(selectionsWithStyleList: readonly ISelectionWithStyle[]): void;
 }
 
 export const ISheetSelectionRenderService = createIdentifier<ISheetSelectionRenderService>('univer.sheet.selection-render-service');
@@ -114,6 +116,8 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         startColumn: -1,
         endColumn: -1,
     };
+
+    protected _activeControlIndex = -1;
 
     /**
      * the posX of viewport when the pointer down
@@ -247,8 +251,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         });
         this._selectionControls.push(control);
         const selectionWithCoord = attachSelectionWithCoord(selection, skeleton);
-        control.updateRangeBySelectionWithCoord(selectionWithCoord);
-
+        control.updateRangeBySelectionWithCoord(selectionWithCoord, skeleton);
         control.setControlExtension({
             skeleton,
             scene,
@@ -265,9 +268,9 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     }
 
     /**
-     * Update the corresponding selectionControl based on selectionsData.
-     * selectionData[i] syncs selectionControls[i]
-     * @param selectionsWithCoord
+     * Update the corresponding selectionControl based on selectionsData from WorkbookSelectionModel
+     * selectionData[i] --> selectionControls[i]
+     * @param selectionsWithStyleList {ISelectionWithStyle[]} selectionsData from WorkbookSelectionModel
      */
     resetSelectionsByModelData(selectionsWithStyleList: readonly ISelectionWithStyle[]): void {
         const allSelectionControls = this.getSelectionControls();
@@ -282,7 +285,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
             const control = allSelectionControls[i];
 
             if (control) {
-                control.updateRangeBySelectionWithCoord(selectionWithCoord);
+                control.updateRangeBySelectionWithCoord(selectionWithCoord, skeleton);
             } else {
                 if (this.isSelectionEnabled()) {
                     this.newSelectionControl(this._scene!, skeleton, selectionWithStyle);
@@ -419,6 +422,14 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         );
     }
 
+    setActiveSelectionIndex(index: number) {
+        this._activeControlIndex = index;
+    }
+
+    resetActiveSelectionIndex(): void {
+        this._activeControlIndex = -1;
+    }
+
     /**
      * get active(actually last) selection control
      * @returns T extends SelectionControl
@@ -426,7 +437,11 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     getActiveSelectionControl<T extends SelectionControl = SelectionControl>(): Nullable<T> {
         const controls = this.getSelectionControls();
         if (controls) {
-            return controls[controls.length - 1] as T;
+            if (this._activeControlIndex < 0) {
+                return controls[controls.length - 1] as T;
+            }
+
+            return controls[this._activeControlIndex] as T;
         }
     }
 

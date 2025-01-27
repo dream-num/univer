@@ -15,18 +15,22 @@
  */
 
 import type { IDisposable, IRange, Nullable } from '@univerjs/core';
-import type { RenderManagerService } from '@univerjs/engine-render';
+import type { IColumnsHeaderCfgParam, IRowsHeaderCfgParam, RenderComponentType, RenderManagerService, SpreadsheetColumnHeader, SpreadsheetRowHeader, SpreadsheetSkeleton } from '@univerjs/engine-render';
+
 import type { IScrollState, IViewportScrollState } from '@univerjs/sheets-ui';
 import { ICommandService, toDisposable } from '@univerjs/core';
 import { IRenderManagerService, SHEET_VIEWPORT_KEY, sheetContentViewportKeys } from '@univerjs/engine-render';
-import { ChangeZoomRatioCommand, SheetScrollManagerService, SheetSkeletonManagerService, SheetsScrollRenderController } from '@univerjs/sheets-ui';
+import { ChangeZoomRatioCommand, SetColumnHeaderHeightCommand, SetRowHeaderWidthCommand, SetWorksheetColAutoWidthCommand, SHEET_VIEW_KEY, SheetScrollManagerService, SheetSkeletonManagerService, SheetsScrollRenderController } from '@univerjs/sheets-ui';
 import { FWorksheet } from '@univerjs/sheets/facade';
 
+/**
+ * @ignore
+ */
 export interface IFWorksheetSkeletonMixin {
     /**
      * Refresh the canvas.
      */
-    refreshCanvas(): void;
+    refreshCanvas(): FWorksheet;
     /**
      * Set zoom ratio of the worksheet.
      * @param {number} zoomRatio The zoom ratio to set.It should be in the range of 10 to 400.
@@ -56,16 +60,28 @@ export interface IFWorksheetSkeletonMixin {
 
     /**
      * Return visible range, sum view range of 4 viewports.
-     * @returns IRange
+     * @returns {IRange} - visible range
+     * @example
+     * ``` ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const visibleRange = fWorksheet.getVisibleRange();
+     * ```
      */
     getVisibleRange(): IRange;
 
     /**
-     * Scroll spreadsheet to cell position. Based on the limitations of viewport and the number of rows and columns, you can only scroll to the maximum scrollable range.
-     * @param row
-     * @param column
+     * Scroll spreadsheet(viewMain) to cell position. Make the cell at topleft of current viewport.
+     * Based on the limitations of viewport and the number of rows and columns, you can only scroll to the maximum scrollable range.
+     * @param {number} row - Cell row index
+     * @param {number} column - Cell column index
+     * @returns {FWorksheet} - Current worksheet
+     * @example
+     * ``` ts
+     * univerAPI.getActiveWorkbook().getActiveSheet().scrollToCell(1, 1);
+     * ```
      */
-    scrollToCell(row: number, column: number): void;
+    scrollToCell(row: number, column: number): FWorksheet;
 
     /**
      * Get scroll state of current sheet.
@@ -75,22 +91,117 @@ export interface IFWorksheetSkeletonMixin {
      * univerAPI.getActiveWorkbook().getActiveSheet().getScrollState()
      * ```
      */
-    getScrollState(): Nullable<IScrollState>;
+    getScrollState(): IScrollState;
 
     /**
-     * Invoked when scrolling the sheet.
-     * @param {function(params: Nullable<IViewportScrollState>): void} callback The scrolling callback function.
+     * Get the skeleton service of the worksheet.
+     * @returns {Nullable<SpreadsheetSkeleton>} The skeleton of the worksheet.
      * @example
-     * ``` ts
-     * univerAPI.getActiveWorkbook().getActiveSheet().onScroll((params) => {...})
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const skeleton = fWorksheet.getSkeleton();
+     * console.log(skeleton);
      * ```
+     */
+    getSkeleton(): Nullable<SpreadsheetSkeleton>;
+
+    /**
+     * Set the given column width to fix-content.
+     * @param {number} columnPosition - Column position
+     * @param {number} numColumn - Number of columns
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * fWorksheet.setColumnAutoWidth(0, 3);
+     * ```
+     */
+    setColumnAutoWidth(columnPosition: number, numColumn: number): FWorksheet;
+
+    /**
+     * Customize the column header of the spreadsheet.
+     * @param {IColumnsHeaderCfgParam} cfg The configuration of the column header.
+     * @example
+     * ```typescript
+        const fWorkbook = univerAPI.getActiveWorkbook();
+        const fWorksheet = fWorkbook.getActiveSheet();
+        fWorksheet.customizeColumnHeader({
+            headerStyle: {
+                fontColor: '#fff',
+                backgroundColor: '#4e69ee',
+                fontSize: 9
+            },
+            columnsCfg: {
+                0: 'kuma II',
+                3: {
+                    text: 'Size',
+                    textAlign: 'left', // CanvasTextAlign
+                    fontColor: '#fff',
+                    fontSize: 12,
+                    borderColor: 'pink',
+                    backgroundColor: 'pink',
+                },
+                4: 'Wow'
+            }
+        });
+     * ```
+     */
+    customizeColumnHeader(cfg: IColumnsHeaderCfgParam): void;
+
+    /**
+     * Customize the row header of the spreadsheet.
+     * @param {IRowsHeaderCfgParam} cfg The configuration of the row header.
+     * @example
+     * ```typescript
+        univerAPI.customizeRowHeader({
+            headerStyle: {
+                backgroundColor: 'pink',
+                fontSize: 12
+            },
+            rowsCfg: {
+                0: 'MokaII',
+                3: {
+                    text: 'Size',
+                    textAlign: 'left'
+                }
+            }
+        });
+     * ```
+     */
+    customizeRowHeader(cfg: IRowsHeaderCfgParam): void;
+
+    /**
+     * Set column height for column header.
+     * @param height
+     * @example
+     * ```ts
+        const sheet = univerAPI.getActiveWorkbook().getActiveSheet();
+        sheet.setColumnHeaderHeight(100);
+     * ```
+     */
+    setColumnHeaderHeight(height: number): FWorksheet;
+
+    /**
+     * Set column height for column header.
+     * @param width
+     * @example
+     * ```ts
+        const sheet = univerAPI.getActiveWorkbook().getActiveSheet();
+        sheet.setRowHeaderWidth(100);
+     * ```
+     */
+    setRowHeaderWidth(width: number): FWorksheet;
+
+    /**
+     * @deprecated use `univerAPI.addEvent(univerAPI.Event.Scroll, () => {})` instead
      */
     onScroll(callback: (params: Nullable<IViewportScrollState>) => void): IDisposable;
 
 }
 
 export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSkeletonMixin {
-    override refreshCanvas(): void {
+    override refreshCanvas(): FWorksheet {
         const renderManagerService = this._injector.get(IRenderManagerService);
         const unitId = this._fWorkbook.id;
         const render = renderManagerService.getRenderById(unitId);
@@ -108,6 +219,8 @@ export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSk
         }
 
         mainComponent.makeDirty();
+
+        return this;
     }
 
     override zoom(zoomRatio: number): FWorksheet {
@@ -117,7 +230,6 @@ export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSk
             subUnitId: this._worksheet.getSheetId(),
             zoomRatio,
         });
-
         return this;
     }
 
@@ -154,7 +266,7 @@ export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSk
         return range;
     }
 
-    override scrollToCell(row: number, column: number): void {
+    override scrollToCell(row: number, column: number): FWorksheet {
         const unitId = this._workbook.getUnitId();
         const renderManagerService = this._injector.get(IRenderManagerService);
         const render = renderManagerService.getRenderById(unitId);
@@ -162,16 +274,24 @@ export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSk
             const scrollRenderController = render?.with(SheetsScrollRenderController);
             scrollRenderController.scrollToCell(row, column);
         }
+        return this;
     }
 
-    override getScrollState(): Nullable<IScrollState> {
+    override getScrollState(): IScrollState {
+        const emptyScrollState: IScrollState = {
+            offsetX: 0,
+            offsetY: 0,
+            sheetViewStartColumn: 0,
+            sheetViewStartRow: 0,
+        };
         const unitId = this._workbook.getUnitId();
         const sheetId = this._worksheet.getSheetId();
         const renderManagerService = this._injector.get(IRenderManagerService);
         const render = renderManagerService.getRenderById(unitId);
-        if (!render) return null;
-        const scm = render.with(SheetScrollManagerService);
-        return scm.getScrollStateByParam({ unitId, sheetId });
+        if (!render) return emptyScrollState;
+        const sheetScrollManagerService = render.with(SheetScrollManagerService);
+        const scrollState = sheetScrollManagerService.getScrollStateByParam({ unitId, sheetId });
+        return scrollState || emptyScrollState;
     }
 
     override onScroll(callback: (params: Nullable<IViewportScrollState>) => void): IDisposable {
@@ -185,6 +305,114 @@ export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSk
             return toDisposable(sub);
         }
         return toDisposable(() => { });
+    }
+
+    override getSkeleton(): Nullable<SpreadsheetSkeleton> {
+        const service = this._injector.get(IRenderManagerService).getRenderById(this._workbook.getUnitId())?.with(SheetSkeletonManagerService);
+        return service?.getWorksheetSkeleton(this._worksheet.getSheetId())?.skeleton;
+    }
+
+    override setColumnAutoWidth(columnPosition: number, numColumn: number): FWorksheet {
+        const unitId = this._workbook.getUnitId();
+        const subUnitId = this._worksheet.getSheetId();
+        const ranges = [
+            {
+                startColumn: columnPosition,
+                endColumn: columnPosition + numColumn - 1,
+                startRow: 0,
+                endRow: this._worksheet.getRowCount() - 1,
+            },
+        ];
+
+        this._commandService.syncExecuteCommand(SetWorksheetColAutoWidthCommand.id, {
+            unitId,
+            subUnitId,
+            ranges,
+        });
+
+        return this;
+    }
+
+    override customizeColumnHeader(cfg: IColumnsHeaderCfgParam): void {
+        const activeSheet = this;
+        const unitId = this._fWorkbook.getId();
+        const renderManagerService = this._injector.get(IRenderManagerService);
+        const subUnitId = activeSheet.getSheetId();
+        const render = renderManagerService.getRenderById(unitId);
+        if (render && cfg.headerStyle?.size) {
+            const skm = render.with(SheetSkeletonManagerService);
+            skm.setColumnHeaderSize(render, subUnitId, cfg.headerStyle?.size);
+            activeSheet?.refreshCanvas();
+        }
+
+        const sheetColumn = this._getSheetRenderComponent(unitId, SHEET_VIEW_KEY.COLUMN) as SpreadsheetColumnHeader;
+        if (sheetColumn) {
+            sheetColumn.setCustomHeader(cfg);
+            activeSheet?.refreshCanvas();
+        }
+    }
+
+    override customizeRowHeader(cfg: IRowsHeaderCfgParam): void {
+        const unitId = this._fWorkbook.getId();
+        const sheetRow = this._getSheetRenderComponent(unitId, SHEET_VIEW_KEY.ROW) as SpreadsheetRowHeader;
+        sheetRow.setCustomHeader(cfg);
+    }
+
+    override setColumnHeaderHeight(height: number): FWorksheet {
+        const activeSheet = this;
+        const unitId = this._fWorkbook.getId();
+        const subUnitId = activeSheet.getSheetId();
+
+        this._commandService.executeCommand(SetColumnHeaderHeightCommand.id, {
+            unitId,
+            subUnitId,
+            size: height,
+        });
+
+        activeSheet?.refreshCanvas();
+        return this;
+    }
+
+    override setRowHeaderWidth(width: number): FWorksheet {
+        const activeSheet = this;
+        const unitId = this._fWorkbook.getId();
+        const subUnitId = activeSheet.getSheetId();
+
+        this._commandService.executeCommand(SetRowHeaderWidthCommand.id, {
+            unitId,
+            subUnitId,
+            size: width,
+        });
+
+        const sheetRow = this._getSheetRenderComponent(unitId, SHEET_VIEW_KEY.ROW) as SpreadsheetRowHeader;
+        if (sheetRow) {
+            sheetRow.setCustomHeader({ headerStyle: { size: width } });
+        }
+        activeSheet?.refreshCanvas();
+        return this;
+    }
+
+    /**
+     * Get sheet render component from render by unitId and view key.
+     * @private
+     * @param {string} unitId The unit id of the spreadsheet.
+     * @param {SHEET_VIEW_KEY} viewKey The view key of the spreadsheet.
+     * @returns {Nullable<RenderComponentType>} The render component.
+     */
+    private _getSheetRenderComponent(unitId: string, viewKey: SHEET_VIEW_KEY): Nullable<RenderComponentType> {
+        const renderManagerService = this._injector.get(IRenderManagerService);
+        const render = renderManagerService.getRenderById(unitId);
+        if (!render) {
+            throw new Error(`Render Unit with unitId ${unitId} not found`);
+        }
+
+        const { components } = render;
+        const renderComponent = components.get(viewKey);
+        if (!renderComponent) {
+            throw new Error('Render component not found');
+        }
+
+        return renderComponent;
     }
 }
 

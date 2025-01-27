@@ -8,6 +8,7 @@
         "prepare": "tsx ./scripts/generate-locales.ts && tsx ./scripts/generate-html.ts",
         "build:demo": "tsx ./esbuild.config.ts",
         "dev:demo": "tsx ./esbuild.config.ts --watch",
+        "dev:demo-libs": "cross-env LINK_TO_LIB=true tsx ./esbuild.config.ts --watch",
         "dev:e2e": "tsx ./esbuild.config.ts --watch --e2e",
         "build:e2e": "tsx ./esbuild.config.ts --e2e",
         "lint:types": "tsc --noEmit"
@@ -51,6 +52,7 @@
         "@univerjs/sheets-numfmt-ui": "workspace:*",
         "@univerjs/sheets-sort": "workspace:*",
         "@univerjs/sheets-sort-ui": "workspace:*",
+        "@univerjs/sheets-source-binding": "workspace:*",
         "@univerjs/sheets-thread-comment": "workspace:*",
         "@univerjs/sheets-thread-comment-ui": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
@@ -69,27 +71,27 @@
         "@univerjs/uniui": "workspace:*",
         "@univerjs/watermark": "workspace:*",
         "monaco-editor": "0.52.2",
-        "react": "18.3.1",
-        "react-dom": "18.3.1",
+        "react": "19.0.0",
+        "react-dom": "19.0.0",
         "react-mosaic-component": "^6.1.1"
     },
     "devDependencies": {
         "@types/fs-extra": "^11.0.4",
-        "@types/react": "^18.3.12",
-        "@types/react-dom": "^18.3.1",
         "@univerjs-infra/shared": "workspace:*",
-        "detect-port": "^1.6.1",
+        "cross-env": "^7.0.3",
+        "detect-port": "^2.1.0",
         "esbuild": "^0.24.2",
         "esbuild-plugin-clean": "^1.0.1",
         "esbuild-plugin-copy": "^2.1.1",
         "esbuild-plugin-vue3": "^0.4.2",
         "esbuild-style-plugin": "^1.6.3",
-        "fs-extra": "^11.2.0",
-        "less": "^4.2.1",
+        "fast-glob": "^3.3.3",
+        "fs-extra": "^11.3.0",
+        "less": "^4.2.2",
         "minimist": "^1.2.8",
-        "postcss": "^8.4.49",
+        "postcss": "^8.5.1",
         "tailwindcss": "^3.4.17",
         "tailwindcss-animate": "^1.0.7",
-        "typescript": "^5.7.2"
+        "typescript": "^5.7.3"
     }
 }

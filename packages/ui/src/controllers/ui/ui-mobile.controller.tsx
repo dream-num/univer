@@ -14,21 +14,22 @@
  * limitations under the License.
  */
 
-import { connectInjector, Disposable, Inject, Injector, IUniverInstanceService, LifecycleService, LifecycleStages, Optional, toDisposable, UniverInstanceType } from '@univerjs/core';
-import { IRenderManagerService } from '@univerjs/engine-render';
 import type { IDisposable } from '@univerjs/core';
-import { render as createRoot, unmount } from 'rc-util/lib/React/render';
-import React from 'react';
-
-import { ILayoutService } from '../../services/layout/layout.service';
-import { BuiltInUIPart, IUIPartsService } from '../../services/parts/parts.service';
-import { CanvasPopup } from '../../views/components/popup/CanvasPopup';
-import { FloatDom } from '../../views/components/dom/FloatDom';
-import { MobileApp } from '../../views/MobileApp';
 import type { IUniverUIConfig } from '../config.schema';
-import { IMenuManagerService } from '../../services/menu/menu-manager.service';
-import { menuSchema } from '../menus/menu.schema';
 import type { IUIController, IWorkbenchOptions } from './ui.controller';
+import { connectInjector, Disposable, Inject, Injector, IUniverInstanceService, LifecycleService, LifecycleStages, Optional, toDisposable, UniverInstanceType } from '@univerjs/core';
+import { render as createRoot, unmount } from '@univerjs/design';
+
+import { IRenderManagerService } from '@univerjs/engine-render';
+
+import React from 'react';
+import { ILayoutService } from '../../services/layout/layout.service';
+import { IMenuManagerService } from '../../services/menu/menu-manager.service';
+import { BuiltInUIPart, IUIPartsService } from '../../services/parts/parts.service';
+import { FloatDom } from '../../views/components/dom/FloatDom';
+import { CanvasPopup } from '../../views/components/popup/CanvasPopup';
+import { MobileApp } from '../../views/MobileApp';
+import { menuSchema } from '../menus/menu.schema';
 
 const STEADY_TIMEOUT = 3000;
 

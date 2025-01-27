@@ -218,9 +218,8 @@ interface Formatter {
     (value: number): string;
 }
 
-type LocaleTag =
+export type LocaleTag =
     | 'zh-CN'
-    | 'zh'
     | 'zh-TW'
     | 'cs'
     | 'da'
@@ -244,7 +243,8 @@ type LocaleTag =
     | 'es'
     | 'sv'
     | 'th'
-    | 'tr';
+    | 'tr'
+    | 'vi';
 
 export interface ParsedReturnType {
     /**

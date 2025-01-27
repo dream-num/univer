@@ -25,7 +25,7 @@ import {
     IUniverInstanceService,
     toDisposable,
 } from '@univerjs/core';
-import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService, IImageIoService } from '@univerjs/drawing';
+import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService, IImageIoService, SetDrawingSelectedOperation } from '@univerjs/drawing';
 import { CURSOR_TYPE, IRenderManagerService } from '@univerjs/engine-render';
 import { IDialogService } from '@univerjs/ui';
 import { ImageResetSizeOperation } from '../commands/operations/image-reset-size.operation';
@@ -151,7 +151,7 @@ export class ImageUpdateController extends Disposable {
             transformer.refreshControls().changeNotification();
         });
 
-        this._drawingManagerService.focusDrawing(params);
+        this._commandService.syncExecuteCommand(SetDrawingSelectedOperation.id, params);
     }
 
     private _drawingAddListener() {

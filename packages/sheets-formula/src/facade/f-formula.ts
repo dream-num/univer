@@ -19,9 +19,13 @@ import type { IDisposable, ILocales } from '@univerjs/core';
 import type { IFunctionInfo } from '@univerjs/engine-formula';
 import type { CalculationMode, IRegisterAsyncFunction, IRegisterFunction, ISingleFunctionRegisterParams, IUniverSheetsFormulaBaseConfig } from '@univerjs/sheets-formula';
 import { debounce, IConfigService, ILogService, LifecycleService, LifecycleStages } from '@univerjs/core';
-import { FFormula, SetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
+import { SetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
+import { FFormula } from '@univerjs/engine-formula/facade';
 import { IRegisterFunctionService, PLUGIN_CONFIG_KEY_BASE, RegisterFunctionService } from '@univerjs/sheets-formula';
 
+/**
+ * @ignore
+ */
 export interface IFFormulaSheetsMixin {
     /**
      * Update the calculation mode of the formula.
@@ -32,7 +36,6 @@ export interface IFFormulaSheetsMixin {
 
     /**
      * Register a custom synchronous formula function.
-     *
      * @param name - The name of the function to register. This will be used in formulas (e.g., =MYFUNC())
      * @param func - The implementation of the function
      * @param description - A string describing the function's purpose and usage
@@ -59,17 +62,39 @@ export interface IFFormulaSheetsMixin {
      * univerAPI.getActiveWorkbook().getActiveSheet().getRange('A2').setValue({ f: '=DISCOUNT(A1, 20)' });
      * // A2 will display: 80
      * ```
+     * @example
+     * ```typescript
+     * // Registered formulas support lambda functions
+     * univerAPI.getFormula().registerFunction('CUSTOMSUM', (...variants) => {
+     *      let sum = 0;
+     *
+     *      const last = variants[variants.length - 1];
+     *      if (last.isLambda && last.isLambda()) {
+     *          variants.pop();
+     *
+     *          const variantsList = variants.map((variant) => Array.isArray(variant) ? variant[0][0]: variant);
+     *
+     *          sum += last.executeCustom(...variantsList).getValue();
+     *      }
+     *
+     *      for (const variant of variants) {
+     *          sum += Number(variant) || 0;
+     *      }
+     *
+     *      return sum;
+     * }, 'Adds its arguments');
+     * ```
      */
     registerFunction(name: string, func: IRegisterFunction, description?: string): IDisposable;
 
     /**
      * Register a custom synchronous formula function with localization support.
-     *
      * @param name - The name of the function to register. This will be used in formulas (e.g., =MYFUNC())
      * @param func - The implementation of the function
      * @param options - Object containing locales and description
+     * @param options.locales - Object containing locales
+     * @param options.description - Object containing description
      * @returns A disposable object that will unregister the function when disposed
-     *
      * @example
      * ```js
      * univerAPI.getFormula().registerFunction('HELLO',
@@ -106,11 +131,9 @@ export interface IFFormulaSheetsMixin {
 
    /**
     * Register a custom asynchronous formula function.
-    *
     * @param name - The name of the function to register. This will be used in formulas (e.g., =ASYNCFUNC())
     * @param func - The async implementation of the function
     * @returns A disposable object that will unregister the function when disposed
-    *
     * @example
     * ```js
     * univerAPI.getFormula().registerAsyncFunction('RANDOM_DELAYED',
@@ -129,12 +152,12 @@ export interface IFFormulaSheetsMixin {
     registerAsyncFunction(name: string, func: IRegisterAsyncFunction, description?: string): IDisposable;
     /**
      * Register a custom asynchronous formula function with description.
-     *
      * @param name - The name of the function to register. This will be used in formulas (e.g., =ASYNCFUNC())
      * @param func - The async implementation of the function
-     * @param description - A string describing the function's purpose and usage
+     * @param options - Object containing locales and description
+     * @param options.locales - Object containing locales
+     * @param options.description - Object containing description
      * @returns A disposable object that will unregister the function when disposed
-     *
      * @example
      * ```js
      * // Mock a user score fetching function
@@ -175,14 +198,13 @@ export interface IFFormulaSheetsMixin {
 
 export class FFormulaSheetsMixin extends FFormula implements IFFormulaSheetsMixin {
     /**
-     * registerFunction may be executed multiple times, triggering multiple formula forced refreshes
+     * RegisterFunction may be executed multiple times, triggering multiple formula forced refreshes.
      */
     declare private _debouncedFormulaCalculation: () => void;
 
     /**
      * Initialize the FUniver instance.
-     *
-     * @private
+     * @ignore
      */
     override _initialize(): void {
         this._debouncedFormulaCalculation = debounce(() => {
@@ -273,7 +295,7 @@ export class FFormulaSheetsMixin extends FFormula implements IFFormulaSheetsMixi
 }
 
 FFormula.extend(FFormulaSheetsMixin);
-declare module '@univerjs/engine-formula' {
+declare module '@univerjs/engine-formula/facade' {
     // eslint-disable-next-line ts/naming-convention
     interface FFormula extends IFFormulaSheetsMixin {}
 }

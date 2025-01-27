@@ -15,7 +15,7 @@
  */
 
 import type { IDisposable, ILocales } from '@univerjs/core';
-import type { FormulaFunctionValueType, IFunctionInfo } from '@univerjs/engine-formula';
+import type { FormulaFunctionResultValueType, FormulaFunctionValueType, IFunctionInfo } from '@univerjs/engine-formula';
 import { createIdentifier, Disposable, DisposableCollection, Inject, LocaleService, Optional, toDisposable } from '@univerjs/core';
 import { AsyncCustomFunction, CustomFunction, FunctionType, IFunctionService } from '@univerjs/engine-formula';
 import { IDescriptionService } from './description.service';
@@ -23,11 +23,11 @@ import { IRemoteRegisterFunctionService } from './remote/remote-register-functio
 
 export type IRegisterFunction = (
     ...arg: Array<FormulaFunctionValueType>
-) => FormulaFunctionValueType;
+) => FormulaFunctionResultValueType;
 
 export type IRegisterAsyncFunction = (
     ...arg: Array<FormulaFunctionValueType>
-) => Promise<FormulaFunctionValueType>;
+) => Promise<FormulaFunctionResultValueType>;
 
 // [[Function, FunctionName, Description]]
 export type IRegisterFunctionList = [[IRegisterFunction, string, string?]];

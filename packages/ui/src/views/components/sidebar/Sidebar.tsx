@@ -97,6 +97,7 @@ export function Sidebar() {
             visible: false,
         };
 
+        sidebarService.options.visible = false;
         sidebarService.sidebarOptions$.next(options);
         options?.onClose?.();
     }

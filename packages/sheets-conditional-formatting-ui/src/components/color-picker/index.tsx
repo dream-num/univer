@@ -46,7 +46,7 @@ export const ColorPicker = (props: IColorPickerProps) => {
                       ${styles.cfColorPicker}
                     `}
                     >
-                        <OriginColorPicker color={color} onChange={onChange} />
+                        <OriginColorPicker value={color} onChange={onChange} />
                     </div>
                 )}
             >

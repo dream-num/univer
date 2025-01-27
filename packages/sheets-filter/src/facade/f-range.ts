@@ -22,13 +22,14 @@ import { FFilter } from './f-filter';
 
 // TODO: add jsdoc comments for the following API
 
+/**
+ * @ignore
+ */
 export interface IFRangeFilter {
     /**
      * Create a filter for the current range. If the worksheet already has a filter, this method would return `null`.
-     *
-     * @return The interface class to handle the filter. If the worksheet already has a filter,
+     * @returns The interface class to handle the filter. If the worksheet already has a filter,
      * this method would return `null`.
-     *
      * @example
      * ```typescript
      * const workbook = univerAPI.getActiveWorkbook();
@@ -39,10 +40,8 @@ export interface IFRangeFilter {
     createFilter(this: FRange): FFilter | null;
     /**
      * Get the filter for the current range's worksheet. Normally, you can directly call `getFilter` on {@link FWorksheet}.
-     *
-     * @return {FFilter | null} The interface class to handle the filter. If the worksheet does not have a filter,
+     * @returns {FFilter | null} The interface class to handle the filter. If the worksheet does not have a filter,
      * this method would return `null`.
-     *
      * @example
      * ```typescript
      * const workbook = univerAPI.getActiveWorkbook();
@@ -70,8 +69,7 @@ export class FRangeFilter extends FRange implements IFRangeFilter {
 
     /**
      * Get the filter for the current range's worksheet.
-     *
-     * @return {FFilter | null} The interface class to handle the filter. If the worksheet does not have a filter,
+     * @returns {FFilter | null} The interface class to handle the filter. If the worksheet does not have a filter,
      * this method would return `null`.
      */
     override getFilter(): FFilter | null {

@@ -27,6 +27,13 @@ export const FILE__BMP_CLIPBOARD_MIME_TYPE = 'image/bmp';
 export const FILE__WEBP_CLIPBOARD_MIME_TYPE = 'image/webp';
 export const FILE_SVG_XML_CLIPBOARD_MIME_TYPE = 'image/svg+xml';
 
+export const imageMimeTypeSet = new Set([
+    FILE__BMP_CLIPBOARD_MIME_TYPE,
+    FILE__JPEG_CLIPBOARD_MIME_TYPE,
+    FILE__WEBP_CLIPBOARD_MIME_TYPE,
+    FILE_PNG_CLIPBOARD_MIME_TYPE,
+]);
+
 /**
  * This interface provides an interface to access system's clipboard.
  */

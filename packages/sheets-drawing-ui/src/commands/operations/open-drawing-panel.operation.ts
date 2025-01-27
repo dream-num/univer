@@ -15,10 +15,10 @@
  */
 
 import type { IAccessor, ICommand } from '@univerjs/core';
-import { CommandType, IUniverInstanceService, LocaleService } from '@univerjs/core';
-import { ISidebarService } from '@univerjs/ui';
+import { CommandType, ICommandService, IUniverInstanceService, LocaleService } from '@univerjs/core';
+import { SetDrawingSelectedOperation } from '@univerjs/drawing';
 import { getSheetCommandTarget } from '@univerjs/sheets';
-import { IDrawingManagerService } from '@univerjs/drawing';
+import { ISidebarService } from '@univerjs/ui';
 import { COMPONENT_SHEET_DRAWING_PANEL } from '../../views/sheet-image-panel/component-name';
 
 export interface IUIComponentCommandParams {
@@ -32,7 +32,8 @@ export const SidebarSheetDrawingOperation: ICommand = {
         const sidebarService = accessor.get(ISidebarService);
         const localeService = accessor.get(LocaleService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const drawingManagerService = accessor.get(IDrawingManagerService);
+        // const drawingManagerService = accessor.get(IDrawingManagerService);
+        const commandService = accessor.get(ICommandService);
 
         const target = getSheetCommandTarget(univerInstanceService);
         if (!target) return false;
@@ -43,7 +44,7 @@ export const SidebarSheetDrawingOperation: ICommand = {
                     header: { title: localeService.t('sheetImage.panel.title') },
                     children: { label: COMPONENT_SHEET_DRAWING_PANEL },
                     onClose: () => {
-                        drawingManagerService.focusDrawing(null);
+                        commandService.syncExecuteCommand(SetDrawingSelectedOperation.id, []);
                     },
                     width: 360,
                 });

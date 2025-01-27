@@ -56,6 +56,7 @@ export interface ISheetPasteParams {
 export interface ISheetPasteByShortKeyParams {
     htmlContent?: string;
     textContent?: string;
+    files?: File[];
 }
 
 export const SheetPasteCommand: IMultiCommand = {
@@ -88,8 +89,8 @@ export const SheetPasteShortKeyCommand: ICommand = {
     type: CommandType.COMMAND,
     handler: async (accessor: IAccessor, params: ISheetPasteByShortKeyParams) => {
         const clipboardService = accessor.get(ISheetClipboardService);
-        const { htmlContent, textContent } = params;
-        clipboardService.legacyPaste(htmlContent, textContent);
+        const { htmlContent, textContent, files } = params;
+        clipboardService.legacyPaste(htmlContent, textContent, files);
 
         return true;
     },
@@ -134,5 +135,15 @@ export const SheetPasteBesidesBorderCommand: ICommand = {
         return commandService.executeCommand(SheetPasteCommand.id, {
             value: PREDEFINED_HOOK_NAME.SPECIAL_PASTE_BESIDES_BORDER,
         });
+    },
+};
+
+export const SheetOptionalPasteCommand: ICommand = {
+    id: 'sheet.command.optional-paste',
+    type: CommandType.COMMAND,
+    handler: async (accessor, { type }: { type: keyof typeof PREDEFINED_HOOK_NAME }) => {
+        const clipboardService = accessor.get(ISheetClipboardService);
+
+        return clipboardService.rePasteWithPasteType(type);
     },
 };

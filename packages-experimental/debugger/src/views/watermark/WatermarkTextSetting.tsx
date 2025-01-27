@@ -100,7 +100,7 @@ export const WatermarkTextSetting: React.FC<IWatermarkTextSettingProps> = (props
                         <DropdownLegacy
                             overlay={(
                                 <div className={styles.watermarkColorPickerWrapper}>
-                                    <ColorPicker color={config.color} onChange={(val) => onChange({ ...config, color: val })} />
+                                    <ColorPicker value={config.color} onChange={(val) => onChange({ ...config, color: val })} />
                                 </div>
                             )}
                         >

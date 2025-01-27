@@ -273,7 +273,7 @@ export function Tooltip({ visible, asChild = false, title, children, placement =
         React.Children.only(children) as React.ReactElement,
         {
             ref: triggerRef,
-        }
+        } as any
     );
 
     return (
@@ -290,8 +290,8 @@ export function Tooltip({ visible, asChild = false, title, children, placement =
                 <div
                     ref={tooltipRef}
                     className={clsx(`
-                      univer-pointer-events-none univer-fixed univer-z-[1100] univer-animate-in univer-fade-in-0
-                      univer-zoom-in-95 univer-duration-200 univer-opacity-0 univer-font-sans
+                      univer-pointer-events-none univer-fixed univer-z-[1100] univer-font-sans univer-opacity-0
+                      univer-duration-200 univer-animate-in univer-fade-in-0 univer-zoom-in-95
                     `, {
                         'univer-opacity-100': mounted,
                         'univer-slide-in-from-bottom-2': actualPlacement === 'top' && mounted,
@@ -309,15 +309,15 @@ export function Tooltip({ visible, asChild = false, title, children, placement =
                     <div className="univer-relative">
                         <div
                             className={`
-                              univer-max-w-[192px] univer-rounded-lg univer-bg-gray-700 univer-px-3 univer-py-2.5
-                              univer-text-xs univer-text-white univer-w-fit univer-font-medium
+                              univer-w-fit univer-max-w-[192px] univer-break-words univer-rounded-lg univer-bg-gray-700
+                              univer-px-3 univer-py-2.5 univer-text-xs univer-font-medium univer-text-white
                             `}
                         >
                             {title}
                         </div>
                         {/* Arrow */}
                         <div
-                            className={clsx('univer-absolute univer-w-2 univer-h-2 univer-rotate-45 univer-bg-gray-700', {
+                            className={clsx('univer-absolute univer-h-2 univer-w-2 univer-rotate-45 univer-bg-gray-700', {
                                 '-univer-bottom-1 univer-left-1/2 -univer-translate-x-1/2': actualPlacement === 'top',
                                 '-univer-top-1 univer-left-1/2 -univer-translate-x-1/2': actualPlacement === 'bottom',
                                 '-univer-right-1 univer-top-1/2 -univer-translate-y-1/2': actualPlacement === 'left',

@@ -40,13 +40,11 @@ export const SidebarDefinedNameOperation: ICommand = {
         const { unitId } = target;
         switch (params.value) {
             case 'open':
-                editorService.setOperationSheetUnitId(unitId);
                 sidebarService.open({
                     id: DEFINED_NAME_CONTAINER,
                     header: { title: localeService.t('definedName.featureTitle') },
                     children: { label: DEFINED_NAME_CONTAINER },
                     onClose: () => {
-                        editorService.closeRangePrompt();
                     },
                     width: 333,
                 });

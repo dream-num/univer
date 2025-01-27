@@ -105,6 +105,10 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
         this._eventDisposables = null;
     }
 
+    disableSelectionChanging(): void {
+        this._disableSelectionChanging();
+    }
+
     private _initCanvasEventListeners(): IDisposable {
         const sheetObject = this._getSheetObject();
         const { spreadsheetRowHeader, spreadsheetColumnHeader, spreadsheet, spreadsheetLeftTopPlaceholder } = sheetObject;
@@ -269,7 +273,7 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
      * @param viewport
      * @param scrollTimerType
      */
-    // eslint-disable-next-line complexity
+    // eslint-disable-next-line complexity, max-lines-per-function
     protected _onPointerDown(
         evt: IPointerEvent | IMouseEvent,
         _zIndex = 0,

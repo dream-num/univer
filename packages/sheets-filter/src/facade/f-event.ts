@@ -21,11 +21,13 @@ import { FEventName, FUniver, ICommandService } from '@univerjs/core';
 import { ClearSheetsFilterCriteriaCommand, SetSheetsFilterCriteriaCommand } from '@univerjs/sheets-filter';
 import { FSheetEventName } from '@univerjs/sheets/facade';
 
+/**
+ * @ignore
+ */
 export interface IFSheetFilterEventMixin {
     /**
      * This event will be emitted when the filter criteria on a column is changed.
      * Type of the event is {@link ISheetRangeFilteredParams}.
-     *
      * @example
      * ```typescript
      * const callbackDisposable = univerAPI.addEvent(univerAPI.Event.SheetRangeFiltered, (params) => {
@@ -39,7 +41,6 @@ export interface IFSheetFilterEventMixin {
     /**
      * This event will be emitted before the filter criteria on a column is changed.
      * Type of the event is {@link ISheetRangeFilteredParams}.
-     *
      * @example
      * ```typescript
      * const callbackDisposable = univerAPI.addEvent(univerAPI.Event.SheetBeforeRangeFilter, (params) => {
@@ -53,7 +54,6 @@ export interface IFSheetFilterEventMixin {
     /**
      * This event will be emitted when the filter on a worksheet is cleared.
      * Type of the event is {@link ISheetRangeFilterClearedEventParams}.
-     *
      * @example
      * ```typescript
      * const callbackDisposable = univerAPI.addEvent(univerAPI.Event.SheetRangeFilterCleared, (params) => {
@@ -67,7 +67,6 @@ export interface IFSheetFilterEventMixin {
     /**
      * This event will be emitted after the filter on a worksheet is cleared.
      * Type of the event is {@link ISheetRangeFilterClearedEventParams}.
-     *
      * @example
      * ```typescript
      * const callbackDisposable = univerAPI.addEvent(univerAPI.Event.SheetBeforeRangeFilterClear, (params) => {
@@ -115,6 +114,9 @@ export interface ISheetRangeFilterClearedEventParams extends IEventBase {
     worksheet: FWorksheet;
 }
 
+/**
+ * @ignore
+ */
 interface ISheetRangeFilterEventParamConfig {
     SheetBeforeRangeFilter: ISheetRangeFilteredParams;
     SheetRangeFiltered: ISheetRangeFilteredParams;
@@ -130,6 +132,9 @@ declare module '@univerjs/core' {
 }
 
 class FUniverSheetsFilterEventMixin extends FUniver {
+    /**
+     * @ignore
+     */
     override _initialize(injector: Injector): void {
         const commandService = injector.get(ICommandService);
 

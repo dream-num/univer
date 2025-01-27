@@ -84,7 +84,6 @@ export function ZenEditor() {
             editorUnitId: DOCS_ZEN_EDITOR_UNIT_ID_KEY,
             initialSnapshot: INITIAL_SNAPSHOT,
             scrollBar: true,
-            noNeedVerticalAlign: true,
             backScrollOffset: 100,
         },
         editorDom);
@@ -104,10 +103,14 @@ export function ZenEditor() {
     }, []); // Empty dependency array means this effect runs once on mount and clean up on unmount
 
     function handleCloseBtnClick() {
+        const editor = editorService.getEditor(DOCS_ZEN_EDITOR_UNIT_ID_KEY);
+        editor?.blur();
         commandService.executeCommand(CancelZenEditCommand.id);
     }
 
     function handleConfirmBtnClick() {
+        const editor = editorService.getEditor(DOCS_ZEN_EDITOR_UNIT_ID_KEY);
+        editor?.blur();
         commandService.executeCommand(ConfirmZenEditCommand.id);
     }
 

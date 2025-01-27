@@ -18,6 +18,9 @@ import type { IDisposable } from '@univerjs/core';
 import { FHooks, ICommandService } from '@univerjs/core';
 import { CopyCommand, PasteCommand, SheetPasteShortKeyCommandName } from '@univerjs/ui';
 
+/**
+ * @ignore
+ */
 export interface IFHooksSheetsUIMixin {
     /**
      * The onBeforeCopy event is fired before a copy operation is performed.
@@ -55,6 +58,9 @@ export interface IFHooksSheetsUIMixin {
     onPaste(callback: () => void): IDisposable;
 }
 
+/**
+ * @ignore
+ */
 export class FHooksSheetsMixin extends FHooks implements IFHooksSheetsUIMixin {
     override onBeforeCopy(callback: () => void): IDisposable {
         const commandService = this._injector.get(ICommandService);

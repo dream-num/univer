@@ -16,7 +16,7 @@
 
 /* eslint-disable max-lines-per-function */
 
-import type { DocumentDataModel, ICellData, ICommandInfo, IDisposable, IDocumentBody, IDocumentData, IStyleData, Nullable, Styles, UnitModel, Workbook } from '@univerjs/core';
+import type { DocumentDataModel, ICellData, ICommandInfo, IDisposable, IDocumentBody, IDocumentData, IDocumentStyle, IStyleData, Nullable, Styles, UnitModel, Workbook } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import type { WorkbookSelectionModel } from '@univerjs/sheets';
@@ -28,7 +28,6 @@ import {
     FOCUSING_EDITOR_INPUT_FORMULA,
     FOCUSING_EDITOR_STANDALONE,
     FOCUSING_FX_BAR_EDITOR,
-    FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE,
     ICommandService,
     IContextService,
     Inject,
@@ -46,7 +45,7 @@ import {
     DocSkeletonManagerService,
     RichTextEditingMutation,
 } from '@univerjs/docs';
-import { VIEWPORT_KEY as DOC_VIEWPORT_KEY, DocSelectionRenderService, IEditorService, MoveCursorOperation, MoveSelectionOperation } from '@univerjs/docs-ui';
+import { VIEWPORT_KEY as DOC_VIEWPORT_KEY, DocSelectionRenderService, IEditorService, MoveCursorOperation, MoveSelectionOperation, ReplaceSnapshotCommand } from '@univerjs/docs-ui';
 import { IFunctionService, LexerTreeBuilder, matchToken } from '@univerjs/engine-formula';
 import { DEFAULT_TEXT_FORMAT } from '@univerjs/engine-numfmt';
 
@@ -56,7 +55,7 @@ import {
     IRenderManagerService,
 } from '@univerjs/engine-render';
 
-import { COMMAND_LISTENER_SKELETON_CHANGE, SetRangeValuesCommand, SetSelectionsOperation, SetWorksheetActivateCommand, SetWorksheetActiveOperation, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
+import { COMMAND_LISTENER_SKELETON_CHANGE, REF_SELECTIONS_ENABLED, SetRangeValuesCommand, SetSelectionsOperation, SetWorksheetActivateCommand, SetWorksheetActiveOperation, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
 import { KeyCode } from '@univerjs/ui';
 import { distinctUntilChanged, filter } from 'rxjs';
 import { getEditorObject } from '../../basics/editor/get-editor-object';
@@ -98,7 +97,6 @@ export class EditingRenderController extends Disposable implements IRenderModule
         @Inject(SheetsSelectionsService) selectionManagerService: SheetsSelectionsService,
         @IUndoRedoService private readonly _undoRedoService: IUndoRedoService,
         @IContextService private readonly _contextService: IContextService,
-        @IUniverInstanceService private readonly _instanceSrv: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
         @ICellEditorManagerService private readonly _cellEditorManagerService: ICellEditorManagerService,
@@ -118,7 +116,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
 
         // EditingRenderController is per unit. It should only handle keyboard events when the unit is
         // the current of its type.
-        this.disposeWithMe(this._instanceSrv.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => {
+        this.disposeWithMe(this._univerInstanceService.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => {
             if (workbook?.getUnitId() === this._context.unitId) {
                 this._d = this._init();
             } else {
@@ -160,7 +158,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
         this._commandExecutedListener(d);
         this._initSkeletonListener(d);
 
-        this.disposeWithMe(this._instanceSrv.unitDisposed$.subscribe((_unit: UnitModel) => {
+        this.disposeWithMe(this._univerInstanceService.unitDisposed$.subscribe((_unit: UnitModel) => {
             clearTimeout(this._cursorTimeout);
         }));
 
@@ -199,7 +197,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
                 const param = this._editorBridgeService.getEditCellState();
                 const editorId = this._editorBridgeService.getCurrentEditorId();
 
-                if (!param || !editorId || !this._editorService.isSheetEditor(editorId)) {
+                if (!param || !editorId) {
                     return;
                 }
 
@@ -246,7 +244,6 @@ export class EditingRenderController extends Disposable implements IRenderModule
             if (editCellState == null || this._editorBridgeService.isForceKeepVisible()) {
                 return;
             }
-
             const state = this._editorBridgeService.getEditCellState();
             if (state == null) {
                 return;
@@ -254,37 +251,46 @@ export class EditingRenderController extends Disposable implements IRenderModule
 
             const { position, documentLayoutObject, scaleX, editorUnitId } = state;
 
-            if (
-                this._contextService.getContextValue(FOCUSING_EDITOR_STANDALONE) ||
-                this._contextService.getContextValue(FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE)
-            ) {
+            if (this._contextService.getContextValue(FOCUSING_EDITOR_STANDALONE)) {
                 return;
             }
 
-            if (this._instanceSrv.getUnit<DocumentDataModel>(DOCS_NORMAL_EDITOR_UNIT_ID_KEY) === documentLayoutObject.documentModel) {
-                return;
-            }
-
+            const cellDocument = this._getDocumentDataModel();
+            if (cellDocument == null) return;
             const { startX, endX } = position;
             const { textRotation, wrapStrategy, documentModel } = documentLayoutObject;
             const { vertexAngle: angle } = convertTextRotation(textRotation);
-            documentModel!.updateDocumentId(editorUnitId);
 
             if (wrapStrategy === WrapStrategy.WRAP && angle === 0) {
-                documentModel!.updateDocumentDataPageSize((endX - startX) / scaleX);
+                cellDocument.updateDocumentDataPageSize((endX - startX) / scaleX);
             }
 
-            this._instanceSrv.changeDoc(editorUnitId, documentModel!);
+            this._commandService.syncExecuteCommand(ReplaceSnapshotCommand.id, {
+                unitId: editorUnitId,
+                snapshot: (documentModel!.getSnapshot()),
+            });
+
             this._contextService.setContextValue(FOCUSING_EDITOR_BUT_HIDDEN, true);
-            this._textSelectionManagerService.replaceTextRanges([{
-                startOffset: 0,
-                endOffset: 0,
-            }]);
+            this._textSelectionManagerService.replaceDocRanges(
+                [{
+                    startOffset: 0,
+                    endOffset: 0,
+                }],
+                {
+                    unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+                    subUnitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+                }
+            );
 
-            const docSelectionRenderManager = this._renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_DOC)?.with(DocSelectionRenderService);
-
-            if (docSelectionRenderManager) {
-                docSelectionRenderManager.activate(HIDDEN_EDITOR_POSITION, HIDDEN_EDITOR_POSITION, !document.activeElement || document.activeElement.classList.contains('univer-editor'));
+            const cellSelectionRenderManager = this._renderManagerService.getRenderById(DOCS_NORMAL_EDITOR_UNIT_ID_KEY)?.with(DocSelectionRenderService);
+            const formulaSelectionRenderManager = this._renderManagerService.getRenderById(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY)?.with(DocSelectionRenderService);
+            if (cellSelectionRenderManager?.canFocusing || formulaSelectionRenderManager?.canFocusing) {
+                this._univerInstanceService.setCurrentUnitForType(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+                cellSelectionRenderManager?.activate(
+                    HIDDEN_EDITOR_POSITION,
+                    HIDDEN_EDITOR_POSITION,
+                    true
+                );
             }
         }));
     }
@@ -293,19 +299,13 @@ export class EditingRenderController extends Disposable implements IRenderModule
      * Listen to document edits to refresh the size of the sheet editor, not for normal editor.
      */
     private _commandExecutedListener(d: DisposableCollection) {
-        const updateCommandList = [RichTextEditingMutation.id];
-
         d.add(this._commandService.onCommandExecuted((command: ICommandInfo) => {
-            if (updateCommandList.includes(command.id)) {
+            if (command.id === RichTextEditingMutation.id) {
                 const params = command.params as IRichTextEditingMutationParams;
                 const { unitId: commandUnitId } = params;
 
                 // Only when the sheet it attached to is focused. Maybe we should change it to the render unit sys.
-                if (
-                    !this._isCurrentSheetFocused() ||
-                    !this._editorService.isSheetEditor(commandUnitId) ||
-                    isRangeSelector(commandUnitId)
-                ) {
+                if (!this._isCurrentSheetFocused() || isRangeSelector(commandUnitId)) {
                     return;
                 }
 
@@ -351,9 +351,9 @@ export class EditingRenderController extends Disposable implements IRenderModule
     }
 
     // You can double-click on the cell or input content by keyboard to put the cell into the edit state.
+    // eslint-disable-next-line complexity
     private _handleEditorVisible(param: IEditorBridgeServiceVisibleParam) {
         const { eventType, keycode } = param;
-
         // Change `CursorChange` to changed status, when formula bar clicked.
         this._cursorChange =
             (eventType === DeviceInputEventType.PointerDown || eventType === DeviceInputEventType.Dblclick)
@@ -375,29 +375,19 @@ export class EditingRenderController extends Disposable implements IRenderModule
         });
 
         this._editorBridgeService.refreshEditCellPosition(false);
-
-        const {
-            documentLayoutObject,
-            editorUnitId,
-            unitId,
-            sheetId,
-            isInArrayFormulaRange = false,
-        } = editCellState;
-
+        const { unitId, isInArrayFormulaRange = false } = editCellState;
         const editorObject = this._getEditorObject();
 
         if (editorObject == null) {
             return;
         }
 
-        this._setOpenForCurrent(unitId, sheetId);
-
         const { document, scene } = editorObject;
 
         this._contextService.setContextValue(EDITOR_ACTIVATED, true);
 
-        const { documentModel: documentDataModel } = documentLayoutObject;
-        const skeleton = this._getEditorSkeleton(editorUnitId);
+        const documentDataModel = this._getDocumentDataModel();
+        const skeleton = this._getEditorSkeleton(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
         if (!skeleton || !documentDataModel) {
             return;
         }
@@ -409,12 +399,33 @@ export class EditingRenderController extends Disposable implements IRenderModule
                 viewportScrollY: Number.POSITIVE_INFINITY,
             });
         });
-        // move selection
-        if (
+
+        // f2, continue to edit
+        if (eventType === DeviceInputEventType.Keyboard && keycode === KeyCode.F2) {
+            document.makeDirty();
+            this._textSelectionManagerService.replaceDocRanges([
+                {
+                    startOffset: 0,
+                    endOffset: 0,
+                },
+            ]);
+            const endOffset = (documentDataModel.getBody()?.dataStream.length ?? 2) - 2;
+            this._textSelectionManagerService.replaceDocRanges(
+                [{
+                    startOffset: endOffset,
+                    endOffset,
+                }],
+                {
+                    unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+                    subUnitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+                }
+            );
+        } else if (
+            // clear and edit
             eventType === DeviceInputEventType.Keyboard ||
             (eventType === DeviceInputEventType.Dblclick && isInArrayFormulaRange)
         ) {
-            this._emptyDocumentDataModel(!!isInArrayFormulaRange);
+            this._emptyDocumentDataModel(documentDataModel.getSnapshot().documentStyle, !!isInArrayFormulaRange);
             document.makeDirty();
 
             // @JOCS, Why calculate here?
@@ -423,19 +434,22 @@ export class EditingRenderController extends Disposable implements IRenderModule
                 this._editorBridgeService.changeEditorDirty(true);
             }
 
-            this._textSelectionManagerService.replaceDocRanges([
-                {
+            this._textSelectionManagerService.replaceDocRanges(
+                [{
                     startOffset: 0,
                     endOffset: 0,
-                },
-            ]);
+                }],
+                {
+                    unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+                    subUnitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+                }
+            );
         } else if (eventType === DeviceInputEventType.Dblclick) {
             if (this._contextService.getContextValue(FOCUSING_EDITOR_INPUT_FORMULA)) {
                 return;
             }
 
             const cursor = documentDataModel.getBody()!.dataStream.length - 2 || 0;
-
             this._textSelectionManagerService.replaceDocRanges([
                 {
                     startOffset: cursor,
@@ -449,10 +463,9 @@ export class EditingRenderController extends Disposable implements IRenderModule
 
     private async _handleEditorInvisible(param: IEditorBridgeServiceVisibleParam) {
         const editCellState = this._editorBridgeService.getEditCellState();
-
+        const documentDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+        const snapshot = Tools.deepClone(documentDataModel?.getSnapshot());
         let { keycode } = param;
-        this._setOpenForCurrent(null, null);
-
         this._cursorChange = CursorChange.InitialState;
 
         this._exitInput(param);
@@ -473,29 +486,11 @@ export class EditingRenderController extends Disposable implements IRenderModule
         const workbookId = this._context.unitId;
         const worksheetId = worksheet.getSheetId();
 
-        // Reselect the current selections, when exist cell editor by press ESC.I
-        if (keycode === KeyCode.ESC) {
-            if (this._editorBridgeService.isForceKeepVisible()) {
-                this._editorBridgeService.disableForceKeepVisible();
-            }
-            const selections = this._workbookSelections.getCurrentSelections();
-            if (selections) {
-                this._commandService.syncExecuteCommand(SetSelectionsOperation.id, {
-                    unitId: this._context.unit.getUnitId(),
-                    subUnitId: worksheetId,
-                    selections,
-                });
-            }
-
-            return;
-        }
-
         const { unitId, sheetId } = editCellState;
-
         /**
          * When closing the editor, switch to the current tab of the editor.
          */
-        if (workbookId === unitId && sheetId !== worksheetId && this._editorBridgeService.isForceKeepVisible()) {
+        if (workbookId === unitId && sheetId !== worksheetId) {
             // SetWorksheetActivateCommand handler uses Promise
             await this._commandService.executeCommand(SetWorksheetActivateCommand.id, {
                 subUnitId: sheetId,
@@ -503,26 +498,30 @@ export class EditingRenderController extends Disposable implements IRenderModule
             });
         }
 
-        const documentDataModel = editCellState.documentLayoutObject.documentModel;
+        // Reselect the current selections, when exist cell editor by press ESC.I
+        if (keycode === KeyCode.ESC) {
+            if (this._editorBridgeService.isForceKeepVisible()) {
+                this._editorBridgeService.disableForceKeepVisible();
+            }
+            const selections = this._workbookSelections.getCurrentSelections();
+            if (selections) {
+                this._contextService.setContextValue(REF_SELECTIONS_ENABLED, false);
+                this._commandService.syncExecuteCommand(SetSelectionsOperation.id, {
+                    unitId: this._context.unit.getUnitId(),
+                    subUnitId: sheetId,
+                    selections,
+                });
+            }
 
-        if (documentDataModel) {
-            await this._submitCellData(documentDataModel);
+            return;
+        }
+
+        if (snapshot) {
+            await this._submitCellData(snapshot);
         }
 
         // moveCursor need to put behind of SetRangeValuesCommand, fix https://github.com/dream-num/univer/issues/1155
         this._moveCursor(keycode);
-    }
-
-    private _setOpenForCurrent(unitId: Nullable<string>, sheetId: Nullable<string>) {
-        const sheetEditors = this._editorService.getAllEditor();
-        for (const [_, sheetEditor] of sheetEditors) {
-            if (!sheetEditor.isSheetEditor()) {
-                continue;
-            }
-
-            sheetEditor.setOpenForSheetUnitId(unitId);
-            sheetEditor.setOpenForSheetSubUnitId(sheetId);
-        }
     }
 
     private _getEditorObject() {
@@ -530,10 +529,10 @@ export class EditingRenderController extends Disposable implements IRenderModule
     }
 
     submitCellData(documentDataModel: DocumentDataModel) {
-        return this._submitCellData(documentDataModel);
+        return this._submitCellData(documentDataModel.getSnapshot());
     }
 
-    private async _submitCellData(documentDataModel: DocumentDataModel) {
+    private async _submitCellData(snapshot: IDocumentData) {
         const editCellState = this._editorBridgeService.getEditCellState();
         if (editCellState == null) {
             return;
@@ -555,10 +554,9 @@ export class EditingRenderController extends Disposable implements IRenderModule
         // If cross-sheet operation, switch current sheet first, then const cellData
         // This should moved to after cell editor
         const cellData: Nullable<ICellData> = getCellDataByInput(
-            worksheet.getCellRaw(row, column) || {},
-            documentDataModel,
+            { ...(worksheet.getCellRaw(row, column) || {}) },
+            snapshot,
             this._lexerTreeBuilder,
-            (model) => model.getSnapshot(),
             this._localService,
             this._functionService,
             workbook.getStyles()
@@ -569,6 +567,9 @@ export class EditingRenderController extends Disposable implements IRenderModule
         }
 
         const finalCell = await this._sheetInterceptorService.onWriteCell(workbook, worksheet, row, column, cellData);
+        if (finalCell === worksheet.getCellRaw(row, column)) {
+            return;
+        }
         this._commandService.executeCommand(SetRangeValuesCommand.id, {
             subUnitId: sheetId,
             unitId,
@@ -648,8 +649,8 @@ export class EditingRenderController extends Disposable implements IRenderModule
      * The logic here predicts the user's first cursor movement behavior based on this rule
      */
     private _cursorStateListener(d: DisposableCollection) {
-        const editorObject = this._getEditorObject()!;
-        if (!editorObject.document) return;
+        const editorObject = this._getEditorObject();
+        if (!editorObject?.document) return;
         const { document: documentComponent } = editorObject;
 
         d.add(toDisposable(documentComponent.onPointerDown$.subscribeEvent(() => {
@@ -681,10 +682,14 @@ export class EditingRenderController extends Disposable implements IRenderModule
         }
     }
 
+    private _getDocumentDataModel() {
+        return this._univerInstanceService.getUnit<DocumentDataModel>(DOCS_NORMAL_EDITOR_UNIT_ID_KEY, UniverInstanceType.UNIVER_DOC);
+    }
+
     // WTF: this is should not exist at all. It is because all editor instances reuse the singleton
     // "DocSelectionManagerService" and other modules. Which will be refactored soon in August, 2024.
     private _isCurrentSheetFocused(): boolean {
-        return this._instanceSrv.getFocusedUnit()?.getUnitId() === this._context.unitId;
+        return this._univerInstanceService.getFocusedUnit()?.getUnitId() === this._context.unitId;
     }
 
     private _getEditorSkeleton(editorId: string) {
@@ -695,62 +700,45 @@ export class EditingRenderController extends Disposable implements IRenderModule
         return this._renderManagerService.getRenderById(editorId)?.with(DocSkeletonManagerService).getViewModel();
     }
 
-    private _emptyDocumentDataModel(removeStyle: boolean) {
-        const editCellState = this._editorBridgeService.getEditCellState();
-        if (editCellState == null) {
-            return;
-        }
-
-        const { documentLayoutObject } = editCellState;
-        const documentDataModel = documentLayoutObject.documentModel;
-        if (documentDataModel == null) {
-            return;
-        }
-
-        const empty = (documentDataModel: DocumentDataModel) => {
+    private _emptyDocumentDataModel(documentStyle: IDocumentStyle, removeStyle: boolean) {
+        const empty = (documentDataModel: DocumentDataModel, resetDocumentStyle?: boolean) => {
             const snapshot = Tools.deepClone(documentDataModel.getSnapshot());
             const documentViewModel = this._getEditorViewModel(documentDataModel.getUnitId());
-
             if (documentViewModel == null) {
                 return;
             }
 
             emptyBody(snapshot.body!, removeStyle);
+            if (resetDocumentStyle) {
+                snapshot.documentStyle = documentStyle;
+            }
             snapshot.drawings = {};
             snapshot.drawingsOrder = [];
             documentDataModel.reset(snapshot);
             documentViewModel.reset(documentDataModel);
         };
 
-        empty(documentDataModel);
+        const documentDataModel = this._getDocumentDataModel();
+        documentDataModel && empty(documentDataModel, true);
+
         const formulaDocument = this._univerInstanceService.getUnit<DocumentDataModel>(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, UniverInstanceType.UNIVER_DOC);
         formulaDocument && empty(formulaDocument);
     }
 }
 
-// eslint-disable-next-line
+// eslint-disable-next-line complexity
 export function getCellDataByInput(
     cellData: ICellData,
-    documentDataModel: Nullable<DocumentDataModel>,
+    snapshot: Nullable<IDocumentData>,
     lexerTreeBuilder: LexerTreeBuilder,
-    getSnapshot: (data: DocumentDataModel) => IDocumentData,
     localeService: LocaleService,
     functionService: IFunctionService,
     styles: Styles
 ) {
-    cellData = Tools.deepClone(cellData);
-
-    if (documentDataModel == null) {
+    if (snapshot?.body == null) {
         return null;
     }
-
-    const snapshot = getSnapshot(documentDataModel);
-
     const { body } = snapshot;
-    if (body == null) {
-        return null;
-    }
-
     cellData.t = undefined;
 
     const data = body.dataStream;
@@ -893,15 +881,11 @@ function emptyBody(body: IDocumentBody, removeStyle = false) {
     }
 
     if (body.paragraphs != null) {
-        if (body.paragraphs.length === 1) {
-            body.paragraphs[0].startIndex = 0;
-        } else {
-            body.paragraphs = [
-                {
-                    startIndex: 0,
-                },
-            ];
-        }
+        body.paragraphs = [
+            {
+                startIndex: 0,
+            },
+        ];
     }
 
     if (body.sectionBreaks != null) {

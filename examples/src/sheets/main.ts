@@ -35,6 +35,7 @@ import { UniverSheetsHyperLinkPlugin } from '@univerjs/sheets-hyper-link';
 import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
 import { UniverSheetsNumfmtUIPlugin } from '@univerjs/sheets-numfmt-ui';
 import { UniverSheetsSortPlugin } from '@univerjs/sheets-sort';
+import { UniverSheetsBindingSourcePlugin } from '@univerjs/sheets-source-binding';
 import { UniverSheetsThreadCommentPlugin } from '@univerjs/sheets-thread-comment';
 import { UniverSheetsThreadCommentUIPlugin } from '@univerjs/sheets-thread-comment-ui';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
@@ -43,6 +44,7 @@ import { UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
 import { UniverUIPlugin } from '@univerjs/ui';
 
 import { enUS, faIR, frFR, ruRU, viVN, zhCN, zhTW } from '../locales';
+
 import '@univerjs/sheets/facade';
 import '@univerjs/ui/facade';
 import '@univerjs/docs-ui/facade';
@@ -53,11 +55,15 @@ import '@univerjs/sheets-filter/facade';
 import '@univerjs/sheets-formula/facade';
 import '@univerjs/sheets-numfmt/facade';
 import '@univerjs/sheets-hyper-link-ui/facade';
-
 import '@univerjs/sheets-thread-comment/facade';
 import '@univerjs/sheets-conditional-formatting/facade';
+import '@univerjs/sheets-find-replace/facade';
 import '@univerjs/sheets-drawing-ui/facade';
+import '@univerjs/sheets-zen-editor/facade';
+import '@univerjs/sheets-source-binding/facade';
+
 import '../global.css';
+import './styles';
 
 /* eslint-disable-next-line node/prefer-global/process */
 const IS_E2E: boolean = !!process.env.IS_E2E;
@@ -73,90 +79,105 @@ export const mockUser = {
     canBindAnonymous: false,
 };
 
-// univer
-const univer = new Univer({
-    theme: defaultTheme,
-    locale: LocaleType.ZH_CN,
-    locales: {
-        [LocaleType.ZH_CN]: zhCN,
-        [LocaleType.EN_US]: enUS,
-        [LocaleType.FR_FR]: frFR,
-        [LocaleType.RU_RU]: ruRU,
-        [LocaleType.ZH_TW]: zhTW,
-        [LocaleType.VI_VN]: viVN,
-        [LocaleType.FA_IR]: faIR,
-    },
-    logLevel: LogLevel.VERBOSE,
-});
+// eslint-disable-next-line max-lines-per-function
+function createNewInstance() {
+    // univer
+    const univer = new Univer({
+        theme: defaultTheme,
+        locale: LocaleType.ZH_CN,
+        locales: {
+            [LocaleType.ZH_CN]: zhCN,
+            [LocaleType.EN_US]: enUS,
+            [LocaleType.FR_FR]: frFR,
+            [LocaleType.RU_RU]: ruRU,
+            [LocaleType.ZH_TW]: zhTW,
+            [LocaleType.VI_VN]: viVN,
+            [LocaleType.FA_IR]: faIR,
+        },
+        logLevel: LogLevel.VERBOSE,
+    });
 
-const worker = new Worker(new URL('./worker.js', import.meta.url), { type: 'module' });
-univer.registerPlugin(UniverRPCMainThreadPlugin, { workerURL: worker });
+    const worker = new Worker(new URL('./worker.js', import.meta.url), { type: 'module' });
+    univer.registerPlugin(UniverRPCMainThreadPlugin, { workerURL: worker });
 
-univer.registerPlugin(UniverDocsPlugin);
-univer.registerPlugin(UniverRenderEnginePlugin);
-univer.registerPlugin(UniverUIPlugin, { container: 'app' });
-univer.registerPlugin(UniverDocsUIPlugin);
-univer.registerPlugin(UniverDocsDrawingUIPlugin);
-univer.registerPlugin(UniverDocsMentionUIPlugin);
+    univer.registerPlugin(UniverDocsPlugin);
+    univer.registerPlugin(UniverRenderEnginePlugin);
+    univer.registerPlugin(UniverUIPlugin, { container: 'app' });
+    univer.registerPlugin(UniverDocsUIPlugin);
+    univer.registerPlugin(UniverDocsDrawingUIPlugin);
+    univer.registerPlugin(UniverDocsMentionUIPlugin);
 
-univer.registerPlugin(UniverSheetsPlugin, { notExecuteFormula: true });
-univer.registerPlugin(UniverSheetsUIPlugin);
-univer.registerPlugin(UniverSheetsNumfmtPlugin);
-univer.registerPlugin(UniverSheetsZenEditorPlugin);
-univer.registerPlugin(UniverFormulaEnginePlugin, { notExecuteFormula: true });
-univer.registerPlugin(UniverSheetsNumfmtUIPlugin);
-univer.registerPlugin(UniverSheetsFormulaPlugin, { notExecuteFormula: true });
-univer.registerPlugin(UniverSheetsFormulaUIPlugin);
-univer.registerPlugin(UniverSheetsDataValidationPlugin);
-univer.registerPlugin(UniverSheetsConditionalFormattingPlugin);
-univer.registerPlugin(UniverSheetsFilterPlugin);
-univer.registerPlugin(UniverSheetsSortPlugin);
-univer.registerPlugin(UniverSheetsHyperLinkPlugin);
-univer.registerPlugin(UniverThreadCommentUIPlugin);
-univer.registerPlugin(UniverSheetsThreadCommentPlugin);
-univer.registerPlugin(UniverSheetsThreadCommentUIPlugin);
+    univer.registerPlugin(UniverSheetsPlugin, { notExecuteFormula: true });
+    univer.registerPlugin(UniverSheetsUIPlugin);
+    univer.registerPlugin(UniverSheetsNumfmtPlugin);
+    univer.registerPlugin(UniverSheetsZenEditorPlugin);
+    univer.registerPlugin(UniverFormulaEnginePlugin, { notExecuteFormula: true });
+    univer.registerPlugin(UniverSheetsNumfmtUIPlugin);
+    univer.registerPlugin(UniverSheetsFormulaPlugin, { notExecuteFormula: true });
+    univer.registerPlugin(UniverSheetsFormulaUIPlugin);
+    univer.registerPlugin(UniverSheetsDataValidationPlugin);
+    univer.registerPlugin(UniverSheetsConditionalFormattingPlugin);
+    univer.registerPlugin(UniverSheetsFilterPlugin);
+    univer.registerPlugin(UniverSheetsSortPlugin);
+    univer.registerPlugin(UniverSheetsHyperLinkPlugin);
+    univer.registerPlugin(UniverThreadCommentUIPlugin);
+    univer.registerPlugin(UniverSheetsThreadCommentPlugin);
+    univer.registerPlugin(UniverSheetsThreadCommentUIPlugin);
+    univer.registerPlugin(UniverSheetsBindingSourcePlugin);
 
-// If we are running in e2e platform, we should immediately register the debugger plugin.
-if (IS_E2E) {
-    univer.registerPlugin(UniverDebuggerPlugin);
+    // If we are running in e2e platform, we should immediately register the debugger plugin.
+    if (IS_E2E) {
+        univer.registerPlugin(UniverDebuggerPlugin);
+    }
+
+    const injector = univer.__getInjector();
+    const userManagerService = injector.get(UserManagerService);
+    userManagerService.setCurrentUser(mockUser);
+
+    // create univer sheet instance
+    if (!IS_E2E) {
+        univer.createUnit(UniverInstanceType.UNIVER_SHEET, DEFAULT_WORKBOOK_DATA_DEMO);
+    }
+
+    setTimeout(() => {
+        import('./lazy').then((lazy) => {
+            const plugins = lazy.default();
+            plugins.forEach((p) => univer.registerPlugin(p[0], p[1]));
+        });
+    }, LOAD_LAZY_PLUGINS_TIMEOUT);
+
+    setTimeout(() => {
+        import('./very-lazy').then((lazy) => {
+            const plugins = lazy.default();
+            plugins.forEach((p) => univer.registerPlugin(p[0], p[1]));
+        });
+    }, LOAD_VERY_LAZY_PLUGINS_TIMEOUT);
+
+    univer.onDispose(() => {
+        worker.terminate();
+        window.univer = undefined;
+        window.univerAPI = undefined;
+    });
+
+    window.univer = univer;
+    window.univerAPI = FUniver.newAPI(univer);
 }
 
-const injector = univer.__getInjector();
-const userManagerService = injector.get(UserManagerService);
-userManagerService.setCurrentUser(mockUser);
-
-// create univer sheet instance
-if (!IS_E2E) {
-    univer.createUnit(UniverInstanceType.UNIVER_SHEET, DEFAULT_WORKBOOK_DATA_DEMO);
-}
-
-setTimeout(() => {
-    import('./lazy').then((lazy) => {
-        const plugins = lazy.default();
-        plugins.forEach((p) => univer.registerPlugin(p[0], p[1]));
-    });
-}, LOAD_LAZY_PLUGINS_TIMEOUT);
-
-setTimeout(() => {
-    import('./very-lazy').then((lazy) => {
-        const plugins = lazy.default();
-        plugins.forEach((p) => univer.registerPlugin(p[0], p[1]));
-    });
-}, LOAD_VERY_LAZY_PLUGINS_TIMEOUT);
-
-univer.onDispose(() => {
-    worker.terminate();
-    window.univer = undefined;
-    window.univerAPI = undefined;
-});
-
-window.univer = univer;
-window.univerAPI = FUniver.newAPI(univer);
+createNewInstance();
+window.createNewInstance = createNewInstance;
 
 declare global {
     // eslint-disable-next-line ts/naming-convention
     interface Window {
         univer?: Univer;
         univerAPI?: ReturnType<typeof FUniver.newAPI>;
+        createNewInstance?: typeof createNewInstance;
     }
 }
+
+window.univerAPI?.addEvent(window.univerAPI.Event.BeforeSheetEditStart, (params) => {
+    const { row, column } = params;
+    if (row === 0 && column === 0) {
+        params.cancel = true;
+    }
+});

@@ -38,7 +38,7 @@ export interface ISetWorksheetColIsAutoWidthCommandParams {
 export const SetWorksheetColAutoWidthCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-col-auto-width',
-    handler: async (accessor: IAccessor, params?: ISetWorksheetColIsAutoWidthCommandParams) => {
+    handler: (accessor: IAccessor, params?: ISetWorksheetColIsAutoWidthCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const selectionManagerService = accessor.get(SheetsSelectionsService);

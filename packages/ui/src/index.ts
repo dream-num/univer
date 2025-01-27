@@ -20,11 +20,9 @@ export * from './common';
 export { getHeaderFooterMenuHiddenObservable, getMenuHiddenObservable } from './common/menu-hidden-observable';
 export { mergeMenuConfigs } from './common/menu-merge-configs';
 export * from './components';
-export { useEvent } from './components/hooks/event';
 export { t } from './components/hooks/locale';
-export { useObservable, useObservableRef } from './components/hooks/observable';
+export * from './components/hooks';
 export { RectPopup } from './views/components/popup/RectPopup';
-export { useVirtualList } from './components/hooks/virtual-list';
 export { Menu as UIMenu } from './components/menu/desktop/Menu';
 export { type INotificationOptions, type NotificationType } from './components/notification/Notification';
 export { ProgressBar } from './components/progress-bar/ProgressBar';
@@ -45,6 +43,7 @@ export { DesktopUIController } from './controllers/ui/ui-desktop.controller';
 export { UniverMobileUIPlugin } from './mobile-ui-plugin';
 export { DesktopBeforeCloseService, IBeforeCloseService } from './services/before-close/before-close.service';
 export { CopyCommand, CutCommand, PasteCommand, SheetPasteShortKeyCommandName } from './services/clipboard/clipboard.command';
+export { supportClipboardAPI } from './services/clipboard/clipboard-utils';
 export {
     BrowserClipboardService,
     FILE__BMP_CLIPBOARD_MIME_TYPE,
@@ -54,6 +53,7 @@ export {
     FILE_SVG_XML_CLIPBOARD_MIME_TYPE,
     HTML_CLIPBOARD_MIME_TYPE,
     IClipboardInterfaceService,
+    imageMimeTypeSet,
     PLAIN_TEXT_CLIPBOARD_MIME_TYPE,
 } from './services/clipboard/clipboard-interface.service';
 export { IConfirmService } from './services/confirm/confirm.service';
@@ -65,7 +65,7 @@ export {
 } from './services/contextmenu/contextmenu.service';
 export { DesktopDialogService } from './services/dialog/desktop-dialog.service';
 export { IDialogService } from './services/dialog/dialog.service';
-export { CanvasFloatDomService, type IFloatDomLayout } from './services/dom/canvas-dom-layer.service';
+export { CanvasFloatDomService, type IFloatDom, type IFloatDomLayout } from './services/dom/canvas-dom-layer.service';
 export { DesktopGlobalZoneService } from './services/global-zone/desktop-global-zone.service';
 export { IGlobalZoneService } from './services/global-zone/global-zone.service';
 export { DesktopLayoutService, ILayoutService } from './services/layout/layout.service';

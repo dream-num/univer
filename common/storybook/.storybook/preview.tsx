@@ -63,6 +63,12 @@ const preview: Preview = {
                 date: /Date$/,
             },
         },
+        backgrounds: {
+            values: [
+                { name: 'Light', value: '#F9FAFB' },
+            ],
+            default: 'Light',
+        },
     },
 
     globalTypes: {

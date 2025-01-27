@@ -22,19 +22,58 @@ import { FWorksheet } from '@univerjs/sheets/facade';
 import { AddCommentCommand } from '@univerjs/thread-comment';
 import { FThreadComment } from './f-thread-comment';
 
+/**
+ * @ignore
+ */
 export interface IFWorksheetCommentMixin {
     /**
      * Get all comments in the current sheet
      * @returns all comments in the current sheet
+     * ```ts
+     * const workbook = univerAPI.getActiveWorkbook();
+     * const worksheet = workbook.getSheetById(sheetId);
+     * const comments = worksheet.getComments();
+     * ```
      */
     getComments(): FThreadComment[];
+
+    /**
+     * Clear all comments in the current sheet
+     * ```ts
+     * const workbook = univerAPI.getActiveWorkbook();
+     * const worksheet = workbook.getSheetById(sheetId);
+     * await worksheet.clearComments();
+     * ```
+     */
+    clearComments(): Promise<boolean>;
+
+    /**
+     * get comment by comment id
+     * @param {string} commentId comment id
+     * ```ts
+     * const workbook = univerAPI.getActiveWorkbook();
+     * const worksheet = workbook.getSheetById(sheetId);
+     * const comment = worksheet.getCommentById(commentId);
+     * ```
+     */
+    getCommentById(commentId: string): FThreadComment | undefined;
 }
 
+/**
+ * @ignore
+ */
 export class FWorksheetCommentMixin extends FWorksheet implements IFWorksheetCommentMixin {
     override getComments(): FThreadComment[] {
         const sheetsTheadCommentModel = this._injector.get(SheetsThreadCommentModel);
         const comments = sheetsTheadCommentModel.getSubUnitAll(this._workbook.getUnitId(), this._worksheet.getSheetId());
         return comments.map((comment) => this._injector.createInstance(FThreadComment, comment));
+    }
+
+    override clearComments(): Promise<boolean> {
+        const comments = this.getComments();
+        const promises = comments.map((comment) => comment.deleteAsync());
+
+        return Promise.all(promises).then(() => true);
     }
 
     /**
@@ -49,6 +88,14 @@ export class FWorksheetCommentMixin extends FWorksheet implements IFWorksheetCom
                 callback(params);
             }
         });
+    }
+
+    override getCommentById(commentId: string): FThreadComment | undefined {
+        const sheetsTheadCommentModel = this._injector.get(SheetsThreadCommentModel);
+        const comment = sheetsTheadCommentModel.getComment(this._workbook.getUnitId(), this._worksheet.getSheetId(), commentId);
+        if (comment) {
+            return this._injector.createInstance(FThreadComment, comment);
+        }
     }
 }
 

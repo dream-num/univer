@@ -18,6 +18,7 @@ import type { CellValue, DataValidationOperator, IDataValidationRule, IDataValid
 import type { IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation';
 import { CellValueType, DataValidationType, isFormulaString, Tools } from '@univerjs/core';
 import { BaseDataValidator } from '@univerjs/data-validation';
+import { LexerTreeBuilder, operatorToken } from '@univerjs/engine-formula';
 import { DataValidationCustomFormulaService } from '../services/dv-custom-formula.service';
 import { isLegalFormulaResult } from '../utils/formula';
 
@@ -28,12 +29,17 @@ export class CustomFormulaValidator extends BaseDataValidator {
     override scopes: string | string[] = ['sheet'];
 
     private readonly _customFormulaService = this.injector.get(DataValidationCustomFormulaService);
+    private readonly _lexerTreeBuilder = this.injector.get(LexerTreeBuilder);
 
     override validatorFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): IFormulaValidResult {
         const success = isFormulaString(rule.formula1);
+        const formulaText = rule.formula1 ?? '';
+        const result = this._lexerTreeBuilder.checkIfAddBracket(formulaText);
+        const valid = result === 0 && formulaText.startsWith(operatorToken.EQUALS);
+
         return {
-            success,
-            formula1: success ? '' : this.localeService.t('dataValidation.validFail.formula'),
+            success: success && valid,
+            formula1: success && valid ? '' : this.localeService.t('dataValidation.validFail.formula'),
         };
     }
 

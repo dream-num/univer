@@ -48,6 +48,6 @@ export { Switch } from './components/switch';
 export { type ILocale } from './locale/interface';
 export { defaultTheme, greenTheme, themeInstance } from './themes';
 export { DraggableList, type IDraggableListProps } from './components/draggable-list';
-export { type IMentionsProps, Mention, type MentionProps, Mentions } from './components/mentions';
 export { clsx } from './helper/clsx';
 export { resizeObserverCtor } from './helper/resize-observer';
+export { render, unmount } from './utils/render';

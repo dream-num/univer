@@ -20,14 +20,14 @@ import { FRange } from '@univerjs/sheets/facade';
 
 export type SortColumnSpec = { column: number; ascending: boolean } | number;
 
+/**
+ * @ignore
+ */
 export interface IFRangeSort {
     /**
      * Sorts the cells in the given range, by column(s) and order specified.
-     *
      * @param {SortColumnSpec | SortColumnSpec[]} column The column index with order or an array of column indexes with order. The column index starts from 1.
-     *
      * @returns The range itself for chaining.
-     *
      * @example
      * ```typescript
      * const activeSpreadsheet = univerAPI.getActiveWorkbook();

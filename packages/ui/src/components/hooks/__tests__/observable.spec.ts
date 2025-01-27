@@ -15,8 +15,8 @@
  */
 
 import type { Observable } from 'rxjs';
-import { act, renderHook } from '@testing-library/react-hooks';
-import { useState } from 'react';
+import { renderHook } from '@testing-library/react';
+import { act, useState } from 'react';
 import { of, Subject } from 'rxjs';
 
 import { describe, expect, it } from 'vitest';

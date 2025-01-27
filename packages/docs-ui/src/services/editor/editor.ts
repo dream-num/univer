@@ -17,7 +17,7 @@
 import type { DocumentDataModel, ICommandService, IDocumentData, IDocumentStyle, IPosition, IUndoRedoService, IUniverInstanceService, Nullable } from '@univerjs/core';
 import type { DocSelectionManagerService } from '@univerjs/docs';
 import type { IDocSelectionInnerParam, IRender, ISuccinctDocRangeParam, ITextRangeWithStyle } from '@univerjs/engine-render';
-import { DEFAULT_STYLES, Disposable, UniverInstanceType } from '@univerjs/core';
+import { Disposable, isInternalEditorID, UniverInstanceType } from '@univerjs/core';
 import { KeyCode } from '@univerjs/ui';
 import { merge, type Observable, Subject } from 'rxjs';
 import { filter } from 'rxjs/operators';
@@ -50,13 +50,13 @@ interface IEditor {
     // Emit when doc selection changed.
     selectionChange$: Observable<IDocSelectionInnerParam>;
 
+    isFocus(): boolean;
     // Methods
     // The focused editor is the editor that will receive keyboard and similar events by default.
     focus(): void;
     // The Editor.blur() method removes keyboard focus from the current editor.
     blur(): void;
     // has focus.
-    isFocus(): boolean;
     // Selects the entire content of the editor.
     // Calling editor.select() will not necessarily focus the editor, so it is often used with Editor.focus
     select(): void;
@@ -99,47 +99,6 @@ export interface IEditorConfigParams {
 
     // show scrollBar
     scrollBar?: boolean;
-
-    // need vertical align and update canvas style. TODO: remove this latter.
-    /** @deprecated */
-    noNeedVerticalAlign?: boolean;
-    /**
-     * @deprecated The implementer makes its own judgment.
-     */
-    isSheetEditor?: boolean;
-    /**
-     * If the editor is for formula editing.
-     * @deprecated this is a temp fix before refactoring editor.
-     */
-    isFormulaEditor?: boolean;
-    /**
-     * @deprecated The implementer makes its own judgment.
-     */
-    isSingle?: boolean;
-    /**
-     * @deprecated The implementer makes its own judgment.
-     */
-    onlyInputFormula?: boolean;
-    /**
-     * @deprecated The implementer makes its own judgment.
-     */
-    onlyInputRange?: boolean;
-    /**
-     * @deprecated The implementer makes its own judgment.
-     */
-    onlyInputContent?: boolean;
-    /**
-     * @deprecated The implementer makes its own judgment.
-     */
-    isSingleChoice?: boolean;
-    /**
-     * @deprecated The implementer makes its own judgment.
-     */
-    openForSheetUnitId?: Nullable<string>;
-    /**
-     * @deprecated The implementer makes its own judgment.
-     */
-    openForSheetSubUnitId?: Nullable<string>;
 }
 
 export interface IEditorOptions extends IEditorConfigParams, IEditorStateParams {
@@ -161,7 +120,6 @@ export class Editor extends Disposable implements IEditor {
     paste$: Observable<IEditorInputConfig> = this._paste$.asObservable();
 
     // Editor get focus.
-    private _focus = false;
     private readonly _focus$ = new Subject<IEditorInputConfig>();
     focus$: Observable<IEditorInputConfig> = this._focus$.asObservable();
 
@@ -173,12 +131,6 @@ export class Editor extends Disposable implements IEditor {
     private readonly _selectionChange$ = new Subject<IDocSelectionInnerParam>();
     selectionChange$: Observable<IDocSelectionInnerParam> = this._selectionChange$.asObservable();
 
-    private _valueLegality = true;
-
-    private _openForSheetUnitId: Nullable<string>;
-
-    private _openForSheetSubUnitId: Nullable<string>;
-
     constructor(
         private _param: IEditorOptions,
         private _univerInstanceService: IUniverInstanceService,
@@ -187,10 +139,12 @@ export class Editor extends Disposable implements IEditor {
         private _undoRedoService: IUndoRedoService
     ) {
         super();
-        this._openForSheetUnitId = this._param.openForSheetUnitId;
-        this._openForSheetSubUnitId = this._param.openForSheetSubUnitId;
 
         this._listenSelection();
+    }
+
+    get docSelectionRenderService() {
+        return this._param.render.with(DocSelectionRenderService);
     }
 
     private _listenSelection() {
@@ -268,6 +222,14 @@ export class Editor extends Disposable implements IEditor {
         );
     }
 
+    isFocus() {
+        const docSelectionRenderService = this._param.render.with(DocSelectionRenderService);
+        return docSelectionRenderService.isFocusing && Boolean(docSelectionRenderService.getActiveTextRange());
+    }
+
+    /**
+     * @deprecated use `IEditorService.focus` as instead. this is for internal usage.
+     */
     focus() {
         const curDoc = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC);
         const editorUnitId = this.getEditorId();
@@ -281,26 +243,26 @@ export class Editor extends Disposable implements IEditor {
         docSelectionRenderService.focus();
 
         // Step 3: Sets the selection of the last selection, and if not, to the beginning of the document.
-        const lastSelectionInfo = this._docSelectionManagerService.getDocRanges({
-            unitId: editorUnitId,
-            subUnitId: editorUnitId,
-        });
+        // const lastSelectionInfo = this._docSelectionManagerService.getDocRanges({
+        //     unitId: editorUnitId,
+        //     subUnitId: editorUnitId,
+        // });
 
-        if (lastSelectionInfo) {
-            this._docSelectionManagerService.replaceDocRanges(lastSelectionInfo, {
-                unitId: editorUnitId,
-                subUnitId: editorUnitId,
-            }, false);
-        }
-
-        this._focus = true;
+        // if (lastSelectionInfo) {
+        //     this._docSelectionManagerService.replaceDocRanges(lastSelectionInfo, {
+        //         unitId: editorUnitId,
+        //         subUnitId: editorUnitId,
+        //     }, false);
+        // }
     }
 
+    /**
+     * @deprecated use `IEditorService.blur` as instead. this is for internal usage.
+     */
     blur(): void {
         const docSelectionRenderService = this._param.render.with(DocSelectionRenderService);
 
         docSelectionRenderService.blur();
-        this._focus = false;
     }
 
     // Selects the entire content of the editor.
@@ -336,6 +298,12 @@ export class Editor extends Disposable implements IEditor {
         return this._docSelectionManagerService.getDocRanges(params);
     }
 
+    getCursorPosition(): number {
+        const selectionRanges = this.getSelectionRanges();
+
+        return selectionRanges.find((range) => range.collapsed)?.startOffset ?? -1;
+    }
+
     // get editor id.
     getEditorId(): string {
         return this._getEditorId();
@@ -348,15 +316,46 @@ export class Editor extends Disposable implements IEditor {
         return docDataModel.getSnapshot();
     }
 
+    getDocumentDataModel() {
+        return this._getDocDataModel();
+    }
+
     // Set the new document data.
     setDocumentData(data: IDocumentData, textRanges: Nullable<ITextRangeWithStyle[]>) {
         const { id } = data;
 
-        this._commandService.executeCommand(ReplaceSnapshotCommand.id, {
+        this._commandService.syncExecuteCommand(ReplaceSnapshotCommand.id, {
             unitId: id,
             snapshot: data,
             textRanges,
         });
+    }
+
+    replaceText(text: string, resetCursor = true) {
+        const data = this.getDocumentData();
+
+        this.setDocumentData(
+            {
+                ...data,
+                body: {
+                    dataStream: `${text}\r\n`,
+                    paragraphs: [{
+                        startIndex: 0,
+                    }],
+                    customRanges: [],
+                    sectionBreaks: [],
+                    tables: [],
+                    textRuns: [],
+                },
+            },
+            resetCursor
+                ? [{
+                    startOffset: text.length,
+                    endOffset: text.length,
+                    collapsed: true,
+                }]
+                : null
+        );
     }
 
     // Clear the undo redo history of this editor.
@@ -394,89 +393,24 @@ export class Editor extends Disposable implements IEditor {
         return this._param.render;
     }
 
-    isSingleChoice() {
-        return this._param.isSingleChoice ?? false;
-    }
-
-    /** @deprecated */
-    setOpenForSheetUnitId(unitId: Nullable<string>) {
-        this._openForSheetUnitId = unitId;
-    }
-
-    /** @deprecated */
-    getOpenForSheetUnitId() {
-        return this._openForSheetUnitId;
-    }
-
-    /** @deprecated */
-    setOpenForSheetSubUnitId(subUnitId: Nullable<string>) {
-        this._openForSheetSubUnitId = subUnitId;
-    }
-
-    /** @deprecated */
-    getOpenForSheetSubUnitId() {
-        return this._openForSheetSubUnitId;
-    }
-
-    /** @deprecated */
-    isValueLegality() {
-        return this._valueLegality === true;
-    }
-
-    /** @deprecated */
-    setValueLegality(state = true) {
-        this._valueLegality = state;
-    }
-
-    isFocus() {
-        return this._focus;
-    }
-
-    /** @deprecated */
-    setFocus(state = false) {
-        this._focus = state;
-    }
-
-    /** @deprecated */
-    isSingle() {
-        return this._param.isSingle === true || this.onlyInputRange();
-    }
-
     isReadOnly() {
         return this._param.readonly === true;
-    }
-
-    /** @deprecated */
-    onlyInputContent() {
-        return this._param.onlyInputContent === true;
-    }
-
-    /** @deprecated */
-    onlyInputFormula() {
-        return this._param.onlyInputFormula === true;
-    }
-
-    /** @deprecated */
-    onlyInputRange() {
-        return this._param.onlyInputRange === true;
     }
 
     getBoundingClientRect() {
         return this._param.editorDom.getBoundingClientRect();
     }
 
+    get editorDOM() {
+        return this._param.editorDom;
+    }
+
     isVisible() {
         return this._param.visible;
     }
 
-    /** @deprecated */
     isSheetEditor() {
-        return this._param.isSheetEditor === true;
-    }
-
-    /** @deprecated */
-    isFormulaEditor() {
-        return this._param.isFormulaEditor === true;
+        return isInternalEditorID(this._getEditorId());
     }
 
     /**
@@ -504,42 +438,6 @@ export class Editor extends Disposable implements IEditor {
             ...this._param,
             ...param,
         };
-    }
-
-    /**
-     * @deprecated.
-     */
-    verticalAlign() {
-        const docDataModel = this._getDocDataModel();
-
-        if (docDataModel == null) {
-            return;
-        }
-
-        const { width, height } = this._param.editorDom.getBoundingClientRect();
-
-        if (height === 0 || width === 0) {
-            return;
-        }
-
-        if (!this.isSingle()) {
-            docDataModel.updateDocumentDataPageSize(width, undefined);
-            return;
-        }
-
-        let fontSize = DEFAULT_STYLES.fs;
-
-        if (this._param.canvasStyle?.fontSize) {
-            fontSize = this._param.canvasStyle.fontSize;
-        }
-
-        const top = (height - (fontSize * 4 / 3)) / 2 - 2;
-
-        docDataModel.updateDocumentDataMargin({
-            t: top < 0 ? 0 : top,
-        });
-
-        docDataModel.updateDocumentDataPageSize(undefined, undefined);
     }
 
     /**

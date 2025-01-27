@@ -17,6 +17,9 @@
 import { FUniver } from '@univerjs/core';
 import { FFormula } from './f-formula';
 
+/**
+ * @ignore
+ */
 export interface IFUniverEngineFormulaMixin {
     getFormula(): FFormula;
 }

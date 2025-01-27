@@ -27,6 +27,9 @@ export interface IScrollBarProps {
     thumbBackgroundColor?: string;
     thumbHoverBackgroundColor?: string;
     thumbActiveBackgroundColor?: string;
+    /**
+     * The thickness of a scrolling bar.
+     */
     barSize?: number;
     barBackgroundColor?: string;
     barBorder?: number;
@@ -36,6 +39,9 @@ export interface IScrollBarProps {
     enableVertical?: boolean;
 
     mainScene?: Scene;
+
+    minThumbSizeH?: number;
+    minThumbSizeV?: number;
 }
 
 export abstract class BaseScrollBar extends Disposable {

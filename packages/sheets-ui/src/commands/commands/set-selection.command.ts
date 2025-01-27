@@ -58,11 +58,15 @@ export interface IMoveSelectionCommandParams {
     direction: Direction;
     jumpOver?: JumpOver;
     nextStep?: number;
+    extra?: string;
+    fromCurrentSelection?: boolean;
 }
 
 export interface IMoveSelectionEnterAndTabCommandParams {
     direction: Direction;
     keycode: KeyCode;
+    extra?: string;
+    fromCurrentSelection?: boolean;
 }
 
 /**
@@ -71,7 +75,7 @@ export interface IMoveSelectionEnterAndTabCommandParams {
 export const MoveSelectionCommand: ICommand<IMoveSelectionCommandParams> = {
     id: 'sheet.command.move-selection',
     type: CommandType.COMMAND,
-    handler: async (accessor, params) => {
+    handler: (accessor, params) => {
         if (!params) {
             return false;
         }
@@ -80,12 +84,12 @@ export const MoveSelectionCommand: ICommand<IMoveSelectionCommandParams> = {
         if (!target) return false;
 
         const { workbook, worksheet } = target;
-        const selection = getSelectionsService(accessor).getCurrentLastSelection();
+        const selection = getSelectionsService(accessor, params.fromCurrentSelection).getCurrentLastSelection();
         if (!selection) {
             return false;
         }
 
-        const { direction, jumpOver } = params;
+        const { direction, jumpOver, extra } = params;
         const { range, primary } = selection;
         const startRange = getStartRange(range, primary, direction);
 
@@ -129,6 +133,7 @@ export const MoveSelectionCommand: ICommand<IMoveSelectionCommandParams> = {
             subUnitId: worksheet.getSheetId(),
             selections,
             type: SelectionMoveType.MOVE_END,
+            extra,
         } as ISetSelectionsOperationParams);
         return rs;
     },
@@ -140,9 +145,8 @@ export const MoveSelectionCommand: ICommand<IMoveSelectionCommandParams> = {
 export const MoveSelectionEnterAndTabCommand: ICommand<IMoveSelectionEnterAndTabCommandParams> = {
     id: 'sheet.command.move-selection-enter-tab',
     type: CommandType.COMMAND,
-
     // eslint-disable-next-line max-lines-per-function, complexity
-    handler: async (accessor, params) => {
+    handler: (accessor, params) => {
         if (!params) {
             return false;
         }
@@ -300,6 +304,7 @@ export const MoveSelectionEnterAndTabCommand: ICommand<IMoveSelectionEnterAndTab
             subUnitId: sheetId,
             type: SelectionMoveType.MOVE_END,
             selections,
+            extra: params.extra,
         });
         const renderManagerService = accessor.get(IRenderManagerService);
         const selectionService = renderManagerService.getRenderById(unitId)?.with(ISheetSelectionRenderService);
@@ -312,6 +317,7 @@ export interface IExpandSelectionCommandParams {
     direction: Direction;
     jumpOver?: JumpOver;
     nextStep?: number;
+    extra?: string;
 }
 
 // Though the command's name is "expand-selection", it actually does not expand but shrink the selection.
@@ -319,7 +325,7 @@ export interface IExpandSelectionCommandParams {
 export const ExpandSelectionCommand: ICommand<IExpandSelectionCommandParams> = {
     id: 'sheet.command.expand-selection',
     type: CommandType.COMMAND,
-    handler: async (accessor, params) => {
+    handler: (accessor, params) => {
         if (!params) return false;
 
         const target = getSheetCommandTarget(accessor.get(IUniverInstanceService));
@@ -331,7 +337,7 @@ export const ExpandSelectionCommand: ICommand<IExpandSelectionCommandParams> = {
         if (!selection) return false;
 
         const { range: startRange, primary } = selection;
-        const { jumpOver, direction } = params;
+        const { jumpOver, direction, extra } = params;
 
         const isShrink = checkIfShrink(selection, direction, worksheet);
         const destRange = !isShrink
@@ -352,7 +358,7 @@ export const ExpandSelectionCommand: ICommand<IExpandSelectionCommandParams> = {
             return false;
         }
 
-        return accessor.get(ICommandService).executeCommand(SetSelectionsOperation.id, {
+        return accessor.get(ICommandService).syncExecuteCommand(SetSelectionsOperation.id, {
             unitId,
             subUnitId,
             type: SelectionMoveType.ONLY_SET,
@@ -362,6 +368,7 @@ export const ExpandSelectionCommand: ICommand<IExpandSelectionCommandParams> = {
                     primary, // this remains unchanged
                 },
             ],
+            extra,
         });
     },
 };

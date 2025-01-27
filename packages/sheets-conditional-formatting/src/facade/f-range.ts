@@ -34,11 +34,14 @@ import {
 import { FRange } from '@univerjs/sheets/facade';
 import { FConditionalFormattingBuilder } from './conditional-formatting-builder';
 
+/**
+ * @ignore
+ */
 export interface IFRangeConditionalFormattingMixin {
 
     /**
      * Gets all the conditional formatting for the current range
-     * @return {*}  {IConditionFormattingRule[]}
+     * @returns {*}  {IConditionFormattingRule[]}
      * @memberof IFWorksheetConditionalFormattingMixin
      * @example
      * ```ts
@@ -51,7 +54,7 @@ export interface IFRangeConditionalFormattingMixin {
     getConditionalFormattingRules(): IConditionFormattingRule[];
     /**
      * Creates a constructor for conditional formatting
-     * @return {*}  {ConditionalFormatRuleBuilder}
+     * @returns {*}  {ConditionalFormatRuleBuilder}
      * @memberof IFWorksheetConditionalFormattingMixin
      * @example
      * ```ts
@@ -81,7 +84,6 @@ export interface IFRangeConditionalFormattingMixin {
 
     /**
      * Delete conditional format according to `cfId`
-     *
      * @param {string} cfId
      * @returns {FRange} Returns the current range instance for method chaining
      * @memberof IFRangeConditionalFormattingMixin

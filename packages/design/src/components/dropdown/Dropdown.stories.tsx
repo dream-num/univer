@@ -38,14 +38,27 @@ export const Playground = {
             <div className="univer-relative">
                 <DropdownProvider>
                     <DropdownTrigger>
-                        <a
-                            className="univer-cursor-pointer univer-border univer-rounded-lg univer-border-gray-200 univer-px-4 univer-py-2 univer-border-solid hover:univer-bg-gray-100 univer-transition-all"
-                        >
+                        <a className="univer-cursor-pointer univer-border univer-rounded-lg univer-border-gray-200 univer-px-4 univer-py-2 univer-border-solid hover:univer-bg-gray-100 univer-transition-all">
                             Click me
                         </a>
                     </DropdownTrigger>
                     <DropdownOverlay>
-                        <div className="univer-text-blue-500">Hello Univer</div>
+                        <div className="univer-text-blue-500">
+                            Hello Univer
+                            <DropdownProvider>
+                                <DropdownTrigger>
+                                    <a>Nested Dropdown</a>
+                                </DropdownTrigger>
+                                <DropdownOverlay>
+                                    <div className="univer-text-cyan-700">
+                                        <div>Nested Content</div>
+                                        <div>Nested Content</div>
+                                        <div>Nested Content</div>
+                                        <div>Nested Content</div>
+                                    </div>
+                                </DropdownOverlay>
+                            </DropdownProvider>
+                        </div>
                     </DropdownOverlay>
                 </DropdownProvider>
             </div>

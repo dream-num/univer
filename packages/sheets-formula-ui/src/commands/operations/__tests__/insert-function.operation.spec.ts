@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { Injector, Univer } from '@univerjs/core';
+import type { ICellData, Injector, Nullable, Univer } from '@univerjs/core';
 import type { IInsertFunctionOperationParams } from '../insert-function.operation';
-import { ICommandService, IUniverInstanceService, RANGE_TYPE, RedoCommand, UndoCommand } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, ObjectMatrix, RANGE_TYPE, RedoCommand, UndoCommand } from '@univerjs/core';
 import {
     SetRangeValuesCommand,
     SetRangeValuesMutation,
@@ -131,6 +131,84 @@ describe('Test insert function operation', () => {
                 expect(values?.[0]?.[0]?.f).toStrictEqual('=SUM(B2)');
                 expect(values?.[0]?.[0]?.si).toStrictEqual(values?.[0]?.[1]?.si);
             });
+
+            it('insert function, the range cell has number value', async () => {
+                const selectionManager = get(SheetsSelectionsService);
+                const range = {
+                    startRow: 1,
+                    startColumn: 0,
+                    endRow: 4,
+                    endColumn: 3,
+                    rangeType: RANGE_TYPE.NORMAL,
+                };
+                // A2:D5
+                selectionManager.addSelections([
+                    {
+                        range,
+                        primary: null,
+                        style: null,
+                    },
+                ]);
+                const params: IInsertFunctionOperationParams = {
+                    value: 'SUM',
+                };
+                const cellMatrix = new ObjectMatrix<Nullable<ICellData>>({
+                    1: {
+                        0: { v: 1, t: 2 },
+                        1: { v: 2, t: 2 },
+                        2: { v: 3, t: 2 },
+                    },
+                    2: {
+                        0: { v: 2, t: 2 },
+                        1: { v: 3, t: 2 },
+                        3: { v: 5, t: 2 },
+                    },
+                    3: {
+                        0: { v: 3, t: 2 },
+                        2: { v: 5, t: 2 },
+                        3: { v: 6, t: 2 },
+                    },
+                    4: {
+                        1: { v: 5, t: 2 },
+                        2: { v: 6, t: 2 },
+                        3: { v: 7, t: 2 },
+                    },
+                });
+                await commandService.executeCommand(SetRangeValuesCommand.id, {
+                    value: cellMatrix.getData(),
+                    sheetId: 'sheet1',
+                    range,
+                });
+
+                function getValues(range: { startRow: number; startColumn: number; endRow: number; endColumn: number }) {
+                    return get(IUniverInstanceService)
+                        .getUniverSheetInstance('test')
+                        ?.getSheetBySheetId('sheet1')
+                        ?.getRange(range.startRow, range.startColumn, range.endRow, range.endColumn)
+                        .getValues();
+                }
+
+                let values = getValues({ startRow: 1, startColumn: 0, endRow: 4, endColumn: 3 });
+                expect(values).toStrictEqual([
+                    [{ v: 1, t: 2 }, { v: 2, t: 2 }, { v: 3, t: 2 }, null],
+                    [{ v: 2, t: 2 }, { v: 3, t: 2 }, null, { v: 5, t: 2 }],
+                    [{ v: 3, t: 2 }, null, { v: 5, t: 2 }, { v: 6, t: 2 }],
+                    [null, { v: 5, t: 2 }, { v: 6, t: 2 }, { v: 7, t: 2 }],
+                ]);
+
+                values = getValues({ startRow: 5, startColumn: 0, endRow: 5, endColumn: 3 });
+                expect(values).toStrictEqual([
+                    [null, null, null, null],
+                ]);
+
+                // insert function
+                expect(await commandService.executeCommand(InsertFunctionOperation.id, params)).toBeTruthy();
+
+                values = getValues({ startRow: 5, startColumn: 0, endRow: 5, endColumn: 3 });
+                expect(values).toStrictEqual([
+                    [{ f: '=SUM(A2:A5)' }, { f: '=SUM(B2:B5)' }, { f: '=SUM(C2:C5)' }, { f: '=SUM(D2:D5)' }],
+                ]);
+            });
         });
 
         describe('fault situations', () => {
@@ -217,6 +295,7 @@ describe('Test insert function operation', () => {
                 expect(isSingleCell(range)).toBeFalsy();
             });
         });
+
         describe('function isMultiRowsColumnsRange', () => {
             it('should return true when startRow !== endRow and startColumn !== endColumn', () => {
                 const range = { startRow: 1, startColumn: 1, endRow: 2, endColumn: 2 };

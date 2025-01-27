@@ -108,10 +108,10 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
             return (
                 <div
                     className={clsx(styles.toolbarItemSelectButton, `
-                      univer-pr-5 univer-h-6 univer-group univer-transition-colors
+                      univer-group univer-h-6 univer-pr-5 univer-transition-colors
                       hover:univer-bg-gray-100
                     `, {
-                        'univer-cursor-not-allowed univer-text-gray-200 univer-pointer-events-none': disabled,
+                        'univer-pointer-events-none univer-cursor-not-allowed univer-text-gray-200': disabled,
                     })}
                     data-disabled={disabled}
                 >
@@ -121,6 +121,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
                           hover:univer-bg-gray-200
                         `, {
                             'univer-bg-gray-200': activated,
+                            'univer-bg-gray-50': activated && disabled,
                         })}
                         onClick={handleClick}
                     >
@@ -148,13 +149,13 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
                     >
                         <div
                             className={clsx(`
-                              univer-absolute univer-top-0 univer-right-0 univer-box-border text-gray-400
-                              univer-transition-colors univer-w-5 univer-flex univer-justify-center univer-items-center
-                              univer-h-6
+                              univer-absolute univer-right-0 univer-top-0 univer-box-border text-gray-400 univer-flex
+                              univer-h-6 univer-w-5 univer-items-center univer-justify-center univer-transition-colors
                               hover:univer-bg-gray-200
                             `, {
-                                'univer-cursor-not-allowed univer-text-gray-400 univer-pointer-events-none': disabled,
+                                'univer-pointer-events-none univer-cursor-not-allowed univer-text-gray-400': disabled,
                                 'univer-bg-gray-200': activated,
+                                'univer-bg-gray-50': activated && disabled,
                             })}
                             data-disabled={disabled}
                         >
@@ -179,7 +180,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
                 >
                     <div
                         className={clsx(styles.toolbarItemSelect, {
-                            'univer-cursor-not-allowed univer-text-gray-200 univer-pointer-events-none': disabled,
+                            'univer-pointer-events-none univer-cursor-not-allowed univer-text-gray-200': disabled,
                             [styles.toolbarItemSelectActivated]: activated,
                         })}
                     >
@@ -192,7 +193,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
                         />
                         <div
                             className={clsx(styles.toolbarItemSelectArrow, {
-                                'univer-cursor-not-allowed univer-text-gray-200 univer-pointer-events-none': disabled,
+                                'univer-pointer-events-none univer-cursor-not-allowed univer-text-gray-200': disabled,
                             })}
                         >
                             <MoreDownSingle className="univer-text-gray-400" />
@@ -207,23 +208,21 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
         const isCustomComponent = componentManager.get(typeof label === 'string' ? label : label?.name ?? '');
 
         return (
-            <span>
-                <ToolbarButton
-                    noIcon={!icon}
-                    active={activated}
-                    disabled={disabled}
-                    onClick={() => executeCommand(props.commandId ?? props.id)}
-                    onDoubleClick={() => props.subId && executeCommand(props.subId)}
-                >
-                    {isCustomComponent
-                        ? (
-                            <CustomLabel title={title!} value={value} label={label} />
-                        )
-                        : (
-                            icon ? <CustomLabel icon={icon} /> : <CustomLabel title={title!} />
-                        )}
-                </ToolbarButton>
-            </span>
+            <ToolbarButton
+                noIcon={!icon}
+                active={activated}
+                disabled={disabled}
+                onClick={() => executeCommand(props.commandId ?? props.id)}
+                onDoubleClick={() => props.subId && executeCommand(props.subId)}
+            >
+                {isCustomComponent
+                    ? (
+                        <CustomLabel title={title!} value={value} label={label} />
+                    )
+                    : (
+                        icon ? <CustomLabel icon={icon} /> : <CustomLabel title={title!} />
+                    )}
+            </ToolbarButton>
         );
     }
 

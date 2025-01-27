@@ -15,10 +15,14 @@
  */
 
 import './f-workbook';
+import './f-worksheet';
 import './f-range';
+import './f-event';
+import './f-univer';
 
-export { FWorkbookHyperLinkMixin } from './f-workbook';
-
-// eslint-disable-next-line perfectionist/sort-exports
+export type * from './f-event';
 export type * from './f-range';
+export type * from './f-univer';
+export { FWorkbookHyperLinkMixin } from './f-workbook';
 export type * from './f-workbook';
+export type * from './f-worksheet';

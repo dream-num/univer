@@ -1,7 +1,7 @@
 {
     "name": "@univerjs/facade",
-    "version": "0.5.3",
-    "private": false,
+    "version": "0.6.0-alpha.0",
+    "private": true,
     "description": "",
     "author": "DreamNum <developer@univer.ai>",
     "license": "Apache-2.0",
@@ -75,6 +75,7 @@
         "@univerjs/sheets-numfmt": "workspace:*",
         "@univerjs/sheets-thread-comment": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
+        "@univerjs/sheets-zen-editor": "workspace:*",
         "@univerjs/ui": "workspace:*"
     },
     "devDependencies": {
@@ -88,8 +89,8 @@
         "jest-canvas-mock": "^2.5.2",
         "jsdom": "^24.1.1",
         "rxjs": "^7.8.1",
-        "typescript": "^5.7.2",
-        "vite": "^6.0.6",
-        "vitest": "^2.1.8"
+        "typescript": "^5.7.3",
+        "vite": "^6.0.11",
+        "vitest": "^3.0.4"
     }
 }

@@ -17,7 +17,16 @@
 export { UniverSheetsPlugin } from './sheets-plugin';
 
 // #region services
-export { COMMAND_LISTENER_SKELETON_CHANGE, COMMAND_LISTENER_VALUE_CHANGE } from './basics/const/command-listener-const';
+export {
+    COMMAND_LISTENER_SKELETON_CHANGE,
+    COMMAND_LISTENER_VALUE_CHANGE,
+    type CommandListenerSkeletonChange,
+    type CommandListenerValueChange,
+    getSkeletonChangedEffectedRange,
+    getValueChangedEffectedRange,
+    SheetSkeletonChangeType,
+    SheetValueChangeType,
+} from './basics/const/command-listener-const';
 export {
     type IAddWorksheetMergeMutationParams,
     type IDeleteRangeMutationParams,
@@ -47,6 +56,7 @@ export { type IUniverSheetsConfig } from './controllers/config.schema';
 export { MAX_CELL_PER_SHEET_KEY } from './controllers/config/config';
 export { BorderStyleManagerService, type IBorderInfo } from './services/border-style-manager.service';
 export { SheetRangeThemeService } from './services/range-theme-service';
+export type { IRangeThemeStyleJSON } from './model/range-theme-util';
 export * from './services/permission/permission-point';
 export { WorksheetPermissionService } from './services/permission/worksheet-permission/worksheet-permission.service';
 export { WorkbookPermissionService } from './services/permission/workbook-permission/workbook-permission.service';
@@ -101,6 +111,8 @@ export { ExclusiveRangeService, IExclusiveRangeService } from './services/exclus
 // permission
 export { defaultWorksheetPermissionPoint, getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel } from './services/permission';
 export type { IWorksheetProtectionRule } from './services/permission/type';
+export { SheetPermissionCheckController } from './controllers/permission/sheet-permission-check.controller';
+export { SheetPermissionInitController } from './controllers/permission/sheet-permission-init.controller';
 export { WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from './services/permission/worksheet-permission';
 export { defaultWorkbookPermissionPoints, getAllWorkbookPermissionPoint } from './services/permission/workbook-permission';
 export {

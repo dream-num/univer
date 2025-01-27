@@ -15,10 +15,11 @@
  */
 
 import type { ISelectionCell, Nullable, Workbook } from '@univerjs/core';
+import type { Observable } from 'rxjs';
 import type { ISelectionWithStyle } from '../../basics/selection';
-import { Disposable } from '@univerjs/core';
 
-import { BehaviorSubject, Subject } from 'rxjs';
+import { Disposable } from '@univerjs/core';
+import { BehaviorSubject, merge, Subject } from 'rxjs';
 import { SelectionMoveType } from './type';
 
 /**
@@ -43,6 +44,8 @@ export class WorkbookSelectionModel extends Disposable {
     private readonly _selectionSet$ = new BehaviorSubject<ISelectionWithStyle[]>([]);
     readonly selectionSet$ = this._selectionSet$.asObservable();
 
+    selectionChanged$: Observable<ISelectionWithStyle[]>;
+
     private readonly _beforeSelectionMoveEnd$ = new BehaviorSubject<ISelectionWithStyle[]>([]);
     readonly beforeSelectionMoveEnd$ = this._beforeSelectionMoveEnd$.asObservable();
 
@@ -50,6 +53,7 @@ export class WorkbookSelectionModel extends Disposable {
         private readonly _workbook: Workbook
     ) {
         super();
+        this.selectionChanged$ = merge(this._selectionMoveEnd$, this._selectionSet$);
     }
 
     override dispose(): void {
@@ -134,7 +138,7 @@ export class WorkbookSelectionModel extends Disposable {
     /** Clear all selections in this workbook. */
     clear(): void {
         this._worksheetSelections.clear();
-        this._eventAfterSetSelections([]);
+        this._selectionSet$.next([]);
     }
 
     private _getCurrentSelections(): ISelectionWithStyle[] {
@@ -144,9 +148,5 @@ export class WorkbookSelectionModel extends Disposable {
     getCurrentLastSelection(): Readonly<Nullable<ISelectionWithStyle & { primary: ISelectionCell }>> {
         const selectionData = this._getCurrentSelections();
         return selectionData[selectionData.length - 1] as Readonly<Nullable<ISelectionWithStyle & { primary: ISelectionCell }>>;
-    }
-
-    private _eventAfterSetSelections(selections: ISelectionWithStyle[]): void {
-        this._selectionSet$.next(selections);
     }
 }

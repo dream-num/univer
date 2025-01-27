@@ -34,3 +34,5 @@ export {
     type IDrawingVisibleParam,
     type IUnitDrawingService,
 } from './services/drawing-manager.service';
+
+export { SetDrawingSelectedOperation } from './commands/operations/set-drawing-selected.operation';

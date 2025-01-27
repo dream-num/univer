@@ -15,7 +15,7 @@
  */
 
 import type { ICellWithCoord, IRangeWithCoord, Nullable, ThemeService } from '@univerjs/core';
-import type { IObjectFullState, IRectProps, Scene } from '@univerjs/engine-render';
+import type { IObjectFullState, IRectProps, Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { ISelectionStyle, ISelectionWidgetConfig, ISelectionWithCoord } from '@univerjs/sheets';
 import type { ISelectionShapeExtensionOption } from './selection-shape-extension';
 import { ColorKit, Disposable, RANGE_TYPE, toDisposable } from '@univerjs/core';
@@ -680,7 +680,11 @@ export class SelectionControl extends Disposable {
      * Update range and primary range and style.
      * @param selectionWthCoord
      */
-    updateRangeBySelectionWithCoord(selectionWthCoord: ISelectionWithCoord) {
+    updateRangeBySelectionWithCoord(selectionWthCoord: ISelectionWithCoord, sk?: SpreadsheetSkeleton) {
+        if (sk) {
+            this._rowHeaderWidth = sk.getWorksheetConfig().rowHeader.width;
+            this._columnHeaderHeight = sk.getWorksheetConfig().columnHeader.height;
+        }
         this._selectionRenderModel.setValue(selectionWthCoord.rangeWithCoord, selectionWthCoord.primaryWithCoord);
         // if primaryWithCoord is undefined, that means keeps the previous value.
         this._showAutoFill = selectionWthCoord.primaryWithCoord !== null;

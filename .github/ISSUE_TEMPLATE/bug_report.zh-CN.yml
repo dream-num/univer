@@ -1,6 +1,6 @@
 name: 🐛 Bug 报告
 description: 尽管我们提供了中文 Bug 报告的入口，但还是建议您使用英语描述问题，这可以让更多的人来帮助您。
-labels: bug
+type: Bug
 title: '[Bug] '
 
 body:
@@ -29,7 +29,7 @@ body:
           description: |
               **请注意，请务必认真提供复现并详细描述复现步骤，如果您无法提供复现链接，你的问题有可能会被直接关闭。**
 
-              我们提供了 [在线模板](https://stackblitz.com/edit/univer-sheets-vite)，如果您的问题可以在这个模板中复现，那么请在这里提供复现链接。
+              我们提供了 [Vite 在线模板](https://stackblitz.com/edit/univer-sheets-vite) 和 [UMD 在线模板](https://stackblitz.com/edit/univer-sheets-umd)，如果您的问题可以在这个模板中复现，那么请在这里提供复现链接。
               我们也提供了一些其他你可能会用到的 [模板仓库](https://github.com/awesome-univer)，你可以选择其中一个来复现你的问题。
               如果您的问题无法在模板中复现，请提供尽可能详细的复现步骤。
       validations:

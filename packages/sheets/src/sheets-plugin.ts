@@ -16,7 +16,7 @@
 
 import type { Dependency } from '@univerjs/core';
 import type { IUniverSheetsConfig } from './controllers/config.schema';
-import { DependentOn, IConfigService, Inject, Injector, IS_ROW_STYLE_PRECEDE_COLUMN_STYLE, merge, mergeOverrideWithDependencies, Plugin, registerDependencies, touchDependencies, UniverInstanceType } from '@univerjs/core';
+import { AUTO_HEIGHT_FOR_MERGED_CELLS, DependentOn, IConfigService, Inject, Injector, IS_ROW_STYLE_PRECEDE_COLUMN_STYLE, merge, mergeOverrideWithDependencies, Plugin, registerDependencies, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { BasicWorksheetController } from './controllers/basic-worksheet.controller';
 import { CalculateResultApplyController } from './controllers/calculate-result-apply.controller';
@@ -25,11 +25,15 @@ import { defaultPluginConfig, SHEETS_PLUGIN_CONFIG_KEY } from './controllers/con
 import { DefinedNameDataController } from './controllers/defined-name-data.controller';
 import { MergeCellController } from './controllers/merge-cell.controller';
 import { NumberCellDisplayController } from './controllers/number-cell.controller';
+import { SheetPermissionCheckController } from './controllers/permission/sheet-permission-check.controller';
+import { SheetPermissionInitController } from './controllers/permission/sheet-permission-init.controller';
+import { SheetPermissionViewModelController } from './controllers/permission/sheet-permission-view-model.controller';
+
 import { RangeProtectionRenderModel } from './model/range-protection-render.model';
 import { RangeProtectionRuleModel } from './model/range-protection-rule.model';
 import { RangeProtectionCache } from './model/range-protection.cache';
-import { SheetRangeThemeModel } from './model/range-theme-model';
 
+import { SheetRangeThemeModel } from './model/range-theme-model';
 import { BorderStyleManagerService } from './services/border-style-manager.service';
 import { ExclusiveRangeService, IExclusiveRangeService } from './services/exclusive-range/exclusive-range-service';
 import { NumfmtService } from './services/numfmt/numfmt.service';
@@ -76,6 +80,9 @@ export class UniverSheetsPlugin extends Plugin {
         if (this._config?.isRowStylePrecedeColumnStyle) {
             this._configService.setConfig(IS_ROW_STYLE_PRECEDE_COLUMN_STYLE, true);
         }
+        if (this._config?.autoHeightForMergedCells) {
+            this._configService.setConfig(AUTO_HEIGHT_FOR_MERGED_CELLS, true);
+        }
     }
 
     private _initDependencies(): void {
@@ -99,6 +106,9 @@ export class UniverSheetsPlugin extends Plugin {
             [WorksheetPermissionService],
             [WorksheetProtectionRuleModel],
             [WorksheetProtectionPointModel],
+            [SheetPermissionViewModelController],
+            [SheetPermissionInitController],
+            [SheetPermissionCheckController],
 
             // range theme
             [SheetRangeThemeModel],
@@ -125,6 +135,7 @@ export class UniverSheetsPlugin extends Plugin {
             [SheetInterceptorService],
             [RangeProtectionService],
             [IExclusiveRangeService],
+            [SheetPermissionInitController],
         ]);
     }
 
@@ -134,6 +145,7 @@ export class UniverSheetsPlugin extends Plugin {
             [MergeCellController],
             [WorkbookPermissionService],
             [WorksheetPermissionService],
+            [SheetPermissionViewModelController],
         ]);
     }
 
@@ -152,6 +164,7 @@ export class UniverSheetsPlugin extends Plugin {
             [RangeProtectionRenderModel],
             [RangeProtectionRefRangeService],
             [RefRangeService],
+            [SheetPermissionCheckController],
         ]);
     }
 }

@@ -16,6 +16,7 @@
 
 import type { IAccessor, IRange, Nullable, Workbook } from '@univerjs/core';
 import type { IImageData, IImageIoServiceParam } from '@univerjs/drawing';
+import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import type { ISheetLocationBase, WorkbookSelectionModel } from '@univerjs/sheets';
 import type { ISheetDrawing, ISheetDrawingPosition } from '@univerjs/sheets-drawing';
 import type { IInsertDrawingCommandParams, ISetDrawingCommandParams } from '../commands/commands/interfaces';
@@ -23,8 +24,8 @@ import type { ISetDrawingArrangeCommandParams } from '../commands/commands/set-d
 import { BooleanNumber, BuildTextUtils, createDocumentModelWithStyle, Disposable, DrawingTypeEnum, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, Inject, Injector, LocaleService, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, WrapTextType } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
 import { docDrawingPositionToTransform } from '@univerjs/docs-ui';
-import { DRAWING_IMAGE_ALLOW_IMAGE_LIST, DRAWING_IMAGE_ALLOW_SIZE, DRAWING_IMAGE_COUNT_LIMIT, DRAWING_IMAGE_HEIGHT_LIMIT, DRAWING_IMAGE_WIDTH_LIMIT, getImageSize, IDrawingManagerService, IImageIoService, ImageUploadStatusType } from '@univerjs/drawing';
-import { type IRenderContext, IRenderManagerService, type IRenderModule } from '@univerjs/engine-render';
+import { DRAWING_IMAGE_ALLOW_IMAGE_LIST, DRAWING_IMAGE_ALLOW_SIZE, DRAWING_IMAGE_COUNT_LIMIT, DRAWING_IMAGE_HEIGHT_LIMIT, DRAWING_IMAGE_WIDTH_LIMIT, getImageSize, IDrawingManagerService, IImageIoService, ImageUploadStatusType, SetDrawingSelectedOperation } from '@univerjs/drawing';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { SetRangeValuesCommand, SheetsSelectionsService } from '@univerjs/sheets';
 import { ISheetDrawingService } from '@univerjs/sheets-drawing';
 import { attachRangeWithCoord, ISheetSelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
@@ -36,13 +37,29 @@ import { SetDrawingArrangeCommand } from '../commands/commands/set-drawing-arran
 import { SetSheetDrawingCommand } from '../commands/commands/set-sheet-drawing.command';
 import { UngroupSheetDrawingCommand } from '../commands/commands/ungroup-sheet-drawing.command';
 
-function rotatedBoundingBox(width: number, height: number, angleDegrees: number) {
-    const angle = angleDegrees * Math.PI / 180; // 将角度转换为弧度
+/**
+ * Calculate the bounding box after rotation
+ * @param {number} width  Width
+ * @param {number} height Height
+ * @param {number} angleDegrees Rotation angle in degrees (0-360)
+ * @returns {{ rotatedWidth: number; rotatedHeight: number }} Rotated width and height
+ */
+function rotatedBoundingBox(width: number, height: number, angleDegrees: number): { rotatedWidth: number; rotatedHeight: number } {
+    const angle = angleDegrees * Math.PI / 180; // Convert angle to radians
     const rotatedWidth = Math.abs(width * Math.cos(angle)) + Math.abs(height * Math.sin(angle));
     const rotatedHeight = Math.abs(width * Math.sin(angle)) + Math.abs(height * Math.cos(angle));
     return { rotatedWidth, rotatedHeight };
 }
 
+/**
+ * Get the size of the drawing within the cell
+ * @param {IAccessor} accessor Accessor
+ * @param {ISheetLocationBase} location Cell location
+ * @param {number} originImageWidth Original image width
+ * @param {number} originImageHeight Original image height
+ * @param {number} angle Rotation angle in degrees (0-360)
+ * @returns {{ width: number; height: number }} Drawing size
+ */
 export function getDrawingSizeByCell(
     accessor: IAccessor,
     location: ISheetLocationBase,
@@ -120,7 +137,7 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
             return false;
         }
 
-        files.forEach(async (file) => await this._insertFloatImage(file));
+        files.forEach(async (file) => await this.insertFloatImageByFile(file));
         return true;
     }
 
@@ -137,7 +154,7 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
         return false;
     }
 
-    private async _insertFloatImage(file: File) {
+    async insertFloatImageByFile(file: File) {
         let imageParam: Nullable<IImageIoServiceParam>;
 
         try {
@@ -198,7 +215,7 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
             sheetTransform,
         };
 
-        this._commandService.executeCommand(InsertSheetDrawingCommand.id, {
+        return this._commandService.executeCommand(InsertSheetDrawingCommand.id, {
             unitId,
             drawings: [sheetDrawingParam],
         } as IInsertDrawingCommandParams);
@@ -477,7 +494,7 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
         this.disposeWithMe(this._drawingManagerService.featurePluginGroupUpdate$.subscribe((params) => {
             this._commandService.executeCommand(GroupSheetDrawingCommand.id, params);
             const { unitId, subUnitId, drawingId } = params[0].parent;
-            this._drawingManagerService.focusDrawing([{ unitId, subUnitId, drawingId }]);
+            this._commandService.syncExecuteCommand(SetDrawingSelectedOperation.id, [{ unitId, subUnitId, drawingId }]);
         }));
 
         this.disposeWithMe(this._drawingManagerService.featurePluginUngroupUpdate$.subscribe((params) => {

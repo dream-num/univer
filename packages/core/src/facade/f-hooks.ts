@@ -25,6 +25,9 @@ import { IUndoRedoService, RedoCommand, UndoCommand } from '../services/undoredo
 import { toDisposable } from '../shared/lifecycle';
 import { FBase } from './f-base';
 
+/**
+ * @hideconstructor
+ */
 export class FHooks extends FBase {
     constructor(
         @Inject(Injector) protected readonly _injector: Injector,
@@ -34,46 +37,36 @@ export class FHooks extends FBase {
     }
 
     /**
-     * The onStarting event is fired when lifecycle stage is Starting.
-     * @param callback Callback function that will be called when the event is fired
-     * @returns A disposable object that can be used to unsubscribe from the event
+     * @deprecated use `univerAPI.addEvent(univerAPI.Event.LifecycleChanged)` as instead
      */
     onStarting(callback: () => void): IDisposable {
         return toDisposable(this._lifecycleService.lifecycle$.pipe(filter((lifecycle) => lifecycle === LifecycleStages.Starting)).subscribe(callback));
     }
 
     /**
-     * The onReady event is fired when lifecycle stage is Ready.
-     * @param callback Callback function that will be called when the event is fired
-     * @returns A disposable object that can be used to unsubscribe from the event
+     * @deprecated use `univerAPI.addEvent(univerAPI.Event.LifecycleChanged)` as instead
      */
     onReady(callback: () => void): IDisposable {
         return toDisposable(this._lifecycleService.lifecycle$.pipe(filter((lifecycle) => lifecycle === LifecycleStages.Ready)).subscribe(callback));
     }
 
     /**
-     * The onRendered event is fired when lifecycle stage is Rendered.
-     * @param callback Callback function that will be called when the event is fired
-     * @returns A disposable object that can be used to unsubscribe from the event
+     * @deprecated use `univerAPI.addEvent(univerAPI.Event.LifecycleChanged, () => {})` as instead
      */
     onRendered(callback: () => void): IDisposable {
         return toDisposable(this._lifecycleService.lifecycle$.pipe(filter((lifecycle) => lifecycle === LifecycleStages.Rendered)).subscribe(callback));
     }
 
     /**
-     * The onSteady event is fired when lifecycle stage is Steady.
-     * @param callback Callback function that will be called when the event is fired
-     * @returns A disposable object that can be used to unsubscribe from the event
+     * @deprecated use `univerAPI.addEvent(univerAPI.Event.LifecycleChanged, () => {})` as instead
      */
     onSteady(callback: () => void): IDisposable {
         return toDisposable(this._lifecycleService.lifecycle$.pipe(filter((lifecycle) => lifecycle === LifecycleStages.Steady)).subscribe(callback));
     }
 
-     /**
-      * Hook that fires before an undo operation is executed.
-      * @param callback Function to be called when the event is triggered
-      * @returns A disposable object that can be used to unsubscribe from the event
-      */
+    /**
+     * @deprecated use `univerAPI.addEvent(univerAPI.Event.BeforeUndo, () => {})` as instead
+     */
     onBeforeUndo(callback: (action: IUndoRedoItem) => void): IDisposable {
         const commandService = this._injector.get(ICommandService);
 
@@ -89,9 +82,7 @@ export class FHooks extends FBase {
     }
 
     /**
-     * Hook that fires after an undo operation is executed.
-     * @param callback Function to be called when the event is triggered
-     * @returns A disposable object that can be used to unsubscribe from the event
+     * @deprecated use `univerAPI.addEvent(univerAPI.Event.Undo, () => {})` as instead
      */
     onUndo(callback: (action: IUndoRedoItem) => void): IDisposable {
         const commandService = this._injector.get(ICommandService);
@@ -108,9 +99,7 @@ export class FHooks extends FBase {
     }
 
     /**
-     * Hook that fires before a redo operation is executed.
-     * @param callback Function to be called when the event is triggered
-     * @returns A disposable object that can be used to unsubscribe from the event
+     * @deprecated use `univerAPI.addEvent(univerAPI.Event.BeforeRedo, () => {})` as instead
      */
     onBeforeRedo(callback: (action: IUndoRedoItem) => void): IDisposable {
         const commandService = this._injector.get(ICommandService);
@@ -127,9 +116,7 @@ export class FHooks extends FBase {
     }
 
     /**
-     * Hook that fires after a redo operation is executed.
-     * @param callback Function to be called when the event is triggered
-     * @returns A disposable object that can be used to unsubscribe from the event
+     * @deprecated use `univerAPI.addEvent(univerAPI.Event.Redo, () => {})` as instead
      */
     onRedo(callback: (action: IUndoRedoItem) => void): IDisposable {
         const commandService = this._injector.get(ICommandService);

@@ -19,6 +19,9 @@ import { Inject, Injector } from '../common/di';
 import { UserManagerService } from '../services/user-manager/user-manager.service';
 import { FBase } from './f-base';
 
+/**
+ * @hideconstructor
+ */
 export class FUserManager extends FBase {
     constructor(
         @Inject(Injector) protected readonly _injector: Injector,
@@ -28,10 +31,11 @@ export class FUserManager extends FBase {
     }
 
     /**
-     * Get current user info
+     * Get current user info.
+     * @returns {IUser} Current user info.
      * @example
-     * ```
-     * univerAPI.getUserManager().getCurrentUser()
+     * ```typescript
+     * univerAPI.getUserManager().getCurrentUser();
      * ```
      */
     getCurrentUser(): IUser {

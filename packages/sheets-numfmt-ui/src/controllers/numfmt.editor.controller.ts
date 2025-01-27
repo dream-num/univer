@@ -114,7 +114,7 @@ export class NumfmtEditorController extends Disposable {
                                     case 'grouped':
                                     case 'number': {
                                         const cell = context.worksheet.getCellRaw(row, col);
-                                        return cell;
+                                        return next && next(cell);
                                     }
                                     case 'percent':
                                     case 'date':
@@ -169,7 +169,8 @@ export class NumfmtEditorController extends Disposable {
                                 return next(value);
                             }
 
-                            if (currentNumfmtValue?.pattern === DEFAULT_TEXT_FORMAT) {
+                            // if the cell is text format or force string, do not convert the value
+                            if (currentNumfmtValue?.pattern === DEFAULT_TEXT_FORMAT || value.t === CellValueType.FORCE_STRING) {
                                 return next(value);
                             }
 

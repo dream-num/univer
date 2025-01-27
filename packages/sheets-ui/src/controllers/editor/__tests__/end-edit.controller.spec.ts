@@ -129,9 +129,8 @@ describe('Test EndEditController', () => {
 
             return getCellDataByInput(
                 cell,
-                documentLayoutObject.documentModel,
+                documentLayoutObject.documentModel?.getSnapshot(),
                 lexerTreeBuilder,
-                (model) => model.getSnapshot(),
                 localeService,
                 get(IMockFunctionService) as IFunctionService,
                 workbook.getStyles()

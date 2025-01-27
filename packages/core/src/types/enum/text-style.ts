@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+/**
+ * An enum that specifies the text direction of a cell.
+ */
 export enum TextDirection {
     UNSPECIFIED,
     LEFT_TO_RIGHT,

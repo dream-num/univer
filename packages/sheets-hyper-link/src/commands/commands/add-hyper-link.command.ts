@@ -16,7 +16,7 @@
 
 import type { ICellData, ICommand, IDocumentData, IMutationInfo } from '@univerjs/core';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import type { ICellHyperLink } from '../../types/interfaces/i-hyper-link';
+import type { ISheetHyperLink } from '../../types/interfaces/i-hyper-link';
 import { BuildTextUtils, CellValueType, CommandType, CustomRangeType, generateRandomId, ICommandService, IUndoRedoService, IUniverInstanceService, sequenceExecuteAsync, TextX, Tools } from '@univerjs/core';
 import { addCustomRangeBySelectionFactory } from '@univerjs/docs';
 import { getSheetCommandTarget, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory, SheetInterceptorService } from '@univerjs/sheets';
@@ -27,7 +27,7 @@ import { RemoveHyperLinkMutation } from '../mutations/remove-hyper-link.mutation
 export interface IAddHyperLinkCommandParams {
     unitId: string;
     subUnitId: string;
-    link: ICellHyperLink;
+    link: ISheetHyperLink;
 }
 /**
  * Command for add hyperlink
@@ -170,7 +170,7 @@ export interface IAddRichHyperLinkCommandParams {
      * url of link
      */
     documentId: string;
-    link: ICellHyperLink;
+    link: ISheetHyperLink;
 }
 
 export const AddRichHyperLinkCommand: ICommand<IAddRichHyperLinkCommandParams> = {

@@ -18,6 +18,7 @@ import type { Nullable } from '@univerjs/core';
 import type {
     IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { RenderComponentType } from '@univerjs/engine-render';
+import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 import {
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     EDITOR_ACTIVATED,
@@ -36,12 +37,13 @@ import {
     DocSkeletonManagerService,
     RichTextEditingMutation,
 } from '@univerjs/docs';
-import { CoverContentCommand, VIEWPORT_KEY as DOC_VIEWPORT_KEY } from '@univerjs/docs-ui';
+import { CoverContentCommand, VIEWPORT_KEY as DOC_VIEWPORT_KEY, IEditorService } from '@univerjs/docs-ui';
 import { DeviceInputEventType, IRenderManagerService, ScrollBar } from '@univerjs/engine-render';
-import { takeUntil } from 'rxjs';
+import { combineLatest, filter, takeUntil } from 'rxjs';
 import { getEditorObject } from '../../basics/editor/get-editor-object';
-import { IFormulaEditorManagerService } from '../../services/editor/formula-editor-manager.service';
+import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
+import { IFormulaEditorManagerService } from '../../services/editor/formula-editor-manager.service';
 
 export class FormulaEditorController extends RxDisposable {
     private _loadedMap = new WeakSet<RenderComponentType>();
@@ -54,7 +56,8 @@ export class FormulaEditorController extends RxDisposable {
         @IContextService private readonly _contextService: IContextService,
         @IFormulaEditorManagerService private readonly _formulaEditorManagerService: IFormulaEditorManagerService,
         @IUndoRedoService private readonly _undoRedoService: IUndoRedoService,
-        @Inject(DocSelectionManagerService) private readonly _textSelectionManagerService: DocSelectionManagerService
+        @Inject(DocSelectionManagerService) private readonly _textSelectionManagerService: DocSelectionManagerService,
+        @IEditorService private readonly _editorService: IEditorService
     ) {
         super();
 
@@ -72,17 +75,12 @@ export class FormulaEditorController extends RxDisposable {
 
         this._create(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
 
-        this._textSelectionManagerService.textSelection$.pipe(takeUntil(this.dispose$)).subscribe((param) => {
-            if (param == null) {
-                return;
-            }
-            const { unitId } = param;
-            // Mark formula editor as non-focused, when current selection is not in formula editor.
-            if (unitId !== DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) {
+        this.disposeWithMe(this._editorService.focus$.subscribe(() => {
+            const focusUnitId = this._editorService.getFocusEditor()?.getEditorId();
+            if (focusUnitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) {
                 this._contextService.setContextValue(FOCUSING_FX_BAR_EDITOR, false);
-                this._undoRedoService.clearUndoRedo(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
             }
-        });
+        }));
     }
 
     private _handleContentChange() {
@@ -116,7 +114,6 @@ export class FormulaEditorController extends RxDisposable {
         }
 
         if (!this._loadedMap.has(documentComponent)) {
-            this._initialMain(unitId);
             this._loadedMap.add(documentComponent);
         }
     }
@@ -138,11 +135,14 @@ export class FormulaEditorController extends RxDisposable {
 
                 const visibleState = this._editorBridgeService.isVisible();
                 if (visibleState.visible === false) {
-                    this._editorBridgeService.changeVisible({
-                        visible: true,
-                        eventType: DeviceInputEventType.PointerDown,
-                        unitId: currentSheet?.getUnitId() ?? '',
-                    });
+                    this._commandService.syncExecuteCommand(
+                        SetCellEditVisibleOperation.id,
+                        {
+                            visible: true,
+                            eventType: DeviceInputEventType.PointerDown,
+                            unitId: currentSheet?.getUnitId() ?? '',
+                        } as IEditorBridgeServiceVisibleParam
+                    );
                 }
 
                 const content = formulaEditorDataModel?.getBody()?.dataStream;
@@ -177,42 +177,11 @@ export class FormulaEditorController extends RxDisposable {
         });
     }
 
-    private _initialMain(unitId: string) {
-        const formulaEditorDocObject = this._renderManagerService.getRenderById(unitId);
-        if (formulaEditorDocObject == null) {
-            return;
-        }
-
-        const { mainComponent: documentComponent } = formulaEditorDocObject;
-
-        if (documentComponent == null) {
-            return;
-        }
-
-        this.disposeWithMe(
-            documentComponent.onPointerDown$.subscribeEvent(() => {
-                // When clicking on the formula bar, the cell editor also needs to enter the edit state
-                const visibleState = this._editorBridgeService.isVisible();
-                if (visibleState.visible === false) {
-                    this._editorBridgeService.changeVisible({
-                        visible: true,
-                        eventType: DeviceInputEventType.PointerDown,
-                        unitId,
-                    });
-                    this._undoRedoService.clearUndoRedo(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
-                }
-
-                // Open the normal editor first, and then we mark formula editor as activated.
-                this._contextService.setContextValue(FOCUSING_FX_BAR_EDITOR, true);
-            })
-        );
-    }
-
-    // Listen to changes in the size of the formula editor container to set the size of the editor.
     private _syncEditorSize() {
-        this._formulaEditorManagerService.position$.pipe(takeUntil(this.dispose$)).subscribe((position) => {
+        // this._univerInstanceService.
+        const addFOrmulaBar$ = this._univerInstanceService.unitAdded$.pipe(filter((unit) => unit.getUnitId() === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY));
+        this.disposeWithMe(combineLatest([this._formulaEditorManagerService.position$, addFOrmulaBar$]).subscribe(([position]) => {
             if (!position) return this._clearScheduledCallback();
-
             const editorObject = getEditorObject(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, this._renderManagerService);
             const formulaEditorDataModel = this._univerInstanceService.getUniverDocInstance(
                 DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY
@@ -227,7 +196,7 @@ export class FormulaEditorController extends RxDisposable {
             formulaEditorDataModel.updateDocumentDataPageSize(width);
             this.autoScroll();
             this._scheduledCallback = requestIdleCallback(() => engine.resizeBySize(width, height));
-        });
+        }));
     }
 
     private _scheduledCallback: number = -1;

@@ -37,6 +37,7 @@ export const FOCUSING_EDITOR_INPUT_FORMULA = 'FOCUSING_EDITOR_INPUT_FORMULA';
 /** The focusing state of the formula editor (Fx bar). */
 export const FOCUSING_FX_BAR_EDITOR = 'FOCUSING_FX_BAR_EDITOR';
 
+/** The focusing state of the cell editor. */
 export const FOCUSING_UNIVER_EDITOR = 'FOCUSING_UNIVER_EDITOR';
 
 export const FOCUSING_EDITOR_STANDALONE = 'FOCUSING_EDITOR_INPUT_FORMULA';

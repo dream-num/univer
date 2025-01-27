@@ -42,7 +42,7 @@ export const FormLayout = (props: IFormLayoutProps) => {
     const isInner = useContext(FormLayoutContext);
 
     return (
-        <FormLayoutContext.Provider value={true}>
+        <FormLayoutContext.Provider value>
             <div className={clsx(styles.formLayout, isInner ? styles.formLayoutInner : '', className)} style={style}>
                 {label && (
                     <div style={{ cursor: collapsable ? 'pointer' : 'default' }} className={styles.formLayoutLabel} onClick={() => setCollapsed(!collapsed)}>

@@ -17,7 +17,7 @@
 import './global.css';
 
 export { UniverSheetsDrawingUIPlugin } from './plugin';
-export { type ICanvasFloatDom, SheetCanvasFloatDomManagerService } from './services/canvas-float-dom-manager.service';
+export { type ICanvasFloatDom, type IDOMAnchor, SheetCanvasFloatDomManagerService } from './services/canvas-float-dom-manager.service';
 export { SHEETS_IMAGE_MENU_ID } from './views/menu/image.menu';
 
 // #region - all commands
@@ -36,5 +36,5 @@ export { EditSheetDrawingOperation } from './commands/operations/edit-sheet-draw
 export { type IInsertImageCommandParams, InsertFloatImageCommand } from './commands/commands/insert-image.command';
 export { SidebarSheetDrawingOperation } from './commands/operations/open-drawing-panel.operation';
 
-export type { IDeleteDrawingCommandParams, IInsertDrawingCommandParams } from './commands/commands/interfaces';
+export type { IDeleteDrawingCommandParams, IInsertDrawingCommandParams, ISetDrawingCommandParams } from './commands/commands/interfaces';
 // #endregion

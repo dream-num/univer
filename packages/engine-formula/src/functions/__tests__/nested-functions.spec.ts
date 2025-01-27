@@ -55,6 +55,8 @@ import { Min } from '../statistical/min';
 import { Concatenate } from '../text/concatenate';
 import { FUNCTION_NAMES_TEXT } from '../text/function-names';
 import { Len } from '../text/len';
+import { T } from '../text/t';
+import { Text } from '../text/text';
 import { createFunctionTestBed, getObjectValue } from './create-function-test-bed';
 
 const getFunctionsTestWorkbookData = (): IWorkbookData => {
@@ -393,7 +395,9 @@ describe('Test nested functions', () => {
             new Len(FUNCTION_NAMES_TEXT.LEN),
             new Divided(FUNCTION_NAMES_META.DIVIDED),
             new Product(FUNCTION_NAMES_MATH.PRODUCT),
-            new Fact(FUNCTION_NAMES_MATH.FACT)
+            new Fact(FUNCTION_NAMES_MATH.FACT),
+            new T(FUNCTION_NAMES_TEXT.T),
+            new Text(FUNCTION_NAMES_TEXT.TEXT)
         );
 
         calculate = (formula: string) => {
@@ -515,6 +519,18 @@ describe('Test nested functions', () => {
             expect(result).toStrictEqual([
                 [3628800],
             ]);
+        });
+
+        it('Text formula test', () => {
+            const result = calculate('=TEXT(1234, "000000")');
+            expect(result).toStrictEqual([
+                ['001234'],
+            ]);
+        });
+
+        it('T formula test', () => {
+            const result = calculate('=T(A1:E1)');
+            expect(result).toStrictEqual('A');
         });
     });
 });

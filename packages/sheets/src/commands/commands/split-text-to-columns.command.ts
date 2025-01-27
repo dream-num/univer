@@ -38,7 +38,7 @@ export const SplitTextToColumnsCommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.split-text-to-columns',
     // eslint-disable-next-line max-lines-per-function
-    handler: async (accessor: IAccessor, params: ISplitTextToColumnsCommandParams) => {
+    handler: (accessor: IAccessor, params: ISplitTextToColumnsCommandParams) => {
         const { unitId, subUnitId, range, delimiter, customDelimiter, treatMultipleDelimitersAsOne } = params;
 
         const commandService = accessor.get(ICommandService);

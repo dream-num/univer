@@ -48,9 +48,9 @@ import { InsertColMutation, InsertRowMutation } from '../../../commands/mutation
 import { type IMoveRowsMutationParams, MoveColsMutation, MoveRowsMutation } from '../../../commands/mutations/move-rows-cols.mutation';
 import { RemoveColMutation, RemoveRowMutation } from '../../../commands/mutations/remove-row-col.mutation';
 import { SetRangeProtectionMutation } from '../../../commands/mutations/set-range-protection.mutation';
-import { RangeProtectionCache } from '../../../model/range-protection.cache';
 import { RangeProtectionRenderModel } from '../../../model/range-protection-render.model';
 import { RangeProtectionRuleModel } from '../../../model/range-protection-rule.model';
+import { RangeProtectionCache } from '../../../model/range-protection.cache';
 import { RefRangeService } from '../../../services/ref-range/ref-range.service';
 import { SheetInterceptorService } from '../../sheet-interceptor/sheet-interceptor.service';
 

@@ -136,15 +136,15 @@ export class RangeThemeStyle {
      */
     lastRowStyle: Nullable<IRangeThemeStyleItem> = null;
     /**
-     * @property {Nullable<IRangeThemeStyleItem>} effect for the first column.
+     * @property {Nullable<IRangeThemeStyleItem>} firstColumnStyle effect for the first column.
      */
     firstColumnStyle: Nullable<IRangeThemeStyleItem> = null;
     /**
-     * @property {Nullable<IRangeThemeStyleItem>} effect for the second column.
+     * @property {Nullable<IRangeThemeStyleItem>} secondColumnStyle effect for the second column.
      */
     secondColumnStyle: Nullable<IRangeThemeStyleItem> = null;
     /**
-     * @property {Nullable<IRangeThemeStyleItem>} effect for the last column.
+     * @property {Nullable<IRangeThemeStyleItem>} lastColumnStyle effect for the last column.
      */
     lastColumnStyle: Nullable<IRangeThemeStyleItem> = null;
 

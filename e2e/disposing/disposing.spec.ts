@@ -47,6 +47,11 @@ test('no error on constructing and disposing sheet unit', async ({ page }) => {
         errored = true;
     });
 
+    // /esbuild request never completes, networkidle will got timeout, mock it!
+    await page.route('/esbuild', async (route) => {
+        await route.fulfill({});
+    });
+
     await page.goto('http://localhost:3000/sheets/', { waitUntil: 'networkidle' });
     await page.evaluate(() => window.E2EControllerAPI.disposeCurrSheetUnit());
     await page.evaluate(() => window.E2EControllerAPI.loadDefaultSheet());

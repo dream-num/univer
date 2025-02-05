@@ -49,12 +49,12 @@ export function ColorPicker({ format = 'hex', value = '#000000', showAlpha = fal
     useEffect(() => {
         try {
             if (format === 'hex') {
-                const [h, s, v] = hexToHsv(value);
+                const [h, s, v] = value ? hexToHsv(value) : hsv;
                 setHsv([h, s, v]);
                 setAlpha(1);
             }
         } catch (error) {
-            console.error('Invalid RGBA value:', error);
+            console.error('Invalid value:', error);
         }
     }, [value]);
 

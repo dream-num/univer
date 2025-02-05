@@ -156,7 +156,7 @@ export interface IFUniverUIMixin {
     registerComponent(name: string, component: ComponentType, options?: IComponentOptions): IDisposable;
 
     /**
-     * Render a unit in the workbench's main area. If you have multi units in Univer,
+     * Set a unit as the current unit and render a unit in the workbench's main area. If you have multiple units in Univer,
      * you should call this method to render the unit.
      * @param unitId Unit to be rendered.
      *
@@ -165,12 +165,12 @@ export interface IFUniverUIMixin {
      * render `unit2`.
      *
      * ```ts
-     * univerAPI.renderUnit('unit2');
+     * univerAPI.setCurrent('unit2');
      * ```
      *
      * This will render `unit2` in the workbench's main area.
      */
-    renderUnit(unitId: string): void;
+    setCurrent(unitId: string): void;
 }
 
 /**
@@ -252,7 +252,7 @@ export class FUniverUIMixin extends FUniver implements IFUniverUIMixin {
         return this.disposeWithMe(componentManager.register(name, component, options));
     }
 
-    override renderUnit(unitId: string): void {
+    override setCurrent(unitId: string): void {
         const rendererManagerService = this._injector.get(IRenderManagerService);
         const renderUnit = rendererManagerService.getRenderById(unitId);
         if (!renderUnit) {

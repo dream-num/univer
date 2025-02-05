@@ -37,13 +37,19 @@ export interface IFUniverSheetsMixin {
     /**
      * Create a new spreadsheet and get the API handler of that spreadsheet.
      * @param {Partial<IWorkbookData>} data The snapshot of the spreadsheet.
+     * @param {ICreateUnitOptions} options The options of creating the spreadsheet.
      * @returns {FWorkbook} FWorkbook API instance.
      * @example
      * ```ts
      * univerAPI.createWorkbook({ id: 'Sheet1', name: 'Sheet1' });
      * ```
+     *
+     * Add you can make the workbook not as the active workbook by setting options:
+     * ```ts
+     * univerAPI.createWorkbook({ id: 'Sheet1', name: 'Sheet1' }, { makeCurrent: false });
+     * ```
      */
-    createWorkbook(data: Partial<IWorkbookData>): FWorkbook;
+    createWorkbook(data: Partial<IWorkbookData>, options?: ICreateUnitOptions): FWorkbook;
 
     /**
      * Get the currently focused Univer spreadsheet.

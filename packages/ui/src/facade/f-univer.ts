@@ -159,6 +159,16 @@ export interface IFUniverUIMixin {
      * Render a unit in the workbench's main area. If you have multi units in Univer,
      * you should call this method to render the unit.
      * @param unitId Unit to be rendered.
+     *
+     * @example
+     * Let's assume you have created two units, `unit1` and `unit2`. Univer is rendering `unit1` and you want to
+     * render `unit2`.
+     *
+     * ```ts
+     * univerAPI.renderUnit('unit2');
+     * ```
+     *
+     * This will render `unit2` in the workbench's main area.
      */
     renderUnit(unitId: string): void;
 }

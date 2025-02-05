@@ -119,6 +119,7 @@ export class SheetsZoomRenderController extends Disposable implements IRenderMod
      */
     private _updateViewZoom(zoomRatio: number) {
         const sheetObject = this._getSheetObject();
+        // sheetObject?.scene.scale(zoomRatio, zoomRatio);
         sheetObject?.scene.transformByState({ scaleX: zoomRatio, scaleY: zoomRatio });
         sheetObject?.spreadsheet.makeForceDirty();
     }

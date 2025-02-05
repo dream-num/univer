@@ -66,6 +66,9 @@ export interface IRect extends ISize, IOffset {
  */
 export interface ISceneTransformState extends ISize, IScale {}
 
+/**
+ * Bad design! should use Bit Flags!
+ */
 export enum TRANSFORM_CHANGE_OBSERVABLE_TYPE {
     translate,
     resize,

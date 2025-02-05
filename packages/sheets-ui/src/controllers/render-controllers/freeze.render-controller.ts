@@ -1522,7 +1522,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
         }
         const { scene } = sheetObject;
         scene.onTransformChange$.subscribeEvent((state) => {
-            if (state.type !== TRANSFORM_CHANGE_OBSERVABLE_TYPE.scale) {
+            if (![TRANSFORM_CHANGE_OBSERVABLE_TYPE.scale, TRANSFORM_CHANGE_OBSERVABLE_TYPE.all].includes(state.type)) {
                 return;
             }
 

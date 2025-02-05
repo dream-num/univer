@@ -209,7 +209,7 @@ export class Font extends SheetExtension {
         if (!visibleRow || !visibleCol) return true;
 
         const cellData = spreadsheetSkeleton.worksheet.getCell(row, col) as ICellDataForSheetInterceptor || {};
-        renderFontCtx.cellData.cellDataInterceptor = cellData;
+        // renderFontCtx.cellData.cellDataInterceptor = cellData;
         if (cellData.fontRenderExtension?.isSkip) {
             return true;
         }

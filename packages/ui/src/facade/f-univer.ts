@@ -259,7 +259,6 @@ export class FUniverUIMixin extends FUniver implements IFUniverUIMixin {
             throw new Error('Unit not found');
         }
 
-        rendererManagerService.setCurrent(unitId);
         this._univerInstanceService.setCurrentUnitForType(unitId);
     }
 }

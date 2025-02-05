@@ -32,6 +32,7 @@ import {
     IUIPartsService,
     UIPartsService,
 } from '@univerjs/ui';
+import { BehaviorSubject } from 'rxjs';
 import { SheetClipboardController } from '../../../controllers/clipboard/clipboard.controller';
 import { IMarkSelectionService } from '../../mark-selection/mark-selection.service';
 import { ISheetSelectionRenderService } from '../../selection/base-selection-render.service';
@@ -603,6 +604,9 @@ export function clipboardTestBed(workbookData?: IWorkbookData, dependencies?: De
         mainComponent: null as any,
         components: null as any,
         isMainScene: true,
+        activated$: new BehaviorSubject(true),
+        activate: () => {},
+        deactivate: () => {},
     }, injector);
 
     injector.add([SheetSkeletonManagerService, { useValue: fakeSheetSkeletonManagerService }]);
@@ -615,6 +619,9 @@ export function clipboardTestBed(workbookData?: IWorkbookData, dependencies?: De
         components: new Map(),
         isMainScene: true,
         with: injector.get.bind(injector),
+        activated$: new BehaviorSubject(true),
+        activate: () => {},
+        deactivate: () => {},
     });
 
     return {

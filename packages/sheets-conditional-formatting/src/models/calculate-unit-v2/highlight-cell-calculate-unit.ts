@@ -218,10 +218,19 @@ export class HighlightCellCalculateUnit extends BaseCalculateUnit<Nullable<IConf
             switch (ruleConfig.subType) {
                 case CFSubRuleType.number: {
                     const v = cellValue && Number(cellValue.v);
-                    if (isNullable(v) || Number.isNaN(v) || cellValue?.t !== CellValueType.NUMBER) {
+                    const isNumber = cellValue?.t === CellValueType.NUMBER;
+                    const subRuleConfig = ruleConfig as INumberHighlightCell;
+                    if (!isNumber) {
+                        if ([CFNumberOperator.notEqual, CFNumberOperator.notBetween].includes(subRuleConfig.operator)) {
+                            return true;
+                        }
+                        return false;
+                    }
+
+                    if (isNullable(v) || Number.isNaN(v)) {
                         return;
                     }
-                    const subRuleConfig = ruleConfig as INumberHighlightCell;
+
                     return compareWithNumber({ operator: subRuleConfig.operator, value: subRuleConfig.value || 0 }, v || 0);
                 }
                 case CFSubRuleType.text: {
@@ -277,10 +286,20 @@ export class HighlightCellCalculateUnit extends BaseCalculateUnit<Nullable<IConf
                 case CFSubRuleType.average: {
                     const value = cellValue && cellValue.v;
                     const v = Number(value);
-                    if (isNullable(value) || Number.isNaN(v) || cellValue?.t !== CellValueType.NUMBER || !preComputingResult) {
+                    const isNumber = cellValue?.t === CellValueType.NUMBER;
+                    const subRuleConfig = ruleConfig as IAverageHighlightCell;
+
+                    if (!isNumber) {
+                        if (CFNumberOperator.notEqual === subRuleConfig.operator) {
+                            return true;
+                        }
                         return false;
                     }
-                    const subRuleConfig = ruleConfig as IAverageHighlightCell;
+
+                    if (isNullable(value) || Number.isNaN(v) || !preComputingResult) {
+                        return false;
+                    }
+
                     const average = preComputingResult.value;
 
                     switch (subRuleConfig.operator) {

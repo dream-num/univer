@@ -21,17 +21,18 @@ import type { DocComponent } from '../components/docs/doc-component';
 
 import type { SheetComponent } from '../components/sheets/sheet-component';
 import type { Slide } from '../components/slides/slide';
+import type { IRender } from './render-unit';
 import { createIdentifier, Disposable, Inject, Injector, IUniverInstanceService, remove, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { Engine } from '../engine';
 import { Scene } from '../scene';
-import { type IRender, RenderUnit } from './render-unit';
+import { RenderUnit } from './render-unit';
 
 export type RenderComponentType = SheetComponent | DocComponent | Slide | BaseObject;
 
 export interface IRenderManagerService extends IDisposable {
-    /** @deprecated */
     currentRender$: Observable<Nullable<string>>;
+    getCurrent(): Nullable<IRender>;
 
     addRender(unitId: string, renderer: IRender): void;
 
@@ -71,8 +72,6 @@ export interface IRenderManagerService extends IDisposable {
     created$: Observable<IRender>;
     disposed$: Observable<string>;
 
-    /** @deprecated There will be multi units to render at the same time, so there is no *current*. */
-    getCurrent(): Nullable<IRender>;
     /** @deprecated There will be multi units to render at the same time, so there is no *first*. */
     getFirst(): Nullable<IRender>;
 
@@ -332,7 +331,6 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
 
     setCurrent(unitId: string): void {
         this._currentUnitId = unitId;
-
         this._currentRender$.next(unitId);
     }
 

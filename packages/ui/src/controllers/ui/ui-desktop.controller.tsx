@@ -60,6 +60,8 @@ export class DesktopUIController extends Disposable {
         this._menuManagerService.mergeMenu(menuSchema);
     }
 
+    private _currentRenderId: string | null = null;
+
     private _bootstrapWorkbench(): void {
         this.disposeWithMe(this._instanceSrv.unitDisposed$.subscribe((_unit: UnitModel) => {
             clearTimeout(this._steadyTimeout);
@@ -72,23 +74,22 @@ export class DesktopUIController extends Disposable {
                     this.disposeWithMe(this._layoutService.registerContentElement(contentElement));
                 }
 
-                // TODO: this is subject to change in the future for Uni-mode
+                // When current render changes, we need to update the render unit.
                 this._renderManagerService.currentRender$.subscribe((renderId) => {
                     if (renderId) {
-                        const render = this._renderManagerService.getRenderById(renderId)!;
-                        if (!render.unitId) return;
-                        if (isInternalEditorID(render.unitId)) return;
-                        render.engine.setContainer(contentElement);
+                        this._changeRenderUnit(renderId, contentElement);
                     }
                 });
 
+                // First render.
                 this.disposeWithMe(this._lifecycleService.lifecycle$.pipe(filter((stage) => stage === LifecycleStages.Ready), take(1)).subscribe(() => {
                     this._renderTimeout = setTimeout(() => {
                         const allRenders = this._renderManagerService.getRenderAll();
 
                         for (const [key, render] of allRenders) {
                             if (isInternalEditorID(key) || !((render) as RenderUnit).isRenderUnit) continue;
-                            render.engine.setContainer(contentElement);
+                            this._changeRenderUnit(key, contentElement);
+                            break; // We only render the first renderer when bootstrapping.
                         }
 
                         this._lifecycleService.stage = LifecycleStages.Rendered;
@@ -99,6 +100,22 @@ export class DesktopUIController extends Disposable {
                 }));
             })
         );
+    }
+
+    private _changeRenderUnit(rendererId: string, contentElement: HTMLElement): void {
+        if (this._currentRenderId === rendererId) return;
+
+        const currentRenderer = this._currentRenderId ? this._renderManagerService.getRenderById(this._currentRenderId) : null;
+        const renderer = this._renderManagerService.getRenderById(rendererId)!;
+        if (!renderer.unitId || isInternalEditorID(renderer.unitId)) return;
+
+        currentRenderer?.deactivate();
+        currentRenderer?.engine.unmount();
+
+        renderer.engine.mount(contentElement);
+        renderer.activate();
+
+        this._currentRenderId = rendererId;
     }
 
     private _initBuiltinComponents(): void {

@@ -15,9 +15,10 @@
  */
 
 import type { Nullable, Workbook } from '@univerjs/core';
+import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import type { ISheetSkeletonManagerParam } from '../../services/sheet-skeleton-manager.service';
 import { Disposable, Inject } from '@univerjs/core';
-import { type IRenderContext, IRenderManagerService, type IRenderModule } from '@univerjs/engine-render';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 
 export class SheetSkeletonRenderController extends Disposable implements IRenderModule {
@@ -32,7 +33,7 @@ export class SheetSkeletonRenderController extends Disposable implements IRender
             this._sheetSkeletonManagerService.disposeSkeleton(sheet.getSheetId());
         }));
 
-        this._sheetSkeletonManagerService.currentSkeletonBefore$.subscribe((param: Nullable<ISheetSkeletonManagerParam>) => {
+        this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param: Nullable<ISheetSkeletonManagerParam>) => {
             this._updateSceneSize(param);
         });
     }

@@ -96,7 +96,7 @@ export class SheetsZoomRenderController extends Disposable implements IRenderMod
 
     private _zoom: number;
     private _initSkeletonListener() {
-        this.disposeWithMe(this._sheetSkeletonManagerService.currentSkeletonBefore$.subscribe((param) => {
+        this.disposeWithMe(this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param) => {
             if (param == null) {
                 return;
             }
@@ -119,8 +119,8 @@ export class SheetsZoomRenderController extends Disposable implements IRenderMod
      */
     private _updateViewZoom(zoomRatio: number) {
         const sheetObject = this._getSheetObject();
-        // sheetObject?.scene.scale(zoomRatio, zoomRatio);
-        sheetObject?.scene.transformByState({ scaleX: zoomRatio, scaleY: zoomRatio });
+        sheetObject?.scene.scale(zoomRatio, zoomRatio);
+        // sheetObject?.scene.transformByState({ scaleX: zoomRatio, scaleY: zoomRatio });
         sheetObject?.spreadsheet.makeForceDirty();
     }
 

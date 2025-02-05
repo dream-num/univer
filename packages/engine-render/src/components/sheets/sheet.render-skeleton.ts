@@ -1252,17 +1252,18 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
      * @param options {{ mergeRange: IRange; cacheItem: ICacheItem } | undefined}
      */
     private _setStylesCacheForOneCell(row: number, col: number, options: { mergeRange?: IRange; cacheItem?: ICacheItem }): void {
+        // when row/col would be negative ?
         if (row === -1 || col === -1) {
             return;
         }
 
-        const handledBgCell = Tools.isDefine(this._handleBgMatrix.getValue(row, col));
-        const handledBorderCell = Tools.isDefine(this._handleBorderMatrix.getValue(row, col));
+        // const handledBgCell = Tools.isDefine(this._handleBgMatrix.getValue(row, col));
+        // const handledBorderCell = Tools.isDefine(this._handleBorderMatrix.getValue(row, col));
 
         // worksheet.getCell has significant performance overhead, if we had handled this cell then return first.
-        if (handledBgCell && handledBorderCell) {
-            return;
-        }
+        // if (handledBgCell && handledBorderCell) {
+        //     return;
+        // }
 
         if (!options) {
             options = { cacheItem: { bg: true, border: true } };

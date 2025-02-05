@@ -251,22 +251,40 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
                 this._scrollManagerService.setSearchParam(scrollParam);
                 const sheetObject = this._getSheetObject();
                 if (!sheetObject) return;
-                const scene = sheetObject.scene;
-                const viewportMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
                 const currScrollInfo = this._scrollManagerService.getScrollStateByParam(scrollParam);
                 const { viewportScrollX, viewportScrollY } = this._scrollManagerService.calcViewportScrollFromRowColOffset(currScrollInfo as unknown as Nullable<IViewportScrollState>);
-                if (viewportMain) {
-                    if (currScrollInfo) {
-                        viewportMain.viewportScrollX = viewportScrollX;
-                        viewportMain.viewportScrollY = viewportScrollY;
-                    } else {
-                        viewportMain.viewportScrollX = 0;
-                        viewportMain.viewportScrollY = 0;
-                    }
-                    // why handle size in scroll controller?
-                    // this._updateSceneSize(param as unknown as ISheetSkeletonManagerParam);
+
+                if (currScrollInfo) {
+                    this._updateViewportScroll(viewportScrollX, viewportScrollY);
                 }
             })));
+    }
+
+    _updateViewportScroll(viewportScrollX: number = 0, viewportScrollY: number = 0) {
+        const sheetObject = this._getSheetObject();
+        if (!sheetObject) return;
+        const scene = sheetObject.scene;
+        const viewportMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
+        const viewColRight = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_COLUMN_RIGHT);
+        const viewRowBottom = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_ROW_BOTTOM);
+        const viewportMainLeft = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT);
+        const viewportMainTop = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN_TOP);
+        if (viewportMain) {
+            viewportMain.viewportScrollX = viewportScrollX;
+            viewportMain.viewportScrollY = viewportScrollY;
+        }
+        if (viewRowBottom) {
+            viewRowBottom.viewportScrollY = viewportScrollY;
+        }
+        if (viewColRight) {
+            viewColRight.viewportScrollX = viewportScrollX;
+        }
+        if (viewportMainLeft) {
+            viewportMainLeft.viewportScrollY = viewportScrollY;
+        }
+        if (viewportMainTop) {
+            viewportMainTop.viewportScrollX = viewportScrollX;
+        }
     }
 
     scrollToRange(range: IRange, forceTop?: boolean, forceLeft?: boolean): boolean {

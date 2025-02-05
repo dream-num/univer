@@ -19,6 +19,7 @@ import { Disposable, DisposableCollection, ICommandService, LocaleType, UniverIn
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { CancelFrozenCommand, SetFrozenMutation, SetSelectionsOperation } from '@univerjs/sheets';
 
+import { BehaviorSubject } from 'rxjs';
 import { SheetScrollManagerService } from '../../../services/scroll-manager.service';
 import { SelectAllService } from '../../../services/select-all/select-all.service';
 import { SheetSkeletonManagerService } from '../../../services/sheet-skeleton-manager.service';
@@ -203,6 +204,9 @@ export function createFrozenCommandTestBed(workbookData?: IWorkbookData) {
         mainComponent: null as any,
         components: null as any,
         isMainScene: true,
+        activated$: new BehaviorSubject(true),
+        activate: () => {},
+        deactivate: () => {},
     }, injector);
 
     injector.add([SheetSkeletonManagerService, { useValue: fakeSheetSkeletonManagerService }]);
@@ -215,6 +219,9 @@ export function createFrozenCommandTestBed(workbookData?: IWorkbookData) {
         components: new Map(),
         isMainScene: true,
         with: injector.get.bind(injector),
+        activated$: new BehaviorSubject(true),
+        activate: () => {},
+        deactivate: () => {},
     });
 
     return {

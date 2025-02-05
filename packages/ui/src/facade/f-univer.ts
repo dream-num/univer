@@ -19,6 +19,7 @@ import type { IMessageProps } from '@univerjs/design';
 import type { BuiltInUIPart, ComponentType, IComponentOptions, IDialogPartMethodOptions, ISidebarMethodOptions } from '@univerjs/ui';
 import type { IFacadeMenuItem, IFacadeSubmenuItem } from './f-menu-builder';
 import { connectInjector, FUniver } from '@univerjs/core';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { ComponentManager, CopyCommand, IDialogService, IMessageService, ISidebarService, IUIPartsService, PasteCommand } from '@univerjs/ui';
 import { FMenu, FSubmenu } from './f-menu-builder';
 import { FShortcut } from './f-shortcut';
@@ -153,6 +154,23 @@ export interface IFUniverUIMixin {
      * ```
      */
     registerComponent(name: string, component: ComponentType, options?: IComponentOptions): IDisposable;
+
+    /**
+     * Set a unit as the current unit and render a unit in the workbench's main area. If you have multiple units in Univer,
+     * you should call this method to render the unit.
+     * @param unitId Unit to be rendered.
+     *
+     * @example
+     * Let's assume you have created two units, `unit1` and `unit2`. Univer is rendering `unit1` and you want to
+     * render `unit2`.
+     *
+     * ```ts
+     * univerAPI.setCurrent('unit2');
+     * ```
+     *
+     * This will render `unit2` in the workbench's main area.
+     */
+    setCurrent(unitId: string): void;
 }
 
 /**
@@ -232,6 +250,16 @@ export class FUniverUIMixin extends FUniver implements IFUniverUIMixin {
     override registerComponent(name: string, component: any, options?: IComponentOptions): IDisposable {
         const componentManager = this._injector.get(ComponentManager);
         return this.disposeWithMe(componentManager.register(name, component, options));
+    }
+
+    override setCurrent(unitId: string): void {
+        const rendererManagerService = this._injector.get(IRenderManagerService);
+        const renderUnit = rendererManagerService.getRenderById(unitId);
+        if (!renderUnit) {
+            throw new Error('Unit not found');
+        }
+
+        this._univerInstanceService.setCurrentUnitForType(unitId);
     }
 }
 

@@ -150,6 +150,9 @@ export function createCommandTestBed(docData?: IDocumentData, dependencies?: Dep
         mainComponent: null as any,
         components: null as any,
         isMainScene: true,
+        activated$: new BehaviorSubject(true),
+        activate: () => {},
+        deactivate: () => {},
     }, univerInstanceService);
 
     injector.add([DocSkeletonManagerService, { useValue: fakeDocSkeletonManager as unknown as DocSkeletonManagerService }]);

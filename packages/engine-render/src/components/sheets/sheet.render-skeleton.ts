@@ -173,7 +173,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         super(worksheet, _styles, _localeService, _contextService, _configService, _injector);
     }
 
-    override init() {
+    override initConfig() {
         this._updateLayout();
         this.disposeWithMe(
             this._contextService.subscribeContextValue$(RENDER_RAW_FORMULA_KEY).pipe(
@@ -204,17 +204,6 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         this._showGridlines = showGridlines;
         this._gridlinesColor = gridlinesColor;
         super._updateLayout(); // make dirty false
-    }
-
-
-    set columnHeaderHeight(value: number) {
-        this._columnHeaderHeight = value;
-        this._worksheetData.columnHeader.height = value;
-    }
-
-    set rowHeaderWidth(value: number) {
-        this._rowHeaderWidth = value;
-        this._worksheetData.rowHeader.width = value;
     }
 
     /**
@@ -417,6 +406,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         return results;
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _calculateRowAutoHeight(rowNum: number): number {
         const worksheet = this.worksheet;
         const { columnCount, columnData, defaultRowHeight, defaultColumnWidth } = this._worksheetData;
@@ -617,13 +607,13 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
 
     getColWidth(colIndex: number) {
         const preColIndex = Math.max(0, colIndex - 1);
-        const currColWidth = this._columnWidthAccumulation[colIndex] - this._columnWidthAccumulation[preColIndex];
+        const currColWidth = this.columnWidthAccumulation[colIndex] - this.columnWidthAccumulation[preColIndex];
         return currColWidth;
     }
 
     getRowHeight(rowIndex: number) {
         const preRowIndex = Math.max(0, rowIndex - 1);
-        const currRowHeight = this._rowHeightAccumulation[rowIndex] - this._rowHeightAccumulation[preRowIndex];
+        const currRowHeight = this.rowHeightAccumulation[rowIndex] - this.rowHeightAccumulation[preRowIndex];
         return currRowHeight;
     }
 
@@ -1450,6 +1440,30 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             }
         }
         return hiddenCols;
+    }
+
+    /**
+     * @deprecated use function `convertTransformToOffsetX` in same package.
+     */
+    convertTransformToOffsetX(
+        offsetX: number,
+        scaleX: number,
+        scrollXY: { x: number; y: number }
+    ): number {
+        const { x: scrollX } = scrollXY;
+        return (offsetX - scrollX) * scaleX;
+    }
+
+    /**
+     * @deprecated use function `convertTransformToOffsetY` in same package.
+     */
+    convertTransformToOffsetY(
+        offsetY: number,
+        scaleY: number,
+        scrollXY: { x: number; y: number }
+    ): number {
+        const { y: scrollY } = scrollXY;
+        return (offsetY - scrollY) * scaleY;
     }
 }
 

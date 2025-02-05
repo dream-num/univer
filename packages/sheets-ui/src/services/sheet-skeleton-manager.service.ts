@@ -15,10 +15,10 @@
  */
 
 import type { IRange, IRangeWithCoord, Nullable, Workbook, Worksheet } from '@univerjs/core';
-import type { IRender, IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import type { IRender, IRenderContext, IRenderModule, Scene } from '@univerjs/engine-render';
 import { Disposable, Inject, Injector } from '@univerjs/core';
 import { SHEET_VIEWPORT_KEY, SpreadsheetSkeleton } from '@univerjs/engine-render';
-import { SheetsSelectionsService } from '@univerjs/sheets';
+import { SheetSkeletonService, SheetsSelectionsService } from '@univerjs/sheets';
 import { BehaviorSubject } from 'rxjs';
 import { SetColumnHeaderHeightCommand, SetRowHeaderWidthCommand } from '../commands/commands/headersize-changed.command';
 import { ISheetSelectionRenderService } from './selection/base-selection-render.service';
@@ -121,17 +121,15 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
         return this.getSkeletonParam(sheetId);
     }
 
-    /**
-     * unitId is never read?
-     * why ?? what does unitId for ??? no need unitId this service is registered in render unit already.
-     */
-    // getUnitSkeleton(sheetId: string): Nullable<ISheetSkeletonManagerParam> {
-    //     const param = this._getSkeleton(sheetId);
-    //     // if (param) {
-    //     //     param.unitId = unitId;
-    //     // }
-    //     return param;
-    // }
+    // why ?? what does unitId for ??? no need unitId, this service is registered in render unit already.
+    getUnitSkeleton(unitId: string, sheetId: string): Nullable<ISheetSkeletonManagerParam> {
+        const param = this._getSkeletonParam(sheetId);
+        if (param != null) {
+            // unitId is never read?
+            param.unitId = unitId;
+        }
+        return param;
+    }
 
     setCurrent(searchParam: ISheetSkeletonManagerSearch): Nullable<ISheetSkeletonManagerParam> {
         this._setCurrent(searchParam.sheetId);
@@ -256,7 +254,7 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
         return param ? param.skeleton : null;
     }
 
-    private _buildSkeleton(worksheet: Worksheet, scene: Nullable<Scene>) {
+    private _buildSkeleton(worksheet: Worksheet, _scene?: Nullable<Scene>) {
         const spreadsheetSkeleton = this._injector.createInstance(
             SpreadsheetSkeleton,
             worksheet,
@@ -337,6 +335,5 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
             sheetSkeletonManagerParam.commandId = SetRowHeaderWidthCommand.id;
             this._currentSkeleton$.next(sheetSkeletonManagerParam);
         }
-        return spreadsheetSkeleton;
     }
 }

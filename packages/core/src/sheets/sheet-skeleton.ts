@@ -35,7 +35,7 @@ import type {
 } from './typedef';
 import type { Worksheet } from './worksheet';
 import { Inject, Injector } from '@wendellhu/redi';
-import { IS_ROW_STYLE_PRECEDE_COLUMN_STYLE } from '../common/const';
+import { AUTO_HEIGHT_FOR_MERGED_CELLS, IS_ROW_STYLE_PRECEDE_COLUMN_STYLE } from '../common/const';
 import { DocumentDataModel } from '../docs/data-model/document-data-model';
 import { IConfigService } from '../services/config/config.service';
 import { IContextService } from '../services/context/context.service';
@@ -71,6 +71,12 @@ export class SheetSkeleton extends Skeleton {
      * Whether the row style precedes the column style.
      */
     protected _isRowStylePrecedeColumnStyle = false;
+
+    /**
+     * Whether auto height for merged cells
+     */
+    protected _skipAutoHeightForMergedCells = true;
+
     constructor(
         readonly worksheet: Worksheet,
         protected _styles: Styles,
@@ -84,10 +90,11 @@ export class SheetSkeleton extends Skeleton {
         this._cellData = this.worksheet.getCellMatrix();
         this._imageCacheMap = new ImageCacheMap(this._injector);
 
-        this.init();
+        this.initConfig();
     }
 
-    init() {
+    initConfig() {
+        this._skipAutoHeightForMergedCells = !(this._configService.getConfig(AUTO_HEIGHT_FOR_MERGED_CELLS) ?? false);
         this._isRowStylePrecedeColumnStyle = this._configService.getConfig(IS_ROW_STYLE_PRECEDE_COLUMN_STYLE) ?? false;
     }
 
@@ -125,6 +132,16 @@ export class SheetSkeleton extends Skeleton {
     protected _scrollX: number;
     /** Viewport scrolled value */
     protected _scrollY: number;
+
+    set columnHeaderHeight(value: number) {
+        this._columnHeaderHeight = value;
+        this._worksheetData.columnHeader.height = value;
+    }
+
+    set rowHeaderWidth(value: number) {
+        this._rowHeaderWidth = value;
+        this._worksheetData.rowHeader.width = value;
+    }
 
     get rowHeightAccumulation(): number[] {
         return this._rowHeightAccumulation;

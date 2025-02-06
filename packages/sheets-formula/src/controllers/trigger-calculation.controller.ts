@@ -162,6 +162,8 @@ export class TriggerCalculationController extends Disposable {
 
         this._progress$.next(NilProgress);
         this._progress$.complete();
+        // clear timer when disposed
+        clearTimeout(this._setTimeoutKey);
     }
 
     private _commandExecutedListener() {

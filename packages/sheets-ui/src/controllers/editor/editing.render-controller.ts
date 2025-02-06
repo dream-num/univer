@@ -16,7 +16,7 @@
 
 /* eslint-disable max-lines-per-function */
 
-import type { DocumentDataModel, ICellData, ICommandInfo, IDisposable, IDocumentBody, IDocumentData, IDocumentStyle, IStyleData, Nullable, Styles, UnitModel, Workbook } from '@univerjs/core';
+import type { DocumentDataModel, ICellData, ICommandInfo, IDisposable, IDocumentBody, IDocumentData, IDocumentStyle, IStyleData, Nullable, Styles, Workbook } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import type { WorkbookSelectionModel } from '@univerjs/sheets';
@@ -158,9 +158,10 @@ export class EditingRenderController extends Disposable implements IRenderModule
         this._commandExecutedListener(d);
         this._initSkeletonListener(d);
 
-        this.disposeWithMe(this._univerInstanceService.unitDisposed$.subscribe((_unit: UnitModel) => {
+        // RenderManagerService._disposeItem will calls EditingRenderController.dispose before unitDisposed$.subscribe,so that the timer won't be cleared
+        d.add(() => {
             clearTimeout(this._cursorTimeout);
-        }));
+        });
 
         // FIXME: this problem is the same with slide. Should be fixed when refactoring editor.
         this._cursorTimeout = setTimeout(() => {

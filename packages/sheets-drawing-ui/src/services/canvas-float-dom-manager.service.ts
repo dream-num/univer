@@ -102,17 +102,21 @@ export interface ILimitBound extends IBoundRectNoAngle {
 
 /**
  * Adjust dom bound size when scrolling (dom bound would shrink when scrolling if over the edge of viewMain)
- * @param posOfFloatObject
+ * @param posOfFloatObject  The position of float object, relative to sheet content, scale & scrolling does not affect it.
  * @param scene
  * @param skeleton
  * @param worksheet
  * @returns ILimitBound
  */
+// eslint-disable-next-line max-lines-per-function
 export function transformBound2DOMBound(posOfFloatObject: IBoundRectNoAngle, scene: Scene, skeleton: SpreadsheetSkeleton, worksheet: Worksheet, floatDomInfo?: ICanvasFloatDomInfo): ILimitBound {
     const { scaleX, scaleY } = scene.getAncestorScale();
     const viewMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
+
+    const freeze = worksheet.getFreeze();
+    const { startColumn: viewMainStartColumn, startRow: viewMainStartRow, xSplit: freezedCol, ySplit: freezedRow } = freeze;
     const absolute = {
-        left: true,
+        left: true, // left means the left of pic is in a viewMainLeft
         top: true,
     };
 
@@ -142,29 +146,108 @@ export function transformBound2DOMBound(posOfFloatObject: IBoundRectNoAngle, sce
         viewportScrollX = 0;
     }
 
-    absolute.left = left * scaleX < leftOfViewMain;
-    const offsetLeft = absolute.left
-        ? leftOfViewMain * scaleX + (left - leftOfViewMain) * scaleX
-        : Math.max((left - viewportScrollX) * scaleX, leftOfViewMain);
-    const offsetRight = right < leftOfViewMain
-        ? right * scaleX
-        : Math.max(leftOfViewMain, (right - viewportScrollX) * scaleX);
+    let offsetLeft: number = 0;
+    let offsetRight: number = 0;
 
-    absolute.top = top * scaleY < topOfViewMain;
-    const offsetTop = absolute.top
-        ? topOfViewMain * scaleY + (top - topOfViewMain) * scaleY
-        : Math.max((top - viewportScrollY) * scaleY, topOfViewMain);
-    const offsetBottom = bottom < topOfViewMain
-        ? bottom * scaleY
-        : Math.max(topOfViewMain, (bottom - viewportScrollY) * scaleY);
+    const freezeStartY = skeleton.rowStartY(viewMainStartRow - freezedRow);
+    const freezeStartX = skeleton.colStartX(viewMainStartColumn - freezedCol);
+    const freezeEndY = skeleton.rowStartY(viewMainStartRow);
+    const freezeEndX = skeleton.colStartX(viewMainStartColumn);
+    // const { x: freezeEndX, y: freezeEndY } = skeleton.getDistanceFromTopLeft(viewMainStartRow, viewMainStartColumn);
+    const { rowHeaderWidth, columnHeaderHeight } = skeleton;
 
-    return {
+    if (freezedCol === 0) {
+        console.log('freezedCol === 0');
+        absolute.left = false;
+        offsetLeft = Math.max((left - viewportScrollX) * scaleX, leftOfViewMain);
+        offsetRight = Math.max((right - viewportScrollX) * scaleX, leftOfViewMain);
+    } else {
+        // freeze
+        // viewMainLeft may not start at col = 0
+        // DO NOT use viewMainLeft?.viewBound.right. It's not accurate. delay!
+        console.log('freezed', freezeEndX);
+        const leftToCanvas = left - freezeStartX;// - viewMainLeft.viewBound.left;
+        const rightToCanvas = right - freezeStartX;// - viewMainLeft.viewBound.left;
+        if (right < freezeEndX) {
+            console.log('freezed1');
+            offsetLeft = leftToCanvas * scaleX;
+            offsetRight = rightToCanvas * scaleX;
+        } else if (left < freezeEndX && right > freezeEndX) {
+            console.log('freezed2');
+            offsetLeft = leftToCanvas * scaleX;
+            offsetRight = Math.max(leftOfViewMain, (right - viewportScrollX) * scaleX);
+        } else if (left > freezeEndX) {
+            console.log('freezed3');
+            absolute.left = false;
+            offsetLeft = Math.max((left - viewportScrollX) * scaleX, leftOfViewMain);
+            offsetRight = Math.max((right - viewportScrollX) * scaleX, leftOfViewMain);
+        }
+    }
+    // if (left * scaleX < viewMain.viewBound.left) {
+    //     absolute.left = true;
+    //     offsetLeft = ((leftOfViewMain) + (left - leftOfViewMain)) * scaleX;
+    //     offsetLeft = Math.max(leftOfViewMain, (left - viewportScrollX) * scaleX);
+    //     if (right < leftOfViewMain) {
+    //         offsetRight = right * scaleX;
+    //     } else {
+    //         offsetRight = Math.max(leftOfViewMain, (right - viewportScrollX) * scaleX);
+    //     }
+    // } else {
+    //     absolute.left = false;
+    //     offsetLeft = Math.max((left - viewportScrollX) * scaleX, leftOfViewMain);
+    //     offsetRight = Math.max((right - viewportScrollX) * scaleX, leftOfViewMain);
+    // }
+    let offsetTop: number = 0;
+    let offsetBottom: number = 0;
+    if (freezedRow === 0) {
+        absolute.top = false;
+        offsetTop = Math.max((top - viewportScrollY) * scaleY, topOfViewMain);
+        offsetBottom = Math.max((bottom - viewportScrollY) * scaleY, topOfViewMain);
+    } else {
+        console.log('freezed', freezeEndY);
+        const topToCanvas = top - freezeStartY;// - viewMainLeft.viewBound.left;
+        const bottomToCanvas = bottom - freezeStartY;// - viewMainLeft.viewBound.left;
+        if(bottom < freezeEndY) {
+            offsetTop = topToCanvas * scaleY;
+            offsetBottom = bottomToCanvas * scaleY;
+        } else if (top < freezeEndY && bottom > freezeEndY) {
+            offsetTop = topToCanvas * scaleY;
+            offsetBottom = Math.max(topOfViewMain, (bottom - viewportScrollY) * scaleY);
+        } else if (top > freezeEndY) {
+            absolute.top = false;
+            offsetTop = Math.max((top - viewportScrollY) * scaleY, topOfViewMain);
+            offsetBottom = Math.max((bottom - viewportScrollY) * scaleY, topOfViewMain);
+        }
+    }
+
+    // if (top * scaleY < topOfViewMain) {
+    //     absolute.top = true;
+    //     offsetTop = ((topOfViewMain) + (top - topOfViewMain)) * scaleY;
+    //     if (bottom < topOfViewMain) {
+    //         offsetBottom = bottom * scaleY;
+    //     } else {
+    //         offsetBottom = Math.max(topOfViewMain, (bottom - viewportScrollY) * scaleY);
+    //     }
+    // } else {
+    //     absolute.top = false;
+    //     offsetTop = Math.max((top - viewportScrollY) * scaleY, topOfViewMain);
+    //     offsetBottom = Math.max((bottom - viewportScrollY) * scaleY, topOfViewMain);
+    // }
+
+    offsetLeft = Math.max(offsetLeft, rowHeaderWidth);
+    offsetTop = Math.max(offsetTop, columnHeaderHeight);
+    offsetRight = Math.max(offsetRight, rowHeaderWidth);
+    offsetBottom = Math.max(offsetBottom, columnHeaderHeight);
+
+    const rs = {
         left: offsetLeft,
         right: offsetRight,
         top: offsetTop,
         bottom: offsetBottom,
         absolute,
     };
+    console.log('rs', rs);
+    return rs;
 }
 
 /**

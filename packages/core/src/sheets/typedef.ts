@@ -16,11 +16,12 @@
 
 import type { IResources } from '../services/resource-manager/type';
 import type { IObjectArrayPrimitiveType, IObjectMatrixPrimitiveType, Nullable } from '../shared';
+import type { BooleanNumber } from '../types/enum';
 import type { LocaleType } from '../types/enum/locale-type';
 import type { IDocumentData } from '../types/interfaces';
 import type { ICellCustomRender } from '../types/interfaces/i-cell-custom-render';
 import type { IStyleData } from '../types/interfaces/i-style-data';
-import { type BooleanNumber, CellValueType } from '../types/enum';
+import { CellValueType } from '../types/enum';
 
 /**
  * Snapshot of a workbook.
@@ -378,12 +379,12 @@ export interface IFreeze {
      */
     ySplit: number;
     /**
-     * scrollable start row
+     * scrollable start row(viewMain start row)
      */
     startRow: number;
 
     /**
-     * scrollable start column
+     * scrollable start column(viewMain start column)
      */
     startColumn: number;
 }

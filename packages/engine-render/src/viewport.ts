@@ -206,7 +206,7 @@ export class Viewport {
     /**
      * bound of visible area
      */
-    private _viewBound: IBoundRectNoAngle;
+    private _viewBound: IBoundRectNoAngle = { top: 0, left: 0, bottom: 0, right: 0 };
     private _preViewBound: IBoundRectNoAngle;
 
     /**
@@ -449,6 +449,9 @@ export class Viewport {
         this._active = false;
     }
 
+    /**
+     * canvas resize & freeze change would invoke this method
+     */
     resetCanvasSizeAndUpdateScroll() {
         this._resizeCacheCanvas();
         this._updateScrollByViewportScrollValue();

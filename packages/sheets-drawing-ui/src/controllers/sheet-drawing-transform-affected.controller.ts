@@ -15,11 +15,13 @@
  */
 
 import type { ICommandInfo, IDrawingParam, IMutationInfo, IRange, ITransformState, Nullable, Workbook } from '@univerjs/core';
+import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
+import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import type { IInsertColCommandParams, IInsertRowCommandParams, IMoveColsCommandParams, IMoveRangeCommandParams, IMoveRowsCommandParams, IRemoveRowColCommandParams, ISetColHiddenMutationParams, ISetColVisibleMutationParams, ISetRowHiddenMutationParams, ISetRowVisibleMutationParams, ISetSpecificColsVisibleCommandParams, ISetSpecificRowsVisibleCommandParams, ISetWorksheetActiveOperationParams, ISetWorksheetColWidthMutationParams, ISetWorksheetRowHeightMutationParams, ISetWorksheetRowIsAutoHeightMutationParams } from '@univerjs/sheets';
 import type { ISheetDrawing, ISheetDrawingPosition } from '@univerjs/sheets-drawing';
 import { Disposable, ICommandService, Inject, IUniverInstanceService, Rectangle } from '@univerjs/core';
-import { type IDrawingJsonUndo1, IDrawingManagerService } from '@univerjs/drawing';
-import { type IRenderContext, IRenderManagerService, type IRenderModule } from '@univerjs/engine-render';
+import { IDrawingManagerService } from '@univerjs/drawing';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { DeleteRangeMoveLeftCommand, DeleteRangeMoveUpCommand, DeltaColumnWidthCommand, DeltaRowHeightCommand, getSheetCommandTarget, InsertColCommand, InsertRangeMoveDownCommand, InsertRangeMoveRightCommand, InsertRowCommand, MoveColsCommand, MoveRangeCommand, MoveRowsCommand, RemoveColCommand, RemoveRowCommand, SetColHiddenCommand, SetColHiddenMutation, SetColVisibleMutation, SetColWidthCommand, SetRowHeightCommand, SetRowHiddenCommand, SetRowHiddenMutation, SetRowVisibleMutation, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetWorksheetActiveOperation, SetWorksheetColWidthMutation, SetWorksheetRowHeightMutation, SheetInterceptorService } from '@univerjs/sheets';
 import { DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation, SheetDrawingAnchorType } from '@univerjs/sheets-drawing';
 import { attachRangeWithCoord, ISheetSelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
@@ -1107,46 +1109,93 @@ export class SheetDrawingTransformAffectedController extends Disposable implemen
 
     private _commandListener() {
         this.disposeWithMe(
+            // TODO@weird94: this should subscribe to the command service
+            // but the skeleton changes like other render modules. These two signals are not equivalent.
+            // As a temp solution, I subscribed to activate$ here.
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (command.id === SetWorksheetActiveOperation.id) {
-                    setTimeout(() => {
-                        const params = command.params as ISetWorksheetActiveOperationParams;
-                        const { unitId: showUnitId, subUnitId: showSubunitId } = params;
-
-                        const drawingMap = this._drawingManagerService.drawingManagerData;
-
-                        const insertDrawings: IDrawingParam[] = [];
-
-                        const removeDrawings: IDrawingParam[] = [];
-
-                        Object.keys(drawingMap).forEach((unitId) => {
-                            const subUnitMap = drawingMap[unitId];
-                            if (subUnitMap == null) {
-                                return;
-                            }
-                            Object.keys(subUnitMap).forEach((subUnitId) => {
-                                const drawingData = subUnitMap[subUnitId].data;
-                                if (drawingData == null) {
-                                    return;
-                                }
-                                Object.keys(drawingData).forEach((drawingId) => {
-                                    if (unitId === showUnitId && subUnitId === showSubunitId) {
-                                        const drawing = drawingData[drawingId] as ISheetDrawing;
-                                        drawing.transform = drawingPositionToTransform(drawing.sheetTransform, this._selectionRenderService, this._skeletonManagerService);
-                                        insertDrawings.push(drawingData[drawingId]);
-                                    } else {
-                                        removeDrawings.push(drawingData[drawingId]);
-                                    }
-                                });
-                            });
-                        });
-
-                        this._drawingManagerService.removeNotification(removeDrawings);
-                        this._drawingManagerService.addNotification(insertDrawings);
-                    }, 0);
+                    const { unitId, subUnitId } = command.params as ISetWorksheetActiveOperationParams;
+                    this._updateDrawings(unitId, subUnitId);
                 }
             })
         );
+
+        this.disposeWithMe(
+            this._context.activated$.subscribe((activated) => {
+                const { unit, unitId } = this._context;
+                if (activated) {
+                    const subUnitId = unit.getActiveSheet().getSheetId();
+                    this._updateDrawings(unitId, subUnitId);
+                } else {
+                    // Better, dispose the command service listener here.
+                    this._clearDrawings(unitId);
+                }
+            })
+        );
+    }
+
+    private _clearDrawings(selfUnitId: string): void {
+        setTimeout(() => {
+            const drawingMap = this._drawingManagerService.drawingManagerData;
+            const removeDrawings: IDrawingParam[] = [];
+
+            // TODO@weird94: should add a iterating function
+            Object.keys(drawingMap).forEach((unitId) => {
+                const subUnitMap = drawingMap[unitId];
+                if (subUnitMap == null) {
+                    return;
+                }
+
+                Object.keys(subUnitMap).forEach((subUnitId) => {
+                    const drawingData = subUnitMap[subUnitId].data;
+                    if (drawingData == null) {
+                        return;
+                    }
+
+                    Object.keys(drawingData).forEach((drawingId) => {
+                        if (unitId === selfUnitId) {
+                            removeDrawings.push(drawingData[drawingId]);
+                        }
+                    });
+                });
+            });
+
+            this._drawingManagerService.removeNotification(removeDrawings);
+        });
+    }
+
+    private _updateDrawings(showUnitId: string, showSubunitId: string): void {
+        // TODO@weird94: remove the setTimeout here
+        setTimeout(() => {
+            const drawingMap = this._drawingManagerService.drawingManagerData;
+            const insertDrawings: IDrawingParam[] = [];
+            const removeDrawings: IDrawingParam[] = [];
+
+            Object.keys(drawingMap).forEach((unitId) => {
+                const subUnitMap = drawingMap[unitId];
+                if (subUnitMap == null) {
+                    return;
+                }
+                Object.keys(subUnitMap).forEach((subUnitId) => {
+                    const drawingData = subUnitMap[subUnitId].data;
+                    if (drawingData == null) {
+                        return;
+                    }
+                    Object.keys(drawingData).forEach((drawingId) => {
+                        if (unitId === showUnitId && subUnitId === showSubunitId) {
+                            const drawing = drawingData[drawingId] as ISheetDrawing;
+                            drawing.transform = drawingPositionToTransform(drawing.sheetTransform, this._selectionRenderService, this._skeletonManagerService);
+                            insertDrawings.push(drawingData[drawingId]);
+                        } else {
+                            removeDrawings.push(drawingData[drawingId]);
+                        }
+                    });
+                });
+            });
+
+            this._drawingManagerService.removeNotification(removeDrawings);
+            this._drawingManagerService.addNotification(insertDrawings);
+        }, 0);
     }
 
     private _sheetRefreshListener() {

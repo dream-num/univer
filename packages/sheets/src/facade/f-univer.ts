@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IDisposable, Injector, IWorkbookData, Nullable, Workbook } from '@univerjs/core';
+import type { ICommandInfo, ICreateUnitOptions, IDisposable, Injector, IWorkbookData, Nullable, Workbook } from '@univerjs/core';
 import type { CommandListenerValueChange, IInsertSheetCommandParams, IRemoveSheetCommandParams, ISetGridlinesColorCommandParams, ISetTabColorMutationParams, ISetWorksheetActivateCommandParams, ISetWorksheetHideMutationParams, ISetWorksheetNameCommandParams, ISetWorksheetOrderMutationParams, IToggleGridlinesCommandParams } from '@univerjs/sheets';
 import type { IBeforeSheetCreateEventParams, ISheetCreatedEventParams } from './f-event';
 import type { FRange } from './f-range';
@@ -37,13 +37,19 @@ export interface IFUniverSheetsMixin {
     /**
      * Create a new spreadsheet and get the API handler of that spreadsheet.
      * @param {Partial<IWorkbookData>} data The snapshot of the spreadsheet.
+     * @param {ICreateUnitOptions} options The options of creating the spreadsheet.
      * @returns {FWorkbook} FWorkbook API instance.
      * @example
      * ```ts
      * univerAPI.createWorkbook({ id: 'Sheet1', name: 'Sheet1' });
      * ```
+     *
+     * Add you can make the workbook not as the active workbook by setting options:
+     * ```ts
+     * univerAPI.createWorkbook({ id: 'Sheet1', name: 'Sheet1' }, { makeCurrent: false });
+     * ```
      */
-    createWorkbook(data: Partial<IWorkbookData>): FWorkbook;
+    createWorkbook(data: Partial<IWorkbookData>, options?: ICreateUnitOptions): FWorkbook;
 
     /**
      * Get the currently focused Univer spreadsheet.
@@ -421,14 +427,14 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
         this._initWorkbookEvent(injector);
     }
 
-    override createUniverSheet(data: Partial<IWorkbookData>): FWorkbook {
+    override createUniverSheet(data: Partial<IWorkbookData>, options?: ICreateUnitOptions): FWorkbook {
         const instanceService = this._injector.get(IUniverInstanceService);
-        const workbook = instanceService.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, data);
+        const workbook = instanceService.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, data, options);
         return this._injector.createInstance(FWorkbook, workbook);
     };
 
-    override createWorkbook(data: Partial<IWorkbookData>): FWorkbook {
-        return this.createUniverSheet(data);
+    override createWorkbook(data: Partial<IWorkbookData>, options?: ICreateUnitOptions): FWorkbook {
+        return this.createUniverSheet(data, options);
     }
 
     override getActiveWorkbook(): FWorkbook | null {

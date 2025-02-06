@@ -123,16 +123,16 @@ export function transformBound2DOMBound(posOfFloatObject: IBoundRectNoAngle, sce
         };
     }
     const { left, right, top, bottom } = posOfFloatObject;
-    let { top: topBoundOfViewArea, left: leftBoundViewArea, viewportScrollX, viewportScrollY } = viewMain;
-
+    let { top: topOfViewMain, left: leftOfViewMain, viewportScrollX, viewportScrollY } = viewMain;
     // specify edge of viewbound. if not specify, use viewMain.
     const { boundsOfViewArea, scrollDirectionResponse } = floatDomInfo || {};
+
     if (boundsOfViewArea) {
         if (Tools.isDefine(boundsOfViewArea.top)) {
-            topBoundOfViewArea = boundsOfViewArea.top;
+            topOfViewMain = boundsOfViewArea.top;
         }
         if (Tools.isDefine(boundsOfViewArea.left)) {
-            leftBoundViewArea = boundsOfViewArea.left;
+            leftOfViewMain = boundsOfViewArea.left;
         }
     }
     if (scrollDirectionResponse === ScrollDirectionResponse.HORIZONTAL) {
@@ -142,43 +142,21 @@ export function transformBound2DOMBound(posOfFloatObject: IBoundRectNoAngle, sce
         viewportScrollX = 0;
     }
 
-    let offsetLeft: number;
-    let offsetRight: number;
+    absolute.left = left * scaleX < leftOfViewMain;
+    const offsetLeft = absolute.left
+        ? leftOfViewMain * scaleX + (left - leftOfViewMain) * scaleX
+        : Math.max((left - viewportScrollX) * scaleX, leftOfViewMain);
+    const offsetRight = right < leftOfViewMain
+        ? right * scaleX
+        : Math.max(leftOfViewMain, (right - viewportScrollX) * scaleX);
 
-    // viewMain or viewTop
-    if (left < leftBoundViewArea) {
-        absolute.left = true;
-        offsetLeft = ((leftBoundViewArea) + (left - leftBoundViewArea)) * scaleX;
-        offsetRight = Math.max(
-            Math.min(
-                ((leftBoundViewArea) + (right - leftBoundViewArea)) * scaleX,
-                (leftBoundViewArea) * scaleX
-            ),
-            (right - viewportScrollX) * scaleX);
-    } else {
-        absolute.left = false;
-        offsetLeft = Math.max((left - viewportScrollX) * scaleX, (leftBoundViewArea) * scaleX);
-        offsetRight = Math.max((right - viewportScrollX) * scaleX, (leftBoundViewArea) * scaleX);
-    }
-
-    let offsetTop: number;
-    let offsetBottom: number;
-    // viewMain or viewTop
-    if (top < topBoundOfViewArea) {
-        absolute.top = true;
-        offsetTop = ((topBoundOfViewArea) + (top - topBoundOfViewArea)) * scaleY;
-        offsetBottom = Math.max(
-            Math.min(
-                ((topBoundOfViewArea) + (right - topBoundOfViewArea)) * scaleY,
-                (topBoundOfViewArea) * scaleY
-            ),
-            (bottom - viewportScrollY) * scaleY
-        );
-    } else {
-        absolute.top = false;
-        offsetTop = Math.max((top - viewportScrollY) * scaleY, (topBoundOfViewArea) * scaleY);
-        offsetBottom = Math.max((bottom - viewportScrollY) * scaleY, (topBoundOfViewArea) * scaleY);
-    }
+    absolute.top = top * scaleY < topOfViewMain;
+    const offsetTop = absolute.top
+        ? topOfViewMain * scaleY + (top - topOfViewMain) * scaleY
+        : Math.max((top - viewportScrollY) * scaleY, topOfViewMain);
+    const offsetBottom = bottom < topOfViewMain
+        ? bottom * scaleY
+        : Math.max(topOfViewMain, (bottom - viewportScrollY) * scaleY);
 
     return {
         left: offsetLeft,

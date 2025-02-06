@@ -192,7 +192,7 @@ export function createFrozenCommandTestBed(workbookData?: IWorkbookData) {
 
     const unitId = sheet.getUnitId();
     const injector = univer.__getInjector();
-
+    injector.add([SheetSkeletonService]);
     // NOTE: this is a hack. Please refer to ./services/clipboard/__tests__/clipboard-test-bed.ts
     const mockSheetSkService = new SheetSkeletonService(injector);
     const fakeSheetSkeletonManagerService = new SheetSkeletonManagerService({
@@ -208,7 +208,7 @@ export function createFrozenCommandTestBed(workbookData?: IWorkbookData) {
         activated$: new BehaviorSubject(true),
         activate: () => {},
         deactivate: () => {},
-    }, injector);
+    }, injector, injector.get(SheetSkeletonService));
 
     injector.add([SheetSkeletonManagerService, { useValue: fakeSheetSkeletonManagerService }]);
     injector.get(IRenderManagerService).addRender(unitId, {

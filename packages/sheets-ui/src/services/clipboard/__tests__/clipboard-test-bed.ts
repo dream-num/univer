@@ -574,6 +574,7 @@ export function clipboardTestBed(workbookData?: IWorkbookData, dependencies?: De
             injector.add([IDefinedNamesService, { useClass: DefinedNamesService }]);
             injector.add([IFormulaRuntimeService, { useClass: FormulaRuntimeService }]);
             injector.add([IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }]);
+            injector.add([SheetSkeletonService]);
 
             dependencies?.forEach((d) => injector.add(d));
 
@@ -608,7 +609,7 @@ export function clipboardTestBed(workbookData?: IWorkbookData, dependencies?: De
         activated$: new BehaviorSubject(true),
         activate: () => {},
         deactivate: () => {},
-    }, injector);
+    }, injector, injector.get(SheetSkeletonService));
 
     injector.add([SheetSkeletonManagerService, { useValue: fakeSheetSkeletonManagerService }]);
     injector.get(IRenderManagerService).addRender('test', {

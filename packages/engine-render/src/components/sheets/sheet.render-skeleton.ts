@@ -189,10 +189,10 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
 
     setScene(scene: Scene) {
         this._scene = scene;
-
-        this._scene.onTransformChange$.subscribeEvent((param: ITransformChangeState) => {
-            this.setScale(param.value.scaleX || 1, param.value.scaleY);
-        });
+        this.disposeWithMe(
+            this._scene.onTransformChange$.subscribeEvent((param: ITransformChangeState) => {
+                this.setScale(param.value.scaleX || 1, param.value.scaleY);
+            }));
     }
 
     override _updateLayout() {

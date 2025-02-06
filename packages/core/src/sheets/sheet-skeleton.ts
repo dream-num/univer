@@ -569,9 +569,9 @@ export class SheetSkeleton extends Skeleton {
      * @param column
      * @returns {ISelectionCell} The cell info with merge data
      */
-    // protected _getCellMergeInfo(row: number, column: number): ISelectionCell {
-    //     return this.worksheet.getCellInfoInMergeData(row, column);
-    // }
+    protected _getCellMergeInfo(row: number, column: number): ISelectionCell {
+        return this.worksheet.getCellInfoInMergeData(row, column);
+    }
 
     /**
      * @deprecated use getNoMergeCellWithCoordByIndex instead.

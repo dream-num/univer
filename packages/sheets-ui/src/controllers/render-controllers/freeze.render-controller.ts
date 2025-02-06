@@ -1523,13 +1523,13 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
             return;
         }
         const { scene } = sheetObject;
-        scene.onTransformChange$.subscribeEvent((state) => {
+
+        this.disposeWithMe(scene.onTransformChange$.subscribeEvent((state) => {
             if (![TRANSFORM_CHANGE_OBSERVABLE_TYPE.scale, TRANSFORM_CHANGE_OBSERVABLE_TYPE.all].includes(state.type)) {
                 return;
             }
-
             this._refreshCurrent();
-        });
+        }));
     }
 
     private _clearObserverEvent() {

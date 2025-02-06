@@ -30,7 +30,7 @@ import type {
     IFloatObject,
     ILayoutContext,
 } from '../../tools';
-import { BooleanNumber, DataStreamTreeTokenType, GridType, ObjectRelativeFromV, PositionedObjectLayoutType, SpacingRule, TableTextWrapType } from '@univerjs/core';
+import { BooleanNumber, DataStreamTreeTokenType, GridType, ObjectRelativeFromV, PositionedObjectLayoutType, SpacingRule, TableTextWrapType, Tools } from '@univerjs/core';
 import { GlyphType, LineType } from '../../../../../basics/i-document-skeleton-cached';
 import { BreakPointType } from '../../line-breaker/break';
 import { addGlyphToDivide, createSkeletonBulletGlyph } from '../../model/glyph';
@@ -523,7 +523,7 @@ function _lineOperator(
     const headerPage = skeHeaders?.get(headerId)?.get(pageWidth);
     const footerPage = skeFooters?.get(footerId)?.get(pageWidth);
 
-    let needOpenNewPageByTableLayout = false;
+    let needOpenNewColumnByTableLayout = false;
 
     // Handle float object relative to line.
     // FIXME: @jocs, it will not update the last line's drawings.
@@ -549,18 +549,19 @@ function _lineOperator(
     }
 
     if (skeTablesInParagraph != null && skeTablesInParagraph.length > 0) {
-        needOpenNewPageByTableLayout = _updateAndPositionTable(ctx, lineTop, lineHeight, lastPage, column, section, skeTablesInParagraph, paragraphConfig.paragraphIndex, sectionBreakConfig, pDrawingAnchor?.get(paragraphIndex)?.top);
+        needOpenNewColumnByTableLayout = _updateAndPositionTable(ctx, lineTop, lineHeight, lastPage, column, section, skeTablesInParagraph, paragraphConfig.paragraphIndex, sectionBreakConfig, pDrawingAnchor?.get(paragraphIndex)?.top);
     }
 
     const newLineTop = calculateLineTopByDrawings(
         lineHeight,
         lineTop,
         lastPage,
+        column,
         headerPage,
         footerPage
     ); // WRAP_TOP_AND_BOTTOM 的 drawing 和 WRAP NONE 的 table 会改变行的起始 top
 
-    if ((lineHeight + newLineTop > section.height && column.lines.length > 0 && lastPage.sections.length > 0) || needOpenNewPageByTableLayout) {
+    if ((lineHeight + newLineTop > section.height && column.lines.length > 0 && lastPage.sections.length > 0) || needOpenNewColumnByTableLayout) {
         // 行高超过Col高度，且列中已存在一行以上，且section大于一个；
         // console.log('_lineOperator', { glyphGroup, pages, lineHeight, newLineTop, sectionHeight: section.height, lastPage });
         setColumnFullState(column, true);
@@ -626,7 +627,7 @@ function _lineOperator(
             marginTop,
             spaceBelowApply,
         },
-        column.width,
+        column,
         lineIndex,
         isParagraphFirstShapedText,
         paragraphConfig,
@@ -793,13 +794,14 @@ function _updateAndPositionTable(
     const { tableId, table } = firstUnPositionedTable;
     const { tableSource } = table;
 
-    if (firstUnPositionedTable.isSlideTable === false) {
-        switch (tableSource.textWrap) {
-            case TableTextWrapType.NONE: {
-                table.top = lineTop;
-                break;
-            }
-            case TableTextWrapType.WRAP: {
+    switch (tableSource.textWrap) {
+        case TableTextWrapType.NONE: {
+            table.top = lineTop;
+            table.left = column.left;
+            break;
+        }
+        case TableTextWrapType.WRAP: {
+            if (firstUnPositionedTable.isSlideTable === false) {
                 __updateWrapTablePosition(
                     ctx,
                     table,
@@ -809,11 +811,11 @@ function _updateAndPositionTable(
                     paragraphIndex,
                     drawingAnchorTop
                 );
-                break;
             }
-            default: {
-                throw new Error(`Unsupported table text wrap type: ${tableSource.textWrap}`);
-            }
+            break;
+        }
+        default: {
+            throw new Error(`Unsupported table text wrap type: ${tableSource.textWrap}`);
         }
     }
 
@@ -1244,19 +1246,20 @@ export function updateInlineDrawingPosition(
                 const { size, angle } = docTransform;
                 const { width = 0, height = 0 } = size;
                 const glyphHeight = glyph.bBox.bd + glyph.bBox.ba;
+                const copyDrawing = Tools.deepClone(drawing);
 
-                drawing.aLeft = divide.left + divide.paddingLeft + glyph.left + 0.5 * glyph.width - 0.5 * width || 0;
-                drawing.aTop = top + lineHeight - 0.5 * glyphHeight - 0.5 * height - marginBottom;
-                drawing.width = width;
-                drawing.height = height;
-                drawing.angle = angle;
-                drawing.isPageBreak = isPageBreak;
-                drawing.lineTop = top;
-                drawing.columnLeft = column.left;
-                drawing.blockAnchorTop = blockAnchorTop ?? top;
-                drawing.lineHeight = line.lineHeight;
+                copyDrawing.aLeft = page.marginLeft + column.left + divide.left + divide.paddingLeft + glyph.left + 0.5 * glyph.width - 0.5 * width || 0;
+                copyDrawing.aTop = page.marginTop + top + lineHeight - 0.5 * glyphHeight - 0.5 * height - marginBottom;
+                copyDrawing.width = width;
+                copyDrawing.height = height;
+                copyDrawing.angle = angle;
+                copyDrawing.isPageBreak = isPageBreak;
+                copyDrawing.lineTop = top;
+                copyDrawing.columnLeft = column.left;
+                copyDrawing.blockAnchorTop = blockAnchorTop ?? top;
+                copyDrawing.lineHeight = line.lineHeight;
 
-                drawings.set(drawing.drawingId, drawing);
+                drawings.set(copyDrawing.drawingId, copyDrawing);
             }
         }
     }

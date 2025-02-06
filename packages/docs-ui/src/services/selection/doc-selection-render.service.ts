@@ -606,14 +606,14 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
     }
 
     private _setSystemHighlightColorToStyle() {
-        const { r, g, b, a } = getSystemHighlightColor();
+        const { r, g, b } = getSystemHighlightColor();
 
         // Only set selection use highlight color.
         const style: ITextSelectionStyle = {
             strokeWidth: 1.5,
             stroke: 'rgba(0, 0, 0, 0)',
             strokeActive: 'rgba(0, 0, 0, 1)',
-            fill: `rgba(${r}, ${g}, ${b}, ${a ?? 0.3})`,
+            fill: `rgba(${r}, ${g}, ${b}, 0.3)`,
         };
 
         this._setRangeStyle(style);

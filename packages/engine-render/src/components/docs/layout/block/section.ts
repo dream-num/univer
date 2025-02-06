@@ -110,6 +110,7 @@ export function dealWithSection(
 // Roll back pages to the state it was in before the dirty paragraph.
 function _rollbackPages(paragraphIndex: number, allCurrentSkeletonPages: IDocumentSkeletonPage[]) {
     let findFirstDirtyLine = false;
+    let findColumnIndex = -1;
     for (let pageIndex = 0; pageIndex < allCurrentSkeletonPages.length; pageIndex++) {
         const page = allCurrentSkeletonPages[pageIndex];
 
@@ -124,23 +125,21 @@ function _rollbackPages(paragraphIndex: number, allCurrentSkeletonPages: IDocume
 
                     if (line.paragraphIndex === paragraphIndex) {
                         findFirstDirtyLine = true;
+                        findColumnIndex = columnIndex;
                         column.lines.splice(lineIndex);
                         break;
                     }
                 }
 
                 if (findFirstDirtyLine) {
-                    let columnSplitIndex = column.lines.length ? columnIndex + 1 : columnIndex;
-                    columnSplitIndex = Math.max(columnSplitIndex, 1);
-                    const preColumnIndex = columnSplitIndex - 1;
-                    if (preColumnIndex >= 0) {
-                        section.columns[preColumnIndex].isFull = false;
+                    if (columnIndex !== findColumnIndex) {
+                        column.lines.length = 0;
                     }
-                    section.columns.splice(columnSplitIndex);
-                    break;
+                    column.isFull = false;
                 }
             }
 
+            // TODO: 目前一个页面只有一个 section，所以还没有问题，后续需要考虑多个 section 的情况。
             if (findFirstDirtyLine) {
                 const sectionSplitIndex = sectionIndex + 1;
                 page.sections.splice(sectionSplitIndex);

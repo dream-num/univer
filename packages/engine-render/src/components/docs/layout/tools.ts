@@ -342,9 +342,9 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
 
             for (const column of columns) {
                 const { lines } = column;
-                const columStartIndex = preColumnStartIndex;
-                const columnEndIndex = columStartIndex;
-                let preLineStartIndex = columStartIndex;
+                const columnStartIndex = preColumnStartIndex;
+                const columnEndIndex = columnStartIndex;
+                let preLineStartIndex = columnStartIndex;
                 let columnHeight = 0;
                 let maxColumnWidth = Number.NEGATIVE_INFINITY;
                 // const preLine: Nullable<IDocumentSkeletonLine> = null;
@@ -429,7 +429,7 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
                     // because of float objects will between lines.
                     preLineStartIndex = line.ed;
                 }
-                column.st = columStartIndex + 1;
+                column.st = columnStartIndex + 1;
                 column.ed = preLineStartIndex >= column.st ? preLineStartIndex : column.st;
                 column.height = columnHeight;
 
@@ -464,6 +464,18 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
         page.width = maxContentWidth;
 
         prePageStartIndex = page.ed;
+    }
+}
+
+export function updatePagesLeft(pages: IDocumentSkeletonPage[]) {
+    const maxPageWidth = Math.max(...pages.map((page) => page.pageWidth));
+
+    if (!Number.isFinite(maxPageWidth) || Number.isNaN(maxPageWidth)) {
+        return;
+    }
+
+    for (const page of pages) {
+        page.left = (maxPageWidth - page.pageWidth) / 2;
     }
 }
 
@@ -621,7 +633,7 @@ export function getPositionHorizon(
 
         let absoluteLeft = 0;
         if (relativeFrom === ObjectRelativeFromH.COLUMN) {
-            absoluteLeft = (isPageBreak ? 0 : column?.left || 0) + posOffset;
+            absoluteLeft = marginLeft + (isPageBreak ? 0 : column?.left || 0) + posOffset;
         } else if (relativeFrom === ObjectRelativeFromH.LEFT_MARGIN) {
             // TODO
         } else if (relativeFrom === ObjectRelativeFromH.MARGIN) {
@@ -705,11 +717,11 @@ export function getPositionVertical(
         const { marginTop } = page;
 
         if (relativeFrom === ObjectRelativeFromV.LINE) {
-            absoluteTop = (lineTop || 0) + posOffset;
+            absoluteTop = marginTop + (lineTop || 0) + posOffset;
         } else if (relativeFrom === ObjectRelativeFromV.TOP_MARGIN) {
             // TODO
         } else if (relativeFrom === ObjectRelativeFromV.MARGIN) {
-            absoluteTop = posOffset;
+            absoluteTop = posOffset + marginTop;
         } else if (relativeFrom === ObjectRelativeFromV.BOTTOM_MARGIN) {
             // TODO
         } else if (relativeFrom === ObjectRelativeFromV.INSIDE_MARGIN) {
@@ -717,9 +729,9 @@ export function getPositionVertical(
         } else if (relativeFrom === ObjectRelativeFromV.OUTSIDE_MARGIN) {
             // TODO
         } else if (relativeFrom === ObjectRelativeFromV.PAGE) {
-            absoluteTop = posOffset - marginTop;
+            absoluteTop = posOffset;
         } else if (relativeFrom === ObjectRelativeFromV.PARAGRAPH) {
-            absoluteTop = (isPageBreak ? 0 : blockAnchorTop == null ? lineTop : blockAnchorTop) + posOffset;
+            absoluteTop = marginTop + (isPageBreak ? 0 : blockAnchorTop == null ? lineTop : blockAnchorTop) + posOffset;
         }
         return absoluteTop;
     } else if (percent != null) {
@@ -973,6 +985,7 @@ const DEFAULT_MODERN_DOCUMENT_STYLE: IDocumentStyle = {
         width: ptToPixel(595),
         height: Number.POSITIVE_INFINITY,
     },
+    pageOrient: PageOrientType.PORTRAIT,
     marginTop: ptToPixel(50),
     marginBottom: ptToPixel(50),
     marginRight: ptToPixel(50),
@@ -999,7 +1012,17 @@ const DEFAULT_MODERN_DOCUMENT_STYLE: IDocumentStyle = {
 const DEFAULT_MODERN_SECTION_BREAK: Partial<ISectionBreak> = {
     columnProperties: [],
     columnSeparatorType: ColumnSeparatorType.NONE,
-    sectionType: SectionType.SECTION_TYPE_UNSPECIFIED,
+    equalWidth: BooleanNumber.FALSE,
+    sectionType: SectionType.CONTINUOUS,
+    pageSize: {
+        width: ptToPixel(595),
+        height: Number.POSITIVE_INFINITY,
+    },
+    pageOrient: PageOrientType.PORTRAIT,
+    marginTop: ptToPixel(50),
+    marginBottom: ptToPixel(50),
+    marginRight: ptToPixel(50),
+    marginLeft: ptToPixel(50),
 };
 
 export function prepareSectionBreakConfig(ctx: ILayoutContext, nodeIndex: number) {
@@ -1073,6 +1096,9 @@ export function prepareSectionBreakConfig(ctx: ILayoutContext, nodeIndex: number
         useFirstPageHeaderFooter = global_useFirstPageHeaderFooter,
         evenAndOddHeaders = global_evenAndOddHeaders,
 
+        equalWidth = BooleanNumber.TRUE,
+        numOfEqualWidthColumns = 1,
+        spaceBetweenEqualWidthColumns = { v: 10 },
         columnProperties = [],
         columnSeparatorType = ColumnSeparatorType.NONE,
         contentDirection,
@@ -1123,6 +1149,9 @@ export function prepareSectionBreakConfig(ctx: ILayoutContext, nodeIndex: number
         sectionTypeNext,
         textDirection,
         renderConfig,
+        equalWidth,
+        numOfEqualWidthColumns,
+        spaceBetweenEqualWidthColumns,
 
         autoHyphenation,
         doNotHyphenateCaps,

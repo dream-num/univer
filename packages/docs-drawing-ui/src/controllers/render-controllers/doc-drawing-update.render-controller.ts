@@ -24,7 +24,7 @@ import { MessageType } from '@univerjs/design';
 import { DocSelectionManagerService, DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { IDocDrawingService } from '@univerjs/docs-drawing';
 import { docDrawingPositionToTransform, DocSelectionRenderService } from '@univerjs/docs-ui';
-import { DRAWING_IMAGE_ALLOW_IMAGE_LIST, DRAWING_IMAGE_ALLOW_SIZE, DRAWING_IMAGE_COUNT_LIMIT, DRAWING_IMAGE_HEIGHT_LIMIT, DRAWING_IMAGE_WIDTH_LIMIT, getDrawingShapeKeyByDrawingSearch, getImageSize, IDrawingManagerService, IImageIoService, ImageUploadStatusType } from '@univerjs/drawing';
+import { DRAWING_IMAGE_ALLOW_IMAGE_LIST, DRAWING_IMAGE_ALLOW_SIZE, DRAWING_IMAGE_COUNT_LIMIT, DRAWING_IMAGE_HEIGHT_LIMIT, getDrawingShapeKeyByDrawingSearch, getImageSize, IDrawingManagerService, IImageIoService, ImageUploadStatusType } from '@univerjs/drawing';
 import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
 
 import { ILocalFileService, IMessageService } from '@univerjs/ui';
@@ -78,10 +78,11 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
         }
 
         await this._insertFloatImages(files);
+
         return true;
     }
 
-    // eslint-disable-next-line max-lines-per-function
+    // eslint-disable-next-line max-lines-per-function, complexity
     private async _insertFloatImages(files: File[]) {
         let imageParams: Nullable<IImageIoServiceParam>[] = [];
 
@@ -118,6 +119,18 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
         const { unitId } = this._context;
         const docDrawingParams: IDocDrawing[] = [];
 
+        const activeTextRange = this._docSelectionManagerService.getActiveTextRange();
+        const skeleton = this._renderManagerSrv.getRenderById(unitId)
+            ?.with(DocSkeletonManagerService);
+
+        if (activeTextRange == null || skeleton == null) {
+            return;
+        }
+
+        const glyph = skeleton.getSkeleton().findNodeByCharIndex(activeTextRange.startOffset);
+        const section = glyph?.parent?.parent?.parent?.parent;
+        const minColWidth = Math.min(...section?.columns.map((col) => col.width) ?? []);
+
         for (const imageParam of imageParams) {
             if (imageParam == null) {
                 continue;
@@ -128,8 +141,8 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
             this._imageIoService.addImageSourceCache(imageId, imageSourceType, image);
 
             let scale = 1;
-            if (width > DRAWING_IMAGE_WIDTH_LIMIT || height > DRAWING_IMAGE_HEIGHT_LIMIT) {
-                const scaleWidth = DRAWING_IMAGE_WIDTH_LIMIT / width;
+            if (width > minColWidth || height > DRAWING_IMAGE_HEIGHT_LIMIT) {
+                const scaleWidth = minColWidth / width;
                 const scaleHeight = DRAWING_IMAGE_HEIGHT_LIMIT / height;
                 scale = Math.min(scaleWidth, scaleHeight);
             }

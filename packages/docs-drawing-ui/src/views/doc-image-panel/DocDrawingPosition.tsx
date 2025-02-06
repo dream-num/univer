@@ -208,17 +208,15 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
         let delta = 0;
 
         if (prevRelativeFrom === ObjectRelativeFromH.COLUMN) {
-            delta -= drawing.columnLeft;
+            delta = delta - drawing.columnLeft - pageMarginLeft;
         } else if (prevRelativeFrom === ObjectRelativeFromH.MARGIN) {
             delta -= pageMarginLeft;
         }
 
         if (relativeFrom === ObjectRelativeFromH.COLUMN) {
-            delta += drawing.columnLeft;
+            delta = delta + drawing.columnLeft + pageMarginLeft;
         } else if (relativeFrom === ObjectRelativeFromH.MARGIN) {
             delta += pageMarginLeft;
-        } else if (relativeFrom === ObjectRelativeFromH.PAGE) {
-            // Do nothing.
         }
 
         const newPositionH = {
@@ -275,19 +273,19 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
         let delta = 0;
 
         if (prevRelativeFrom === ObjectRelativeFromV.PARAGRAPH) {
-            delta -= paragraphStartLine.top;
+            delta = delta - paragraphStartLine.top - page.marginTop;
         } else if (prevRelativeFrom === ObjectRelativeFromV.LINE) {
-            delta -= line.top;
-        } else if (prevRelativeFrom === ObjectRelativeFromV.PAGE) {
-            delta += page.marginTop;
+            delta = delta - line.top - page.marginTop;
+        } else if (prevRelativeFrom === ObjectRelativeFromV.MARGIN) {
+            delta -= page.marginTop;
         }
 
         if (relativeFrom === ObjectRelativeFromV.PARAGRAPH) {
-            delta += paragraphStartLine.top;
+            delta = delta + paragraphStartLine.top + page.marginTop;
         } else if (relativeFrom === ObjectRelativeFromV.LINE) {
-            delta += line.top;
-        } else if (relativeFrom === ObjectRelativeFromV.PAGE) {
-            delta -= page.marginTop;
+            delta = delta + line.top + page.marginTop;
+        } else if (relativeFrom === ObjectRelativeFromV.MARGIN) {
+            delta += page.marginTop;
         }
 
         const newPositionV = {

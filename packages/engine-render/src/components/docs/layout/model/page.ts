@@ -24,7 +24,7 @@ import type { ISectionBreakConfig } from '../../../../basics/interfaces';
 import type { DataStreamTreeNode } from '../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../view-model/document-view-model';
 import type { ILayoutContext } from '../tools';
-import { BooleanNumber, PageOrientType } from '@univerjs/core';
+import { BooleanNumber, ColumnSeparatorType, PageOrientType } from '@univerjs/core';
 import { BreakType, DocumentSkeletonPageType } from '../../../../basics/i-document-skeleton-cached';
 import { dealWithSection } from '../block/section';
 import { resetContext, updateBlockIndex } from '../tools';
@@ -56,7 +56,7 @@ export function createSkeletonPage(
         footerTreeMap,
         headerTreeMap,
         columnProperties = [],
-        columnSeparatorType,
+        columnSeparatorType = ColumnSeparatorType.COLUMN_SEPARATOR_STYLE_UNSPECIFIED,
         marginTop = 0,
         marginBottom = 0,
         marginHeader: _marginHeader = 0,
@@ -64,11 +64,18 @@ export function createSkeletonPage(
         marginLeft = 0,
         marginRight = 0,
         renderConfig = {},
+        equalWidth = BooleanNumber.TRUE,
+        numOfEqualWidthColumns = 1,
+        spaceBetweenEqualWidthColumns = { v: 10 },
     } = sectionBreakConfig;
 
     const { skeHeaders, skeFooters } = skeletonResourceReference;
 
-    const { width: pageWidth = Number.POSITIVE_INFINITY, height: pageHeight = Number.POSITIVE_INFINITY } = pageSize;
+    let { width: pageWidth = Number.POSITIVE_INFINITY, height: pageHeight = Number.POSITIVE_INFINITY } = pageSize;
+
+    if (pageOrient === PageOrientType.LANDSCAPE) {
+        [pageWidth, pageHeight] = [pageHeight, pageWidth];
+    }
 
     page.pageNumber = pageNumber;
     page.pageNumberStart = pageNumberStart;
@@ -87,6 +94,7 @@ export function createSkeletonPage(
 
     let headerId = defaultHeaderId ?? '';
     let footerId = defaultFooterId ?? '';
+
     if (pageNumber === pageNumberStart && useFirstPageHeaderFooter === BooleanNumber.TRUE) {
         headerId = firstPageHeaderId ?? '';
         footerId = firstPageFooterId ?? '';
@@ -110,7 +118,13 @@ export function createSkeletonPage(
                 true
             );
 
-            skeHeaders.set(headerId, new Map([[pageWidth, header]]));
+            let headerMap = skeHeaders.get(headerId);
+            if (headerMap == null) {
+                headerMap = new Map();
+                skeHeaders.set(headerId, headerMap);
+            }
+
+            headerMap.set(pageWidth, header);
         }
         page.headerId = headerId;
     }
@@ -128,7 +142,13 @@ export function createSkeletonPage(
                 false
             );
 
-            skeFooters.set(footerId, new Map([[pageWidth, footer]]));
+            let footerMap = skeFooters.get(footerId);
+            if (footerMap == null) {
+                footerMap = new Map();
+                skeFooters.set(footerId, footerMap);
+            }
+
+            footerMap.set(pageWidth, footer);
         }
         page.footerId = footerId;
     }
@@ -149,6 +169,9 @@ export function createSkeletonPage(
     }
 
     const newSection = createSkeletonSection(
+        equalWidth,
+        numOfEqualWidthColumns,
+        spaceBetweenEqualWidthColumns,
         columnProperties,
         columnSeparatorType,
         lastSectionBottom,
@@ -212,17 +235,25 @@ function _createSkeletonHeaderFooter(
         lists, footerTreeMap, headerTreeMap, localeService, pageSize, drawings,
         marginLeft = 0, marginRight = 0,
         marginHeader = 0, marginFooter = 0,
+        pageOrient = PageOrientType.PORTRAIT,
     } = sectionBreakConfig;
-    const pageWidth = pageSize?.width || Number.POSITIVE_INFINITY;
-    const pageHeight = pageSize?.height || Number.POSITIVE_INFINITY;
+    let pageWidth = pageSize?.width || Number.POSITIVE_INFINITY;
+    let pageHeight = pageSize?.height || Number.POSITIVE_INFINITY;
+
+    if (pageOrient === PageOrientType.LANDSCAPE) {
+        [pageWidth, pageHeight] = [pageHeight, pageWidth];
+    }
+
     const headerFooterConfig: ISectionBreakConfig = {
         lists,
         footerTreeMap,
         headerTreeMap,
         pageSize: {
-            width: pageWidth - marginLeft - marginRight,
+            width: pageWidth,
             height: getHeaderFooterMaxHeight(pageHeight) - (isHeader ? marginHeader : marginFooter) - 5,
         },
+        marginLeft,
+        marginRight,
         localeService,
         drawings,
     };

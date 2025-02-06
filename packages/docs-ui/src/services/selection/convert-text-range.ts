@@ -511,7 +511,11 @@ export class NodePositionConvertToCursor {
 
         for (let p = skipPageIndex; p <= endIndex; p++) {
             const page = pages[p];
-            const { headerId, footerId, pageWidth } = page;
+            const { headerId, footerId, pageWidth, left } = page;
+
+            this._liquid.translateSave();
+            this._liquid.translate(left, 0);
+
             let segmentPage: Nullable<IDocumentSkeletonPage> = page;
 
             if (pageType === DocumentSkeletonPageType.HEADER) {
@@ -523,6 +527,7 @@ export class NodePositionConvertToCursor {
             }
 
             if (segmentPage == null) {
+                this._liquid.translateRestore();
                 this._liquid.translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
                 continue;
             }
@@ -578,6 +583,7 @@ export class NodePositionConvertToCursor {
                     s
                 );
 
+                this._liquid.translateSave();
                 this._liquid.translateSection(section);
 
                 for (let c = start_c; c <= end_c; c++) {
@@ -591,6 +597,7 @@ export class NodePositionConvertToCursor {
                         c
                     );
 
+                    this._liquid.translateSave();
                     this._liquid.translateColumn(column);
 
                     for (let l = start_l; l <= end_l; l++) {
@@ -640,8 +647,14 @@ export class NodePositionConvertToCursor {
 
                         this._liquid.translateRestore();
                     }
+
+                    this._liquid.translateRestore();
                 }
+
+                this._liquid.translateRestore();
             }
+
+            this._liquid.translateRestore();
             this._liquid.translateRestore();
 
             this._liquid.translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);

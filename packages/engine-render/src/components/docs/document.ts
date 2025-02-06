@@ -152,6 +152,7 @@ export class Documents extends DocComponent {
                 footerId,
                 renderConfig = {},
                 skeTables,
+                left,
             } = page;
             const {
                 verticalAlign = VerticalAlign.TOP, // Do not make changes, otherwise the document will not render.
@@ -195,6 +196,9 @@ export class Documents extends DocComponent {
 
                 continue;
             }
+
+            this._drawLiquid.translateSave();
+            this._drawLiquid.translate(left, 0);
 
             if (skeTables.size > 0) {
                 this._drawTable(
@@ -478,6 +482,8 @@ export class Documents extends DocComponent {
                 pageTop,
                 ctx,
             });
+
+            this._drawLiquid.translateRestore();
 
             const { x, y } = this._drawLiquid.translatePage(
                 page,

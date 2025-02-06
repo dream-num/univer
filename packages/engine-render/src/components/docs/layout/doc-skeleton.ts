@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ColumnSeparatorType, ISectionColumnProperties, LocaleService, Nullable } from '@univerjs/core';
+import type { INumberUnit, ISectionColumnProperties, LocaleService, Nullable } from '@univerjs/core';
 import type {
     IDocumentSkeletonCached,
     IDocumentSkeletonGlyph,
@@ -25,7 +25,7 @@ import type { IDocsConfig, INodeInfo, INodePosition, INodeSearch } from '../../.
 import type { IViewportInfo, Vector2 } from '../../../basics/vector2';
 import type { DocumentViewModel } from '../view-model/document-view-model';
 import type { ILayoutContext } from './tools';
-import { PRESET_LIST_TYPE, SectionType } from '@univerjs/core';
+import { BooleanNumber, ColumnSeparatorType, PRESET_LIST_TYPE, SectionType } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { DocumentSkeletonPageType, GlyphType, LineType, PageLayoutType } from '../../../basics/i-document-skeleton-cached';
 import { Skeleton } from '../../skeleton';
@@ -36,7 +36,7 @@ import { Hyphen } from './hyphenation/hyphen';
 import { LanguageDetector } from './hyphenation/language-detector';
 import { createSkeletonPage } from './model/page';
 import { createSkeletonSection } from './model/section';
-import { getLastPage, getNullSkeleton, getPageFromPath, prepareSectionBreakConfig, resetContext, setPageParent, updateBlockIndex, updateInlineDrawingCoords } from './tools';
+import { getLastPage, getNullSkeleton, getPageFromPath, prepareSectionBreakConfig, resetContext, setPageParent, updateBlockIndex, updateInlineDrawingCoords, updatePagesLeft } from './tools';
 
 export enum DocumentSkeletonState {
     PENDING = 'pending',
@@ -448,7 +448,10 @@ export class DocumentSkeleton extends Skeleton {
         for (let i = 0, len = pages.length; i < len; i++) {
             const page = pages[i];
 
-            const { marginTop, marginBottom, pageWidth, pageHeight } = page;
+            const { marginTop, marginBottom, pageWidth, pageHeight, left } = page;
+
+            this._findLiquid.translateSave();
+            this._findLiquid.translate(left, 0);
 
             if (
                 x > this._findLiquid.x && x < this._findLiquid.x + pageWidth &&
@@ -480,6 +483,7 @@ export class DocumentSkeleton extends Skeleton {
                 break;
             }
 
+            this._findLiquid.translateRestore();
             this._translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
         }
 
@@ -510,6 +514,7 @@ export class DocumentSkeleton extends Skeleton {
         };
 
         const { pages, skeHeaders, skeFooters } = skeletonData;
+
         const editArea = this.findEditAreaByCoord(coord, pageLayoutType, pageMarginLeft, pageMarginTop).editArea;
         const pageLength = pages.length;
 
@@ -517,9 +522,12 @@ export class DocumentSkeleton extends Skeleton {
         if (restrictions == null) {
             for (let pi = 0; pi < pageLength; pi++) {
                 const page = pages[pi];
-                const { headerId, footerId, pageWidth } = page;
+                const { headerId, footerId, pageWidth, left } = page;
 
                 let exactMatch = null;
+
+                this._findLiquid.translateSave();
+                this._findLiquid.translate(left, 0);
 
                 if (editArea === DocumentEditArea.HEADER || editArea === DocumentEditArea.FOOTER) {
                     const headerSke = skeHeaders.get(headerId)?.get(pageWidth) as IDocumentSkeletonPage;
@@ -568,6 +576,8 @@ export class DocumentSkeleton extends Skeleton {
                     );
                 }
 
+                this._findLiquid.translateRestore();
+
                 if (exactMatch) {
                     return exactMatch;
                 }
@@ -581,11 +591,13 @@ export class DocumentSkeleton extends Skeleton {
             if (strict === false) {
                 for (let pi = 0; pi < pageLength; pi++) {
                     const page = pages[pi];
-                    const { headerId, footerId, pageWidth } = page;
+                    const { headerId, footerId, pageWidth, left } = page;
+
+                    this._findLiquid.translateSave();
+                    this._findLiquid.translate(left, 0);
 
                     if (segmentId !== '') {
                         const headerSke = skeHeaders.get(headerId)?.get(pageWidth) as IDocumentSkeletonPage;
-
                         if (headerSke) {
                             exactMatch = this._collectNearestNode(
                                 headerSke,
@@ -630,6 +642,8 @@ export class DocumentSkeleton extends Skeleton {
                         );
                     }
 
+                    this._findLiquid.translateRestore();
+
                     if (exactMatch) {
                         return exactMatch;
                     }
@@ -639,9 +653,14 @@ export class DocumentSkeleton extends Skeleton {
             } else {
                 for (let pi = 0; pi < pageLength; pi++) {
                     const page = pages[pi];
+                    const { left } = page;
+
+                    this._findLiquid.translateSave();
+                    this._findLiquid.translate(left, 0);
 
                     if (segmentId) {
                         if (segmentPage !== pi) {
+                            this._findLiquid.translateRestore();
                             this._translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
                             continue;
                         }
@@ -676,6 +695,8 @@ export class DocumentSkeleton extends Skeleton {
                             pageLength
                         );
                     }
+
+                    this._findLiquid.translateRestore();
 
                     if (exactMatch) {
                         return exactMatch;
@@ -1016,6 +1037,8 @@ export class DocumentSkeleton extends Skeleton {
             paragraphLineGapDefault = 0,
             defaultTabStop = 10.5,
             textStyle = {},
+            autoSpaceDE = BooleanNumber.TRUE,
+            autoSpaceDN = BooleanNumber.TRUE,
         } = documentStyle;
 
         const docsConfig: IDocsConfig = {
@@ -1023,11 +1046,12 @@ export class DocumentSkeleton extends Skeleton {
             footerTreeMap,
             lists,
             drawings,
-
             localeService: this._localeService,
             paragraphLineGapDefault,
             defaultTabStop,
             documentTextStyle: textStyle,
+            autoSpaceDE,
+            autoSpaceDN,
         };
 
         const skeleton = getNullSkeleton();
@@ -1116,23 +1140,43 @@ export class DocumentSkeleton extends Skeleton {
         for (let i = startSectionIndex, len = viewModel.getChildren().length; i < len; i++) {
             const sectionNode = viewModel.getChildren()[i];
             const sectionBreakConfig = prepareSectionBreakConfig(ctx, i);
-            const { sectionType, columnProperties, columnSeparatorType, sectionTypeNext, pageNumberStart = 1 } = sectionBreakConfig;
+            const {
+                sectionType,
+                columnProperties = [],
+                columnSeparatorType = ColumnSeparatorType.COLUMN_SEPARATOR_STYLE_UNSPECIFIED,
+                sectionTypeNext,
+                pageNumberStart = 1,
+                equalWidth = BooleanNumber.TRUE,
+                numOfEqualWidthColumns = 1,
+                spaceBetweenEqualWidthColumns = { v: 10 },
+            } = sectionBreakConfig;
 
             let curSkeletonPage = getLastPage(allSkeletonPages);
             let isContinuous = false;
 
             ctx.sectionBreakConfigCache.set(sectionNode.endIndex, sectionBreakConfig);
 
-            if (sectionType === SectionType.CONTINUOUS) {
+            if (sectionType === SectionType.CONTINUOUS && curSkeletonPage) {
                 updateBlockIndex(allSkeletonPages);
-                this._addNewSectionByContinuous(curSkeletonPage, columnProperties!, columnSeparatorType!);
+                this._addNewSectionByContinuous(
+                    curSkeletonPage,
+                    columnProperties,
+                    columnSeparatorType,
+                    equalWidth,
+                    numOfEqualWidthColumns,
+                    spaceBetweenEqualWidthColumns
+                );
                 isContinuous = true;
-            } else if (layoutAnchor == null || curSkeletonPage == null) {
+            } else if (
+                layoutAnchor == null ||
+                curSkeletonPage == null ||
+                (sectionType === SectionType.NEXT_PAGE && layoutAnchor && startSectionIndex !== i)
+            ) {
                 curSkeletonPage = createSkeletonPage(
                     ctx,
                     sectionBreakConfig,
                     skeletonResourceReference,
-                    curSkeletonPage?.pageNumber ?? pageNumberStart
+                    curSkeletonPage ? curSkeletonPage.pageNumber + 1 : pageNumberStart
                 );
             }
 
@@ -1174,8 +1218,11 @@ export class DocumentSkeleton extends Skeleton {
             this._iteratorCount = 0;
             removeDupPages(ctx);
             updateBlockIndex(skeleton.pages);
+            updatePagesLeft(skeleton.pages);
             // Calculate inline drawing position and update.
             updateInlineDrawingCoords(ctx, skeleton.pages);
+
+            // Update the position of inline drawing in header and footer.
             for (const hSkeMap of skeleton.skeHeaders.values()) {
                 for (const page of hSkeMap.values()) {
                     updateInlineDrawingCoords(ctx, [page]);
@@ -1186,6 +1233,7 @@ export class DocumentSkeleton extends Skeleton {
                     updateInlineDrawingCoords(ctx, [page]);
                 }
             }
+
             setPageParent(skeleton.pages, skeleton);
 
             return skeleton;
@@ -1196,7 +1244,10 @@ export class DocumentSkeleton extends Skeleton {
     private _addNewSectionByContinuous(
         curSkeletonPage: IDocumentSkeletonPage,
         columnProperties: ISectionColumnProperties[],
-        columnSeparatorType: ColumnSeparatorType
+        columnSeparatorType: ColumnSeparatorType,
+        equalWidth: BooleanNumber,
+        numOfEqualWidthColumns: number,
+        spaceBetweenEqualWidthColumns: INumberUnit
     ) {
         const sections = curSkeletonPage.sections;
         const lastSection = sections[sections.length - 1];
@@ -1212,6 +1263,9 @@ export class DocumentSkeleton extends Skeleton {
         const pageContentHeight = pageHeight - curPageMT - curPageMB;
         const lastSectionBottom = (lastSection?.top || 0) + (lastSection?.height || 0);
         const newSection = createSkeletonSection(
+            equalWidth,
+            numOfEqualWidthColumns,
+            spaceBetweenEqualWidthColumns,
             columnProperties,
             columnSeparatorType,
             lastSectionBottom,

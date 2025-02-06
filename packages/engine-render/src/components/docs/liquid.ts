@@ -94,23 +94,12 @@ export class Liquid {
     translatePage(
         page: IDocumentSkeletonPage,
         type = PageLayoutType.VERTICAL,
-        left = 0,
-        top = 0,
-        _right = 0,
-        _bottom = 0
+        docLeft = 0,
+        docTop = 0
     ) {
         const {
-            // sections,
-            // marginTop: pagePaddingTop = 0,
-            // marginBottom: pagePaddingBottom = 0,
-            // marginLeft: pagePaddingLeft = 0,
-            // marginRight: pagePaddingRight = 0,
             pageWidth,
             pageHeight,
-            // width,
-            // height,
-            // pageNumber = 1,
-            // renderConfig = {},
         } = page;
 
         let pageTop = 0;
@@ -118,9 +107,9 @@ export class Liquid {
         let pageLeft = 0;
 
         if (type === PageLayoutType.VERTICAL) {
-            pageTop += pageHeight + top;
+            pageTop += pageHeight + docTop;
         } else if (type === PageLayoutType.HORIZONTAL) {
-            pageLeft += pageWidth + left;
+            pageLeft += pageWidth + docLeft;
         }
 
         this.translate(pageLeft, pageTop);

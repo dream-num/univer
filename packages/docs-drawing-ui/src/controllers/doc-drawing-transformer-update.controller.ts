@@ -500,6 +500,7 @@ export class DocDrawingTransformerController extends Disposable {
             segmentId: docSelectionRenderService.getSegment(),
             segmentPage: docSelectionRenderService.getSegmentPage(),
         });
+
         if (nodeInfo) {
             const { node, segmentPage: segmentPageIndex, segmentId: nodeSegmentId } = nodeInfo;
             glyphAnchor = node;
@@ -525,8 +526,11 @@ export class DocDrawingTransformerController extends Disposable {
         const pageType = page.type;
 
         for (const p of pages) {
-            const { headerId, footerId, pageHeight, pageWidth, marginLeft, marginBottom } = p;
+            const { headerId, footerId, pageHeight, pageWidth, marginLeft, marginBottom, left: pageLeft } = p;
             const pIndex = pages.indexOf(p);
+
+            this._liquid.translateSave();
+            this._liquid.translate(pageLeft, 0);
 
             if (segmentPage > -1 && pIndex === segmentPage) {
                 switch (pageType) {
@@ -570,6 +574,7 @@ export class DocDrawingTransformerController extends Disposable {
             }
 
             this._liquid.restorePagePadding(p);
+            this._liquid.translateRestore();
             this._liquid.translatePage(p, pageLayoutType, pageMarginLeft, pageMarginTop);
         }
 
@@ -579,14 +584,15 @@ export class DocDrawingTransformerController extends Disposable {
             glyphAnchor = paragraphStartLine.divides?.[0]?.glyphGroup?.[0] ?? glyphAnchor;
         }
 
+        //
         docTransform.positionH = {
             relativeFrom: positionH.relativeFrom,
             posOffset: left - this._liquid.x - docsLeft,
         };
 
         switch (positionH.relativeFrom) {
-            case ObjectRelativeFromH.MARGIN: {
-                docTransform.positionH.posOffset = left - this._liquid.x - docsLeft - page.marginLeft;
+            case ObjectRelativeFromH.PAGE: {
+                docTransform.positionH.posOffset = left - this._liquid.x - docsLeft + page.marginLeft;
                 break;
             }
             case ObjectRelativeFromH.COLUMN: {
@@ -602,7 +608,7 @@ export class DocDrawingTransformerController extends Disposable {
 
         switch (positionV.relativeFrom) {
             case ObjectRelativeFromV.PAGE: {
-                docTransform.positionV.posOffset = top - this._liquid.y - docsTop - page.marginTop;
+                docTransform.positionV.posOffset = top - this._liquid.y - docsTop + page.marginTop;
                 break;
             }
             case ObjectRelativeFromV.LINE: {

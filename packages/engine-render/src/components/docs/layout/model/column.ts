@@ -15,11 +15,11 @@
  */
 
 import type { ISectionColumnProperties } from '@univerjs/core';
-import { ColumnSeparatorType } from '@univerjs/core';
-
 import type { IDocumentSkeletonColumn } from '../../../../basics/i-document-skeleton-cached';
 
-export function createSkeletonColumn(
+import { ColumnSeparatorType } from '@univerjs/core';
+
+function createSkeletonColumn(
     columnIndex: number = 0,
     columnProperties: ISectionColumnProperties[],
     columnSeparatorType: ColumnSeparatorType = ColumnSeparatorType.NONE,

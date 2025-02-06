@@ -15,7 +15,7 @@
  */
 
 export enum DataStreamTreeNodeType {
-    // COLUMN_BREAK, // \v 换列
+    // COLUMN_BREAK, // \v 换栏
     // PAGE_BREAK, // \f 换页
     // DOCS_END, // \0  文档结尾
     // TAB, // \t  制表符
@@ -47,7 +47,7 @@ export enum DataStreamTreeTokenType {
      */
     CUSTOM_RANGE_END = '\x1E', // 自定义范围结束
 
-    COLUMN_BREAK = '\v', // 换列
+    COLUMN_BREAK = '\v', // 换栏
     PAGE_BREAK = '\f', // 换页
     DOCS_END = '\0', // 文档结尾
     TAB = '\t', // 制表符

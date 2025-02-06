@@ -78,8 +78,16 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
         const sheetId = worksheet.getSheetId();
         this._sheetSkeletonManagerService.setCurrent({ sheetId });
 
-        // TODO: we should attach the context object to the RenderContext object on scene.canvas.
-        engine.runRenderLoop(() => scene.render());
+        const frameFn = () => scene.render();
+        this.disposeWithMe(this._context.activated$.subscribe((activated) => {
+            if (activated) {
+                // TODO: we should attach the context object to the RenderContext object on scene.canvas.
+                engine.runRenderLoop(frameFn);
+            } else {
+                // Stop the render loop when the render unit is deactivated.
+                engine.stopRenderLoop(frameFn);
+            }
+        }));
     }
 
     private _renderFrameTimeMetric: Nullable<Record<string, number[]>> = null;

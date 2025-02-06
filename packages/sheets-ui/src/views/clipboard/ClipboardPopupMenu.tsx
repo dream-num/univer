@@ -19,7 +19,7 @@ import type { IDiscreteRange } from '../../controllers/utils/range-tools';
 import type { IPasteHookKeyType } from '../../services/clipboard/type';
 import { ICommandService, IUniverInstanceService, LocaleService, toDisposable, useDependency, useObservable } from '@univerjs/core';
 import { DropdownOverlay, DropdownProvider, DropdownTrigger } from '@univerjs/design';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { convertTransformToOffsetX, convertTransformToOffsetY, IRenderManagerService } from '@univerjs/engine-render';
 import { CheckMarkSingle, MoreDownSingle, PasteSpecial } from '@univerjs/icons';
 import clsx from 'clsx';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -81,8 +81,8 @@ const useMenuPosition = (range?: IDiscreteRange) => {
     const endX = endPosition?.endX ?? 0;
     const endY = endPosition?.endY ?? 0;
 
-    const positionEndX = skeleton?.convertTransformToOffsetX(endX, scaleX, scrollXY) ?? -9999;
-    const positionEndY = skeleton?.convertTransformToOffsetY(endY, scaleY, scrollXY) ?? -9999;
+    const positionEndX = convertTransformToOffsetX(endX, scaleX, scrollXY) ?? -9999;
+    const positionEndY = convertTransformToOffsetY(endY, scaleY, scrollXY) ?? -9999;
 
     const canvasWidth = canvas?.getWidth();
     const canvasHeight = canvas?.getHeight();
@@ -192,7 +192,7 @@ export const ClipboardPopupMenu = () => {
                     </div>
                 </DropdownTrigger>
                 <DropdownOverlay className={clsx(styles.sheetPasteOptionsMenu, `
-                  univer-border univer-border-gray-200 univer-border-solid
+                  univer-border univer-border-solid univer-border-gray-200
                 `)}
                 >
                     <ul>
@@ -220,4 +220,3 @@ export const ClipboardPopupMenu = () => {
         </div>
     );
 };
-

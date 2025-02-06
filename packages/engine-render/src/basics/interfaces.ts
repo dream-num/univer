@@ -58,8 +58,17 @@ export interface IRect extends ISize, IOffset {
     points: Vector2[];
 }
 
+/**
+ * width
+ * height
+ * scaleX
+ * scaleY
+ */
 export interface ISceneTransformState extends ISize, IScale {}
 
+/**
+ * Bad design! should use Bit Flags!
+ */
 export enum TRANSFORM_CHANGE_OBSERVABLE_TYPE {
     translate,
     resize,

@@ -20,7 +20,7 @@ import type { Dependency, IDisposable, IWorkbookData } from '@univerjs/core';
 import { DisposableCollection, ILogService, Inject, Injector, IUniverInstanceService, LocaleService, LocaleType, LogLevel, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
 import { CalculateFormulaService, DefinedNamesService, FormulaCurrentConfigService, FormulaDataModel, FormulaRuntimeService, ICalculateFormulaService, IDefinedNamesService, IFormulaCurrentConfigService, IFormulaRuntimeService, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
-import { SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
+import { SheetInterceptorService, SheetSkeletonService, SheetsSelectionsService } from '@univerjs/sheets';
 
 import {
     BrowserClipboardService,
@@ -574,6 +574,7 @@ export function clipboardTestBed(workbookData?: IWorkbookData, dependencies?: De
             injector.add([IDefinedNamesService, { useClass: DefinedNamesService }]);
             injector.add([IFormulaRuntimeService, { useClass: FormulaRuntimeService }]);
             injector.add([IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }]);
+            injector.add([SheetSkeletonService]);
 
             dependencies?.forEach((d) => injector.add(d));
 
@@ -595,6 +596,7 @@ export function clipboardTestBed(workbookData?: IWorkbookData, dependencies?: De
 
     // NOTE: This is pretty hack for the test. But with these hacks we can avoid to create
     // real canvas-environment in univerjs/sheets-ui. If some we have to do that, this hack could be removed.
+    const mockSheetSkService = new SheetSkeletonService(injector);
     const fakeSheetSkeletonManagerService = new SheetSkeletonManagerService({
         unit: sheet,
         unitId: 'test',
@@ -607,7 +609,7 @@ export function clipboardTestBed(workbookData?: IWorkbookData, dependencies?: De
         activated$: new BehaviorSubject(true),
         activate: () => {},
         deactivate: () => {},
-    }, injector);
+    }, injector, injector.get(SheetSkeletonService));
 
     injector.add([SheetSkeletonManagerService, { useValue: fakeSheetSkeletonManagerService }]);
     injector.get(IRenderManagerService).addRender('test', {

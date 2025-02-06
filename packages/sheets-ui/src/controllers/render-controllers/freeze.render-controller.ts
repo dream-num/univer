@@ -190,7 +190,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
         this._zoomRefresh();
     }
 
-    // eslint-disable-next-line max-lines-per-function
+    // eslint-disable-next-line max-lines-per-function, complexity
     private _createFreeze(
         freezeDirectionType: FREEZE_DIRECTION_TYPE = FREEZE_DIRECTION_TYPE.ROW,
         freezeConfig?: IFreeze
@@ -198,7 +198,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
         const config = freezeConfig ?? this._getFreeze();
         if (config == null) return null;
 
-        const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+        const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
 
         const { startRow: freezeRow, startColumn: freezeColumn } = config;
         const position = this._getPositionByIndex(freezeRow, freezeColumn);
@@ -238,7 +238,9 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
 
             this._rowFreezeHeaderRect = new Rect(FREEZE_ROW_HEADER_NAME, {
                 fill: this._freezeNormalHeaderColor, width: rowHeaderWidthAndMarginLeft,
-                height: FREEZE_SIZE, left: 0, top: startY - FREEZE_OFFSET, zIndex: 3,
+                height: FREEZE_SIZE, left: 0,
+                top: startY - FREEZE_OFFSET,
+                zIndex: 3,
             });
 
             let fill = this._freezeNormalHeaderColor;
@@ -401,7 +403,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
             return;
         }
 
-        const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+        const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
         if (skeleton == null) {
             return;
         }
@@ -472,7 +474,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
         freezeObjectMainRect: Rect,
         freezeDirectionType: FREEZE_DIRECTION_TYPE = FREEZE_DIRECTION_TYPE.ROW
     ) {
-        const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+        const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
         if (skeleton == null) {
             return;
         }
@@ -797,7 +799,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
         xSplit: number = 0,
         resetScroll = ResetScrollType.ALL
     ) {
-        const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+        const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
         if (skeleton == null) {
             return;
         }
@@ -857,9 +859,9 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
         }
 
         // freeze start
-        const startSheetView = skeleton.getNoMergeCellPositionByIndexWithNoHeader(row - ySplit, column - xSplit);
+        const startSheetView = skeleton.getNoMergeCellWithCoordByIndex(row - ySplit, column - xSplit, false);
         // freeze end
-        const endSheetView = skeleton.getNoMergeCellPositionByIndexWithNoHeader(row, column);
+        const endSheetView = skeleton.getNoMergeCellWithCoordByIndex(row, column, false);
 
         viewMainLeftTop.disable();
         viewMainTop.disable();
@@ -1521,13 +1523,13 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
             return;
         }
         const { scene } = sheetObject;
-        scene.onTransformChange$.subscribeEvent((state) => {
-            if (state.type !== TRANSFORM_CHANGE_OBSERVABLE_TYPE.scale) {
+
+        this.disposeWithMe(scene.onTransformChange$.subscribeEvent((state) => {
+            if (![TRANSFORM_CHANGE_OBSERVABLE_TYPE.scale, TRANSFORM_CHANGE_OBSERVABLE_TYPE.all].includes(state.type)) {
                 return;
             }
-
             this._refreshCurrent();
-        });
+        }));
     }
 
     private _clearObserverEvent() {
@@ -1574,8 +1576,8 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
             return;
         }
 
-        const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
-        const position = skeleton?.getNoMergeCellPositionByIndex(row, column);
+        const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
+        const position = skeleton?.getNoMergeCellWithCoordByIndex(row, column);
         if (skeleton == null) {
             return;
         }
@@ -1595,7 +1597,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
 
     private _getFreeze() {
         const config: IWorksheetData | undefined = this._sheetSkeletonManagerService
-            .getCurrent()
+            .getCurrentParam()
             ?.skeleton
             .getWorksheetConfig();
 

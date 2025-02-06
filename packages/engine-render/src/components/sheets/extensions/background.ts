@@ -17,7 +17,7 @@
 import type { ICellWithCoord, IRange, IScale, ObjectMatrix } from '@univerjs/core';
 import type { UniverRenderingContext } from '../../../context';
 import type { IDrawInfo } from '../../extension';
-import type { SpreadsheetSkeleton } from '../sheet-skeleton';
+import type { SpreadsheetSkeleton } from '../sheet.render-skeleton';
 import type { Spreadsheet } from '../spreadsheet';
 import { Range } from '@univerjs/core';
 import { fixLineWidthByScale, getColor, inViewRanges } from '../../../basics/tools';

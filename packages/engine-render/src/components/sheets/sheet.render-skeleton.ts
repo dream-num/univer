@@ -16,57 +16,52 @@
 
 import type {
     BorderStyleTypes,
+    DocumentDataModel,
     IBorderStyleData,
     ICellData,
     ICellDataForSheetInterceptor,
     ICellInfo,
     ICellWithCoord,
     IColAutoWidthInfo,
-    IColumnData,
     IColumnRange,
-    IDocumentData,
-    IDocumentRenderConfig,
-    IObjectArrayPrimitiveType,
+    IGetRowColByPosOptions,
     IPaddingData,
-    IPosition,
     IRange,
     IRowAutoHeightInfo,
-    IRowData,
     IRowRange,
-    ISelectionCell,
     ISize,
     IStyleData,
     ITextRotation,
-    IWorksheetData,
     Nullable,
     Styles,
     VerticalAlign,
-    Worksheet } from '@univerjs/core';
+
+    Worksheet,
+} from '@univerjs/core';
 import type { IDocumentSkeletonColumn } from '../../basics/i-document-skeleton-cached';
-import type { IBoundRectNoAngle, IPoint, IViewportInfo } from '../../basics/vector2';
+import type { ITransformChangeState } from '../../basics/interfaces';
+import type { IBoundRectNoAngle, IViewportInfo } from '../../basics/vector2';
+import type { Scene } from '../../scene';
+import type { BorderCache, IFontCacheItem, IStylesCache } from './interfaces';
 import {
     addLinkToDocumentModel,
-    AUTO_HEIGHT_FOR_MERGED_CELLS,
     BooleanNumber,
     CellValueType,
     composeStyles,
     DEFAULT_STYLES,
-    DocumentDataModel,
     extractPureTextFromCell,
     getColorStyle,
     HorizontalAlign,
     IConfigService,
     IContextService,
-    ImageCacheMap,
     Inject,
     Injector,
-    IS_ROW_STYLE_PRECEDE_COLUMN_STYLE,
-    isCellCoverable,
     isNullCell,
     isWhiteColor,
     LocaleService,
     ObjectMatrix,
     searchArray,
+    SheetSkeleton,
     Tools,
     WrapStrategy,
 } from '@univerjs/core';
@@ -76,73 +71,14 @@ import { getRotateOffsetAndFarthestHypotenuse } from '../../basics/draw';
 import { convertTextRotation, VERTICAL_ROTATE_ANGLE } from '../../basics/text-rotation';
 import {
     degToRad,
-    getCellPositionByIndex,
-    getCellWithCoordByIndexCore,
     getFontStyleString,
-    isRectIntersect,
 } from '../../basics/tools';
 import { DocumentSkeleton } from '../docs/layout/doc-skeleton';
 import { columnIterator } from '../docs/layout/tools';
 import { DocumentViewModel } from '../docs/view-model/document-view-model';
-import { Skeleton } from '../skeleton';
 import { EXPAND_SIZE_FOR_RENDER_OVERFLOW, MEASURE_EXTENT, MEASURE_EXTENT_FOR_PARAGRAPH } from './constants';
-import { type BorderCache, type IFontCacheItem, type IStylesCache, SHEET_VIEWPORT_KEY } from './interfaces';
+import { SHEET_VIEWPORT_KEY } from './interfaces';
 import { createDocumentModelWithStyle, extractOtherStyle, getFontFormat } from './util';
-
-/**
- * Obtain the height and width of a cell's text, taking into account scenarios with rotated text.
- * @param documentSkeleton Data of the document's ViewModel
- * @param angleInDegree The rotation angle of an Excel cell, it's **degree**
- */
-export function getDocsSkeletonPageSize(documentSkeleton: DocumentSkeleton, angleInDegree: number = 0): Nullable<Required<ISize>> {
-    const skeletonData = documentSkeleton?.getSkeletonData();
-    const angle = degToRad(angleInDegree);
-
-    if (!skeletonData) {
-        return null;
-    }
-    const { pages } = skeletonData;
-    const lastPage = pages[pages.length - 1];
-    const { width, height } = lastPage;
-
-    if (angle === 0) {
-        return { width, height };
-    }
-
-    if (Math.abs(angle) === Math.PI / 2) {
-        return { width: height, height: width };
-    }
-
-    let allRotatedWidth = 0;
-    let allRotatedHeight = 0;
-
-    const widthArray: Array<{ rotatedWidth: number; spaceWidth: number }> = [];
-
-    columnIterator([lastPage], (column: IDocumentSkeletonColumn) => {
-        const { lines, width: columnWidth, spaceWidth } = column;
-
-        const { rotatedHeight, rotatedWidth } = getRotateOffsetAndFarthestHypotenuse(lines, columnWidth, angle);
-
-        allRotatedHeight += rotatedHeight;
-
-        widthArray.push({ rotatedWidth, spaceWidth });
-    });
-
-    const widthCount = widthArray.length;
-
-    for (let i = 0; i < widthCount; i++) {
-        const { rotatedWidth } = widthArray[i];
-
-        if (i === 0) {
-            allRotatedWidth += rotatedWidth;
-        }
-    }
-
-    return {
-        width: allRotatedWidth,
-        height: allRotatedHeight,
-    };
-}
 
 interface ICellDocumentModelOption {
     isDeepClone?: boolean;
@@ -182,17 +118,6 @@ export interface ICacheItem {
     border: boolean;
 }
 
-export interface IGetRowColByPosOptions {
-    closeFirst?: boolean;
-
-    /**
-     * For searchArray(rowHeightAccumulation) & searchArray(colWidthAccumulation)
-     * true means return first matched index in matched sequence.
-     * default return last index in matched sequence.
-     */
-    firstMatch?: boolean;
-}
-
 export interface IGetPosByRowColOptions {
     closeFirst?: boolean;
 
@@ -203,15 +128,7 @@ export interface IGetPosByRowColOptions {
     firstMatch?: boolean;
 }
 
-export class SpreadsheetSkeleton extends Skeleton {
-    private _rowHeightAccumulation: number[] = [];
-    private _columnWidthAccumulation: number[] = [];
-
-    private _rowTotalHeight = 0;
-    private _columnTotalWidth = 0;
-    private _rowHeaderWidth = 0;
-    private _columnHeaderHeight = 0;
-
+export class SpreadsheetSkeleton extends SheetSkeleton {
     /**
      * Range viewBounds. only update by viewBounds.
      * It would change multiple times in one frame if there is multiple viewport (after freeze row&col)
@@ -243,87 +160,50 @@ export class SpreadsheetSkeleton extends Skeleton {
 
     private _showGridlines: BooleanNumber = BooleanNumber.TRUE;
     private _gridlinesColor: string | undefined = undefined;
-    private _marginTop: number = 0;
-    private _marginLeft: number = 0;
 
-    private _imageCacheMap: ImageCacheMap;
-    /**
-     * Whether the row style precedes the column style.
-     */
-    private _isRowStylePrecedeColumnStyle = false;
-    /**
-     * Whether auto height for merged cells
-     */
-    private _skipAutoHeightForMergedCells = true;
-
-    private _renderRawFormula = false;
-
-    /**
-     * @deprecated avoid use `IWorksheetData` directly, use API provided by `Worksheet`, otherwise
-     * `ViewModel` will be not working.
-     */
-    private _worksheetData: IWorksheetData;
-    private _cellData: ObjectMatrix<Nullable<ICellData>>;
-
+    private _scene: Nullable<Scene> = null;
     constructor(
-        readonly worksheet: Worksheet,
-        private _styles: Styles,
+        worksheet: Worksheet,
+        _styles: Styles,
         @Inject(LocaleService) _localeService: LocaleService,
-        @IContextService private readonly _contextService: IContextService,
-        @IConfigService private readonly _configService: IConfigService,
-        @Inject(Injector) private _injector: Injector
+        @IContextService _contextService: IContextService,
+        @IConfigService _configService: IConfigService,
+        @Inject(Injector) _injector: Injector
     ) {
-        super(_localeService);
-        this._worksheetData = this.worksheet.getConfig();
-        this._cellData = this.worksheet.getCellMatrix();
+        super(worksheet, _styles, _localeService, _contextService, _configService, _injector);
+    }
 
-        this._imageCacheMap = new ImageCacheMap(this._injector);
-        this.initConfig();
+    override initConfig() {
         this._updateLayout();
-        this._initContextListener();
+        this.disposeWithMe(
+            this._contextService.subscribeContextValue$(RENDER_RAW_FORMULA_KEY).pipe(
+                startWith(false),
+                distinctUntilChanged()
+            ).subscribe((renderRaw) => {
+                this._renderRawFormula = renderRaw;
+                this._resetCache();
+                this.makeDirty(true);
+            })
+        );
     }
 
-    initConfig() {
-        this._skipAutoHeightForMergedCells = !(this._configService.getConfig(AUTO_HEIGHT_FOR_MERGED_CELLS) ?? false);
-        this._isRowStylePrecedeColumnStyle = this._configService.getConfig(IS_ROW_STYLE_PRECEDE_COLUMN_STYLE) ?? false;
+    setScene(scene: Scene) {
+        this._scene = scene;
+        this.disposeWithMe(
+            this._scene.onTransformChange$.subscribeEvent((param: ITransformChangeState) => {
+                this.setScale(param.value.scaleX || 1, param.value.scaleY);
+            }));
     }
 
-    get rowHeightAccumulation(): number[] {
-        return this._rowHeightAccumulation;
-    }
+    override _updateLayout() {
+        const {
+            showGridlines,
+            gridlinesColor,
+        } = this._worksheetData;
 
-    get rowTotalHeight(): number {
-        return this._rowTotalHeight;
-    }
-
-    get columnWidthAccumulation(): number[] {
-        return this._columnWidthAccumulation;
-    }
-
-    get columnTotalWidth(): number {
-        return this._columnTotalWidth;
-    }
-
-    get rowHeaderWidth(): number {
-        return this._rowHeaderWidth;
-    }
-
-    get columnHeaderHeight(): number {
-        return this._columnHeaderHeight;
-    }
-
-    set columnHeaderHeight(value: number) {
-        this._columnHeaderHeight = value;
-        this._worksheetData.columnHeader.height = value;
-    }
-
-    set rowHeaderWidth(value: number) {
-        this._rowHeaderWidth = value;
-        this._worksheetData.rowHeader.width = value;
-    }
-
-    get imageCacheMap(): ImageCacheMap {
-        return this._imageCacheMap;
+        this._showGridlines = showGridlines;
+        this._gridlinesColor = gridlinesColor;
+        super._updateLayout(); // make dirty false
     }
 
     /**
@@ -342,10 +222,6 @@ export class SpreadsheetSkeleton extends Skeleton {
         return this._cacheRangeMap.get(viewportKey);
     }
 
-    // get dataMergeCache(): IRange[] {
-    //     return this._dataMergeCache;
-    // }
-
     get stylesCache(): IStylesCache {
         return this._stylesCache;
     }
@@ -362,34 +238,15 @@ export class SpreadsheetSkeleton extends Skeleton {
         return this._gridlinesColor;
     }
 
-    get mergeData(): IRange[] {
-        return this._worksheetData.mergeData;
-    }
-
-    get rowHeaderWidthAndMarginLeft(): number {
-        return this.rowHeaderWidth + this._marginLeft;
-    }
-
-    get columnHeaderHeightAndMarginTop(): number {
-        return this.columnHeaderHeight + this._marginTop;
-    }
-
     override dispose(): void {
         super.dispose();
 
-        this._rowHeightAccumulation = [];
-        this._columnWidthAccumulation = [];
-        this._rowTotalHeight = 0;
-        this._columnTotalWidth = 0;
-        this._rowHeaderWidth = 0;
-        this._columnHeaderHeight = 0;
         this._drawingRange = {
             startRow: -1,
             endRow: -1,
             startColumn: -1,
             endColumn: -1,
         };
-        // this._dataMergeCache = [];
         this._stylesCache = {
             background: {},
             backgroundPositions: new ObjectMatrix<ICellWithCoord>(),
@@ -400,50 +257,17 @@ export class SpreadsheetSkeleton extends Skeleton {
         this._handleBgMatrix.reset();
         this._handleBorderMatrix.reset();
         this._overflowCache.reset();
-
-        this._worksheetData = null as unknown as IWorksheetData;
-        this._cellData = null as unknown as ObjectMatrix<Nullable<ICellData>>;
-        this._styles = null as unknown as Styles;
     }
 
     /**
      * @deprecated should never expose a property that is provided by another module!
      */
-    getsStyles(): Styles {
+    getStyles(): Styles {
         return this._styles;
-    }
-
-    /**
-     * Get which Workbook and Worksheet this skeleton is attached to.
-     * @returns [unitId, sheetId]
-     */
-    getLocation(): [string, string] {
-        return [this.worksheet.getUnitId(), this.worksheet.getSheetId()];
-    }
-
-    private _initContextListener(): void {
-        this.disposeWithMe(
-            this._contextService.subscribeContextValue$(RENDER_RAW_FORMULA_KEY).pipe(
-                startWith(false),
-                distinctUntilChanged()
-            ).subscribe((renderRaw) => {
-                this._renderRawFormula = renderRaw;
-                this._resetCache();
-                this.makeDirty(true);
-            })
-        );
     }
 
     setOverflowCache(value: ObjectMatrix<IRange>): void {
         this._overflowCache = value;
-    }
-
-    setMarginLeft(left: number): void {
-        this._marginLeft = left;
-    }
-
-    setMarginTop(top: number): void {
-        this._marginTop = top;
     }
 
     getFont(rowIndex: number, columnIndex: number): Nullable<IFontCacheItem> {
@@ -464,7 +288,7 @@ export class SpreadsheetSkeleton extends Skeleton {
      * @returns boolean
      */
     updateVisibleRange(vpInfo?: IViewportInfo): boolean {
-        if (!this._worksheetData || !this._rowHeightAccumulation || !this._columnWidthAccumulation) {
+        if (!this._worksheetData || !this.rowHeightAccumulation || !this.columnWidthAccumulation) {
             return false;
         }
 
@@ -494,7 +318,7 @@ export class SpreadsheetSkeleton extends Skeleton {
      */
     setStylesCache(vpInfo?: IViewportInfo): Nullable<SpreadsheetSkeleton> {
         if (!this._worksheetData) return;
-        if (!this._rowHeightAccumulation || !this._columnWidthAccumulation) return;
+        if (!this.rowHeightAccumulation || !this.columnWidthAccumulation) return;
 
         this.updateVisibleRange(vpInfo);
 
@@ -534,34 +358,6 @@ export class SpreadsheetSkeleton extends Skeleton {
         }
 
         return this;
-    }
-
-    /**
-     * Refresh cache after markDirty by SheetSkeletonManagerService.reCalculate()
-     * @param bounds
-     */
-    calculate(): Nullable<SpreadsheetSkeleton> {
-        this._resetCache();
-        this._updateLayout();
-
-        return this;
-    }
-
-    private _hasUnMergedCellInRow(rowIndex: number, startColumn: number, endColumn: number): boolean {
-        const mergeData = this.worksheet.getMergeData();
-        if (!mergeData) {
-            return false;
-        }
-
-        for (let i = startColumn; i <= endColumn; i++) {
-            const { isMerged, isMergedMainCell } = this.worksheet.getCellInfoInMergeData(rowIndex, i);
-
-            if (!isMerged && !isMergedMainCell) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     //#region auto height
@@ -610,6 +406,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         return results;
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _calculateRowAutoHeight(rowNum: number): number {
         const worksheet = this.worksheet;
         const { columnCount, columnData, defaultRowHeight, defaultColumnWidth } = this._worksheetData;
@@ -777,14 +574,14 @@ export class SpreadsheetSkeleton extends Skeleton {
         const rowIdxArr = createRowSequence(checkStartRow, checkEndRow, otherRowIndex);
 
         const preColIndex = Math.max(0, colIndex - 1);
-        let currColWidth = this._columnWidthAccumulation[colIndex] - this._columnWidthAccumulation[preColIndex];
+        let currColWidth = this.columnWidthAccumulation[colIndex] - this.columnWidthAccumulation[preColIndex];
         if (colIndex === 0) {
-            currColWidth = this._columnWidthAccumulation[colIndex];
+            currColWidth = this.columnWidthAccumulation[colIndex];
         }
 
         for (let i = 0; i < rowIdxArr.length; i++) {
             const row = rowIdxArr[i];
-            const { isMerged, isMergedMainCell } = this._getCellMergeInfo(colIndex, row);
+            const { isMerged, isMergedMainCell } = this.worksheet.getCellInfoInMergeData(colIndex, row);
             if (isMerged && !isMergedMainCell) continue;
             if (!this.worksheet.getRowVisible(row)) continue;
             const cell = worksheet.getCell(row, colIndex);
@@ -810,20 +607,20 @@ export class SpreadsheetSkeleton extends Skeleton {
 
     getColWidth(colIndex: number) {
         const preColIndex = Math.max(0, colIndex - 1);
-        const currColWidth = this._columnWidthAccumulation[colIndex] - this._columnWidthAccumulation[preColIndex];
+        const currColWidth = this.columnWidthAccumulation[colIndex] - this.columnWidthAccumulation[preColIndex];
         return currColWidth;
     }
 
     getRowHeight(rowIndex: number) {
         const preRowIndex = Math.max(0, rowIndex - 1);
-        const currRowHeight = this._rowHeightAccumulation[rowIndex] - this._rowHeightAccumulation[preRowIndex];
+        const currRowHeight = this.rowHeightAccumulation[rowIndex] - this.rowHeightAccumulation[preRowIndex];
         return currRowHeight;
     }
 
     /**
      * For _calculateColMaxWidth
      * @param cell
-     * @returns {number} width
+     * @returns {number} currColWidth
      */
     _getMeasuredWidthByCell(cell: ICellDataForSheetInterceptor, currColWidth: number) {
         let measuredWidth = 0;
@@ -885,158 +682,23 @@ export class SpreadsheetSkeleton extends Skeleton {
     //#endregion
 
     /**
-     * Calculate data for row col & cell position.
-     * This method should be called whenever a sheet is dirty.
-     * Update position value to this._rowHeaderWidth & this._rowHeightAccumulation & this._columnHeaderHeight & this._columnWidthAccumulation.
-     */
-    private _updateLayout(): void {
-        if (!this.dirty) {
-            return;
-        }
-
-        const {
-            rowData,
-            columnData,
-            defaultRowHeight,
-            defaultColumnWidth,
-            rowCount,
-            columnCount,
-            rowHeader,
-            columnHeader,
-            showGridlines,
-            gridlinesColor,
-        } = this._worksheetData;
-
-        const { rowTotalHeight, rowHeightAccumulation } = this._generateRowMatrixCache(
-            rowCount,
-            rowData,
-            defaultRowHeight
-        );
-
-        const { columnTotalWidth, columnWidthAccumulation } = this._generateColumnMatrixCache(
-            columnCount,
-            columnData,
-            defaultColumnWidth
-        );
-
-        this._rowHeaderWidth = rowHeader.hidden !== BooleanNumber.TRUE ? this._dynamicallyUpdateRowHeaderWidth(rowHeader) : 0;
-        this._columnHeaderHeight = columnHeader.hidden !== BooleanNumber.TRUE ? columnHeader.height : 0;
-
-        this._rowTotalHeight = rowTotalHeight;
-        this._rowHeightAccumulation = rowHeightAccumulation;
-        this._columnTotalWidth = columnTotalWidth;
-        this._columnWidthAccumulation = columnWidthAccumulation;
-        this._showGridlines = showGridlines;
-        this._gridlinesColor = gridlinesColor;
-
-        this.makeDirty(false);
-    }
-
-    private _dynamicallyUpdateRowHeaderWidth(rowHeader: { width: number }): number {
-        const SIZE_BY_EACH_CHARACTER = 8;
-        const widthByComputation = (`${this.worksheet.getRowCount()}`.length * SIZE_BY_EACH_CHARACTER);
-        return Math.max(rowHeader.width, widthByComputation);
-    }
-
-    /**
      * @deprecated use `getRangeByViewport` instead.
      * @param bounds
      */
     getRangeByBounding(bounds?: IViewportInfo): IRange {
-        return this._getRangeByViewBounding(this._rowHeightAccumulation, this._columnWidthAccumulation, bounds?.cacheBound);
+        return this._getRangeByViewBounding(this.rowHeightAccumulation, this.columnWidthAccumulation, bounds?.cacheBound);
     }
 
     getRangeByViewport(vpInfo?: IViewportInfo): IRange {
-        return this._getRangeByViewBounding(this._rowHeightAccumulation, this._columnWidthAccumulation, vpInfo?.viewBound);
+        return this._getRangeByViewBounding(this.rowHeightAccumulation, this.columnWidthAccumulation, vpInfo?.viewBound);
     }
 
     getCacheRangeByViewport(vpInfo?: IViewportInfo): IRange {
-        return this._getRangeByViewBounding(this._rowHeightAccumulation, this._columnWidthAccumulation, vpInfo?.cacheBound);
+        return this._getRangeByViewBounding(this.rowHeightAccumulation, this.columnWidthAccumulation, vpInfo?.cacheBound);
     }
 
     getRangeByViewBound(bound?: IBoundRectNoAngle): IRange {
-        return this._getRangeByViewBounding(this._rowHeightAccumulation, this._columnWidthAccumulation, bound);
-    }
-
-    /**
-     * @deprecated should never expose a property that is provided by another module!
-     * @returns
-     */
-    getWorksheetConfig(): IWorksheetData {
-        return this._worksheetData;
-    }
-
-    getMergeBounding(startRow: number, startColumn: number, endRow: number, endColumn: number): IRange {
-        const mergeData = this._worksheetData.mergeData;
-        if (!mergeData) {
-            return {
-                startRow,
-                startColumn,
-                endRow,
-                endColumn,
-            };
-        }
-
-        let isSearching = true;
-        const searchedMarge = new ObjectMatrix<boolean>();
-
-        // the loop breaks when there are not merged cells intersect with the current range
-        // NOTE: what about the performance issue?
-        while (isSearching) {
-            isSearching = false;
-
-            for (let i = 0; i < mergeData.length; i++) {
-                const {
-                    startRow: mainStartRow,
-                    startColumn: mainStartColumn,
-                    endRow: mainEndRow,
-                    endColumn: mainEndColumn,
-                } = mergeData[i];
-
-                if (searchedMarge.getValue(mainStartRow, mainStartColumn)) {
-                    continue;
-                }
-
-                const rect1 = {
-                    left: startColumn,
-                    top: startRow,
-                    right: endColumn,
-                    bottom: endRow,
-                };
-
-                const rect2 = {
-                    left: mainStartColumn,
-                    top: mainStartRow,
-                    right: mainEndColumn,
-                    bottom: mainEndRow,
-                };
-
-                if (isRectIntersect(rect1, rect2)) {
-                    startRow = Math.min(startRow, mainStartRow);
-                    startColumn = Math.min(startColumn, mainStartColumn);
-                    endRow = Math.max(endRow, mainEndRow);
-                    endColumn = Math.max(endColumn, mainEndColumn);
-                    searchedMarge.setValue(mainStartRow, mainStartColumn, true);
-                    isSearching = true;
-                }
-            }
-        }
-
-        return {
-            startRow,
-            startColumn,
-            endRow,
-            endColumn,
-        };
-    }
-
-    /**
-     * expand curr range if it's intersect with merge range.
-     * @param range
-     * @returns {IRange} expanded range because merge info.
-     */
-    expandRangeByMerge(range: IRange): IRange {
-        return this.getMergeBounding(range.startRow, range.startColumn, range.endRow, range.endColumn);
+        return this._getRangeByViewBounding(this.rowHeightAccumulation, this.columnWidthAccumulation, bound);
     }
 
     appendToOverflowCache(row: number, column: number, startColumn: number, endColumn: number): void {
@@ -1046,14 +708,6 @@ export class SpreadsheetSkeleton extends Skeleton {
             startColumn,
             endColumn,
         });
-    }
-
-    getColumnCount(): number {
-        return this._columnWidthAccumulation.length;
-    }
-
-    getRowCount(): number {
-        return this._rowHeightAccumulation.length;
     }
 
     getOverflowPosition(
@@ -1082,65 +736,6 @@ export class SpreadsheetSkeleton extends Skeleton {
         };
     }
 
-    getNoMergeCellPositionByIndex(rowIndex: number, columnIndex: number): IPosition {
-        const {
-            rowHeightAccumulation,
-            columnWidthAccumulation,
-            rowHeaderWidthAndMarginLeft,
-            columnHeaderHeightAndMarginTop,
-        } = this;
-
-        // const rowCount = this.getRowCount();
-
-        // const columnCount = this.getColumnCount();
-
-        // if (rowIndex >= rowCount || rowIndex < 0 || columnIndex >= columnCount || columnIndex < 0) {
-        //     return {
-        //         startY: -100,
-        //         endY: -100,
-        //         startX: -100,
-        //         endX: -100,
-        //     };
-        // }
-
-        let { startY, endY, startX, endX } = getCellPositionByIndex(
-            rowIndex,
-            columnIndex,
-            rowHeightAccumulation,
-            columnWidthAccumulation
-        );
-
-        startY += columnHeaderHeightAndMarginTop;
-        endY += columnHeaderHeightAndMarginTop;
-        startX += rowHeaderWidthAndMarginLeft;
-        endX += rowHeaderWidthAndMarginLeft;
-
-        return {
-            startY,
-            endY,
-            startX,
-            endX,
-        };
-    }
-
-    getNoMergeCellPositionByIndexWithNoHeader(rowIndex: number, columnIndex: number): IPosition {
-        const { rowHeightAccumulation, columnWidthAccumulation } = this;
-
-        const { startY, endY, startX, endX } = getCellPositionByIndex(
-            rowIndex,
-            columnIndex,
-            rowHeightAccumulation,
-            columnWidthAccumulation
-        );
-
-        return {
-            startY,
-            endY,
-            startX,
-            endX,
-        };
-    }
-
     /**
      * Get cell by pos(offsetX, offsetY).
      * @deprecated Please use `getCellWithCoordByOffset` instead.
@@ -1153,31 +748,6 @@ export class SpreadsheetSkeleton extends Skeleton {
         scrollXY: { x: number; y: number }
     ): Nullable<ICellWithCoord> {
         return this.getCellWithCoordByOffset(offsetX, offsetY, scaleX, scaleY, scrollXY);
-    }
-
-    /**
-     * Get cell by pos(offsetX, offsetY).
-     *
-     * options.matchFirst true means get cell would skip all invisible cells.
-     * @param offsetX position X in viewport.
-     * @param offsetY position Y in viewport.
-     * @param scaleX render scene scale x-axis, scene.getAncestorScale
-     * @param scaleY render scene scale y-axis, scene.getAncestorScale
-     * @param scrollXY render viewportScroll {x, y}
-     * @param options {IGetRowColByPosOptions}
-     * @returns {ICellWithCoord} Selection data with coordinates
-     */
-    getCellWithCoordByOffset(
-        offsetX: number,
-        offsetY: number,
-        scaleX: number,
-        scaleY: number,
-        scrollXY: { x: number; y: number },
-        options?: IGetRowColByPosOptions
-    ): ICellWithCoord {
-        const { row, column } = this.getCellIndexByOffset(offsetX, offsetY, scaleX, scaleY, scrollXY, options);
-
-        return this.getCellWithCoordByIndex(row, column);
     }
 
     /**
@@ -1197,55 +767,6 @@ export class SpreadsheetSkeleton extends Skeleton {
         return this.getCellIndexByOffset(offsetX, offsetY, scaleX, scaleY, scrollXY, options);
     }
 
-    /**
-     * Get cell index by offset(o)
-     * @param offsetX position X in viewport.
-     * @param offsetY position Y in viewport.
-     * @param scaleX render scene scale x-axis, scene.getAncestorScale
-     * @param scaleY render scene scale y-axis, scene.getAncestorScale
-     * @param scrollXY  render viewport scroll {x, y}, scene.getScrollXYByRelativeCoords, scene.getScrollXY
-     * @param scrollXY.x
-     * @param scrollXY.y
-     * @returns cell index
-     */
-    getCellIndexByOffset(
-        offsetX: number,
-        offsetY: number,
-        scaleX: number,
-        scaleY: number,
-        scrollXY: { x: number; y: number },
-        options?: IGetRowColByPosOptions
-    ): { row: number; column: number } {
-        const row = this.getRowIndexByOffsetY(offsetY, scaleY, scrollXY, options);
-        const column = this.getColumnIndexByOffsetX(offsetX, scaleX, scrollXY, options);
-
-        return {
-            row,
-            column,
-        };
-    }
-
-    getCellByOffset(
-        offsetX: number,
-        offsetY: number,
-        scaleX: number,
-        scaleY: number,
-        scrollXY: { x: number; y: number }
-    ): Nullable<ICellInfo> {
-        const cellIndex = this?.getCellIndexByOffset(
-            offsetX,
-            offsetY,
-            scaleX,
-            scaleY,
-            scrollXY,
-            { firstMatch: true } // for visible
-        );
-        if (!cellIndex) return null;
-
-        const selectionCell = this.worksheet.getCellInfoInMergeData(cellIndex.row, cellIndex.column);
-        return selectionCell;
-    }
-
     getCellWithMergeInfoByIndex(row: number, column: number): Nullable<ICellInfo> {
         const selectionCell = this.worksheet.getCellInfoInMergeData(row, column);
         return selectionCell;
@@ -1260,106 +781,11 @@ export class SpreadsheetSkeleton extends Skeleton {
     }
 
     /**
-     * Get column index by offset x.
-     * @param offsetX scaled offset x
-     * @param scaleX scale x
-     * @param scrollXY scrollXY
-     * @returns column index
-     */
-    getColumnIndexByOffsetX(evtOffsetX: number, scaleX: number, scrollXY: { x: number; y: number }, options?: IGetRowColByPosOptions): number {
-        const offsetX = this.getTransformOffsetX(evtOffsetX, scaleX, scrollXY);
-        const { columnWidthAccumulation } = this;
-        let column = searchArray(columnWidthAccumulation, offsetX, options?.firstMatch);
-
-        if (options?.closeFirst) {
-            // check if upper column was closer than current
-            if (Math.abs(columnWidthAccumulation[column] - offsetX) < Math.abs(offsetX - (columnWidthAccumulation[column - 1] ?? 0))) {
-                column = column + 1;
-            }
-        }
-
-        return column;
-    }
-
-    /**
      * Same as getRowIndexByOffsetY
      * @deprecated Please use `getRowIndexByOffsetY` method instead.
      */
     getRowPositionByOffsetY(offsetY: number, scaleY: number, scrollXY: { x: number; y: number }, options?: IGetRowColByPosOptions): number {
         return this.getRowIndexByOffsetY(offsetY, scaleY, scrollXY, options);
-    }
-
-    /**
-     *
-     * @param offsetY scaled offset y
-     * @param scaleY scale y
-     * @param scrollXY
-     * @param scrollXY.x
-     * @param scrollXY.y
-     */
-    getRowIndexByOffsetY(offsetY: number, scaleY: number, scrollXY: { x: number; y: number }, options?: IGetRowColByPosOptions): number {
-        const { rowHeightAccumulation } = this;
-        offsetY = this.getTransformOffsetY(offsetY, scaleY, scrollXY);
-
-        let row = searchArray(rowHeightAccumulation, offsetY, options?.firstMatch);
-
-        if (options?.closeFirst) {
-            // check if upper row was closer than current
-            if (Math.abs(rowHeightAccumulation[row] - offsetY) < Math.abs(offsetY - (rowHeightAccumulation[row - 1] ?? 0))) {
-                row = row + 1;
-            }
-        }
-
-        return row;
-    }
-
-    getTransformOffsetX(offsetX: number, scaleX: number, scrollXY: { x: number; y: number }): number {
-        const { x: scrollX } = scrollXY;
-
-        // so we should map physical positions to ideal positions
-        const afterOffsetX = offsetX / scaleX + scrollX - this.rowHeaderWidthAndMarginLeft;
-
-        return afterOffsetX;
-    }
-
-    getTransformOffsetY(offsetY: number, scaleY: number, scrollXY: { x: number; y: number }): number {
-        const { y: scrollY } = scrollXY;
-
-        // these values are not affected by zooming (ideal positions)
-        offsetY = offsetY / scaleY + scrollY - this.columnHeaderHeightAndMarginTop;
-
-        return offsetY;
-    }
-
-    getOffsetByPositionX(column: number): number {
-        const { columnWidthAccumulation, rowHeaderWidthAndMarginLeft } = this;
-
-        const lastColumnIndex = columnWidthAccumulation.length - 1;
-        const columnValue = columnWidthAccumulation[column];
-        if (columnValue != null) {
-            return columnValue + rowHeaderWidthAndMarginLeft;
-        }
-
-        if (column < 0) {
-            return rowHeaderWidthAndMarginLeft;
-        }
-
-        return columnWidthAccumulation[lastColumnIndex] + rowHeaderWidthAndMarginLeft;
-    }
-
-    getOffsetByPositionY(row: number): number {
-        const { rowHeightAccumulation, columnHeaderHeightAndMarginTop } = this;
-        const lastRowIndex = rowHeightAccumulation.length - 1;
-        const rowValue = rowHeightAccumulation[row];
-        if (rowValue != null) {
-            return rowValue + columnHeaderHeightAndMarginTop;
-        }
-
-        if (row < 0) {
-            return columnHeaderHeightAndMarginTop;
-        }
-
-        return rowHeightAccumulation[lastRowIndex] + columnHeaderHeightAndMarginTop;
     }
 
     /**
@@ -1377,84 +803,6 @@ export class SpreadsheetSkeleton extends Skeleton {
      */
     getCellByIndexWithNoHeader(row: number, column: number) {
         return this.getCellWithCoordByIndex(row, column, false);
-    }
-
-    /**
-     * Return cell information corresponding to the current coordinates, including the merged cell object.
-     *
-     * @param row Specified Row Coordinate
-     * @param column Specified Column Coordinate
-     */
-    getCellWithCoordByIndex(row: number, column: number, header: boolean = true): ICellWithCoord {
-        const {
-            rowHeightAccumulation,
-            columnWidthAccumulation,
-            rowHeaderWidthAndMarginLeft,
-            columnHeaderHeightAndMarginTop,
-        } = this;
-
-        const primary: ICellWithCoord = getCellWithCoordByIndexCore(
-            row,
-            column,
-            rowHeightAccumulation,
-            columnWidthAccumulation,
-            this.worksheet.getCellInfoInMergeData(row, column)
-        );
-        const { isMerged, isMergedMainCell } = primary;
-        let { startY, endY, startX, endX, mergeInfo } = primary;
-
-        let offsetX = rowHeaderWidthAndMarginLeft;
-        let offsetY = columnHeaderHeightAndMarginTop;
-        if (header === false) {
-            offsetX = 0;
-            offsetY = 0;
-        }
-
-        startY += offsetY;
-        endY += offsetY;
-        startX += offsetX;
-        endX += offsetX;
-
-        mergeInfo.startY += offsetY;
-        mergeInfo.endY += offsetY;
-        mergeInfo.startX += offsetX;
-        mergeInfo.endX += offsetX;
-
-        // mergeInfo = mergeInfoOffset(mergeInfo, rowHeaderWidthAndMarginLeft, columnHeaderHeightAndMarginTop);
-
-        return {
-            actualRow: row,
-            actualColumn: column,
-            startX,
-            startY,
-            endX,
-            endY,
-            isMerged,
-            isMergedMainCell,
-            mergeInfo,
-        };
-    }
-
-    /**
-     * convert canvas content position to physical position in screen
-     * @param offsetX
-     * @param scaleX
-     * @param scrollXY
-     */
-    convertTransformToOffsetX(offsetX: number, scaleX: number, scrollXY: { x: number; y: number }): number {
-        const { x: scrollX } = scrollXY;
-        return (offsetX - scrollX) * scaleX;
-    }
-
-    /**
-     * convert canvas content position to physical position in screen
-     * @param offsetY
-     * @param scaleY
-     * @param scrollXY
-     */
-    convertTransformToOffsetY(offsetY: number, scaleY: number, scrollXY: { x: number; y: number }): number {
-        const { y: scrollY } = scrollXY;
-        return (offsetY - scrollY) * scaleY;
     }
 
     /**
@@ -1616,30 +964,6 @@ export class SpreadsheetSkeleton extends Skeleton {
         };
     }
 
-    getDecomposedOffset(offsetX: number, offsetY: number): { row: number; column: number; columnOffset: number; rowOffset: number } {
-        const column = searchArray(this._columnWidthAccumulation, offsetX);
-        let columnOffset = 0;
-        if (column === 0) {
-            columnOffset = offsetX;
-        } else {
-            columnOffset = offsetX - this._columnWidthAccumulation[column - 1];
-        }
-
-        const row = searchArray(this._rowHeightAccumulation, offsetY);
-        let rowOffset = 0;
-        if (row === 0) {
-            rowOffset = offsetY;
-        } else {
-            rowOffset = offsetY - this._rowHeightAccumulation[row - 1];
-        }
-        return {
-            row,
-            column,
-            columnOffset,
-            rowOffset,
-        };
-    }
-
     /**
      * Calculate the overflow of cell text. If there is no value on either side of the cell,
      * the text content of this cell can be drawn to both sides, not limited by the cell's width.
@@ -1685,13 +1009,11 @@ export class SpreadsheetSkeleton extends Skeleton {
             }
 
             if (vertexAngle !== 0) {
-                const { startY, endY, startX, endX } = getCellWithCoordByIndexCore(
+                const { startY, endY, startX, endX } = this.getCellWithCoordByIndex(
                     row,
-                    column,
-                    this.rowHeightAccumulation,
-                    this.columnWidthAccumulation,
-                    this.worksheet.getCellInfoInMergeData(row, column)
+                    column
                 );
+
                 const cellWidth = endX - startX;
                 const cellHeight = endY - startY;
 
@@ -1718,12 +1040,9 @@ export class SpreadsheetSkeleton extends Skeleton {
                 return true;
             }
 
-            const { startY, endY } = getCellWithCoordByIndexCore(
+            const { startY, endY } = this.getCellWithCoordByIndex(
                 row,
-                column,
-                this.rowHeightAccumulation,
-                this.columnWidthAccumulation,
-                this.worksheet.getCellInfoInMergeData(row, column)
+                column
             );
 
             const cellHeight = endY - startY;
@@ -1790,167 +1109,6 @@ export class SpreadsheetSkeleton extends Skeleton {
         } as IRange;
     }
 
-    private _generateRowMatrixCache(
-        rowCount: number,
-        rowData: IObjectArrayPrimitiveType<Partial<IRowData>>,
-        defaultRowHeight: number
-    ): { rowTotalHeight: number; rowHeightAccumulation: number[] } {
-        let rowTotalHeight = 0;
-        const rowHeightAccumulation: number[] = [];
-        const data = rowData;
-        for (let r = 0; r < rowCount; r++) {
-            let rowHeight = defaultRowHeight;
-
-            if (this.worksheet.getRowFiltered(r)) {
-                rowHeight = 0;
-            } else if (data[r] != null) {
-                const rowDataItem = data[r];
-                if (!rowDataItem) {
-                    continue;
-                }
-
-                const { h = defaultRowHeight, ah, ia } = rowDataItem;
-                if ((ia == null || ia === BooleanNumber.TRUE) && typeof ah === 'number') {
-                    rowHeight = ah;
-                } else {
-                    rowHeight = h;
-                }
-
-                if (rowDataItem.hd === BooleanNumber.TRUE) {
-                    rowHeight = 0;
-                }
-            }
-
-            rowTotalHeight += rowHeight;
-
-            rowHeightAccumulation.push(rowTotalHeight);
-        }
-
-        return {
-            rowTotalHeight,
-            rowHeightAccumulation,
-        };
-    }
-
-    /**
-     * Calc columnWidthAccumulation by columnData
-     * @param colCount
-     * @param columnData
-     * @param defaultColumnWidth
-     */
-    private _generateColumnMatrixCache(
-        colCount: number,
-        columnData: IObjectArrayPrimitiveType<Partial<IColumnData>>,
-        defaultColumnWidth: number
-    ): { columnTotalWidth: number; columnWidthAccumulation: number[] } {
-        let columnTotalWidth = 0;
-        const columnWidthAccumulation: number[] = [];
-
-        const data = columnData;
-
-        for (let c = 0; c < colCount; c++) {
-            let columnWidth = defaultColumnWidth;
-
-            if (data[c] != null) {
-                const columnDataItem = data[c];
-
-                if (!columnDataItem) {
-                    continue;
-                }
-                if (columnDataItem.w != null) {
-                    columnWidth = columnDataItem.w;
-                }
-
-                if (columnDataItem.hd === BooleanNumber.TRUE) {
-                    columnWidth = 0;
-                }
-            }
-
-            columnTotalWidth += columnWidth;
-            columnWidthAccumulation.push(columnTotalWidth);
-        }
-
-        return {
-            columnTotalWidth,
-            columnWidthAccumulation,
-        };
-    }
-
-    //eslint-disable-next-line complexity
-    private _getOverflowBound(
-        row: number,
-        startColumn: number,
-        endColumn: number,
-        contentWidth: number,
-        horizontalAlign = HorizontalAlign.LEFT
-    ): number {
-        let cumWidth = 0;
-        if (startColumn > endColumn) {
-            const columnCount = this._columnWidthAccumulation.length - 1;
-            for (let i = startColumn; i >= endColumn; i--) {
-                const column = i;
-                const cell = this.worksheet.getCell(row, column);
-                if ((!isCellCoverable(cell) && column !== startColumn) || this.intersectMergeRange(row, column)) {
-                    if (column === startColumn) {
-                        return column;
-                    }
-                    return column + 1 > columnCount ? columnCount : column + 1;
-                }
-                const { startX, endX } = getCellPositionByIndex(
-                    row,
-                    column,
-                    this.rowHeightAccumulation,
-                    this.columnWidthAccumulation
-                );
-
-                // For center alignment, the current cell's width needs to be divided in half for comparison.
-                if (horizontalAlign === HorizontalAlign.CENTER && column === startColumn) {
-                    cumWidth += (endX - startX) / 2;
-                } else {
-                    cumWidth += endX - startX;
-                }
-
-                if (contentWidth < cumWidth) {
-                    return column;
-                }
-            }
-            return startColumn;
-        }
-        for (let i = startColumn; i <= endColumn; i++) {
-            const column = i;
-            const cell = this.worksheet.getCell(row, column);
-            if ((!isCellCoverable(cell) && column !== startColumn) || this.intersectMergeRange(row, column)) {
-                if (column === startColumn) {
-                    return column;
-                }
-
-                return column - 1 < 0 ? 0 : column - 1;
-            }
-            const { startX, endX } = getCellPositionByIndex(
-                row,
-                column,
-                this.rowHeightAccumulation,
-                this.columnWidthAccumulation
-            );
-
-            if (horizontalAlign === HorizontalAlign.CENTER && column === startColumn) {
-                cumWidth += (endX - startX) / 2;
-            } else {
-                cumWidth += endX - startX;
-            }
-
-            if (contentWidth < cumWidth) {
-                return column;
-            }
-        }
-        return endColumn;
-    }
-
-    intersectMergeRange(row: number, column: number): boolean {
-        const mergedData = this.worksheet.getMergedCell(row, column);
-        return Boolean(mergedData);
-    }
-
     /**
      * Get the current row and column segment visible merge data.
      * @returns {IRange} The visible merge data
@@ -1979,7 +1137,8 @@ export class SpreadsheetSkeleton extends Skeleton {
     /**
      * Any changes to sheet model would reset cache.
      */
-    private _resetCache(): void {
+    override _resetCache(): void {
+        super._resetCache();
         this._stylesCache = {
             background: {},
             backgroundPositions: new ObjectMatrix<ICellWithCoord>(),
@@ -1987,9 +1146,10 @@ export class SpreadsheetSkeleton extends Skeleton {
             fontMatrix: new ObjectMatrix<IFontCacheItem>(),
             border: new ObjectMatrix<BorderCache>(),
         };
-        this._handleBgMatrix.reset();
-        this._handleBorderMatrix.reset();
-        this._overflowCache.reset();
+
+        this._handleBgMatrix?.reset();
+        this._handleBorderMatrix?.reset();
+        this._overflowCache?.reset();
     }
 
     _setBorderStylesCache(row: number, col: number, style: Nullable<IStyleData>, options: {
@@ -2050,40 +1210,55 @@ export class SpreadsheetSkeleton extends Skeleton {
         }
     }
 
-    _setFontStylesCache(row: number, col: number, cell: Nullable<ICellDataForSheetInterceptor>) {
-        if (isNullCell(cell)) return;
+    _setFontStylesCache(row: number, col: number, cellData: Nullable<ICellDataForSheetInterceptor>) {
+        if (isNullCell(cellData)) return;
 
-        this._handleFontMatrix.setValue(row, col, true);
-        if (this._stylesCache.fontMatrix.getValue(row, col)) return;
+        let config: Partial<IFontCacheItem> = {
+            cellData,
+            imageCacheMap: this._imageCacheMap,
+        };
 
-        const modelObject = this._getCellDocumentModel(cell, {
+        const cacheValue = this._stylesCache.fontMatrix.getValue(row, col);
+        if (!cacheValue) {
+            this._stylesCache.fontMatrix.setValue(row, col, config as IFontCacheItem);
+        } else {
+            const cacheItem = cacheValue as IFontCacheItem;
+            cacheItem.cellData = cellData;
+            this._stylesCache.fontMatrix.setValue(row, col, cacheValue as IFontCacheItem);
+            return;
+        }
+
+        const modelObject = this._getCellDocumentModel(cellData, {
             displayRawFormula: this._renderRawFormula,
         });
-        if (modelObject == null) return;
-        const { documentModel } = modelObject;
-        if (documentModel == null) return;
+        if (modelObject) {
+            const { documentModel } = modelObject;
+            if (documentModel) {
+                const { fontString: _fontString, textRotation, wrapStrategy, verticalAlign, horizontalAlign } = modelObject;
+                const documentViewModel = new DocumentViewModel(documentModel);
+                if (documentViewModel) {
+                    const { vertexAngle, centerAngle } = convertTextRotation(textRotation);
+                    const documentSkeleton = DocumentSkeleton.create(documentViewModel, this._localeService);
+                    documentSkeleton.calculate();
 
-        const { fontString: _fontString, textRotation, wrapStrategy, verticalAlign, horizontalAlign } = modelObject;
-
-        const documentViewModel = new DocumentViewModel(documentModel);
-        if (documentViewModel) {
-            const { vertexAngle, centerAngle } = convertTextRotation(textRotation);
-            const documentSkeleton = DocumentSkeleton.create(documentViewModel, this._localeService);
-            documentSkeleton.calculate();
-
-            const config: IFontCacheItem = {
-                documentSkeleton,
-                vertexAngle,
-                centerAngle,
-                verticalAlign,
-                horizontalAlign,
-                wrapStrategy,
-                imageCacheMap: this._imageCacheMap,
-                fontRenderExtension: cell?.fontRenderExtension,
-            };
-            this._stylesCache.fontMatrix.setValue(row, col, config);
-            this._calculateOverflowCell(row, col, config);
+                    config = {
+                        documentSkeleton,
+                        vertexAngle,
+                        centerAngle,
+                        verticalAlign,
+                        horizontalAlign,
+                        wrapStrategy,
+                        imageCacheMap: this._imageCacheMap,
+                        cellData,
+                    };
+                    this._calculateOverflowCell(row, col, config as IFontCacheItem);
+                    this._handleFontMatrix.setValue(row, col, true);
+                }
+            }
         }
+
+        this._stylesCache.fontMatrix.setValue(row, col, config as IFontCacheItem);
+        this._handleFontMatrix.setValue(row, col, true);
     }
 
     /**
@@ -2093,17 +1268,18 @@ export class SpreadsheetSkeleton extends Skeleton {
      * @param options {{ mergeRange: IRange; cacheItem: ICacheItem } | undefined}
      */
     private _setStylesCacheForOneCell(row: number, col: number, options: { mergeRange?: IRange; cacheItem?: ICacheItem }): void {
+        // when row/col would be negative ?
         if (row === -1 || col === -1) {
             return;
         }
 
-        const handledBgCell = Tools.isDefine(this._handleBgMatrix.getValue(row, col));
-        const handledBorderCell = Tools.isDefine(this._handleBorderMatrix.getValue(row, col));
+        // const handledBgCell = Tools.isDefine(this._handleBgMatrix.getValue(row, col));
+        // const handledBorderCell = Tools.isDefine(this._handleBorderMatrix.getValue(row, col));
 
-        // worksheet.getCell has significant performance overhead, if we had handled this cell then return first.
-        if (handledBgCell && handledBorderCell) {
-            return;
-        }
+        // // worksheet.getCell has significant performance overhead, if we had handled this cell then return first.
+        // if (handledBgCell && handledBorderCell) {
+        //     return;
+        // }
 
         if (!options) {
             options = { cacheItem: { bg: true, border: true } };
@@ -2126,7 +1302,6 @@ export class SpreadsheetSkeleton extends Skeleton {
         }
 
         const cell = this.worksheet.getCell(row, col) || this.worksheet.getCellRaw(row, col);
-
         const cellStyle = this._styles.getStyleByCell(cell);
         const columnStyle = this.worksheet.getColumnStyle(col) as IStyleData;
         const rowStyle = this.worksheet.getRowStyle(row) as IStyleData;
@@ -2138,55 +1313,7 @@ export class SpreadsheetSkeleton extends Skeleton {
 
         this._setBgStylesCache(row, col, style, options);
         this._setBorderStylesCache(row, col, style, options);
-
         this._setFontStylesCache(row, col, { ...cell, ...{ s: style } });
-    }
-
-    private _updateConfigAndGetDocumentModel(
-        documentData: IDocumentData,
-        horizontalAlign: HorizontalAlign,
-        paddingData: IPaddingData,
-        renderConfig?: IDocumentRenderConfig
-    ): Nullable<DocumentDataModel> {
-        if (!renderConfig) {
-            return;
-        }
-
-        if (!documentData.body?.dataStream) {
-            return;
-        }
-
-        if (!documentData.documentStyle) {
-            documentData.documentStyle = {};
-        }
-
-        documentData.documentStyle.marginTop = paddingData.t ?? 0;
-        documentData.documentStyle.marginBottom = paddingData.b ?? 2;
-        documentData.documentStyle.marginLeft = paddingData.l ?? 2;
-        documentData.documentStyle.marginRight = paddingData.r ?? 2;
-
-        // Fix https://github.com/dream-num/univer/issues/1586
-        documentData.documentStyle.pageSize = {
-            width: Number.POSITIVE_INFINITY,
-            height: Number.POSITIVE_INFINITY,
-        };
-
-        documentData.documentStyle.renderConfig = {
-            ...documentData.documentStyle.renderConfig,
-            ...renderConfig,
-        };
-
-        const paragraphs = documentData.body.paragraphs || [];
-
-        for (const paragraph of paragraphs) {
-            if (!paragraph.paragraphStyle) {
-                paragraph.paragraphStyle = {};
-            }
-
-            paragraph.paragraphStyle.horizontalAlign = horizontalAlign;
-        }
-
-        return new DocumentDataModel(documentData);
     }
 
     /**
@@ -2310,43 +1437,6 @@ export class SpreadsheetSkeleton extends Skeleton {
         };
     }
 
-    /**
-     * New version to get merge data.
-     * @param row
-     * @param column
-     * @returns {ISelectionCell} The cell info with merge data
-     */
-    private _getCellMergeInfo(row: number, column: number): ISelectionCell {
-        return this.worksheet.getCellInfoInMergeData(row, column);
-    }
-
-    getDistanceFromTopLeft(row: number, col: number): IPoint {
-        return {
-            x: this._offsetXToCol(col),
-            y: this._offsetYToRow(row),
-        };
-    }
-
-    /**
-     * Distance from top left to row
-     * @param row
-     */
-    private _offsetYToRow(row: number): number {
-        const arr = this._rowHeightAccumulation;
-        const i = Math.max(0, row - 1);
-        return arr[i];
-    }
-
-    /**
-     * Distance from top left to col
-     * @param col
-     */
-    private _offsetXToCol(col: number): number {
-        const arr = this._columnWidthAccumulation;
-        const i = Math.max(0, col - 1);
-        return arr[i];
-    }
-
     getHiddenRowsInRange(range: IRowRange) {
         const hiddenRows = [];
         for (let i = range.startRow; i <= range.endRow; i++) {
@@ -2366,4 +1456,113 @@ export class SpreadsheetSkeleton extends Skeleton {
         }
         return hiddenCols;
     }
+
+    /**
+     * @deprecated use function `convertTransformToOffsetX` in same package.
+     */
+    convertTransformToOffsetX(
+        offsetX: number,
+        scaleX: number,
+        scrollXY: { x: number; y: number }
+    ): number {
+        const { x: scrollX } = scrollXY;
+        return (offsetX - scrollX) * scaleX;
+    }
+
+    /**
+     * @deprecated use function `convertTransformToOffsetY` in same package.
+     */
+    convertTransformToOffsetY(
+        offsetY: number,
+        scaleY: number,
+        scrollXY: { x: number; y: number }
+    ): number {
+        const { y: scrollY } = scrollXY;
+        return (offsetY - scrollY) * scaleY;
+    }
+}
+
+/**
+ * convert canvas content position to physical position in screen
+ * @param offsetX
+ * @param scaleX
+ * @param scrollXY
+ */
+export function convertTransformToOffsetX(
+    offsetX: number,
+    scaleX: number,
+    scrollXY: { x: number; y: number }
+): number {
+    const { x: scrollX } = scrollXY;
+    return (offsetX - scrollX) * scaleX;
+}
+
+/**
+ * convert canvas content position to physical position in screen
+ * @param offsetY
+ * @param scaleY
+ * @param scrollXY
+ */
+export function convertTransformToOffsetY(
+    offsetY: number,
+    scaleY: number,
+    scrollXY: { x: number; y: number }
+): number {
+    const { y: scrollY } = scrollXY;
+    return (offsetY - scrollY) * scaleY;
+}
+
+/**
+ * Obtain the height and width of a cell's text, taking into account scenarios with rotated text.
+ * @param documentSkeleton Data of the document's ViewModel
+ * @param angleInDegree The rotation angle of an Excel cell, it's **degree**
+ */
+export function getDocsSkeletonPageSize(documentSkeleton: DocumentSkeleton, angleInDegree: number = 0): Nullable<Required<ISize>> {
+    const skeletonData = documentSkeleton?.getSkeletonData();
+    const angle = degToRad(angleInDegree);
+
+    if (!skeletonData) {
+        return null;
+    }
+    const { pages } = skeletonData;
+    const lastPage = pages[pages.length - 1];
+    const { width, height } = lastPage;
+
+    if (angle === 0) {
+        return { width, height };
+    }
+
+    if (Math.abs(angle) === Math.PI / 2) {
+        return { width: height, height: width };
+    }
+
+    let allRotatedWidth = 0;
+    let allRotatedHeight = 0;
+
+    const widthArray: Array<{ rotatedWidth: number; spaceWidth: number }> = [];
+
+    columnIterator([lastPage], (column: IDocumentSkeletonColumn) => {
+        const { lines, width: columnWidth, spaceWidth } = column;
+
+        const { rotatedHeight, rotatedWidth } = getRotateOffsetAndFarthestHypotenuse(lines, columnWidth, angle);
+
+        allRotatedHeight += rotatedHeight;
+
+        widthArray.push({ rotatedWidth, spaceWidth });
+    });
+
+    const widthCount = widthArray.length;
+
+    for (let i = 0; i < widthCount; i++) {
+        const { rotatedWidth } = widthArray[i];
+
+        if (i === 0) {
+            allRotatedWidth += rotatedWidth;
+        }
+    }
+
+    return {
+        width: allRotatedWidth,
+        height: allRotatedHeight,
+    };
 }

@@ -116,8 +116,8 @@ export class Viewport {
      * scrollX means scroll x value for scrollbar in viewMain
      * use getBarScroll to get scrolling value(scrollX, scrollY) for scrollbar
      */
-    scrollX: number = 0;
-    scrollY: number = 0;
+    _scrollX: number = 0;
+    _scrollY: number = 0;
     private _preScrollX: number = 0;
     private _preScrollY: number = 0;
 
@@ -344,6 +344,8 @@ export class Viewport {
 
     set viewportScrollX(val: number) {
         this._viewportScrollX = val;
+        // const { x } = this.transViewportScroll2ScrollValue(this._viewportScrollX, this._viewportScrollY);
+        // this.scrollX = x;
     }
 
     get viewportScrollX() {
@@ -352,10 +354,32 @@ export class Viewport {
 
     set viewportScrollY(val: number) {
         this._viewportScrollY = val;
+        // const { y } = this.transViewportScroll2ScrollValue(this._viewportScrollX, this._viewportScrollY);
+        // this.scrollY = y;
     }
 
     get viewportScrollY() {
         return this._viewportScrollY;
+    }
+
+    set scrollX(val: number) {
+        this._scrollX = val;
+        // const { x } = this.transScroll2ViewportScrollValue(this._scrollX, this._scrollY);
+        // this._viewportScrollX = x;
+    }
+
+    set scrollY(val: number) {
+        this._scrollY = val;
+        // const { y } = this.transScroll2ViewportScrollValue(this._scrollX, this._scrollY);
+        // this._viewportScrollY = y;
+    }
+
+    get scrollX() {
+        return this._scrollX;
+    }
+
+    get scrollY() {
+        return this._scrollY;
     }
 
     set top(num: number) {

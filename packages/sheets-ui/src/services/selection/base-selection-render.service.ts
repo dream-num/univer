@@ -376,7 +376,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     }
 
     protected _getFreeze(): Nullable<IFreeze> {
-        const freeze = this._sheetSkeletonManagerService.getCurrent()?.skeleton.getWorksheetConfig().freeze;
+        const freeze = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton.getWorksheetConfig().freeze;
         return freeze;
     }
 
@@ -823,7 +823,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
 
         //@region other range type
         const { row, column } = skeleton.getCellIndexByOffset(offsetX, offsetY, scaleX, scaleY, scrollXY);
-        const startCell = skeleton.getNoMergeCellPositionByIndex(row, column);
+        const startCell = skeleton.getNoMergeCellWithCoordByIndex(row, column);
         const { startX, startY, endX, endY } = startCell;
 
         const rangeWithCoord: IRangeWithCoord = {

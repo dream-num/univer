@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IRange, Nullable } from '@univerjs/core';
+import type { IPosition, IRange, Nullable } from '@univerjs/core';
 import type { IBoundRectNoAngle, IViewportInfo, Vector2 } from '../../basics/vector2';
 import type { Canvas } from '../../canvas';
 import type { UniverRenderingContext2D } from '../../context';
@@ -26,10 +26,10 @@ import type { Background } from './extensions/background';
 import type { Border } from './extensions/border';
 import type { Font } from './extensions/font';
 import type { IPaintForRefresh, IPaintForScrolling, SHEET_VIEWPORT_KEY } from './interfaces';
-import type { SpreadsheetSkeleton } from './sheet-skeleton';
+import type { SpreadsheetSkeleton } from './sheet.render-skeleton';
 import { BooleanNumber, sortRules, Tools } from '@univerjs/core';
 import { FIX_ONE_PIXEL_BLUR_OFFSET, RENDER_CLASS_TYPE } from '../../basics/const';
-import { getCellPositionByIndex, getColor } from '../../basics/tools';
+import { getColor } from '../../basics/tools';
 import { Documents } from '../docs/document';
 import { SpreadsheetExtensionRegistry } from '../extension';
 import { sheetContentViewportKeys, sheetHeaderViewportKeys } from './constants';
@@ -173,32 +173,33 @@ export class Spreadsheet extends SheetComponent {
         return false;
     }
 
-    override getNoMergeCellPositionByIndex(rowIndex: number, columnIndex: number) {
-        const spreadsheetSkeleton = this.getSkeleton();
-        if (!spreadsheetSkeleton) {
-            return;
+    override getNoMergeCellPositionByIndex(rowIndex: number, columnIndex: number): IPosition {
+        const skeleton = this.getSkeleton();
+        if (!skeleton) {
+            return { startX: 0, startY: 0, endX: 0, endY: 0 };
         }
-        const { rowHeightAccumulation, columnWidthAccumulation, rowHeaderWidth, columnHeaderHeight } =
-            spreadsheetSkeleton;
+        return skeleton.getNoMergeCellWithCoordByIndex(rowIndex, columnIndex);
+        // const { rowHeightAccumulation, columnWidthAccumulation, rowHeaderWidth, columnHeaderHeight } =
+        //     spreadsheetSkeleton;
 
-        let { startY, endY, startX, endX } = getCellPositionByIndex(
-            rowIndex,
-            columnIndex,
-            rowHeightAccumulation,
-            columnWidthAccumulation
-        );
+        // let { startY, endY, startX, endX } = getCellWithCoordByIndexCore(
+        //     rowIndex,
+        //     columnIndex,
+        //     rowHeightAccumulation,
+        //     columnWidthAccumulation
+        // );
 
-        startY += columnHeaderHeight;
-        endY += columnHeaderHeight;
-        startX += rowHeaderWidth;
-        endX += rowHeaderWidth;
+        // startY += columnHeaderHeight;
+        // endY += columnHeaderHeight;
+        // startX += rowHeaderWidth;
+        // endX += rowHeaderWidth;
 
-        return {
-            startY,
-            endY,
-            startX,
-            endX,
-        };
+        // return {
+        //     startY,
+        //     endY,
+        //     startX,
+        //     endX,
+        // };
     }
 
     override getScrollXYByRelativeCoords(coord: Vector2) {
@@ -236,7 +237,7 @@ export class Spreadsheet extends SheetComponent {
     }
 
     override getSelectionBounding(startRow: number, startColumn: number, endRow: number, endColumn: number) {
-        return this.getSkeleton()?.getMergeBounding(startRow, startColumn, endRow, endColumn);
+        return this.getSkeleton()?.expandRangeByMerge({ startRow, startColumn, endRow, endColumn });
     }
 
     /**

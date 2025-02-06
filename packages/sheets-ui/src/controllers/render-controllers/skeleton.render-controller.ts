@@ -14,22 +14,52 @@
  * limitations under the License.
  */
 
-import type { Workbook } from '@univerjs/core';
+import type { Nullable, Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import type { ISheetSkeletonManagerParam } from '../../services/sheet-skeleton-manager.service';
 import { Disposable, Inject } from '@univerjs/core';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 
 export class SheetSkeletonRenderController extends Disposable implements IRenderModule {
     constructor(
         private readonly _context: IRenderContext<Workbook>,
-        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService
+        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
         super();
 
         this.disposeWithMe(this._context.unit.sheetDisposed$.subscribe((sheet) => {
-            this._sheetSkeletonManagerService.disposeSkeleton({
-                sheetId: sheet.getSheetId(),
-            });
+            this._sheetSkeletonManagerService.disposeSkeleton(sheet.getSheetId());
         }));
+
+        this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param: Nullable<ISheetSkeletonManagerParam>) => {
+            this._updateSceneSize(param);
+        });
+    }
+
+    private _updateSceneSize(param: Nullable<ISheetSkeletonManagerParam>) {
+        if (param == null) {
+            return;
+        }
+
+        const { unitId } = this._context;
+        const { skeleton } = param;
+        const scene = this._renderManagerService.getRenderById(unitId)?.scene;
+
+        if (skeleton == null || scene == null) {
+            return;
+        }
+
+        const { rowTotalHeight, columnTotalWidth, rowHeaderWidthAndMarginLeft, columnHeaderHeightAndMarginTop } =
+            skeleton;
+        const workbook = this._context.unit;
+        const worksheet = workbook.getActiveSheet();
+        if (!worksheet) return;
+
+        scene?.transformByState({
+            width: rowHeaderWidthAndMarginLeft + columnTotalWidth,
+            height: columnHeaderHeightAndMarginTop + rowTotalHeight,
+        });
     }
 }

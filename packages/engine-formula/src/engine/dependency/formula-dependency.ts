@@ -345,6 +345,11 @@ export class FormulaDependencyGenerator extends Disposable {
         for (let i = 0, len = treeList.length; i < len; i++) {
             const tree = treeList[i];
 
+            // After entering the pivot table, no calculation is required if there is no formula
+            if (!tree.formula) {
+                continue;
+            }
+
             const node = this._getTreeNode(tree);
             tree.isDirty = this._includeTree(tree, node);
 

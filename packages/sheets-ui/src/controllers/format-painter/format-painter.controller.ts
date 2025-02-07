@@ -59,7 +59,10 @@ export class FormatPainterController extends Disposable {
     }
 
     private _commandExecutedListener() {
-        const selectionRenderService = this._renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET)!.with(ISheetSelectionRenderService);
+        const unitId = this._univerInstanceService.getFocusedUnit()?.getUnitId() || '';
+        const renderUnit = this._renderManagerService.getRenderById(unitId);
+        if (!renderUnit) return;
+        const selectionRenderService = renderUnit.with(ISheetSelectionRenderService);
 
         this.disposeWithMe(
             selectionRenderService.selectionMoveEnd$.subscribe((selections) => {

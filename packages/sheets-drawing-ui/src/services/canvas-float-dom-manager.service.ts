@@ -94,6 +94,11 @@ export interface IDOMAnchor {
 }
 
 export interface ILimitBound extends IBoundRectNoAngle {
+    /**
+     * Actually, it means fixed.
+     * When left is true, dom is fixed to left of dom pos when dom width is shrinking. or dom is fixed to right of dom pos when dom width is shrinking.
+     * When top is true, dom is fixed to top of dom pos when dom height is shrinking. or dom is fixed to bottom of dom pos when dom height is shrinking.
+     */
     absolute: {
         left: boolean;
         top: boolean;
@@ -102,17 +107,24 @@ export interface ILimitBound extends IBoundRectNoAngle {
 
 /**
  * Adjust dom bound size when scrolling (dom bound would shrink when scrolling if over the edge of viewMain)
- * @param posOfFloatObject
+ * @param posOfFloatObject  The position of float object, relative to sheet content, scale & scrolling does not affect it.
  * @param scene
  * @param skeleton
  * @param worksheet
  * @returns ILimitBound
  */
+// eslint-disable-next-line max-lines-per-function
 export function transformBound2DOMBound(posOfFloatObject: IBoundRectNoAngle, scene: Scene, skeleton: SpreadsheetSkeleton, worksheet: Worksheet, floatDomInfo?: ICanvasFloatDomInfo): ILimitBound {
     const { scaleX, scaleY } = scene.getAncestorScale();
     const viewMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
+
+    const freeze = worksheet.getFreeze();
+    const { startColumn: viewMainStartColumn, startRow: viewMainStartRow, xSplit: freezedCol, ySplit: freezedRow } = freeze;
+    /**
+     * Actually, it means fixed.
+     */
     const absolute = {
-        left: true,
+        left: true, // left means the left of pic is in a viewMainLeft
         top: true,
     };
 
@@ -123,16 +135,20 @@ export function transformBound2DOMBound(posOfFloatObject: IBoundRectNoAngle, sce
         };
     }
     const { left, right, top, bottom } = posOfFloatObject;
-    let { top: topBoundOfViewArea, left: leftBoundViewArea, viewportScrollX, viewportScrollY } = viewMain;
-
+    let { top: viewBoundsTop, left: viewBoundsLeft, viewportScrollX, viewportScrollY } = viewMain;
     // specify edge of viewbound. if not specify, use viewMain.
-    const { boundsOfViewArea, scrollDirectionResponse } = floatDomInfo || {};
-    if (boundsOfViewArea) {
+    const { boundsOfViewArea: specBoundsOfViewArea, scrollDirectionResponse } = floatDomInfo || {};
+    const { rowHeaderWidth, columnHeaderHeight } = skeleton;
+    const boundsOfViewArea = {
+        top: columnHeaderHeight,
+        left: rowHeaderWidth,
+    };
+    if (specBoundsOfViewArea) {
         if (Tools.isDefine(boundsOfViewArea.top)) {
-            topBoundOfViewArea = boundsOfViewArea.top;
+            boundsOfViewArea.top = specBoundsOfViewArea.top;
         }
         if (Tools.isDefine(boundsOfViewArea.left)) {
-            leftBoundViewArea = boundsOfViewArea.left;
+            boundsOfViewArea.left = specBoundsOfViewArea.left;
         }
     }
     if (scrollDirectionResponse === ScrollDirectionResponse.HORIZONTAL) {
@@ -142,51 +158,75 @@ export function transformBound2DOMBound(posOfFloatObject: IBoundRectNoAngle, sce
         viewportScrollX = 0;
     }
 
-    let offsetLeft: number;
-    let offsetRight: number;
+    let offsetLeft: number = 0;
+    let offsetRight: number = 0;
 
-    // viewMain or viewTop
-    if (left < leftBoundViewArea) {
-        absolute.left = true;
-        offsetLeft = ((leftBoundViewArea) + (left - leftBoundViewArea)) * scaleX;
-        offsetRight = Math.max(
-            Math.min(
-                ((leftBoundViewArea) + (right - leftBoundViewArea)) * scaleX,
-                (leftBoundViewArea) * scaleX
-            ),
-            (right - viewportScrollX) * scaleX);
-    } else {
+    /**
+     * freezed viewport start & end position
+     */
+    const freezeStartY = skeleton.rowStartY(viewMainStartRow - freezedRow) + columnHeaderHeight;
+    const freezeStartX = skeleton.colStartX(viewMainStartColumn - freezedCol) + rowHeaderWidth;
+    const freezeEndY = skeleton.rowStartY(viewMainStartRow) + columnHeaderHeight;
+    const freezeEndX = skeleton.colStartX(viewMainStartColumn) + rowHeaderWidth;
+
+    if (freezedCol === 0) {
         absolute.left = false;
-        offsetLeft = Math.max((left - viewportScrollX) * scaleX, (leftBoundViewArea) * scaleX);
-        offsetRight = Math.max((right - viewportScrollX) * scaleX, (leftBoundViewArea) * scaleX);
-    }
-
-    let offsetTop: number;
-    let offsetBottom: number;
-    // viewMain or viewTop
-    if (top < topBoundOfViewArea) {
-        absolute.top = true;
-        offsetTop = ((topBoundOfViewArea) + (top - topBoundOfViewArea)) * scaleY;
-        offsetBottom = Math.max(
-            Math.min(
-                ((topBoundOfViewArea) + (right - topBoundOfViewArea)) * scaleY,
-                (topBoundOfViewArea) * scaleY
-            ),
-            (bottom - viewportScrollY) * scaleY
-        );
+        offsetLeft = (left - viewportScrollX) * scaleX;
+        offsetRight = (right - viewportScrollX) * scaleX;
     } else {
-        absolute.top = false;
-        offsetTop = Math.max((top - viewportScrollY) * scaleY, (topBoundOfViewArea) * scaleY);
-        offsetBottom = Math.max((bottom - viewportScrollY) * scaleY, (topBoundOfViewArea) * scaleY);
+        // freeze
+        // viewMainLeft may not start at col = 0
+        // DO NOT use viewMainLeft?.viewBound.right. It's not accurate. there is a delay to set viewBound!
+        const leftToCanvas = left - (freezeStartX - rowHeaderWidth);
+        const rightToCanvas = right - (freezeStartX - rowHeaderWidth);
+        if (right < freezeEndX) {
+            offsetLeft = leftToCanvas * scaleX;
+            offsetRight = rightToCanvas * scaleX;
+        } else if (left <= freezeEndX && right >= freezeEndX) {
+            offsetLeft = leftToCanvas * scaleX;
+            offsetRight = Math.max(viewBoundsLeft, (right - viewportScrollX) * scaleX);
+        } else if (left > freezeEndX) {
+            absolute.left = false;
+            offsetLeft = Math.max((left - viewportScrollX) * scaleX, viewBoundsLeft);
+            offsetRight = Math.max((right - viewportScrollX) * scaleX, viewBoundsLeft);
+        }
     }
 
-    return {
+    let offsetTop: number = 0;
+    let offsetBottom: number = 0;
+    if (freezedRow === 0) {
+        absolute.top = false;
+        offsetTop = (top - viewportScrollY) * scaleY;
+        offsetBottom = (bottom - viewportScrollY) * scaleY;
+    } else {
+        const topToCanvas = top - (freezeStartY - columnHeaderHeight);
+        const bottomToCanvas = bottom - (freezeStartY - columnHeaderHeight);
+        if (bottom < freezeEndY) {
+            offsetTop = topToCanvas * scaleY;
+            offsetBottom = bottomToCanvas * scaleY;
+        } else if (top <= freezeEndY && bottom >= freezeEndY) {
+            offsetTop = topToCanvas * scaleY;
+            offsetBottom = Math.max(viewBoundsTop, (bottom - viewportScrollY) * scaleY);
+        } else if (top > freezeEndY) {
+            absolute.top = false;
+            offsetTop = Math.max((top - viewportScrollY) * scaleY, viewBoundsTop);
+            offsetBottom = Math.max((bottom - viewportScrollY) * scaleY, viewBoundsTop);
+        }
+    }
+
+    offsetLeft = Math.max(offsetLeft, boundsOfViewArea.left);
+    offsetTop = Math.max(offsetTop, boundsOfViewArea.top);
+    offsetRight = Math.max(offsetRight, boundsOfViewArea.left);
+    offsetBottom = Math.max(offsetBottom, boundsOfViewArea.top);
+
+    const rs = {
         left: offsetLeft,
         right: offsetRight,
         top: offsetTop,
         bottom: offsetBottom,
         absolute,
     };
+    return rs;
 }
 
 /**
@@ -728,6 +768,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         };
     }
 
+    // eslint-disable-next-line max-lines-per-function, complexity
     addFloatDomToRange(range: IRange, config: ICanvasFloatDom, domAnchor: Partial<IDOMAnchor>, propId?: string) {
         const target = getSheetCommandTarget(this._univerInstanceService, {
             unitId: config.unitId,
@@ -796,8 +837,8 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             if (!skMangerService) {
                 return;
             }
-            const skeleton = skMangerService.getWorksheetSkeleton(subUnitId);
-            if (!skeleton) {
+            const skeletonParam = skMangerService.getWorksheetSkeleton(subUnitId);
+            if (!skeletonParam) {
                 return;
             }
 
@@ -870,9 +911,11 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             const disposableCollection = new DisposableCollection();
 
             const viewMain = scene.getMainViewport();
+            const { rowHeaderWidth, columnHeaderHeight } = skeletonParam.skeleton;
+
             const boundsOfViewArea: IBoundRectNoAngle = {
-                top: viewMain.top,
-                left: viewMain.left,
+                top: columnHeaderHeight,
+                left: rowHeaderWidth,
                 bottom: viewMain.bottom,
                 right: viewMain.right,
             };
@@ -886,7 +929,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                 subUnitId,
             } as unknown as ICanvasFloatDomInfo;
 
-            const initedPosition = calcPosition(domRect, renderObject.renderUnit, skeleton.skeleton, target.worksheet, floatDomInfo);
+            const initedPosition = calcPosition(domRect, renderObject.renderUnit, skeletonParam.skeleton, target.worksheet, floatDomInfo);
             const position$ = new BehaviorSubject<IFloatDomLayout>(initedPosition);
             floatDomInfo.position$ = position$;
 
@@ -943,7 +986,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                     height: domAnchor.height ?? newRangePos.height,
                     zIndex: this._drawingManagerService.getDrawingOrder(unitId, subUnitId).length - 1,
                 });
-                const newPos = calcPosition(newRect, renderObject.renderUnit, skeleton.skeleton, target.worksheet, floatDomInfo);
+                const newPos = calcPosition(newRect, renderObject.renderUnit, skeletonParam.skeleton, target.worksheet, floatDomInfo);
                 position$.next(newPos);
             }));
             const skm = this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService);
@@ -956,7 +999,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             });
 
             const listener = domRect.onTransformChange$.subscribeEvent(() => {
-                const newPosition = calcPosition(domRect, renderObject.renderUnit, skeleton.skeleton, target.worksheet, floatDomInfo);
+                const newPosition = calcPosition(domRect, renderObject.renderUnit, skeletonParam.skeleton, target.worksheet, floatDomInfo);
                 position$.next(
                     newPosition
                 );

@@ -40,7 +40,7 @@ import type {
 } from '@univerjs/core';
 import type { IDocumentSkeletonColumn } from '../../basics/i-document-skeleton-cached';
 import type { ITransformChangeState } from '../../basics/interfaces';
-import type { IBoundRectNoAngle, IViewportInfo } from '../../basics/vector2';
+import type { IBoundRectNoAngle, IPoint, IViewportInfo } from '../../basics/vector2';
 import type { Scene } from '../../scene';
 import type { BorderCache, IFontCacheItem, IStylesCache } from './interfaces';
 import {
@@ -1435,6 +1435,27 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             style: props.s,
             color: rgb,
         };
+    }
+
+    getDistanceFromTopLeft(row: number, col: number): IPoint {
+        return {
+            x: this.colStartX(col),
+            y: this.rowStartY(row),
+        };
+    }
+
+    colStartX(col: number): number {
+        const arr = this.columnWidthAccumulation;
+        const i = col - 1;
+        if (i === -1) return 0;
+        return arr[i];
+    }
+
+    rowStartY(row: number): number {
+        const arr = this.rowHeightAccumulation;
+        const i = row - 1;
+        if (i === -1) return 0;
+        return arr[i];
     }
 
     getHiddenRowsInRange(range: IRowRange) {

@@ -44,7 +44,7 @@ export interface ISheetSkeletonManagerSearch {
 export class SheetSkeletonManagerService extends Disposable implements IRenderModule {
     private _sheetId: string = '';
 
-    // @TODO lumixraku, why need this?  How about put dirty & sheetId & unitId in skeleton itself z?
+    // @TODO lumixraku, why need this?  How about put dirty & sheetId & unitId in skeleton itself?
     private _sheetSkeletonParamStore: Map<string, ISheetSkeletonManagerParam> = new Map();
 
     private readonly _currentSkeleton$ = new BehaviorSubject<Nullable<ISheetSkeletonManagerParam>>(null);
@@ -68,6 +68,7 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
             this._currentSkeletonBefore$.complete();
             this._currentSkeleton$.complete();
             this._sheetSkeletonParamStore = new Map();
+            this._sheetSkService.deleteSkeleton(this._context.unitId, this._sheetId);
         });
 
         this._initRemoveSheet();
@@ -131,6 +132,10 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
         return param;
     }
 
+    /**
+     * Command in COMMAND_LISTENER_SKELETON_CHANGE would cause setCurrent, see @packages/sheets-ui/src/controllers/render-controllers/sheet.render-controller.ts
+     * @param searchParam
+     */
     setCurrent(searchParam: ISheetSkeletonManagerSearch): Nullable<ISheetSkeletonManagerParam> {
         this._setCurrent(searchParam.sheetId);
     }

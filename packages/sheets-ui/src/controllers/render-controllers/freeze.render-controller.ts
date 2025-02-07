@@ -884,6 +884,36 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
                 right: 0,
             });
             viewMain.resetPadding();
+            viewMainLeft.resizeWhenFreezeChange({
+                left: rowHeaderWidthAndMarginLeft,
+                top: columnHeaderHeightAndMarginTop,
+                bottom: 0,
+                width: 0,
+            });
+            viewMainTop.resizeWhenFreezeChange({
+                left: rowHeaderWidthAndMarginLeft,
+                top: columnHeaderHeightAndMarginTop,
+                height: 0,
+                right: 0,
+            });
+            viewMainLeftTop.resizeWhenFreezeChange({
+                left: rowHeaderWidthAndMarginLeft,
+                top: columnHeaderHeightAndMarginTop,
+                width: 0,
+                height: 0,
+            });
+            viewRowTop.resizeWhenFreezeChange({
+                left: 0,
+                top: columnHeaderHeightAndMarginTop,
+                width: rowHeaderWidthAndMarginLeft,
+                height: 0,
+            });
+            viewColumnLeft.resizeWhenFreezeChange({
+                left: 0,
+                top: 0,
+                height: columnHeaderHeightAndMarginTop,
+                width: 0,
+            });
         } else if (isTopView === true && isLeftView === false) {
             // freeze row
             const topGap = endSheetView.startY - startSheetView.startY;

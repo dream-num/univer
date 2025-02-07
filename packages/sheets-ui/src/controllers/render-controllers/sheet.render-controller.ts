@@ -413,6 +413,8 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
                     commandId,
                 }, true);
 
+                // TODO @lumixraku
+                // This is insane !!! Tons changes would call sk.setCurrent.
                 this._sheetSkeletonManagerService.setCurrent({
                     sheetId: worksheetId,
                     commandId,

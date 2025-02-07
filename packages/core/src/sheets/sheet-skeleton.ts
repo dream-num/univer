@@ -1042,9 +1042,8 @@ export class SheetSkeleton extends Skeleton {
 }
 
 /**
- * Only the coordinates of the corresponding cells in rows and columns are considered, without taking into account the merged data.
+ * Not same as getCellWithCoordByIndex, Only the coordinates of the corresponding cells in rows and columns are considered, without taking into account the merged data.
  *
- * Original name: getCellPositionByIndexSimple
  * @param row
  * @param column
  * @param rowHeightAccumulation
@@ -1079,6 +1078,23 @@ export function getCellCoordByIndexSimple(
         startX,
         endX,
     };
+}
+
+/**
+ * @deprecated use `getCellCoordByIndexSimple` instead.
+ * @param row
+ * @param column
+ * @param rowHeightAccumulation
+ * @param columnWidthAccumulation
+ * @returns
+ */
+export function getCellPositionByIndexSimple(
+    row: number,
+    column: number,
+    rowHeightAccumulation: number[],
+    columnWidthAccumulation: number[]
+): IPosition {
+    return getCellCoordByIndexSimple(row, column, rowHeightAccumulation, columnWidthAccumulation);
 }
 
 /**

@@ -161,10 +161,13 @@ export function transformBound2DOMBound(posOfFloatObject: IBoundRectNoAngle, sce
     let offsetLeft: number = 0;
     let offsetRight: number = 0;
 
-    const freezeStartY = skeleton.rowStartY(viewMainStartRow - freezedRow);
-    const freezeStartX = skeleton.colStartX(viewMainStartColumn - freezedCol);
-    const freezeEndY = skeleton.rowStartY(viewMainStartRow);
-    const freezeEndX = skeleton.colStartX(viewMainStartColumn);
+    /**
+     * freezed viewport start & end position
+     */
+    const freezeStartY = skeleton.rowStartY(viewMainStartRow - freezedRow) + columnHeaderHeight;
+    const freezeStartX = skeleton.colStartX(viewMainStartColumn - freezedCol) + rowHeaderWidth;
+    const freezeEndY = skeleton.rowStartY(viewMainStartRow) + columnHeaderHeight;
+    const freezeEndX = skeleton.colStartX(viewMainStartColumn) + rowHeaderWidth;
 
     if (freezedCol === 0) {
         absolute.left = false;
@@ -174,12 +177,12 @@ export function transformBound2DOMBound(posOfFloatObject: IBoundRectNoAngle, sce
         // freeze
         // viewMainLeft may not start at col = 0
         // DO NOT use viewMainLeft?.viewBound.right. It's not accurate. there is a delay to set viewBound!
-        const leftToCanvas = left - freezeStartX;// - viewMainLeft.viewBound.left;
-        const rightToCanvas = right - freezeStartX;// - viewMainLeft.viewBound.left;
+        const leftToCanvas = left - (freezeStartX - rowHeaderWidth);
+        const rightToCanvas = right - (freezeStartX - rowHeaderWidth);
         if (right < freezeEndX) {
             offsetLeft = leftToCanvas * scaleX;
             offsetRight = rightToCanvas * scaleX;
-        } else if (left < freezeEndX && right > freezeEndX) {
+        } else if (left <= freezeEndX && right >= freezeEndX) {
             offsetLeft = leftToCanvas * scaleX;
             offsetRight = Math.max(viewBoundsLeft, (right - viewportScrollX) * scaleX);
         } else if (left > freezeEndX) {
@@ -196,12 +199,12 @@ export function transformBound2DOMBound(posOfFloatObject: IBoundRectNoAngle, sce
         offsetTop = (top - viewportScrollY) * scaleY;
         offsetBottom = (bottom - viewportScrollY) * scaleY;
     } else {
-        const topToCanvas = top - freezeStartY;
-        const bottomToCanvas = bottom - freezeStartY;
+        const topToCanvas = top - (freezeStartY - columnHeaderHeight);
+        const bottomToCanvas = bottom - (freezeStartY - columnHeaderHeight);
         if (bottom < freezeEndY) {
             offsetTop = topToCanvas * scaleY;
             offsetBottom = bottomToCanvas * scaleY;
-        } else if (top < freezeEndY && bottom > freezeEndY) {
+        } else if (top <= freezeEndY && bottom >= freezeEndY) {
             offsetTop = topToCanvas * scaleY;
             offsetBottom = Math.max(viewBoundsTop, (bottom - viewportScrollY) * scaleY);
         } else if (top > freezeEndY) {

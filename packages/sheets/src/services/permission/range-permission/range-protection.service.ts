@@ -16,9 +16,12 @@
 
 import type { UnitAction } from '@univerjs/protocol';
 
+import type { IUniverSheetsConfig } from '../../../controllers/config.schema';
 import type { IObjectModel } from '../../../model/range-protection-rule.model';
-import { Disposable, Inject, IPermissionService, IResourceManagerService, IUniverInstanceService } from '@univerjs/core';
+import { Disposable, IConfigService, Inject, IPermissionService, IResourceManagerService, IUniverInstanceService } from '@univerjs/core';
 import { UnitObject, UniverType } from '@univerjs/protocol';
+import { SHEETS_PLUGIN_CONFIG_KEY } from '../../../controllers/config.schema';
+
 import { RangeProtectionRuleModel } from '../../../model/range-protection-rule.model';
 
 import { RangeProtectionCache } from '../../../model/range-protection.cache';
@@ -32,7 +35,8 @@ export class RangeProtectionService extends Disposable {
         @Inject(IPermissionService) private _permissionService: IPermissionService,
         @Inject(IResourceManagerService) private _resourceManagerService: IResourceManagerService,
         @Inject(RangeProtectionCache) private _selectionProtectionCache: RangeProtectionCache,
-        @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService
+        @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
+        @Inject(IConfigService) private _configService: IConfigService
 
     ) {
         super();
@@ -74,6 +78,11 @@ export class RangeProtectionService extends Disposable {
     }
 
     private _initSnapshot() {
+        const config = this._configService.getConfig<IUniverSheetsConfig>(SHEETS_PLUGIN_CONFIG_KEY);
+        if (config?.permissionConfig?.customImplement) {
+            return;
+        }
+
         const toJson = (unitID: string) => {
             const object = this._selectionProtectionRuleModel.toObject();
             const v = object[unitID];

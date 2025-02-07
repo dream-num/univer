@@ -15,13 +15,16 @@
  */
 
 import type { IRenderContext, IRenderModule, Spreadsheet } from '@univerjs/engine-render';
+import type { IUniverSheetsConfig } from '@univerjs/sheets';
 import type { MenuConfig } from '@univerjs/ui';
 import { connectInjector, Disposable, IConfigService, Inject, Injector, IPermissionService, IUniverInstanceService } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { CheckMarkSingle, DeleteSingle, LockSingle, ProtectSingle, WriteSingle } from '@univerjs/icons';
-import { RangeProtectionRuleModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
-import { ComponentManager, IUIPartsService } from '@univerjs/ui';
+import { RangeProtectionRuleModel, SHEETS_PLUGIN_CONFIG_KEY, WorksheetProtectionRuleModel } from '@univerjs/sheets';
+import { ComponentManager, IMenuManagerService, IUIPartsService } from '@univerjs/ui';
 import { merge, throttleTime } from 'rxjs';
+import { AddRangeProtectionFromSheetBarCommand, AddRangeProtectionFromToolbarCommand, ViewSheetPermissionFromSheetBarCommand } from '../../commands/commands/range-protection.command';
+import { ChangeSheetProtectionFromSheetBarCommand, DeleteWorksheetProtectionFormSheetBarCommand } from '../../commands/commands/worksheet-protection.command';
 import { permissionCheckIconKey, permissionDeleteIconKey, permissionEditIconKey, permissionLockIconKey, permissionMenuIconKey, UNIVER_SHEET_PERMISSION_BACKGROUND, UNIVER_SHEET_PERMISSION_DIALOG, UNIVER_SHEET_PERMISSION_PANEL, UNIVER_SHEET_PERMISSION_USER_DIALOG, UNIVER_SHEET_PERMISSION_USER_PART } from '../../consts/permission';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import { SheetPermissionDialog, SheetPermissionPanel, SheetPermissionUserDialog } from '../../views/permission';
@@ -31,6 +34,7 @@ import { RANGE_PROTECTION_CAN_NOT_VIEW_RENDER_EXTENSION_KEY, RANGE_PROTECTION_CA
 import { worksheetProtectionKey, WorksheetProtectionRenderExtension } from '../../views/permission/extensions/worksheet-permission.render';
 import { PermissionDetailUserPart } from '../../views/permission/panel-detail/PermissionDetailUserPart';
 import { type IUniverSheetsUIConfig, SHEETS_UI_PLUGIN_CONFIG_KEY } from '../config.schema';
+import { SHEET_PERMISSION_CONTEXT_MENU_ID } from '../menu/permission.menu';
 
 export interface IUniverSheetsPermissionMenuConfig {
     menu: MenuConfig;
@@ -40,13 +44,27 @@ export class SheetPermissionRenderManagerController extends Disposable {
     constructor(
         @Inject(Injector) private _injector: Injector,
         @Inject(ComponentManager) private _componentManager: ComponentManager,
-        @Inject(IUIPartsService) private _uiPartsService: IUIPartsService
+        @Inject(IUIPartsService) private _uiPartsService: IUIPartsService,
+        @Inject(IConfigService) private _configService: IConfigService,
+        @Inject(IMenuManagerService) private _menuManagerService: IMenuManagerService
     ) {
         super();
         this._init();
     }
 
     private _init(): void {
+        const config = this._configService.getConfig<IUniverSheetsConfig>(SHEETS_PLUGIN_CONFIG_KEY);
+        if (config?.permissionConfig?.customImplement) {
+            this._menuManagerService.removeMenuByKeys([
+                AddRangeProtectionFromToolbarCommand.id,
+                SHEET_PERMISSION_CONTEXT_MENU_ID,
+                AddRangeProtectionFromSheetBarCommand.id,
+                DeleteWorksheetProtectionFormSheetBarCommand.id,
+                ChangeSheetProtectionFromSheetBarCommand.id,
+                ViewSheetPermissionFromSheetBarCommand.id,
+            ]);
+            return;
+        }
         this._initComponents();
         this._initUiPartComponents();
     }

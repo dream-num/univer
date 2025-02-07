@@ -15,11 +15,13 @@
  */
 
 import type { Workbook, Worksheet } from '@univerjs/core';
+import type { IUniverSheetsConfig } from '../../../controllers/config.schema';
 import type { IObjectModel, IObjectPointModel } from '../type';
-import { ILogService, Inject, Injector, IPermissionService, IResourceManagerService, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
-import { UniverType } from '@univerjs/protocol';
+import { IConfigService, ILogService, Inject, Injector, IPermissionService, IResourceManagerService, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
 
+import { UniverType } from '@univerjs/protocol';
 import { takeUntil } from 'rxjs/operators';
+import { SHEETS_PLUGIN_CONFIG_KEY } from '../../../controllers/config.schema';
 import { RangeProtectionRuleModel } from '../../../model/range-protection-rule.model';
 import { getAllRangePermissionPoint } from '../range-permission/util';
 import { getAllWorkbookPermissionPoint } from '../workbook-permission';
@@ -39,6 +41,7 @@ export class WorksheetPermissionService extends RxDisposable {
         @Inject(WorksheetProtectionPointModel) private _worksheetProtectionPointRuleModel: WorksheetProtectionPointModel,
         @Inject(IResourceManagerService) private _resourceManagerService: IResourceManagerService,
         @Inject(RangeProtectionRuleModel) private _rangeProtectionRuleModel: RangeProtectionRuleModel,
+        @Inject(IConfigService) private _configService: IConfigService,
         @Inject(ILogService) private _logService: ILogService
     ) {
         super();
@@ -127,6 +130,11 @@ export class WorksheetPermissionService extends RxDisposable {
     }
 
     private _initRuleSnapshot() {
+        const config = this._configService.getConfig<IUniverSheetsConfig>(SHEETS_PLUGIN_CONFIG_KEY);
+        if (config?.permissionConfig?.customImplement) {
+            return;
+        }
+
         const toJson = () => {
             const object = this._worksheetProtectionRuleModel.toObject();
             return JSON.stringify(object);
@@ -181,6 +189,11 @@ export class WorksheetPermissionService extends RxDisposable {
     }
 
     private _initPointSnapshot() {
+        const config = this._configService.getConfig<IUniverSheetsConfig>(SHEETS_PLUGIN_CONFIG_KEY);
+        if (config?.permissionConfig?.customImplement) {
+            return;
+        }
+
         const toJson = () => {
             const object = this._worksheetProtectionPointRuleModel.toObject();
             return JSON.stringify(object);

@@ -28,15 +28,23 @@ export interface IUniverSheetsConfig {
      * web worker environment or server-side-calculation.
      */
     onlyRegisterFormulaRelatedMutations?: true;
-     /**
-      * If the row style and column style be set both, and the row style should precede the column style or not.
-      */
+    /**
+     * If the row style and column style be set both, and the row style should precede the column style or not.
+     */
     isRowStylePrecedeColumnStyle?: boolean;
 
     /**
      * default false, auto height works for merged cells
      */
     autoHeightForMergedCells?: boolean;
+
+    /**
+     * Mark the user's configuration information for the permission module
+     * If customImplement is true, the permission information will not be stored in the resource, and there will be no built-in logic and UI for permissions.
+     */
+    permissionConfig?: {
+        customImplement?: boolean;
+    };
 }
 
 export const defaultPluginConfig: IUniverSheetsConfig = {};

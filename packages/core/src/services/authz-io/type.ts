@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import type { IAllowedRequest, IAllowedResponse, IBatchAllowedResponse, ICreateCollaboratorRequest, ICreateRequest, ICreateResponse, IDeleteCollaboratorRequest, IListCollaboratorRequest, IListCollaboratorResponse, IListPermPointRequest, IListPermPointResponse, IListRolesRequest, IListRolesResponse, IPutCollaboratorsRequest, IUpdateCollaboratorRequest, IUpdatePermPointRequest } from '@univerjs/protocol';
-import { createIdentifier } from '../../common/di';
+import type { IAllowedRequest, IAllowedResponse, IBatchAllowedResponse, ICreateCollaboratorRequest, ICreateRequest, ICreateRequest_SelectRangeObject, ICreateRequest_WorksheetObject, ICreateResponse, IDeleteCollaboratorRequest, IListCollaboratorRequest, IListCollaboratorResponse, IListPermPointRequest, IListPermPointResponse, IListRolesRequest, IListRolesResponse, IPutCollaboratorsRequest, IUpdateCollaboratorRequest, IUpdatePermPointRequest, UnitObject } from '@univerjs/protocol';
 import type { ILogContext } from '../log/context';
+import type { IUser } from '../user-manager/user-manager.service';
+import { createIdentifier } from '../../common/di';
 
 // FIXME: should not import ILogContext here
 
@@ -36,3 +37,20 @@ export interface IAuthzIoService {
 
 export const IAuthzIoService = createIdentifier<IAuthzIoService>('IAuthzIoIoService');
 
+// unitId -> { ruleMap: { permissionId: rule } }
+export type IPermissionLocalData = Map<string, {
+    ruleMap: Map<string, IPermissionLocalRule>;
+    createMap: Map<string, ICreateInfo>;
+}>;
+
+export interface IPermissionLocalJson {
+    rules?: Record<string, IPermissionLocalRule>;
+    creates?: Record<string, ICreateInfo>;
+}
+
+export type IPermissionLocalRule = ICreateRequest_SelectRangeObject | ICreateRequest_WorksheetObject;
+export interface ICreateInfo {
+    objectID: string;
+    objectType: UnitObject;
+    creator: IUser | undefined;
+}

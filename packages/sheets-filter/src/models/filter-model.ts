@@ -16,10 +16,11 @@
 
 import type { CellValue, ICellData, IRange, Nullable, Worksheet } from '@univerjs/core';
 import type { Observable } from 'rxjs';
+import type { IAutoFilter, ICustomFilter, ICustomFilters, IFilterColumn, IFilters } from './types';
 import { CellValueType, Disposable, extractPureTextFromCell, mergeSets, Rectangle, Tools } from '@univerjs/core';
 import { BehaviorSubject } from 'rxjs';
 import { ensureNumeric, getCustomFilterFn, isNumericFilterFn, notEquals } from './custom-filters';
-import { CustomFilterOperator, type IAutoFilter, type ICustomFilter, type ICustomFilters, type IFilterColumn, type IFilters } from './types';
+import { CustomFilterOperator } from './types';
 
 const EMPTY = () => new Set<number>();
 

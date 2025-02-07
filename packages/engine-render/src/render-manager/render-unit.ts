@@ -128,15 +128,6 @@ export class RenderUnit extends Disposable implements IRender {
 
         this._activated$.next(false);
         this._activated$.complete();
-
-        // Avoid memory leak. Basically it is because RenderUnit itself is leaking.
-        // We use this as a temporary solution to make CI pass.
-        // @ts-ignore
-        this._renderContext.activated$ = null;
-        // @ts-ignore
-        this._renderContext.activate = null;
-        // @ts-ignore
-        this._renderContext.deactivate = null;
     }
 
     /**

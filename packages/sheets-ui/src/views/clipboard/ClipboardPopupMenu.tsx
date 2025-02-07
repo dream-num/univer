@@ -22,7 +22,7 @@ import { DropdownOverlay, DropdownProvider, DropdownTrigger } from '@univerjs/de
 import { convertTransformToOffsetX, convertTransformToOffsetY, IRenderManagerService } from '@univerjs/engine-render';
 import { CheckMarkSingle, MoreDownSingle, PasteSpecial } from '@univerjs/icons';
 import clsx from 'clsx';
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { SheetOptionalPasteCommand } from '../../commands/commands/clipboard.command';
 import { SetScrollOperation } from '../../commands/operations/scroll.operation';
 import { useActiveWorkbook, useSheetSkeleton } from '../../components/hook';
@@ -113,7 +113,6 @@ export const ClipboardPopupMenu = () => {
     const clipboardService = useDependency(ISheetClipboardService);
     const showMenu = useObservable(clipboardService.showMenu$, true);
     const pasteOptionsCache = useObservable(clipboardService.pasteOptionsCache$, null);
-    const renderManagerService = useDependency(IRenderManagerService);
     const localeService = useDependency(LocaleService);
     const commandService = useDependency(ICommandService);
 

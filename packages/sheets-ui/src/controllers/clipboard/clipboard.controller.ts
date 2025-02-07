@@ -148,7 +148,7 @@ export class SheetClipboardController extends RxDisposable {
         super();
         this._init();
         this._initCommandListener();
-        this._initUIComponents();
+        // this._initUIComponents();
         this._pasteWithDoc();
     }
 
@@ -913,6 +913,7 @@ export class SheetClipboardController extends RxDisposable {
         if (sheetsUIConfig?.clipboardConfig?.hidePasteOptions) {
             return;
         }
+
         this.disposeWithMe(
             this._uiPartsService.registerComponent(BuiltInUIPart.CONTENT, () => connectInjector(ClipboardPopupMenu, this._injector))
         );

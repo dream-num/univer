@@ -40,7 +40,7 @@ import type {
 } from '@univerjs/core';
 import type { IDocumentSkeletonColumn } from '../../basics/i-document-skeleton-cached';
 import type { ITransformChangeState } from '../../basics/interfaces';
-import type { IBoundRectNoAngle, IViewportInfo } from '../../basics/vector2';
+import type { IBoundRectNoAngle, IPoint, IViewportInfo } from '../../basics/vector2';
 import type { Scene } from '../../scene';
 import type { BorderCache, IFontCacheItem, IStylesCache } from './interfaces';
 import {
@@ -1437,54 +1437,24 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         };
     }
 
-    /**
-     * New version to get merge data.
-     * @param row
-     * @param column
-     * @returns {ISelectionCell} The cell info with merge data
-     */
-    private _getCellMergeInfo(row: number, column: number): ISelectionCell {
-        return this.worksheet.getCellInfoInMergeData(row, column);
-    }
-
     getDistanceFromTopLeft(row: number, col: number): IPoint {
         return {
-            x: this._offsetXToCol(col),
-            y: this._offsetYToRow(row),
+            x: this.colStartX(col),
+            y: this.rowStartY(row),
         };
     }
 
-    /**
-     * Distance from top left to row
-     * @param row
-     */
-    private _offsetYToRow(row: number): number {
-        const arr = this._rowHeightAccumulation;
-        const i = Math.max(0, row - 1);
-        return arr[i];
-    }
-
-    /**
-     * Distance from top left to col
-     * @param col
-     */
-    private _offsetXToCol(col: number): number {
-        const arr = this._columnWidthAccumulation;
-        const i = Math.max(0, col - 1);
-        return arr[i];
-    }
-
     colStartX(col: number): number {
-        const arr = this._columnWidthAccumulation;
+        const arr = this.columnWidthAccumulation;
         const i = col - 1;
-        if(i == - 1) return 0;
+        if (i === -1) return 0;
         return arr[i];
     }
 
     rowStartY(row: number): number {
-        const arr = this._rowHeightAccumulation;
+        const arr = this.rowHeightAccumulation;
         const i = row - 1;
-        if(i == - 1) return 0;
+        if (i === -1) return 0;
         return arr[i];
     }
 

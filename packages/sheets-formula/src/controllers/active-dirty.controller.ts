@@ -17,7 +17,6 @@
 import type { ICellData, ICommandInfo, IObjectMatrixPrimitiveType, IRange, IUnitRange, Nullable } from '@univerjs/core';
 import type { IDirtyUnitSheetDefinedNameMap, IDirtyUnitSheetNameMap, ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
 import type {
-    IDeleteRangeMutationParams,
     IInsertColMutationParams,
     IInsertRowMutationParams,
     IInsertSheetMutationParams,
@@ -31,7 +30,6 @@ import type {
     ISetRangeValuesMutationParams,
 } from '@univerjs/sheets';
 import {
-    Dimension,
     Disposable,
     Inject,
     IUniverInstanceService,
@@ -335,52 +333,6 @@ export class ActiveDirtyController extends Disposable {
         return dirtyRanges;
     }
 
-    private _getDeleteRangeMutationDirtyRange(params: IDeleteRangeMutationParams) {
-        const { subUnitId: sheetId, unitId, range, shiftDimension } = params;
-
-        const dirtyRanges: IUnitRange[] = [];
-
-        const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
-
-        const worksheet = workbook?.getSheetBySheetId(sheetId);
-
-        const lastEndRow = worksheet?.getLastRowWithContent() || 0;
-
-        const lastEndColumn = worksheet?.getLastColumnWithContent() || 0;
-
-        const matrix = new ObjectMatrix<Nullable<ICellData>>();
-
-        let newMatrix: Nullable<ObjectMatrix<Nullable<ICellData>>> = null;
-        const { startRow, startColumn, endRow, endColumn } = range;
-        if (shiftDimension === Dimension.ROWS) {
-            newMatrix = this._rangeToMatrix({
-                startRow,
-                startColumn,
-                endRow: lastEndRow,
-                endColumn,
-            });
-        } else if (shiftDimension === Dimension.COLUMNS) {
-            newMatrix = this._rangeToMatrix({
-                startRow,
-                startColumn,
-                endRow,
-                endColumn: lastEndColumn,
-            });
-        }
-
-        if (newMatrix != null) {
-            matrix.merge(newMatrix);
-        }
-
-        const matrixData = matrix.getData();
-
-        dirtyRanges.push(...this._getDirtyRangesByCellValue(unitId, sheetId, matrixData));
-
-        dirtyRanges.push(...this._getDirtyRangesForArrayFormula(unitId, sheetId, matrixData));
-
-        return dirtyRanges;
-    }
-
     private _getRemoveRowOrColumnMutation(params: IRemoveRowsMutationParams, isRow: boolean = true) {
         const { subUnitId: sheetId, unitId, range } = params;
 
@@ -394,29 +346,23 @@ export class ActiveDirtyController extends Disposable {
 
         const columnCount = worksheet?.getColumnCount() || 0;
 
-        const matrix = new ObjectMatrix<Nullable<ICellData>>();
-
-        let newMatrix: Nullable<ObjectMatrix<Nullable<ICellData>>> = null;
+        let matrix: Nullable<ObjectMatrix<Nullable<ICellData>>> = null;
         const { startRow, endRow, startColumn, endColumn } = range;
 
         if (isRow === true) {
-            newMatrix = this._rangeToMatrix({
+            matrix = this._rangeToMatrix({
                 startRow,
                 startColumn: 0,
                 endRow,
                 endColumn: columnCount - 1,
             });
         } else {
-            newMatrix = this._rangeToMatrix({
+            matrix = this._rangeToMatrix({
                 startRow: 0,
                 startColumn,
                 endRow: rowCount,
                 endColumn,
             });
-        }
-
-        if (newMatrix != null) {
-            matrix.merge(newMatrix);
         }
 
         const matrixData = matrix.getData();

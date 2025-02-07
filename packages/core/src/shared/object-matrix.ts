@@ -701,15 +701,6 @@ export class ObjectMatrix<T> {
         return ranges;
     }
 
-    merge(newObject: ObjectMatrix<T>) {
-        this.forValue((row, column) => {
-            const cellValue = newObject.getValue(row, column);
-            if (cellValue != null) {
-                this.setValue(row, column, cellValue);
-            }
-        });
-    }
-
     private _setOriginValue(matrix: IObjectMatrixPrimitiveType<T> = {}) {
         this._matrix = matrix;
     }

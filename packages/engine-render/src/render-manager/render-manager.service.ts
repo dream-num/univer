@@ -56,7 +56,6 @@ export interface IRenderManagerService extends IDisposable {
     getRenderUnitById(unitId: string): Nullable<IRender>;
     getAllRenderersOfType(type: UniverInstanceType): RenderUnit[];
     getCurrentTypeOfRenderer(type: UniverInstanceType): Nullable<RenderUnit>;
-    getCurrentTypeOfRenderer$(type: UniverInstanceType): Observable<Nullable<RenderUnit>>;
     getRenderAll(): Map<string, IRender>;
     defaultEngine: Engine;
 

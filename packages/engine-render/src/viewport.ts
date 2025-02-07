@@ -354,8 +354,6 @@ export class Viewport {
 
     set viewportScrollY(val: number) {
         this._viewportScrollY = val;
-        // const { y } = this.transViewportScroll2ScrollValue(this._viewportScrollX, this._viewportScrollY);
-        // this.scrollY = y;
     }
 
     get viewportScrollY() {
@@ -364,14 +362,10 @@ export class Viewport {
 
     set scrollX(val: number) {
         this._scrollX = val;
-        // const { x } = this.transScroll2ViewportScrollValue(this._scrollX, this._scrollY);
-        // this._viewportScrollX = x;
     }
 
     set scrollY(val: number) {
         this._scrollY = val;
-        // const { y } = this.transScroll2ViewportScrollValue(this._scrollX, this._scrollY);
-        // this._viewportScrollY = y;
     }
 
     get scrollX() {

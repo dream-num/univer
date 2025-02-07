@@ -131,6 +131,10 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
         return param;
     }
 
+    /**
+     * Command in COMMAND_LISTENER_SKELETON_CHANGE would cause setCurrent, see @packages/sheets-ui/src/controllers/render-controllers/sheet.render-controller.ts
+     * @param searchParam
+     */
     setCurrent(searchParam: ISheetSkeletonManagerSearch): Nullable<ISheetSkeletonManagerParam> {
         this._setCurrent(searchParam.sheetId);
     }

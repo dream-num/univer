@@ -175,16 +175,15 @@ export function Tree(props: ITreeProps) {
                             onChange?.(treeItem);
                         }}
                     />
-                    <div className={styles.treeListItemTitle}>
+                    <div
+                        className={styles.treeListItemTitle}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            handleExpendItem(treeItem);
+                        }}
+                    >
                         <Tooltip showIfEllipsis placement="top" title={title}>
-                            <span
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleExpendItem(treeItem);
-                                }}
-                            >
-                                {title}
-                            </span>
+                            <>{title}</>
                         </Tooltip>
                     </div>
 

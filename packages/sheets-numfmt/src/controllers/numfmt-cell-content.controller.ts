@@ -37,10 +37,16 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { DEFAULT_TEXT_FORMAT } from '@univerjs/engine-numfmt';
-import { InterceptCellContentPriority, INTERCEPTOR_POINT, INumfmtService, SetNumfmtMutation, SetRangeValuesMutation, SheetInterceptorService } from '@univerjs/sheets';
+import { checkCellValueType, InterceptCellContentPriority, INTERCEPTOR_POINT, INumfmtService, SetNumfmtMutation, SetRangeValuesMutation, SheetInterceptorService } from '@univerjs/sheets';
 import { BehaviorSubject, merge, of, skip, switchMap } from 'rxjs';
 import { getPatternPreviewIgnoreGeneral } from '../utils/pattern';
 
+const TEXT_FORMAT_MARK = {
+    tl: {
+        size: 6,
+        color: '#409f11',
+    },
+};
 export class SheetsNumfmtCellContentController extends Disposable {
     private _local$ = new BehaviorSubject<INumfmtLocalTag>('en');
     public local$ = this._local$.asObservable();
@@ -90,13 +96,6 @@ export class SheetsNumfmtCellContentController extends Disposable {
 
     // eslint-disable-next-line max-lines-per-function
     private _initInterceptorCellContent() {
-        const TEXT_FORMAT_MARK = {
-            tl: {
-                size: 6,
-                color: '#409f11',
-            },
-        };
-
         const renderCache = new ObjectMatrix<{ result: ICellData; parameters: string | number }>();
 
         this.disposeWithMe(merge(this._local$, this._localeService.currentLocale$).subscribe(() => {
@@ -129,20 +128,22 @@ export class SheetsNumfmtCellContentController extends Disposable {
                     return next(cell);
                 }
 
-                // Add error marker to text format number
-                if (numfmtValue.pattern === DEFAULT_TEXT_FORMAT && originCellValue.v && isRealNum(originCellValue.v)) {
+                const type = checkCellValueType(originCellValue.v);
+                // just handle number
+                if (type !== CellValueType.NUMBER) {
+                    return next(cell);
+                }
+
+                 // Add error marker to text format number
+                if (numfmtValue.pattern === DEFAULT_TEXT_FORMAT) {
                     return next({
                         ...cell,
+                        t: CellValueType.STRING,
                         markers: {
                             ...cell?.markers,
                             ...TEXT_FORMAT_MARK,
                         },
                     });
-                }
-
-                // just handle number
-                if (originCellValue.t !== CellValueType.NUMBER || originCellValue.v == null || Number.isNaN(originCellValue.v)) {
-                    return next(cell);
                 }
 
                 let numfmtRes: string = '';
@@ -157,7 +158,7 @@ export class SheetsNumfmtCellContentController extends Disposable {
                     return next(cell);
                 }
 
-                const res: ICellDataForSheetInterceptor = { v: numfmtRes };
+                const res: ICellDataForSheetInterceptor = { v: numfmtRes, t: CellValueType.NUMBER };
                 if (info.color) {
                     const color = this._themeService.getCurrentTheme()[`${info.color}500`];
 

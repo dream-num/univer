@@ -192,7 +192,7 @@ export const ClipboardPopupMenu = () => {
                     </div>
                 </DropdownTrigger>
                 <DropdownOverlay className={clsx(styles.sheetPasteOptionsMenu, `
-                  univer-border univer-border-gray-200 univer-border-solid
+                  univer-border univer-border-solid univer-border-gray-200
                 `)}
                 >
                     <ul>

@@ -28,7 +28,7 @@ import { COMMAND_LISTENER_SKELETON_CHANGE, getSheetCommandTarget, SetFrozenMutat
 import { DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation } from '@univerjs/sheets-drawing';
 import { ISheetSelectionRenderService, SetScrollOperation, SetZoomRatioOperation, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { CanvasFloatDomService } from '@univerjs/ui';
-import { BehaviorSubject, filter, map, Subject, switchMap, take } from 'rxjs';
+import { BehaviorSubject, filter, map, of, Subject, switchMap, take } from 'rxjs';
 import { InsertSheetDrawingCommand } from '../commands/commands/insert-sheet-drawing.command';
 
 export interface ICanvasFloatDom {
@@ -556,22 +556,27 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         // #region scroll
         this.disposeWithMe(
             this._univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET).pipe(
-                filter((workbook) => !!workbook),
-                switchMap((workbook) => workbook.activeSheet$),
-                filter((sheet) => !!sheet),
-                map((sheet) => {
-                    const render = this._renderManagerService.getRenderById(sheet.getUnitId());
-                    return render ? { render, unitId: sheet.getUnitId(), subUnitId: sheet.getSheetId() } : null;
+                switchMap((workbook) => workbook ? workbook.activeSheet$ : of(null)),
+                map((worksheet) => {
+                    if (!worksheet) return null;
+                    const unitId = worksheet.getUnitId();
+                    const render = this._renderManagerService.getRenderById(unitId);
+                    return render ? { render, unitId, subUnitId: worksheet.getSheetId() } : null;
                 }),
-                filter((render) => !!render),
                 switchMap((render) =>
-                    fromEventSubject(render.render.scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN)!.onScrollAfter$)
-                        .pipe(map(() => ({ unitId: render.unitId, subUnitId: render.subUnitId })))
+                    render
+                        ? fromEventSubject(render.render.scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN)!.onScrollAfter$)
+                            .pipe(map(() => ({ unitId: render.unitId, subUnitId: render.subUnitId })))
+                        : of(null)
                 )
-            ).subscribe(({ unitId, subUnitId }) => {
+            ).subscribe((value) => {
+                if (!value) return; // TODO@weird94: maybe we should throw an error here and do some cleaning work?
+
+                const { unitId, subUnitId } = value;
                 updateSheet(unitId, subUnitId);
             })
         );
+
         //#endregion
 
         // #region zoom

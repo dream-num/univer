@@ -305,11 +305,11 @@ export class SheetInterceptorService extends Disposable {
         interceptors.push(interceptor);
         const sortedInterceptors = interceptors.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
 
+        this._interceptorsDirty = true;
+
         if (key === INTERCEPTOR_POINT.CELL_CONTENT as unknown as string) {
-            this._interceptorsByName.set(
-                `${key}-${(InterceptorEffectEnum.Style | InterceptorEffectEnum.Value)}`,
-                sortedInterceptors
-            );
+            const JOINED_EFFECT = InterceptorEffectEnum.Style | InterceptorEffectEnum.Value;
+            this._interceptorsByName.set(`${key}-${JOINED_EFFECT}`, sortedInterceptors);
 
             const BOTH_EFFECT = InterceptorEffectEnum.Style | InterceptorEffectEnum.Value;
             this._interceptorsByName.set(
@@ -320,15 +320,17 @@ export class SheetInterceptorService extends Disposable {
                 `${key}-${(InterceptorEffectEnum.Value)}`,
                 (sortedInterceptors as ICellInterceptor<unknown, unknown>[]).filter((i) => ((i.effect || BOTH_EFFECT) & InterceptorEffectEnum.Value) > 0)
             );
-        } else {
-            this._interceptorsByName.set(
-                key,
-                sortedInterceptors
-            );
-        }
 
-        this._interceptorsDirty = true;
-        return this.disposeWithMe(toDisposable(() => remove(this._interceptorsByName.get(key)!, interceptor)));
+            return this.disposeWithMe(toDisposable(() => {
+                remove(this._interceptorsByName.get(key)!, interceptor);
+                remove(this._interceptorsByName.get(`${key}-${JOINED_EFFECT}`)!, interceptor);
+                remove(this._interceptorsByName.get(`${key}-${(InterceptorEffectEnum.Style)}`)!, interceptor);
+                remove(this._interceptorsByName.get(`${key}-${(InterceptorEffectEnum.Value)}`)!, interceptor);
+            }));
+        } else {
+            this._interceptorsByName.set(key, sortedInterceptors);
+            return this.disposeWithMe(toDisposable(() => remove(this._interceptorsByName.get(key)!, interceptor)));
+        }
     }
 
     fetchThroughInterceptors<T, C>(

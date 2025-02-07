@@ -67,8 +67,9 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
         this.disposeWithMe(() => {
             this._currentSkeletonBefore$.complete();
             this._currentSkeleton$.complete();
-            this._sheetSkeletonParamStore = new Map();
-            this._sheetSkService.deleteSkeleton(this._context.unitId, this._sheetId);
+
+            this._sheetSkeletonParamStore.forEach((sk) => this.disposeSkeleton(sk.sheetId));
+            this._sheetSkeletonParamStore.clear();
         });
 
         this._initRemoveSheet();

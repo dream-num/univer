@@ -30,13 +30,9 @@ import {
 } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { AddMergeUndoMutationFactory, AddWorksheetMergeMutation, getAddMergeMutationRangeByType, RemoveMergeUndoMutationFactory, RemoveWorksheetMergeMutation, SetRangeValuesCommand, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
-import {
-    ApplyFormatPainterCommand,
-    SetOnceFormatPainterCommand,
-} from '../../commands/commands/set-format-painter.command';
+
 import { checkCellContentInRanges, getClearContentMutationParamsForRanges } from '../../common/utils';
 import { FormatPainterStatus, IFormatPainterService } from '../../services/format-painter/format-painter.service';
-import { ISheetSelectionRenderService } from '../../services/selection/base-selection-render.service';
 
 export class FormatPainterController extends Disposable {
     constructor(
@@ -54,38 +50,7 @@ export class FormatPainterController extends Disposable {
     }
 
     private _initialize() {
-        this._commandExecutedListener();
         this._addDefaultHook();
-    }
-
-    private _commandExecutedListener() {
-        const unitId = this._univerInstanceService.getFocusedUnit()?.getUnitId() || '';
-        const renderUnit = this._renderManagerService.getRenderById(unitId);
-        if (!renderUnit) return;
-        const selectionRenderService = renderUnit.with(ISheetSelectionRenderService);
-
-        this.disposeWithMe(
-            selectionRenderService.selectionMoveEnd$.subscribe((selections) => {
-                if (this._formatPainterService.getStatus() !== FormatPainterStatus.OFF) {
-                    const { rangeWithCoord } = selections[selections.length - 1];
-                    this._commandService.executeCommand(ApplyFormatPainterCommand.id, {
-                        unitId: this._univerInstanceService.getFocusedUnit()?.getUnitId() || '',
-                        subUnitId: (this._univerInstanceService.getFocusedUnit() as Workbook).getActiveSheet()?.getSheetId() || '',
-                        range: {
-                            startRow: rangeWithCoord.startRow,
-                            startColumn: rangeWithCoord.startColumn,
-                            endRow: rangeWithCoord.endRow,
-                            endColumn: rangeWithCoord.endColumn,
-                        },
-                    });
-
-                    // if once, turn off the format painter
-                    if (this._formatPainterService.getStatus() === FormatPainterStatus.ONCE) {
-                        this._commandService.executeCommand(SetOnceFormatPainterCommand.id);
-                    }
-                }
-            })
-        );
     }
 
     private _addDefaultHook() {

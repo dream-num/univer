@@ -40,7 +40,6 @@ import {
     IUniverInstanceService,
     ObjectMatrix,
     Rectangle,
-    toDisposable,
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
@@ -113,7 +112,7 @@ export class AutoFillController extends Disposable {
 
     private _init() {
         this._initDefaultHook();
-        this._onSelectionControlFillChanged();
+        this._initSelectionControlFillChanged();
         this._initQuitListener();
         this._initSkeletonChange();
     }
@@ -179,11 +178,10 @@ export class AutoFillController extends Disposable {
         this._autoFillService.setShowMenu(false);
     }
 
-    // eslint-disable-next-line max-lines-per-function
-    private _onSelectionControlFillChanged() {
+    private _initSelectionControlFillChanged() {
         const disposableCollection = new DisposableCollection();
-        const addListener = (disposableCollection: DisposableCollection) => {
-            // Each range change requires re-listening
+        const updateListener = () => {
+            // Each range change requires re-listening.
             disposableCollection.dispose();
 
             const currentRenderer = this._renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET);
@@ -192,78 +190,69 @@ export class AutoFillController extends Disposable {
             const selectionRenderService = currentRenderer.with(ISheetSelectionRenderService);
             const selectionControls = selectionRenderService.getSelectionControls();
             selectionControls.forEach((controlSelection) => {
-                disposableCollection.add(
-                    toDisposable(
-                        controlSelection.selectionFilled$.subscribe((filled) => {
-                            if (
-                                filled == null ||
+                disposableCollection.add(controlSelection.selectionFilled$.subscribe((filled) => {
+                    if (
+                        filled == null ||
                                 filled.startColumn === -1 ||
                                 filled.startRow === -1 ||
                                 filled.endColumn === -1 ||
                                 filled.endRow === -1
-                            ) {
-                                return;
-                            }
-                            const source: IRange = {
-                                startColumn: controlSelection.model.startColumn,
-                                endColumn: controlSelection.model.endColumn,
-                                startRow: controlSelection.model.startRow,
-                                endRow: controlSelection.model.endRow,
-                            };
-                            const selection: IRange = {
-                                startColumn: filled.startColumn,
-                                endColumn: filled.endColumn,
-                                startRow: filled.startRow,
-                                endRow: filled.endRow,
-                            };
+                    ) {
+                        return;
+                    }
+                    const source: IRange = {
+                        startColumn: controlSelection.model.startColumn,
+                        endColumn: controlSelection.model.endColumn,
+                        startRow: controlSelection.model.startRow,
+                        endRow: controlSelection.model.endRow,
+                    };
+                    const selection: IRange = {
+                        startColumn: filled.startColumn,
+                        endColumn: filled.endColumn,
+                        startRow: filled.startRow,
+                        endRow: filled.endRow,
+                    };
 
-                            this._commandService.executeCommand(AutoFillCommand.id, { sourceRange: source, targetRange: selection });
-                        })
-                    )
-                );
+                    this._commandService.executeCommand(AutoFillCommand.id, { sourceRange: source, targetRange: selection });
+                }));
 
                 // double click to fill range, range length will align to left or right column.
                 // fill results will be as same as drag operation
-                disposableCollection.add(
-                    toDisposable(
-                        controlSelection.fillControl.onDblclick$.subscribeEvent(() => {
-                            const source = {
-                                startColumn: controlSelection.model.startColumn,
-                                endColumn: controlSelection.model.endColumn,
-                                startRow: controlSelection.model.startRow,
-                                endRow: controlSelection.model.endRow,
-                            };
-                            this._handleDbClickFill(source);
-                        })
-                    )
-                );
+                disposableCollection.add(controlSelection.fillControl.onDblclick$.subscribeEvent(() => {
+                    const source = {
+                        startColumn: controlSelection.model.startColumn,
+                        endColumn: controlSelection.model.endColumn,
+                        startRow: controlSelection.model.startRow,
+                        endRow: controlSelection.model.endRow,
+                    };
+                    this._handleDbClickFill(source);
+                }));
 
-                disposableCollection.add(
-                    toDisposable(
-                        controlSelection.fillControl.onPointerDown$.subscribeEvent(() => {
-                            const visibleState = this._editorBridgeService.isVisible();
-                            if (visibleState.visible) {
-                                this._editorBridgeService.changeVisible({
-                                    visible: false,
-                                    eventType: DeviceInputEventType.PointerDown,
-                                    unitId: currentRenderer.unitId,
-                                });
-                            }
-                        })
-                    )
-                );
+                disposableCollection.add(controlSelection.fillControl.onPointerDown$.subscribeEvent(() => {
+                    const visibleState = this._editorBridgeService.isVisible();
+                    if (visibleState.visible) {
+                        this._editorBridgeService.changeVisible({
+                            visible: false,
+                            eventType: DeviceInputEventType.PointerDown,
+                            unitId: currentRenderer.unitId,
+                        });
+                    }
+                }));
             });
         };
 
-        addListener(disposableCollection);
+        updateListener();
 
-        this.disposeWithMe(
-            this._commandService.onCommandExecuted((command: ICommandInfo) => {
-                if (command.id === SetSelectionsOperation.id) {
-                    addListener(disposableCollection);
-                }
-            })
-        );
+        // Should subscribe current current renderer change as well.
+        // TODO@yuhongz: this seems not ideal. This should be an `IRenderModule` for running with multiple renderers?
+        this.disposeWithMe(this._commandService.onCommandExecuted((command: ICommandInfo) => {
+            if (command.id === SetSelectionsOperation.id) {
+                updateListener();
+            }
+        }));
+
+        this.disposeWithMe(this._univerInstanceService.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_SHEET)
+            .subscribe(() => updateListener()));
     }
 
     private _handleDbClickFill(source: IRange) {

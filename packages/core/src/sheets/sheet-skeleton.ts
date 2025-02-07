@@ -57,7 +57,6 @@ export interface IGetRowColByPosOptions {
     firstMatch?: boolean;
 }
 
-export const RENDER_RAW_FORMULA_KEY = 'RENDER_RAW_FORMULA';
 export class SheetSkeleton extends Skeleton {
     /**
      * @deprecated avoid use `IWorksheetData` directly, use API provided by `Worksheet`, otherwise

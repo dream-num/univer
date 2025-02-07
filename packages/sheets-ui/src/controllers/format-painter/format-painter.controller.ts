@@ -17,6 +17,7 @@
 import type { ICellData, IMutationInfo, IRange, IStyleData, Workbook } from '@univerjs/core';
 import type { IAddWorksheetMergeMutationParams, IRemoveWorksheetMergeMutationParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
 
+import type { Subscription } from 'rxjs';
 import type { IFormatPainterHook, ISelectionFormatInfo } from '../../services/format-painter/format-painter.service';
 import {
     Disposable,
@@ -59,33 +60,33 @@ export class FormatPainterController extends Disposable {
     }
 
     private _commandExecutedListener() {
-        const unitId = this._univerInstanceService.getFocusedUnit()?.getUnitId() || '';
-        const renderUnit = this._renderManagerService.getRenderById(unitId);
-        if (!renderUnit) return;
-        const selectionRenderService = renderUnit.with(ISheetSelectionRenderService);
-
-        this.disposeWithMe(
-            selectionRenderService.selectionMoveEnd$.subscribe((selections) => {
-                if (this._formatPainterService.getStatus() !== FormatPainterStatus.OFF) {
-                    const { rangeWithCoord } = selections[selections.length - 1];
-                    this._commandService.executeCommand(ApplyFormatPainterCommand.id, {
-                        unitId: this._univerInstanceService.getFocusedUnit()?.getUnitId() || '',
-                        subUnitId: (this._univerInstanceService.getFocusedUnit() as Workbook).getActiveSheet()?.getSheetId() || '',
-                        range: {
-                            startRow: rangeWithCoord.startRow,
-                            startColumn: rangeWithCoord.startColumn,
-                            endRow: rangeWithCoord.endRow,
-                            endColumn: rangeWithCoord.endColumn,
-                        },
-                    });
+        let disposable: Subscription;
+        this.disposeWithMe(this._renderManagerService.currentRender$.subscribe((currentUnitId) => {
+            if (currentUnitId) {
+                disposable?.unsubscribe();
+                const selectionRenderService = this._renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET)!.with(ISheetSelectionRenderService);
+                disposable = selectionRenderService.selectionMoveEnd$.subscribe((selections) => {
+                    if (this._formatPainterService.getStatus() !== FormatPainterStatus.OFF) {
+                        const { rangeWithCoord } = selections[selections.length - 1];
+                        this._commandService.executeCommand(ApplyFormatPainterCommand.id, {
+                            unitId: this._univerInstanceService.getFocusedUnit()?.getUnitId() || '',
+                            subUnitId: (this._univerInstanceService.getFocusedUnit() as Workbook).getActiveSheet()?.getSheetId() || '',
+                            range: {
+                                startRow: rangeWithCoord.startRow,
+                                startColumn: rangeWithCoord.startColumn,
+                                endRow: rangeWithCoord.endRow,
+                                endColumn: rangeWithCoord.endColumn,
+                            },
+                        });
 
                     // if once, turn off the format painter
-                    if (this._formatPainterService.getStatus() === FormatPainterStatus.ONCE) {
-                        this._commandService.executeCommand(SetOnceFormatPainterCommand.id);
+                        if (this._formatPainterService.getStatus() === FormatPainterStatus.ONCE) {
+                            this._commandService.executeCommand(SetOnceFormatPainterCommand.id);
+                        }
                     }
-                }
-            })
-        );
+                });
+            }
+        }));
     }
 
     private _addDefaultHook() {

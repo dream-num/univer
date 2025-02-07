@@ -275,7 +275,7 @@ function generateFilterTreeBySort(tree: IFilterByValueWithTreeItem[]) {
     return Array.from(tree).sort((a, b) => {
         if (a.children && !b.children) return -1;
         if (!a.children && b.children) return 1;
-        return b.title.localeCompare(a.title);
+        return a.title.localeCompare(b.title);
     }).map((yearItem) => {
         if (yearItem.children) {
             yearItem.children.sort((a, b) => {

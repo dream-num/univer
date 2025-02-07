@@ -523,6 +523,7 @@ export function getCellPositionByIndex(
 }
 
 /**
+ * @deprecated use same function in @univerjs/core
  * @description Get the cell position information of the specified row and column, including the position information of the cell and the merge information of the cell
  * @param {number} row The row index of the cell
  * @param {number} column The column index of the cell
@@ -605,7 +606,7 @@ export function getCellWithCoordByIndexCore(
 }
 
 /**
- * @deprecated please use getCellWithCoordByIndexCore instead
+ * @deprecated please use getCellWithCoordByIndexCore in @univerjs/core instead
  */
 const getCellByIndexWithMergeInfo = getCellWithCoordByIndexCore;
 export { getCellByIndexWithMergeInfo };

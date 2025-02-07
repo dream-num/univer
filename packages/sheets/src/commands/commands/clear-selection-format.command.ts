@@ -60,10 +60,10 @@ export const ClearSelectionFormatCommand: ICommand = {
 
         const subUnitId = params?.subUnitId || worksheet.getSheetId();
         const ranges = params?.ranges || selectionManagerService.getCurrentSelections()?.map((s) => s.range);
-        const visibleRanges = getVisibleRanges(ranges, accessor, unitId, subUnitId);
-        if (!visibleRanges?.length) {
+        if (!ranges?.length) {
             return false;
         }
+        const visibleRanges = getVisibleRanges(ranges, accessor, unitId, subUnitId);
 
         const sequenceExecuteList: IMutationInfo[] = [];
         const sequenceExecuteUndoList: IMutationInfo[] = [];

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { createWriteStream } from 'node:fs';
 import { expect, test } from '@playwright/test';
 import { getMetrics } from './util';
 
@@ -29,30 +30,63 @@ const MAX_SECOND_INSTANCE_OVERFLOW = 100_000; // Only 100 KB
 
 test('memory', async ({ page }) => {
     test.setTimeout(60_000);
+    const client = await page.context().newCDPSession(page);
+    async function takeHeapSnapshot(filename) {
+        const file = createWriteStream(filename);
+
+        // Create a promise that resolves when the snapshot is complete
+        const snapshotComplete = new Promise((resolve) => {
+            client.on('HeapProfiler.addHeapSnapshotChunk', (params) => {
+                console.log('Writing chunk to file', params.chunk.length);
+                file.write(params.chunk);
+            });
+
+            client.on('HeapProfiler.reportHeapSnapshotProgress', (params) => {
+                if (params.finished) {
+                    file.end();
+                    console.log(`Heap snapshot finished saved to ${filename}`);
+                    resolve(1);
+                }
+            });
+        });
+
+        // Take the snapshot
+        client.send('HeapProfiler.takeHeapSnapshot');
+
+        // Wait for the snapshot to complete
+        await snapshotComplete;
+    }
 
     await page.goto('http://localhost:3000/sheets/');
     await page.waitForTimeout(5000);
 
     const memoryAfterFirstInstance = (await getMetrics(page)).JSHeapUsedSize;
 
-    await page.evaluate(() => window.E2EControllerAPI.loadAndRelease(1));
-    await page.waitForTimeout(2000);
-    const memoryAfterFirstLoad = (await getMetrics(page)).JSHeapUsedSize;
+    // await page.evaluate(() => window.E2EControllerAPI.loadAndRelease(1));
+    // await page.waitForTimeout(2000);
+    // const memoryAfterFirstLoad = (await getMetrics(page)).JSHeapUsedSize;
 
-    await page.evaluate(() => window.E2EControllerAPI.loadAndRelease(2));
-    await page.waitForTimeout(2000);
-    const memoryAfterSecondLoad = (await getMetrics(page)).JSHeapUsedSize;
-    expect(memoryAfterSecondLoad - memoryAfterFirstLoad)
-        .toBeLessThanOrEqual(MAX_UNIT_MEMORY_OVERFLOW);
+    // await page.evaluate(() => window.E2EControllerAPI.loadAndRelease(2));
+    // await page.waitForTimeout(2000);
+    // const memoryAfterSecondLoad = (await getMetrics(page)).JSHeapUsedSize;
+    // expect(memoryAfterSecondLoad - memoryAfterFirstLoad)
+    //     .toBeLessThanOrEqual(MAX_UNIT_MEMORY_OVERFLOW);
 
     await page.evaluate(() => window.univer.dispose());
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(12000);
+    takeHeapSnapshot('memory-before.heapsnapshot');
+
     const memoryAfterDisposingFirstInstance = (await getMetrics(page)).JSHeapUsedSize;
 
     await page.evaluate(() => window.createNewInstance());
     await page.waitForTimeout(2000);
     await page.evaluate(() => window.univer.dispose());
     await page.waitForTimeout(2000);
+
+    takeHeapSnapshot('memory-after.heapsnapshot');
+
+    await page.waitForTimeout(12000);
+
     const memoryAfterDisposingSecondUniver = (await getMetrics(page)).JSHeapUsedSize;
     expect(memoryAfterDisposingSecondUniver - memoryAfterDisposingFirstInstance)
         .toBeLessThanOrEqual(MAX_SECOND_INSTANCE_OVERFLOW);

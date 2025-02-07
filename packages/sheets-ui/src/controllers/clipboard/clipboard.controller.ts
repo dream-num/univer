@@ -148,7 +148,7 @@ export class SheetClipboardController extends RxDisposable {
         super();
         this._init();
         this._initCommandListener();
-        // this._initUIComponents();
+        this._initUIComponents();
         this._pasteWithDoc();
     }
 

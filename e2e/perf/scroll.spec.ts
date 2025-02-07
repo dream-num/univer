@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { Page } from '@playwright/test';
 /* eslint-disable no-console */
+import type { Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
 import { sheetData as emptySheetData } from '../__testing__/emptysheet';
 import { sheetData as freezeData } from '../__testing__/freezesheet';

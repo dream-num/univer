@@ -204,3 +204,4 @@ export { isNodeEnv } from './shared/tools';
 export { Skeleton } from './skeleton.ts';
 export type { IGetRowColByPosOptions } from './sheets/sheet-skeleton';
 export type { IPosition } from './sheets/typedef.ts';
+export * from './sheets/sheet-skeleton';

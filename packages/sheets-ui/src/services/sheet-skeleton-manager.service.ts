@@ -44,7 +44,7 @@ export interface ISheetSkeletonManagerSearch {
 export class SheetSkeletonManagerService extends Disposable implements IRenderModule {
     private _sheetId: string = '';
 
-    // @TODO lumixraku, why need this?  How about put dirty & sheetId & unitId in skeleton itself z?
+    // @TODO lumixraku, why need this?  How about put dirty & sheetId & unitId in skeleton itself?
     private _sheetSkeletonParamStore: Map<string, ISheetSkeletonManagerParam> = new Map();
 
     private readonly _currentSkeleton$ = new BehaviorSubject<Nullable<ISheetSkeletonManagerParam>>(null);

@@ -15,6 +15,7 @@
  */
 
 /* eslint-disable no-console */
+import type { CDPSession } from '@playwright/test';
 import { createWriteStream } from 'node:fs';
 import { expect, test } from '@playwright/test';
 import { getMetrics } from './util';
@@ -29,92 +30,103 @@ const MAX_UNIVER_MEMORY_OVERFLOW = 6_000_000; // TODO@wzhudev: temporarily added
 
 const MAX_SECOND_INSTANCE_OVERFLOW = 100_000; // Only 100 KB
 
-test('memory', async ({ page }) => {
-    test.setTimeout(80_000);
-    const client = await page.context().newCDPSession(page);
+interface HeapSnapshotChunk {
+    chunk: string;
+}
 
-    async function takeHeapSnapshot(client, filename) {
-        return new Promise((resolve, reject) => {
-            const file = createWriteStream(filename);
-            let isFinished = false;
-            let error = null;
-            let noChunkTimeout = null;
+        // Type the progress handler parameter
+interface HeapSnapshotProgress {
+    done: number;
+    total: number;
+    finished?: boolean;
+}
+async function takeHeapSnapshot(client: CDPSession, filename: string) {
+    return new Promise((resolve, reject) => {
+        const file = createWriteStream(filename);
+        let isFinished = false;
+        let error = null;
+        let noChunkTimeout = null;
+        let chunkHandler = (_: HeapSnapshotChunk) => {};
+        let progressHandler = (_: HeapSnapshotProgress) => {};
 
-            // Handle file stream errors
-            file.on('error', (err) => {
+        // Cleanup function to remove listeners
+        const cleanup = () => {
+            client.off('HeapProfiler.addHeapSnapshotChunk', chunkHandler);
+            client.off('HeapProfiler.reportHeapSnapshotProgress', progressHandler);
+        };
+
+        // Handle file stream errors
+        file.on('error', (err) => {
+            error = err;
+            reject(err);
+        });
+
+        // Handle successful completion
+        file.on('finish', () => {
+            if (!error && isFinished) {
+                resolve(0);
+            }
+        });
+
+        const scheduleEnd = () => {
+            if (noChunkTimeout) {
+                clearTimeout(noChunkTimeout);
+            }
+
+            // Set new timeout
+            noChunkTimeout = setTimeout(() => {
+                cleanup();
+                file.end();
+            }, 1000); // Wait 1 second after last chunk
+        };
+
+        // Set up the chunk handler
+        chunkHandler = (payload: HeapSnapshotChunk) => {
+            try {
+                if (payload.chunk) {
+                    console.log('chunkHandler write chunk', filename, file.writableLength);
+                    file.write(payload.chunk);
+                    scheduleEnd();
+                }
+            } catch (err) {
                 error = err;
+                console.error('chunkHandler error', err);
+                cleanup();
+                reject(err);
+            }
+        };
+
+        // Set up the progress handler
+        progressHandler = (params: HeapSnapshotProgress) => {
+            if (params.finished) {
+                isFinished = true;
+            }
+        };
+
+        // Add event listeners
+        client.on('HeapProfiler.addHeapSnapshotChunk', chunkHandler);
+        client.on('HeapProfiler.reportHeapSnapshotProgress', progressHandler);
+
+        // Start the heap snapshot process
+        client.send('HeapProfiler.enable')
+            .then(() => client.send('HeapProfiler.takeHeapSnapshot', { reportProgress: true }))
+            .catch((err) => {
+                console.error('HeapProfiler.enable error', err);
+                error = err;
+                file.end();
+                cleanup();
                 reject(err);
             });
+    });
+}
 
-            // Handle successful completion
-            file.on('finish', () => {
-                if (!error && isFinished) {
-                    console.log('file write finished', filename);
-                    resolve(0);
-                }
-            });
-
-            const scheduleEnd = () => {
-                // Clear any existing timeout
-                if (noChunkTimeout) {
-                    clearTimeout(noChunkTimeout);
-                }
-
-                // Set new timeout
-                noChunkTimeout = setTimeout(() => {
-                    cleanup();
-                    file.end();
-                }, 1000); // Wait 1 second after last chunk
-            };
-            // Set up the chunk handler
-            const chunkHandler = (params) => {
-                try {
-                    if (params.chunk) {
-                        console.log('chunkHandler write chunk', filename, file.writableLength);
-                        file.write(params.chunk);
-                        scheduleEnd();
-                    }
-                } catch (err) {
-                    error = err;
-                    console.error('chunkHandler error', err);
-                    cleanup();
-                    reject(err);
-                }
-            };
-
-            // Set up the progress handler
-            const progressHandler = (params) => {
-                console.log('progressHandler params', filename, params);
-                if (params.finished) {
-                    isFinished = true;
-                }
-            };
-
-            // Cleanup function to remove listeners
-            const cleanup = () => {
-                client.off('HeapProfiler.addHeapSnapshotChunk', chunkHandler);
-                client.off('HeapProfiler.reportHeapSnapshotProgress', progressHandler);
-            };
-
-            // Add event listeners
-            client.on('HeapProfiler.addHeapSnapshotChunk', chunkHandler);
-            client.on('HeapProfiler.reportHeapSnapshotProgress', progressHandler);
-
-            // Start the heap snapshot process
-            client.send('HeapProfiler.enable')
-                .then(() => client.send('HeapProfiler.takeHeapSnapshot', { reportProgress: true }))
-                .catch((err) => {
-                    console.error('HeapProfiler.enable error', err);
-                    error = err;
-                    cleanup();
-                    file.end();
-                    reject(err);
-                });
-        });
-    }
+const isLocal = !process.env.CI;
+test('memory', async ({ page }) => {
+    test.setTimeout(60_000);
+    const client = await page.context().newCDPSession(page);
 
     await page.goto('http://localhost:3000/sheets/');
-    await page.waitForTimeout(5000);
+    await page.waitForTimeout(2000);
 
     const memoryAfterFirstInstance = (await getMetrics(page)).JSHeapUsedSize;
 
@@ -131,8 +143,9 @@ test('memory', async ({ page }) => {
     await page.evaluate(() => window.univer.dispose());
     await page.waitForTimeout(2000);
 
-    const firstSnapshot = await takeHeapSnapshot(client, 'memory-first.heapsnapshot');
-    console.log('firstSnapshot', firstSnapshot);
+    if (isLocal) {
+        await takeHeapSnapshot(client, 'memory-first.heapsnapshot');
+    }
 
     const memoryAfterDisposingFirstInstance = (await getMetrics(page)).JSHeapUsedSize;
 
@@ -141,8 +154,9 @@ test('memory', async ({ page }) => {
     await page.evaluate(() => window.univer.dispose());
     await page.waitForTimeout(2000);
 
-    const secondSnapshot = await takeHeapSnapshot(client, 'memory-second.heapsnapshot');
-    console.log('secondSnapshot', secondSnapshot);
+    if (isLocal) {
+        await takeHeapSnapshot(client, 'memory-second.heapsnapshot');
+    }
 
     const memoryAfterDisposingSecondUniver = (await getMetrics(page)).JSHeapUsedSize;
     expect(memoryAfterDisposingSecondUniver - memoryAfterDisposingFirstInstance)

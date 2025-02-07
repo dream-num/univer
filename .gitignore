@@ -86,6 +86,7 @@ typings/
 # examples
 
 screenshot
+*.heapsnapshot
 
 univer-custom-build
 universheet-custom-build

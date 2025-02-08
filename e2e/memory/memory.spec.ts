@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-/* eslint-disable no-console */
 import type { CDPSession } from '@playwright/test';
 import { createWriteStream } from 'node:fs';
 import { expect, test } from '@playwright/test';
@@ -28,7 +27,7 @@ const MAX_UNIT_MEMORY_OVERFLOW = 1_000_000; // 1MB
 const MAX_UNIVER_MEMORY_OVERFLOW = 6_000_000; // TODO@wzhudev: temporarily added 300KB
 // there is a memory leak in the univer object, so we need to make sure that
 
-const MAX_SECOND_INSTANCE_OVERFLOW = 100_000; // Only 100 KB
+// const MAX_SECOND_INSTANCE_OVERFLOW = 100_000; // Only 100 KB
 
 interface HeapSnapshotChunk {
     chunk: string;
@@ -42,7 +41,7 @@ interface HeapSnapshotProgress {
 }
 async function takeHeapSnapshot(client: CDPSession, filename: string) {
     return new Promise((resolve, reject) => {
-        const file = createWriteStream(filename);
+        const file = createWriteStream(`./test-results/${filename}`);
         let isFinished = false;
         let error = null;
         let noChunkTimeout = null;
@@ -84,7 +83,7 @@ async function takeHeapSnapshot(client: CDPSession, filename: string) {
         chunkHandler = (payload: HeapSnapshotChunk) => {
             try {
                 if (payload.chunk) {
-                    console.log('chunkHandler write chunk', filename, file.writableLength);
+                    // console.log('chunkHandler write chunk', filename, file.writableLength);
                     file.write(payload.chunk);
                     scheduleEnd();
                 }
@@ -120,7 +119,7 @@ async function takeHeapSnapshot(client: CDPSession, filename: string) {
     });
 }
 
-const isLocal = !process.env.CI;
+// const isLocal = !process.env.CI;
 test('memory', async ({ page }) => {
     test.setTimeout(60_000);
     const client = await page.context().newCDPSession(page);

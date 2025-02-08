@@ -26,7 +26,7 @@ jobs:
               run: pnpm build:e2e
 
             - name: Run Playwright Tests
-              run: pnpm exec playwright test --output=playwright-assets
+              run: pnpm exec playwright test
 
             - name: 🚀 Deploy to Vercel
               uses: amondnet/vercel-action@v25
@@ -54,11 +54,10 @@ jobs:
                       test-results/
                   retention-days: 30
 
-            - name: Upload heap snapshots
-              if: steps.test-run.outcome == 'failure' # Only upload if test step failed
+            - name: Upload Snapshots
               uses: actions/upload-artifact@v4
+              if: ${{ !cancelled() }}
               with:
-                  name: heap-snapshots-${{ github.sha }}
-                  path: |
-                      *.heapsnapshot
-                  retention-days: 5
+                  name: snapshots
+                  path: test-results/
+                  retention-days: 30

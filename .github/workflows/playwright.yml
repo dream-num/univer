@@ -54,10 +54,10 @@ jobs:
                       test-results/
                   retention-days: 30
 
-            - name: Upload Snapshots
+            - name: Upload HeapSnapshots
               uses: actions/upload-artifact@v4
-              if: ${{ !cancelled() }}
+              if: ${{ failure() }}
               with:
                   name: snapshots
-                  path: test-results/
+                  path: test-results/*.heapsnapshot
                   retention-days: 30

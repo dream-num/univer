@@ -67,7 +67,6 @@ import {
     ObjectMatrix,
 
     RxDisposable,
-    toDisposable,
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
@@ -156,6 +155,10 @@ export class SheetClipboardController extends RxDisposable {
         this._initCommandListener();
         this._initUIComponents();
         this._pasteWithDoc();
+    }
+
+    refreshOptionalPaste() {
+        this._refreshOptionalPaste$.next(Math.random());
     }
 
     private _pasteWithDoc() {
@@ -929,25 +932,6 @@ export class SheetClipboardController extends RxDisposable {
                 }
             })
         );
-
-        const sheetSkeletonManagerService = this._renderManagerService.withCurrentTypeOfUnit(UniverInstanceType.UNIVER_SHEET, SheetSkeletonManagerService);
-        if (sheetSkeletonManagerService) {
-            this.disposeWithMe(
-                toDisposable(sheetSkeletonManagerService.currentSkeleton$.subscribe((skeleton) => {
-                    if (!skeleton?.unitId) {
-                        return;
-                    }
-                    if (!this._sheetClipboardService.getPasteMenuVisible()) {
-                        return;
-                    }
-                    const pasteOptionsCache = this._sheetClipboardService.getPasteOptionsCache();
-                    const menuUnitId = pasteOptionsCache?.target.unitId;
-                    if (skeleton.unitId === menuUnitId) {
-                        this._refreshOptionalPaste$.next(Math.random());
-                    }
-                }))
-            );
-        }
     }
 
     private _initUIComponents() {

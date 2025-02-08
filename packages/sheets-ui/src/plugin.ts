@@ -47,6 +47,7 @@ import { SheetPermissionInterceptorCanvasRenderController } from './controllers/
 import { SheetPermissionInterceptorClipboardController } from './controllers/permission/sheet-permission-interceptor-clipboard.controller';
 import { SheetPermissionInterceptorFormulaRenderController } from './controllers/permission/sheet-permission-interceptor-formula-render.controller';
 import { SheetPermissionRenderController, SheetPermissionRenderManagerController, WorksheetProtectionRenderController } from './controllers/permission/sheet-permission-render.controller';
+import { ClipboardRenderController } from './controllers/render-controllers/clipboard.render-controller';
 import { SheetContextMenuRenderController } from './controllers/render-controllers/contextmenu.render-controller';
 import { EditorBridgeRenderController } from './controllers/render-controllers/editor-bridge.render-controller';
 import { FormatPainterRenderController } from './controllers/render-controllers/format-painter.render-controller';
@@ -233,6 +234,7 @@ export class UniverSheetsUIPlugin extends Plugin {
             [SheetCellEditorResizeService],
 
             [FormatPainterRenderController],
+            [ClipboardRenderController],
             [CellAlertRenderController],
             [ForceStringAlertRenderController],
             [MarkSelectionRenderController],

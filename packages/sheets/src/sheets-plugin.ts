@@ -46,6 +46,7 @@ import { SheetRangeThemeService } from './services/range-theme-service';
 import { RefRangeService } from './services/ref-range/ref-range.service';
 import { SheetsSelectionsService } from './services/selections/selection.service';
 import { SheetInterceptorService } from './services/sheet-interceptor/sheet-interceptor.service';
+import { SheetSkeletonService } from './skeleton/skeleton.service';
 
 const PLUGIN_NAME = 'SHEET_PLUGIN';
 
@@ -95,6 +96,7 @@ export class UniverSheetsPlugin extends Plugin {
             [INumfmtService, { useClass: NumfmtService }],
             [SheetInterceptorService],
             [SheetRangeThemeService],
+            [SheetSkeletonService],
 
             // controllers
             [BasicWorksheetController],
@@ -146,6 +148,7 @@ export class UniverSheetsPlugin extends Plugin {
             [WorkbookPermissionService],
             [WorksheetPermissionService],
             [SheetPermissionViewModelController],
+            [SheetSkeletonService],
         ]);
     }
 

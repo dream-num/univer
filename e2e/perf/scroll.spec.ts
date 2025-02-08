@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { Page } from '@playwright/test';
 /* eslint-disable no-console */
-import { chromium, expect, test } from '@playwright/test';
+import type { Page } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 import { sheetData as emptySheetData } from '../__testing__/emptysheet';
 import { sheetData as freezeData } from '../__testing__/freezesheet';
 import { sheetData as mergeCellData } from '../__testing__/mergecell';
@@ -135,14 +135,7 @@ async function measureFPS(page: Page, testDuration = 5, deltaX: number, deltaY: 
 const createTest = (title: string, sheetData: IJsonObject, minFpsValue: number, deltaX = 0, deltaY = 0) => {
     // Default Size Of browser: 1280x720 pixels. And default DPR is 1.
     test(title, async ({ page }) => {
-        let port = 3000;
-        if (!isCI) {
-            const browser = await chromium.launch({ headless: false }); // launch browser
-            page = await browser.newPage();
-            port = 3002;
-        }
-
-        await page.goto(`http://localhost:${port}/sheets/`);
+        await page.goto('http://localhost:3000/sheets/');
         await page.waitForTimeout(2000);
 
         const windowOfPage = await page.evaluateHandle('window');

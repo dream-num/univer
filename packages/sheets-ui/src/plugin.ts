@@ -47,6 +47,7 @@ import { SheetPermissionInterceptorCanvasRenderController } from './controllers/
 import { SheetPermissionInterceptorClipboardController } from './controllers/permission/sheet-permission-interceptor-clipboard.controller';
 import { SheetPermissionInterceptorFormulaRenderController } from './controllers/permission/sheet-permission-interceptor-formula-render.controller';
 import { SheetPermissionRenderController, SheetPermissionRenderManagerController, WorksheetProtectionRenderController } from './controllers/permission/sheet-permission-render.controller';
+import { ClipboardRenderController } from './controllers/render-controllers/clipboard.render-controller';
 import { SheetContextMenuRenderController } from './controllers/render-controllers/contextmenu.render-controller';
 import { EditorBridgeRenderController } from './controllers/render-controllers/editor-bridge.render-controller';
 import { FormatPainterRenderController } from './controllers/render-controllers/format-painter.render-controller';
@@ -57,6 +58,7 @@ import { HeaderResizeRenderController } from './controllers/render-controllers/h
 import { HeaderUnhideRenderController } from './controllers/render-controllers/header-unhide.render-controller';
 import { SheetsScrollRenderController } from './controllers/render-controllers/scroll.render-controller';
 import { SheetRenderController } from './controllers/render-controllers/sheet.render-controller';
+import { SheetSkeletonRenderController } from './controllers/render-controllers/skeleton.render-controller';
 import { SheetsZoomRenderController } from './controllers/render-controllers/zoom.render-controller';
 import { SheetUIController } from './controllers/sheet-ui.controller';
 import { StatusBarController } from './controllers/status-bar.controller';
@@ -211,6 +213,7 @@ export class UniverSheetsUIPlugin extends Plugin {
     private _registerRenderBasics(): void {
         ([
             [SheetSkeletonManagerService],
+            [SheetSkeletonRenderController],
             [SheetRenderController],
             [ISheetSelectionRenderService, { useClass: SheetSelectionRenderService }],
         ] as Dependency[]).forEach((m) => {
@@ -233,6 +236,7 @@ export class UniverSheetsUIPlugin extends Plugin {
             [SheetCellEditorResizeService],
 
             [FormatPainterRenderController],
+            [ClipboardRenderController],
             [CellAlertRenderController],
             [ForceStringAlertRenderController],
             [MarkSelectionRenderController],

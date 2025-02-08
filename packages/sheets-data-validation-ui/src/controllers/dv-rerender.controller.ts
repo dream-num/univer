@@ -41,7 +41,7 @@ export class SheetsDataValidationReRenderController extends Disposable implement
                 sheetIds.add(value.subUnitId);
             });
             sheetIds.forEach((sheetId) => {
-                this._sheetSkeletonManagerService.getWorksheetSkeleton(sheetId)?.skeleton.makeDirty(true);
+                this._sheetSkeletonManagerService.getSkeletonParam(sheetId)?.skeleton.makeDirty(true);
             });
             this._context.mainComponent?.makeForceDirty();
         };

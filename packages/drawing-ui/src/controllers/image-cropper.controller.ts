@@ -23,7 +23,7 @@ import { MessageType } from '@univerjs/design';
 import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService, SetDrawingSelectedOperation } from '@univerjs/drawing';
 import { CURSOR_TYPE, degToRad, Image, IRenderManagerService, precisionTo, Vector2 } from '@univerjs/engine-render';
 import { IMessageService } from '@univerjs/ui';
-import { filter, switchMap } from 'rxjs';
+import { of, switchMap } from 'rxjs';
 import { AutoImageCropOperation, CloseImageCropOperation, CropType, OpenImageCropOperation } from '../commands/operations/image-crop.operation';
 import { ImageCropperObject } from '../views/crop/image-cropper-object';
 
@@ -334,14 +334,14 @@ export class ImageCropperController extends Disposable {
                 imageCropperObject?.dispose();
             })
         );
-        const sheetUnit = this._univerInstanceService
+
+        const sheetUnit$ = this._univerInstanceService
             .getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET)
             .pipe(
-                filter((workbook) => Boolean(workbook)),
-                switchMap((workbook) => workbook!.activeSheet$)
+                switchMap((workbook) => workbook ? workbook.activeSheet$ : of(null))
             );
 
-        this.disposeWithMe(sheetUnit.subscribe(() => {
+        this.disposeWithMe(sheetUnit$.subscribe(() => {
             this._commandService.syncExecuteCommand(CloseImageCropOperation.id);
         }));
     }

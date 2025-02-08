@@ -105,6 +105,7 @@ export { expandToContinuousRange } from './basics/expand-range';
 export { splitRangeText } from './basics/split-range-text';
 export type { SplitDelimiterEnum } from './basics/split-range-text';
 export { getNextPrimaryCell } from './services/selections/move-active-cell-util';
+export { checkCellValueType } from './basics/cell-type';
 
 export { ExclusiveRangeService, IExclusiveRangeService } from './services/exclusive-range/exclusive-range-service';
 
@@ -444,4 +445,6 @@ export { type ISetWorksheetActiveOperationParams, SetWorksheetActiveOperation } 
 export { type IToggleCellCheckboxCommandParams, ToggleCellCheckboxCommand } from './commands/commands/toggle-checkbox.command';
 export { SCOPE_WORKBOOK_VALUE_DEFINED_NAME } from './controllers/defined-name-data.controller';
 export type { ICellOverGridPosition, ISheetOverGridPosition } from './basics/cell-position';
+
+export { SheetSkeletonService } from './skeleton/skeleton.service';
 // #endregion

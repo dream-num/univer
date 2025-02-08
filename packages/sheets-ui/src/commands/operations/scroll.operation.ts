@@ -39,7 +39,7 @@ export const SetScrollOperation: IOperation<IScrollStateWithSearchParam> = {
         // const worksheet = workbook!.getSheetBySheetId(sheetId);
         // const { xSplit, ySplit } = worksheet!.getConfig().freeze;
 
-        scrollManagerService.setScrollInfoAndEmitEvent({
+        scrollManagerService.emitRawScrollParam({
             unitId,
             sheetId,
             offsetX,

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+import type { IInputProps } from './Input';
 import React, { useEffect, useRef } from 'react';
-
 import styles from './index.module.less';
-import { type IInputProps, Input } from './Input';
+import { Input } from './Input';
 
 export interface IInputWithSlotProps extends IInputProps {
     /**

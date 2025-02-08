@@ -46,7 +46,7 @@ export class SheetContextMenuMobileRenderController extends Disposable implement
         let listenToSelectionChangeEvent = false;
         this.disposeWithMe(this._selectionManagerService.selectionMoveStart$.subscribe(() => listenToSelectionChangeEvent = true));
         this.disposeWithMe(this._selectionManagerService.selectionMoveEnd$.subscribe((selectionWithStyleList: ISelectionWithStyle[]) => {
-            const skeleton = this._sheetSkeletonManagerService.getCurrent()!.skeleton;
+            const skeleton = this._sheetSkeletonManagerService.getCurrentParam()!.skeleton;
             if (!skeleton || !selectionWithStyleList || listenToSelectionChangeEvent === false) {
                 return;
             }

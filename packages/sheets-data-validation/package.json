@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-data-validation",
-    "version": "0.5.5",
+    "version": "0.6.0-alpha.0",
     "private": false,
     "description": "Data validation for Univer Sheets",
     "author": "DreamNum <developer@univer.ai>",
@@ -77,10 +77,10 @@
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
-        "less": "^4.2.1",
+        "less": "^4.2.2",
         "rxjs": "^7.8.1",
         "typescript": "^5.7.3",
-        "vite": "^6.0.7",
-        "vitest": "^2.1.8"
+        "vite": "^6.0.11",
+        "vitest": "^3.0.4"
     }
 }

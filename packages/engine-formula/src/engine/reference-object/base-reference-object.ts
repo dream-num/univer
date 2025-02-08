@@ -17,7 +17,9 @@
 import type { ICellData, IRange, Nullable } from '@univerjs/core';
 import type { IRuntimeUnitDataType, IUnitData, IUnitSheetNameMap, IUnitStylesData } from '../../basics/common';
 
+import type { BaseValueObject, IArrayValueObject } from '../value-object/base-value-object';
 import { CellValueType, moveRangeByOffset } from '@univerjs/core';
+import { DEFAULT_TEXT_FORMAT } from '@univerjs/engine-numfmt';
 import { FormulaAstLRU } from '../../basics/cache-lru';
 import { ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
 import { isNullCellForFormula } from '../../basics/is-null-cell';
@@ -25,7 +27,7 @@ import { ObjectClassType } from '../../basics/object-class-type';
 import { getCellValue } from '../utils/cell';
 import { getRuntimeFeatureCell } from '../utils/get-runtime-feature-cell';
 import { ArrayValueObject, ValueObjectFactory } from '../value-object/array-value-object';
-import { type BaseValueObject, ErrorValueObject, type IArrayValueObject } from '../value-object/base-value-object';
+import { ErrorValueObject } from '../value-object/base-value-object';
 import {
     createBooleanValueObjectByRawValue,
     createNumberValueObjectByRawValue,
@@ -402,6 +404,11 @@ export class BaseReferenceObject extends ObjectClassType {
 
         if (cell.t === CellValueType.NUMBER) {
             const pattern = this._getPatternByCell(cell);
+
+            if (pattern === DEFAULT_TEXT_FORMAT) {
+                return StringValueObject.create(value.toString());
+            }
+
             return createNumberValueObjectByRawValue(value, pattern);
         }
         if (cell.t === CellValueType.STRING || cell.t === CellValueType.FORCE_STRING) {

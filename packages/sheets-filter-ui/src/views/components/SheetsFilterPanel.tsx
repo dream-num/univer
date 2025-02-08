@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
+import type { ISegmentedProps } from '@univerjs/design';
 import type { ByConditionsModel, ByValuesModel } from '../../services/sheets-filter-panel.service';
 import { ICommandService, LocaleService, useDependency } from '@univerjs/core';
-import { Button, type ISegmentedProps, Segmented } from '@univerjs/design';
+import { Button, Segmented } from '@univerjs/design';
 import { SheetsFilterService } from '@univerjs/sheets-filter';
 
 import { SheetsUIPart } from '@univerjs/sheets-ui';
@@ -106,8 +107,8 @@ function useFilterByOptions(localeService: LocaleService): ISegmentedProps['opti
     return useMemo(() => [
         { label: localeService.t('sheets-filter.panel.by-values'), value: FilterBy.VALUES },
         { label: localeService.t('sheets-filter.panel.by-conditions'), value: FilterBy.CONDITIONS },
-    ]
+    ],
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    , [locale, localeService]);
+    [locale, localeService]);
 }
 

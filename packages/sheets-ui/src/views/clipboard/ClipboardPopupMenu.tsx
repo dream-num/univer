@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo } from '@univerjs/core';
 import type { IDiscreteRange } from '../../controllers/utils/range-tools';
 import type { IPasteHookKeyType } from '../../services/clipboard/type';
-import { ICommandService, IUniverInstanceService, LocaleService, toDisposable, useDependency, useObservable } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, LocaleService, useDependency, useObservable } from '@univerjs/core';
 import { DropdownOverlay, DropdownProvider, DropdownTrigger } from '@univerjs/design';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { convertTransformToOffsetX, convertTransformToOffsetY, IRenderManagerService } from '@univerjs/engine-render';
 import { CheckMarkSingle, MoreDownSingle, PasteSpecial } from '@univerjs/icons';
 import clsx from 'clsx';
-import React, { useCallback, useEffect, useState } from 'react';
+import { useState } from 'react';
 import { SheetOptionalPasteCommand } from '../../commands/commands/clipboard.command';
-import { SetScrollOperation } from '../../commands/operations/scroll.operation';
-import { useActiveWorkbook, useSheetSkeleton } from '../../components/hook';
+import { useActiveWorkbook } from '../../components/hook';
+import { SheetClipboardController } from '../../controllers/clipboard/clipboard.controller';
 import { getSheetObject } from '../../controllers/utils/component-tools';
 import { ISheetClipboardService, PREDEFINED_HOOK_NAME } from '../../services/clipboard/clipboard.service';
 import { ISheetSelectionRenderService } from '../../services/selection/base-selection-render.service';
@@ -81,8 +80,8 @@ const useMenuPosition = (range?: IDiscreteRange) => {
     const endX = endPosition?.endX ?? 0;
     const endY = endPosition?.endY ?? 0;
 
-    const positionEndX = skeleton?.convertTransformToOffsetX(endX, scaleX, scrollXY) ?? -9999;
-    const positionEndY = skeleton?.convertTransformToOffsetY(endY, scaleY, scrollXY) ?? -9999;
+    const positionEndX = convertTransformToOffsetX(endX, scaleX, scrollXY) ?? -9999;
+    const positionEndY = convertTransformToOffsetY(endY, scaleY, scrollXY) ?? -9999;
 
     const canvasWidth = canvas?.getWidth();
     const canvasHeight = canvas?.getHeight();
@@ -111,50 +110,20 @@ const useMenuPosition = (range?: IDiscreteRange) => {
 
 export const ClipboardPopupMenu = () => {
     const clipboardService = useDependency(ISheetClipboardService);
-    const showMenu = useObservable(clipboardService.showMenu$, true);
+    const showMenu = useObservable(clipboardService.showMenu$, false);
+    const clipboardController = useDependency(SheetClipboardController);
     const pasteOptionsCache = useObservable(clipboardService.pasteOptionsCache$, null);
-    const renderManagerService = useDependency(IRenderManagerService);
     const localeService = useDependency(LocaleService);
     const commandService = useDependency(ICommandService);
 
     const [menuHovered, setMenuHovered] = useState(false);
     const [menuVisible, setMenuVisible] = useState(false);
 
-    const [_, setVersion] = useState(Math.random());
+    const version = useObservable(clipboardController.refreshOptionalPaste$, Math.random());
 
     const range = pasteOptionsCache?.target.pastedRange;
 
     const relativePosition = useMenuPosition(range);
-
-    const sheetSkeletonManagerService = useSheetSkeleton();
-
-    useEffect(() => {
-        if (!showMenu) {
-            setMenuHovered(false);
-            setMenuVisible(false);
-        }
-    }, [showMenu]);
-
-    const forceUpdate = useCallback(() => setVersion(Math.random()), []);
-
-    useEffect(() => {
-        const disposable = sheetSkeletonManagerService && toDisposable(
-            sheetSkeletonManagerService.currentSkeleton$.subscribe((skeleton) => {
-                if (skeleton) {
-                    forceUpdate();
-                }
-            }));
-        return disposable?.dispose;
-    }, [sheetSkeletonManagerService, forceUpdate]);
-
-    useEffect(() => {
-        const disposable = commandService.onCommandExecuted((command: ICommandInfo) => {
-            if (command.id === SetScrollOperation.id) {
-                forceUpdate();
-            }
-        });
-        return disposable.dispose;
-    }, [forceUpdate, commandService]);
 
     if (!relativePosition || !showMenu) return null;
 
@@ -192,7 +161,7 @@ export const ClipboardPopupMenu = () => {
                     </div>
                 </DropdownTrigger>
                 <DropdownOverlay className={clsx(styles.sheetPasteOptionsMenu, `
-                  univer-border univer-border-gray-200 univer-border-solid
+                  univer-border univer-border-solid univer-border-gray-200
                 `)}
                 >
                     <ul>
@@ -220,4 +189,3 @@ export const ClipboardPopupMenu = () => {
         </div>
     );
 };
-

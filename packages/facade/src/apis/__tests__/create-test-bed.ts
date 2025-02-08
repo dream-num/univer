@@ -41,6 +41,7 @@ import {
     RangeProtectionRuleModel,
     RefRangeService,
     SheetInterceptorService,
+    SheetSkeletonService,
     SheetsSelectionsService,
     WorkbookPermissionService,
     WorksheetPermissionService,
@@ -169,6 +170,7 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
             injector.add([SheetsRenderService]);
             injector.add([IShortcutService, { useClass: ShortcutService }]);
             injector.add([IPlatformService, { useClass: PlatformService }]);
+            injector.add([SheetSkeletonService]);
             injector.add([SheetSkeletonManagerService]);
             injector.add([FormulaDataModel]);
             injector.add([LexerTreeBuilder]);

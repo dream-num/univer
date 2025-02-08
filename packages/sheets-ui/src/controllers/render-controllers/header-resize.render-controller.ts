@@ -160,7 +160,7 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
         };
 
         const pointerMoveEvent = (evt: IPointerEvent | IMouseEvent, _state: EventState) => {
-            const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+            const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
             if (skeleton == null || this._rowResizeRect == null || this._columnResizeRect == null) {
                 return;
             }
@@ -307,7 +307,7 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
 
         this.disposeWithMe(
             eventBindingObject.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent) => {
-                const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+                const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
                 if (skeleton == null) return;
 
                 const scene = this._context.scene;
@@ -326,9 +326,9 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
 
                 this._startOffsetY = transformCoord.y;
 
-                const currentOffsetX = skeleton.getOffsetByPositionX(this._currentColumn);
-                const currentOffsetY = skeleton.getOffsetByPositionY(this._currentRow);
-                const cell = skeleton.getNoMergeCellPositionByIndex(this._currentRow, this._currentColumn);
+                const currentOffsetX = skeleton.getOffsetByColumn(this._currentColumn);
+                const currentOffsetY = skeleton.getOffsetByRow(this._currentRow);
+                const cell = skeleton.getNoMergeCellWithCoordByIndex(this._currentRow, this._currentColumn);
 
                 let isStartMove = false;
                 let moveChangeX = 0;
@@ -488,7 +488,7 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
                 const scene = this._context.scene;
                 scene.resetCursor();
 
-                const sk = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+                const sk = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
                 if (!sk) return;
 
                 const startRow = 0;

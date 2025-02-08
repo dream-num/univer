@@ -124,7 +124,7 @@ export class HoverRenderController extends Disposable implements IRenderModule {
             }
         };
 
-        handleSkeletonChange(this._sheetSkeletonManagerService.getCurrent());
+        handleSkeletonChange(this._sheetSkeletonManagerService.getCurrentParam());
         this.disposeWithMe(this._sheetSkeletonManagerService.currentSkeleton$.subscribe((skeletonParam) => {
             handleSkeletonChange(skeletonParam);
         }));

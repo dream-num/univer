@@ -34,7 +34,7 @@ export { DocumentViewModel } from './components/docs/view-model/document-view-mo
 export { DocumentEditArea } from './components/docs/view-model/document-view-model';
 export { parseDataStreamToTree } from './components/docs/view-model/document-view-model';
 export { getLastColumn } from './components/docs/layout/tools';
-export { DEFAULT_PADDING_DATA } from './components/sheets/sheet-skeleton';
+export { DEFAULT_PADDING_DATA } from './components/sheets/sheet.render-skeleton';
 export * from './context';
 export * from './custom';
 export * from './engine';
@@ -48,5 +48,4 @@ export { type IChangeObserverConfig } from './scene.transformer';
 export * from './scene-viewer';
 export * from './scroll-timer';
 export * from './shape';
-export { ThinEngine } from './thin-engine';
 export * from './viewport';

@@ -40,7 +40,6 @@ import {
 } from '../../common/keys';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import { SheetsRenderService } from '../../services/sheets-render.service';
-import { FREEZE_COLUMN_HEADER_NAME, FREEZE_ROW_HEADER_NAME } from './freeze.render-controller';
 
 interface ISetWorksheetMutationParams {
     unitId: string;
@@ -78,8 +77,16 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
         const sheetId = worksheet.getSheetId();
         this._sheetSkeletonManagerService.setCurrent({ sheetId });
 
-        // TODO: we should attach the context object to the RenderContext object on scene.canvas.
-        engine.runRenderLoop(() => scene.render());
+        const frameFn = () => scene.render();
+        this.disposeWithMe(this._context.activated$.subscribe((activated) => {
+            if (activated) {
+                // TODO: we should attach the context object to the RenderContext object on scene.canvas.
+                engine.runRenderLoop(frameFn);
+            } else {
+                // Stop the render loop when the render unit is deactivated.
+                engine.stopRenderLoop(frameFn);
+            }
+        }));
     }
 
     private _renderFrameTimeMetric: Nullable<Record<string, number[]>> = null;
@@ -239,6 +246,7 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
     private _initViewports(scene: Scene, rowHeader: { width: number }, columnHeader: { height: number }) {
         const bufferEdgeX = 100;
         const bufferEdgeY = 100;
+
         const viewMain = new Viewport(SHEET_VIEWPORT_KEY.VIEW_MAIN, scene, {
             left: rowHeader.width,
             top: columnHeader.height,
@@ -360,18 +368,19 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
                 height: columnHeaderHeight,
             });
 
-            const rowFreezeHeaderRect = this._context.scene.getObject(FREEZE_ROW_HEADER_NAME);
-            if (rowFreezeHeaderRect) {
-                rowFreezeHeaderRect.transformByState({
-                    top: columnHeaderHeight - rowFreezeHeaderRect.height,
-                });
-            }
-            const colFreezeHeaderRect = this._context.scene.getObject(FREEZE_COLUMN_HEADER_NAME);
-            if (colFreezeHeaderRect) {
-                colFreezeHeaderRect.transformByState({
-                    height: columnHeaderHeight,
-                });
-            }
+            // no need to update freezelineRect, freeze render controller has handled.
+            // const rowFreezeHeaderRect = this._context.scene.getObject(FREEZE_ROW_HEADER_NAME);
+            // if (rowFreezeHeaderRect) {
+            //     rowFreezeHeaderRect.transformByState({
+            //         top: columnHeaderHeight - rowFreezeHeaderRect.height,
+            //     });
+            // }
+            // const colFreezeHeaderRect = this._context.scene.getObject(FREEZE_COLUMN_HEADER_NAME);
+            // if (colFreezeHeaderRect) {
+            //     colFreezeHeaderRect.transformByState({
+            //         height: columnHeaderHeight,
+            //     });
+            // }
         }));
     }
 
@@ -404,6 +413,8 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
                     commandId,
                 }, true);
 
+                // TODO @lumixraku
+                // This is insane !!! Tons changes would call sk.setCurrent.
                 this._sheetSkeletonManagerService.setCurrent({
                     sheetId: worksheetId,
                     commandId,
@@ -502,7 +513,7 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
     }
 
     private _rangeToBounds(ranges: IRange[]) {
-        const skeleton = this._sheetSkeletonManagerService.getCurrent()!.skeleton;
+        const skeleton = this._sheetSkeletonManagerService.getCurrentParam()!.skeleton;
         const { rowHeightAccumulation, columnWidthAccumulation, rowHeaderWidth, columnHeaderHeight } = skeleton;
 
         const dirtyBounds: IViewportInfos[] = [];

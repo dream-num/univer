@@ -123,8 +123,8 @@ export class FDocument {
                     endOffset,
                     rangeType: DOC_RANGE_TYPE.TEXT,
                 },
-            ]
-            , true
+            ],
+            true
         );
     }
 }

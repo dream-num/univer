@@ -77,7 +77,7 @@ export class DocInputController extends Disposable implements IRenderModule {
             const defaultTextStyle = this._docMenuStyleService.getDefaultStyle();
             const cacheStyle = this._docMenuStyleService.getStyleCache();
             const curCustomRange = getCustomRangeAtPosition(originBody?.customRanges ?? [], activeRange.endOffset, SHEET_EDITOR_UNITS.includes(unitId));
-            const curTextRun = getTextRunAtPosition(originBody?.textRuns ?? [], activeRange.endOffset, defaultTextStyle, cacheStyle);
+            const curTextRun = getTextRunAtPosition(originBody?.textRuns ?? [], activeRange.endOffset, defaultTextStyle, cacheStyle, SHEET_EDITOR_UNITS.includes(unitId));
             const curCustomDecorations = getCustomDecorationAtPosition(originBody?.customDecorations ?? [], activeRange.endOffset);
 
             await this._commandService.executeCommand(InsertCommand.id, {

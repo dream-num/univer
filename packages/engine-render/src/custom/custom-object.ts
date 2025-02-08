@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { BaseObject } from '../base-object';
 import type { IViewportInfo, Vector2 } from '../basics/vector2';
 import type { UniverRenderingContext } from '../context';
+import { BaseObject } from '../base-object';
 
 export class CustomObject extends BaseObject {
     constructor(

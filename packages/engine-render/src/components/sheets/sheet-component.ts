@@ -19,7 +19,7 @@ import type { IRange, Nullable } from '@univerjs/core';
 import type { IViewportInfo, Vector2 } from '../../basics/vector2';
 import type { UniverRenderingContext } from '../../context';
 import type { SHEET_EXTENSION_TYPE } from './extensions/sheet-extension';
-import type { SpreadsheetSkeleton } from './sheet-skeleton';
+import type { SpreadsheetSkeleton } from './sheet.render-skeleton';
 import { RENDER_CLASS_TYPE } from '../../basics/const';
 import { RenderComponent } from '../component';
 

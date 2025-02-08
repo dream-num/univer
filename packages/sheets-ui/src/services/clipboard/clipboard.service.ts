@@ -59,10 +59,11 @@ import {
     SetSelectionsOperation,
     SetWorksheetActiveOperation,
 
-    SheetsSelectionsService } from '@univerjs/sheets';
+    SheetsSelectionsService,
+} from '@univerjs/sheets';
 import { FILE__BMP_CLIPBOARD_MIME_TYPE, FILE__JPEG_CLIPBOARD_MIME_TYPE, FILE__WEBP_CLIPBOARD_MIME_TYPE, FILE_PNG_CLIPBOARD_MIME_TYPE, HTML_CLIPBOARD_MIME_TYPE, IClipboardInterfaceService, imageMimeTypeSet, INotificationService, IPlatformService, PLAIN_TEXT_CLIPBOARD_MIME_TYPE } from '@univerjs/ui';
 
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { rangeToDiscreteRange, virtualizeDiscreteRanges } from '../../controllers/utils/range-tools';
 import { IMarkSelectionService } from '../mark-selection/mark-selection.service';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
@@ -113,8 +114,10 @@ HtmlToUSMService.use(UniverPastePlugin);
 export interface ISheetClipboardService {
     showMenu$: Observable<boolean>;
     setShowMenu: (show: boolean) => void;
+    getPasteMenuVisible: () => boolean;
 
     pasteOptionsCache$: Observable<IPasteOptionCache | null>;
+    getPasteOptionsCache: () => IPasteOptionCache | null;
     updatePasteOptionsCache(cache: IPasteOptionCache | null): void;
 
     copy(): Promise<boolean>;
@@ -152,7 +155,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
     readonly pasteOptionsCache$ = this._pasteOptionsCache$.asObservable();
 
     //Control the visibility of the Paste Options menu
-    private readonly _showMenu$: Subject<boolean> = new Subject<boolean>();
+    private readonly _showMenu$ = new BehaviorSubject(false);
     readonly showMenu$ = this._showMenu$.asObservable();
 
     constructor(
@@ -173,7 +176,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
     ) {
         super();
         this._htmlToUSM = new HtmlToUSMService({
-            getCurrentSkeleton: () => this._renderManagerService.withCurrentTypeOfUnit(UniverInstanceType.UNIVER_SHEET, SheetSkeletonManagerService)?.getCurrent(),
+            getCurrentSkeleton: () => this._renderManagerService.withCurrentTypeOfUnit(UniverInstanceType.UNIVER_SHEET, SheetSkeletonManagerService)?.getCurrentParam(),
         });
 
         this._usmToHtml = new USMToHtmlService();
@@ -185,6 +188,14 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
 
     setShowMenu(show: boolean) {
         this._showMenu$.next(show);
+    }
+
+    getPasteMenuVisible() {
+        return this._showMenu$.getValue();
+    }
+
+    getPasteOptionsCache() {
+        return this._pasteOptionsCache$.getValue();
     }
 
     copyContentCache(): CopyContentCache {

@@ -27,6 +27,7 @@ export class CustomFormulaValidator extends BaseDataValidator {
     override title: string = 'dataValidation.custom.title';
     override operators: DataValidationOperator[] = [];
     override scopes: string | string[] = ['sheet'];
+    order = 60;
 
     private readonly _customFormulaService = this.injector.get(DataValidationCustomFormulaService);
     private readonly _lexerTreeBuilder = this.injector.get(LexerTreeBuilder);

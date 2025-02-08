@@ -272,7 +272,7 @@ export function DataValidationDetail() {
             </FormLayout>
             <FormLayout label={localeService.t('dataValidation.panel.type')}>
                 <Select
-                    options={validators?.map((validator) => ({
+                    options={validators?.sort((a, b) => a.order - b.order)?.map((validator) => ({
                         label: localeService.t(validator.title),
                         value: validator.id,
                     }))}

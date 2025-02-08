@@ -92,7 +92,7 @@ export class ListValidator extends BaseDataValidator {
     protected formulaService = this.injector.get(DataValidationFormulaService);
     private _lexer = this.injector.get(LexerTreeBuilder);
     private _univerInstanceService = this.injector.get(IUniverInstanceService);
-
+    order = 50;
     override readonly offsetFormulaByRange = false;
 
     id: string = DataValidationType.LIST;

@@ -53,7 +53,7 @@ export class CheckboxValidator extends BaseDataValidator {
     override title: string = 'dataValidation.checkbox.title';
     override operators: DataValidationOperator[] = [];
     override scopes: string | string[] = ['sheet'];
-
+    order = 41;
     override readonly offsetFormulaByRange = false;
 
     private _formulaService = this.injector.get(DataValidationFormulaService);

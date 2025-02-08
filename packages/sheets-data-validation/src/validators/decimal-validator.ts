@@ -45,6 +45,7 @@ export class DecimalValidator extends BaseDataValidator {
     id: string = DataValidationType.DECIMAL;
     private readonly _lexerTreeBuilder = this.injector.get(LexerTreeBuilder);
     title: string = 'dataValidation.decimal.title';
+    order = 20;
 
     operators: DataValidationOperator[] = [
         DataValidationOperator.BETWEEN,

@@ -34,6 +34,7 @@ export class WholeValidator extends BaseDataValidator {
 
     id: string = DataValidationType.WHOLE;
     title: string = 'dataValidation.whole.title';
+    order = 10;
 
     operators: DataValidationOperator[] = [
         DataValidationOperator.BETWEEN,

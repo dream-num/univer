@@ -75,6 +75,7 @@ export abstract class BaseDataValidator {
     abstract title: string;
     abstract operators: DataValidationOperator[];
     abstract scopes: string[] | string;
+    abstract order: number;
 
     offsetFormulaByRange = true;
 

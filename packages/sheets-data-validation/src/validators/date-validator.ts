@@ -49,6 +49,7 @@ const transformDate2SerialNumber = (value: Nullable<CellValue>) => {
 export class DateValidator extends BaseDataValidator {
     id: string = DataValidationType.DATE;
     title: string = 'dataValidation.date.title';
+    order = 40;
     operators: DataValidationOperator[] = [
         DataValidationOperator.BETWEEN,
         DataValidationOperator.EQUAL,

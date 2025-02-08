@@ -143,9 +143,7 @@ test('memory', async ({ page }) => {
     await page.evaluate(() => window.univer.dispose());
     await page.waitForTimeout(2000);
 
-    if (isLocal) {
-        await takeHeapSnapshot(client, 'memory-first.heapsnapshot');
-    }
+    await takeHeapSnapshot(client, 'memory-first.heapsnapshot');
 
     const memoryAfterDisposingFirstInstance = (await getMetrics(page)).JSHeapUsedSize;
 
@@ -154,13 +152,11 @@ test('memory', async ({ page }) => {
     await page.evaluate(() => window.univer.dispose());
     await page.waitForTimeout(2000);
 
-    if (isLocal) {
-        await takeHeapSnapshot(client, 'memory-second.heapsnapshot');
-    }
+    await takeHeapSnapshot(client, 'memory-second.heapsnapshot');
 
     const memoryAfterDisposingSecondUniver = (await getMetrics(page)).JSHeapUsedSize;
     expect(memoryAfterDisposingSecondUniver - memoryAfterDisposingFirstInstance)
-        .toBeLessThanOrEqual(MAX_SECOND_INSTANCE_OVERFLOW);
+        .toBeLessThanOrEqual(1);
 
     expect(memoryAfterDisposingSecondUniver - memoryAfterFirstInstance)
         .toBeLessThanOrEqual(MAX_UNIVER_MEMORY_OVERFLOW);

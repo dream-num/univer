@@ -135,14 +135,6 @@ async function measureFPS(page: Page, testDuration = 5, deltaX: number, deltaY: 
 const createTest = (title: string, sheetData: IJsonObject, minFpsValue: number, deltaX = 0, deltaY = 0) => {
     // Default Size Of browser: 1280x720 pixels. And default DPR is 1.
     test(title, async ({ page }) => {
-        // dev:e2e open localhost:3000, not 3002
-        // let port = 3000;
-        // if (!isCI) {
-        //     const browser = await chromium.launch({ headless: false }); // launch browser
-        //     page = await browser.newPage();
-        //     port = 3002;
-        // }
-
         await page.goto('http://localhost:3000/sheets/');
         await page.waitForTimeout(2000);
 

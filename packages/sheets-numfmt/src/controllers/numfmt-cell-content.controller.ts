@@ -27,7 +27,6 @@ import {
     ICommandService,
     Inject,
     InterceptorEffectEnum,
-    isRealNum,
     IUniverInstanceService,
     LocaleService,
     LocaleType,

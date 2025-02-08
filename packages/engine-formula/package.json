@@ -69,6 +69,7 @@
     "dependencies": {
         "@flatten-js/interval-tree": "^1.1.3",
         "@univerjs/core": "workspace:*",
+        "@univerjs/engine-numfmt": "workspace:*",
         "@univerjs/rpc": "workspace:*",
         "decimal.js": "^10.4.3",
         "numfmt": "^2.5.2"

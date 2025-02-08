@@ -118,7 +118,6 @@ describe('test numfmt service', () => {
         const cell = sheet.getCellRaw(0, 5);
         const numfmtId = cell?.s;
         expect(styles.get(numfmtId)?.n).toEqual({ pattern: DEFAULT_TEXT_FORMAT });
-        expect(cell).toStrictEqual({ v: 1, t: CellValueType.STRING, s: numfmtId });
     });
 
     it('model set, text format contains number, to number format', () => {

@@ -18,7 +18,7 @@ import type { IPopup } from '@univerjs/ui';
 import type { IBaseDropdownProps } from '../type';
 import { dayjs, LocaleService, numfmt, useDependency } from '@univerjs/core';
 import { Button, DatePanel } from '@univerjs/design';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import styles from './index.module.less';
 
 export interface IDateDropdownProps {
@@ -33,9 +33,9 @@ export function DateDropdown(props: { popup: IPopup<IDateDropdownProps & IBaseDr
     const { extraProps } = popup;
     const { hideFn, patternType, defaultValue, onChange, showTime } = extraProps!;
     const [localDate, setLocalDate] = useState<dayjs.Dayjs | undefined>(defaultValue);
-    const date = localDate && localDate.isValid() ? localDate : dayjs();
+    const defaultDate = useMemo(() => dayjs(), []);
+    const date = localDate && localDate.isValid() ? localDate : defaultDate;
     const localeService = useDependency(LocaleService);
-
     const handleSave = async () => {
         if (!date) {
             return;
@@ -48,10 +48,10 @@ export function DateDropdown(props: { popup: IPopup<IDateDropdownProps & IBaseDr
     return (
         <div className={styles.dvDateDropdown}>
             <DatePanel
-                defaultValue={date}
+                value={date}
                 pickerValue={date}
                 mode={patternType === 'time' ? 'time' : 'date'}
-                showTime={(showTime ?? patternType === 'datetime') || undefined}
+                showTime={(showTime ?? (patternType === 'datetime' || patternType === 'time')) || undefined}
                 onSelect={async (newValue) => {
                     setLocalDate(newValue);
                 }}

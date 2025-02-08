@@ -532,7 +532,7 @@ export function getCellPositionByIndex(
  * @param {ICellInfo} mergeDataInfo The merge information of the cell
  * @returns {ICellWithCoord} The cell position information of the specified row and column, including the position information of the cell and the merge information of the cell
  */
-export function getCellWithCoordByIndexCore(
+function getCellWithCoordByIndexCore(
     row: number,
     column: number,
     rowHeightAccumulation: number[],

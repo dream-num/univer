@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-import type { Workbook } from '@univerjs/core';
+/* eslint-disable max-lines-per-function */
+
+import type { Workbook, Worksheet } from '@univerjs/core';
 import { Disposable, Inject, IPermissionService, IUniverInstanceService, UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService, RENDER_CLASS_TYPE } from '@univerjs/engine-render';
 import { WorkbookEditablePermission, WorkbookViewPermission, WorksheetEditPermission, WorksheetViewPermission } from '@univerjs/sheets';
-import { combineLatest, distinctUntilChanged, filter, map } from 'rxjs';
+import { combineLatest, distinctUntilChanged, EMPTY, map, switchMap, tap } from 'rxjs';
 
 export class SheetDrawingPermissionController extends Disposable {
     constructor(
@@ -38,221 +40,355 @@ export class SheetDrawingPermissionController extends Disposable {
 
     private _initDrawingVisible() {
         const workbook$ = this._univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        const currentUser$ = this._userManagerService.currentUser$;
+        const combined$ = combineLatest([workbook$, currentUser$]);
+
         this.disposeWithMe(
-            combineLatest([workbook$, this._userManagerService.currentUser$]).subscribe(([workbook, _]) => {
-                if (!workbook) {
-                    this._drawingManagerService.setDrawingVisible(false);
-                    return;
-                }
-                workbook.activeSheet$.subscribe((sheet) => {
-                    if (!sheet) {
-                        this._drawingManagerService.setDrawingVisible(false);
-                        return;
-                    }
-                    const unitId = workbook.getUnitId();
-                    const subUnitId = sheet.getSheetId();
-                    const worksheetViewPermission = this._permissionService.composePermission([new WorkbookViewPermission(unitId).id, new WorksheetViewPermission(unitId, subUnitId).id]).every((permission) => permission.value);
-                    if (worksheetViewPermission) {
-                        this._drawingManagerService.setDrawingVisible(true);
-                    } else {
-                        this._drawingManagerService.setDrawingVisible(false);
-                        const unitId = workbook.getUnitId();
-                        const subUnitId = sheet.getSheetId();
-                        const drawingData = this._drawingManagerService.getDrawingData(unitId, subUnitId);
-                        const drawingDataValues = Object.values(drawingData);
-                        const renderObject = this._renderManagerService.getRenderById(unitId);
-                        const scene = renderObject?.scene;
-                        if (scene == null) {
-                            return;
+            combined$
+                .pipe(
+                    switchMap(([workbook, _]) => {
+                        if (!workbook) {
+                            this._drawingManagerService.setDrawingVisible(false);
+                            return EMPTY;
                         }
-                        const objects = scene.getAllObjectsByOrder();
-                        objects.forEach((object) => {
-                            if (object.classType === RENDER_CLASS_TYPE.IMAGE && drawingDataValues.some((item) => object.oKey.includes(item.drawingId))) {
-                                scene.removeObject(object);
-                            }
-                        });
-                    }
-                });
-            })
+
+                        return workbook.activeSheet$.pipe(
+                            tap((sheet) => {
+                                if (!sheet) {
+                                    this._drawingManagerService.setDrawingVisible(false);
+                                    return;
+                                }
+
+                                const unitId = workbook.getUnitId();
+                                const subUnitId = sheet.getSheetId();
+
+                                const worksheetViewPermission = this._permissionService
+                                    .composePermission([
+                                        new WorkbookViewPermission(unitId).id,
+                                        new WorksheetViewPermission(unitId, subUnitId).id,
+                                    ])
+                                    .every((permission) => permission.value);
+
+                                if (worksheetViewPermission) {
+                                    this._drawingManagerService.setDrawingVisible(true);
+                                } else {
+                                    this._handleDrawingVisibilityFalse(workbook, sheet);
+                                }
+                            })
+                        );
+                    })
+                )
+                .subscribe()
         );
+    }
+
+    private _handleDrawingVisibilityFalse(workbook: Workbook, sheet: Worksheet) {
+        this._drawingManagerService.setDrawingVisible(false);
+
+        const unitId = workbook.getUnitId();
+        const subUnitId = sheet.getSheetId();
+        const drawingData = this._drawingManagerService.getDrawingData(unitId, subUnitId);
+        const drawingDataValues = Object.values(drawingData);
+
+        const renderObject = this._renderManagerService.getRenderById(unitId);
+        const scene = renderObject?.scene;
+
+        if (!scene) {
+            return;
+        }
+
+        const objects = scene.getAllObjectsByOrder();
+
+        objects.forEach((object) => {
+            if (
+                object.classType === RENDER_CLASS_TYPE.IMAGE &&
+                drawingDataValues.some((item) => object.oKey.includes(item.drawingId))
+            ) {
+                scene.removeObject(object);
+            }
+        });
     }
 
     private _initDrawingEditable() {
         const workbook$ = this._univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        const currentUser$ = this._userManagerService.currentUser$;
+
+        const combined$ = combineLatest([workbook$, currentUser$]);
+
         this.disposeWithMe(
-            combineLatest([workbook$, this._userManagerService.currentUser$]).subscribe(([workbook, _]) => {
-                if (!workbook) {
-                    this._drawingManagerService.setDrawingEditable(false);
-                    return;
-                }
-                workbook.activeSheet$.subscribe((sheet) => {
-                    if (!sheet) {
-                        this._drawingManagerService.setDrawingEditable(false);
-                        return;
-                    }
-                    const unitId = workbook.getUnitId();
-                    const subUnitId = sheet.getSheetId();
-                    const worksheetEditPermission = this._permissionService.composePermission([new WorkbookEditablePermission(unitId).id, new WorksheetEditPermission(unitId, subUnitId).id]).every((permission) => permission.value);
-                    if (worksheetEditPermission) {
-                        this._drawingManagerService.setDrawingEditable(true);
-                    } else {
-                        this._drawingManagerService.setDrawingEditable(false);
-                        const unitId = workbook.getUnitId();
-                        const subUnitId = sheet.getSheetId();
-                        const drawingData = this._drawingManagerService.getDrawingData(unitId, subUnitId);
-                        const drawingDataValues = Object.values(drawingData);
-                        const renderObject = this._renderManagerService.getRenderById(unitId);
-                        const scene = renderObject?.scene;
-                        if (scene == null) {
-                            return;
+            combined$
+                .pipe(
+                    switchMap(([workbook, _]) => {
+                        if (!workbook) {
+                            this._drawingManagerService.setDrawingEditable(false);
+                            return EMPTY;
                         }
-                        const objects = scene.getAllObjectsByOrder();
-                        objects.forEach((object) => {
-                            if (object.classType === RENDER_CLASS_TYPE.IMAGE && drawingDataValues.some((item) => object.oKey.includes(item.drawingId))) {
-                                scene.detachTransformerFrom(object);
-                            }
-                        });
-                    }
-                });
-            })
+
+                        return workbook.activeSheet$.pipe(
+                            tap((sheet) => {
+                                if (!sheet) {
+                                    this._drawingManagerService.setDrawingEditable(false);
+                                    return;
+                                }
+
+                                const unitId = workbook.getUnitId();
+                                const subUnitId = sheet.getSheetId();
+
+                                const worksheetEditPermission = this._permissionService
+                                    .composePermission([
+                                        new WorkbookEditablePermission(unitId).id,
+                                        new WorksheetEditPermission(unitId, subUnitId).id,
+                                    ])
+                                    .every((permission) => permission.value);
+
+                                if (worksheetEditPermission) {
+                                    this._drawingManagerService.setDrawingEditable(true);
+                                } else {
+                                    this._handleDrawingEditableFalse(workbook, sheet);
+                                }
+                            })
+                        );
+                    })
+                )
+                .subscribe()
         );
+    }
+
+    private _handleDrawingEditableFalse(workbook: Workbook, sheet: Worksheet) {
+        this._drawingManagerService.setDrawingEditable(false);
+
+        const unitId = workbook.getUnitId();
+        const subUnitId = sheet.getSheetId();
+        const drawingData = this._drawingManagerService.getDrawingData(unitId, subUnitId);
+        const drawingDataValues = Object.values(drawingData);
+
+        const renderObject = this._renderManagerService.getRenderById(unitId);
+        const scene = renderObject?.scene;
+
+        if (!scene) {
+            return;
+        }
+
+        const objects = scene.getAllObjectsByOrder();
+
+        objects.forEach((object) => {
+            if (
+                object.classType === RENDER_CLASS_TYPE.IMAGE &&
+                drawingDataValues.some((item) => object.oKey.includes(item.drawingId))
+            ) {
+                scene.detachTransformerFrom(object);
+            }
+        });
     }
 
     private _initViewPermissionChange() {
         const workbook$ = this._univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        const currentUser$ = this._userManagerService.currentUser$;
         this.disposeWithMe(
-            combineLatest([workbook$, this._userManagerService.currentUser$]).subscribe(([workbook, _]) => {
-                if (!workbook) {
-                    return;
-                }
-                workbook.activeSheet$.subscribe((sheet) => {
-                    if (!sheet) {
-                        return;
-                    }
-                    const unitId = workbook.getUnitId();
-                    const subUnitId = sheet.getSheetId();
-                    let initialViewPermission = true;
-                    const renderObject = this._renderManagerService.getRenderById(unitId);
-                    const scene = renderObject?.scene;
-                    if (scene == null) {
-                        return;
-                    }
-                    const transformer = scene.getTransformerByCreate();
-                    const worksheetViewPermission$ = this._permissionService.composePermission$([new WorkbookViewPermission(unitId).id, new WorksheetViewPermission(unitId, subUnitId).id]).pipe(map((permissions) => permissions.every((item) => item.value)));
-                    worksheetViewPermission$?.pipe(
-                        filter((permission) => permission !== initialViewPermission),
-                        distinctUntilChanged()
-                    ).subscribe({
-                        next: (permission) => {
-                            initialViewPermission = permission;
-                            this._drawingManagerService.setDrawingVisible(permission);
-                            const objects = scene.getAllObjectsByOrder();
-                            const drawingData = this._drawingManagerService.getDrawingData(unitId, subUnitId);
-                            const drawingDataValues = Object.values(drawingData);
-                            if (permission) {
-                                this._drawingManagerService.addNotification(drawingDataValues);
-                            } else {
-                                objects.forEach((object) => {
-                                    if (object.classType === RENDER_CLASS_TYPE.IMAGE && drawingDataValues.some((item) => object.oKey.includes(item.drawingId))) {
-                                        scene.removeObject(object);
-                                    }
-                                });
-                                transformer.clearSelectedObjects();
-                            }
-                        },
-                    });
-                    this._permissionService.getPermissionPoint$(new WorksheetViewPermission(unitId, subUnitId).id)?.pipe(
-                        filter((permission) => permission.value !== initialViewPermission),
-                        distinctUntilChanged()
-                    ).subscribe({
-                        complete: () => {
-                            initialViewPermission = true;
-                            this._drawingManagerService.setDrawingVisible(true);
-                            const drawingData = this._drawingManagerService.getDrawingData(unitId, subUnitId);
-                            const drawingDataValues = Object.values(drawingData);
+            combineLatest([workbook$, currentUser$])
+                .pipe(
+                    switchMap(([workbook, _]) => {
+                        if (!workbook) return EMPTY;
+
+                        return workbook.activeSheet$.pipe(
+                            switchMap((sheet) => {
+                                if (!sheet) {
+                                    return EMPTY;
+                                }
+
+                                const unitId = workbook.getUnitId();
+                                const subUnitId = sheet.getSheetId();
+                                const renderObject = this._renderManagerService.getRenderById(unitId);
+                                const scene = renderObject?.scene;
+
+                                if (!scene) {
+                                    return EMPTY;
+                                }
+
+                                const transformer = scene.getTransformerByCreate();
+
+                                const worksheetViewPermission$ = this._permissionService
+                                    .composePermission$([
+                                        new WorkbookViewPermission(unitId).id,
+                                        new WorksheetViewPermission(unitId, subUnitId).id,
+                                    ])
+                                    .pipe(
+                                        map((permissions) => permissions.every((item) => item.value)),
+                                        distinctUntilChanged()
+                                    );
+
+                                return worksheetViewPermission$.pipe(
+                                    map((permission) => ({
+                                        permission,
+                                        scene,
+                                        transformer,
+                                        unitId,
+                                        subUnitId,
+                                    }))
+                                );
+                            })
+                        );
+                    })
+                )
+                .subscribe({
+                    next: ({ permission, scene, transformer, unitId, subUnitId }) => {
+                        this._drawingManagerService.setDrawingVisible(permission);
+
+                        const objects = scene.getAllObjectsByOrder();
+                        const drawingData = this._drawingManagerService.getDrawingData(unitId, subUnitId);
+                        const drawingDataValues = Object.values(drawingData);
+
+                        if (permission) {
                             this._drawingManagerService.addNotification(drawingDataValues);
-                        },
-                    });
-                });
-            })
+                        } else {
+                            objects.forEach((object) => {
+                                if (
+                                    object.classType === RENDER_CLASS_TYPE.IMAGE &&
+                                    drawingDataValues.some((item) => object.oKey.includes(item.drawingId))
+                                ) {
+                                    scene.removeObject(object);
+                                }
+                            });
+                            transformer.clearSelectedObjects();
+                        }
+                    },
+                    complete: () => {
+                        this._drawingManagerService.setDrawingVisible(true);
+                        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+                        const sheet = workbook?.getActiveSheet();
+                        const unitId = workbook?.getUnitId();
+                        const subUnitId = sheet?.getSheetId();
+                        if (!unitId || !subUnitId) {
+                            return;
+                        }
+                        const drawingData = this._drawingManagerService.getDrawingData(unitId, subUnitId);
+                        const drawingDataValues = Object.values(drawingData);
+                        this._drawingManagerService.addNotification(drawingDataValues);
+                    },
+                })
         );
     }
 
     private _initEditPermissionChange() {
         const workbook$ = this._univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET);
-        this.disposeWithMe(
-            combineLatest([workbook$, this._userManagerService.currentUser$]).subscribe(([workbook, _]) => {
-                if (!workbook) {
-                    return;
-                }
-                workbook.activeSheet$.subscribe((sheet) => {
-                    if (!sheet) {
-                        return;
-                    }
-                    const unitId = workbook.getUnitId();
-                    const subUnitId = sheet.getSheetId();
-                    let initialEditPermission = true;
-                    const renderObject = this._renderManagerService.getRenderById(unitId);
-                    const scene = renderObject?.scene;
-                    if (scene == null) {
-                        return;
-                    }
-                    const transformer = scene.getTransformerByCreate();
-                    const composeWorksheetEditPermission = this._permissionService.composePermission$([new WorkbookEditablePermission(unitId).id, new WorksheetEditPermission(unitId, subUnitId).id]).pipe(map((permissions) => permissions.every((item) => item.value)));
-                    composeWorksheetEditPermission?.pipe(
-                        filter((permission) => permission !== initialEditPermission),
-                        distinctUntilChanged()
-                    ).subscribe({
-                        next: (permission) => {
-                            initialEditPermission = permission;
-                            this._drawingManagerService.setDrawingEditable(permission);
-                            const objects = scene.getAllObjectsByOrder();
-                            const drawingData = this._drawingManagerService.getDrawingData(unitId, subUnitId);
-                            const drawingDataValues = Object.values(drawingData);
-                            if (permission) {
-                                objects.forEach((object) => {
-                                    if (object.classType === RENDER_CLASS_TYPE.IMAGE && drawingDataValues.some((item) => object.oKey.includes(item.drawingId))) {
-                                        scene.attachTransformerTo(object);
-                                    }
-                                });
+        const currentUser$ = this._userManagerService.currentUser$;
 
-                                this._drawingManagerService.addNotification(drawingDataValues);
-                            } else {
-                                objects.forEach((object) => {
-                                    if (object.classType === RENDER_CLASS_TYPE.IMAGE && drawingDataValues.some((item) => object.oKey.includes(item.drawingId))) {
-                                        scene.detachTransformerFrom(object);
-                                    }
-                                });
-                                transformer.clearSelectedObjects();
-                            }
-                        },
-                    });
-                    this._permissionService.getPermissionPoint$(new WorksheetEditPermission(unitId, subUnitId).id)?.pipe(
-                        filter((permission) => permission.value !== initialEditPermission),
-                        distinctUntilChanged()
-                    ).subscribe({
-                        complete: () => {
-                            initialEditPermission = true;
-                            const unitId = workbook.getUnitId();
-                            const subUnitId = sheet.getSheetId();
-                            const drawingData = this._drawingManagerService.getDrawingData(unitId, subUnitId);
-                            const drawingDataValues = Object.values(drawingData);
-                            const renderObject = this._renderManagerService.getRenderById(unitId);
-                            const scene = renderObject?.scene;
-                            if (scene == null) {
-                                return;
-                            }
-                            this._drawingManagerService.setDrawingEditable(true);
-                            const objects = scene.getAllObjectsByOrder();
+        this.disposeWithMe(
+            combineLatest([workbook$, currentUser$])
+                .pipe(
+                    switchMap(([workbook, _]) => {
+                        if (!workbook) {
+                            return EMPTY;
+                        }
+
+                        return workbook.activeSheet$.pipe(
+                            switchMap((sheet) => {
+                                if (!sheet) {
+                                    return EMPTY;
+                                }
+
+                                const unitId = workbook.getUnitId();
+                                const subUnitId = sheet.getSheetId();
+                                const renderObject = this._renderManagerService.getRenderById(unitId);
+                                const scene = renderObject?.scene;
+
+                                if (!scene) {
+                                    return EMPTY;
+                                }
+
+                                const transformer = scene.getTransformerByCreate();
+
+                                const composeWorksheetEditPermission$ = this._permissionService
+                                    .composePermission$([
+                                        new WorkbookEditablePermission(unitId).id,
+                                        new WorksheetEditPermission(unitId, subUnitId).id,
+                                    ])
+                                    .pipe(
+                                        map((permissions) => permissions.every((item) => item.value)),
+                                        distinctUntilChanged()
+                                    );
+
+                                return composeWorksheetEditPermission$.pipe(
+                                    map((permission) => ({
+                                        permission,
+                                        scene,
+                                        transformer,
+                                        unitId,
+                                        subUnitId,
+                                    }))
+                                );
+                            })
+                        );
+                    })
+                )
+                .subscribe({
+                    next: ({ permission, scene, transformer, unitId, subUnitId }) => {
+                        this._drawingManagerService.setDrawingEditable(permission);
+
+                        const objects = scene.getAllObjectsByOrder();
+                        const drawingData = this._drawingManagerService.getDrawingData(unitId, subUnitId);
+                        const drawingDataValues = Object.values(drawingData);
+
+                        if (permission) {
                             objects.forEach((object) => {
-                                if (object.classType === RENDER_CLASS_TYPE.IMAGE && drawingDataValues.some((item) => object.oKey.includes(item.drawingId))) {
+                                if (
+                                    object.classType === RENDER_CLASS_TYPE.IMAGE &&
+                                    drawingDataValues.some((item) => object.oKey.includes(item.drawingId))
+                                ) {
+                                    scene.attachTransformerTo(object);
+                                }
+                            });
+
+                            this._drawingManagerService.addNotification(drawingDataValues);
+                        } else {
+                            objects.forEach((object) => {
+                                if (
+                                    object.classType === RENDER_CLASS_TYPE.IMAGE &&
+                                    drawingDataValues.some((item) => object.oKey.includes(item.drawingId))
+                                ) {
                                     scene.detachTransformerFrom(object);
                                 }
                             });
-                        },
-                    });
-                });
-            })
+
+                            transformer.clearSelectedObjects();
+                        }
+                    },
+                    complete: () => {
+                        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+                        if (!workbook) {
+                            return;
+                        }
+
+                        const unitId = workbook.getUnitId();
+                        const sheet = workbook.getActiveSheet();
+                        if (!sheet) {
+                            return;
+                        }
+
+                        const subUnitId = sheet.getSheetId();
+                        const renderObject = this._renderManagerService.getRenderById(unitId);
+                        const scene = renderObject?.scene;
+
+                        if (!scene) {
+                            return;
+                        }
+
+                        const drawingData = this._drawingManagerService.getDrawingData(unitId, subUnitId);
+                        const drawingDataValues = Object.values(drawingData);
+
+                        this._drawingManagerService.setDrawingEditable(true);
+
+                        const objects = scene.getAllObjectsByOrder();
+                        objects.forEach((object) => {
+                            if (
+                                object.classType === RENDER_CLASS_TYPE.IMAGE &&
+                                drawingDataValues.some((item) => object.oKey.includes(item.drawingId))
+                            ) {
+                                scene.detachTransformerFrom(object);
+                            }
+                        });
+                    },
+                })
         );
     }
 }

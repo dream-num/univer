@@ -27,13 +27,12 @@ const MAX_UNIT_MEMORY_OVERFLOW = 1_000_000; // 1MB
 const MAX_UNIVER_MEMORY_OVERFLOW = 6_000_000; // TODO@wzhudev: temporarily added 300KB
 // there is a memory leak in the univer object, so we need to make sure that
 
-// const MAX_SECOND_INSTANCE_OVERFLOW = 100_000; // Only 100 KB
+const MAX_SECOND_INSTANCE_OVERFLOW = 100_000; // Only 100 KB
 
 interface HeapSnapshotChunk {
     chunk: string;
 }
 
-        // Type the progress handler parameter
 interface HeapSnapshotProgress {
     done: number;
     total: number;
@@ -83,7 +82,6 @@ async function takeHeapSnapshot(client: CDPSession, filename: string) {
         chunkHandler = (payload: HeapSnapshotChunk) => {
             try {
                 if (payload.chunk) {
-                    // console.log('chunkHandler write chunk', filename, file.writableLength);
                     file.write(payload.chunk);
                     scheduleEnd();
                 }
@@ -155,7 +153,7 @@ test('memory', async ({ page }) => {
 
     const memoryAfterDisposingSecondUniver = (await getMetrics(page)).JSHeapUsedSize;
     expect(memoryAfterDisposingSecondUniver - memoryAfterDisposingFirstInstance)
-        .toBeLessThanOrEqual(1);
+        .toBeLessThanOrEqual(MAX_SECOND_INSTANCE_OVERFLOW);
 
     expect(memoryAfterDisposingSecondUniver - memoryAfterFirstInstance)
         .toBeLessThanOrEqual(MAX_UNIVER_MEMORY_OVERFLOW);

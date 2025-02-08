@@ -49,9 +49,7 @@ jobs:
               if: ${{ !cancelled() }}
               with:
                   name: playwright-report
-                  path: |
-                      playwright-report/
-                      test-results/
+                  path: playwright-report/
                   retention-days: 30
 
             - name: Upload HeapSnapshots
@@ -60,4 +58,4 @@ jobs:
               with:
                   name: snapshots
                   path: test-results/*.heapsnapshot
-                  retention-days: 30
+                  retention-days: 3

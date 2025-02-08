@@ -25,7 +25,7 @@ import {
     sequenceExecute,
     UniverInstanceType,
 } from '@univerjs/core';
-import { generateNullCellValue } from '../../basics/utils';
+import { generateNullCellValue, getVisibleRanges } from '../../basics/utils';
 import { SheetsSelectionsService } from '../../services/selections/selection.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
@@ -63,11 +63,12 @@ export const ClearSelectionContentCommand: ICommand = {
         if (!ranges?.length) {
             return false;
         }
+        const visibleRanges = getVisibleRanges(ranges, accessor, unitId, subUnitId);
 
         const clearMutationParams: ISetRangeValuesMutationParams = {
             subUnitId,
             unitId,
-            cellValue: generateNullCellValue(ranges),
+            cellValue: generateNullCellValue(visibleRanges),
         };
         const undoClearMutationParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
             accessor,

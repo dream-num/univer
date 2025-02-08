@@ -180,7 +180,7 @@ export { RangeProtectionPermissionManageCollaPoint } from './services/permission
 export { RangeProtectionPermissionDeleteProtectionPoint } from './services/permission/permission-point/range/delete-protection';
 export { baseProtectionActions } from './services/permission/range-permission/util';
 
-export { generateNullCell, generateNullCellValue } from './basics/utils';
+export { generateNullCell, generateNullCellValue, getVisibleRanges, rangeToDiscreteRange } from './basics/utils';
 export { getSheetCommandTarget, getSheetCommandTargetWorkbook, getSheetMutationTarget } from './commands/commands/utils/target-util';
 export { alignToMergedCellsBorders, getCellAtRowCol, isSingleCellSelection, setEndForRange } from './commands/commands/utils/selection-utils';
 export { getSelectionsService } from './commands/utils/selection-command-util';

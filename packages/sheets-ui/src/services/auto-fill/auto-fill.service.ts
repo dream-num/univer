@@ -34,11 +34,11 @@ import { createIdentifier, Direction,
 } from '@univerjs/core';
 
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { SetRangeValuesMutation, SetSelectionsOperation, SetWorksheetRowAutoHeightMutation, SetWorksheetRowAutoHeightMutationFactory, SheetsSelectionsService } from '@univerjs/sheets';
+import { rangeToDiscreteRange, SetRangeValuesMutation, SetSelectionsOperation, SetWorksheetRowAutoHeightMutation, SetWorksheetRowAutoHeightMutationFactory, SheetsSelectionsService } from '@univerjs/sheets';
 import { BehaviorSubject } from 'rxjs';
 import { AutoClearContentCommand } from '../../commands/commands/auto-fill.command';
 import { AFFECT_LAYOUT_STYLES } from '../../controllers/auto-height.controller';
-import { discreteRangeToRange, rangeToDiscreteRange } from '../../controllers/utils/range-tools';
+import { discreteRangeToRange } from '../../controllers/utils/range-tools';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import {
     chnNumberRule,

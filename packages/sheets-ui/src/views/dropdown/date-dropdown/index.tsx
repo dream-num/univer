@@ -33,7 +33,7 @@ export function DateDropdown(props: { popup: IPopup<IDateDropdownProps & IBaseDr
     const { extraProps } = popup;
     const { hideFn, patternType, defaultValue, onChange, showTime } = extraProps!;
     const [localDate, setLocalDate] = useState<dayjs.Dayjs | undefined>(defaultValue);
-    const defaultDate = useMemo(() => dayjs(), []);
+    const defaultDate = useMemo(() => patternType !== 'time' ? dayjs() : dayjs('1900-01-01 00:00:00'), []);
     const date = localDate && localDate.isValid() ? localDate : defaultDate;
     const localeService = useDependency(LocaleService);
     const handleSave = async () => {
@@ -61,7 +61,7 @@ export function DateDropdown(props: { popup: IPopup<IDateDropdownProps & IBaseDr
                 disabledDate={(current) => !numfmt.parseDate(current.format('YYYY-MM-DD'))}
             />
             <div className={styles.dvDateDropdownBtns}>
-                <Button size="small" type="primary" onClick={handleSave} disabled={!date.isValid()}>
+                <Button size="small" type="primary" onClick={handleSave} disabled={!date || !date.isValid()}>
                     {localeService.t('dataValidation.alert.ok')}
                 </Button>
             </div>

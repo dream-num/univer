@@ -185,7 +185,8 @@ export class DataValidationDropdownManagerService extends Disposable {
             const newValue = date;
             const cellData = worksheet.getCell(row, col);
             const dateStr = newValue.format(targetPatternType === 'date' ? 'YYYY-MM-DD 00:00:00' : 'YYYY-MM-DD HH:mm:ss');
-            const serialTime = numfmt.parseDate(dateStr)?.v as number;
+            const serialNum = numfmt.parseDate(dateStr)?.v as number;
+            const serialTime = targetPatternType === 'time' ? (serialNum) % 1 : serialNum;
             const cellStyle = workbook.getStyles().getStyleByCell(cellData);
             const format = cellStyle?.n?.pattern ?? '';
 

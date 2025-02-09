@@ -68,11 +68,13 @@ export function DesktopContextMenu() {
             setMenuType(menuType);
             setOffset([event.clientX, event.clientY]);
             setVisible(true);
+            contextMenuService.trigger$.next(1);
         });
     }
 
     function handleClose() {
         setVisible(false);
+        contextMenuService.trigger$.next(0);
     }
 
     return (

@@ -30,6 +30,7 @@ import styles from './index.module.less';
 export const UniFormulaBar = () => {
     const editorBridgeService = useDependency(IEditorBridgeService);
     const univerInstanceService = useDependency(IUniverInstanceService);
+    const commandService = useDependency(ICommandService);
 
     const visibleInfo = useObservable(editorBridgeService.visible$);
     const focusedId = useObservable(univerInstanceService.focused$);

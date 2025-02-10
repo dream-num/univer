@@ -49,6 +49,7 @@ const transformDate2SerialNumber = (value: Nullable<CellValue>) => {
 export class DateValidator extends BaseDataValidator {
     id: string = DataValidationType.DATE;
     title: string = 'dataValidation.date.title';
+    order = 40;
     operators: DataValidationOperator[] = [
         DataValidationOperator.BETWEEN,
         DataValidationOperator.EQUAL,
@@ -99,7 +100,7 @@ export class DateValidator extends BaseDataValidator {
         const operator = rule.operator;
         if (!operator) {
             return {
-                success: false,
+                success: true,
             };
         }
 
@@ -129,13 +130,13 @@ export class DateValidator extends BaseDataValidator {
             }
             let date;
             if (!Number.isNaN(+formula)) {
-                date = numfmt.dateFromSerial(+formula) as unknown as [number, number, number, number, number, number];
+                date = numfmt.dateFromSerial(+formula);
             } else {
                 const res = numfmt.parseDate(formula)?.v as number;
                 if (res === undefined || res === null) {
                     return '';
                 }
-                date = numfmt.dateFromSerial(res) as unknown as [number, number, number, number, number, number];
+                date = numfmt.dateFromSerial(res);
             }
 
             return dayjs(`${date[0]}/${date[1]}/${date[2]} ${date[3]}:${date[4]}:${date[5]}`).format(bizInfo?.showTime ? 'YYYY-MM-DD HH:mm:ss' : 'YYYY-MM-DD');
@@ -162,7 +163,7 @@ export class DateValidator extends BaseDataValidator {
 
     override generateRuleName(rule: IDataValidationRuleBase): string {
         if (!rule.operator) {
-            return this.titleStr;
+            return this.localeService.t(DateOperatorTitleMap.NONE);
         }
 
         const ruleName = this.localeService.t(DateOperatorTitleMap[rule.operator]).replace(FORMULA1, rule.formula1 ?? '').replace(FORMULA2, rule.formula2 ?? '');

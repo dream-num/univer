@@ -38,7 +38,7 @@ export const DateOperatorTextMap: Record<DataValidationOperator, string> = {
     [DataValidationOperator.NOT_EQUAL]: 'dataValidation.date.operators.notEqual',
 };
 
-export const DateOperatorTitleMap: Record<DataValidationOperator, string> = {
+export const DateOperatorTitleMap: Record<DataValidationOperator | 'NONE', string> = {
     [DataValidationOperator.BETWEEN]: 'dataValidation.date.ruleName.between',
     [DataValidationOperator.EQUAL]: 'dataValidation.date.ruleName.equal',
     [DataValidationOperator.GREATER_THAN]: 'dataValidation.date.ruleName.greaterThan',
@@ -47,9 +47,10 @@ export const DateOperatorTitleMap: Record<DataValidationOperator, string> = {
     [DataValidationOperator.LESS_THAN_OR_EQUAL]: 'dataValidation.date.ruleName.lessThanOrEqual',
     [DataValidationOperator.NOT_BETWEEN]: 'dataValidation.date.ruleName.notBetween',
     [DataValidationOperator.NOT_EQUAL]: 'dataValidation.date.ruleName.notEqual',
+    NONE: 'dataValidation.date.ruleName.legal',
 };
 
-export const DateOperatorErrorTitleMap: Record<DataValidationOperator, string> = {
+export const DateOperatorErrorTitleMap: Record<DataValidationOperator | 'NONE', string> = {
     [DataValidationOperator.BETWEEN]: 'dataValidation.date.errorMsg.between',
     [DataValidationOperator.EQUAL]: 'dataValidation.date.errorMsg.equal',
     [DataValidationOperator.GREATER_THAN]: 'dataValidation.date.errorMsg.greaterThan',
@@ -58,4 +59,5 @@ export const DateOperatorErrorTitleMap: Record<DataValidationOperator, string> =
     [DataValidationOperator.LESS_THAN_OR_EQUAL]: 'dataValidation.date.errorMsg.lessThanOrEqual',
     [DataValidationOperator.NOT_BETWEEN]: 'dataValidation.date.errorMsg.notBetween',
     [DataValidationOperator.NOT_EQUAL]: 'dataValidation.date.errorMsg.notEqual',
+    NONE: 'dataValidation.date.errorMsg.legal',
 };

@@ -64,16 +64,18 @@ const locale: typeof zhCN = {
             equal: 'equal',
             notEqual: 'not equal',
             notBetween: 'not between',
+            legal: 'is legal type',
         },
         ruleName: {
-            between: 'is between {FORMULA1} and {FORMULA2}',
-            greaterThan: 'is greater than {FORMULA1}',
-            greaterThanOrEqual: 'is greater than or equal to {FORMULA1}',
-            lessThan: 'is less than {FORMULA1}',
-            lessThanOrEqual: 'is less than or equal to {FORMULA1}',
-            equal: 'is equal to {FORMULA1}',
-            notEqual: 'is not equal to {FORMULA1}',
-            notBetween: 'is not between {FORMULA1} and {FORMULA2}',
+            between: 'Is between {FORMULA1} and {FORMULA2}',
+            greaterThan: 'Is greater than {FORMULA1}',
+            greaterThanOrEqual: 'Is greater than or equal to {FORMULA1}',
+            lessThan: 'Is less than {FORMULA1}',
+            lessThanOrEqual: 'Is less than or equal to {FORMULA1}',
+            equal: 'Is equal to {FORMULA1}',
+            notEqual: 'Is not equal to {FORMULA1}',
+            notBetween: 'Is not between {FORMULA1} and {FORMULA2}',
+            legal: 'Is a legal {TYPE}',
         },
         errorMsg: {
             between: 'Value must be between {FORMULA1} and {FORMULA2}',
@@ -84,6 +86,7 @@ const locale: typeof zhCN = {
             equal: 'Value must be equal to {FORMULA1}',
             notEqual: 'Value must be not equal to {FORMULA1}',
             notBetween: 'Value must be not between {FORMULA1} and {FORMULA2}',
+            legal: 'Value must be a legal {TYPE}',
         },
         any: {
             title: 'Any value',
@@ -100,6 +103,7 @@ const locale: typeof zhCN = {
                 equal: 'equal',
                 notEqual: 'not equal',
                 notBetween: 'not between',
+                legal: 'is a legal date',
             },
             ruleName: {
                 between: 'is between {FORMULA1} and {FORMULA2}',
@@ -110,6 +114,7 @@ const locale: typeof zhCN = {
                 equal: 'is {FORMULA1}',
                 notEqual: 'is not {FORMULA1}',
                 notBetween: 'is not between {FORMULA1}',
+                legal: 'is a legal date',
             },
             errorMsg: {
                 between: 'Value must be a legal date and between {FORMULA1} and {FORMULA2}',
@@ -120,6 +125,7 @@ const locale: typeof zhCN = {
                 equal: 'Value must be a legal date and {FORMULA1}',
                 notEqual: 'Value must be a legal date and not {FORMULA1}',
                 notBetween: 'Value must be a legal date and not between {FORMULA1}',
+                legal: 'Value must be a legal date',
             },
         },
         list: {

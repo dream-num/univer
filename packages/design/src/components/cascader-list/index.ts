@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export { CascaderList, type ICascaderListProps } from './CascaderList';
+export { CascaderList, type ICascaderListProps, type ICascaderOption } from './CascaderList';

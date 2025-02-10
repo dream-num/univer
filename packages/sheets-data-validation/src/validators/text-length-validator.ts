@@ -30,6 +30,7 @@ export class TextLengthValidator extends BaseDataValidator {
     id: string = DataValidationType.TEXT_LENGTH;
     title: string = 'dataValidation.textLength.title';
     private readonly _lexerTreeBuilder = this.injector.get(LexerTreeBuilder);
+    order = 30;
 
     operators: DataValidationOperator[] = [
         DataValidationOperator.BETWEEN,

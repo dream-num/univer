@@ -297,7 +297,7 @@ export interface INumfmt {
 
     dateToSerial(value: Date | [number, number, number], opt?: Options): number | string;
 
-    dateFromSerial(value: number, opt?: Options): Date;
+    dateFromSerial(value: number, opt?: Options): [number, number, number, number, number, number];
 
     options(op: Partial<Options>): void;
 }

@@ -24,6 +24,7 @@ export class AnyValidator extends BaseDataValidator {
     override title: string = 'dataValidation.any.title';
     override operators: DataValidationOperator[] = [];
     override scopes: string | string[] = ['sheet'];
+    order = 0;
 
     override readonly offsetFormulaByRange = false;
 

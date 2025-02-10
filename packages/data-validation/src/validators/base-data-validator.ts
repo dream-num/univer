@@ -18,11 +18,12 @@ import type { CellValue, IDataValidationRule, IDataValidationRuleBase, IStyleDat
 import type { CellValueType } from '@univerjs/protocol';
 import type { ISheetLocationBase } from '@univerjs/sheets';
 import type { IBaseDataValidationWidget } from './base-widget';
-import { DataValidationOperator, Inject, Injector, LocaleService, Tools } from '@univerjs/core';
+import { DataValidationOperator, Inject, Injector, LocaleService } from '@univerjs/core';
 import { OperatorErrorTitleMap, OperatorTitleMap } from '../types/const/operator-text-map';
 
-const FORMULA1 = '{FORMULA1}';
-const FORMULA2 = '{FORMULA2}';
+export const FORMULA1 = '{FORMULA1}';
+export const FORMULA2 = '{FORMULA2}';
+export const TYPE = '{TYPE}';
 
 const operatorNameMap: Record<DataValidationOperator, string> = {
     [DataValidationOperator.BETWEEN]: 'dataValidation.operators.between',
@@ -59,11 +60,22 @@ export interface IFormulaValidResult {
     formula2?: string;
 }
 
+export enum DataValidatorDropdownType {
+    DATE = 'date',
+    TIME = 'time',
+    DATETIME = 'datetime',
+    LIST = 'list',
+    MULTIPLE_LIST = 'multipleList',
+    COLOR = 'color',
+    CASCADE = 'cascade',
+}
+
 export abstract class BaseDataValidator {
     abstract id: string;
     abstract title: string;
     abstract operators: DataValidationOperator[];
     abstract scopes: string[] | string;
+    abstract order: number;
 
     offsetFormulaByRange = true;
 
@@ -71,7 +83,7 @@ export abstract class BaseDataValidator {
 
     formulaInput: string | undefined = undefined;
     canvasRender: Nullable<IBaseDataValidationWidget> = null;
-    dropdown: string | undefined = undefined;
+    dropdownType: DataValidatorDropdownType | undefined = undefined;
     optionsInput: string | undefined = undefined;
 
     // #endregion
@@ -95,7 +107,7 @@ export abstract class BaseDataValidator {
 
     generateRuleName(rule: IDataValidationRuleBase): string {
         if (!rule.operator) {
-            return this.titleStr;
+            return this.localeService.t(OperatorTitleMap.NONE).replace(TYPE, this.titleStr);
         }
 
         const ruleName = this.localeService.t(OperatorTitleMap[rule.operator]).replace(FORMULA1, rule.formula1 ?? '').replace(FORMULA2, rule.formula2 ?? '');
@@ -104,7 +116,7 @@ export abstract class BaseDataValidator {
 
     generateRuleErrorMessage(rule: IDataValidationRuleBase, position: ISheetLocationBase) {
         if (!rule.operator) {
-            return this.titleStr;
+            return this.localeService.t(OperatorErrorTitleMap.NONE).replace(TYPE, this.titleStr); ;
         }
 
         const errorMsg = this.localeService.t(OperatorErrorTitleMap[rule.operator]).replace(FORMULA1, rule.formula1 ?? '').replace(FORMULA2, rule.formula2 ?? '');
@@ -239,7 +251,7 @@ export abstract class BaseDataValidator {
             return false;
         }
 
-        if (!Tools.isDefine(operator)) {
+        if (!operator) {
             return true;
         }
 

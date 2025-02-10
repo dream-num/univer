@@ -31,8 +31,7 @@ const locale: typeof zhCN = {
             checkboxEqual: 'Для выбранных и не выбранных ячеек введите разные значения',
             formulaError: 'Диапазон ссылок содержит невидимые данные, пожалуйста, пересмотрите диапазон',
             listIntersects: 'Выбранный диапазон не может пересекаться с диапазоном правила.',
-            primitive: 'Formulas are not permitted for custom ticked and unticked values.',
-
+            primitive: 'Формулы не разрешены для пользовательских отмеченных и неотмеченных значений.',
         },
         panel: {
             title: 'Управление проверкой данных',
@@ -65,6 +64,7 @@ const locale: typeof zhCN = {
             equal: 'равно',
             notEqual: 'не равно',
             notBetween: 'не между',
+            legal: 'является допустимым типом',
         },
         ruleName: {
             between: 'между {FORMULA1} и {FORMULA2}',
@@ -75,6 +75,7 @@ const locale: typeof zhCN = {
             equal: 'равно {FORMULA1}',
             notEqual: 'не равно {FORMULA1}',
             notBetween: 'не между {FORMULA1} и {FORMULA2}',
+            legal: 'является допустимым {TYPE}',
         },
         errorMsg: {
             between: 'Значение должно быть между {FORMULA1} и {FORMULA2}',
@@ -85,6 +86,7 @@ const locale: typeof zhCN = {
             equal: 'Значение должно быть равно {FORMULA1}',
             notEqual: 'Значение должно быть не равно {FORMULA1}',
             notBetween: 'Значение должно быть не между {FORMULA1} и {FORMULA2}',
+            legal: 'Значение должно быть допустимым {TYPE}',
         },
         any: {
             title: 'Любое значение',
@@ -101,6 +103,7 @@ const locale: typeof zhCN = {
                 equal: 'равно',
                 notEqual: 'не равно',
                 notBetween: 'не между',
+                legal: 'является допустимой датой',
             },
             ruleName: {
                 between: 'между {FORMULA1} и {FORMULA2}',
@@ -110,7 +113,8 @@ const locale: typeof zhCN = {
                 lessThanOrEqual: 'в или до {FORMULA1}',
                 equal: 'равно {FORMULA1}',
                 notEqual: 'не равно {FORMULA1}',
-                notBetween: 'не между {FORMULA1}',
+                notBetween: 'не между {FORMULA1} и {FORMULA2}',
+                legal: 'является допустимой датой',
             },
             errorMsg: {
                 between: 'Значение должно быть между {FORMULA1} и {FORMULA2}',
@@ -120,7 +124,8 @@ const locale: typeof zhCN = {
                 lessThanOrEqual: 'Значение должно быть в или до {FORMULA1}',
                 equal: 'Значение должно быть {FORMULA1}',
                 notEqual: 'Значение должно быть не {FORMULA1}',
-                notBetween: 'Значение должно быть не между {FORMULA1}',
+                notBetween: 'Значение должно быть не между {FORMULA1} и {FORMULA2}',
+                legal: 'Значение должно быть допустимой датой',
             },
         },
         list: {
@@ -150,7 +155,7 @@ const locale: typeof zhCN = {
                 lessThanOrEqual: 'Длина текста должна быть меньше или равна {FORMULA1}',
                 equal: 'Длина текста должна быть равна {FORMULA1}',
                 notEqual: 'Длина текста должна быть не равна {FORMULA1}',
-                notBetween: 'Длина текста должна быть не между {FORMULA1}',
+                notBetween: 'Длина текста должна быть не между {FORMULA1} и {FORMULA2}',
             },
         },
         decimal: {
@@ -174,7 +179,7 @@ const locale: typeof zhCN = {
         },
         alert: {
             title: 'Ошибка',
-            ok: 'ОК',
+            ok: 'OK',
         },
         error: {
             title: 'Недопустимо:',
@@ -182,7 +187,7 @@ const locale: typeof zhCN = {
         renderMode: {
             arrow: 'Стрелка',
             chip: 'Чип',
-            text: 'Простой текст',
+            text: 'Обычный текст',
             label: 'Стиль отображения',
         },
         showTime: {

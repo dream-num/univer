@@ -18,11 +18,16 @@ import type { dayjs } from '@univerjs/core';
 import type { BasePickerPanelProps } from 'rc-picker';
 import { PickerPanel } from 'rc-picker';
 import generateConfig from 'rc-picker/lib/generate/dayjs';
-import React, { useContext } from 'react';
+import { useContext } from 'react';
 import { ConfigContext } from '../config-provider';
 import styles from './index.module.less';
 
-export type IDatePanelProps = Omit<BasePickerPanelProps<dayjs.Dayjs>, 'prefixCls' | 'locale' | 'generateConfig'>;
+export type IDatePanelProps = Omit<BasePickerPanelProps<dayjs.Dayjs>, 'prefixCls' | 'locale' | 'generateConfig'> & {
+    multiple?: boolean;
+    defaultValue?: dayjs.Dayjs | dayjs.Dayjs[];
+    value?: dayjs.Dayjs | dayjs.Dayjs[];
+    onChange?: (date: dayjs.Dayjs | dayjs.Dayjs[]) => void;
+};
 
 export const DatePanel = (props: IDatePanelProps) => {
     const { locale } = useContext(ConfigContext);

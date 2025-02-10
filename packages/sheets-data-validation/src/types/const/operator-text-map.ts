@@ -38,7 +38,7 @@ export const OperatorTitleMap: Record<DataValidationOperator, string> = {
     [DataValidationOperator.NOT_EQUAL]: 'dataValidation.ruleName.notEqual',
 };
 
-export const OperatorErrorTitleMap: Record<DataValidationOperator, string> = {
+export const OperatorErrorTitleMap: Record<DataValidationOperator | 'NONE', string> = {
     [DataValidationOperator.BETWEEN]: 'dataValidation.errorMsg.between',
     [DataValidationOperator.EQUAL]: 'dataValidation.errorMsg.equal',
     [DataValidationOperator.GREATER_THAN]: 'dataValidation.errorMsg.greaterThan',
@@ -47,4 +47,5 @@ export const OperatorErrorTitleMap: Record<DataValidationOperator, string> = {
     [DataValidationOperator.LESS_THAN_OR_EQUAL]: 'dataValidation.errorMsg.lessThanOrEqual',
     [DataValidationOperator.NOT_BETWEEN]: 'dataValidation.errorMsg.notBetween',
     [DataValidationOperator.NOT_EQUAL]: 'dataValidation.errorMsg.notEqual',
+    NONE: 'dataValidation.errorMsg.legal',
 };

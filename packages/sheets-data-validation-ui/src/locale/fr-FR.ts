@@ -64,6 +64,7 @@ const locale: typeof enUS = {
             equal: 'égal à',
             notEqual: 'différent de',
             notBetween: 'pas entre',
+            legal: 'est de type légal',
         },
         ruleName: {
             between: 'est entre {FORMULA1} et {FORMULA2}',
@@ -74,6 +75,7 @@ const locale: typeof enUS = {
             equal: 'est égal à {FORMULA1}',
             notEqual: 'est différent de {FORMULA1}',
             notBetween: 'n\'est pas entre {FORMULA1} et {FORMULA2}',
+            legal: 'est un {TYPE} légal',
         },
         errorMsg: {
             between: 'La valeur doit être entre {FORMULA1} et {FORMULA2}',
@@ -84,6 +86,7 @@ const locale: typeof enUS = {
             equal: 'La valeur doit être égale à {FORMULA1}',
             notEqual: 'La valeur doit être différente de {FORMULA1}',
             notBetween: 'La valeur ne doit pas être entre {FORMULA1} et {FORMULA2}',
+            legal: 'La valeur doit être un {TYPE} légal',
         },
         any: {
             title: 'N\'importe quelle valeur',
@@ -100,6 +103,7 @@ const locale: typeof enUS = {
                 equal: 'égal à',
                 notEqual: 'différent de',
                 notBetween: 'pas entre',
+                legal: 'est une date légale',
             },
             ruleName: {
                 between: 'est entre {FORMULA1} et {FORMULA2}',
@@ -110,6 +114,7 @@ const locale: typeof enUS = {
                 equal: 'est {FORMULA1}',
                 notEqual: 'n\'est pas {FORMULA1}',
                 notBetween: 'n\'est pas entre {FORMULA1}',
+                legal: 'est une date légale',
             },
             errorMsg: {
                 between: 'La valeur doit être une date légale et entre {FORMULA1} et {FORMULA2}',
@@ -120,6 +125,7 @@ const locale: typeof enUS = {
                 equal: 'La valeur doit être une date légale et {FORMULA1}',
                 notEqual: 'La valeur doit être une date légale et non {FORMULA1}',
                 notBetween: 'La valeur doit être une date légale et non entre {FORMULA1}',
+                legal: 'La valeur doit être une date légale',
             },
         },
         list: {

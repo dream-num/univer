@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
-export { CellDropdown } from './CellDropdown';
-const DROP_DOWN_KEY = 'sheet.ui.dropdown';
-export { DROP_DOWN_KEY };
+import type { ISheetLocation } from '@univerjs/sheets';
+
+export interface IBaseDropdownProps {
+    location: ISheetLocation;
+    hideFn: () => void;
+}

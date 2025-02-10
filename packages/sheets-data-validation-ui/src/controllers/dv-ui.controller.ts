@@ -21,8 +21,7 @@ import { DataValidatorRegistryService } from '@univerjs/data-validation';
 import { DataValidationSingle } from '@univerjs/icons';
 import { ComponentManager } from '@univerjs/ui';
 import { DATA_VALIDATION_PANEL } from '../commands/operations/data-validation.operation';
-import { DataValidationPanel, DATE_DROPDOWN_KEY, DateDropdown, LIST_DROPDOWN_KEY, ListDropDown } from '../views/components';
-import { CellDropdown, DROP_DOWN_KEY } from '../views/components/drop-down';
+import { DataValidationPanel } from '../views/components';
 import { FORMULA_INPUTS } from '../views/components/formula-input';
 import { ListRenderModeInput } from '../views/components/render-mode';
 import { DateShowTimeOption } from '../views/components/show-time';
@@ -52,9 +51,6 @@ export class SheetsDataValidationUIController extends RxDisposable {
         ([
             [DataValidationIcon, DataValidationSingle],
             [DATA_VALIDATION_PANEL, DataValidationPanel],
-            [DROP_DOWN_KEY, CellDropdown],
-            [LIST_DROPDOWN_KEY, ListDropDown],
-            [DATE_DROPDOWN_KEY, DateDropdown],
             [ListRenderModeInput.componentKey, ListRenderModeInput],
             [DateShowTimeOption.componentKey, DateShowTimeOption],
             ...FORMULA_INPUTS,
@@ -82,7 +78,7 @@ export class SheetsDataValidationUIController extends RxDisposable {
             if (validator) {
                 validator.formulaInput = view.formulaInput;
                 validator.canvasRender = view.canvasRender;
-                validator.dropdown = view.dropdown;
+                validator.dropdownType = view.dropdownType;
                 validator.optionsInput = view.optionsInput;
             }
         });

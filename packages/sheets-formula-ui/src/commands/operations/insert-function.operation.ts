@@ -15,6 +15,7 @@
  */
 
 import type { IAccessor, ICellData, ICommand, IRange, Nullable, ObjectMatrix } from '@univerjs/core';
+import type { IInsertFunction } from '@univerjs/sheets-formula';
 import {
     CellValueType,
     CommandType,
@@ -36,8 +37,8 @@ import {
     SetSelectionsOperation,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
-import { type IInsertFunction, InsertFunctionCommand } from '@univerjs/sheets-formula';
-import { IEditorBridgeService } from '@univerjs/sheets-ui';
+import { InsertFunctionCommand } from '@univerjs/sheets-formula';
+import { IEditorBridgeService, SetCellEditVisibleOperation } from '@univerjs/sheets-ui';
 
 export interface IInsertFunctionOperationParams {
     /**
@@ -215,7 +216,7 @@ export const InsertFunctionOperation: ICommand = {
             await commandService.executeCommand(SetSelectionsOperation.id, setSelectionParams);
             const editor = editorService.getEditor(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
             const formulaEditor = editorService.getEditor(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
-            editorBridgeService.changeVisible({
+            commandService.syncExecuteCommand(SetCellEditVisibleOperation.id, {
                 visible: true,
                 unitId,
                 eventType: DeviceInputEventType.Dblclick,

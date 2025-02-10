@@ -60,7 +60,7 @@ import { KeyCode } from '@univerjs/ui';
 import { distinctUntilChanged, filter } from 'rxjs';
 import { getEditorObject } from '../../basics/editor/get-editor-object';
 import { MoveSelectionCommand, MoveSelectionEnterAndTabCommand } from '../../commands/commands/set-selection.command';
-import { SetCellEditVisibleArrowOperation, SetCellEditVisibleWithF2Operation } from '../../commands/operations/cell-edit.operation';
+import { SetCellEditVisibleArrowOperation, SetCellEditVisibleOperation, SetCellEditVisibleWithF2Operation } from '../../commands/operations/cell-edit.operation';
 import { ScrollToRangeOperation } from '../../commands/operations/scroll-to-range.operation';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { ICellEditorManagerService } from '../../services/editor/cell-editor-manager.service';
@@ -176,7 +176,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
             this._editorBridgeService.visible$
                 .pipe(distinctUntilChanged((prev, curr) => prev.visible === curr.visible))
                 .subscribe((param) => {
-                    if ((param.unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY || param.unitId === this._context.unitId) && param.visible) {
+                    if ((param.unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY || param.unitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY || param.unitId === this._context.unitId) && param.visible) {
                         this._isUnitEditing = true;
                         this._handleEditorVisible(param);
                     } else if (this._isUnitEditing) {
@@ -342,7 +342,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
 
                 // TODO@Jocs: After we merging editor related controllers, this seems verbose.
                 // We can directly call SetRangeValues here.
-                this._editorBridgeService.changeVisible(params);
+                this._commandService.syncExecuteCommand(SetCellEditVisibleOperation.id, params);
             }
 
             if (command.id === SetCellEditVisibleWithF2Operation.id) {

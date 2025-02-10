@@ -77,8 +77,10 @@ export class FormulaEditorController extends RxDisposable {
 
         this.disposeWithMe(this._editorService.focus$.subscribe(() => {
             const focusUnitId = this._editorService.getFocusEditor()?.getEditorId();
-            if (focusUnitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) {
+            if (focusUnitId !== DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) {
                 this._contextService.setContextValue(FOCUSING_FX_BAR_EDITOR, false);
+            } else {
+                this._contextService.setContextValue(FOCUSING_FX_BAR_EDITOR, true);
             }
         }));
     }

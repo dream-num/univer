@@ -94,6 +94,9 @@ export interface IEditorBridgeService {
     getEditLocation(): Readonly<Nullable<ICellEditorState>>;
     // Gets the DocumentDataModel of the latest table cell based on the latest cell contents
     getLatestEditCellState(): Readonly<Nullable<IEditorBridgeServiceParam>>;
+    /**
+     * @deprecated do not use it directly, use command SetCellEditVisibleOperation as instead.
+     */
     changeVisible(param: IEditorBridgeServiceVisibleParam): void;
     changeEditorDirty(dirtyStatus: boolean): void;
     getEditorDirty(): boolean;

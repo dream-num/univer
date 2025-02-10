@@ -15,12 +15,12 @@
  */
 
 import type { IFunctionInfo } from '@univerjs/engine-formula';
-import { DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, IUniverInstanceService, LocaleService, useDependency } from '@univerjs/core';
+import { DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, ICommandService, IUniverInstanceService, LocaleService, useDependency } from '@univerjs/core';
 import { Button } from '@univerjs/design';
 import { IEditorService } from '@univerjs/docs-ui';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { getSheetCommandTarget } from '@univerjs/sheets';
-import { IEditorBridgeService, useActiveWorkbook } from '@univerjs/sheets-ui';
+import { IEditorBridgeService, SetCellEditVisibleOperation, useActiveWorkbook } from '@univerjs/sheets-ui';
 import React, { useState } from 'react';
 import styles from './index.module.less';
 import { InputParams } from './input-params/InputParams';
@@ -36,6 +36,7 @@ export function MoreFunctions() {
     const localeService = useDependency(LocaleService);
     const editorService = useDependency(IEditorService);
     const univerInstanceService = useDependency(IUniverInstanceService);
+    const commandService = useDependency(ICommandService);
 
     function handleClickNextPrev() {
         if (selectFunction) {
@@ -49,7 +50,7 @@ export function MoreFunctions() {
     function handleConfirm() {
         const sheetTarget = getSheetCommandTarget(univerInstanceService);
         if (!sheetTarget) return;
-        editorBridgeService.changeVisible({
+        commandService.executeCommand(SetCellEditVisibleOperation.id, {
             visible: true,
             unitId: sheetTarget.unitId,
             eventType: DeviceInputEventType.Dblclick,

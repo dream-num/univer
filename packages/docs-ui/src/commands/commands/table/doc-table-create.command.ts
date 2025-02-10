@@ -126,7 +126,7 @@ export const CreateDocTableCommand: ICommand<ICreateDocTableCommandParams> = {
         const defaultTextStyle = docMenuStyleService.getDefaultStyle();
         const styleCache = docMenuStyleService.getStyleCache();
         const curTextRun = getTextRunAtPosition(
-            body.textRuns ?? [],
+            body,
             startOffset,
             defaultTextStyle,
             styleCache

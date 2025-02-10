@@ -52,7 +52,7 @@ export function FormulaBar() {
     const selectionManager = useDependency(SheetsSelectionsService);
     const permissionService = useDependency(IPermissionService);
     const rangeProtectionCache = useDependency(RangeProtectionCache);
-
+    const commandService = useDependency(ICommandService);
     const [disableInfo, setDisableInfo] = useState<{ editDisable: boolean; viewDisable: boolean }>({
         editDisable: false,
         viewDisable: false,
@@ -181,7 +181,7 @@ export function FormulaBar() {
     function handleCloseBtnClick() {
         const visibleState = editorBridgeService.isVisible();
         if (visibleState.visible) {
-            editorBridgeService.changeVisible({
+            commandService.executeCommand(SetCellEditVisibleOperation.id, {
                 visible: false,
                 eventType: DeviceInputEventType.Keyboard,
                 keycode: KeyCode.ESC,
@@ -194,7 +194,7 @@ export function FormulaBar() {
     function handleConfirmBtnClick() {
         const visibleState = editorBridgeService.isVisible();
         if (visibleState.visible) {
-            editorBridgeService.changeVisible({
+            commandService.executeCommand(SetCellEditVisibleOperation.id, {
                 visible: false,
                 eventType: DeviceInputEventType.PointerDown,
                 unitId: currentWorkbook?.getUnitId() ?? '',
@@ -210,7 +210,7 @@ export function FormulaBar() {
     const { viewDisable, editDisable } = disableInfo;
     const disabled = editDisable || imageDisable;
     const shouldSkipFocus = useRef(false);
-    const commandService = useDependency(ICommandService);
+
     const unitId = currentWorkbook?.getUnitId() ?? '';
 
     const handlePointerDown = () => {

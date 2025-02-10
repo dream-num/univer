@@ -232,11 +232,11 @@ export function ListDropDown(props: IDropdownComponentProps) {
                 };
 
                 if (editorBridgeService.isVisible()) {
-                    editorBridgeService.changeVisible({
+                    commandService.executeCommand(SetCellEditVisibleOperation.id, {
                         visible: false,
-                        keycode: KeyCode.ESC,
                         eventType: DeviceInputEventType.Keyboard,
                         unitId,
+                        keycode: KeyCode.ESC,
                     });
                 }
                 setLocalValue(str);

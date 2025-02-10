@@ -371,12 +371,6 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
                 scene.addObject(this._resizeHelperShape, SHEET_COMPONENT_HEADER_LAYER_INDEX);
                 scene.disableObjectsEvent();
 
-                // TODO: do it in another way
-                // this._editorBridgeService.changeVisible({
-                //     visible: false,
-                //     eventType: DeviceInputEventType.PointerDown,
-                // });
-
                 this._scenePointerMoveSub = scene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
                     const relativeCoords = scene.getCoordRelativeToViewport(
                         Vector2.FromArray([this._startOffsetX, this._startOffsetY])

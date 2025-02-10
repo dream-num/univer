@@ -20,7 +20,7 @@ import { IEditorService } from '@univerjs/docs-ui';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { ComponentManager, DISABLE_AUTO_FOCUS_KEY, MetaKeys, useEvent, useObservable, useSidebarClick } from '@univerjs/ui';
 import React, { useEffect, useRef, useState } from 'react';
-import { SetCellEditVisibleArrowOperation } from '../../commands/operations/cell-edit.operation';
+import { SetCellEditVisibleArrowOperation, SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
 
 import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY } from '../../common/keys';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
@@ -116,10 +116,10 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
 
     const handleClickSideBar = useEvent(() => {
         if (editorBridgeService.isVisible().visible) {
-            editorBridgeService.changeVisible({
+            commandService.executeCommand(SetCellEditVisibleOperation.id, {
                 visible: false,
                 eventType: DeviceInputEventType.PointerUp,
-                unitId: editState!.unitId,
+                unitId: editState?.unitId,
             });
         }
     });

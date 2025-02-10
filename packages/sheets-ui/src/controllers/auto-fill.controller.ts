@@ -231,11 +231,14 @@ export class AutoFillController extends Disposable {
                 disposableCollection.add(controlSelection.fillControl.onPointerDown$.subscribeEvent(() => {
                     const visibleState = this._editorBridgeService.isVisible();
                     if (visibleState.visible) {
-                        this._editorBridgeService.changeVisible({
-                            visible: false,
-                            eventType: DeviceInputEventType.PointerDown,
-                            unitId: currentRenderer.unitId,
-                        });
+                        this._commandService.syncExecuteCommand(
+                            SetCellEditVisibleOperation.id,
+                            {
+                                visible: false,
+                                eventType: DeviceInputEventType.PointerDown,
+                                unitId: currentRenderer.unitId,
+                            }
+                        );
                     }
                 }));
             });

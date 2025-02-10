@@ -17,7 +17,7 @@
 import type { ICommandInfo } from '@univerjs/core';
 import type { ISetFormulaCalculationNotificationMutation } from '../commands/mutations/set-formula-calculation.mutation';
 import { Disposable, DisposableCollection, ICommandService, Inject } from '@univerjs/core';
-import { BehaviorSubject, Observable, shareReplay } from 'rxjs';
+import { BehaviorSubject, distinctUntilChanged, Observable, shareReplay } from 'rxjs';
 import { SetFormulaCalculationNotificationMutation } from '../commands/mutations/set-formula-calculation.mutation';
 import { GlobalComputingStatusService } from '../services/global-computing-status.service';
 import { FormulaExecuteStageType } from '../services/runtime.service';
@@ -32,8 +32,6 @@ import { FormulaExecuteStageType } from '../services/runtime.service';
  */
 export class ComputingStatusReporterController extends Disposable {
     private _computingCompleted$ = new Observable<boolean>((observe) => {
-        observe.next(true);
-
         this._commandService.onCommandExecuted((command: ICommandInfo) => {
             if (command.id !== SetFormulaCalculationNotificationMutation.id) return;
 
@@ -45,7 +43,10 @@ export class ComputingStatusReporterController extends Disposable {
                 );
             }
         });
-    }).pipe(shareReplay());
+    }).pipe(
+        distinctUntilChanged(),
+        shareReplay()
+    );
 
     constructor(
         @ICommandService private readonly _commandService: ICommandService,

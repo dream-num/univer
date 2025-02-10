@@ -45,6 +45,7 @@ export const SetFormulaCalculationStopMutation: IMutation<ISetFormulaCalculation
     handler: () => true,
 };
 
+// TODO: this name lacks Params
 export interface ISetFormulaCalculationNotificationMutation {
     functionsExecutedState?: FormulaExecutedStateType;
     stageInfo?: IExecutionInProgressParams;

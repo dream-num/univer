@@ -140,6 +140,7 @@ export { FormulaDataModel } from './models/formula-data.model';
 export { initSheetFormulaData } from './models/formula-data.model';
 export type { IRangeChange } from './models/formula-data.model';
 export { UniverFormulaEnginePlugin } from './plugin';
+export { GlobalComputingStatusService } from './services/global-computing-status.service';
 export { IActiveDirtyManagerService } from './services/active-dirty-manager.service';
 export { ActiveDirtyManagerService } from './services/active-dirty-manager.service';
 export { CalculateFormulaService, ICalculateFormulaService } from './services/calculate-formula.service';

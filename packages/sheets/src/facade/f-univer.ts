@@ -20,7 +20,7 @@ import type { IBeforeSheetCreateEventParams, ISheetCreatedEventParams } from './
 import type { FRange } from './f-range';
 import type { FWorksheet } from './f-worksheet';
 import { CanceledError, FUniver, ICommandService, IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
-import { COMMAND_LISTENER_VALUE_CHANGE, getValueChangedEffectedRange, InsertSheetCommand, RemoveSheetCommand, SetGridlinesColorCommand, SetTabColorCommand, SetWorksheetActivateCommand, SetWorksheetHideCommand, SetWorksheetNameCommand, SetWorksheetOrderCommand, ToggleGridlinesCommand } from '@univerjs/sheets';
+import { COMMAND_LISTENER_VALUE_CHANGE, getValueChangedEffectedRange, InsertSheetCommand, RemoveSheetCommand, SetGridlinesColorCommand, SetTabColorCommand, SetWorksheetActiveOperation, SetWorksheetHideCommand, SetWorksheetNameCommand, SetWorksheetOrderCommand, ToggleGridlinesCommand } from '@univerjs/sheets';
 import { FDefinedNameBuilder } from './f-defined-name';
 import { FPermission } from './f-permission';
 import { FWorkbook } from './f-workbook';
@@ -237,7 +237,7 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
                         }
                         break;
                     }
-                    case SetWorksheetActivateCommand.id: {
+                    case SetWorksheetActiveOperation.id: {
                         if (!this._eventListend(this.Event.BeforeActiveSheetChange)) return;
                         const { subUnitId: sheetId, unitId } = commandInfo.params as ISetWorksheetActivateCommandParams;
                         const workbook = unitId ? this.getUniverSheet(unitId) : this.getActiveWorkbook?.();
@@ -358,7 +358,7 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
                         );
                         break;
                     }
-                    case SetWorksheetActivateCommand.id: {
+                    case SetWorksheetActiveOperation.id: {
                         if (!this._eventListend(this.Event.ActiveSheetChanged)) return;
                         const target = this.getActiveSheet();
                         if (!target) return;

@@ -149,6 +149,9 @@ export class EditorService extends Disposable implements IEditorService, IDispos
     }
 
     focus(editorUnitId: string) {
+        if (editorUnitId === this._focusEditorUnitId) {
+            return;
+        }
         if (this._focusEditorUnitId) {
             this.blur();
         }

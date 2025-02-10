@@ -102,7 +102,7 @@ export const BreakLineCommand: ICommand = {
 
         const defaultTextStyle = docMenuStyleService.getDefaultStyle();
         const styleCache = docMenuStyleService.getStyleCache();
-        const curTextRun = getTextRunAtPosition(body.textRuns ?? [], endOffset, defaultTextStyle, styleCache);
+        const curTextRun = getTextRunAtPosition(body, endOffset, defaultTextStyle, styleCache);
 
         const insertBody: IDocumentBody = {
             dataStream: DataStreamTreeTokenType.PARAGRAPH,

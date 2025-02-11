@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { FUniver, LocaleType, LogLevel, Univer, UniverInstanceType, UserManagerService } from '@univerjs/core';
+import { FUniver, ILogService, LocaleType, LogLevel, Univer, UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { UniverDebuggerPlugin } from '@univerjs/debugger';
 import { defaultTheme } from '@univerjs/design';
 import { UniverDocsPlugin } from '@univerjs/docs';
@@ -174,10 +174,15 @@ declare global {
         createNewInstance?: typeof createNewInstance;
     }
 }
+const logService = window.univer!.__getInjector().get(ILogService);
 
 window.univerAPI?.addEvent(window.univerAPI.Event.BeforeSheetEditStart, (params) => {
     const { row, column } = params;
     if (row === 0 && column === 0) {
         params.cancel = true;
     }
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.ActiveSheetChanged, (params) => {
+    logService.log('===active sheet changed', params);
 });

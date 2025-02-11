@@ -138,27 +138,43 @@ class FUniverSheetsFilterEventMixin extends FUniver {
     override _initialize(injector: Injector): void {
         const commandService = injector.get(ICommandService);
 
-        this.disposeWithMe(commandService.beforeCommandExecuted((commandInfo) => {
-            switch (commandInfo.id) {
-                case SetSheetsFilterCriteriaCommand.id:
+        // Register filter criteria set event handlers
+        this.registerEventHandler(
+            this.Event.SheetBeforeRangeFilter,
+            () => commandService.beforeCommandExecuted((commandInfo) => {
+                if (commandInfo.id === SetSheetsFilterCriteriaCommand.id) {
                     this._beforeRangeFilter(commandInfo as Readonly<ICommandInfo<ISetSheetsFilterCriteriaCommandParams>>);
-                    break;
-                case ClearSheetsFilterCriteriaCommand.id:
-                    this._beforeRangeFilterClear();
-                    break;
-            }
-        }));
+                }
+            })
+        );
 
-        this.disposeWithMe(commandService.onCommandExecuted((commandInfo) => {
-            switch (commandInfo.id) {
-                case SetSheetsFilterCriteriaCommand.id:
+        this.registerEventHandler(
+            this.Event.SheetBeforeRangeFilterClear,
+            () => commandService.beforeCommandExecuted((commandInfo) => {
+                if (commandInfo.id === ClearSheetsFilterCriteriaCommand.id) {
+                    this._beforeRangeFilterClear();
+                }
+            })
+        );
+
+        // Register filter criteria execution event handlers
+        this.registerEventHandler(
+            this.Event.SheetRangeFiltered,
+            () => commandService.onCommandExecuted((commandInfo) => {
+                if (commandInfo.id === SetSheetsFilterCriteriaCommand.id) {
                     this._onRangeFiltered(commandInfo as Readonly<ICommandInfo<ISetSheetsFilterCriteriaCommandParams>>);
-                    break;
-                case ClearSheetsFilterCriteriaCommand.id:
+                }
+            })
+        );
+
+        this.registerEventHandler(
+            this.Event.SheetRangeFilterCleared,
+            () => commandService.onCommandExecuted((commandInfo) => {
+                if (commandInfo.id === ClearSheetsFilterCriteriaCommand.id) {
                     this._onRangeFilterCleared();
-                    break;
-            }
-        }));
+                }
+            })
+        );
     }
 
     private _beforeRangeFilter(commandInfo: Readonly<ICommandInfo<ISetSheetsFilterCriteriaCommandParams>>): void {

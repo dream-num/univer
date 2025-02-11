@@ -31,16 +31,21 @@ export class FEventRegistry {
         return this._eventRegistry.get(event)!;
     }
 
-    private _eventHandlerMap = new Map<string, () => IDisposable | Subscription>();
-    private _eventHandlerRegisted = new Map<string, IDisposable>();
+    private _eventHandlerMap = new Map<string, Set<() => IDisposable | Subscription>>();
+    private _eventHandlerRegisted = new Map<string, Map<() => IDisposable | Subscription, IDisposable>>();
 
     registerEventHandler(event: string, handler: () => IDisposable | Subscription) {
-        this._eventHandlerMap.set(event, handler);
+        const current = this._eventHandlerMap.get(event);
+        if (current) {
+            current.add(handler);
+        } else {
+            this._eventHandlerMap.set(event, new Set([handler]));
+        }
 
         return toDisposable(() => {
-            this._eventHandlerMap.delete(event);
-            this._eventHandlerRegisted.get(event)?.dispose();
-            this._eventHandlerRegisted.delete(event);
+            this._eventHandlerMap.get(event)?.delete(handler);
+            this._eventHandlerRegisted.get(event)?.get(handler)?.dispose();
+            this._eventHandlerRegisted.get(event)?.delete(handler);
         });
     }
 
@@ -50,7 +55,7 @@ export class FEventRegistry {
 
         if (map.getData().length === 0) {
             const disposable = this._eventHandlerRegisted.get(event);
-            disposable?.dispose();
+            disposable?.forEach((d) => d.dispose());
             this._eventHandlerRegisted.delete(event);
         }
     }
@@ -69,9 +74,16 @@ export class FEventRegistry {
      */
     addEvent<T extends keyof IEventParamConfig>(event: T, callback: (params: IEventParamConfig[T]) => void) {
         this._ensureEventRegistry(event).add(callback);
-        if (!this._eventHandlerRegisted.has(event)) {
-            this._eventHandlerRegisted.set(event, toDisposable(this._eventHandlerMap.get(event)!()));
+        let current = this._eventHandlerRegisted.get(event);
+        const handlers = this._eventHandlerMap.get(event);
+        if (!current) {
+            current = new Map();
+            this._eventHandlerRegisted.set(event, current);
+            handlers?.forEach((handler) => {
+                current?.set(handler, toDisposable(handler()));
+            });
         }
+
         return toDisposable(() => this.removeEvent(event, callback));
     }
 

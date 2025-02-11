@@ -552,6 +552,7 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
             renderManagerService.created$,
             lifeCycleService.lifecycle$,
         ]);
+        // eslint-disable-next-line max-lines-per-function
         this.disposeWithMe(combined$.subscribe(([created, lifecycle]) => {
             // univer & univer-pro are not same in life cycle.
 
@@ -577,47 +578,65 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
             }
             unitMap.set(sheetRenderUnit.unitId, disposable);
             const scrollManagerService = sheetRenderUnit.with(SheetScrollManagerService);
-            disposable.add(scrollManagerService.validViewportScrollInfo$.subscribe((params: Nullable<IViewportScrollState>) => {
-                if (!params) return;
-                this.fireEvent(this.Event.Scroll, {
-                    workbook,
-                    worksheet: workbook.getActiveSheet(),
-                    ...params,
-                });
-            }));
-
             const selectionService = sheetRenderUnit.with(SheetsSelectionsService);
-            disposable.add(selectionService.selectionMoveStart$.subscribe((selections) => {
-                this.fireEvent(this.Event.SelectionMoveStart, {
-                    workbook,
-                    worksheet: workbook.getActiveSheet(),
-                    selections: selections?.map((s) => s.range) ?? [],
-                });
-            }));
 
-            disposable.add(selectionService.selectionMoving$.subscribe((selections) => {
-                this.fireEvent(this.Event.SelectionMoving, {
-                    workbook,
-                    worksheet: workbook.getActiveSheet(),
-                    selections: selections?.map((s) => s.range) ?? [],
-                });
-            }));
+            // Register scroll event handler
+            disposable.add(this.registerEventHandler(
+                this.Event.Scroll,
+                () => scrollManagerService.validViewportScrollInfo$.subscribe((params: Nullable<IViewportScrollState>) => {
+                    if (!params) return;
+                    this.fireEvent(this.Event.Scroll, {
+                        workbook,
+                        worksheet: workbook.getActiveSheet(),
+                        ...params,
+                    });
+                })
+            ));
 
-            disposable.add(selectionService.selectionMoveEnd$.subscribe((selections) => {
-                this.fireEvent(this.Event.SelectionMoveEnd, {
-                    workbook,
-                    worksheet: workbook.getActiveSheet(),
-                    selections: selections?.map((s) => s.range) ?? [],
-                });
-            }));
+            // Register selection event handlers
+            disposable.add(this.registerEventHandler(
+                this.Event.SelectionMoveStart,
+                () => selectionService.selectionMoveStart$.subscribe((selections) => {
+                    this.fireEvent(this.Event.SelectionMoveStart, {
+                        workbook,
+                        worksheet: workbook.getActiveSheet(),
+                        selections: selections?.map((s) => s.range) ?? [],
+                    });
+                })
+            ));
 
-            disposable.add(selectionService.selectionChanged$.subscribe((selections) => {
-                this.fireEvent(this.Event.SelectionChanged, {
-                    workbook,
-                    worksheet: workbook.getActiveSheet(),
-                    selections: selections?.map((s) => s.range) ?? [],
-                });
-            }));
+            disposable.add(this.registerEventHandler(
+                this.Event.SelectionMoving,
+                () => selectionService.selectionMoving$.subscribe((selections) => {
+                    this.fireEvent(this.Event.SelectionMoving, {
+                        workbook,
+                        worksheet: workbook.getActiveSheet(),
+                        selections: selections?.map((s) => s.range) ?? [],
+                    });
+                })
+            ));
+
+            disposable.add(this.registerEventHandler(
+                this.Event.SelectionMoveEnd,
+                () => selectionService.selectionMoveEnd$.subscribe((selections) => {
+                    this.fireEvent(this.Event.SelectionMoveEnd, {
+                        workbook,
+                        worksheet: workbook.getActiveSheet(),
+                        selections: selections?.map((s) => s.range) ?? [],
+                    });
+                })
+            ));
+
+            disposable.add(this.registerEventHandler(
+                this.Event.SelectionChanged,
+                () => selectionService.selectionChanged$.subscribe((selections) => {
+                    this.fireEvent(this.Event.SelectionChanged, {
+                        workbook,
+                        worksheet: workbook.getActiveSheet(),
+                        selections: selections?.map((s) => s.range) ?? [],
+                    });
+                })
+            ));
             // for pro, in pro, life cycle & created$ is not same as univer sdk
             // if not clear sheetRenderUnit, that would cause event bind twice!
             sheetRenderUnit = null;

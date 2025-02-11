@@ -310,6 +310,20 @@ export default {
             number2: { name: 'nombre2', detail: 'second' },
         },
     },
+    NUMBERSTRING: {
+        description: 'Convertir des nombres en chaînes chinoises',
+        abstract: 'Convertir des nombres en chaînes chinoises',
+        links: [
+            {
+                title: 'guide',
+                url: 'https://www.wps.cn/learning/course/detail/id/340.html?chan=pc_kdocs_function',
+            },
+        ],
+        functionParameter: {
+            number: { name: 'numérique', detail: 'La valeur numérique convertie en chaîne chinoise.' },
+            type: { name: 'type', detail: 'Le type du résultat renvoyé. \n1. Minuscules chinoises \n2. Mettre les caractères chinois en majuscules \n3. Lire et écrire des caractères chinois' },
+        },
+    },
     NUMBERVALUE: {
         description: 'Converts text to number in a locale-independent manner',
         abstract: 'Converts text to number in a locale-independent manner',

@@ -305,6 +305,20 @@ export default {
             numBytes: { name: 'num_bytes', detail: 'Specifies the number of characters you want MIDB to extract, based on bytes.' },
         },
     },
+    NUMBERSTRING: {
+        description: 'Convert numbers to Chinese strings',
+        abstract: 'Convert numbers to Chinese strings',
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://www.wps.cn/learning/course/detail/id/340.html?chan=pc_kdocs_function',
+            },
+        ],
+        functionParameter: {
+            number: { name: 'number', detail: 'The value converted to a Chinese string.' },
+            type: { name: 'type', detail: 'The type of the returned result. \n1. Chinese lowercase \n2. Chinese uppercase \n3. Reading and Writing Chinese Characters' },
+        },
+    },
     NUMBERVALUE: {
         description: 'Converts text to number in a locale-independent manner',
         abstract: 'Converts text to number in a locale-independent manner',

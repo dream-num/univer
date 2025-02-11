@@ -304,6 +304,20 @@ export default {
             numBytes: { name: '字節數', detail: '指定要 MIDB 擷取的字元數目，以位元組為單位。' },
         },
     },
+    NUMBERSTRING: {
+        description: '將數字轉換為中文字符串',
+        abstract: '將數字轉換為中文字符串',
+        links: [
+            {
+                title: '教導',
+                url: 'https://www.wps.cn/learning/course/detail/id/340.html?chan=pc_kdocs_function',
+            },
+        ],
+        functionParameter: {
+            number: { name: '數值', detail: '被轉換為中文字符串的數值。' },
+            type: { name: '類型', detail: '傳回結果的類型。\n1. 漢字小寫 \n2. 漢字大寫 \n3. 漢字讀寫' },
+        },
+    },
     NUMBERVALUE: {
         description: '以與區域設定無關的方式將文字轉換為數字',
         abstract: '以與區域設定無關的方式將文字轉換為數字',

@@ -29,9 +29,8 @@ import { ICommandService } from '../services/command/command.service';
 import { IUniverInstanceService } from '../services/instance/instance.service';
 import { LifecycleService } from '../services/lifecycle/lifecycle.service';
 import { RedoCommand, UndoCommand } from '../services/undoredo/undoredo.service';
-import { ColorBuilder, toDisposable } from '../shared';
+import { ColorBuilder, Disposable, toDisposable } from '../shared';
 import { Univer } from '../univer';
-import { FBaseInitialable } from './f-base';
 import { FBlob } from './f-blob';
 import { FDoc } from './f-doc';
 import { FEnum } from './f-enum';
@@ -42,12 +41,22 @@ import { FUserManager } from './f-usermanager';
 import { FUtil } from './f-util';
 
 /**
+ * @ignore
+ */
+const InitializerSymbol = Symbol('initializers');
+
+/**
+ * @ignore
+ */
+type Initializers = Array<(injector: Injector) => void>;
+
+/**
  * The root Facade API object to interact with Univer. Please use `newAPI` static method
  * to create a new instance.
  *
  * @hideconstructor
  */
-export class FUniver extends FBaseInitialable {
+export class FUniver extends Disposable {
     /**
      * Create an FUniver instance, if the injector is not provided, it will create a new Univer instance.
      * @static
@@ -59,19 +68,53 @@ export class FUniver extends FBaseInitialable {
         return injector.createInstance(FUniver);
     }
 
-    private _eventRegistry = new FEventRegistry();
+    declare private [InitializerSymbol]: Initializers | undefined;
 
-    protected registerEventHandler(event: string, handler: () => IDisposable | Subscription) {
-        return this._eventRegistry.registerEventHandler(event, handler);
+    /**
+     * @ignore
+     */
+    _initialize(injector: Injector) { }
+
+    /**
+     * @ignore
+     */
+    static extend(source: any): void {
+        Object.getOwnPropertyNames(source.prototype).forEach((name) => {
+            if (name === '_initialize') {
+                let initializers = this.prototype[InitializerSymbol];
+                if (!initializers) {
+                    initializers = [];
+                    this.prototype[InitializerSymbol] = initializers;
+                }
+
+                initializers.push(source.prototype._initialize);
+            } else if (name !== 'constructor') {
+                // @ts-ignore
+                this.prototype[name] = source.prototype[name];
+            }
+        });
+
+        Object.getOwnPropertyNames(source).forEach((name) => {
+            if (name !== 'prototype' && name !== 'name' && name !== 'length') {
+                // @ts-ignore
+                this[name] = source[name];
+            }
+        });
     }
 
+    protected _eventRegistry = new FEventRegistry();
+
+    protected registerEventHandler = (event: string, handler: () => IDisposable | Subscription) => {
+        return this._eventRegistry.registerEventHandler(event, handler);
+    };
+
     constructor(
-        @Inject(Injector) protected override readonly _injector: Injector,
+        @Inject(Injector) protected readonly _injector: Injector,
         @ICommandService protected readonly _commandService: ICommandService,
         @IUniverInstanceService protected readonly _univerInstanceService: IUniverInstanceService,
         @Inject(LifecycleService) protected readonly _lifecycleService: LifecycleService
     ) {
-        super(_injector);
+        super();
 
         this.registerEventHandler(
             this.Event.LifeCycleChanged,
@@ -89,6 +132,14 @@ export class FUniver extends FBaseInitialable {
         this._injector.onDispose(() => {
             this.dispose();
         });
+
+        const initializers = Object.getPrototypeOf(this)[InitializerSymbol];
+        if (initializers) {
+            const self = this;
+            initializers.forEach(function (fn: (_injector: Injector) => void) {
+                fn.apply(self, [_injector]);
+            });
+        }
     }
 
     private _initCommandEvent(injector: Injector): void {

@@ -22,6 +22,8 @@ import { toDisposable } from '../shared';
 
 export class FEventRegistry {
     protected _eventRegistry: Map<string, Registry<(param: any) => void>> = new Map();
+    protected _eventHandlerMap = new Map<string, Set<() => IDisposable | Subscription>>();
+    protected _eventHandlerRegisted = new Map<string, Map<() => IDisposable | Subscription, IDisposable>>();
 
     protected _ensureEventRegistry(event: string) {
         if (!this._eventRegistry.has(event)) {
@@ -30,9 +32,6 @@ export class FEventRegistry {
 
         return this._eventRegistry.get(event)!;
     }
-
-    private _eventHandlerMap = new Map<string, Set<() => IDisposable | Subscription>>();
-    private _eventHandlerRegisted = new Map<string, Map<() => IDisposable | Subscription, IDisposable>>();
 
     registerEventHandler(event: string, handler: () => IDisposable | Subscription) {
         const current = this._eventHandlerMap.get(event);

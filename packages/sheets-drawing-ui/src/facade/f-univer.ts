@@ -55,7 +55,6 @@ export class FUniverDrawingMixin extends FUniver {
     // eslint-disable-next-line max-lines-per-function
     override _initialize(injector: Injector): void {
         const commandService = injector.get(ICommandService);
-        const drawingManagerService = injector.get(IDrawingManagerService);
 
         this.registerEventHandler(
             this.Event.BeforeOverGridImageInsert,
@@ -93,6 +92,8 @@ export class FUniverDrawingMixin extends FUniver {
                     return;
                 }
 
+                const drawingManagerService = injector.get(IDrawingManagerService);
+
                 const { drawings } = params;
                 const willRemoveDrawings = drawings.map((drawing) => {
                     return drawingManagerService.getDrawingByParam(drawing);
@@ -123,6 +124,8 @@ export class FUniverDrawingMixin extends FUniver {
                 }
 
                 const { drawings } = params;
+                const drawingManagerService = injector.get(IDrawingManagerService);
+
                 const images: IBeforeOverGridImageChangeParamObject[] = [];
                 drawings.forEach((drawing) => {
                     const image = drawingManagerService.getDrawingByParam(drawing as IDrawingSearch) as ISheetImage;
@@ -160,6 +163,7 @@ export class FUniverDrawingMixin extends FUniver {
                 if (workbook == null) {
                     return;
                 }
+                const drawingManagerService = injector.get(IDrawingManagerService);
 
                 const oldSelectedDrawings = drawingManagerService.getFocusDrawings() as ISheetImage[];
                 const selectedDrawings = drawings.map((drawing) => {
@@ -230,6 +234,8 @@ export class FUniverDrawingMixin extends FUniver {
                 }
 
                 const { drawings } = params;
+                const drawingManagerService = injector.get(IDrawingManagerService);
+
                 const images = drawings.map((drawing) => {
                     return this._injector.createInstance(FOverGridImage, drawingManagerService.getDrawingByParam(drawing as IDrawingSearch) as ISheetImage);
                 });
@@ -251,6 +257,7 @@ export class FUniverDrawingMixin extends FUniver {
                 if (workbook == null) {
                     return;
                 }
+                const drawingManagerService = injector.get(IDrawingManagerService);
 
                 const selectedDrawings = drawings.map((drawing) => {
                     return drawingManagerService.getDrawingByParam(drawing);

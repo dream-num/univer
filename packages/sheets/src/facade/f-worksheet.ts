@@ -200,9 +200,11 @@ export class FWorksheet extends FBaseInitialable {
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getActiveSheet();
      * fWorksheet.setDefaultStyle('default');
+     * // or
+     * // fWorksheet.setDefaultStyle({fs: 12, ff: 'Arial'});
      * ```
      */
-    setDefaultStyle(style: string): FWorksheet {
+    setDefaultStyle(style: string | Nullable<IStyleData>): FWorksheet {
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
         this._commandService.syncExecuteCommand(SetWorksheetDefaultStyleMutation.id, {
@@ -224,6 +226,8 @@ export class FWorksheet extends FBaseInitialable {
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getActiveSheet();
      * fWorksheet.setRowDefaultStyle(0, 'default');
+     * // or
+     * // fWorksheet.setRowDefaultStyle(0, {fs: 12, ff: 'Arial'});
      * ```
      */
     setColumnDefaultStyle(index: number, style: string | Nullable<IStyleData>): FWorksheet {
@@ -254,6 +258,8 @@ export class FWorksheet extends FBaseInitialable {
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getActiveSheet();
      * fWorksheet.setColumnDefaultStyle(0, 'default');
+     * // or
+     * // fWorksheet.setColumnDefaultStyle(0, {fs: 12, ff: 'Arial'});
      * ```
      */
     setRowDefaultStyle(index: number, style: string | Nullable<IStyleData>): FWorksheet {

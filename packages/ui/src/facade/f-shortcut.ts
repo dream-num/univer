@@ -24,7 +24,7 @@ import { IShortcutService } from '@univerjs/ui';
  * @hideconstructor
  */
 export class FShortcut extends FBase {
-    private _forceEscapeDisposable: IDisposable | null = null;
+    private _forceDisableDisposable: IDisposable | null = null;
 
     constructor(
         @Inject(Injector) protected readonly _injector: Injector,
@@ -36,20 +36,31 @@ export class FShortcut extends FBase {
     /**
      * Enable shortcuts of Univer.
      * @returns {FShortcut} The Facade API instance itself for chaining.
+     *
+     * @example
+     * ```typescript
+     * fShortcut.enableShortcut(); // Use the FShortcut instance used by disableShortcut before, do not create a new instance
+     * ```
      */
     enableShortcut(): this {
-        this._forceEscapeDisposable?.dispose();
-        this._forceEscapeDisposable = null;
+        this._forceDisableDisposable?.dispose();
+        this._forceDisableDisposable = null;
         return this;
     }
 
     /**
      * Disable shortcuts of Univer.
      * @returns {FShortcut} The Facade API instance itself for chaining.
+     *
+     * @example
+     * ```typescript
+     * const fShortcut = univerAPI.getShortcut();
+     * fShortcut.disableShortcut();
+     * ```
      */
     disableShortcut(): this {
-        if (!this._forceEscapeDisposable) {
-            this._forceEscapeDisposable = this._shortcutService.forceEscape();
+        if (!this._forceDisableDisposable) {
+            this._forceDisableDisposable = this._shortcutService.forceDisable();
         }
 
         return this;

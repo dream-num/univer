@@ -132,7 +132,7 @@ export class FFormula extends FBase {
         if (gcss.computingStatus) return Promise.resolve(true);
 
         return firstValueFrom(race(
-            gcss.computingStatus$.pipe(filter((computing) => !computing), map(() => true)),
+            gcss.computingStatus$.pipe(filter((computing) => computing)),
             timer(timeout ?? 30_000).pipe(map(() => false))
         ));
     }

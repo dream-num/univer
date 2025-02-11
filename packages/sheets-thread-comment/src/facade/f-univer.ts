@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IDisposable, Injector } from '@univerjs/core';
+import type { IDisposable, Injector } from '@univerjs/core';
 import type { IAddCommentCommandParams, IDeleteCommentCommandParams, IResolveCommentCommandParams, IThreadComment, IUpdateCommentCommandParams } from '@univerjs/thread-comment';
 import type { IBeforeSheetCommentAddEvent, IBeforeSheetCommentDeleteEvent, IBeforeSheetCommentUpdateEvent, ISheetCommentAddEvent, ISheetCommentDeleteEvent, ISheetCommentResolveEvent, ISheetCommentUpdateEvent } from './f-event';
 import { CanceledError, FUniver, ICommandService, RichTextValue } from '@univerjs/core';
@@ -60,23 +60,22 @@ export interface IFUniverCommentMixin {
  * @ignore
  */
 export class FUniverCommentMixin extends FUniver implements IFUniverCommentMixin {
-    // eslint-disable-next-line complexity
-    private _handleCommentCommand(commandInfo: ICommandInfo): void {
-        const params = commandInfo.params as { unitId: string; subUnitId: string; sheetId: string };
-        if (!params) return;
-        const workbook = params.unitId ? this.getUniverSheet(params.unitId) : this.getActiveWorkbook?.();
-        if (!workbook) {
-            return;
-        }
+    // eslint-disable-next-line max-lines-per-function
+    override _initialize(injector: Injector): void {
+        const commandService = injector.get(ICommandService);
 
-        const worksheet = workbook.getSheetBySheetId(params.subUnitId || params.sheetId) || workbook.getActiveSheet();
-        if (!worksheet) {
-            return;
-        }
+        // After command events
+        this.registerEventHandler(
+            this.Event.CommentAdded,
+            () => commandService.onCommandExecuted((commandInfo) => {
+                if (commandInfo.id !== AddCommentCommand.id) return;
+                const params = commandInfo.params as { unitId: string; subUnitId: string; sheetId: string };
+                if (!params) return;
+                const workbook = params.unitId ? this.getUniverSheet(params.unitId) : this.getActiveWorkbook?.();
+                if (!workbook) return;
+                const worksheet = workbook.getSheetBySheetId(params.subUnitId || params.sheetId) || workbook.getActiveSheet();
+                if (!worksheet) return;
 
-        switch (commandInfo.id) {
-            case AddCommentCommand.id: {
-                if (!this._eventListend(this.Event.CommentAdded)) return;
                 const addParams = commandInfo.params as IAddCommentCommandParams;
                 const { comment } = addParams;
                 const threadComment = worksheet.getRange(comment.ref).getComment();
@@ -89,10 +88,20 @@ export class FUniverCommentMixin extends FUniver implements IFUniverCommentMixin
                         comment: threadComment,
                     });
                 }
-                break;
-            }
-            case UpdateCommentCommand.id: {
-                if (!this._eventListend(this.Event.CommentUpdated)) return;
+            })
+        );
+
+        this.registerEventHandler(
+            this.Event.CommentUpdated,
+            () => commandService.onCommandExecuted((commandInfo) => {
+                if (commandInfo.id !== UpdateCommentCommand.id) return;
+                const params = commandInfo.params as { unitId: string; subUnitId: string; sheetId: string };
+                if (!params) return;
+                const workbook = params.unitId ? this.getUniverSheet(params.unitId) : this.getActiveWorkbook?.();
+                if (!workbook) return;
+                const worksheet = workbook.getSheetBySheetId(params.subUnitId || params.sheetId) || workbook.getActiveSheet();
+                if (!worksheet) return;
+
                 const updateParams = commandInfo.params as IUpdateCommentCommandParams;
                 const { commentId } = updateParams.payload;
                 const threadComment = worksheet.getCommentById(commentId);
@@ -105,10 +114,20 @@ export class FUniverCommentMixin extends FUniver implements IFUniverCommentMixin
                         comment: threadComment,
                     });
                 }
-                break;
-            }
-            case DeleteCommentCommand.id: {
-                if (!this._eventListend(this.Event.CommentDeleted)) return;
+            })
+        );
+
+        this.registerEventHandler(
+            this.Event.CommentDeleted,
+            () => commandService.onCommandExecuted((commandInfo) => {
+                if (commandInfo.id !== DeleteCommentCommand.id) return;
+                const params = commandInfo.params as { unitId: string; subUnitId: string; sheetId: string };
+                if (!params) return;
+                const workbook = params.unitId ? this.getUniverSheet(params.unitId) : this.getActiveWorkbook?.();
+                if (!workbook) return;
+                const worksheet = workbook.getSheetBySheetId(params.subUnitId || params.sheetId) || workbook.getActiveSheet();
+                if (!worksheet) return;
+
                 const deleteParams = commandInfo.params as IDeleteCommentCommandParams;
                 const { commentId } = deleteParams;
                 this.fireEvent(this.Event.CommentDeleted, {
@@ -116,10 +135,20 @@ export class FUniverCommentMixin extends FUniver implements IFUniverCommentMixin
                     worksheet,
                     commentId,
                 });
-                break;
-            }
-            case ResolveCommentCommand.id: {
-                if (!this._eventListend(this.Event.CommentResolved)) return;
+            })
+        );
+
+        this.registerEventHandler(
+            this.Event.CommentResolved,
+            () => commandService.onCommandExecuted((commandInfo) => {
+                if (commandInfo.id !== ResolveCommentCommand.id) return;
+                const params = commandInfo.params as { unitId: string; subUnitId: string; sheetId: string };
+                if (!params) return;
+                const workbook = params.unitId ? this.getUniverSheet(params.unitId) : this.getActiveWorkbook?.();
+                if (!workbook) return;
+                const worksheet = workbook.getSheetBySheetId(params.subUnitId || params.sheetId) || workbook.getActiveSheet();
+                if (!worksheet) return;
+
                 const resolveParams = commandInfo.params as IResolveCommentCommandParams;
                 const { commentId, resolved } = resolveParams;
                 const threadComment = worksheet.getComments().find((c) => c.getCommentData().id === commentId);
@@ -133,28 +162,21 @@ export class FUniverCommentMixin extends FUniver implements IFUniverCommentMixin
                         resolved,
                     });
                 }
-                break;
-            }
-        }
-    }
+            })
+        );
 
-    // eslint-disable-next-line complexity, max-lines-per-function
-    private _handleBeforeCommentCommand(commandInfo: ICommandInfo): void {
-        const params = commandInfo.params as { unitId: string; subUnitId: string; sheetId: string };
-        if (!params) return;
-        const workbook = params.unitId ? this.getUniverSheet(params.unitId) : this.getActiveWorkbook?.();
-        if (!workbook) {
-            return;
-        }
+        // Before command events
+        this.registerEventHandler(
+            this.Event.BeforeCommentAdd,
+            () => commandService.beforeCommandExecuted((commandInfo) => {
+                if (commandInfo.id !== AddCommentCommand.id) return;
+                const params = commandInfo.params as { unitId: string; subUnitId: string; sheetId: string };
+                if (!params) return;
+                const workbook = params.unitId ? this.getUniverSheet(params.unitId) : this.getActiveWorkbook?.();
+                if (!workbook) return;
+                const worksheet = workbook.getSheetBySheetId(params.subUnitId || params.sheetId) || workbook.getActiveSheet();
+                if (!worksheet) return;
 
-        const worksheet = workbook.getSheetBySheetId(params.subUnitId || params.sheetId) || workbook.getActiveSheet();
-        if (!worksheet) {
-            return;
-        }
-
-        switch (commandInfo.id) {
-            case AddCommentCommand.id: {
-                if (!this._eventListend(this.Event.BeforeCommentAdd)) return;
                 const addParams = commandInfo.params as IAddCommentCommandParams;
                 const { comment } = addParams;
                 const activeRange = worksheet.getActiveRange();
@@ -170,11 +192,21 @@ export class FUniverCommentMixin extends FUniver implements IFUniverCommentMixin
                 this.fireEvent(this.Event.BeforeCommentAdd, eventParams);
                 if (eventParams.cancel) {
                     throw new CanceledError();
-                };
-                break;
-            }
-            case UpdateCommentCommand.id: {
-                if (!this._eventListend(this.Event.BeforeCommentUpdate)) return;
+                }
+            })
+        );
+
+        this.registerEventHandler(
+            this.Event.BeforeCommentUpdate,
+            () => commandService.beforeCommandExecuted((commandInfo) => {
+                if (commandInfo.id !== UpdateCommentCommand.id) return;
+                const params = commandInfo.params as { unitId: string; subUnitId: string; sheetId: string };
+                if (!params) return;
+                const workbook = params.unitId ? this.getUniverSheet(params.unitId) : this.getActiveWorkbook?.();
+                if (!workbook) return;
+                const worksheet = workbook.getSheetBySheetId(params.subUnitId || params.sheetId) || workbook.getActiveSheet();
+                if (!worksheet) return;
+
                 const updateParams = commandInfo.params as IUpdateCommentCommandParams;
                 const { commentId, text } = updateParams.payload;
                 const threadComment = worksheet.getCommentById(commentId);
@@ -190,12 +222,22 @@ export class FUniverCommentMixin extends FUniver implements IFUniverCommentMixin
                     this.fireEvent(this.Event.BeforeCommentUpdate, eventParams);
                     if (eventParams.cancel) {
                         throw new CanceledError();
-                    };
+                    }
                 }
-                break;
-            }
-            case DeleteCommentCommand.id: {
-                if (!this._eventListend(this.Event.BeforeCommentDeleted)) return;
+            })
+        );
+
+        this.registerEventHandler(
+            this.Event.BeforeCommentDeleted,
+            () => commandService.beforeCommandExecuted((commandInfo) => {
+                if (commandInfo.id !== DeleteCommentCommand.id) return;
+                const params = commandInfo.params as { unitId: string; subUnitId: string; sheetId: string };
+                if (!params) return;
+                const workbook = params.unitId ? this.getUniverSheet(params.unitId) : this.getActiveWorkbook?.();
+                if (!workbook) return;
+                const worksheet = workbook.getSheetBySheetId(params.subUnitId || params.sheetId) || workbook.getActiveSheet();
+                if (!worksheet) return;
+
                 const deleteParams = commandInfo.params as IDeleteCommentCommandParams;
                 const { commentId } = deleteParams;
                 const threadComment = worksheet.getCommentById(commentId);
@@ -210,12 +252,22 @@ export class FUniverCommentMixin extends FUniver implements IFUniverCommentMixin
                     this.fireEvent(this.Event.BeforeCommentDeleted, eventParams);
                     if (eventParams.cancel) {
                         throw new CanceledError();
-                    };
+                    }
                 }
-                break;
-            }
-            case ResolveCommentCommand.id: {
-                if (!this._eventListend(this.Event.BeforeCommentResolve)) return;
+            })
+        );
+
+        this.registerEventHandler(
+            this.Event.BeforeCommentResolve,
+            () => commandService.beforeCommandExecuted((commandInfo) => {
+                if (commandInfo.id !== ResolveCommentCommand.id) return;
+                const params = commandInfo.params as { unitId: string; subUnitId: string; sheetId: string };
+                if (!params) return;
+                const workbook = params.unitId ? this.getUniverSheet(params.unitId) : this.getActiveWorkbook?.();
+                if (!workbook) return;
+                const worksheet = workbook.getSheetBySheetId(params.subUnitId || params.sheetId) || workbook.getActiveSheet();
+                if (!worksheet) return;
+
                 const resolveParams = commandInfo.params as IResolveCommentCommandParams;
                 const { commentId, resolved } = resolveParams;
                 const threadComment = worksheet.getComments().find((c) => c.getCommentData().id === commentId);
@@ -233,29 +285,13 @@ export class FUniverCommentMixin extends FUniver implements IFUniverCommentMixin
                         throw new CanceledError();
                     }
                 }
-                break;
-            }
-        }
+            })
+        );
     }
 
     /**
      * @ignore
      */
-    override _initialize(injector: Injector): void {
-        const commandService = injector.get(ICommandService);
-        this.disposeWithMe(
-            commandService.onCommandExecuted((commandInfo) => {
-                this._handleCommentCommand(commandInfo);
-            })
-        );
-
-        this.disposeWithMe(
-            commandService.beforeCommandExecuted((commandInfo) => {
-                this._handleBeforeCommentCommand(commandInfo);
-            })
-        );
-    }
-
     override newTheadComment(comment?: IThreadComment): FTheadCommentBuilder {
         return new FTheadCommentBuilder(comment);
     }

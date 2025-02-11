@@ -15,9 +15,10 @@
  */
 
 import type { ICommandInfo, IEventBase, Injector } from '@univerjs/core';
+import type { ISortRangeCommandParams } from '@univerjs/sheets-sort';
 import type { FRange, FWorkbook, FWorksheet } from '@univerjs/sheets/facade';
 import { FEventName, FUniver, ICommandService } from '@univerjs/core';
-import { type ISortRangeCommandParams, SortRangeCommand, SortType } from '@univerjs/sheets-sort';
+import { SortRangeCommand, SortType } from '@univerjs/sheets-sort';
 import { FSheetEventName } from '@univerjs/sheets/facade';
 
 /**
@@ -94,21 +95,21 @@ class FUniverSheetsSortEventMixin extends FUniver {
     override _initialize(injector: Injector): void {
         const commandService = injector.get(ICommandService);
 
-        this.disposeWithMe(commandService.beforeCommandExecuted((commandInfo) => {
-            switch (commandInfo.id) {
-                case SortRangeCommand.id:
-                    this._beforeRangeSort(commandInfo as Readonly<ICommandInfo<ISortRangeCommandParams>>);
-                    break;
-            }
-        }));
+        this.registerEventHandler(
+            this.Event.SheetBeforeRangeSort,
+            () => commandService.beforeCommandExecuted((commandInfo) => {
+                if (commandInfo.id !== SortRangeCommand.id) return;
+                this._beforeRangeSort(commandInfo as Readonly<ICommandInfo<ISortRangeCommandParams>>);
+            })
+        );
 
-        this.disposeWithMe(commandService.onCommandExecuted((commandInfo) => {
-            switch (commandInfo.id) {
-                case SortRangeCommand.id:
-                    this._onRangeSorted(commandInfo as Readonly<ICommandInfo<ISortRangeCommandParams>>);
-                    break;
-            }
-        }));
+        this.registerEventHandler(
+            this.Event.SheetRangeSorted,
+            () => commandService.onCommandExecuted((commandInfo) => {
+                if (commandInfo.id !== SortRangeCommand.id) return;
+                this._onRangeSorted(commandInfo as Readonly<ICommandInfo<ISortRangeCommandParams>>);
+            })
+        );
     }
 
     private _beforeRangeSort(commandInfo: Readonly<ICommandInfo<ISortRangeCommandParams>>): void {

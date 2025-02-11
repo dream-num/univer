@@ -20,8 +20,10 @@ import { DocSelectionManagerService } from '@univerjs/docs';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import { isFormulaLexerToken, LexerTreeBuilder, matchRefDrawToken, matchToken, sequenceNodeType } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import { useEvent } from '@univerjs/ui';
 import { useEffect, useRef, useState } from 'react';
 import { filter, map } from 'rxjs';
+import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render-service';
 
 function getCurrentBodyDataStreamAndOffset(accssor: IAccessor) {
     const univerInstanceService = accssor.get(IUniverInstanceService);
@@ -41,17 +43,27 @@ export enum FormulaSelectingType {
     CAN_EDIT = 2,
 }
 
-export function useFormulaSelecting(editorId: string, isFocus: boolean, disableOnClick?: boolean) {
+export function useFormulaSelecting(opts: { editorId: string; isFocus: boolean; disableOnClick?: boolean; unitId: string; subUnitId: string }) {
+    const { editorId, isFocus, disableOnClick, unitId } = opts;
     const renderManagerService = useDependency(IRenderManagerService);
+    const sheetRenderer = renderManagerService.getRenderById(unitId);
     const renderer = renderManagerService.getRenderById(editorId);
     const docSelectionRenderService = renderer?.with(DocSelectionRenderService);
     const docSelectionManagerService = useDependency(DocSelectionManagerService);
     const injector = useDependency(Injector);
-    const [isSelecting, setIsSelecting] = useState<FormulaSelectingType>(FormulaSelectingType.NOT_SELECT);
+    const [isSelecting, innerSetIsSelecting] = useState<FormulaSelectingType>(FormulaSelectingType.NOT_SELECT);
     const lexerTreeBuilder = useDependency(LexerTreeBuilder);
     const isDisabledByPointer = useRef(true);
     const isSelectingRef = useRef(isSelecting);
     isSelectingRef.current = isSelecting;
+    const refSelectionsRenderService = sheetRenderer?.with(RefSelectionsRenderService);
+
+    const setIsSelecting = useEvent((v: FormulaSelectingType) => {
+        if (refSelectionsRenderService) {
+            refSelectionsRenderService.setSkipLastEnabled(v === FormulaSelectingType.NEED_ADD);
+        }
+        innerSetIsSelecting(v);
+    });
 
     useEffect(() => {
         const sub = docSelectionManagerService.textSelection$

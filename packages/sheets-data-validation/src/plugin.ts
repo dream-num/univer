@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
+import type { Dependency } from '@univerjs/core';
 import type { IUniverSheetsDataValidationConfig } from './controllers/config.schema';
 import {
     DependentOn,
     ICommandService,
     IConfigService,
-    merge,
-    Plugin,
-    UniverInstanceType,
+    Inject,
+    Injector,
+    merge, Plugin, UniverInstanceType,
 } from '@univerjs/core';
-import { type Dependency, Inject, Injector } from '@univerjs/core';
 import { UniverDataValidationPlugin } from '@univerjs/data-validation';
 import {
     AddSheetDataValidationCommand,
@@ -99,6 +99,7 @@ export class UniverSheetsDataValidationPlugin extends Plugin {
 
         this._injector.get(DataValidationCacheService);
         this._injector.get(SheetsDataValidationValidatorService);
+        this._injector.get(DataValidationController);
         this._injector.get(DataValidationFormulaRefRangeController);
         this._injector.get(DataValidationRefRangeController);
     }
@@ -108,7 +109,6 @@ export class UniverSheetsDataValidationPlugin extends Plugin {
     }
 
     override onRendered(): void {
-        this._injector.get(DataValidationController);
         this._injector.get(DataValidationFormulaController);
     }
 }

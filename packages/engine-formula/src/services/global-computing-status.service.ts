@@ -27,6 +27,8 @@ export class GlobalComputingStatusService extends Disposable {
     private readonly _computingStatus$ = new BehaviorSubject<ComputingStatus>(true);
     readonly computingStatus$ = this._computingStatus$.pipe(distinctUntilChanged());
 
+    get computingStatus(): ComputingStatus { return this._computingStatus$.getValue(); }
+
     private _computingSubscription: Nullable<Subscription>;
 
     override dispose(): void {

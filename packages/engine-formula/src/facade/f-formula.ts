@@ -17,7 +17,8 @@
 import type { ICommandInfo, IDisposable } from '@univerjs/core';
 import type { FormulaExecutedStateType, IExecutionInProgressParams, ISequenceNode, ISetFormulaCalculationNotificationMutation, ISetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
 import { FBase, ICommandService, IConfigService, Inject, Injector } from '@univerjs/core';
-import { ENGINE_FORMULA_CYCLE_REFERENCE_COUNT, LexerTreeBuilder, SetFormulaCalculationNotificationMutation, SetFormulaCalculationStartMutation, SetFormulaCalculationStopMutation } from '@univerjs/engine-formula';
+import { ENGINE_FORMULA_CYCLE_REFERENCE_COUNT, GlobalComputingStatusService, LexerTreeBuilder, SetFormulaCalculationNotificationMutation, SetFormulaCalculationStartMutation, SetFormulaCalculationStopMutation } from '@univerjs/engine-formula';
+import { filter, firstValueFrom, map, race, timer } from 'rxjs';
 
 /**
  * This interface class provides methods to modify the behavior of the operation formula.
@@ -118,6 +119,28 @@ export class FFormula extends FBase {
         });
     }
 
+    /**
+     * Wait for computing in the Univer instance to complete. Please note that this does not only include formula calculation,
+     * but also other computing tasks, e.g. pivot table calculation.
+     * @param {number} [timeout] The maximum time to wait for the computing to complete, in milliseconds. The default
+     * value is 30,000 milliseconds.
+     * @returns {Promise<boolean>} This method returns `true` if the computing is complete. If the timeout is reached, this
+     * method returns `false`.
+     */
+    whenComputingCompleteAsync(timeout?: number): Promise<boolean> {
+        const gcss = this._injector.get(GlobalComputingStatusService);
+        if (gcss.computingStatus) return Promise.resolve(true);
+
+        return firstValueFrom(race(
+            gcss.computingStatus$.pipe(filter((computing) => !computing), map(() => true)),
+            timer(timeout ?? 30_000).pipe(map(() => false))
+        ));
+    }
+
+    /**
+     * @deprecated Use `whenComputingCompleteAsync` instead.
+     * @returns {Promise<void>} This method returns a promise that resolves when the calculation is complete.
+     */
     onCalculationEnd(): Promise<void> {
         return new Promise((resolve, reject) => {
             const timer = setTimeout(() => {

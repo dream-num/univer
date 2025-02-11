@@ -17,13 +17,13 @@
 import type { DocumentDataModel, IDocumentData, Nullable } from '@univerjs/core';
 import type { ILocale } from '@univerjs/design';
 import type { IWorkbenchOptions } from '../../controllers/ui/ui.controller';
-import { DocumentFlavor, IUniverInstanceService, LocaleService, ThemeService, UniverInstanceType, useDependency } from '@univerjs/core';
+import { DocumentFlavor, IUniverInstanceService, LocaleService, ThemeService, UniverInstanceType } from '@univerjs/core';
 import { ConfigContext, ConfigProvider, defaultTheme, themeInstance } from '@univerjs/design';
-
 import clsx from 'clsx';
 import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { BuiltInUIPart } from '../../services/parts/parts.service';
+import { useDependency } from '../../utils/di';
 import { ComponentContainer, useComponentsOfPart } from '../components/ComponentContainer';
 import { DesktopContextMenu } from '../components/context-menu/ContextMenu';
 

@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import { debounce, useDependency } from '@univerjs/core';
-import clsx from 'clsx';
-import React, { useEffect, useState } from 'react';
-
-import { IStatusBarService } from '../../services/status-bar.service';
 import type { IStatisticItem } from './CopyableStatisticItem';
+import { debounce } from '@univerjs/core';
+import { useDependency } from '@univerjs/ui';
+import clsx from 'clsx';
+
+import React, { useEffect, useState } from 'react';
+import { IStatusBarService } from '../../services/status-bar.service';
 import { CopyableStatisticItem } from './CopyableStatisticItem';
 import styles from './index.module.less';
 

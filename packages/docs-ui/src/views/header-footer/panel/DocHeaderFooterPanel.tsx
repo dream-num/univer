@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import { IUniverInstanceService, LocaleService, useDependency } from '@univerjs/core';
+import { IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
+import { useDependency } from '@univerjs/ui';
 import React, { useEffect, useState } from 'react';
 
 import { DocHeaderFooterOptions } from './DocHeaderFooterOptions';

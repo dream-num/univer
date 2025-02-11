@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import { LocaleService, useDependency } from '@univerjs/core';
+import type { IFontFamilyItemProps } from './interface';
+import { LocaleService } from '@univerjs/core';
 import React from 'react';
 
+import { useDependency } from '../../utils/di';
 import styles from './index.module.less';
-import type { IFontFamilyItemProps } from './interface';
 
 export const FontFamilyItem = (props: IFontFamilyItemProps) => {
     const { value } = props;

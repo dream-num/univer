@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { EDITOR_ACTIVATED, IContextService, useDependency } from '@univerjs/core';
+import { EDITOR_ACTIVATED, IContextService } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { IRefSelectionsService, REF_SELECTIONS_ENABLED } from '@univerjs/sheets';
-import { IContextMenuService } from '@univerjs/ui';
+import { IContextMenuService, useDependency } from '@univerjs/ui';
 
 import { useEffect, useLayoutEffect } from 'react';
 import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render-service';

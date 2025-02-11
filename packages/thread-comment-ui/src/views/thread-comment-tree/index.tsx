@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
+import type { IUser, UniverInstanceType } from '@univerjs/core';
 import type { IAddCommentCommandParams, IThreadComment, IUpdateCommentCommandParams } from '@univerjs/thread-comment';
 import type { IThreadCommentEditorInstance } from '../thread-comment-editor';
-import { generateRandomId, useDependency } from '@univerjs/core';
-import { ICommandService, type IUser, LocaleService, type UniverInstanceType, UserManagerService } from '@univerjs/core';
+import { generateRandomId, ICommandService, LocaleService, UserManagerService } from '@univerjs/core';
 import { DropdownLegacy, Menu, MenuItem, Tooltip } from '@univerjs/design';
 import { DeleteSingle, MoreHorizontalSingle, ReplyToCommentSingle, ResolvedSingle, SolveSingle } from '@univerjs/icons';
 import { AddCommentCommand, DeleteCommentCommand, DeleteCommentTreeCommand, getDT, ResolveCommentCommand, ThreadCommentModel, UpdateCommentCommand } from '@univerjs/thread-comment';
-import { useObservable } from '@univerjs/ui';
+import { useDependency, useObservable } from '@univerjs/ui';
 import cs from 'clsx';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { debounceTime } from 'rxjs';

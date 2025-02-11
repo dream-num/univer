@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { ICommandService, useDependency } from '@univerjs/core';
+import { ICommandService } from '@univerjs/core';
 import { Button } from '@univerjs/design';
 import { RecordSingle } from '@univerjs/icons';
-import { useObservable } from '@univerjs/ui';
+import { useDependency, useObservable } from '@univerjs/ui';
 import clsx from 'clsx';
 import React, { useCallback } from 'react';
 import { CompleteRecordingActionCommand, StartRecordingActionCommand, StopRecordingActionCommand } from '../../commands/commands/record.command';

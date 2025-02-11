@@ -16,15 +16,15 @@
 
 import type { DataValidationOperator, DataValidationType, IDataValidationRuleBase, IDataValidationRuleOptions, IExecutionOptions, ISheetDataValidationRule, IUnitRange, Workbook } from '@univerjs/core';
 import type { IUpdateSheetDataValidationRangeCommandParams } from '@univerjs/sheets-data-validation';
-import { debounce, ICommandService, isUnitRangesEqual, IUniverInstanceService, LocaleService, RedoCommand, shallowEqual, UndoCommand, UniverInstanceType, useDependency } from '@univerjs/core';
+import { debounce, ICommandService, isUnitRangesEqual, IUniverInstanceService, LocaleService, RedoCommand, shallowEqual, UndoCommand, UniverInstanceType } from '@univerjs/core';
 import { DataValidationModel, DataValidatorRegistryScope, DataValidatorRegistryService, getRuleOptions, getRuleSetting, TWO_FORMULA_OPERATOR_COUNT } from '@univerjs/data-validation';
 import { Button, Checkbox, FormLayout, Select } from '@univerjs/design';
 import { deserializeRangeWithSheet, serializeRange } from '@univerjs/engine-formula';
 import { SheetsSelectionsService } from '@univerjs/sheets';
 import { RemoveSheetDataValidationCommand, UpdateSheetDataValidationOptionsCommand, UpdateSheetDataValidationRangeCommand, UpdateSheetDataValidationSettingCommand } from '@univerjs/sheets-data-validation';
 import { RangeSelector } from '@univerjs/sheets-formula-ui';
+import { ComponentManager, useDependency, useEvent, useObservable, useSidebarClick } from '@univerjs/ui';
 
-import { ComponentManager, useEvent, useObservable, useSidebarClick } from '@univerjs/ui';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { DataValidationPanelService } from '../../../services/data-validation-panel.service';
 import { DataValidationOptions } from '../options';

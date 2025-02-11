@@ -17,7 +17,7 @@
 import type { IDocumentData, Nullable } from '@univerjs/core';
 import type { RefObject } from 'react';
 import type { Editor } from '../../../services/editor/editor';
-import { useDependency } from '@univerjs/core';
+import { useDependency } from '@univerjs/ui';
 import { useLayoutEffect, useMemo, useState } from 'react';
 import { IEditorService } from '../../../services/editor/editor-manager.service';
 

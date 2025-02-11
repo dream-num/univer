@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { useDependency, useObservable } from '@univerjs/core';
-import React, { useCallback } from 'react';
+import { useDependency, useObservable } from '@univerjs/ui';
 import clsx from 'clsx';
+import React, { useCallback } from 'react';
 import { CROSSHAIR_HIGHLIGHT_COLORS, SheetsCrosshairHighlightService } from '../../services/crosshair.service';
 
 import styles from './index.module.less';

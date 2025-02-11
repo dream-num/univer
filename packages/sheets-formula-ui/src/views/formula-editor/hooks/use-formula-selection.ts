@@ -15,12 +15,12 @@
  */
 
 import type { IAccessor } from '@univerjs/core';
-import { Injector, IUniverInstanceService, useDependency } from '@univerjs/core';
+import { Injector, IUniverInstanceService } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import { isFormulaLexerToken, LexerTreeBuilder, matchRefDrawToken, matchToken, sequenceNodeType } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { useEvent } from '@univerjs/ui';
+import { useDependency, useEvent } from '@univerjs/ui';
 import { useEffect, useRef, useState } from 'react';
 import { filter, map } from 'rxjs';
 import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render-service';

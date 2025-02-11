@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { useObservable } from '@univerjs/core';
 import type { IDisplayMenuItem, IMenuItem } from '../../../services/menu/menu';
+import { useObservable } from '../../../utils/di';
 
 export function useMenuItemState(
     menuItem: IDisplayMenuItem<IMenuItem>

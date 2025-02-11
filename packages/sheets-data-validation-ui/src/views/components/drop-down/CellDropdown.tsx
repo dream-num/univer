@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import { useDependency } from '@univerjs/core';
-import { ComponentManager, useObservable } from '@univerjs/ui';
+import { ComponentManager, useDependency, useObservable } from '@univerjs/ui';
 import React from 'react';
 import { DataValidationDropdownManagerService } from '../../../services/dropdown-manager.service';
 

@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import { ThemeService, useDependency } from '@univerjs/core';
+import { ThemeService } from '@univerjs/core';
 import { Tooltip } from '@univerjs/design';
 import { CloseSingle } from '@univerjs/icons';
 import React, { useEffect, useRef } from 'react';
+import { useDependency } from '../../utils/di';
 import styles from './index.module.less';
 
 export interface IProgressBarProps {

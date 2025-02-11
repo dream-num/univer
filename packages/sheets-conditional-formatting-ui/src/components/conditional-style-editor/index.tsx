@@ -15,9 +15,9 @@
  */
 
 import type { IHighlightCell } from '@univerjs/sheets-conditional-formatting';
-import { BooleanNumber, useDependency } from '@univerjs/core';
+import { BooleanNumber } from '@univerjs/core';
 import { removeUndefinedAttr } from '@univerjs/sheets-conditional-formatting';
-import { ComponentManager } from '@univerjs/ui';
+import { ComponentManager, useDependency } from '@univerjs/ui';
 import cl from 'clsx';
 import React, { useEffect, useState } from 'react';
 import { ColorPicker } from '../color-picker';

@@ -16,11 +16,12 @@
 
 import type { Observable } from 'rxjs';
 import type { IMenuSelectorItem } from '../../services/menu/menu';
-import { ColorKit, LocaleService, useDependency } from '@univerjs/core';
+import { ColorKit, LocaleService } from '@univerjs/core';
 import React, { useEffect, useMemo, useState } from 'react';
 
 import { isObservable } from 'rxjs';
 import { ComponentManager } from '../../common/component-manager';
+import { useDependency } from '../../utils/di';
 
 export type ICustomLabelProps<T = undefined> = {
     value?: string | number | undefined;

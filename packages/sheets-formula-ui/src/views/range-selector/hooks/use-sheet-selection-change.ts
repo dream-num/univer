@@ -20,9 +20,10 @@ import type { Workbook } from '@univerjs/core';
 import type { ISelectionWithCoord } from '@univerjs/sheets';
 import type { INode } from '../utils/filter-reference-node';
 
-import { DisposableCollection, IUniverInstanceService, useDependency } from '@univerjs/core';
+import { DisposableCollection, IUniverInstanceService } from '@univerjs/core';
 import { deserializeRangeWithSheet, matchToken, sequenceNodeType, serializeRange, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import { useDependency } from '@univerjs/ui';
 import { useEffect, useMemo, useRef } from 'react';
 import { distinctUntilChanged, map, merge } from 'rxjs';
 import { throttleTime } from 'rxjs/operators';

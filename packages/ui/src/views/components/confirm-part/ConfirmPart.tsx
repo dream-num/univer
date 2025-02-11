@@ -16,12 +16,12 @@
 
 import type { IConfirmProps } from '@univerjs/design';
 import type { IConfirmPartMethodOptions } from './interface';
-import { useDependency } from '@univerjs/core';
 import { Confirm } from '@univerjs/design';
-
 import React, { useEffect, useState } from 'react';
+
 import { CustomLabel } from '../../../components/custom-label/CustomLabel';
 import { IConfirmService } from '../../../services/confirm/confirm.service';
+import { useDependency } from '../../../utils/di';
 
 export function ConfirmPart() {
     const confirmService = useDependency(IConfirmService);

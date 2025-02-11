@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import { type IDataValidationRuleOptions, LocaleService } from '@univerjs/core';
-import { useDependency } from '@univerjs/core';
+import type { IDataValidationRuleOptions } from '@univerjs/core';
+import { LocaleService } from '@univerjs/core';
 import { Checkbox, FormLayout } from '@univerjs/design';
+import { useDependency } from '@univerjs/ui';
 import React from 'react';
 
 export interface IDateShowTimeOptionProps {

@@ -16,9 +16,9 @@
 
 import type { IMessageProps } from '@univerjs/design';
 import type { IMessageService } from './message.service';
-import { connectInjector, Disposable, Inject, Injector } from '@univerjs/core';
+import { Disposable, Inject, Injector } from '@univerjs/core';
 import { message, Messager, removeMessage } from '@univerjs/design';
-
+import { connectInjector } from '../../utils/di';
 import { BuiltInUIPart, IUIPartsService } from '../parts/parts.service';
 
 export class DesktopMessageService extends Disposable implements IMessageService {

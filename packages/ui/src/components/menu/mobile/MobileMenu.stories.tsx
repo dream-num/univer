@@ -15,12 +15,13 @@
  */
 
 import type { Meta } from '@storybook/react';
+import { Inject, Injector, LocaleType, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
 import React, { useState } from 'react';
-import { Inject, Injector, LocaleType, Plugin, RediContext, Univer, UniverInstanceType } from '@univerjs/core';
-import { IShortcutService, ShortcutService } from '../../../services/shortcut/shortcut.service';
-import { IPlatformService, PlatformService } from '../../../services/platform/platform.service';
 import { ComponentManager } from '../../../common';
 import { ContextMenuPosition } from '../../../services/menu/types';
+import { IPlatformService, PlatformService } from '../../../services/platform/platform.service';
+import { IShortcutService, ShortcutService } from '../../../services/shortcut/shortcut.service';
+import { RediContext } from '../../../utils/di';
 import { MobileMenu } from './MobileMenu';
 
 const meta: Meta = {

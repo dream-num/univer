@@ -15,14 +15,16 @@
  */
 
 import type { Nullable, SlideDataModel } from '@univerjs/core';
-import { IUniverInstanceService, UniverInstanceType, useDependency } from '@univerjs/core';
-import { type BaseObject, ObjectType } from '@univerjs/engine-render';
+import type { BaseObject } from '@univerjs/engine-render';
+import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { ObjectType } from '@univerjs/engine-render';
+import { useDependency } from '@univerjs/ui';
 
 import React from 'react';
-import ArrangePanel from '../panels/ArrangePanel';
-import TransformPanel from '../panels/TransformPanel';
-import FillPanel from '../panels/FillPanel';
 import { CanvasView } from '../../controllers/canvas-view';
+import ArrangePanel from '../panels/ArrangePanel';
+import FillPanel from '../panels/FillPanel';
+import TransformPanel from '../panels/TransformPanel';
 import styles from './index.module.less';
 
 export const COMPONENT_SLIDE_SIDEBAR = 'COMPONENT_SLIDE_SIDEBAR';

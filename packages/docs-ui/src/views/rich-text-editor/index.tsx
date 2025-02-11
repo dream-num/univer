@@ -17,10 +17,10 @@
 import type { IDocumentData } from '@univerjs/core';
 import type { Editor } from '../../services/editor/editor';
 import type { IKeyboardEventConfig } from './hooks';
-import { BuildTextUtils, createInternalEditorID, generateRandomId, useDependency, useObservable } from '@univerjs/core';
+import { BuildTextUtils, createInternalEditorID, generateRandomId } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { useEvent } from '@univerjs/ui';
+import { useDependency, useEvent, useObservable } from '@univerjs/ui';
 import clsx from 'clsx';
 import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useState } from 'react';
 import { IEditorService } from '../../services/editor/editor-manager.service';

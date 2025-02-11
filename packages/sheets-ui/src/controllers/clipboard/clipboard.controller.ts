@@ -47,7 +47,6 @@ import type { IUniverSheetsUIConfig } from '../config.schema';
 
 import {
     BooleanNumber,
-    connectInjector,
     convertBodyToHtml,
     DEFAULT_WORKSHEET_COLUMN_WIDTH,
     DEFAULT_WORKSHEET_COLUMN_WIDTH_KEY,
@@ -63,9 +62,7 @@ import {
     isFormulaString,
     IUniverInstanceService,
     LocaleService,
-
     ObjectMatrix,
-
     RxDisposable,
     Tools,
     UniverInstanceType,
@@ -89,7 +86,7 @@ import {
     SetWorksheetColWidthMutation,
     SetWorksheetRowHeightMutation,
 } from '@univerjs/sheets';
-import { BuiltInUIPart, IMessageService, IUIPartsService } from '@univerjs/ui';
+import { BuiltInUIPart, connectInjector, IMessageService, IUIPartsService } from '@univerjs/ui';
 import { Subject, takeUntil } from 'rxjs';
 import { AddWorksheetMergeCommand } from '../../commands/commands/add-worksheet-merge.command';
 import {

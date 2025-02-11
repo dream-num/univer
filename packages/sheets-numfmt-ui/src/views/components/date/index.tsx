@@ -16,9 +16,10 @@
 
 import type { FC } from 'react';
 import type { IBusinessComponentProps } from '../interface';
-import { LocaleService, numfmt, useDependency } from '@univerjs/core';
+import { LocaleService, numfmt } from '@univerjs/core';
 import { SelectList } from '@univerjs/design';
 import { getDateFormatOptions } from '@univerjs/sheets-numfmt';
+import { useDependency } from '@univerjs/ui';
 import React, { useMemo, useState } from 'react';
 
 export const isDatePanel = (pattern: string) => {

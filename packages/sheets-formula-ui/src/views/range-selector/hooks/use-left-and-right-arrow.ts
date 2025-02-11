@@ -15,11 +15,11 @@
  */
 
 import type { Editor } from '@univerjs/docs-ui';
-import { CommandType, Direction, DisposableCollection, ICommandService, useDependency } from '@univerjs/core';
+import { CommandType, Direction, DisposableCollection, ICommandService } from '@univerjs/core';
 import { MoveCursorOperation, MoveSelectionOperation } from '@univerjs/docs-ui';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { ExpandSelectionCommand, JumpOver, MoveSelectionCommand } from '@univerjs/sheets-ui';
-import { IShortcutService, KeyCode, MetaKeys } from '@univerjs/ui';
+import { IShortcutService, KeyCode, MetaKeys, useDependency } from '@univerjs/ui';
 import { useEffect, useRef } from 'react';
 import { FormulaSelectingType } from '../../formula-editor/hooks/use-formula-selection';
 

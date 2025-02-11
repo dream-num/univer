@@ -16,7 +16,7 @@
 
 import type { DocumentDataModel, Nullable, Workbook } from '@univerjs/core';
 import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
-import { BuildTextUtils, ColorKit, CustomRangeType, DataStreamTreeTokenType, DisposableCollection, DOCS_ZEN_EDITOR_UNIT_ID_KEY, FOCUSING_SHEET, generateRandomId, ICommandService, IContextService, isValidRange, IUniverInstanceService, LocaleService, ThemeService, Tools, UniverInstanceType, useDependency } from '@univerjs/core';
+import { BuildTextUtils, ColorKit, CustomRangeType, DataStreamTreeTokenType, DisposableCollection, DOCS_ZEN_EDITOR_UNIT_ID_KEY, FOCUSING_SHEET, generateRandomId, ICommandService, IContextService, isValidRange, IUniverInstanceService, LocaleService, ThemeService, Tools, UniverInstanceType } from '@univerjs/core';
 import { Button, FormLayout, Input, Select } from '@univerjs/design';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { DocBackScrollRenderController, DocSelectionRenderService } from '@univerjs/docs-ui';
@@ -26,7 +26,7 @@ import { SetSelectionsOperation, SetWorksheetActiveOperation } from '@univerjs/s
 import { RangeSelector } from '@univerjs/sheets-formula-ui';
 import { AddHyperLinkCommand, AddRichHyperLinkCommand, SheetHyperLinkType, SheetsHyperLinkParserService, UpdateHyperLinkCommand, UpdateRichHyperLinkCommand } from '@univerjs/sheets-hyper-link';
 import { IEditorBridgeService, IMarkSelectionService, ScrollToRangeOperation } from '@univerjs/sheets-ui';
-import { IZenZoneService, KeyCode, useEvent, useObservable } from '@univerjs/ui';
+import { IZenZoneService, KeyCode, useDependency, useEvent, useObservable } from '@univerjs/ui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CloseHyperLinkPopupOperation } from '../../commands/operations/popup.operations';
 import { isLegalLink, serializeUrl } from '../../common/util';

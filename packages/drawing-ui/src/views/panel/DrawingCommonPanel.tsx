@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-import { type IDrawingParam, LocaleService, useDependency } from '@univerjs/core';
+import type { IDrawingParam } from '@univerjs/core';
+import { LocaleService } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import { useDependency } from '@univerjs/ui';
 import React, { useEffect, useState } from 'react';
 import { getUpdateParams } from '../../utils/get-update-params';
 import { DrawingAlign } from './DrawingAlign';

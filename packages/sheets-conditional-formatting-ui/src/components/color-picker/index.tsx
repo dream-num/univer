@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { ColorKit, useDependency } from '@univerjs/core';
+import { ColorKit } from '@univerjs/core';
 import { DropdownLegacy, ColorPicker as OriginColorPicker } from '@univerjs/design';
 import { MoreDownSingle } from '@univerjs/icons';
-import { ComponentManager } from '@univerjs/ui';
+import { ComponentManager, useDependency } from '@univerjs/ui';
 import React, { useMemo } from 'react';
 
 import styles from './index.module.less';

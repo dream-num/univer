@@ -18,9 +18,8 @@ import type { Observable } from 'rxjs';
 import { renderHook } from '@testing-library/react';
 import { act, useState } from 'react';
 import { of, Subject } from 'rxjs';
-
 import { describe, expect, it } from 'vitest';
-import { useObservable } from '../observable';
+import { useObservable } from '../../../utils/di';
 
 // New to testing React Hooks? You can refer to https://mayashavin.com/articles/test-react-hooks-with-vitest .
 

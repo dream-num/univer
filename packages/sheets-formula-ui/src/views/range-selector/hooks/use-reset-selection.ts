@@ -15,8 +15,9 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import { IUniverInstanceService, UniverInstanceType, useDependency } from '@univerjs/core';
+import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { SheetsSelectionsService } from '@univerjs/sheets';
+import { useDependency } from '@univerjs/ui';
 import { useCallback } from 'react';
 
 export const useResetSelection = (isNeed: boolean, unitId: string, subUnitId: string) => {

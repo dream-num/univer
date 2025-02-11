@@ -15,10 +15,11 @@
  */
 
 import type { IDrawingParam } from '@univerjs/core';
-import { ICommandService, LocaleService, useDependency } from '@univerjs/core';
-import React, { useState } from 'react';
+import { ICommandService, LocaleService } from '@univerjs/core';
 import { Select } from '@univerjs/design';
+import { useDependency } from '@univerjs/ui';
 import clsx from 'clsx';
+import React, { useState } from 'react';
 import { AlignType, SetDrawingAlignOperation } from '../../commands/operations/drawing-align.operation';
 import styles from './index.module.less';
 

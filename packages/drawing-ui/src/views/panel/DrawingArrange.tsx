@@ -15,10 +15,11 @@
  */
 
 import type { IDrawingParam } from '@univerjs/core';
-import { ArrangeTypeEnum, LocaleService, useDependency } from '@univerjs/core';
+import { ArrangeTypeEnum, LocaleService } from '@univerjs/core';
 import { Button } from '@univerjs/design';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { BottomSingle, MoveDownSingle, MoveUpSingle, TopmostSingle } from '@univerjs/icons';
+import { useDependency } from '@univerjs/ui';
 import clsx from 'clsx';
 import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';

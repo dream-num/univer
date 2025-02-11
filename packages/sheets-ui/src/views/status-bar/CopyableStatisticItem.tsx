@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import { LocaleService, numfmt, useDependency } from '@univerjs/core';
+import type { IFunctionNames } from '@univerjs/engine-formula';
+import { LocaleService, numfmt } from '@univerjs/core';
 import { MessageType, Tooltip } from '@univerjs/design';
 import { FUNCTION_NAMES_MATH, FUNCTION_NAMES_STATISTICAL, FUNCTION_NAMES_TEXT } from '@univerjs/engine-formula';
-import { IClipboardInterfaceService, IMessageService } from '@univerjs/ui';
+import { IClipboardInterfaceService, IMessageService, useDependency } from '@univerjs/ui';
 import React from 'react';
-import type { IFunctionNames } from '@univerjs/engine-formula';
 
 import styles from './index.module.less';
 

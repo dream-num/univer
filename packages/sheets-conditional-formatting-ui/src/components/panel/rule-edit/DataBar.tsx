@@ -17,12 +17,12 @@
 import type { Workbook } from '@univerjs/core';
 import type { IConditionalFormattingRuleConfig, IValueConfig } from '@univerjs/sheets-conditional-formatting';
 import type { IStyleEditorProps } from './type';
-import { IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
+import { IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { Checkbox, InputNumber, Radio, RadioGroup, Select } from '@univerjs/design';
-
 import { CFRuleType, CFValueType, createDefaultValueByValueType, defaultDataBarNativeColor, defaultDataBarPositiveColor } from '@univerjs/sheets-conditional-formatting';
+
 import { FormulaEditor } from '@univerjs/sheets-formula-ui';
-import { useSidebarClick } from '@univerjs/ui';
+import { useDependency, useSidebarClick } from '@univerjs/ui';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ColorPicker } from '../../color-picker';
 import { Preview } from '../../preview';

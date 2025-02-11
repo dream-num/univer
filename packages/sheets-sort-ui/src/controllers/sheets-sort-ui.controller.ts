@@ -17,12 +17,12 @@
 import type { UIPartsService } from '@univerjs/ui';
 
 import type { ISheetSortLocation } from '../services/sheets-sort-ui.service';
-import { connectInjector, ICommandService, Inject, Injector, LocaleService, RxDisposable } from '@univerjs/core';
+import { ICommandService, Inject, Injector, LocaleService, RxDisposable } from '@univerjs/core';
 import { serializeRange } from '@univerjs/engine-formula';
 import { AscendingSingle, CustomSortSingle, DescendingSingle, ExpandAscendingSingle, ExpandDescendingSingle } from '@univerjs/icons';
 import { SortRangeCommand } from '@univerjs/sheets-sort';
 import { SheetsRenderService, SheetsUIPart } from '@univerjs/sheets-ui';
-import { ComponentManager, IDialogService, ILayoutService, IMenuManagerService, IUIPartsService } from '@univerjs/ui';
+import { ComponentManager, connectInjector, IDialogService, ILayoutService, IMenuManagerService, IUIPartsService } from '@univerjs/ui';
 import { takeUntil } from 'rxjs';
 import { SortRangeAscCommand, SortRangeAscExtCommand, SortRangeAscExtInCtxMenuCommand, SortRangeAscInCtxMenuCommand, SortRangeCustomCommand, SortRangeCustomInCtxMenuCommand, SortRangeDescCommand, SortRangeDescExtCommand, SortRangeDescExtInCtxMenuCommand, SortRangeDescInCtxMenuCommand } from '../commands/commands/sheets-sort.command';
 import { SheetsSortUIService } from '../services/sheets-sort-ui.service';

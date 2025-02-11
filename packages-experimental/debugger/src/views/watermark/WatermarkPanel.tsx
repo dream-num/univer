@@ -15,8 +15,9 @@
  */
 
 import type { IWatermarkConfig, IWatermarkConfigWithType } from '@univerjs/watermark';
-import { ILocalStorageService, LocaleService, useDependency, useObservable } from '@univerjs/core';
+import { ILocalStorageService, LocaleService } from '@univerjs/core';
 import { Select } from '@univerjs/design';
+import { useDependency, useObservable } from '@univerjs/ui';
 import { IWatermarkTypeEnum, UNIVER_WATERMARK_STORAGE_KEY, WatermarkImageBaseConfig, WatermarkService, WatermarkTextBaseConfig } from '@univerjs/watermark';
 import React, { useCallback, useEffect, useState } from 'react';
 import styles from './index.module.less';

@@ -17,11 +17,11 @@
 import type { IRenderContext, IRenderModule, Spreadsheet } from '@univerjs/engine-render';
 import type { MenuConfig } from '@univerjs/ui';
 import type { IUniverSheetsUIConfig } from '../config.schema';
-import { connectInjector, Disposable, IConfigService, Inject, Injector, IPermissionService, IUniverInstanceService } from '@univerjs/core';
+import { Disposable, IConfigService, Inject, Injector, IPermissionService, IUniverInstanceService } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { CheckMarkSingle, DeleteSingle, LockSingle, ProtectSingle, WriteSingle } from '@univerjs/icons';
 import { RangeProtectionRuleModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
-import { ComponentManager, IUIPartsService } from '@univerjs/ui';
+import { ComponentManager, connectInjector, IUIPartsService } from '@univerjs/ui';
 import { merge, throttleTime } from 'rxjs';
 import { permissionCheckIconKey, permissionDeleteIconKey, permissionEditIconKey, permissionLockIconKey, permissionMenuIconKey, UNIVER_SHEET_PERMISSION_BACKGROUND, UNIVER_SHEET_PERMISSION_DIALOG, UNIVER_SHEET_PERMISSION_PANEL, UNIVER_SHEET_PERMISSION_USER_DIALOG, UNIVER_SHEET_PERMISSION_USER_PART } from '../../consts/permission';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';

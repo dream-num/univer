@@ -16,11 +16,11 @@
 
 import type { Workbook } from '@univerjs/core';
 import type { ICollaborator } from '@univerjs/protocol';
-import { IAuthzIoService, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency, useObservable, UserManagerService } from '@univerjs/core';
+import { IAuthzIoService, IUniverInstanceService, LocaleService, UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { Avatar, FormLayout, Radio, RadioGroup, Select } from '@univerjs/design';
 import { UnitRole } from '@univerjs/protocol';
 import { EditStateEnum, ViewStateEnum } from '@univerjs/sheets';
-import { IDialogService } from '@univerjs/ui';
+import { IDialogService, useDependency, useObservable } from '@univerjs/ui';
 import React, { useEffect } from 'react';
 import { UNIVER_SHEET_PERMISSION_USER_DIALOG, UNIVER_SHEET_PERMISSION_USER_DIALOG_ID } from '../../../consts/permission';
 import { SheetPermissionUserManagerService } from '../../../services/permission/sheet-permission-user-list.service';

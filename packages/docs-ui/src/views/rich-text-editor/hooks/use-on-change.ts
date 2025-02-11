@@ -17,8 +17,9 @@
 import type { IDocumentData } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { Editor } from '../../../services/editor/editor';
-import { ICommandService, useDependency } from '@univerjs/core';
+import { ICommandService } from '@univerjs/core';
 import { RichTextEditingMutation } from '@univerjs/docs';
+import { useDependency } from '@univerjs/ui';
 import { useEffect } from 'react';
 
 export function useOnChange(editor: Editor | undefined, onChange: (data: IDocumentData) => void) {

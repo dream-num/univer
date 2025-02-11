@@ -15,8 +15,9 @@
  */
 
 import type { IFormulaInputProps } from '@univerjs/data-validation';
-import { LocaleService, useDependency } from '@univerjs/core';
+import { LocaleService } from '@univerjs/core';
 import { Checkbox, FormLayout, Input } from '@univerjs/design';
+import { useDependency } from '@univerjs/ui';
 import React, { useState } from 'react';
 import styles from './index.module.less';
 

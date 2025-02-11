@@ -15,9 +15,9 @@
  */
 
 import type { Editor } from '@univerjs/docs-ui';
-import { Tools, useDependency } from '@univerjs/core';
+import { Tools } from '@univerjs/core';
 import { IEditorService } from '@univerjs/docs-ui';
-import { useEvent } from '@univerjs/ui';
+import { useDependency, useEvent } from '@univerjs/ui';
 
 export const useFocus = (editor?: Editor) => {
     const editorService = useDependency(IEditorService);

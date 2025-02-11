@@ -15,9 +15,9 @@
  */
 
 import type { IDrawingParam } from '@univerjs/core';
-import { useDependency } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { DrawingCommonPanel } from '@univerjs/drawing-ui';
+import { useDependency } from '@univerjs/ui';
 import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
 import { SheetDrawingAnchor } from './SheetDrawingAnchor';

@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, ICommandService, useDependency } from '@univerjs/core';
+import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, ICommandService } from '@univerjs/core';
 import { IEditorService } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SetWorksheetActiveOperation } from '@univerjs/sheets';
+import { useDependency } from '@univerjs/ui';
 import { useEffect } from 'react';
 import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render-service';
 

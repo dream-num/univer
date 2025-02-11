@@ -16,10 +16,10 @@
 
 import type { Editor } from '@univerjs/docs-ui';
 import type { IFunctionParam } from '@univerjs/engine-formula';
-import { LocaleService, useDependency } from '@univerjs/core';
+import { LocaleService } from '@univerjs/core';
 import { CloseSingle, MoreSingle } from '@univerjs/icons';
+import { RectPopup, useDependency } from '@univerjs/ui';
 
-import { RectPopup } from '@univerjs/ui';
 import React, { useMemo, useState } from 'react';
 import { generateParam } from '../../../services/utils';
 import { useEditorPosition } from '../hooks/use-editor-position';

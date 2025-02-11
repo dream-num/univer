@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { IUniverInstanceService, useDependency } from '@univerjs/core';
+import { IUniverInstanceService } from '@univerjs/core';
 import { IEditorService } from '@univerjs/docs-ui';
-import { ISidebarService, useEvent } from '@univerjs/ui';
+import { ISidebarService, useDependency, useEvent } from '@univerjs/ui';
 import { useEffect, useMemo } from 'react';
 import { BehaviorSubject, throttleTime } from 'rxjs';
 import useResizeScrollObserver from './use-resize-scroll-observer';

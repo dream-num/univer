@@ -22,7 +22,7 @@ import type {
     ITimePeriodHighlightCell,
 } from '@univerjs/sheets-conditional-formatting';
 import type { IStyleEditorProps } from './type';
-import { LocaleService, useDependency } from '@univerjs/core';
+import { LocaleService } from '@univerjs/core';
 import { Input, InputNumber, Select } from '@univerjs/design';
 import {
     CFNumberOperator,
@@ -32,6 +32,7 @@ import {
     CFTimePeriodOperator,
     createDefaultValue,
 } from '@univerjs/sheets-conditional-formatting';
+import { useDependency } from '@univerjs/ui';
 import React, { useEffect, useMemo, useState } from 'react';
 import { ConditionalStyleEditor } from '../../conditional-style-editor';
 import { Preview } from '../../preview';

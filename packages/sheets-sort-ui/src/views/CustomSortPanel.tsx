@@ -15,10 +15,12 @@
  */
 
 import type { IRange, Nullable } from '@univerjs/core';
-import { LocaleService, LocaleType, throttle, useDependency } from '@univerjs/core';
+import type { IOrderRule } from '@univerjs/sheets-sort';
+import { LocaleService, LocaleType, throttle } from '@univerjs/core';
 import { Button, Checkbox, DraggableList, DropdownLegacy, Radio, RadioGroup } from '@univerjs/design';
 import { CheckMarkSingle, DeleteEmptySingle, IncreaseSingle, MoreDownSingle, SequenceSingle } from '@univerjs/icons';
-import { type IOrderRule, SheetsSortService, SortType } from '@univerjs/sheets-sort';
+import { SheetsSortService, SortType } from '@univerjs/sheets-sort';
+import { useDependency } from '@univerjs/ui';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { SheetsSortUIService } from '../services/sheets-sort-ui.service';
 

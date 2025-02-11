@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-import React from 'react';
-
 import type { Nullable } from '@univerjs/core';
-import { ICommandService, LocaleService, useDependency } from '@univerjs/core';
-import clsx from 'clsx';
-import { Button } from '@univerjs/design';
-import { BottomSingle, MoveDownSingle, MoveUpSingle, TopmostSingle } from '@univerjs/icons';
 
 import type { Image, Rect, RichText } from '@univerjs/engine-render';
+import { ICommandService, LocaleService } from '@univerjs/core';
+import { Button } from '@univerjs/design';
+import { BottomSingle, MoveDownSingle, MoveUpSingle, TopmostSingle } from '@univerjs/icons';
+import { useDependency } from '@univerjs/ui';
+import clsx from 'clsx';
+
+import React from 'react';
 import { UpdateSlideElementOperation } from '../../commands/operations/update-element.operation';
 import { CanvasView } from '../../controllers/canvas-view';
 import styles from './index.module.less';

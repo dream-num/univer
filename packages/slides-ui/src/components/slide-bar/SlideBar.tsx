@@ -15,9 +15,10 @@
  */
 
 import type { SlideDataModel } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { Scrollbar } from '@univerjs/design';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import { useDependency } from '@univerjs/ui';
 import clsx from 'clsx';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ActivateSlidePageOperation } from '../../commands/operations/activate.operation';

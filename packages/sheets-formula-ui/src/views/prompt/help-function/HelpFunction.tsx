@@ -16,12 +16,12 @@
 
 import type { IFunctionInfo, IFunctionParam } from '@univerjs/engine-formula';
 import type { IHelpFunctionOperationParams } from '../../../services/prompt.service';
-import { IUniverInstanceService, LocaleService, useDependency, useInjector } from '@univerjs/core';
+import { IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { Popup } from '@univerjs/design';
 import { IEditorService } from '@univerjs/docs-ui';
 import { CloseSingle, DetailsSingle, MoreSingle } from '@univerjs/icons';
+import { ILayoutService, ISidebarService, useDependency, useInjector } from '@univerjs/ui';
 
-import { ILayoutService, ISidebarService } from '@univerjs/ui';
 import React, { useEffect, useState } from 'react';
 import { throttleTime } from 'rxjs';
 import { IFormulaPromptService } from '../../../services/prompt.service';

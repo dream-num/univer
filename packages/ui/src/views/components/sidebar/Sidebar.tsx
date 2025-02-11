@@ -15,13 +15,12 @@
  */
 
 import type { ISidebarMethodOptions } from './interface';
-import { useDependency } from '@univerjs/core';
 import { CloseSingle } from '@univerjs/icons';
 import clsx from 'clsx';
 import React, { useEffect, useMemo, useRef } from 'react';
 import { CustomLabel } from '../../../components/custom-label/CustomLabel';
-import { useObservable } from '../../../components/hooks/observable';
 import { ISidebarService } from '../../../services/sidebar/sidebar.service';
+import { useDependency, useObservable } from '../../../utils/di';
 import styles from './index.module.less';
 
 export function Sidebar() {

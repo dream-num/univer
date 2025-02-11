@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-import { useDependency } from '@univerjs/core';
-import { useObservable } from '@univerjs/ui';
-import React from 'react';
+import { useDependency, useObservable } from '@univerjs/ui';
 import { DataValidationPanelService } from '../../../services/data-validation-panel.service';
 import { DataValidationDetail } from '../detail';
 import { DataValidationList } from '../list';

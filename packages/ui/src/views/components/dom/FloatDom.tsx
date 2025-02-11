@@ -15,12 +15,12 @@
  */
 
 import type { IFloatDom } from '../../../services/dom/canvas-dom-layer.service';
-import { IUniverInstanceService, UniverInstanceType, useDependency } from '@univerjs/core';
+import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import React, { memo, useEffect, useMemo, useRef } from 'react';
 import { distinctUntilChanged, first } from 'rxjs';
 import { ComponentManager } from '../../../common';
-import { useObservable } from '../../../components/hooks/observable';
 import { CanvasFloatDomService } from '../../../services/dom/canvas-dom-layer.service';
+import { useDependency, useObservable } from '../../../utils/di';
 import styles from './index.module.less';
 
 const FloatDomSingle = memo((props: { layer: IFloatDom; id: string }) => {

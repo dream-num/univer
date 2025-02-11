@@ -19,17 +19,17 @@ import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { Editor } from '@univerjs/docs-ui';
 import type { ReactNode } from 'react';
 import type { IRefSelection } from './hooks/use-highlight';
-import { BuildTextUtils, createInternalEditorID, generateRandomId, ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency, useObservable } from '@univerjs/core';
+import { BuildTextUtils, createInternalEditorID, generateRandomId, ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { Button, Dialog, Input, Tooltip } from '@univerjs/design';
 import { RichTextEditingMutation } from '@univerjs/docs';
 import { DocBackScrollRenderController, IEditorService } from '@univerjs/docs-ui';
 import { deserializeRangeWithSheet, LexerTreeBuilder, matchToken, sequenceNodeType } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { CloseSingle, DeleteSingle, IncreaseSingle, SelectRangeSingle } from '@univerjs/icons';
-
 import { IDescriptionService } from '@univerjs/sheets-formula';
 import { RANGE_SELECTOR_SYMBOLS, SetCellEditVisibleOperation } from '@univerjs/sheets-ui';
-import { useEvent } from '@univerjs/ui';
+
+import { useDependency, useEvent, useObservable } from '@univerjs/ui';
 import cl from 'clsx';
 
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';

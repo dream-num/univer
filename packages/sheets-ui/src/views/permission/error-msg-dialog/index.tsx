@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import { LocaleService, useDependency } from '@univerjs/core';
-import React from 'react';
+import { LocaleService } from '@univerjs/core';
 import { Button } from '@univerjs/design';
-import { IDialogService } from '@univerjs/ui';
+import { IDialogService, useDependency } from '@univerjs/ui';
 import styles from './index.module.less';
 import { UNIVER_SHEET_PERMISSION_ALERT_DIALOG_ID } from './interface';
 

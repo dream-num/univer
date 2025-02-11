@@ -16,9 +16,9 @@
 
 import type { IDisposable, Nullable } from '@univerjs/core';
 import type { ForwardedRef } from 'react';
-import { ICommandService, IContextService, LocaleService, useDependency } from '@univerjs/core';
+import { ICommandService, IContextService, LocaleService } from '@univerjs/core';
 import { Button, Checkbox, FormDualColumnLayout, FormLayout, Input, MessageType, Select } from '@univerjs/design';
-import { ILayoutService, IMessageService, useObservable } from '@univerjs/ui';
+import { ILayoutService, IMessageService, useDependency, useObservable } from '@univerjs/ui';
 import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef } from 'react';
 import { fromEvent } from 'rxjs';
 

@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import { LocaleService, useDependency } from '@univerjs/core';
-import React, { useEffect } from 'react';
+import { LocaleService } from '@univerjs/core';
 import { IImageIoService } from '@univerjs/drawing';
+import { useDependency } from '@univerjs/ui';
+import React, { useEffect } from 'react';
 
 import styles from './index.module.less';
 

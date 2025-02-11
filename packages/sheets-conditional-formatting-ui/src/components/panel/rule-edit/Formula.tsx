@@ -17,10 +17,10 @@
 import type { Workbook } from '@univerjs/core';
 import type { IAverageHighlightCell, IConditionalFormattingRuleConfig, IHighlightCell, IRankHighlightCell } from '@univerjs/sheets-conditional-formatting';
 import type { IStyleEditorProps } from './type';
-import { IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
+import { IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { CFRuleType, CFSubRuleType } from '@univerjs/sheets-conditional-formatting';
 import { FormulaEditor } from '@univerjs/sheets-formula-ui';
-import { useSidebarClick } from '@univerjs/ui';
+import { useDependency, useSidebarClick } from '@univerjs/ui';
 import React, { useEffect, useRef, useState } from 'react';
 import { ConditionalStyleEditor } from '../../conditional-style-editor';
 import { Preview } from '../../preview';

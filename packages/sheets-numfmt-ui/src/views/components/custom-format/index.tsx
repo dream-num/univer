@@ -15,10 +15,11 @@
  */
 
 import type { IBusinessComponentProps } from '../interface';
-import { ILocalStorageService, LocaleService, useDependency } from '@univerjs/core';
+import { ILocalStorageService, LocaleService } from '@univerjs/core';
 import { Input } from '@univerjs/design';
 import { CheckMarkSingle } from '@univerjs/icons';
 import { CURRENCYFORMAT, DATEFMTLISG, NUMBERFORMAT } from '@univerjs/sheets-numfmt';
+import { useDependency } from '@univerjs/ui';
 import React, { useEffect, useState } from 'react';
 import { UserHabitController } from '../../../controllers/user-habit.controller';
 import styles from './index.module.less';

@@ -23,7 +23,7 @@ import { ErrorValueObject } from '../../../engine/value-object/base-value-object
 import { StringValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
-const chineseLowercaseNumbers = ['o', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
+const chineseLowercaseNumbers = ['〇', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
 const chineseUppercaseNumbers = ['零', '壹', '贰', '叁', '肆', '伍', '陆', '柒', '捌', '玖'];
 const chineseLowercaseUnits = ['', '十', '百', '千'];
 const chineseUppercaseUnits = ['', '拾', '佰', '仟'];

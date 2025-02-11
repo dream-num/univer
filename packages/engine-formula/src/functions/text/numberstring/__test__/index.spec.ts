@@ -70,7 +70,7 @@ describe('Test numberstring function', () => {
             const number = NullValueObject.create();
             const type = NumberValueObject.create(1);
             const result = testFunction.calculate(number, type);
-            expect(getObjectValue(result)).toBe('o');
+            expect(getObjectValue(result)).toBe('〇');
         });
 
         it('Value is error', () => {
@@ -123,15 +123,15 @@ describe('Test numberstring function', () => {
             let number = NumberValueObject.create(102300000000003);
             let type = NumberValueObject.create(1);
             let result = testFunction.calculate(number, type);
-            expect(getObjectValue(result)).toBe('一百o二兆三千亿o三');
+            expect(getObjectValue(result)).toBe('一百〇二兆三千亿〇三');
 
             number = NumberValueObject.create(10230000000000000);
             result = testFunction.calculate(number, type);
-            expect(getObjectValue(result)).toBe('一o二三o兆');
+            expect(getObjectValue(result)).toBe('一〇二三〇兆');
 
             number = NumberValueObject.create(10230);
             result = testFunction.calculate(number, type);
-            expect(getObjectValue(result)).toBe('一万o二百三十');
+            expect(getObjectValue(result)).toBe('一万〇二百三十');
 
             number = NumberValueObject.create(102300);
             type = NumberValueObject.create(2);

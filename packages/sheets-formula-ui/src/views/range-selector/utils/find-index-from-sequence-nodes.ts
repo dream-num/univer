@@ -15,6 +15,7 @@
  */
 
 import type { ISequenceNode } from '@univerjs/engine-formula';
+import { sequenceNodeType } from '@univerjs/engine-formula';
 
 export const findIndexFromSequenceNodes = (sequenceNode: (string | ISequenceNode)[], targetIndex: number, isEqual = true) => {
     let result = -1;
@@ -36,5 +37,16 @@ export const findIndexFromSequenceNodes = (sequenceNode: (string | ISequenceNode
         }
         return pre;
     }, { currentIndex: 0, isFinish: false });
+    return result;
+};
+
+export const findRefSequenceIndex = (sequenceNode: (string | ISequenceNode)[], targetIndex: number) => {
+    let result = -1;
+    for (let i = 0; i <= targetIndex; i++) {
+        const currentNode = sequenceNode[i];
+        if (typeof currentNode !== 'string' && currentNode.nodeType === sequenceNodeType.REFERENCE) {
+            result++;
+        }
+    }
     return result;
 };

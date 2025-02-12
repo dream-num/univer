@@ -19,11 +19,11 @@
 import type { Workbook } from '@univerjs/core';
 import type { Editor } from '@univerjs/docs-ui';
 import type { ISelectionWithCoord, ISetSelectionsOperationParams } from '@univerjs/sheets';
+import type { RefObject } from 'react';
 import type { IRefSelection } from '../../range-selector/hooks/use-highlight';
-import type { INode } from '../../range-selector/utils/filter-reference-node';
 import { DisposableCollection, ICommandService, IUniverInstanceService, ThemeService } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
-import { deserializeRangeWithSheet, sequenceNodeType, serializeRange, serializeRangeWithSheet } from '@univerjs/engine-formula';
+import { deserializeRangeWithSheet, LexerTreeBuilder, sequenceNodeType, serializeRange, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { IRefSelectionsService, SetSelectionsOperation } from '@univerjs/sheets';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
@@ -33,21 +33,40 @@ import { merge } from 'rxjs';
 import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
 import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render-service';
 import { calcHighlightRanges } from '../../range-selector/hooks/use-highlight';
-import { findIndexFromSequenceNodes } from '../../range-selector/utils/find-index-from-sequence-nodes';
+import { findIndexFromSequenceNodes, findRefSequenceIndex } from '../../range-selector/utils/find-index-from-sequence-nodes';
 import { getOffsetFromSequenceNodes } from '../../range-selector/utils/get-offset-from-sequence-nodes';
 import { sequenceNodeToText } from '../../range-selector/utils/sequence-node-to-text';
 import { unitRangesToText } from '../../range-selector/utils/unit-ranges-to-text';
 import { useStateRef } from '../hooks/use-state-ref';
 import { FormulaSelectingType } from './use-formula-selection';
 
+const prepareSelectionChangeContext = (opts: { editor?: Editor; lexerTreeBuilder: LexerTreeBuilder }) => {
+    const { editor, lexerTreeBuilder } = opts;
+    const currentDocSelections = editor?.getSelectionRanges();
+    if (currentDocSelections?.length !== 1) {
+        return;
+    }
+    const docRange = currentDocSelections[0];
+    const offset = docRange.startOffset - 1;
+    const dataStream = (editor?.getDocumentData().body?.dataStream ?? '\r\n').slice(0, -2);
+    const sequenceNodes = lexerTreeBuilder.sequenceNodesBuilder(dataStream.slice(1)) ?? [];
+    const nodeIndex = findIndexFromSequenceNodes(sequenceNodes, offset, false);
+    const updatingRefIndex = findRefSequenceIndex(sequenceNodes, nodeIndex);
+    return {
+        nodeIndex,
+        updatingRefIndex,
+        sequenceNodes,
+        offset,
+    };
+};
+
 const noop = (() => { }) as any;
 export const useSheetSelectionChange = (
     isNeed: boolean,
     isFocus: boolean,
-    isSelecting: FormulaSelectingType,
+    isSelectingRef: RefObject<FormulaSelectingType>,
     unitId: string,
     subUnitId: string,
-    sequenceNodes: INode[],
     refSelectionRef: React.MutableRefObject<IRefSelection[]>,
     isSupportAcrossSheet: boolean,
     listenSelectionSet: boolean,
@@ -57,9 +76,9 @@ export const useSheetSelectionChange = (
     const renderManagerService = useDependency(IRenderManagerService);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const commandService = useDependency(ICommandService);
-    const sequenceNodesRef = useStateRef(sequenceNodes);
     const docSelectionManagerService = useDependency(DocSelectionManagerService);
     const themeService = useDependency(ThemeService);
+    const lexerTreeBuilder = useDependency(LexerTreeBuilder);
 
     const workbook = univerInstanceService.getUnit<Workbook>(unitId);
     const getSheetNameById = useEvent((sheetId: string) => workbook?.getSheetBySheetId(sheetId)?.getName() ?? '');
@@ -71,9 +90,6 @@ export const useSheetSelectionChange = (
     const sheetSkeletonManagerService = render?.with(SheetSkeletonManagerService);
     const refSelectionsService = useDependency(IRefSelectionsService);
     const isScalingRef = useRef(false);
-    const isSelectingRef = useRef(isSelecting);
-    isSelectingRef.current = isSelecting;
-
     const scalingOptionRef = useRef<{ result: string; offset: number }>(undefined);
 
     useEffect(() => {
@@ -85,15 +101,10 @@ export const useSheetSelectionChange = (
                     isFirst = false;
                     return;
                 }
-                const currentDocSelections = editor?.getSelectionRanges();
-                if (currentDocSelections?.length !== 1) {
-                    return;
-                }
-                const docRange = currentDocSelections[0];
-                const offset = docRange.startOffset - 1;
-                const sequenceNodes = [...sequenceNodesRef.current];
-                const nodeIndex = findIndexFromSequenceNodes(sequenceNodes, offset, false);
 
+                const ctx = prepareSelectionChangeContext({ editor, lexerTreeBuilder });
+                if (!ctx) return;
+                const { nodeIndex, updatingRefIndex, sequenceNodes, offset } = ctx;
                 if (isSelectingRef.current === FormulaSelectingType.NEED_ADD) {
                     if (offset !== 0) {
                         if (nodeIndex === -1 && sequenceNodes.length) {
@@ -128,6 +139,9 @@ export const useSheetSelectionChange = (
                         handleRangeChange(result, refRanges[0].length, isEnd);
                     }
                 } else {
+                    const orderedSelections = [...selections];
+                    const last = orderedSelections.pop();
+                    last && orderedSelections.splice(updatingRefIndex, 0, last);
                     // 更新全部的 ref Selection
                     let currentRefIndex = 0;
                     const newTokens = sequenceNodes.map((item) => {
@@ -146,7 +160,7 @@ export const useSheetSelectionChange = (
                                     return item.token;
                                 }
                             }
-                            const selection = selections[currentRefIndex];
+                            const selection = orderedSelections[currentRefIndex];
                             currentRefIndex++;
                             if (!selection) {
                                 return '';
@@ -162,6 +176,7 @@ export const useSheetSelectionChange = (
                         }
                         return item.token;
                     });
+
                     let currentText = '';
                     let newOffset;
                     newTokens.forEach((item, index) => {
@@ -203,7 +218,7 @@ export const useSheetSelectionChange = (
                 disposableCollection.dispose();
             };
         }
-    }, [refSelectionsRenderService, editor, isSupportAcrossSheet, isNeed, sequenceNodesRef, subUnitId, unitId, getSheetNameById, sheetName, handleRangeChange, contextRef]);
+    }, [refSelectionsRenderService, editor, isSupportAcrossSheet, isNeed, subUnitId, unitId, getSheetNameById, sheetName, handleRangeChange, contextRef, lexerTreeBuilder, isSelectingRef]);
 
     useEffect(() => {
         if (isFocus && refSelectionsRenderService && editor) {
@@ -214,7 +229,11 @@ export const useSheetSelectionChange = (
                 let isFinish = false;
                 const { sheetName } = contextRef.current;
 
-                const newSequenceNodes = sequenceNodesRef.current.map((node) => {
+                const dataStream = (editor?.getDocumentData().body?.dataStream ?? '\r\n').slice(0, -2);
+                const sequenceNodes = lexerTreeBuilder.sequenceNodesBuilder(dataStream.slice(1)) ?? [];
+                // updating sequence index
+
+                const newSequenceNodes = sequenceNodes.map((node) => {
                     if (typeof node === 'string') {
                         if (!isFinish) {
                             offset += node.length;
@@ -308,7 +327,7 @@ export const useSheetSelectionChange = (
                 disposableCollection.dispose();
             };
         }
-    }, [isFocus, refSelectionsRenderService, editor, refSelectionsService.selectionSet$, contextRef, sequenceNodesRef, handleRangeChange, isSupportAcrossSheet, unitId]);
+    }, [isFocus, refSelectionsRenderService, editor, refSelectionsService.selectionSet$, contextRef, handleRangeChange, isSupportAcrossSheet, unitId, lexerTreeBuilder]);
 
     useEffect(() => {
         if (listenSelectionSet) {
@@ -332,7 +351,9 @@ export const useSheetSelectionChange = (
                             unitId: params.unitId === unitId ? '' : params.unitId,
                             sheetName: params.subUnitId === sheetId ? '' : getSheetNameById(sheetId),
                         };
-                        const sequenceNodes = [...sequenceNodesRef.current];
+                        const ctx = prepareSelectionChangeContext({ editor, lexerTreeBuilder });
+                        if (!ctx) return;
+                        const { sequenceNodes } = ctx;
                         const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet, sheetName);
                         const result = refRanges[0];
                         let lastNode = sequenceNodes[sequenceNodes.length - 1];
@@ -363,7 +384,7 @@ export const useSheetSelectionChange = (
                 d.dispose();
             };
         }
-    }, [commandService, getSheetNameById, handleRangeChange, isSupportAcrossSheet, listenSelectionSet, sequenceNodesRef, sheetName, subUnitId, unitId]);
+    }, [commandService, editor, getSheetNameById, handleRangeChange, isSupportAcrossSheet, lexerTreeBuilder, listenSelectionSet, sheetName, subUnitId, unitId]);
 
     useEffect(() => {
         if (!editor) {
@@ -388,5 +409,5 @@ export const useSheetSelectionChange = (
         });
 
         return () => sub.unsubscribe();
-    }, [docSelectionManagerService.textSelection$, editor, refSelectionRef, refSelectionsRenderService, refSelectionsService, sequenceNodesRef, sheetSkeletonManagerService, subUnitId, themeService, unitId, univerInstanceService]);
+    }, [docSelectionManagerService.textSelection$, editor, refSelectionRef, refSelectionsRenderService, refSelectionsService, sheetSkeletonManagerService, subUnitId, themeService, unitId, univerInstanceService]);
 };

@@ -223,7 +223,7 @@ export const useSheetSelectionChange = (
                 disposableCollection.dispose();
             };
         }
-    }, [refSelectionsRenderService, editor, isSupportAcrossSheet, isNeed, subUnitId, unitId, getSheetNameById, sheetName, handleRangeChange, contextRef, lexerTreeBuilder, isSelectingRef, onSelectionsChange]);
+    }, [isNeed, onSelectionsChange, refSelectionsRenderService]);
 
     useEffect(() => {
         if (isFocus && refSelectionsRenderService && editor) {
@@ -309,7 +309,7 @@ export const useSheetSelectionChange = (
                     }));
                 });
 
-                disposableCollection.add(refSelectionsRenderService.selectionMoveEnd$.subscribe((selections) => {
+                disposableCollection.add(refSelectionsRenderService.selectionMoveEnd$.subscribe(() => {
                     isScalingRef.current = false;
                     if (scalingOptionRef.current) {
                         const { result, offset } = scalingOptionRef.current;
@@ -332,7 +332,7 @@ export const useSheetSelectionChange = (
                 disposableCollection.dispose();
             };
         }
-    }, [isFocus, refSelectionsRenderService, editor, refSelectionsService.selectionSet$, contextRef, handleRangeChange, isSupportAcrossSheet, unitId, lexerTreeBuilder]);
+    }, [contextRef, editor, handleRangeChange, isFocus, isSupportAcrossSheet, lexerTreeBuilder, refSelectionsRenderService, refSelectionsService.selectionSet$, unitId]);
 
     refSelectionsRenderService?.getSelectionDataWithStyle();
 
@@ -367,7 +367,7 @@ export const useSheetSelectionChange = (
                 d.dispose();
             };
         }
-    }, [commandService, editor, getSheetNameById, handleRangeChange, isSelectingRef, isSupportAcrossSheet, lexerTreeBuilder, listenSelectionSet, onSelectionsChange, refSelectionsRenderService, sheetName, subUnitId, unitId]);
+    }, [commandService, editor, isSelectingRef, lexerTreeBuilder, listenSelectionSet, onSelectionsChange, refSelectionsRenderService]);
 
     useEffect(() => {
         if (!editor) {

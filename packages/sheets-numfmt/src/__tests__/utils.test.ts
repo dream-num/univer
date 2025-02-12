@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ import { cellToRange } from '@univerjs/core';
 import { RemoveNumfmtMutation, SetNumfmtMutation } from '@univerjs/sheets';
 import { describe, expect, it } from 'vitest';
 
-import { currencySymbols } from '../base/const/CURRENCY-SYMBOLS';
+import { currencySymbols } from '../base/const/currency-symbols';
 import { getCurrencyType } from '../utils/currency';
 import {
     getDecimalFromPattern,

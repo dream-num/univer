@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,7 +68,7 @@ import { SheetCellEditorResizeService } from '../../services/editor/cell-editor-
 import { MOVE_SELECTION_KEYCODE_LIST } from '../shortcuts/editor.shortcut';
 import { extractStringFromForceString, isForceString } from '../utils/cell-tools';
 import { normalizeString } from '../utils/char-tools';
-import { isRangeSelector } from './utils/isRangeSelector';
+import { isRangeSelector } from './utils/is-range-selector';
 
 const HIDDEN_EDITOR_POSITION = -1000;
 

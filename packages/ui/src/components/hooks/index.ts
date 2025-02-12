@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,5 +17,5 @@
 export { useEvent } from './event';
 export { useObservable, useObservableRef } from './observable';
 export { useUpdateEffect } from './update-effect';
-export { useClickOutSide } from './useClickOutSide';
+export { useClickOutSide } from './use-click-out-side';
 export { useVirtualList } from './virtual-list';

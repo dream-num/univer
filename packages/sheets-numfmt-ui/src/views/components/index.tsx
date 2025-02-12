@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,8 @@ import { Button, Select } from '@univerjs/design';
 import { getCurrencyType } from '@univerjs/sheets-numfmt';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { UserHabitCurrencyContext } from '../../controllers/user-habit.controller';
-import { useCurrencyOptions } from '../hooks/useCurrencyOptions';
-import { useNextTick } from '../hooks/useNextTick';
+import { useCurrencyOptions } from '../hooks/use-currency-options';
+import { useNextTick } from '../hooks/use-next-tick';
 import { AccountingPanel, isAccountingPanel } from './accounting';
 import { CurrencyPanel, isCurrencyPanel } from './currency';
 import { CustomFormat } from './custom-format';
@@ -32,7 +32,7 @@ import { DatePanel, isDatePanel } from './date';
 import { GeneralPanel, isGeneralPanel } from './general';
 
 import { isThousandthPercentilePanel, ThousandthPercentilePanel } from './thousandth-percentile';
-// TODO@Gggpound: fix this
+// TODO: @Gggpound: fix this
 // FIXME: DO NOT USE GLOBAL STYLES
 import './index.less';
 

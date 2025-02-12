@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,7 +109,7 @@ export { KeyCode, MetaKeys } from './services/shortcut/keycode';
 export { type IShortcutItem, IShortcutService, ShortcutService } from './services/shortcut/shortcut.service';
 export { ShortcutPanelService } from './services/shortcut/shortcut-panel.service';
 export { DesktopSidebarService } from './services/sidebar/desktop-sidebar.service';
-export { useSidebarClick } from './services/sidebar/hooks/useSidebarClick';
+export { useSidebarClick } from './services/sidebar/hooks/use-sidebar-click';
 export { ILeftSidebarService, ISidebarService } from './services/sidebar/sidebar.service';
 export { DesktopZenZoneService } from './services/zen-zone/desktop-zen-zone.service';
 export { IZenZoneService } from './services/zen-zone/zen-zone.service';

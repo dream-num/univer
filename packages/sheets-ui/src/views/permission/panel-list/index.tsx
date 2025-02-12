@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 
 import { distinctUntilChanged, merge } from 'rxjs';
 import { UNIVER_SHEET_PERMISSION_PANEL } from '../../../consts/permission';
-import { useHighlightRange } from '../../../hooks/useHighlightRange';
+import { useHighlightRange } from '../../../hooks/use-highlight-range';
 import { SheetPermissionUserManagerService } from '../../../services/permission/sheet-permission-user-list.service';
 import { panelListEmptyBase64 } from './constant';
 import styles from './index.module.less';

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,5 +14,5 @@
  * limitations under the License.
  */
 
-export { type IKeyboardEventConfig, useKeyboardEvent } from './useKeyboardEvent';
-export { useResize } from './useResize';
+export { type IKeyboardEventConfig, useKeyboardEvent } from './use-keyboard-event';
+export { useResize } from './use-resize';

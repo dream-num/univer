@@ -19,6 +19,25 @@ exports.baseRules = {
         enums: 'always-multiline',
         functions: 'never',
     }],
+    'unicorn/filename-case': [
+        'error',
+        {
+            cases: {
+                kebabCase: true,
+                pascalCase: true,
+            },
+            ignore: [
+                '^README-(\w+)?\\.md$',
+                '^[a-z]{2}-[A-Z]{2}\.ts$',
+                '^__tests__$',
+                '^FUNDING.yml$',
+                '^bug_report.yml$',
+                '^bug_report.zh-CN.yml$',
+                '^feature_request.yml$',
+                '^feature_request.zh-CN.yml$',
+            ],
+        },
+    ],
     'no-empty-function': 'off',
     'style/arrow-parens': ['error', 'always'],
     'ts/no-redeclare': 'off',

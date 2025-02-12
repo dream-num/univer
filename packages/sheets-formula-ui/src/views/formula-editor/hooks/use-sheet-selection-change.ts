@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@
 import type { Workbook } from '@univerjs/core';
 import type { Editor } from '@univerjs/docs-ui';
 import type { ISelectionWithCoord, ISetSelectionsOperationParams } from '@univerjs/sheets';
+import type { IRefSelection } from '../../range-selector/hooks/useHighlight';
 import type { INode } from '../../range-selector/utils/filterReferenceNode';
 import { DisposableCollection, ICommandService, IUniverInstanceService, ThemeService, useDependency, useObservable } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
@@ -31,13 +32,13 @@ import { useEffect, useMemo, useRef } from 'react';
 import { merge } from 'rxjs';
 import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
 import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render-service';
-import { calcHighlightRanges, type IRefSelection } from '../../range-selector/hooks/useHighlight';
+import { calcHighlightRanges } from '../../range-selector/hooks/useHighlight';
 import { findIndexFromSequenceNodes } from '../../range-selector/utils/findIndexFromSequenceNodes';
 import { getOffsetFromSequenceNodes } from '../../range-selector/utils/getOffsetFromSequenceNodes';
 import { sequenceNodeToText } from '../../range-selector/utils/sequenceNodeToText';
 import { unitRangesToText } from '../../range-selector/utils/unitRangesToText';
-import { useStateRef } from '../hooks/useStateRef';
-import { FormulaSelectingType } from './useFormulaSelection';
+import { useStateRef } from '../hooks/use-state-ref';
+import { FormulaSelectingType } from './use-formula-selection';
 
 const noop = (() => { }) as any;
 export const useSheetSelectionChange = (

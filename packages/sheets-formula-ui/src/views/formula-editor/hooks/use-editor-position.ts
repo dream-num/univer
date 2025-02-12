@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,9 @@ import { IEditorService } from '@univerjs/docs-ui';
 import { ISidebarService, useEvent } from '@univerjs/ui';
 import { useEffect, useMemo } from 'react';
 import { BehaviorSubject, throttleTime } from 'rxjs';
-import useResizeScrollObserver from './useResizeScrollObserver';
+import useResizeScrollObserver from './use-resize-scroll-observer';
 
-export function useEditorPostion(editorId: string, ready: boolean, deps?: any[]) {
+export function useEditorPosition(editorId: string, ready: boolean, deps?: any[]) {
     const editorService = useDependency(IEditorService);
     const position$ = useMemo(() => new BehaviorSubject({ left: -999, top: -999, right: -999, bottom: -999 }), []);
     const sidebarService = useDependency(ISidebarService);

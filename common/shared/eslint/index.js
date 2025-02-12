@@ -19,6 +19,19 @@ exports.baseRules = {
         enums: 'always-multiline',
         functions: 'never',
     }],
+    'unicorn/filename-case': [
+        'error',
+        {
+            cases: {
+                camelCase: true,
+                pascalCase: true,
+            },
+            ignore: [
+                '^README-(\w+)?\\.md$',
+                '\w{2}-\W{2}\\.ts$',
+            ],
+        },
+    ],
     'no-empty-function': 'off',
     'style/arrow-parens': ['error', 'always'],
     'ts/no-redeclare': 'off',

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,9 @@ import type { DocumentDataModel, IDisposable, ITextRange } from '@univerjs/core'
 import type { Editor } from '@univerjs/docs-ui';
 import type { KeyCode, MetaKeys } from '@univerjs/ui';
 import type { ReactNode } from 'react';
-import type { IRefSelection } from '../range-selector/hooks/useHighlight';
-import type { IKeyboardEventConfig } from '../range-selector/hooks/useKeyboardEvent';
-import type { FormulaSelectingType } from './hooks/useFormulaSelection';
+import type { IRefSelection } from '../range-selector/hooks/use-highlight';
+import type { IKeyboardEventConfig } from '../range-selector/hooks/use-keyboard-event';
+import type { FormulaSelectingType } from './hooks/use-formula-selection';
 import { BuildTextUtils, createInternalEditorID, generateRandomId, IUniverInstanceService, UniverInstanceType, useDependency, useObservable } from '@univerjs/core';
 import { DocBackScrollRenderController, DocSelectionRenderService, IEditorService } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -28,19 +28,19 @@ import { EMBEDDING_FORMULA_EDITOR } from '@univerjs/sheets-ui';
 import { useEvent, useUpdateEffect } from '@univerjs/ui';
 import clsx from 'clsx';
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { useFocus } from '../range-selector/hooks/useFocus';
-import { useFormulaToken } from '../range-selector/hooks/useFormulaToken';
-import { useDocHight, useSheetHighlight } from '../range-selector/hooks/useHighlight';
-import { useKeyboardEvent } from '../range-selector/hooks/useKeyboardEvent';
-import { useLeftAndRightArrow } from '../range-selector/hooks/useLeftAndRightArrow';
-import { useRefactorEffect } from '../range-selector/hooks/useRefactorEffect';
-import { useResetSelection } from '../range-selector/hooks/useResetSelection';
-import { useResize } from '../range-selector/hooks/useResize';
-import { useSwitchSheet } from '../range-selector/hooks/useSwitchSheet';
+import { useFocus } from '../range-selector/hooks/use-focus';
+import { useFormulaToken } from '../range-selector/hooks/use-formula-token';
+import { useDocHight, useSheetHighlight } from '../range-selector/hooks/use-highlight';
+import { useKeyboardEvent } from '../range-selector/hooks/use-keyboard-event';
+import { useLeftAndRightArrow } from '../range-selector/hooks/use-left-and-right-arrow';
+import { useRefactorEffect } from '../range-selector/hooks/use-refactor-effect';
+import { useResetSelection } from '../range-selector/hooks/use-reset-selection';
+import { useResize } from '../range-selector/hooks/use-resize';
+import { useSwitchSheet } from '../range-selector/hooks/use-switch-sheet';
 import { HelpFunction } from './help-function/HelpFunction';
-import { useFormulaSelecting } from './hooks/useFormulaSelection';
-import { useSheetSelectionChange } from './hooks/useSheetSelectionChange';
-import { useVerify } from './hooks/useVerify';
+import { useFormulaSelecting } from './hooks/use-formula-selection';
+import { useSheetSelectionChange } from './hooks/use-sheet-selection-change';
+import { useVerify } from './hooks/use-verify';
 import styles from './index.module.less';
 import { SearchFunction } from './search-function/SearchFunction';
 import { getFormulaText } from './utils/getFormulaText';

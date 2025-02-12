@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,8 @@ import { CloseSingle, MoreSingle } from '@univerjs/icons';
 import { RectPopup } from '@univerjs/ui';
 import React, { useMemo, useState } from 'react';
 import { generateParam } from '../../../services/utils';
-import { useEditorPostion } from '../hooks/useEditorPostion';
-import { useFormulaDescribe } from '../hooks/useFormulaDescribe';
+import { useEditorPosition } from '../hooks/use-editor-position';
+import { useFormulaDescribe } from '../hooks/use-formula-describe';
 import styles from './index.module.less';
 
 interface IParamsProps {
@@ -95,7 +95,7 @@ export function HelpFunction(props: IHelpFunctionProps) {
     const required = localeService.t('formula.prompt.required');
     const optional = localeService.t('formula.prompt.optional');
     const editorId = editor.getEditorId();
-    const [position$] = useEditorPostion(editorId, visible, [functionInfo, paramIndex]);
+    const [position$] = useEditorPosition(editorId, visible, [functionInfo, paramIndex]);
     function handleSwitchActive(paramIndex: number) {
         onParamsSwitch && onParamsSwitch(paramIndex);
     }

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
-import { useLayoutEffect, useRef } from 'react';
+// import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, IUniverInstanceService, useDependency } from '@univerjs/core';
+import { useEffect } from 'react';
 
-export const useIsFirstRender = () => {
-    const isFirstRef = useRef(true);
-    useLayoutEffect(() => {
-        isFirstRef.current = false;
+export const useRefocus = () => {
+    // const univerInstanceService = useDependency(IUniverInstanceService);
+
+    useEffect(() => {
+        return () => {
+            // univerInstanceService.focusUnit(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+        };
     }, []);
-    return isFirstRef;
 };

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import type { IRangeSelectorProps } from '../';
-import type { INode } from './useFormulaToken';
+import type { IFormulaEditorProps } from '../index';
+import { useDependency } from '@univerjs/core';
+import { LexerTreeBuilder, operatorToken } from '@univerjs/engine-formula';
 import { useEffect, useRef } from 'react';
-import { sequenceNodeToText } from '../utils/sequenceNodeToText';
-import { verifyRange } from '../utils/verifyRange';
 
-export const useVerify = (isNeed: boolean, onVerify: IRangeSelectorProps['onVerify'], sequenceNodes: INode[]) => {
+export const useVerify = (isNeed: boolean, onVerify: IFormulaEditorProps['onVerify'], formulaText: string) => {
+    const lexerTreeBuilder = useDependency(LexerTreeBuilder);
     const isInitRender = useRef(true);
 
     // No validation is performed during the initialization phase.
@@ -38,9 +38,9 @@ export const useVerify = (isNeed: boolean, onVerify: IRangeSelectorProps['onVeri
     useEffect(() => {
         if (!isInitRender.current) {
             if (onVerify) {
-                const result = verifyRange(sequenceNodes);
-                onVerify(result, sequenceNodeToText(sequenceNodes));
+                const result = lexerTreeBuilder.checkIfAddBracket(formulaText);
+                onVerify(result === 0 && formulaText.startsWith(operatorToken.EQUALS), `${formulaText}`);
             }
         }
-    }, [sequenceNodes, onVerify]);
+    }, [formulaText, onVerify]);
 };

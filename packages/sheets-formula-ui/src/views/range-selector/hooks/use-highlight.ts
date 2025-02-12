@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ import type { ITextRange, ITextRun, Workbook } from '@univerjs/core';
 import type { Editor } from '@univerjs/docs-ui';
 import type { ISequenceNode } from '@univerjs/engine-formula';
 import type { ISelectionWithStyle, SheetsSelectionsService } from '@univerjs/sheets';
-import type { INode } from './useFormulaToken';
+import type { INode } from './use-formula-token';
 import { getBodySlice, ICommandService, IUniverInstanceService, ThemeService, UniverInstanceType, useDependency } from '@univerjs/core';
 import { ReplaceTextRunsCommand } from '@univerjs/docs-ui';
 import { deserializeRangeWithSheet, sequenceNodeType } from '@univerjs/engine-formula';

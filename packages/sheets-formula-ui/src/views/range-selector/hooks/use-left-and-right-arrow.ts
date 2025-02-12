@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
+import type { Editor } from '@univerjs/docs-ui';
 import { CommandType, Direction, DisposableCollection, ICommandService, useDependency } from '@univerjs/core';
-import { type Editor, MoveCursorOperation, MoveSelectionOperation } from '@univerjs/docs-ui';
+import { MoveCursorOperation, MoveSelectionOperation } from '@univerjs/docs-ui';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { ExpandSelectionCommand, JumpOver, MoveSelectionCommand } from '@univerjs/sheets-ui';
 import { IShortcutService, KeyCode, MetaKeys } from '@univerjs/ui';
 import { useEffect, useRef } from 'react';
-import { FormulaSelectingType } from '../../formula-editor/hooks/useFormulaSelection';
+import { FormulaSelectingType } from '../../formula-editor/hooks/use-formula-selection';
 
 // eslint-disable-next-line max-lines-per-function
 export const useLeftAndRightArrow = (isNeed: boolean, shouldMoveSelection: FormulaSelectingType, editor?: Editor, onMoveInEditor?: (keyCode: KeyCode, metaKey?: MetaKeys) => void) => {

@@ -36,6 +36,8 @@ test('ensure switching render unit successful with no errors', async () => {
     await page.waitForTimeout(1000);
 
     await page.evaluate(() => window.E2EControllerAPI.loadDefaultSheet());
+    await page.waitForTimeout(1000);
+
     const filename = generateSnapshotName('switching-render-unit');
     const firstScreenshot = await page.screenshot({
         mask: [

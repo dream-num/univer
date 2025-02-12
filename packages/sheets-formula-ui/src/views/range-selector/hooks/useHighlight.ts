@@ -26,6 +26,7 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import { IRefSelectionsService, setEndForRange } from '@univerjs/sheets';
 import { IDescriptionService } from '@univerjs/sheets-formula';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { useEvent } from '@univerjs/ui';
 import { useCallback, useEffect, useMemo } from 'react';
 import { genFormulaRefSelectionStyle } from '../../../common/selection';
 import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render-service';
@@ -128,7 +129,8 @@ export function useSheetHighlight(unitId: string, subUnitId: string) {
     const refSelectionsRenderService = render?.with(RefSelectionsRenderService);
     const sheetSkeletonManagerService = render?.with(SheetSkeletonManagerService);
 
-    const highlightSheet = useCallback((refSelections: IRefSelection[], editor?: Editor) => {
+    const highlightSheet = useEvent((refSelections: IRefSelection[], editor?: Editor) => {
+        if (refSelectionsRenderService?.selectionMoving) return;
         const selectionWithStyle = calcHighlightRanges({
             unitId,
             subUnitId,
@@ -148,7 +150,7 @@ export function useSheetHighlight(unitId: string, subUnitId: string) {
         } else {
             refSelectionsService.setSelections(selectionWithStyle);
         }
-    }, [refSelectionsRenderService, refSelectionsService, sheetSkeletonManagerService, themeService, unitId, subUnitId, univerInstanceService]);
+    });
 
     useEffect(() => {
         return () => {

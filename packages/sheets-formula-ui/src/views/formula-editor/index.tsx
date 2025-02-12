@@ -37,6 +37,7 @@ import { useRefactorEffect } from '../range-selector/hooks/useRefactorEffect';
 import { useResetSelection } from '../range-selector/hooks/useResetSelection';
 import { useResize } from '../range-selector/hooks/useResize';
 import { useSwitchSheet } from '../range-selector/hooks/useSwitchSheet';
+import { findIndexFromSequenceNodes, findRefSequenceIndex } from '../range-selector/utils/findIndexFromSequenceNodes';
 import { HelpFunction } from './help-function/HelpFunction';
 import { useFormulaSelecting } from './hooks/useFormulaSelection';
 import { useSheetSelectionChange } from './hooks/useSheetSelectionChange';
@@ -132,7 +133,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     const formulaText = BuildTextUtils.transform.getPlainText(document?.getBody()?.dataStream ?? '');
     const formulaWithoutEqualSymbol = useMemo(() => getFormulaText(formulaText), [formulaText]);
     const sequenceNodes = useMemo(() => getFormulaToken(formulaWithoutEqualSymbol), [formulaWithoutEqualSymbol, getFormulaToken]);
-    const { isSelecting } = useFormulaSelecting(editorId, isFocus, disableSelectionOnClick);
+    const { isSelecting, isSelectingRef } = useFormulaSelecting({ unitId, subUnitId, editorId, isFocus, disableOnClick: disableSelectionOnClick });
     const highTextRef = useRef('');
     const renderManagerService = useDependency(IRenderManagerService);
     const renderer = renderManagerService.getRenderById(editorId);
@@ -165,6 +166,17 @@ export function FormulaEditor(props: IFormulaEditorProps) {
         refSelections.current = ranges;
 
         if (isEnd) {
+            const currentDocSelections = editor?.getSelectionRanges();
+            if (currentDocSelections?.length !== 1) {
+                return;
+            }
+            const docRange = currentDocSelections[0];
+            const offset = docRange.startOffset - 1;
+            const nodeIndex = findIndexFromSequenceNodes(sequenceNodes, offset, false);
+            const refIndex = findRefSequenceIndex(sequenceNodes, nodeIndex);
+            const target = ranges.splice(refIndex, 1)[0];
+            target && ranges.push(target);
+
             highlightSheet(isFocus ? ranges : [], editorRef.current);
         }
     });
@@ -253,10 +265,9 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     useSheetSelectionChange(
         isFocus && Boolean(isSelecting && docFocusing),
         isFocus,
-        isSelecting,
+        isSelectingRef,
         unitId,
         subUnitId,
-        sequenceNodes,
         refSelections,
         isSupportAcrossSheet,
         Boolean(selectingMode),

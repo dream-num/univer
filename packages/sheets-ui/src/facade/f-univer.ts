@@ -291,11 +291,8 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
         );
     }
 
-    /**
-     * @ignore
-     */
     // eslint-disable-next-line max-lines-per-function
-    _initObserverListener(injector: Injector): void {
+    private _initObserverListener(injector: Injector): void {
         const univerInstanceService = injector.get(IUniverInstanceService);
         const unitM = univerInstanceService.getFocusedUnit();
         const unitId = unitM?.getUnitId();
@@ -658,10 +655,10 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
     /**
      * @ignore
      */
-
     // eslint-disable-next-line max-lines-per-function
     override _initialize(injector: Injector): void {
         this._initSheetUIEvent(injector);
+        this._initObserverListener(injector);
         const commandService = injector.get(ICommandService);
         this.registerEventHandler(
             this.Event.BeforeClipboardChange,

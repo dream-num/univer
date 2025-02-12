@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
+import type { IRange, IRectLTRB } from '../sheets/typedef';
 import type { Nullable } from './types';
-import { AbsoluteRefType, type IRange, type IRectLTRB, RANGE_TYPE } from '../sheets/typedef';
+import { AbsoluteRefType, RANGE_TYPE } from '../sheets/typedef';
 import { mergeRanges, multiSubtractSingleRange, splitIntoGrid } from './range';
 
 /**
@@ -612,18 +613,18 @@ export class Rectangle {
      * ```
      */
     static getIntersectionBetweenTwoRect(rect1: IRectLTRB, rect2: IRectLTRB) {
-        // 计算两个矩形的交集部分的坐标
+        // Calculating the coordinates of the intersection part of the two rectangles
         const left = Math.max(rect1.left, rect2.left);
         const right = Math.min(rect1.right, rect2.right);
         const top = Math.max(rect1.top, rect2.top);
         const bottom = Math.min(rect1.bottom, rect2.bottom);
 
-        // 如果交集部分的宽度或高度小于等于 0，说明两个矩形不相交
+        // If the width or height of the intersection part is less than or equal to 0, it means that the two rectangles do not intersect
         if (right <= left || bottom <= top) {
             return null;
         }
 
-        // 返回交集部分的矩形
+        // Return the rectangle of the intersection part
         return {
             left,
             right,

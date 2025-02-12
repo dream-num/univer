@@ -16,10 +16,10 @@
 
 /* eslint-disable max-lines-per-function */
 
-import type { DocumentDataModel, ICellData, ICommandInfo, IDisposable, IDocumentBody, IDocumentData, IDocumentStyle, IStyleData, Nullable, Styles, Workbook } from '@univerjs/core';
+import type { DocumentDataModel, ICellData, ICommandInfo, IDisposable, IDocumentBody, IDocumentData, IDocumentStyle, IMutationInfo, IStyleData, Nullable, Styles, Workbook } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import type { WorkbookSelectionModel } from '@univerjs/sheets';
+import type { MutationsAffectRange, WorkbookSelectionModel } from '@univerjs/sheets';
 
 import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 import {
@@ -55,7 +55,7 @@ import {
     IRenderManagerService,
 } from '@univerjs/engine-render';
 
-import { COMMAND_LISTENER_SKELETON_CHANGE, REF_SELECTIONS_ENABLED, SetRangeValuesCommand, SetSelectionsOperation, SetWorksheetActivateCommand, SetWorksheetActiveOperation, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
+import { adjustRangeOnMutation, COMMAND_LISTENER_SKELETON_CHANGE, InsertColMutation, InsertRowMutation, MoveColsMutation, MoveRowsMutation, REF_SELECTIONS_ENABLED, RemoveColMutation, RemoveRowMutation, SetRangeValuesCommand, SetSelectionsOperation, SetWorksheetActivateCommand, SetWorksheetActiveOperation, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
 import { KeyCode } from '@univerjs/ui';
 import { distinctUntilChanged, filter } from 'rxjs';
 import { getEditorObject } from '../../basics/editor/get-editor-object';
@@ -225,6 +225,31 @@ export class EditingRenderController extends Disposable implements IRenderModule
             if (!commandList.has(commandInfo.id)) {
                 return;
             }
+            switch (commandInfo.id) {
+                case MoveRowsMutation.id:
+                case MoveColsMutation.id:
+                case RemoveColMutation.id:
+                case RemoveRowMutation.id:
+                case InsertColMutation.id:
+                case InsertRowMutation.id:
+                {
+                    const editLocation = this._editorBridgeService.getEditLocation();
+                    if (!editLocation) break;
+                    const currentRange = {
+                        startRow: editLocation.row,
+                        startColumn: editLocation.column,
+                        endRow: editLocation.row,
+                        endColumn: editLocation.column,
+                    };
+                    const newRange = adjustRangeOnMutation(currentRange, commandInfo as IMutationInfo<MutationsAffectRange>);
+                    if (!newRange) break;
+                    const newRow = newRange.startRow;
+                    const newColumn = newRange.startColumn;
+                    this._editorBridgeService.updateEditLocation(newRow, newColumn);
+                    break;
+                }
+            }
+
             this._sheetCellEditorResizeService.resizeCellEditor(() => {
                 this._textSelectionManagerService.refreshSelection({
                     unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,

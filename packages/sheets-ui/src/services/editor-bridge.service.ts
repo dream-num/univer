@@ -92,6 +92,7 @@ export interface IEditorBridgeService {
     getEditCellState(): Readonly<Nullable<IEditorBridgeServiceParam>>;
     getEditCellLayout(): Readonly<Nullable<ICellEditorLayout>>;
     getEditLocation(): Readonly<Nullable<ICellEditorState>>;
+    updateEditLocation(row: number, col: number): void;
     // Gets the DocumentDataModel of the latest table cell based on the latest cell contents
     getLatestEditCellState(): Readonly<Nullable<IEditorBridgeServiceParam>>;
     /**
@@ -288,6 +289,16 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
 
     getEditLocation(): Readonly<Nullable<ICellEditorState>> {
         return this._currentEditCellState;
+    }
+
+    updateEditLocation(row: number, column: number) {
+        if (this._currentEditCellState) {
+            this._currentEditCellState = {
+                ...this._currentEditCellState,
+                row,
+                column,
+            };
+        }
     }
 
     // eslint-disable-next-line max-lines-per-function

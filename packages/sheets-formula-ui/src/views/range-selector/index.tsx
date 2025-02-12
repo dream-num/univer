@@ -50,10 +50,10 @@ import { useSheetSelectionChange } from './hooks/use-sheet-selection-change';
 import { useSwitchSheet } from './hooks/use-switch-sheet';
 import { useVerify } from './hooks/use-verify';
 import styles from './index.module.less';
-import { rangePreProcess } from './utils/rangePreProcess';
-import { sequenceNodeToText } from './utils/sequenceNodeToText';
-import { unitRangesToText } from './utils/unitRangesToText';
-import { verifyRange } from './utils/verifyRange';
+import { rangePreProcess } from './utils/range-pre-process';
+import { sequenceNodeToText } from './utils/sequence-node-to-text';
+import { unitRangesToText } from './utils/unit-ranges-to-text';
+import { verifyRange } from './utils/verify-range';
 
 export interface IRangeSelectorProps {
     initValue: string | IUnitRangeName[];

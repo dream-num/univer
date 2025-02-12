@@ -15,8 +15,8 @@
  */
 
 import type { IMutationInfo } from '@univerjs/core';
-import { Tools } from '@univerjs/core';
 import type { IRemoveNumfmtMutationParams, ISetNumfmtMutationParams } from '@univerjs/sheets';
+import { Tools } from '@univerjs/core';
 import { rangeMerge, RemoveNumfmtMutation, SetNumfmtMutation } from '@univerjs/sheets';
 
 export const mergeNumfmtMutations = (list: IMutationInfo[]) => {

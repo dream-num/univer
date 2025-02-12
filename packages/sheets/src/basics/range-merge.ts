@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { ObjectMatrix, Range } from '@univerjs/core';
 import type { IRange } from '@univerjs/core';
+import { ObjectMatrix, Range } from '@univerjs/core';
 
 export const createTopMatrixFromRanges = (ranges: IRange[]) => {
     const matrix = new ObjectMatrix<number>();

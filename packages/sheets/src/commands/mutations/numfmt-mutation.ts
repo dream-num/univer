@@ -17,7 +17,7 @@
 import type { IAccessor, ICommand, IMutationInfo, IRange } from '@univerjs/core';
 import { cellToRange, CommandType, Range } from '@univerjs/core';
 
-import { rangeMerge } from '../../basics/rangeMerge';
+import { rangeMerge } from '../../basics/range-merge';
 import { createUniqueKey, groupByKey } from '../../basics/utils';
 import { INumfmtService } from '../../services/numfmt/type';
 

@@ -68,7 +68,7 @@ import { SheetCellEditorResizeService } from '../../services/editor/cell-editor-
 import { MOVE_SELECTION_KEYCODE_LIST } from '../shortcuts/editor.shortcut';
 import { extractStringFromForceString, isForceString } from '../utils/cell-tools';
 import { normalizeString } from '../utils/char-tools';
-import { isRangeSelector } from './utils/isRangeSelector';
+import { isRangeSelector } from './utils/is-range-selector';
 
 const HIDDEN_EDITOR_POSITION = -1000;
 

@@ -16,7 +16,7 @@
 
 import { DependentOn, ICommandService, Inject, Injector, Plugin, registerDependencies, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
-import { SHEET_NUMFMT_PLUGIN } from './base/const/PLUGIN_NAME';
+import { SHEET_NUMFMT_PLUGIN } from './base/const/plugin-name';
 import { AddDecimalCommand } from './commands/commands/add-decimal.command';
 import { SetCurrencyCommand } from './commands/commands/set-currency.command';
 import { SetNumfmtCommand } from './commands/commands/set-numfmt.command';

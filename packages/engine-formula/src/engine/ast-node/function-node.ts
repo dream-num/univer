@@ -23,6 +23,7 @@ import type {
     BaseReferenceObject,
     FunctionVariantType,
     NodeValueType } from '../reference-object/base-reference-object';
+import type { BaseValueObject } from '../value-object/base-value-object';
 import type { FormulaFunctionResultValueType } from '../value-object/primitive-object';
 import { Inject, Injector } from '@univerjs/core';
 import { AstNodePromiseType } from '../../basics/common';
@@ -32,11 +33,10 @@ import { FormulaDataModel } from '../../models/formula-data.model';
 import { IFormulaCurrentConfigService } from '../../services/current-data.service';
 import { IDefinedNamesService } from '../../services/defined-names.service';
 import { IFunctionService } from '../../services/function.service';
-
 import { IFormulaRuntimeService } from '../../services/runtime.service';
-import { prefixHandler } from '../utils/prefixHandler';
+import { prefixHandler } from '../utils/prefix-handler';
 import { ArrayValueObject, transformToValueObject, ValueObjectFactory } from '../value-object/array-value-object';
-import { type BaseValueObject, ErrorValueObject } from '../value-object/base-value-object';
+import { ErrorValueObject } from '../value-object/base-value-object';
 import { BaseAstNode, ErrorNode } from './base-ast-node';
 import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './base-ast-node-factory';
 import { NODE_ORDER_MAP, NodeType } from './node-type';

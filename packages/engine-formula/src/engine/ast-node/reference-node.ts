@@ -27,7 +27,7 @@ import { IFormulaCurrentConfigService } from '../../services/current-data.servic
 import { IFunctionService } from '../../services/function.service';
 import { IFormulaRuntimeService } from '../../services/runtime.service';
 import { LexerNode } from '../analysis/lexer-node';
-import { prefixHandler } from '../utils/prefixHandler';
+import { prefixHandler } from '../utils/prefix-handler';
 import { getReferenceObjectFromCache, ReferenceObjectType } from '../utils/value-object';
 import { ErrorValueObject } from '../value-object/base-value-object';
 import { BaseAstNode } from './base-ast-node';

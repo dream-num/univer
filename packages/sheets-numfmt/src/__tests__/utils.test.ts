@@ -18,7 +18,7 @@ import { cellToRange } from '@univerjs/core';
 import { RemoveNumfmtMutation, SetNumfmtMutation } from '@univerjs/sheets';
 import { describe, expect, it } from 'vitest';
 
-import { currencySymbols } from '../base/const/CURRENCY-SYMBOLS';
+import { currencySymbols } from '../base/const/currency-symbols';
 import { getCurrencyType } from '../utils/currency';
 import {
     getDecimalFromPattern,

@@ -19,8 +19,8 @@
 import type { Workbook } from '@univerjs/core';
 import type { Editor } from '@univerjs/docs-ui';
 import type { ISelectionWithCoord, ISetSelectionsOperationParams } from '@univerjs/sheets';
-import type { IRefSelection } from '../../range-selector/hooks/useHighlight';
-import type { INode } from '../../range-selector/utils/filterReferenceNode';
+import type { IRefSelection } from '../../range-selector/hooks/use-highlight';
+import type { INode } from '../../range-selector/utils/filter-reference-node';
 import { DisposableCollection, ICommandService, IUniverInstanceService, ThemeService, useDependency, useObservable } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { deserializeRangeWithSheet, sequenceNodeType, serializeRange, serializeRangeWithSheet } from '@univerjs/engine-formula';
@@ -32,11 +32,11 @@ import { useEffect, useMemo, useRef } from 'react';
 import { merge } from 'rxjs';
 import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
 import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render-service';
-import { calcHighlightRanges } from '../../range-selector/hooks/useHighlight';
-import { findIndexFromSequenceNodes } from '../../range-selector/utils/findIndexFromSequenceNodes';
-import { getOffsetFromSequenceNodes } from '../../range-selector/utils/getOffsetFromSequenceNodes';
-import { sequenceNodeToText } from '../../range-selector/utils/sequenceNodeToText';
-import { unitRangesToText } from '../../range-selector/utils/unitRangesToText';
+import { calcHighlightRanges } from '../../range-selector/hooks/use-highlight';
+import { findIndexFromSequenceNodes } from '../../range-selector/utils/find-index-from-sequence-nodes';
+import { getOffsetFromSequenceNodes } from '../../range-selector/utils/get-offset-from-sequence-nodes';
+import { sequenceNodeToText } from '../../range-selector/utils/sequence-node-to-text';
+import { unitRangesToText } from '../../range-selector/utils/unit-ranges-to-text';
 import { useStateRef } from '../hooks/use-state-ref';
 import { FormulaSelectingType } from './use-formula-selection';
 

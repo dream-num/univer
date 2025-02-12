@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { currencySymbols } from '../base/const/CURRENCY-SYMBOLS';
-import { CURRENCYFORMAT, DATEFMTLISG, NUMBERFORMAT } from '../base/const/FORMATDETAIL';
+import { currencySymbols } from '../base/const/currency-symbols';
+import { CURRENCYFORMAT, DATEFMTLISG, NUMBERFORMAT } from '../base/const/formatdetail';
 
 export const getCurrencyOptions = () => currencySymbols.map((item) => ({ label: item, value: item }));
 

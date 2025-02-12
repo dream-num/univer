@@ -17,8 +17,8 @@
 import type { IRangeSelectorProps } from '../';
 import type { INode } from './use-formula-token';
 import { useEffect, useRef } from 'react';
-import { sequenceNodeToText } from '../utils/sequenceNodeToText';
-import { verifyRange } from '../utils/verifyRange';
+import { sequenceNodeToText } from '../utils/sequence-node-to-text';
+import { verifyRange } from '../utils/verify-range';
 
 export const useVerify = (isNeed: boolean, onVerify: IRangeSelectorProps['onVerify'], sequenceNodes: INode[]) => {
     const isInitRender = useRef(true);

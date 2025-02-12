@@ -43,7 +43,7 @@ import { useSheetSelectionChange } from './hooks/use-sheet-selection-change';
 import { useVerify } from './hooks/use-verify';
 import styles from './index.module.less';
 import { SearchFunction } from './search-function/SearchFunction';
-import { getFormulaText } from './utils/getFormulaText';
+import { getFormulaText } from './utils/get-formula-text';
 
 export interface IFormulaEditorProps {
     unitId: string;

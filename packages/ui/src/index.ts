@@ -109,7 +109,7 @@ export { KeyCode, MetaKeys } from './services/shortcut/keycode';
 export { type IShortcutItem, IShortcutService, ShortcutService } from './services/shortcut/shortcut.service';
 export { ShortcutPanelService } from './services/shortcut/shortcut-panel.service';
 export { DesktopSidebarService } from './services/sidebar/desktop-sidebar.service';
-export { useSidebarClick } from './services/sidebar/hooks/useSidebarClick';
+export { useSidebarClick } from './services/sidebar/hooks/use-sidebar-click';
 export { ILeftSidebarService, ISidebarService } from './services/sidebar/sidebar.service';
 export { DesktopZenZoneService } from './services/zen-zone/desktop-zen-zone.service';
 export { IZenZoneService } from './services/zen-zone/zen-zone.service';

@@ -18,7 +18,7 @@
 
 import type { Workbook } from '@univerjs/core';
 import type { ISelectionWithCoord } from '@univerjs/sheets';
-import type { INode } from '../utils/filterReferenceNode';
+import type { INode } from '../utils/filter-reference-node';
 
 import { DisposableCollection, IUniverInstanceService, useDependency } from '@univerjs/core';
 import { deserializeRangeWithSheet, matchToken, sequenceNodeType, serializeRange, serializeRangeWithSheet } from '@univerjs/engine-formula';
@@ -27,10 +27,10 @@ import { useEffect, useMemo, useRef } from 'react';
 import { distinctUntilChanged, map, merge } from 'rxjs';
 import { throttleTime } from 'rxjs/operators';
 import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render-service';
-import { filterReferenceNode, isComma } from '../utils/filterReferenceNode';
-import { rangePreProcess } from '../utils/rangePreProcess';
-import { sequenceNodeToText } from '../utils/sequenceNodeToText';
-import { getSheetNameById, unitRangesToText } from '../utils/unitRangesToText';
+import { filterReferenceNode, isComma } from '../utils/filter-reference-node';
+import { rangePreProcess } from '../utils/range-pre-process';
+import { sequenceNodeToText } from '../utils/sequence-node-to-text';
+import { getSheetNameById, unitRangesToText } from '../utils/unit-ranges-to-text';
 
 export const useSheetSelectionChange = (
     isNeed: boolean,

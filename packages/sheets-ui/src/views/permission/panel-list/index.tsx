@@ -31,7 +31,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 
 import { distinctUntilChanged, merge } from 'rxjs';
 import { UNIVER_SHEET_PERMISSION_PANEL } from '../../../consts/permission';
-import { useHighlightRange } from '../../../hooks/useHighlightRange';
+import { useHighlightRange } from '../../../hooks/use-highlight-range';
 import { SheetPermissionUserManagerService } from '../../../services/permission/sheet-permission-user-list.service';
 import { panelListEmptyBase64 } from './constant';
 import styles from './index.module.less';

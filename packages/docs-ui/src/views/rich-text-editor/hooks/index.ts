@@ -14,5 +14,5 @@
  * limitations under the License.
  */
 
-export { type IKeyboardEventConfig, useKeyboardEvent } from './useKeyboardEvent';
-export { useResize } from './useResize';
+export { type IKeyboardEventConfig, useKeyboardEvent } from './use-keyboard-event';
+export { useResize } from './use-resize';

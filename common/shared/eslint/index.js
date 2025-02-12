@@ -23,12 +23,18 @@ exports.baseRules = {
         'error',
         {
             cases: {
-                camelCase: true,
+                kebabCase: true,
                 pascalCase: true,
             },
             ignore: [
                 '^README-(\w+)?\\.md$',
-                '\w{2}-\W{2}\\.ts$',
+                '^[a-z]{2}-[A-Z]{2}\.ts$',
+                '^__tests__$',
+                '^FUNDING.yml$',
+                '^bug_report.yml$',
+                '^bug_report.zh-CN.yml$',
+                '^feature_request.yml$',
+                '^feature_request.zh-CN.yml$',
             ],
         },
     ],

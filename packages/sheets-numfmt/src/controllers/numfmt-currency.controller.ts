@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { countryCurrencyMap } from '../base/const/CURRENCY-SYMBOLS';
+import type { countryCurrencyMap } from '../base/const/currency-symbols';
 import { Disposable } from '@univerjs/core';
 import { BehaviorSubject } from 'rxjs';
 

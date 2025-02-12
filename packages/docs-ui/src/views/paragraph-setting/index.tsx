@@ -16,8 +16,9 @@
 
 import type { ITextRange } from '@univerjs/core';
 import type { IRichTextEditingMutationParams, ISetTextSelectionsOperationParams } from '@univerjs/docs';
-import { debounce, generateRandomId, ICommandService, LocaleService, useDependency, useObservable } from '@univerjs/core';
+import { debounce, generateRandomId, ICommandService, LocaleService } from '@univerjs/core';
 import { RichTextEditingMutation, SetTextSelectionsOperation } from '@univerjs/docs';
+import { useDependency, useObservable } from '@univerjs/ui';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { DocParagraphSettingCommand } from '../../commands/commands/doc-paragraph-setting.command';
 import { ParagraphSetting } from './Setting';

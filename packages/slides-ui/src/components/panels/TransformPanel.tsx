@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import React, { useEffect, useState } from 'react';
-
 import type { Nullable } from '@univerjs/core';
-import { ICommandService, LocaleService, useDependency } from '@univerjs/core';
-import clsx from 'clsx';
-import { InputNumber } from '@univerjs/design';
+
 import type { BaseObject, IChangeObserverConfig, Image, Rect, RichText } from '@univerjs/engine-render';
+import { ICommandService, LocaleService } from '@univerjs/core';
+import { InputNumber } from '@univerjs/design';
+import { useDependency } from '@univerjs/ui';
+import clsx from 'clsx';
+import React, { useEffect, useState } from 'react';
 import { UpdateSlideElementOperation } from '../../commands/operations/update-element.operation';
 import { CanvasView } from '../../controllers/canvas-view';
 import styles from './index.module.less';

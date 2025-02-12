@@ -15,10 +15,10 @@
  */
 
 import type { DocumentDataModel } from '@univerjs/core';
-import { CustomRangeType, ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
+import { CustomRangeType, ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { MessageType, Tooltip } from '@univerjs/design';
 import { CopySingle, LinkSingle, UnlinkSingle, WriteSingle } from '@univerjs/icons';
-import { IMessageService, useObservable } from '@univerjs/ui';
+import { IMessageService, useDependency, useObservable } from '@univerjs/ui';
 import cs from 'clsx';
 import React from 'react';
 import { DeleteDocHyperLinkCommand } from '../../commands/commands/delete-link.command';

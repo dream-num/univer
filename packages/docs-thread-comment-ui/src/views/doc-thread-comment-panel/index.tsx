@@ -16,13 +16,15 @@
 
 import type { DocumentDataModel } from '@univerjs/core';
 import type { IAddDocCommentComment } from '../../commands/commands/add-doc-comment.command';
-import { ICommandService, Injector, isInternalEditorID, IUniverInstanceService, UniverInstanceType, useDependency, useObservable } from '@univerjs/core';
+import type { IDeleteDocCommentComment } from '../../commands/commands/delete-doc-comment.command';
+import { ICommandService, Injector, isInternalEditorID, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { ThreadCommentPanel } from '@univerjs/thread-comment-ui';
+import { useDependency, useObservable } from '@univerjs/ui';
 import React, { useEffect, useMemo, useState } from 'react';
 import { debounceTime, filter, Observable } from 'rxjs';
 import { AddDocCommentComment } from '../../commands/commands/add-doc-comment.command';
-import { DeleteDocCommentComment, type IDeleteDocCommentComment } from '../../commands/commands/delete-doc-comment.command';
+import { DeleteDocCommentComment } from '../../commands/commands/delete-doc-comment.command';
 import { StartAddCommentOperation } from '../../commands/operations/show-comment-panel.operation';
 import { DEFAULT_DOC_SUBUNIT_ID } from '../../common/const';
 import { shouldDisableAddComment } from '../../controllers/menu';

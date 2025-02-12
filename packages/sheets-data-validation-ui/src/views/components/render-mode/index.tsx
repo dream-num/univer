@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { type IDataValidationRuleOptions, LocaleService } from '@univerjs/core';
-import { DataValidationRenderMode, useDependency } from '@univerjs/core';
+import type { IDataValidationRuleOptions } from '@univerjs/core';
+import { DataValidationRenderMode, LocaleService } from '@univerjs/core';
 import { FormLayout, Radio, RadioGroup } from '@univerjs/design';
-import React from 'react';
+import { useDependency } from '@univerjs/ui';
 
 export interface IListRenderModeInputProps {
     value: IDataValidationRuleOptions;

@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-/* eslint-disable ts/no-explicit-any */
-
 import type { Nullable } from '@univerjs/core';
 import type { RefObject } from 'react';
 import type { Observable } from 'rxjs';
 import { useEffect, useRef } from 'react';
+
+export * from '@wendellhu/redi/react-bindings';
 
 type ObservableOrFn<T> = Observable<T> | (() => Observable<T>);
 
@@ -31,8 +31,7 @@ function unwrap<T>(o: ObservableOrFn<T>): Observable<T> {
     return o;
 }
 
-export { useObservable } from '@univerjs/core';
-declare module '@univerjs/core' {
+declare module '@univerjs/ui' {
     export function useObservable<T>(observable: ObservableOrFn<T>, defaultValue: T | undefined, shouldHaveSyncValue?: true): T;
     export function useObservable<T>(observable: Nullable<ObservableOrFn<T>>, defaultValue: T): T;
     export function useObservable<T>(observable: Nullable<ObservableOrFn<T>>, defaultValue?: undefined): T | undefined;

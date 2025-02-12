@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { ICommandService, useDependency, useObservable } from '@univerjs/core';
+import { ICommandService } from '@univerjs/core';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
-import { KeyCode } from '@univerjs/ui';
+import { KeyCode, useDependency, useObservable } from '@univerjs/ui';
 import { useMemo } from 'react';
 import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';

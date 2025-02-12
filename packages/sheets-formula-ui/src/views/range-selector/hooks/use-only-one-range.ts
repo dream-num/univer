@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { useDependency } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import { useDependency } from '@univerjs/ui';
 import { useEffect } from 'react';
 import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render-service';
 

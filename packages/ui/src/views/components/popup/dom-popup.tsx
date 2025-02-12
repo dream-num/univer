@@ -17,7 +17,7 @@
 import type { IPopup } from '../../../services/popup/canvas-popup.service';
 import React, { useEffect, useMemo, useState } from 'react';
 import { animationFrameScheduler, combineLatest, map, of, throttleTime } from 'rxjs';
-import { useObservableRef } from '../../../components/hooks/observable';
+import { useObservableRef } from '../../../utils/di';
 import { RectPopup } from './RectPopup';
 
 interface ISingleDOMPopupProps {

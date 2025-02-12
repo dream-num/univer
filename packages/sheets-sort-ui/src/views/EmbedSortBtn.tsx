@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import { type IRange, IUniverInstanceService, LocaleService } from '@univerjs/core';
-import { useDependency } from '@univerjs/core';
+import type { IRange } from '@univerjs/core';
+import { IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { AscendingSingle, DescendingSingle } from '@univerjs/icons';
 import { getSheetCommandTarget } from '@univerjs/sheets';
+import { useDependency } from '@univerjs/ui';
 import React, { useCallback } from 'react';
 import { SheetsSortUIService } from '../services/sheets-sort-ui.service';
 import styles from './index.module.less';

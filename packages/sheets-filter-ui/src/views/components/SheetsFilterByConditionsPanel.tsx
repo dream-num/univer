@@ -17,10 +17,10 @@
 import type { ISelectProps } from '@univerjs/design';
 import type { FilterOperator, IFilterConditionFormParams } from '../../models/conditions';
 import type { ByConditionsModel } from '../../services/sheets-filter-panel.service';
-import { LocaleService, useDependency } from '@univerjs/core';
+import { LocaleService } from '@univerjs/core';
 import { Input, Radio, RadioGroup, Select } from '@univerjs/design';
+import { useDependency, useObservable } from '@univerjs/ui';
 
-import { useObservable } from '@univerjs/ui';
 import React, { useCallback, useMemo } from 'react';
 import { FilterConditionItems } from '../../models/conditions';
 

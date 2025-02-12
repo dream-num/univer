@@ -15,8 +15,8 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import { IUniverInstanceService, UniverInstanceType, useDependency } from '@univerjs/core';
-import { ContextMenuPosition, IMenuManagerService, ToolbarItem, useObservable } from '@univerjs/ui';
+import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { ContextMenuPosition, IMenuManagerService, ToolbarItem, useDependency, useObservable } from '@univerjs/ui';
 import React, { useMemo } from 'react';
 
 import { useActiveWorkbook } from '../../components/hook';

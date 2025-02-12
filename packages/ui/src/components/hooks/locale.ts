@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { LocaleService, useDependency } from '@univerjs/core';
+import { LocaleService } from '@univerjs/core';
+import { useDependency } from '../../utils/di';
 
 export function useLocaleService() {
     return useDependency(LocaleService);

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { LocaleService, useDependency } from '@univerjs/core';
+import { LocaleService } from '@univerjs/core';
 import React, { useCallback, useEffect } from 'react';
 
-import { useObservable } from '../../../components/hooks/observable';
 import { IShortcutService } from '../../../services/shortcut/shortcut.service';
+import { useDependency, useObservable } from '../../../utils/di';
 import styles from './index.module.less';
 
 interface IRenderShortcutItem {

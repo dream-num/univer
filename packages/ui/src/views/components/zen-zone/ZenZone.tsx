@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import { useDependency, useObservable } from '@univerjs/core';
 import clsx from 'clsx';
 import React, { useEffect, useMemo, useState } from 'react';
 
 import { ComponentManager } from '../../../common/component-manager';
 import { IZenZoneService } from '../../../services/zen-zone/zen-zone.service';
+import { useDependency, useObservable } from '../../../utils/di';
 import styles from './index.module.less';
 
 export function ZenZone() {

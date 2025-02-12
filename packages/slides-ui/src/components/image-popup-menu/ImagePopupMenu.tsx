@@ -15,9 +15,10 @@
  */
 
 import type { IDrawingSearch } from '@univerjs/core';
-import { ICommandService, LocaleService, useDependency } from '@univerjs/core';
+import { ICommandService, LocaleService } from '@univerjs/core';
 import { DropdownLegacy } from '@univerjs/design';
 import { Autofill, MoreDownSingle } from '@univerjs/icons';
+import { useDependency } from '@univerjs/ui';
 import clsx from 'clsx';
 import React, { useState } from 'react';
 import styles from './index.module.less';

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { connectInjector, Disposable, ICommandService, Inject, Injector } from '@univerjs/core';
+import { Disposable, ICommandService, Inject, Injector } from '@univerjs/core';
 import { RecordSingle } from '@univerjs/icons';
 import { AddWorksheetMergeAllCommand,
     AddWorksheetMergeCommand,
@@ -68,6 +68,7 @@ import { AutoFillCommand, RefillCommand, SetRangeBoldCommand,
 import {
     BuiltInUIPart,
     ComponentManager,
+    connectInjector,
     IMenuManagerService,
     IUIPartsService,
 } from '@univerjs/ui';

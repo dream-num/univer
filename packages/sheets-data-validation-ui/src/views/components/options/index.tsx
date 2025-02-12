@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { DataValidationErrorStyle, type IDataValidationRuleOptions, LocaleService } from '@univerjs/core';
-import { useDependency } from '@univerjs/core';
+import type { IDataValidationRuleOptions } from '@univerjs/core';
+import { DataValidationErrorStyle, LocaleService } from '@univerjs/core';
 import { Checkbox, FormLayout, Input, Radio, RadioGroup } from '@univerjs/design';
 import { MoreDownSingle, MoreUpSingle } from '@univerjs/icons';
-import { ComponentManager } from '@univerjs/ui';
+import { ComponentManager, useDependency } from '@univerjs/ui';
 import React, { useState } from 'react';
 import styles from './index.module.less';
 

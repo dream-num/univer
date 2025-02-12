@@ -16,8 +16,8 @@
 
 import type { FC } from 'react';
 import type { IBusinessComponentProps } from '../interface';
-import { LocaleService, useDependency } from '@univerjs/core';
-import React from 'react';
+import { LocaleService } from '@univerjs/core';
+import { useDependency } from '@univerjs/ui';
 
 export const isGeneralPanel = (pattern: string) => !pattern;
 

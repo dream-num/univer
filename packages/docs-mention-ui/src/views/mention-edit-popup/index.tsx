@@ -15,9 +15,10 @@
  */
 
 import type { DocumentDataModel, ITypeMentionList } from '@univerjs/core';
-import { ICommandService, IMentionIOService, IUniverInstanceService, Tools, UniverInstanceType, useDependency, useObservable } from '@univerjs/core';
+import { ICommandService, IMentionIOService, IUniverInstanceService, Tools, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { IEditorService } from '@univerjs/docs-ui';
+import { useDependency, useObservable } from '@univerjs/ui';
 import React, { useEffect, useMemo, useState } from 'react';
 import { filter } from 'rxjs';
 import { AddDocMentionCommand } from '../../commands/commands/doc-mention.command';

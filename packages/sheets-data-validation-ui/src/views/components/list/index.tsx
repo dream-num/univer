@@ -16,11 +16,11 @@
 
 import type { ISheetDataValidationRule, Workbook } from '@univerjs/core';
 import type { IAddSheetDataValidationCommandParams } from '@univerjs/sheets-data-validation';
-import { ICommandService, Injector, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
+import { ICommandService, Injector, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { Button } from '@univerjs/design';
 import { checkRangesEditablePermission } from '@univerjs/sheets';
 import { AddSheetDataValidationCommand, createDefaultNewRule, RemoveSheetAllDataValidationCommand, SheetDataValidationModel } from '@univerjs/sheets-data-validation';
-import { useObservable } from '@univerjs/ui';
+import { useDependency, useObservable } from '@univerjs/ui';
 import React, { useEffect, useState } from 'react';
 import { DataValidationPanelService } from '../../../services/data-validation-panel.service';
 import { DataValidationItem } from '../item';

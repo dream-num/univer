@@ -17,7 +17,7 @@
 import type { IDisposable } from '@univerjs/core';
 import type { IUniverUIConfig } from '../config.schema';
 import type { IUIController, IWorkbenchOptions } from './ui.controller';
-import { connectInjector, Disposable, Inject, Injector, IUniverInstanceService, LifecycleService, LifecycleStages, Optional, toDisposable, UniverInstanceType } from '@univerjs/core';
+import { Disposable, Inject, Injector, IUniverInstanceService, LifecycleService, LifecycleStages, Optional, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { render as createRoot, unmount } from '@univerjs/design';
 
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -26,6 +26,7 @@ import React from 'react';
 import { ILayoutService } from '../../services/layout/layout.service';
 import { IMenuManagerService } from '../../services/menu/menu-manager.service';
 import { BuiltInUIPart, IUIPartsService } from '../../services/parts/parts.service';
+import { connectInjector } from '../../utils/di';
 import { FloatDom } from '../../views/components/dom/FloatDom';
 import { CanvasPopup } from '../../views/components/popup/CanvasPopup';
 import { MobileApp } from '../../views/MobileApp';

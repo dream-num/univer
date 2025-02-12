@@ -16,9 +16,9 @@
 
 import type { KeyCode, MetaKeys } from '@univerjs/ui';
 import type { Editor } from '../../../services/editor/editor';
-import { CommandType, DisposableCollection, generateRandomId, ICommandService, useDependency } from '@univerjs/core';
+import { CommandType, DisposableCollection, generateRandomId, ICommandService } from '@univerjs/core';
 import { DeviceInputEventType } from '@univerjs/engine-render';
-import { IShortcutService } from '@univerjs/ui';
+import { IShortcutService, useDependency } from '@univerjs/ui';
 import { useEffect, useMemo } from 'react';
 
 export interface IKeyboardEventConfig {

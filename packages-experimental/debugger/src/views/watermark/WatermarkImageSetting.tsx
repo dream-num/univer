@@ -15,9 +15,9 @@
  */
 
 import type { IImageWatermarkConfig } from '@univerjs/watermark';
-import { LocaleService, useDependency } from '@univerjs/core';
+import { LocaleService } from '@univerjs/core';
 import { Button, Checkbox, InputNumber } from '@univerjs/design';
-import { ILocalFileService } from '@univerjs/ui';
+import { ILocalFileService, useDependency } from '@univerjs/ui';
 import { WATERMARK_IMAGE_ALLOW_IMAGE_LIST } from '@univerjs/watermark';
 import React from 'react';
 import styles from './index.module.less';

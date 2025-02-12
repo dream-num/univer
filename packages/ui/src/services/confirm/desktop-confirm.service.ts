@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
+import type { IDisposable } from '@univerjs/core';
 import type { IConfirmPartMethodOptions } from '../../views/components/confirm-part/interface';
 import type { IConfirmService } from './confirm.service';
-import { connectInjector, Disposable, toDisposable } from '@univerjs/core';
 
-import { type IDisposable, Inject, Injector } from '@univerjs/core';
+import { Disposable, Inject, Injector, toDisposable } from '@univerjs/core';
 import { BehaviorSubject } from 'rxjs';
+import { connectInjector } from '../../utils/di';
 import { ConfirmPart } from '../../views/components/confirm-part/ConfirmPart';
 import { BuiltInUIPart, IUIPartsService } from '../parts/parts.service';
 

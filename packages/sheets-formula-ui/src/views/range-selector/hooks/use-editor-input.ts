@@ -15,9 +15,9 @@
  */
 
 import type { Editor } from '@univerjs/docs-ui';
-import { useDependency } from '@univerjs/core';
 import { matchToken } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import { useDependency } from '@univerjs/ui';
 import { useEffect } from 'react';
 import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render-service';
 

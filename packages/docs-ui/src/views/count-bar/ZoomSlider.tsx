@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
+import type { DocumentDataModel } from '@univerjs/core';
 import {
     ICommandService,
     IUniverInstanceService,
     UniverInstanceType,
-    useDependency,
-    useObservable,
 } from '@univerjs/core';
 import { Slider } from '@univerjs/design';
+import { useDependency, useObservable } from '@univerjs/ui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import type { DocumentDataModel } from '@univerjs/core';
 import { SetDocZoomRatioOperation } from '../../commands/operations/set-doc-zoom-ratio.operation';
 
 const ZOOM_MAP = [50, 80, 100, 130, 150, 170, 200, 400];

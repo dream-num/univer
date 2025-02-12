@@ -17,9 +17,10 @@
 import type { Nullable } from '@univerjs/core';
 
 import type { Rect } from '@univerjs/engine-render';
-import { ICommandService, LocaleService, useDependency } from '@univerjs/core';
+import { ICommandService, LocaleService } from '@univerjs/core';
 import { ColorPicker, DropdownLegacy } from '@univerjs/design';
 import { MoreDownSingle, PaintBucket } from '@univerjs/icons';
+import { useDependency } from '@univerjs/ui';
 import clsx from 'clsx';
 
 import React from 'react';

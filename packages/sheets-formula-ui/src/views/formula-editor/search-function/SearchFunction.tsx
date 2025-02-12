@@ -16,9 +16,9 @@
 
 import type { Editor } from '@univerjs/docs-ui';
 import type { ISequenceNode } from '@univerjs/engine-formula';
-import { CommandType, DisposableCollection, ICommandService, useDependency } from '@univerjs/core';
+import { CommandType, DisposableCollection, ICommandService } from '@univerjs/core';
 import { DeviceInputEventType } from '@univerjs/engine-render';
-import { IShortcutService, KeyCode, RectPopup } from '@univerjs/ui';
+import { IShortcutService, KeyCode, RectPopup, useDependency } from '@univerjs/ui';
 import React, { forwardRef, useEffect, useMemo, useRef, useState } from 'react';
 import { useEditorPosition } from '../hooks/use-editor-position';
 import { useFormulaSearch } from '../hooks/use-formula-search';

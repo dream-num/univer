@@ -16,9 +16,9 @@
 
 import type { Editor } from '@univerjs/docs-ui';
 import type { IFunctionInfo } from '@univerjs/engine-formula';
-import { useDependency } from '@univerjs/core';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { IDescriptionService } from '@univerjs/sheets-formula';
+import { useDependency } from '@univerjs/ui';
 import { useEffect, useRef, useState } from 'react';
 import { debounceTime, distinctUntilChanged, filter, map } from 'rxjs';
 import { useStateRef } from './use-state-ref';

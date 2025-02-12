@@ -15,11 +15,11 @@
  */
 
 import type { IScrollState } from './sheet-bar-tabs/utils/slide-tab-bar';
-import { ICommandService, IPermissionService, useDependency } from '@univerjs/core';
+import { ICommandService, IPermissionService } from '@univerjs/core';
 import { IncreaseSingle, MoreSingle } from '@univerjs/icons';
 import { InsertSheetCommand, WorkbookCreateSheetPermission, WorkbookEditablePermission } from '@univerjs/sheets';
+import { useDependency, useObservable } from '@univerjs/ui';
 
-import { useObservable } from '@univerjs/ui';
 import React, { useEffect, useState } from 'react';
 import { useActiveWorkbook } from '../../components/hook';
 import { ISheetBarService } from '../../services/sheet-bar/sheet-bar.service';

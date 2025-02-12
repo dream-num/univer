@@ -16,11 +16,10 @@
 
 import type { FormatType } from '@univerjs/sheets';
 
-import { ICommandService, LocaleService, Range, useDependency } from '@univerjs/core';
+import { ICommandService, LocaleService, Range } from '@univerjs/core';
 import { SheetsSelectionsService } from '@univerjs/sheets';
 import { getPatternPreview, getPatternType, SetNumfmtCommand, SheetsNumfmtCellContentController } from '@univerjs/sheets-numfmt';
-import { ILayoutService } from '@univerjs/ui';
-import React from 'react';
+import { ILayoutService, useDependency } from '@univerjs/ui';
 import { OpenNumfmtPanelOperator } from '../../../commands/operations/open.numfmt.panel.operation';
 
 import { MENU_OPTIONS } from '../../../controllers/menu';

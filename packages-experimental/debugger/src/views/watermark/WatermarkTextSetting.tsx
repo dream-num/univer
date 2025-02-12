@@ -15,9 +15,10 @@
  */
 
 import type { ITextWatermarkConfig } from '@univerjs/watermark';
-import { LocaleService, useDependency } from '@univerjs/core';
+import { LocaleService } from '@univerjs/core';
 import { Checkbox, ColorPicker, DropdownLegacy, Input, InputNumber, Select } from '@univerjs/design';
 import { BoldSingle, FontColor, ItalicSingle } from '@univerjs/icons';
+import { useDependency } from '@univerjs/ui';
 import clsx from 'clsx';
 import React from 'react';
 import styles from './index.module.less';

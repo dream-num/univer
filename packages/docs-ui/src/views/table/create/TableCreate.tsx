@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import React, { useEffect, useState } from 'react';
-import { LocaleService, useDependency } from '@univerjs/core';
-
+import { LocaleService } from '@univerjs/core';
 import { InputNumber } from '@univerjs/design';
+import { useDependency } from '@univerjs/ui';
+
+import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
 
 interface IDocCreateTableConfirmProps {

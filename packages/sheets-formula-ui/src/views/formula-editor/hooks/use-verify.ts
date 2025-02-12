@@ -15,8 +15,8 @@
  */
 
 import type { IFormulaEditorProps } from '../index';
-import { useDependency } from '@univerjs/core';
 import { LexerTreeBuilder, operatorToken } from '@univerjs/engine-formula';
+import { useDependency } from '@univerjs/ui';
 import { useEffect, useRef } from 'react';
 
 export const useVerify = (isNeed: boolean, onVerify: IFormulaEditorProps['onVerify'], formulaText: string) => {

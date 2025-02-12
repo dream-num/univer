@@ -17,7 +17,7 @@
 import type { ICommandInfo, Workbook } from '@univerjs/core';
 import type { ISetWorksheetActiveOperationParams } from '@univerjs/sheets';
 import type { IBaseSheetBarProps } from '../../sheet-bar/sheet-bar-tabs/SheetBarItem';
-import { ICommandService, useDependency } from '@univerjs/core';
+import { ICommandService } from '@univerjs/core';
 import {
     InsertSheetMutation,
     RemoveSheetMutation,
@@ -26,10 +26,11 @@ import {
     SetWorksheetNameMutation,
     SetWorksheetOrderMutation,
 } from '@univerjs/sheets';
+import { useDependency } from '@univerjs/ui';
 import clsx from 'clsx';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { useActiveWorkbook } from '../../../components/hook';
 
+import { useActiveWorkbook } from '../../../components/hook';
 import styles from './index.module.less';
 
 export function MobileSheetBar() {

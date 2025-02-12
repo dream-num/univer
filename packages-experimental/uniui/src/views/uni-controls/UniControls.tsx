@@ -15,10 +15,9 @@
  */
 
 import type { IProjectNode } from '../../services/unit-grid/unit-grid.service';
-import { useDependency } from '@univerjs/core';
 import { DropdownLegacy, Tooltip } from '@univerjs/design';
 import { CheckMarkSingle, FullscreenSingle, IncreaseSingle, ZoomReduceSingle } from '@univerjs/icons';
-import { ISidebarService } from '@univerjs/ui';
+import { ISidebarService, useDependency } from '@univerjs/ui';
 import {
     useReactFlow,
 } from '@xyflow/react';

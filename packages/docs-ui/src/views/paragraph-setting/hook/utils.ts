@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-import { ICommandService, IUniverInstanceService, SpacingRule, UniverInstanceType, useDependency } from '@univerjs/core';
+import type { DocumentDataModel, IParagraph, ISectionBreak } from '@univerjs/core';
+import type { IDocParagraphSettingCommandParams } from '../../../commands/commands/doc-paragraph-setting.command';
+import { ICommandService, IUniverInstanceService, SpacingRule, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
 import { getNumberUnitValue, IRenderManagerService } from '@univerjs/engine-render';
+import { useDependency } from '@univerjs/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { bufferTime, filter, map } from 'rxjs/operators';
-import type { DocumentDataModel, IParagraph, ISectionBreak } from '@univerjs/core';
 import { DocParagraphSettingCommand } from '../../../commands/commands/doc-paragraph-setting.command';
 import { findNearestSectionBreak, getParagraphsInRanges } from '../../../commands/commands/list.command';
 import { DocParagraphSettingController } from '../../../controllers/doc-paragraph-setting.controller';
-import type { IDocParagraphSettingCommandParams } from '../../../commands/commands/doc-paragraph-setting.command';
 
 const useDocRanges = () => {
     const docSelectionManagerService = useDependency(DocSelectionManagerService);

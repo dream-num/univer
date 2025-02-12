@@ -15,7 +15,7 @@
  */
 
 import type { IRange } from '@univerjs/core';
-import { useDependency } from '@univerjs/core';
+import { useDependency } from '@univerjs/ui';
 import { useEffect } from 'react';
 import { IMarkSelectionService } from '../services/mark-selection/mark-selection.service';
 

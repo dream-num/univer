@@ -3,7 +3,7 @@
     "type": "module",
     "version": "0.6.0-alpha.0",
     "private": true,
-    "packageManager": "pnpm@9.15.2",
+    "packageManager": "pnpm@10.3.0",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",
     "license": "Apache-2.0",
     "funding": {
@@ -79,8 +79,8 @@
         "vitest": "^3.0.4"
     },
     "resolutions": {
-        "@types/react": "^19.0.2",
-        "@types/react-dom": "^19.0.2",
+        "@types/react": "^19.0.8",
+        "@types/react-dom": "^19.0.3",
         "react": "19.0.0",
         "react-dom": "19.0.0"
     },

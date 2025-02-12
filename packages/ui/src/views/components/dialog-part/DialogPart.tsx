@@ -15,13 +15,12 @@
  */
 
 import type { IDialogProps } from '@univerjs/design';
+import type { IDialogPartMethodOptions } from './interface';
 import { Dialog } from '@univerjs/design';
-import { useDependency } from '@univerjs/core';
 import React, { useEffect, useState } from 'react';
-
 import { CustomLabel } from '../../../components/custom-label/CustomLabel';
 import { IDialogService } from '../../../services/dialog/dialog.service';
-import type { IDialogPartMethodOptions } from './interface';
+import { useDependency } from '../../../utils/di';
 
 export function DialogPart() {
     const dialogService = useDependency(IDialogService);

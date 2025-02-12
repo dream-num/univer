@@ -15,10 +15,10 @@
  */
 
 import type { IPermissionPanelRule } from '../../../services/permission/sheet-permission-panel.model';
-import { IUniverInstanceService, useDependency } from '@univerjs/core';
+import { IUniverInstanceService } from '@univerjs/core';
 import { serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { getSheetCommandTarget, SheetsSelectionsService } from '@univerjs/sheets';
-import React from 'react';
+import { useDependency } from '@univerjs/ui';
 import { SheetPermissionPanelModel } from '../../../services/permission/sheet-permission-panel.model';
 import { SheetPermissionPanelDetail } from '../panel-detail/PermissionDetailPanel';
 import { SheetPermissionPanelList } from '../panel-list';

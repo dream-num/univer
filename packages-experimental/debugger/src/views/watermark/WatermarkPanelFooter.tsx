@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { LocaleService, useDependency } from '@univerjs/core';
+import { LocaleService } from '@univerjs/core';
 import { Button } from '@univerjs/design';
-import { IClipboardInterfaceService, ISidebarService } from '@univerjs/ui';
+import { IClipboardInterfaceService, ISidebarService, useDependency } from '@univerjs/ui';
 import { IWatermarkTypeEnum, WatermarkService, WatermarkTextBaseConfig } from '@univerjs/watermark';
 import React from 'react';
 import styles from './index.module.less';

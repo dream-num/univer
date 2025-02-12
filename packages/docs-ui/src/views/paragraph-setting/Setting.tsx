@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import { HorizontalAlign, LocaleService, SpacingRule, useDependency } from '@univerjs/core';
+import { HorizontalAlign, LocaleService, SpacingRule } from '@univerjs/core';
 import { InputNumber, Select, Tooltip } from '@univerjs/design';
 import { AlignTextBothSingle, HorizontallySingle, LeftJustifyingSingle, RightJustifyingSingle } from '@univerjs/icons';
+import { useDependency } from '@univerjs/ui';
 import clsx from 'clsx';
 import * as React from 'react';
 import { useMemo } from 'react';

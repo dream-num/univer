@@ -15,8 +15,8 @@
  */
 
 import type { ISequenceNode } from '@univerjs/engine-formula';
-import { useDependency } from '@univerjs/core';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
+import { useDependency } from '@univerjs/ui';
 import { useCallback } from 'react';
 
 export type INode = (string | ISequenceNode);

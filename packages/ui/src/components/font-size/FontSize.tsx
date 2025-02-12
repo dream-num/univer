@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
+import type { IFontSizeProps } from './interface';
 import { InputNumber } from '@univerjs/design';
 import React, { useMemo, useState } from 'react';
-
-import { useObservable } from '../hooks/observable';
+import { useObservable } from '../../utils/di';
 import styles from './index.module.less';
-import type { IFontSizeProps } from './interface';
 
 export const FontSize = (props: IFontSizeProps) => {
     const { value, min, max, onChange, disabled$ } = props;

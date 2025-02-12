@@ -17,12 +17,12 @@
 import type { IFunctionInfo, IFunctionParam } from '@univerjs/engine-formula';
 import type { ISearchItem } from '@univerjs/sheets-formula';
 import type { ISidebarMethodOptions } from '@univerjs/ui';
-import { LocaleService, useDependency, useObservable } from '@univerjs/core';
+import { LocaleService } from '@univerjs/core';
 import { Input, Select } from '@univerjs/design';
 import { FunctionType } from '@univerjs/engine-formula';
 import { CheckMarkSingle } from '@univerjs/icons';
 import { IDescriptionService } from '@univerjs/sheets-formula';
-import { ISidebarService } from '@univerjs/ui';
+import { ISidebarService, useDependency, useObservable } from '@univerjs/ui';
 import React, { useEffect, useState } from 'react';
 import { getFunctionTypeValues } from '../../../services/utils';
 import { FunctionHelp } from '../function-help/FunctionHelp';

@@ -149,9 +149,8 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     const highlightDoc = useDocHight('=');
     const highlightSheet = useSheetHighlight(unitId, subUnitId);
     const highlight = useEvent((text: string, isNeedResetSelection: boolean = true, isEnd?: boolean, newSelections?: ITextRange[]) => {
-        if (!editorRef.current) {
-            return;
-        }
+        if (!editorRef.current) return;
+        if (highTextRef.current === text) return;
         highTextRef.current = text;
         const sequenceNodes = getFormulaToken(text[0] === '=' ? text.slice(1) : '');
         const ranges = highlightDoc(
@@ -163,7 +162,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
         refSelections.current = ranges;
 
         if (isEnd) {
-            const currentDocSelections = editor?.getSelectionRanges();
+            const currentDocSelections = newSelections ?? editor?.getSelectionRanges();
             if (currentDocSelections?.length !== 1) {
                 return;
             }
@@ -171,8 +170,10 @@ export function FormulaEditor(props: IFormulaEditorProps) {
             const offset = docRange.startOffset - 1;
             const nodeIndex = findIndexFromSequenceNodes(sequenceNodes, offset, false);
             const refIndex = findRefSequenceIndex(sequenceNodes, nodeIndex);
-            const target = ranges.splice(refIndex, 1)[0];
-            target && ranges.push(target);
+            if (refIndex >= 0) {
+                const target = ranges.splice(refIndex, 1)[0];
+                target && ranges.push(target);
+            }
 
             highlightSheet(isFocus ? ranges : [], editorRef.current);
         }

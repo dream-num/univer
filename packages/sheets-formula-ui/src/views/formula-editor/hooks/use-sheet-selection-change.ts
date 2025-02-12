@@ -16,7 +16,7 @@
 
 /* eslint-disable max-lines-per-function */
 
-import type { Workbook } from '@univerjs/core';
+import type { IRange, Workbook } from '@univerjs/core';
 import type { Editor } from '@univerjs/docs-ui';
 import type { ISelectionWithCoord, ISetSelectionsOperationParams } from '@univerjs/sheets';
 import type { RefObject } from 'react';
@@ -92,118 +92,123 @@ export const useSheetSelectionChange = (
     const isScalingRef = useRef(false);
     const scalingOptionRef = useRef<{ result: string; offset: number }>(undefined);
 
+       // eslint-disable-next-line complexity
+    const onSelectionsChange = useEvent((selections: IRange[], isEnd: boolean) => {
+        const ctx = prepareSelectionChangeContext({ editor, lexerTreeBuilder });
+        if (!ctx) return;
+        const { nodeIndex, updatingRefIndex, sequenceNodes, offset } = ctx;
+        if (isSelectingRef.current === FormulaSelectingType.NEED_ADD) {
+            if (offset !== 0) {
+                if (nodeIndex === -1 && sequenceNodes.length) {
+                    return;
+                }
+                const range = selections[selections.length - 1];
+                const lastNodes = sequenceNodes.splice(nodeIndex + 1);
+                const rangeSheetId = range.sheetId ?? subUnitId;
+                const unitRangeName = {
+                    range,
+                    unitId: range.unitId ?? unitId,
+                    sheetName: getSheetNameById(rangeSheetId),
+                };
+                const isAcrossSheet = rangeSheetId !== subUnitId;
+                const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet && isAcrossSheet, sheetName);
+                sequenceNodes.push({ token: refRanges[0], nodeType: sequenceNodeType.REFERENCE } as any);
+                const newSequenceNodes = [...sequenceNodes, ...lastNodes];
+                const result = sequenceNodeToText(newSequenceNodes);
+                handleRangeChange(result, getOffsetFromSequenceNodes(sequenceNodes), isEnd);
+            } else {
+                const range = selections[selections.length - 1];
+                const rangeSheetId = range.sheetId ?? subUnitId;
+                const unitRangeName = {
+                    range,
+                    unitId: range.unitId ?? unitId,
+                    sheetName: getSheetNameById(rangeSheetId),
+                };
+                const isAcrossSheet = rangeSheetId !== subUnitId;
+                const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet && isAcrossSheet);
+                sequenceNodes.unshift({ token: refRanges[0], nodeType: sequenceNodeType.REFERENCE } as any);
+                const result = sequenceNodeToText(sequenceNodes);
+                handleRangeChange(result, refRanges[0].length, isEnd);
+            }
+        } else {
+            const orderedSelections = [...selections];
+            const last = orderedSelections.pop();
+            last && orderedSelections.splice(updatingRefIndex, 0, last);
+            // 更新全部的 ref Selection
+            let currentRefIndex = 0;
+            const newTokens = sequenceNodes.map((item) => {
+                if (typeof item === 'string') {
+                    return item;
+                }
+                if (item.nodeType === sequenceNodeType.REFERENCE) {
+                    const nodeRange = deserializeRangeWithSheet(item.token);
+                    if (!nodeRange.sheetName) {
+                        nodeRange.sheetName = sheetName;
+                    }
+
+                    if (isSupportAcrossSheet) {
+                        // 直接跳过非当前表的 node 节点
+                        if (contextRef.current.activeSheet?.getName() !== nodeRange.sheetName) {
+                            return item.token;
+                        }
+                    }
+                    const selection = orderedSelections[currentRefIndex];
+                    currentRefIndex++;
+                    if (!selection) {
+                        return '';
+                    }
+                    const rangeSheetId = selection.sheetId ?? subUnitId;
+                    const unitRangeName = {
+                        range: selection,
+                        unitId: selection.unitId ?? unitId,
+                        sheetName: getSheetNameById(rangeSheetId),
+                    };
+                    const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet, sheetName);
+                    return refRanges[0];
+                }
+                return item.token;
+            });
+
+            let currentText = '';
+            let newOffset;
+            newTokens.forEach((item, index) => {
+                currentText += item;
+                if (index === nodeIndex) {
+                    newOffset = currentText.length;
+                }
+            });
+            const theLastList: string[] = [];
+            for (let index = currentRefIndex; index <= selections.length - 1; index++) {
+                const selection = selections[index];
+                const rangeSheetId = selection.sheetId ?? subUnitId;
+                const unitRangeName = {
+                    range: selection,
+                    unitId: selection.unitId ?? unitId,
+                    sheetName: getSheetNameById(rangeSheetId),
+                };
+                const isAcrossSheet = rangeSheetId !== subUnitId;
+                const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet && isAcrossSheet, sheetName);
+                theLastList.push(refRanges[0]);
+            }
+            const preNode = sequenceNodes[sequenceNodes.length - 1];
+            const isPreNodeRef = preNode && (typeof preNode === 'string' ? false : preNode.nodeType === sequenceNodeType.REFERENCE);
+            const result = `${currentText}${theLastList.length && isPreNodeRef ? ',' : ''}${theLastList.join(',')}`;
+            handleRangeChange(result, !theLastList.length && newOffset ? newOffset : result.length, isEnd);
+        }
+    });
+
     useEffect(() => {
         if (refSelectionsRenderService && isNeed) {
             let isFirst = true;
-            // eslint-disable-next-line complexity
+
             const handleSelectionsChange = (selections: ISelectionWithCoord[], isEnd: boolean) => {
                 if (isFirst) {
                     isFirst = false;
                     return;
                 }
-
-                const ctx = prepareSelectionChangeContext({ editor, lexerTreeBuilder });
-                if (!ctx) return;
-                const { nodeIndex, updatingRefIndex, sequenceNodes, offset } = ctx;
-                if (isSelectingRef.current === FormulaSelectingType.NEED_ADD) {
-                    if (offset !== 0) {
-                        if (nodeIndex === -1 && sequenceNodes.length) {
-                            return;
-                        }
-                        const range = selections[selections.length - 1];
-                        const lastNodes = sequenceNodes.splice(nodeIndex + 1);
-                        const rangeSheetId = range.rangeWithCoord.sheetId ?? subUnitId;
-                        const unitRangeName = {
-                            range: range.rangeWithCoord,
-                            unitId: range.rangeWithCoord.unitId ?? unitId,
-                            sheetName: getSheetNameById(rangeSheetId),
-                        };
-                        const isAcrossSheet = rangeSheetId !== subUnitId;
-                        const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet && isAcrossSheet, sheetName);
-                        sequenceNodes.push({ token: refRanges[0], nodeType: sequenceNodeType.REFERENCE } as any);
-                        const newSequenceNodes = [...sequenceNodes, ...lastNodes];
-                        const result = sequenceNodeToText(newSequenceNodes);
-                        handleRangeChange(result, getOffsetFromSequenceNodes(sequenceNodes), isEnd);
-                    } else {
-                        const range = selections[selections.length - 1];
-                        const rangeSheetId = range.rangeWithCoord.sheetId ?? subUnitId;
-                        const unitRangeName = {
-                            range: range.rangeWithCoord,
-                            unitId: range.rangeWithCoord.unitId ?? unitId,
-                            sheetName: getSheetNameById(rangeSheetId),
-                        };
-                        const isAcrossSheet = rangeSheetId !== subUnitId;
-                        const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet && isAcrossSheet);
-                        sequenceNodes.unshift({ token: refRanges[0], nodeType: sequenceNodeType.REFERENCE } as any);
-                        const result = sequenceNodeToText(sequenceNodes);
-                        handleRangeChange(result, refRanges[0].length, isEnd);
-                    }
-                } else {
-                    const orderedSelections = [...selections];
-                    const last = orderedSelections.pop();
-                    last && orderedSelections.splice(updatingRefIndex, 0, last);
-                    // 更新全部的 ref Selection
-                    let currentRefIndex = 0;
-                    const newTokens = sequenceNodes.map((item) => {
-                        if (typeof item === 'string') {
-                            return item;
-                        }
-                        if (item.nodeType === sequenceNodeType.REFERENCE) {
-                            const nodeRange = deserializeRangeWithSheet(item.token);
-                            if (!nodeRange.sheetName) {
-                                nodeRange.sheetName = sheetName;
-                            }
-
-                            if (isSupportAcrossSheet) {
-                                // 直接跳过非当前表的 node 节点
-                                if (contextRef.current.activeSheet?.getName() !== nodeRange.sheetName) {
-                                    return item.token;
-                                }
-                            }
-                            const selection = orderedSelections[currentRefIndex];
-                            currentRefIndex++;
-                            if (!selection) {
-                                return '';
-                            }
-                            const rangeSheetId = selection.rangeWithCoord.sheetId ?? subUnitId;
-                            const unitRangeName = {
-                                range: selection.rangeWithCoord,
-                                unitId: selection.rangeWithCoord.unitId ?? unitId,
-                                sheetName: getSheetNameById(rangeSheetId),
-                            };
-                            const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet, sheetName);
-                            return refRanges[0];
-                        }
-                        return item.token;
-                    });
-
-                    let currentText = '';
-                    let newOffset;
-                    newTokens.forEach((item, index) => {
-                        currentText += item;
-                        if (index === nodeIndex) {
-                            newOffset = currentText.length;
-                        }
-                    });
-                    const theLastList: string[] = [];
-                    for (let index = currentRefIndex; index <= selections.length - 1; index++) {
-                        const selection = selections[index];
-                        const rangeSheetId = selection.rangeWithCoord.sheetId ?? subUnitId;
-                        const unitRangeName = {
-                            range: selection.rangeWithCoord,
-                            unitId: selection.rangeWithCoord.unitId ?? unitId,
-                            sheetName: getSheetNameById(rangeSheetId),
-                        };
-                        const isAcrossSheet = rangeSheetId !== subUnitId;
-                        const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet && isAcrossSheet, sheetName);
-                        theLastList.push(refRanges[0]);
-                    }
-                    const preNode = sequenceNodes[sequenceNodes.length - 1];
-                    const isPreNodeRef = preNode && (typeof preNode === 'string' ? false : preNode.nodeType === sequenceNodeType.REFERENCE);
-                    const result = `${currentText}${theLastList.length && isPreNodeRef ? ',' : ''}${theLastList.join(',')}`;
-                    handleRangeChange(result, !theLastList.length && newOffset ? newOffset : result.length, isEnd);
-                }
+                onSelectionsChange(selections.map((i) => i.rangeWithCoord), isEnd);
             };
+
             const disposableCollection = new DisposableCollection();
             disposableCollection.add(refSelectionsRenderService.selectionMoving$.subscribe((selections) => {
                 if (isScalingRef.current) return;
@@ -218,7 +223,7 @@ export const useSheetSelectionChange = (
                 disposableCollection.dispose();
             };
         }
-    }, [refSelectionsRenderService, editor, isSupportAcrossSheet, isNeed, subUnitId, unitId, getSheetNameById, sheetName, handleRangeChange, contextRef, lexerTreeBuilder, isSelectingRef]);
+    }, [refSelectionsRenderService, editor, isSupportAcrossSheet, isNeed, subUnitId, unitId, getSheetNameById, sheetName, handleRangeChange, contextRef, lexerTreeBuilder, isSelectingRef, onSelectionsChange]);
 
     useEffect(() => {
         if (isFocus && refSelectionsRenderService && editor) {
@@ -329,8 +334,11 @@ export const useSheetSelectionChange = (
         }
     }, [isFocus, refSelectionsRenderService, editor, refSelectionsService.selectionSet$, contextRef, handleRangeChange, isSupportAcrossSheet, unitId, lexerTreeBuilder]);
 
+    refSelectionsRenderService?.getSelectionDataWithStyle();
+
     useEffect(() => {
         if (listenSelectionSet) {
+            // selection changed by keyborad
             const d = commandService.onCommandExecuted((commandInfo) => {
                 if (commandInfo.id !== SetSelectionsOperation.id) {
                     return;
@@ -340,42 +348,17 @@ export const useSheetSelectionChange = (
                 if (params.extra !== 'formula-editor') {
                     return;
                 }
-                const { selections } = params;
-                if (selections.length) {
-                    const last = selections[selections.length - 1];
+                if (params.selections.length) {
+                    const last = params.selections[params.selections.length - 1];
                     if (last) {
-                        const range = last.range;
-                        const sheetId = subUnitId;
-                        const unitRangeName = {
-                            range,
-                            unitId: params.unitId === unitId ? '' : params.unitId,
-                            sheetName: params.subUnitId === sheetId ? '' : getSheetNameById(sheetId),
-                        };
-                        const ctx = prepareSelectionChangeContext({ editor, lexerTreeBuilder });
-                        if (!ctx) return;
-                        const { sequenceNodes } = ctx;
-                        const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet, sheetName);
-                        const result = refRanges[0];
-                        let lastNode = sequenceNodes[sequenceNodes.length - 1];
-                        if (typeof lastNode === 'object' && lastNode.nodeType === sequenceNodeType.REFERENCE) {
-                            lastNode = { ...lastNode };
-                            lastNode.token = result;
-                            lastNode.endIndex = lastNode.startIndex + result.length;
-                            sequenceNodes[sequenceNodes.length - 1] = lastNode;
-                            const refStr = sequenceNodeToText(sequenceNodes);
-                            handleRangeChange(refStr, getOffsetFromSequenceNodes(sequenceNodes), true);
+                        const isAdd = isSelectingRef.current === FormulaSelectingType.NEED_ADD;
+                        const selections: IRange[] = (refSelectionsRenderService?.getSelectionDataWithStyle() ?? []).map((i) => i.rangeWithCoord);
+                        if (isAdd) {
+                            selections.push(last.range);
                         } else {
-                            const start = getOffsetFromSequenceNodes(sequenceNodes);
-                            sequenceNodes.push({
-                                nodeType: sequenceNodeType.REFERENCE,
-                                token: result,
-                                startIndex: start,
-                                endIndex: start + result.length,
-                            });
-
-                            const refStr = sequenceNodeToText(sequenceNodes);
-                            handleRangeChange(refStr, getOffsetFromSequenceNodes(sequenceNodes), true);
+                            selections[selections.length - 1] = last.range;
                         }
+                        onSelectionsChange(selections, true);
                     }
                 }
             });
@@ -384,7 +367,7 @@ export const useSheetSelectionChange = (
                 d.dispose();
             };
         }
-    }, [commandService, editor, getSheetNameById, handleRangeChange, isSupportAcrossSheet, lexerTreeBuilder, listenSelectionSet, sheetName, subUnitId, unitId]);
+    }, [commandService, editor, getSheetNameById, handleRangeChange, isSelectingRef, isSupportAcrossSheet, lexerTreeBuilder, listenSelectionSet, onSelectionsChange, refSelectionsRenderService, sheetName, subUnitId, unitId]);
 
     useEffect(() => {
         if (!editor) {

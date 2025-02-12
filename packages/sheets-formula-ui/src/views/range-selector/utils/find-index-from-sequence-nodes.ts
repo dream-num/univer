@@ -41,7 +41,9 @@ export const findIndexFromSequenceNodes = (sequenceNode: (string | ISequenceNode
 };
 
 export const findRefSequenceIndex = (sequenceNode: (string | ISequenceNode)[], targetIndex: number) => {
+    const last = sequenceNode[targetIndex];
     let result = -1;
+    if (!last || typeof last === 'string' || last.nodeType !== sequenceNodeType.REFERENCE) return -1;
     for (let i = 0; i <= targetIndex; i++) {
         const currentNode = sequenceNode[i];
         if (typeof currentNode !== 'string' && currentNode.nodeType === sequenceNodeType.REFERENCE) {

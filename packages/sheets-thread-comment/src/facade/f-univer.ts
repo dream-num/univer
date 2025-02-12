@@ -27,22 +27,22 @@ import { FTheadCommentBuilder, FTheadCommentItem } from './f-thread-comment';
  */
 export interface IFUniverCommentMixin {
     /**
-     * @deprecated use `univerAPI.addEvent(univerAPI.event.CommentAdded, () => {})` as instead
+     * @deprecated use `univerAPI.addEvent(univerAPI.Event.CommentAdded, () => {})` as instead
      */
     onCommentAdded(callback: (event: ISheetCommentAddEvent) => void): IDisposable;
 
     /**
-     * @deprecated use `univerAPI.addEvent(univerAPI.event.CommentUpdated, () => {})` as instead
+     * @deprecated use `univerAPI.addEvent(univerAPI.Event.CommentUpdated, () => {})` as instead
      */
     onCommentUpdated(callback: (event: ISheetCommentUpdateEvent) => void): IDisposable;
 
     /**
-     * @deprecated use `univerAPI.addEvent(univerAPI.event.CommentDeleted, () => {})` as instead
+     * @deprecated use `univerAPI.addEvent(univerAPI.Event.CommentDeleted, () => {})` as instead
      */
     onCommentDeleted(callback: (event: ISheetCommentDeleteEvent) => void): IDisposable;
 
     /**
-     * @deprecated use `univerAPI.addEvent(univerAPI.event.CommentResolved, () => {})` as instead
+     * @deprecated use `univerAPI.addEvent(univerAPI.Event.CommentResolved, () => {})` as instead
      */
     onCommentResolved(callback: (event: ISheetCommentResolveEvent) => void): IDisposable;
 

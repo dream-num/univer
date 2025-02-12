@@ -49,6 +49,11 @@ export class FUniver extends Disposable {
      * @static
      * @param {Univer | Injector} wrapped - The Univer instance or injector instance.
      * @returns {FUniver} - The FUniver instance.
+     *
+     * @example
+     * ```ts
+     * const univerAPI = FUniver.newAPI(univer);
+     * ```
      */
     static newAPI(wrapped: Univer | Injector): FUniver {
         const injector = wrapped instanceof Univer ? wrapped.__getInjector() : wrapped;
@@ -261,6 +266,16 @@ export class FUniver extends Disposable {
      * Dispose the UniverSheet by the `unitId`. The UniverSheet would be unload from the application.
      * @param unitId The unit id of the UniverSheet.
      * @returns Whether the Univer instance is disposed successfully.
+     *
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const unitId = fWorkbook?.getId();
+     *
+     * if (unitId) {
+     *   univerAPI.disposeUnit(unitId);
+     * }
+     * ```
      */
     disposeUnit(unitId: string): boolean {
         return this._univerInstanceService.disposeUnit(unitId);
@@ -269,6 +284,12 @@ export class FUniver extends Disposable {
     /**
      * Get the current lifecycle stage.
      * @returns {LifecycleStages} - The current lifecycle stage.
+     *
+     * @example
+     * ```ts
+     * const stage = univerAPI.getCurrentLifecycleStage();
+     * console.log(stage);
+     * ```
      */
     getCurrentLifecycleStage(): LifecycleStages {
         const lifecycleService = this._injector.get(LifecycleService);
@@ -278,6 +299,11 @@ export class FUniver extends Disposable {
     /**
      * Undo an editing on the currently focused document.
      * @returns {Promise<boolean>} undo result
+     *
+     * @example
+     * ```ts
+     * univerAPI.undo();
+     * ```
      */
     undo(): Promise<boolean> {
         return this._commandService.executeCommand(UndoCommand.id);
@@ -286,6 +312,11 @@ export class FUniver extends Disposable {
     /**
      * Redo an editing on the currently focused document.
      * @returns {Promise<boolean>} redo result
+     *
+     * @example
+     * ```ts
+     * univerAPI.redo();
+     * ```
      */
     redo(): Promise<boolean> {
         return this._commandService.executeCommand(RedoCommand.id);
@@ -293,7 +324,7 @@ export class FUniver extends Disposable {
 
     /**
      * Register a callback that will be triggered before invoking a command.
-     * @deprecated use `addEvent(univerAPI.event.BeforeCommandExecute, () => {})` instead.
+     * @deprecated use `univerAPI.addEvent(univerAPI.Event.BeforeCommandExecute, (event) => {})` instead.
      * @param {CommandListener} callback The callback.
      * @returns {IDisposable} The disposable instance.
      */
@@ -305,7 +336,7 @@ export class FUniver extends Disposable {
 
     /**
      * Register a callback that will be triggered when a command is invoked.
-     * @deprecated use `addEvent(univerAPI.event.CommandExecuted, () => {})` instead.
+     * @deprecated use `univerAPI.addEvent(univerAPI.Event.CommandExecuted, (event) => {})` instead.
      * @param {CommandListener} callback The callback.
      * @returns {IDisposable} The disposable instance.
      */
@@ -321,6 +352,14 @@ export class FUniver extends Disposable {
      * @param params Parameters of this execution.
      * @param options Options of this execution.
      * @returns The result of the execution. It is a boolean value by default which indicates the command is executed.
+     *
+     * @example
+     * ```ts
+     * univerAPI.executeCommand('sheet.command.set-range-values', {
+     *   value: { v: "Hello, Univer!" },
+     *   range: { startRow: 0, startColumn: 0, endRow: 0, endColumn: 0 }
+     * });
+     * ```
      */
     executeCommand<P extends object = object, R = boolean>(
         id: string,
@@ -336,6 +375,14 @@ export class FUniver extends Disposable {
      * @param params Parameters of this execution.
      * @param options Options of this execution.
      * @returns The result of the execution. It is a boolean value by default which indicates the command is executed.
+     *
+     * @example
+     * ```ts
+     * univerAPI.syncExecuteCommand('sheet.command.set-range-values', {
+     *   value: { v: "Hello, Univer!" },
+     *   range: { startRow: 0, startColumn: 0, endRow: 0, endColumn: 0 }
+     * });
+     * ```
      */
     syncExecuteCommand<P extends object = object, R = boolean>(
         id: string,
@@ -373,8 +420,9 @@ export class FUniver extends Disposable {
      * @returns {Disposable} The Disposable instance, for remove the listener
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.event.UnitCreated, (params) => {
-     *   console.log('unit created', params);
+     * univerAPI.addEvent(univerAPI.Event.LifeCycleChanged, (params) => {
+     *   const { stage } = params;
+     *   console.log('life cycle changed', params);
      * });
      * ```
      */
@@ -390,7 +438,7 @@ export class FUniver extends Disposable {
      * @returns {boolean} should cancel
      * @example
      * ```ts
-     * this.fireEvent(univerAPI.event.UnitCreated, params);
+     * this.fireEvent(univerAPI.Event.LifeCycleChanged, params);
      * ```
      */
     protected fireEvent<T extends keyof IEventParamConfig>(event: T, params: IEventParamConfig[T]): boolean | undefined {
@@ -431,7 +479,9 @@ export class FUniver extends Disposable {
      * @returns {RichTextBuilder} The new rich text instance
      * @example
      * ```ts
-     * const richText = univerAPI.newRichText();
+     * const richText = univerAPI.newRichText({ body: { dataStream: 'Hello World\r\n' } });
+     * const range = univerAPI.getActiveWorkbook().getActiveSheet().getRange('A1');
+     * range.setRichTextValueForCell(richText);
      * ```
      */
     newRichText(data?: IDocumentData): RichTextBuilder {
@@ -444,7 +494,9 @@ export class FUniver extends Disposable {
      * @returns {RichTextValue} The new rich text value instance
      * @example
      * ```ts
-     * const richTextValue = univerAPI.newRichTextValue();
+     * const richTextValue = univerAPI.newRichTextValue({ body: { dataStream: 'Hello World\r\n' } });
+     * const range = univerAPI.getActiveWorkbook().getActiveSheet().getRange('A1');
+     * range.setRichTextValueForCell(richTextValue);
      * ```
      */
     newRichTextValue(data: IDocumentData): RichTextValue {
@@ -457,7 +509,11 @@ export class FUniver extends Disposable {
      * @returns {ParagraphStyleBuilder} The new paragraph style instance
      * @example
      * ```ts
-     * const paragraphStyle = univerAPI.newParagraphStyle();
+     * const richText = univerAPI.newRichText({ body: { dataStream: 'Hello World\r\n' } });
+     * const paragraphStyle = univerAPI.newParagraphStyle({ textStyle: { ff: 'Arial', fs: 12, it: univerAPI.Enum.BooleanNumber.TRUE, bl: univerAPI.Enum.BooleanNumber.TRUE } });
+     * richText.insertParagraph(paragraphStyle);
+     * const range = univerAPI.getActiveWorkbook().getActiveSheet().getRange('A1');
+     * range.setRichTextValueForCell(richText);
      * ```
      */
     newParagraphStyle(style?: IParagraphStyle): ParagraphStyleBuilder {

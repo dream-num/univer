@@ -52,20 +52,20 @@ export interface IFWorkbookThreadCommentMixin {
     clearComments(): Promise<boolean>;
 
     /**
-     * @deprecated use `univerAPI.addEvent(univerAPI.event.CommentUpdated, () => {})` as instead
+     * @deprecated use `univerAPI.addEvent(univerAPI.Event.CommentUpdated, () => {})` as instead
      */
     onThreadCommentChange(callback: (commentUpdate: CommentUpdate) => void | false): IDisposable;
 
-     /**
-      * @deprecated use `univerAPI.addEvent(univerAPI.event.BeforeCommentAdd, () => {})` as instead
-      */
+    /**
+     * @deprecated use `univerAPI.addEvent(univerAPI.Event.BeforeCommentAdd, () => {})` as instead
+     */
     onBeforeAddThreadComment(
         this: FWorkbook,
         callback: (params: IAddCommentCommandParams, options: IExecutionOptions | undefined) => void | false
     ): IDisposable;
 
     /**
-     * @deprecated use `univerAPI.addEvent(univerAPI.event.BeforeCommentUpdate, () => {})` as instead
+     * @deprecated use `univerAPI.addEvent(univerAPI.Event.BeforeCommentUpdate, () => {})` as instead
      */
     onBeforeUpdateThreadComment(
         this: FWorkbook,
@@ -73,7 +73,7 @@ export interface IFWorkbookThreadCommentMixin {
     ): IDisposable;
 
     /**
-     * @deprecated use `univerAPI.addEvent(univerAPI.event.BeforeCommentDelete, () => {})` as instead
+     * @deprecated use `univerAPI.addEvent(univerAPI.Event.BeforeCommentDelete, () => {})` as instead
      */
     onBeforeDeleteThreadComment(
         this: FWorkbook,

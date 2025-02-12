@@ -148,6 +148,13 @@ export function getSetCellFormulaMutations(
 
     const valueMatrix = getValueMatrix(unitId, subUnitId, range, matrix, copyInfo, lexerTreeBuilder, formulaDataModel, pasteFrom);
 
+    if (!valueMatrix.hasValue()) {
+        return {
+            undos: [],
+            redos: [],
+        };
+    }
+
     // set cell value and style
     const setValuesMutation: ISetRangeValuesMutationParams = {
         unitId,

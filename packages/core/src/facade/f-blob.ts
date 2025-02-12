@@ -47,7 +47,7 @@ export class FBlob extends FBase {
      * @returns a new blob by copying the current blob
      * @example
      * ```ts
-     * const blob = univerAPI.newBlob(blob);
+     * const blob = univerAPI.newBlob();
      * const newBlob = blob.copyBlob();
      * console.log(newBlob);
      * ```
@@ -62,8 +62,9 @@ export class FBlob extends FBase {
      * @returns a new blob by converting the current blob to the specified content type
      * @example
      * ```ts
-     * const blob = univerAPI.newBlob(blob);
-     * const newBlob = blob.getBlob();
+     * const blob = univerAPI.newBlob();
+     * const newBlob = blob.getAs('text/plain');
+     * console.log(newBlob);
      * ```
      */
     getAs(contentType: string): FBlob {
@@ -77,9 +78,9 @@ export class FBlob extends FBase {
      * @returns
      * @example
      * ```ts
-     * const blob = univerAPI.newBlob(blob);
-     * const newBlob = blob.getDataAsString();
-     * console.log(newBlob);
+     * const blob = univerAPI.newBlob();
+     * const data = await blob.getDataAsString();
+     * console.log(data);
      * ```
      */
     getDataAsString(): Promise<string>;
@@ -89,9 +90,9 @@ export class FBlob extends FBase {
      * @returns the blob content as a string
      * @example
      * ```ts
-     * const blob = univerAPI.newBlob(blob);
-     * const newBlob = blob.getDataAsString('iso-8859-1');
-     * console.log(newBlob);
+     * const blob = univerAPI.newBlob();
+     * const data = await blob.getDataAsString('iso-8859-1');
+     * console.log(data);
      * ```
      */
     getDataAsString(charset?: string): Promise<string>;
@@ -118,9 +119,9 @@ export class FBlob extends FBase {
      * @returns the blob content as a byte array
      * @example
      * ```ts
-     * const blob = univerAPI.newBlob(blob);
-     * const newBlob = blob.getBytes();
-     * console.log(newBlob);
+     * const blob = univerAPI.newBlob();
+     * const bytes = await blob.getBytes();
+     * console.log(bytes);
      * ```
      */
     getBytes(): Promise<Uint8Array> {
@@ -181,9 +182,9 @@ export class FBlob extends FBase {
      * @returns the content type
      * @example
      * ```ts
-     * const blob = univerAPI.newBlob(blob);
-     * const newBlob = blob.getContentType();
-     * console.log(newBlob);
+     * const blob = univerAPI.newBlob();
+     * const contentType = blob.getContentType();
+     * console.log(contentType);
      * ```
      */
     getContentType(): string | undefined {
@@ -196,9 +197,8 @@ export class FBlob extends FBase {
      * @returns the blob object
      * @example
      * ```ts
-     * const blob = univerAPI.newBlob(blob);
-     * const newBlob = blob.setContentType('text/plain');
-     * console.log(newBlob);
+     * const blob = univerAPI.newBlob();
+     * blob.setContentType('text/plain');
      * ```
      */
     setContentType(contentType: string): FBlob {

@@ -62,6 +62,8 @@ import '@univerjs/sheets-find-replace/facade';
 import '@univerjs/sheets-drawing-ui/facade';
 import '@univerjs/sheets-zen-editor/facade';
 import '@univerjs/sheets-source-binding/facade';
+import '@univerjs/sheets-crosshair-highlight/facade';
+import '@univerjs/sheets-sort/facade';
 
 import '../global.css';
 import './styles';
@@ -176,6 +178,410 @@ declare global {
     }
 }
 const logService = window.univer!.__getInjector().get(ILogService);
+
+// Workbook Events
+window.univerAPI?.addEvent(window.univerAPI.Event.WorkbookCreated, (params) => {
+    logService.log('===WorkbookCreated', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.WorkbookDisposed, (params) => {
+    logService.log('===WorkbookDisposed', params);
+});
+
+// Sheet Lifecycle Events
+window.univerAPI?.addEvent(window.univerAPI.Event.BeforeSheetCreate, (params) => {
+    logService.log('===BeforeSheetCreate', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.SheetCreated, (params) => {
+    logService.log('===SheetCreated', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.BeforeSheetDelete, (params) => {
+    logService.log('===BeforeSheetDelete', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.SheetDeleted, (params) => {
+    logService.log('===SheetDeleted', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.BeforeSheetMove, (params) => {
+    logService.log('===BeforeSheetMove', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.SheetMoved, (params) => {
+    logService.log('===SheetMoved', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.BeforeSheetNameChange, (params) => {
+    logService.log('===BeforeSheetNameChange', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.SheetNameChanged, (params) => {
+    logService.log('===SheetNameChanged', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.BeforeSheetHideChange, (params) => {
+    logService.log('===BeforeSheetHideChange', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.SheetHideChanged, (params) => {
+    logService.log('===SheetHideChanged', params);
+});
+
+// Cell and Selection Events
+window.univerAPI?.addEvent(window.univerAPI.Event.CellClicked, (params) => {
+    logService.log('===CellClicked', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.CellHover, (params) => {
+    logService.log('===CellHover', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.CellPointerDown, (params) => {
+    logService.log('===CellPointerDown', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.CellPointerUp, (params) => {
+    logService.log('===CellPointerUp', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.CellPointerMove, (params) => {
+    logService.log('===CellPointerMove', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.SelectionChanged, (params) => {
+    logService.log('===SelectionChanged', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.SelectionMoveStart, (params) => {
+    logService.log('===SelectionMoveStart', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.SelectionMoveEnd, (params) => {
+    logService.log('===SelectionMoveEnd', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.SelectionMoving, (params) => {
+    logService.log('===SelectionMoving', params);
+});
+
+// Edit Events
+window.univerAPI?.addEvent(window.univerAPI.Event.BeforeSheetEditStart, (params) => {
+    logService.log('===BeforeSheetEditStart', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.SheetEditStarted, (params) => {
+    logService.log('===SheetEditStarted', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.SheetEditChanging, (params) => {
+    logService.log('===SheetEditChanging', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.BeforeSheetEditEnd, (params) => {
+    logService.log('===BeforeSheetEditEnd', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.SheetEditEnded, (params) => {
+    logService.log('===SheetEditEnded', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.SheetValueChanged, (params) => {
+    logService.log('===SheetValueChanged', params);
+});
+
+// Clipboard Events
+window.univerAPI?.addEvent(window.univerAPI.Event.BeforeClipboardChange, (params) => {
+    logService.log('===BeforeClipboardChange', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.ClipboardChanged, (params) => {
+    logService.log('===ClipboardChanged', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.BeforeClipboardPaste, (params) => {
+    logService.log('===BeforeClipboardPaste', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.ClipboardPasted, (params) => {
+    logService.log('===ClipboardPasted', params);
+});
+
+// UI and Visualization Events
+window.univerAPI?.addEvent(window.univerAPI.Event.BeforeGridlineColorChange, (params) => {
+    logService.log('===BeforeGridlineColorChange', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.GridlineChanged, (params) => {
+    logService.log('===GridlineChanged', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.BeforeSheetZoomChange, (params) => {
+    logService.log('===BeforeSheetZoomChange', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.SheetZoomChanged, (params) => {
+    logService.log('===SheetZoomChanged', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.Scroll, (params) => {
+    logService.log('===Scroll', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.SheetSkeletonChanged, (params) => {
+    logService.log('===SheetSkeletonChanged', params);
+});
+
+// Data Validation Events
+window.univerAPI?.addEvent(window.univerAPI.Event.BeforeSheetDataValidationAdd, (params) => {
+    logService.log('===BeforeSheetDataValidationAdd', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.SheetDataValidationChanged, (params) => {
+    logService.log('===SheetDataValidationChanged', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.SheetDataValidatorStatusChanged, (params) => {
+    logService.log('===SheetDataValidatorStatusChanged', params);
+});
+
+// Filter and Sort Events
+window.univerAPI?.addEvent(window.univerAPI.Event.SheetBeforeRangeFilter, (params) => {
+    logService.log('===SheetBeforeRangeFilter', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.SheetRangeFiltered, (params) => {
+    logService.log('===SheetRangeFiltered', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.SheetBeforeRangeSort, (params) => {
+    logService.log('===SheetBeforeRangeSort', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.SheetRangeSorted, (params) => {
+    logService.log('===SheetRangeSorted', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.SheetBeforeRangeFilterClear, (params) => {
+    logService.log('===SheetBeforeRangeFilterClear', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.SheetRangeFilterCleared, (params) => {
+    logService.log('===SheetRangeFilterCleared', params);
+});
+
+// Image Events
+window.univerAPI?.addEvent(window.univerAPI.Event.BeforeOverGridImageInsert, (params) => {
+    logService.log('===BeforeOverGridImageInsert', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.OverGridImageInserted, (params) => {
+    logService.log('===OverGridImageInserted', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.BeforeOverGridImageChange, (params) => {
+    logService.log('===BeforeOverGridImageChange', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.OverGridImageChanged, (params) => {
+    logService.log('===OverGridImageChanged', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.BeforeOverGridImageRemove, (params) => {
+    logService.log('===BeforeOverGridImageRemove', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.OverGridImageRemoved, (params) => {
+    logService.log('===OverGridImageRemoved', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.BeforeOverGridImageSelect, (params) => {
+    logService.log('===BeforeOverGridImageSelect', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.OverGridImageSelected, (params) => {
+    logService.log('===OverGridImageSelected', params);
+});
+
+// Comment Events
+window.univerAPI?.addEvent(window.univerAPI.Event.BeforeCommentAdd, (params) => {
+    logService.log('===BeforeCommentAdd', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.CommentAdded, (params) => {
+    logService.log('===CommentAdded', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.BeforeCommentUpdate, (params) => {
+    logService.log('===BeforeCommentUpdate', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.CommentUpdated, (params) => {
+    logService.log('===CommentUpdated', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.BeforeCommentDeleted, (params) => {
+    logService.log('===BeforeCommentDeleted', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.CommentDeleted, (params) => {
+    logService.log('===CommentDeleted', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.BeforeCommentResolve, (params) => {
+    logService.log('===BeforeCommentResolve', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.CommentResolved, (params) => {
+    logService.log('===CommentResolved', params);
+});
+
+// Print Events
+window.univerAPI?.addEvent(window.univerAPI.Event.BeforeSheetPrintOpen, (params) => {
+    logService.log('===BeforeSheetPrintOpen', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.SheetPrintOpen, (params) => {
+    logService.log('===SheetPrintOpen', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.BeforeSheetPrintConfirm, (params) => {
+    logService.log('===BeforeSheetPrintConfirm', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.SheetPrintConfirmed, (params) => {
+    logService.log('===SheetPrintConfirmed', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.BeforeSheetPrintCanceled, (params) => {
+    logService.log('===BeforeSheetPrintCanceled', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.SheetPrintCanceled, (params) => {
+    logService.log('===SheetPrintCanceled', params);
+});
+
+// PivotTable Events
+window.univerAPI?.addEvent(window.univerAPI.Event.BeforePivotTableAdd, (params) => {
+    logService.log('===BeforePivotTableAdd', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.PivotTableAdded, (params) => {
+    logService.log('===PivotTableAdded', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.BeforePivotTableMove, (params) => {
+    logService.log('===BeforePivotTableMove', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.PivotTableMoved, (params) => {
+    logService.log('===PivotTableMoved', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.PivotTableRemoved, (params) => {
+    logService.log('===PivotTableRemoved', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.PivotTableRendered, (params) => {
+    logService.log('===PivotTableRendered', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.PivotTableFieldAdded, (params) => {
+    logService.log('===PivotTableFieldAdded', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.PivotTableFieldRemoved, (params) => {
+    logService.log('===PivotTableFieldRemoved', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.PivotTableFieldMoved, (params) => {
+    logService.log('===PivotTableFieldMoved', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.PivotTableFieldSettingChanged, (params) => {
+    logService.log('===PivotTableFieldSettingChanged', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.PivotTableFieldSortChanged, (params) => {
+    logService.log('===PivotTableFieldSortChanged', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.PivotTableFieldFilterChanged, (params) => {
+    logService.log('===PivotTableFieldFilterChanged', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.PivotTableFieldCollapseChanged, (params) => {
+    logService.log('===PivotTableFieldCollapseChanged', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.PivotTableValuePositionChanged, (params) => {
+    logService.log('===PivotTableValuePositionChanged', params);
+});
+
+// Row/Column Header Events
+window.univerAPI?.addEvent(window.univerAPI.Event.RowHeaderClick, (params) => {
+    logService.log('===RowHeaderClick', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.RowHeaderHover, (params) => {
+    logService.log('===RowHeaderHover', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.RowHeaderPointerDown, (params) => {
+    logService.log('===RowHeaderPointerDown', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.RowHeaderPointerUp, (params) => {
+    logService.log('===RowHeaderPointerUp', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.ColumnHeaderClick, (params) => {
+    logService.log('===ColumnHeaderClick', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.ColumnHeaderHover, (params) => {
+    logService.log('===ColumnHeaderHover', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.ColumnHeaderPointerDown, (params) => {
+    logService.log('===ColumnHeaderPointerDown', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.ColumnHeaderPointerUp, (params) => {
+    logService.log('===ColumnHeaderPointerUp', params);
+});
+
+// Link Events
+window.univerAPI?.addEvent(window.univerAPI.Event.BeforeSheetLinkAdd, (params) => {
+    logService.log('===BeforeSheetLinkAdd', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.BeforeSheetLinkUpdate, (params) => {
+    logService.log('===BeforeSheetLinkUpdate', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.BeforeSheetLinkCancel, (params) => {
+    logService.log('===BeforeSheetLinkCancel', params);
+});
+
+// Drag and Drop Events
+window.univerAPI?.addEvent(window.univerAPI.Event.DragOver, (params) => {
+    logService.log('===DragOver', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.Drop, (params) => {
+    logService.log('===Drop', params);
+});
+
+// Crosshair Events
+window.univerAPI?.addEvent(window.univerAPI.Event.CrosshairHighlightColorChanged, (params) => {
+    logService.log('===CrosshairHighlightColorChanged', params);
+});
+
+window.univerAPI?.addEvent(window.univerAPI.Event.CrosshairHighlightEnabledChanged, (params) => {
+    logService.log('===CrosshairHighlightEnabledChanged', params);
+});
 
 window.univerAPI?.addEvent(window.univerAPI.Event.BeforeSheetEditStart, (params) => {
     const { row, column } = params;

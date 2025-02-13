@@ -150,7 +150,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
 
     const highlightDoc = useDocHight('=');
     const highlightSheet = useSheetHighlight(unitId, subUnitId);
-    const highlight = useEvent((text: string, isNeedResetSelection: boolean = true, isEnd?: boolean, newSelections?: ITextRange[], forceReset?: boolean) => {
+    const highlight = useEvent((text: string, isNeedResetSelection: boolean = true, isEnd?: boolean, newSelections?: ITextRange[]) => {
         if (!editorRef.current) return;
         highTextRef.current = text;
         const sequenceNodes = getFormulaToken(text[0] === '=' ? text.slice(1) : '');

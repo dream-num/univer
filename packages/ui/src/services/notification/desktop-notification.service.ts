@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import { connectInjector, Disposable, toDisposable } from '@univerjs/core';
-import { type IDisposable, Inject, Injector } from '@univerjs/core';
-
+import type { IDisposable } from '@univerjs/core';
 import type { INotificationOptions } from '../../components/notification/Notification';
-import { notification, Notification } from '../../components/notification/Notification';
-import { BuiltInUIPart, IUIPartsService } from '../parts/parts.service';
+
 import type { INotificationService } from './notification.service';
+import { Disposable, Inject, Injector, toDisposable } from '@univerjs/core';
+import { notification, Notification } from '../../components/notification/Notification';
+import { connectInjector } from '../../utils/di';
+import { BuiltInUIPart, IUIPartsService } from '../parts/parts.service';
 
 export class DesktopNotificationService extends Disposable implements INotificationService {
     constructor(

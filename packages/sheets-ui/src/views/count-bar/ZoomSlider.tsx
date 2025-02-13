@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,10 @@ import {
     ICommandService,
     IUniverInstanceService,
     UniverInstanceType,
-    useDependency,
-    useObservable,
 } from '@univerjs/core';
 import { Slider } from '@univerjs/design';
 import { SetWorksheetActiveOperation } from '@univerjs/sheets';
+import { useDependency, useObservable } from '@univerjs/ui';
 import React, { useCallback, useEffect, useState } from 'react';
 
 import { SetZoomRatioCommand } from '../../commands/commands/set-zoom-ratio.command';

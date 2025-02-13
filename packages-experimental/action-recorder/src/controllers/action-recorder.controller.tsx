@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { connectInjector, Disposable, ICommandService, Inject, Injector } from '@univerjs/core';
+import { Disposable, ICommandService, Inject, Injector } from '@univerjs/core';
 import { RecordSingle } from '@univerjs/icons';
 import { AddWorksheetMergeAllCommand,
     AddWorksheetMergeCommand,
@@ -68,6 +68,7 @@ import { AutoFillCommand, RefillCommand, SetRangeBoldCommand,
 import {
     BuiltInUIPart,
     ComponentManager,
+    connectInjector,
     IMenuManagerService,
     IUIPartsService,
 } from '@univerjs/ui';

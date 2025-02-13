@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 
 import type { ICommandInfo, Workbook } from '@univerjs/core';
-import { BooleanNumber, DisposableCollection, ICommandService, IUniverInstanceService, UniverInstanceType, useDependency } from '@univerjs/core';
+import { BooleanNumber, DisposableCollection, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DropdownLegacy } from '@univerjs/design';
 import { CheckMarkSingle, ConvertSingle, EyelashSingle } from '@univerjs/icons';
 import {
@@ -29,7 +29,7 @@ import {
     SetWorksheetShowCommand,
     WorksheetProtectionRuleModel,
 } from '@univerjs/sheets';
-import { useObservable } from '@univerjs/ui';
+import { useDependency, useObservable } from '@univerjs/ui';
 import React, { useCallback, useEffect, useState } from 'react';
 
 import { ISheetBarService } from '../../../services/sheet-bar/sheet-bar.service';

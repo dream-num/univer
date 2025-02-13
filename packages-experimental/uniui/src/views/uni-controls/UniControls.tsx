@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,9 @@
  */
 
 import type { IProjectNode } from '../../services/unit-grid/unit-grid.service';
-import { useDependency } from '@univerjs/core';
 import { DropdownLegacy, Tooltip } from '@univerjs/design';
 import { CheckMarkSingle, FullscreenSingle, IncreaseSingle, ZoomReduceSingle } from '@univerjs/icons';
-import { ISidebarService } from '@univerjs/ui';
+import { ISidebarService, useDependency } from '@univerjs/ui';
 import {
     useReactFlow,
 } from '@xyflow/react';

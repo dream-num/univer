@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,10 @@
  */
 
 import type { DocumentDataModel } from '@univerjs/core';
-import { CustomRangeType, ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
+import { CustomRangeType, ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { MessageType, Tooltip } from '@univerjs/design';
 import { CopySingle, LinkSingle, UnlinkSingle, WriteSingle } from '@univerjs/icons';
-import { IMessageService, useObservable } from '@univerjs/ui';
+import { IMessageService, useDependency, useObservable } from '@univerjs/ui';
 import cs from 'clsx';
 import React from 'react';
 import { DeleteDocHyperLinkCommand } from '../../commands/commands/delete-link.command';

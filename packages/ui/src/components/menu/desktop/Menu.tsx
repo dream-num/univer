@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import type {
     IValueOption,
     MenuItemDefaultValueType,
 } from '../../../services/menu/menu';
-import { isRealNum, useDependency } from '@univerjs/core';
+import { isRealNum } from '@univerjs/core';
 import {
     Menu as DesignMenu,
     MenuItem as DesignMenuItem,
@@ -37,9 +37,9 @@ import { combineLatest, isObservable, of } from 'rxjs';
 import { ILayoutService } from '../../../services/layout/layout.service';
 import { MenuItemType } from '../../../services/menu/menu';
 import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
+import { useDependency, useObservable } from '../../../utils/di';
 import { CustomLabel } from '../../custom-label/CustomLabel';
 import { useScrollYOverContainer } from '../../hooks/layout';
-import { useObservable } from '../../hooks/observable';
 import styles from './index.module.less';
 
 // TODO: @jikkai disabled and hidden are not working

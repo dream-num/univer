@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import { LocaleService, useDependency } from '@univerjs/core';
+import type { IFontFamilyProps } from './interface';
+import { LocaleService } from '@univerjs/core';
 import React, { useMemo } from 'react';
 
+import { useDependency } from '../../utils/di';
 import styles from './index.module.less';
-import type { IFontFamilyProps } from './interface';
 
 export const FontFamily = (props: IFontFamilyProps) => {
     const { value } = props;

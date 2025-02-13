@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,10 @@
 
 import type { FormatType } from '@univerjs/sheets';
 
-import { ICommandService, LocaleService, Range, useDependency } from '@univerjs/core';
+import { ICommandService, LocaleService, Range } from '@univerjs/core';
 import { SheetsSelectionsService } from '@univerjs/sheets';
 import { getPatternPreview, getPatternType, SetNumfmtCommand, SheetsNumfmtCellContentController } from '@univerjs/sheets-numfmt';
-import { ILayoutService } from '@univerjs/ui';
-import React from 'react';
+import { ILayoutService, useDependency } from '@univerjs/ui';
 import { OpenNumfmtPanelOperator } from '../../../commands/operations/open.numfmt.panel.operation';
 
 import { MENU_OPTIONS } from '../../../controllers/menu';

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,12 @@
 
 import type { ISegmentedProps } from '@univerjs/design';
 import type { ByConditionsModel, ByValuesModel } from '../../services/sheets-filter-panel.service';
-import { ICommandService, LocaleService, useDependency } from '@univerjs/core';
+import { ICommandService, LocaleService } from '@univerjs/core';
 import { Button, Segmented } from '@univerjs/design';
 import { SheetsFilterService } from '@univerjs/sheets-filter';
-
 import { SheetsUIPart } from '@univerjs/sheets-ui';
-import { ComponentContainer, useComponentsOfPart, useObservable } from '@univerjs/ui';
+
+import { ComponentContainer, useComponentsOfPart, useDependency, useObservable } from '@univerjs/ui';
 import React, { useCallback, useMemo } from 'react';
 import { of } from 'rxjs';
 import { ChangeFilterByOperation, CloseFilterPanelOperation } from '../../commands/operations/sheets-filter.operation';

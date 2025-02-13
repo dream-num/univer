@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,13 @@
 
 import type { Editor } from '@univerjs/docs-ui';
 import type { ISequenceNode } from '@univerjs/engine-formula';
-import { CommandType, DisposableCollection, ICommandService, useDependency } from '@univerjs/core';
+import { CommandType, DisposableCollection, ICommandService } from '@univerjs/core';
 import { DeviceInputEventType } from '@univerjs/engine-render';
-import { IShortcutService, KeyCode, RectPopup } from '@univerjs/ui';
+import { IShortcutService, KeyCode, RectPopup, useDependency } from '@univerjs/ui';
 import React, { forwardRef, useEffect, useMemo, useRef, useState } from 'react';
-import { useEditorPostion } from '../hooks/useEditorPostion';
-import { useFormulaSearch } from '../hooks/useFormulaSearch';
-import { useStateRef } from '../hooks/useStateRef';
+import { useEditorPosition } from '../hooks/use-editor-position';
+import { useFormulaSearch } from '../hooks/use-formula-search';
+import { useStateRef } from '../hooks/use-state-ref';
 import styles from './index.module.less';
 
 interface ISearchFunctionProps {
@@ -48,7 +48,7 @@ function SearchFunctionFactory(props: ISearchFunctionProps, ref: any) {
     const ulRef = useRef<HTMLUListElement>(undefined);
     const [active, activeSet] = useState(0);
     const isEnableMouseEnterOrOut = useRef(false);
-    const [position$] = useEditorPostion(editorId, visible, [searchText, searchList]);
+    const [position$] = useEditorPosition(editorId, visible, [searchText, searchList]);
     const stateRef = useStateRef({ searchList, active });
 
     const handleFunctionSelect = (v: string) => {

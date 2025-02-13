@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,12 @@
 
 import type { ICommandInfo } from '@univerjs/core';
 import type { IBaseSheetBarProps } from '@univerjs/sheets-ui';
-import { ICommandService, useDependency } from '@univerjs/core';
+import { ICommandService } from '@univerjs/core';
 import { Tooltip } from '@univerjs/design';
 import { IncreaseSingle } from '@univerjs/icons';
 import { InsertSheetCommand, InsertSheetMutation, RemoveSheetMutation, SetTabColorMutation, SetWorksheetActiveOperation, SetWorksheetHideMutation, SetWorksheetNameMutation, SetWorksheetOrderMutation } from '@univerjs/sheets';
 import { useActiveWorkbook } from '@univerjs/sheets-ui';
+import { useDependency } from '@univerjs/ui';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import styles from './index.module.less';
 

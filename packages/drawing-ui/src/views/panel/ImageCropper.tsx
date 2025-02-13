@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,12 @@
  */
 
 import type { IDrawingParam } from '@univerjs/core';
-import { ICommandService, LocaleService, useDependency } from '@univerjs/core';
-import React, { useEffect, useRef, useState } from 'react';
-import { CreateCopySingle } from '@univerjs/icons';
+import { ICommandService, LocaleService } from '@univerjs/core';
 import { Button, Select } from '@univerjs/design';
+import { CreateCopySingle } from '@univerjs/icons';
+import { useDependency } from '@univerjs/ui';
 import clsx from 'clsx';
+import React, { useEffect, useRef, useState } from 'react';
 import { AutoImageCropOperation, CloseImageCropOperation, CropType } from '../../commands/operations/image-crop.operation';
 import styles from './index.module.less';
 

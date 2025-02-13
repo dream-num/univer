@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,9 @@ import type { Workbook } from '@univerjs/core';
 import type { IIconSet, IIconType } from '@univerjs/sheets-conditional-formatting';
 import type { IStyleEditorProps } from './type';
 
-import { get, IUniverInstanceService, LocaleService, set, Tools, UniverInstanceType, useDependency } from '@univerjs/core';
+import { get, IUniverInstanceService, LocaleService, set, Tools, UniverInstanceType } from '@univerjs/core';
 import { Checkbox, DropdownLegacy, InputNumber, Select } from '@univerjs/design';
 import { MoreDownSingle, SlashSingle } from '@univerjs/icons';
-
 import {
     CFNumberOperator,
     CFRuleType,
@@ -34,8 +33,9 @@ import {
     iconGroup,
     iconMap,
 } from '@univerjs/sheets-conditional-formatting';
+
 import { FormulaEditor } from '@univerjs/sheets-formula-ui';
-import { ILayoutService, useScrollYOverContainer, useSidebarClick } from '@univerjs/ui';
+import { ILayoutService, useDependency, useScrollYOverContainer, useSidebarClick } from '@univerjs/ui';
 
 import React, { forwardRef, useEffect, useMemo, useRef, useState } from 'react';
 

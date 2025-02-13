@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { useDependency } from '@univerjs/core';
-
 import { DropdownOverlay, DropdownProvider, DropdownTrigger } from '@univerjs/design';
+
 import { IDefinedNamesService } from '@univerjs/engine-formula';
 import { MoreDownSingle } from '@univerjs/icons';
+import { useDependency } from '@univerjs/ui';
 import clsx from 'clsx';
 import React, { useEffect, useState } from 'react';
 import { DefinedNameOverlay } from './DefinedNameOverlay';
@@ -48,8 +48,8 @@ export function DefinedName({ disable }: { disable: boolean }) {
         <div className={styles.definedName}>
             <input
                 className={clsx(`
-                  univer-border-none univer-absolute univer-w-full univer-h-full univer-appearance-none
-                  univer-box-border univer-px-1.5
+                  univer-absolute univer-box-border univer-h-full univer-w-full univer-appearance-none
+                  univer-border-none univer-px-1.5
                   focus:univer-outline-none
                 `, {
                     [styles.defineNameInputDisable]: disable,
@@ -63,12 +63,13 @@ export function DefinedName({ disable }: { disable: boolean }) {
                 <DropdownTrigger>
                     <a
                         className={clsx(`
-                          univer-flex univer-items-center univer-justify-center univer-px-1 univer-cursor-pointer
-                          univer-absolute univer-right-0 univer-h-full univer-transition-colors univer-duration-200
+                          univer-absolute univer-right-0 univer-flex univer-h-full univer-cursor-pointer
+                          univer-items-center univer-justify-center univer-px-1 univer-transition-colors
+                          univer-duration-200
                           hover:univer-bg-gray-100
                         `,
                         {
-                            'univer-text-gray-300 univer-cursor-not-allowed hover:univer-bg-transparent': disable,
+                            'univer-cursor-not-allowed univer-text-gray-300 hover:univer-bg-transparent': disable,
                         })}
                     >
                         <MoreDownSingle />

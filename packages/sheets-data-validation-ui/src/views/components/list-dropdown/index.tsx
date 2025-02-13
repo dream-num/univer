@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import type { ListMultipleValidator } from '@univerjs/sheets-data-validation';
 import type { IEditorBridgeServiceVisibleParam } from '@univerjs/sheets-ui';
 import type { IUniverSheetsDataValidationUIConfig } from '../../../controllers/config.schema';
 import type { IDropdownComponentProps } from '../../../services/dropdown-manager.service';
-import { BuildTextUtils, DataValidationRenderMode, DataValidationType, ICommandService, IConfigService, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
+import { BuildTextUtils, DataValidationRenderMode, DataValidationType, ICommandService, IConfigService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { DataValidationModel } from '@univerjs/data-validation';
 import { Scrollbar } from '@univerjs/design';
 import { RichTextEditingMutation } from '@univerjs/docs';
@@ -30,7 +30,7 @@ import { CheckMarkSingle } from '@univerjs/icons';
 import { RangeProtectionPermissionEditPoint, SetRangeValuesCommand, SheetPermissionCheckController, WorkbookEditablePermission, WorksheetEditPermission } from '@univerjs/sheets';
 import { deserializeListOptions, getDataValidationCellValue, serializeListOptions, SheetDataValidationModel } from '@univerjs/sheets-data-validation';
 import { IEditorBridgeService, SetCellEditVisibleOperation } from '@univerjs/sheets-ui';
-import { KeyCode, RectPopup, useObservable } from '@univerjs/ui';
+import { KeyCode, RectPopup, useDependency, useObservable } from '@univerjs/ui';
 import React, { useEffect, useMemo, useState } from 'react';
 import { debounceTime } from 'rxjs';
 import { OpenValidationPanelOperation } from '../../../commands/operations/data-validation.operation';

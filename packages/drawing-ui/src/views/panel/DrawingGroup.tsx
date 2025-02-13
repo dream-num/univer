@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
+import type { IDrawingParam } from '@univerjs/core';
 import type { IDrawingGroupUpdateParam } from '@univerjs/drawing';
-import { DrawingTypeEnum, type IDrawingParam, LocaleService, Tools, useDependency } from '@univerjs/core';
+import { DrawingTypeEnum, LocaleService, Tools } from '@univerjs/core';
 import { Button } from '@univerjs/design';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { getGroupState, IRenderManagerService, transformObjectOutOfGroup } from '@univerjs/engine-render';
 import { GroupSingle, UngroupSingle } from '@univerjs/icons';
+import { useDependency } from '@univerjs/ui';
 import clsx from 'clsx';
 import React, { useEffect, useState } from 'react';
 import { getUpdateParams } from '../../utils/get-update-params';

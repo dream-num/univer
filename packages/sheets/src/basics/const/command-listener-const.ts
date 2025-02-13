@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { ICommandInfo, IRange } from '@univerjs/core';
 import type { IMoveRangeMutationParams } from '../../commands/mutations/move-range.mutation';
 import type { IMoveColumnsMutationParams, IMoveRowsMutationParams } from '../../commands/mutations/move-rows-cols.mutation';
 import type { IReorderRangeMutationParams } from '../../commands/mutations/reorder-range.mutation';
@@ -32,7 +33,7 @@ import type {
 import type { IToggleGridlinesMutationParams } from '../../commands/mutations/toggle-gridlines.mutation';
 import type { ISetWorksheetActiveOperationParams } from '../../commands/operations/set-worksheet-active.operation';
 import type { IAddWorksheetMergeMutationParams, IInsertColMutationParams, IInsertRowMutationParams, IRemoveColMutationParams, IRemoveRowsMutationParams, IRemoveWorksheetMergeMutationParams, IWorksheetRangeThemeStyleMutationParams } from '../interfaces';
-import { type ICommandInfo, type IRange, ObjectMatrix, RANGE_TYPE } from '@univerjs/core';
+import { ObjectMatrix, RANGE_TYPE } from '@univerjs/core';
 import { AddWorksheetMergeMutation } from '../../commands/mutations/add-worksheet-merge.mutation';
 import { SetWorksheetRangeThemeStyleMutation } from '../../commands/mutations/add-worksheet-range-theme.mutation';
 import { DeleteWorksheetRangeThemeStyleMutation } from '../../commands/mutations/delete-worksheet-range-theme.mutation';
@@ -362,17 +363,31 @@ export function getValueChangedEffectedRange(commandInfo: ICommandInfo): { unitI
  * @returns {{ unitId: string; subUnitId: string; range: IRange }[]} Array of affected ranges
  */
 // eslint-disable-next-line max-lines-per-function
-export function getSkeletonChangedEffectedRange(commandInfo: ICommandInfo): { unitId: string; subUnitId: string; range: IRange }[] {
+export function getSkeletonChangedEffectedRange(commandInfo: ICommandInfo, columnCount: number): { unitId: string; subUnitId: string; range: IRange }[] {
     switch (commandInfo.id) {
         case SheetSkeletonChangeType.SET_WORKSHEET_ROW_HEIGHT:
-        case SheetSkeletonChangeType.SET_WORKSHEET_ROW_IS_AUTO_HEIGHT:
-        case SheetSkeletonChangeType.SET_WORKSHEET_ROW_AUTO_HEIGHT: {
+        case SheetSkeletonChangeType.SET_WORKSHEET_ROW_IS_AUTO_HEIGHT: {
             const params = commandInfo.params as ISetWorksheetRowHeightMutationParams;
             return params.ranges.map((range) => ({
                 unitId: params.unitId,
                 subUnitId: params.subUnitId,
                 range: {
                     ...range,
+                    rangeType: RANGE_TYPE.ROW,
+                },
+            }));
+        }
+        // Note: SET_WORKSHEET_ROW_AUTO_HEIGHT has no ranges
+        case SheetSkeletonChangeType.SET_WORKSHEET_ROW_AUTO_HEIGHT:{
+            const params = commandInfo.params as ISetWorksheetRowAutoHeightMutationParams;
+            return params.rowsAutoHeightInfo.map((rowAutoHeightInfo) => ({
+                unitId: params.unitId,
+                subUnitId: params.subUnitId,
+                range: {
+                    startRow: rowAutoHeightInfo.row,
+                    endRow: rowAutoHeightInfo.row,
+                    startColumn: 0,
+                    endColumn: columnCount - 1,
                     rangeType: RANGE_TYPE.ROW,
                 },
             }));

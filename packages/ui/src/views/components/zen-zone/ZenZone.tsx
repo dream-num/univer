@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import { useDependency, useObservable } from '@univerjs/core';
 import clsx from 'clsx';
 import React, { useEffect, useMemo, useState } from 'react';
 
 import { ComponentManager } from '../../../common/component-manager';
 import { IZenZoneService } from '../../../services/zen-zone/zen-zone.service';
+import { useDependency, useObservable } from '../../../utils/di';
 import styles from './index.module.less';
 
 export function ZenZone() {

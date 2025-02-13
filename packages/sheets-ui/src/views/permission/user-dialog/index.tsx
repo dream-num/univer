@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import { LocaleService, useDependency } from '@univerjs/core';
+import type { ICollaborator } from '@univerjs/protocol';
+import { LocaleService } from '@univerjs/core';
 import { Avatar, Button, Input } from '@univerjs/design';
 import { CheckMarkSingle } from '@univerjs/icons';
-import { type ICollaborator, UnitRole } from '@univerjs/protocol';
-import { IDialogService } from '@univerjs/ui';
+import { UnitRole } from '@univerjs/protocol';
+import { IDialogService, useDependency } from '@univerjs/ui';
 import clsx from 'clsx';
 import React, { useState } from 'react';
 import { UNIVER_SHEET_PERMISSION_USER_DIALOG_ID } from '../../../consts/permission';

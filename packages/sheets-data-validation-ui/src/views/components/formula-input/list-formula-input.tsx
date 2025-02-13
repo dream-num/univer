@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
+import type { IFormulaInputProps } from '@univerjs/data-validation';
 import type { ListValidator } from '@univerjs/sheets-data-validation';
-import { DataValidationType, isFormulaString, LocaleService, Tools, useDependency } from '@univerjs/core';
-import { DataValidationModel, DataValidatorRegistryService, type IFormulaInputProps } from '@univerjs/data-validation';
+import { DataValidationType, isFormulaString, LocaleService, Tools } from '@univerjs/core';
+import { DataValidationModel, DataValidatorRegistryService } from '@univerjs/data-validation';
 import { DraggableList, FormLayout, Input, Radio, RadioGroup, Select } from '@univerjs/design';
 import { DeleteSingle, IncreaseSingle, SequenceSingle } from '@univerjs/icons';
 import { DataValidationFormulaController, deserializeListOptions, serializeListOptions } from '@univerjs/sheets-data-validation';
 import { FormulaEditor } from '@univerjs/sheets-formula-ui';
+import { useDependency, useEvent, useObservable, useSidebarClick } from '@univerjs/ui';
 
-import { useEvent, useObservable, useSidebarClick } from '@univerjs/ui';
 import cs from 'clsx';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { debounceTime } from 'rxjs';

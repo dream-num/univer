@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,11 @@
  */
 
 import type { IRange, Workbook } from '@univerjs/core';
-import { Injector, isValidRange, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
+import { Injector, isValidRange, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { FormLayout, Input } from '@univerjs/design';
 import { deserializeRangeWithSheet, serializeRange } from '@univerjs/engine-formula';
 import { setEndForRange } from '@univerjs/sheets';
-import { ComponentManager } from '@univerjs/ui';
+import { ComponentManager, useDependency } from '@univerjs/ui';
 import React, { useMemo } from 'react';
 import { RANGE_SELECTOR_COMPONENT_KEY } from '../../../common/keys';
 import { checkRangeValid } from '../util';

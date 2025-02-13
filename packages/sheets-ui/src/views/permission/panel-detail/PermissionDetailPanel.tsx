@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,9 @@
 
 import type { IRange, Workbook } from '@univerjs/core';
 import type { IPermissionPanelRule } from '../../../services/permission/sheet-permission-panel.model';
-import { Injector, IUniverInstanceService, UniverInstanceType, useDependency } from '@univerjs/core';
+import { Injector, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { EditStateEnum, ViewStateEnum } from '@univerjs/sheets';
-import { ComponentContainer, ISidebarService, useComponentsOfPart, useSidebarClick } from '@univerjs/ui';
+import { ComponentContainer, ISidebarService, useComponentsOfPart, useDependency, useSidebarClick } from '@univerjs/ui';
 import React, { useEffect, useRef, useState } from 'react';
 import { UNIVER_SHEET_PERMISSION_USER_PART } from '../../../consts/permission';
 import { checkRangeValid, generateDefaultRule, generateRuleByUnitType } from '../util';

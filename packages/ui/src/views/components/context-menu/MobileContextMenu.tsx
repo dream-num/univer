@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import { ICommandService, useDependency } from '@univerjs/core';
-import React, { useEffect, useRef, useState } from 'react';
-import { Popup } from '@univerjs/design';
 import type { IMouseEvent } from '@univerjs/engine-render';
-import { IContextMenuService } from '../../../services/contextmenu/contextmenu.service';
+import { ICommandService } from '@univerjs/core';
+import { Popup } from '@univerjs/design';
+import React, { useEffect, useRef, useState } from 'react';
 import { MobileMenu } from '../../../components/menu/mobile/MobileMenu';
+import { IContextMenuService } from '../../../services/contextmenu/contextmenu.service';
+import { useDependency } from '../../../utils/di';
 
 export function MobileContextMenu() {
     const [visible, setVisible] = useState(false);

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ export {
     getTransformCoord,
 } from './controllers/utils/component-tools';
 export { matchedSelectionByRowColIndex as checkInHeaderRanges } from './controllers/utils/selections-tools';
-export { useHighlightRange } from './hooks/useHighlightRange';
+export { useHighlightRange } from './hooks/use-highlight-range';
 export { UniverSheetsMobileUIPlugin } from './mobile-plugin';
 export { UniverSheetsUIPlugin } from './plugin';
 export { AutoFillService, IAutoFillService } from './services/auto-fill/auto-fill.service';
@@ -101,8 +101,8 @@ export { type IUniverSheetsUIConfig } from './controllers/config.schema';
 export { getCellRealRange } from './common/utils';
 export { FONT_FAMILY_COMPONENT, FONT_FAMILY_ITEM_COMPONENT } from './components/font-family/interface';
 export { FONT_SIZE_COMPONENT } from './components/font-size/interface';
-export { EMBEDDING_FORMULA_EDITOR, isEmbeddingFormulaEditor } from './controllers/editor/utils/isEmbeddingFormulaEditor';
-export { isRangeSelector, RANGE_SELECTOR_SYMBOLS } from './controllers/editor/utils/isRangeSelector';
+export { EMBEDDING_FORMULA_EDITOR, isEmbeddingFormulaEditor } from './controllers/editor/utils/is-embedding-formula-editor';
+export { isRangeSelector, RANGE_SELECTOR_SYMBOLS } from './controllers/editor/utils/is-range-selector';
 export { menuSchema as SheetsUIMenuSchema } from './controllers/menu.schema';
 export { SheetCellEditorResizeService } from './services/editor/cell-editor-resize.service';
 export { FormatPainterStatus, IFormatPainterService } from './services/format-painter/format-painter.service';

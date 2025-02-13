@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,9 @@
  */
 
 import type { SlideDataModel } from '@univerjs/core';
-import { connectInjector, ICommandService, Inject, Injector, IUniverInstanceService, UniverInstanceType, useDependency } from '@univerjs/core';
+import { ICommandService, Inject, Injector, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { SHAPE_MENU_ID, SlideAddTextCommand, SlideEditorContainer, SLIDES_IMAGE_MENU_ID, SlidesUIController } from '@univerjs/slides-ui';
-import { BuiltInUIPart, ComponentManager, IMenuManagerService, IShortcutService, IUIPartsService, useObservable } from '@univerjs/ui';
+import { BuiltInUIPart, ComponentManager, connectInjector, IMenuManagerService, IShortcutService, IUIPartsService, useDependency, useObservable } from '@univerjs/ui';
 import { BuiltinUniToolbarItemId, UniToolbarService, UniUIPart } from '@univerjs/uniui';
 import React from 'react';
 import { UniSlideSideBar } from '../views/UniSlideSideBar';

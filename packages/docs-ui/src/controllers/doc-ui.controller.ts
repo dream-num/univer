@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 import type { IUniverDocsUIConfig } from './config.schema';
 import {
-    connectInjector,
     Disposable,
     ICommandService,
     IConfigService,
@@ -28,7 +27,7 @@ import {
 
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { TodoList } from '@univerjs/icons';
-import { BuiltInUIPart, ComponentManager, ILayoutService, IMenuManagerService, IShortcutService, IUIPartsService } from '@univerjs/ui';
+import { BuiltInUIPart, ComponentManager, connectInjector, ILayoutService, IMenuManagerService, IShortcutService, IUIPartsService } from '@univerjs/ui';
 import { CoreHeaderFooterCommand, OpenHeaderFooterPanelCommand } from '../commands/commands/doc-header-footer.command';
 import { SidebarDocHeaderFooterPanelOperation } from '../commands/operations/doc-header-footer-panel.operation';
 import { COLOR_PICKER_COMPONENT, ColorPicker } from '../components/color-picker';

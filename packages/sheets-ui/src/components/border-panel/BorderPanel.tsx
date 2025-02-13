@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,18 @@
  * limitations under the License.
  */
 
-import { BorderStyleTypes, useDependency } from '@univerjs/core';
+import type { IBorderInfo } from '@univerjs/sheets';
+import type { IBorderPanelProps } from './interface';
+import { BorderStyleTypes } from '@univerjs/core';
 import { ColorPicker, DropdownLegacy, Menu, MenuItem } from '@univerjs/design';
 import { MoreDownSingle, PaintBucket } from '@univerjs/icons';
-import { BorderStyleManagerService, type IBorderInfo } from '@univerjs/sheets';
-import { ComponentManager } from '@univerjs/ui';
-import React from 'react';
+import { BorderStyleManagerService } from '@univerjs/sheets';
+import { ComponentManager, useDependency } from '@univerjs/ui';
 
+import React from 'react';
 import { BorderLine } from './border-line/BorderLine';
 import styles from './index.module.less';
-import { BORDER_LINE_CHILDREN, type IBorderPanelProps } from './interface';
+import { BORDER_LINE_CHILDREN } from './interface';
 
 const BORDER_SIZE_CHILDREN = [
     {

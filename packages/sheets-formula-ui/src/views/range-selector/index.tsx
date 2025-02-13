@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,42 +18,42 @@ import type { IDisposable, IUnitRangeName } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { Editor } from '@univerjs/docs-ui';
 import type { ReactNode } from 'react';
-import type { IRefSelection } from './hooks/useHighlight';
-import { BuildTextUtils, createInternalEditorID, generateRandomId, ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency, useObservable } from '@univerjs/core';
+import type { IRefSelection } from './hooks/use-highlight';
+import { BuildTextUtils, createInternalEditorID, generateRandomId, ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { Button, Dialog, Input, Tooltip } from '@univerjs/design';
 import { RichTextEditingMutation } from '@univerjs/docs';
 import { DocBackScrollRenderController, IEditorService } from '@univerjs/docs-ui';
 import { deserializeRangeWithSheet, LexerTreeBuilder, matchToken, sequenceNodeType } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { CloseSingle, DeleteSingle, IncreaseSingle, SelectRangeSingle } from '@univerjs/icons';
-
 import { IDescriptionService } from '@univerjs/sheets-formula';
 import { RANGE_SELECTOR_SYMBOLS, SetCellEditVisibleOperation } from '@univerjs/sheets-ui';
-import { useEvent } from '@univerjs/ui';
+
+import { useDependency, useEvent, useObservable } from '@univerjs/ui';
 import cl from 'clsx';
 
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { noop, throttleTime } from 'rxjs';
 import { RefSelectionsRenderService } from '../../services/render-services/ref-selections.render-service';
-import { useEditorInput } from './hooks/useEditorInput';
-import { useFirstHighlightDoc } from './hooks/useFirstHighlightDoc';
-import { useFocus } from './hooks/useFocus';
-import { useFormulaToken } from './hooks/useFormulaToken';
-import { buildTextRuns, useColor, useDocHight, useSheetHighlight } from './hooks/useHighlight';
-import { useLeftAndRightArrow } from './hooks/useLeftAndRightArrow';
-import { useOnlyOneRange } from './hooks/useOnlyOneRange';
-import { useRefactorEffect } from './hooks/useRefactorEffect';
-import { useRefocus } from './hooks/useRefocus';
-import { useResetSelection } from './hooks/useResetSelection';
-import { useResize } from './hooks/useResize';
-import { useSheetSelectionChange } from './hooks/useSheetSelectionChange';
-import { useSwitchSheet } from './hooks/useSwitchSheet';
-import { useVerify } from './hooks/useVerify';
+import { useEditorInput } from './hooks/use-editor-input';
+import { useFirstHighlightDoc } from './hooks/use-first-highlight-doc';
+import { useFocus } from './hooks/use-focus';
+import { useFormulaToken } from './hooks/use-formula-token';
+import { buildTextRuns, useColor, useDocHight, useSheetHighlight } from './hooks/use-highlight';
+import { useLeftAndRightArrow } from './hooks/use-left-and-right-arrow';
+import { useOnlyOneRange } from './hooks/use-only-one-range';
+import { useRefactorEffect } from './hooks/use-refactor-effect';
+import { useRefocus } from './hooks/use-refocus';
+import { useResetSelection } from './hooks/use-reset-selection';
+import { useResize } from './hooks/use-resize';
+import { useSheetSelectionChange } from './hooks/use-sheet-selection-change';
+import { useSwitchSheet } from './hooks/use-switch-sheet';
+import { useVerify } from './hooks/use-verify';
 import styles from './index.module.less';
-import { rangePreProcess } from './utils/rangePreProcess';
-import { sequenceNodeToText } from './utils/sequenceNodeToText';
-import { unitRangesToText } from './utils/unitRangesToText';
-import { verifyRange } from './utils/verifyRange';
+import { rangePreProcess } from './utils/range-pre-process';
+import { sequenceNodeToText } from './utils/sequence-node-to-text';
+import { unitRangesToText } from './utils/unit-ranges-to-text';
+import { verifyRange } from './utils/verify-range';
 
 export interface IRangeSelectorProps {
     initValue: string | IUnitRangeName[];

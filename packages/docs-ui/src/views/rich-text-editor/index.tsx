@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,21 @@
  * limitations under the License.
  */
 
+import type { IDocumentData } from '@univerjs/core';
 import type { Editor } from '../../services/editor/editor';
 import type { IKeyboardEventConfig } from './hooks';
-import { BuildTextUtils, createInternalEditorID, generateRandomId, type IDocumentData, useDependency, useObservable } from '@univerjs/core';
+import { BuildTextUtils, createInternalEditorID, generateRandomId } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { useEvent } from '@univerjs/ui';
+import { useDependency, useEvent, useObservable } from '@univerjs/ui';
 import clsx from 'clsx';
 import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useState } from 'react';
 import { IEditorService } from '../../services/editor/editor-manager.service';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
 import { useKeyboardEvent, useResize } from './hooks';
-import { useEditor } from './hooks/useEditor';
-import { useLeftAndRightArrow } from './hooks/useLeftAndRightArrow';
-import { useOnChange } from './hooks/useOnChange';
+import { useEditor } from './hooks/use-editor';
+import { useLeftAndRightArrow } from './hooks/use-left-and-right-arrow';
+import { useOnChange } from './hooks/use-on-change';
 import styles from './index.module.less';
 
 export interface IRichTextEditorProps {

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
+import type { ISidebarMethodOptions } from '@univerjs/ui';
 import { CloseSingle } from '@univerjs/icons';
-import { useDependency } from '@univerjs/core';
+import { CustomLabel, ILeftSidebarService, ISidebarService, useDependency, useObservable } from '@univerjs/ui';
 import clsx from 'clsx';
 import React, { useEffect, useMemo, useRef } from 'react';
-import type { ISidebarMethodOptions } from '@univerjs/ui';
-import { CustomLabel, ILeftSidebarService, ISidebarService, useObservable } from '@univerjs/ui';
 import styles from './index.module.less';
 
 export interface IUniSidebarProps {

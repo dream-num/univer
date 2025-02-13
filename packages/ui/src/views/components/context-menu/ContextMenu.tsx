@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-import { ICommandService, useDependency, useInjector } from '@univerjs/core';
+import type { IMouseEvent } from '@univerjs/engine-render';
+import { ICommandService } from '@univerjs/core';
 import { Popup } from '@univerjs/design';
 import React, { useEffect, useRef, useState } from 'react';
-import type { IMouseEvent } from '@univerjs/engine-render';
-
 import { Menu } from '../../../components/menu/desktop/Menu';
+
 import { IContextMenuService } from '../../../services/contextmenu/contextmenu.service';
 import { ILayoutService } from '../../../services/layout/layout.service';
+import { useDependency, useInjector } from '../../../utils/di';
 
 export function DesktopContextMenu() {
     const contentRef = useRef<HTMLDivElement>(null);

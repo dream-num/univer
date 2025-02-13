@@ -35,6 +35,10 @@ export class SheetRangeThemeService extends Disposable {
         this._sheetRangeThemeModel.registerRangeThemeStyle(unitId, rangeThemeStyle);
     }
 
+    removeRangeThemeRule(themeName: string, rangeInfo: IRangeThemeRangeInfo): void {
+        this._sheetRangeThemeModel.removeRangeThemeRule(themeName, rangeInfo);
+    }
+
     /**
      * Get custom register themes name list
      * @returns {string[]} The list of custom register themes name.

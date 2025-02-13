@@ -330,11 +330,17 @@ window.univerAPI?.addEvent(window.univerAPI.Event.ClipboardPasted, (params) => {
     logService.log('===ClipboardPasted', params);
 });
 
-// UI and Visualization Events
+// checked
+window.univerAPI?.addEvent(window.univerAPI.Event.BeforeGridlineEnableChange, (params) => {
+    logService.log('===BeforeGridlineEnableChange', params);
+});
+
+// checked
 window.univerAPI?.addEvent(window.univerAPI.Event.BeforeGridlineColorChange, (params) => {
     logService.log('===BeforeGridlineColorChange', params);
 });
 
+// checked
 window.univerAPI?.addEvent(window.univerAPI.Event.GridlineChanged, (params) => {
     logService.log('===GridlineChanged', params);
 });

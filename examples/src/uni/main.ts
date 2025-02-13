@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { FUniver, Injector, LocaleType, LogLevel, Univer, UniverInstanceType } from '@univerjs/core';
+import { Injector, LocaleType, LogLevel, Univer, UniverInstanceType } from '@univerjs/core';
+import { FUniver } from '@univerjs/core/facade';
 import { UniverDebuggerPlugin } from '@univerjs/debugger';
 import { defaultTheme } from '@univerjs/design';
 import { UniverDocsPlugin } from '@univerjs/docs';

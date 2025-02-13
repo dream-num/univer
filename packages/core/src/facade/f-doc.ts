@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel } from '../docs';
-import { Inject, Injector } from '../common/di';
+import type { DocumentDataModel } from '@univerjs/core';
+import { Inject, Injector } from '@univerjs/core';
 import { FBaseInitialable } from './f-base';
 
 /**

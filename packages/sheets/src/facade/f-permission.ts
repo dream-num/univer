@@ -18,7 +18,8 @@ import type { RangePermissionPointConstructor, WorkbookPermissionPointConstructo
 import type { ISetWorksheetPermissionPointsMutationParams } from '@univerjs/sheets';
 import type { Observable } from 'rxjs';
 import type { FRange } from './f-range';
-import { FBase, generateRandomId, IAuthzIoService, ICommandService, Inject, Injector, IPermissionService, Rectangle } from '@univerjs/core';
+import { generateRandomId, IAuthzIoService, ICommandService, Inject, Injector, IPermissionService, Rectangle } from '@univerjs/core';
+import { FBase } from '@univerjs/core/facade';
 import { AddRangeProtectionMutation, AddWorksheetProtectionMutation, DeleteRangeProtectionMutation, DeleteWorksheetProtectionMutation, getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel, PermissionPointsDefinitions, RangeProtectionRuleModel, SetRangeProtectionMutation, SetWorksheetPermissionPointsMutation, UnitObject, WorkbookEditablePermission, WorksheetEditPermission, WorksheetProtectionPointModel, WorksheetProtectionRuleModel, WorksheetViewPermission } from '@univerjs/sheets';
 
 /**

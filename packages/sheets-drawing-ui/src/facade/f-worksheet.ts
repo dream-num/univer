@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import type { IDisposable, IFBlobSource, Nullable } from '@univerjs/core';
+import type { IDisposable, Nullable } from '@univerjs/core';
+import type { IFBlobSource } from '@univerjs/core/facade';
 import type { ISheetImage } from '@univerjs/sheets-drawing';
 import type { ICanvasFloatDom, IDOMAnchor } from '@univerjs/sheets-drawing-ui';
 import type { IFComponentKey } from '@univerjs/sheets-ui/facade';

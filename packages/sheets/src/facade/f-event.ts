@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import type { IEventBase, IWorkbookData, IWorksheetData, UniverInstanceType } from '@univerjs/core';
+import type { IWorkbookData, IWorksheetData, UniverInstanceType } from '@univerjs/core';
+import type { IEventBase } from '@univerjs/core/facade';
 import type { CommandListenerValueChange } from '@univerjs/sheets';
 import type { FRange } from './f-range';
 import type { FWorkbook } from './f-workbook';
 import type { FWorksheet } from './f-worksheet';
-import { FEventName } from '@univerjs/core';
+import { FEventName } from '@univerjs/core/facade';
 
 /**
  * Interface for sheet-related events
@@ -663,7 +664,7 @@ export class FSheetEventName extends FEventName implements IFSheetEventMixin {
 }
 
 FEventName.extend(FSheetEventName);
-declare module '@univerjs/core' {
+declare module '@univerjs/core/facade' {
     // eslint-disable-next-line ts/naming-convention
     interface FEventName extends IFSheetEventMixin { }
     interface IEventParamConfig extends ISheetEventParamConfig { }

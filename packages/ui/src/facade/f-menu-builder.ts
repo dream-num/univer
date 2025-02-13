@@ -16,7 +16,8 @@
 
 import type { IAccessor } from '@univerjs/core';
 import type { IMenuButtonItem, IMenuItem, MenuSchemaType } from '@univerjs/ui';
-import { CommandType, FBase, ICommandService, Inject, Injector, Tools } from '@univerjs/core';
+import { CommandType, ICommandService, Inject, Injector, Tools } from '@univerjs/core';
+import { FBase } from '@univerjs/core/facade';
 import { IMenuManagerService, MenuItemType, MenuManagerPosition, RibbonPosition, RibbonStartGroup } from '@univerjs/ui';
 
 /**

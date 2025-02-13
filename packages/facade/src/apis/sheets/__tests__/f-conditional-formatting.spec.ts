@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import type { FUniver, Injector, Univer } from '@univerjs/core';
+import type { Injector, Univer } from '@univerjs/core';
+import type { FUniver } from '@univerjs/core/facade';
 import { ICommandService } from '@univerjs/core/services/command/command.service.js';
 import { RemoveOtherFormulaMutation } from '@univerjs/engine-formula';
 import { SetSelectionsOperation } from '@univerjs/sheets';

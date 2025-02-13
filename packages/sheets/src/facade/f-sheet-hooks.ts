@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { FBase, Inject, Injector } from '@univerjs/core';
+import { Inject, Injector } from '@univerjs/core';
+import { FBase } from '@univerjs/core/facade';
 
 /**
  * @hideconstructor

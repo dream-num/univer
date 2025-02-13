@@ -17,7 +17,8 @@
 import type { Injector } from '@univerjs/core';
 import type { IAddHyperLinkCommandParams, ICancelHyperLinkCommandParams, IUpdateHyperLinkCommandParams } from '@univerjs/sheets-hyper-link';
 import type { IBeforeSheetLinkAddEvent, IBeforeSheetLinkCancelEvent, IBeforeSheetLinkUpdateEvent } from './f-event';
-import { CanceledError, FUniver, ICommandService } from '@univerjs/core';
+import { CanceledError, ICommandService } from '@univerjs/core';
+import { FUniver } from '@univerjs/core/facade';
 import { AddHyperLinkCommand, CancelHyperLinkCommand, UpdateHyperLinkCommand } from '@univerjs/sheets-hyper-link';
 
 export class FSheetLinkUniver extends FUniver {

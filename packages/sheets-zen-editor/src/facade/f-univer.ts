@@ -18,7 +18,8 @@ import type { DocumentDataModel, Injector } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IEditorBridgeServiceVisibleParam } from '@univerjs/sheets-ui';
 import type { IBeforeSheetEditEndEventParams, IBeforeSheetEditStartEventParams, ISheetEditChangingEventParams, ISheetEditEndedEventParams, ISheetEditStartedEventParams } from '@univerjs/sheets-ui/facade';
-import { CanceledError, DOCS_ZEN_EDITOR_UNIT_ID_KEY, FUniver, ICommandService, IUniverInstanceService, RichTextValue } from '@univerjs/core';
+import { CanceledError, DOCS_ZEN_EDITOR_UNIT_ID_KEY, ICommandService, IUniverInstanceService, RichTextValue } from '@univerjs/core';
+import { FUniver } from '@univerjs/core/facade';
 import { RichTextEditingMutation } from '@univerjs/docs';
 
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
@@ -207,7 +208,7 @@ export class FUniverSheetsZenEditorMixin extends FUniver implements IFUniverShee
 
 FUniver.extend(FUniverSheetsZenEditorMixin);
 
-declare module '@univerjs/core' {
+declare module '@univerjs/core/facade' {
     // eslint-disable-next-line ts/naming-convention
     interface FUniver extends IFUniverSheetsZenEditorMixin { }
 }

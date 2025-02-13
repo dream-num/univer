@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import type { IEventBase, Injector } from '@univerjs/core';
+import type { Injector } from '@univerjs/core';
+import type { IEventBase } from '@univerjs/core/facade';
 import type { ISetCrosshairHighlightColorOperationParams } from '@univerjs/sheets-crosshair-highlight';
 import type { FWorkbook, FWorksheet } from '@univerjs/sheets/facade';
-import { FUniver, ICommandService } from '@univerjs/core';
+import { ICommandService } from '@univerjs/core';
+import { FUniver } from '@univerjs/core/facade';
 import { CROSSHAIR_HIGHLIGHT_COLORS, DisableCrosshairHighlightOperation, EnableCrosshairHighlightOperation, SetCrosshairHighlightColorOperation, SheetsCrosshairHighlightService } from '@univerjs/sheets-crosshair-highlight';
 
 /**
@@ -225,7 +227,7 @@ export class FUniverCrosshairHighlightMixin extends FUniver implements IFUniverC
 }
 
 FUniver.extend(FUniverCrosshairHighlightMixin);
-declare module '@univerjs/core' {
+declare module '@univerjs/core/facade' {
     // eslint-disable-next-line ts/naming-convention
     interface FUniver extends IFUniverCrosshairHighlightMixin {}
 

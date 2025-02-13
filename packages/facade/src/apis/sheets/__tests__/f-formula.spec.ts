@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import type { FUniver, ICellData, Injector, IStyleData, Nullable } from '@univerjs/core';
+import type { ICellData, Injector, IStyleData, Nullable } from '@univerjs/core';
+import type { FUniver } from '@univerjs/core/facade';
 import type { IUniverSheetsFormulaBaseConfig } from '@univerjs/sheets-formula';
 import { ICommandService, IConfigService, IUniverInstanceService } from '@univerjs/core';
 

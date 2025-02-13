@@ -235,6 +235,9 @@ export const useSheetSelectionChange = (
                         control.selectionScaling$
                             .subscribe((newRange) => {
                                 const selections = refSelectionsRenderService.getSelectionDataWithStyle().map((i) => i.rangeWithCoord);
+                                const current = selections[index];
+                                newRange.sheetId = current.sheetId;
+                                newRange.unitId = current.unitId;
                                 selections[index] = newRange;
                                 onSelectionsChange(selections, false);
                             })
@@ -244,6 +247,9 @@ export const useSheetSelectionChange = (
                         control.selectionMoving$
                             .subscribe((newRange) => {
                                 const selections = refSelectionsRenderService.getSelectionDataWithStyle().map((i) => i.rangeWithCoord);
+                                const current = selections[index];
+                                newRange.sheetId = current.sheetId;
+                                newRange.unitId = current.unitId;
                                 selections[index] = newRange;
                                 onSelectionsChange(selections, true);
                             })

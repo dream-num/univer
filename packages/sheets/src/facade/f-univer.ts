@@ -42,12 +42,14 @@ export interface IFUniverSheetsMixin {
      * @returns {FWorkbook} FWorkbook API instance.
      * @example
      * ```ts
-     * univerAPI.createWorkbook({ id: 'Sheet1', name: 'Sheet1' });
+     * const fWorkbook = univerAPI.createWorkbook({ id: 'Sheet1', name: 'Sheet1' });
+     * console.log(fWorkbook);
      * ```
      *
      * Add you can make the workbook not as the active workbook by setting options:
      * ```ts
-     * univerAPI.createWorkbook({ id: 'Sheet1', name: 'Sheet1' }, { makeCurrent: false });
+     * const fWorkbook = univerAPI.createWorkbook({ id: 'Sheet1', name: 'Sheet1' }, { makeCurrent: false });
+     * console.log(fWorkbook);
      * ```
      */
     createWorkbook(data: Partial<IWorkbookData>, options?: ICreateUnitOptions): FWorkbook;
@@ -57,7 +59,8 @@ export interface IFUniverSheetsMixin {
      * @returns {FWorkbook | null} The currently focused Univer spreadsheet.
      * @example
      * ```ts
-     * univerAPI.getActiveWorkbook();
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * console.log(fWorkbook);
      * ```
      */
     getActiveWorkbook(): FWorkbook | null;
@@ -71,10 +74,20 @@ export interface IFUniverSheetsMixin {
      * Get the spreadsheet API handler by the spreadsheet id.
      * @param {string} id The spreadsheet id.
      * @returns {FWorkbook | null} The spreadsheet API instance.
+     *
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getUniverSheet('Sheet1');
+     * console.log(fWorkbook);
+     *
+     * const fWorkbook = univerAPI.getWorkbook('Sheet1');
+     * console.log(fWorkbook);
+     * ```
      */
     getUniverSheet(id: string): FWorkbook | null;
 
     getWorkbook(id: string): FWorkbook | null;
+
     /**
      * Get the PermissionInstance.
      * @deprecated This function is deprecated and will be removed in version 0.6.0. Please use the function with the same name on the `FWorkbook` instance instead.
@@ -91,7 +104,8 @@ export interface IFUniverSheetsMixin {
      * @returns {FDefinedNameBuilder} - The defined name builder.
      * @example
      * ```ts
-     * univerAPI.newDefinedName();
+     * const definedNameBuilder = univerAPI.newDefinedName();
+     * console.log(definedNameBuilder);
      * ```
      */
     newDefinedName(): FDefinedNameBuilder;
@@ -103,7 +117,12 @@ export interface IFUniverSheetsMixin {
      * @returns {Nullable<{ workbook: FWorkbook; worksheet: FWorksheet }>} - The target of the sheet.
      * @example
      * ```ts
-     * univerAPI.getSheetTarget('unitId', 'subUnitId');
+     * const unitId = 'workbook-01';
+     * const subUnitId = 'sheet-0001';
+     * const target = univerAPI.getSheetTarget(unitId, subUnitId);
+     * if (!target) return;
+     * const { workbook, worksheet } = target;
+     * console.log(workbook, worksheet);
      * ```
      */
     getSheetTarget(unitId: string, subUnitId: string): Nullable<{ workbook: FWorkbook; worksheet: FWorksheet }>;
@@ -118,6 +137,7 @@ export interface IFUniverSheetsMixin {
      *   const target = univerAPI.getCommandSheetTarget(commandInfo);
      *   if (!target) return;
      *   const { workbook, worksheet } = target;
+     *   console.log(workbook, worksheet);
      * });
      * ```
      */
@@ -131,6 +151,7 @@ export interface IFUniverSheetsMixin {
      * const target = univerAPI.getActiveSheet();
      * if (!target) return;
      * const { workbook, worksheet } = target;
+     * console.log(workbook, worksheet);
      * ```
      */
     getActiveSheet(): Nullable<{ workbook: FWorkbook; worksheet: FWorksheet }>;

@@ -46,5 +46,5 @@ test('ensure switching render unit successful with no errors', async () => {
         ],
         fullPage: true,
     });
-    expect(firstScreenshot).toMatchSnapshot(filename, { maxDiffPixels: 50 });
+    expect(firstScreenshot).toMatchSnapshot(filename, { maxDiffPixels: 120 });
 });

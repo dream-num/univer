@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
+import type { IEventBase } from '@univerjs/core/facade';
 import type { ICellLinkContent, ISheetHyperLink } from '@univerjs/sheets-hyper-link';
 import type { FWorkbook, FWorksheet } from '@univerjs/sheets/facade';
-import { FEventName, type IEventBase } from '@univerjs/core';
+import { FEventName } from '@univerjs/core/facade';
 
 /**
  * @ignore
@@ -126,7 +127,7 @@ export interface ISheetLinkEventConfig {
 
 FEventName.extend(FSheetLinkEvent);
 
-declare module '@univerjs/core' {
+declare module '@univerjs/core/facade' {
     // eslint-disable-next-line ts/naming-convention
     interface FEventName extends IFSheetLinkEvent {
     }

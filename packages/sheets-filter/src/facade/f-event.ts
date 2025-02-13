@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IEventBase, Injector } from '@univerjs/core';
+import type { ICommandInfo, Injector } from '@univerjs/core';
+import type { IEventBase } from '@univerjs/core/facade';
 import type { ISetSheetsFilterCriteriaCommandParams } from '@univerjs/sheets-filter';
 import type { FWorkbook, FWorksheet } from '@univerjs/sheets/facade';
-import { FEventName, FUniver, ICommandService } from '@univerjs/core';
+import { ICommandService } from '@univerjs/core';
+import { FEventName, FUniver } from '@univerjs/core/facade';
 import { ClearSheetsFilterCriteriaCommand, SetSheetsFilterCriteriaCommand } from '@univerjs/sheets-filter';
 import { FSheetEventName } from '@univerjs/sheets/facade';
 
@@ -87,7 +89,7 @@ export class FSheetFilterEventName extends FEventName implements IFSheetFilterEv
 }
 
 FEventName.extend(FSheetFilterEventName);
-declare module '@univerjs/core' {
+declare module '@univerjs/core/facade' {
     // eslint-disable-next-line ts/naming-convention
     interface FEventName extends IFSheetFilterEventMixin { }
 }
@@ -125,7 +127,7 @@ interface ISheetRangeFilterEventParamConfig {
 }
 
 FEventName.extend(FSheetEventName);
-declare module '@univerjs/core' {
+declare module '@univerjs/core/facade' {
     // eslint-disable-next-line ts/naming-convention
     interface FEventName extends IFSheetFilterEventMixin { }
     interface IEventParamConfig extends ISheetRangeFilterEventParamConfig { }

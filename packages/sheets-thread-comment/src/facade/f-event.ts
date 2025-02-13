@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import type { IEventBase, RichTextValue } from '@univerjs/core';
+import type { RichTextValue } from '@univerjs/core';
+import type { IEventBase } from '@univerjs/core/facade';
 import type { FWorkbook, FWorksheet } from '@univerjs/sheets/facade';
 import type { FTheadCommentItem, FThreadComment } from './f-thread-comment';
-import { FEventName } from '@univerjs/core';
+import { FEventName } from '@univerjs/core/facade';
 
 /**
  * @ignore
@@ -324,7 +325,7 @@ export interface ISheetCommentEventConfig {
     CommentResolved: ISheetCommentResolveEvent;
 }
 
-declare module '@univerjs/core' {
+declare module '@univerjs/core/facade' {
     // eslint-disable-next-line ts/naming-convention
     interface FEventName extends ICommentEventMixin {
     }

@@ -14,24 +14,10 @@
  * limitations under the License.
  */
 
-import { FUniver } from '@univerjs/core/facade';
-import { FFormula } from './f-formula';
-
-/**
- * @ignore
- */
-export interface IFUniverEngineFormulaMixin {
-    getFormula(): FFormula;
-}
-
-export class FUniverEngineFormulaMixin extends FUniver implements IFUniverEngineFormulaMixin {
-    override getFormula(): FFormula {
-        return this._injector.createInstance(FFormula);
-    }
-}
-
-FUniver.extend(FUniverEngineFormulaMixin);
-declare module '@univerjs/core/facade' {
-    // eslint-disable-next-line ts/naming-convention
-    interface FUniver extends IFUniverEngineFormulaMixin {}
-}
+export { FBase, FBaseInitialable } from './f-base';
+export { FBlob, type IFBlobSource } from './f-blob';
+export { FEnum } from './f-enum';
+export { FEventName, type IEventBase, type IEventParamConfig } from './f-event';
+export { FHooks } from './f-hooks';
+export { FUniver } from './f-univer';
+export { FUtil } from './f-util';

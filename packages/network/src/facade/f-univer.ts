@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { FUniver } from '@univerjs/core';
+import { FUniver } from '@univerjs/core/facade';
 import { FNetwork } from './f-network';
 
 /**
@@ -34,7 +34,7 @@ export class FUniverNetworkMixin extends FUniver implements IFUniverNetworkMixin
 }
 
 FUniver.extend(FUniverNetworkMixin);
-declare module '@univerjs/core' {
+declare module '@univerjs/core/facade' {
     // eslint-disable-next-line ts/naming-convention
     interface FUniver extends IFUniverNetworkMixin { }
 }

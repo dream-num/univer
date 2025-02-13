@@ -16,7 +16,8 @@
 
 import type { IDisposable } from '@univerjs/core';
 import type { IShortcutItem } from '@univerjs/ui';
-import { FBase, Inject, Injector } from '@univerjs/core';
+import { Inject, Injector } from '@univerjs/core';
+import { FBase } from '@univerjs/core/facade';
 import { IShortcutService } from '@univerjs/ui';
 
 /**

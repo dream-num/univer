@@ -16,7 +16,8 @@
 
 import type { ICommandInfo, IDisposable } from '@univerjs/core';
 import type { FormulaExecutedStateType, IExecutionInProgressParams, ISequenceNode, ISetFormulaCalculationNotificationMutation, ISetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
-import { FBase, ICommandService, IConfigService, Inject, Injector } from '@univerjs/core';
+import { ICommandService, IConfigService, Inject, Injector } from '@univerjs/core';
+import { FBase } from '@univerjs/core/facade';
 import { ENGINE_FORMULA_CYCLE_REFERENCE_COUNT, GlobalComputingStatusService, LexerTreeBuilder, SetFormulaCalculationNotificationMutation, SetFormulaCalculationStartMutation, SetFormulaCalculationStopMutation } from '@univerjs/engine-formula';
 import { filter, firstValueFrom, map, race, timer } from 'rxjs';
 

@@ -14,30 +14,9 @@
  * limitations under the License.
  */
 
-import { UniverInstanceType } from '../common/unit';
-import { CommandType } from '../services/command/command.service';
-import { LifecycleStages } from '../services/lifecycle/lifecycle';
-import { BaselineOffset, BooleanNumber, BorderStyleTypes, BorderType, HorizontalAlign, TextDecoration, TextDirection, VerticalAlign } from '../types/enum';
-import { AutoFillSeries } from '../types/enum/auto-fill-series';
-import { ColorType } from '../types/enum/color-type';
-import { CommonHideTypes } from '../types/enum/common-hide-types';
-import { CopyPasteType } from '../types/enum/copy-paste-type';
-import { DataValidationErrorStyle } from '../types/enum/data-validation-error-style';
-import { DataValidationOperator } from '../types/enum/data-validation-operator';
-import { DataValidationRenderMode } from '../types/enum/data-validation-render-mode';
-import { DataValidationStatus } from '../types/enum/data-validation-status';
-import { DataValidationType } from '../types/enum/data-validation-type';
-import { DeleteDirection } from '../types/enum/delete-direction';
-import { DeveloperMetadataVisibility } from '../types/enum/developer-metadata-visibility';
-import { Dimension } from '../types/enum/dimension';
-import { Direction } from '../types/enum/direction';
-import { InterpolationPointType } from '../types/enum/interpolation-point-type';
-import { LocaleType } from '../types/enum/locale-type';
-import { MentionType } from '../types/enum/mention-type';
-import { ProtectionType } from '../types/enum/protection-type';
-import { RelativeDate } from '../types/enum/relative-date';
-import { SheetTypes } from '../types/enum/sheet-types';
-import { ThemeColorType } from '../types/enum/theme-color-type';
+/* eslint-disable ts/explicit-function-return-type */
+
+import { AutoFillSeries, BaselineOffset, BooleanNumber, BorderStyleTypes, BorderType, ColorType, CommandType, CommonHideTypes, CopyPasteType, DataValidationErrorStyle, DataValidationOperator, DataValidationRenderMode, DataValidationStatus, DataValidationType, DeleteDirection, DeveloperMetadataVisibility, Dimension, Direction, HorizontalAlign, InterpolationPointType, LifecycleStages, LocaleType, MentionType, ProtectionType, RelativeDate, SheetTypes, TextDecoration, TextDirection, ThemeColorType, UniverInstanceType, VerticalAlign } from '@univerjs/core';
 
 /**
  * @hideconstructor

@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IEventBase, Injector } from '@univerjs/core';
+import type { ICommandInfo, Injector } from '@univerjs/core';
+import type { IEventBase } from '@univerjs/core/facade';
 import type { ISortRangeCommandParams } from '@univerjs/sheets-sort';
 import type { FRange, FWorkbook, FWorksheet } from '@univerjs/sheets/facade';
-import { FEventName, FUniver, ICommandService } from '@univerjs/core';
+import { ICommandService } from '@univerjs/core';
+import { FEventName, FUniver } from '@univerjs/core/facade';
 import { SortRangeCommand, SortType } from '@univerjs/sheets-sort';
 import { FSheetEventName } from '@univerjs/sheets/facade';
 
@@ -82,7 +84,7 @@ export interface ISheetRangeSortEventParamConfig {
 
 FEventName.extend(FSheetEventName);
 
-declare module '@univerjs/core' {
+declare module '@univerjs/core/facade' {
     // eslint-disable-next-line ts/naming-convention
     interface FEventName extends IFSheetSortEventMixin { }
     interface IEventParamConfig extends ISheetRangeSortEventParamConfig { }

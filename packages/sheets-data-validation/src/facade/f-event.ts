@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import type { DataValidationStatus, IDataValidationRule, IDataValidationRuleBase, IDataValidationRuleOptions, IEventBase, IRange, ISheetDataValidationRule } from '@univerjs/core';
+import type { DataValidationStatus, IDataValidationRule, IDataValidationRuleBase, IDataValidationRuleOptions, IRange, ISheetDataValidationRule } from '@univerjs/core';
+import type { IEventBase } from '@univerjs/core/facade';
 import type { DataValidationChangeType, IRuleChange } from '@univerjs/data-validation';
 import type { FWorkbook, FWorksheet } from '@univerjs/sheets/facade';
 import type { FDataValidation } from './f-data-validation';
-import { FEventName } from '@univerjs/core';
+import { FEventName } from '@univerjs/core/facade';
 
 /**
  * Event interface triggered when a data validation rule is changed
@@ -326,7 +327,7 @@ export interface IDataValidationEventConfig {
 }
 
 FEventName.extend(FDataValidationEvent);
-declare module '@univerjs/core' {
+declare module '@univerjs/core/facade' {
     // eslint-disable-next-line ts/naming-convention
     interface FEventName extends IDataValidationEvent {
     }

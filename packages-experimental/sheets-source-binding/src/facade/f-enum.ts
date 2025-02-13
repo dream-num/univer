@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { FEnum } from '@univerjs/core';
+import { FEnum } from '@univerjs/core/facade';
 import { BindModeEnum, DataBindingNodeTypeEnum } from '@univerjs/sheets-source-binding';
 
 /**
@@ -42,7 +42,7 @@ class FSourceBindingEnum extends FEnum implements ISourceBindingEnumMixin {
 
 FEnum.extend(FSourceBindingEnum);
 
-declare module '@univerjs/core' {
+declare module '@univerjs/core/facade' {
     // eslint-disable-next-line ts/naming-convention
     interface FEnum extends ISourceBindingEnumMixin { }
 }

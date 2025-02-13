@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { IUser } from '../services/user-manager/user-manager.service';
-import { Inject, Injector } from '../common/di';
-import { UserManagerService } from '../services/user-manager/user-manager.service';
+import type { IUser } from '@univerjs/core';
+import { Inject, Injector, UserManagerService } from '@univerjs/core';
 import { FBase } from './f-base';
 
 /**

@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import type { IDrawingSearch, IEventBase } from '@univerjs/core';
+import type { IDrawingSearch } from '@univerjs/core';
+import type { IEventBase } from '@univerjs/core/facade';
 import type { ISheetImage } from '@univerjs/sheets-drawing';
 import type { FWorkbook } from '@univerjs/sheets/facade';
 import type { FOverGridImage } from './f-over-grid-image';
-import { FEventName } from '@univerjs/core';
+import { FEventName } from '@univerjs/core/facade';
 
 /**
  * @ignore
@@ -305,7 +306,7 @@ interface IFSheetsUIEventParamConfig {
 }
 
 FEventName.extend(FDrawingEventNameMixin);
-declare module '@univerjs/core' {
+declare module '@univerjs/core/facade' {
     // eslint-disable-next-line ts/naming-convention
     interface FEventName extends IFDrawingEventNameMixin { }
     interface IEventParamConfig extends IFSheetsUIEventParamConfig { }

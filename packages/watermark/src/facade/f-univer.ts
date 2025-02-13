@@ -15,7 +15,7 @@
  */
 
 import type { IImageWatermarkConfig, ITextWatermarkConfig } from '@univerjs/watermark';
-import { FUniver } from '@univerjs/core';
+import { FUniver } from '@univerjs/core/facade';
 import { IWatermarkTypeEnum, WatermarkImageBaseConfig, WatermarkService, WatermarkTextBaseConfig } from '@univerjs/watermark';
 
 /**
@@ -90,7 +90,7 @@ export class FUniverWatermarkMixin extends FUniver {
 }
 
 FUniver.extend(FUniverWatermarkMixin);
-declare module '@univerjs/core' {
+declare module '@univerjs/core/facade' {
     // eslint-disable-next-line ts/naming-convention
     interface FUniver extends IFUniverWatermarkMixin {}
 }

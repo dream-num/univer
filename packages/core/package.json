@@ -22,7 +22,8 @@
     ],
     "exports": {
         ".": "./src/index.ts",
-        "./*": "./src/*"
+        "./*": "./src/*",
+        "./facade": "./src/facade/index.ts"
     },
     "main": "./src/index.ts",
     "types": "./lib/types/index.d.ts",
@@ -41,6 +42,11 @@
                 "require": "./lib/cjs/*",
                 "types": "./lib/types/index.d.ts"
             },
+            "./facade": {
+                "import": "./lib/es/facade.js",
+                "require": "./lib/cjs/facade.js",
+                "types": "./lib/types/facade/index.d.ts"
+            },
             "./lib/*": "./lib/*"
         }
     },
@@ -58,6 +64,7 @@
         "build": "univer-cli build"
     },
     "peerDependencies": {
+        "@wendellhu/redi": "0.17.1",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {

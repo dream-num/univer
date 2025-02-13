@@ -14,23 +14,10 @@
  * limitations under the License.
  */
 
+import type { CommandListener, DocumentDataModel, IDisposable, IDocumentData, IExecutionOptions, IParagraphStyle, ITextDecoration, ITextStyle, LifecycleStages } from '@univerjs/core';
 import type { Subscription } from 'rxjs';
-import type { IDisposable } from '../common/di';
-import type { DocumentDataModel } from '../docs';
-import type { CommandListener, IExecutionOptions } from '../services/command/command.service';
-import type { LifecycleStages } from '../services/lifecycle/lifecycle';
-import type { IDocumentData, IParagraphStyle, ITextDecoration, ITextStyle } from '../types/interfaces';
 import type { ICommandEvent, IEventParamConfig } from './f-event';
-import { Inject, Injector } from '../common/di';
-import { CanceledError } from '../common/error';
-import { UniverInstanceType } from '../common/unit';
-import { ParagraphStyleBuilder, ParagraphStyleValue, RichTextBuilder, RichTextValue, TextDecorationBuilder, TextStyleBuilder, TextStyleValue } from '../docs/data-model/rich-text-builder';
-import { ICommandService } from '../services/command/command.service';
-import { IUniverInstanceService } from '../services/instance/instance.service';
-import { LifecycleService } from '../services/lifecycle/lifecycle.service';
-import { RedoCommand, UndoCommand } from '../services/undoredo/undoredo.service';
-import { ColorBuilder, Disposable, toDisposable } from '../shared';
-import { Univer } from '../univer';
+import { CanceledError, ColorBuilder, Disposable, ICommandService, Inject, Injector, IUniverInstanceService, LifecycleService, ParagraphStyleBuilder, ParagraphStyleValue, RedoCommand, RichTextBuilder, RichTextValue, TextDecorationBuilder, TextStyleBuilder, TextStyleValue, toDisposable, UndoCommand, Univer, UniverInstanceType } from '@univerjs/core';
 import { FBlob } from './f-blob';
 import { FDoc } from './f-doc';
 import { FEnum } from './f-enum';
@@ -73,7 +60,7 @@ export class FUniver extends Disposable {
     /**
      * @ignore
      */
-    _initialize(injector: Injector) { }
+    _initialize(injector: Injector): void { }
 
     /**
      * @ignore
@@ -104,7 +91,7 @@ export class FUniver extends Disposable {
 
     protected _eventRegistry = new FEventRegistry();
 
-    protected registerEventHandler = (event: string, handler: () => IDisposable | Subscription) => {
+    protected registerEventHandler = (event: string, handler: () => IDisposable | Subscription): IDisposable => {
         return this._eventRegistry.registerEventHandler(event, handler);
     };
 
@@ -367,15 +354,15 @@ export class FUniver extends Disposable {
         return this._injector.createInstance(FHooks);
     }
 
-    get Enum() {
+    get Enum(): FEnum {
         return FEnum.get();
     }
 
-    get Event() {
+    get Event(): FEventName {
         return FEventName.get();
     }
 
-    get Util() {
+    get Util(): FUtil {
         return FUtil.get();
     }
 
@@ -391,7 +378,7 @@ export class FUniver extends Disposable {
      * });
      * ```
      */
-    addEvent<T extends keyof IEventParamConfig>(event: T, callback: (params: IEventParamConfig[T]) => void) {
+    addEvent<T extends keyof IEventParamConfig>(event: T, callback: (params: IEventParamConfig[T]) => void): IDisposable {
         return this._eventRegistry.addEvent(event, callback);
     }
 
@@ -405,7 +392,7 @@ export class FUniver extends Disposable {
      * this.fireEvent(univerAPI.event.UnitCreated, params);
      * ```
      */
-    protected fireEvent<T extends keyof IEventParamConfig>(event: T, params: IEventParamConfig[T]) {
+    protected fireEvent<T extends keyof IEventParamConfig>(event: T, params: IEventParamConfig[T]): boolean | undefined {
         return this._eventRegistry.fireEvent(event, params);
     }
 

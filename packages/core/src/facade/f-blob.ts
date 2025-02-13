@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '../shared';
-import { Inject, Injector } from '@wendellhu/redi';
+import type { Nullable } from '@univerjs/core';
+import { Inject, Injector } from '@univerjs/core';
 import { FBase } from './f-base';
 
 export interface IFBlobSource {
@@ -52,7 +52,7 @@ export class FBlob extends FBase {
      * console.log(newBlob);
      * ```
      */
-    copyBlob() {
+    copyBlob(): FBlob {
         return this._injector.createInstance(FBlob, this._blob);
     }
 
@@ -66,7 +66,7 @@ export class FBlob extends FBase {
      * const newBlob = blob.getBlob();
      * ```
      */
-    getAs(contentType: string) {
+    getAs(contentType: string): FBlob {
         const newBlob = this.copyBlob();
         newBlob.setContentType(contentType);
         return newBlob;
@@ -186,7 +186,7 @@ export class FBlob extends FBase {
      * console.log(newBlob);
      * ```
      */
-    getContentType() {
+    getContentType(): string | undefined {
         return this._blob?.type;
     }
 

@@ -15,7 +15,8 @@
  */
 
 import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
-import { FUniver, UniverInstanceType } from '@univerjs/core';
+import { UniverInstanceType } from '@univerjs/core';
+import { FUniver } from '@univerjs/core/facade';
 import { FDocument } from './f-document';
 
 /**
@@ -70,7 +71,7 @@ export class FUniverDocsMixin extends FUniver implements IFUniverDocsUIMixin {
 }
 
 FUniver.extend(FUniverDocsMixin);
-declare module '@univerjs/core' {
+declare module '@univerjs/core/facade' {
     // eslint-disable-next-line ts/naming-convention
     interface FUniver extends IFUniverDocsUIMixin {}
 }

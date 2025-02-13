@@ -178,12 +178,20 @@ export function FormulaEditor(props: IFormulaEditorProps) {
         }
     });
 
+    // re highlight when focus
+    useEffect(() => {
+        if (isFocus) {
+            highlight(formulaText, false, true);
+        }
+    }, [isFocus]);
+
+    // re highlight when formula text changed
     useEffect(() => {
         if (isFocus) {
             if (highTextRef.current === formulaText) return;
             highlight(formulaText, false, true);
         }
-    }, [formulaText, isFocus, highlight]);
+    }, [formulaText]);
 
     useVerify(isFocus, onVerify, formulaText);
     const focus = useFocus(editor);

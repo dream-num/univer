@@ -24,6 +24,7 @@ import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '@univerjs/mockdata';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
+import { UniverSheetsFormulaUIPlugin } from '@univerjs/sheets-formula-ui';
 import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
 import { UniverSheetsNumfmtUIPlugin } from '@univerjs/sheets-numfmt-ui';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
@@ -62,14 +63,15 @@ function factory(id: string) {
         // sheets plugin
         univer.registerPlugin(UniverSheetsPlugin);
         univer.registerPlugin(UniverSheetsUIPlugin);
-
+        univer.registerPlugin(UniverSheetsFormulaUIPlugin);
         // sheet feature plugins
         univer.registerPlugin(UniverSheetsNumfmtPlugin);
         univer.registerPlugin(UniverSheetsNumfmtUIPlugin);
         univer.registerPlugin(UniverSheetsFormulaPlugin);
 
+        const data = Tools.deepClone(DEFAULT_WORKBOOK_DATA_DEMO);
         // create univer sheet instance
-        univer.createUnit(UniverInstanceType.UNIVER_SHEET, Tools.deepClone(DEFAULT_WORKBOOK_DATA_DEMO));
+        univer.createUnit(UniverInstanceType.UNIVER_SHEET, data);
     };
 }
 

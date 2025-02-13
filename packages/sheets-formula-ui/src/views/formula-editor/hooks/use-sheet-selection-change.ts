@@ -132,8 +132,10 @@ export const useSheetSelectionChange = (
             }
         } else {
             const orderedSelections = [...selections];
-            const last = orderedSelections.pop();
-            last && orderedSelections.splice(updatingRefIndex, 0, last);
+            if (updatingRefIndex !== -1) {
+                const last = orderedSelections.pop();
+                last && orderedSelections.splice(updatingRefIndex, 0, last);
+            }
             // 更新全部的 ref Selection
             let currentRefIndex = 0;
             const newTokens = sequenceNodes.map((item) => {
@@ -301,8 +303,7 @@ export const useSheetSelectionChange = (
                         map((e) => {
                             return serializeRange(e);
                         }),
-                        distinctUntilChanged(),
-                        debounceTime(100)
+                        distinctUntilChanged()
                     ).subscribe((rangeText) => {
                         isScalingRef.current = true;
                         handleSequenceNodeReplace(rangeText, index);

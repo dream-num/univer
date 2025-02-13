@@ -60,11 +60,13 @@ export class FWorksheet extends FBaseInitialable {
     }
 
     /**
-     * Returns the worksheet
+     * Get the worksheet instance.
      * @returns {Worksheet} The worksheet instance.
      * @example
      * ```typescript
-     * const sheet = univerAPI.getActiveWorkbook().getActiveSheet().getSheet();
+     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * const sheet = fWorksheet.getSheet();
+     * console.log(sheet);
      * ```
      */
     getSheet(): Worksheet {
@@ -72,11 +74,13 @@ export class FWorksheet extends FBaseInitialable {
     }
 
     /**
-     * Returns the injector
-     * @returns {Injector} The injector
+     * Get the injector instance.
+     * @returns {Injector} The injector instance.
      * @example
      * ```typescript
-     * const injector = univerAPI.getActiveWorkbook().getActiveSheet().getInject();
+     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * const injector = fWorksheet.getInject();
+     * console.log(injector);
      * ```
      */
     getInject(): Injector {
@@ -84,11 +88,13 @@ export class FWorksheet extends FBaseInitialable {
     }
 
     /**
-     * Returns the workbook
+     * Get the workbook instance.
      * @returns {Workbook} The workbook instance.
      * @example
      * ```typescript
-     * const workbook = univerAPI.getActiveWorkbook().getWorkbook();
+     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * const workbook = fWorksheet.getWorkbook();
+     * console.log(workbook);
      * ```
      */
     getWorkbook(): Workbook {
@@ -96,12 +102,13 @@ export class FWorksheet extends FBaseInitialable {
     }
 
     /**
-     * Returns the worksheet id.
+     * Get the worksheet id.
      * @returns {string} The id of the worksheet.
      * @example
      * ```typescript
-     * const sheet = univerAPI.getActiveWorkbook().getActiveSheet();
-     * const id = sheet.getSheetId();
+     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * const sheetId = fWorksheet.getSheetId();
+     * console.log(sheetId);
      * ```
      */
     getSheetId(): string {
@@ -109,12 +116,13 @@ export class FWorksheet extends FBaseInitialable {
     }
 
     /**
-     * Returns the worksheet name.
+     * Get the worksheet name.
      * @returns {string} The name of the worksheet.
      * @example
      * ```typescript
-     * const sheet = univerAPI.getActiveWorkbook().getActiveSheet();
-     * const name = sheet.getSheetName();
+     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * const sheetName = fWorksheet.getSheetName();
+     * console.log(sheetName);
      * ```
      */
     getSheetName(): string {
@@ -122,12 +130,13 @@ export class FWorksheet extends FBaseInitialable {
     }
 
     /**
-     * Represents the selection ranges info of the worksheet.
+     * Get the current selection of the worksheet.
      * @returns {FSelection} return the current selections of the worksheet or null if there is no selection.
      * @example
      * ```typescript
-     * const sheet = univerAPI.getActiveWorkbook().getActiveSheet();
-     * const selections = sheet.getSelection();
+     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * const selection = fWorksheet.getSelection();
+     * console.log(selection);
      * ```
      */
     getSelection(): FSelection | null {
@@ -144,12 +153,13 @@ export class FWorksheet extends FBaseInitialable {
     // #region default style
 
     /**
-     * Get the default style of the worksheet
+     * Get the default style of the worksheet.
      * @returns {IStyleData} Default style of the worksheet.
      * @example
      * ```typescript
-     * const sheet = workbook.getActiveSheet();
-     * const defaultStyle = sheet.getDefaultStyle();
+     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * const defaultStyle = fWorksheet.getDefaultStyle();
+     * console.log(defaultStyle);
      * ```
      */
     getDefaultStyle(): Nullable<IStyleData> | string {
@@ -163,11 +173,13 @@ export class FWorksheet extends FBaseInitialable {
      * @returns {(Nullable<IStyleData> | string)} The default style of the worksheet row name or style data
      * @example
      * ```typescript
-     * const sheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
      * // Get default style for row 0 (1)
-     * const rowStyle = sheet.getRowDefaultStyle(0);
+     * const rowStyle = fWorksheet.getRowDefaultStyle(0);
+     * console.log(rowStyle);
      * // Get raw style data for row 0
-     * const rawRowStyle = sheet.getRowDefaultStyle(0, true);
+     * const rawRowStyle = fWorksheet.getRowDefaultStyle(0, true);
+     * console.log(rawRowStyle);
      * ```
      */
     getRowDefaultStyle(index: number, keepRaw: boolean = false): Nullable<IStyleData> | string {
@@ -181,11 +193,13 @@ export class FWorksheet extends FBaseInitialable {
      * @returns {(Nullable<IStyleData> | string)} The default style of the worksheet column name or style data
      * @example
      * ```typescript
-     * const sheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
      * // Get default style for column 0 (A)
-     * const colStyle = sheet.getColumnDefaultStyle(0);
+     * const colStyle = fWorksheet.getColumnDefaultStyle(0);
+     * console.log(colStyle);
      * // Get raw style data for column 0
-     * const rawColStyle = sheet.getColumnDefaultStyle(0, true);
+     * const rawColStyle = fWorksheet.getColumnDefaultStyle(0, true);
+     * console.log(rawColStyle);
      * ```
      */
     getColumnDefaultStyle(index: number, keepRaw: boolean = false): Nullable<IStyleData> | string {
@@ -198,8 +212,7 @@ export class FWorksheet extends FBaseInitialable {
      * @returns {FWorksheet} This worksheet instance for chaining
      * @example
      * ```typescript
-     * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
      * fWorksheet.setDefaultStyle('default');
      * // or
      * // fWorksheet.setDefaultStyle({fs: 12, ff: 'Arial'});
@@ -226,9 +239,9 @@ export class FWorksheet extends FBaseInitialable {
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getActiveSheet();
-     * fWorksheet.setRowDefaultStyle(0, 'default');
+     * fWorksheet.setColumnDefaultStyle(0, 'default');
      * // or
-     * // fWorksheet.setRowDefaultStyle(0, {fs: 12, ff: 'Arial'});
+     * // fWorksheet.setColumnDefaultStyle(0, {fs: 12, ff: 'Arial'});
      * ```
      */
     setColumnDefaultStyle(index: number, style: string | Nullable<IStyleData>): FWorksheet {
@@ -258,9 +271,9 @@ export class FWorksheet extends FBaseInitialable {
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getActiveSheet();
-     * fWorksheet.setColumnDefaultStyle(0, 'default');
+     * fWorksheet.setRowDefaultStyle(0, 'default');
      * // or
-     * // fWorksheet.setColumnDefaultStyle(0, {fs: 12, ff: 'Arial'});
+     * // fWorksheet.setRowDefaultStyle(0, {fs: 12, ff: 'Arial'});
      * ```
      */
     setRowDefaultStyle(index: number, style: string | Nullable<IStyleData>): FWorksheet {
@@ -290,9 +303,10 @@ export class FWorksheet extends FBaseInitialable {
      * @returns {FRange} A Range object representing the specified cell.
      * @example
      * ```typescript
-     * const sheet = workbook.getActiveSheet();
+     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
      * // Get range for cell at row 0, column 0 (A1)
-     * const range = sheet.getRange(0, 0);
+     * const range = fWorksheet.getRange(0, 0);
+     * console.log(range);
      * ```
      */
     getRange(row: number, column: number): FRange;
@@ -311,6 +325,13 @@ export class FWorksheet extends FBaseInitialable {
      * @param {number} numRows - The number of rows in the range.
      * @param {number} numColumns - The number of columns in the range.
      * @returns {FRange} A Range object representing the specified range.
+     * @example
+     * ```typescript
+     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * // Get range for cells A1:C3
+     * const range = fWorksheet.getRange(0, 0, 3, 3);
+     * console.log(range);
+     * ```
      */
     getRange(row: number, column: number, numRows: number, numColumns: number): FRange;
     /**
@@ -319,13 +340,17 @@ export class FWorksheet extends FBaseInitialable {
      * @returns {FRange} A Range object representing the specified range.
      * @example
      * ```typescript
-     * const sheet = workbook.getActiveSheet();
+     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
      * // Get range for cells A1:C3
-     * const range = sheet.getRange("A1:C3");
+     * const range = fWorksheet.getRange("A1:C3");
+     * console.log(range);
      * // Get range for a single cell
-     * const cell = sheet.getRange("B2");
+     * const cell = fWorksheet.getRange("B2");
+     * console.log(cell);
      * // Get range with sheet name
-     * const rangeWithSheet = sheet.getRange("Sheet1!A1:C3");
+     * const sheetName = fWorksheet.getSheetName();
+     * const rangeWithSheet = fWorksheet.getRange(`${sheetName}!A1:C3`);
+     * console.log(rangeWithSheet);
      * ```
      */
     getRange(a1Notation: string): FRange;
@@ -387,8 +412,8 @@ export class FWorksheet extends FBaseInitialable {
      * @returns {number} The maximum columns count of the sheet
      * @example
      * ```typescript
-     * const sheet = workbook.getActiveSheet();
-     * const totalColumns = sheet.getMaxColumns();
+     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * const totalColumns = fWorksheet.getMaxColumns();
      * console.log(`Sheet has ${totalColumns} columns`);
      * ```
      */
@@ -401,8 +426,8 @@ export class FWorksheet extends FBaseInitialable {
      * @returns {number}The maximum rows count of the sheet
      * @example
      * ```typescript
-     * const sheet = workbook.getActiveSheet();
-     * const totalRows = sheet.getMaxRows();
+     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * const totalRows = fWorksheet.getMaxRows();
      * console.log(`Sheet has ${totalRows} rows`);
      * ```
      */
@@ -416,11 +441,11 @@ export class FWorksheet extends FBaseInitialable {
      * @returns {FWorksheet} This sheet, for chaining.
      * @example
      * ```typescript
-     * const sheet = workbook.getActiveSheet();
-     * // Insert 3 rows at row index 2 (before the third row)
-     * sheet.insertRowAfter(2);
-     * // Insert 1 row at row index 0 (before the first row)
-     * sheet.insertRowAfter(0);
+     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * // Insert a row after the third row
+     * fWorksheet.insertRowAfter(2);
+     * // Insert a row after the first row
+     * fWorksheet.insertRowAfter(0);
      * ```
      */
     insertRowAfter(afterPosition: number): FWorksheet {
@@ -433,11 +458,11 @@ export class FWorksheet extends FBaseInitialable {
      * @returns {FWorksheet} This sheet, for chaining.
      * @example
      * ```typescript
-     * const sheet = workbook.getActiveSheet();
-     * // Insert 3 rows at row index 2 (before the third row)
-     * sheet.insertRowBefore(2);
-     * // Insert 1 row at row index 0 (before the first row)
-     * sheet.insertRowBefore(0);
+     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * // Insert a row before the third row
+     * fWorksheet.insertRowBefore(2);
+     * // Insert a row before the first row
+     * fWorksheet.insertRowBefore(0);
      * ```
      */
     insertRowBefore(beforePosition: number): FWorksheet {
@@ -451,11 +476,11 @@ export class FWorksheet extends FBaseInitialable {
      * @returns {FWorksheet} This sheet, for chaining.
      * @example
      * ```typescript
-     * const sheet = workbook.getActiveSheet();
-     * // Insert 3 rows at row index 2 (before the third row)
-     * sheet.insertRows(2, 3);
-     * // Insert 1 row at row index 0 (before the first row)
-     * sheet.insertRows(0);
+     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * // Insert 3 rows before the third row
+     * fWorksheet.insertRows(2, 3);
+     * // Insert 1 row before the first row
+     * fWorksheet.insertRows(0);
      * ```
      */
     insertRows(rowIndex: number, numRows: number = 1): FWorksheet {
@@ -469,11 +494,11 @@ export class FWorksheet extends FBaseInitialable {
      * @returns {FWorksheet} This sheet, for chaining.
      * @example
      * ```typescript
-     * const sheet = workbook.getActiveSheet();
-     * // Insert 3 rows at row index 2 (before the third row)
-     * sheet.insertRowsAfter(2, 3);
-     * // Insert 1 row at row index 0 (before the first row)
-     * sheet.insertRowsAfter(0);
+     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * // Insert 3 rows after the third row
+     * fWorksheet.insertRowsAfter(2, 3);
+     * // Insert 1 row after the first row
+     * fWorksheet.insertRowsAfter(0, 1);
      * ```
      */
     insertRowsAfter(afterPosition: number, howMany: number): FWorksheet {
@@ -512,11 +537,11 @@ export class FWorksheet extends FBaseInitialable {
      * @returns {FWorksheet} This sheet, for chaining.
      * @example
      * ```typescript
-     * const sheet = workbook.getActiveSheet();
-     * // Insert 3 rows at row index 2 (before the third row)
-     * sheet.insertRowsBefore(2, 3);
-     * // Insert 1 row at row index 0 (before the first row)
-     * sheet.insertRowsBefore(0);
+     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * // Insert 3 rows before the third row
+     * fWorksheet.insertRowsBefore(2, 3);
+     * // Insert 1 row before the first row
+     * fWorksheet.insertRowsBefore(0, 1);
      * ```
      */
     insertRowsBefore(beforePosition: number, howMany: number): FWorksheet {
@@ -554,11 +579,11 @@ export class FWorksheet extends FBaseInitialable {
      * @returns {FWorksheet} This sheet, for chaining.
      * @example
      * ```typescript
-     * const sheet = workbook.getActiveSheet();
-     * // Delete 3 rows at row index 2 (rows 3-5)
-     * sheet.deleteRow(2);
-     * // Delete 1 row at row index 0 (first row)
-     * sheet.deleteRow(0);
+     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * // Delete the third row
+     * fWorksheet.deleteRow(2);
+     * // Delete the first row
+     * fWorksheet.deleteRow(0);
      * ```
      */
     deleteRow(rowPosition: number): FWorksheet {
@@ -572,11 +597,11 @@ export class FWorksheet extends FBaseInitialable {
      * @returns {FWorksheet} This sheet, for chaining.
      * @example
      * ```typescript
-     * const sheet = workbook.getActiveSheet();
+     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
      * // Delete 3 rows at row index 2 (rows 3-5)
-     * sheet.deleteRows(2, 3);
+     * fWorksheet.deleteRows(2, 3);
      * // Delete 1 row at row index 0 (first row)
-     * sheet.deleteRows(0);
+     * fWorksheet.deleteRows(0, 1);
      * ```
      */
     deleteRows(rowPosition: number, howMany: number): FWorksheet {
@@ -603,11 +628,13 @@ export class FWorksheet extends FBaseInitialable {
      * @returns {FWorksheet} This sheet, for chaining.
      * @example
      * ```typescript
-     * const sheet = workbook.getActiveSheet();
+     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
      * // Move 3 rows at row index 2 (rows 3-5) to row index 0
-     * sheet.moveRows(rowSpec, 0);
+     * const rowSpec1 = fWorksheet.getRange('3:5');
+     * fWorksheet.moveRows(rowSpec1, 0);
      * // Move 1 row at row index 0 (first row) to row index 2
-     * sheet.moveRows(rowSpec, 2);
+     * const rowSpec2 = fWorksheet.getRange('1:1');
+     * fWorksheet.moveRows(rowSpec2, 2);
      * ```
      */
     moveRows(rowSpec: FRange, destinationIndex: number): FWorksheet {
@@ -639,11 +666,13 @@ export class FWorksheet extends FBaseInitialable {
      * @returns {FWorksheet} This sheet, for chaining.
      * @example
      * ```typescript
-     * const sheet = workbook.getActiveSheet();
+     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
      * // Hide 3 rows starting from row index 1 (rows 2-4)
-     * sheet.hideRow(1);
+     * const row1 = fWorksheet.getRange('2:4');
+     * fWorksheet.hideRow(row1);
      * // Hide single row at index 0 (first row)
-     * sheet.hideRow(0);
+     * const row2 = fWorksheet.getRange('1:1');
+     * fWorksheet.hideRow(row2);
      * ```
      */
     hideRow(row: FRange): FWorksheet {
@@ -667,11 +696,11 @@ export class FWorksheet extends FBaseInitialable {
      * @returns {FWorksheet} This sheet, for chaining.
      * @example
      * ```typescript
-     * const sheet = workbook.getActiveSheet();
+     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
      * // Hide 3 rows starting from row index 1 (rows 2-4)
-     * sheet.hideRows(1, 3);
+     * fWorksheet.hideRows(1, 3);
      * // Hide single row at index 0 (first row)
-     * sheet.hideRows(0);
+     * fWorksheet.hideRows(0);
      * ```
      */
     hideRows(rowIndex: number, numRow: number = 1): FWorksheet {
@@ -699,11 +728,13 @@ export class FWorksheet extends FBaseInitialable {
      * @returns {FWorksheet} This sheet, for chaining.
      * @example
      * ```typescript
-     * const sheet = workbook.getActiveSheet();
+     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
      * // Unhide 3 rows starting from row index 1 (rows 2-4)
-     * sheet.unhideRow(1);
+     * const row1 = fWorksheet.getRange('2:4');
+     * fWorksheet.unhideRow(row1);
      * // Unhide single row at index 0 (first row)
-     * sheet.unhideRow(0);
+     * const row2 = fWorksheet.getRange('1:1');
+     * fWorksheet.unhideRow(row2);
      * ```
      */
     unhideRow(row: FRange): FWorksheet {
@@ -727,11 +758,11 @@ export class FWorksheet extends FBaseInitialable {
      * @returns {FWorksheet} This worksheet instance for chaining
      * @example
      * ```typescript
-     * const sheet = workbook.getActiveSheet();
+     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
      * // Show 3 rows starting from row index 1 (rows 2-4)
-     * sheet.showRows(1);
+     * fWorksheet.showRows(1, 3);
      * // Show single row at index 0 (first row)
-     * sheet.showRows(0);
+     * fWorksheet.showRows(0);
      * ```
      */
     showRows(rowIndex: number, numRow: number = 1): FWorksheet {
@@ -761,11 +792,11 @@ export class FWorksheet extends FBaseInitialable {
      * @returns {FWorksheet} This worksheet instance for chaining
      * @example
      * ```typescript
-     * const sheet = workbook.getActiveSheet();
+     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
      * // Set the height of the second row to 30 pixels
-     * sheet.setRowHeight(1, 30);
+     * fWorksheet.setRowHeight(1, 30);
      * // Set the height of the first row to 20 pixels
-     * sheet.setRowHeight(0, 20);
+     * fWorksheet.setRowHeight(0, 20);
      * ```
      */
     setRowHeight(rowPosition: number, height: number): FWorksheet {
@@ -774,14 +805,13 @@ export class FWorksheet extends FBaseInitialable {
 
     /**
      * Make certain row wrap and auto height.
-     * @param rowPosition
-     * @param auto
-     * @returns {FWorksheet} this
+     * @param {number} rowPosition - The row position to change.
+     * @param {BooleanNumber} auto - Whether to auto fit the row height.
+     * @returns {FWorksheet} This worksheet instance for chaining
      * @example
      * ```ts
-     const fWorkbook = univerAPI.getActiveWorkbook();
-     const fWorkSheet = fWorkbook.getActiveSheet();
-     fWorkSheet.autoFitRow(24);
+     * const fWorkSheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * fWorkSheet.autoFitRow(24);
      * ```
      */
     autoFitRow(rowPosition: number, auto: BooleanNumber = BooleanNumber.TRUE): FWorksheet {

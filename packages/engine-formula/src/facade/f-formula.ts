@@ -53,13 +53,18 @@ export class FFormula extends FBase {
 
     /**
      * Offsets the formula
-     * @param {string} formulaString
-     * @param {number} refOffsetX
-     * @param {number} refOffsetY
-     * @param {boolean} [ignoreAbsolute] default is false
+     * @param {string} formulaString - The formula string to offset
+     * @param {number} refOffsetX - The offset column
+     * @param {number} refOffsetY - The offset row
+     * @param {boolean} [ignoreAbsolute] - Whether to ignore the absolute reference
+     * @returns {string} The offset formula string
+     *
      * @example
-     * const result = moveFormulaRefOffset('sum(a1,b2)',1,1)
-     * // result  is 'sum(b2,c3)'
+     * ```ts
+     * const formulaEngine = univerAPI.getFormula();
+     * const result = formulaEngine.moveFormulaRefOffset('=SUM(A1,B2)', 1, 1);
+     * console.log(result);
+     * ```
      */
     moveFormulaRefOffset(formulaString: string, refOffsetX: number, refOffsetY: number, ignoreAbsolute?: boolean): string {
         return this._lexerTreeBuilder.moveFormulaRefOffset(formulaString, refOffsetX, refOffsetY, ignoreAbsolute);
@@ -67,9 +72,15 @@ export class FFormula extends FBase {
 
     /**
      * Resolves the formula string to a 'node' node
-     * @param {string} formulaString
-     * @returns {*}  {((string | ISequenceNode)[])}
-     * @memberof FFormula
+     * @param {string} formulaString - The formula string to resolve
+     * @returns {Array<ISequenceNode | string>} The nodes of the formula string
+     *
+     * @example
+     * ```ts
+     * const formulaEngine = univerAPI.getFormula();
+     * const nodes = formulaEngine.sequenceNodesBuilder('=SUM(A1,B2)');
+     * console.log(nodes);
+     * ```
      */
     sequenceNodesBuilder(formulaString: string): (string | ISequenceNode)[] {
         return this._lexerTreeBuilder.sequenceNodesBuilder(formulaString) || [];
@@ -77,6 +88,12 @@ export class FFormula extends FBase {
 
     /**
      * Start the calculation of the formula.
+     *
+     * @example
+     * ```ts
+     * const formulaEngine = univerAPI.getFormula();
+     * formulaEngine.executeCalculation();
+     * ```
      */
     executeCalculation(): void {
         this._commandService.executeCommand(SetFormulaCalculationStartMutation.id, { commands: [], forceCalculation: true }, { onlyLocal: true });
@@ -84,6 +101,12 @@ export class FFormula extends FBase {
 
     /**
      * Stop the calculation of the formula.
+     *
+     * @example
+     * ```ts
+     * const formulaEngine = univerAPI.getFormula();
+     * formulaEngine.stopCalculation();
+     * ```
      */
     stopCalculation(): void {
         this._commandService.executeCommand(SetFormulaCalculationStopMutation.id, {});
@@ -91,7 +114,16 @@ export class FFormula extends FBase {
 
     /**
      * Listening calculation starts.
-     * @param callback
+     * @param {Function} callback - The callback function to be called when the formula calculation starts.
+     * @returns {IDisposable} The disposable instance.
+     *
+     * @example
+     * ```ts
+     * const formulaEngine = univerAPI.getFormula();
+     * formulaEngine.calculationStart((forceCalculation) => {
+     *   console.log('Calculation start', forceCalculation);
+     * });
+     * ```
      */
     calculationStart(callback: (forceCalculation: boolean) => void): IDisposable {
         return this._commandService.onCommandExecuted((command: ICommandInfo) => {
@@ -104,7 +136,16 @@ export class FFormula extends FBase {
 
     /**
      * Listening calculation ends.
-     * @param callback
+     * @param {Function} callback - The callback function to be called when the formula calculation ends.
+     * @returns {IDisposable} The disposable instance.
+     *
+     * @example
+     * ```ts
+     * const formulaEngine = univerAPI.getFormula();
+     * formulaEngine.calculationEnd((functionsExecutedState) => {
+     *   console.log('Calculation end', functionsExecutedState);
+     * });
+     * ```
      */
     calculationEnd(callback: (functionsExecutedState: FormulaExecutedStateType) => void): IDisposable {
         return this._commandService.onCommandExecuted((command: ICommandInfo) => {
@@ -127,6 +168,14 @@ export class FFormula extends FBase {
      * value is 30,000 milliseconds.
      * @returns {Promise<boolean>} This method returns `true` if the computing is complete. If the timeout is reached, this
      * method returns `false`.
+     *
+     * @example
+     * ```ts
+     * const formulaEngine = univerAPI.getFormula();
+     * formulaEngine.whenComputingCompleteAsync(3000).then((isComplete) => {
+     *   console.log('Computing complete:', isComplete);
+     * });
+     * ```
      */
     whenComputingCompleteAsync(timeout?: number): Promise<boolean> {
         const gcss = this._injector.get(GlobalComputingStatusService);
@@ -159,7 +208,16 @@ export class FFormula extends FBase {
 
     /**
      * Listening calculation processing.
-     * @param callback
+     * @param {Function} callback - The callback function to be called when the formula calculation is in progress.
+     * @returns {IDisposable} The disposable instance.
+     *
+     * @example
+     * ```ts
+     * const formulaEngine = univerAPI.getFormula();
+     * formulaEngine.calculationProcessing((stageInfo) => {
+     *   console.log('Calculation processing', stageInfo);
+     * });
+     * ```
      */
     calculationProcessing(callback: (stageInfo: IExecutionInProgressParams) => void): IDisposable {
         return this._commandService.onCommandExecuted((command: ICommandInfo) => {
@@ -177,7 +235,8 @@ export class FFormula extends FBase {
 
     /**
      * When a formula contains a circular reference, set the maximum number of iterations for the formula calculation.
-     * @param maxIteration The maximum number of iterations. The default value is 1.
+     * @param {number} maxIteration The maximum number of iterations. The default value is 1.
+     *
      * @example
      * ```ts
      * // Set the maximum number of iterations for the formula calculation to 5.

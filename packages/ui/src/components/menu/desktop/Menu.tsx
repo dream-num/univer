@@ -223,19 +223,23 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
     const activated = useObservable<boolean>(menuItem.activated$, false);
     const hidden = useObservable(menuItem.hidden$, false);
     const value = useObservable<MenuItemDefaultValueType>(menuItem.value$);
-
+    const trigger = useObservable(contextMenuService.trigger$);
     const item = menuItem as IDisplayMenuItem<IMenuSelectorItem>;
     const selectionsFromObservable = useObservable(isObservable(item.selections) ? item.selections : undefined);
     const [inputValue, setInputValue] = useState(value);
-    const [trigger, setMenuTrigger] = useState(0);
+    // const [trigger, setMenuTrigger] = useState(0);
 
-    useEffect(() => {
-        const subscription = contextMenuService.trigger$.subscribe((value) => {
-            setMenuTrigger(value);
-        });
+    // useEffect(() => {
+    //     const subscription = contextMenuService.trigger$.subscribe((value) => {
+    //         setMenuTrigger(value);
+    //     });
 
-        return () => subscription.unsubscribe();
-    }, []);
+    //     return () => subscription.unsubscribe();
+    // }, []);
+
+    // useEffect(() => {
+    //     setInputValue(value);
+    // }, [value, trigger]);
 
     useEffect(() => {
         setInputValue(value);

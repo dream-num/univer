@@ -74,7 +74,6 @@ describe('Test insert and remove rows cols commands', () => {
             InsertRowAfterCommand,
             InsertMultiRowsAboveCommand,
             InsertMultiRowsAfterCommand,
-            InsertRowByRangeCommand,
             InsertColAfterCommand,
             InsertColBeforeCommand,
             InsertMultiColsLeftCommand,

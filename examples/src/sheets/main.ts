@@ -177,398 +177,404 @@ declare global {
         createNewInstance?: typeof createNewInstance;
     }
 }
-const logService = window.univer!.__getInjector().get(ILogService);
+
+// eslint-disable-next-line max-lines-per-function, complexity
+function initEvent() {
+    const logService = window.univer!.__getInjector().get(ILogService);
 
 // Workbook Events
-window.univerAPI?.addEvent(window.univerAPI.Event.WorkbookCreated, (params) => {
-    logService.log('===WorkbookCreated', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.WorkbookCreated, (params) => {
+        logService.log('===WorkbookCreated', params);
+    });
 
-window.univerAPI?.addEvent(window.univerAPI.Event.WorkbookDisposed, (params) => {
-    logService.log('===WorkbookDisposed', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.WorkbookDisposed, (params) => {
+        logService.log('===WorkbookDisposed', params);
+    });
 
 // Sheet Lifecycle Events
 // checked
-window.univerAPI?.addEvent(window.univerAPI.Event.BeforeSheetCreate, (params) => {
-    logService.log('===BeforeSheetCreate', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.BeforeSheetCreate, (params) => {
+        logService.log('===BeforeSheetCreate', params);
+    });
 // checked
-window.univerAPI?.addEvent(window.univerAPI.Event.SheetCreated, (params) => {
-    logService.log('===SheetCreated', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.SheetCreated, (params) => {
+        logService.log('===SheetCreated', params);
+    });
 
 // checked
-window.univerAPI?.addEvent(window.univerAPI.Event.BeforeSheetDelete, (params) => {
-    logService.log('===BeforeSheetDelete', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.BeforeSheetDelete, (params) => {
+        logService.log('===BeforeSheetDelete', params);
+    });
 
 // checked
-window.univerAPI?.addEvent(window.univerAPI.Event.SheetDeleted, (params) => {
-    logService.log('===SheetDeleted', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.SheetDeleted, (params) => {
+        logService.log('===SheetDeleted', params);
+    });
 
 // checked
-window.univerAPI?.addEvent(window.univerAPI.Event.BeforeSheetMove, (params) => {
-    logService.log('===BeforeSheetMove', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.BeforeSheetMove, (params) => {
+        logService.log('===BeforeSheetMove', params);
+    });
 
 // checked
-window.univerAPI?.addEvent(window.univerAPI.Event.SheetMoved, (params) => {
-    logService.log('===SheetMoved', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.SheetMoved, (params) => {
+        logService.log('===SheetMoved', params);
+    });
 
 // checked
-window.univerAPI?.addEvent(window.univerAPI.Event.BeforeSheetNameChange, (params) => {
-    logService.log('===BeforeSheetNameChange', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.BeforeSheetNameChange, (params) => {
+        logService.log('===BeforeSheetNameChange', params);
+    });
 
 // checked
-window.univerAPI?.addEvent(window.univerAPI.Event.SheetNameChanged, (params) => {
-    logService.log('===SheetNameChanged', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.SheetNameChanged, (params) => {
+        logService.log('===SheetNameChanged', params);
+    });
 
 // checked
-window.univerAPI?.addEvent(window.univerAPI.Event.BeforeSheetHideChange, (params) => {
-    logService.log('===BeforeSheetHideChange', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.BeforeSheetHideChange, (params) => {
+        logService.log('===BeforeSheetHideChange', params);
+    });
 
 // checked
-window.univerAPI?.addEvent(window.univerAPI.Event.SheetHideChanged, (params) => {
-    logService.log('===SheetHideChanged', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.SheetHideChanged, (params) => {
+        logService.log('===SheetHideChanged', params);
+    });
 
 // checked
-window.univerAPI?.addEvent(window.univerAPI.Event.CellClicked, (params) => {
-    logService.log('===CellClicked', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.CellClicked, (params) => {
+        logService.log('===CellClicked', params);
+    });
 
 // checked
-window.univerAPI?.addEvent(window.univerAPI.Event.CellHover, (params) => {
-    logService.log('===CellHover', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.CellHover, (params) => {
+        logService.log('===CellHover', params);
+    });
 
 // checked
-window.univerAPI?.addEvent(window.univerAPI.Event.CellPointerDown, (params) => {
-    logService.log('===CellPointerDown', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.CellPointerDown, (params) => {
+        logService.log('===CellPointerDown', params);
+    });
 
 // checked
-window.univerAPI?.addEvent(window.univerAPI.Event.CellPointerUp, (params) => {
-    logService.log('===CellPointerUp', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.CellPointerUp, (params) => {
+        logService.log('===CellPointerUp', params);
+    });
 
 // checked
-window.univerAPI?.addEvent(window.univerAPI.Event.CellPointerMove, (params) => {
-    logService.log('===CellPointerMove', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.CellPointerMove, (params) => {
+        logService.log('===CellPointerMove', params);
+    });
 
 // checked
-window.univerAPI?.addEvent(window.univerAPI.Event.SelectionChanged, (params) => {
-    logService.log('===SelectionChanged', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.SelectionChanged, (params) => {
+        logService.log('===SelectionChanged', params);
+    });
 
 // checked
-window.univerAPI?.addEvent(window.univerAPI.Event.SelectionMoveStart, (params) => {
-    logService.log('===SelectionMoveStart', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.SelectionMoveStart, (params) => {
+        logService.log('===SelectionMoveStart', params);
+    });
 
 // checked
-window.univerAPI?.addEvent(window.univerAPI.Event.SelectionMoveEnd, (params) => {
-    logService.log('===SelectionMoveEnd', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.SelectionMoveEnd, (params) => {
+        logService.log('===SelectionMoveEnd', params);
+    });
 
 // checked
-window.univerAPI?.addEvent(window.univerAPI.Event.SelectionMoving, (params) => {
-    logService.log('===SelectionMoving', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.SelectionMoving, (params) => {
+        logService.log('===SelectionMoving', params);
+    });
 
 // checked
-window.univerAPI?.addEvent(window.univerAPI.Event.BeforeSheetEditStart, (params) => {
-    logService.log('===BeforeSheetEditStart', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.BeforeSheetEditStart, (params) => {
+        logService.log('===BeforeSheetEditStart', params);
+    });
 
 // checked
-window.univerAPI?.addEvent(window.univerAPI.Event.SheetEditStarted, (params) => {
-    logService.log('===SheetEditStarted', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.SheetEditStarted, (params) => {
+        logService.log('===SheetEditStarted', params);
+    });
 
 // checked
-window.univerAPI?.addEvent(window.univerAPI.Event.SheetEditChanging, (params) => {
-    logService.log('===SheetEditChanging', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.SheetEditChanging, (params) => {
+        logService.log('===SheetEditChanging', params);
+    });
 
 // checked
-window.univerAPI?.addEvent(window.univerAPI.Event.BeforeSheetEditEnd, (params) => {
-    logService.log('===BeforeSheetEditEnd', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.BeforeSheetEditEnd, (params) => {
+        logService.log('===BeforeSheetEditEnd', params);
+    });
 
 // checked
-window.univerAPI?.addEvent(window.univerAPI.Event.SheetEditEnded, (params) => {
-    logService.log('===SheetEditEnded', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.SheetEditEnded, (params) => {
+        logService.log('===SheetEditEnded', params);
+    });
 
 // checked
-window.univerAPI?.addEvent(window.univerAPI.Event.SheetValueChanged, (params) => {
-    logService.log('===SheetValueChanged', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.SheetValueChanged, (params) => {
+        logService.log('===SheetValueChanged', params);
+    });
 
 // Clipboard Events
-window.univerAPI?.addEvent(window.univerAPI.Event.BeforeClipboardChange, (params) => {
-    logService.log('===BeforeClipboardChange', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.BeforeClipboardChange, (params) => {
+        logService.log('===BeforeClipboardChange', params);
+    });
 
-window.univerAPI?.addEvent(window.univerAPI.Event.ClipboardChanged, (params) => {
-    logService.log('===ClipboardChanged', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.ClipboardChanged, (params) => {
+        logService.log('===ClipboardChanged', params);
+    });
 
-window.univerAPI?.addEvent(window.univerAPI.Event.BeforeClipboardPaste, (params) => {
-    logService.log('===BeforeClipboardPaste', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.BeforeClipboardPaste, (params) => {
+        logService.log('===BeforeClipboardPaste', params);
+    });
 
-window.univerAPI?.addEvent(window.univerAPI.Event.ClipboardPasted, (params) => {
-    logService.log('===ClipboardPasted', params);
-});
-
-// checked
-window.univerAPI?.addEvent(window.univerAPI.Event.BeforeGridlineEnableChange, (params) => {
-    logService.log('===BeforeGridlineEnableChange', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.ClipboardPasted, (params) => {
+        logService.log('===ClipboardPasted', params);
+    });
 
 // checked
-window.univerAPI?.addEvent(window.univerAPI.Event.BeforeGridlineColorChange, (params) => {
-    logService.log('===BeforeGridlineColorChange', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.BeforeGridlineEnableChange, (params) => {
+        logService.log('===BeforeGridlineEnableChange', params);
+    });
 
 // checked
-window.univerAPI?.addEvent(window.univerAPI.Event.GridlineChanged, (params) => {
-    logService.log('===GridlineChanged', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.BeforeGridlineColorChange, (params) => {
+        logService.log('===BeforeGridlineColorChange', params);
+    });
 
 // checked
-window.univerAPI?.addEvent(window.univerAPI.Event.BeforeSheetZoomChange, (params) => {
-    logService.log('===BeforeSheetZoomChange', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.GridlineChanged, (params) => {
+        logService.log('===GridlineChanged', params);
+    });
 
 // checked
-window.univerAPI?.addEvent(window.univerAPI.Event.SheetZoomChanged, (params) => {
-    logService.log('===SheetZoomChanged', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.BeforeSheetZoomChange, (params) => {
+        logService.log('===BeforeSheetZoomChange', params);
+    });
 
 // checked
-window.univerAPI?.addEvent(window.univerAPI.Event.Scroll, (params) => {
-    logService.log('===Scroll', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.SheetZoomChanged, (params) => {
+        logService.log('===SheetZoomChanged', params);
+    });
 
 // checked
-window.univerAPI?.addEvent(window.univerAPI.Event.SheetSkeletonChanged, (params) => {
-    logService.log('===SheetSkeletonChanged', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.Scroll, (params) => {
+        logService.log('===Scroll', params);
+    });
 
 // checked
-window.univerAPI?.addEvent(window.univerAPI.Event.BeforeSheetDataValidationAdd, (params) => {
-    logService.log('===BeforeSheetDataValidationAdd', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.SheetSkeletonChanged, (params) => {
+        logService.log('===SheetSkeletonChanged', params);
+    });
 
 // checked
-window.univerAPI?.addEvent(window.univerAPI.Event.SheetDataValidationChanged, (params) => {
-    logService.log('===SheetDataValidationChanged', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.BeforeSheetDataValidationAdd, (params) => {
+        logService.log('===BeforeSheetDataValidationAdd', params);
+    });
 
 // checked
-window.univerAPI?.addEvent(window.univerAPI.Event.SheetDataValidatorStatusChanged, (params) => {
-    logService.log('===SheetDataValidatorStatusChanged', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.SheetDataValidationChanged, (params) => {
+        logService.log('===SheetDataValidationChanged', params);
+    });
 
 // checked
-window.univerAPI?.addEvent(window.univerAPI.Event.SheetBeforeRangeFilter, (params) => {
-    logService.log('===SheetBeforeRangeFilter', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.SheetDataValidatorStatusChanged, (params) => {
+        logService.log('===SheetDataValidatorStatusChanged', params);
+    });
 
 // checked
-window.univerAPI?.addEvent(window.univerAPI.Event.SheetRangeFiltered, (params) => {
-    logService.log('===SheetRangeFiltered', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.SheetBeforeRangeFilter, (params) => {
+        logService.log('===SheetBeforeRangeFilter', params);
+    });
 
 // checked
-window.univerAPI?.addEvent(window.univerAPI.Event.SheetBeforeRangeSort, (params) => {
-    logService.log('===SheetBeforeRangeSort', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.SheetRangeFiltered, (params) => {
+        logService.log('===SheetRangeFiltered', params);
+    });
 
 // checked
-window.univerAPI?.addEvent(window.univerAPI.Event.SheetRangeSorted, (params) => {
-    logService.log('===SheetRangeSorted', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.SheetBeforeRangeSort, (params) => {
+        logService.log('===SheetBeforeRangeSort', params);
+    });
 
-window.univerAPI?.addEvent(window.univerAPI.Event.SheetBeforeRangeFilterClear, (params) => {
-    logService.log('===SheetBeforeRangeFilterClear', params);
-});
+// checked
+    window.univerAPI?.addEvent(window.univerAPI.Event.SheetRangeSorted, (params) => {
+        logService.log('===SheetRangeSorted', params);
+    });
 
-window.univerAPI?.addEvent(window.univerAPI.Event.SheetRangeFilterCleared, (params) => {
-    logService.log('===SheetRangeFilterCleared', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.SheetBeforeRangeFilterClear, (params) => {
+        logService.log('===SheetBeforeRangeFilterClear', params);
+    });
+
+    window.univerAPI?.addEvent(window.univerAPI.Event.SheetRangeFilterCleared, (params) => {
+        logService.log('===SheetRangeFilterCleared', params);
+    });
 
 // Image Events
-window.univerAPI?.addEvent(window.univerAPI.Event.BeforeOverGridImageInsert, (params) => {
-    logService.log('===BeforeOverGridImageInsert', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.BeforeOverGridImageInsert, (params) => {
+        logService.log('===BeforeOverGridImageInsert', params);
+    });
 
-window.univerAPI?.addEvent(window.univerAPI.Event.OverGridImageInserted, (params) => {
-    logService.log('===OverGridImageInserted', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.OverGridImageInserted, (params) => {
+        logService.log('===OverGridImageInserted', params);
+    });
 
-window.univerAPI?.addEvent(window.univerAPI.Event.BeforeOverGridImageChange, (params) => {
-    logService.log('===BeforeOverGridImageChange', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.BeforeOverGridImageChange, (params) => {
+        logService.log('===BeforeOverGridImageChange', params);
+    });
 
-window.univerAPI?.addEvent(window.univerAPI.Event.OverGridImageChanged, (params) => {
-    logService.log('===OverGridImageChanged', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.OverGridImageChanged, (params) => {
+        logService.log('===OverGridImageChanged', params);
+    });
 
-window.univerAPI?.addEvent(window.univerAPI.Event.BeforeOverGridImageRemove, (params) => {
-    logService.log('===BeforeOverGridImageRemove', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.BeforeOverGridImageRemove, (params) => {
+        logService.log('===BeforeOverGridImageRemove', params);
+    });
 
-window.univerAPI?.addEvent(window.univerAPI.Event.OverGridImageRemoved, (params) => {
-    logService.log('===OverGridImageRemoved', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.OverGridImageRemoved, (params) => {
+        logService.log('===OverGridImageRemoved', params);
+    });
 
-window.univerAPI?.addEvent(window.univerAPI.Event.BeforeOverGridImageSelect, (params) => {
-    logService.log('===BeforeOverGridImageSelect', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.BeforeOverGridImageSelect, (params) => {
+        logService.log('===BeforeOverGridImageSelect', params);
+    });
 
-window.univerAPI?.addEvent(window.univerAPI.Event.OverGridImageSelected, (params) => {
-    logService.log('===OverGridImageSelected', params);
-});
-
-// checked
-window.univerAPI?.addEvent(window.univerAPI.Event.BeforeCommentAdd, (params) => {
-    logService.log('===BeforeCommentAdd', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.OverGridImageSelected, (params) => {
+        logService.log('===OverGridImageSelected', params);
+    });
 
 // checked
-window.univerAPI?.addEvent(window.univerAPI.Event.CommentAdded, (params) => {
-    logService.log('===CommentAdded', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.BeforeCommentAdd, (params) => {
+        logService.log('===BeforeCommentAdd', params);
+    });
 
 // checked
-window.univerAPI?.addEvent(window.univerAPI.Event.BeforeCommentUpdate, (params) => {
-    logService.log('===BeforeCommentUpdate', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.CommentAdded, (params) => {
+        logService.log('===CommentAdded', params);
+    });
 
 // checked
-window.univerAPI?.addEvent(window.univerAPI.Event.CommentUpdated, (params) => {
-    logService.log('===CommentUpdated', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.BeforeCommentUpdate, (params) => {
+        logService.log('===BeforeCommentUpdate', params);
+    });
 
 // checked
-window.univerAPI?.addEvent(window.univerAPI.Event.BeforeCommentDeleted, (params) => {
-    logService.log('===BeforeCommentDeleted', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.CommentUpdated, (params) => {
+        logService.log('===CommentUpdated', params);
+    });
 
 // checked
-window.univerAPI?.addEvent(window.univerAPI.Event.CommentDeleted, (params) => {
-    logService.log('===CommentDeleted', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.BeforeCommentDeleted, (params) => {
+        logService.log('===BeforeCommentDeleted', params);
+    });
 
 // checked
-window.univerAPI?.addEvent(window.univerAPI.Event.BeforeCommentResolve, (params) => {
-    logService.log('===BeforeCommentResolve', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.CommentDeleted, (params) => {
+        logService.log('===CommentDeleted', params);
+    });
 
 // checked
-window.univerAPI?.addEvent(window.univerAPI.Event.CommentResolved, (params) => {
-    logService.log('===CommentResolved', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.BeforeCommentResolve, (params) => {
+        logService.log('===BeforeCommentResolve', params);
+    });
 
 // checked
-window.univerAPI?.addEvent(window.univerAPI.Event.RowHeaderClick, (params) => {
-    logService.log('===RowHeaderClick', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.CommentResolved, (params) => {
+        logService.log('===CommentResolved', params);
+    });
 
 // checked
-window.univerAPI?.addEvent(window.univerAPI.Event.RowHeaderHover, (params) => {
-    logService.log('===RowHeaderHover', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.RowHeaderClick, (params) => {
+        logService.log('===RowHeaderClick', params);
+    });
 
 // checked
-window.univerAPI?.addEvent(window.univerAPI.Event.RowHeaderPointerDown, (params) => {
-    logService.log('===RowHeaderPointerDown', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.RowHeaderHover, (params) => {
+        logService.log('===RowHeaderHover', params);
+    });
 
 // checked
-window.univerAPI?.addEvent(window.univerAPI.Event.RowHeaderPointerUp, (params) => {
-    logService.log('===RowHeaderPointerUp', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.RowHeaderPointerDown, (params) => {
+        logService.log('===RowHeaderPointerDown', params);
+    });
 
 // checked
-window.univerAPI?.addEvent(window.univerAPI.Event.ColumnHeaderClick, (params) => {
-    logService.log('===ColumnHeaderClick', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.RowHeaderPointerUp, (params) => {
+        logService.log('===RowHeaderPointerUp', params);
+    });
 
 // checked
-window.univerAPI?.addEvent(window.univerAPI.Event.ColumnHeaderHover, (params) => {
-    logService.log('===ColumnHeaderHover', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.ColumnHeaderClick, (params) => {
+        logService.log('===ColumnHeaderClick', params);
+    });
 
 // checked
-window.univerAPI?.addEvent(window.univerAPI.Event.ColumnHeaderPointerDown, (params) => {
-    logService.log('===ColumnHeaderPointerDown', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.ColumnHeaderHover, (params) => {
+        logService.log('===ColumnHeaderHover', params);
+    });
 
 // checked
-window.univerAPI?.addEvent(window.univerAPI.Event.ColumnHeaderPointerUp, (params) => {
-    logService.log('===ColumnHeaderPointerUp', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.ColumnHeaderPointerDown, (params) => {
+        logService.log('===ColumnHeaderPointerDown', params);
+    });
 
 // checked
-window.univerAPI?.addEvent(window.univerAPI.Event.BeforeSheetLinkAdd, (params) => {
-    logService.log('===BeforeSheetLinkAdd', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.ColumnHeaderPointerUp, (params) => {
+        logService.log('===ColumnHeaderPointerUp', params);
+    });
 
 // checked
-window.univerAPI?.addEvent(window.univerAPI.Event.BeforeSheetLinkUpdate, (params) => {
-    logService.log('===BeforeSheetLinkUpdate', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.BeforeSheetLinkAdd, (params) => {
+        logService.log('===BeforeSheetLinkAdd', params);
+    });
 
 // checked
-window.univerAPI?.addEvent(window.univerAPI.Event.BeforeSheetLinkCancel, (params) => {
-    logService.log('===BeforeSheetLinkCancel', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.BeforeSheetLinkUpdate, (params) => {
+        logService.log('===BeforeSheetLinkUpdate', params);
+    });
+
+// checked
+    window.univerAPI?.addEvent(window.univerAPI.Event.BeforeSheetLinkCancel, (params) => {
+        logService.log('===BeforeSheetLinkCancel', params);
+    });
 
 // Drag and Drop Events
-window.univerAPI?.addEvent(window.univerAPI.Event.DragOver, (params) => {
-    logService.log('===DragOver', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.DragOver, (params) => {
+        logService.log('===DragOver', params);
+    });
 
-window.univerAPI?.addEvent(window.univerAPI.Event.Drop, (params) => {
-    logService.log('===Drop', params);
-});
-
-// checked
-window.univerAPI?.addEvent(window.univerAPI.Event.CrosshairHighlightColorChanged, (params) => {
-    logService.log('===CrosshairHighlightColorChanged', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.Drop, (params) => {
+        logService.log('===Drop', params);
+    });
 
 // checked
-window.univerAPI?.addEvent(window.univerAPI.Event.CrosshairHighlightEnabledChanged, (params) => {
-    logService.log('===CrosshairHighlightEnabledChanged', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.CrosshairHighlightColorChanged, (params) => {
+        logService.log('===CrosshairHighlightColorChanged', params);
+    });
 
 // checked
-window.univerAPI?.addEvent(window.univerAPI.Event.BeforeSheetEditStart, (params) => {
-    const { row, column } = params;
-    if (row === 0 && column === 0) {
-        params.cancel = true;
-    }
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.CrosshairHighlightEnabledChanged, (params) => {
+        logService.log('===CrosshairHighlightEnabledChanged', params);
+    });
 
 // checked
-window.univerAPI?.addEvent(window.univerAPI.Event.ActiveSheetChanged, (params) => {
-    logService.log('===active sheet changed', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.BeforeSheetEditStart, (params) => {
+        const { row, column } = params;
+        if (row === 0 && column === 0) {
+            params.cancel = true;
+        }
+    });
 
 // checked
-window.univerAPI?.addEvent(window.univerAPI.Event.SheetEditChanging, (params) => {
-    logService.log('===SheetEditChanging', params);
-});
+    window.univerAPI?.addEvent(window.univerAPI.Event.ActiveSheetChanged, (params) => {
+        logService.log('===active sheet changed', params);
+    });
+
+// checked
+    window.univerAPI?.addEvent(window.univerAPI.Event.SheetEditChanging, (params) => {
+        logService.log('===SheetEditChanging', params);
+    });
+}
+
+// initEvent();

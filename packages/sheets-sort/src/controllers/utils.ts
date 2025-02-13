@@ -15,8 +15,8 @@
  */
 
 import type { ICellData, Nullable } from '@univerjs/core';
-import { SortType } from '../services/interface';
 import type { ICommonComparableCellValue } from './sheets-sort.controller';
+import { SortType } from '../services/interface';
 
 export enum ORDER {
     POSITIVE = 1,
@@ -123,4 +123,3 @@ export const isNullValue = (cell: Nullable<ICellData>) => {
     }
     return false;
 };
-

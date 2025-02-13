@@ -45,8 +45,7 @@ export const WatermarkTextSetting: React.FC<IWatermarkTextSettingProps> = (props
                     onChange={(val) => onChange({ ...config, content: val })}
                     className={styles.watermarkInputContent}
                     placeholder={localeService.t('univer-watermark.textPlaceholder')}
-                >
-                </Input>
+                />
             </div>
 
             <div className={styles.watermarkTextSettingFontStyle}>
@@ -75,8 +74,7 @@ export const WatermarkTextSetting: React.FC<IWatermarkTextSettingProps> = (props
                                 { label: localeService.t('univer-watermark.ltr'), value: 'ltr' },
                                 { label: localeService.t('univer-watermark.rtl'), value: 'rtl' },
                             ]}
-                        >
-                        </Select>
+                        />
                     </div>
 
                     <div>
@@ -141,9 +139,7 @@ export const WatermarkTextSetting: React.FC<IWatermarkTextSettingProps> = (props
                         <Checkbox
                             checked={config.repeat}
                             onChange={(val) => onChange({ ...config, repeat: val as boolean })}
-                        >
-
-                        </Checkbox>
+                        />
                     </div>
                 </div>
                 <div className={styles.watermarkTextSettingFontStylePart}>

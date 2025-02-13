@@ -59,4 +59,3 @@ export const SetWorksheetProtectionCommand: ICommand<ISetWorksheetProtectionPara
         return true;
     },
 };
-

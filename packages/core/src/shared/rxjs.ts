@@ -76,4 +76,3 @@ export function afterTime(ms: number): Observable<void> {
     setTimeout(() => subject.next(), ms);
     return subject.pipe(take(1));
 }
-

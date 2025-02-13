@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { retry } from 'rxjs/operators';
 import type { Nullable } from '@univerjs/core';
 import type { HTTPInterceptorFnFactory } from '../interceptor';
+import { retry } from 'rxjs/operators';
 
 const DEFAULT_MAX_RETRY_ATTEMPTS = 3;
 const DELAY_INTERVAL = 1000;
@@ -31,4 +31,3 @@ export const RetryInterceptorFactory: HTTPInterceptorFnFactory<[Nullable<IRetryI
     const delayInterval = params?.delayInterval ?? DELAY_INTERVAL;
     return (request, next) => next(request).pipe(retry({ delay: delayInterval, count: maxRetryAttempts }));
 };
-

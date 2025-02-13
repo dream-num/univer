@@ -17,4 +17,3 @@
 import type { ISequenceNode } from '@univerjs/engine-formula';
 
 export const sequenceNodeToText = (sequenceNode: (string | ISequenceNode)[]) => sequenceNode.map((item) => typeof item === 'string' ? item : item.token).join('');
-

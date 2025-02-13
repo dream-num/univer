@@ -15,4 +15,3 @@
  */
 
 export const COMPONENT_IMAGE_VIEWER = 'COMPONENT_IMAGE_VIEWER';
-

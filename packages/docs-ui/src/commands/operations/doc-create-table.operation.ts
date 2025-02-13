@@ -65,4 +65,3 @@ export const DocCreateTableOperation: ICommand = {
         return true;
     },
 };
-

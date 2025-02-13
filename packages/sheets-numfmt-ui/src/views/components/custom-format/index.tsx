@@ -72,7 +72,7 @@ export function CustomFormat(props: IBusinessComponentProps) {
     return (
         <div className={styles.customFormat}>
             <div className={styles.customFormatTitle}>{localeService.t('sheet.numfmt.customFormat')}</div>
-            <Input placeholder={localeService.t('sheet.numfmt.customFormat')} onBlur={handleBlur} value={pattern} onChange={patternSet} className={styles.customFormatInput}></Input>
+            <Input placeholder={localeService.t('sheet.numfmt.customFormat')} onBlur={handleBlur} value={pattern} onChange={patternSet} className={styles.customFormatInput} />
             <div className={styles.customFormatHistoryList}>
                 {options.map((p) => (
                     <div key={p} onClick={() => handleClick(p as string)} className={styles.customFormatHistoryListItem}>

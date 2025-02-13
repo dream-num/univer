@@ -38,4 +38,3 @@ export type IModel = Map<string, Map<string, IWorksheetProtectionRule>>;
 
 export type IObjectPointModel = Record<string, IWorksheetProtectionPointRule[]>;
 export type IPointRuleModel = Map<string, Map<string, IWorksheetProtectionPointRule>>;
-

@@ -78,7 +78,7 @@ export function FilterPanel() {
                 sharedProps={{ range, colIndex, onClose: onCancel }}
             />
             <div className={styles.sheetsFilterPanelHeader}>
-                <Segmented value={filterBy} options={options} onChange={(value) => onFilterByTypeChange(value as FilterBy)}></Segmented>
+                <Segmented value={filterBy} options={options} onChange={(value) => onFilterByTypeChange(value as FilterBy)} />
             </div>
             {filterByModel
                 ? (
@@ -111,4 +111,3 @@ function useFilterByOptions(localeService: LocaleService): ISegmentedProps['opti
         // eslint-disable-next-line react-hooks/exhaustive-deps
     [locale, localeService]);
 }
-

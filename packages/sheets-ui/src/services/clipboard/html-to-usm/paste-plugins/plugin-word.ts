@@ -15,11 +15,10 @@
  */
 
 import type { IParagraph } from '@univerjs/core';
+import type { IPastePlugin } from './type';
 import { BooleanNumber } from '@univerjs/core';
-
 import { extractNodeStyle as getInlineStyle } from '../parse-node-style';
 import { getParagraphStyle } from '../utils';
-import type { IPastePlugin } from './type';
 
 export const WordPastePlugin: IPastePlugin = {
     name: 'univer-doc-paste-plugin-word',
@@ -64,4 +63,3 @@ export const WordPastePlugin: IPastePlugin = {
         },
     ],
 };
-

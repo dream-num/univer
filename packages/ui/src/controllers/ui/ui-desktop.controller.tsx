@@ -164,8 +164,8 @@ function bootstrap(
 
     return toDisposable(() => {
         // https://github.com/facebook/react/issues/26031
-        createRoot(<div></div>, mountContainer);
-        setTimeout(() => createRoot(<div></div>, mountContainer), 200);
+        createRoot(<div />, mountContainer);
+        setTimeout(() => createRoot(<div />, mountContainer), 200);
         setTimeout(() => unmount(mountContainer), 500);
     });
 }

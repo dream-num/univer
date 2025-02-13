@@ -59,4 +59,3 @@ describe('test custom rxjs utils', () => {
         });
     });
 });
-

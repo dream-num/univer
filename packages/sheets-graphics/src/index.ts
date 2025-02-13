@@ -16,4 +16,3 @@
 
 export { UniverSheetGraphicsPlugin } from './plugin';
 export { SheetGraphicsRenderController } from './controllers/graphics-render.controller';
-

@@ -58,4 +58,3 @@ export const defaultWorksheetPermissionPoint = [
     UnitAction.SetRowStyle,
     UnitAction.Sort,
 ];
-

@@ -87,7 +87,7 @@ export function FilterByCondition(props: { model: ByConditionsModel }) {
                                 {condition.numOfParameters >= 2 && renderSecondaryCondition(formParams.operator2!, formParams.val2 ?? '', 'operator2')}
                                 <div className={styles.sheetsFilterPanelConditionsDesc}>
                                     {localeService.t('sheets-filter.panel.?')}
-                                    <br></br>
+                                    <br />
                                     {localeService.t('sheets-filter.panel.*')}
                                 </div>
                             </div>

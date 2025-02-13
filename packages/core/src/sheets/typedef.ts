@@ -571,7 +571,7 @@ export interface IRangeCellData {
 export type IRangeType = IRange | IRangeStringData | IRangeArrayData | IRangeCellData;
 
 /**
- * Whether to clear only the contents.	Whether to clear only the format; note that clearing format also clears data validation rules.
+ * Whether to clear only the contents. Whether to clear only the format; note that clearing format also clears data validation rules.
  */
 export interface IOptionData {
     /**

@@ -47,8 +47,7 @@ export function CrosshairOverlay(props: ICrosshairOverlayProps): React.JSX.Eleme
                         })}
                         style={{ backgroundColor: color }}
                         onClick={() => handleColorPicked(color)}
-                    >
-                    </div>
+                    />
                 );
             })}
         </div>

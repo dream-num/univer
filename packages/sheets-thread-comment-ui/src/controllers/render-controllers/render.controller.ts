@@ -76,4 +76,3 @@ export class SheetsThreadCommentRenderController extends Disposable {
         }));
     }
 }
-

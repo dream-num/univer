@@ -27,4 +27,3 @@ export const DocParagraphSettingPanelOperation: ICommand = {
         return true;
     },
 };
-

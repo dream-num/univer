@@ -19,4 +19,3 @@ export const EMBEDDING_FORMULA_EDITOR = 'embedding_formula_editor';
 export const isEmbeddingFormulaEditor = (unitId: string) => {
     return unitId.includes(EMBEDDING_FORMULA_EDITOR);
 };
-

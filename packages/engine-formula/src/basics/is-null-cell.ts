@@ -42,4 +42,3 @@ export function isNullCellForFormula(cell: Nullable<ICellData>) {
 
     return true;
 }
-

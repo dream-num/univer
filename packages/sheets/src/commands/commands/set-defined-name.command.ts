@@ -15,13 +15,14 @@
  */
 
 import type { IAccessor, ICommand } from '@univerjs/core';
+import type { ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
 import {
     CommandType,
     ICommandService,
     IUndoRedoService,
     sequenceExecute,
 } from '@univerjs/core';
-import { type ISetDefinedNameMutationParam, RemoveDefinedNameMutation, SetDefinedNameMutation, SetDefinedNameMutationFactory } from '@univerjs/engine-formula';
+import { RemoveDefinedNameMutation, SetDefinedNameMutation, SetDefinedNameMutationFactory } from '@univerjs/engine-formula';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 
 /**
@@ -77,4 +78,3 @@ export const SetDefinedNameCommand: ICommand = {
         return false;
     },
 };
-

@@ -200,7 +200,7 @@ export const SheetPermissionDialog = () => {
                         </div>
                     );
                 })}
-                <div className={styles.sheetPermissionDialogSplit}></div>
+                <div className={styles.sheetPermissionDialogSplit} />
                 <div className={styles.sheetPermissionUserDialogFooter}>
 
                     <Button

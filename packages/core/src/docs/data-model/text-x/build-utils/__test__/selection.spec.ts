@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import type { ITextRange } from '../../../../../sheets/typedef';
 import { describe, expect, it } from 'vitest';
 import { makeSelection, normalizeSelection } from '../selection';
-import type { ITextRange } from '../../../../../sheets/typedef';
 
 describe('makeSelection', () => {
     it('should create a collapsed selection when only startOffset is provided', () => {
@@ -80,4 +80,3 @@ describe('normalizeSelection', () => {
         expect(result).toEqual(expected);
     });
 });
-

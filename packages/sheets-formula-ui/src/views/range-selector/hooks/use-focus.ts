@@ -37,4 +37,3 @@ export const useFocus = (editor?: Editor) => {
 
     return focus;
 };
-

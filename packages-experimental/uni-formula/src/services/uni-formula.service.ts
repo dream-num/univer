@@ -15,6 +15,9 @@
  */
 
 import type { ICellData, IDisposable, Nullable } from '@univerjs/core';
+import type { IDocFormulaCache, IDocFormulaData, IDocFormulaReference } from '../models/doc-formula';
+
+import type { ISlideFormulaReference } from '../models/slide-formula';
 import {
     createIdentifier,
     Disposable,
@@ -24,10 +27,8 @@ import {
     toDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
-
-import { type IDocFormulaCache, type IDocFormulaData, type IDocFormulaReference, toJson } from '../models/doc-formula';
 import { DOC_UNI_FORMULA_RESOURCE_NAME } from '../const';
-import type { ISlideFormulaReference } from '../models/slide-formula';
+import { toJson } from '../models/doc-formula';
 
 export interface IUniFormulaService {
     updateDocFormulaResults(unitId: string, formulaIds: string[], v: IDocFormulaCache[]): boolean;
@@ -217,4 +218,3 @@ export function getDocFormulaKey(unitId: string, formulaId: string): string {
 function getSlideFormulaKey(unitId: string, pageId: string, elementId: string, formulaId: string): string {
     return `pseudo-${unitId}-${pageId}-${elementId}-${formulaId}`;
 }
-

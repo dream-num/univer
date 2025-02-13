@@ -135,11 +135,11 @@ export interface IPageElement {
 }
 
 export enum PageType {
-    SLIDE, //	A slide page.
-    MASTER, //	A master slide page.
-    LAYOUT, //	A layout page.
-    HANDOUT_MASTER, //	A handout master page.
-    NOTES_MASTER, //	A notes master page.
+    SLIDE, // A slide page.
+    MASTER, // A master slide page.
+    LAYOUT, // A layout page.
+    HANDOUT_MASTER, // A handout master page.
+    NOTES_MASTER, // A notes master page.
 }
 
 export enum PageElementType {
@@ -175,9 +175,9 @@ interface ILink {
 }
 
 export enum RelativeSlideLink {
-    RELATIVE_SLIDE_LINK_UNSPECIFIED, //	An unspecified relative slide link.
-    NEXT_SLIDE, //	A link to the next slide.
-    PREVIOUS_SLIDE, //	A link to the previous slide.
-    FIRST_SLIDE, //	A link to the first slide in the presentation.
-    LAST_SLIDE, //	A link to the last slide in the presentation.
+    RELATIVE_SLIDE_LINK_UNSPECIFIED, // An unspecified relative slide link.
+    NEXT_SLIDE, // A link to the next slide.
+    PREVIOUS_SLIDE, // A link to the previous slide.
+    FIRST_SLIDE, // A link to the first slide in the presentation.
+    LAST_SLIDE, // A link to the last slide in the presentation.
 }

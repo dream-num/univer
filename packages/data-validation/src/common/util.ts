@@ -41,4 +41,3 @@ export function getRuleOptions(rule: IDataValidationRuleOptions): IDataValidatio
         bizInfo: rule.bizInfo,
     };
 }
-

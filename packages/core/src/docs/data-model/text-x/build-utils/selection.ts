@@ -43,4 +43,3 @@ export function normalizeSelection(selection: ITextRange): ITextRange {
 export function isSegmentIntersects(start: number, end: number, start2: number, end2: number) {
     return Math.max(start, start2) <= Math.min(end, end2);
 }
-

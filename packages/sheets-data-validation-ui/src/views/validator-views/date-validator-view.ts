@@ -26,4 +26,3 @@ export class DateValidatorView extends BaseSheetDataValidatorView {
     override optionsInput = DateShowTimeOption.componentKey;
     override dropdown = DATE_DROPDOWN_KEY;
 }
-

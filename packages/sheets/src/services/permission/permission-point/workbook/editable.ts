@@ -30,4 +30,3 @@ export class WorkbookEditablePermission implements IPermissionPoint {
         this.id = `${this.type}.${UnitAction.Edit}_${unitId}`;
     }
 }
-

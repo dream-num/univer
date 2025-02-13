@@ -193,4 +193,3 @@ export class ReferenceNodeFactory extends BaseAstNodeFactory {
         return param.getParent()?.getParent()?.getToken().trim() === matchToken.COLON;
     }
 }
-

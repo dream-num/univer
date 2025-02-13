@@ -40,7 +40,7 @@ export const UploadLoading = () => {
     return (
         <div style={{ display: remain > 0 ? 'block' : 'none' }} className={styles.uploadLoading}>
             <div className={styles.uploadLoadingBody}>
-                <div className={styles.uploadLoadingBodyAnimation}></div>
+                <div className={styles.uploadLoadingBodyAnimation} />
                 <div className={styles.uploadLoadingBodyText}>{`${localeService.t('uploadLoading.loading')}: ${remain}` }</div>
             </div>
         </div>

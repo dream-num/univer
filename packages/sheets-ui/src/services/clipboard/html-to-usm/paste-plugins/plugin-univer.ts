@@ -15,8 +15,8 @@
  */
 
 import type { IParagraph } from '@univerjs/core';
-import { getParagraphStyle } from '../utils';
 import type { IPastePlugin } from './type';
+import { getParagraphStyle } from '../utils';
 
 export const UniverPastePlugin: IPastePlugin = {
     name: 'univer-doc-paste-plugin-univer',
@@ -52,4 +52,3 @@ export const UniverPastePlugin: IPastePlugin = {
         },
     ],
 };
-

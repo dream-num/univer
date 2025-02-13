@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
+import type { IAccessor } from '@univerjs/core';
+import type { IMenuItem } from '@univerjs/ui';
 import { UniverInstanceType } from '@univerjs/core';
 import { RangeProtectionPermissionEditPoint, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSortPermission } from '@univerjs/sheets';
 import { getCurrentExclusiveRangeInterest$, getCurrentRangeDisable$ } from '@univerjs/sheets-ui';
-import { getMenuHiddenObservable, type IMenuItem, MenuItemType } from '@univerjs/ui';
-import type { IAccessor } from '@univerjs/core';
+import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { SortRangeAscCommand, SortRangeAscExtCommand, SortRangeAscExtInCtxMenuCommand, SortRangeAscInCtxMenuCommand, SortRangeCustomCommand, SortRangeCustomInCtxMenuCommand, SortRangeDescCommand, SortRangeDescExtCommand, SortRangeDescExtInCtxMenuCommand, SortRangeDescInCtxMenuCommand } from '../commands/commands/sheets-sort.command';
 
 export const SHEETS_SORT_MENU_ID = 'sheet.menu.sheets-sort';
@@ -151,4 +152,3 @@ export function sortRangeCustomCtxMenuFactory(_accessor: IAccessor): IMenuItem {
         disabled$: getCurrentRangeDisable$(_accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetSortPermission, WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
     };
 }
-

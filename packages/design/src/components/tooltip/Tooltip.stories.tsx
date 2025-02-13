@@ -101,8 +101,7 @@ export const Playground = {
                         placement="bottom"
                         asChild
                     >
-                        <div className="univer-h-8 univer-w-8 univer-bg-blue-400 univer-absolute univer-right-0">
-                        </div>
+                        <div className="univer-h-8 univer-w-8 univer-bg-blue-400 univer-absolute univer-right-0" />
                     </Tooltip>
                 </div>
             </>

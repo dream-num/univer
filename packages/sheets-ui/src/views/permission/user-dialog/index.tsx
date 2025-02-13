@@ -81,7 +81,7 @@ export const SheetPermissionUserDialog = () => {
                         </div>
                     )}
             </div>
-            <div className={styles.sheetPermissionSplit}></div>
+            <div className={styles.sheetPermissionSplit} />
             <div className={styles.sheetPermissionUserDialogFooter}>
 
                 <Button className={styles.sheetPermissionUserDialogButton} onClick={() => dialogService.close(UNIVER_SHEET_PERMISSION_USER_DIALOG_ID)}>

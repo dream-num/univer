@@ -36,4 +36,3 @@ const locale: typeof zhCN = {
 };
 
 export default locale;
-

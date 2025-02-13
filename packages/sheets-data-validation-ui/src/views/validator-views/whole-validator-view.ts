@@ -22,4 +22,3 @@ export class WholeValidatorView extends BaseSheetDataValidatorView {
     override id = DataValidationType.WHOLE;
     override formulaInput: string = BASE_FORMULA_INPUT_NAME;
 }
-

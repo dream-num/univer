@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import type { IEventBase, IRange, RichTextValue } from '@univerjs/core';
+import type { IRange, RichTextValue } from '@univerjs/core';
+import type { IEventBase } from '@univerjs/core/facade';
 import type { DeviceInputEventType, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { CommandListenerSkeletonChange } from '@univerjs/sheets';
 import type { FRange, FWorkbook, FWorksheet } from '@univerjs/sheets/facade';
 import type { KeyCode } from '@univerjs/ui';
-import { FEventName } from '@univerjs/core';
+import { FEventName } from '@univerjs/core/facade';
 
 /**
  * Event interface triggered when cell editing starts
@@ -811,7 +812,7 @@ export interface IFSheetsUIEventParamConfig {
 }
 
 FEventName.extend(FSheetsUIEventName);
-declare module '@univerjs/core' {
+declare module '@univerjs/core/facade' {
     // eslint-disable-next-line ts/naming-convention
     interface FEventName extends IFSheetsUIEventNameMixin { }
     interface IEventParamConfig extends IFSheetsUIEventParamConfig { }

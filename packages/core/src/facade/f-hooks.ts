@@ -14,15 +14,9 @@
  * limitations under the License.
  */
 
-import type { IDisposable } from '../common/di';
-import type { IUndoRedoItem } from '../services/undoredo/undoredo.service';
+import type { IDisposable, IUndoRedoItem } from '@univerjs/core';
+import { ICommandService, Inject, Injector, IUndoRedoService, LifecycleService, LifecycleStages, RedoCommand, toDisposable, UndoCommand } from '@univerjs/core';
 import { filter } from 'rxjs';
-import { Inject, Injector } from '../common/di';
-import { ICommandService } from '../services/command/command.service';
-import { LifecycleStages } from '../services/lifecycle/lifecycle';
-import { LifecycleService } from '../services/lifecycle/lifecycle.service';
-import { IUndoRedoService, RedoCommand, UndoCommand } from '../services/undoredo/undoredo.service';
-import { toDisposable } from '../shared/lifecycle';
 import { FBase } from './f-base';
 
 /**
@@ -37,6 +31,7 @@ export class FHooks extends FBase {
     }
 
     /**
+     * @param callback
      * @deprecated use `univerAPI.addEvent(univerAPI.Event.LifecycleChanged)` as instead
      */
     onStarting(callback: () => void): IDisposable {
@@ -44,6 +39,7 @@ export class FHooks extends FBase {
     }
 
     /**
+     * @param callback
      * @deprecated use `univerAPI.addEvent(univerAPI.Event.LifecycleChanged)` as instead
      */
     onReady(callback: () => void): IDisposable {
@@ -51,6 +47,7 @@ export class FHooks extends FBase {
     }
 
     /**
+     * @param callback
      * @deprecated use `univerAPI.addEvent(univerAPI.Event.LifecycleChanged, () => {})` as instead
      */
     onRendered(callback: () => void): IDisposable {
@@ -58,6 +55,7 @@ export class FHooks extends FBase {
     }
 
     /**
+     * @param callback
      * @deprecated use `univerAPI.addEvent(univerAPI.Event.LifecycleChanged, () => {})` as instead
      */
     onSteady(callback: () => void): IDisposable {
@@ -65,6 +63,7 @@ export class FHooks extends FBase {
     }
 
     /**
+     * @param callback
      * @deprecated use `univerAPI.addEvent(univerAPI.Event.BeforeUndo, () => {})` as instead
      */
     onBeforeUndo(callback: (action: IUndoRedoItem) => void): IDisposable {
@@ -82,6 +81,7 @@ export class FHooks extends FBase {
     }
 
     /**
+     * @param callback
      * @deprecated use `univerAPI.addEvent(univerAPI.Event.Undo, () => {})` as instead
      */
     onUndo(callback: (action: IUndoRedoItem) => void): IDisposable {
@@ -99,6 +99,7 @@ export class FHooks extends FBase {
     }
 
     /**
+     * @param callback
      * @deprecated use `univerAPI.addEvent(univerAPI.Event.BeforeRedo, () => {})` as instead
      */
     onBeforeRedo(callback: (action: IUndoRedoItem) => void): IDisposable {
@@ -116,6 +117,7 @@ export class FHooks extends FBase {
     }
 
     /**
+     * @param callback
      * @deprecated use `univerAPI.addEvent(univerAPI.Event.Redo, () => {})` as instead
      */
     onRedo(callback: (action: IUndoRedoItem) => void): IDisposable {

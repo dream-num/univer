@@ -18,7 +18,7 @@ import type { IDisposable } from '@univerjs/core';
 import type { IMessageProps } from '@univerjs/design';
 import type { BuiltInUIPart, ComponentType, IComponentOptions, IDialogPartMethodOptions, ISidebarMethodOptions } from '@univerjs/ui';
 import type { IFacadeMenuItem, IFacadeSubmenuItem } from './f-menu-builder';
-import { FUniver } from '@univerjs/core';
+import { FUniver } from '@univerjs/core/facade';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { ComponentManager, connectInjector, CopyCommand, IDialogService, IMessageService, ISidebarService, IUIPartsService, PasteCommand } from '@univerjs/ui';
 import { FMenu, FSubmenu } from './f-menu-builder';
@@ -264,7 +264,7 @@ export class FUniverUIMixin extends FUniver implements IFUniverUIMixin {
 }
 
 FUniver.extend(FUniverUIMixin);
-declare module '@univerjs/core' {
+declare module '@univerjs/core/facade' {
     // eslint-disable-next-line ts/naming-convention
     interface FUniver extends IFUniverUIMixin { }
 }

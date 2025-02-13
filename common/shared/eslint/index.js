@@ -197,7 +197,6 @@ exports.facadePreset = () => {
     return {
         files: ['**/src/facade/**/*.ts'],
         ignores: [
-            '**/core/src/**/*.ts',
             '**/__tests__/**/*',
             '**/*.spec.ts',
             '**/*.test.ts',

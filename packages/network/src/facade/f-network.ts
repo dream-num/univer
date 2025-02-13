@@ -16,7 +16,8 @@
 
 import type { HTTPEvent, HTTPRequestMethod, HTTPResponse, IPostRequestParams, IRequestParams } from '@univerjs/network';
 import type { Observable } from 'rxjs';
-import { FBase, Inject, Injector } from '@univerjs/core';
+import { Inject, Injector } from '@univerjs/core';
+import { FBase } from '@univerjs/core/facade';
 import { HTTPService } from '@univerjs/network';
 
 /**

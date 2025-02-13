@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { FEnum } from '@univerjs/core';
+import { FEnum } from '@univerjs/core/facade';
 import { BuiltInUIPart } from '@univerjs/ui';
 
 /**
@@ -35,7 +35,7 @@ export class FUIEnum extends FEnum implements IFUIEnumMixin {
 
 FEnum.extend(FUIEnum);
 
-declare module '@univerjs/core' {
+declare module '@univerjs/core/facade' {
     // eslint-disable-next-line ts/naming-convention
     interface FEnum extends IFUIEnumMixin {}
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { FEnum } from '@univerjs/core';
+import { FEnum } from '@univerjs/core/facade';
 import { CustomFilterOperator } from '@univerjs/sheets-filter';
 
 /**
@@ -32,7 +32,7 @@ export class FSheetsFilterEnumMixin implements IFSheetsFilterEnumMixin {
 }
 
 FEnum.extend(FSheetsFilterEnumMixin);
-declare module '@univerjs/core' {
+declare module '@univerjs/core/facade' {
     // eslint-disable-next-line ts/naming-convention
     interface FEnum extends IFSheetsFilterEnumMixin {
     }

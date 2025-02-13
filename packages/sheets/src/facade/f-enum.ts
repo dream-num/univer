@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { FEnum } from '@univerjs/core';
+import { FEnum } from '@univerjs/core/facade';
 import { SheetSkeletonChangeType, SheetValueChangeType } from '@univerjs/sheets';
 
 /**
@@ -45,7 +45,7 @@ export class FSheetsEnum implements IFSheetsEnum {
 }
 
 FEnum.extend(FSheetsEnum);
-declare module '@univerjs/core' {
+declare module '@univerjs/core/facade' {
     // eslint-disable-next-line ts/naming-convention
     export interface FEnum extends IFSheetsEnum {
     }

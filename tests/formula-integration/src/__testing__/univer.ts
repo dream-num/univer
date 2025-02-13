@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { FUniver } from '@univerjs/core';
+import { FUniver } from '@univerjs/core/facade';
 import { createUniverOnNode } from 'examples-node';
 
 export function createFormulaTestBed() {

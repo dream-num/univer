@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-import type { IDrawingSearch, IEventBase, Injector } from '@univerjs/core';
+import type { IDrawingSearch, Injector } from '@univerjs/core';
+import type { IEventBase } from '@univerjs/core/facade';
 import type { ISheetImage } from '@univerjs/sheets-drawing';
 import type { IDeleteDrawingCommandParams, IInsertDrawingCommandParams, ISetDrawingCommandParams } from '@univerjs/sheets-drawing-ui';
 import type { FWorkbook } from '@univerjs/sheets/facade';
 import type { IBeforeOverGridImageChangeParamObject } from './f-event';
-import { FUniver, ICommandService } from '@univerjs/core';
+import { ICommandService } from '@univerjs/core';
+import { FUniver } from '@univerjs/core/facade';
 import { IDrawingManagerService, SetDrawingSelectedOperation } from '@univerjs/drawing';
 import { InsertSheetDrawingCommand, RemoveSheetDrawingCommand, SetSheetDrawingCommand } from '@univerjs/sheets-drawing-ui';
 import { FOverGridImage } from './f-over-grid-image';

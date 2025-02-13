@@ -18,6 +18,7 @@ import { installShims } from './common/shims';
 
 installShims();
 
+export type { INumfmt } from './shared/types/numfmt.type';
 export { debounce, get, merge, mergeWith, set } from 'lodash-es';
 export { textDiff } from './shared/text-diff';
 export { dedupe, groupBy, makeArray, remove, rotate } from './common/array';
@@ -33,13 +34,6 @@ export { AsyncInterceptorManager, composeInterceptors, createAsyncInterceptorKey
 export type { Serializable } from './common/json';
 export { MemoryCursor } from './common/memory-cursor';
 export { mixinClass } from './common/mixin';
-export { FBase, FBaseInitialable } from './facade/f-base';
-export { FUniver } from './facade/f-univer';
-export { FHooks } from './facade/f-hooks';
-export { FBlob, type IFBlobSource } from './facade/f-blob';
-export { FEventName, type IEventBase, type IEventParamConfig } from './facade/f-event';
-export { FEnum } from './facade/f-enum';
-export { FUtil } from './facade/f-util';
 export { isNumeric, isSafeNumeric } from './common/number';
 export { Registry, RegistryAsMap } from './common/registry';
 export { requestImmediateMacroTask } from './common/request-immediate-macro-task';

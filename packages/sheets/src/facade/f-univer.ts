@@ -19,7 +19,8 @@ import type { CommandListenerValueChange, IInsertSheetCommandParams, IRemoveShee
 import type { IBeforeSheetCreateEventParams, ISheetCreatedEventParams } from './f-event';
 import type { FRange } from './f-range';
 import type { FWorksheet } from './f-worksheet';
-import { CanceledError, FUniver, ICommandService, IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
+import { CanceledError, ICommandService, IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
+import { FUniver } from '@univerjs/core/facade';
 import { COMMAND_LISTENER_VALUE_CHANGE, getValueChangedEffectedRange, InsertSheetCommand, RemoveSheetCommand, SetGridlinesColorCommand, SetTabColorCommand, SetWorksheetActiveOperation, SetWorksheetHideCommand, SetWorksheetNameCommand, SetWorksheetOrderCommand, ToggleGridlinesCommand } from '@univerjs/sheets';
 import { FDefinedNameBuilder } from './f-defined-name';
 import { FPermission } from './f-permission';
@@ -643,7 +644,7 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
 }
 
 FUniver.extend(FUniverSheetsMixin);
-declare module '@univerjs/core' {
+declare module '@univerjs/core/facade' {
     // eslint-disable-next-line ts/naming-convention
     interface FUniver extends IFUniverSheetsMixin { }
 }

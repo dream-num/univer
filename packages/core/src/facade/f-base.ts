@@ -15,7 +15,7 @@
  */
 
 import type { Injector } from '@wendellhu/redi';
-import { Disposable } from '../shared';
+import { Disposable } from '@univerjs/core';
 
 /**
  * `FBase` is a base class for all facade classes.
@@ -80,7 +80,7 @@ export class FBaseInitialable extends Disposable {
     /**
      * @ignore
      */
-    _initialize(injector: Injector) { }
+    _initialize(injector: Injector): void { }
 
     /**
      * @ignore

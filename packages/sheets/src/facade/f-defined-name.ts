@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
+import type { ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
 import type { FWorksheet } from './f-worksheet';
-import { FBase, generateRandomId, IAuthzIoService, ICommandService, Inject, Injector, IPermissionService, LocaleService } from '@univerjs/core';
-import { IDefinedNamesService, type ISetDefinedNameMutationParam, serializeRange } from '@univerjs/engine-formula';
+import { generateRandomId, IAuthzIoService, ICommandService, Inject, Injector, IPermissionService, LocaleService } from '@univerjs/core';
+import { FBase } from '@univerjs/core/facade';
+import { IDefinedNamesService, serializeRange } from '@univerjs/engine-formula';
 import { RangeProtectionRuleModel, RemoveDefinedNameCommand, SCOPE_WORKBOOK_VALUE_DEFINED_NAME, SetDefinedNameCommand, WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 
 /**

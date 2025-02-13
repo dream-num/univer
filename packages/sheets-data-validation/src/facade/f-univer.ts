@@ -31,7 +31,8 @@ import type { IBeforeSheetDataValidationAddEvent,
     IBeforeSheetDataValidationRangeUpdateEvent,
 
 } from './f-event';
-import { CanceledError, FUniver, ICommandService } from '@univerjs/core';
+import { CanceledError, ICommandService } from '@univerjs/core';
+import { FUniver } from '@univerjs/core/facade';
 import {
     AddSheetDataValidationCommand,
     RemoveSheetAllDataValidationCommand,
@@ -294,7 +295,7 @@ export class FUnvierDataValidationMixin extends FUniver implements IFUnvierDataV
 }
 
 FUniver.extend(FUnvierDataValidationMixin);
-declare module '@univerjs/core' {
+declare module '@univerjs/core/facade' {
     /**
      * @ignore
      */

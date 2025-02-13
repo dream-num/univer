@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import type { UniverInstanceType } from '../common/unit';
-import type { CommandType } from '../services/command/command.service';
-import type { LifecycleStages } from '../services/lifecycle/lifecycle';
-import type { IDocumentData } from '../types/interfaces';
+/* eslint-disable ts/explicit-function-return-type */
+
+import type { CommandType, IDocumentData, LifecycleStages, UniverInstanceType } from '@univerjs/core';
 import type { FDoc } from './f-doc';
 
 /**

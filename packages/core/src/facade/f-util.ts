@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { numfmt, Rectangle, Tools } from '../shared';
+import type { INumfmt } from '@univerjs/core';
+import { numfmt, Rectangle, Tools } from '@univerjs/core';
 
 /**
  * @ignore
@@ -25,7 +26,7 @@ export class FUtil {
      */
     static _instance: FUtil | null;
 
-    static get() {
+    static get(): FUtil {
         if (this._instance) {
             return this._instance;
         }
@@ -57,21 +58,21 @@ export class FUtil {
     /**
      * Rectangle utils, including range operations likes merge, subtract, split
      */
-    get rectangle() {
+    get rectangle(): typeof Rectangle {
         return Rectangle;
     }
 
     /**
      * Number format utils, including parse and strigify about date, price, etc
      */
-    get numfmt() {
+    get numfmt(): INumfmt {
         return numfmt;
     }
 
     /**
      * common tools
      */
-    get tools() {
+    get tools(): typeof Tools {
         return Tools;
     }
 }

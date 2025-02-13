@@ -15,7 +15,8 @@
  */
 
 import process from 'node:process';
-import { awaitTime, FUniver } from '@univerjs/core';
+import { awaitTime } from '@univerjs/core';
+import { FUniver } from '@univerjs/core/facade';
 import { createUniverOnNode } from '../sdk';
 
 // From now on, Univer is a full-stack SDK.

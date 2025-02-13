@@ -15,6 +15,7 @@
  */
 
 import type { ICellData, Injector, Nullable } from '@univerjs/core';
+import type { FUniver } from '@univerjs/core/facade';
 import type { LambdaValueObjectObject, PrimitiveValueType } from '@univerjs/engine-formula';
 import type {
     ColumnHeaderLayout,
@@ -24,7 +25,6 @@ import type {
     SpreadsheetColumnHeader,
     SpreadsheetRowHeader,
 } from '@univerjs/engine-render';
-import type { FUniver } from '../everything';
 
 import { ICommandService, IUniverInstanceService } from '@univerjs/core';
 import { RegisterFunctionMutation, SetFormulaCalculationStartMutation } from '@univerjs/engine-formula';

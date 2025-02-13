@@ -17,7 +17,8 @@
 import type { IDisposable, Injector } from '@univerjs/core';
 import type { IAddCommentCommandParams, IDeleteCommentCommandParams, IResolveCommentCommandParams, IThreadComment, IUpdateCommentCommandParams } from '@univerjs/thread-comment';
 import type { IBeforeSheetCommentAddEvent, IBeforeSheetCommentDeleteEvent, IBeforeSheetCommentUpdateEvent, ISheetCommentAddEvent, ISheetCommentDeleteEvent, ISheetCommentResolveEvent, ISheetCommentUpdateEvent } from './f-event';
-import { CanceledError, FUniver, ICommandService, RichTextValue } from '@univerjs/core';
+import { CanceledError, ICommandService, RichTextValue } from '@univerjs/core';
+import { FUniver } from '@univerjs/core/facade';
 import { AddCommentCommand, DeleteCommentCommand, ResolveCommentCommand, UpdateCommentCommand } from '@univerjs/thread-comment';
 import { FTheadCommentBuilder, FTheadCommentItem } from './f-thread-comment';
 
@@ -299,7 +300,7 @@ export class FUniverCommentMixin extends FUniver implements IFUniverCommentMixin
 
 FUniver.extend(FUniverCommentMixin);
 
-declare module '@univerjs/core' {
+declare module '@univerjs/core/facade' {
     // eslint-disable-next-line ts/naming-convention
     interface FUniver extends IFUniverCommentMixin {}
 }

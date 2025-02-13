@@ -17,7 +17,6 @@
 import type { Dependency, IWorkbookData, UnitModel } from '@univerjs/core';
 import type { IRender } from '@univerjs/engine-render';
 import {
-    FUniver,
     ILogService,
     Inject,
     Injector,
@@ -28,8 +27,10 @@ import {
     ThemeService,
     Univer,
     UniverInstanceType } from '@univerjs/core';
+import { FUniver } from '@univerjs/core/facade';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { Engine, IRenderingEngine, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
+
 import {
     SheetInterceptorService,
 } from '@univerjs/sheets';

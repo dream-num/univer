@@ -362,13 +362,13 @@ export function RangeSelector(props: IRangeSelectorProps) {
 
     return (
         <div className={styles.sheetRangeSelector} ref={rangeSelectorWrapRef}>
-            <div className={cl(styles.sheetRangeSelectorTextWrap, {
-                [styles.sheetRangeSelectorActive]: isFocus && !isError,
-                [styles.sheetRangeSelectorError]: isError,
-            })}
+            <div
+                className={cl(styles.sheetRangeSelectorTextWrap, {
+                    [styles.sheetRangeSelectorActive]: isFocus && !isError,
+                    [styles.sheetRangeSelectorError]: isError,
+                })}
             >
-                <div className={styles.sheetRangeSelectorText} ref={containerRef} onMouseUp={handleClick}>
-                </div>
+                <div className={styles.sheetRangeSelectorText} ref={containerRef} onMouseUp={handleClick} />
                 <Tooltip title={localeService.t('rangeSelector.buttonTooltip')} placement="bottom">
                     <SelectRangeSingle className={styles.sheetRangeSelectorIcon} onClick={handleOpenModal} />
                 </Tooltip>
@@ -387,8 +387,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
                     visible={rangeDialogVisible}
                     isOnlyOneRange={isOnlyOneRange}
                     isSupportAcrossSheet={isSupportAcrossSheet}
-                >
-                </RangeSelectorDialog>
+                />
             )}
         </div>
     );

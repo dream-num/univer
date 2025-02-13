@@ -29,4 +29,3 @@ describe('EventState', () => {
         expect(eventState.isStopPropagation).toBe(true);
     });
 });
-

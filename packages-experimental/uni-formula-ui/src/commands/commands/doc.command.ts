@@ -100,4 +100,3 @@ export const RemoveDocUniFormulaCommand: ICommand<IRemoveDocUniFormulaCommandPar
         return commandService.syncExecuteCommand(RemoveDocUniFormulaMutation.id, params as IRemoveDocUniFormulaMutationParams);
     },
 };
-

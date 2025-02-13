@@ -413,7 +413,7 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
                         </div>
                         <div className={clsx(styles.imageCommonPanelRow, styles.imageCommonPanelRowVertical)}>
                             <div className={styles.imageCommonPanelColumn}>
-                                <Checkbox checked={lockRatio} onChange={handleLockRatioChange}></Checkbox>
+                                <Checkbox checked={lockRatio} onChange={handleLockRatioChange} />
                             </div>
                         </div>
                     </label>

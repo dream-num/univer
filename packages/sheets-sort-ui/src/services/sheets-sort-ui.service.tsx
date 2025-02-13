@@ -33,7 +33,6 @@ import {
 import { expandToContinuousRange, getPrimaryForRange, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { SheetsSortService, SortType } from '@univerjs/sheets-sort';
 import { IConfirmService } from '@univerjs/ui';
-import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { ExtendConfirm } from '../views/ExtendConfirm';
 
@@ -228,7 +227,7 @@ export class SheetsSortUIService extends Disposable {
         return true;
     }
 
-    private async _detectSortLocation(extend?: boolean): Promise<Nullable<ISheetSortLocation >> {
+    private async _detectSortLocation(extend?: boolean): Promise<Nullable<ISheetSortLocation>> {
         const workbook = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SHEET) as Workbook;
         const worksheet = workbook.getActiveSheet() as Worksheet;
         const unitId = workbook.getUnitId();

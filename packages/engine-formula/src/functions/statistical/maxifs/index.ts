@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+import type { BaseValueObject, IArrayValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
 import { calculateMaxDimensions, getBooleanResults, getErrorArray } from '../../../engine/utils/value-object';
 import { ArrayValueObject } from '../../../engine/value-object/array-value-object';
-import type { BaseValueObject, IArrayValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
 
@@ -83,4 +83,3 @@ export class Maxifs extends BaseFunction {
         return ArrayValueObject.create(arrayValueObjectData);
     }
 }
-

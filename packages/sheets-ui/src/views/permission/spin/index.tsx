@@ -27,7 +27,7 @@ const Spin = ({ loading, children }: ISpinProps) => {
         <div className={styles.spinContainer}>
             {loading && (
                 <div className={styles.spinOverlay}>
-                    <div className={styles.spinner}></div>
+                    <div className={styles.spinner} />
                 </div>
             )}
             <div className={loading ? styles.contentBlur : ''}>

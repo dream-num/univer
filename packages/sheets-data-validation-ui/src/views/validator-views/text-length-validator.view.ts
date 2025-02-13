@@ -22,4 +22,3 @@ export class TextLengthValidatorView extends BaseSheetDataValidatorView {
     override id = DataValidationType.TEXT_LENGTH;
     override formulaInput: string = BASE_FORMULA_INPUT_NAME;
 }
-

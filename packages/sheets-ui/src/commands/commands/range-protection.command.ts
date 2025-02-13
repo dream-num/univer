@@ -183,4 +183,3 @@ export const SetRangeProtectionFromContextMenuCommand: ICommand = {
         }
     },
 };
-

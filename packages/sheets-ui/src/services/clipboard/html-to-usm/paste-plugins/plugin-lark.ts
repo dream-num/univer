@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { BooleanNumber } from '@univerjs/core';
-
-import { extractNodeStyle as getInlineStyle } from '../parse-node-style';
 import type { IPastePlugin } from './type';
+
+import { BooleanNumber } from '@univerjs/core';
+import { extractNodeStyle as getInlineStyle } from '../parse-node-style';
 
 export const LarkPastePlugin: IPastePlugin = {
     name: 'univer-doc-paste-plugin-lark',
@@ -59,4 +59,3 @@ export const LarkPastePlugin: IPastePlugin = {
         },
     ],
 };
-

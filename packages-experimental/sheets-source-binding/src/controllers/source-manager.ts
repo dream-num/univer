@@ -21,7 +21,7 @@ import { ListSourceModel, ObjectSourceModel, SourceModelBase } from '../model/so
 import { BindingSourceChangeTypeEnum, DataBindingNodeTypeEnum } from '../types';
 
 export class SheetsSourceManager extends Disposable {
-    sourceMap: Map<string, Map<string, SourceModelBase> > = new Map();
+    sourceMap: Map<string, Map<string, SourceModelBase>> = new Map();
     private _sourceDataUpdate$ = new Subject<ISourceEvent>();
     sourceDataUpdate$ = this._sourceDataUpdate$.asObservable();
     constructor() {

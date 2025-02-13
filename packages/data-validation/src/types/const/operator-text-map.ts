@@ -59,4 +59,3 @@ export const TextLengthErrorTitleMap: Record<DataValidationOperator, string> = {
     [DataValidationOperator.NOT_BETWEEN]: 'dataValidation.textLength.errorMsg.notBetween',
     [DataValidationOperator.NOT_EQUAL]: 'dataValidation.textLength.errorMsg.notEqual',
 };
-

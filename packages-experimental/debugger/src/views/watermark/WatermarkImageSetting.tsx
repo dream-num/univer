@@ -105,9 +105,7 @@ export const WatermarkImageSetting: React.FC<IWatermarkImageSettingProps> = ({ c
                                     onChange({ ...config, maintainAspectRatio: val as boolean });
                                 }
                             }}
-                        >
-
-                        </Checkbox>
+                        />
                     </div>
                 </div>
             </div>
@@ -178,9 +176,7 @@ export const WatermarkImageSetting: React.FC<IWatermarkImageSettingProps> = ({ c
                         <Checkbox
                             checked={config.repeat}
                             onChange={(val) => onChange({ ...config, repeat: val as boolean })}
-                        >
-
-                        </Checkbox>
+                        />
                     </div>
                 </div>
                 <div className={styles.watermarkTextSettingFontStylePart}>

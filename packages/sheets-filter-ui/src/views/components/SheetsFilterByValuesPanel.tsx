@@ -73,8 +73,7 @@ export function FilterByValue(props: { model: ByValuesModel }) {
                             disabled={items.length === 0}
                             checked={allChecked}
                             onChange={onCheckAllToggled}
-                        >
-                        </Checkbox>
+                        />
                         <span className={styles.sheetsFilterPanelValuesItemText}>{`${localeService.t('sheets-filter.panel.select-all')}`}</span>
                         <span className={styles.sheetsFilterPanelValuesItemCount}>{`(${stat.checked}/${stat.checked + stat.unchecked})`}</span>
                     </div>
@@ -121,8 +120,7 @@ export function FilterByValue(props: { model: ByValuesModel }) {
                                 </Button>
                             </div>
                         )}
-                    >
-                    </Tree>
+                    />
                 </div>
             </div>
         </div>

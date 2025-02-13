@@ -16,9 +16,7 @@
 
 import type { ICellData, ICommandInfo, IRange, ISelectionCell, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import type { ArrayValueObject, ISheetData } from '@univerjs/engine-formula';
-import type {
-    ISelectionWithStyle,
-} from '@univerjs/sheets';
+import type { ISelectionWithStyle } from '@univerjs/sheets';
 import type { IStatusBarServiceStatus } from '../services/status-bar.service';
 import {
     CellValueType,
@@ -293,4 +291,3 @@ export class StatusBarController extends Disposable {
         }
     }
 }
-

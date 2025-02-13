@@ -158,12 +158,13 @@ export function DesktopWorkbench(props: IUniverWorkbenchProps) {
                             <ComponentContainer key="left-sidebar" components={leftSidebarComponents} />
                         </aside>
 
-                        <section className={clsx(
-                            styles.workbenchContainerContent,
-                            {
-                                [styles.workbenchContainerDocContent]: docSnapShot?.documentStyle.documentFlavor === DocumentFlavor.TRADITIONAL,
-                            }
-                        )}
+                        <section
+                            className={clsx(
+                                styles.workbenchContainerContent,
+                                {
+                                    [styles.workbenchContainerDocContent]: docSnapShot?.documentStyle.documentFlavor === DocumentFlavor.TRADITIONAL,
+                                }
+                            )}
                         >
                             <header>
                                 {header && <ComponentContainer key="header" components={headerComponents} />}
@@ -199,7 +200,7 @@ export function DesktopWorkbench(props: IUniverWorkbenchProps) {
             <ComponentContainer key="built-in-global" components={builtInGlobalComponents} />
             {contextMenu && <DesktopContextMenu />}
             <FloatingContainer />
-            <div id="univer-popup-portal"></div>
+            <div id="univer-popup-portal" />
         </ConfigProvider>
     );
 }

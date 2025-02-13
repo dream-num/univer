@@ -47,7 +47,7 @@ const exampleTables = [
     ['Faculty Council', 'June 1, 2205', 'Building 35 Room 5'],
     ['Faculty Council', 'June 15, 2205', 'Building 35 Room 5'],
     ['Faculty Council', 'June 30, 2205', 'Building 35 Room 5'],
-    ['Commencement Meeting	', 'December 15, 2205', 'Building 42 Room 10'],
+    ['Commencement Meeting', 'December 15, 2205', 'Building 42 Room 10'],
     ['Dean\'s Council', 'February 1, 2206', 'Building 35 Room 5'],
     ['Faculty Council', 'March 1, 2206', 'Building 35 Room 5'],
 ];

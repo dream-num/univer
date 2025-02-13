@@ -20,4 +20,3 @@ export type { IImageWatermarkConfig, ITextWatermarkConfig } from './common/type'
 export { IWatermarkTypeEnum } from './common/type';
 export { WatermarkService } from './services/watermark.service';
 export type { IWatermarkConfig, IWatermarkConfigWithType } from './common/type';
-

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+import type { DocumentDataModel, ICommand, IDocumentData, Injector, Univer } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, RedoCommand, UndoCommand, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation, SetTextSelectionsOperation } from '@univerjs/docs';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import type { DocumentDataModel, ICommand, IDocumentData, Injector, Univer } from '@univerjs/core';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { CoverContentCommand, ReplaceContentCommand } from '../replace-content.command';
 import { createCommandTestBed } from './create-command-test-bed';
 
@@ -142,4 +142,3 @@ describe('replace or cover content of document', () => {
         });
     });
 });
-

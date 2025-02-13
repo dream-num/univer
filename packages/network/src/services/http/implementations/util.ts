@@ -26,4 +26,3 @@ export function parseFetchParamsFromRequest(request: HTTPRequest): RequestInit {
 
     return fetchParams;
 }
-

@@ -40,4 +40,3 @@ export async function getMetrics(page: Page): Promise<IMetrics> {
 
     return metricObject as unknown as IMetrics;
 }
-

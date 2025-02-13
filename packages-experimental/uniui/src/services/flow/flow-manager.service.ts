@@ -71,4 +71,3 @@ export class FlowManagerService extends Disposable {
         this._viewportChanged$.next(viewport);
     }
 }
-

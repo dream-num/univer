@@ -327,7 +327,7 @@ export function FormulaBar() {
                 </div>
             </div>
 
-            <ComponentContainer key="formula-aux" components={formulaAuxUIParts}></ComponentContainer>
+            <ComponentContainer key="formula-aux" components={formulaAuxUIParts} />
         </div>
     );
 }

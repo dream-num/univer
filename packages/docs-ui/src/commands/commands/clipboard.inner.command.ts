@@ -534,4 +534,3 @@ export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
         return Boolean(result);
     },
 };
-

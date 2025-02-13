@@ -61,4 +61,3 @@ export const RegisterWorksheetRangeThemeStyleCommand: ICommand<IRegisterWorkshee
         return true;
     },
 };
-

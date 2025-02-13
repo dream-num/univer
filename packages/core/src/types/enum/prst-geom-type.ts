@@ -123,4 +123,3 @@ export enum SpecialShapes {
  */
 export type ShapeType = BasicShapes | ArrowsAndMarkersShapes | OtherShapes | SpecialShapes;
 export type PresetGeometryType = ShapeType | 'custom';
-

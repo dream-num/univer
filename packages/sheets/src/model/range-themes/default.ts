@@ -49,4 +49,3 @@ const defaultRangeThemeStyleJSON: Omit<IRangeThemeStyleJSON, 'name'> = {
     },
 };
 export const defaultRangeThemeStyle = new RangeThemeStyle('default', defaultRangeThemeStyleJSON);
-

@@ -40,4 +40,3 @@ export interface IUniverSheetsUIConfig {
 export const defaultPluginConfig: IUniverSheetsUIConfig = {
     formulaBar: true,
 };
-

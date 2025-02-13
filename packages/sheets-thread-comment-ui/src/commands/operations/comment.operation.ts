@@ -66,4 +66,3 @@ export const ShowAddSheetCommentModalOperation: ICommand = {
         return true;
     },
 };
-

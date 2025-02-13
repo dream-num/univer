@@ -48,13 +48,13 @@ function generateOrderedSymbol(startIndex: number, startNumber: number, glyphTyp
     return decimal(startIndex, startNumber);
 }
 
-// 	A number, like 1, 2, or 3.
+// A number, like 1, 2, or 3.
 function decimal(startIndex: number, startNumber: number) {
     const currentIndex = startIndex + startNumber;
     return currentIndex.toString();
 }
 
-// 	// 	A number where single digit numbers are prefixed with a zero, like 01, 02, or 03. Numbers with more than one digit are not prefixed with a zero.
+// A number where single digit numbers are prefixed with a zero, like 01, 02, or 03. Numbers with more than one digit are not prefixed with a zero.
 function zeroDecimal(startIndex: number, startNumber: number) {
     const currentIndex = startIndex + startNumber;
 
@@ -64,22 +64,22 @@ function zeroDecimal(startIndex: number, startNumber: number) {
     return currentIndex.toString();
 }
 
-// 	An uppercase letter, like A, B, or C.
+// An uppercase letter, like A, B, or C.
 function upperAlpha(startIndex: number, startNumber: number) {
     return numberToListABC(startIndex + startNumber - 1, true);
 }
 
-// 	A lowercase letter, like a, b, or c.
+// A lowercase letter, like a, b, or c.
 function alpha(startIndex: number, startNumber: number) {
     return numberToListABC(startIndex + startNumber - 1, false);
 }
 
-// 	An uppercase Roman numeral, like I, II, or III.
+// An uppercase Roman numeral, like I, II, or III.
 function upperRoman(startIndex: number, startNumber: number) {
     return _convertRoman(startIndex + startNumber, true);
 }
 
-// 	A lowercase Roman numeral, like i, ii, or iii.
+// A lowercase Roman numeral, like i, ii, or iii.
 function roman(startIndex: number, startNumber: number) {
     return _convertRoman(startIndex + startNumber, false);
 }

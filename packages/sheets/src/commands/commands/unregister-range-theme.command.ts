@@ -62,4 +62,3 @@ export const UnregisterWorksheetRangeThemeStyleCommand: ICommand<IUnregisterWork
         return true;
     },
 };
-

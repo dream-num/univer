@@ -57,8 +57,7 @@ const AutoFocusInputNumber = (props: {
                 });
             }}
             className={className}
-        >
-        </InputNumber>
+        />
     );
 };
 export function ParagraphSetting() {
@@ -94,10 +93,11 @@ export function ParagraphSetting() {
     return (
         <div className={styles.paragraphSetting}>
             <div className={styles.paragraphSettingTitle}>{localeService.t('doc.paragraphSetting.alignment')}</div>
-            <div className={`
-              ${styles.paragraphSettingIconList}
-              ${styles.paragraphSettingMtBase}
-            `}
+            <div
+                className={`
+                  ${styles.paragraphSettingIconList}
+                  ${styles.paragraphSettingMtBase}
+                `}
             >
                 {alignmentOptions.map((item) => {
                     return (
@@ -122,7 +122,7 @@ export function ParagraphSetting() {
                         {localeService.t('doc.paragraphSetting.left')}
                         (px)
                     </div>
-                    <AutoFocusInputNumber className={styles.paragraphSettingMtBase} value={indentStart} onChange={(v) => indentStartSet(v ?? 0)}></AutoFocusInputNumber>
+                    <AutoFocusInputNumber className={styles.paragraphSettingMtBase} value={indentStart} onChange={(v) => indentStartSet(v ?? 0)} />
                 </div>
                 <div className={styles.paragraphSettingFlexCol}>
 
@@ -130,7 +130,7 @@ export function ParagraphSetting() {
                         {localeService.t('doc.paragraphSetting.right')}
                         (px)
                     </div>
-                    <AutoFocusInputNumber className={styles.paragraphSettingMtBase} value={indentEnd} onChange={(v) => indentEndSet(v ?? 0)}></AutoFocusInputNumber>
+                    <AutoFocusInputNumber className={styles.paragraphSettingMtBase} value={indentEnd} onChange={(v) => indentEndSet(v ?? 0)} />
                 </div>
                 <div className={styles.paragraphSettingFlexCol}>
 
@@ -138,7 +138,7 @@ export function ParagraphSetting() {
                         {localeService.t('doc.paragraphSetting.firstLine')}
                         (px)
                     </div>
-                    <AutoFocusInputNumber className={styles.paragraphSettingMtBase} value={indentFirstLine} onChange={(v) => indentFirstLineSet(v ?? 0)}></AutoFocusInputNumber>
+                    <AutoFocusInputNumber className={styles.paragraphSettingMtBase} value={indentFirstLine} onChange={(v) => indentFirstLineSet(v ?? 0)} />
                 </div>
                 <div className={styles.paragraphSettingFlexCol}>
 
@@ -146,7 +146,7 @@ export function ParagraphSetting() {
                         {localeService.t('doc.paragraphSetting.hanging')}
                         (px)
                     </div>
-                    <AutoFocusInputNumber className={styles.paragraphSettingMtBase} value={hanging} onChange={(v) => hangingSet(v ?? 0)}></AutoFocusInputNumber>
+                    <AutoFocusInputNumber className={styles.paragraphSettingMtBase} value={hanging} onChange={(v) => hangingSet(v ?? 0)} />
                 </div>
             </div>
             <div className={styles.paragraphSettingTitle}>{localeService.t('doc.paragraphSetting.spacing')}</div>
@@ -157,7 +157,7 @@ export function ParagraphSetting() {
                         {localeService.t('doc.paragraphSetting.before')}
                         (px)
                     </div>
-                    <AutoFocusInputNumber className={styles.paragraphSettingMtBase} value={spaceAbove} onChange={(v) => spaceAboveSet(v ?? 0)}></AutoFocusInputNumber>
+                    <AutoFocusInputNumber className={styles.paragraphSettingMtBase} value={spaceAbove} onChange={(v) => spaceAboveSet(v ?? 0)} />
                 </div>
                 <div className={styles.paragraphSettingFlexCol}>
 
@@ -165,7 +165,7 @@ export function ParagraphSetting() {
                         {localeService.t('doc.paragraphSetting.after')}
                         (px)
                     </div>
-                    <AutoFocusInputNumber className={styles.paragraphSettingMtBase} value={spaceBelow} onChange={(v) => spaceBelowSet(v ?? 0)}></AutoFocusInputNumber>
+                    <AutoFocusInputNumber className={styles.paragraphSettingMtBase} value={spaceBelow} onChange={(v) => spaceBelowSet(v ?? 0)} />
                 </div>
                 <div className={styles.paragraphSettingFlexCol}>
                     <div className={styles.paragraphSettingLabel}>{localeService.t('doc.paragraphSetting.lineSpace')}</div>
@@ -183,14 +183,12 @@ export function ParagraphSetting() {
                                 { label: localeService.t('doc.paragraphSetting.fixedValue'), value: `${SpacingRule.AT_LEAST}` },
                             ]}
                             onChange={(v) => spacingRuleSet(Number(v))}
-                        >
-                        </Select>
+                        />
                         <AutoFocusInputNumber
                             {...lineSpaceConfig}
                             value={lineSpacing}
                             onChange={(v) => lineSpacingSet(v ?? 0)}
-                        >
-                        </AutoFocusInputNumber>
+                        />
                     </div>
 
                 </div>

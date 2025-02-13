@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { CommandType, type ICommand } from '@univerjs/core';
+import type { ICommand } from '@univerjs/core';
+import { CommandType } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
 import { IMessageService } from '@univerjs/ui';
 import { ActionReplayService, ReplayMode } from '../../services/replay.service';
@@ -75,4 +76,3 @@ export const ReplayLocalRecordOnActiveCommand: ICommand = {
         return result;
     },
 };
-

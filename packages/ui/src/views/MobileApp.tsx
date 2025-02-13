@@ -103,7 +103,7 @@ export function MobileApp(props: IUniverAppProps) {
             <div className={styles.appLayout} tabIndex={-1} onBlur={(e) => e.stopPropagation()}>
                 {/* header */}
                 {header && (
-                    <header className={styles.appContainerHeader}></header>
+                    <header className={styles.appContainerHeader} />
                 )}
 
                 {/* content */}

@@ -17,11 +17,11 @@
 // This file provides a ton of mutations to manipulate `FilterModel`.
 // These models would be held on `SheetsFilterService`.
 
-import { CommandType, ICommandService, IUniverInstanceService, Rectangle, sequenceExecute } from '@univerjs/core';
 import type { IAccessor, ICellData, ICommand, IRange, Nullable, Worksheet } from '@univerjs/core';
 import type { IReorderRangeCommandParams, ISheetCommandSharedParams } from '@univerjs/sheets';
-import { getSheetCommandTarget, ReorderRangeCommand } from '@univerjs/sheets';
 import type { IOrderRule, SortType } from '../../services/interface';
+import { CommandType, ICommandService, IUniverInstanceService, Rectangle, sequenceExecute } from '@univerjs/core';
+import { getSheetCommandTarget, ReorderRangeCommand } from '@univerjs/sheets';
 import { SheetsSortService } from '../../services/sheets-sort.service';
 
 export interface ISortRangeCommandParams extends ISheetCommandSharedParams {
@@ -159,4 +159,3 @@ function reorderFnGenerator(orderRules: IOrderRule[], valueCompare: ICellValueCo
         return 0;
     };
 }
-

@@ -42,4 +42,3 @@ export const RegisterWorksheetRangeThemeStyleMutation: IMutation<IRegisterWorksh
         return true;
     },
 };
-

@@ -132,4 +132,3 @@ export class RangeProtectionService extends Disposable {
         );
     }
 }
-

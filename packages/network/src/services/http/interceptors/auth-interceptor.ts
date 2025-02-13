@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { catchError, throwError } from 'rxjs';
 import type { HTTPInterceptorFn, HTTPInterceptorFnFactory } from '../interceptor';
+import { catchError, throwError } from 'rxjs';
 import { HTTPResponseError } from '../response';
 
 export interface IAuthInterceptorParams {
@@ -40,4 +40,3 @@ export const AuthInterceptorFactory: HTTPInterceptorFnFactory<[IAuthInterceptorP
 
     return authInterceptor;
 };
-

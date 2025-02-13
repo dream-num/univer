@@ -15,10 +15,11 @@
  */
 
 import type { Ctor, IDisposable } from '../../common/di';
+import type { UnitType } from '../../common/unit';
 import type { Plugin, PluginCtor } from './plugin';
 import { skip } from 'rxjs';
 import { Inject, Injector } from '../../common/di';
-import { type UnitType, UniverInstanceType } from '../../common/unit';
+import { UniverInstanceType } from '../../common/unit';
 import { Disposable } from '../../shared/lifecycle';
 import { LifecycleStages } from '../lifecycle/lifecycle';
 import { getLifecycleStagesAndBefore, LifecycleService } from '../lifecycle/lifecycle.service';
@@ -306,4 +307,3 @@ export class PluginHolder extends Disposable {
         });
     }
 }
-

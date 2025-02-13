@@ -39,4 +39,3 @@ export class Countblank extends BaseFunction {
         return variant.countBlank();
     }
 }
-

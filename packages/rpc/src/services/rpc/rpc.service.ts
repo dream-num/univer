@@ -449,4 +449,3 @@ export class ChannelServer extends RxDisposable implements IChannelServer {
         this._protocol.send(response);
     }
 }
-

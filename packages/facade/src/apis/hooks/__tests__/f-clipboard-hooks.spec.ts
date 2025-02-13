@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
+import type { Injector } from '@univerjs/core';
 import type { FWorkbook, FWorksheet } from '@univerjs/sheets/facade';
-import { ICommandService, type Injector, IUniverInstanceService, Univer, UniverInstanceType } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, Univer, UniverInstanceType } from '@univerjs/core';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { CopyCommand, PasteCommand } from '@univerjs/ui';
@@ -51,12 +52,10 @@ function createUnitTestBed(): {
 }
 
 describe('Test Clipboard Hooks', () => {
-    let get: Injector['get'];
     let univerAPI: FUniver;
 
     beforeEach(() => {
         const testBed = createUnitTestBed();
-        get = testBed.get;
         univerAPI = testBed.univerAPI;
     });
 
@@ -84,4 +83,3 @@ describe('Test Clipboard Hooks', () => {
         expect(afterPasteFn).toHaveBeenCalledTimes(1);
     });
 });
-

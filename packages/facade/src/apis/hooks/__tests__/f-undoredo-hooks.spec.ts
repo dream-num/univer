@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
+import type { Injector } from '@univerjs/core';
 import type { FWorksheet } from '@univerjs/sheets/facade';
-import { type Injector, IUndoRedoService, IUniverInstanceService, Univer, UniverInstanceType } from '@univerjs/core';
+import { IUndoRedoService, IUniverInstanceService, Univer, UniverInstanceType } from '@univerjs/core';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -108,4 +109,3 @@ describe('Test Undo Redo Hooks', () => {
         expect(afterRedoFn).toHaveBeenCalledTimes(0);
     });
 });
-

@@ -70,4 +70,3 @@ export class UniuiToolbarController extends Disposable {
         });
     }
 }
-

@@ -48,4 +48,3 @@ export const DocDrawingPanel = () => {
         </div>
     );
 };
-

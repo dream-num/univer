@@ -53,4 +53,3 @@ export interface IDocFormulaCache extends Pick<ICellData, 'v' | 't'> { }
 export function toJson(formulas: IDocFormulaReference[]): string {
     return JSON.stringify(formulas.map((f) => ({ rangeId: f.rangeId, f: f.f, v: f.v, t: f.t })));
 }
-

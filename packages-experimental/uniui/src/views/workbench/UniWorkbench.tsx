@@ -238,7 +238,7 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
                                 onMove={onMove}
                                 onInit={onFlowInit}
                             >
-                                <Background bgColor="#f4f6f8" color="#d9d9d9"></Background>
+                                <Background bgColor="#f4f6f8" color="#d9d9d9" />
                             </ReactFlow>
 
                             {/* Sheet cell editors etc. Their size would not be affected the scale of ReactFlow. */}
@@ -351,8 +351,7 @@ function UnitRenderer(props: IUnitRendererProps) {
             // We bind these focusing events on capture phrase so the
             // other event handlers would have correct currently focused unit.
             onWheel={(event) => event.stopPropagation()}
-        >
-        </div>
+        />
     );
 }
 

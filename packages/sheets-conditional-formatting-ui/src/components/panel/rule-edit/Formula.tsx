@@ -95,16 +95,18 @@ export const FormulaStyleEditor = (props: IStyleEditorProps) => {
 
     return (
         <div ref={divEleRef}>
-            <div className={`
-              ${stylesBase.title}
-              ${stylesBase.mTBase}
-            `}
+            <div
+                className={`
+                  ${stylesBase.title}
+                  ${stylesBase.mTBase}
+                `}
             >
                 {localeService.t('sheet.cf.panel.styleRule')}
             </div>
-            <div className={`
-              ${stylesBase.mTSm}
-            `}
+            <div
+                className={`
+                  ${stylesBase.mTSm}
+                `}
             >
 
                 <FormulaEditor
@@ -126,14 +128,14 @@ export const FormulaStyleEditor = (props: IStyleEditorProps) => {
                     initValue={formula as any}
                     unitId={workbook.getUnitId()}
                     subUnitId={worksheet?.getSheetId()}
-                >
-                </FormulaEditor>
+                />
 
             </div>
 
-            <div className={`
-              ${styles.cfPreviewWrap}
-            `}
+            <div
+                className={`
+                  ${styles.cfPreviewWrap}
+                `}
             >
                 <Preview rule={getResult({ style, formula }) as IConditionalFormattingRuleConfig} />
             </div>

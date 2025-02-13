@@ -47,4 +47,3 @@ export const SidebarDocHeaderFooterPanelOperation: ICommand = {
         return true;
     },
 };
-

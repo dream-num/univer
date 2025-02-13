@@ -429,4 +429,3 @@ export class RangeThemeStyle {
         this._mergeCacheMap.clear();
     }
 }
-

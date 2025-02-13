@@ -37,4 +37,3 @@ declare module '@univerjs/core' {
     interface FEnum extends IFSheetsFilterEnumMixin {
     }
 }
-

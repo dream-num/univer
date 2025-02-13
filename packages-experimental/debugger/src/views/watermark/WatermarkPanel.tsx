@@ -69,8 +69,7 @@ export const WatermarkPanel: React.FC = () => {
                     { label: localeService.t('univer-watermark.image'), value: IWatermarkTypeEnum.Image },
                 ]}
                 className={styles.watermarkPanelTypeSelect}
-            >
-            </Select>
+            />
             <div className={styles.watermarkPanelSetting}>
                 {watermarkType === IWatermarkTypeEnum.Text && <WatermarkTextSetting config={config?.text} onChange={(v) => handleConfigChange({ text: v })} />}
                 {watermarkType === IWatermarkTypeEnum.Image && <WatermarkImageSetting config={config?.image} onChange={(v) => handleConfigChange({ image: v })} />}
@@ -78,4 +77,3 @@ export const WatermarkPanel: React.FC = () => {
         </div>
     );
 };
-

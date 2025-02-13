@@ -253,4 +253,3 @@ export const DocHeaderFooterOptions = (props: IDocHeaderFooterOptionsProps) => {
         </div>
     );
 };
-

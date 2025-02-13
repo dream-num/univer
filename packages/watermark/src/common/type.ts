@@ -68,4 +68,3 @@ export interface IWatermarkConfigWithType {
     config: IWatermarkConfig;
     type: IWatermarkTypeEnum;
 }
-

@@ -45,4 +45,3 @@ export const createDefaultUser = (type?: UnitRole) => {
 export const isDevRole = (userId: string, type: UnitRole) => {
     return userId.startsWith(nameMap[type]);
 };
-

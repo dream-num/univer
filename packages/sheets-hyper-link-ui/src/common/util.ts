@@ -57,4 +57,3 @@ export function serializeUrl(urlStr: string) {
 
     return urlStr;
 }
-

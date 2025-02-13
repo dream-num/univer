@@ -16,38 +16,57 @@
 
 /* eslint-disable max-lines-per-function */
 
-import type { Workbook } from '@univerjs/core';
+import type { IRange, Workbook } from '@univerjs/core';
 import type { Editor } from '@univerjs/docs-ui';
 import type { ISelectionWithCoord, ISetSelectionsOperationParams } from '@univerjs/sheets';
+import type { RefObject } from 'react';
 import type { IRefSelection } from '../../range-selector/hooks/use-highlight';
-import type { INode } from '../../range-selector/utils/filter-reference-node';
 import { DisposableCollection, ICommandService, IUniverInstanceService, ThemeService } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
-import { deserializeRangeWithSheet, sequenceNodeType, serializeRange, serializeRangeWithSheet } from '@univerjs/engine-formula';
+import { deserializeRangeWithSheet, LexerTreeBuilder, sequenceNodeType } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { IRefSelectionsService, SetSelectionsOperation } from '@univerjs/sheets';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { useDependency, useEvent, useObservable } from '@univerjs/ui';
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo } from 'react';
 import { merge } from 'rxjs';
-import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
+import { debounceTime } from 'rxjs/operators';
 import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render-service';
 import { calcHighlightRanges } from '../../range-selector/hooks/use-highlight';
-import { findIndexFromSequenceNodes } from '../../range-selector/utils/find-index-from-sequence-nodes';
+import { findIndexFromSequenceNodes, findRefSequenceIndex } from '../../range-selector/utils/find-index-from-sequence-nodes';
 import { getOffsetFromSequenceNodes } from '../../range-selector/utils/get-offset-from-sequence-nodes';
 import { sequenceNodeToText } from '../../range-selector/utils/sequence-node-to-text';
 import { unitRangesToText } from '../../range-selector/utils/unit-ranges-to-text';
 import { useStateRef } from '../hooks/use-state-ref';
 import { FormulaSelectingType } from './use-formula-selection';
 
+const prepareSelectionChangeContext = (opts: { editor?: Editor; lexerTreeBuilder: LexerTreeBuilder }) => {
+    const { editor, lexerTreeBuilder } = opts;
+    const currentDocSelections = editor?.getSelectionRanges();
+    if (currentDocSelections?.length !== 1) {
+        return;
+    }
+    const docRange = currentDocSelections[0];
+    const offset = docRange.startOffset - 1;
+    const dataStream = (editor?.getDocumentData().body?.dataStream ?? '\r\n').slice(0, -2);
+    const sequenceNodes = lexerTreeBuilder.sequenceNodesBuilder(dataStream.slice(1)) ?? [];
+    const nodeIndex = findIndexFromSequenceNodes(sequenceNodes, offset, false);
+    const updatingRefIndex = findRefSequenceIndex(sequenceNodes, nodeIndex);
+    return {
+        nodeIndex,
+        updatingRefIndex,
+        sequenceNodes,
+        offset,
+    };
+};
+
 const noop = (() => { }) as any;
 export const useSheetSelectionChange = (
     isNeed: boolean,
     isFocus: boolean,
-    isSelecting: FormulaSelectingType,
+    isSelectingRef: RefObject<FormulaSelectingType>,
     unitId: string,
     subUnitId: string,
-    sequenceNodes: INode[],
     refSelectionRef: React.MutableRefObject<IRefSelection[]>,
     isSupportAcrossSheet: boolean,
     listenSelectionSet: boolean,
@@ -57,9 +76,9 @@ export const useSheetSelectionChange = (
     const renderManagerService = useDependency(IRenderManagerService);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const commandService = useDependency(ICommandService);
-    const sequenceNodesRef = useStateRef(sequenceNodes);
     const docSelectionManagerService = useDependency(DocSelectionManagerService);
     const themeService = useDependency(ThemeService);
+    const lexerTreeBuilder = useDependency(LexerTreeBuilder);
 
     const workbook = univerInstanceService.getUnit<Workbook>(unitId);
     const getSheetNameById = useEvent((sheetId: string) => workbook?.getSheetBySheetId(sheetId)?.getName() ?? '');
@@ -70,132 +89,131 @@ export const useSheetSelectionChange = (
     const refSelectionsRenderService = render?.with(RefSelectionsRenderService);
     const sheetSkeletonManagerService = render?.with(SheetSkeletonManagerService);
     const refSelectionsService = useDependency(IRefSelectionsService);
-    const isScalingRef = useRef(false);
-    const isSelectingRef = useRef(isSelecting);
-    isSelectingRef.current = isSelecting;
 
-    const scalingOptionRef = useRef<{ result: string; offset: number }>(undefined);
+    // eslint-disable-next-line complexity
+    const onSelectionsChange = useEvent((selections: IRange[], isEnd: boolean) => {
+        const ctx = prepareSelectionChangeContext({ editor, lexerTreeBuilder });
+        if (!ctx) return;
+        const { nodeIndex, updatingRefIndex, sequenceNodes, offset } = ctx;
+        if (isSelectingRef.current === FormulaSelectingType.NEED_ADD) {
+            if (offset !== 0) {
+                if (nodeIndex === -1 && sequenceNodes.length) {
+                    return;
+                }
+                const range = selections[selections.length - 1];
+                const lastNodes = sequenceNodes.splice(nodeIndex + 1);
+                const rangeSheetId = range.sheetId ?? subUnitId;
+                const unitRangeName = {
+                    range,
+                    unitId: range.unitId ?? unitId,
+                    sheetName: getSheetNameById(rangeSheetId),
+                };
+                const isAcrossSheet = rangeSheetId !== subUnitId;
+                const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet && isAcrossSheet, sheetName);
+                sequenceNodes.push({ token: refRanges[0], nodeType: sequenceNodeType.REFERENCE } as any);
+                const newSequenceNodes = [...sequenceNodes, ...lastNodes];
+                const result = sequenceNodeToText(newSequenceNodes);
+                handleRangeChange(result, getOffsetFromSequenceNodes(sequenceNodes), isEnd);
+            } else {
+                const range = selections[selections.length - 1];
+                const rangeSheetId = range.sheetId ?? subUnitId;
+                const unitRangeName = {
+                    range,
+                    unitId: range.unitId ?? unitId,
+                    sheetName: getSheetNameById(rangeSheetId),
+                };
+                const isAcrossSheet = rangeSheetId !== subUnitId;
+                const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet && isAcrossSheet);
+                sequenceNodes.unshift({ token: refRanges[0], nodeType: sequenceNodeType.REFERENCE } as any);
+                const result = sequenceNodeToText(sequenceNodes);
+                handleRangeChange(result, refRanges[0].length, isEnd);
+            }
+        } else {
+            const orderedSelections = [...selections];
+            if (updatingRefIndex !== -1) {
+                const last = orderedSelections.pop();
+                last && orderedSelections.splice(updatingRefIndex, 0, last);
+            }
+            // 更新全部的 ref Selection
+            let currentRefIndex = 0;
+            const newTokens = sequenceNodes.map((item) => {
+                if (typeof item === 'string') {
+                    return item;
+                }
+                if (item.nodeType === sequenceNodeType.REFERENCE) {
+                    const nodeRange = deserializeRangeWithSheet(item.token);
+                    if (!nodeRange.sheetName) {
+                        nodeRange.sheetName = sheetName;
+                    }
+
+                    if (isSupportAcrossSheet) {
+                        // 直接跳过非当前表的 node 节点
+                        if (contextRef.current.activeSheet?.getName() !== nodeRange.sheetName) {
+                            return item.token;
+                        }
+                    }
+                    const selection = orderedSelections[currentRefIndex];
+                    currentRefIndex++;
+                    if (!selection) {
+                        return '';
+                    }
+                    const rangeSheetId = selection.sheetId ?? subUnitId;
+                    const unitRangeName = {
+                        range: selection,
+                        unitId: selection.unitId ?? unitId,
+                        sheetName: getSheetNameById(rangeSheetId),
+                    };
+                    const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet, sheetName);
+                    return refRanges[0];
+                }
+                return item.token;
+            });
+
+            let currentText = '';
+            let newOffset;
+            newTokens.forEach((item, index) => {
+                currentText += item;
+                if (index === nodeIndex) {
+                    newOffset = currentText.length;
+                }
+            });
+            const theLastList: string[] = [];
+            for (let index = currentRefIndex; index <= selections.length - 1; index++) {
+                const selection = selections[index];
+                const rangeSheetId = selection.sheetId ?? subUnitId;
+                const unitRangeName = {
+                    range: selection,
+                    unitId: selection.unitId ?? unitId,
+                    sheetName: getSheetNameById(rangeSheetId),
+                };
+                const isAcrossSheet = rangeSheetId !== subUnitId;
+                const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet && isAcrossSheet, sheetName);
+                theLastList.push(refRanges[0]);
+            }
+            const preNode = sequenceNodes[sequenceNodes.length - 1];
+            const isPreNodeRef = preNode && (typeof preNode === 'string' ? false : preNode.nodeType === sequenceNodeType.REFERENCE);
+            const result = `${currentText}${theLastList.length && isPreNodeRef ? ',' : ''}${theLastList.join(',')}`;
+            handleRangeChange(result, !theLastList.length && newOffset ? newOffset : result.length, isEnd);
+        }
+    });
 
     useEffect(() => {
         if (refSelectionsRenderService && isNeed) {
             let isFirst = true;
-            // eslint-disable-next-line complexity
+
             const handleSelectionsChange = (selections: ISelectionWithCoord[], isEnd: boolean) => {
                 if (isFirst) {
                     isFirst = false;
                     return;
                 }
-                const currentDocSelections = editor?.getSelectionRanges();
-                if (currentDocSelections?.length !== 1) {
-                    return;
-                }
-                const docRange = currentDocSelections[0];
-                const offset = docRange.startOffset - 1;
-                const sequenceNodes = [...sequenceNodesRef.current];
-                const nodeIndex = findIndexFromSequenceNodes(sequenceNodes, offset, false);
-
-                if (isSelectingRef.current === FormulaSelectingType.NEED_ADD) {
-                    if (offset !== 0) {
-                        if (nodeIndex === -1 && sequenceNodes.length) {
-                            return;
-                        }
-                        const range = selections[selections.length - 1];
-                        const lastNodes = sequenceNodes.splice(nodeIndex + 1);
-                        const rangeSheetId = range.rangeWithCoord.sheetId ?? subUnitId;
-                        const unitRangeName = {
-                            range: range.rangeWithCoord,
-                            unitId: range.rangeWithCoord.unitId ?? unitId,
-                            sheetName: getSheetNameById(rangeSheetId),
-                        };
-                        const isAcrossSheet = rangeSheetId !== subUnitId;
-                        const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet && isAcrossSheet, sheetName);
-                        sequenceNodes.push({ token: refRanges[0], nodeType: sequenceNodeType.REFERENCE } as any);
-                        const newSequenceNodes = [...sequenceNodes, ...lastNodes];
-                        const result = sequenceNodeToText(newSequenceNodes);
-                        handleRangeChange(result, getOffsetFromSequenceNodes(sequenceNodes), isEnd);
-                    } else {
-                        const range = selections[selections.length - 1];
-                        const rangeSheetId = range.rangeWithCoord.sheetId ?? subUnitId;
-                        const unitRangeName = {
-                            range: range.rangeWithCoord,
-                            unitId: range.rangeWithCoord.unitId ?? unitId,
-                            sheetName: getSheetNameById(rangeSheetId),
-                        };
-                        const isAcrossSheet = rangeSheetId !== subUnitId;
-                        const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet && isAcrossSheet);
-                        sequenceNodes.unshift({ token: refRanges[0], nodeType: sequenceNodeType.REFERENCE } as any);
-                        const result = sequenceNodeToText(sequenceNodes);
-                        handleRangeChange(result, refRanges[0].length, isEnd);
-                    }
-                } else {
-                    // 更新全部的 ref Selection
-                    let currentRefIndex = 0;
-                    const newTokens = sequenceNodes.map((item) => {
-                        if (typeof item === 'string') {
-                            return item;
-                        }
-                        if (item.nodeType === sequenceNodeType.REFERENCE) {
-                            const nodeRange = deserializeRangeWithSheet(item.token);
-                            if (!nodeRange.sheetName) {
-                                nodeRange.sheetName = sheetName;
-                            }
-
-                            if (isSupportAcrossSheet) {
-                                // 直接跳过非当前表的 node 节点
-                                if (contextRef.current.activeSheet?.getName() !== nodeRange.sheetName) {
-                                    return item.token;
-                                }
-                            }
-                            const selection = selections[currentRefIndex];
-                            currentRefIndex++;
-                            if (!selection) {
-                                return '';
-                            }
-                            const rangeSheetId = selection.rangeWithCoord.sheetId ?? subUnitId;
-                            const unitRangeName = {
-                                range: selection.rangeWithCoord,
-                                unitId: selection.rangeWithCoord.unitId ?? unitId,
-                                sheetName: getSheetNameById(rangeSheetId),
-                            };
-                            const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet, sheetName);
-                            return refRanges[0];
-                        }
-                        return item.token;
-                    });
-                    let currentText = '';
-                    let newOffset;
-                    newTokens.forEach((item, index) => {
-                        currentText += item;
-                        if (index === nodeIndex) {
-                            newOffset = currentText.length;
-                        }
-                    });
-                    const theLastList: string[] = [];
-                    for (let index = currentRefIndex; index <= selections.length - 1; index++) {
-                        const selection = selections[index];
-                        const rangeSheetId = selection.rangeWithCoord.sheetId ?? subUnitId;
-                        const unitRangeName = {
-                            range: selection.rangeWithCoord,
-                            unitId: selection.rangeWithCoord.unitId ?? unitId,
-                            sheetName: getSheetNameById(rangeSheetId),
-                        };
-                        const isAcrossSheet = rangeSheetId !== subUnitId;
-                        const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet && isAcrossSheet, sheetName);
-                        theLastList.push(refRanges[0]);
-                    }
-                    const preNode = sequenceNodes[sequenceNodes.length - 1];
-                    const isPreNodeRef = preNode && (typeof preNode === 'string' ? false : preNode.nodeType === sequenceNodeType.REFERENCE);
-                    const result = `${currentText}${theLastList.length && isPreNodeRef ? ',' : ''}${theLastList.join(',')}`;
-                    handleRangeChange(result, !theLastList.length && newOffset ? newOffset : result.length, isEnd);
-                }
+                onSelectionsChange(selections.map((i) => i.rangeWithCoord), isEnd);
             };
+
             const disposableCollection = new DisposableCollection();
             disposableCollection.add(refSelectionsRenderService.selectionMoving$.subscribe((selections) => {
-                if (isScalingRef.current) return;
                 handleSelectionsChange(selections, false);
             }));
             disposableCollection.add(refSelectionsRenderService.selectionMoveEnd$.subscribe((selections) => {
-                if (isScalingRef.current) return;
                 handleSelectionsChange(selections, true);
             }));
 
@@ -203,96 +221,40 @@ export const useSheetSelectionChange = (
                 disposableCollection.dispose();
             };
         }
-    }, [refSelectionsRenderService, editor, isSupportAcrossSheet, isNeed, sequenceNodesRef, subUnitId, unitId, getSheetNameById, sheetName, handleRangeChange, contextRef]);
+    }, [isNeed, onSelectionsChange, refSelectionsRenderService]);
 
     useEffect(() => {
         if (isFocus && refSelectionsRenderService && editor) {
             const disposableCollection = new DisposableCollection();
-            const handleSequenceNodeReplace = (token: string, index: number) => {
-                let currentIndex = 0;
-                let offset = 0;
-                let isFinish = false;
-                const { sheetName } = contextRef.current;
-
-                const newSequenceNodes = sequenceNodesRef.current.map((node) => {
-                    if (typeof node === 'string') {
-                        if (!isFinish) {
-                            offset += node.length;
-                        }
-                        return node;
-                    } else if (node.nodeType === sequenceNodeType.REFERENCE) {
-                        const unitRange = deserializeRangeWithSheet(node.token);
-                        if (!unitRange.unitId) {
-                            unitRange.unitId = unitId;
-                        }
-                        if (!unitRange.sheetName) {
-                            unitRange.sheetName = sheetName;
-                        }
-                        if (isSupportAcrossSheet) {
-                            // 直接跳过非当前表的 node 节点
-                            if (contextRef.current.activeSheet?.getName() !== unitRange.sheetName) {
-                                if (!isFinish) {
-                                    offset += node.token.length;
-                                }
-                                return node;
-                            }
-                        }
-                        if (currentIndex === index) {
-                            isFinish = true;
-                            const cloneNode = { ...node, token };
-                            if (isSupportAcrossSheet) {
-                                if (unitRange.sheetName !== sheetName) {
-                                    cloneNode.token = serializeRangeWithSheet(unitRange.sheetName, deserializeRangeWithSheet(token).range);
-                                } else {
-                                    cloneNode.token = token;
-                                }
-                            } else {
-                                cloneNode.token = token;
-                            }
-                            offset += cloneNode.token.length;
-                            currentIndex++;
-                            return cloneNode;
-                        }
-                        if (!isFinish) {
-                            offset += node.token.length;
-                        }
-                        currentIndex++;
-                        return node;
-                    }
-                    if (!isFinish) {
-                        offset += node.token.length;
-                    }
-                    return node;
-                });
-                const result = sequenceNodeToText(newSequenceNodes);
-                handleRangeChange(result, -1, true);
-                scalingOptionRef.current = { result, offset };
-            };
 
             const reListen = () => {
                 disposableCollection.dispose();
                 const controls = refSelectionsRenderService.getSelectionControls();
                 controls.forEach((control, index) => {
-                    disposableCollection.add(merge(control.selectionMoving$, control.selectionScaling$).pipe(
-                        map((e) => {
-                            return serializeRange(e);
-                        }),
-                        distinctUntilChanged(),
-                        debounceTime(100)
-                    ).subscribe((rangeText) => {
-                        isScalingRef.current = true;
-                        handleSequenceNodeReplace(rangeText, index);
-                    }));
-                });
+                    disposableCollection.add(
+                        control.selectionScaling$
+                            .subscribe((newRange) => {
+                                const selections = refSelectionsRenderService.getSelectionDataWithStyle().map((i) => i.rangeWithCoord);
+                                const current = selections[index];
+                                newRange.sheetId = current.sheetId;
+                                newRange.unitId = current.unitId;
+                                selections[index] = newRange;
+                                onSelectionsChange(selections, false);
+                            })
+                    );
 
-                disposableCollection.add(refSelectionsRenderService.selectionMoveEnd$.subscribe((selections) => {
-                    isScalingRef.current = false;
-                    if (scalingOptionRef.current) {
-                        const { result, offset } = scalingOptionRef.current;
-                        handleRangeChange(result, offset || -1, true);
-                        scalingOptionRef.current = undefined;
-                    }
-                }));
+                    disposableCollection.add(
+                        control.selectionMoving$
+                            .subscribe((newRange) => {
+                                const selections = refSelectionsRenderService.getSelectionDataWithStyle().map((i) => i.rangeWithCoord);
+                                const current = selections[index];
+                                newRange.sheetId = current.sheetId;
+                                newRange.unitId = current.unitId;
+                                selections[index] = newRange;
+                                onSelectionsChange(selections, true);
+                            })
+                    );
+                });
             };
             const dispose = merge(
                 editor.input$,
@@ -308,10 +270,13 @@ export const useSheetSelectionChange = (
                 disposableCollection.dispose();
             };
         }
-    }, [isFocus, refSelectionsRenderService, editor, refSelectionsService.selectionSet$, contextRef, sequenceNodesRef, handleRangeChange, isSupportAcrossSheet, unitId]);
+    }, [editor, isFocus, onSelectionsChange, refSelectionsRenderService, refSelectionsService.selectionSet$]);
+
+    refSelectionsRenderService?.getSelectionDataWithStyle();
 
     useEffect(() => {
         if (listenSelectionSet) {
+            // selection changed by keyborad
             const d = commandService.onCommandExecuted((commandInfo) => {
                 if (commandInfo.id !== SetSelectionsOperation.id) {
                     return;
@@ -321,40 +286,17 @@ export const useSheetSelectionChange = (
                 if (params.extra !== 'formula-editor') {
                     return;
                 }
-                const { selections } = params;
-                if (selections.length) {
-                    const last = selections[selections.length - 1];
+                if (params.selections.length) {
+                    const last = params.selections[params.selections.length - 1];
                     if (last) {
-                        const range = last.range;
-                        const sheetId = subUnitId;
-                        const unitRangeName = {
-                            range,
-                            unitId: params.unitId === unitId ? '' : params.unitId,
-                            sheetName: params.subUnitId === sheetId ? '' : getSheetNameById(sheetId),
-                        };
-                        const sequenceNodes = [...sequenceNodesRef.current];
-                        const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet, sheetName);
-                        const result = refRanges[0];
-                        let lastNode = sequenceNodes[sequenceNodes.length - 1];
-                        if (typeof lastNode === 'object' && lastNode.nodeType === sequenceNodeType.REFERENCE) {
-                            lastNode = { ...lastNode };
-                            lastNode.token = result;
-                            lastNode.endIndex = lastNode.startIndex + result.length;
-                            sequenceNodes[sequenceNodes.length - 1] = lastNode;
-                            const refStr = sequenceNodeToText(sequenceNodes);
-                            handleRangeChange(refStr, getOffsetFromSequenceNodes(sequenceNodes), true);
+                        const isAdd = isSelectingRef.current === FormulaSelectingType.NEED_ADD;
+                        const selections: IRange[] = (refSelectionsRenderService?.getSelectionDataWithStyle() ?? []).map((i) => i.rangeWithCoord);
+                        if (isAdd) {
+                            selections.push(last.range);
                         } else {
-                            const start = getOffsetFromSequenceNodes(sequenceNodes);
-                            sequenceNodes.push({
-                                nodeType: sequenceNodeType.REFERENCE,
-                                token: result,
-                                startIndex: start,
-                                endIndex: start + result.length,
-                            });
-
-                            const refStr = sequenceNodeToText(sequenceNodes);
-                            handleRangeChange(refStr, getOffsetFromSequenceNodes(sequenceNodes), true);
+                            selections[selections.length - 1] = last.range;
                         }
+                        onSelectionsChange(selections, true);
                     }
                 }
             });
@@ -363,7 +305,7 @@ export const useSheetSelectionChange = (
                 d.dispose();
             };
         }
-    }, [commandService, getSheetNameById, handleRangeChange, isSupportAcrossSheet, listenSelectionSet, sequenceNodesRef, sheetName, subUnitId, unitId]);
+    }, [commandService, editor, isSelectingRef, lexerTreeBuilder, listenSelectionSet, onSelectionsChange, refSelectionsRenderService]);
 
     useEffect(() => {
         if (!editor) {
@@ -388,5 +330,5 @@ export const useSheetSelectionChange = (
         });
 
         return () => sub.unsubscribe();
-    }, [docSelectionManagerService.textSelection$, editor, refSelectionRef, refSelectionsRenderService, refSelectionsService, sequenceNodesRef, sheetSkeletonManagerService, subUnitId, themeService, unitId, univerInstanceService]);
+    }, [docSelectionManagerService.textSelection$, editor, refSelectionRef, refSelectionsRenderService, refSelectionsService, sheetSkeletonManagerService, subUnitId, themeService, unitId, univerInstanceService]);
 };

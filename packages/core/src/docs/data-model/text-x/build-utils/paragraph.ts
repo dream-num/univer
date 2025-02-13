@@ -305,4 +305,3 @@ export const changeParagraphBulletNestLevel = (params: IChangeParagraphBulletNes
 
     return textX;
 };
-

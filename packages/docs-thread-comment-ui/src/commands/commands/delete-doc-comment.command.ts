@@ -45,4 +45,3 @@ export const DeleteDocCommentComment: ICommand<IDeleteDocCommentComment> = {
         return false;
     },
 };
-

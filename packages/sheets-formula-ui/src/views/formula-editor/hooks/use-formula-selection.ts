@@ -24,6 +24,7 @@ import { useDependency, useEvent } from '@univerjs/ui';
 import { useEffect, useRef, useState } from 'react';
 import { filter, map } from 'rxjs';
 import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render-service';
+import { useStateRef } from './use-state-ref';
 
 function getCurrentBodyDataStreamAndOffset(accssor: IAccessor) {
     const univerInstanceService = accssor.get(IUniverInstanceService);
@@ -54,14 +55,14 @@ export function useFormulaSelecting(opts: { editorId: string; isFocus: boolean; 
     const [isSelecting, innerSetIsSelecting] = useState<FormulaSelectingType>(FormulaSelectingType.NOT_SELECT);
     const lexerTreeBuilder = useDependency(LexerTreeBuilder);
     const isDisabledByPointer = useRef(true);
-    const isSelectingRef = useRef(isSelecting);
-    isSelectingRef.current = isSelecting;
     const refSelectionsRenderService = sheetRenderer?.with(RefSelectionsRenderService);
+    const isSelectingRef = useStateRef(isSelecting);
 
     const setIsSelecting = useEvent((v: FormulaSelectingType) => {
         if (refSelectionsRenderService) {
             refSelectionsRenderService.setSkipLastEnabled(v === FormulaSelectingType.NEED_ADD);
         }
+        isSelectingRef.current = v;
         innerSetIsSelecting(v);
     });
 
@@ -102,14 +103,14 @@ export function useFormulaSelecting(opts: { editorId: string; isFocus: boolean; 
             });
 
         return () => sub.unsubscribe();
-    }, [docSelectionManagerService.textSelection$, docSelectionRenderService, editorId, injector, lexerTreeBuilder]);
+    }, [docSelectionManagerService.textSelection$, docSelectionRenderService, editorId, injector, lexerTreeBuilder, setIsSelecting]);
 
     useEffect(() => {
         if (!isFocus) {
             setIsSelecting(FormulaSelectingType.NOT_SELECT);
             isDisabledByPointer.current = true;
         }
-    }, [isFocus]);
+    }, [isFocus, setIsSelecting]);
 
     useEffect(() => {
         if (!disableOnClick) return;
@@ -119,7 +120,7 @@ export function useFormulaSelecting(opts: { editorId: string; isFocus: boolean; 
         });
 
         return () => sub?.unsubscribe();
-    }, [disableOnClick, renderer?.mainComponent?.onPointerDown$]);
+    }, [disableOnClick, renderer?.mainComponent?.onPointerDown$, setIsSelecting]);
 
-    return { isSelecting };
+    return { isSelecting, isSelectingRef };
 }

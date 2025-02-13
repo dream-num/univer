@@ -146,4 +146,3 @@ export const BreakLineCommand: ICommand = {
         return result;
     },
 };
-

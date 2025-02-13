@@ -209,4 +209,3 @@ export const getNextPrimaryCell = (selections: ISelectionWithStyle[], direction:
         endColumn: destRange.endColumn,
     };
 };
-

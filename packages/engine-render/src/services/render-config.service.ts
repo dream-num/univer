@@ -44,4 +44,3 @@ export class UniverRenderConfigService {
         return this._renderConfig;
     }
 }
-

@@ -25,4 +25,3 @@ export const FILTER_MUTATIONS = new Set([
     RemoveSheetsFilterMutationId,
     ReCalcSheetsFilterMutationId,
 ]);
-

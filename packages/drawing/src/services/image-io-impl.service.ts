@@ -96,4 +96,3 @@ export class ImageIoService implements IImageIoService {
         this._change$.next(this._waitCount);
     }
 }
-

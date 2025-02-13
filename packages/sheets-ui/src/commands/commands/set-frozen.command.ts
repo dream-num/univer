@@ -131,4 +131,3 @@ export const SetColumnFrozenCommand: ICommand = {
         return true;
     },
 };
-

@@ -29,4 +29,3 @@ export interface IImageData extends IDrawingParam {
      */
     prstGeom?: Nullable<PresetGeometryType>;
 }
-

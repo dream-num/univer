@@ -453,7 +453,7 @@ describe('test get cell text/plain', () => {
             commandService.syncExecuteCommand(SetNumfmtMutation.id, params);
             const matrix = worksheet.getMatrixWithMergedCells(0, 0, 0, 1, CellModeEnum.Both);
             const plain = getMatrixPlainText(matrix);
-            expect(plain).toBe('2022-11-11	univer');
+            expect(plain).toBe('2022-11-11\tuniver');
         }
     });
 });

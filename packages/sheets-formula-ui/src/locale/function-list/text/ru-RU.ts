@@ -729,4 +729,3 @@ export default {
         },
     },
 };
-

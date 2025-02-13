@@ -38,4 +38,3 @@ export const UnregisterWorksheetRangeThemeStyleMutation: IMutation<IUnregisterWo
         return true;
     },
 };
-

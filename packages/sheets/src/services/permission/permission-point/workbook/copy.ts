@@ -30,4 +30,3 @@ export class WorkbookCopyPermission implements IPermissionPoint {
         this.id = `${this.type}.${UnitAction.Copy}_${unitId}`;
     }
 }
-

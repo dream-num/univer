@@ -283,4 +283,3 @@ export class FTextFinder extends Disposable implements IFTextFinder {
         return this._injector.createInstance(FRange, workbook, worksheet, range);
     }
 }
-

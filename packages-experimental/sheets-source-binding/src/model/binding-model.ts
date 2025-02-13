@@ -96,4 +96,3 @@ export class SheetBindingModel {
         return Array.from(this._nodeMap.values());
     }
 }
-

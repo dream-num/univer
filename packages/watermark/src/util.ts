@@ -172,4 +172,3 @@ export function renderImageWatermark(ctx: UniverRenderingContext, config: IImage
 
     ctx.restore();
 };
-

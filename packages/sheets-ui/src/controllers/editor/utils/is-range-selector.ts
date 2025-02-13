@@ -19,4 +19,3 @@ export const RANGE_SELECTOR_SYMBOLS = 'range_selector';
 export const isRangeSelector = (unitId: string) => {
     return unitId.includes(RANGE_SELECTOR_SYMBOLS);
 };
-

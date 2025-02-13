@@ -197,10 +197,10 @@ export const ReplaceDialog = forwardRef(function ReplaceDIalogImpl(_props, ref) 
             <FormDualColumnLayout>
                 <>
                     <FormLayout label={localeService.t('find-replace.dialog.find-scope.title')}>
-                        <Select value={findScope} options={findScopeOptions} onChange={onChangeFindScope}></Select>
+                        <Select value={findScope} options={findScopeOptions} onChange={onChangeFindScope} />
                     </FormLayout>
                     <FormLayout label={localeService.t('find-replace.dialog.find-by.title')}>
-                        <Select value={findBy} options={findByOptions} onChange={onChangeFindBy}></Select>
+                        <Select value={findBy} options={findByOptions} onChange={onChangeFindBy} />
                     </FormLayout>
                 </>
             </FormDualColumnLayout>

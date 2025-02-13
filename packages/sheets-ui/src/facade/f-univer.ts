@@ -708,7 +708,7 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
             if (COMMAND_LISTENER_SKELETON_CHANGE.indexOf(commandInfo.id) > -1) {
                 const sheet = this.getActiveSheet();
                 if (!sheet) return;
-                const ranges = getSkeletonChangedEffectedRange(commandInfo)
+                const ranges = getSkeletonChangedEffectedRange(commandInfo, sheet.worksheet.getMaxColumns())
                     .map((range) => this.getWorkbook(range.unitId)?.getSheetBySheetId(range.subUnitId)?.getRange(range.range))
                     .filter(Boolean) as FRange[];
                 if (!ranges.length) return;

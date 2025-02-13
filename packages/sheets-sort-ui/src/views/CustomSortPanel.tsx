@@ -118,10 +118,11 @@ export function CustomSortPanel() {
                             </div>
                         )
                         : (
-                            <div className={`
-                              ${styles.addCondition}
-                              ${styles.addConditionDisable}
-                            `}
+                            <div
+                                className={`
+                                  ${styles.addCondition}
+                                  ${styles.addConditionDisable}
+                                `}
                             >
                                 <IncreaseSingle />
                                 <span className={styles.addConditionText}>{localeService.t('sheets-sort.dialog.add-condition')}</span>
@@ -267,4 +268,3 @@ function findNextColIndex(range: IRange, list: Nullable<IOrderRule>[]): number |
     }
     return null;
 }
-

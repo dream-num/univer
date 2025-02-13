@@ -1,6 +1,7 @@
 const jsdoc = require('eslint-plugin-jsdoc');
 const eslintPluginReadableTailwind = require('eslint-plugin-readable-tailwind');
 const noExternalImportsInFacade = require('./plugins/no-external-imports-in-facade');
+const noFacadeImportsOutsideFacade = require('./plugins/no-facade-imports-outside-facade');
 const noSelfPackageImports = require('./plugins/no-self-package-imports');
 
 exports.baseRules = {
@@ -146,6 +147,7 @@ exports.typescriptPreset = () => {
                 rules: {
                     'no-external-imports-in-facade': noExternalImportsInFacade,
                     'no-self-package-imports': noSelfPackageImports,
+                    'no-facade-imports-outside-facade': noFacadeImportsOutsideFacade,
                 },
             },
         },
@@ -186,6 +188,7 @@ exports.univerSourcePreset = () => {
         ],
         rules: {
             'univer/no-self-package-imports': 'error',
+            'univer/no-facade-imports-outside-facade': 'error',
         },
         languageOptions: {
             parser: require('@typescript-eslint/parser'),

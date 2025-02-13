@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
+import type { IDisposable } from '@univerjs/core';
 import type { Subscription } from 'rxjs';
-import type { IDisposable } from '../common/di';
 import type { IEventParamConfig } from './f-event';
-import { Registry } from '../common/registry';
-import { toDisposable } from '../shared';
+import { Registry, toDisposable } from '@univerjs/core';
 
 export class FEventRegistry {
     protected _eventRegistry: Map<string, Registry<(param: any) => void>> = new Map();
     protected _eventHandlerMap = new Map<string, Set<() => IDisposable | Subscription>>();
     protected _eventHandlerRegisted = new Map<string, Map<() => IDisposable | Subscription, IDisposable>>();
 
-    protected _ensureEventRegistry(event: string) {
+    protected _ensureEventRegistry(event: string): Registry<(param: any) => void> {
         if (!this._eventRegistry.has(event)) {
             this._eventRegistry.set(event, new Registry());
         }
@@ -33,7 +32,7 @@ export class FEventRegistry {
         return this._eventRegistry.get(event)!;
     }
 
-    registerEventHandler(event: string, handler: () => IDisposable | Subscription) {
+    registerEventHandler(event: string, handler: () => IDisposable | Subscription): IDisposable {
         const current = this._eventHandlerMap.get(event);
         if (current) {
             current.add(handler);
@@ -48,7 +47,7 @@ export class FEventRegistry {
         });
     }
 
-    removeEvent<T extends keyof IEventParamConfig>(event: T, callback: (params: IEventParamConfig[T]) => void) {
+    removeEvent<T extends keyof IEventParamConfig>(event: T, callback: (params: IEventParamConfig[T]) => void): void {
         const map = this._ensureEventRegistry(event);
         map.delete(callback);
 
@@ -71,7 +70,7 @@ export class FEventRegistry {
      * });
      * ```
      */
-    addEvent<T extends keyof IEventParamConfig>(event: T, callback: (params: IEventParamConfig[T]) => void) {
+    addEvent<T extends keyof IEventParamConfig>(event: T, callback: (params: IEventParamConfig[T]) => void): IDisposable {
         this._ensureEventRegistry(event).add(callback);
         let current = this._eventHandlerRegisted.get(event);
         const handlers = this._eventHandlerMap.get(event);
@@ -96,7 +95,7 @@ export class FEventRegistry {
      * this.fireEvent(univerAPI.event.UnitCreated, params);
      * ```
      */
-    fireEvent<T extends keyof IEventParamConfig>(event: T, params: IEventParamConfig[T]) {
+    fireEvent<T extends keyof IEventParamConfig>(event: T, params: IEventParamConfig[T]): boolean | undefined {
         this._eventRegistry.get(event)?.getData().forEach((callback) => {
             callback(params);
         });

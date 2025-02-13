@@ -15,6 +15,7 @@
  */
 
 import { createIdentifier, Disposable, ILogService, Inject, Injector } from '@univerjs/core';
+// eslint-disable-next-line univer/no-facade-imports-outside-facade
 import { FUniver } from '@univerjs/core/facade';
 
 export const IUniscriptExecutionService = createIdentifier<IUniscriptExecutionService>('univer.uniscript.execution-service');

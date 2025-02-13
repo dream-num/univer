@@ -42,7 +42,7 @@ export interface ISocket {
      */
     send(data: SocketBodyType): void;
 
-    close$: Observable<CloseEvent>;
+    close$: Observable<Event>;
     error$: Observable<Event>;
     message$: Observable<MessageEvent>;
     open$: Observable<Event>;
@@ -71,8 +71,8 @@ export class WebSocketService extends Disposable implements ISocketService {
                     connection.addEventListener('open', callback);
                     disposables.add(toDisposable(() => connection.removeEventListener('open', callback)));
                 }).pipe(share()),
-                close$: new Observable<CloseEvent>((subscriber) => {
-                    const callback = (event: CloseEvent) => subscriber.next(event);
+                close$: new Observable<Event>((subscriber) => {
+                    const callback = (event: Event) => subscriber.next(event);
                     connection.addEventListener('close', callback);
                     disposables.add(toDisposable(() => connection.removeEventListener('close', callback)));
                 }).pipe(share()),

@@ -150,7 +150,6 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     const highlightSheet = useSheetHighlight(unitId, subUnitId);
     const highlight = useEvent((text: string, isNeedResetSelection: boolean = true, isEnd?: boolean, newSelections?: ITextRange[]) => {
         if (!editorRef.current) return;
-        if (highTextRef.current === text) return;
         highTextRef.current = text;
         const sequenceNodes = getFormulaToken(text[0] === '=' ? text.slice(1) : '');
         const ranges = highlightDoc(
@@ -181,6 +180,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
 
     useEffect(() => {
         if (isFocus) {
+            if (highTextRef.current === formulaText) return;
             highlight(formulaText, false, true);
         }
     }, [formulaText, isFocus, highlight]);

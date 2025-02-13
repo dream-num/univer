@@ -252,11 +252,13 @@ export function getValueChangedEffectedRange(commandInfo: ICommandInfo): { unitI
     switch (commandInfo.id) {
         case SheetValueChangeType.SET_RANGE_VALUES: {
             const params = commandInfo.params as ISetRangeValuesMutationParams;
+            const range = new ObjectMatrix(params.cellValue).getDataRange();
+            if (range.endRow === -1) return [];
             return params.cellValue
                 ? [{
                     unitId: params.unitId,
                     subUnitId: params.subUnitId,
-                    range: new ObjectMatrix(params.cellValue).getDataRange(),
+                    range,
                 }]
                 : [];
         }

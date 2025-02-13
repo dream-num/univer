@@ -139,7 +139,7 @@ export interface IFUniverSheetsMixin {
 export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
     override getCommandSheetTarget(commandInfo: ICommandInfo<object>): Nullable<{ workbook: FWorkbook; worksheet: FWorksheet }> {
         const params = commandInfo.params as { unitId: string; subUnitId: string; sheetId: string };
-        if (!params) return;
+        if (!params) return this.getActiveSheet();
         const workbook = params.unitId ? this.getUniverSheet(params.unitId) : this.getActiveWorkbook?.();
         if (!workbook) {
             return;

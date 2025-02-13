@@ -93,6 +93,8 @@ export function calcHighlightRanges(opts: {
         }
 
         const range = setEndForRange(rawRange, worksheet.getRowCount(), worksheet.getColumnCount());
+        range.unitId = unitId;
+        range.sheetId = currentSheetId;
         selectionWithStyle.push({
             range,
             primary: null,

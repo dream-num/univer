@@ -171,7 +171,7 @@ export class FUniverSheetsZenEditorMixin extends FUniver implements IFUniverShee
             this.Event.SheetEditChanging,
             () => commandService.onCommandExecuted((commandInfo) => {
                 if (commandInfo.id === RichTextEditingMutation.id) {
-                    const target = this.getCommandSheetTarget(commandInfo);
+                    const target = this.getActiveSheet();
                     if (!target) {
                         return;
                     }

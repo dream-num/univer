@@ -40,6 +40,10 @@ export class FEventRegistry {
             this._eventHandlerMap.set(event, new Set([handler]));
         }
 
+        if (this._ensureEventRegistry(event).getData().length) {
+            this._initEventHandler(event);
+        }
+
         return toDisposable(() => {
             this._eventHandlerMap.get(event)?.delete(handler);
             this._eventHandlerRegisted.get(event)?.get(handler)?.dispose();
@@ -58,6 +62,20 @@ export class FEventRegistry {
         }
     }
 
+    private _initEventHandler(event: string): void {
+        let current = this._eventHandlerRegisted.get(event);
+        const handlers = this._eventHandlerMap.get(event);
+        if (!handlers) return;
+
+        if (!current) {
+            current = new Map();
+            this._eventHandlerRegisted.set(event, current);
+            handlers?.forEach((handler) => {
+                current?.set(handler, toDisposable(handler()));
+            });
+        }
+    }
+
     /**
      * Add an event listener
      * @param {string} event key of event
@@ -72,16 +90,7 @@ export class FEventRegistry {
      */
     addEvent<T extends keyof IEventParamConfig>(event: T, callback: (params: IEventParamConfig[T]) => void): IDisposable {
         this._ensureEventRegistry(event).add(callback);
-        let current = this._eventHandlerRegisted.get(event);
-        const handlers = this._eventHandlerMap.get(event);
-        if (!current) {
-            current = new Map();
-            this._eventHandlerRegisted.set(event, current);
-            handlers?.forEach((handler) => {
-                current?.set(handler, toDisposable(handler()));
-            });
-        }
-
+        this._initEventHandler(event);
         return toDisposable(() => this.removeEvent(event, callback));
     }
 

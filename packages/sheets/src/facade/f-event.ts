@@ -581,84 +581,84 @@ export interface ISheetEventParamConfig {
     SheetValueChanged: ISheetValueChangedEvent;
 }
 
-export class FSheetEventName extends FEventName implements IFSheetEventMixin {
-    override get SheetCreated(): 'SheetCreated' {
+export class FSheetEventName implements IFSheetEventMixin {
+    get SheetCreated(): 'SheetCreated' {
         return 'SheetCreated' as const;
     }
 
-    override get BeforeSheetCreate(): 'BeforeSheetCreate' {
+    get BeforeSheetCreate(): 'BeforeSheetCreate' {
         return 'BeforeSheetCreate' as const;
     }
 
-    override get WorkbookCreated(): 'WorkbookCreated' {
+    get WorkbookCreated(): 'WorkbookCreated' {
         return 'WorkbookCreated' as const;
     }
 
-    override get WorkbookDisposed(): 'WorkbookDisposed' {
+    get WorkbookDisposed(): 'WorkbookDisposed' {
         return 'WorkbookDisposed' as const;
     }
 
-    override get GridlineChanged(): 'GridlineChanged' {
+    get GridlineChanged(): 'GridlineChanged' {
         return 'GridlineChanged' as const;
     }
 
-    override get BeforeGridlineEnableChange(): 'BeforeGridlineEnableChange' {
+    get BeforeGridlineEnableChange(): 'BeforeGridlineEnableChange' {
         return 'BeforeGridlineEnableChange' as const;
     }
 
-    override get BeforeGridlineColorChange(): 'BeforeGridlineColorChange' {
+    get BeforeGridlineColorChange(): 'BeforeGridlineColorChange' {
         return 'BeforeGridlineColorChange' as const;
     }
 
-    override get BeforeActiveSheetChange(): 'BeforeActiveSheetChange' {
+    get BeforeActiveSheetChange(): 'BeforeActiveSheetChange' {
         return 'BeforeActiveSheetChange' as const;
     }
 
-    override get ActiveSheetChanged(): 'ActiveSheetChanged' {
+    get ActiveSheetChanged(): 'ActiveSheetChanged' {
         return 'ActiveSheetChanged' as const;
     }
 
-    override get SheetDeleted(): 'SheetDeleted' {
+    get SheetDeleted(): 'SheetDeleted' {
         return 'SheetDeleted' as const;
     }
 
-    override get BeforeSheetDelete(): 'BeforeSheetDelete' {
+    get BeforeSheetDelete(): 'BeforeSheetDelete' {
         return 'BeforeSheetDelete' as const;
     }
 
-    override get SheetMoved(): 'SheetMoved' {
+    get SheetMoved(): 'SheetMoved' {
         return 'SheetMoved' as const;
     }
 
-    override get BeforeSheetMove(): 'BeforeSheetMove' {
+    get BeforeSheetMove(): 'BeforeSheetMove' {
         return 'BeforeSheetMove' as const;
     }
 
-    override get SheetNameChanged(): 'SheetNameChanged' {
+    get SheetNameChanged(): 'SheetNameChanged' {
         return 'SheetNameChanged' as const;
     }
 
-    override get BeforeSheetNameChange(): 'BeforeSheetNameChange' {
+    get BeforeSheetNameChange(): 'BeforeSheetNameChange' {
         return 'BeforeSheetNameChange' as const;
     }
 
-    override get SheetTabColorChanged(): 'SheetTabColorChanged' {
+    get SheetTabColorChanged(): 'SheetTabColorChanged' {
         return 'SheetTabColorChanged' as const;
     }
 
-    override get BeforeSheetTabColorChange(): 'BeforeSheetTabColorChange' {
+    get BeforeSheetTabColorChange(): 'BeforeSheetTabColorChange' {
         return 'BeforeSheetTabColorChange' as const;
     }
 
-    override get SheetHideChanged(): 'SheetHideChanged' {
+    get SheetHideChanged(): 'SheetHideChanged' {
         return 'SheetHideChanged' as const;
     }
 
-    override get BeforeSheetHideChange(): 'BeforeSheetHideChange' {
+    get BeforeSheetHideChange(): 'BeforeSheetHideChange' {
         return 'BeforeSheetHideChange' as const;
     }
 
-    override get SheetValueChanged(): 'SheetValueChanged' {
+    get SheetValueChanged(): 'SheetValueChanged' {
         return 'SheetValueChanged' as const;
     }
 }

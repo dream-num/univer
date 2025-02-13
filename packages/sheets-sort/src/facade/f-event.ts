@@ -57,9 +57,9 @@ export interface IFSheetSortEventMixin {
     SheetBeforeRangeSort: 'SheetBeforeRangeSort';
 }
 
-export class FSheetSortEventName extends FEventName implements IFSheetSortEventMixin {
-    override readonly SheetRangeSorted = 'SheetRangeSorted' as const;
-    override readonly SheetBeforeRangeSort = 'SheetBeforeRangeSort' as const;
+export class FSheetSortEventName implements IFSheetSortEventMixin {
+    get SheetRangeSorted(): 'SheetRangeSorted' { return 'SheetRangeSorted' as const; }
+    get SheetBeforeRangeSort(): 'SheetBeforeRangeSort' { return 'SheetBeforeRangeSort' as const; }
 }
 
 interface ISortColumn {
@@ -83,12 +83,6 @@ export interface ISheetRangeSortEventParamConfig {
 }
 
 FEventName.extend(FSheetEventName);
-
-declare module '@univerjs/core/facade' {
-    // eslint-disable-next-line ts/naming-convention
-    interface FEventName extends IFSheetSortEventMixin { }
-    interface IEventParamConfig extends ISheetRangeSortEventParamConfig { }
-}
 
 class FUniverSheetsSortEventMixin extends FUniver {
     /**
@@ -160,3 +154,10 @@ class FUniverSheetsSortEventMixin extends FUniver {
 }
 
 FUniver.extend(FUniverSheetsSortEventMixin);
+FEventName.extend(FSheetSortEventName);
+
+declare module '@univerjs/core/facade' {
+    // eslint-disable-next-line ts/naming-convention
+    interface FEventName extends IFSheetSortEventMixin { }
+    interface IEventParamConfig extends ISheetRangeSortEventParamConfig { }
+}

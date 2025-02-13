@@ -19,8 +19,8 @@ import type { IEventBase } from '@univerjs/core/facade';
 import type { ISetCrosshairHighlightColorOperationParams } from '@univerjs/sheets-crosshair-highlight';
 import type { FWorkbook, FWorksheet } from '@univerjs/sheets/facade';
 import { ICommandService } from '@univerjs/core';
-import { FUniver } from '@univerjs/core/facade';
-import { CROSSHAIR_HIGHLIGHT_COLORS, DisableCrosshairHighlightOperation, EnableCrosshairHighlightOperation, SetCrosshairHighlightColorOperation, SheetsCrosshairHighlightService } from '@univerjs/sheets-crosshair-highlight';
+import { FEventName, FUniver } from '@univerjs/core/facade';
+import { CROSSHAIR_HIGHLIGHT_COLORS, DisableCrosshairHighlightOperation, EnableCrosshairHighlightOperation, SetCrosshairHighlightColorOperation, SheetsCrosshairHighlightService, ToggleCrosshairHighlightOperation } from '@univerjs/sheets-crosshair-highlight';
 
 /**
  * @ignore
@@ -168,7 +168,11 @@ export class FUniverCrosshairHighlightMixin extends FUniver implements IFUniverC
         this.registerEventHandler(
             this.Event.CrosshairHighlightEnabledChanged,
             () => commandService.onCommandExecuted((commandInfo) => {
-                if (commandInfo.id === EnableCrosshairHighlightOperation.id || commandInfo.id === DisableCrosshairHighlightOperation.id) {
+                if (
+                    commandInfo.id === EnableCrosshairHighlightOperation.id ||
+                    commandInfo.id === DisableCrosshairHighlightOperation.id ||
+                    commandInfo.id === ToggleCrosshairHighlightOperation.id
+                ) {
                     const activeSheet = this.getActiveSheet();
                     if (!activeSheet) return;
                     this.fireEvent(this.Event.CrosshairHighlightEnabledChanged, {
@@ -226,7 +230,9 @@ export class FUniverCrosshairHighlightMixin extends FUniver implements IFUniverC
     }
 }
 
+FEventName.extend(FSheetCrosshairHighlightEventMixin);
 FUniver.extend(FUniverCrosshairHighlightMixin);
+
 declare module '@univerjs/core/facade' {
     // eslint-disable-next-line ts/naming-convention
     interface FUniver extends IFUniverCrosshairHighlightMixin {}

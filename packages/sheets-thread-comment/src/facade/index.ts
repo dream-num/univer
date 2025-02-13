@@ -18,10 +18,12 @@ import './f-range';
 import './f-workbook';
 import './f-worksheet';
 import './f-event';
+import './f-univer';
 
 export type * from './f-event';
 export type * from './f-range';
 export type * from './f-thread-comment';
 export { FThreadComment } from './f-thread-comment';
+export type * from './f-univer';
 export type * from './f-workbook';
 export type * from './f-worksheet';

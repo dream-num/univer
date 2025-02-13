@@ -379,6 +379,7 @@ export class FUniver extends Disposable {
      * ```
      */
     addEvent<T extends keyof IEventParamConfig>(event: T, callback: (params: IEventParamConfig[T]) => void): IDisposable {
+        if (!event || !callback) throw new Error('Cannot add empty event');
         return this._eventRegistry.addEvent(event, callback);
     }
 

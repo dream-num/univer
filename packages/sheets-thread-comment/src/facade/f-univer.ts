@@ -19,7 +19,7 @@ import type { IAddCommentCommandParams, IDeleteCommentCommandParams, IResolveCom
 import type { IBeforeSheetCommentAddEvent, IBeforeSheetCommentDeleteEvent, IBeforeSheetCommentUpdateEvent, ISheetCommentAddEvent, ISheetCommentDeleteEvent, ISheetCommentResolveEvent, ISheetCommentUpdateEvent } from './f-event';
 import { CanceledError, ICommandService, RichTextValue } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
-import { AddCommentCommand, DeleteCommentCommand, ResolveCommentCommand, UpdateCommentCommand } from '@univerjs/thread-comment';
+import { AddCommentCommand, DeleteCommentCommand, DeleteCommentTreeCommand, ResolveCommentCommand, UpdateCommentCommand } from '@univerjs/thread-comment';
 import { FTheadCommentBuilder, FTheadCommentItem } from './f-thread-comment';
 
 /**
@@ -64,7 +64,6 @@ export class FUniverCommentMixin extends FUniver implements IFUniverCommentMixin
     // eslint-disable-next-line max-lines-per-function
     override _initialize(injector: Injector): void {
         const commandService = injector.get(ICommandService);
-
         // After command events
         this.registerEventHandler(
             this.Event.CommentAdded,
@@ -121,7 +120,7 @@ export class FUniverCommentMixin extends FUniver implements IFUniverCommentMixin
         this.registerEventHandler(
             this.Event.CommentDeleted,
             () => commandService.onCommandExecuted((commandInfo) => {
-                if (commandInfo.id !== DeleteCommentCommand.id) return;
+                if (commandInfo.id !== DeleteCommentCommand.id && commandInfo.id !== DeleteCommentTreeCommand.id) return;
                 const params = commandInfo.params as { unitId: string; subUnitId: string; sheetId: string };
                 if (!params) return;
                 const workbook = params.unitId ? this.getUniverSheet(params.unitId) : this.getActiveWorkbook?.();
@@ -231,7 +230,7 @@ export class FUniverCommentMixin extends FUniver implements IFUniverCommentMixin
         this.registerEventHandler(
             this.Event.BeforeCommentDeleted,
             () => commandService.beforeCommandExecuted((commandInfo) => {
-                if (commandInfo.id !== DeleteCommentCommand.id) return;
+                if (commandInfo.id !== DeleteCommentCommand.id && commandInfo.id !== DeleteCommentTreeCommand.id) return;
                 const params = commandInfo.params as { unitId: string; subUnitId: string; sheetId: string };
                 if (!params) return;
                 const workbook = params.unitId ? this.getUniverSheet(params.unitId) : this.getActiveWorkbook?.();

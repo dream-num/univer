@@ -15,7 +15,7 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { Inject, Injector } from '@wendellhu/redi';
+import { Inject, Injector } from '@univerjs/core';
 import { FBase } from './f-base';
 
 export interface IFBlobSource {

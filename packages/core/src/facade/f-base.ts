@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Injector } from '@wendellhu/redi';
+import type { Injector } from '@univerjs/core';
 import { Disposable } from '@univerjs/core';
 
 /**

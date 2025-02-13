@@ -38,6 +38,7 @@ import { findIndexFromSequenceNodes, findRefSequenceIndex } from '../range-selec
 import { HelpFunction } from './help-function/HelpFunction';
 import { useFormulaSelecting } from './hooks/use-formula-selection';
 import { useSheetSelectionChange } from './hooks/use-sheet-selection-change';
+import { useStateRef } from './hooks/use-state-ref';
 import { useVerify } from './hooks/use-verify';
 import styles from './index.module.less';
 import { SearchFunction } from './search-function/SearchFunction';
@@ -128,6 +129,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     useObservable(document?.change$);
     const getFormulaToken = useFormulaToken();
     const formulaText = BuildTextUtils.transform.getPlainText(document?.getBody()?.dataStream ?? '');
+    const formulaTextRef = useStateRef(formulaText);
     const formulaWithoutEqualSymbol = useMemo(() => getFormulaText(formulaText), [formulaText]);
     const sequenceNodes = useMemo(() => getFormulaToken(formulaWithoutEqualSymbol), [formulaWithoutEqualSymbol, getFormulaToken]);
     const { isSelecting, isSelectingRef } = useFormulaSelecting({ unitId, subUnitId, editorId, isFocus, disableOnClick: disableSelectionOnClick });
@@ -148,7 +150,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
 
     const highlightDoc = useDocHight('=');
     const highlightSheet = useSheetHighlight(unitId, subUnitId);
-    const highlight = useEvent((text: string, isNeedResetSelection: boolean = true, isEnd?: boolean, newSelections?: ITextRange[]) => {
+    const highlight = useEvent((text: string, isNeedResetSelection: boolean = true, isEnd?: boolean, newSelections?: ITextRange[], forceReset?: boolean) => {
         if (!editorRef.current) return;
         highTextRef.current = text;
         const sequenceNodes = getFormulaToken(text[0] === '=' ? text.slice(1) : '');
@@ -281,7 +283,9 @@ export function FormulaEditor(props: IFormulaEditorProps) {
         editor,
         handleSelectionChange
     );
-    useSwitchSheet(isFocus && Boolean(isSelecting && docFocusing), unitId, isSupportAcrossSheet, isFocusSet, onBlur, noop);
+    useSwitchSheet(isFocus && Boolean(isSelecting && docFocusing), unitId, isSupportAcrossSheet, isFocusSet, onBlur, () => {
+        highlight(formulaTextRef.current, false, true);
+    });
 
     const handleFunctionSelect = (res: { text: string; offset: number }) => {
         if (res) {

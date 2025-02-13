@@ -23,12 +23,12 @@ import type { RefObject } from 'react';
 import type { IRefSelection } from '../../range-selector/hooks/use-highlight';
 import { DisposableCollection, ICommandService, IUniverInstanceService, ThemeService } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
-import { deserializeRangeWithSheet, LexerTreeBuilder, sequenceNodeType, serializeRange, serializeRangeWithSheet } from '@univerjs/engine-formula';
+import { deserializeRangeWithSheet, LexerTreeBuilder, sequenceNodeType, serializeRange } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { IRefSelectionsService, SetSelectionsOperation } from '@univerjs/sheets';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { useDependency, useEvent, useObservable } from '@univerjs/ui';
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo } from 'react';
 import { merge } from 'rxjs';
 import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
 import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render-service';
@@ -89,10 +89,8 @@ export const useSheetSelectionChange = (
     const refSelectionsRenderService = render?.with(RefSelectionsRenderService);
     const sheetSkeletonManagerService = render?.with(SheetSkeletonManagerService);
     const refSelectionsService = useDependency(IRefSelectionsService);
-    const isScalingRef = useRef(false);
-    const scalingOptionRef = useRef<{ result: string; offset: number }>(undefined);
 
-       // eslint-disable-next-line complexity
+    // eslint-disable-next-line complexity
     const onSelectionsChange = useEvent((selections: IRange[], isEnd: boolean) => {
         const ctx = prepareSelectionChangeContext({ editor, lexerTreeBuilder });
         if (!ctx) return;
@@ -213,11 +211,9 @@ export const useSheetSelectionChange = (
 
             const disposableCollection = new DisposableCollection();
             disposableCollection.add(refSelectionsRenderService.selectionMoving$.subscribe((selections) => {
-                if (isScalingRef.current) return;
                 handleSelectionsChange(selections, false);
             }));
             disposableCollection.add(refSelectionsRenderService.selectionMoveEnd$.subscribe((selections) => {
-                if (isScalingRef.current) return;
                 handleSelectionsChange(selections, true);
             }));
 
@@ -230,94 +226,21 @@ export const useSheetSelectionChange = (
     useEffect(() => {
         if (isFocus && refSelectionsRenderService && editor) {
             const disposableCollection = new DisposableCollection();
-            const handleSequenceNodeReplace = (token: string, index: number) => {
-                let currentIndex = 0;
-                let offset = 0;
-                let isFinish = false;
-                const { sheetName } = contextRef.current;
-
-                const dataStream = (editor?.getDocumentData().body?.dataStream ?? '\r\n').slice(0, -2);
-                const sequenceNodes = lexerTreeBuilder.sequenceNodesBuilder(dataStream.slice(1)) ?? [];
-                // updating sequence index
-
-                const newSequenceNodes = sequenceNodes.map((node) => {
-                    if (typeof node === 'string') {
-                        if (!isFinish) {
-                            offset += node.length;
-                        }
-                        return node;
-                    } else if (node.nodeType === sequenceNodeType.REFERENCE) {
-                        const unitRange = deserializeRangeWithSheet(node.token);
-                        if (!unitRange.unitId) {
-                            unitRange.unitId = unitId;
-                        }
-                        if (!unitRange.sheetName) {
-                            unitRange.sheetName = sheetName;
-                        }
-                        if (isSupportAcrossSheet) {
-                            // 直接跳过非当前表的 node 节点
-                            if (contextRef.current.activeSheet?.getName() !== unitRange.sheetName) {
-                                if (!isFinish) {
-                                    offset += node.token.length;
-                                }
-                                return node;
-                            }
-                        }
-                        if (currentIndex === index) {
-                            isFinish = true;
-                            const cloneNode = { ...node, token };
-                            if (isSupportAcrossSheet) {
-                                if (unitRange.sheetName !== sheetName) {
-                                    cloneNode.token = serializeRangeWithSheet(unitRange.sheetName, deserializeRangeWithSheet(token).range);
-                                } else {
-                                    cloneNode.token = token;
-                                }
-                            } else {
-                                cloneNode.token = token;
-                            }
-                            offset += cloneNode.token.length;
-                            currentIndex++;
-                            return cloneNode;
-                        }
-                        if (!isFinish) {
-                            offset += node.token.length;
-                        }
-                        currentIndex++;
-                        return node;
-                    }
-                    if (!isFinish) {
-                        offset += node.token.length;
-                    }
-                    return node;
-                });
-                const result = sequenceNodeToText(newSequenceNodes);
-                handleRangeChange(result, -1, true);
-                scalingOptionRef.current = { result, offset };
-            };
 
             const reListen = () => {
                 disposableCollection.dispose();
                 const controls = refSelectionsRenderService.getSelectionControls();
-                controls.forEach((control, index) => {
+                controls.forEach((control) => {
                     disposableCollection.add(merge(control.selectionMoving$, control.selectionScaling$).pipe(
                         map((e) => {
                             return serializeRange(e);
                         }),
                         distinctUntilChanged()
-                    ).subscribe((rangeText) => {
-                        isScalingRef.current = true;
-                        handleSequenceNodeReplace(rangeText, index);
+                    ).subscribe(() => {
+                        const selections = refSelectionsRenderService.getSelectionDataWithStyle();
+                        onSelectionsChange(selections.map((i) => i.rangeWithCoord), false);
                     }));
                 });
-
-                disposableCollection.add(refSelectionsRenderService.selectionMoveEnd$.subscribe(() => {
-                    isScalingRef.current = false;
-                    if (scalingOptionRef.current) {
-                        const { result, offset } = scalingOptionRef.current;
-                        handleRangeChange(result, offset || -1, true);
-                        scalingOptionRef.current = undefined;
-                    }
-                }));
             };
             const dispose = merge(
                 editor.input$,
@@ -333,7 +256,7 @@ export const useSheetSelectionChange = (
                 disposableCollection.dispose();
             };
         }
-    }, [contextRef, editor, handleRangeChange, isFocus, isSupportAcrossSheet, lexerTreeBuilder, refSelectionsRenderService, refSelectionsService.selectionSet$, unitId]);
+    }, [editor, isFocus, onSelectionsChange, refSelectionsRenderService, refSelectionsService.selectionSet$]);
 
     refSelectionsRenderService?.getSelectionDataWithStyle();
 

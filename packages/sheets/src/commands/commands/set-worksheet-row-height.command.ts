@@ -80,8 +80,8 @@ export const DeltaRowHeightCommand: ICommand = {
 
         let redoMutationParams: ISetWorksheetRowHeightMutationParams;
         if (rangeType === RANGE_TYPE.ALL) {
-            const colCount = worksheet.getRowCount();
-            const allRowRanges = new Array(worksheet.getColumnCount())
+            const colCount = worksheet.getColumnCount();
+            const allRowRanges = new Array(worksheet.getRowCount())
                 .fill(undefined)
                 .map(
                     (_, index) =>

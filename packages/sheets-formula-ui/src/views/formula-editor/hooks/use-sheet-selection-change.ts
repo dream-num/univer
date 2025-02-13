@@ -23,14 +23,14 @@ import type { RefObject } from 'react';
 import type { IRefSelection } from '../../range-selector/hooks/use-highlight';
 import { DisposableCollection, ICommandService, IUniverInstanceService, ThemeService } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
-import { deserializeRangeWithSheet, LexerTreeBuilder, sequenceNodeType, serializeRange } from '@univerjs/engine-formula';
+import { deserializeRangeWithSheet, LexerTreeBuilder, sequenceNodeType } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { IRefSelectionsService, SetSelectionsOperation } from '@univerjs/sheets';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { useDependency, useEvent, useObservable } from '@univerjs/ui';
 import { useEffect, useMemo } from 'react';
 import { merge } from 'rxjs';
-import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
+import { debounceTime } from 'rxjs/operators';
 import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render-service';
 import { calcHighlightRanges } from '../../range-selector/hooks/use-highlight';
 import { findIndexFromSequenceNodes, findRefSequenceIndex } from '../../range-selector/utils/find-index-from-sequence-nodes';
@@ -230,16 +230,24 @@ export const useSheetSelectionChange = (
             const reListen = () => {
                 disposableCollection.dispose();
                 const controls = refSelectionsRenderService.getSelectionControls();
-                controls.forEach((control) => {
-                    disposableCollection.add(merge(control.selectionMoving$, control.selectionScaling$).pipe(
-                        map((e) => {
-                            return serializeRange(e);
-                        }),
-                        distinctUntilChanged()
-                    ).subscribe(() => {
-                        const selections = refSelectionsRenderService.getSelectionDataWithStyle();
-                        onSelectionsChange(selections.map((i) => i.rangeWithCoord), false);
-                    }));
+                controls.forEach((control, index) => {
+                    disposableCollection.add(
+                        control.selectionScaling$
+                            .subscribe((newRange) => {
+                                const selections = refSelectionsRenderService.getSelectionDataWithStyle().map((i) => i.rangeWithCoord);
+                                selections[index] = newRange;
+                                onSelectionsChange(selections, false);
+                            })
+                    );
+
+                    disposableCollection.add(
+                        control.selectionMoving$
+                            .subscribe((newRange) => {
+                                const selections = refSelectionsRenderService.getSelectionDataWithStyle().map((i) => i.rangeWithCoord);
+                                selections[index] = newRange;
+                                onSelectionsChange(selections, true);
+                            })
+                    );
                 });
             };
             const dispose = merge(

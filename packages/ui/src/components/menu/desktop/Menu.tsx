@@ -218,7 +218,6 @@ interface IMenuItemProps {
 function MenuItem({ menuItem, onClick }: IMenuItemProps) {
     const menuManagerService = useDependency(IMenuManagerService);
     const contextMenuService = useDependency(IContextMenuService);
-    // console.log('contextMenuService', contextMenuService);
     const disabled = useObservable<boolean>(menuItem.disabled$, false);
     const activated = useObservable<boolean>(menuItem.activated$, false);
     const hidden = useObservable(menuItem.hidden$, false);
@@ -227,19 +226,6 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
     const item = menuItem as IDisplayMenuItem<IMenuSelectorItem>;
     const selectionsFromObservable = useObservable(isObservable(item.selections) ? item.selections : undefined);
     const [inputValue, setInputValue] = useState(value);
-    // const [trigger, setMenuTrigger] = useState(0);
-
-    // useEffect(() => {
-    //     const subscription = contextMenuService.trigger$.subscribe((value) => {
-    //         setMenuTrigger(value);
-    //     });
-
-    //     return () => subscription.unsubscribe();
-    // }, []);
-
-    // useEffect(() => {
-    //     setInputValue(value);
-    // }, [value, trigger]);
 
     useEffect(() => {
         setInputValue(value);
@@ -271,7 +257,6 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
                     [styles.menuItemActivated]: activated,
                 })}
                 onClick={() => {
-                    // console.log('MENU CLICK______', menuItem.id, inputValue);
                     onClick({ commandId: item.commandId, value: inputValue, id: item.id });
                 }}
             >

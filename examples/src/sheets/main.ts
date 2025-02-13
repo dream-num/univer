@@ -186,3 +186,7 @@ window.univerAPI?.addEvent(window.univerAPI.Event.BeforeSheetEditStart, (params)
 window.univerAPI?.addEvent(window.univerAPI.Event.ActiveSheetChanged, (params) => {
     logService.log('===active sheet changed', params);
 });
+
+window.univerAPI?.addEvent(window.univerAPI.Event.SheetEditChanging, (params) => {
+    logService.log('===SheetEditChanging', params);
+});

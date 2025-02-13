@@ -230,7 +230,7 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
             () => commandService.onCommandExecuted((commandInfo) => {
                 if (commandInfo.id !== RichTextEditingMutation.id) return;
 
-                const target = this.getCommandSheetTarget(commandInfo);
+                const target = this.getActiveSheet();
                 if (!target) return;
 
                 const { workbook, worksheet } = target;

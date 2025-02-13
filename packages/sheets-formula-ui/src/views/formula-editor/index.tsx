@@ -169,6 +169,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
             const offset = docRange.startOffset - 1;
             const nodeIndex = findIndexFromSequenceNodes(sequenceNodes, offset, false);
             const refIndex = findRefSequenceIndex(sequenceNodes, nodeIndex);
+            // make sure current editing selection is at the end
             if (refIndex >= 0) {
                 const target = ranges.splice(refIndex, 1)[0];
                 target && ranges.push(target);

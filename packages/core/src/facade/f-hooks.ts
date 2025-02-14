@@ -32,7 +32,7 @@ export class FHooks extends FBase {
 
     /**
      * @param callback
-     * @deprecated use `univerAPI.addEvent(univerAPI.Event.LifecycleChanged)` as instead
+     * @deprecated use `univerAPI.addEvent(univerAPI.Event.LifeCycleChanged, ({ stage }) => {})` as instead
      */
     onStarting(callback: () => void): IDisposable {
         return toDisposable(this._lifecycleService.lifecycle$.pipe(filter((lifecycle) => lifecycle === LifecycleStages.Starting)).subscribe(callback));

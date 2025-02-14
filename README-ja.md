@@ -39,6 +39,7 @@
     - [📽️ Univer Slide](#%EF%B8%8F-univer-slide開発中)
 - [🌐 国際化](#-国際化)
 - [👾 ショーケース](#-ショーケース)<!-- - [📦 Ecosystem](#-ecosystem) -->
+- [🔗 リンク](#-リンク)
 - [💬 コミュニティ](#-コミュニティ)
 - [🤝 コントリビュート](#-コントリビュート)
 - [❤️ スポンサー](#%EF%B8%8F-スポンサー)
@@ -81,7 +82,7 @@ Univer はスプレッドシート、ドキュメント、プレゼンテーシ�
 - **共同編集**[^1]：複数のユーザーが同時にスプレッドシートを編集することをサポートします。
 - **印刷**[^1]：スプレッドシートを印刷したり、PDF にエクスポートしたりすることができます。
 - **インポート＆エクスポート**[^1]：XLSX 形式でのデータのインポートとエクスポートをサポートしています。
-- **チャート**[^2]：[VChart][vchart-link] を介したサードパーティチャートのサポート。
+- **チャート**：棒グラフ、折れ線グラフ、円グラフ、散布図など、さまざまな種類のチャートを作成することができます。
 
 ### 📝 Univer Doc（開発中）
 
@@ -102,16 +103,17 @@ Univer はスプレッドシート、ドキュメント、プレゼンテーシ�
 
 Univer は多言語をサポートしており、以下の言語が利用可能です：
 
-- `zh-CN`
-- `zh-TW`
 - `en-US`
+- `fa-IR`
+- `fr-FR`
 - `ru-RU`
 - `vi-VN`
-- `fa-IR`
+- `zh-CN`
+- `zh-TW`
 
 `zh-CN` と `en-US` は公式サポート言語であり、その他の言語はコミュニティによって提供されています。
 
-[Using Custom Locales](https://univer.ai/guides/sheet/getting-started/i18n#using-custom-locales)を使用して、追加の言語を追加することができます。また、新しい言語サポートを追加するために[貢献ガイド](/CONTRIBUTING.md)を参照してください。
+[Using Custom Locales](https://docs.univer.ai/en-US/guides/sheets/getting-started/i18n#using-custom-locales)を使用して、追加の言語を追加することができます。また、新しい言語サポートを追加するために[貢献ガイド](/CONTRIBUTING.md)を参照してください。
 
 ## 👾 ショーケース
 
@@ -134,6 +136,11 @@ Univer は多言語をサポートしており、以下の言語が利用可能�
 <!-- ## 📦 Ecosystem
 
 Univer has a rich ecosystem that includes a wide range of tools and resources to help you get started with Univer: -->
+
+## 🔗 リンク
+
+- [Official Site](https://univer.ai)
+- [Presets Repository](https://github.com/dream-num/univer-presets)
 
 ## 💬 コミュニティ
 
@@ -187,7 +194,6 @@ Copyright © 2021-2024 DreamNum Co,Ltd. All Rights Reserved.
 
 <!-- Footnotes -->
 [^1]: これらの機能は、Univer の非 OSS バージョンによって提供されています。非 OSS バージョンは商用利用には無料であり、有料のアップグレードプランも提供されています。
-[^2]: VChart は Univer にチャート機能を提供するサードパーティライブラリです。詳細はこちらをご覧ください：[univer-vchart-plugin][vchart-univer-link].
 
 <!-- Links -->
 [github-license-shield]: https://img.shields.io/github/license/dream-num/univer?style=flat-square
@@ -261,9 +267,6 @@ Copyright © 2021-2024 DreamNum Co,Ltd. All Rights Reserved.
 [backer-badge-5]: https://opencollective.com/univer/backer/5/avatar.svg
 [backer-badge-6]: https://opencollective.com/univer/backer/6/avatar.svg
 
-[vchart-link]: https://github.com/VisActor/VChart
-[vchart-univer-link]: https://github.com/VisActor/univer-vchart-plugin
-
 [examples-preview-0]: ./docs/img/examples-sheets.gif
 [examples-preview-1]: ./docs/img/examples-sheets-multi.gif
 [examples-preview-2]: ./docs/img/examples-sheets-uniscript.gif
@@ -281,20 +284,20 @@ Copyright © 2021-2024 DreamNum Co,Ltd. All Rights Reserved.
 [examples-preview-14]: ./docs/img/examples-slides.gif
 [examples-preview-15]: ./docs/img/zen-mode.gif
 [examples-preview-16]: ./docs/img/univer-workspace-drag-chart.gif
-[examples-link-0]: https://univer.ai/examples/sheets/
+[examples-link-0]: https://univer.ai/en-US/features/sheets-basic
 [examples-link-1]: https://univer.ai/examples/sheets-multi/
 [examples-link-2]: https://univer.ai/examples/sheets-uniscript/
-[examples-link-3]: https://univer.ai/examples/sheets-big-data/
+[examples-link-3]: https://univer.ai/en-US/features/sheets-big-data
 [examples-link-4]: https://univer.ai/pro/examples/sheets-collaboration/
 [examples-link-5]: https://univer.ai/pro/examples/sheets-collaboration-playground/
 [examples-link-6]: https://univer.ai/pro/examples/sheets-exchange/
 [examples-link-7]: https://univer.ai/pro/examples/sheets-print/
-[examples-link-8]: https://univer.ai/examples/docs/
+[examples-link-8]: https://univer.ai/en-US/features/docs-basic
 [examples-link-9]: https://univer.ai/examples/docs-multi/
 [examples-link-10]: https://univer.ai/examples/docs-uniscript/
-[examples-link-11]: https://univer.ai/examples/docs-big-data/
+[examples-link-11]: https://univer.ai/en-US/features/docs-big-data
 [examples-link-12]: https://univer.ai/pro/examples/docs-collaboration/
 [examples-link-13]: https://univer.ai/pro/examples/docs-collaboration-playground/
 [examples-link-14]: https://univer.ai/examples/slides/
-[examples-link-15]: https://univer.ai/guides/sheet/features/zen-editor
+[examples-link-15]: https://docs.univer.ai/en-US/guides/sheets/features/zen-editor
 [examples-link-16]: https://youtu.be/kpV0MvQuFZA

@@ -19,18 +19,21 @@ import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import {
     InsertColAfterCommand,
     InsertColBeforeCommand,
+    InsertMultiColsLeftCommand,
+    InsertMultiRowsAboveCommand,
+    InsertMultiRowsAfterCommand,
     InsertRowAfterCommand,
     InsertRowBeforeCommand,
     RangeProtectionPermissionEditPoint,
     WorkbookEditablePermission,
-    WorksheetEditPermission,
-    WorksheetInsertColumnPermission,
-    WorksheetInsertRowPermission,
+    WorksheetEditPermission, WorksheetInsertColumnPermission, WorksheetInsertRowPermission,
 } from '@univerjs/sheets';
-import { MenuItemType } from '@univerjs/ui';
 
+import { MenuItemType } from '@univerjs/ui';
+import { Observable } from 'rxjs';
 import { InsertRangeMoveDownConfirmCommand } from '../../commands/commands/insert-range-move-down-confirm.command';
 import { InsertRangeMoveRightConfirmCommand } from '../../commands/commands/insert-range-move-right-confirm.command';
+import { MENU_ITEM_INPUT_COMPONENT } from '../../components/menu-item-input';
 import { getBaseRangeMenuHidden$, getCellMenuHidden$, getCurrentRangeDisable$, getInsertAfterMenuHidden$, getInsertBeforeMenuHidden$, getObservableWithExclusiveRange$ } from './menu-util';
 
 export const COL_INSERT_MENU_ID = 'sheet.menu.col-insert';
@@ -132,5 +135,97 @@ export function InsertRangeMoveDownMenuItemFactory(accessor: IAccessor): IMenuBu
         icon: 'InsertCellDown',
         disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
         hidden$: getCellMenuHidden$(accessor, 'row'),
+    };
+}
+
+export function InsertMultiRowsAfterMenuItemFactory(accessor: IAccessor): IMenuButtonItem<number> {
+    return {
+        id: InsertMultiRowsAfterCommand.id,
+        type: MenuItemType.BUTTON,
+        icon: 'InsertRowBelow',
+        label: {
+            name: MENU_ITEM_INPUT_COMPONENT,
+            props: {
+                prefix: 'rightClick.insertRowsAfter',
+                min: 1,
+                max: 1000,
+                suffix: 'rightClick.insertRowsAfterSuffix',
+            },
+        },
+        value$: new Observable<number>((subscriber) => {
+            subscriber.next(1);
+            subscriber.complete();
+        }),
+        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetInsertRowPermission, WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
+        hidden$: getInsertAfterMenuHidden$(accessor, 'row'),
+    };
+}
+
+export function InsertMultiRowsAboveMenuItemFactory(accessor: IAccessor): IMenuButtonItem<number> {
+    return {
+        id: InsertMultiRowsAboveCommand.id,
+        type: MenuItemType.BUTTON,
+        icon: 'InsertRowAbove',
+        label: {
+            name: MENU_ITEM_INPUT_COMPONENT,
+            props: {
+                prefix: 'rightClick.insertRowsAbove',
+                min: 1,
+                max: 1000,
+                suffix: 'rightClick.insertRowsAboveSuffix',
+            },
+        },
+        value$: new Observable<number>((subscriber) => {
+            subscriber.next(1);
+            subscriber.complete();
+        }),
+        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetInsertRowPermission, WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
+        hidden$: getInsertAfterMenuHidden$(accessor, 'row'),
+    };
+}
+
+export function InsertMultiColsLeftMenuItemFactory(accessor: IAccessor): IMenuButtonItem<number> {
+    return {
+        id: InsertMultiColsLeftCommand.id,
+        type: MenuItemType.BUTTON,
+        icon: 'LeftInsertColumn',
+        label: {
+            name: MENU_ITEM_INPUT_COMPONENT,
+            props: {
+                prefix: 'rightClick.insertColsLeft',
+                min: 1,
+                max: 1000,
+                suffix: 'rightClick.insertColsLeftSuffix',
+            },
+        },
+        value$: new Observable<number>((subscriber) => {
+            subscriber.next(1);
+            subscriber.complete();
+        }),
+        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetInsertRowPermission, WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
+        hidden$: getInsertAfterMenuHidden$(accessor, 'col'),
+    };
+}
+
+export function InsertMultiColsRightMenuItemFactory(accessor: IAccessor): IMenuButtonItem<number> {
+    return {
+        id: InsertMultiRowsAboveCommand.id,
+        type: MenuItemType.BUTTON,
+        icon: 'RightInsertColumn',
+        label: {
+            name: MENU_ITEM_INPUT_COMPONENT,
+            props: {
+                prefix: 'rightClick.insertColsRight',
+                min: 1,
+                max: 1000,
+                suffix: 'rightClick.insertColsRightSuffix',
+            },
+        },
+        value$: new Observable<number>((subscriber) => {
+            subscriber.next(1);
+            subscriber.complete();
+        }),
+        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetInsertRowPermission, WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
+        hidden$: getInsertAfterMenuHidden$(accessor, 'col'),
     };
 }

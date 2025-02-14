@@ -24,9 +24,11 @@ import {
     ClearSelectionAllCommand,
     ClearSelectionContentCommand,
     ClearSelectionFormatCommand, CopySheetCommand,
-    InsertColAfterCommand,
     InsertColBeforeCommand,
-    InsertRowAfterCommand,
+    InsertMultiColsLeftCommand,
+    InsertMultiColsRightCommand,
+    InsertMultiRowsAboveCommand,
+    InsertMultiRowsAfterCommand,
     InsertRowBeforeCommand,
     RemoveWorksheetMergeCommand,
     ResetBackgroundColorCommand,
@@ -35,14 +37,12 @@ import {
     SetBorderBasicCommand,
     SetColWidthCommand,
     SetHorizontalTextAlignCommand,
-    SetRowHeightCommand,
-    SetSelectedColsVisibleCommand,
-    SetSelectedRowsVisibleCommand, SetTabColorCommand,
-    SetTextRotationCommand,
-    SetTextWrapCommand,
-    SetVerticalTextAlignCommand, SetWorksheetHideCommand,
-    SetWorksheetRowIsAutoHeightCommand,
-    ToggleGridlinesCommand,
+    SetRowHeightCommand, SetSelectedColsVisibleCommand,
+    SetSelectedRowsVisibleCommand,
+    SetTabColorCommand,
+    SetTextRotationCommand, SetTextWrapCommand,
+    SetVerticalTextAlignCommand,
+    SetWorksheetHideCommand, SetWorksheetRowIsAutoHeightCommand, ToggleGridlinesCommand,
 } from '@univerjs/sheets';
 import { ContextMenuGroup, ContextMenuPosition, RibbonStartGroup } from '@univerjs/ui';
 import {
@@ -95,15 +95,14 @@ import { ToggleGridlinesMenuFactory } from './menu/gridlines.menu';
 import {
     CELL_INSERT_MENU_ID,
     CellInsertMenuItemFactory,
-    COL_INSERT_MENU_ID,
-    ColInsertMenuItemFactory,
-    InsertColAfterMenuItemFactory,
     InsertColBeforeMenuItemFactory,
+    InsertMultiColsLeftMenuItemFactory,
+    InsertMultiColsRightMenuItemFactory,
+    InsertMultiRowsAboveMenuItemFactory,
+    InsertMultiRowsAfterMenuItemFactory,
     InsertRangeMoveDownMenuItemFactory,
     InsertRangeMoveRightMenuItemFactory,
-    InsertRowAfterMenuItemFactory,
     InsertRowBeforeMenuItemFactory,
-    ROW_INSERT_MENU_ID, RowInsertMenuItemFactory,
 } from './menu/insert.menu';
 import {
     BackgroundColorSelectorMenuItemFactory,
@@ -169,7 +168,6 @@ import {
     HideSheetMenuItemFactory,
     RenameSheetMenuItemFactory,
     ShowMenuItemFactory,
-    // UnHideSheetMenuItemFactory,
 } from './menu/sheet.menu';
 
 export const menuSchema: MenuSchemaType = {
@@ -461,17 +459,13 @@ export const menuSchema: MenuSchemaType = {
         },
         [ContextMenuGroup.LAYOUT]: {
             order: 1,
-            [COL_INSERT_MENU_ID]: {
+            [InsertMultiColsLeftCommand.id]: {
                 order: 0,
-                menuItemFactory: ColInsertMenuItemFactory,
-                [InsertColBeforeCommand.id]: {
-                    order: 0,
-                    menuItemFactory: InsertColBeforeMenuItemFactory,
-                },
-                [InsertColAfterCommand.id]: {
-                    order: 1,
-                    menuItemFactory: InsertColAfterMenuItemFactory,
-                },
+                menuItemFactory: InsertMultiColsLeftMenuItemFactory,
+            },
+            [InsertMultiColsRightCommand.id]: {
+                order: 0,
+                menuItemFactory: InsertMultiColsRightMenuItemFactory,
             },
             [HideColConfirmCommand.id]: {
                 order: 1,
@@ -586,17 +580,13 @@ export const menuSchema: MenuSchemaType = {
         },
         [ContextMenuGroup.LAYOUT]: {
             order: 1,
-            [ROW_INSERT_MENU_ID]: {
+            [InsertMultiRowsAboveCommand.id]: {
                 order: 0,
-                menuItemFactory: RowInsertMenuItemFactory,
-                [InsertRowBeforeCommand.id]: {
-                    order: 0,
-                    menuItemFactory: InsertRowBeforeMenuItemFactory,
-                },
-                [InsertRowAfterCommand.id]: {
-                    order: 1,
-                    menuItemFactory: InsertRowAfterMenuItemFactory,
-                },
+                menuItemFactory: InsertMultiRowsAboveMenuItemFactory,
+            },
+            [InsertMultiRowsAfterCommand.id]: {
+                order: 1,
+                menuItemFactory: InsertMultiRowsAfterMenuItemFactory,
             },
             [RemoveRowConfirmCommand.id]: {
                 order: 1,

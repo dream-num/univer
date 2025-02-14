@@ -164,7 +164,7 @@ export class DesktopLayoutService extends Disposable implements ILayoutService {
             fromEvent(window, 'focusin').subscribe((event) => {
                 const target = event.target as HTMLElement;
 
-                if (givingBackFocusElements.some((item) => target.classList.contains(item))) {
+                if (this._rootContainerElement?.contains(target) && givingBackFocusElements.some((item) => target.classList.contains(item))) {
                     queueMicrotask(() => this.focus());
                     return;
                 }

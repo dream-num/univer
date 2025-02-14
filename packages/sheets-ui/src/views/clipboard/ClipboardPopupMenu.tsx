@@ -146,7 +146,12 @@ export const ClipboardPopupMenu = () => {
             onMouseEnter={() => setMenuHovered(true)}
             onMouseLeave={() => setMenuHovered(false)}
         >
-            <DropdownProvider>
+            <DropdownProvider
+                visible={menuVisible}
+                onVisibleChange={(visible) => {
+                    setMenuVisible(visible);
+                }}
+            >
                 <DropdownTrigger>
                     <div
                         className={styles.sheetPasteOptionsIconWrapper}
@@ -162,7 +167,7 @@ export const ClipboardPopupMenu = () => {
                     </div>
                 </DropdownTrigger>
                 <DropdownOverlay className={clsx(styles.sheetPasteOptionsMenu, `
-                  univer-border univer-border-solid univer-border-gray-200
+                  univer-border univer-border-solid univer-border-gray-200 univer-opacity-100
                 `)}
                 >
                     <ul>

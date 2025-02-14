@@ -70,6 +70,7 @@ function factory(id: string) {
         univer.registerPlugin(UniverSheetsFormulaPlugin);
 
         const data = Tools.deepClone(DEFAULT_WORKBOOK_DATA_DEMO);
+        data.id = id;
         // create univer sheet instance
         univer.createUnit(UniverInstanceType.UNIVER_SHEET, data);
     };

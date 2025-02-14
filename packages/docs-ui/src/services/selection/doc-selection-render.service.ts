@@ -109,6 +109,10 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
     // When the user switches editors, whether to clear the doc ranges.
     private _reserveRanges = false;
 
+    get isIMEInputing() {
+        return this._isIMEInputApply;
+    }
+
     get isOnPointerEvent() {
         return this._onPointerEvent;
     }

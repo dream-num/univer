@@ -101,6 +101,12 @@ export interface IShortcutService {
     forceEscape(): IDisposable;
 
     /**
+     * Used by API to force disable all shortcut keys, which will not be restored by selection
+     * @returns {IDisposable} a disposable that could be used to cancel the force disabling.
+     */
+    forceDisable(): IDisposable;
+
+    /**
      * Dispatch a keyboard event to the shortcut service and check if there is a shortcut that matches the event.
      * @param e - the keyboard event to be dispatched.
      */
@@ -141,6 +147,8 @@ export class ShortcutService extends Disposable implements IShortcutService {
     readonly shortcutChanged$ = this._shortcutChanged$.asObservable();
 
     private _forceEscaped = false;
+
+    private _forceDisabled = false;
 
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
@@ -239,6 +247,13 @@ export class ShortcutService extends Disposable implements IShortcutService {
         return toDisposable(() => (this._forceEscaped = false));
     }
 
+    forceDisable(): IDisposable {
+        this._forceDisabled = true;
+        return toDisposable(() => {
+            this._forceDisabled = false;
+        });
+    }
+
     private _resolveKeyboardEvent(e: KeyboardEvent): void {
         const candidate = this.dispatch(e);
         if (candidate) {
@@ -251,8 +266,9 @@ export class ShortcutService extends Disposable implements IShortcutService {
         // Should get the container element of the Univer instance and see if
         // the event target is a descendant of the container element.
         // Also we should check through escape list and force catching list.
-        // if the target is not focused on the univer instance we should ignore the keyboard event
-        if (this._forceEscaped) return;
+        // if the target is not focused on the univer instance we should ignore the keyboard event.
+        // Maybe the user has forcibly disabled the shortcut keys, and the shortcut keys should not be processed at this time.
+        if (this._forceEscaped || this._forceDisabled) return;
 
         if (
             this._layoutService &&

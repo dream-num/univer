@@ -305,6 +305,20 @@ export default {
             numBytes: { name: 'số Byte', detail: 'Chỉ rõ số ký tự mà bạn muốn hàm MIDB trích xuất, dựa trên byte.' },
         },
     },
+    NUMBERSTRING: {
+        description: 'Chuyển đổi số sang chuỗi tiếng Trung',
+        abstract: 'Chuyển đổi số sang chuỗi tiếng Trung',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://www.wps.cn/learning/course/detail/id/340.html?chan=pc_kdocs_function',
+            },
+        ],
+        functionParameter: {
+            number: { name: 'số', detail: 'Giá trị được chuyển đổi thành chuỗi tiếng Trung.' },
+            type: { name: 'kiểu', detail: 'Kiểu kết quả trả về.\n1. chữ thường Trung Quốc \n2. Viết hoa chữ Hán \n3. Đọc và viết chữ Hán' },
+        },
+    },
     NUMBERVALUE: {
         description: 'Chuyển văn bản sang số, theo cách độc lập vị trí.',
         abstract: 'Chuyển văn bản sang số, theo cách độc lập vị trí.',

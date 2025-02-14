@@ -306,6 +306,20 @@ export default {
             numBytes: { name: 'バイト数', detail: '取り出す文字数をバイト数で指定します。' },
         },
     },
+    NUMBERSTRING: {
+        description: '数字を中国語の文字列に変換する',
+        abstract: '数字を中国語の文字列に変換する',
+        links: [
+            {
+                title: '指導',
+                url: 'https://www.wps.cn/learning/course/detail/id/340.html?chan=pc_kdocs_function',
+            },
+        ],
+        functionParameter: {
+            number: { name: '数値', detail: '中国語の文字列に変換される数値。' },
+            type: { name: 'タイプ', detail: '返される結果のタイプ。\n1. 中国語小文字 \n2. 中国語の文字を大文字にする \n3. 漢字の読み書き' },
+        },
+    },
     NUMBERVALUE: {
         description: '文字列をロケールに依存しない方法で数値に変換します。',
         abstract: '文字列をロケールに依存しない方法で数値に変換します。',

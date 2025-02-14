@@ -305,6 +305,20 @@ export default {
             numBytes: { name: '字节数', detail: '按字节指定要由 MIDB 提取的字符的数量。' },
         },
     },
+    NUMBERSTRING: {
+        description: '将数字转换为中文字符串',
+        abstract: '将数字转换为中文字符串',
+        links: [
+            {
+                title: '教学',
+                url: 'https://www.wps.cn/learning/course/detail/id/340.html?chan=pc_kdocs_function',
+            },
+        ],
+        functionParameter: {
+            number: { name: '数值', detail: '被转化为中文字符串的数值。' },
+            type: { name: '类型', detail: '返回结果的类型。\n1. 汉字小写 \n2. 汉字大写 \n3. 汉字读写' },
+        },
+    },
     NUMBERVALUE: {
         description: '以与区域设置无关的方式将文本转换为数字',
         abstract: '以与区域设置无关的方式将文本转换为数字',

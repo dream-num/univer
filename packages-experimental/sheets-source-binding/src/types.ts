@@ -105,6 +105,11 @@ export interface ICellBindingNodeParam {
       */
     isDate?: boolean;
     nodeId?: string; // optional in ICellBindingNodeParam
+
+    /**
+     * The formatter of the binding node, the formatter will be applied to the binding value.
+     */
+    formatter?: string;
 }
 
 export interface ICellBindingNode extends ICellBindingNodeParam {

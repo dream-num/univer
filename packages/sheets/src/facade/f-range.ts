@@ -704,7 +704,7 @@ export class FRange extends FBaseInitialable {
     }
 
     /**
-     * Set new value for current cell, first cell in this range.
+     * Sets the value of the range.
      * @param {CellValue | ICellData} value The value can be a number, string, boolean, or standard cell format. If it begins with `=`, it is interpreted as a formula. The value is tiled to all cells in the range.
      * @returns {FRange} This range, for chaining
      * ```ts
@@ -727,12 +727,7 @@ export class FRange extends FBaseInitialable {
         this._commandService.syncExecuteCommand(SetRangeValuesCommand.id, {
             unitId: this._workbook.getUnitId(),
             subUnitId: this._worksheet.getSheetId(),
-            range: {
-                startColumn: this._range.startColumn,
-                startRow: this._range.startRow,
-                endColumn: this._range.startColumn,
-                endRow: this._range.startRow,
-            },
+            range: this._range,
             value: realValue,
         });
 

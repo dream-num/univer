@@ -623,6 +623,7 @@ export class FRange extends FBaseInitialable {
         this._commandService.syncExecuteCommand(SetBorderBasicCommand.id, {
             unitId: this._workbook.getUnitId(),
             subUnitId: this._worksheet.getSheetId(),
+            ranges: [this._range],
             value: {
                 type,
                 style,

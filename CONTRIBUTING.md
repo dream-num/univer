@@ -33,7 +33,7 @@ To better assist you, we recommend:
 Univer requires Node.js >= 18.17.0. We recommend using nvm or fnm to switch between different versions of Node.js.
 
 ```shell
-git clone http://github.com/dream-num/univer
+git clone https://github.com/dream-num/univer
 cd univer
 
 # install package manager pnpm
@@ -142,10 +142,6 @@ Before merging a pull request, please make sure the following requirements are m
 - Test coverage is not decreased.
 
 We provide preview deployments for pull requests. You can view the preview deployment by clicking the "Preview" link in the "View Deployment" section.
-
-### Documentation
-
-If you are adding a new feature, please make sure to update the documentation accordingly. Refer to our [documentation repository](https://github.com/dream-num/docs) for more guidance.
 
 ### Storybook
 

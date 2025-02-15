@@ -36,12 +36,10 @@ import {
 import { IRenderManagerService, RENDER_CLASS_TYPE, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 import { getSelectionsService, ScrollToCellOperation, SetSelectionsOperation } from '@univerjs/sheets';
 import { ScrollCommand, SetScrollRelativeCommand } from '../../commands/commands/set-scroll.command';
-import { ExpandSelectionCommand, MoveSelectionCommand, MoveSelectionEnterAndTabCommand } from '../../commands/commands/set-selection.command';
+import { ExpandSelectionCommand } from '../../commands/commands/set-selection.command';
 import { SheetScrollManagerService } from '../../services/scroll-manager.service';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import { getSheetObject } from '../utils/component-tools';
-
-const SHEET_NAVIGATION_COMMANDS = [MoveSelectionCommand.id, MoveSelectionEnterAndTabCommand.id];
 
 const MOUSE_WHEEL_SPEED_SMOOTHING_FACTOR = 3;
 /**
@@ -332,15 +330,17 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
 
     private _initCommandListener(): void {
         this.disposeWithMe(this._commandService.onCommandExecuted((command) => {
-            if (SHEET_NAVIGATION_COMMANDS.includes(command.id)) {
-                this._scrollToSelection();
-            } else if (command.id === ScrollToCellOperation.id) {
+            if (command.id === ScrollToCellOperation.id && command.id === this._context.unitId) {
                 const param = command.params as IRange;
                 this.scrollToRange(param);
             } else if (command.id === ExpandSelectionCommand.id) {
                 const param = command.params as IExpandSelectionCommandParams;
-                this._scrollToSelectionForExpand(param);
-            } else if (command.id === SetSelectionsOperation.id && (command.params as ISetSelectionsOperationParams).reveal) {
+                this._scrollToSelectionForExpand(param); // TODO: this should be refactored. Should not treat it differently.
+            } else if (
+                command.id === SetSelectionsOperation.id
+                && (command.params as ISetSelectionsOperationParams).reveal
+                && (command.params as ISetSelectionsOperationParams).unitId === this._context.unitId
+            ) {
                 this._scrollToSelection();
             }
         }));
@@ -473,10 +473,10 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
     }
 
     private _scrollToSelection(targetIsActualRowAndColumn = true) {
-        const selection = this._getSelectionsService().getCurrentLastSelection();
+        const selection = this._getSelectionsService().getWorkbookSelections(this._context.unitId).getCurrentLastSelection();
         if (!selection) return;
 
-        const { startRow, startColumn, actualRow, actualColumn } = selection.primary ?? selection.range;
+        const { startRow, startColumn, actualRow, actualColumn } = selection.primary;
         const selectionStartRow = targetIsActualRowAndColumn ? actualRow ?? startRow : startRow;
         const selectionStartColumn = targetIsActualRowAndColumn ? actualColumn ?? startColumn : startColumn;
         this._scrollToCell(selectionStartRow, selectionStartColumn);

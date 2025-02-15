@@ -16,7 +16,7 @@
 
 /* eslint-disable ts/explicit-function-return-type */
 
-import { AutoFillSeries, BaselineOffset, BooleanNumber, BorderStyleTypes, BorderType, ColorType, CommandType, CommonHideTypes, CopyPasteType, DataValidationErrorStyle, DataValidationOperator, DataValidationRenderMode, DataValidationStatus, DataValidationType, DeleteDirection, DeveloperMetadataVisibility, Dimension, Direction, HorizontalAlign, InterpolationPointType, LifecycleStages, LocaleType, MentionType, ProtectionType, RelativeDate, SheetTypes, TextDecoration, TextDirection, ThemeColorType, UniverInstanceType, VerticalAlign } from '@univerjs/core';
+import { AutoFillSeries, BaselineOffset, BooleanNumber, BorderStyleTypes, BorderType, ColorType, CommandType, CommonHideTypes, CopyPasteType, DataValidationErrorStyle, DataValidationOperator, DataValidationRenderMode, DataValidationStatus, DataValidationType, DeleteDirection, DeveloperMetadataVisibility, Dimension, Direction, HorizontalAlign, InterpolationPointType, LifecycleStages, LocaleType, MentionType, ProtectionType, RelativeDate, SheetTypes, TextDecoration, TextDirection, ThemeColorType, UniverInstanceType, VerticalAlign, WrapStrategy } from '@univerjs/core';
 
 /**
  * @hideconstructor
@@ -229,6 +229,18 @@ export class FEnum {
      */
     get VerticalAlign() {
         return VerticalAlign;
+    }
+
+    /**
+     * Different wrap strategy options
+     *
+     * @example
+     * ```ts
+     * console.log(univerAPI.Enum.WrapStrategy.WRAP);
+     * ```
+     */
+    get WrapStrategy() {
+        return WrapStrategy;
     }
 
     /**

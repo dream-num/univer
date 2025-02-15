@@ -15,7 +15,7 @@
  */
 
 import { FEnum } from '@univerjs/core/facade';
-import { SheetSkeletonChangeType, SheetValueChangeType } from '@univerjs/sheets';
+import { SheetSkeletonChangeType, SheetValueChangeType, SplitDelimiterEnum } from '@univerjs/sheets';
 
 /**
  * @ignore
@@ -32,6 +32,11 @@ export interface IFSheetsEnum {
      * Includes operations like changing row/column dimensions, visibility, and grid properties.
      */
     SheetSkeletonChangeType: typeof SheetSkeletonChangeType;
+
+    /**
+     * Split delimiter types.
+     */
+    SplitDelimiterType: typeof SplitDelimiterEnum;
 }
 
 export class FSheetsEnum implements IFSheetsEnum {
@@ -41,6 +46,10 @@ export class FSheetsEnum implements IFSheetsEnum {
 
     get SheetSkeletonChangeType(): typeof SheetSkeletonChangeType {
         return SheetSkeletonChangeType;
+    }
+
+    get SplitDelimiterType(): typeof SplitDelimiterEnum {
+        return SplitDelimiterEnum;
     }
 }
 

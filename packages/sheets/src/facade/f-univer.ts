@@ -21,7 +21,7 @@ import type { FRange } from './f-range';
 import type { FWorksheet } from './f-worksheet';
 import { CanceledError, ICommandService, IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
-import { COMMAND_LISTENER_VALUE_CHANGE, getValueChangedEffectedRange, InsertSheetCommand, RemoveSheetCommand, SetGridlinesColorCommand, SetTabColorCommand, SetWorksheetActiveOperation, SetWorksheetHideCommand, SetWorksheetNameCommand, SetWorksheetOrderCommand, ToggleGridlinesCommand } from '@univerjs/sheets';
+import { COMMAND_LISTENER_VALUE_CHANGE, getValueChangedEffectedRange, InsertSheetCommand, RemoveSheetCommand, SetGridlinesColorCommand, SetTabColorMutation, SetWorksheetActiveOperation, SetWorksheetHideMutation, SetWorksheetNameCommand, SetWorksheetOrderMutation, ToggleGridlinesCommand } from '@univerjs/sheets';
 import { FDefinedNameBuilder } from './f-defined-name';
 import { FPermission } from './f-permission';
 import { FWorkbook } from './f-workbook';
@@ -42,12 +42,14 @@ export interface IFUniverSheetsMixin {
      * @returns {FWorkbook} FWorkbook API instance.
      * @example
      * ```ts
-     * univerAPI.createWorkbook({ id: 'Sheet1', name: 'Sheet1' });
+     * const fWorkbook = univerAPI.createWorkbook({ id: 'Sheet1', name: 'Sheet1' });
+     * console.log(fWorkbook);
      * ```
      *
      * Add you can make the workbook not as the active workbook by setting options:
      * ```ts
-     * univerAPI.createWorkbook({ id: 'Sheet1', name: 'Sheet1' }, { makeCurrent: false });
+     * const fWorkbook = univerAPI.createWorkbook({ id: 'Sheet1', name: 'Sheet1' }, { makeCurrent: false });
+     * console.log(fWorkbook);
      * ```
      */
     createWorkbook(data: Partial<IWorkbookData>, options?: ICreateUnitOptions): FWorkbook;
@@ -57,7 +59,8 @@ export interface IFUniverSheetsMixin {
      * @returns {FWorkbook | null} The currently focused Univer spreadsheet.
      * @example
      * ```ts
-     * univerAPI.getActiveWorkbook();
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * console.log(fWorkbook);
      * ```
      */
     getActiveWorkbook(): FWorkbook | null;
@@ -71,10 +74,20 @@ export interface IFUniverSheetsMixin {
      * Get the spreadsheet API handler by the spreadsheet id.
      * @param {string} id The spreadsheet id.
      * @returns {FWorkbook | null} The spreadsheet API instance.
+     *
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getUniverSheet('Sheet1');
+     * console.log(fWorkbook);
+     *
+     * const fWorkbook = univerAPI.getWorkbook('Sheet1');
+     * console.log(fWorkbook);
+     * ```
      */
     getUniverSheet(id: string): FWorkbook | null;
 
     getWorkbook(id: string): FWorkbook | null;
+
     /**
      * Get the PermissionInstance.
      * @deprecated This function is deprecated and will be removed in version 0.6.0. Please use the function with the same name on the `FWorkbook` instance instead.
@@ -91,7 +104,13 @@ export interface IFUniverSheetsMixin {
      * @returns {FDefinedNameBuilder} - The defined name builder.
      * @example
      * ```ts
-     * univerAPI.newDefinedName();
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const definedNameBuilder = univerAPI.newDefinedName()
+     *   .setRef('Sheet1!$A$1')
+     *   .setName('MyDefinedName')
+     *   .setComment('This is a comment');
+     * console.log(definedNameBuilder);
+     * fWorkbook.insertDefinedNameBuilder(definedNameBuilder.build());
      * ```
      */
     newDefinedName(): FDefinedNameBuilder;
@@ -103,7 +122,12 @@ export interface IFUniverSheetsMixin {
      * @returns {Nullable<{ workbook: FWorkbook; worksheet: FWorksheet }>} - The target of the sheet.
      * @example
      * ```ts
-     * univerAPI.getSheetTarget('unitId', 'subUnitId');
+     * const unitId = 'workbook-01';
+     * const subUnitId = 'sheet-0001';
+     * const target = univerAPI.getSheetTarget(unitId, subUnitId);
+     * if (!target) return;
+     * const { workbook, worksheet } = target;
+     * console.log(workbook, worksheet);
      * ```
      */
     getSheetTarget(unitId: string, subUnitId: string): Nullable<{ workbook: FWorkbook; worksheet: FWorksheet }>;
@@ -114,10 +138,11 @@ export interface IFUniverSheetsMixin {
      * @returns {Nullable<{ workbook: FWorkbook; worksheet: FWorksheet }>} - The target of the sheet.
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.event.CommandExecuted, (commandInfo) => {
+     * univerAPI.addEvent(univerAPI.Event.CommandExecuted, (commandInfo) => {
      *   const target = univerAPI.getCommandSheetTarget(commandInfo);
      *   if (!target) return;
      *   const { workbook, worksheet } = target;
+     *   console.log(workbook, worksheet);
      * });
      * ```
      */
@@ -131,6 +156,7 @@ export interface IFUniverSheetsMixin {
      * const target = univerAPI.getActiveSheet();
      * if (!target) return;
      * const { workbook, worksheet } = target;
+     * console.log(workbook, worksheet);
      * ```
      */
     getActiveSheet(): Nullable<{ workbook: FWorkbook; worksheet: FWorksheet }>;
@@ -270,7 +296,7 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
         this.registerEventHandler(
             this.Event.BeforeSheetMove,
             () => commandService.beforeCommandExecuted((commandInfo) => {
-                if (commandInfo.id === SetWorksheetOrderCommand.id) {
+                if (commandInfo.id === SetWorksheetOrderMutation.id) {
                     const { fromOrder, toOrder } = commandInfo.params as ISetWorksheetOrderMutationParams;
                     const target = this.getCommandSheetTarget(commandInfo);
                     if (!target) return;
@@ -294,7 +320,7 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
         this.registerEventHandler(
             this.Event.BeforeSheetTabColorChange,
             () => commandService.beforeCommandExecuted((commandInfo) => {
-                if (commandInfo.id === SetTabColorCommand.id) {
+                if (commandInfo.id === SetTabColorMutation.id) {
                     const { color } = commandInfo.params as ISetTabColorMutationParams;
                     const target = this.getCommandSheetTarget(commandInfo);
                     if (!target) return;
@@ -306,7 +332,7 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
         this.registerEventHandler(
             this.Event.BeforeSheetHideChange,
             () => commandService.beforeCommandExecuted((commandInfo) => {
-                if (commandInfo.id === SetWorksheetHideCommand.id) {
+                if (commandInfo.id === SetWorksheetHideMutation.id) {
                     const { hidden } = commandInfo.params as ISetWorksheetHideMutationParams;
                     const target = this.getCommandSheetTarget(commandInfo);
                     if (!target) return;
@@ -418,7 +444,7 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
         this.registerEventHandler(
             this.Event.SheetMoved,
             () => commandService.onCommandExecuted((commandInfo) => {
-                if (commandInfo.id === SetWorksheetOrderCommand.id) {
+                if (commandInfo.id === SetWorksheetOrderMutation.id) {
                     const { toOrder: toIndex } = commandInfo.params as ISetWorksheetOrderMutationParams;
                     const target = this.getCommandSheetTarget(commandInfo);
                     if (!target) return;
@@ -442,7 +468,7 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
         this.registerEventHandler(
             this.Event.SheetTabColorChanged,
             () => commandService.onCommandExecuted((commandInfo) => {
-                if (commandInfo.id === SetTabColorCommand.id) {
+                if (commandInfo.id === SetTabColorMutation.id) {
                     const { color } = commandInfo.params as ISetTabColorMutationParams;
                     const target = this.getCommandSheetTarget(commandInfo);
                     if (!target) return;
@@ -454,7 +480,7 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
         this.registerEventHandler(
             this.Event.SheetHideChanged,
             () => commandService.onCommandExecuted((commandInfo) => {
-                if (commandInfo.id === SetWorksheetHideCommand.id) {
+                if (commandInfo.id === SetWorksheetHideMutation.id) {
                     const { hidden } = commandInfo.params as ISetWorksheetHideMutationParams;
                     const target = this.getCommandSheetTarget(commandInfo);
                     if (!target) return;

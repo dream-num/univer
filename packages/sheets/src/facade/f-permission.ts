@@ -195,6 +195,7 @@ export class FPermission extends FBase {
      * const permissionId = await permission.addWorksheetBasePermission(unitId, subUnitId)
      * // After this line of code , the worksheet will no longer be editable
      * permission.setWorksheetPermissionPoint(unitId, subUnitId, permission.permissionPointsDefinition.WorksheetEditPermission, false);
+     * ```
      */
     async setWorksheetPermissionPoint(unitId: string, subUnitId: string, FPointClass: WorkSheetPermissionPointConstructor, value: boolean): Promise<string | undefined> {
         const hasBasePermission = this._worksheetProtectionRuleModel.getRule(unitId, subUnitId);
@@ -249,12 +250,12 @@ export class FPermission extends FBase {
      *
      * @example
      * ```typescript
-     *const workbook = univerAPI.getActiveWorkbook();
+     * const workbook = univerAPI.getActiveWorkbook();
      * const permission = workbook.getPermission();
      * const unitId = workbook.getId();
      * const worksheet = workbook.getActiveSheet();
      * const subUnitId = worksheet.getSheetId();
-     * const range = worksheet.getRange(0,0,2,2);
+     * const range = worksheet.getRange('A1:B2');
      * const ranges = [];
      * ranges.push(range);
      * // Note that there will be no permission changes after this step is completed. It only returns an ID for subsequent permission changes.
@@ -326,7 +327,7 @@ export class FPermission extends FBase {
      * const unitId = workbook.getId();
      * const worksheet = workbook.getActiveSheet();
      * const subUnitId = worksheet.getSheetId();
-     * const range = worksheet.getRange(0,0,2,2);
+     * const range = worksheet.getRange('A1:B2');
      * const ranges = [];
      * ranges.push(range);
      * const res = await permission.addRangeBaseProtection(unitId, subUnitId, ranges);
@@ -369,7 +370,7 @@ export class FPermission extends FBase {
      * const unitId = workbook.getId();
      * const worksheet = workbook.getActiveSheet();
      * const subUnitId = worksheet.getSheetId();
-     * const range = worksheet.getRange(0, 0, 2, 2);
+     * const range = worksheet.getRange('A1:B2');
      * const ranges = [];
      * ranges.push(range);
      * // Note that there will be no permission changes after this step is completed. It only returns an ID for subsequent permission changes.
@@ -398,7 +399,7 @@ export class FPermission extends FBase {
      * @param {string} unitId - The unique identifier of the workbook.
      * @param {string} subUnitId - The unique identifier of the worksheet within the workbook.
      * @param {string} ruleId - The ruleId of the range protection rule that is being updated.
-     * @param {IRange[]} ranges - The array of new ranges to be set for the range protection rule.
+     * @param {FRange[]} ranges - The array of new ranges to be set for the range protection rule.
      *
      * @example
      * ```typescript
@@ -407,12 +408,12 @@ export class FPermission extends FBase {
      * const unitId = workbook.getId();
      * const worksheet = workbook.getActiveSheet();
      * const subUnitId = worksheet.getSheetId();
-     * const range = worksheet.getRange(0, 0, 2, 2);
+     * const range = worksheet.getRange('A1:B2');
      * const ranges = [];
      * ranges.push(range);
      * const res = await permission.addRangeBaseProtection(unitId, subUnitId, ranges);
      * const {permissionId, ruleId} = res;
-     * const newRange = worksheet.getRange(3, 3, 2, 2);
+     * const newRange = worksheet.getRange('C1:D2');
      * permission.setRangeProtectionRanges(unitId, subUnitId, ruleId, [newRange]);
      * ```
      */

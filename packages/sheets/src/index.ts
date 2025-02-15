@@ -102,8 +102,7 @@ export { AddMergeRedoSelectionsOperationFactory, AddMergeUndoSelectionsOperation
 
 export type { FormatType } from './services/numfmt/type';
 export { expandToContinuousRange } from './basics/expand-range';
-export { splitRangeText } from './basics/split-range-text';
-export type { SplitDelimiterEnum } from './basics/split-range-text';
+export { SplitDelimiterEnum, splitRangeText } from './basics/split-range-text';
 export { getNextPrimaryCell } from './services/selections/move-active-cell-util';
 export { checkCellValueType } from './basics/cell-type';
 

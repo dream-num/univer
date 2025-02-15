@@ -83,8 +83,9 @@ export class FEventRegistry {
      * @returns {Disposable} The Disposable instance, for remove the listener
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.event.UnitCreated, (params) => {
-     *   console.log('unit created', params);
+     * univerAPI.addEvent(univerAPI.Event.LifeCycleChanged, (params) => {
+     *   const { stage } = params;
+     *   console.log('life cycle changed', params);
      * });
      * ```
      */
@@ -101,7 +102,7 @@ export class FEventRegistry {
      * @returns {boolean} should cancel
      * @example
      * ```ts
-     * this.fireEvent(univerAPI.event.UnitCreated, params);
+     * this.fireEvent(univerAPI.Event.LifeCycleChanged, params);
      * ```
      */
     fireEvent<T extends keyof IEventParamConfig>(event: T, params: IEventParamConfig[T]): boolean | undefined {

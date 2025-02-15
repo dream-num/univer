@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ILogService, LocaleType, LogLevel, Univer, UniverInstanceType, UserManagerService } from '@univerjs/core';
+import { ILogService, LocaleType, LogLevel, Univer, UserManagerService } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
 import { UniverDebuggerPlugin } from '@univerjs/debugger';
 import { defaultTheme } from '@univerjs/design';
@@ -24,7 +24,6 @@ import { UniverDocsMentionUIPlugin } from '@univerjs/docs-mention-ui';
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
-import { DEFAULT_WORKBOOK_DATA_DEMO } from '@univerjs/mockdata';
 import { UniverRPCMainThreadPlugin } from '@univerjs/rpc';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverSheetsConditionalFormattingPlugin } from '@univerjs/sheets-conditional-formatting';
@@ -133,13 +132,57 @@ function createNewInstance() {
         univer.registerPlugin(UniverDebuggerPlugin);
     }
 
+    window.univer = univer;
+    const univerAPI = window.univerAPI = FUniver.newAPI(univer);
+
     const injector = univer.__getInjector();
     const userManagerService = injector.get(UserManagerService);
     userManagerService.setCurrentUser(mockUser);
 
     // create univer sheet instance
     if (!IS_E2E) {
-        univer.createUnit(UniverInstanceType.UNIVER_SHEET, DEFAULT_WORKBOOK_DATA_DEMO);
+        // univer.createUnit(UniverInstanceType.UNIVER_SHEET, DEFAULT_WORKBOOK_DATA_DEMO);
+        univerAPI.createWorkbook({
+            id: 'workbook1',
+            sheetOrder: ['sheet-01'],
+            sheets: {
+                'sheet-01': {
+                    id: 'sheet-01',
+                    name: 'Sheet 01',
+                    rowCount: 10,
+                    columnCount: 40,
+                    cellData: { 0: { 0: { f: "=SUM('[workbook2]Sheet 01'!A1:B2)" } } },
+      // Use workbook's ID, worksheet's NAME
+                },
+            },
+        });
+        univerAPI.createWorkbook(
+            {
+                id: 'workbook2',
+                sheetOrder: ['sheet-01'],
+                sheets: {
+                    'sheet-01': {
+                        id: 'sheet-01',
+                        name: 'Sheet 01',
+                        rowCount: 10,
+                        columnCount: 5,
+                        cellData: {
+                            0: {
+                                0: { v: 1 },
+                                1: { v: 2 },
+                            },
+                            1: {
+                                0: { v: 3 },
+                                1: { v: 4 },
+                            },
+                        },
+                    },
+                },
+            },
+            {
+                makeCurrent: false,
+            }
+        );
     }
 
     setTimeout(() => {
@@ -161,9 +204,6 @@ function createNewInstance() {
         window.univer = undefined;
         window.univerAPI = undefined;
     });
-
-    window.univer = univer;
-    window.univerAPI = FUniver.newAPI(univer);
 }
 
 createNewInstance();

@@ -131,6 +131,7 @@ export const MoveSelectionCommand: ICommand<IMoveSelectionCommandParams> = {
         const rs = accessor.get(ICommandService).executeCommand(SetSelectionsOperation.id, {
             unitId: workbook.getUnitId(),
             subUnitId: worksheet.getSheetId(),
+            reveal: true,
             selections,
             type: SelectionMoveType.MOVE_END,
             extra,
@@ -305,7 +306,8 @@ export const MoveSelectionEnterAndTabCommand: ICommand<IMoveSelectionEnterAndTab
             type: SelectionMoveType.MOVE_END,
             selections,
             extra: params.extra,
-        });
+            reveal: true,
+        } as ISetSelectionsOperationParams);
         const renderManagerService = accessor.get(IRenderManagerService);
         const selectionService = renderManagerService.getRenderById(unitId)?.with(ISheetSelectionRenderService);
         selectionService?.refreshSelectionMoveEnd();
@@ -445,13 +447,13 @@ export const SelectAllCommand: ICommand<ISelectAllCommandParams> = {
         return accessor.get(ICommandService).executeCommand(SetSelectionsOperation.id, {
             unitId,
             subUnitId,
-
+            reveal: true,
             selections: [
                 {
                     range: destRange,
                     primary, // this remains unchanged
                 },
             ],
-        });
+        } as ISetSelectionsOperationParams);
     },
 };

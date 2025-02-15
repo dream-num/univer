@@ -250,18 +250,25 @@ export class PluginHolder extends Disposable {
         const dependents = plugin[DependentOnSymbol];
         if (dependents) {
             const exhaustUnregisteredDependents = () => {
-                const NotRegistered = dependents.find((d) => !this._checkPluginRegistered(d));
-                if (NotRegistered) {
-                    this._logService.debug(
-                        '[PluginService]',
-                        `Plugin "${plugin.pluginName}" depends on "${NotRegistered.pluginName}" which is not registered. Univer will automatically register it with default configuration.`
-                    );
-
-                    this._registerPlugin(NotRegistered, undefined);
-                    return true;
+                const notRegisteredPlugin = dependents.find((d) => !this._checkPluginRegistered(d));
+                if (!notRegisteredPlugin) {
+                    return false;
                 }
 
-                return false;
+                // TODO: plugin with Univer type cannot dependent on types other than Univer.
+                if (plugin.type === UniverInstanceType.UNIVER_UNKNOWN && notRegisteredPlugin.type !== UniverInstanceType.UNIVER_UNKNOWN) {
+                    throw new Error('[PluginService]: cannot register a plugin with Univer type that depends on a plugin with other type. '
+                        + `The dependent is ${plugin.pluginName} and the dependency is ${notRegisteredPlugin.pluginName}.`
+                    );
+                }
+
+                this._logService.debug(
+                    '[PluginService]',
+                    `Plugin "${plugin.pluginName}" depends on "${notRegisteredPlugin.pluginName}" which is not registered. Univer will automatically register it with default configuration.`
+                );
+
+                this._registerPlugin(notRegisteredPlugin, undefined);
+                return true;
             };
 
             while (exhaustUnregisteredDependents()) {

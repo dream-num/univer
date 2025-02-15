@@ -710,7 +710,7 @@ export class FRange extends FBaseInitialable {
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getActiveSheet();
-     * const fRange = fWorksheet.getRange('A1:B2');
+     * const fRange = fWorksheet.getRange('B2');
      * fRange.setValue(123);
      *
      * // or

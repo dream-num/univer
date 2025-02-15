@@ -33,7 +33,7 @@ To better assist you, we recommend:
 Univer requires Node.js >= 18.17.0. We recommend using nvm or fnm to switch between different versions of Node.js.
 
 ```shell
-git clone http://github.com/dream-num/univer
+git clone https://github.com/dream-num/univer
 cd univer
 
 # install package manager pnpm

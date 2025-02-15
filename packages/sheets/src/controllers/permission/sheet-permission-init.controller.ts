@@ -48,6 +48,14 @@ export class SheetPermissionInitController extends Disposable {
         @Inject(RangeProtectionCache) private _rangeProtectionCache: RangeProtectionCache
     ) {
         super();
+
+        // eslint-disable-next-line node/prefer-global/process
+        const isNodeEnv = typeof process !== 'undefined' && process.versions != null && process.versions.node != null;
+        const isWorkerEnv = typeof self === 'object' && self.constructor && self.constructor.name === 'WorkerGlobalScope';
+        if (isNodeEnv || isWorkerEnv) {
+            return;
+        }
+
         this._initRangePermissionFromSnapshot();
         this._initRangePermissionChange();
         this._initWorksheetPermissionFromSnapshot();

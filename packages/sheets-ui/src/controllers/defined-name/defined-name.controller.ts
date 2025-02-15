@@ -67,7 +67,10 @@ export class SheetsDefinedNameController extends Disposable {
 
             this._selectionManagerService.setSelections(selections);
 
-            this._cmdSrv.executeCommand(ScrollToCellOperation.id, selections[0].range);
+            this._cmdSrv.executeCommand(ScrollToCellOperation.id, {
+                unitId,
+                range: selections[0].range,
+            });
         }));
     }
 

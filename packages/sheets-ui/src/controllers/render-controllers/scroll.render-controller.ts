@@ -16,7 +16,7 @@
 
 import type { IFreeze, IRange, IWorksheetData, Nullable, Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule, IScrollObserverParam, IWheelEvent } from '@univerjs/engine-render';
-import type { ISetSelectionsOperationParams, SheetsSelectionsService } from '@univerjs/sheets';
+import type { IScrollToCellOperationParams, ISetSelectionsOperationParams, SheetsSelectionsService } from '@univerjs/sheets';
 import type { IScrollCommandParams } from '../../commands/commands/set-scroll.command';
 import type { IExpandSelectionCommandParams } from '../../commands/commands/set-selection.command';
 import type { IScrollState, IScrollStateSearchParam, IViewportScrollState } from '../../services/scroll-manager.service';
@@ -344,8 +344,11 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
 
                 case ScrollToCellOperation.id:
                     {
-                        const rangeParam = command.params as IRange;
-                        this.scrollToRange(rangeParam);
+                        const p = command.params as IScrollToCellOperationParams;
+                        if (p.unitId === this._context.unitId) {
+                            const rangeParam = p.range;
+                            this.scrollToRange(rangeParam);
+                        }
                     }
                     break;
 

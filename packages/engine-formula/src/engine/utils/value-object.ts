@@ -71,6 +71,7 @@ export function isSingleValueObject(valueObject: FunctionVariantType) {
 export function objectValueToCellValue(objectValue: Nullable<BaseValueObject>): ICellData | undefined {
     const pattern = objectValue?.getPattern();
     let cellWithStyle: ICellData = {};
+    let cellWithCustomData: ICellData = {};
 
     if (pattern) {
         cellWithStyle = {
@@ -79,6 +80,12 @@ export function objectValueToCellValue(objectValue: Nullable<BaseValueObject>): 
                     pattern,
                 },
             },
+        };
+    }
+
+    if (objectValue?.getCustomData()) {
+        cellWithCustomData = {
+            custom: objectValue.getCustomData(),
         };
     }
 
@@ -93,6 +100,7 @@ export function objectValueToCellValue(objectValue: Nullable<BaseValueObject>): 
             v: (objectValue as ErrorValueObject).getErrorType() as string,
             t: CellValueType.STRING,
             ...cellWithStyle,
+            ...cellWithCustomData,
         };
     }
     if (objectValue.isValueObject()) {
@@ -103,6 +111,7 @@ export function objectValueToCellValue(objectValue: Nullable<BaseValueObject>): 
                 v,
                 t: CellValueType.NUMBER,
                 ...cellWithStyle,
+                ...cellWithCustomData,
             };
         }
         if (vo.isBoolean()) {
@@ -110,6 +119,7 @@ export function objectValueToCellValue(objectValue: Nullable<BaseValueObject>): 
                 v: v ? 1 : 0,
                 t: CellValueType.BOOLEAN,
                 ...cellWithStyle,
+                ...cellWithCustomData,
             };
         }
         // String "00"
@@ -119,6 +129,7 @@ export function objectValueToCellValue(objectValue: Nullable<BaseValueObject>): 
                 v,
                 t: CellValueType.STRING,
                 ...cellWithStyle,
+                ...cellWithCustomData,
             };
         }
 
@@ -126,6 +137,7 @@ export function objectValueToCellValue(objectValue: Nullable<BaseValueObject>): 
             return {
                 v: null,
                 ...cellWithStyle,
+                ...cellWithCustomData,
             };
         }
 
@@ -133,6 +145,7 @@ export function objectValueToCellValue(objectValue: Nullable<BaseValueObject>): 
             v,
             t: CellValueType.STRING,
             ...cellWithStyle,
+            ...cellWithCustomData,
         };
     }
 }

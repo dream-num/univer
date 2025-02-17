@@ -157,11 +157,19 @@ export class StatusBarController extends Disposable {
             );
         }, 100);
 
+        const _statisticsMovingHandler = debounce((selections: ISelectionWithStyle[]) => {
+            const primary = selections[selections.length - 1]?.primary;
+            this._calculateSelection(
+                selections.map((selection) => selection.range),
+                primary
+            );
+        }, 500);
+
         this.disposeWithMe(
             toDisposable(
                 this._selectionManagerService.selectionMoving$.subscribe((selections) => {
                     if (selections) {
-                        _statisticsHandler(selections);
+                        _statisticsMovingHandler(selections);
                     }
                 })
             )

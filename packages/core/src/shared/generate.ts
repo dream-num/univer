@@ -19,9 +19,8 @@
  * @param val The number or string to be judged
  * @returns Result
  */
-const $blank = /\s/g;
-export function isRealNum(val: string | number | boolean) {
-    if (val === null || val.toString().replace($blank, '') === '') {
+export function isRealNum(val: string | number | boolean): boolean {
+    if (val === null || val === undefined) {
         return false;
     }
 
@@ -29,8 +28,17 @@ export function isRealNum(val: string | number | boolean) {
         return false;
     }
 
-    if (!isNaN(val as number)) {
-        return true;
+    if (typeof val === 'number') {
+        return !isNaN(val);
     }
+
+    if (typeof val === 'string') {
+        const trimmedVal = val.trim();
+        if (trimmedVal === '') {
+            return false;
+        }
+        return !isNaN(Number(trimmedVal));
+    }
+
     return false;
 }

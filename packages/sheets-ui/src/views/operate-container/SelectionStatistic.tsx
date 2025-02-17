@@ -160,11 +160,32 @@ export const SelectionStatistic: React.FC<{}> = () => {
     //   return disposable.dispose;
     // }, [autoFillService]);
 
+
+
     // position
+    const setAnchorBySelection = (selections: Nullable<ISelectionWithStyle[]>) => {
+        if (!selections || selections.length === 0) {
+            setAnchor({ row: -1, col: -1 });
+            return
+        }
+        const { range, primary } = selections[selections?.length - 1];
+
+        let anchorRow = range.endRow;
+        let anchorCol = range.endColumn;
+        if((primary?.startRow || 0) > range.startRow) {
+            console.log('into reverse', primary?.startRow, range.endRow)
+            anchorRow = range.startRow - 1;
+        }
+        if((primary?.startColumn || 0) > range.startColumn) {
+            anchorCol = range.startColumn - 1;
+        }
+
+        setAnchor({ row: anchorRow, col: anchorCol });
+    }
 
     useEffect(() => {
         const disposable = toDisposable(
-            selectionService.selectionMoveStart$.subscribe((selections: Nullable<ISelectionWithStyle[]>) => {
+            selectionService.selectionMoveStart$.subscribe((_selections: Nullable<ISelectionWithStyle[]>) => {
                 setAnchor({ row: -1, col: -1 });
                 setStatistics([]);
                 return
@@ -176,13 +197,7 @@ export const SelectionStatistic: React.FC<{}> = () => {
     useEffect(() => {
         const disposable = toDisposable(
             selectionService.selectionMoving$.subscribe((selections: Nullable<ISelectionWithStyle[]>) => {
-                if (!selections || selections.length === 0) {
-                    setAnchor({ row: -1, col: -1 });
-                    return
-                }
-                const { range } = selections[selections?.length - 1];
-                console.log('range', range)
-                setAnchor({ row: range.endRow, col: range.endColumn });
+                setAnchorBySelection(selections);
             })
         );
         return disposable.dispose;
@@ -191,12 +206,7 @@ export const SelectionStatistic: React.FC<{}> = () => {
     useEffect(() => {
         const disposable = toDisposable(
             selectionService.selectionMoveEnd$.subscribe((selections: Nullable<ISelectionWithStyle[]>) => {
-                if (!selections || selections.length === 0) {
-                    setAnchor({ row: -1, col: -1 });
-                    return
-                }
-                const { range } = selections[selections?.length - 1];
-                setAnchor({ row: range.endRow, col: range.endColumn });
+                setAnchorBySelection(selections);
             })
         );
         return disposable.dispose;
@@ -205,25 +215,11 @@ export const SelectionStatistic: React.FC<{}> = () => {
     useEffect(() => {
         const disposable = toDisposable(
             selectionService.selectionSet$.subscribe((selections: Nullable<ISelectionWithStyle[]>) => {
-                if (!selections || selections.length === 0) {
-                    setAnchor({ row: -1, col: -1 });
-                    return
-                }
-                const { range } = selections[selections?.length - 1];
-                setAnchor({ row: range.endRow, col: range.endColumn });
+                setAnchorBySelection(selections);
             })
         );
         return disposable.dispose;
     }, [selectionService]);
-
-    // useEffect(() => {
-    //     const disposable = toDisposable(
-    //         autoFillService.applyType$.subscribe((type) => {
-    //             setSelected(type);
-    //         })
-    //     );
-    //     return disposable.dispose;
-    // }, [autoFillService]);
 
     useEffect(() => {
         function handleClose() {
@@ -257,7 +253,7 @@ export const SelectionStatistic: React.FC<{}> = () => {
     if (!scaleX || !scene || !scaleX || !scaleY || !scrollXY) return null;
     const x = skeleton?.getNoMergeCellWithCoordByIndex(anchor.row, anchor.col).endX || 0;
     const y = skeleton?.getNoMergeCellWithCoordByIndex(anchor.row, anchor.col).endY || 0;
-    const relativeX = convertTransformToOffsetX(x, scaleX, scrollXY) - 100;
+    const relativeX = convertTransformToOffsetX(x, scaleX, scrollXY);
     const relativeY = convertTransformToOffsetY(y, scaleY, scrollXY);
 
     if (relativeX == null || relativeY == null) return null;
@@ -265,13 +261,6 @@ export const SelectionStatistic: React.FC<{}> = () => {
         setExpand(visible);
     };
 
-    // const handleClick = (item: IAutoFillPopupMenuItem) => {
-    // commandService.executeCommand(RefillCommand.id, { type: item.value });
-    // setVisible(false);
-    // };
-
-
-    // const availableMenu = menu.filter((item) => !item.disable);
     const maxStat = statistics.filter((item) => item.name === 'MAX')[0] || { name: 'MAX', value: 0 };
 
     return (

@@ -21,7 +21,7 @@ import type { IStatisticItem } from '../status-bar/CopyableStatisticItem';
 import { ICommandService, IUniverInstanceService, LocaleService, toDisposable } from '@univerjs/core';
 import { DropdownLegacy } from '@univerjs/design';
 import { convertTransformToOffsetX, convertTransformToOffsetY, IRenderManagerService } from '@univerjs/engine-render';
-import { Autofill, MoreDownSingle } from '@univerjs/icons';
+import { Autofill, MoreDownSingle, MoreUpSingle } from '@univerjs/icons';
 import { SheetsSelectionsService } from '@univerjs/sheets';
 
 import { useDependency } from '@univerjs/ui';
@@ -62,10 +62,10 @@ export const SelectionStatistic: React.FC<{}> = () => {
     const statusBarService = useDependency(IStatusBarService);
     const selectionService = useDependency(SheetsSelectionsService);
 
-  // const [menu, setMenu] = useState<IAutoFillPopupMenuItem[]>([]);
-    const [visible, setVisible] = useState(false);
+    // const [menu, setMenu] = useState<IAutoFillPopupMenuItem[]>([]);
+    const [isExpanded, setExpand] = useState(false);
     const [anchor, setAnchor] = useState<IAnchorPoint>({ row: -1, col: -1 });
-  // const [selected, setSelected] = useState<APPLY_TYPE>(APPLY_TYPE.SERIES);
+    // const [selected, setSelected] = useState<APPLY_TYPE>(APPLY_TYPE.SERIES);
     const [isHovered, setHovered] = useState(false);
     const workbook = useActiveWorkbook();
     const { sheetSkeletonManagerService, selectionRenderService } = useMemo(() => {
@@ -108,22 +108,23 @@ export const SelectionStatistic: React.FC<{}> = () => {
         return disposable?.dispose;
     }, [sheetSkeletonManagerService, forceUpdate]);
 
-  // useEffect(() => {
-  //     const disposable = toDisposable(
-  //         autoFillService.menu$.subscribe((menu) => {
-  //             setMenu(menu.map((i) => ({ ...i, index: menu.indexOf(i) })));
-  //         })
-  //     );
-  //     return disposable.dispose;
-  // }, [autoFillService]);
+    // useEffect(() => {
+    //     const disposable = toDisposable(
+    //         autoFillService.menu$.subscribe((menu) => {
+    //             setMenu(menu.map((i) => ({ ...i, index: menu.indexOf(i) })));
+    //         })
+    //     );
+    //     return disposable.dispose;
+    // }, [autoFillService]);
     const [statistics, setStatistics] = useState<IStatisticItem[]>([]);
     useEffect(() => {
         const subscription = statusBarService.state$.subscribe((state) => {
             const item = state?.values;
             if (!item || item.length === 0) {
-                setVisible(false);
+                setExpand(false);
+                setStatistics([]);
             } else {
-                setVisible(true);
+                // setExpand(true);
                 const newStatistics = state.values.map((stat) => {
                     const staticItem: IStatisticItem = {
                         value: stat.value,
@@ -143,27 +144,57 @@ export const SelectionStatistic: React.FC<{}> = () => {
         };
     }, [statusBarService]);
 
-  // useEffect(() => {
-  //   const disposable = toDisposable(
-  //     autoFillService.showMenu$.subscribe((show) => {
-  //       const { source, target } = autoFillService.autoFillLocation || { source: null, target: null };
-  //       if (show && source && target) {
-  //         const lastRow = Math.max(source.rows[source.rows.length - 1], target.rows[target.rows.length - 1]);
-  //         const lastCol = Math.max(source.cols[source.cols.length - 1], target.cols[target.cols.length - 1]);
-  //         setAnchor({ row: lastRow, col: lastCol });
-  //       } else {
-  //         setAnchor({ row: -1, col: -1 });
-  //       }
-  //     })
-  //   );
-  //   return disposable.dispose;
-  // }, [autoFillService]);
+    // useEffect(() => {
+    //   const disposable = toDisposable(
+    //     autoFillService.showMenu$.subscribe((show) => {
+    //       const { source, target } = autoFillService.autoFillLocation || { source: null, target: null };
+    //       if (show && source && target) {
+    //         const lastRow = Math.max(source.rows[source.rows.length - 1], target.rows[target.rows.length - 1]);
+    //         const lastCol = Math.max(source.cols[source.cols.length - 1], target.cols[target.cols.length - 1]);
+    //         setAnchor({ row: lastRow, col: lastCol });
+    //       } else {
+    //         setAnchor({ row: -1, col: -1 });
+    //       }
+    //     })
+    //   );
+    //   return disposable.dispose;
+    // }, [autoFillService]);
 
-  // position
+    // position
+
+    useEffect(() => {
+        const disposable = toDisposable(
+            selectionService.selectionMoveStart$.subscribe((selections: Nullable<ISelectionWithStyle[]>) => {
+                setAnchor({ row: -1, col: -1 });
+                setStatistics([]);
+                return
+            })
+        );
+        return disposable.dispose;
+    }, [selectionService]);
+
     useEffect(() => {
         const disposable = toDisposable(
             selectionService.selectionMoving$.subscribe((selections: Nullable<ISelectionWithStyle[]>) => {
-                if (!selections) return;
+                if (!selections || selections.length === 0) {
+                    setAnchor({ row: -1, col: -1 });
+                    return
+                }
+                const { range } = selections[selections?.length - 1];
+                console.log('range', range)
+                setAnchor({ row: range.endRow, col: range.endColumn });
+            })
+        );
+        return disposable.dispose;
+    }, [selectionService]);
+
+    useEffect(() => {
+        const disposable = toDisposable(
+            selectionService.selectionMoveEnd$.subscribe((selections: Nullable<ISelectionWithStyle[]>) => {
+                if (!selections || selections.length === 0) {
+                    setAnchor({ row: -1, col: -1 });
+                    return
+                }
                 const { range } = selections[selections?.length - 1];
                 setAnchor({ row: range.endRow, col: range.endColumn });
             })
@@ -171,18 +202,32 @@ export const SelectionStatistic: React.FC<{}> = () => {
         return disposable.dispose;
     }, [selectionService]);
 
-  // useEffect(() => {
-  //     const disposable = toDisposable(
-  //         autoFillService.applyType$.subscribe((type) => {
-  //             setSelected(type);
-  //         })
-  //     );
-  //     return disposable.dispose;
-  // }, [autoFillService]);
+    useEffect(() => {
+        const disposable = toDisposable(
+            selectionService.selectionSet$.subscribe((selections: Nullable<ISelectionWithStyle[]>) => {
+                if (!selections || selections.length === 0) {
+                    setAnchor({ row: -1, col: -1 });
+                    return
+                }
+                const { range } = selections[selections?.length - 1];
+                setAnchor({ row: range.endRow, col: range.endColumn });
+            })
+        );
+        return disposable.dispose;
+    }, [selectionService]);
+
+    // useEffect(() => {
+    //     const disposable = toDisposable(
+    //         autoFillService.applyType$.subscribe((type) => {
+    //             setSelected(type);
+    //         })
+    //     );
+    //     return disposable.dispose;
+    // }, [autoFillService]);
 
     useEffect(() => {
         function handleClose() {
-            setVisible(false);
+            setExpand(false);
         }
 
         document.addEventListener('wheel', handleClose);
@@ -190,11 +235,15 @@ export const SelectionStatistic: React.FC<{}> = () => {
         return () => {
             document.removeEventListener('wheel', handleClose);
         };
-    }, [visible]);
+    }, [isExpanded]);
 
-  // if (anchor.col < 0 || anchor.row < 0) {
-  //   return null;
-  // }
+    if (anchor.col < 0 || anchor.row < 0) {
+      return null;
+    }
+
+    if(statistics.length === 0) {
+      return null;
+    }
 
     const sheetObject = getSheetObject(univerInstanceService, renderManagerService);
     if (!sheetObject || !selectionRenderService) return null;
@@ -212,26 +261,27 @@ export const SelectionStatistic: React.FC<{}> = () => {
     const relativeY = convertTransformToOffsetY(y, scaleY, scrollXY);
 
     if (relativeX == null || relativeY == null) return null;
-    const onVisibleChange = (visible: boolean) => {
-        setVisible(visible);
+    const onExpandChange = (visible: boolean) => {
+        setExpand(visible);
     };
 
     // const handleClick = (item: IAutoFillPopupMenuItem) => {
     // commandService.executeCommand(RefillCommand.id, { type: item.value });
-    setVisible(false);
+    // setVisible(false);
     // };
 
-    const showMore = visible || isHovered;
 
-  // const availableMenu = menu.filter((item) => !item.disable);
+    // const availableMenu = menu.filter((item) => !item.disable);
+    const maxStat = statistics.filter((item) => item.name === 'MAX')[0] || { name: 'MAX', value: 0 };
 
     return (
         <div
-            className="selection-statistic-outer"
+            className={styles.selectionStatisticOuter}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
             style={{ left: `${relativeX + 2}px`, top: `${relativeY + 2}px`, position: 'absolute' }}
         >
+
             <DropdownLegacy
                 placement="bottomLeft"
                 trigger={['click']}
@@ -253,19 +303,18 @@ export const SelectionStatistic: React.FC<{}> = () => {
                         ))}
                     </ul>
                 )}
-                visible={visible}
-                onVisibleChange={onVisibleChange}
+                visible={isExpanded}
+                onVisibleChange={onExpandChange}
             >
                 <div
-                    className={clsx(styles.btnContainer, {
-                        [styles.btnContainerExpand]: visible,
+                    className={clsx(styles.selectionStatisticLabel, {
+                        [styles.btnContainerExpand]: isExpanded,
                     })}
                 >
-                    <Autofill
-                        style={{ color: '#35322B' }}
-                        extend={{ colorChannel1: 'rgb(var(--green-700, #409f11))' }}
-                    />
-                    {showMore && <MoreDownSingle style={{ color: '#CCCCCC', fontSize: '8px', marginLeft: '8px' }} />}
+                    <div className={styles.textLabel}>
+                        {maxStat.name}: {maxStat.value}
+                    </div>
+                    {isExpanded ? <MoreUpSingle/> : <MoreDownSingle/>}
                 </div>
             </DropdownLegacy>
         </div>

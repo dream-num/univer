@@ -14,16 +14,18 @@
  * limitations under the License.
  */
 
-import type { IOperation, IRange } from '@univerjs/core';
-import { CommandType } from '@univerjs/core';
+import { Disposable, Inject } from '@univerjs/core';
+import { SheetPermissionInitController } from '@univerjs/sheets';
 
-export interface IScrollToCellOperationParams {
-    range: IRange;
-    unitId: string;
+export class SheetPermissionInitUIController extends Disposable {
+    constructor(
+        @Inject(SheetPermissionInitController) private readonly _sheetPermissionInitController: SheetPermissionInitController
+    ) {
+        super();
+        this._initPermission();
+    }
+
+    private _initPermission() {
+        this._sheetPermissionInitController.initPermission();
+    }
 }
-
-export const ScrollToCellOperation: IOperation<IScrollToCellOperationParams> = {
-    id: 'sheet.operation.scroll-to-cell',
-    type: CommandType.OPERATION,
-    handler: () => true,
-};

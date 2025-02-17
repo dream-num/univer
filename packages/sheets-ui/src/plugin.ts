@@ -43,6 +43,7 @@ import { HoverRenderController } from './controllers/hover-render.controller';
 import { MarkSelectionRenderController } from './controllers/mark-selection.controller';
 import { MoveRangeRenderController } from './controllers/move-range.controller';
 import { SheetPermissionCheckUIController } from './controllers/permission/sheet-permission-check-ui.controller';
+import { SheetPermissionInitUIController } from './controllers/permission/sheet-permission-init-ui.controller';
 import { SheetPermissionInterceptorCanvasRenderController } from './controllers/permission/sheet-permission-interceptor-canvas-render.controller';
 import { SheetPermissionInterceptorClipboardController } from './controllers/permission/sheet-permission-interceptor-clipboard.controller';
 import { SheetPermissionInterceptorFormulaRenderController } from './controllers/permission/sheet-permission-interceptor-formula-render.controller';
@@ -154,6 +155,7 @@ export class UniverSheetsUIPlugin extends Plugin {
 
             // permission
             [SheetPermissionPanelModel],
+            [SheetPermissionInitUIController],
             [SheetPermissionUserManagerService],
             [SheetPermissionInterceptorClipboardController],
             [SheetPermissionCheckUIController],
@@ -161,7 +163,7 @@ export class UniverSheetsUIPlugin extends Plugin {
         ] as Dependency[], this._config.override));
 
         touchDependencies(this._injector, [
-            [SheetPermissionPanelModel],
+            [SheetPermissionInitUIController],
         ]);
     }
 
@@ -189,6 +191,7 @@ export class UniverSheetsUIPlugin extends Plugin {
 
         touchDependencies(this._injector, [
             [SheetPermissionRenderManagerController],
+            [SheetPermissionPanelModel],
             [SheetClipboardController],
             [FormulaEditorController],
             [SheetsDefinedNameController],

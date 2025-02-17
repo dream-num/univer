@@ -134,6 +134,7 @@ export const MoveSelectionCommand: ICommand<IMoveSelectionCommandParams> = {
             selections,
             type: SelectionMoveType.MOVE_END,
             extra,
+            reveal: true,
         } as ISetSelectionsOperationParams);
         return rs;
     },
@@ -304,6 +305,7 @@ export const MoveSelectionEnterAndTabCommand: ICommand<IMoveSelectionEnterAndTab
             subUnitId: sheetId,
             type: SelectionMoveType.MOVE_END,
             selections,
+            reveal: true,
             extra: params.extra,
         });
         const renderManagerService = accessor.get(IRenderManagerService);
@@ -445,7 +447,7 @@ export const SelectAllCommand: ICommand<ISelectAllCommandParams> = {
         return accessor.get(ICommandService).executeCommand(SetSelectionsOperation.id, {
             unitId,
             subUnitId,
-
+            reveal: true,
             selections: [
                 {
                     range: destRange,

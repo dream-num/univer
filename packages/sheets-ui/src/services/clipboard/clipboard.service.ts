@@ -76,7 +76,7 @@ import { UniverPastePlugin } from './html-to-usm/paste-plugins/plugin-univer';
 import { WordPastePlugin } from './html-to-usm/paste-plugins/plugin-word';
 import { COPY_TYPE } from './type';
 import { USMToHtmlService } from './usm-to-html/convertor';
-import { convertTextToTable, discreteRangeContainsRange, htmlIsFromExcel, mergeSetRangeValues, rangeIntersectWithDiscreteRange } from './utils';
+import { convertTextToTable, discreteRangeContainsRange, htmlIsContainsImage, htmlIsFromExcel, mergeSetRangeValues, rangeIntersectWithDiscreteRange } from './utils';
 
 export const PREDEFINED_HOOK_NAME = {
     DEFAULT_COPY: 'default-copy',
@@ -270,27 +270,11 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
                 ? await item.getType(HTML_CLIPBOARD_MIME_TYPE).then((blob) => blob && blob.text())
                 : '';
 
-        const isFromExcel = htmlIsFromExcel(html);
+        const isContainsImage = htmlIsContainsImage(html);
 
-        // clipboard item from excel may contain image, so we need to check if the clipboard item is from excel
-        const imageIndex = types.findIndex((type) => imageMimeTypeSet.has(type));
-        if (imageIndex !== -1 && !isFromExcel) {
-            const imageMimeType = types[imageIndex]!;
-            const imageBlob = await item.getType(imageMimeType);
-
-            if (imageBlob) {
-                const file = new File(
-                    [imageBlob],
-                    `clipboard-image.${IMAGE_MIME_TO_EXTENSION[imageMimeType as keyof typeof IMAGE_MIME_TO_EXTENSION]}`,
-                    { type: imageMimeType });
-
-                return this._pasteFiles([file], pasteType);
-            }
-        }
-
-        if (html) {
+        if (html && !isContainsImage) {
             // Firstly see if the html content is from Excel
-            if (this._platformService.isWindows && isFromExcel) {
+            if (this._platformService.isWindows && htmlIsFromExcel(html)) {
                 this._notificationService.show({
                     type: 'warning',
                     title: this._localeService.t('clipboard.shortCutNotify.title'),
@@ -301,6 +285,23 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             }
 
             return this._pasteHTML(html, pasteType);
+        }
+
+        const imageIndex = types.findIndex((type) => imageMimeTypeSet.has(type));
+        // clipboard item from excel may contain image, so we need to check if the clipboard item is from excel
+        if (imageIndex !== -1) {
+            const imageMimeType = types[imageIndex]!;
+            const imageBlob = await item.getType(imageMimeType);
+
+            if (imageBlob) {
+                const imageExtension = IMAGE_MIME_TO_EXTENSION[imageMimeType as keyof typeof IMAGE_MIME_TO_EXTENSION];
+                const file = new File(
+                    [imageBlob],
+                    `clipboard-image.${imageExtension}`,
+                    { type: imageMimeType });
+
+                return this._pasteFiles([file], pasteType);
+            }
         }
 
         if (text) {

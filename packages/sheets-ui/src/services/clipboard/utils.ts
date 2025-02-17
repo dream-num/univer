@@ -123,14 +123,12 @@ export function htmlIsContainsImage(html: string): boolean {
         return false;
     }
 
-    const imageMarker = /<img[^>]*>/i;
-
     // test the image tag is base64 image
-    const base64ImageRegex = /^<img[^>]*src\s*=\s*["']data:image\/[^;]+;base64,[^"']*["'][^>]*>$/i; ;
+    const base64ImageRegex = /<img[^>]*src\s*=\s*["']data:image\/[^;]+;base64,[^"']*["'][^>]*>/i; ;
 
-    const images = (html.match(imageMarker) || []);
+    const images = (html.match(base64ImageRegex) || []);
 
-    return images.length > 0 && images.every((image) => base64ImageRegex.test(image));
+    return images.length > 0;
 }
 
 export function mergeCellValues(...cellValues: IObjectMatrixPrimitiveType<Nullable<ICellData>>[]) {

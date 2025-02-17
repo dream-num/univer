@@ -270,9 +270,10 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
                 ? await item.getType(HTML_CLIPBOARD_MIME_TYPE).then((blob) => blob && blob.text())
                 : '';
 
-        const isContainsImage = htmlIsContainsImage(html);
+        const imageIndex = types.findIndex((type) => imageMimeTypeSet.has(type));
 
-        if (html && !isContainsImage) {
+        const shouldPasteHTML = (imageIndex === -1 || !htmlIsContainsImage(html)) && html;
+        if (shouldPasteHTML) {
             // Firstly see if the html content is from Excel
             if (this._platformService.isWindows && htmlIsFromExcel(html)) {
                 this._notificationService.show({
@@ -287,7 +288,6 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             return this._pasteHTML(html, pasteType);
         }
 
-        const imageIndex = types.findIndex((type) => imageMimeTypeSet.has(type));
         // clipboard item from excel may contain image, so we need to check if the clipboard item is from excel
         if (imageIndex !== -1) {
             const imageMimeType = types[imageIndex]!;

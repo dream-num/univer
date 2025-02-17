@@ -76,6 +76,7 @@ export class BaseValueObject extends ObjectClassType {
 
     withCustomData(data: any) {
         this._customData = data;
+        return this;
     }
 
     getCustomData() {

@@ -28,6 +28,8 @@ export const IS_ROW_STYLE_PRECEDE_COLUMN_STYLE = 'isRowStylePrecedeColumnStyle';
 
 export const AUTO_HEIGHT_FOR_MERGED_CELLS = Symbol('AUTO_HEIGHT_FOR_MERGED_CELLS');
 
+export const FLOAT_STATISTIC = Symbol('FLOAT_STATISTIC');
+
 export function createInternalEditorID(id: string) {
     return `${PREFIX}${id}`;
 }

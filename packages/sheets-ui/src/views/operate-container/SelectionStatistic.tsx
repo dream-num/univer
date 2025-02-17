@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,97 +15,98 @@
  */
 
 import type { ICommandInfo, IExecutionOptions, Nullable } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, LocaleService, toDisposable, useDependency } from '@univerjs/core';
+import type { ISelectionWithStyle } from '@univerjs/sheets';
+import type { APPLY_TYPE } from '../../services/auto-fill/type';
+import type { IStatisticItem } from '../status-bar/CopyableStatisticItem';
+import { ICommandService, IUniverInstanceService, LocaleService, toDisposable } from '@univerjs/core';
 import { DropdownLegacy } from '@univerjs/design';
 import { convertTransformToOffsetX, convertTransformToOffsetY, IRenderManagerService } from '@univerjs/engine-render';
-import { Autofill, CheckMarkSingle, MoreDownSingle } from '@univerjs/icons';
+import { Autofill, MoreDownSingle } from '@univerjs/icons';
+import { SheetsSelectionsService } from '@univerjs/sheets';
+
+import { useDependency } from '@univerjs/ui';
 import clsx from 'clsx';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-
-import { RefillCommand } from '../../commands/commands/refill.command';
 import { SetScrollOperation } from '../../commands/operations/scroll.operation';
 import { useActiveWorkbook } from '../../components/hook';
 import { getSheetObject } from '../../controllers/utils/component-tools';
 import { IAutoFillService } from '../../services/auto-fill/auto-fill.service';
-import { APPLY_TYPE } from '../../services/auto-fill/type';
 import { ISheetSelectionRenderService } from '../../services/selection/base-selection-render.service';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
-import styles from './index.module.less';
-import { IStatisticItem } from '../status-bar/CopyableStatisticItem';
 import { IStatusBarService } from '../../services/status-bar.service';
-import { ISelectionWithStyle, SheetsSelectionsService } from '@univerjs/sheets';
+import styles from './index.module.less';
 
 export interface IAnchorPoint {
-  row: number;
-  col: number;
+    row: number;
+    col: number;
 }
 
 export interface IAutoFillPopupMenuItem {
-  label: string;
-  value?: APPLY_TYPE;
-  index: number;
-  disable: boolean;
+    label: string;
+    value?: APPLY_TYPE;
+    index: number;
+    disable: boolean;
 }
 
 const useUpdate = () => {
-  const [, setState] = useState({});
-  return useCallback(() => setState((prevState) => !prevState), []);
+    const [, setState] = useState({});
+    return useCallback(() => setState((prevState) => !prevState), []);
 };
 
 export const SelectionStatistic: React.FC<{}> = () => {
-  const commandService = useDependency(ICommandService);
-  const univerInstanceService = useDependency(IUniverInstanceService);
-  const renderManagerService = useDependency(IRenderManagerService);
-  const autoFillService = useDependency(IAutoFillService);
-  const localeService = useDependency(LocaleService);
-  const statusBarService = useDependency(IStatusBarService);
-  const selectionService = useDependency(SheetsSelectionsService);
+    const commandService = useDependency(ICommandService);
+    const univerInstanceService = useDependency(IUniverInstanceService);
+    const renderManagerService = useDependency(IRenderManagerService);
+    // const autoFillService = useDependency(IAutoFillService);
+    const localeService = useDependency(LocaleService);
+    const statusBarService = useDependency(IStatusBarService);
+    const selectionService = useDependency(SheetsSelectionsService);
 
-  const [menu, setMenu] = useState<IAutoFillPopupMenuItem[]>([]);
-  const [visible, setVisible] = useState(false);
-  const [anchor, setAnchor] = useState<IAnchorPoint>({ row: -1, col: -1 });
-  const [selected, setSelected] = useState<APPLY_TYPE>(APPLY_TYPE.SERIES);
-  const [isHovered, setHovered] = useState(false);
-  const workbook = useActiveWorkbook();
-  const { sheetSkeletonManagerService, selectionRenderService } = useMemo(() => {
-    if (workbook) {
-      const ru = renderManagerService.getRenderById(workbook.getUnitId());
-      return {
-        sheetSkeletonManagerService: ru?.with(SheetSkeletonManagerService),
-        selectionRenderService: ru?.with(ISheetSelectionRenderService),
-      };
-    }
-
-    return { sheetSkeletonManagerService: null, selectionRenderService: null };
-  }, [workbook, renderManagerService]);
-
-  const handleMouseEnter = () => {
-    setHovered(true);
-  };
-
-  const handleMouseLeave = () => {
-    setHovered(false);
-  };
-  const forceUpdate = useUpdate();
-
-  useEffect(() => {
-    const disposable = commandService.onCommandExecuted((command: ICommandInfo, options?: IExecutionOptions) => {
-      if (command.id === SetScrollOperation.id) {
-        forceUpdate();
-      }
-    });
-    return disposable.dispose;
-  }, [forceUpdate, commandService]);
-
-  useEffect(() => {
-    const disposable = sheetSkeletonManagerService && toDisposable(
-      sheetSkeletonManagerService.currentSkeleton$.subscribe((skeleton) => {
-        if (skeleton) {
-          forceUpdate();
+  // const [menu, setMenu] = useState<IAutoFillPopupMenuItem[]>([]);
+    const [visible, setVisible] = useState(false);
+    const [anchor, setAnchor] = useState<IAnchorPoint>({ row: -1, col: -1 });
+  // const [selected, setSelected] = useState<APPLY_TYPE>(APPLY_TYPE.SERIES);
+    const [isHovered, setHovered] = useState(false);
+    const workbook = useActiveWorkbook();
+    const { sheetSkeletonManagerService, selectionRenderService } = useMemo(() => {
+        if (workbook) {
+            const ru = renderManagerService.getRenderById(workbook.getUnitId());
+            return {
+                sheetSkeletonManagerService: ru?.with(SheetSkeletonManagerService),
+                selectionRenderService: ru?.with(ISheetSelectionRenderService),
+            };
         }
-      }));
-    return disposable?.dispose;
-  }, [sheetSkeletonManagerService, forceUpdate]);
+
+        return { sheetSkeletonManagerService: null, selectionRenderService: null };
+    }, [workbook, renderManagerService]);
+
+    const handleMouseEnter = () => {
+        setHovered(true);
+    };
+
+    const handleMouseLeave = () => {
+        setHovered(false);
+    };
+    const forceUpdate = useUpdate();
+
+    useEffect(() => {
+        const disposable = commandService.onCommandExecuted((command: ICommandInfo, options?: IExecutionOptions) => {
+            if (command.id === SetScrollOperation.id) {
+                forceUpdate();
+            }
+        });
+        return disposable.dispose;
+    }, [forceUpdate, commandService]);
+
+    useEffect(() => {
+        const disposable = sheetSkeletonManagerService && toDisposable(
+            sheetSkeletonManagerService.currentSkeleton$.subscribe((skeleton) => {
+                if (skeleton) {
+                    forceUpdate();
+                }
+            }));
+        return disposable?.dispose;
+    }, [sheetSkeletonManagerService, forceUpdate]);
 
   // useEffect(() => {
   //     const disposable = toDisposable(
@@ -115,35 +116,32 @@ export const SelectionStatistic: React.FC<{}> = () => {
   //     );
   //     return disposable.dispose;
   // }, [autoFillService]);
-  const [statistics, setStatistics] = useState<IStatisticItem[]>([]);
-  useEffect(() => {
-    const subscription = statusBarService.state$.subscribe((state) => {
-      const item = state?.values;
-      if (!item || item.length === 0) {
-        setVisible(false);
-      } else {
-        setVisible(true);
-        const newStatistics = state.values.map((stat) => {
-          const staticItem: IStatisticItem = {
-            value: stat.value,
-            name: stat.func,
-            show: true,
-            disable: false,
-            pattern: ''
-          };
-          return staticItem;
+    const [statistics, setStatistics] = useState<IStatisticItem[]>([]);
+    useEffect(() => {
+        const subscription = statusBarService.state$.subscribe((state) => {
+            const item = state?.values;
+            if (!item || item.length === 0) {
+                setVisible(false);
+            } else {
+                setVisible(true);
+                const newStatistics = state.values.map((stat) => {
+                    const staticItem: IStatisticItem = {
+                        value: stat.value,
+                        name: stat.func,
+                        show: true,
+                        disable: false,
+                        pattern: '',
+                    };
+                    return staticItem;
+                });
+                console.log('newStatistics', newStatistics);
+                setStatistics(newStatistics);
+            }
         });
-        console.log('newStatistics', newStatistics);
-        setStatistics(newStatistics);
-      }
-    });
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [statusBarService]);
-
-
-
+        return () => {
+            subscription.unsubscribe();
+        };
+    }, [statusBarService]);
 
   // useEffect(() => {
   //   const disposable = toDisposable(
@@ -161,117 +159,115 @@ export const SelectionStatistic: React.FC<{}> = () => {
   //   return disposable.dispose;
   // }, [autoFillService]);
 
-
   // position
-  useEffect(() => {
-    const disposable = toDisposable(
-      selectionService.selectionMoving$.subscribe((selections: Nullable<ISelectionWithStyle[]>) => {
-        if(!selections) return;
-        const { range } = selections[selections?.length -1];
-          setAnchor({ row: range.endRow, col: range.endColumn });
-      })
-    );
-    return disposable.dispose;
+    useEffect(() => {
+        const disposable = toDisposable(
+            selectionService.selectionMoving$.subscribe((selections: Nullable<ISelectionWithStyle[]>) => {
+                if (!selections) return;
+                const { range } = selections[selections?.length - 1];
+                setAnchor({ row: range.endRow, col: range.endColumn });
+            })
+        );
+        return disposable.dispose;
+    }, [selectionService]);
 
-  }, [selectionService])
+  // useEffect(() => {
+  //     const disposable = toDisposable(
+  //         autoFillService.applyType$.subscribe((type) => {
+  //             setSelected(type);
+  //         })
+  //     );
+  //     return disposable.dispose;
+  // }, [autoFillService]);
 
-  useEffect(() => {
-    const disposable = toDisposable(
-      autoFillService.applyType$.subscribe((type) => {
-        setSelected(type);
-      })
-    );
-    return disposable.dispose;
-  }, [autoFillService]);
+    useEffect(() => {
+        function handleClose() {
+            setVisible(false);
+        }
 
-  useEffect(() => {
-    function handleClose() {
-      setVisible(false);
-    }
+        document.addEventListener('wheel', handleClose);
 
-    // document.addEventListener('wheel', handleClose);
-
-    // return () => {
-    //     document.removeEventListener('wheel', handleClose);
-    // };
-  }, [visible]);
+        return () => {
+            document.removeEventListener('wheel', handleClose);
+        };
+    }, [visible]);
 
   // if (anchor.col < 0 || anchor.row < 0) {
   //   return null;
   // }
 
-  const sheetObject = getSheetObject(univerInstanceService, renderManagerService);
-  if (!sheetObject || !selectionRenderService) return null;
+    const sheetObject = getSheetObject(univerInstanceService, renderManagerService);
+    if (!sheetObject || !selectionRenderService) return null;
 
-  const { scene } = sheetObject;
-  const skeleton = sheetSkeletonManagerService?.getCurrentSkeleton();
-  const viewport = selectionRenderService.getViewPort();
-  const scaleX = scene?.scaleX;
-  const scaleY = scene?.scaleY;
-  const scrollXY = scene?.getViewportScrollXY(viewport);
-  if (!scaleX || !scene || !scaleX || !scaleY || !scrollXY) return null;
-  const x = skeleton?.getNoMergeCellWithCoordByIndex(anchor.row, anchor.col).endX || 0;
-  const y = skeleton?.getNoMergeCellWithCoordByIndex(anchor.row, anchor.col).endY || 0;
-  const relativeX = convertTransformToOffsetX(x, scaleX, scrollXY) - 100;
-  const relativeY = convertTransformToOffsetY(y, scaleY, scrollXY);
+    const { scene } = sheetObject;
+    const skeleton = sheetSkeletonManagerService?.getCurrentSkeleton();
+    const viewport = selectionRenderService.getViewPort();
+    const scaleX = scene?.scaleX;
+    const scaleY = scene?.scaleY;
+    const scrollXY = scene?.getViewportScrollXY(viewport);
+    if (!scaleX || !scene || !scaleX || !scaleY || !scrollXY) return null;
+    const x = skeleton?.getNoMergeCellWithCoordByIndex(anchor.row, anchor.col).endX || 0;
+    const y = skeleton?.getNoMergeCellWithCoordByIndex(anchor.row, anchor.col).endY || 0;
+    const relativeX = convertTransformToOffsetX(x, scaleX, scrollXY) - 100;
+    const relativeY = convertTransformToOffsetY(y, scaleY, scrollXY);
 
-  if (relativeX == null || relativeY == null) return null;
-  const onVisibleChange = (visible: boolean) => {
-    setVisible(visible);
-  };
+    if (relativeX == null || relativeY == null) return null;
+    const onVisibleChange = (visible: boolean) => {
+        setVisible(visible);
+    };
 
-  const handleClick = (item: IAutoFillPopupMenuItem) => {
+    // const handleClick = (item: IAutoFillPopupMenuItem) => {
     // commandService.executeCommand(RefillCommand.id, { type: item.value });
     setVisible(false);
-  };
+    // };
 
-  const showMore = visible || isHovered;
+    const showMore = visible || isHovered;
 
   // const availableMenu = menu.filter((item) => !item.disable);
 
-  return (
-    <div
-      className='selection-statistic-outer'
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      style={{ left: `${relativeX + 2}px`, top: `${relativeY + 2}px`, position: 'absolute' }}
-    >
-      <DropdownLegacy
-        placement="bottomLeft"
-        trigger={['click']}
-        overlay={(
-          <ul className={styles.autoFillPopupMenu}>
-            {statistics.map((item, index) => (
-              <li
-                key={index}
-                className={styles.autoFillPopupMenuItem}
-              >
-                <span className={styles.autoFillPopupMenuItemIcon}>
-                  <div key={item.name} className={styles.statisticItem}>
-                    <span>
-                      {`${localeService.t(item.name as string)}: ${item.value}`}
-                    </span>
-                  </div>
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
-        visible={visible}
-        onVisibleChange={onVisibleChange}
-      >
+    return (
         <div
-          className={clsx(styles.btnContainer, {
-            [styles.btnContainerExpand]: visible,
-          })}
+            className="selection-statistic-outer"
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+            style={{ left: `${relativeX + 2}px`, top: `${relativeY + 2}px`, position: 'absolute' }}
         >
-          <Autofill
-            style={{ color: '#35322B' }}
-            extend={{ colorChannel1: 'rgb(var(--green-700, #409f11))' }}
-          />
-          {showMore && <MoreDownSingle style={{ color: '#CCCCCC', fontSize: '8px', marginLeft: '8px' }} />}
+            <DropdownLegacy
+                placement="bottomLeft"
+                trigger={['click']}
+                overlay={(
+                    <ul className={styles.autoFillPopupMenu}>
+                        {statistics.map((item) => (
+                            <li
+                                key={item.name}
+                                className={styles.autoFillPopupMenuItem}
+                            >
+                                <span className={styles.autoFillPopupMenuItemIcon}>
+                                    <div key={item.name} className={styles.statisticItem}>
+                                        <span>
+                                            {`${localeService.t(item.name as string)}: ${item.value}`}
+                                        </span>
+                                    </div>
+                                </span>
+                            </li>
+                        ))}
+                    </ul>
+                )}
+                visible={visible}
+                onVisibleChange={onVisibleChange}
+            >
+                <div
+                    className={clsx(styles.btnContainer, {
+                        [styles.btnContainerExpand]: visible,
+                    })}
+                >
+                    <Autofill
+                        style={{ color: '#35322B' }}
+                        extend={{ colorChannel1: 'rgb(var(--green-700, #409f11))' }}
+                    />
+                    {showMore && <MoreDownSingle style={{ color: '#CCCCCC', fontSize: '8px', marginLeft: '8px' }} />}
+                </div>
+            </DropdownLegacy>
         </div>
-      </DropdownLegacy>
-    </div>
-  );
+    );
 };

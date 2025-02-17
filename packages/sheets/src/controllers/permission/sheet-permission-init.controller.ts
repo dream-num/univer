@@ -48,6 +48,9 @@ export class SheetPermissionInitController extends Disposable {
         @Inject(RangeProtectionCache) private _rangeProtectionCache: RangeProtectionCache
     ) {
         super();
+    }
+
+    public initPermission() {
         this._initRangePermissionFromSnapshot();
         this._initRangePermissionChange();
         this._initWorksheetPermissionFromSnapshot();

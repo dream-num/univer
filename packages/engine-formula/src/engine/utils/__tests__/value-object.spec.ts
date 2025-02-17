@@ -65,6 +65,6 @@ describe('Test object cover', () => {
         expect(objectValueToCellValue(NullValueObject.create())).toStrictEqual({ v: null });
         expect(objectValueToCellValue(null)).toStrictEqual({ v: null });
         expect(objectValueToCellValue(ErrorValueObject.create(ErrorType.VALUE))).toStrictEqual({ v: ErrorType.VALUE, t: CellValueType.STRING });
-        expect(objectValueToCellValue(StringValueObject.create('0').withCustomData({ custom: 'test' }))).toStrictEqual({ v: '0', t: CellValueType.STRING, custom: 'test' });
+        expect(objectValueToCellValue(StringValueObject.create('0').withCustomData({ test: 'abc' }))).toStrictEqual({ v: '0', t: CellValueType.STRING, custom: { test: 'abc' } });
     });
 });

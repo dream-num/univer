@@ -102,6 +102,7 @@ export class StatusBarService implements IStatusBarService, IDisposable {
             }
         });
         newState.pattern = param?.pattern ?? null;
+        console.log('service', newState);
         this._state$.next(newState);
     }
 

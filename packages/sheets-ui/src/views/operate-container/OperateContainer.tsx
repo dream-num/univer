@@ -18,9 +18,11 @@ import React from 'react';
 
 import { AutoFillPopupMenu } from './AutoFillPopupMenu';
 import styles from './index.module.less';
+import { SelectionStatistic } from './SelectionStatistic';
 
 export const OperateContainer: React.FC = () => (
     <div className={styles.operateContainer}>
         <AutoFillPopupMenu />
+        <SelectionStatistic />
     </div>
 );

@@ -118,7 +118,7 @@ export function htmlIsFromExcel(html: string): boolean {
     return excelMarkers.some((marker) => marker.test(html));
 }
 
-export function htmlIsContainsImage(html: string): boolean {
+export function htmlContainsImage(html: string): boolean {
     if (!html) {
         return false;
     }

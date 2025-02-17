@@ -76,7 +76,7 @@ import { UniverPastePlugin } from './html-to-usm/paste-plugins/plugin-univer';
 import { WordPastePlugin } from './html-to-usm/paste-plugins/plugin-word';
 import { COPY_TYPE } from './type';
 import { USMToHtmlService } from './usm-to-html/convertor';
-import { convertTextToTable, discreteRangeContainsRange, htmlIsContainsImage, htmlIsFromExcel, mergeSetRangeValues, rangeIntersectWithDiscreteRange } from './utils';
+import { convertTextToTable, discreteRangeContainsRange, htmlContainsImage, htmlIsFromExcel, mergeSetRangeValues, rangeIntersectWithDiscreteRange } from './utils';
 
 export const PREDEFINED_HOOK_NAME = {
     DEFAULT_COPY: 'default-copy',
@@ -272,8 +272,8 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
 
         const imageIndex = types.findIndex((type) => imageMimeTypeSet.has(type));
 
-        const shouldPasteHTML = (imageIndex === -1 || !htmlIsContainsImage(html)) && html;
-        if (shouldPasteHTML) {
+        const shouldUseHTMLPaste = imageIndex === -1 || !htmlContainsImage(html);
+        if (html && shouldUseHTMLPaste) {
             // Firstly see if the html content is from Excel
             if (this._platformService.isWindows && htmlIsFromExcel(html)) {
                 this._notificationService.show({

@@ -17,8 +17,6 @@
 import { Disposable, Inject } from '@univerjs/core';
 import { SheetPermissionInitController } from '@univerjs/sheets';
 
-export const SHEET_PERMISSION_PASTE_PLUGIN = 'SHEET_PERMISSION_PASTE_PLUGIN';
-
 export class SheetPermissionInitUIController extends Disposable {
     constructor(
         @Inject(SheetPermissionInitController) private readonly _sheetPermissionInitController: SheetPermissionInitController

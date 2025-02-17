@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+const BooleanStringSet = new Set(['true', 'false']);
 export function isBooleanString(str: string): boolean {
-    return ['true', 'false'].includes(str.toLowerCase());
+    return BooleanStringSet.has(str.toLowerCase());
 }

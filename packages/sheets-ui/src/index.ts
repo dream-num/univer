@@ -32,12 +32,7 @@ export { SheetsScrollRenderController } from './controllers/render-controllers/s
 export { SheetRenderController } from './controllers/render-controllers/sheet.render-controller';
 export { SheetUIController } from './controllers/sheet-ui.controller';
 export { whenFormulaEditorActivated, whenSheetEditorFocused } from './controllers/shortcuts/utils';
-export {
-    getCoordByCell,
-    getCoordByOffset,
-    getSheetObject,
-    getTransformCoord,
-} from './controllers/utils/component-tools';
+export { getCoordByCell, getCoordByOffset, getSheetObject, getTransformCoord } from './controllers/utils/component-tools';
 export { matchedSelectionByRowColIndex as checkInHeaderRanges } from './controllers/utils/selections-tools';
 export { useHighlightRange } from './hooks/use-highlight-range';
 export { UniverSheetsMobileUIPlugin } from './mobile-plugin';
@@ -48,21 +43,12 @@ export { APPLY_TYPE, DATA_TYPE, type IAutoFillRule, type ICopyDataInTypeIndexInf
 export type { IAutoFillLocation, ICopyDataPiece, ISheetAutoFillHook } from './services/auto-fill/type';
 export { type ICanvasPopup, SheetCanvasPopManagerService } from './services/canvas-pop-manager.service';
 export { CellAlertManagerService, CellAlertType, type ICellAlert } from './services/cell-alert-manager.service';
-export {
-    getMatrixPlainText,
-    ISheetClipboardService,
-    PREDEFINED_HOOK_NAME,
-    SheetClipboardService,
-} from './services/clipboard/clipboard.service';
+export { getMatrixPlainText, ISheetClipboardService, PREDEFINED_HOOK_NAME, SheetClipboardService } from './services/clipboard/clipboard.service';
 export { COPY_TYPE } from './services/clipboard/type';
 export type { ICellDataWithSpanInfo, ICopyPastePayload, IPasteHookValueType, ISheetClipboardHook, ISheetDiscreteRangeLocation } from './services/clipboard/type';
 export { getRepeatRange, mergeSetRangeValues } from './services/clipboard/utils';
 export { DragManagerService, type IDragCellPosition } from './services/drag-manager.service';
-export {
-    EditorBridgeService,
-    IEditorBridgeService,
-    type IEditorBridgeServiceVisibleParam,
-} from './services/editor-bridge.service';
+export { EditorBridgeService, IEditorBridgeService, type IEditorBridgeServiceVisibleParam } from './services/editor-bridge.service';
 export type { IEditorBridgeServiceParam } from './services/editor-bridge.service';
 export { CellEditorManagerService, ICellEditorManagerService } from './services/editor/cell-editor-manager.service';
 export { IFormulaEditorManagerService } from './services/editor/formula-editor-manager.service';
@@ -109,6 +95,7 @@ export { FormatPainterStatus, IFormatPainterService } from './services/format-pa
 export type { IFormatPainterBeforeApplyHookParams, IFormatPainterHook } from './services/format-painter/format-painter.service';
 export { SELECTION_SHAPE_DEPTH } from './services/selection/const';
 export { type IBaseSheetBarProps } from './views/sheet-bar/sheet-bar-tabs/SheetBarItem';
+export { FormulaBar } from './views/formula-bar/FormulaBar';
 
 // #region - all commands
 export { SetWorksheetColAutoWidthCommand } from './commands/commands/set-worksheet-auto-col-width.command';

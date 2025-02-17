@@ -22,7 +22,7 @@ import { SheetInterceptorService } from '../services/sheet-interceptor/sheet-int
 import { RangeThemeStyle } from './range-theme-util';
 
 import { buildInThemes } from './range-themes/build-in-theme.factory';
-import { defaultRangeThemeStyle } from './range-themes/default';
+import { defaultRangeThemeStyle, defaultRangeThemeStyleJSONWithLastRowStyle } from './range-themes/default';
 
 export interface IRangeThemeRangeInfo {
     range: IRange;
@@ -59,6 +59,7 @@ export class SheetRangeThemeModel extends Disposable {
 
     private _initDefaultTheme() {
         this.registerDefaultRangeTheme(defaultRangeThemeStyle);
+        this.registerDefaultRangeTheme(defaultRangeThemeStyleJSONWithLastRowStyle);
         for (const theme of buildInThemes) {
             this.registerDefaultRangeTheme(theme);
         }

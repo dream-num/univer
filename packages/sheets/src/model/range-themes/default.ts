@@ -35,6 +35,13 @@ const defaultRangeThemeStyleJSON: Omit<IRangeThemeStyleJSON, 'name'> = {
             rgb: 'rgb(217,225,242)',
         },
     },
+
+};
+
+export const defaultRangeThemeStyle = new RangeThemeStyle('default', defaultRangeThemeStyleJSON);
+
+export const defaultRangeThemeStyleJSONWithLastRowStyle = new RangeThemeStyle('default-last-row', {
+    ...defaultRangeThemeStyleJSON,
     lastRowStyle: {
         bd: {
             t: {
@@ -47,5 +54,4 @@ const defaultRangeThemeStyleJSON: Omit<IRangeThemeStyleJSON, 'name'> = {
         ht: HorizontalAlign.CENTER,
         bl: BooleanNumber.TRUE,
     },
-};
-export const defaultRangeThemeStyle = new RangeThemeStyle('default', defaultRangeThemeStyleJSON);
+});

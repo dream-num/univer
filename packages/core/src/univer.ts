@@ -17,9 +17,10 @@
 import type { Dependency, IDisposable } from './common/di';
 import type { UnitModel, UnitType } from './common/unit';
 import type { LogLevel } from './services/log/log.service';
-import type { Plugin, PluginCtor } from './services/plugin/plugin';
 import type { DependencyOverride } from './services/plugin/plugin-override';
+import type { Plugin, PluginCtor } from './services/plugin/plugin.service';
 import type { IStyleSheet } from './services/theme/theme.service';
+import type { ILocales } from './shared';
 import type { IWorkbookData } from './sheets/typedef';
 import type { LocaleType } from './types/enum/locale-type';
 import type { IDocumentData, ISlideData } from './types/interfaces';
@@ -50,7 +51,7 @@ import { IResourceManagerService } from './services/resource-manager/type';
 import { ThemeService } from './services/theme/theme.service';
 import { IUndoRedoService, LocalUndoRedoService } from './services/undoredo/undoredo.service';
 import { UserManagerService } from './services/user-manager/user-manager.service';
-import { DisposableCollection, type ILocales, toDisposable } from './shared';
+import { DisposableCollection, toDisposable } from './shared';
 import { Workbook } from './sheets/workbook';
 import { SlideDataModel } from './slides/slide-model';
 
@@ -165,7 +166,7 @@ export class Univer implements IDisposable {
         univerInstanceService.__setCreateHandler(
             (type: UnitType, data, ctor, options) => {
                 if (!this._startedTypes.has(type)) {
-                    this._pluginService.startPluginForType(type);
+                    this._pluginService.startPluginsForType(type);
                     this._startedTypes.add(type);
 
                     const model = injector.createInstance(ctor, data);

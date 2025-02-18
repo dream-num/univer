@@ -25,7 +25,7 @@ import { Autofill, MoreDownSingle, MoreUpSingle } from '@univerjs/icons';
 import { SheetsSelectionsService } from '@univerjs/sheets';
 
 import { useDependency } from '@univerjs/ui';
-import clsx from 'clsx';
+import {clsx}  from '@univerjs/design';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { SetScrollOperation } from '../../commands/operations/scroll.operation';
 import { useActiveWorkbook } from '../../components/hook';
@@ -161,6 +161,8 @@ export const SelectionStatistic: React.FC<{}> = () => {
     // }, [autoFillService]);
 
 
+    const [verticalDirect, setVerticalDirect] = useState<'up' | 'down'>('down');
+    const [horizontalDirect, setHorizontalDirect] = useState<'left' | 'right'>('right');
 
     // position
     const setAnchorBySelection = (selections: Nullable<ISelectionWithStyle[]>) => {
@@ -175,9 +177,15 @@ export const SelectionStatistic: React.FC<{}> = () => {
         if((primary?.startRow || 0) > range.startRow) {
             console.log('into reverse', primary?.startRow, range.endRow)
             anchorRow = range.startRow - 1;
+            setVerticalDirect('up');
+        } else {
+            setVerticalDirect('down');
         }
         if((primary?.startColumn || 0) > range.startColumn) {
             anchorCol = range.startColumn - 1;
+            setHorizontalDirect('left');
+        } else {
+            setHorizontalDirect('right');
         }
 
         setAnchor({ row: anchorRow, col: anchorCol });
@@ -268,11 +276,11 @@ export const SelectionStatistic: React.FC<{}> = () => {
             className={styles.selectionStatisticOuter}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
-            style={{ left: `${relativeX + 2}px`, top: `${relativeY + 2}px`, position: 'absolute' }}
+            style={{ left: `${relativeX}px`, top: `${relativeY}px`, position: 'absolute' }}
         >
 
             <DropdownLegacy
-                placement="bottomLeft"
+                placement="bottomRight"
                 trigger={['click']}
                 overlay={(
                     <ul className={styles.autoFillPopupMenu}>
@@ -297,7 +305,11 @@ export const SelectionStatistic: React.FC<{}> = () => {
             >
                 <div
                     className={clsx(styles.selectionStatisticLabel, {
-                        [styles.btnContainerExpand]: isExpanded,
+                        'univer-bg-gray-100': isExpanded,
+                        'univer-right-0': horizontalDirect === 'right',
+                        'univer-left-0': horizontalDirect === 'left',
+                        'univer-top-1': verticalDirect === 'down',
+                        'univer-bottom-1': verticalDirect === 'up',
                     })}
                 >
                     <div className={styles.textLabel}>

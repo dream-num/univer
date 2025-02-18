@@ -17,7 +17,7 @@
 import type { IAccessor } from '@univerjs/core';
 import type { IMenuSelectorItem } from '@univerjs/ui';
 import { ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
-import { DEFAULT_TEXT_FORMAT } from '@univerjs/engine-numfmt';
+import { DEFAULT_TEXT_FORMAT_EXCEL, isDefaultFormat } from '@univerjs/engine-numfmt';
 import {
     RangeProtectionPermissionEditPoint,
     RemoveNumfmtMutation,
@@ -41,7 +41,7 @@ export const MENU_OPTIONS: Array<{ label: string; pattern: string | null } | '|'
     },
     {
         label: 'sheet.numfmt.text',
-        pattern: DEFAULT_TEXT_FORMAT,
+        pattern: DEFAULT_TEXT_FORMAT_EXCEL,
     },
     '|',
     {
@@ -185,6 +185,12 @@ export const FactoryOtherMenuItem = (accessor: IAccessor): IMenuSelectorItem => 
 
                 const pattern = numfmtValue?.pattern;
                 let value: string = localeService.t('sheet.numfmt.general');
+
+                // Adapts the 'General' obtained during import, or the 'General' set manually
+                if (isDefaultFormat(pattern)) {
+                    subscribe.next(value);
+                    return;
+                }
 
                 if (pattern) {
                     const item = MENU_OPTIONS.filter((item) => typeof item === 'object' && item.pattern).find(

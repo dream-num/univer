@@ -261,7 +261,7 @@ test('diff set text format number cell', async () => {
                 {
                     row: 0,
                     col: 7,
-                    pattern: '@@@',
+                    pattern: '@',
                     type: 'text',
                 },
             ],
@@ -276,7 +276,7 @@ test('diff set text format number cell', async () => {
                 {
                     row: 0,
                     col: 8,
-                    pattern: '@@@',
+                    pattern: '@',
                     type: 'text',
                 },
             ],

@@ -19,7 +19,7 @@ import type { IRuntimeUnitDataType, IUnitData, IUnitSheetNameMap, IUnitStylesDat
 
 import type { BaseValueObject, IArrayValueObject } from '../value-object/base-value-object';
 import { CellValueType, moveRangeByOffset } from '@univerjs/core';
-import { DEFAULT_TEXT_FORMAT } from '@univerjs/engine-numfmt';
+import { isTextFormat } from '@univerjs/engine-numfmt';
 import { FormulaAstLRU } from '../../basics/cache-lru';
 import { ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
 import { isNullCellForFormula } from '../../basics/is-null-cell';
@@ -405,7 +405,7 @@ export class BaseReferenceObject extends ObjectClassType {
         if (cell.t === CellValueType.NUMBER) {
             const pattern = this._getPatternByCell(cell);
 
-            if (pattern === DEFAULT_TEXT_FORMAT) {
+            if (isTextFormat(pattern)) {
                 return StringValueObject.create(value.toString());
             }
 

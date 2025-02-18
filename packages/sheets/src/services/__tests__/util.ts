@@ -16,7 +16,7 @@
 
 import type { Dependency, IWorkbookData, Workbook } from '@univerjs/core';
 import { CellValueType, ILogService, Inject, Injector, IUniverInstanceService, LocaleType, LogLevel, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
-import { DEFAULT_TEXT_FORMAT } from '@univerjs/engine-numfmt';
+import { DEFAULT_TEXT_FORMAT_EXCEL } from '@univerjs/engine-numfmt';
 
 export const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
     id: 'test',
@@ -72,7 +72,7 @@ export const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
     styles: {
         s5: {
             n: {
-                pattern: DEFAULT_TEXT_FORMAT, // text
+                pattern: DEFAULT_TEXT_FORMAT_EXCEL, // text
             },
         },
     },

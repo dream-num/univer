@@ -168,7 +168,7 @@ describe('Test EndEditController', () => {
             const cell: ICellData = {
                 s: {
                     n: {
-                        pattern: '@@@',
+                        pattern: '@',
                     },
                 },
                 t: null,
@@ -184,7 +184,7 @@ describe('Test EndEditController', () => {
                 t: CellValueType.STRING,
                 s: {
                     n: {
-                        pattern: '@@@',
+                        pattern: '@',
                     },
                 },
                 f: null,
@@ -200,7 +200,7 @@ describe('Test EndEditController', () => {
             const cell: ICellData = {
                 s: {
                     n: {
-                        pattern: '@@@',
+                        pattern: '@',
                     },
                 },
                 t: null,
@@ -216,7 +216,7 @@ describe('Test EndEditController', () => {
                 t: CellValueType.STRING,
                 s: {
                     n: {
-                        pattern: '@@@',
+                        pattern: '@',
                     },
                 },
                 f: null,
@@ -232,7 +232,7 @@ describe('Test EndEditController', () => {
             const cell: ICellData = {
                 s: {
                     n: {
-                        pattern: '@@@',
+                        pattern: '@',
                     },
                 },
                 t: null,
@@ -248,7 +248,7 @@ describe('Test EndEditController', () => {
                 t: CellValueType.STRING,
                 s: {
                     n: {
-                        pattern: '@@@',
+                        pattern: '@',
                     },
                 },
                 f: null,
@@ -264,7 +264,7 @@ describe('Test EndEditController', () => {
             const cell: ICellData = {
                 s: {
                     n: {
-                        pattern: '@@@',
+                        pattern: '@',
                     },
                 },
                 t: 1,
@@ -320,7 +320,7 @@ describe('Test EndEditController', () => {
                 t: CellValueType.STRING,
                 s: {
                     n: {
-                        pattern: '@@@',
+                        pattern: '@',
                     },
                 },
                 f: null,

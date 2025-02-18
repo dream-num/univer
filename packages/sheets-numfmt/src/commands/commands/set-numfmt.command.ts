@@ -29,7 +29,7 @@ import { CellValueType,
     IUniverInstanceService,
     ObjectMatrix,
     sequenceExecute } from '@univerjs/core';
-import { DEFAULT_TEXT_FORMAT } from '@univerjs/engine-numfmt';
+import { isTextFormat } from '@univerjs/engine-numfmt';
 import {
     checkCellValueType,
     factoryRemoveNumfmtUndoMutation,
@@ -82,7 +82,7 @@ export const SetNumfmtCommand: ICommand<ISetNumfmtCommandParams> = {
         const undos: Array<IMutationInfo<IRemoveNumfmtMutationParams | ISetNumfmtMutationParams | ISetRangeValuesMutationParams>> = [];
         if (setCells.length) {
             const setCellTypeObj = setCells.reduce((pre, cur) => {
-                if (cur.pattern === DEFAULT_TEXT_FORMAT) {
+                if (isTextFormat(cur.pattern)) {
                     pre.setValue(cur.row, cur.col, { t: CellValueType.STRING });
                 }
                 const cell = worksheet.getCellRaw(cur.row, cur.col);

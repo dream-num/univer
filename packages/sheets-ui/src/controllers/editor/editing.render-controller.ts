@@ -47,7 +47,7 @@ import {
 } from '@univerjs/docs';
 import { VIEWPORT_KEY as DOC_VIEWPORT_KEY, DocSelectionRenderService, IEditorService, MoveCursorOperation, MoveSelectionOperation, ReplaceSnapshotCommand } from '@univerjs/docs-ui';
 import { IFunctionService, LexerTreeBuilder, matchToken } from '@univerjs/engine-formula';
-import { DEFAULT_TEXT_FORMAT } from '@univerjs/engine-numfmt';
+import { isTextFormat } from '@univerjs/engine-numfmt';
 
 import {
     convertTextRotation,
@@ -781,9 +781,9 @@ export function getCellDataByInput(
         cellData.p = snapshot;
         cellData.t = CellValueType.STRING;
     }
-    // Text format ('@@@') has the highest priority
-    else if (cellData.s && styles?.get(cellData.s)?.n?.pattern === DEFAULT_TEXT_FORMAT) {
-        // If the style is text format ('@@@'), the data should be set as a string.
+    // Text format ('@' or '@@@') has the highest priority
+    else if (cellData.s && isTextFormat(styles?.get(cellData.s)?.n?.pattern)) {
+        // If the style is text format ('@'or  '@@@'), the data should be set as a string.
         cellData.v = newDataStream;
         cellData.f = null;
         cellData.si = null;

@@ -35,7 +35,7 @@ import {
     ThemeService,
     UniverInstanceType,
 } from '@univerjs/core';
-import { DEFAULT_TEXT_FORMAT } from '@univerjs/engine-numfmt';
+import { isTextFormat } from '@univerjs/engine-numfmt';
 import { checkCellValueType, InterceptCellContentPriority, INTERCEPTOR_POINT, INumfmtService, SetNumfmtMutation, SetRangeValuesMutation, SheetInterceptorService } from '@univerjs/sheets';
 import { BehaviorSubject, merge, of, skip, switchMap } from 'rxjs';
 import { getPatternPreviewIgnoreGeneral } from '../utils/pattern';
@@ -134,7 +134,7 @@ export class SheetsNumfmtCellContentController extends Disposable {
                 }
 
                  // Add error marker to text format number
-                if (numfmtValue.pattern === DEFAULT_TEXT_FORMAT) {
+                if (isTextFormat(numfmtValue.pattern)) {
                     return next({
                         ...cell,
                         t: CellValueType.STRING,

@@ -18,7 +18,7 @@ import type { Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { Disposable, Inject, isRealNum, LocaleService } from '@univerjs/core';
 import { FormulaDataModel } from '@univerjs/engine-formula';
-import { DEFAULT_TEXT_FORMAT } from '@univerjs/engine-numfmt';
+import { isTextFormat } from '@univerjs/engine-numfmt';
 import { INumfmtService } from '@univerjs/sheets';
 import { CellAlertManagerService, CellAlertType, HoverManagerService } from '@univerjs/sheets-ui';
 import { IZenZoneService } from '@univerjs/ui';
@@ -76,7 +76,7 @@ export class NumfmtAlertRenderController extends Disposable implements IRenderMo
                 }
 
                 // Preventing blank object
-                if (numfmtValue.pattern === DEFAULT_TEXT_FORMAT && cellData?.v && isRealNum(cellData.v)) {
+                if (isTextFormat(numfmtValue.pattern) && cellData?.v && isRealNum(cellData.v)) {
                     const currentAlert = this._cellAlertManagerService.currentAlert.get(ALERT_KEY);
                     const currentLoc = currentAlert?.alert?.location;
                     if (

@@ -18,13 +18,13 @@ import canUseDom from 'rc-util/lib/Dom/canUseDom';
 
 import styles from './theme-root.module.less';
 
-function convertToDashCase(input: string): string {
+export function convertToDashCase(input: string): string {
     const dashCase = input.replace(/([A-Z])/g, (match) => `-${match.toLowerCase()}`).replace(/(\d+)/g, '-$1');
 
     return `--${dashCase}`;
 }
 
-function convertHexToRgb(input: string): string {
+export function convertHexToRgb(input: string): string {
     if (input.startsWith('#')) {
         const hex = input.replace('#', '');
         const r = Number.parseInt(hex.substring(0, 2), 16);
@@ -35,6 +35,22 @@ function convertHexToRgb(input: string): string {
     }
 
     return input;
+}
+
+/**
+ * convert hex string, e.g. #123456 to rgb object
+ * @param input
+ * @returns
+ */
+export function convertHexToRgbObject(hex: string): {r: number; g: number; b: number, a?: number} {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result
+        ? {
+              r: parseInt(result[1], 16),
+              g: parseInt(result[2], 16),
+              b: parseInt(result[3], 16),
+          }
+        : {r: 0, b: 0, g: 0};
 }
 
 class Theme {

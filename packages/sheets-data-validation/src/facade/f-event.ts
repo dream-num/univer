@@ -182,93 +182,100 @@ interface IDataValidationEvent {
      * @see {@link ISheetDataValidationChangedEvent}
      * @example
      * ```ts
-     * univerAPI.on(univerAPI.Event.SheetDataValidationChanged, (event) => {
-     *     const { worksheet, workbook, changeType, oldRule, rule } = event;
-     *     console.log(event);
+     * univerAPI.addEvent(univerAPI.Event.SheetDataValidationChanged, (event) => {
+     *   const { origin, worksheet, workbook, changeType, oldRule, rule } = event;
+     *   console.log(event);
      * });
      * ```
      */
     readonly SheetDataValidationChanged: 'SheetDataValidationChanged';
+
     /**
      * Event fired when a cell validator status is changed
      * @see {@link ISheetDataValidatorStatusChangedEvent}
      * @example
      * ```ts
-     * univerAPI.on(univerAPI.Event.SheetDataValidatorStatusChanged, (event) => {
-     *     const { worksheet, workbook, row, column, status, rule } = event;
-     *     console.log(event);
+     * univerAPI.addEvent(univerAPI.Event.SheetDataValidatorStatusChanged, (event) => {
+     *   const { worksheet, workbook, row, column, status, rule } = event;
+     *   console.log(event);
      * });
      * ```
      */
     readonly SheetDataValidatorStatusChanged: 'SheetDataValidatorStatusChanged';
+
     /**
      * Event fired before a rule is added
      * @see {@link IBeforeSheetDataValidationAddEvent}
      * @example
      * ```ts
-     * univerAPI.on(univerAPI.Event.BeforeSheetDataValidationAdd, (event) => {
-     *      const { worksheet, workbook, rule } = event;
-     *     console.log(event);
+     * univerAPI.addEvent(univerAPI.Event.BeforeSheetDataValidationAdd, (event) => {
+     *   const { worksheet, workbook, rule } = event;
+     *   console.log(event);
      * });
      * ```
      */
     readonly BeforeSheetDataValidationAdd: 'BeforeSheetDataValidationAdd';
+
     /**
      * Event fired before a rule is deleted
      * @see {@link IBeforeSheetDataValidationDeleteEvent}
      * @example
      * ```ts
-     * univerAPI.on(univerAPI.Event.BeforeSheetDataValidationDelete, (event) => {
-     *     const { worksheet, workbook, rule } = event;
-     *     console.log(event);
+     * univerAPI.addEvent(univerAPI.Event.BeforeSheetDataValidationDelete, (event) => {
+     *   const { worksheet, workbook, ruleId, rule } = event;
+     *   console.log(event);
      * });
      * ```
      */
     readonly BeforeSheetDataValidationDelete: 'BeforeSheetDataValidationDelete';
+
     /**
      * Event fired before all rules are deleted
      * @see {@link IBeforeSheetDataValidationDeleteAllEvent}
      * @example
      * ```ts
-     * univerAPI.on(univerAPI.Event.BeforeSheetDataValidationDeleteAll, (event) => {
-     *     const { worksheet, workbook, rules } = event;
-     *     console.log(event);
+     * univerAPI.addEvent(univerAPI.Event.BeforeSheetDataValidationDeleteAll, (event) => {
+     *   const { worksheet, workbook, rules } = event;
+     *   console.log(event);
      * });
      * ```
      */
     readonly BeforeSheetDataValidationDeleteAll: 'BeforeSheetDataValidationDeleteAll';
+
     /**
      * Event fired before the criteria of a rule are updated
      * @see {@link IBeforeSheetDataValidationCriteriaUpdateEvent}
      * @example
      * ```ts
-     * univerAPI.on(univerAPI.Event.BeforeSheetDataValidationCriteriaUpdate, (event) => {
-     *     const { worksheet, workbook, rule, newCriteria } = event;
-     *     console.log(event);
+     * univerAPI.addEvent(univerAPI.Event.BeforeSheetDataValidationCriteriaUpdate, (event) => {
+     *   const { worksheet, workbook, ruleId, rule, newCriteria } = event;
+     *   console.log(event);
      * });
      * ```
      */
     readonly BeforeSheetDataValidationCriteriaUpdate: 'BeforeSheetDataValidationCriteriaUpdate';
+
     /**
      * Event fired before the range of a rule is updated
      * @see {@link IBeforeSheetDataValidationRangeUpdateEvent}
      * @example
      * ```ts
-     * univerAPI.on(univerAPI.Event.BeforeSheetDataValidationRangeUpdate, (event) => {
-     *     const { worksheet, workbook, rule, newRanges } = event;
-     *     console.log(event);
+     * univerAPI.addEvent(univerAPI.Event.BeforeSheetDataValidationRangeUpdate, (event) => {
+     *   const { worksheet, workbook, ruleId, rule, newRanges } = event;
+     *   console.log(event);
      * });
      * ```
      */
     readonly BeforeSheetDataValidationRangeUpdate: 'BeforeSheetDataValidationRangeUpdate';
+
     /**
      * Event fired before the options of a rule are updated
      * @see {@link IBeforeSheetDataValidationOptionsUpdateEvent}
      * @example
      * ```ts
-     * univerAPI.on(univerAPI.Event.BeforeSheetDataValidationOptionsUpdate, (event) => {
-     *     const { worksheet, workbook, rule, newOptions } = event;
-     *     console.log(event);
+     * univerAPI.addEvent(univerAPI.Event.BeforeSheetDataValidationOptionsUpdate, (event) => {
+     *   const { worksheet, workbook, ruleId, rule, newOptions } = event;
+     *   console.log(event);
      * });
      * ```
      */

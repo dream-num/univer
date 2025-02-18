@@ -28,24 +28,25 @@ import { CROSSHAIR_HIGHLIGHT_COLORS, DisableCrosshairHighlightOperation, EnableC
 export interface IFSheetCrosshairHighlightEventMixin {
     /**
      * Triggered when the crosshair highlight is enabled or disabled.
+     * @see {@link ICrosshairHighlightEnabledChangedEvent}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.CrosshairHighlightEnabledChanged, (event) => {
-     *     const enabled = event.enabled;
-     *     const workbook = event.workbook;
-     *     const worksheet = event.worksheet;
+     * univerAPI.addEvent(univerAPI.Event.CrosshairHighlightEnabledChanged, (params) => {
+     *   const { enabled, workbook, worksheet } = params;
+     *   console.log(params);
      * });
      * ```
      */
     readonly CrosshairHighlightEnabledChanged: 'CrosshairHighlightEnabledChanged';
+
     /**
      * Triggered when the crosshair highlight color is changed.
+     * @see {@link ICrosshairHighlightColorChangedEvent}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.CrosshairHighlightColorChanged, (event) => {
-     *     const color = event.color;
-     *     const workbook = event.workbook;
-     *     const worksheet = event.worksheet;
+     * univerAPI.addEvent(univerAPI.Event.CrosshairHighlightColorChanged, (params) => {
+     *   const { color, workbook, worksheet } = params;
+     *   console.log(params);
      * });
      * ```
      */
@@ -109,42 +110,44 @@ export interface ISheetCrosshairHighlightEventConfigs {
 export interface IFUniverCrosshairHighlightMixin {
     /**
      * Enable or disable crosshair highlight.
-     * @param {boolean} enabled if crosshair highlight should be enabled
-     * @returns {FUniver} the FUniver instance
+     * @param {boolean} enabled - Whether to enable the crosshair highlight
+     * @returns {FUniver} The FUniver instance for chaining
      * @example
      * ```ts
-     * univer.setCrosshairHighlightEnabled(true);
+     * univerAPI.setCrosshairHighlightEnabled(true);
      * ```
      */
     setCrosshairHighlightEnabled(enabled: boolean): FUniver;
 
     /**
      * Set the color of the crosshair highlight.
-     * @param {string} color the color of the crosshair highlight
-     * @returns {FUniver} the FUniver instance
+     * @param {string} color - The color of the crosshair highlight, if the color not has alpha channel, the alpha channel will be set to 0.5
+     * @returns {FUniver} The FUniver instance for chaining
      * @example
      * ```ts
-     * univer.setCrosshairHighlightColor('#FF0000');
+     * univerAPI.setCrosshairHighlightColor('#FF0000');
+     * // or
+     * univerAPI.setCrosshairHighlightColor('rgba(232, 11, 11, 0.2)');
      * ```
      */
     setCrosshairHighlightColor(color: string): FUniver;
 
     /**
      * Get whether the crosshair highlight is enabled.
-     * @returns {boolean} whether the crosshair highlight is enabled
+     * @returns {boolean} Whether the crosshair highlight is enabled
      * @example
      * ```ts
-     * const enabled = univer.getCrosshairHighlightEnabled();
+     * console.log(univerAPI.getCrosshairHighlightEnabled());
      * ```
      */
     getCrosshairHighlightEnabled(): boolean;
 
     /**
      * Get the color of the crosshair highlight.
-     * @returns {string} the color of the crosshair highlight
+     * @returns {string} The color of the crosshair highlight
      * @example
      * ```ts
-     * const color = univer.getCrosshairHighlightColor();
+     * console.log(univerAPI.getCrosshairHighlightColor());
      * ```
      */
     getCrosshairHighlightColor(): string;

@@ -184,6 +184,9 @@ const entryPoints = [
     // sheets-multi
     './src/sheets-multi/main.tsx',
 
+    // sheets-multi-units
+    './src/sheets-multi-units/main.ts',
+
     // sheets-uniscript
     './src/sheets-uniscript/main.ts',
 

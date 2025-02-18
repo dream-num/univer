@@ -15,8 +15,8 @@
  */
 
 import type { ICommandInfo, IExecutionOptions, Nullable } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, LocaleService, toDisposable } from '@univerjs/core';
-import { Checkbox, DropdownLegacy } from '@univerjs/design';
+import { ICommandService, IUniverInstanceService, LocaleService, ThemeService, toDisposable } from '@univerjs/core';
+import { Checkbox, convertHexToRgb, convertHexToRgbObject, DropdownLegacy } from '@univerjs/design';
 import { convertTransformToOffsetX, convertTransformToOffsetY, IRenderManagerService } from '@univerjs/engine-render';
 import { MoreDownSingle, MoreUpSingle } from '@univerjs/icons';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
@@ -62,6 +62,7 @@ export const SelectionStatistic: React.FC<{}> = () => {
     const localeService = useDependency(LocaleService);
     const statusBarService = useDependency(IStatusBarService);
     const selectionService = useDependency(SheetsSelectionsService);
+    const themeService = useDependency(ThemeService);
 
     const [isExpanded, setExpand] = useState(false);
     const [anchor, setAnchor] = useState<IAnchorPoint>({ row: -1, col: -1 });
@@ -215,7 +216,7 @@ export const SelectionStatistic: React.FC<{}> = () => {
 
 
 
-    //#region LocalStorage
+    //#region select key to show
     // Load initial state from localStorage
     const [selectedKeys, setSelectedKeys] = useState([] as string[]);
 
@@ -234,6 +235,10 @@ export const SelectionStatistic: React.FC<{}> = () => {
             prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
         );
     };
+
+    // useEffect(() => {
+    //     setTextBySelectedKeys(selectedKeys);
+    //   }, [selectedKeys]);
     //#endregion
 
     const onExpandChange = (visible: boolean) => {
@@ -267,7 +272,22 @@ export const SelectionStatistic: React.FC<{}> = () => {
 
     if (relativeX == null || relativeY == null) return null;
 
-    const maxStat = statistics.filter((item) => item.name === 'MAX')[0] || { name: 'MAX', value: 0 };
+    const setTextBySelectedKeys = (selectedKeys: string[], statistics:  IStatisticItem[]) => {
+        const filtered = statistics
+          .filter((stat) => selectedKeys.includes((stat.name as string)))
+          .map((stat) => `${(stat.name as string).toLowerCase()}: ${stat.value}`)
+          .join(", ");
+        //   setShowText(filtered);
+        return filtered;
+    }
+    const shownText = setTextBySelectedKeys(selectedKeys, statistics);
+
+    const primaryColorRGB = convertHexToRgbObject(themeService.getCurrentTheme().primaryColor);
+
+    const primaryColor = `rgba(${primaryColorRGB.r}, ${primaryColorRGB.g}, ${primaryColorRGB.b})`
+    const primaryColorAlpha008 =
+    `rgba(${primaryColorRGB.r}, ${primaryColorRGB.g}, ${primaryColorRGB.b}, 0.08)`;
+
 
     const menu = (
         <ul className={clsx(styles.selectionStatisticPopupMenu,
@@ -315,9 +335,11 @@ export const SelectionStatistic: React.FC<{}> = () => {
                         'univer-top-1': verticalDirect === 'down',
                         'univer-bottom-1': verticalDirect === 'up',
                     })}
+                    style={{ color: primaryColor, backgroundColor: primaryColorAlpha008}}
+
                 >
                     <div className={styles.textLabel}>
-                        {maxStat.name}: {maxStat.value}
+                        {shownText}
                     </div>
                     {isExpanded ? <MoreUpSingle /> : <MoreDownSingle />}
                 </div>

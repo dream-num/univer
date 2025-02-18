@@ -15,22 +15,21 @@
  */
 
 import type { ICommandInfo, IExecutionOptions, Nullable } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, LocaleService, toDisposable } from '@univerjs/core';
+import { Checkbox, DropdownLegacy } from '@univerjs/design';
+import { convertTransformToOffsetX, convertTransformToOffsetY, IRenderManagerService } from '@univerjs/engine-render';
+import { MoreDownSingle, MoreUpSingle } from '@univerjs/icons';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
+import { SheetsSelectionsService } from '@univerjs/sheets';
 import type { APPLY_TYPE } from '../../services/auto-fill/type';
 import type { IStatisticItem } from '../status-bar/CopyableStatisticItem';
-import { ICommandService, IUniverInstanceService, LocaleService, toDisposable } from '@univerjs/core';
-import { DropdownLegacy } from '@univerjs/design';
-import { convertTransformToOffsetX, convertTransformToOffsetY, IRenderManagerService } from '@univerjs/engine-render';
-import { Autofill, MoreDownSingle, MoreUpSingle } from '@univerjs/icons';
-import { SheetsSelectionsService } from '@univerjs/sheets';
 
+import { clsx } from '@univerjs/design';
 import { useDependency } from '@univerjs/ui';
-import {clsx}  from '@univerjs/design';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { SetScrollOperation } from '../../commands/operations/scroll.operation';
 import { useActiveWorkbook } from '../../components/hook';
 import { getSheetObject } from '../../controllers/utils/component-tools';
-import { IAutoFillService } from '../../services/auto-fill/auto-fill.service';
 import { ISheetSelectionRenderService } from '../../services/selection/base-selection-render.service';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import { IStatusBarService } from '../../services/status-bar.service';
@@ -53,21 +52,21 @@ const useUpdate = () => {
     return useCallback(() => setState((prevState) => !prevState), []);
 };
 
+
+const STORAGE_KEY = 'FLOAT_STATISTIC_SELECTED_KEYS';
+
 export const SelectionStatistic: React.FC<{}> = () => {
     const commandService = useDependency(ICommandService);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const renderManagerService = useDependency(IRenderManagerService);
-    // const autoFillService = useDependency(IAutoFillService);
     const localeService = useDependency(LocaleService);
     const statusBarService = useDependency(IStatusBarService);
     const selectionService = useDependency(SheetsSelectionsService);
 
-    // const [menu, setMenu] = useState<IAutoFillPopupMenuItem[]>([]);
     const [isExpanded, setExpand] = useState(false);
     const [anchor, setAnchor] = useState<IAnchorPoint>({ row: -1, col: -1 });
-    // const [selected, setSelected] = useState<APPLY_TYPE>(APPLY_TYPE.SERIES);
-    const [isHovered, setHovered] = useState(false);
     const workbook = useActiveWorkbook();
+
     const { sheetSkeletonManagerService, selectionRenderService } = useMemo(() => {
         if (workbook) {
             const ru = renderManagerService.getRenderById(workbook.getUnitId());
@@ -80,13 +79,6 @@ export const SelectionStatistic: React.FC<{}> = () => {
         return { sheetSkeletonManagerService: null, selectionRenderService: null };
     }, [workbook, renderManagerService]);
 
-    const handleMouseEnter = () => {
-        setHovered(true);
-    };
-
-    const handleMouseLeave = () => {
-        setHovered(false);
-    };
     const forceUpdate = useUpdate();
 
     useEffect(() => {
@@ -108,14 +100,7 @@ export const SelectionStatistic: React.FC<{}> = () => {
         return disposable?.dispose;
     }, [sheetSkeletonManagerService, forceUpdate]);
 
-    // useEffect(() => {
-    //     const disposable = toDisposable(
-    //         autoFillService.menu$.subscribe((menu) => {
-    //             setMenu(menu.map((i) => ({ ...i, index: menu.indexOf(i) })));
-    //         })
-    //     );
-    //     return disposable.dispose;
-    // }, [autoFillService]);
+    //#region stat data
     const [statistics, setStatistics] = useState<IStatisticItem[]>([]);
     useEffect(() => {
         const subscription = statusBarService.state$.subscribe((state) => {
@@ -124,7 +109,6 @@ export const SelectionStatistic: React.FC<{}> = () => {
                 setExpand(false);
                 setStatistics([]);
             } else {
-                // setExpand(true);
                 const newStatistics = state.values.map((stat) => {
                     const staticItem: IStatisticItem = {
                         value: stat.value,
@@ -135,7 +119,6 @@ export const SelectionStatistic: React.FC<{}> = () => {
                     };
                     return staticItem;
                 });
-                console.log('newStatistics', newStatistics);
                 setStatistics(newStatistics);
             }
         });
@@ -143,45 +126,32 @@ export const SelectionStatistic: React.FC<{}> = () => {
             subscription.unsubscribe();
         };
     }, [statusBarService]);
-
-    // useEffect(() => {
-    //   const disposable = toDisposable(
-    //     autoFillService.showMenu$.subscribe((show) => {
-    //       const { source, target } = autoFillService.autoFillLocation || { source: null, target: null };
-    //       if (show && source && target) {
-    //         const lastRow = Math.max(source.rows[source.rows.length - 1], target.rows[target.rows.length - 1]);
-    //         const lastCol = Math.max(source.cols[source.cols.length - 1], target.cols[target.cols.length - 1]);
-    //         setAnchor({ row: lastRow, col: lastCol });
-    //       } else {
-    //         setAnchor({ row: -1, col: -1 });
-    //       }
-    //     })
-    //   );
-    //   return disposable.dispose;
-    // }, [autoFillService]);
+    //#endregion
 
 
+
+    //#region selection pos
+    // position
     const [verticalDirect, setVerticalDirect] = useState<'up' | 'down'>('down');
     const [horizontalDirect, setHorizontalDirect] = useState<'left' | 'right'>('right');
 
-    // position
     const setAnchorBySelection = (selections: Nullable<ISelectionWithStyle[]>) => {
         if (!selections || selections.length === 0) {
             setAnchor({ row: -1, col: -1 });
-            return
+            return;
         }
         const { range, primary } = selections[selections?.length - 1];
 
         let anchorRow = range.endRow;
         let anchorCol = range.endColumn;
-        if((primary?.startRow || 0) > range.startRow) {
-            console.log('into reverse', primary?.startRow, range.endRow)
+        if ((primary?.startRow || 0) > range.startRow) {
+            console.log('into reverse', primary?.startRow, range.endRow);
             anchorRow = range.startRow - 1;
             setVerticalDirect('up');
         } else {
             setVerticalDirect('down');
         }
-        if((primary?.startColumn || 0) > range.startColumn) {
+        if ((primary?.startColumn || 0) > range.startColumn) {
             anchorCol = range.startColumn - 1;
             setHorizontalDirect('left');
         } else {
@@ -189,14 +159,14 @@ export const SelectionStatistic: React.FC<{}> = () => {
         }
 
         setAnchor({ row: anchorRow, col: anchorCol });
-    }
+    };
 
     useEffect(() => {
         const disposable = toDisposable(
             selectionService.selectionMoveStart$.subscribe((_selections: Nullable<ISelectionWithStyle[]>) => {
                 setAnchor({ row: -1, col: -1 });
                 setStatistics([]);
-                return
+                return;
             })
         );
         return disposable.dispose;
@@ -228,6 +198,8 @@ export const SelectionStatistic: React.FC<{}> = () => {
         );
         return disposable.dispose;
     }, [selectionService]);
+    //#endregion
+
 
     useEffect(() => {
         function handleClose() {
@@ -241,12 +213,41 @@ export const SelectionStatistic: React.FC<{}> = () => {
         };
     }, [isExpanded]);
 
+
+
+    //#region LocalStorage
+    // Load initial state from localStorage
+    const [selectedKeys, setSelectedKeys] = useState([] as string[]);
+
+    useEffect(() => {
+        const savedKeys = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+        setSelectedKeys(savedKeys);
+    }, []);
+
+    // Save state to localStorage on change
+    useEffect(() => {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(selectedKeys));
+    }, [selectedKeys]);
+
+    const handleCheckboxChange = (key: string) => {
+        setSelectedKeys((prev: string[]) =>
+            prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
+        );
+    };
+    //#endregion
+
+    const onExpandChange = (visible: boolean) => {
+        setExpand(visible);
+    };
+
+
+
     if (anchor.col < 0 || anchor.row < 0) {
-      return null;
+        return null;
     }
 
-    if(statistics.length === 0) {
-      return null;
+    if (statistics.length === 0) {
+        return null;
     }
 
     const sheetObject = getSheetObject(univerInstanceService, renderManagerService);
@@ -265,41 +266,44 @@ export const SelectionStatistic: React.FC<{}> = () => {
     const relativeY = convertTransformToOffsetY(y, scaleY, scrollXY);
 
     if (relativeX == null || relativeY == null) return null;
-    const onExpandChange = (visible: boolean) => {
-        setExpand(visible);
-    };
 
     const maxStat = statistics.filter((item) => item.name === 'MAX')[0] || { name: 'MAX', value: 0 };
+
+    const menu = (
+        <ul className={clsx(styles.selectionStatisticPopupMenu,
+            'univer-bg-white',
+            'univer-border-gray-200',
+            'univer-border-solid',
+            'univer-border'
+            )}>
+            {statistics.map((item) => (
+                <li
+                    key={item.name}
+                    className="univer-flex univer-items-center univer-px-3 univer-py-2 hover:univer-bg-gray-100 univer-text-[12px]"
+                >
+                    <Checkbox checked={selectedKeys.includes(item.name as string)}
+                        onChange={() => handleCheckboxChange(item.name as string)}
+                    />
+                    <div key={item.name} className={styles.statisticItem}>
+                        <span>
+                            {`${localeService.t(item.name as string)}: ${item.value}`}
+                        </span>
+                    </div>
+                </li>
+            ))}
+        </ul>
+    );
 
     return (
         <div
             className={styles.selectionStatisticOuter}
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
             style={{ left: `${relativeX}px`, top: `${relativeY}px`, position: 'absolute' }}
         >
 
             <DropdownLegacy
                 placement="bottomRight"
                 trigger={['click']}
-                overlay={(
-                    <ul className={styles.autoFillPopupMenu}>
-                        {statistics.map((item) => (
-                            <li
-                                key={item.name}
-                                className={styles.autoFillPopupMenuItem}
-                            >
-                                <span className={styles.autoFillPopupMenuItemIcon}>
-                                    <div key={item.name} className={styles.statisticItem}>
-                                        <span>
-                                            {`${localeService.t(item.name as string)}: ${item.value}`}
-                                        </span>
-                                    </div>
-                                </span>
-                            </li>
-                        ))}
-                    </ul>
-                )}
+                overlay={menu}
                 visible={isExpanded}
                 onVisibleChange={onExpandChange}
             >
@@ -315,7 +319,7 @@ export const SelectionStatistic: React.FC<{}> = () => {
                     <div className={styles.textLabel}>
                         {maxStat.name}: {maxStat.value}
                     </div>
-                    {isExpanded ? <MoreUpSingle/> : <MoreDownSingle/>}
+                    {isExpanded ? <MoreUpSingle /> : <MoreDownSingle />}
                 </div>
             </DropdownLegacy>
         </div>

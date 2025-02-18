@@ -179,6 +179,7 @@ export class PluginService implements IDisposable {
         });
 
         this._loadFromPlugins(allPluginsOfThisType);
+        this._loadedPluginTypes.add(type);
     }
 
     private _assertPluginValid(ctor: PluginCtor<Plugin>): void {

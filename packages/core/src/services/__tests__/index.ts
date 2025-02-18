@@ -22,7 +22,7 @@ import { LocaleType } from '../../types/enum';
 import { Univer } from '../../univer';
 import { ICommandService } from '../command/command.service';
 import { IUniverInstanceService } from '../instance/instance.service';
-import { Plugin } from '../plugin/plugin';
+import { Plugin } from '../plugin/plugin.service';
 
 const TEST_WORKBOOK_DATA_DEMO: () => IWorkbookData = () => ({
     id: 'test',

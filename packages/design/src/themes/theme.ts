@@ -42,15 +42,15 @@ export function convertHexToRgb(input: string): string {
  * @param input
  * @returns
  */
-export function convertHexToRgbObject(hex: string): {r: number; g: number; b: number, a?: number} {
+export function convertHexToRgbObject(hex: string): { r: number; g: number; b: number; a?: number } {
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
     return result
         ? {
-              r: parseInt(result[1], 16),
-              g: parseInt(result[2], 16),
-              b: parseInt(result[3], 16),
-          }
-        : {r: 0, b: 0, g: 0};
+            r: Number.parseInt(result[1], 16),
+            g: Number.parseInt(result[2], 16),
+            b: Number.parseInt(result[3], 16),
+        }
+        : { r: 0, b: 0, g: 0 };
 }
 
 class Theme {

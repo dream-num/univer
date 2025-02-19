@@ -16,9 +16,9 @@
 
 import type { IDisposable, Nullable } from '@univerjs/core';
 import type { IFunctionNames } from '@univerjs/engine-formula';
-import { FUNCTION_NAMES_MATH, FUNCTION_NAMES_STATISTICAL } from '@univerjs/engine-formula';
-import { createIdentifier } from '@univerjs/core';
 import type { Observable } from 'rxjs';
+import { createIdentifier } from '@univerjs/core';
+import { FUNCTION_NAMES_MATH, FUNCTION_NAMES_STATISTICAL } from '@univerjs/engine-formula';
 import { BehaviorSubject } from 'rxjs';
 
 export interface IStatusBarService {
@@ -102,7 +102,6 @@ export class StatusBarService implements IStatusBarService, IDisposable {
             }
         });
         newState.pattern = param?.pattern ?? null;
-        console.log('service', newState);
         this._state$.next(newState);
     }
 

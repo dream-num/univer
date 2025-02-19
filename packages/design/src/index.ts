@@ -51,4 +51,4 @@ export { DraggableList, type IDraggableListProps } from './components/draggable-
 export { clsx } from './helper/clsx';
 export { resizeObserverCtor } from './helper/resize-observer';
 export { render, unmount } from './utils/render';
-export { convertHexToRgb, convertToDashCase, convertHexToRgbObject } from './themes/theme';
+export { convertHexToRgb, convertHexToRgbObject, convertToDashCase } from './themes/theme';

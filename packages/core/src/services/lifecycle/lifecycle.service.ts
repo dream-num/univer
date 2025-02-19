@@ -35,10 +35,7 @@ export class LifecycleService extends Disposable {
 
     constructor(@ILogService private readonly _logService: ILogService) {
         super();
-        if (typeof window !== 'undefined') {
-            window.life = this;
-          } else {
-          }
+
         this._reportProgress(LifecycleStages.Starting);
     }
 

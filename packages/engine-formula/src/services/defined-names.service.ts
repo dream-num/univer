@@ -76,10 +76,10 @@ export interface IDefinedNamesService {
     getWorksheetByRef(unitId: string, ref: string): Nullable<Worksheet>;
 
 }
-
 export class DefinedNamesService extends Disposable implements IDefinedNamesService {
     // 18.2.6 definedNames (Defined Names)
     private _definedNameMap: IDefinedNameMap = {};
+    private _nameCacheMap: { [unitId: string]: { [name: string]: IDefinedNamesServiceParam } } = {}; // Cache for name-to-definition mapping
 
     private readonly _update$ = new Subject();
     readonly update$ = this._update$.asObservable();
@@ -101,11 +101,11 @@ export class DefinedNamesService extends Disposable implements IDefinedNamesServ
 
     constructor(@IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService) {
         super();
-        // this.registerDefinedName('workbook-01', { id: 'test1', name: 'name-01', formulaOrRefString: '=sum(A1:B10)', comment: 'this is comment', localSheetId: 'sheet-0011', hidden: false });
     }
 
     override dispose(): void {
         this._definedNameMap = {};
+        this._nameCacheMap = {}; // Clear cache
     }
 
     getWorksheetByRef(unitId: string, ref: string) {
@@ -137,6 +137,7 @@ export class DefinedNamesService extends Disposable implements IDefinedNamesServ
 
     registerDefinedNames(unitId: string, params: IDefinedNameMapItem) {
         this._definedNameMap[unitId] = params;
+        this._updateCache(unitId); // Update cache
         this._update();
     }
 
@@ -148,16 +149,19 @@ export class DefinedNamesService extends Disposable implements IDefinedNamesServ
         }
         this._definedNameMap[unitId][param.id] = param;
 
+        this._updateCache(unitId); // Update cache
         this._update();
     }
 
     removeDefinedName(unitId: string, id: string) {
         delete this._definedNameMap[unitId]?.[id];
+        this._updateCache(unitId); // Update cache
         this._update();
     }
 
     removeUnitDefinedName(unitId: string) {
         delete this._definedNameMap[unitId];
+        this._updateCache(unitId); // Update cache
         this._update();
     }
 
@@ -166,13 +170,27 @@ export class DefinedNamesService extends Disposable implements IDefinedNamesServ
     }
 
     getValueByName(unitId: string, name: string) {
+        // Check cache first
+        const cachedMap = this._nameCacheMap[unitId];
+        if (cachedMap) {
+            return cachedMap[name] || null;
+        }
+
+        // If not in cache, traverse the nameMap
         const nameMap = this._definedNameMap[unitId];
         if (nameMap == null) {
             return null;
         }
-        return Array.from(Object.values(nameMap)).filter((value) => {
-            return value.name === name;
-        })?.[0];
+
+        const result = Array.from(Object.values(nameMap)).filter((value) => value.name === name)?.[0] || null;
+
+        // Cache the result if found
+        if (result) {
+            this._nameCacheMap[unitId] = this._nameCacheMap[unitId] || {};
+            this._nameCacheMap[unitId][name] = result;
+        }
+
+        return result;
     }
 
     getValueById(unitId: string, id: string) {
@@ -189,6 +207,22 @@ export class DefinedNamesService extends Disposable implements IDefinedNamesServ
 
     private _update() {
         this._update$.next(null);
+    }
+
+    // Update cache
+    private _updateCache(unitId: string) {
+        const nameMap = this._definedNameMap[unitId];
+        if (nameMap == null) {
+            delete this._nameCacheMap[unitId];
+            return;
+        }
+
+        this._nameCacheMap[unitId] = {};
+
+        // Cache all name mappings for this unitId
+        for (const item of Object.values(nameMap)) {
+            this._nameCacheMap[unitId][item.name] = item;
+        }
     }
 }
 

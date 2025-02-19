@@ -28,7 +28,7 @@ export const OperateContainer: React.FC = () => {
     return (
         <div className={styles.operateContainer}>
             <AutoFillPopupMenu />
-            {enableFloatStatistic &&<SelectionStatistic />}
+            {enableFloatStatistic && <SelectionStatistic />}
         </div>
     );
 };

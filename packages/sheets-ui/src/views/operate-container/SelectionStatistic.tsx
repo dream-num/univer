@@ -32,6 +32,7 @@ import { getSheetObject } from '../../controllers/utils/component-tools';
 import { ISheetSelectionRenderService } from '../../services/selection/base-selection-render.service';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import { IStatusBarService } from '../../services/status-bar.service';
+import { functionDisplayNames } from '../status-bar/CopyableStatisticItem';
 import styles from './index.module.less';
 
 export interface IAnchorPoint {
@@ -142,7 +143,6 @@ export const SelectionStatistic: React.FC<{}> = () => {
         let anchorRow = range.endRow;
         let anchorCol = range.endColumn;
         if ((primary?.startRow || 0) > range.startRow) {
-            console.log('into reverse', primary?.startRow, range.endRow);
             anchorRow = range.startRow - 1;
             setVerticalDirect('up');
         } else {
@@ -224,8 +224,21 @@ export const SelectionStatistic: React.FC<{}> = () => {
 
     const handleCheckboxChange = (key: string) => {
         setSelectedKeys((prev: string[]) =>
-            prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
+        // prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
+        {
+            if (prev.includes(key)) {
+                return prev.filter((k) => k !== key);
+            }
+            if (prev.length < 3) {
+                return [...prev, key];
+            }
+            return prev;
+        }
         );
+    };
+
+    const isDisabled = (key: string) => {
+        return selectedKeys.length >= 3 && !selectedKeys.includes(key);
     };
 
     const onExpandChange = (visible: boolean) => {
@@ -260,17 +273,15 @@ export const SelectionStatistic: React.FC<{}> = () => {
     const setTextBySelectedKeys = (selectedKeys: string[], statistics: IStatisticItem[]) => {
         const filtered = statistics
             .filter((stat) => selectedKeys.includes((stat.name as string)))
-            .map((stat) => `${(stat.name as string).toLowerCase()}: ${stat.value}`)
+            .map((stat) => `${localeService.t(functionDisplayNames[stat.name])}: ${stat.value}`)
             .join(', ');
-        //   setShowText(filtered);
         return filtered;
     };
     const shownText = setTextBySelectedKeys(selectedKeys, statistics);
     const primaryColorRGB = convertHexToRgbObject(themeService.getCurrentTheme().primaryColor);
 
-    // const primaryColor = `rgba(${primaryColorRGB.r}, ${primaryColorRGB.g}, ${primaryColorRGB.b})`;
     const primaryColorAlpha008 =
-    `rgba(${primaryColorRGB.r}, ${primaryColorRGB.g}, ${primaryColorRGB.b}, 0.9)`;
+        `rgba(${primaryColorRGB.r}, ${primaryColorRGB.g}, ${primaryColorRGB.b}, 0.9)`;
 
     const menu = (
         <ul
@@ -284,26 +295,40 @@ export const SelectionStatistic: React.FC<{}> = () => {
                 e.stopPropagation();
             }}
         >
-            {statistics.map((item) => (
-                <li
-                    key={item.name}
-                    className={`
-                      univer-flex univer-items-center univer-px-3 univer-py-2 univer-text-[12px]
-                      hover:univer-bg-gray-100
-                    `}
-                >
-                    <Checkbox
-                        key="checkbox-{item.name}"
-                        checked={selectedKeys.includes(item.name as string)}
-                        onChange={() => handleCheckboxChange(item.name as string)}
-                    />
-                    <div key={item.name} className={styles.statisticItem}>
-                        <span>
-                            {`${localeService.t(item.name as string)}: ${item.value}`}
-                        </span>
-                    </div>
-                </li>
-            ))}
+            {statistics.map((item) => {
+                const disabled = isDisabled(item.name as string);
+                const i18nKey = `${functionDisplayNames[item.name]}`;
+                return (
+                    <li
+                        key={item.name}
+                        className={clsx(`
+                          univer-flex univer-items-center univer-px-3 univer-py-2 univer-text-[12px]
+                          hover:univer-bg-gray-100
+                        `, {
+                            'univer-cursor-not-allowed univer-bg-gray-50 univer-text-gray-400 univer-opacity-50': disabled,
+                            'univer-cursor-pointer univer-text-gray-900 hover:univer-bg-gray-100': !disabled,
+                        })}
+
+                        onClick={() => {
+                            if (!disabled) {
+                                handleCheckboxChange(item.name as string);
+                            }
+                        }}
+                    >
+                        <Checkbox
+                            key="checkbox-{item.name}"
+                            checked={selectedKeys.includes(item.name as string)}
+                            // onChange={() => handleCheckboxChange(item.name as string)}
+                            disabled={isDisabled(item.name as string)}
+                        />
+                        <div key={item.name} className={styles.statisticItem}>
+                            <span>
+                                {`${localeService.t(i18nKey)}: ${item.value}`}
+                            </span>
+                        </div>
+                    </li>
+                );
+            })}
         </ul>
     );
 
@@ -340,7 +365,7 @@ export const SelectionStatistic: React.FC<{}> = () => {
                     </div>
                 </DropdownTrigger>
                 <DropdownOverlay className="univer-theme" anchor={{ x: 'right', y: 'top' }} offset={{ x: 4, y: 0 }}>
-                    { menu }
+                    {menu}
                 </DropdownOverlay>
             </DropdownProvider>
         </div>

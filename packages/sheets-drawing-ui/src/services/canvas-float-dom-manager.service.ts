@@ -89,8 +89,8 @@ export interface IDOMAnchor {
     height: number;
     horizonOffsetAlign?: 'left' | 'right';
     verticalOffsetAlign?: 'top' | 'bottom';
-    marginX?: number;
-    marginY?: number;
+    marginX?: number | string;
+    marginY?: number | string;
 }
 
 export interface ILimitBound extends IBoundRectNoAngle {

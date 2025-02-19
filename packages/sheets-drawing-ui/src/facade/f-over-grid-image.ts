@@ -21,7 +21,7 @@ import { ArrangeTypeEnum, DrawingTypeEnum, generateRandomId, ICommandService, Im
 import { FBase } from '@univerjs/core/facade';
 import { getImageSize } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { SetDrawingArrangeCommand, SetSheetDrawingCommand } from '@univerjs/sheets-drawing-ui';
+import { RemoveSheetDrawingCommand, SetDrawingArrangeCommand, SetSheetDrawingCommand } from '@univerjs/sheets-drawing-ui';
 import { convertPositionCellToSheetOverGrid, convertPositionSheetOverGridToAbsolute, ISheetSelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 
 export interface IFOverGridImage extends Omit<ISheetImage, 'sheetTransform' | 'transform'>, ICellOverGridPosition, IRotationSkewFlipTransform, Required<ISize> {
@@ -43,7 +43,7 @@ function convertSheetImageToFOverGridImage(sheetImage: ISheetImage, sheetSkeleto
         sheetImage.unitId, sheetImage.subUnitId, { from, to }, sheetSkeletonManagerService
     );
 
-    const { left, top, width, height } = absolutePosition;
+    const { width, height } = absolutePosition;
 
     return {
         ...sheetImage,
@@ -128,23 +128,27 @@ export class FOverGridImageBuilder {
 
     /**
      * Set the initial image configuration for the image builder.
-     * @param image The image to be set. {@link ISheetImage}
-     * @returns The builder. {@link FOverGridImageBuilder}
+     * @param {ISheetImage} image - The image configuration
+     * @returns {FOverGridImageBuilder} The `FOverGridImageBuilder` for chaining
      * @example
      * ```ts
-     * // create a new image builder.
-     * const activeSpreadsheet = univerAPI.getActiveWorkbook();
-     * const activeSheet = activeSpreadsheet.getActiveSheet();
-     * const imageBuilder = activeSheet.newOverGridImage();
-     * const param = await imageBuilder.setImage({
-     *    drawingId: '123456',
-     *    drawingType: univerAPI.Enum.DrawingType.DRAWING_IMAGE,
-     *    imageSourceType: univerAPI.Enum.ImageSourceType.BASE64,
-     *    source: 'https://avatars.githubusercontent.com/u/61444807?s=48&v=4',
-     *    unitId: activeSpreadsheet.getId(),
-     *    subUnitId: activeSheet.getSheetId(),
-     * }).setColumn(5).setRow(5).buildAsync();
-     * activeSheet.insertImages([param]);
+     * // create a new image builder and set initial image configuration.
+     * // then build `ISheetImage` and insert it into the sheet, position is start from F6 cell.
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const image = await fWorksheet.newOverGridImage()
+     *   .setImage({
+     *     drawingId: '123456',
+     *     drawingType: univerAPI.Enum.DrawingType.DRAWING_IMAGE,
+     *     imageSourceType: univerAPI.Enum.ImageSourceType.BASE64,
+     *     source: 'https://avatars.githubusercontent.com/u/61444807?s=48&v=4',
+     *     unitId: fWorkbook.getId(),
+     *     subUnitId: fWorksheet.getSheetId(),
+     *   })
+     *   .setColumn(5)
+     *   .setRow(5)
+     *   .buildAsync();
+     * fWorksheet.insertImages([image]);
      * ```
      */
     setImage(image: ISheetImage): FOverGridImageBuilder {
@@ -176,17 +180,22 @@ export class FOverGridImageBuilder {
     }
 
     /**
-     * Set the unit id of the image
-     * @param unitId The unit id of the image
-     * @returns The builder
+     * Set the source of the image.
+     * @param {string} source - The source of the image
+     * @param {ImageSourceType} [sourceType] - The source type of the image, default is URL
+     * @returns {FOverGridImageBuilder} The `FOverGridImageBuilder` for chaining
      * @example
      * ```ts
-     * // create a new image builder.
-     * const activeSpreadsheet = univerAPI.getActiveWorkbook();
-     * const activeSheet = activeSpreadsheet.getActiveSheet();
-     * const imageBuilder = activeSheet.newOverGridImage();
-     * const param = await imageBuilder.setSource('https://avatars.githubusercontent.com/u/61444807?s=48&v=4').setColumn(5).setRow(5).buildAsync();
-     * activeSheet.insertImages([param]);
+     * // create a new image builder and set image source.
+     * // then build `ISheetImage` and insert it into the sheet, position is start from F6 cell.
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const image = await fWorksheet.newOverGridImage()
+     *   .setSource('https://avatars.githubusercontent.com/u/61444807?s=48&v=4', univerAPI.Enum.ImageSourceType.URL)
+     *   .setColumn(5)
+     *   .setRow(5)
+     *   .buildAsync();
+     * fWorksheet.insertImages([image]);
      * ```
      */
     setSource(source: string): FOverGridImageBuilder;
@@ -198,26 +207,56 @@ export class FOverGridImageBuilder {
         return this;
     }
 
-    getsource(): string {
+    /**
+     * Get the source of the image
+     * @returns {string} The source of the image
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const images = fWorksheet.getImages();
+     * images.forEach((image) => {
+     *   console.log(image, image.toBuilder().getSource());
+     * });
+     * ```
+     */
+    getSource(): string {
         return this._image.source;
     }
 
+    /**
+     * Get the source type of the image
+     * @returns {ImageSourceType} The source type of the image
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const images = fWorksheet.getImages();
+     * images.forEach((image) => {
+     *   console.log(image, image.toBuilder().getSourceType());
+     * });
+     * ```
+     */
     getSourceType(): ImageSourceType {
         return this._image.imageSourceType;
     }
 
     /**
-     * Set the position of the image
-     * @param column  The sheet start column of the image
-     * @returns The builder.  {@link FOverGridImageBuilder}
+     * Set the horizontal position of the image
+     * @param {number} column - The column index of the image start position
+     * @returns {FOverGridImageBuilder} The `FOverGridImageBuilder` for chaining
      * @example
      * ```ts
-     * // create a new image builder.
-     * const activeSpreadsheet = univerAPI.getActiveWorkbook();
-     * const activeSheet = activeSpreadsheet.getActiveSheet();
-     * const imageBuilder = activeSheet.newOverGridImage();
-     * const param = await imageBuilder.setSource('https://avatars.githubusercontent.com/u/61444807?s=48&v=4').setColumn(5).setRow(5).buildAsync();
-     * activeSheet.insertImages([param]);
+     * // create a new image builder and set image source.
+     * // then build `ISheetImage` and insert it into the sheet, position is start from F6 cell.
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const image = await fWorksheet.newOverGridImage()
+     *   .setSource('https://avatars.githubusercontent.com/u/61444807?s=48&v=4', univerAPI.Enum.ImageSourceType.URL)
+     *   .setColumn(5)
+     *   .setRow(5)
+     *   .buildAsync();
+     * fWorksheet.insertImages([image]);
      * ```
      */
     setColumn(column: number): FOverGridImageBuilder {
@@ -226,17 +265,21 @@ export class FOverGridImageBuilder {
     }
 
     /**
-     * Set the position of the image
-     * @param row The sheet start row of the image
-     * @returns The builder.  {@link FOverGridImageBuilder}
+     * Set the vertical position of the image
+     * @param {number} row - The row index of the image start position
+     * @returns {FOverGridImageBuilder} The `FOverGridImageBuilder` for chaining
      * @example
      * ```ts
-     * // create a new image builder.
-     * const activeSpreadsheet = univerAPI.getActiveWorkbook();
-     * const activeSheet = activeSpreadsheet.getActiveSheet();
-     * const imageBuilder = activeSheet.newOverGridImage();
-     * const param = await imageBuilder.setSource('https://avatars.githubusercontent.com/u/61444807?s=48&v=4').setColumn(5).setRow(5).buildAsync();
-     * activeSheet.insertImages([param]);
+     * // create a new image builder and set image source.
+     * // then build `ISheetImage` and insert it into the sheet, position is start from F6 cell.
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const image = await fWorksheet.newOverGridImage()
+     *   .setSource('https://avatars.githubusercontent.com/u/61444807?s=48&v=4', univerAPI.Enum.ImageSourceType.URL)
+     *   .setColumn(5)
+     *   .setRow(5)
+     *   .buildAsync();
+     * fWorksheet.insertImages([image]);
      * ```
      */
     setRow(row: number): FOverGridImageBuilder {
@@ -245,17 +288,22 @@ export class FOverGridImageBuilder {
     }
 
     /**
-     * Set the column offset of the image in a unit
-     * @param offset The offset in pixels
-     * @returns The builder.  {@link FOverGridImageBuilder}
+     * Set the horizontal offset of the image
+     * @param {number} offset - The column offset of the image start position, pixel unit
+     * @returns {FOverGridImageBuilder} The `FOverGridImageBuilder` for chaining
      * @example
      * ```ts
-     * // create a new image builder.
-     * const activeSpreadsheet = univerAPI.getActiveWorkbook();
-     * const activeSheet = activeSpreadsheet.getActiveSheet();
-     * const imageBuilder = activeSheet.newOverGridImage();
-     * const param = await imageBuilder.setSource('https://avatars.githubusercontent.com/u/61444807?s=48&v=4').setColumn(5).setRow(5).setColumnOffset(10).setRowOffset(10).buildAsync();
-     * activeSheet.insertImages([param]);
+     * // create a new image builder and set image source.
+     * // then build `ISheetImage` and insert it into the sheet, position is start from F6 cell and horizontal offset is 10px.
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const image = await fWorksheet.newOverGridImage()
+     *   .setSource('https://avatars.githubusercontent.com/u/61444807?s=48&v=4', univerAPI.Enum.ImageSourceType.URL)
+     *   .setColumn(5)
+     *   .setRow(5)
+     *   .setColumnOffset(10)
+     *   .buildAsync();
+     * fWorksheet.insertImages([image]);
      * ```
      */
     setColumnOffset(offset: number): FOverGridImageBuilder {
@@ -264,17 +312,22 @@ export class FOverGridImageBuilder {
     }
 
     /**
-     * Set the row offset of the image in a unit
-     * @param offset The offset in pixels
-     * @returns The builder.  {@link FOverGridImageBuilder}
+     * Set the vertical offset of the image
+     * @param {number} offset - The row offset of the image start position, pixel unit
+     * @returns {FOverGridImageBuilder} The `FOverGridImageBuilder` for chaining
      * @example
      * ```ts
-     * // create a new image builder.
-     * const activeSpreadsheet = univerAPI.getActiveWorkbook();
-     * const activeSheet = activeSpreadsheet.getActiveSheet();
-     * const imageBuilder = activeSheet.newOverGridImage();
-     * const param = await imageBuilder.setSource('https://avatars.githubusercontent.com/u/61444807?s=48&v=4').setColumn(5).setRow(5).setColumnOffset(10).setRowOffset(10).buildAsync();
-     * activeSheet.insertImages([param]);
+     * // create a new image builder and set image source.
+     * // then build `ISheetImage` and insert it into the sheet, position is start from F6 cell and vertical offset is 10px.
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const image = await fWorksheet.newOverGridImage()
+     *   .setSource('https://avatars.githubusercontent.com/u/61444807?s=48&v=4', univerAPI.Enum.ImageSourceType.URL)
+     *   .setColumn(5)
+     *   .setRow(5)
+     *   .setRowOffset(10)
+     *   .buildAsync();
+     * fWorksheet.insertImages([image]);
      * ```
      */
     setRowOffset(offset: number): FOverGridImageBuilder {
@@ -283,17 +336,23 @@ export class FOverGridImageBuilder {
     }
 
     /**
-     * set the width of the image
-     * @param width The width of the image, in pixels
-     * @returns The builder.  {@link FOverGridImageBuilder}
+     * Set the width of the image
+     * @param {number} width - The width of the image, pixel unit
+     * @returns {FOverGridImageBuilder} The `FOverGridImageBuilder` for chaining
      * @example
      * ```ts
-     * // create a new image builder.
-     * const activeSpreadsheet = univerAPI.getActiveWorkbook();
-     * const activeSheet = activeSpreadsheet.getActiveSheet();
-     * const imageBuilder = activeSheet.newOverGridImage();
-     * const param = await imageBuilder.setSource('https://avatars.githubusercontent.com/u/61444807?s=48&v=4').setColumn(5).setRow(5).setWidth(120).setHeight(50).buildAsync();
-     * activeSheet.insertImages([param]);
+     * // create a new image builder and set image source.
+     * // then build `ISheetImage` and insert it into the sheet, position is start from F6 cell, width is 120px and height is 50px.
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const image = await fWorksheet.newOverGridImage()
+     *   .setSource('https://avatars.githubusercontent.com/u/61444807?s=48&v=4', univerAPI.Enum.ImageSourceType.URL)
+     *   .setColumn(5)
+     *   .setRow(5)
+     *   .setWidth(120)
+     *   .setHeight(50)
+     *   .buildAsync();
+     * fWorksheet.insertImages([image]);
      * ```
      */
     setWidth(width: number): FOverGridImageBuilder {
@@ -303,16 +362,22 @@ export class FOverGridImageBuilder {
 
     /**
      * Set the height of the image
-     * @param height The height of the image, in pixels
-     * @returns The builder.  {@link FOverGridImageBuilder}
+     * @param {number} height - The height of the image, pixel unit
+     * @returns {FOverGridImageBuilder} The `FOverGridImageBuilder` for chaining
      * @example
      * ```ts
-     * // create a new image builder.
-     * const activeSpreadsheet = univerAPI.getActiveWorkbook();
-     * const activeSheet = activeSpreadsheet.getActiveSheet();
-     * const imageBuilder = activeSheet.newOverGridImage();
-     * const param = await imageBuilder.setSource('https://avatars.githubusercontent.com/u/61444807?s=48&v=4').setColumn(5).setRow(5).setWidth(120).setHeight(50).buildAsync();
-     * activeSheet.insertImages([param]);
+     * // create a new image builder and set image source.
+     * // then build `ISheetImage` and insert it into the sheet, position is start from F6 cell, width is 120px and height is 50px.
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const image = await fWorksheet.newOverGridImage()
+     *   .setSource('https://avatars.githubusercontent.com/u/61444807?s=48&v=4', univerAPI.Enum.ImageSourceType.URL)
+     *   .setColumn(5)
+     *   .setRow(5)
+     *   .setWidth(120)
+     *   .setHeight(50)
+     *   .buildAsync();
+     * fWorksheet.insertImages([image]);
      * ```
      */
     setHeight(height: number): FOverGridImageBuilder {
@@ -322,16 +387,48 @@ export class FOverGridImageBuilder {
 
     /**
      * Set the anchor type of the image, whether the position and size change with the cell
-     * @param anchorType The anchor type {@link SheetDrawingAnchorType}
-     * @returns The builder.  {@link FOverGridImageBuilder}
+     * @param {SheetDrawingAnchorType} anchorType - The anchor type of the image
+     * @returns {FOverGridImageBuilder} The `FOverGridImageBuilder` for chaining
      * @example
      * ```ts
-     * // create a new image builder.
-     * const activeSpreadsheet = univerAPI.getActiveWorkbook();
-     * const activeSheet = activeSpreadsheet.getActiveSheet();
-     * const imageBuilder = activeSheet.newOverGridImage();
-     * const param = await imageBuilder.setSource('https://avatars.githubusercontent.com/u/61444807?s=48&v=4').setColumn(5).setRow(5).setAnchorType(univerAPI.Enum.SheetDrawingAnchorType.None).buildAsync();
-     * activeSheet.insertImages([param]);
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // image1 position is start from A6 cell, anchor type is Position.
+     * // Only the position of the drawing follows the cell changes. When rows or columns are inserted or deleted, the position of the drawing changes, but the size remains the same.
+     * const image1 = await fWorksheet.newOverGridImage()
+     *   .setSource('https://avatars.githubusercontent.com/u/61444807?s=48&v=4', univerAPI.Enum.ImageSourceType.URL)
+     *   .setColumn(0)
+     *   .setRow(5)
+     *   .setAnchorType(univerAPI.Enum.SheetDrawingAnchorType.Position)
+     *   .buildAsync();
+     *
+     * // image2 position is start from C6 cell, anchor type is Both.
+     * // The size and position of the drawing follow the cell changes. When rows or columns are inserted or deleted, the size and position of the drawing change accordingly.
+     * const image2 = await fWorksheet.newOverGridImage()
+     *   .setSource('https://avatars.githubusercontent.com/u/61444807?s=48&v=4', univerAPI.Enum.ImageSourceType.URL)
+     *   .setColumn(2)
+     *   .setRow(5)
+     *   .setAnchorType(univerAPI.Enum.SheetDrawingAnchorType.Both)
+     *   .buildAsync();
+     *
+     * // image3 position is start from E6 cell, anchor type is None.
+     * // The size and position of the drawing do not follow the cell changes. When rows or columns are inserted or deleted, the position and size of the drawing remain unchanged.
+     * const image3 = await fWorksheet.newOverGridImage()
+     *   .setSource('https://avatars.githubusercontent.com/u/61444807?s=48&v=4', univerAPI.Enum.ImageSourceType.URL)
+     *   .setColumn(4)
+     *   .setRow(5)
+     *   .setAnchorType(univerAPI.Enum.SheetDrawingAnchorType.None)
+     *   .buildAsync();
+     *
+     * // insert images into the sheet
+     * fWorksheet.insertImages([image1, image2, image3]);
+     *
+     * // after 2 seconds, set the row height of the 5th row to 100px and insert a row before the 5th row.
+     * // then observe the position and size changes of the images.
+     * setTimeout(() => {
+     *   fWorksheet.setRowHeight(5, 100).insertRowBefore(5);
+     * }, 2000);
      * ```
      */
     setAnchorType(anchorType: SheetDrawingAnchorType): FOverGridImageBuilder {
@@ -341,16 +438,21 @@ export class FOverGridImageBuilder {
 
     /**
      * Set the cropping region of the image by defining the top edges, thereby displaying the specific part of the image you want.
-     * @param top  The number of pixels to crop from the top of the image.
-     * @returns The builder.  {@link FOverGridImageBuilder}
+     * @param {number} top - The number of pixels to crop from the top of the image
+     * @returns {FOverGridImageBuilder} The `FOverGridImageBuilder` for chaining
      * @example
      * ```ts
-     * // create a new image builder.
-     * const activeSpreadsheet = univerAPI.getActiveWorkbook();
-     * const activeSheet = activeSpreadsheet.getActiveSheet();
-     * const imageBuilder = activeSheet.newOverGridImage();
-     * const param = await imageBuilder.setSource('https://avatars.githubusercontent.com/u/61444807?s=48&v=4').setColumn(5).setRow(5).setCropTop(10).setCropLeft(10).setCropBottom(10).setCropRight(10).buildAsync();
-     * activeSheet.insertImages([param]);
+     * // create a new image builder and set image source.
+     * // then build `ISheetImage` and insert it into the sheet, position is start from F6 cell, top crop is 10px.
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const image = await fWorksheet.newOverGridImage()
+     *   .setSource('https://avatars.githubusercontent.com/u/61444807?s=48&v=4', univerAPI.Enum.ImageSourceType.URL)
+     *   .setColumn(5)
+     *   .setRow(5)
+     *   .setCropTop(10)
+     *   .buildAsync();
+     * fWorksheet.insertImages([image]);
      * ```
      */
     setCropTop(top: number): FOverGridImageBuilder {
@@ -361,16 +463,21 @@ export class FOverGridImageBuilder {
 
     /**
      * Set the cropping region of the image by defining the left edges, thereby displaying the specific part of the image you want.
-     * @param left  The number of pixels to crop from the left side of the image.
-     * @returns The builder.  {@link FOverGridImageBuilder}
+     * @param {number} left - The number of pixels to crop from the left side of the image
+     * @returns {FOverGridImageBuilder} The `FOverGridImageBuilder` for chaining
      * @example
      * ```ts
-     * // create a new image builder.
-     * const activeSpreadsheet = univerAPI.getActiveWorkbook();
-     * const activeSheet = activeSpreadsheet.getActiveSheet();
-     * const imageBuilder = activeSheet.newOverGridImage();
-     * const param = await imageBuilder.setSource('https://avatars.githubusercontent.com/u/61444807?s=48&v=4').setColumn(5).setRow(5).setCropTop(10).setCropLeft(10).setCropBottom(10).setCropRight(10).buildAsync();
-     * activeSheet.insertImages([param]);
+     * // create a new image builder and set image source.
+     * // then build `ISheetImage` and insert it into the sheet, position is start from F6 cell, left crop is 10px.
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const image = await fWorksheet.newOverGridImage()
+     *   .setSource('https://avatars.githubusercontent.com/u/61444807?s=48&v=4', univerAPI.Enum.ImageSourceType.URL)
+     *   .setColumn(5)
+     *   .setRow(5)
+     *   .setCropLeft(10)
+     *   .buildAsync();
+     * fWorksheet.insertImages([image]);
      * ```
      */
     setCropLeft(left: number): FOverGridImageBuilder {
@@ -381,16 +488,21 @@ export class FOverGridImageBuilder {
 
     /**
      * Set the cropping region of the image by defining the bottom edges, thereby displaying the specific part of the image you want.
-     * @param bottom  The number of pixels to crop from the bottom of the image.
-     * @returns The builder.  {@link FOverGridImageBuilder}
+     * @param {number} bottom - The number of pixels to crop from the bottom of the image
+     * @returns {FOverGridImageBuilder} The `FOverGridImageBuilder` for chaining
      * @example
      * ```ts
-     * // create a new image builder.
-     * const activeSpreadsheet = univerAPI.getActiveWorkbook();
-     * const activeSheet = activeSpreadsheet.getActiveSheet();
-     * const imageBuilder = activeSheet.newOverGridImage();
-     * const param = await imageBuilder.setSource('https://avatars.githubusercontent.com/u/61444807?s=48&v=4').setColumn(5).setRow(5).setCropTop(10).setCropLeft(10).setCropBottom(10).setCropRight(10).buildAsync();
-     * activeSheet.insertImages([param]);
+     * // create a new image builder and set image source.
+     * // then build `ISheetImage` and insert it into the sheet, position is start from F6 cell, bottom crop is 10px.
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const image = await fWorksheet.newOverGridImage()
+     *   .setSource('https://avatars.githubusercontent.com/u/61444807?s=48&v=4', univerAPI.Enum.ImageSourceType.URL)
+     *   .setColumn(5)
+     *   .setRow(5)
+     *   .setCropBottom(10)
+     *   .buildAsync();
+     * fWorksheet.insertImages([image]);
      * ```
      */
     setCropBottom(bottom: number): FOverGridImageBuilder {
@@ -401,16 +513,21 @@ export class FOverGridImageBuilder {
 
     /**
      * Set the cropping region of the image by defining the right edges, thereby displaying the specific part of the image you want.
-     * @param right  The number of pixels to crop from the right side of the image.
-     * @returns The builder.  {@link FOverGridImageBuilder}
+     * @param {number} right - The number of pixels to crop from the right side of the image
+     * @returns {FOverGridImageBuilder} The `FOverGridImageBuilder` for chaining
      * @example
      * ```ts
-     * // create a new image builder.
-     * const activeSpreadsheet = univerAPI.getActiveWorkbook();
-     * const activeSheet = activeSpreadsheet.getActiveSheet();
-     * const imageBuilder = activeSheet.newOverGridImage();
-     * const param = await imageBuilder.setSource('https://avatars.githubusercontent.com/u/61444807?s=48&v=4').setColumn(5).setRow(5).setCropTop(10).setCropLeft(10).setCropBottom(10).setCropRight(10).buildAsync();
-     * activeSheet.insertImages([param]);
+     * // create a new image builder and set image source.
+     * // then build `ISheetImage` and insert it into the sheet, position is start from F6 cell, right crop is 10px.
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const image = await fWorksheet.newOverGridImage()
+     *   .setSource('https://avatars.githubusercontent.com/u/61444807?s=48&v=4', univerAPI.Enum.ImageSourceType.URL)
+     *   .setColumn(5)
+     *   .setRow(5)
+     *   .setCropRight(10)
+     *   .buildAsync();
+     * fWorksheet.insertImages([image]);
      * ```
      */
     setCropRight(right: number): FOverGridImageBuilder {
@@ -432,27 +549,27 @@ export class FOverGridImageBuilder {
 
     /**
      * Set the rotation angle of the image
-     * @param angle Degree of rotation of the image, for example, 90, 180, 270, etc.
-     * @returns The builder {@link FOverGridImageBuilder}
+     * @param {number} angle - Degree of rotation of the image, for example, 90, 180, 270, etc.
+     * @returns {FOverGridImageBuilder} The `FOverGridImageBuilder` for chaining
      * @example
      * ```ts
-     * // create a new image builder.
-     * const activeSpreadsheet = univerAPI.getActiveWorkbook();
-     * const activeSheet = activeSpreadsheet.getActiveSheet();
-     * const imageBuilder = activeSheet.newOverGridImage();
-     * const param = await imageBuilder.setSource('https://avatars.githubusercontent.com/u/61444807?s=48&v=4').setColumn(5).setRow(5).setRotate(90).buildAsync();
-     * activeSheet.insertImages([param]);
+     * // create a new image builder and set image source.
+     * // then build `ISheetImage` and insert it into the sheet, position is start from F6 cell, rotate 90 degrees.
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const image = await fWorksheet.newOverGridImage()
+     *   .setSource('https://avatars.githubusercontent.com/u/61444807?s=48&v=4', univerAPI.Enum.ImageSourceType.URL)
+     *   .setColumn(5)
+     *   .setRow(5)
+     *   .setRotate(90)
+     *   .buildAsync();
+     * fWorksheet.insertImages([image]);
      * ```
      */
     setRotate(angle: number): FOverGridImageBuilder {
         this._image.angle = angle;
         return this;
     }
-
-    // setPresetGeometry(prstGeom: PresetGeometryType): FOverGridImageBuilder {
-    //     this._image.prstGeom = prstGeom;
-    //     return this;
-    // }
 
     setUnitId(unitId: string): FOverGridImageBuilder {
         this._image.unitId = unitId;
@@ -503,42 +620,67 @@ export class FOverGridImage extends FBase {
         super();
     }
 
+    /**
+     * Get the id of the image
+     * @returns {string} The id of the image
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const images = fWorksheet.getImages();
+     * images.forEach((image) => {
+     *   console.log(image, image.getId());
+     * });
+     * ```
+     */
     getId(): string {
         return this._image.drawingId;
     }
 
+    /**
+     * Get the drawing type of the image
+     * @returns {DrawingTypeEnum} The drawing type of the image
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const images = fWorksheet.getImages();
+     * images.forEach((image) => {
+     *   console.log(image, image.getType());
+     * });
+     * ```
+     */
     getType(): DrawingTypeEnum {
         return this._image.drawingType;
     }
 
     /**
      * Remove the image from the sheet
-     * @returns success or not
+     * @returns {boolean} true if the image is removed successfully, otherwise false
      * @example
      * ```ts
-     * // remove the image from the sheet
-     * const activeSpreadsheet = univerAPI.getActiveWorkbook();
-     * const activeSheet = activeSpreadsheet.getActiveSheet();
-     * const image = activeSheet.getImages()[0];
-     * console.log('Delete state is ', image?.remove());
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const image = fWorksheet.getImages()[0];
+     * const result = image?.remove();
+     * console.log(result);
      * ```
      */
     remove(): boolean {
-        return this._commandService.syncExecuteCommand(SetSheetDrawingCommand.id, { unitId: this._image.unitId, drawings: [this._image] });
+        return this._commandService.syncExecuteCommand(RemoveSheetDrawingCommand.id, { unitId: this._image.unitId, drawings: [this._image] });
     }
 
     /**
      * Convert the image to a FOverGridImageBuilder
-     * @returns The builder FOverGridImageBuilder
+     * @returns {FOverGridImageBuilder} The builder FOverGridImageBuilder
      * @example
      * ```ts
-     * // convert the image to a builder
-     * const activeSpreadsheet = univerAPI.getActiveWorkbook();
-     * const activeSheet = activeSpreadsheet.getActiveSheet();
-     * const image = activeSheet.getImages()[0];
-     * const builder = image.toBuilder();
-     * const param = await builder.setSource('https://avatars.githubusercontent.com/u/61444807?s=48&v=4').setColumn(5).setRow(5).buildAsync();
-     * activeSheet.updateImages([param]);
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const images = fWorksheet.getImages();
+     * images.forEach((image) => {
+     *   console.log(image, image.toBuilder().getSource());
+     * });
      * ```
      */
     toBuilder(): FOverGridImageBuilder {
@@ -549,22 +691,31 @@ export class FOverGridImage extends FBase {
 
     /**
      * Set the source of the image
-     * @param source The source of the image
-     * @returns success or not
+     * @param {string} source - The source of the image
+     * @returns {boolean} true if the source is set successfully, otherwise false
      * @example
      * ```ts
-     * // set the source of the image
-     * const activeSpreadsheet = univerAPI.getActiveWorkbook();
-     * const activeSheet = activeSpreadsheet.getActiveSheet();
-     * const image = activeSheet.getImages()[0];
-     * console.log('Set source state is ', image.setSource('https://avatars.githubusercontent.com/u/61444807?s=48&v=4'));
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const image = fWorksheet.getImages()[0];
+     * const result = image?.setSource('https://avatars.githubusercontent.com/u/61444807?s=48&v=4');
+     * console.log(result);
+     * ```
      */
     setSource(source: string): boolean;
     /**
      * Set the source of the image, change image display.
-     * @param source  The source of the image
-     * @param sourceType The source type of the image, {@link ImageSourceType}
-     * @returns success or not
+     * @param {string} source - The source of the image
+     * @param {ImageSourceType} [sourceType] - The source type of the image, default is URL
+     * @returns {boolean} true if the source is set successfully, otherwise false
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const image = fWorksheet.getImages()[0];
+     * const result = image?.setSource('https://avatars.githubusercontent.com/u/61444807?s=48&v=4', univerAPI.Enum.ImageSourceType.URL);
+     * console.log(result);
+     * ```
      */
     setSource(source: string, sourceType?: ImageSourceType): boolean;
     setSource(source: string, sourceType?: ImageSourceType): boolean {
@@ -576,33 +727,34 @@ export class FOverGridImage extends FBase {
 
     /**
      * Set the position of the image
-     * @param row  The sheet start row of the image
-     * @param column The sheet start column of the image
-     * @returns success or not
+     * @param {number} row - The row index of the image start position
+     * @param {number} column - The column index of the image start position
+     * @returns {boolean} true if the position is set successfully, otherwise false
      * @example
      * ```ts
-     *  // set the position of the image
-     * const activeSpreadsheet = univerAPI.getActiveWorkbook();
-     * const activeSheet = activeSpreadsheet.getActiveSheet();
-     * const image = activeSheet.getImages()[0];
-     * console.log('Set position state is ', image.setPosition(5, 5));
+     * // set the position of the image, the start position is F6 cell.
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const image = fWorksheet.getImages()[0];
+     * const result = image?.setPositionAsync(5, 5);
+     * console.log(result);
      * ```
      */
     async setPositionAsync(row: number, column: number): Promise<boolean>;
     /**
-     *
-     * @param column  The sheet start column of the image
-     * @param row  The sheet start row of the image
-     * @param rowOffset  The offset of the start row
-     * @param columnOffset  The offset of the start column
-     * @returns success or not
+     * @param {number} row - The row index of the image start position
+     * @param {number} column - The column index of the image start position
+     * @param {number} rowOffset - The row offset of the image start position, pixel unit
+     * @param {number} columnOffset - The column offset of the image start position, pixel unit
+     * @returns {boolean} true if the position is set successfully, otherwise false
      * @example
      * ```ts
-     * // set the position of the image
-     * const activeSpreadsheet = univerAPI.getActiveWorkbook();
-     * const activeSheet = activeSpreadsheet.getActiveSheet();
-     * const image = activeSheet.getImages()[0];
-     * console.log('Set position state is ', image.setPosition(5, 5, 10, 10));
+     * // set the position of the image, the start position is F6 cell, and the offset is 10px.
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const image = fWorksheet.getImages()[0];
+     * const result = image?.setPositionAsync(5, 5, 10, 10);
+     * console.log(result);
      * ```
      */
     async setPositionAsync(row: number, column: number, rowOffset?: number, columnOffset?: number): Promise<boolean>;
@@ -622,16 +774,18 @@ export class FOverGridImage extends FBase {
 
     /**
      * Set the size of the image
-     * @param width  The width of the image
-     * @param height  The height of the image
-     * @returns success or not
+     * @param {number} width - The width of the image, pixel unit
+     * @param {number} height - The height of the image, pixel unit
+     * @returns {boolean} true if the size is set successfully, otherwise false
      * @example
      * ```ts
-     * // set the size of the image
-     * const activeSpreadsheet = univerAPI.getActiveWorkbook();
-     * const activeSheet = activeSpreadsheet.getActiveSheet();
-     * const image = activeSheet.getImages()[0];
-     * console.log('Set size state is ', image.setSize(50, 120));
+     * // set the image width 120px and height 50px
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const image = fWorksheet.getImages()[0];
+     * const result = image?.setSizeAsync(120, 50);
+     * console.log(result);
+     * ```
      */
     async setSizeAsync(width: number, height: number): Promise<boolean> {
         const builder = this.toBuilder();
@@ -643,18 +797,19 @@ export class FOverGridImage extends FBase {
 
     /**
      * Set the cropping region of the image by defining the top, bottom, left, and right edges, thereby displaying the specific part of the image you want.
-     * @param top  The number of pixels to crop from the top of the image.
-     * @param left  The number of pixels to crop from the left side of the image.
-     * @param bottom  The number of pixels to crop from the bottom of the image.
-     * @param right  The number of pixels to crop from the right side of the image.
-     * @returns success or not
+     * @param {number} top - The number of pixels to crop from the top of the image
+     * @param {number} left - The number of pixels to crop from the left side of the image
+     * @param {number} bottom - The number of pixels to crop from the bottom of the image
+     * @param {number} right - The number of pixels to crop from the right side of the image
+     * @returns {boolean} true if the crop is set successfully, otherwise false
      * @example
      * ```ts
-     * // set the crop of the image
-     * const activeSpreadsheet = univerAPI.getActiveWorkbook();
-     * const activeSheet = activeSpreadsheet.getActiveSheet();
-     * const image = activeSheet.getImages()[0];
-     * console.log('Set crop state is ', image.setCrop(10, 10, 10, 10));
+     * // set the crop of the image, top 10px, left 10px, bottom 10px, right 10px.
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const image = fWorksheet.getImages()[0];
+     * const result = image?.setCrop(10, 10, 10, 10);
+     * console.log(result);
      * ```
      */
     setCrop(top?: number, left?: number, bottom?: number, right?: number): boolean {
@@ -686,39 +841,36 @@ export class FOverGridImage extends FBase {
         return this._commandService.syncExecuteCommand(SetSheetDrawingCommand.id, { unitId: this._image.unitId, drawings: [this._image] });
     }
 
-    // setPresetGeometry(prstGeom: PresetGeometryType): boolean {
-    //     this._image.prstGeom = prstGeom;
-    //     return this._commandService.syncExecuteCommand(SetSheetDrawingCommand.id, { unitId: this._image.unitId, drawings: [this._image] });
-    // }
-
     /**
      * Set the rotation angle of the image
-     * @param angle Degree of rotation of the image, for example, 90, 180, 270, etc.
-     * @returns success or not
+     * @param {number} angle - Degree of rotation of the image, for example, 90, 180, 270, etc.
+     * @returns {boolean} true if the rotation is set successfully, otherwise false
      * @example
      * ```ts
-     * // set the rotation angle of the image
-     * const activeSpreadsheet = univerAPI.getActiveWorkbook();
-     * const activeSheet = activeSpreadsheet.getActiveSheet();
-     * const image = activeSheet.getImages()[0];
-     * console.log('Set rotate state is ', image.setRotate(90));
+     * // set 90 degrees rotation of the image
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const image = fWorksheet.getImages()[0];
+     * const result = image?.setRotate(90);
+     * console.log(result);
      * ```
      */
     setRotate(angle: number): boolean {
         this._image.sheetTransform.angle = angle;
+        this._image.transform && (this._image.transform.angle = angle);
         return this._commandService.syncExecuteCommand(SetSheetDrawingCommand.id, { unitId: this._image.unitId, drawings: [this._image] });
     }
 
     /**
      * Move the image layer forward by one level
-     * @returns success or not
+     * @returns {boolean} true if the image is moved forward successfully, otherwise false
      * @example
      * ```ts
-     * // move the image forward
-     * const activeSpreadsheet = univerAPI.getActiveWorkbook();
-     * const activeSheet = activeSpreadsheet.getActiveSheet();
-     * const image = activeSheet.getImages()[0];
-     * console.log('Move forward state is ', image.setForward());
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const image = fWorksheet.getImages()[0];
+     * const result = image?.setForward();
+     * console.log(result);
      * ```
      */
     setForward(): boolean {
@@ -735,11 +887,11 @@ export class FOverGridImage extends FBase {
      * @returns success or not
      * @example
      * ```ts
-     * // move the image backward
-     * const activeSpreadsheet = univerAPI.getActiveWorkbook();
-     * const activeSheet = activeSpreadsheet.getActiveSheet();
-     * const image = activeSheet.getImages()[0];
-     * console.log('Move backward state is ', image.setBackward());
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const image = fWorksheet.getImages()[0];
+     * const result = image?.setBackward();
+     * console.log(result);
      * ```
      */
     setBackward(): boolean {
@@ -752,15 +904,15 @@ export class FOverGridImage extends FBase {
     }
 
     /**
-     * Move the image layer to the back
+     * Move the image layer to the bottom layer
      * @returns success or not
      * @example
      * ```ts
-     * // move the image to the back
-     * const activeSpreadsheet = univerAPI.getActiveWorkbook();
-     * const activeSheet = activeSpreadsheet.getActiveSheet();
-     * const image = activeSheet.getImages()[0];
-     * console.log('Move back state is ', image.setBack());
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const image = fWorksheet.getImages()[0];
+     * const result = image?.setBack();
+     * console.log(result);
      * ```
      */
     setBack(): boolean {
@@ -773,15 +925,15 @@ export class FOverGridImage extends FBase {
     }
 
     /**
-     * Move the image layer to the front
+     * Move the image layer to the top layer
      * @returns success or not
      * @example
      * ```ts
-     * // move the image to the front
-     * const activeSpreadsheet = univerAPI.getActiveWorkbook();
-     * const activeSheet = activeSpreadsheet.getActiveSheet();
-     * const image = activeSheet.getImages()[0];
-     * console.log('Move front state is ', image.setFront());
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const image = fWorksheet.getImages()[0];
+     * const result = image?.setFront();
+     * console.log(result);
      * ```
      */
     setFront(): boolean {

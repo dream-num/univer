@@ -36,128 +36,142 @@ import { FConditionalFormattingBuilder } from './conditional-formatting-builder'
  * @ignore
  */
 export interface IFWorksheetConditionalFormattingMixin {
-
     /**
      * Gets all the conditional formatting for the current sheet
-     * @returns {*}  {IConditionFormattingRule[]}
+     * @returns {IConditionFormattingRule[]} conditional formatting rules for the current sheet
      * @memberof IFWorksheetConditionalFormattingMixin
      * @example
      * ```ts
-     * univerAPI.getActiveWorkbook()?.getActiveSheet().getConditionalFormattingRules();
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const rules = fWorksheet.getConditionalFormattingRules();
+     * console.log(rules);
      * ```
      */
     getConditionalFormattingRules(): IConditionFormattingRule[];
 
     /**
-     * @deprecated use newConditionalFormattingRule instead.
+     * @deprecated use `newConditionalFormattingRule` instead.
      * Creates a constructor for conditional formatting
-     * @returns {ConditionalFormatRuleBuilder}
+     * @returns {FConditionalFormattingBuilder} The conditional formatting builder
      * @memberof IFWorksheetConditionalFormattingMixin
      * @example
      * ```ts
-     *  const workbook = univerAPI.getActiveWorkbook();
-     *  const worksheet = workbook?.getActiveSheet();
-     *  const rule = worksheet?.createConditionalFormattingRule()
-     *      .whenCellNotEmpty()
-     *      .setRanges([{ startRow: 0, endRow: 100, startColumn: 0, endColumn: 100 }])
-     *      .setItalic(true)
-     *      .setItalic(true)
-     *      .setBackground('red')
-     *      .setFontColor('green')
-     *      .build();
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:T100');
+     * const rule = fWorksheet.createConditionalFormattingRule()
+     *   .whenCellNotEmpty()
+     *   .setRanges([fRange.getRange()])
+     *   .setItalic(true)
+     *   .setBackground('red')
+     *   .setFontColor('green')
+     *   .build();
+     * fWorksheet.addConditionalFormattingRule(rule);
      * ```
      */
     createConditionalFormattingRule(): FConditionalFormattingBuilder;
 
     /**
      * Creates a constructor for conditional formatting
-     * @returns {ConditionalFormatRuleBuilder}@example
+     * @returns {FConditionalFormattingBuilder} The conditional formatting builder
      * @memberof IFWorksheetConditionalFormattingMixin
      * @example
      * ```ts
-     *  const workbook = univerAPI.getActiveWorkbook();
-     *  const worksheet = workbook?.getActiveSheet();
-     *  const rule = worksheet?.createConditionalFormattingRule()
-     *      .whenCellNotEmpty()
-     *      .setRanges([{ startRow: 0, endRow: 100, startColumn: 0, endColumn: 100 }])
-     *      .setItalic(true)
-     *      .setItalic(true)
-     *      .setBackground('red')
-     *      .setFontColor('green')
-     *      .build();
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:T100');
+     * const rule = fWorksheet.newConditionalFormattingRule()
+     *   .whenCellNotEmpty()
+     *   .setRanges([fRange.getRange()])
+     *   .setItalic(true)
+     *   .setBackground('red')
+     *   .setFontColor('green')
+     *   .build();
+     * fWorksheet.addConditionalFormattingRule(rule);
      * ```
      */
     newConditionalFormattingRule(): FConditionalFormattingBuilder;
 
     /**
      * Add a new conditional format
-     * @param {IConditionFormattingRule} rule
+     * @param {IConditionFormattingRule} rule - The conditional formatting rule to add
      * @returns {FWorksheet} Returns the current worksheet instance for method chaining
      * @memberof IFWorksheetConditionalFormattingMixin
      * @example
      * ```ts
-     *  const workbook = univerAPI.getActiveWorkbook();
-     *  const worksheet = workbook?.getActiveSheet();
-     *  const rule = worksheet?.createConditionalFormattingRule()
-     *       .whenCellNotEmpty()
-     *       .setRanges([{ startRow: 0, endRow: 100, startColumn: 0, endColumn: 100 }])
-     *       .setItalic(true)
-     *       .setItalic(true)
-     *       .setBackground('red')
-     *       .setFontColor('green')
-     *       .build();
-     *  worksheet?.addConditionalFormattingRule(rule!);
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:T100');
+     * const rule = fWorksheet.newConditionalFormattingRule()
+     *   .whenCellNotEmpty()
+     *   .setRanges([fRange.getRange()])
+     *   .setItalic(true)
+     *   .setBackground('red')
+     *   .setFontColor('green')
+     *   .build();
+     * fWorksheet.addConditionalFormattingRule(rule);
      * ```
      */
     addConditionalFormattingRule(rule: IConditionFormattingRule): FWorksheet;
 
     /**
      * Delete conditional format according to `cfId`
-     * @param {string} cfId
+     * @param {string} cfId - The conditional formatting rule id to delete
      * @returns {FWorksheet} Returns the current worksheet instance for method chaining
      * @memberof IFWorksheetConditionalFormattingMixin
      * @example
      * ```ts
-     *  const workbook = univerAPI.getActiveWorkbook();
-     *  const worksheet = workbook?.getActiveSheet();
-     *  const rules = worksheet?.getConditionalFormattingRules();
-     *  worksheet?.deleteConditionalFormattingRule(rules![0].cfId);
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const rules = fWorksheet.getConditionalFormattingRules();
+     * fWorksheet.deleteConditionalFormattingRule(rules[0]?.cfId);
      * ```
      */
     deleteConditionalFormattingRule(cfId: string): FWorksheet;
 
     /**
      * Modify the priority of the conditional format
-     * @param {string} cfId Rules that need to be moved
+     * @param {string} cfId - The conditional formatting rule id to move
      * @param {string} toCfId Target rule
      * @param {IAnchor['type']} [type] After the default move to the destination rule, if type = before moves to the front, the default value is after
      * @returns {FWorksheet} Returns the current worksheet instance for method chaining
      * @memberof FWorksheetConditionalFormattingMixin
      * @example
      * ```ts
-     * const workbook = univerAPI.getActiveWorkbook();
-     * const worksheet = workbook?.getActiveSheet();
-     * const rules = worksheet?.getConditionalFormattingRules()!;
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const rules = fWorksheet.getConditionalFormattingRules();
      * const rule = rules[2];
      * const targetRule = rules[0];
-     * worksheet?.moveConditionalFormattingRule(rule.cfId, targetRule.cfId, 'before');
+     * fWorksheet.moveConditionalFormattingRule(rule?.cfId, targetRule?.cfId, 'before');
      * ```
      */
     moveConditionalFormattingRule(cfId: string, toCfId: string, type?: IAnchor['type']): FWorksheet;
 
     /**
      * Set the conditional format according to `cfId`
-     * @param {string} cfId
-     * @param {IConditionFormattingRule} rule
+     * @param {string} cfId - The conditional formatting rule id to set
+     * @param {IConditionFormattingRule} rule - The conditional formatting rule to set
      * @returns {FWorksheet} Returns the current worksheet instance for method chaining
      * @memberof IFWorksheetConditionalFormattingMixin
      * @example
      * ```ts
-     *   const workbook = univerAPI.getActiveWorkbook();
-     *   const worksheet = workbook?.getActiveSheet();
-     *   const rules = worksheet?.getConditionalFormattingRules()!;
-     *   const rule = rules[0];
-     *   worksheet?.setConditionalFormattingRule(rule.cfId, { ...rule, ranges: [] });
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:T100');
+     * const rule = fWorksheet.newConditionalFormattingRule()
+     *   .whenCellNotEmpty()
+     *   .setRanges([fRange.getRange()])
+     *   .setItalic(true)
+     *   .setBackground('red')
+     *   .setFontColor('green')
+     *   .build();
+     * fWorksheet.addConditionalFormattingRule(rule);
+     *
+     * const rules = fWorksheet.getConditionalFormattingRules();
+     * const newRuleRange = fWorksheet.getRange('A1:D10');
+     * fWorksheet.setConditionalFormattingRule(rules[0]?.cfId, { ...rules[0], ranges: [newRuleRange.getRange()] });
      * ```
      */
     setConditionalFormattingRule(cfId: string, rule: IConditionFormattingRule): FWorksheet;

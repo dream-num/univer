@@ -15,16 +15,15 @@
  */
 
 import type { ICommandInfo, IExecutionOptions, Nullable } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, LocaleService, ThemeService, toDisposable } from '@univerjs/core';
-import { Checkbox, convertHexToRgb, convertHexToRgbObject, DropdownLegacy } from '@univerjs/design';
-import { convertTransformToOffsetX, convertTransformToOffsetY, IRenderManagerService } from '@univerjs/engine-render';
-import { MoreDownSingle, MoreUpSingle } from '@univerjs/icons';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
-import { SheetsSelectionsService } from '@univerjs/sheets';
 import type { APPLY_TYPE } from '../../services/auto-fill/type';
 import type { IStatisticItem } from '../status-bar/CopyableStatisticItem';
+import { ICommandService, IUniverInstanceService, LocaleService, ThemeService, toDisposable } from '@univerjs/core';
+import { Checkbox, clsx, convertHexToRgbObject, DropdownOverlay, DropdownProvider, DropdownTrigger } from '@univerjs/design';
+import { convertTransformToOffsetX, convertTransformToOffsetY, IRenderManagerService } from '@univerjs/engine-render';
+import { MoreDownSingle, MoreUpSingle } from '@univerjs/icons';
 
-import { clsx } from '@univerjs/design';
+import { SheetsSelectionsService } from '@univerjs/sheets';
 import { useDependency } from '@univerjs/ui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { SetScrollOperation } from '../../commands/operations/scroll.operation';
@@ -51,7 +50,6 @@ const useUpdate = () => {
     const [, setState] = useState({});
     return useCallback(() => setState((prevState) => !prevState), []);
 };
-
 
 const STORAGE_KEY = 'FLOAT_STATISTIC_SELECTED_KEYS';
 
@@ -129,8 +127,6 @@ export const SelectionStatistic: React.FC<{}> = () => {
     }, [statusBarService]);
     //#endregion
 
-
-
     //#region selection pos
     // position
     const [verticalDirect, setVerticalDirect] = useState<'up' | 'down'>('down');
@@ -167,7 +163,6 @@ export const SelectionStatistic: React.FC<{}> = () => {
             selectionService.selectionMoveStart$.subscribe((_selections: Nullable<ISelectionWithStyle[]>) => {
                 setAnchor({ row: -1, col: -1 });
                 setStatistics([]);
-                return;
             })
         );
         return disposable.dispose;
@@ -201,7 +196,6 @@ export const SelectionStatistic: React.FC<{}> = () => {
     }, [selectionService]);
     //#endregion
 
-
     useEffect(() => {
         function handleClose() {
             setExpand(false);
@@ -214,14 +208,12 @@ export const SelectionStatistic: React.FC<{}> = () => {
         };
     }, [isExpanded]);
 
-
-
     //#region select key to show
     // Load initial state from localStorage
     const [selectedKeys, setSelectedKeys] = useState([] as string[]);
 
     useEffect(() => {
-        const savedKeys = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+        const savedKeys = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[\"MAX\"]');
         setSelectedKeys(savedKeys);
     }, []);
 
@@ -236,16 +228,9 @@ export const SelectionStatistic: React.FC<{}> = () => {
         );
     };
 
-    // useEffect(() => {
-    //     setTextBySelectedKeys(selectedKeys);
-    //   }, [selectedKeys]);
-    //#endregion
-
     const onExpandChange = (visible: boolean) => {
         setExpand(visible);
     };
-
-
 
     if (anchor.col < 0 || anchor.row < 0) {
         return null;
@@ -272,36 +257,44 @@ export const SelectionStatistic: React.FC<{}> = () => {
 
     if (relativeX == null || relativeY == null) return null;
 
-    const setTextBySelectedKeys = (selectedKeys: string[], statistics:  IStatisticItem[]) => {
+    const setTextBySelectedKeys = (selectedKeys: string[], statistics: IStatisticItem[]) => {
         const filtered = statistics
-          .filter((stat) => selectedKeys.includes((stat.name as string)))
-          .map((stat) => `${(stat.name as string).toLowerCase()}: ${stat.value}`)
-          .join(", ");
+            .filter((stat) => selectedKeys.includes((stat.name as string)))
+            .map((stat) => `${(stat.name as string).toLowerCase()}: ${stat.value}`)
+            .join(', ');
         //   setShowText(filtered);
         return filtered;
-    }
+    };
     const shownText = setTextBySelectedKeys(selectedKeys, statistics);
-
     const primaryColorRGB = convertHexToRgbObject(themeService.getCurrentTheme().primaryColor);
 
-    const primaryColor = `rgba(${primaryColorRGB.r}, ${primaryColorRGB.g}, ${primaryColorRGB.b})`
+    // const primaryColor = `rgba(${primaryColorRGB.r}, ${primaryColorRGB.g}, ${primaryColorRGB.b})`;
     const primaryColorAlpha008 =
-    `rgba(${primaryColorRGB.r}, ${primaryColorRGB.g}, ${primaryColorRGB.b}, 0.08)`;
-
+    `rgba(${primaryColorRGB.r}, ${primaryColorRGB.g}, ${primaryColorRGB.b}, 0.9)`;
 
     const menu = (
-        <ul className={clsx(styles.selectionStatisticPopupMenu,
-            'univer-bg-white',
-            'univer-border-gray-200',
-            'univer-border-solid',
-            'univer-border'
-            )}>
+        <ul
+            className={clsx(styles.selectionStatisticPopupMenu,
+                'univer-bg-white',
+                'univer-border-gray-200',
+                'univer-border-solid',
+                'univer-border'
+            )}
+            onClick={(e) => {
+                e.stopPropagation();
+            }}
+        >
             {statistics.map((item) => (
                 <li
                     key={item.name}
-                    className="univer-flex univer-items-center univer-px-3 univer-py-2 hover:univer-bg-gray-100 univer-text-[12px]"
+                    className={`
+                      univer-flex univer-items-center univer-px-3 univer-py-2 univer-text-[12px]
+                      hover:univer-bg-gray-100
+                    `}
                 >
-                    <Checkbox checked={selectedKeys.includes(item.name as string)}
+                    <Checkbox
+                        key="checkbox-{item.name}"
+                        checked={selectedKeys.includes(item.name as string)}
                         onChange={() => handleCheckboxChange(item.name as string)}
                     />
                     <div key={item.name} className={styles.statisticItem}>
@@ -320,30 +313,36 @@ export const SelectionStatistic: React.FC<{}> = () => {
             style={{ left: `${relativeX}px`, top: `${relativeY}px`, position: 'absolute' }}
         >
 
-            <DropdownLegacy
-                placement="bottomRight"
-                trigger={['click']}
-                overlay={menu}
+            <DropdownProvider
                 visible={isExpanded}
                 onVisibleChange={onExpandChange}
             >
-                <div
-                    className={clsx(styles.selectionStatisticLabel, {
-                        'univer-bg-gray-100': isExpanded,
-                        'univer-right-0': horizontalDirect === 'right',
-                        'univer-left-0': horizontalDirect === 'left',
-                        'univer-top-1': verticalDirect === 'down',
-                        'univer-bottom-1': verticalDirect === 'up',
-                    })}
-                    style={{ color: primaryColor, backgroundColor: primaryColorAlpha008}}
+                <DropdownTrigger>
+                    <div
+                        className={clsx(styles.selectionStatisticLabel, `
+                          univer-absolute univer-flex univer-items-center univer-border univer-border-solid
+                          univer-border-indigo-200 univer-p-1 univer-text-xs univer-text-gray-50
+                        `, {
 
-                >
-                    <div className={styles.textLabel}>
-                        {shownText}
+                            'univer-right-0': horizontalDirect === 'right',
+                            'univer-left-0': horizontalDirect === 'left',
+                            'univer-top-1': verticalDirect === 'down',
+                            'univer-bottom-1': verticalDirect === 'up',
+                        })}
+                        style={{ backgroundColor: primaryColorAlpha008 }}
+                    >
+                        {shownText
+                            ? (
+                                <div className="univer-whitespace-nowrap univer-pl-1">{shownText}</div>
+                            )
+                            : null}
+                        {isExpanded ? <MoreUpSingle /> : <MoreDownSingle />}
                     </div>
-                    {isExpanded ? <MoreUpSingle /> : <MoreDownSingle />}
-                </div>
-            </DropdownLegacy>
+                </DropdownTrigger>
+                <DropdownOverlay className="univer-theme" anchor={{ x: 'right', y: 'top' }} offset={{ x: 4, y: 0 }}>
+                    { menu }
+                </DropdownOverlay>
+            </DropdownProvider>
         </div>
     );
 };

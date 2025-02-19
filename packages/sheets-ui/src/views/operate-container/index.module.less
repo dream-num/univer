@@ -128,6 +128,15 @@
     list-style: none;
     padding: 6px 0;
     margin: 0;
+    input:checked + .checkbox-target-inner {
+        background-color: #466af7; // univer theme does not contain indigo-500
+
+        &::after {
+            transform: rotate(45deg) scale(1);
+            opacity: 1;
+            border-color: rgb(var(--bg-color-secondary));
+        }
+    }
 }
 
 .selection-statistic-label {

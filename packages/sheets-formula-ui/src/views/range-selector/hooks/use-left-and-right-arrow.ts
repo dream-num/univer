@@ -83,7 +83,7 @@ export const useLeftAndRightArrow = (isNeed: boolean, shouldMoveSelection: Formu
                         direction,
                         jumpOver: JumpOver.moveGap,
                         extra: 'formula-editor',
-                        fromCurrentSelection: shouldMoveSelectionRef.current === FormulaSelectingType.NEED_ADD,
+                        fromCurrentSelection: shouldMoveSelectionRef.current === FormulaSelectingType.NEED_ADD || shouldMoveSelectionRef.current === FormulaSelectingType.EDIT_OTHER_SHEET_REFERENCE,
                     });
                 } else if (metaKey === MetaKeys.SHIFT) {
                     commandService.executeCommand(ExpandSelectionCommand.id, {
@@ -100,7 +100,7 @@ export const useLeftAndRightArrow = (isNeed: boolean, shouldMoveSelection: Formu
                     commandService.executeCommand(MoveSelectionCommand.id, {
                         direction,
                         extra: 'formula-editor',
-                        fromCurrentSelection: shouldMoveSelectionRef.current === FormulaSelectingType.NEED_ADD,
+                        fromCurrentSelection: shouldMoveSelectionRef.current === FormulaSelectingType.NEED_ADD || shouldMoveSelectionRef.current === FormulaSelectingType.EDIT_OTHER_SHEET_REFERENCE,
                     });
                 }
             } else {

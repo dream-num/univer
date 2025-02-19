@@ -233,6 +233,9 @@ interface IDataValidationEvent {
      * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeSheetDataValidationDelete, (event) => {
      *   const { worksheet, workbook, ruleId, rule } = event;
      *   console.log(event);
+     *
+     *   // Cancel the data validation rule deletion operation
+     *   event.cancel = true;
      * });
      *
      * // Remove the event listener, use `disposable.dispose()`
@@ -248,6 +251,9 @@ interface IDataValidationEvent {
      * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeSheetDataValidationDeleteAll, (event) => {
      *   const { worksheet, workbook, rules } = event;
      *   console.log(event);
+     *
+     *   // Cancel the data validation rule deletion operation
+     *   event.cancel = true;
      * });
      *
      * // Remove the event listener, use `disposable.dispose()`
@@ -263,6 +269,9 @@ interface IDataValidationEvent {
      * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeSheetDataValidationCriteriaUpdate, (event) => {
      *   const { worksheet, workbook, ruleId, rule, newCriteria } = event;
      *   console.log(event);
+     *
+     *   // Cancel the data validation rule criteria update operation
+     *   event.cancel = true;
      * });
      *
      * // Remove the event listener, use `disposable.dispose()`
@@ -278,6 +287,9 @@ interface IDataValidationEvent {
      * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeSheetDataValidationRangeUpdate, (event) => {
      *   const { worksheet, workbook, ruleId, rule, newRanges } = event;
      *   console.log(event);
+     *
+     *   // Cancel the data validation rule range update operation
+     *   event.cancel = true;
      * });
      *
      * // Remove the event listener, use `disposable.dispose()`
@@ -293,6 +305,9 @@ interface IDataValidationEvent {
      * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeSheetDataValidationOptionsUpdate, (event) => {
      *   const { worksheet, workbook, ruleId, rule, newOptions } = event;
      *   console.log(event);
+     *
+     *   // Cancel the data validation rule options update operation
+     *   event.cancel = true;
      * });
      *
      * // Remove the event listener, use `disposable.dispose()`

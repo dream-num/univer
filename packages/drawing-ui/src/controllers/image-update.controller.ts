@@ -21,6 +21,7 @@ import {
     Disposable,
     DrawingTypeEnum,
     ICommandService,
+    ImageSourceType,
     Inject,
     IUniverInstanceService,
     toDisposable,
@@ -229,9 +230,9 @@ export class ImageUpdateController extends Disposable {
 
                     imageShape.setSrcRect(srcRect);
                     imageShape.setPrstGeom(prstGeom);
-                    // if (source != null && source.length > 0 && (imageSourceType === ImageSourceType.BASE64 || imageSourceType === ImageSourceType.URL)) {
-                    //     imageShape.changeSource(source);
-                    // }
+                    if (source != null && source.length > 0 && (imageSourceType === ImageSourceType.BASE64 || imageSourceType === ImageSourceType.URL)) {
+                        imageShape.changeSource(source);
+                    }
                 });
             })
         );

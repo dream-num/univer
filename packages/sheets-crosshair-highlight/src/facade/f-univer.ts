@@ -31,10 +31,12 @@ export interface IFSheetCrosshairHighlightEventMixin {
      * @see {@link ICrosshairHighlightEnabledChangedEvent}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.CrosshairHighlightEnabledChanged, (params) => {
+     * const disposable = univerAPI.addEvent(univerAPI.Event.CrosshairHighlightEnabledChanged, (params) => {
      *   const { enabled, workbook, worksheet } = params;
      *   console.log(params);
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly CrosshairHighlightEnabledChanged: 'CrosshairHighlightEnabledChanged';
@@ -44,10 +46,12 @@ export interface IFSheetCrosshairHighlightEventMixin {
      * @see {@link ICrosshairHighlightColorChangedEvent}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.CrosshairHighlightColorChanged, (params) => {
+     * const disposable = univerAPI.addEvent(univerAPI.Event.CrosshairHighlightColorChanged, (params) => {
      *   const { color, workbook, worksheet } = params;
      *   console.log(params);
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly CrosshairHighlightColorChanged: 'CrosshairHighlightColorChanged';

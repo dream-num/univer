@@ -26,11 +26,12 @@ import { FDataValidation } from './f-data-validation';
 export interface IFWorksheetDataValidationMixin {
     /**
      * Get all data validation rules in current sheet.
-     * @returns {FDataValidation[]} all data validation rules
+     * @returns {FDataValidation[]} All data validation rules
      * ```ts
-     * const workbook = univerAPI.getActiveWorkbook();
-     * const worksheet = workbook.getWorksheet('sheet1');
-     * const dataValidations = worksheet.getDataValidations();
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const rules = fWorksheet.getDataValidations();
+     * console.log(rules);
      * ```
      */
     getDataValidations(): FDataValidation[];
@@ -44,24 +45,26 @@ export interface IFWorksheetDataValidationMixin {
      * Get data validation validator status for current sheet.
      * @returns {Promise<ObjectMatrix<Nullable<DataValidationStatus>>>} matrix of validator status
      * ```ts
-     * const workbook = univerAPI.getActiveWorkbook();
-     * const worksheet = workbook.getWorksheet('sheet1');
-     * const validatorStatus = worksheet.getValidatorStatus();
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const status = await fWorksheet.getValidatorStatusAsync();
+     * console.log(status);
      * ```
      */
     getValidatorStatusAsync(): Promise<ObjectMatrix<Nullable<DataValidationStatus>>>;
+
     /**
      * get data validation rule by rule id
      * @param ruleId - the rule id
      * @returns {Nullable<FDataValidation>} data validation rule
      * ```ts
-     * const workbook = univerAPI.getActiveWorkbook();
-     * const worksheet = workbook.getWorksheet('sheet1');
-     * const dataValidation = worksheet.getDataValidation('ruleId');
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const rules = fWorksheet.getDataValidations();
+     * console.log(fWorksheet.getDataValidation(rules[0]?.rule.uid));
      * ```
      */
     getDataValidation(ruleId: string): Nullable<FDataValidation>;
-
 }
 
 /**

@@ -133,10 +133,12 @@ export class FEventName {
      * @see {@link IDocCreatedParam}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.DocCreated, (params) => {
+     * const disposable = univerAPI.addEvent(univerAPI.Event.DocCreated, (params) => {
      *   const { unitId, type, doc, unit } = params;
      *   console.log('doc created', params);
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     get DocCreated() {
@@ -148,10 +150,12 @@ export class FEventName {
      * @see {@link IDocDisposedEvent}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.DocDisposed, (params) => {
+     * const disposable = univerAPI.addEvent(univerAPI.Event.DocDisposed, (params) => {
      *   const { unitId, unitType, snapshot } = params;
      *   console.log('doc disposed', params);
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     get DocDisposed() {
@@ -163,10 +167,12 @@ export class FEventName {
      * @see {@link ILifeCycleChangedEvent}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.LifeCycleChanged, (params) => {
+     * const disposable = univerAPI.addEvent(univerAPI.Event.LifeCycleChanged, (params) => {
      *   const { stage } = params;
      *   console.log('life cycle changed', params);
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     get LifeCycleChanged() {
@@ -178,10 +184,12 @@ export class FEventName {
      * @see {@link ICommandEvent}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.Redo, (event) => {
+     * const disposable = univerAPI.addEvent(univerAPI.Event.Redo, (event) => {
      *   const { params, id, type } = event;
      *   console.log('redo command executed', event);
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     get Redo() {
@@ -193,10 +201,12 @@ export class FEventName {
      * @see {@link ICommandEvent}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.Undo, (event) => {
+     * const disposable = univerAPI.addEvent(univerAPI.Event.Undo, (event) => {
      *   const { params, id, type } = event;
      *   console.log('undo command executed', event);
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     get Undo() {
@@ -208,10 +218,15 @@ export class FEventName {
      * @see {@link ICommandEvent}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.BeforeRedo, (event) => {
+     * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeRedo, (event) => {
      *   const { params, id, type } = event;
      *   console.log('before redo command executed', event);
+     *
+     *   // Cancel the redo operation
+     *   event.cancel = true;
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     get BeforeRedo() {
@@ -223,10 +238,15 @@ export class FEventName {
      * @see {@link ICommandEvent}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.BeforeUndo, (event) => {
+     * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeUndo, (event) => {
      *   const { params, id, type } = event;
      *   console.log('before undo command executed', event);
+     *
+     *   // Cancel the undo operation
+     *   event.cancel = true;
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     get BeforeUndo() {
@@ -238,10 +258,12 @@ export class FEventName {
      * @see {@link ICommandEvent}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.CommandExecuted, (event) => {
+     * const disposable = univerAPI.addEvent(univerAPI.Event.CommandExecuted, (event) => {
      *   const { params, id, type } = event;
      *   console.log('command executed', event);
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     get CommandExecuted() {
@@ -253,10 +275,15 @@ export class FEventName {
      * @see {@link ICommandEvent}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.BeforeCommandExecute, (event) => {
+     * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeCommandExecute, (event) => {
      *   const { params, id, type } = event;
      *   console.log('before command executed', event);
+     *
+     *   // Cancel the command execution
+     *   event.cancel = true;
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     get BeforeCommandExecute() {

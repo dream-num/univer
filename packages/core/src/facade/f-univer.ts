@@ -420,10 +420,13 @@ export class FUniver extends Disposable {
      * @returns {Disposable} The Disposable instance, for remove the listener
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.LifeCycleChanged, (params) => {
+     * // Add life cycle changed event listener
+     * const disposable = univerAPI.addEvent(univerAPI.Event.LifeCycleChanged, (params) => {
      *   const { stage } = params;
      *   console.log('life cycle changed', params);
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     addEvent<T extends keyof IEventParamConfig>(event: T, callback: (params: IEventParamConfig[T]) => void): IDisposable {

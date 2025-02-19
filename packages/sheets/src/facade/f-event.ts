@@ -33,10 +33,12 @@ export interface IFSheetEventMixin {
      * @see {@link ISheetCreatedEventParams}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.SheetCreated, (params) => {
+     * const disposable = univerAPI.addEvent(univerAPI.Event.SheetCreated, (params) => {
      *   const { workbook, worksheet } = params;
      *   console.log('sheet created', params);
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     get SheetCreated(): 'SheetCreated';
@@ -46,10 +48,15 @@ export interface IFSheetEventMixin {
      * @see {@link IBeforeSheetCreateEventParams}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.BeforeSheetCreate, (params) => {
+     * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeSheetCreate, (params) => {
      *   const { workbook, index, sheet } = params;
      *   console.log('before sheet create', params);
+     *
+     *   // Cancel the sheet creation operation
+     *   params.cancel = true;
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     get BeforeSheetCreate(): 'BeforeSheetCreate';
@@ -59,10 +66,15 @@ export interface IFSheetEventMixin {
      * @see {@link IBeforeActiveSheetChangeEvent}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.BeforeActiveSheetChange, (params) => {
+     * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeActiveSheetChange, (params) => {
      *   const { workbook, activeSheet, oldActiveSheet } = params;
      *   console.log('before active sheet change', params);
+     *
+     *   // Cancel the active sheet change operation
+     *   params.cancel = true;
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     get BeforeActiveSheetChange(): 'BeforeActiveSheetChange';
@@ -72,10 +84,12 @@ export interface IFSheetEventMixin {
      * @see {@link IActiveSheetChangedEvent}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.ActiveSheetChanged, (params) => {
+     * const disposable = univerAPI.addEvent(univerAPI.Event.ActiveSheetChanged, (params) => {
      *   const { workbook, activeSheet } = params;
      *   console.log('after active sheet changed', params);
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     get ActiveSheetChanged(): 'ActiveSheetChanged';
@@ -85,10 +99,12 @@ export interface IFSheetEventMixin {
      * @see {@link ISheetDeletedEvent}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.SheetDeleted, (params) => {
+     * const disposable = univerAPI.addEvent(univerAPI.Event.SheetDeleted, (params) => {
      *   const { workbook, sheetId } = params;
      *   console.log('sheet deleted', params);
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     get SheetDeleted(): 'SheetDeleted';
@@ -98,10 +114,15 @@ export interface IFSheetEventMixin {
      * @see {@link IBeforeSheetDeleteEvent}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.BeforeSheetDelete, (params) => {
+     * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeSheetDelete, (params) => {
      *   const { workbook, worksheet } = params;
      *   console.log('before sheet delete', params);
+     *
+     *   // Cancel the sheet deletion operation
+     *   params.cancel = true;
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     get BeforeSheetDelete(): 'BeforeSheetDelete';
@@ -111,10 +132,12 @@ export interface IFSheetEventMixin {
      * @see {@link ISheetMovedEvent}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.SheetMoved, (params) => {
+     * const disposable = univerAPI.addEvent(univerAPI.Event.SheetMoved, (params) => {
      *   const { workbook, worksheet, newIndex } = params;
      *   console.log('sheet moved', params);
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     get SheetMoved(): 'SheetMoved';
@@ -124,10 +147,15 @@ export interface IFSheetEventMixin {
      * @see {@link IBeforeSheetMoveEvent}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.BeforeSheetMove, (params) => {
+     * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeSheetMove, (params) => {
      *   const { workbook, worksheet, newIndex, oldIndex } = params;
      *   console.log('before sheet move', params);
+     *
+     *   // Cancel the sheet move operation
+     *   params.cancel = true;
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     get BeforeSheetMove(): 'BeforeSheetMove';
@@ -137,10 +165,12 @@ export interface IFSheetEventMixin {
      * @see {@link ISheetNameChangedEvent}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.SheetNameChanged, (params) => {
+     * const disposable = univerAPI.addEvent(univerAPI.Event.SheetNameChanged, (params) => {
      *   const { workbook, worksheet, newName } = params;
      *   console.log('sheet name changed', params);
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     get SheetNameChanged(): 'SheetNameChanged';
@@ -150,10 +180,15 @@ export interface IFSheetEventMixin {
      * @see {@link IBeforeSheetNameChangeEvent}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.BeforeSheetNameChange, (params) => {
+     * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeSheetNameChange, (params) => {
      *   const { workbook, worksheet, newName, oldName } = params;
      *   console.log('before sheet name change', params);
+     *
+     *   // Cancel the sheet name change operation
+     *   params.cancel = true;
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     get BeforeSheetNameChange(): 'BeforeSheetNameChange';
@@ -163,10 +198,12 @@ export interface IFSheetEventMixin {
      * @see {@link ISheetTabColorChangedEvent}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.SheetTabColorChanged, (params) => {
+     * const disposable = univerAPI.addEvent(univerAPI.Event.SheetTabColorChanged, (params) => {
      *   const { workbook, worksheet, newColor } = params;
      *   console.log('sheet tab color changed', params);
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     get SheetTabColorChanged(): 'SheetTabColorChanged';
@@ -176,10 +213,15 @@ export interface IFSheetEventMixin {
      * @see {@link IBeforeSheetTabColorChangeEvent}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.BeforeSheetTabColorChange, (params) => {
+     * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeSheetTabColorChange, (params) => {
      *   const { workbook, worksheet, newColor, oldColor } = params;
      *   console.log('before sheet tab color change', params);
+     *
+     *   // Cancel the sheet tab color change operation
+     *   params.cancel = true;
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     get BeforeSheetTabColorChange(): 'BeforeSheetTabColorChange';
@@ -189,10 +231,12 @@ export interface IFSheetEventMixin {
      * @see {@link ISheetHideChangedEvent}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.SheetHideChanged, (params) => {
+     * const disposable = univerAPI.addEvent(univerAPI.Event.SheetHideChanged, (params) => {
      *   const { workbook, worksheet, hidden } = params;
      *   console.log('sheet hide changed', params);
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     get SheetHideChanged(): 'SheetHideChanged';
@@ -202,10 +246,15 @@ export interface IFSheetEventMixin {
      * @see {@link IBeforeSheetHideChangeEvent}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.BeforeSheetHideChange, (params) => {
+     * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeSheetHideChange, (params) => {
      *   const { workbook, worksheet, hidden } = params;
      *   console.log('before sheet hide change', params);
+     *
+     *   // Cancel the sheet hide operation
+     *   params.cancel = true;
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     get BeforeSheetHideChange(): 'BeforeSheetHideChange';
@@ -215,10 +264,12 @@ export interface IFSheetEventMixin {
      * @see {@link IWorkbookCreateParam}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.WorkbookCreated, (params) => {
+     * const disposable = univerAPI.addEvent(univerAPI.Event.WorkbookCreated, (params) => {
      *   const { unitId, type, workbook, unit } = params;
      *   console.log('workbook created', params);
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     get WorkbookCreated(): 'WorkbookCreated';
@@ -228,10 +279,12 @@ export interface IFSheetEventMixin {
      * @see {@link IWorkbookDisposedEvent}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.WorkbookDisposed, (params) => {
+     * const disposable = univerAPI.addEvent(univerAPI.Event.WorkbookDisposed, (params) => {
      *   const { unitId, unitType, snapshot } = params;
      *   console.log('workbook disposed', params);
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     get WorkbookDisposed(): 'WorkbookDisposed';
@@ -241,10 +294,12 @@ export interface IFSheetEventMixin {
      * @see {@link IGridlineChangedEvent}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.GridlineChanged, (params) => {
+     * const disposable = univerAPI.addEvent(univerAPI.Event.GridlineChanged, (params) => {
      *   const { workbook, worksheet, enabled, color } = params;
      *   console.log('gridline changed', params);
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     get GridlineChanged(): 'GridlineChanged';
@@ -254,10 +309,15 @@ export interface IFSheetEventMixin {
      * @see {@link IBeforeGridlineEnableChange}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.BeforeGridlineEnableChange, (params) => {
+     * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeGridlineEnableChange, (params) => {
      *   const { workbook, worksheet, enabled } = params;
      *   console.log('before gridline enable change', params);
+     *
+     *   // Cancel the gridline enable change operation
+     *   params.cancel = true;
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     get BeforeGridlineEnableChange(): 'BeforeGridlineEnableChange';
@@ -267,10 +327,15 @@ export interface IFSheetEventMixin {
      * @see {@link IBeforeGridlineColorChanged}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.BeforeGridlineColorChange, (params) => {
+     * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeGridlineColorChange, (params) => {
      *   const { workbook, worksheet, color } = params;
      *   console.log('before gridline color change', params);
+     *
+     *   // Cancel the gridline color change operation
+     *   params.cancel = true;
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     get BeforeGridlineColorChange(): 'BeforeGridlineColorChange';
@@ -280,14 +345,15 @@ export interface IFSheetEventMixin {
      * @see {@link ISheetValueChangedEvent}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.SheetValueChanged, (params)=> {
+     * const disposable = univerAPI.addEvent(univerAPI.Event.SheetValueChanged, (params)=> {
      *   const { effectedRanges, payload } = params;
      *   console.log('sheet value changed', params);
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly SheetValueChanged: 'SheetValueChanged';
-
 }
 
 /**

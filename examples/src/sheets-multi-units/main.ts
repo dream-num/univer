@@ -103,13 +103,13 @@ univer.registerPlugin(UniverDocsUIPlugin);
 univer.registerPlugin(UniverDocsDrawingUIPlugin);
 univer.registerPlugin(UniverDocsMentionUIPlugin);
 
-univer.registerPlugin(UniverSheetsPlugin, { notExecuteFormula: true });
+univer.registerPlugin(UniverSheetsPlugin, { notExecuteFormula: false });
 univer.registerPlugin(UniverSheetsUIPlugin);
 univer.registerPlugin(UniverSheetsNumfmtPlugin);
 univer.registerPlugin(UniverSheetsZenEditorPlugin);
-univer.registerPlugin(UniverFormulaEnginePlugin, { notExecuteFormula: true });
+univer.registerPlugin(UniverFormulaEnginePlugin, { notExecuteFormula: false });
 univer.registerPlugin(UniverSheetsNumfmtUIPlugin);
-univer.registerPlugin(UniverSheetsFormulaPlugin, { notExecuteFormula: true });
+univer.registerPlugin(UniverSheetsFormulaPlugin, { notExecuteFormula: false });
 univer.registerPlugin(UniverSheetsFormulaUIPlugin);
 univer.registerPlugin(UniverSheetsDataValidationPlugin);
 univer.registerPlugin(UniverSheetsConditionalFormattingPlugin);
@@ -125,7 +125,7 @@ const injector = univer.__getInjector();
 const userManagerService = injector.get(UserManagerService);
 userManagerService.setCurrentUser(mockUser);
 
-// create univer sheet instances
+    // create univer sheet instances
 
 setTimeout(() => {
     import('./lazy').then((lazy) => {
@@ -150,14 +150,6 @@ univer.onDispose(() => {
 window.univer = univer;
 const univerAPI = window.univerAPI = FUniver.newAPI(univer);
 
-declare global {
-    // eslint-disable-next-line ts/naming-convention
-    interface Window {
-        univer?: Univer;
-        univerAPI?: ReturnType<typeof FUniver.newAPI>;
-    }
-}
-
 univerAPI.createWorkbook({
     id: 'workbook1',
     sheetOrder: ['sheet-01'],
@@ -167,10 +159,11 @@ univerAPI.createWorkbook({
             name: 'Sheet 01',
             rowCount: 10,
             columnCount: 5,
-            cellData: { 0: { 0: { f: "=SUM('[workbook2]sheet-01'!A1:B2)" } } },
+            cellData: { 0: { 0: { f: "=SUM('[workbook2]Sheet 01'!A1:B2)" } } },
         },
     },
 });
+
 univerAPI.createWorkbook(
     {
         id: 'workbook2',
@@ -188,7 +181,7 @@ univerAPI.createWorkbook(
                     },
                     1: {
                         0: { v: 3 },
-                        1: { v: 4 },
+                        1: { v: 1 },
                     },
                 },
             },
@@ -198,3 +191,11 @@ univerAPI.createWorkbook(
         makeCurrent: false,
     }
 );
+
+declare global {
+    // eslint-disable-next-line ts/naming-convention
+    interface Window {
+        univer?: Univer;
+        univerAPI?: ReturnType<typeof FUniver.newAPI>;
+    }
+}

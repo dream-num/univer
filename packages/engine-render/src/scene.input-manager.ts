@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import type { PointerEvent } from 'react';
+import type { Nullable } from '@univerjs/core';
 
+import type { PointerEvent } from 'react';
 import type { Subscription } from 'rxjs';
 import type { BaseObject } from './base-object';
 import type { IDragEvent, IEvent, IKeyboardEvent, IMouseEvent, IPointerEvent, IWheelEvent } from './basics/i-events';
 import type { ISceneInputControlOptions, Scene } from './scene';
-import { Disposable, type Nullable, toDisposable } from '@univerjs/core';
+import { Disposable, toDisposable } from '@univerjs/core';
 import { RENDER_CLASS_TYPE } from './basics/const';
 import { DeviceType, PointerInput } from './basics/i-events';
 import { Vector2 } from './basics/vector2';
@@ -90,7 +91,7 @@ export class InputManager extends Disposable {
 
     // Handle events such as triggering mouseleave and mouseenter.
     mouseLeaveEnterHandler(evt: IMouseEvent) {
-        const o = this._currentObject;
+        const o = this._currentObject || this._scene.capturedObject;
         if (o === null || o === undefined) {
             this._currentMouseEnterPicked?.triggerPointerLeave(evt);
             this._currentMouseEnterPicked = null;
@@ -142,12 +143,11 @@ export class InputManager extends Disposable {
             (evt as unknown as PointerEvent).pointerId = 0;
         }
         const currentObject = this._currentObject = this._getObjectAtPos(evt.offsetX, evt.offsetY);
-
-        const isStop = currentObject?.triggerPointerMove(evt);
+        const isStop = (currentObject || this._scene.capturedObject)?.triggerPointerMove(evt);
 
         this.mouseLeaveEnterHandler(evt);
 
-        if (this._checkDirectSceneEventTrigger(!isStop, this._currentObject)) {
+        if (this._checkDirectSceneEventTrigger(!isStop, currentObject)) {
             this._scene.onPointerMove$.emitEvent(evt);
             this._scene.getEngine()?.setCapture();
         }
@@ -372,7 +372,7 @@ export class InputManager extends Disposable {
     }
 
     /**
-     * Just call this._scene.pick, nothing special.
+     * Get the object under the pointer, if scene.event is disabled, return null.
      * @param offsetX
      * @param offsetY
      */
@@ -380,6 +380,16 @@ export class InputManager extends Disposable {
         return this._scene?.pick(Vector2.FromArray([offsetX, offsetY]));
     }
 
+    /**
+     *
+     * If currentObject is null, return true
+     * @param isTrigger
+     * @param currentObject
+     * @returns
+     */
+
+    // WHAT is this method doing ???
+    // WHAT is this method doing ???
     private _checkDirectSceneEventTrigger(isTrigger: boolean, currentObject: Nullable<Scene | BaseObject>) {
         let notObject = false;
         if (currentObject == null) {

@@ -33,6 +33,8 @@ export interface IArrayValueObject {
     column: number;
 }
 export class BaseValueObject extends ObjectClassType {
+    private _customData: any;
+
     constructor(private _rawValue: string | number | boolean) {
         super();
     }
@@ -70,6 +72,15 @@ export class BaseValueObject extends ObjectClassType {
 
     setArrayValue(value: BaseValueObject[][]) {
         /** abstract */
+    }
+
+    withCustomData(data: any) {
+        this._customData = data;
+        return this;
+    }
+
+    getCustomData() {
+        return this._customData;
     }
 
     isCube() {

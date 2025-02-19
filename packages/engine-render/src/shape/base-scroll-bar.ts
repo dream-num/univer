@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import type { Vector2 } from '../basics/vector2';
+import type { Nullable } from '@univerjs/core';
 
+import type { Vector2 } from '../basics/vector2';
 import type { UniverRenderingContext } from '../context';
 import type { Scene } from '../scene';
 import type { Rect } from './rect';
-import { Disposable, type Nullable } from '@univerjs/core';
+import { Disposable } from '@univerjs/core';
 
 export interface IScrollBarProps {
     thumbMargin?: number;
@@ -49,24 +50,18 @@ export abstract class BaseScrollBar extends Disposable {
 
     enableVertical: boolean = true;
 
-    horizontalThumbWidth: number = 0;
-
+    horizontalThumbSize: number = 0;
     horizontalMinusMiniThumb: number = 0;
-
     horizontalBarWidth: number = 0;
 
-    verticalThumbHeight: number = 0;
-
-    verticalBarHeight: number = 0;
-
-    verticalMinusMiniThumb: number = 0;
-
     horizonScrollTrack: Nullable<Rect>;
-
     horizonThumbRect: Nullable<Rect>;
 
-    verticalScrollTrack: Nullable<Rect>;
+    verticalThumbSize: number = 0;
+    verticalBarHeight: number = 0;
+    verticalMinusMiniThumb: number = 0;
 
+    verticalScrollTrack: Nullable<Rect>;
     verticalThumbRect: Nullable<Rect>;
 
     placeholderBarRect: Nullable<Rect>;
@@ -75,27 +70,27 @@ export abstract class BaseScrollBar extends Disposable {
         if (!this.horizonThumbRect?.visible) {
             return 0;
         }
-        return this.horizontalBarWidth - this.horizontalThumbWidth;
+        return this.horizontalBarWidth - this.horizontalThumbSize;
     }
 
     get limitY() {
         if (!this.verticalThumbRect?.visible) {
             return 0;
         }
-        return this.verticalBarHeight - this.verticalThumbHeight;
+        return this.verticalBarHeight - this.verticalThumbSize;
     }
 
     get ratioScrollX(): number {
         if (
             this.enableHorizontal === false ||
-            this.horizontalThumbWidth === undefined ||
+            this.horizontalThumbSize === undefined ||
             this.horizontalBarWidth === undefined
         ) {
             return 1;
         }
 
         const ratio = (
-            ((this.horizontalThumbWidth - this.horizontalMinusMiniThumb) * this.miniThumbRatioX) /
+            ((this.horizontalThumbSize - this.horizontalMinusMiniThumb) * this.miniThumbRatioX) /
             this.horizontalBarWidth
         );
 
@@ -109,13 +104,13 @@ export abstract class BaseScrollBar extends Disposable {
     get ratioScrollY(): number {
         if (
             this.enableVertical === false ||
-            this.verticalThumbHeight === undefined ||
+            this.verticalThumbSize === undefined ||
             this.verticalBarHeight === undefined
         ) {
             return 1;
         }
         const ratio = (
-            ((this.verticalThumbHeight - this.verticalMinusMiniThumb) * this.miniThumbRatioY) / this.verticalBarHeight
+            ((this.verticalThumbSize - this.verticalMinusMiniThumb) * this.miniThumbRatioY) / this.verticalBarHeight
         );
 
         if (Number.isNaN(ratio)) {
@@ -126,13 +121,13 @@ export abstract class BaseScrollBar extends Disposable {
     }
 
     get miniThumbRatioX() {
-        const limit = this.horizontalBarWidth - this.horizontalThumbWidth;
+        const limit = this.horizontalBarWidth - this.horizontalThumbSize;
 
         if (limit === 0) {
             return 0;
         }
 
-        const actual = this.horizontalBarWidth - (this.horizontalThumbWidth - this.horizontalMinusMiniThumb);
+        const actual = this.horizontalBarWidth - (this.horizontalThumbSize - this.horizontalMinusMiniThumb);
 
         if (actual === 0) {
             return 0;
@@ -142,13 +137,13 @@ export abstract class BaseScrollBar extends Disposable {
     }
 
     get miniThumbRatioY() {
-        const limit = this.verticalBarHeight - this.verticalThumbHeight;
+        const limit = this.verticalBarHeight - this.verticalThumbSize;
 
         if (limit === 0) {
             return 0;
         }
 
-        const actual = this.verticalBarHeight - (this.verticalThumbHeight - this.verticalMinusMiniThumb);
+        const actual = this.verticalBarHeight - (this.verticalThumbSize - this.verticalMinusMiniThumb);
 
         if (actual === 0) {
             return 0;

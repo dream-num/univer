@@ -115,7 +115,7 @@ export class DefinedNamesService extends Disposable implements IDefinedNamesServ
 
     focusRange(unitId: string, id: string) {
         const item = this.getValueById(unitId, id);
-        if (item == null) {
+        if (item === undefined) {
             return;
         }
 
@@ -144,7 +144,7 @@ export class DefinedNamesService extends Disposable implements IDefinedNamesServ
     registerDefinedName(unitId: string, param: IDefinedNamesServiceParam) {
         const unitMap = this._definedNameMap[unitId];
 
-        if (unitMap == null) {
+        if (unitMap === undefined) {
             this._definedNameMap[unitId] = {};
         }
         this._definedNameMap[unitId][param.id] = param;
@@ -178,11 +178,17 @@ export class DefinedNamesService extends Disposable implements IDefinedNamesServ
 
         // If not in cache, traverse the nameMap
         const nameMap = this._definedNameMap[unitId];
-        if (nameMap == null) {
+        if (nameMap === undefined) {
             return null;
         }
 
-        const result = Array.from(Object.values(nameMap)).filter((value) => value.name === name)?.[0] || null;
+        let result = null;
+        for (const item of Object.values(nameMap)) {
+            if (item.name === name) {
+                result = item;
+                break;
+            }
+        }
 
         // Cache the result if found
         if (result) {
@@ -198,7 +204,7 @@ export class DefinedNamesService extends Disposable implements IDefinedNamesServ
     }
 
     hasDefinedName(unitId: string) {
-        if (this._definedNameMap[unitId] == null) {
+        if (this._definedNameMap[unitId] === undefined) {
             return false;
         }
         const size = Array.from(Object.values(this._definedNameMap[unitId])).length || 0;
@@ -212,7 +218,7 @@ export class DefinedNamesService extends Disposable implements IDefinedNamesServ
     // Update cache
     private _updateCache(unitId: string) {
         const nameMap = this._definedNameMap[unitId];
-        if (nameMap == null) {
+        if (nameMap === undefined) {
             delete this._nameCacheMap[unitId];
             return;
         }

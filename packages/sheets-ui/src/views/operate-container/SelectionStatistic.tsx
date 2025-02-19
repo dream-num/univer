@@ -19,7 +19,7 @@ import type { ISelectionWithStyle } from '@univerjs/sheets';
 import type { APPLY_TYPE } from '../../services/auto-fill/type';
 import type { IStatisticItem } from '../status-bar/CopyableStatisticItem';
 import { ICommandService, IUniverInstanceService, LocaleService, ThemeService, toDisposable } from '@univerjs/core';
-import { Checkbox, clsx, convertHexToRgbObject, DropdownOverlay, DropdownProvider, DropdownTrigger } from '@univerjs/design';
+import { Checkbox, clsx, DropdownOverlay, DropdownProvider, DropdownTrigger } from '@univerjs/design';
 import { convertTransformToOffsetX, convertTransformToOffsetY, IRenderManagerService } from '@univerjs/engine-render';
 import { MoreDownSingle, MoreUpSingle } from '@univerjs/icons';
 
@@ -61,7 +61,7 @@ export const SelectionStatistic: React.FC<{}> = () => {
     const localeService = useDependency(LocaleService);
     const statusBarService = useDependency(IStatusBarService);
     const selectionService = useDependency(SheetsSelectionsService);
-    const themeService = useDependency(ThemeService);
+    const _themeService = useDependency(ThemeService);
 
     const [isExpanded, setExpand] = useState(false);
     const [anchor, setAnchor] = useState<IAnchorPoint>({ row: -1, col: -1 });
@@ -278,10 +278,10 @@ export const SelectionStatistic: React.FC<{}> = () => {
         return filtered;
     };
     const shownText = setTextBySelectedKeys(selectedKeys, statistics);
-    const primaryColorRGB = convertHexToRgbObject(themeService.getCurrentTheme().primaryColor);
+    // const primaryColorRGB = convertHexToRgbObject(themeService.getCurrentTheme().primaryColor);
 
-    const primaryColorAlpha008 =
-        `rgba(${primaryColorRGB.r}, ${primaryColorRGB.g}, ${primaryColorRGB.b}, 0.9)`;
+    // const primaryColorAlpha008 =
+    //     `rgba(${primaryColorRGB.r}, ${primaryColorRGB.g}, ${primaryColorRGB.b}, 0.9)`;
 
     const menu = (
         <ul
@@ -346,7 +346,8 @@ export const SelectionStatistic: React.FC<{}> = () => {
                     <div
                         className={clsx(styles.selectionStatisticLabel, `
                           univer-absolute univer-flex univer-items-center univer-border univer-border-solid
-                          univer-border-indigo-200 univer-p-1 univer-text-xs univer-text-gray-50
+                          univer-border-indigo-200 bg-[rgba(var(--univer-indigo-100),0.9)] univer-p-1 univer-text-xs
+                          univer-text-indigo-500
                         `, {
 
                             'univer-right-0': horizontalDirect === 'right',
@@ -354,14 +355,13 @@ export const SelectionStatistic: React.FC<{}> = () => {
                             'univer-top-1': verticalDirect === 'down',
                             'univer-bottom-1': verticalDirect === 'up',
                         })}
-                        style={{ backgroundColor: primaryColorAlpha008 }}
                     >
                         {shownText
                             ? (
                                 <div className="univer-whitespace-nowrap univer-pl-1">{shownText}</div>
                             )
                             : null}
-                        {isExpanded ? <MoreUpSingle /> : <MoreDownSingle />}
+                        {isExpanded ? <MoreUpSingle style={{ color: 'var(--univer-text-indigo-500)' }} /> : <MoreDownSingle style={{ color: 'var(--univer-text-indigo-500)' }} />}
                     </div>
                 </DropdownTrigger>
                 <DropdownOverlay className="univer-theme" anchor={{ x: 'right', y: 'top' }} offset={{ x: 4, y: 0 }}>

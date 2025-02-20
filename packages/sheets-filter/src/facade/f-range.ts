@@ -62,7 +62,7 @@ export interface IFRangeFilter {
      *    fFilter = fRange.createFilter();
      * }
      * console.log(fFilter);
-     * ````
+     * ```
      */
     getFilter(): FFilter | null;
 }

@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
+import type { IRange } from '@univerjs/core';
 import type { ISheetHyperLinkInfo } from '@univerjs/sheets-hyper-link';
 import type { FRange } from '@univerjs/sheets/facade';
-import { Inject, type IRange } from '@univerjs/core';
+import { Inject } from '@univerjs/core';
 import { SheetsHyperLinkParserService } from '@univerjs/sheets-hyper-link';
 import { FWorkbook } from '@univerjs/sheets/facade';
 
@@ -46,11 +47,19 @@ export interface IFWorkbookHyperlinkMixin {
 
     /**
      * Parse the hyperlink string to get the hyperlink info.
-     * @param hyperlink the hyperlink string
-     * @returns the hyperlink info
+     * @param {string} hyperlink - The hyperlink string.
+     * @returns {ISheetHyperLinkInfo} The hyperlink info.
      * @example
      * ``` ts
-     * univerAPI.getActiveWorkbook().parseSheetHyperlink('#gid=sheet_Id&range=F6')
+     * // Create a hyperlink to the range A1:D10 of the current sheet
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:D10');
+     * const hyperlink = fRange.getUrl();
+     *
+     * // Parse the hyperlink
+     * const hyperlinkInfo = fWorkbook.parseSheetHyperlink(hyperlink);
+     * console.log(hyperlinkInfo);
      * ```
      */
     parseSheetHyperlink(this: FWorkbook, hyperlink: string): ISheetHyperLinkInfo;

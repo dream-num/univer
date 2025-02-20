@@ -25,37 +25,54 @@ import { FEventName } from '@univerjs/core/facade';
 interface IFSheetLinkEvent {
     /**
      * Event triggered before adding a link
-     *
+     * @see {@link IBeforeSheetLinkAddEvent}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.BeforeSheetLinkAdd, (params) => {
-     *     const { workbook, worksheet, row, col, link } = params;
-     *     console.log('before sheet link add', params);
+     * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeSheetLinkAdd, (params) => {
+     *   const { workbook, worksheet, row, col, link } = params;
+     *   console.log('before sheet link add', params);
+     *
+     *   // Cancel the sheet link add operation
+     *   params.cancel = true;
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly BeforeSheetLinkAdd: 'BeforeSheetLinkAdd';
+
     /**
      * Event triggered before canceling a link
-     *
+     * @see {@link IBeforeSheetLinkCancelEvent}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.BeforeSheetLinkCancel, (params) => {
-     *     const { workbook, worksheet, row, column, id } = params;
-     *     console.log('before sheet link cancel', params);
+     * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeSheetLinkCancel, (params) => {
+     *   const { workbook, worksheet, row, column, id } = params;
+     *   console.log('before sheet link cancel', params);
+     *
+     *   // Cancel the sheet link cancel operation
+     *   params.cancel = true;
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly BeforeSheetLinkCancel: 'BeforeSheetLinkCancel';
+
     /**
      * Event triggered before updating a link
-     *
+     * @see {@link IBeforeSheetLinkUpdateEvent}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.BeforeSheetLinkUpdate, (params) => {
-     *     const { workbook, worksheet, row, column, id, payload } = params;
-     *     console.log('before sheet link update', params);
+     * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeSheetLinkUpdate, (params) => {
+     *   const { workbook, worksheet, row, column, id, payload } = params;
+     *   console.log('before sheet link update', params);
+     *
+     *   // Cancel the sheet link update operation
+     *   params.cancel = true;
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly BeforeSheetLinkUpdate: 'BeforeSheetLinkUpdate';

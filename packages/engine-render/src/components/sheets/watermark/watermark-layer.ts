@@ -15,11 +15,11 @@
  */
 
 import type { IUser, Nullable } from '@univerjs/core';
-import type { UniverRenderingContext } from '@univerjs/engine-render';
-import type { IWatermarkConfigWithType } from '../../common/type';
-import { Layer } from '@univerjs/engine-render';
-import { IWatermarkTypeEnum } from '../../common/type';
-import { renderWatermark } from '../../util';
+import type { UniverRenderingContext } from '../../../context';
+import type { IWatermarkConfigWithType } from './type';
+import { Layer } from '../../../layer';
+import { IWatermarkTypeEnum } from './type';
+import { renderWatermark } from './util';
 
 export class WatermarkLayer extends Layer {
     private _config: Nullable<IWatermarkConfigWithType & { user?: IUser }>;

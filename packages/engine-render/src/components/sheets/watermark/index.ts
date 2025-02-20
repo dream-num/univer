@@ -14,16 +14,9 @@
  * limitations under the License.
  */
 
-import type { IImageWatermarkConfig, ITextWatermarkConfig, IUserInfoWatermarkConfig } from '@univerjs/engine-render';
+export * from './type';
+export * from './util';
+export * from './watermark-layer';
 
-export const WATERMARK_PLUGIN_CONFIG_KEY = 'watermark.config';
-
-export const configSymbol = Symbol(WATERMARK_PLUGIN_CONFIG_KEY);
-
-export interface IUniverWatermarkConfig {
-    userWatermarkSettings?: Partial<IUserInfoWatermarkConfig>;
-    textWatermarkSettings?: Partial<ITextWatermarkConfig>;
-    imageWatermarkSettings?: Partial<IImageWatermarkConfig>;
-}
-
-export const defaultPluginConfig: IUniverWatermarkConfig = {};
+export const UNIVER_WATERMARK_STORAGE_KEY = 'UNIVER_WATERMARK_STORAGE_KEY';
+export const UNIVER_WATERMARK_LAYER_INDEX = 10;

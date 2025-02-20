@@ -16,8 +16,9 @@
 
 import { LocaleService } from '@univerjs/core';
 import { Button } from '@univerjs/design';
+import { IWatermarkTypeEnum } from '@univerjs/engine-render';
 import { IClipboardInterfaceService, ISidebarService, useDependency } from '@univerjs/ui';
-import { IWatermarkTypeEnum, WatermarkService, WatermarkTextBaseConfig } from '@univerjs/watermark';
+import { WatermarkService, WatermarkTextBaseConfig } from '@univerjs/watermark';
 import React from 'react';
 import styles from './index.module.less';
 
@@ -58,15 +59,16 @@ export const WatermarkPanelFooter: React.FC = () => {
                 >
                     {localeService.t('univer-watermark.copy')}
                 </Button>
-                <Button onClick={async () => {
-                    const watermarkConfig = await watermarkService.getWatermarkConfig();
-                    if (watermarkConfig?.type === IWatermarkTypeEnum.Text && !watermarkConfig.config.text?.content) {
-                        watermarkService.deleteWatermarkConfig();
-                    } else if (watermarkConfig?.type === IWatermarkTypeEnum.Image && !watermarkConfig.config.image?.url) {
-                        watermarkService.deleteWatermarkConfig();
-                    }
-                    sidebarService.close();
-                }}
+                <Button
+                    onClick={async () => {
+                        const watermarkConfig = await watermarkService.getWatermarkConfig();
+                        if (watermarkConfig?.type === IWatermarkTypeEnum.Text && !watermarkConfig.config.text?.content) {
+                            watermarkService.deleteWatermarkConfig();
+                        } else if (watermarkConfig?.type === IWatermarkTypeEnum.Image && !watermarkConfig.config.image?.url) {
+                            watermarkService.deleteWatermarkConfig();
+                        }
+                        sidebarService.close();
+                    }}
                 >
                     {localeService.t('univer-watermark.close')}
                 </Button>

@@ -17,14 +17,22 @@
 import './global.css';
 
 export { getEditorObject } from './basics/editor/get-editor-object';
+export { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY, RANGE_SELECTOR_COMPONENT_KEY, SHEET_VIEW_KEY } from './common/keys';
 export { useActiveWorkbook, useActiveWorksheet, useWorkbooks } from './components/hook';
 export { SHEET_UI_PLUGIN_NAME } from './consts/plugin-name';
 export { SheetsUIPart } from './consts/ui-name';
 export { AutoFillController } from './controllers/auto-fill.controller';
+export { AFFECT_LAYOUT_STYLES, AutoHeightController } from './controllers/auto-height.controller';
+export { AutoWidthController } from './controllers/auto-width.controller';
 export { CellCustomRenderController } from './controllers/cell-custom-render.controller';
+export { type IUniverSheetsUIConfig } from './controllers/config.schema';
+export { DragRenderController } from './controllers/drag-render.controller';
 export { EditingRenderController } from './controllers/editor/editing.render-controller';
+export { FormulaEditorController } from './controllers/editor/formula-editor.controller';
+export { HoverRenderController } from './controllers/hover-render.controller';
 export { PASTE_SPECIAL_MENU_ID, SheetMenuPosition } from './controllers/menu/menu';
 export { deriveStateFromActiveSheet$, getCurrentExclusiveRangeInterest$, getCurrentRangeDisable$, getObservableWithExclusiveRange$ } from './controllers/menu/menu-util';
+export { SheetPermissionCheckUIController } from './controllers/permission/sheet-permission-check-ui.controller';
 export { HeaderFreezeRenderController } from './controllers/render-controllers/freeze.render-controller';
 export { HeaderMoveRenderController } from './controllers/render-controllers/header-move.render-controller';
 export { HeaderResizeRenderController } from './controllers/render-controllers/header-resize.render-controller';
@@ -32,7 +40,10 @@ export { SheetsScrollRenderController } from './controllers/render-controllers/s
 export { SheetRenderController } from './controllers/render-controllers/sheet.render-controller';
 export { SheetUIController } from './controllers/sheet-ui.controller';
 export { whenFormulaEditorActivated, whenSheetEditorFocused } from './controllers/shortcuts/utils';
+export { StatusBarController } from './controllers/status-bar.controller';
 export { getCoordByCell, getCoordByOffset, getSheetObject, getTransformCoord } from './controllers/utils/component-tools';
+export { discreteRangeToRange, rangeToDiscreteRange, virtualizeDiscreteRanges } from './controllers/utils/range-tools';
+export type { IDiscreteRange } from './controllers/utils/range-tools';
 export { matchedSelectionByRowColIndex as checkInHeaderRanges } from './controllers/utils/selections-tools';
 export { useHighlightRange } from './hooks/use-highlight-range';
 export { UniverSheetsMobileUIPlugin } from './mobile-plugin';
@@ -55,16 +66,6 @@ export { IFormulaEditorManagerService } from './services/editor/formula-editor-m
 export { HoverManagerService } from './services/hover-manager.service';
 export type { ICellPosWithEvent, IHoverCellPosition, IHoverRichTextInfo, IHoverRichTextPosition } from './services/hover-manager.service';
 export { IMarkSelectionService, MarkSelectionService } from './services/mark-selection/mark-selection.service';
-export { HoverRenderController } from './controllers/hover-render.controller';
-export { DragRenderController } from './controllers/drag-render.controller';
-export { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY, RANGE_SELECTOR_COMPONENT_KEY, SHEET_VIEW_KEY } from './common/keys';
-export type { IDiscreteRange } from './controllers/utils/range-tools';
-export { discreteRangeToRange, rangeToDiscreteRange, virtualizeDiscreteRanges } from './controllers/utils/range-tools';
-export { AFFECT_LAYOUT_STYLES, AutoHeightController } from './controllers/auto-height.controller';
-export { AutoWidthController } from './controllers/auto-width.controller';
-export { FormulaEditorController } from './controllers/editor/formula-editor.controller';
-export { StatusBarController } from './controllers/status-bar.controller';
-export { SheetPermissionCheckUIController } from './controllers/permission/sheet-permission-check-ui.controller';
 export { SheetPermissionUserManagerService } from './services/permission/sheet-permission-user-list.service';
 export { SheetPrintInterceptorService } from './services/print-interceptor.service';
 export { SheetScrollManagerService } from './services/scroll-manager.service';
@@ -82,7 +83,7 @@ export { MobileSheetBar } from './views/mobile/sheet-bar/MobileSheetBar';
 export type { IRangeProtectionRenderCellData } from './views/permission/extensions/range-protection.render';
 export { SheetBar } from './views/sheet-bar/SheetBar';
 export { RenderSheetContent, RenderSheetFooter, RenderSheetHeader } from './views/sheet-container/SheetContainer';
-export { type IUniverSheetsUIConfig } from './controllers/config.schema';
+export { type IStatisticItem } from './views/status-bar/CopyableStatisticItem';
 
 export { getCellRealRange } from './common/utils';
 export { FONT_FAMILY_COMPONENT, FONT_FAMILY_ITEM_COMPONENT } from './components/font-family/interface';
@@ -94,11 +95,10 @@ export { SheetCellEditorResizeService } from './services/editor/cell-editor-resi
 export { FormatPainterStatus, IFormatPainterService } from './services/format-painter/format-painter.service';
 export type { IFormatPainterBeforeApplyHookParams, IFormatPainterHook } from './services/format-painter/format-painter.service';
 export { SELECTION_SHAPE_DEPTH } from './services/selection/const';
-export { type IBaseSheetBarProps } from './views/sheet-bar/sheet-bar-tabs/SheetBarItem';
 export { FormulaBar } from './views/formula-bar/FormulaBar';
+export { type IBaseSheetBarProps } from './views/sheet-bar/sheet-bar-tabs/SheetBarItem';
 
 // #region - all commands
-export { SetWorksheetColAutoWidthCommand } from './commands/commands/set-worksheet-auto-col-width.command';
 export { AutoClearContentCommand, AutoFillCommand } from './commands/commands/auto-fill.command';
 export {
     type ISheetPasteByShortKeyParams,
@@ -107,12 +107,12 @@ export {
     SheetCutCommand,
     SheetPasteBesidesBorderCommand,
     SheetPasteColWidthCommand,
-    SheetPasteCommand,
-    SheetPasteFormatCommand,
-    SheetPasteShortKeyCommand, SheetPasteValueCommand,
+    SheetPasteCommand, SheetPasteFormatCommand, SheetPasteShortKeyCommand,
+    SheetPasteValueCommand,
 } from './commands/commands/clipboard.command';
 export { DeleteRangeMoveLeftConfirmCommand } from './commands/commands/delete-range-move-left-confirm.command';
 export { DeleteRangeMoveUpConfirmCommand } from './commands/commands/delete-range-move-up-confirm.command';
+export { SetColumnHeaderHeightCommand, SetRowHeaderWidthCommand } from './commands/commands/headersize-changed.command';
 export { HideColConfirmCommand, HideRowConfirmCommand } from './commands/commands/hide-row-col-confirm.command';
 export {
     ResetRangeTextColorCommand,
@@ -143,21 +143,20 @@ export { RemoveSheetConfirmCommand } from './commands/commands/remove-sheet-conf
 export { ApplyFormatPainterCommand, SetInfiniteFormatPainterCommand, SetOnceFormatPainterCommand } from './commands/commands/set-format-painter.command';
 export { SetColumnFrozenCommand, SetRowFrozenCommand, SetSelectionFrozenCommand } from './commands/commands/set-frozen.command';
 export {
-    type IScrollCommandParams,
-    type IScrollToCellCommandParams,
+    type IScrollCommandParams, type IScrollToCellCommandParams,
     type ISetScrollRelativeCommandParams,
     ResetScrollCommand, ScrollCommand,
     ScrollToCellCommand,
     SetScrollRelativeCommand,
 } from './commands/commands/set-scroll.command';
 export { ExpandSelectionCommand, JumpOver, MoveSelectionCommand, MoveSelectionEnterAndTabCommand, SelectAllCommand } from './commands/commands/set-selection.command';
+export { SetWorksheetColAutoWidthCommand } from './commands/commands/set-worksheet-auto-col-width.command';
 export { ChangeZoomRatioCommand, type ISetZoomRatioCommandParams, SetZoomRatioCommand } from './commands/commands/set-zoom-ratio.command';
 export { ShowMenuListCommand } from './commands/commands/unhide.command';
 export {
     ChangeSheetProtectionFromSheetBarCommand,
     DeleteWorksheetProtectionFormSheetBarCommand,
 } from './commands/commands/worksheet-protection.command';
-export { SetColumnHeaderHeightCommand, SetRowHeaderWidthCommand } from './commands/commands/headersize-changed.command';
 
 export { SetActivateCellEditOperation } from './commands/operations/activate-cell-edit.operation';
 export { SetCellEditVisibleArrowOperation, SetCellEditVisibleOperation, SetCellEditVisibleWithF2Operation } from './commands/operations/cell-edit.operation';
@@ -170,6 +169,6 @@ export { SheetPermissionOpenDialogOperation } from './commands/operations/sheet-
 export { SheetPermissionOpenPanelOperation } from './commands/operations/sheet-permission-open-panel.operation';
 export { SidebarDefinedNameOperation } from './commands/operations/sidebar-defined-name.operation';
 export { UNIVER_SHEET_PERMISSION_BACKGROUND, UNIVER_SHEET_PERMISSION_USER_PART } from './consts/permission';
-export { convertPositionCellToSheetOverGrid, convertPositionSheetOverGridToAbsolute } from './services/utils/drawing-position-util';
 export type { IScrollState, IViewportScrollState } from './services/scroll-manager.service';
+export { convertPositionCellToSheetOverGrid, convertPositionSheetOverGridToAbsolute } from './services/utils/drawing-position-util';
 // #endregion

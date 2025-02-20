@@ -447,6 +447,12 @@ export class HtmlToUSMService {
                 }
             } else if (node.nodeType === Node.COMMENT_NODE || node.nodeName === 'STYLE') {
                 continue;
+            } else if (node.nodeName.toLowerCase() === 'br') {
+                if (!doc.paragraphs) {
+                    doc.paragraphs = [];
+                }
+                doc.paragraphs.push({ startIndex: doc.dataStream.length });
+                doc.dataStream += '\r';
             } else if (node.nodeType === Node.ELEMENT_NODE) {
                 const currentNodeStyle = this._getStyle(node as HTMLElement, styleStr);
                 const parentStyles = parent ? styleCache.get(parent) : {};

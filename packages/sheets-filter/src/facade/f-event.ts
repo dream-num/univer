@@ -29,53 +29,74 @@ import { FSheetEventName } from '@univerjs/sheets/facade';
 export interface IFSheetFilterEventMixin {
     /**
      * This event will be emitted when the filter criteria on a column is changed.
-     * Type of the event is {@link ISheetRangeFilteredParams}.
+     * @see {@link ISheetRangeFilteredParams}
      * @example
      * ```typescript
      * const callbackDisposable = univerAPI.addEvent(univerAPI.Event.SheetRangeFiltered, (params) => {
+     *   console.log(params);
      *   const { workbook, worksheet, col, criteria } = params;
      *
      *   // your custom logic
      * });
+     *
+     * // Remove the event listener, use `callbackDisposable.dispose()`
      * ```
      */
     readonly SheetRangeFiltered: 'SheetRangeFiltered';
+
     /**
      * This event will be emitted before the filter criteria on a column is changed.
-     * Type of the event is {@link ISheetRangeFilteredParams}.
+     * @see {@link ISheetRangeFilteredParams}
      * @example
      * ```typescript
      * const callbackDisposable = univerAPI.addEvent(univerAPI.Event.SheetBeforeRangeFilter, (params) => {
+     *   console.log(params);
      *   const { workbook, worksheet, col, criteria } = params;
      *
      *   // your custom logic
+     *
+     *   // Cancel the filter criteria change operation
+     *   params.cancel = true;
      * });
+     *
+     * // Remove the event listener, use `callbackDisposable.dispose()`
      * ```
      */
     readonly SheetBeforeRangeFilter: 'SheetBeforeRangeFilter';
+
     /**
      * This event will be emitted when the filter on a worksheet is cleared.
-     * Type of the event is {@link ISheetRangeFilterClearedEventParams}.
+     * @see {@link ISheetRangeFilterClearedEventParams}
      * @example
      * ```typescript
      * const callbackDisposable = univerAPI.addEvent(univerAPI.Event.SheetRangeFilterCleared, (params) => {
+     *   console.log(params);
      *   const { workbook, worksheet } = params;
      *
      *   // your custom logic
      * });
+     *
+     * // Remove the event listener, use `callbackDisposable.dispose()`
      * ```
      */
     readonly SheetRangeFilterCleared: 'SheetRangeFilterCleared';
+
     /**
      * This event will be emitted after the filter on a worksheet is cleared.
-     * Type of the event is {@link ISheetRangeFilterClearedEventParams}.
+     * @see {@link ISheetRangeFilterClearedEventParams}
      * @example
      * ```typescript
      * const callbackDisposable = univerAPI.addEvent(univerAPI.Event.SheetBeforeRangeFilterClear, (params) => {
+     *   console.log(params);
      *   const { workbook, worksheet } = params;
      *
      *   // your custom logic
+     *
+     *   // Cancel the filter clear operation
+     *   params.cancel = true;
      * });
+     *
+     * // Remove the event listener, use `callbackDisposable.dispose()`
      * ```
      */
     readonly SheetBeforeRangeFilterClear: 'SheetBeforeRangeFilterClear';
@@ -206,9 +227,6 @@ class FUniverSheetsFilterEventMixin extends FUniver {
         };
 
         this.fireEvent(this.Event.SheetRangeFiltered, eventParams);
-        if (eventParams.cancel) {
-            throw new Error('SetSheetsFilterCriteriaCommand canceled.');
-        }
     }
 
     private _beforeRangeFilterClear(): void {
@@ -236,9 +254,6 @@ class FUniverSheetsFilterEventMixin extends FUniver {
         };
 
         this.fireEvent(this.Event.SheetRangeFilterCleared, eventParams);
-        if (eventParams.cancel) {
-            throw new Error('SetSheetsFilterCriteriaCommand canceled.');
-        }
     }
 }
 

@@ -137,7 +137,7 @@ export class DefinedNamesService extends Disposable implements IDefinedNamesServ
 
     registerDefinedNames(unitId: string, params: IDefinedNameMapItem) {
         this._definedNameMap[unitId] = params;
-        this._updateCache(unitId); // Update cache
+        this._updateCache(unitId);
         this._update();
     }
 
@@ -149,19 +149,19 @@ export class DefinedNamesService extends Disposable implements IDefinedNamesServ
         }
         this._definedNameMap[unitId][param.id] = param;
 
-        this._updateCache(unitId); // Update cache
+        this._updateCache(unitId);
         this._update();
     }
 
     removeDefinedName(unitId: string, id: string) {
         delete this._definedNameMap[unitId]?.[id];
-        this._updateCache(unitId); // Update cache
+        this._updateCache(unitId);
         this._update();
     }
 
     removeUnitDefinedName(unitId: string) {
         delete this._definedNameMap[unitId];
-        this._updateCache(unitId); // Update cache
+        this._updateCache(unitId);
         this._update();
     }
 
@@ -215,7 +215,6 @@ export class DefinedNamesService extends Disposable implements IDefinedNamesServ
         this._update$.next(null);
     }
 
-    // Update cache
     private _updateCache(unitId: string) {
         const nameMap = this._definedNameMap[unitId];
         if (nameMap === undefined) {

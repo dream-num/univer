@@ -67,7 +67,7 @@ export function useFormulaSelecting(opts: { editorId: string; isFocus: boolean; 
 
     const setIsSelecting = useEvent((v: FormulaSelectingType) => {
         if (refSelectionsRenderService) {
-            refSelectionsRenderService.setSkipLastEnabled(v === FormulaSelectingType.NEED_ADD);
+            refSelectionsRenderService.setSkipLastEnabled(v === FormulaSelectingType.NEED_ADD || v === FormulaSelectingType.EDIT_OTHER_SHEET_REFERENCE);
         }
         isSelectingRef.current = v;
         innerSetIsSelecting(v);

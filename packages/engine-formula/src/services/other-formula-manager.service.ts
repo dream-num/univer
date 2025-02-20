@@ -57,6 +57,7 @@ export class OtherFormulaManagerService extends Disposable implements IOtherForm
     private _otherFormulaData: IOtherFormulaData = {};
 
     override dispose(): void {
+        super.dispose();
         this._otherFormulaData = {};
     }
 

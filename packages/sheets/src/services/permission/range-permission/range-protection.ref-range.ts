@@ -149,36 +149,40 @@ export class RangeProtectionRefRangeService extends Disposable {
     private _getRefRangeMutationsByDeleteCols(params: IRemoveRowColCommandParams, unitId: string, subUnitId: string) {
         const permissionRangeLapRules = this._selectionProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).filter((rule) => {
             return rule.ranges.some((range) => {
-                return Rectangle.intersects(range, params.range);
+                return params.ranges.some((removeRange) => Rectangle.intersects(range, removeRange));
             });
         });
 
-        const removeRange = params.range;
         if (permissionRangeLapRules.length) {
             const redoMutations: IMutationInfo<ISetRangeProtectionMutationParams | IAddRangeProtectionMutationParams | IDeleteRangeProtectionMutationParams>[] = [];
             const undoMutations: IMutationInfo<ISetRangeProtectionMutationParams | IAddRangeProtectionMutationParams | IDeleteRangeProtectionMutationParams>[] = [];
+
             permissionRangeLapRules.forEach((rule) => {
                 const cloneRule = Tools.deepClone(rule);
                 const rangesByRemove = cloneRule.ranges.reduce((p, c) => {
-                    if (Rectangle.intersects(c, removeRange)) {
+                    if (params.ranges.some((removeRange) => Rectangle.intersects(c, removeRange))) {
                         const cloneRange = Tools.deepClone(c);
-                        const { startColumn, endColumn } = removeRange;
-                        if (startColumn <= cloneRange.startColumn && endColumn >= cloneRange.endColumn) {
-                            return p;
-                        } else if (startColumn >= cloneRange.startColumn && endColumn <= cloneRange.endColumn) {
-                            cloneRange.endColumn -= endColumn - startColumn + 1;
-                        } else if (startColumn < cloneRange.startColumn) {
-                            cloneRange.startColumn = startColumn;
-                            cloneRange.endColumn -= endColumn - startColumn + 1;
-                        } else if (endColumn > cloneRange.endColumn) {
-                            cloneRange.endColumn = startColumn - 1;
-                        }
+                        params.ranges.forEach((removeRange) => {
+                            const { startColumn, endColumn } = removeRange;
+                            if (startColumn <= cloneRange.startColumn && endColumn >= cloneRange.endColumn) {
+                                return p;
+                            } else if (startColumn >= cloneRange.startColumn && endColumn <= cloneRange.endColumn) {
+                                cloneRange.endColumn -= endColumn - startColumn + 1;
+                            } else if (startColumn < cloneRange.startColumn) {
+                                cloneRange.startColumn = startColumn;
+                                cloneRange.endColumn -= endColumn - startColumn + 1;
+                            } else if (endColumn > cloneRange.endColumn) {
+                                cloneRange.endColumn = startColumn - 1;
+                            }
+                        });
+
                         if (this._checkIsRightRange(cloneRange)) {
                             p.push(cloneRange);
                         }
                     }
                     return p;
                 }, [] as IRange[]);
+
                 cloneRule.ranges = rangesByRemove;
                 if (cloneRule.ranges.length) {
                     redoMutations.push({ id: SetRangeProtectionMutation.id, params: { unitId, subUnitId, rule: cloneRule, ruleId: rule.id } });
@@ -197,36 +201,40 @@ export class RangeProtectionRefRangeService extends Disposable {
     private _getRefRangeMutationsByDeleteRows(params: IRemoveRowColCommandParams, unitId: string, subUnitId: string) {
         const permissionRangeLapRules = this._selectionProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).filter((rule) => {
             return rule.ranges.some((range) => {
-                return Rectangle.intersects(range, params.range);
+                return params.ranges.some((removeRange) => Rectangle.intersects(range, removeRange));
             });
         });
 
-        const removeRange = params.range;
         if (permissionRangeLapRules.length) {
             const redoMutations: { id: string; params: ISetRangeProtectionMutationParams }[] = [];
             const undoMutations: { id: string; params: ISetRangeProtectionMutationParams }[] = [];
+
             permissionRangeLapRules.forEach((rule) => {
                 const cloneRule = Tools.deepClone(rule);
                 const rangesByRemove = cloneRule.ranges.reduce((p, c) => {
-                    if (Rectangle.intersects(c, removeRange)) {
+                    if (params.ranges.some((removeRange) => Rectangle.intersects(c, removeRange))) {
                         const cloneRange = Tools.deepClone(c);
-                        const { startRow, endRow } = removeRange;
-                        if (startRow <= cloneRange.startRow && endRow >= cloneRange.endRow) {
-                            return p;
-                        } else if (startRow >= cloneRange.startRow && endRow <= cloneRange.endRow) {
-                            cloneRange.endRow -= endRow - startRow + 1;
-                        } else if (startRow < cloneRange.startRow) {
-                            cloneRange.startRow = startRow;
-                            cloneRange.endRow -= endRow - startRow + 1;
-                        } else if (endRow > cloneRange.endRow) {
-                            cloneRange.endRow = startRow - 1;
-                        }
+                        params.ranges.forEach((removeRange) => {
+                            const { startRow, endRow } = removeRange;
+                            if (startRow <= cloneRange.startRow && endRow >= cloneRange.endRow) {
+                                return p;
+                            } else if (startRow >= cloneRange.startRow && endRow <= cloneRange.endRow) {
+                                cloneRange.endRow -= endRow - startRow + 1;
+                            } else if (startRow < cloneRange.startRow) {
+                                cloneRange.startRow = startRow;
+                                cloneRange.endRow -= endRow - startRow + 1;
+                            } else if (endRow > cloneRange.endRow) {
+                                cloneRange.endRow = startRow - 1;
+                            }
+                        });
+
                         if (this._checkIsRightRange(cloneRange)) {
                             p.push(cloneRange);
                         }
                     }
                     return p;
                 }, [] as IRange[]);
+
                 cloneRule.ranges = rangesByRemove;
                 redoMutations.push({ id: SetRangeProtectionMutation.id, params: { unitId, subUnitId, rule: cloneRule, ruleId: rule.id } });
                 undoMutations.push({ id: SetRangeProtectionMutation.id, params: { unitId, subUnitId, rule, ruleId: rule.id } });

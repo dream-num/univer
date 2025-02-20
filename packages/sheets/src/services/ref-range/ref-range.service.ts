@@ -231,28 +231,41 @@ export class RefRangeService extends Disposable {
                         }
                         case EffectRefRangId.RemoveRowCommandId: {
                             const params = command;
+                            const ranges = params.params!.ranges;
 
-                            const rowStart = params.params!.range.startRow;
-                            const range: IRange = {
-                                startRow: rowStart,
-                                endRow: worksheet.getRowCount() - 1,
-                                startColumn: 0,
-                                endColumn: worksheet.getColumnCount() - 1,
-                                rangeType: RANGE_TYPE.ROW,
-                            };
-                            return this._checkRange([range], unitId, subUnitId);
+                            // Iterate through each range in the ranges array
+                            const rangeList: IRange[] = ranges.map((range) => {
+                                const rowStart = range.startRow;
+                                return {
+                                    startRow: rowStart,
+                                    endRow: worksheet.getRowCount() - 1,
+                                    startColumn: 0,
+                                    endColumn: worksheet.getColumnCount() - 1,
+                                    rangeType: RANGE_TYPE.ROW,
+                                };
+                            });
+
+                            // Now check the range(s)
+                            return this._checkRange(rangeList, unitId, subUnitId);
                         }
                         case EffectRefRangId.RemoveColCommandId: {
                             const params = command;
-                            const colStart = params.params!.range.startColumn;
-                            const range: IRange = {
-                                startRow: 0,
-                                endRow: worksheet.getRowCount() - 1,
-                                startColumn: colStart,
-                                endColumn: worksheet.getColumnCount() - 1,
-                                rangeType: RANGE_TYPE.COLUMN,
-                            };
-                            return this._checkRange([range], unitId, subUnitId);
+                            const ranges = params.params!.ranges;
+
+                            // Iterate through each range in the ranges array
+                            const rangeList: IRange[] = ranges.map((range) => {
+                                const colStart = range.startColumn;
+                                return {
+                                    startRow: 0,
+                                    endRow: worksheet.getRowCount() - 1,
+                                    startColumn: colStart,
+                                    endColumn: worksheet.getColumnCount() - 1,
+                                    rangeType: RANGE_TYPE.COLUMN,
+                                };
+                            });
+
+                            // Now check the range(s)
+                            return this._checkRange(rangeList, unitId, subUnitId);
                         }
                         case EffectRefRangId.DeleteRangeMoveUpCommandId:
                         case EffectRefRangId.InsertRangeMoveDownCommandId: {

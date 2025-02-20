@@ -15,7 +15,7 @@
  */
 
 import type { ICellData, ICommandInfo, IMutationInfo, IObjectArrayPrimitiveType, IRange, Nullable, Workbook } from '@univerjs/core';
-import type { EffectRefRangeParams, IAddWorksheetMergeMutationParams, ICopySheetCommandParams, IInsertColCommandParams, IInsertRowCommandParams, IInsertRowMutationParams, IMoveColsCommandParams, IMoveRangeCommandParams, IMoveRowsCommandParams, IRemoveColMutationParams, IRemoveRowsMutationParams, IRemoveSheetCommandParams, ISetRangeValuesMutationParams, ISetWorksheetActiveOperationParams, ISheetCommandSharedParams } from '@univerjs/sheets';
+import type { EffectRefRangeParams, IAddWorksheetMergeMutationParams, ICopySheetCommandParams, IInsertColCommandParams, IInsertRowCommandParams, IInsertRowMutationParams, IMoveColsCommandParams, IMoveRangeCommandParams, IMoveRowsCommandParams, IRemoveRowColCommandParams, IRemoveRowsMutationParams, IRemoveSheetCommandParams, ISetRangeValuesMutationParams, ISetWorksheetActiveOperationParams, ISheetCommandSharedParams } from '@univerjs/sheets';
 import type { ISetSheetsFilterCriteriaMutationParams, ISetSheetsFilterRangeMutationParams } from '../commands/mutations/sheets-filter.mutation';
 import type { FilterColumn } from '../models/filter-model';
 
@@ -109,11 +109,11 @@ export class SheetsFilterController extends Disposable {
                     return this._handleInsertColCommand(params, _unitId, _subUnitId);
                 }
                 case RemoveColCommand.id: {
-                    const params = config.params as IRemoveColMutationParams;
+                    const params = config.params as IRemoveRowColCommandParams;
                     return this._handleRemoveColCommand(params, unitId, subUnitId);
                 }
                 case RemoveRowCommand.id: {
-                    const params = config.params as IRemoveRowsMutationParams;
+                    const params = config.params as IRemoveRowColCommandParams;
                     return this._handleRemoveRowCommand(params, unitId, subUnitId);
                 }
                 case EffectRefRangId.MoveColsCommandId: {
@@ -243,72 +243,77 @@ export class SheetsFilterController extends Disposable {
         };
     }
 
-    private _handleRemoveColCommand(config: IRemoveColMutationParams, unitId: string, subUnitId: string) {
+    private _handleRemoveColCommand(config: IRemoveRowColCommandParams, unitId: string, subUnitId: string) {
         const filterModel = this._sheetsFilterService.getFilterModel(unitId, subUnitId);
         const filterRange = filterModel?.getRange() ?? null;
         if (!filterModel || !filterRange) {
             return this._handleNull();
         }
         const { startColumn, endColumn } = filterRange;
-        const { startColumn: removeStartColumn, endColumn: removeEndColumn } = config.range;
 
-        if (removeStartColumn > endColumn) {
-            return this._handleNull();
-        }
         const redos: IMutationInfo[] = [];
         const undos: IMutationInfo[] = [];
 
-        const rangeRemoveCount =
-            removeEndColumn < startColumn
-                ? 0 :
-                Math.min(removeEndColumn, endColumn) - Math.max(removeStartColumn, startColumn) + 1;
+        for (let i = 0; i < config.ranges.length; i++) {
+            const range = config.ranges[i];
+            const { startColumn: removeStartColumn, endColumn: removeEndColumn } = range;
 
-        const removeCount = removeEndColumn - removeStartColumn + 1;
-
-        const filterColumn = filterModel.getAllFilterColumns();
-        filterColumn.forEach((column) => {
-            const [col, filter] = column;
-            if (col <= removeEndColumn && col >= removeStartColumn) {
-                redos.push({ id: SetSheetsFilterCriteriaMutation.id, params: { unitId, subUnitId, col, criteria: null } });
-                undos.push({ id: SetSheetsFilterCriteriaMutation.id, params: { unitId, subUnitId, col, criteria: { ...filter.serialize(), colId: col } } });
+            if (removeStartColumn > endColumn) {
+                continue; // Skip this range and move to the next one
             }
-        });
 
-        const shifted = filterColumn.filter((column) => {
-            const [col, _] = column;
-            return col > removeEndColumn;
-        });
+            const rangeRemoveCount =
+                removeEndColumn < startColumn
+                    ? 0 :
+                    Math.min(removeEndColumn, endColumn) - Math.max(removeStartColumn, startColumn) + 1;
 
-        let newRangeCriteria: { undos: IMutationInfo[]; redos: IMutationInfo[] } = { undos: [], redos: [] };
-        if (shifted.length > 0) {
-            const { oldRange, newRange } = this._moveCriteria(unitId, subUnitId, shifted, -removeCount);
-            newRangeCriteria = newRange;
-            redos.push(...oldRange.redos);
-            undos.unshift(...oldRange.undos);
-        }
+            const removeCount = removeEndColumn - removeStartColumn + 1;
 
-        if (rangeRemoveCount === endColumn - startColumn + 1) {
-            const removeFilterRangeMutationParams: ISheetCommandSharedParams = {
-                unitId,
-                subUnitId,
-            };
-            redos.push({ id: RemoveSheetsFilterMutation.id, params: removeFilterRangeMutationParams });
-            undos.unshift({ id: SetSheetsFilterRangeMutation.id, params: { range: filterRange, unitId, subUnitId } });
-        } else {
-            const newStartColumn = startColumn <= removeStartColumn
-                ? startColumn :
-                (rangeRemoveCount === 0 ? startColumn - removeCount : removeStartColumn);
-            const newEndColumn = startColumn <= removeStartColumn ? endColumn - rangeRemoveCount : endColumn - removeCount;
-            const setFilterRangeMutationParams: ISetSheetsFilterRangeMutationParams = {
-                unitId,
-                subUnitId,
-                range: { ...filterRange, startColumn: newStartColumn, endColumn: newEndColumn },
-            };
-            redos.push({ id: SetSheetsFilterRangeMutation.id, params: setFilterRangeMutationParams });
-            undos.unshift({ id: SetSheetsFilterRangeMutation.id, params: { range: filterRange, unitId, subUnitId } });
+            const filterColumn = filterModel.getAllFilterColumns();
+            filterColumn.forEach((column) => {
+                const [col, filter] = column;
+                if (col <= removeEndColumn && col >= removeStartColumn) {
+                    redos.push({ id: SetSheetsFilterCriteriaMutation.id, params: { unitId, subUnitId, col, criteria: null } });
+                    undos.push({ id: SetSheetsFilterCriteriaMutation.id, params: { unitId, subUnitId, col, criteria: { ...filter.serialize(), colId: col } } });
+                }
+            });
 
-            redos.push(...newRangeCriteria.redos);
-            undos.unshift(...newRangeCriteria.undos);
+            const shifted = filterColumn.filter((column) => {
+                const [col, _] = column;
+                return col > removeEndColumn;
+            });
+
+            let newRangeCriteria: { undos: IMutationInfo[]; redos: IMutationInfo[] } = { undos: [], redos: [] };
+            if (shifted.length > 0) {
+                const { oldRange, newRange } = this._moveCriteria(unitId, subUnitId, shifted, -removeCount);
+                newRangeCriteria = newRange;
+                redos.push(...oldRange.redos);
+                undos.unshift(...oldRange.undos);
+            }
+
+            if (rangeRemoveCount === endColumn - startColumn + 1) {
+                const removeFilterRangeMutationParams: ISheetCommandSharedParams = {
+                    unitId,
+                    subUnitId,
+                };
+                redos.push({ id: RemoveSheetsFilterMutation.id, params: removeFilterRangeMutationParams });
+                undos.unshift({ id: SetSheetsFilterRangeMutation.id, params: { range: filterRange, unitId, subUnitId } });
+            } else {
+                const newStartColumn = startColumn <= removeStartColumn
+                    ? startColumn :
+                    (rangeRemoveCount === 0 ? startColumn - removeCount : removeStartColumn);
+                const newEndColumn = startColumn <= removeStartColumn ? endColumn - rangeRemoveCount : endColumn - removeCount;
+                const setFilterRangeMutationParams: ISetSheetsFilterRangeMutationParams = {
+                    unitId,
+                    subUnitId,
+                    range: { ...filterRange, startColumn: newStartColumn, endColumn: newEndColumn },
+                };
+                redos.push({ id: SetSheetsFilterRangeMutation.id, params: setFilterRangeMutationParams });
+                undos.unshift({ id: SetSheetsFilterRangeMutation.id, params: { range: filterRange, unitId, subUnitId } });
+
+                redos.push(...newRangeCriteria.redos);
+                undos.unshift(...newRangeCriteria.undos);
+            }
         }
 
         return {
@@ -317,7 +322,8 @@ export class SheetsFilterController extends Disposable {
         };
     }
 
-    private _handleRemoveRowCommand(config: IRemoveRowsMutationParams, unitId: string, subUnitId: string) {
+    // eslint-disable-next-line max-lines-per-function
+    private _handleRemoveRowCommand(config: IRemoveRowColCommandParams, unitId: string, subUnitId: string) {
         const filterModel = this._sheetsFilterService.getFilterModel(unitId, subUnitId);
         if (!filterModel) {
             return this._handleNull();
@@ -325,74 +331,93 @@ export class SheetsFilterController extends Disposable {
 
         const filterRange = filterModel.getRange();
         const { startRow, endRow } = filterRange;
-        const { startRow: removeStartRow, endRow: removeEndRow } = config.range;
-        if (removeStartRow > endRow) {
-            return this._handleNull();
-        }
-        if (removeEndRow < startRow) {
-            return {
-                undos: [{ id: SetSheetsFilterRangeMutation.id, params: { range: filterRange, unitId, subUnitId } }],
-                redos: [{
-                    id: SetSheetsFilterRangeMutation.id, params: {
-                        range: {
-                            ...filterRange,
-                            startRow: startRow - (removeEndRow - removeStartRow + 1),
-                            endRow: endRow - (removeEndRow - removeStartRow + 1),
-                        },
-                        unitId, subUnitId,
-                    },
-                }],
-            };
-        }
+        let cumulativeShift = 0; // To accumulate row shifts for ranges before the filter range
         const redos: IMutationInfo[] = [];
         const undos: IMutationInfo[] = [];
-        const filterColumn = filterModel.getAllFilterColumns();
 
-        const filterHeaderIsRemoved = startRow <= removeEndRow && startRow >= removeStartRow;
+        for (let i = 0; i < config.ranges.length; i++) {
+            const range = config.ranges[i];
+            const { startRow: removeStartRow, endRow: removeEndRow } = range;
 
-        undos.push({ id: SetSheetsFilterRangeMutation.id, params: { range: filterRange, unitId, subUnitId } });
+            if (removeEndRow < startRow) {
+                // If the removal range is before the filter range, accumulate shift
+                cumulativeShift += removeEndRow - removeStartRow + 1;
+                continue; // Skip to the next range
+            }
 
-        const count = Math.min(removeEndRow, endRow) - Math.max(removeStartRow, startRow) + 1;
-        if (count === endRow - startRow + 1 || filterHeaderIsRemoved) {
-            const removeFilterRangeMutationParams: ISheetCommandSharedParams = {
-                unitId,
-                subUnitId,
-            };
-            redos.push({ id: RemoveSheetsFilterMutation.id, params: removeFilterRangeMutationParams });
+            if (removeStartRow > endRow) {
+                // If the removal range is after the filter range, no need to do anything
+                continue;
+            }
 
-            filterColumn.forEach((column) => {
-                const [offset, filter] = column;
-                const setCriteriaMutationParams: ISetSheetsFilterCriteriaMutationParams = {
+            const filterColumn = filterModel.getAllFilterColumns();
+            const filterHeaderIsRemoved = startRow <= removeEndRow && startRow >= removeStartRow;
+
+            const count = Math.min(removeEndRow, endRow) - Math.max(removeStartRow, startRow) + 1;
+
+            if (count === endRow - startRow + 1 || filterHeaderIsRemoved) {
+                // If the entire filter range is removed or the header row is affected
+                const removeFilterRangeMutationParams: ISheetCommandSharedParams = {
                     unitId,
                     subUnitId,
-                    col: offset,
-                    criteria: { ...filter.serialize(), colId: offset },
                 };
-                undos.push({ id: SetSheetsFilterCriteriaMutation.id, params: setCriteriaMutationParams });
-            });
-        } else {
-            const worksheet = this._univerInstanceService.getUniverSheetInstance(unitId)?.getSheetBySheetId(subUnitId);
-            if (!worksheet) {
-                return this._handleNull();
-            }
-            const hiddenRows = [];
-            for (let r = removeStartRow; r <= removeEndRow; r++) {
-                if (worksheet.getRowFiltered(r)) {
-                    hiddenRows.push(r);
+                redos.push({ id: RemoveSheetsFilterMutation.id, params: removeFilterRangeMutationParams });
+
+                filterColumn.forEach((column) => {
+                    const [offset, filter] = column;
+                    const setCriteriaMutationParams: ISetSheetsFilterCriteriaMutationParams = {
+                        unitId,
+                        subUnitId,
+                        col: offset,
+                        criteria: { ...filter.serialize(), colId: offset },
+                    };
+                    undos.push({ id: SetSheetsFilterCriteriaMutation.id, params: setCriteriaMutationParams });
+                });
+            } else {
+                // If part of the range is removed, adjust the filter range accordingly
+                const worksheet = this._univerInstanceService.getUniverSheetInstance(unitId)?.getSheetBySheetId(subUnitId);
+                if (!worksheet) {
+                    return this._handleNull();
                 }
+
+                const hiddenRows: number[] = [];
+                for (let r = removeStartRow; r <= removeEndRow; r++) {
+                    if (worksheet.getRowFiltered(r)) {
+                        hiddenRows.push(r);
+                    }
+                }
+
+                const afterStartRow = Math.min(startRow, removeStartRow);
+                const afterEndRow = afterStartRow + (endRow - startRow) - count + hiddenRows.length;
+
+                const setFilterRangeMutationParams: ISetSheetsFilterRangeMutationParams = {
+                    unitId,
+                    subUnitId,
+                    range: {
+                        ...filterRange,
+                        startRow: afterStartRow,
+                        endRow: afterEndRow,
+                    },
+                };
+                redos.push({ id: SetSheetsFilterRangeMutation.id, params: setFilterRangeMutationParams });
             }
-            const afterStartRow = Math.min(startRow, removeStartRow);
-            const afterEndRow = afterStartRow + (endRow - startRow) - count + hiddenRows.length;
-            const setFilterRangeMutationParams: ISetSheetsFilterRangeMutationParams = {
+        }
+
+        // Record undo for filter range before processing this range
+        undos.push({ id: SetSheetsFilterRangeMutation.id, params: { range: filterRange, unitId, subUnitId } });
+
+        // Apply the cumulative shift for rows before the filter range
+        if (cumulativeShift > 0) {
+            // The shift applies only before the filter, so adjust both startRow and endRow
+            const updatedStartRow = startRow - cumulativeShift;
+            const updatedEndRow = endRow - cumulativeShift;
+
+            const finalSetFilterRangeMutationParams: ISetSheetsFilterRangeMutationParams = {
                 unitId,
                 subUnitId,
-                range: {
-                    ...filterRange,
-                    startRow: afterStartRow,
-                    endRow: afterEndRow,
-                },
+                range: { ...filterRange, startRow: updatedStartRow, endRow: updatedEndRow },
             };
-            redos.push({ id: SetSheetsFilterRangeMutation.id, params: setFilterRangeMutationParams });
+            redos.push({ id: SetSheetsFilterRangeMutation.id, params: finalSetFilterRangeMutationParams });
         }
 
         return {

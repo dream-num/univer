@@ -235,6 +235,7 @@ export class FFormulaSheetsMixin extends FFormula implements IFFormulaSheetsMixi
         const config = configService.getConfig<Partial<IUniverSheetsFormulaBaseConfig>>(PLUGIN_CONFIG_KEY_BASE);
 
         if (!config) {
+            configService.setConfig(PLUGIN_CONFIG_KEY_BASE, { initialFormulaComputing: calculationMode });
             return;
         }
 

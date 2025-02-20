@@ -27,9 +27,13 @@ export interface IDropdownOverlayProps {
         x?: number;
         y?: number;
     };
+    anchor?: {
+        x: 'left' | 'right';
+        y: 'top' | 'bottom';
+    };
 }
 
-export function DropdownOverlay({ children, className, offset }: IDropdownOverlayProps) {
+export function DropdownOverlay({ children, className, offset, anchor: anchorPos = { x: 'left', y: 'bottom' } }: IDropdownOverlayProps) {
     if (!canUseDom) {
         return null;
     }
@@ -45,8 +49,8 @@ export function DropdownOverlay({ children, className, offset }: IDropdownOverla
             const viewportWidth = document.documentElement.clientWidth;
             const viewportHeight = document.documentElement.clientHeight;
 
-            let top = triggerRect.bottom + window.scrollY;
-            let left = triggerRect.left + window.scrollX;
+            let top = triggerRect[anchorPos.y] + window.scrollY;
+            let left = triggerRect[anchorPos.x] + window.scrollX;
 
             if (top + overlayRect.height > viewportHeight + window.scrollY) {
                 top = triggerRect.top - overlayRect.height + window.scrollY;

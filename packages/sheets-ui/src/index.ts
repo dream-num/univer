@@ -172,4 +172,10 @@ export { SidebarDefinedNameOperation } from './commands/operations/sidebar-defin
 export { UNIVER_SHEET_PERMISSION_BACKGROUND, UNIVER_SHEET_PERMISSION_USER_PART } from './consts/permission';
 export { convertPositionCellToSheetOverGrid, convertPositionSheetOverGridToAbsolute } from './services/utils/drawing-position-util';
 export type { IScrollState, IViewportScrollState } from './services/scroll-manager.service';
+
+export { IStatusBarService, StatusBarService } from './services/status-bar.service';
+
+export { type IStatisticItem } from './views/status-bar/CopyableStatisticItem';
+
+export { functionDisplayNames } from './views/status-bar/CopyableStatisticItem';
 // #endregion

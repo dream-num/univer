@@ -68,7 +68,7 @@ export class E2EController extends Disposable {
             loadDemoSheet: () => this._loadDemoSheet(),
             loadMergeCellSheet: () => this._loadMergeCellSheet(2000),
             loadDefaultStyleSheet: (loadTimeout) => this._loadDefaultStyleSheet(loadTimeout),
-            disposeCurrSheetUnit: (disposeTimeout?: number) => this._diposeDefaultSheetUnit(disposeTimeout),
+            disposeCurrSheetUnit: (disposeTimeout?: number) => this._disposeDefaultSheetUnit(disposeTimeout),
             loadDefaultDoc: (loadTimeout) => this._loadDefaultDoc(loadTimeout),
             disposeUniver: () => this._disposeUniver(),
         };
@@ -121,7 +121,7 @@ export class E2EController extends Disposable {
         await this._commandService.executeCommand(DisposeUniverCommand.id);
     }
 
-    private async _diposeDefaultSheetUnit(disposingTimeout: number = AWAIT_DISPOSING_TIMEOUT): Promise<void> {
+    private async _disposeDefaultSheetUnit(disposingTimeout: number = AWAIT_DISPOSING_TIMEOUT): Promise<void> {
         const unit = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SHEET);
         const unitId = unit?.getUnitId();
         await this._univerInstanceService.disposeUnit(unitId || '');

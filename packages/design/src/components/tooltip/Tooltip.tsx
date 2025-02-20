@@ -53,9 +53,11 @@ export interface ITooltipProps {
      * Callback when the visibility of the tooltip changes
      */
     onVisibleChange?: (visible: boolean) => void;
+
+    className?: string;
 }
 
-export function Tooltip({ visible, asChild = false, title, children, placement = 'bottom', showIfEllipsis = false, onVisibleChange }: ITooltipProps) {
+export function Tooltip({ visible, asChild = false, title, children, placement = 'bottom', showIfEllipsis = false, onVisibleChange, className }: ITooltipProps) {
     if (!canUseDom || title === undefined) {
         return null;
     }
@@ -281,7 +283,13 @@ export function Tooltip({ visible, asChild = false, title, children, placement =
             {asChild
                 ? enhancedChild
                 : (
-                    <div ref={triggerRef} className="univer-inline-block">
+                    <div
+                        ref={triggerRef}
+                        className={`
+                          ${className}
+                          univer-inline-block
+                        `}
+                    >
                         {children}
                     </div>
                 )}

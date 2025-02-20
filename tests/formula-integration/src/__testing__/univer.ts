@@ -15,7 +15,7 @@
  */
 
 import { FUniver } from '@univerjs/core/facade';
-import { createUniverOnNode } from 'examples-node';
+import { createUniverOnNode } from 'univer-examples/node/index.ts';
 
 export function createFormulaTestBed() {
     const univer = createUniverOnNode();

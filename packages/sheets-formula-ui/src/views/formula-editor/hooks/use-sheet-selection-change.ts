@@ -23,7 +23,7 @@ import type { RefObject } from 'react';
 import type { IRefSelection } from '../../range-selector/hooks/use-highlight';
 import { DisposableCollection, ICommandService, IUniverInstanceService, ThemeService } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
-import { deserializeRangeWithSheet, LexerTreeBuilder, sequenceNodeType } from '@univerjs/engine-formula';
+import { deserializeRangeWithSheet, generateStringWithSequence, LexerTreeBuilder, sequenceNodeType, serializeRange, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { IRefSelectionsService, SetSelectionsOperation } from '@univerjs/sheets';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
@@ -127,6 +127,16 @@ export const useSheetSelectionChange = (
                 sequenceNodes.unshift({ token: refRanges[0], nodeType: sequenceNodeType.REFERENCE } as any);
                 const result = sequenceNodeToText(sequenceNodes);
                 handleRangeChange(result, refRanges[0].length, isEnd);
+            }
+        } else if (isSelectingRef.current === FormulaSelectingType.EDIT_OTHER_SHEET_REFERENCE) {
+            const last = selections.pop();
+            if (!last) return;
+            const node = sequenceNodes[nodeIndex];
+            if (typeof node === 'object' && node.nodeType === sequenceNodeType.REFERENCE) {
+                const oldToken = node.token;
+                node.token = sheetName === activeSheet?.getName() ? serializeRange(last) : serializeRangeWithSheet(activeSheet!.getName(), last);
+                const newOffset = offset + (node.token.length - oldToken.length);
+                handleRangeChange(generateStringWithSequence(sequenceNodes), newOffset, isEnd);
             }
         } else {
             const orderedSelections = [...selections];

@@ -19,7 +19,7 @@ export * from './constants';
 export * from './extensions';
 export * from './interfaces';
 export * from './row-header';
-export * from './sheet.render-skeleton';
 export * from './sheet-component';
+export * from './sheet.render-skeleton';
 export * from './spreadsheet';
 export * from './watermark';

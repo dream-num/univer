@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IImageWatermarkConfig } from '@univerjs/watermark';
+import type { IImageWatermarkConfig } from '@univerjs/engine-render';
 import { LocaleService } from '@univerjs/core';
 import { Button, Checkbox, InputNumber } from '@univerjs/design';
 import { ILocalFileService, useDependency } from '@univerjs/ui';

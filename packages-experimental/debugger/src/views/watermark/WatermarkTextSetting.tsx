@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ITextWatermarkConfig } from '@univerjs/watermark';
+import type { ITextWatermarkConfig } from '@univerjs/engine-render';
 import { LocaleService } from '@univerjs/core';
 import { Checkbox, ColorPicker, DropdownLegacy, Input, InputNumber, Select } from '@univerjs/design';
 import { BoldSingle, FontColor, ItalicSingle } from '@univerjs/icons';

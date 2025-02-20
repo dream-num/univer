@@ -70,7 +70,7 @@
     "dependencies": {
         "@rc-component/color-picker": "^2.0.1",
         "@rc-component/trigger": "^2.2.6",
-        "@univerjs/icons": "^0.2.15",
+        "@univerjs/icons": "^0.2.20",
         "clsx": "^2.1.1",
         "dayjs": "^1.11.13",
         "rc-dialog": "^9.6.0",

@@ -15,7 +15,7 @@
  */
 
 import path from 'node:path';
-import { Univer } from '@univerjs/core';
+import { LocaleType, Univer } from '@univerjs/core';
 import { UniverDataValidationPlugin } from '@univerjs/data-validation';
 import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverDocsDrawingPlugin } from '@univerjs/docs-drawing';
@@ -32,6 +32,8 @@ import { UniverSheetsHyperLinkPlugin } from '@univerjs/sheets-hyper-link';
 import { UniverSheetsSortPlugin } from '@univerjs/sheets-sort';
 import { UniverThreadCommentPlugin } from '@univerjs/thread-comment';
 
+import { enUS } from '../locales';
+
 import './facade';
 
 export interface ICreateUniverOnNodeOptions {
@@ -41,7 +43,12 @@ export interface ICreateUniverOnNodeOptions {
 export function createUniverOnNode(options: ICreateUniverOnNodeOptions = {}): Univer {
     const { useComputingWorker = false } = options;
 
-    const univer = new Univer();
+    const univer = new Univer({
+        locale: LocaleType.EN_US,
+        locales: {
+            [LocaleType.EN_US]: enUS,
+        },
+    });
 
     registerBasicPlugins(univer, useComputingWorker);
     registerSharedPlugins(univer);

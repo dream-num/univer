@@ -14,12 +14,9 @@
  * limitations under the License.
  */
 
-export * from './column-header';
-export * from './constants';
-export * from './extensions';
-export * from './interfaces';
-export * from './row-header';
-export * from './sheet.render-skeleton';
-export * from './sheet-component';
-export * from './spreadsheet';
-export * from './watermark';
+export * from './type';
+export * from './util';
+export * from './watermark-layer';
+
+export const UNIVER_WATERMARK_STORAGE_KEY = 'UNIVER_WATERMARK_STORAGE_KEY';
+export const UNIVER_WATERMARK_LAYER_INDEX = 10;

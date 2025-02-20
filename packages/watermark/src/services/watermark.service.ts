@@ -15,10 +15,10 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import type { IWatermarkConfigWithType } from '../common/type';
+import type { IWatermarkConfigWithType } from '@univerjs/engine-render';
 import { Disposable, ILocalStorageService, Inject } from '@univerjs/core';
+import { UNIVER_WATERMARK_STORAGE_KEY } from '@univerjs/engine-render';
 import { Subject } from 'rxjs';
-import { UNIVER_WATERMARK_STORAGE_KEY } from '../common/const';
 
 export class WatermarkService extends Disposable {
     private readonly _updateConfig$ = new Subject<Nullable<IWatermarkConfigWithType>>();

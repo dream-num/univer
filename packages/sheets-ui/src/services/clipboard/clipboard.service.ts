@@ -56,6 +56,7 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 
 import {
     getPrimaryForRange,
+    rangeToDiscreteRange,
     SetSelectionsOperation,
     SetWorksheetActiveOperation,
 
@@ -64,7 +65,7 @@ import {
 import { FILE__BMP_CLIPBOARD_MIME_TYPE, FILE__JPEG_CLIPBOARD_MIME_TYPE, FILE__WEBP_CLIPBOARD_MIME_TYPE, FILE_PNG_CLIPBOARD_MIME_TYPE, HTML_CLIPBOARD_MIME_TYPE, IClipboardInterfaceService, imageMimeTypeSet, INotificationService, IPlatformService, PLAIN_TEXT_CLIPBOARD_MIME_TYPE } from '@univerjs/ui';
 
 import { BehaviorSubject } from 'rxjs';
-import { rangeToDiscreteRange, virtualizeDiscreteRanges } from '../../controllers/utils/range-tools';
+import { virtualizeDiscreteRanges } from '../../controllers/utils/range-tools';
 import { IMarkSelectionService } from '../mark-selection/mark-selection.service';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import { createCopyPasteSelectionStyle } from '../utils/selection-util';

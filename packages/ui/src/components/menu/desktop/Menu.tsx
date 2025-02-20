@@ -34,6 +34,7 @@ import clsx from 'clsx';
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { combineLatest, isObservable, of } from 'rxjs';
+import { IContextMenuService } from '../../../services/contextmenu/contextmenu.service';
 import { ILayoutService } from '../../../services/layout/layout.service';
 import { MenuItemType } from '../../../services/menu/menu';
 import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
@@ -204,15 +205,19 @@ interface IMenuItemProps {
 
 function MenuItem({ menuItem, onClick }: IMenuItemProps) {
     const menuManagerService = useDependency(IMenuManagerService);
-
+    const contextMenuService = useDependency(IContextMenuService);
     const disabled = useObservable<boolean>(menuItem.disabled$, false);
     const activated = useObservable<boolean>(menuItem.activated$, false);
     const hidden = useObservable(menuItem.hidden$, false);
     const value = useObservable<MenuItemDefaultValueType>(menuItem.value$);
-
+    const trigger = useObservable(contextMenuService.trigger$);
     const item = menuItem as IDisplayMenuItem<IMenuSelectorItem>;
     const selectionsFromObservable = useObservable(isObservable(item.selections) ? item.selections : undefined);
     const [inputValue, setInputValue] = useState(value);
+
+    useEffect(() => {
+        setInputValue(value);
+    }, [value, trigger]);
 
     if (hidden) {
         return null;

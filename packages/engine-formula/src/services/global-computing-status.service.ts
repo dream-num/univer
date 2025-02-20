@@ -38,6 +38,9 @@ export class GlobalComputingStatusService extends Disposable {
 
         this._computingStatus$.next(true);
         this._computingStatus$.complete();
+        this._allSubjects.forEach((subject) => {
+            subject.complete();
+        });
     }
 
     pushComputingStatusSubject(subject: BehaviorSubject<ComputingStatus>): IDisposable {

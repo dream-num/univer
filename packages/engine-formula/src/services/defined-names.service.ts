@@ -104,8 +104,12 @@ export class DefinedNamesService extends Disposable implements IDefinedNamesServ
     }
 
     override dispose(): void {
+        super.dispose();
         this._definedNameMap = {};
-        this._nameCacheMap = {}; // Clear cache
+        this._nameCacheMap = {};
+        this._update$.complete();
+        this._currentRange$.complete();
+        this._focusRange$.complete();
     }
 
     getWorksheetByRef(unitId: string, ref: string) {

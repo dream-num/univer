@@ -225,6 +225,7 @@ export class DependencyManagerService extends DependencyManagerBaseService imple
     protected _allTreeMap: Map<number, IFormulaDependencyTree> = new Map();
 
     override dispose(): void {
+        super.dispose();
         this.reset();
     }
 
@@ -325,11 +326,11 @@ export class DependencyManagerService extends DependencyManagerBaseService imple
         this._otherFormulaData.clear();
         this._featureFormulaData.clear();
         this._formulaData.clear();
+        this._definedNameMap.clear();
+        this._otherFormulaDataMainData.clear();
         this._dependencyRTreeCache.clear();
         this._allTreeMap.clear();
         this._restDependencyTreeId();
-
-        this._otherFormulaDataMainData.clear();
     }
 
     override addOtherFormulaDependency(unitId: string, sheetId: string, formulaId: string, dependencyTree: IFormulaDependencyTree) {

@@ -150,19 +150,21 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
     }
 
     override dispose(): void {
+        super.dispose();
         this._unitData = {};
         this._unitStylesData = {};
-        this._formulaData = {};
         this._arrayFormulaCellData = {};
         this._arrayFormulaRange = {};
+        this._formulaData = {};
         this._sheetNameMap = {};
+        this._clearDependencyTreeCache = {};
         this._dirtyRanges = [];
         this._dirtyNameMap = {};
         this._dirtyDefinedNameMap = {};
         this._dirtyUnitFeatureMap = {};
+        this._dirtyUnitOtherFormulaMap = {};
         this._excludedCell = {};
         this._sheetIdToNameMap = {};
-        this._dirtyUnitOtherFormulaMap = {};
     }
 
     getExecuteUnitId() {

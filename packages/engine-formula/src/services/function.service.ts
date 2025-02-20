@@ -15,10 +15,10 @@
  */
 
 import type { IDisposable, Nullable } from '@univerjs/core';
-import { createIdentifier, Disposable, toDisposable } from '@univerjs/core';
-
 import type { IFunctionInfo, IFunctionNames } from '../basics/function';
+
 import type { BaseFunction } from '../functions/base-function';
+import { createIdentifier, Disposable, toDisposable } from '@univerjs/core';
 
 export interface IFunctionService {
     /**
@@ -62,6 +62,7 @@ export class FunctionService extends Disposable implements IFunctionService {
     private _functionDescriptions: Map<IFunctionNames, IFunctionInfo> = new Map();
 
     override dispose(): void {
+        super.dispose();
         this._functionExecutors.clear();
         this._functionDescriptions.clear();
     }

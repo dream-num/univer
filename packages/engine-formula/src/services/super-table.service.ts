@@ -15,9 +15,9 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { createIdentifier, Disposable } from '@univerjs/core';
-
 import type { ISuperTable, TableOptionType } from '../basics/common';
+
+import { createIdentifier, Disposable } from '@univerjs/core';
 
 export interface ISuperTableOptionParam {
     tableOption: string;
@@ -44,8 +44,9 @@ export class SuperTableService extends Disposable implements ISuperTableService 
     private _tableOptionMap: Map<string, TableOptionType> = new Map();
 
     override dispose(): void {
-        this._tableMap.clear();
+        super.dispose();
 
+        this._tableMap.clear();
         this._tableOptionMap.clear();
     }
 

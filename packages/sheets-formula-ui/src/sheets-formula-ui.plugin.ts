@@ -62,7 +62,7 @@ export class UniverSheetsFormulaUIPlugin extends Plugin {
         if (menu) {
             this._configService.setConfig('menu', menu, { merge: true });
         }
-        this._configService.setConfig(PLUGIN_CONFIG_KEY_BASE, rest);
+        this._configService.setConfig(PLUGIN_CONFIG_KEY_BASE, rest, { merge: true });
     }
 
     override onStarting(): void {

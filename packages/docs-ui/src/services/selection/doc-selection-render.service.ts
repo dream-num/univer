@@ -279,7 +279,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
             options,
         });
 
-        if (!ranges.length) return;
+        if (!ranges.length || options?.shouldFocus === false) return;
         this._updateInputPosition(options?.forceFocus);
     }
 

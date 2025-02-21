@@ -278,14 +278,14 @@ export class Editor extends Disposable implements IEditor {
     }
 
     // Selects the specified range of characters within editor.
-    setSelectionRanges(ranges: ISuccinctDocRangeParam[]): void {
+    setSelectionRanges(ranges: ISuccinctDocRangeParam[], shouldFocus = true): void {
         const editorUnitId = this.getEditorId();
         const params = {
             unitId: editorUnitId,
             subUnitId: editorUnitId,
         };
 
-        return this._docSelectionManagerService.replaceDocRanges(ranges, params, false);
+        return this._docSelectionManagerService.replaceDocRanges(ranges, params, false, { shouldFocus });
     }
 
     // Get current doc ranges. include text range and rect range.

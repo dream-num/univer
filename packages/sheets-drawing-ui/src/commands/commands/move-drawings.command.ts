@@ -26,7 +26,7 @@ import { ClearSheetDrawingTransformerOperation } from '../operations/clear-drawi
 import { SetSheetDrawingCommand } from './set-sheet-drawing.command';
 
 export interface IMoveDrawingsCommandParams {
-    direction: Direction ;
+    direction: Direction;
 }
 
 export const MoveDrawingsCommand: ICommand = {

@@ -96,7 +96,7 @@ export interface IColorScale extends IBaseCfRule {
 export interface IIconSet extends IBaseCfRule {
     type: CFRuleType.iconSet;
     isShowValue: boolean;
-    config: { operator: CFNumberOperator;value: IValueConfig;iconType: IIconType; iconId: string }[];
+    config: { operator: CFNumberOperator; value: IValueConfig; iconType: IIconType; iconId: string }[];
 }
 
 export type IConditionalFormattingRuleConfig = IColorScale | IDataBar | IUniqueValuesHighlightCell |

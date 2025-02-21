@@ -29,7 +29,8 @@ import type { ISetWorksheetDefaultStyleMutationParams } from '../../commands/mut
 import type {
     ISetWorksheetRowAutoHeightMutationParams,
     ISetWorksheetRowHeightMutationParams,
-    ISetWorksheetRowIsAutoHeightMutationParams } from '../../commands/mutations/set-worksheet-row-height.mutation';
+    ISetWorksheetRowIsAutoHeightMutationParams,
+} from '../../commands/mutations/set-worksheet-row-height.mutation';
 import type { IToggleGridlinesMutationParams } from '../../commands/mutations/toggle-gridlines.mutation';
 import type { ISetWorksheetActiveOperationParams } from '../../commands/operations/set-worksheet-active.operation';
 import type { IAddWorksheetMergeMutationParams, IInsertColMutationParams, IInsertRowMutationParams, IRemoveColMutationParams, IRemoveRowsMutationParams, IRemoveWorksheetMergeMutationParams, IWorksheetRangeThemeStyleMutationParams } from '../interfaces';
@@ -248,7 +249,7 @@ export type CommandListenerValueChange =
     };
 
 // eslint-disable-next-line max-lines-per-function
-export function getValueChangedEffectedRange(commandInfo: ICommandInfo): { unitId: string;subUnitId: string; range: IRange }[] {
+export function getValueChangedEffectedRange(commandInfo: ICommandInfo): { unitId: string; subUnitId: string; range: IRange }[] {
     switch (commandInfo.id) {
         case SheetValueChangeType.SET_RANGE_VALUES: {
             const params = commandInfo.params as ISetRangeValuesMutationParams;

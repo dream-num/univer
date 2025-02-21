@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Nullable } from '@univerjs/core';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useEvent } from './event';
 
 type ItemHeight<T> = (index: number, data: T) => number;
@@ -40,13 +40,13 @@ const useVirtualList = <T>(list: T[], options: IVirtualListOptions<T>) => {
 
     const itemHeightRef = useLatest(itemHeight);
 
-    const [size, setSize] = useState<Nullable<{ width: number;height: number }>>(null);
+    const [size, setSize] = useState<Nullable<{ width: number; height: number }>>(null);
 
     const scrollTriggerByScrollToFunc = useRef(false);
 
     const [targetList, setTargetList] = useState<{ index: number; data: T }[]>([]);
 
-    const [wrapperStyle, setWrapperStyle] = useState<{ height: string | undefined;marginTop: string | undefined }>({ height: undefined, marginTop: undefined });
+    const [wrapperStyle, setWrapperStyle] = useState<{ height: string | undefined; marginTop: string | undefined }>({ height: undefined, marginTop: undefined });
 
     const getVisibleCount = (containerHeight: number, fromIndex: number) => {
         if (typeof itemHeightRef.current === 'number') {

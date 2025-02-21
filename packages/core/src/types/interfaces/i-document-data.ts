@@ -709,11 +709,11 @@ export interface ITextStyle extends IStyleBase {
 }
 
 export interface IIndentStart {
-    indentFirstLine?: INumberUnit ; // indentFirstLine，17.3.1.12 ind (Paragraph Indentation)
-    hanging?: INumberUnit ; // hanging，offset of first word except first line
-    indentStart?: INumberUnit ; // indentStart
+    indentFirstLine?: INumberUnit; // indentFirstLine，17.3.1.12 ind (Paragraph Indentation)
+    hanging?: INumberUnit; // hanging，offset of first word except first line
+    indentStart?: INumberUnit; // indentStart
     tabStops?: ITabStop[]; // tabStops
-    indentEnd?: INumberUnit ; // indentEnd
+    indentEnd?: INumberUnit; // indentEnd
 }
 
 /**
@@ -732,8 +732,8 @@ export interface IParagraphProperties extends IIndentStart {
     direction?: TextDirection; // direction
     spacingRule?: SpacingRule; // SpacingRule
     snapToGrid?: BooleanNumber; // snapToGrid 17.3.2.34 snapToGrid (Use Document Grid Settings For Inter-Character Spacing)
-    spaceAbove?: INumberUnit ; // spaceAbove before beforeLines (Spacing Above Paragraph)
-    spaceBelow?: INumberUnit ; // spaceBelow after afterLines (Spacing Below Paragraph)
+    spaceAbove?: INumberUnit; // spaceAbove before beforeLines (Spacing Above Paragraph)
+    spaceBelow?: INumberUnit; // spaceBelow after afterLines (Spacing Below Paragraph)
     borderBetween?: IParagraphBorder; // borderBetween
     borderTop?: IParagraphBorder; // borderTop
     borderBottom?: IParagraphBorder; // borderBottom

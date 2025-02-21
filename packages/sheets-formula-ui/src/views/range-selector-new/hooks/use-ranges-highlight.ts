@@ -17,7 +17,7 @@
 import type { Nullable } from '@univerjs/core';
 import type { Editor } from '@univerjs/docs-ui';
 import type { ISequenceNode } from '@univerjs/engine-formula';
-import { DisposableCollection } from '@univerjs/core';
+import { ColorKit, DisposableCollection } from '@univerjs/core';
 import { deserializeRangeWithSheet, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { IMarkSelectionService } from '@univerjs/sheets-ui';
 import { useDependency, useObservable } from '@univerjs/ui';
@@ -55,10 +55,12 @@ export function useRangesHighlight(editor: Nullable<Editor>, focusing: boolean) 
         const selections = highlightDoc(editor, sequenceNodes);
         const disposable = new DisposableCollection();
         selections.forEach((selection) => {
+            const rgb = new ColorKit(selection.themeColor).toRgb();
             const id = markSelectionService.addShape({
                 range: deserializeRangeWithSheet(selection.token).range,
                 style: {
                     stroke: selection.themeColor,
+                    fill: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.1)`,
                 },
                 primary: null,
             });

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import type { IRange } from '@univerjs/core';
 import type { IOrderRule } from '@univerjs/sheets-sort';
-import { type IRange, RANGE_TYPE } from '@univerjs/core';
-
+import { RANGE_TYPE } from '@univerjs/core';
 import { SortRangeCommand, SortType } from '@univerjs/sheets-sort';
 import { FWorksheet } from '@univerjs/sheets/facade';
 
@@ -28,13 +28,17 @@ export interface IFWorksheetSort {
      * Sort the worksheet by the specified column.
      * @param {number} colIndex The column index to sort by. which starts from 1.
      * @param {boolean} [asc=true] The sort order. `true` for ascending, `false` for descending.
-     * @returns The worksheet itself for chaining.
+     * @returns {FWorksheet} The worksheet itself for chaining.
      * @example
      * ```typescript
-     * const activeSpreadsheet = univerAPI.getActiveWorkbook();
-     * const activeSheet = activeSpreadsheet.getActiveSheet();
-     * activeSheet.sort(1); // Sorts the worksheet by the first column in ascending order.
-     * activeSheet.sort(1, false); // Sorts the worksheet by the first column in descending order.
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // Sorts the worksheet by the first column in ascending order.
+     * fWorksheet.sort(1);
+     *
+     * // Sorts the worksheet by the first column in descending order.
+     * fWorksheet.sort(1, false);
      * ```
      */
     sort(colIndex: number, asc?: boolean): FWorksheet;

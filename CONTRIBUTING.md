@@ -227,7 +227,6 @@ pnpm create @univerjs/cli init <project-name>
 
 # npm
 npm create @univerjs/cli init <project-name>
-
 ```
 
 ### How to Contribute to Facade API
@@ -238,6 +237,6 @@ Please refer to [How to Contribute to Facade API](./docs/CONTRIBUTING.md).
 
 If you are going to deprecate an API, please follow the steps below:
 
-1. Mark the API as deprecated in the JSDoc, and use `{@link }` to refer to the new API.
+1. Mark the API as deprecated in the JSDoc, and use `{@link}` to refer to the new API.
 2. In the implementation, call `deprecate` of `ILogService` to log a deprecation message.
 3. Remove the API in the next minor version. If the API is considered heavily used, you can remove it in the next major version, e.g. 1.0.0.

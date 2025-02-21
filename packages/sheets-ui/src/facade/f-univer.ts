@@ -656,77 +656,27 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
     /**
      * @ignore
      */
-    // eslint-disable-next-line max-lines-per-function
+
     override _initialize(injector: Injector): void {
         this._initSheetUIEvent(injector);
         this._initObserverListener(injector);
         const commandService = injector.get(ICommandService);
+
         this.registerEventHandler(
             this.Event.BeforeClipboardChange,
-            () => {
-                const disposableCollection = new DisposableCollection();
-                disposableCollection.add(
-                    commandService.beforeCommandExecuted((commandInfo) => {
-                        switch (commandInfo.id) {
-                            case CopyCommand.id:
-                            case CutCommand.id:
-                                this._beforeClipboardChange();
-                                break;
-                        }
-                    })
-                );
-
-                return disposableCollection;
-            }
-        );
-
-        this.registerEventHandler(
-            this.Event.ClipboardChanged,
-            () => {
-                const disposableCollection = new DisposableCollection();
-                disposableCollection.add(commandService.beforeCommandExecuted((commandInfo) => {
-                    switch (commandInfo.id) {
-                        case SheetPasteShortKeyCommand.id:
-                            this._beforeClipboardPaste(commandInfo.params);
-                            break;
-                    }
-                }));
-
-                disposableCollection.add(
-                    commandService.beforeCommandExecuted(async (commandInfo) => {
-                        switch (commandInfo.id) {
-                            case PasteCommand.id:
-                                await this._beforeClipboardPasteAsync();
-                                break;
-                        }
-                    })
-                );
-                return disposableCollection;
-            }
-        );
-
-        this.disposeWithMe(commandService.onCommandExecuted((commandInfo) => {
-            if (COMMAND_LISTENER_SKELETON_CHANGE.indexOf(commandInfo.id) > -1) {
-                const sheet = this.getActiveSheet();
-                if (!sheet) return;
-                const ranges = getSkeletonChangedEffectedRange(commandInfo, sheet.worksheet.getMaxColumns())
-                    .map((range) => this.getWorkbook(range.unitId)?.getSheetBySheetId(range.subUnitId)?.getRange(range.range))
-                    .filter(Boolean) as FRange[];
-                if (!ranges.length) return;
-
-                this.fireEvent(this.Event.SheetSkeletonChanged, {
-                    workbook: sheet.workbook,
-                    worksheet: sheet.worksheet,
-                    payload: commandInfo as CommandListenerSkeletonChange,
-                    skeleton: sheet.worksheet.getSkeleton()!,
-                    effectedRanges: ranges,
-                });
-            }
-        }));
-
-        this.registerEventHandler(
-            this.Event.ClipboardChanged,
             () => commandService.beforeCommandExecuted((commandInfo) => {
+                switch (commandInfo.id) {
+                    case CopyCommand.id:
+                    case CutCommand.id:
+                        this._beforeClipboardChange();
+                        break;
+                }
+            })
+        );
+
+        this.registerEventHandler(
+            this.Event.ClipboardChanged,
+            () => commandService.onCommandExecuted((commandInfo) => {
                 switch (commandInfo.id) {
                     case CopyCommand.id:
                     case CutCommand.id:
@@ -737,8 +687,22 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
         );
 
         this.registerEventHandler(
-            this.Event.ClipboardPasted,
+            this.Event.BeforeClipboardPaste,
             () => commandService.beforeCommandExecuted((commandInfo) => {
+                switch (commandInfo.id) {
+                    case SheetPasteShortKeyCommand.id:
+                        this._beforeClipboardPaste(commandInfo.params);
+                        break;
+                    case PasteCommand.id:
+                        this._beforeClipboardPasteAsync();
+                        break;
+                }
+            })
+        );
+
+        this.registerEventHandler(
+            this.Event.ClipboardPasted,
+            () => commandService.onCommandExecuted((commandInfo) => {
                 switch (commandInfo.id) {
                     case SheetPasteShortKeyCommand.id:
                         this._clipboardPaste(commandInfo.params);
@@ -750,7 +714,27 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
             })
         );
 
-        // async listeners
+        this.registerEventHandler(
+            this.Event.SheetSkeletonChanged,
+            () => commandService.onCommandExecuted((commandInfo) => {
+                if (COMMAND_LISTENER_SKELETON_CHANGE.indexOf(commandInfo.id) > -1) {
+                    const sheet = this.getActiveSheet();
+                    if (!sheet) return;
+                    const ranges = getSkeletonChangedEffectedRange(commandInfo, sheet.worksheet.getMaxColumns())
+                        .map((range) => this.getWorkbook(range.unitId)?.getSheetBySheetId(range.subUnitId)?.getRange(range.range))
+                        .filter(Boolean) as FRange[];
+                    if (!ranges.length) return;
+
+                    this.fireEvent(this.Event.SheetSkeletonChanged, {
+                        workbook: sheet.workbook,
+                        worksheet: sheet.worksheet,
+                        payload: commandInfo as CommandListenerSkeletonChange,
+                        skeleton: sheet.worksheet.getSkeleton()!,
+                        effectedRanges: ranges,
+                    });
+                }
+            })
+        );
     }
 
     private _generateClipboardCopyParam(): IBeforeClipboardChangeParam | undefined {
@@ -784,7 +768,7 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
 
         this.fireEvent(this.Event.BeforeClipboardChange, eventParams);
         if (eventParams.cancel) {
-            throw new Error('Before clipboard change is canceled');
+            throw new Error('Clipboard change is canceled');
         }
     }
 
@@ -793,9 +777,6 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
         if (!eventParams) return;
 
         this.fireEvent(this.Event.ClipboardChanged, eventParams);
-        if (eventParams.cancel) {
-            throw new Error('Clipboard changed is canceled');
-        }
     }
 
     private _generateClipboardPasteParam(params?: ISheetPasteByShortKeyParams): IBeforeClipboardPasteParam | undefined {

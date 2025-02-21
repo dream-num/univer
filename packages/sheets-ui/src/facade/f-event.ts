@@ -160,12 +160,15 @@ export interface IFSheetsUIEventNameMixin {
      * Type of the event parameter is {@link IBeforeClipboardChangeParam}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.BeforeClipboardChange, (param) => {
-     *   const {text, html} = param;
-     *   console.log('debugger', text, html); // {text: '...', html: '...'}
+     * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeClipboardChange, (params) => {
+     *   const { workbook, worksheet, text, html, fromSheet, fromRange } = params;
+     *   console.log(params);
+     *
      *   // if want to cancel the clipboard change
      *   param.cancel = true;
      * })
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly BeforeClipboardChange: 'BeforeClipboardChange';
@@ -175,36 +178,45 @@ export interface IFSheetsUIEventNameMixin {
      * Type of the event parameter is {@link IClipboardChangedParam}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.ClipboardChanged, (param) => {
-     *  const {text, html} = param;
-     *  console.log('debugger', text, html); // {text: '...', html: '...'}
+     * const disposable = univerAPI.addEvent(univerAPI.Event.ClipboardChanged, (params) => {
+     *   const { workbook, worksheet, text, html, fromSheet, fromRange } = params;
+     *   console.log(params);
      * })
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly ClipboardChanged: 'ClipboardChanged';
+
     /**
      * Trigger this event before pasting.
      * Type of the event parameter is {@link IBeforeClipboardPasteParam}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.BeforeClipboardPaste, (param) => {
-     *   const {text, html} = param;
-     *   console.log('debugger', text, html);
+     * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeClipboardPaste, (params) => {
+     *   const { workbook, worksheet, text, html } = params;
+     *   console.log(params);
+     *
      *   // if want to cancel the clipboard paste
      *   param.cancel = true;
      * })
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly BeforeClipboardPaste: 'BeforeClipboardPaste';
+
     /**
      * Trigger this event after pasting.
      * Type of the event parameter is {@link IClipboardPastedParam}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.ClipboardPasted, (param) => {
-     *   const {text, html} = param;
-     *   console.log('debugger', text, html); // {text: '...', html: '...'}
+     * const disposable = univerAPI.addEvent(univerAPI.Event.ClipboardPasted, (params) => {
+     *   const { workbook, worksheet, text, html } = params;
+     *   console.log(params);
      * })
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly ClipboardPasted: 'ClipboardPasted';
@@ -214,53 +226,78 @@ export interface IFSheetsUIEventNameMixin {
      * @see {@link IBeforeSheetEditStartEventParams}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.BeforeSheetEditStart, (params) => {
+     * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeSheetEditStart, (params) => {
      *   const { worksheet, workbook, row, column, eventType, keycode, isZenEditor } = params;
+     *   console.log(params);
+     *
+     *   // Cancel the cell edit start
+     *   param.cancel = true;
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly BeforeSheetEditStart: 'BeforeSheetEditStart';
+
     /**
      * Event fired after a cell is edited
-     * @see {@link ISheetEditEndedEventParams}
+     * @see {@link ISheetEditStartedEventParams}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.SheetEditStarted, (params) => {
+     * const disposable = univerAPI.addEvent(univerAPI.Event.SheetEditStarted, (params) => {
      *   const { worksheet, workbook, row, column, eventType, keycode, isZenEditor } = params;
+     *   console.log(params);
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly SheetEditStarted: 'SheetEditStarted';
+
     /**
      * Event fired when a cell is being edited
      * @see {@link ISheetEditChangingEventParams}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.SheetEditChanging, (params) => {
+     * const disposable = univerAPI.addEvent(univerAPI.Event.SheetEditChanging, (params) => {
      *   const { worksheet, workbook, row, column, value, isZenEditor } = params;
+     *   console.log(params);
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly SheetEditChanging: 'SheetEditChanging';
+
     /**
      * Event fired before a cell edit ends
      * @see {@link IBeforeSheetEditEndEventParams}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.BeforeSheetEditEnd, (params) => {
-     *   const { worksheet, workbook, row, column, value, eventType, keycode, isZenEditor } = params;
+     * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeSheetEditEnd, (params) => {
+     *   const { worksheet, workbook, row, column, value, eventType, keycode, isZenEditor, isConfirm } = params;
+     *   console.log(params);
+     *
+     *   // Cancel the cell edit end
+     *   param.cancel = true;
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly BeforeSheetEditEnd: 'BeforeSheetEditEnd';
+
     /**
      * Event fired after a cell edit ends
      * @see {@link ISheetEditEndedEventParams}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.SheetEditEnded, (params) => {
-     *   const { worksheet, workbook, row, column, eventType, keycode, isZenEditor } = params;
+     * const disposable = univerAPI.addEvent(univerAPI.Event.SheetEditEnded, (params) => {
+     *   const { worksheet, workbook, row, column, eventType, keycode, isZenEditor, isConfirm } = params;
+     *   console.log(params);
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly SheetEditEnded: 'SheetEditEnded';

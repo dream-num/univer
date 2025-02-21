@@ -29,10 +29,12 @@ interface ICommentEventMixin {
      * @see {@link ISheetCommentAddEvent}
      * @example
      * ```ts
-     * univerAPI.addEventListener(CommentEvent.CommentAdded, (event) => {
-     *     const { comment, workbook, worksheet, row, col } = event;
-     *     console.log(event);
+     * const disposable = univerAPI.addEvent(univerAPI.Event.CommentAdded, (params) => {
+     *   const { comment, workbook, worksheet, row, col } = params;
+     *   console.log(params);
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly CommentAdded: 'CommentAdded';
@@ -42,10 +44,15 @@ interface ICommentEventMixin {
      * @see {@link IBeforeSheetCommentAddEvent}
      * @example
      * ```ts
-     * univerAPI.addEventListener(CommentEvent.BeforeCommentAdd, (event) => {
-     *     const { comment, workbook, worksheet, row, col } = event;
-     *     console.log(event);
+     * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeCommentAdd, (params) => {
+     *   const { comment, workbook, worksheet, row, col } = params;
+     *   console.log(params);
+     *
+     *   // Cancel the comment add operation
+     *   params.cancel = true;
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly BeforeCommentAdd: 'BeforeCommentAdd';
@@ -55,10 +62,12 @@ interface ICommentEventMixin {
      * @see {@link ISheetCommentUpdateEvent}
      * @example
      * ```ts
-     * univerAPI.addEventListener(CommentEvent.CommentUpdated, (event) => {
-     *     const { comment, workbook, worksheet, row, col } = event;
-     *     console.log(event);
+     * const disposable = univerAPI.addEvent(univerAPI.Event.CommentUpdated, (params) => {
+     *   const { comment, workbook, worksheet, row, col } = params;
+     *   console.log(params);
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly CommentUpdated: 'CommentUpdated';
@@ -68,10 +77,15 @@ interface ICommentEventMixin {
      * @see {@link IBeforeSheetCommentUpdateEvent}
      * @example
      * ```ts
-     * univerAPI.addEventListener(CommentEvent.BeforeCommentUpdate, (event) => {
-     *     const { comment, workbook, worksheet, row, col, newContent } = event;
-     *     console.log(event);
+     * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeCommentUpdate, (params) => {
+     *   const { comment, workbook, worksheet, row, col, newContent } = params;
+     *   console.log(params);
+     *
+     *   // Cancel the comment update operation
+     *   params.cancel = true;
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly BeforeCommentUpdate: 'BeforeCommentUpdate';
@@ -81,10 +95,12 @@ interface ICommentEventMixin {
      * @see {@link ISheetCommentDeleteEvent}
      * @example
      * ```ts
-     * univerAPI.addEventListener(CommentEvent.CommentDeleted, (event) => {
-     *     const { commentId, workbook, worksheet } = event;
-     *     console.log(event);
+     * const disposable = univerAPI.addEvent(univerAPI.Event.CommentDeleted, (params) => {
+     *   const { commentId, workbook, worksheet } = params;
+     *   console.log(params);
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly CommentDeleted: 'CommentDeleted';
@@ -94,23 +110,30 @@ interface ICommentEventMixin {
      * @see {@link IBeforeSheetCommentDeleteEvent}
      * @example
      * ```ts
-     * univerAPI.addEventListener(CommentEvent.BeforeCommentDeleted, (event) => {
-     *     const { commentId, workbook, worksheet } = event;
-     *     console.log(event);
+     * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeCommentDelete, (params) => {
+     *   const { comment, workbook, worksheet, row, col } = params;
+     *   console.log(params);
+     *
+     *   // Cancel the comment delete operation
+     *   params.cancel = true;
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
-    readonly BeforeCommentDeleted: 'BeforeCommentDeleted';
+    readonly BeforeCommentDelete: 'BeforeCommentDelete';
 
     /**
      * Event fired after comment resolve
      * @see {@link ISheetCommentResolveEvent}
      * @example
      * ```ts
-     * univerAPI.addEventListener(CommentEvent.CommentResolved, (event) => {
-     *     const { comment, row, col, resolved, workbook, worksheet } = event;
-     *     console.log(event);
+     * const disposable = univerAPI.addEvent(univerAPI.Event.CommentResolved, (params) => {
+     *   const { comment, row, col, resolved, workbook, worksheet } = params;
+     *   console.log(params);
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly CommentResolved: 'CommentResolved';
@@ -120,10 +143,15 @@ interface ICommentEventMixin {
      * @see {@link ISheetCommentResolveEvent}
      * @example
      * ```ts
-     * univerAPI.addEventListener(CommentEvent.BeforeCommentResolve, (event) => {
-     *     const { comment, row, col, resolved, workbook, worksheet } = event;
-     *     console.log(event);
+     * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeCommentResolve, (params) => {
+     *   const { comment, row, col, resolved, workbook, worksheet } = params;
+     *   console.log(params);
+     *
+     *   // Cancel the comment resolve operation
+     *   params.cancel = true;
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly BeforeCommentResolve: 'BeforeCommentResolve';
@@ -137,7 +165,7 @@ const CommentEvent: ICommentEventMixin = {
     BeforeCommentUpdate: 'BeforeCommentUpdate',
 
     CommentDeleted: 'CommentDeleted',
-    BeforeCommentDeleted: 'BeforeCommentDeleted',
+    BeforeCommentDelete: 'BeforeCommentDelete',
 
     CommentResolved: 'CommentResolved',
     BeforeCommentResolve: 'BeforeCommentResolve',
@@ -167,8 +195,8 @@ export class FCommentEvent extends FEventName {
         return CommentEvent.CommentDeleted;
     }
 
-    override get BeforeCommentDeleted(): 'BeforeCommentDeleted' {
-        return CommentEvent.BeforeCommentDeleted;
+    override get BeforeCommentDelete(): 'BeforeCommentDelete' {
+        return CommentEvent.BeforeCommentDelete;
     }
 
     override get CommentResolved(): 'CommentResolved' {
@@ -318,7 +346,7 @@ export interface ISheetCommentEventConfig {
     BeforeCommentUpdate: IBeforeSheetCommentUpdateEvent;
     CommentUpdated: ISheetCommentUpdateEvent;
 
-    BeforeCommentDeleted: IBeforeSheetCommentDeleteEvent;
+    BeforeCommentDelete: IBeforeSheetCommentDeleteEvent;
     CommentDeleted: ISheetCommentDeleteEvent;
 
     BeforeCommentResolve: ISheetCommentResolveEvent;

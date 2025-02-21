@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import type { IRichTextEditorProps } from '@univerjs/docs-ui';
+import type { Nullable } from '@univerjs/core';
+import type { Editor, IRichTextEditorProps } from '@univerjs/docs-ui';
 
 export interface IRangeSelectorInstance {
     editor: Nullable<Editor>;

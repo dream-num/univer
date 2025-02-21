@@ -475,7 +475,6 @@ export const CellLinkEdit = () => {
                         supportAcrossSheet
                         initialValue={payload}
                         onChange={(_, text) => handleRangeChange(text)}
-                        autoFocus={type === SheetHyperLinkType.RANGE}
                         onRangeSelectorDialogVisibleChange={async (visible) => {
                             if (visible) {
                                 if (editing.type === HyperLinkEditSourceType.ZEN_EDITOR) {

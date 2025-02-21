@@ -91,7 +91,7 @@ export class InputManager extends Disposable {
 
     // Handle events such as triggering mouseleave and mouseenter.
     mouseLeaveEnterHandler(evt: IMouseEvent) {
-        const o = this._currentObject || this._scene.capturedObject;
+        const o = this._currentObject || this.capturedObject;
         if (o === null || o === undefined) {
             this._currentMouseEnterPicked?.triggerPointerLeave(evt);
             this._currentMouseEnterPicked = null;
@@ -143,7 +143,8 @@ export class InputManager extends Disposable {
             (evt as unknown as PointerEvent).pointerId = 0;
         }
         const currentObject = this._currentObject = this._getObjectAtPos(evt.offsetX, evt.offsetY);
-        const isStop = (currentObject || this._scene.capturedObject)?.triggerPointerMove(evt);
+
+        const isStop = (currentObject || this.capturedObject)?.triggerPointerMove(evt);
 
         this.mouseLeaveEnterHandler(evt);
 
@@ -460,5 +461,9 @@ export class InputManager extends Disposable {
     private _resetDoubleClickParam() {
         this._doubleClickOccurred = 0;
         clearTimeout(this._delayedTimeout);
+    }
+
+    get capturedObject() {
+        return this._scene._capturedObject;
     }
 }

@@ -58,7 +58,7 @@ export function RangeSelectorPopup(props: IRangeSelectorDialogProps) {
 
     useEffect(() => {
         if (visible && initialValue.length) {
-            setRanges(initialValue.map((range) => serializeRangeWithSheet(range.sheetName, range.range)));
+            setRanges(initialValue.map((range) => range.sheetName ? serializeRangeWithSheet(range.sheetName, range.range) : serializeRange(range.range)));
         } else {
             setRanges(['']);
         }
@@ -66,8 +66,6 @@ export function RangeSelectorPopup(props: IRangeSelectorDialogProps) {
 
     const handleRangeInput = (index: number, value: string) => {
         const newRanges = [...ranges];
-        newRanges[index] = value;
-        setRanges(newRanges);
         newRanges[index] = value;
         setRanges(newRanges);
     };
@@ -191,7 +189,7 @@ export function RangeSelectorNew(props: IRangeSelectorProps) {
                     setFocusing(focusing);
                     props.onFocusChange?.(focusing);
                 }}
-                ref={editorRef}
+                editorRef={editorRef}
                 onClickOutside={() => {
                     setFocusing(false);
                     props.onClickOutside?.();

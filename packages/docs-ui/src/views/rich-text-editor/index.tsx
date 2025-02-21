@@ -23,7 +23,7 @@ import { DocSkeletonManagerService } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { useDependency, useEvent, useObservable } from '@univerjs/ui';
 import clsx from 'clsx';
-import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { IEditorService } from '../../services/editor/editor-manager.service';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
 import { useKeyboardEvent, useResize } from './hooks';
@@ -49,9 +49,10 @@ export interface IRichTextEditorProps {
     maxHeight?: number;
     defaultHeight?: number;
     icon?: ReactNode;
+    editorRef?: React.RefObject<Editor | null>;
 }
 
-export const RichTextEditor = forwardRef<Editor, IRichTextEditorProps>((props, ref) => {
+export const RichTextEditor = (props: IRichTextEditorProps) => {
     const {
         className,
         autoFocus,
@@ -68,6 +69,7 @@ export const RichTextEditor = forwardRef<Editor, IRichTextEditorProps>((props, r
         defaultHeight = 32,
         maxHeight = 32,
         icon,
+        editorRef,
     } = props;
     const editorService = useDependency(IEditorService);
     const onFocusChange = useEvent(_onFocusChange);
@@ -140,8 +142,11 @@ export const RichTextEditor = forwardRef<Editor, IRichTextEditorProps>((props, r
 
     useLeftAndRightArrow(isFocusing && moveCursor, false, editor);
     useKeyboardEvent(isFocusing, keyboardEventConfig, editor);
-    useImperativeHandle(ref, () => editor!, [editor]);
     useOnChange(editor, onChange);
+    useEffect(() => {
+        if (!editorRef || !editor) return;
+        editorRef.current = editor;
+    }, [editor]);
 
     return (
         <div className={clsx(styles.richTextEditor, className)} style={style}>
@@ -168,4 +173,4 @@ export const RichTextEditor = forwardRef<Editor, IRichTextEditorProps>((props, r
             </div>
         </div>
     );
-});
+};

@@ -16,7 +16,7 @@
 
 import type { Dependency } from '@univerjs/core';
 import type { IUniverSheetsConfig } from './controllers/config.schema';
-import { AUTO_HEIGHT_FOR_MERGED_CELLS, DependentOn, IConfigService, Inject, Injector, IS_ROW_STYLE_PRECEDE_COLUMN_STYLE, merge, mergeOverrideWithDependencies, Plugin, registerDependencies, touchDependencies, UniverInstanceType } from '@univerjs/core';
+import { AUTO_HEIGHT_FOR_MERGED_CELLS, DependentOn, HIDE_STATUS_BAR_STATISTIC, IConfigService, Inject, Injector, IS_ROW_STYLE_PRECEDE_COLUMN_STYLE, merge, mergeOverrideWithDependencies, Plugin, registerDependencies, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { BasicWorksheetController } from './controllers/basic-worksheet.controller';
 import { CalculateResultApplyController } from './controllers/calculate-result-apply.controller';
@@ -83,6 +83,9 @@ export class UniverSheetsPlugin extends Plugin {
         }
         if (this._config?.autoHeightForMergedCells) {
             this._configService.setConfig(AUTO_HEIGHT_FOR_MERGED_CELLS, true);
+        }
+        if (this._config?.hideStatusBarStatistic) {
+            this._configService.setConfig(HIDE_STATUS_BAR_STATISTIC, true);
         }
     }
 

@@ -37,6 +37,8 @@ export interface IUniverSheetsConfig {
      * default false, auto height works for merged cells
      */
     autoHeightForMergedCells?: boolean;
+
+    hideStatusBarStatistic?: boolean;
 }
 
 export const defaultPluginConfig: IUniverSheetsConfig = {};

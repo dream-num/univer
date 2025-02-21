@@ -15,7 +15,7 @@
  */
 
 import type { IStatisticItem } from './CopyableStatisticItem';
-import { debounce } from '@univerjs/core';
+import { debounce, HIDE_STATUS_BAR_STATISTIC, IConfigService } from '@univerjs/core';
 import { useDependency } from '@univerjs/ui';
 import clsx from 'clsx';
 
@@ -28,6 +28,9 @@ const SINGLE_MODE_WIDTH = 800;
 const ROW_COUNT_THRESHOLD = 3;
 
 export const StatusBar = () => {
+    const configService = useDependency(IConfigService);
+    const hideStatistic = configService.getConfig(HIDE_STATUS_BAR_STATISTIC);
+
     const [isSingle, setIsSingle] = useState(window.innerWidth < SINGLE_MODE_WIDTH);
     const [show, setShow] = useState(true);
 
@@ -44,6 +47,7 @@ export const StatusBar = () => {
     const showList = isSingle && firstItem ? [firstItem] : statistics.filter((item) => item.show && !item.disable);
 
     useEffect(() => {
+        if (hideStatistic) return;
         const subscription = statusBarService.state$.subscribe((state) => {
             const item = state?.values;
             if (!item || item.length === 0) {

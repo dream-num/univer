@@ -128,11 +128,10 @@ export function RangeSelectorPopup(props: IRangeSelectorDialogProps) {
         >
             <div className={styles.sheetRangeSelectorDialog}>
                 {ranges.map((text, index) => (
-                    <div key={`${text}_${index}`} className={styles.sheetRangeSelectorDialogItem}>
+                    <div key={index} className={styles.sheetRangeSelectorDialogItem}>
                         <Input
                             affixWrapperStyle={{ width: '100%' }}
                             placeholder={localeService.t('rangeSelector.placeHolder')}
-                            key={`input_${index}`}
                             onFocus={() => setFocusIndex(index)}
                             value={text}
                             onChange={(value) => handleRangeInput(index, value)}
@@ -174,6 +173,8 @@ export function RangeSelectorNew(props: IRangeSelectorProps) {
     const editorService = useDependency(IEditorService);
 
     const handleOpenModal = () => {
+        editorRef.current?.setSelectionRanges([]);
+        editorRef.current?.blur();
         setRangeSelectorRanges(parseRanges(editorRef.current?.getDocumentDataModel().getPlainText() ?? ''));
         setPopupVisible(true);
     };
@@ -191,6 +192,7 @@ export function RangeSelectorNew(props: IRangeSelectorProps) {
                 }}
                 editorRef={editorRef}
                 onClickOutside={() => {
+                    if (!focusing) return;
                     setFocusing(false);
                     props.onClickOutside?.();
                     editorRef.current?.setSelectionRanges([]);

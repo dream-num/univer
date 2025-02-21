@@ -223,7 +223,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
         if (isEnd) {
             focus();
             if (offset !== -1) {
-                    // 在渲染结束之后再设置选区
+                // 在渲染结束之后再设置选区
                 setTimeout(() => {
                     const range = { startOffset: offset, endOffset: offset };
                     editor?.setSelectionRanges([range]);
@@ -531,11 +531,10 @@ function RangeSelectorDialog(props: {
         >
             <div className={styles.sheetRangeSelectorDialog}>
                 {ranges.map((text, index) => (
-                    <div key={`${text}_${index}`} className={styles.sheetRangeSelectorDialogItem}>
+                    <div key={index} className={styles.sheetRangeSelectorDialogItem}>
                         <Input
                             affixWrapperStyle={{ width: '100%' }}
                             placeholder={localeService.t('rangeSelector.placeHolder')}
-                            key={`input_${index}`}
                             onFocus={() => focusIndexSet(index)}
                             value={text}
                             onChange={(value) => handleRangeInput(index, value)}

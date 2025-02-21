@@ -236,7 +236,6 @@ export const RuleEdit = (props: IRuleEditProps) => {
             errorTextSet(localeService.t('sheet.cf.errorMessage.rangeError'));
         }
     };
-
     return (
         <div className={styles.cfRuleStyleEditor}>
             <div className={styleBase.title}>{localeService.t('sheet.cf.panel.range')}</div>

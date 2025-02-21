@@ -22,7 +22,7 @@ import { IEditorService, RichTextEditor } from '@univerjs/docs-ui';
 import { deserializeRangeWithSheet, LexerTreeBuilder, matchToken, sequenceNodeType, serializeRange, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { CloseSingle, DeleteSingle, IncreaseSingle, SelectRangeSingle } from '@univerjs/icons';
 import { useDependency } from '@univerjs/ui';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { rangePreProcess } from '../range-selector/utils/range-pre-process';
 import { useRangesHighlight } from './hooks/use-ranges-highlight';
 import { useRangeSelectorSelectionChange } from './hooks/use-selection-change';
@@ -174,24 +174,24 @@ export function stringifyRanges(ranges: IUnitRangeName[]) {
 }
 
 export function RangeSelectorNew(props: IRangeSelectorProps) {
-    const editorRef = useRef<Editor>(null);
+    const [editor, setEditor] = useState<Editor | null>(null);
     const { onVerify, selectorRef, unitId, subUnitId, maxRangeCount, supportAcrossSheet, autoFocus, onChange, onRangeSelectorDialogVisibleChange } = props;
     const [focusing, setFocusing] = useState(autoFocus ?? false);
     const [popupVisible, setPopupVisible] = useState(false);
     const [rangeSelectorRanges, setRangeSelectorRanges] = useState<IUnitRangeName[]>([]);
     const localeService = useDependency(LocaleService);
     const editorService = useDependency(IEditorService);
-    const { sequenceNodes } = useRangesHighlight(editorRef.current, focusing);
+    const { sequenceNodes } = useRangesHighlight(editor, focusing);
 
     const blurEditor = () => {
-        editorRef.current?.setSelectionRanges([]);
-        editorRef.current?.blur();
+        editor?.setSelectionRanges([]);
+        editor?.blur();
         editorService.blur();
     };
 
     const handleOpenModal = () => {
         blurEditor();
-        setRangeSelectorRanges(parseRanges(editorRef.current?.getDocumentDataModel().getPlainText() ?? ''));
+        setRangeSelectorRanges(parseRanges(editor?.getDocumentDataModel().getPlainText() ?? ''));
         setPopupVisible(true);
     };
 
@@ -199,10 +199,10 @@ export function RangeSelectorNew(props: IRangeSelectorProps) {
         if (!selectorRef) return;
         selectorRef.current = {
             get editor() {
-                return editorRef.current;
+                return editor;
             },
             focus() {
-                editorService.focus(editorRef.current!.getEditorId());
+                editorService.focus(editor!.getEditorId());
             },
             blur: blurEditor,
             verify: () => verifyRange(sequenceNodes),
@@ -217,7 +217,7 @@ export function RangeSelectorNew(props: IRangeSelectorProps) {
     }, []);
 
     useEffect(() => {
-        onVerify?.(verifyRange(sequenceNodes), editorRef.current?.getDocumentDataModel().getPlainText() ?? '');
+        onVerify?.(verifyRange(sequenceNodes), editor?.getDocumentDataModel().getPlainText() ?? '');
     }, [sequenceNodes]);
 
     useEffect(() => {
@@ -233,7 +233,7 @@ export function RangeSelectorNew(props: IRangeSelectorProps) {
                     setFocusing(focusing);
                     props.onFocusChange?.(focusing);
                 }}
-                editorRef={editorRef}
+                editorRef={setEditor}
                 onClickOutside={() => {
                     if (!focusing) return;
                     setFocusing(false);
@@ -256,7 +256,7 @@ export function RangeSelectorNew(props: IRangeSelectorProps) {
                     const resultStr = stringifyRanges(ranges);
                     const empty = RichTextBuilder.newEmptyData();
                     empty.body!.dataStream = resultStr;
-                    editorRef.current?.replaceText(resultStr, []);
+                    editor?.replaceText(resultStr, []);
                     onChange?.(empty, resultStr);
                     setPopupVisible(false);
                     setRangeSelectorRanges([]);

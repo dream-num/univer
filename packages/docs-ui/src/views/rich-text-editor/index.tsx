@@ -23,7 +23,7 @@ import { DocSkeletonManagerService } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { useDependency, useEvent, useObservable } from '@univerjs/ui';
 import clsx from 'clsx';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import { IEditorService } from '../../services/editor/editor-manager.service';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
 import { useKeyboardEvent, useResize } from './hooks';
@@ -49,7 +49,7 @@ export interface IRichTextEditorProps {
     maxHeight?: number;
     defaultHeight?: number;
     icon?: ReactNode;
-    editorRef?: React.RefObject<Editor | null>;
+    editorRef?: React.RefObject<Editor | null> | ((editor: Editor | null) => void);
 }
 
 export const RichTextEditor = (props: IRichTextEditorProps) => {
@@ -91,6 +91,16 @@ export const RichTextEditor = (props: IRichTextEditorProps) => {
     const sheetEmbeddingRef = React.useRef<HTMLDivElement>(null);
     const [showPlaceholder, setShowPlaceholder] = useState(() => !BuildTextUtils.transform.getPlainText(editor?.getDocumentData().body?.dataStream ?? ''));
     const { checkScrollBar } = useResize(editor, isSingle, true, true);
+
+    useLayoutEffect(() => {
+        if (!editorRef || !editor) return;
+        if (typeof editorRef === 'function') {
+            editorRef(editor);
+            return;
+        }
+        editorRef.current = editor;
+    }, [editor]);
+
     const onChange = useEvent((data: IDocumentData) => {
         const docSkeleton = renderer?.with(DocSkeletonManagerService);
         const size = docSkeleton?.getSkeleton().getActualSize();
@@ -143,10 +153,6 @@ export const RichTextEditor = (props: IRichTextEditorProps) => {
     useLeftAndRightArrow(isFocusing && moveCursor, false, editor);
     useKeyboardEvent(isFocusing, keyboardEventConfig, editor);
     useOnChange(editor, onChange);
-    useEffect(() => {
-        if (!editorRef || !editor) return;
-        editorRef.current = editor;
-    }, [editor]);
 
     return (
         <div className={clsx(styles.richTextEditor, className)} style={style}>

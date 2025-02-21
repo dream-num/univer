@@ -540,7 +540,6 @@ function RangeSelectorDialog(props: {
                             onChange={(value) => handleRangeInput(index, value)}
                         />
                         {ranges.length > 1 && !isOnlyOneRange && <DeleteSingle className={styles.sheetRangeSelectorDialogItemDelete} onClick={() => handleRangeRemove(index)} />}
-
                     </div>
                 ))}
 

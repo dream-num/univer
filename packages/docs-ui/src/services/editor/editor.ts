@@ -332,7 +332,7 @@ export class Editor extends Disposable implements IEditor {
         });
     }
 
-    replaceText(text: string, resetCursor = true) {
+    replaceText(text: string, resetCursor: boolean | ITextRangeWithStyle[] = true) {
         const data = this.getDocumentData();
 
         this.setDocumentData(
@@ -349,13 +349,15 @@ export class Editor extends Disposable implements IEditor {
                     textRuns: [],
                 },
             },
-            resetCursor
-                ? [{
-                    startOffset: text.length,
-                    endOffset: text.length,
-                    collapsed: true,
-                }]
-                : null
+            typeof resetCursor === 'object'
+                ? resetCursor
+                : resetCursor
+                    ? [{
+                        startOffset: text.length,
+                        endOffset: text.length,
+                        collapsed: true,
+                    }]
+                    : null
         );
     }
 

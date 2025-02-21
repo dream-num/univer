@@ -172,14 +172,19 @@ export function RangeSelectorNew(props: IRangeSelectorProps) {
     const localeService = useDependency(LocaleService);
     const editorService = useDependency(IEditorService);
 
-    const handleOpenModal = () => {
+    useRangesHighlight(editorRef.current, focusing);
+
+    const blurEditor = () => {
         editorRef.current?.setSelectionRanges([]);
         editorRef.current?.blur();
+        editorService.blur();
+    };
+
+    const handleOpenModal = () => {
+        blurEditor();
         setRangeSelectorRanges(parseRanges(editorRef.current?.getDocumentDataModel().getPlainText() ?? ''));
         setPopupVisible(true);
     };
-
-    useRangesHighlight(editorRef.current, focusing);
 
     return (
         <>
@@ -195,9 +200,7 @@ export function RangeSelectorNew(props: IRangeSelectorProps) {
                     if (!focusing) return;
                     setFocusing(false);
                     props.onClickOutside?.();
-                    editorRef.current?.setSelectionRanges([]);
-                    editorRef.current?.blur();
-                    editorService.blur();
+                    blurEditor();
                 }}
                 icon={(
                     <Tooltip title={localeService.t('rangeSelector.buttonTooltip')} placement="bottom">
@@ -215,10 +218,13 @@ export function RangeSelectorNew(props: IRangeSelectorProps) {
                     const resultStr = stringifyRanges(ranges);
                     const empty = RichTextBuilder.newEmptyData();
                     empty.body!.dataStream = resultStr;
-                    editorRef.current?.replaceText(resultStr, true);
+                    editorRef.current?.replaceText(resultStr, []);
                     onChange?.(empty, resultStr);
                     setPopupVisible(false);
                     setRangeSelectorRanges([]);
+                    requestAnimationFrame(() => {
+                        blurEditor();
+                    });
                 }}
                 onClose={() => {
                     setPopupVisible(false);

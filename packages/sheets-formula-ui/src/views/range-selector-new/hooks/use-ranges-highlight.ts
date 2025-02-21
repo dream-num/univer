@@ -39,7 +39,19 @@ export function useRangesHighlight(editor: Nullable<Editor>, focusing: boolean) 
     }, [change, editor, lexerTreeBuilder]);
 
     useEffect(() => {
-        if (!editor || !focusing) return;
+        if (!editor) return;
+        if (!focusing) {
+            const current = editor.getDocumentData();
+            editor.setDocumentData({
+                ...current,
+                body: {
+                    ...current.body,
+                    dataStream: current.body?.dataStream ?? '',
+                    textRuns: [],
+                },
+            });
+            return;
+        }
         const selections = highlightDoc(editor, sequenceNodes);
         const disposable = new DisposableCollection();
         selections.forEach((selection) => {

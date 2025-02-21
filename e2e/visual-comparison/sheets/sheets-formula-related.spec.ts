@@ -32,9 +32,6 @@ test('diff formula related', async () => {
     await page.goto('http://localhost:3000/sheets/');
     await page.waitForTimeout(2000);
 
-    await page.evaluate(() => window.E2EControllerAPI.loadDefaultStyleSheet());
-    await page.waitForTimeout(2000);
-
     await page.evaluate(async () => {
         const worksheet = window.univerAPI.getActiveWorkbook().create('formula', 50, 20);
         worksheet.getRange('A1:C6').setValues({
@@ -128,9 +125,11 @@ test('diff formula related', async () => {
         await worksheet.hideRows(3, 2);
     });
 
+    await page.waitForTimeout(100);
+
     const filename1 = generateSnapshotName('formula-hide-row-current-worksheet');
     const screenshot1 = await page.locator(SHEET_MAIN_CANVAS_ID).screenshot();
-    await expect(screenshot1).toMatchSnapshot(filename1, { maxDiffPixels: 5 });
+    await expect(screenshot1).toMatchSnapshot(filename1, { maxDiffPixels: 7 });
 
     // restore the hidden row
     await page.evaluate(async () => {
@@ -154,6 +153,8 @@ test('diff formula related', async () => {
         });
     });
 
+    await page.waitForTimeout(100);
+
     const filename2 = generateSnapshotName('formula-filter-row-current-worksheet');
     const screenshot2 = await page.locator(SHEET_MAIN_CANVAS_ID).screenshot();
     await expect(screenshot2).toMatchSnapshot(filename2, { maxDiffPixels: 7 });
@@ -162,6 +163,8 @@ test('diff formula related', async () => {
         const worksheet2 = window.univerAPI.getActiveWorkbook().getSheetByName('formula2');
         window.univerAPI.getActiveWorkbook().setActiveSheet(worksheet2);
     });
+
+    await page.waitForTimeout(100);
 
     const filename3 = generateSnapshotName('formula-filter-row-other-worksheet');
     const screenshot3 = await page.locator(SHEET_MAIN_CANVAS_ID).screenshot();

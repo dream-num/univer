@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
+import type { Nullable } from '@univerjs/core';
+import type { IStatusBarServiceStatus, StatusBarService } from '../../services/status-bar.service';
 import type { IStatisticItem } from './CopyableStatisticItem';
 import { debounce, IConfigService } from '@univerjs/core';
 import { useDependency } from '@univerjs/ui';
-import clsx from 'clsx';
 
-import React, { useEffect, useState } from 'react';
+import clsx from 'clsx';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { HIDE_STATUS_BAR_STATISTIC } from '../../controllers/config.schema';
 import { IStatusBarService } from '../../services/status-bar.service';
 import { CopyableStatisticItem } from './CopyableStatisticItem';
@@ -30,12 +32,12 @@ const ROW_COUNT_THRESHOLD = 3;
 
 export const StatusBar = () => {
     const configService = useDependency(IConfigService);
-    const hideStatistic = configService.getConfig(HIDE_STATUS_BAR_STATISTIC);
+    const hideStatistic = configService.getConfig<boolean>(HIDE_STATUS_BAR_STATISTIC) || false;
 
     const [isSingle, setIsSingle] = useState(window.innerWidth < SINGLE_MODE_WIDTH);
-    const [show, setShow] = useState(true);
 
     const statusBarService = useDependency(IStatusBarService);
+    // items is six functions: MAX MIN ALL ...
     const items = statusBarService.getFunctions().map((item, index) => ({
         name: item.func,
         value: 0,
@@ -43,37 +45,70 @@ export const StatusBar = () => {
         disable: false,
         pattern: null,
     }));
-    const [statistics, setStatistics] = useState<IStatisticItem[]>(items);
-    const firstItem = statistics.find((item) => item.show && !item.disable);
-    const showList = isSingle && firstItem ? [firstItem] : statistics.filter((item) => item.show && !item.disable);
 
-    useEffect(() => {
-        if (hideStatistic) return;
-        const subscription = statusBarService.state$.subscribe((state) => {
-            const item = state?.values;
-            if (!item || item.length === 0) {
+    const useStatistics = (
+        initialItems: IStatisticItem[],
+        statusBarService: StatusBarService,
+        isSingle: boolean,
+        hideStatistic: boolean
+    ) => {
+        const [statistics, setStatistics] = useState<IStatisticItem[]>(initialItems);
+        const [show, setShow] = useState(true);
+
+        const filteredStatistics = useMemo(() =>
+            statistics.filter((item) => item.show && !item.disable),
+        [statistics]
+        );
+
+        const firstItem = useMemo(() =>
+            filteredStatistics.find((item) => item.show && !item.disable),
+        [filteredStatistics]
+        );
+
+        const showList = useMemo(() =>
+            isSingle && firstItem ? [firstItem] : filteredStatistics,
+        [isSingle, firstItem, filteredStatistics]
+        );
+
+        const updateStatistics = useCallback((state: Nullable<IStatusBarServiceStatus>) => {
+            const items = state?.values;
+            if (!items?.length) {
                 setShow(false);
-            } else {
-                setShow(true);
-                const newStatistics = statistics.map((stat) => {
-                    const target = item.find((i) => i.func === stat.name);
-                    if (target) {
-                        stat.value = target.value;
-                        stat.disable = false;
-                    } else {
-                        stat.disable = true;
-                    }
-                    stat.pattern = state?.pattern ?? null;
-                    return stat;
-                });
-                setStatistics(newStatistics);
+                return;
             }
-        });
-        return () => {
-            subscription.unsubscribe();
-        };
-    }, [statusBarService, hideStatistic, statistics]);
 
+            setShow(true);
+            setStatistics((prevStats) =>
+                prevStats.map((stat) => ({
+                    ...stat,
+                    value: items.find((i) => i.func === stat.name)?.value ?? stat.value,
+                    disable: !items.some((i) => i.func === stat.name),
+                    pattern: state?.pattern ?? null,
+                }))
+            );
+        }, []);
+
+        useEffect(() => {
+            if (hideStatistic) return;
+
+            const subscription = statusBarService.state$.subscribe(updateStatistics);
+
+            return () => subscription.unsubscribe();
+        }, [hideStatistic, statusBarService, updateStatistics]);
+
+        return {
+            statistics,
+            showList,
+            show,
+        };
+    };
+
+    const { showList, show } = useStatistics(
+        items,
+        statusBarService,
+        isSingle,
+        hideStatistic
+    );
     const handleResize = debounce(() => {
         const newSingleState = window.innerWidth < SINGLE_MODE_WIDTH;
         if (isSingle !== newSingleState) {

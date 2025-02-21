@@ -87,7 +87,7 @@ export class ScrollBar extends BaseScrollBar {
     private _eventSub = new Subscription();
 
     get scrollHandleThickness() {
-        return this.barSize - this.thumbMargin * 2;
+        return Math.max(0, this.barSize - this.thumbMargin * 2);
     }
 
     constructor(view: Viewport, props?: IScrollBarProps) {
@@ -421,7 +421,6 @@ export class ScrollBar extends BaseScrollBar {
 
     private _hoverFunc(color: string, object: Rect): (evt: unknown, state: EventState) => void {
         return (_evt: unknown, _state: EventState) => {
-            // const e = evt as IPointerEvent | IMouseEvent;
             const srcElement = object;
             srcElement.setProps({
                 fill: color,
@@ -466,7 +465,6 @@ export class ScrollBar extends BaseScrollBar {
                 this._isHorizonMove = true;
                 this._lastX = e.offsetX;
                 this._lastY = e.offsetY;
-                // this.fill = this._thumbHoverBackgroundColor!;
                 this.horizonThumbRect?.setProps({
                     fill: this.thumbActiveBackgroundColor!,
                 });

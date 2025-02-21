@@ -1256,7 +1256,6 @@ export class Scene extends Disposable {
     }
 
     setCaptureObject(o: BaseObject) {
-        // 将传入的对象赋值给_captureObject
         this._capturedObject = o;
     }
 

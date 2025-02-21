@@ -27,6 +27,11 @@ export interface IUniverSheetsUIConfig {
     disableAutoFocus?: true;
     override?: DependencyOverride;
     customComponents?: Set<string>;
+    /**
+     * The maximum count of rows triggering auto height. This is used to avoid performance issue.
+     * @default 1000
+     */
+    maxAutoHeightCount?: number;
 
     /**
      * Whether to show the formula bar.
@@ -42,4 +47,5 @@ export interface IUniverSheetsUIConfig {
 
 export const defaultPluginConfig: IUniverSheetsUIConfig = {
     formulaBar: true,
+    maxAutoHeightCount: 1000,
 };

@@ -147,7 +147,7 @@ export class InputManager extends Disposable {
 
         this.mouseLeaveEnterHandler(evt);
 
-        if (this._checkDirectSceneEventTrigger(!isStop, currentObject)) {
+        if (this._shouldDispatchEventToScene(!isStop, currentObject)) {
             this._scene.onPointerMove$.emitEvent(evt);
             this._scene.getEngine()?.setCapture();
         }
@@ -162,7 +162,7 @@ export class InputManager extends Disposable {
         const currentObject = this._getObjectAtPos(evt.offsetX, evt.offsetY);
         const isStop = currentObject?.triggerPointerDown(evt);
 
-        if (this._checkDirectSceneEventTrigger(!isStop, currentObject)) {
+        if (this._shouldDispatchEventToScene(!isStop, currentObject)) {
             this._scene.onPointerDown$.emitEvent(evt);
         }
     }
@@ -176,7 +176,7 @@ export class InputManager extends Disposable {
         const currentObject = this._getObjectAtPos(evt.offsetX, evt.offsetY);
         const isStop = currentObject?.triggerPointerUp(evt);
 
-        if (this._checkDirectSceneEventTrigger(!isStop, currentObject)) {
+        if (this._shouldDispatchEventToScene(!isStop, currentObject)) {
             this._scene.onPointerUp$.emitEvent(evt);
         }
 
@@ -204,7 +204,7 @@ export class InputManager extends Disposable {
         viewportMain.onMouseWheel$.emitEvent(evt);
 
         // what is checkDirectSceneEventTrigger??  for what ???
-        if (this._checkDirectSceneEventTrigger(!isStop, currentObject)) {
+        if (this._shouldDispatchEventToScene(!isStop, currentObject)) {
             this._scene.onMouseWheel$.emitEvent(evt);
         }
     }
@@ -238,7 +238,7 @@ export class InputManager extends Disposable {
 
         this.dragLeaveEnterHandler(evt);
 
-        if (this._checkDirectSceneEventTrigger(!isStop, this._currentObject)) {
+        if (this._shouldDispatchEventToScene(!isStop, this._currentObject)) {
             this._scene.onDragOver$.emitEvent(evt);
             this._scene.getEngine()?.setCapture();
         }
@@ -248,7 +248,7 @@ export class InputManager extends Disposable {
         const currentObject = this._getObjectAtPos(evt.offsetX, evt.offsetY);
         const isStop = currentObject?.triggerDrop(evt);
 
-        if (this._checkDirectSceneEventTrigger(!isStop, currentObject)) {
+        if (this._shouldDispatchEventToScene(!isStop, currentObject)) {
             this._scene.onDrop$.emitEvent(evt);
         }
     }
@@ -388,23 +388,46 @@ export class InputManager extends Disposable {
      * @returns
      */
 
-    // WHAT is this method doing ???
-    // WHAT is this method doing ???
-    private _checkDirectSceneEventTrigger(isTrigger: boolean, currentObject: Nullable<Scene | BaseObject>) {
-        let notObject = false;
+    // The return value of this method is so weird! // TODO @lumixraku
+    private _shouldDispatchEventToScene(isTrigger: boolean, currentObject: Nullable<Scene | BaseObject>) {
+        // let notObject = false;
+        // if (currentObject == null) {
+        //     notObject = true;
+        // }
+
+        // let isNotInSceneViewer = true;
+        // if (currentObject && currentObject.classType === RENDER_CLASS_TYPE.BASE_OBJECT) {
+        //     const scene = (currentObject as BaseObject).getScene() as Scene;
+        //     if (scene) {
+        //         const parent = scene.getParent();
+        //         isNotInSceneViewer = parent.classType !== RENDER_CLASS_TYPE.SCENE_VIEWER;
+        //     }
+        // }
+        // return (!this._scene.objectsEvented && isTrigger && isNotInSceneViewer) || notObject;
+
         if (currentObject == null) {
-            notObject = true;
+            return true;
         }
 
-        let isNotInSceneViewer = true;
-        if (currentObject && currentObject.classType === RENDER_CLASS_TYPE.BASE_OBJECT) {
-            const scene = (currentObject as BaseObject).getScene() as Scene;
+        // 如果不是触发状态或场景允许对象事件，直接返回 false
+        if (!isTrigger || this._scene.objectsEvented) {
+            return false;
+        }
+
+        const isInSceneViewer = this._isObjectInSceneViewer(currentObject);
+
+        return !isInSceneViewer;
+    }
+
+    private _isObjectInSceneViewer(obj: Scene | BaseObject | boolean): boolean {
+        if (obj && obj.classType === RENDER_CLASS_TYPE.BASE_OBJECT) {
+            const scene = (obj as BaseObject).getScene() as Scene;
             if (scene) {
                 const parent = scene.getParent();
-                isNotInSceneViewer = parent.classType !== RENDER_CLASS_TYPE.SCENE_VIEWER;
+                return parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER;
             }
         }
-        return (!this._scene.objectsEvented && isTrigger && isNotInSceneViewer) || notObject;
+        return false;
     }
 
     /**

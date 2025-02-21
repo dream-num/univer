@@ -23,7 +23,7 @@ import { IEditorService } from '../../../services/editor/editor-manager.service'
 
 export interface IUseEditorProps {
     editorId: string;
-    initialValue: Nullable<IDocumentData>;
+    initialValue: Nullable<IDocumentData | string>;
     container: RefObject<HTMLDivElement>;
     autoFocus?: boolean;
     isSingle?: boolean;
@@ -37,9 +37,10 @@ export function useEditor(opts: IUseEditorProps) {
 
     useLayoutEffect(() => {
         if (container.current) {
+            const initialDoc = typeof initialValue === 'string' ? undefined : initialValue;
             const snapshot: IDocumentData = {
                 body: {
-                    dataStream: '\r\n',
+                    dataStream: typeof initialValue === 'string' ? `${initialValue}\r\n` : '\r\n',
                     textRuns: [],
                     customBlocks: [],
                     customDecorations: [],
@@ -48,9 +49,9 @@ export function useEditor(opts: IUseEditorProps) {
                         startIndex: 0,
                     }],
                 },
-                ...initialValue,
+                ...initialDoc,
                 documentStyle: {
-                    ...initialValue?.documentStyle,
+                    ...initialDoc?.documentStyle,
                     pageSize: {
                         width: !isSingle ? container.current.clientWidth : Infinity,
                         height: Infinity,

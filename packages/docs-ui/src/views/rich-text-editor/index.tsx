@@ -15,9 +15,10 @@
  */
 
 import type { IDocumentData } from '@univerjs/core';
+import type { ReactNode } from 'react';
 import type { Editor } from '../../services/editor/editor';
 import type { IKeyboardEventConfig } from './hooks';
-import { BuildTextUtils, createInternalEditorID, generateRandomId } from '@univerjs/core';
+import { BuildTextUtils, createInternalEditorID, generateRandomId, getPlainText } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { useDependency, useEvent, useObservable } from '@univerjs/ui';
@@ -35,7 +36,7 @@ export interface IRichTextEditorProps {
     className?: string;
     autoFocus?: boolean;
     onFocusChange?: (isFocus: boolean) => void;
-    initialValue?: IDocumentData;
+    initialValue?: IDocumentData | string;
     onClickOutside?: () => void;
     keyboardEventConfig?: IKeyboardEventConfig;
     moveCursor?: boolean;
@@ -44,9 +45,10 @@ export interface IRichTextEditorProps {
     placeholder?: string;
     editorId?: string;
     onHeightChange?: (height: number) => void;
-    onChange?: (data: IDocumentData) => void;
+    onChange?: (data: IDocumentData, str: string) => void;
     maxHeight?: number;
     defaultHeight?: number;
+    icon?: ReactNode;
 }
 
 export const RichTextEditor = forwardRef<Editor, IRichTextEditorProps>((props, ref) => {
@@ -65,6 +67,7 @@ export const RichTextEditor = forwardRef<Editor, IRichTextEditorProps>((props, r
         onChange: _onChange,
         defaultHeight = 32,
         maxHeight = 32,
+        icon,
     } = props;
     const editorService = useDependency(IEditorService);
     const onFocusChange = useEvent(_onFocusChange);
@@ -93,7 +96,7 @@ export const RichTextEditor = forwardRef<Editor, IRichTextEditorProps>((props, r
             onHeightChange?.(size.actualHeight);
             setHeight(Math.max(defaultHeight, Math.min(size.actualHeight + 10, maxHeight)));
         }
-        _onChange?.(data);
+        _onChange?.(data, getPlainText(data.body?.dataStream ?? ''));
         checkScrollBar();
     });
 
@@ -125,12 +128,13 @@ export const RichTextEditor = forwardRef<Editor, IRichTextEditorProps>((props, r
             }
         };
 
-        setTimeout(() => {
+        const timer = setTimeout(() => {
             document.addEventListener('click', handleClickOutside);
         }, 100);
 
         return () => {
             document.removeEventListener('click', handleClickOutside);
+            clearTimeout(timer);
         };
     }, [editor, editorId, editorService, onClickOutside]);
 
@@ -153,6 +157,7 @@ export const RichTextEditor = forwardRef<Editor, IRichTextEditorProps>((props, r
                     ref={formulaEditorContainerRef}
                     onMouseUp={() => editor?.focus()}
                 />
+                {icon}
                 {!showPlaceholder
                     ? null
                     : (

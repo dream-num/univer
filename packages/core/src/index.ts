@@ -17,7 +17,7 @@
 import { installShims } from './common/shims';
 
 installShims();
-
+export { getPlainText } from './docs/data-model/text-x/build-utils/parse.js';
 export type { INumfmt } from './shared/types/numfmt.type';
 export { debounce, get, merge, mergeWith, set } from 'lodash-es';
 export { textDiff } from './shared/text-diff';

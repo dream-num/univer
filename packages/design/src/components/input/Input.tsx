@@ -33,6 +33,7 @@ export interface IInputProps extends Pick<InputProps, 'onFocus' | 'onBlur'> {
     onClick?: (e: React.MouseEvent<HTMLInputElement>) => void;
     onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
     onChange?: (value: string) => void;
+    style?: React.CSSProperties;
 }
 
 export const Input = ({

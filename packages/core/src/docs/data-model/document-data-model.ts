@@ -31,6 +31,7 @@ import { Tools } from '../../shared/tools';
 import { getEmptySnapshot } from './empty-snapshot';
 import { JSONX } from './json-x/json-x';
 import { PRESET_LIST_TYPE } from './preset-list-type';
+import { getPlainText } from './text-x/build-utils/parse';
 import { getBodySlice, SliceBodyType } from './text-x/utils';
 
 export const DEFAULT_DOC = {
@@ -355,5 +356,9 @@ export class DocumentDataModel extends DocumentDataModelSimple {
         super.updateDocumentId(unitId);
 
         this._unitId = unitId;
+    }
+
+    getPlainText() {
+        return getPlainText(this.getBody()?.dataStream ?? '');
     }
 }

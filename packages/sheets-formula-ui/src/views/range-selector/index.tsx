@@ -554,7 +554,6 @@ function RangeSelectorDialog(props: {
                     </div>
                 )}
             </div>
-
         </Dialog>
     );
 }

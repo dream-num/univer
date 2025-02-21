@@ -17,12 +17,14 @@
 import type { DocumentDataModel, ICommandService, IDocumentData, IDocumentStyle, IPosition, IUndoRedoService, IUniverInstanceService, Nullable } from '@univerjs/core';
 import type { DocSelectionManagerService } from '@univerjs/docs';
 import type { IDocSelectionInnerParam, IRender, ISuccinctDocRangeParam, ITextRangeWithStyle } from '@univerjs/engine-render';
+import type { Observable } from 'rxjs';
+import type { IEditorInputConfig } from '../selection/doc-selection-render.service';
 import { Disposable, isInternalEditorID, UniverInstanceType } from '@univerjs/core';
 import { KeyCode } from '@univerjs/ui';
-import { merge, type Observable, Subject } from 'rxjs';
+import { merge, Subject } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { ReplaceSnapshotCommand } from '../../commands/commands/replace-content.command';
-import { DocSelectionRenderService, type IEditorInputConfig } from '../selection/doc-selection-render.service';
+import { DocSelectionRenderService } from '../selection/doc-selection-render.service';
 
 interface IEditorEvent {
     target: IEditor;
@@ -261,7 +263,6 @@ export class Editor extends Disposable implements IEditor {
      */
     blur(): void {
         const docSelectionRenderService = this._param.render.with(DocSelectionRenderService);
-
         docSelectionRenderService.blur();
     }
 

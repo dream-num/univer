@@ -27,7 +27,7 @@ import { IRefSelectionsService, setEndForRange } from '@univerjs/sheets';
 import { IDescriptionService } from '@univerjs/sheets-formula';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { useDependency, useEvent } from '@univerjs/ui';
-import { useCallback, useEffect, useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { genFormulaRefSelectionStyle } from '../../../common/selection';
 import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render-service';
 
@@ -169,7 +169,7 @@ export function useDocHight(_leadingCharacter: string = '') {
     const commandService = useDependency(ICommandService);
     const leadingCharacterLength = useMemo(() => _leadingCharacter.length, [_leadingCharacter]);
 
-    const highlightDoc = useCallback((
+    const highlightDoc = useEvent((
         editor: Editor,
         sequenceNodes: INode[],
         isNeedResetSelection = true,
@@ -228,7 +228,7 @@ export function useDocHight(_leadingCharacter: string = '') {
             });
             return refSelections;
         }
-    }, [commandService, descriptionService, colorMap, leadingCharacterLength, _leadingCharacter]);
+    });
     return highlightDoc;
 }
 

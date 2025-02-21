@@ -25,6 +25,7 @@ export { ReferenceAbsoluteOperation } from './commands/operations/reference-abso
 export { SearchFunctionOperation } from './commands/operations/search-function.operation';
 export { RangeSelector } from './views/range-selector/index';
 export { FormulaEditor } from './views/formula-editor/index';
+export { type IRangeSelectorProps, RangeSelectorNew } from './views/range-selector-new/index';
 export { RefSelectionsRenderService } from './services/render-services/ref-selections.render-service';
 
 // #region - all commands

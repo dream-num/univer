@@ -15,11 +15,12 @@
  */
 
 import type { IStatisticItem } from './CopyableStatisticItem';
-import { debounce } from '@univerjs/core';
+import { debounce, IConfigService } from '@univerjs/core';
 import { useDependency } from '@univerjs/ui';
 import clsx from 'clsx';
 
 import React, { useEffect, useState } from 'react';
+import { HIDE_STATUS_BAR_STATISTIC } from '../../controllers/config.schema';
 import { IStatusBarService } from '../../services/status-bar.service';
 import { CopyableStatisticItem } from './CopyableStatisticItem';
 import styles from './index.module.less';
@@ -28,6 +29,9 @@ const SINGLE_MODE_WIDTH = 800;
 const ROW_COUNT_THRESHOLD = 3;
 
 export const StatusBar = () => {
+    const configService = useDependency(IConfigService);
+    const hideStatistic = configService.getConfig(HIDE_STATUS_BAR_STATISTIC);
+
     const [isSingle, setIsSingle] = useState(window.innerWidth < SINGLE_MODE_WIDTH);
     const [show, setShow] = useState(true);
 
@@ -44,6 +48,7 @@ export const StatusBar = () => {
     const showList = isSingle && firstItem ? [firstItem] : statistics.filter((item) => item.show && !item.disable);
 
     useEffect(() => {
+        if (hideStatistic) return;
         const subscription = statusBarService.state$.subscribe((state) => {
             const item = state?.values;
             if (!item || item.length === 0) {
@@ -67,7 +72,7 @@ export const StatusBar = () => {
         return () => {
             subscription.unsubscribe();
         };
-    }, [statusBarService]);
+    }, [statusBarService, hideStatistic, statistics]);
 
     const handleResize = debounce(() => {
         const newSingleState = window.innerWidth < SINGLE_MODE_WIDTH;
@@ -84,35 +89,64 @@ export const StatusBar = () => {
         };
     }, [isSingle]);
 
-    let renderContent = null;
-    if (showList.length > ROW_COUNT_THRESHOLD) {
-        const doubleLineList: IStatisticItem[][] = [];
-        showList.forEach((_, index) => {
-            if (index % 2 === 0) {
-                doubleLineList.push(showList.slice(index, index + 2));
+    const useStatisticLayout = (
+        showList: IStatisticItem[],
+        rowCountThreshold: number,
+        CopyableStatisticItem: React.ComponentType<IStatisticItem>
+    ) => {
+        if (hideStatistic) return null;
+        const renderContent = React.useMemo(() => {
+            if (showList.length > rowCountThreshold) {
+                const doubleLineList = showList.reduce<IStatisticItem[][]>((acc, _, index) => {
+                    if (index % 2 === 0) {
+                        acc.push(showList.slice(index, index + 2));
+                    }
+                    return acc;
+                }, []);
+
+                return (
+                    <>
+                        {doubleLineList.map((item, index) => (
+                            <div
+                                key={`stat-col-${index}`}
+                                className={styles.statisticListColumn}
+                            >
+                                {item[0] && (
+                                    <CopyableStatisticItem
+                                        key={item[0].name}
+                                        {...item[0]}
+                                    />
+                                )}
+                                {item[1] && (
+                                    <CopyableStatisticItem
+                                        key={item[1].name}
+                                        {...item[1]}
+                                    />
+                                )}
+                            </div>
+                        ))}
+                    </>
+                );
             }
-        });
-        renderContent = (
-            <>
-                {' '}
-                {doubleLineList!.map((item: IStatisticItem[], index: number) => (
-                    <div key={`stat-col-${index}`} className={styles.statisticListColumn}>
-                        {item?.[0] && <CopyableStatisticItem key={item?.[0].name} {...item?.[0]} />}
-                        {item?.[1] && <CopyableStatisticItem key={item?.[1].name} {...item?.[1]} />}
-                    </div>
-                ))}
-                {' '}
-            </>
-        );
-    } else {
-        renderContent = (
-            <>
-                {showList.map((item) => (
-                    <CopyableStatisticItem key={item.name} {...item} />
-                ))}
-            </>
-        );
-    }
+
+            return (
+                <>
+                    {showList.map((item) => (
+                        <CopyableStatisticItem
+                            key={item.name}
+                            {...item}
+                        />
+                    ))}
+                </>
+            );
+        }, [showList, rowCountThreshold, CopyableStatisticItem]);
+
+        return renderContent;
+    };
+
+    const renderContent = useStatisticLayout(showList,
+        ROW_COUNT_THRESHOLD,
+        CopyableStatisticItem);
 
     return (
         show && (

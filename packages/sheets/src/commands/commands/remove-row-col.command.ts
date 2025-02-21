@@ -83,12 +83,12 @@ export const RemoveRowByRangeCommand: ICommand<IRemoveRowByRangeCommandParams> =
 
         const visibleRanges = getVisibleRanges([range], accessor, unitId, subUnitId).reverse();
 
-        const preRedos: IMutationInfo[] = [];
-        const preUndos: IMutationInfo[] = [];
-        const undos: IMutationInfo[] = [];
-        const redos: IMutationInfo[] = [];
+        const undoMutations: IMutationInfo[] = [];
+        const redoMutations: IMutationInfo[] = [];
 
         visibleRanges.forEach((visibleRange) => {
+            const undos: IMutationInfo[] = [];
+            const redos: IMutationInfo[] = [];
             const removeRowsParams: IRemoveRowsMutationParams = {
                 unitId,
                 subUnitId,
@@ -111,17 +111,19 @@ export const RemoveRowByRangeCommand: ICommand<IRemoveRowByRangeCommandParams> =
                 params: { range: visibleRange } as IRemoveRowColCommandParams,
             });
 
-            preRedos.push(...(intercepted.preRedos ?? []));
+            redos.push(...(intercepted.preRedos ?? []));
             redos.push({ id: RemoveRowMutation.id, params: removeRowsParams });
             redos.push(...(intercepted.redos ?? []));
-            preUndos.push(...(intercepted.preUndos ?? []));
+            undos.push(...(intercepted.preUndos ?? []));
             undos.push({ id: InsertRowMutation.id, params: undoRemoveRowsParams });
             undos.push({ id: SetRangeValuesMutation.id, params: undoSetRangeValuesParams });
             undos.push(...(intercepted.undos ?? []));
+
+            redoMutations.push(...redos);
+            undoMutations.unshift(...undos);
         });
 
-        const undoMutations = [...preUndos, ...undos];
-        const redoMutations = [...preRedos, ...redos, followSelectionOperation(range, workbook, worksheet)];
+        redoMutations.push(followSelectionOperation(range, workbook, worksheet));
 
         const commandService = accessor.get(ICommandService);
         const result = sequenceExecute(redoMutations, commandService);

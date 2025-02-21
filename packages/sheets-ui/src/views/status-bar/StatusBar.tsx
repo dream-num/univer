@@ -15,11 +15,12 @@
  */
 
 import type { IStatisticItem } from './CopyableStatisticItem';
-import { debounce, HIDE_STATUS_BAR_STATISTIC, IConfigService } from '@univerjs/core';
+import { debounce, IConfigService } from '@univerjs/core';
 import { useDependency } from '@univerjs/ui';
 import clsx from 'clsx';
 
 import React, { useEffect, useState } from 'react';
+import { HIDE_STATUS_BAR_STATISTIC } from '../../controllers/config.schema';
 import { IStatusBarService } from '../../services/status-bar.service';
 import { CopyableStatisticItem } from './CopyableStatisticItem';
 import styles from './index.module.less';

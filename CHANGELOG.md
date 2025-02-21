@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.6.1](https://github.com/dream-num/univer/compare/v0.6.0...v0.6.1) (2025-02-21)
+
+
+### Bug Fixes
+
+* **facade:** add ranges to setBorder ([#4650](https://github.com/dream-num/univer/issues/4650)) ([434943f](https://github.com/dream-num/univer/commit/434943f4fa636f5790a94886a612d60c487f65fd))
+* fix eslint ([#4687](https://github.com/dream-num/univer/issues/4687)) ([a3a55ff](https://github.com/dream-num/univer/commit/a3a55ff33a138c2c49fe3a601355921a52c5d6bf))
+* fix plugin lazy loading not working ([#4668](https://github.com/dream-num/univer/issues/4668)) ([9702222](https://github.com/dream-num/univer/commit/9702222d58acb35dfa9ff14df0538be09048c22b))
+* **numfmt:** text format excel, default format ([#4669](https://github.com/dream-num/univer/issues/4669)) ([72411b9](https://github.com/dream-num/univer/commit/72411b96fa25d345f52ed84ebb3d1657c52ce45d))
+* paste rich text with br should keep line break ([#4670](https://github.com/dream-num/univer/issues/4670)) ([535a2a9](https://github.com/dream-num/univer/commit/535a2a91e94e7363f10b0e4398a0235eef12d819))
+* paste value from excel incorrect ([#4659](https://github.com/dream-num/univer/issues/4659)) ([d2323e4](https://github.com/dream-num/univer/commit/d2323e40c0321cfde43c6b197eface97e6983784))
+* scroll cmd should consider about unitId ([#4654](https://github.com/dream-num/univer/issues/4654)) ([c2e7fc1](https://github.com/dream-num/univer/commit/c2e7fc160a263542f07ec68a6d0a7cfba6e1c320))
+* **sheet:** fix some performance issue ([#4664](https://github.com/dream-num/univer/issues/4664)) ([b9e7402](https://github.com/dream-num/univer/commit/b9e740298fe7ef64fd1ae3626ddac8ce6fbfb256))
+* **sheets-formula-ui:** edit other sheet range error ([#4673](https://github.com/dream-num/univer/issues/4673)) ([dec0fdb](https://github.com/dream-num/univer/commit/dec0fdb9e9e06ea19ca39a2455bb941c65341e9b))
+* **style:** fix defualt theme style ([#4657](https://github.com/dream-num/univer/issues/4657)) ([95d4fee](https://github.com/dream-num/univer/commit/95d4feef5c5c41e6f28fba9ba769d26b8461320a))
+* **ui:** fix the issue where disabling shortcuts through the facade API does not work ([#4618](https://github.com/dream-num/univer/issues/4618)) ([684db12](https://github.com/dream-num/univer/commit/684db12b64282585305e8e3fdf2432826ff03a0c))
+* use number value in stats calculation ([#4684](https://github.com/dream-num/univer/issues/4684)) ([1811593](https://github.com/dream-num/univer/commit/1811593d601e103f8283a66ac57f559557f4bcf8))
+
+
+### Features
+
+* **sheets-ui:** update `FormulaBar` to accept custom className prop ([#4663](https://github.com/dream-num/univer/issues/4663)) ([f39baf5](https://github.com/dream-num/univer/commit/f39baf57b7278c4f3f54fb0c35e520c0605a392b))
+* **watermark:** move watermark component to engine render ([#4683](https://github.com/dream-num/univer/issues/4683)) ([95f6b9d](https://github.com/dream-num/univer/commit/95f6b9da975948d2b3c053a21589ef66a77ba5ce))
+
 # [0.6.0](https://github.com/dream-num/univer/compare/v0.6.0-alpha.0...v0.6.0) (2025-02-14)
 
 

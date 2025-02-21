@@ -16,7 +16,6 @@
 
 import type { IUnitRangeName, Nullable } from '@univerjs/core';
 import type { Editor, IRichTextEditorProps } from '@univerjs/docs-ui';
-import type { ReactNode } from 'react';
 import { LocaleService, RichTextBuilder } from '@univerjs/core';
 import { Button, Dialog, Input, Tooltip } from '@univerjs/design';
 import { IEditorService, RichTextEditor } from '@univerjs/docs-ui';
@@ -28,13 +27,24 @@ import { rangePreProcess } from '../range-selector/utils/range-pre-process';
 import { useRangesHighlight } from './hooks/use-ranges-highlight';
 import { useRangeSelectorSelectionChange } from './hooks/use-selection-change';
 import styles from './index.module.less';
+import { verifyRange } from './util';
+
+export interface IRangeSelectorInstance {
+    editor: Nullable<Editor>;
+    blur: () => void;
+    focus: () => void;
+    changePopupVisible: (visible: boolean) => void;
+    verify: () => boolean;
+}
 
 export interface IRangeSelectorProps extends IRichTextEditorProps {
     unitId: string;
     subUnitId: string;
-    onVerify?: (result: string) => Nullable<ReactNode>;
     maxRangeCount?: number;
     supportAcrossSheet?: boolean;
+    selectorRef?: React.RefObject<IRangeSelectorInstance>;
+    onVerify?: (res: boolean, rangeText: string) => void;
+    onRangeSelectorDialogVisibleChange?: (visible: boolean) => void;
 };
 
 export interface IRangeSelectorDialogProps {
@@ -49,7 +59,7 @@ export interface IRangeSelectorDialogProps {
     onShowBySelection?: () => void;
 }
 
-export function RangeSelectorPopup(props: IRangeSelectorDialogProps) {
+export function RangeSelectorDialog(props: IRangeSelectorDialogProps) {
     const { visible, initialValue, unitId, subUnitId, maxRangeCount = Infinity, supportAcrossSheet, onConfirm, onClose, onShowBySelection } = props;
     const localeService = useDependency(LocaleService);
     const lexerTreeBuilder = useDependency(LexerTreeBuilder);
@@ -165,14 +175,13 @@ export function stringifyRanges(ranges: IUnitRangeName[]) {
 
 export function RangeSelectorNew(props: IRangeSelectorProps) {
     const editorRef = useRef<Editor>(null);
-    const { unitId, subUnitId, onVerify, maxRangeCount, supportAcrossSheet, autoFocus, onChange } = props;
+    const { onVerify, selectorRef, unitId, subUnitId, maxRangeCount, supportAcrossSheet, autoFocus, onChange, onRangeSelectorDialogVisibleChange } = props;
     const [focusing, setFocusing] = useState(autoFocus ?? false);
     const [popupVisible, setPopupVisible] = useState(false);
     const [rangeSelectorRanges, setRangeSelectorRanges] = useState<IUnitRangeName[]>([]);
     const localeService = useDependency(LocaleService);
     const editorService = useDependency(IEditorService);
-
-    useRangesHighlight(editorRef.current, focusing);
+    const { sequenceNodes } = useRangesHighlight(editorRef.current, focusing);
 
     const blurEditor = () => {
         editorRef.current?.setSelectionRanges([]);
@@ -185,6 +194,35 @@ export function RangeSelectorNew(props: IRangeSelectorProps) {
         setRangeSelectorRanges(parseRanges(editorRef.current?.getDocumentDataModel().getPlainText() ?? ''));
         setPopupVisible(true);
     };
+
+    useEffect(() => {
+        if (!selectorRef) return;
+        selectorRef.current = {
+            get editor() {
+                return editorRef.current;
+            },
+            focus() {
+                editorService.focus(editorRef.current!.getEditorId());
+            },
+            blur: blurEditor,
+            verify: () => verifyRange(sequenceNodes),
+            changePopupVisible: (visible) => {
+                if (visible) {
+                    handleOpenModal();
+                } else {
+                    setPopupVisible(false);
+                }
+            },
+        };
+    }, []);
+
+    useEffect(() => {
+        onVerify?.(verifyRange(sequenceNodes), editorRef.current?.getDocumentDataModel().getPlainText() ?? '');
+    }, [sequenceNodes]);
+
+    useEffect(() => {
+        onRangeSelectorDialogVisibleChange?.(popupVisible);
+    }, [popupVisible]);
 
     return (
         <>
@@ -208,7 +246,7 @@ export function RangeSelectorNew(props: IRangeSelectorProps) {
                     </Tooltip>
                 )}
             />
-            <RangeSelectorPopup
+            <RangeSelectorDialog
                 initialValue={rangeSelectorRanges}
                 unitId={unitId}
                 subUnitId={subUnitId}

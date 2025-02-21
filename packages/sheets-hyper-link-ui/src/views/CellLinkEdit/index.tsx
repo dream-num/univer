@@ -23,7 +23,7 @@ import { DocBackScrollRenderController, DocSelectionRenderService } from '@unive
 import { deserializeRangeWithSheet, IDefinedNamesService, serializeRange, serializeRangeToRefString, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SetSelectionsOperation, SetWorksheetActiveOperation } from '@univerjs/sheets';
-import { RangeSelector } from '@univerjs/sheets-formula-ui';
+import { RangeSelectorNew } from '@univerjs/sheets-formula-ui';
 import { AddHyperLinkCommand, AddRichHyperLinkCommand, SheetHyperLinkType, SheetsHyperLinkParserService, UpdateHyperLinkCommand, UpdateRichHyperLinkCommand } from '@univerjs/sheets-hyper-link';
 import { IEditorBridgeService, IMarkSelectionService, ScrollToRangeOperation } from '@univerjs/sheets-ui';
 import { IZenZoneService, KeyCode, useDependency, useEvent, useObservable } from '@univerjs/ui';
@@ -62,8 +62,6 @@ export const CellLinkEdit = () => {
     const contextService = useDependency(IContextService);
     const themeService = useDependency(ThemeService);
     const docSelectionManagerService = useDependency(DocSelectionManagerService);
-
-    const rangeSelectorActionsRef = useRef<Parameters<typeof RangeSelector>[0]['actions']>({});
 
     const customHyperLinkSidePanel = useMemo(() => {
         if (sidePanelService.isBuiltInLinkType(type)) {
@@ -405,20 +403,13 @@ export const CellLinkEdit = () => {
 
         commandService.executeCommand(CloseHyperLinkPopupOperation.id);
     };
-    const handlePanelClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-        if (type !== SheetHyperLinkType.RANGE) {
-            return;
-        }
-        const handleOutClick = rangeSelectorActionsRef.current?.handleOutClick;
-        handleOutClick && handleOutClick(e as unknown as MouseEvent, () => isFocusRangeSelectorSet(false));
-    };
 
     if (!editing) {
         return null;
     }
 
     return (
-        <div className={styles.cellLinkEdit} style={{ display: hide ? 'none' : 'block' }} onClick={handlePanelClick}>
+        <div className={styles.cellLinkEdit} style={{ display: hide ? 'none' : 'block' }}>
             {showLabel
                 ? (
                     <FormLayout
@@ -477,16 +468,14 @@ export const CellLinkEdit = () => {
             )}
             {type === SheetHyperLinkType.RANGE && (
                 <FormLayout error={showError && !payload ? localeService.t('hyperLink.form.inputError') : ''}>
-                    <RangeSelector
+                    <RangeSelectorNew
                         unitId={workbook.getUnitId()}
                         subUnitId={subUnitId}
-                        isOnlyOneRange
-                        isSupportAcrossSheet
-                        initValue={payload}
-                        onChange={handleRangeChange}
-                        isFocus={isFocusRangeSelector}
-                        onFocus={() => isFocusRangeSelectorSet(true)}
-                        actions={rangeSelectorActionsRef.current}
+                        maxRangeCount={1}
+                        supportAcrossSheet
+                        initialValue={payload}
+                        onChange={(_, text) => handleRangeChange(text)}
+                        autoFocus={type === SheetHyperLinkType.RANGE}
                         onRangeSelectorDialogVisibleChange={async (visible) => {
                             if (visible) {
                                 if (editing.type === HyperLinkEditSourceType.ZEN_EDITOR) {
@@ -520,6 +509,7 @@ export const CellLinkEdit = () => {
                                 setHide(false);
                             }
                         }}
+                        onFocusChange={(focus) => isFocusRangeSelectorSet(focus)}
                     />
                 </FormLayout>
             )}

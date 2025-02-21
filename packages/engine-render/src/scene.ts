@@ -39,11 +39,11 @@ export const MAIN_VIEW_PORT_KEY = 'viewMain';
 
 export interface ISceneInputControlOptions {
     enableDown: boolean;
-    enableUp: boolean ;
-    enableMove: boolean ;
-    enableWheel: boolean ;
-    enableEnter: boolean ;
-    enableLeave: boolean ;
+    enableUp: boolean;
+    enableMove: boolean;
+    enableWheel: boolean;
+    enableEnter: boolean;
+    enableLeave: boolean;
 }
 export class Scene extends Disposable {
     private _sceneKey: string = '';

@@ -138,7 +138,7 @@ export class RuleMatrix {
         this._addRule(ruleId, _newRanges);
     }
 
-    addRangeRules(rules: { id: string;ranges: IRange[] }[]) {
+    addRangeRules(rules: { id: string; ranges: IRange[] }[]) {
         rules.forEach(({ id: ruleId, ranges }) => {
             if (!ranges.length) {
                 return;

@@ -51,7 +51,7 @@ export class ConditionalFormattingI18nController extends Disposable {
 
     private _findReplaceIndex = (text: string) => {
         const reg = /\{([^}]+)?\}/g;
-        const result: { startIndex: number;key: number;endIndex: number }[] = [];
+        const result: { startIndex: number; key: number; endIndex: number }[] = [];
         let currentValue = reg.exec(text);
         while (currentValue) {
             result.push({

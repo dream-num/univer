@@ -154,8 +154,8 @@ export class ScrollBar extends BaseScrollBar {
             this.placeholderBarRect?.transformByState({
                 left: parentWidth - this.barSize,
                 top: parentHeight - this.barSize,
-                width: this.barSize - this.barBorder,
-                height: this.barSize - this.barBorder,
+                width: Math.max(0, this.barSize - this.barBorder),
+                height: Math.max(0, this.barSize - this.barBorder),
             });
         }
     }
@@ -234,7 +234,7 @@ export class ScrollBar extends BaseScrollBar {
             left: 0,
             top: parentHeight - this.barSize,
             width: this.horizontalBarWidth,
-            height: this.barSize - this.barBorder,
+            height: Math.max(0, this.barSize - this.barBorder),
         });
 
         if (this.horizontalThumbWidth >= parentWidth - this.barSize) {
@@ -253,7 +253,7 @@ export class ScrollBar extends BaseScrollBar {
                 left: this._viewport.scrollX,
                 top: parentHeight - this.barSize + this.thumbMargin,
                 width: this.horizontalThumbWidth,
-                height: this.barSize - this.thumbMargin * 2,
+                height: Math.max(0, this.barSize - this.thumbMargin * 2),
             });
         }
     }
@@ -276,7 +276,7 @@ export class ScrollBar extends BaseScrollBar {
         this.verticalScrollTrack?.transformByState({
             left: parentWidth - this.barSize,
             top: 0,
-            width: this.barSize - this.barBorder,
+            width: Math.max(0, this.barSize - this.barBorder),
             height: this.verticalBarHeight,
         });
 
@@ -295,7 +295,7 @@ export class ScrollBar extends BaseScrollBar {
             this.verticalThumbRect?.transformByState({
                 left: parentWidth - this.barSize + this.thumbMargin,
                 top: this._viewport.scrollY,
-                width: this.barSize - this.thumbMargin * 2,
+                width: Math.max(0, this.barSize - this.thumbMargin * 2),
                 height: this.verticalThumbHeight,
             });
         }
@@ -355,7 +355,7 @@ export class ScrollBar extends BaseScrollBar {
             }));
         }
 
-        // events for pointerdown at scrolltrack
+        // events for pointerdown at scroll track
         if (this.verticalScrollTrack) {
             this._eventSub.add(this.verticalScrollTrack.onPointerDown$.subscribeEvent((evt: unknown, state: EventState) => {
                 const e = evt as IPointerEvent | IMouseEvent;
@@ -424,8 +424,6 @@ export class ScrollBar extends BaseScrollBar {
             srcElement.setProps({
                 fill: color,
             });
-            // srcElement.fill = color;
-            // srcElement.makeDirty(true);
             this.makeViewDirty(true);
         };
     }

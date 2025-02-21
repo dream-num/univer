@@ -235,10 +235,9 @@ export function RangeSelectorNew(props: IRangeSelectorProps) {
                 }}
                 editorRef={setEditor}
                 onClickOutside={() => {
-                    if (!focusing) return;
                     setFocusing(false);
-                    props.onClickOutside?.();
                     blurEditor();
+                    props.onClickOutside?.();
                 }}
                 icon={(
                     <Tooltip title={localeService.t('rangeSelector.buttonTooltip')} placement="bottom">
@@ -256,7 +255,7 @@ export function RangeSelectorNew(props: IRangeSelectorProps) {
                     const resultStr = stringifyRanges(ranges);
                     const empty = RichTextBuilder.newEmptyData();
                     empty.body!.dataStream = resultStr;
-                    editor?.replaceText(resultStr, []);
+                    editor?.replaceText(resultStr, false);
                     onChange?.(empty, resultStr);
                     setPopupVisible(false);
                     setRangeSelectorRanges([]);

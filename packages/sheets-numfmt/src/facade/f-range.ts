@@ -26,8 +26,16 @@ export interface IFRangeSheetsNumfmtMixin {
 
     /**
      * Set the number format of the range.
-     * @param pattern number format pattern.
-     * @returns FRange
+     * @param {string} pattern - The number format pattern.
+     * @returns {FRange} The FRange instance for chaining.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1');
+     * fRange.setValue(1234.567).setNumberFormat('#,##0.00');
+     * console.log(fRange.getValue()); // 1,234.57
+     * ```
      */
     setNumberFormat(pattern: string): FRange;
 }

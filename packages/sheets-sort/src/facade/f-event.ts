@@ -29,29 +29,33 @@ import { FSheetEventName } from '@univerjs/sheets/facade';
 export interface IFSheetSortEventMixin {
     /**
      * This event will be emitted when a range on a worksheet is sorted.
-     * Type of the event is {@link ISheetRangeSortedParams}.
+     * @see {@link ISheetRangeSortParams}
      * @example
      * ```typescript
      * const callbackDisposable = univerAPI.addEvent(univerAPI.Event.SheetRangeSorted, (params) => {
-     *   const { workbook, worksheet, sortColumn } = params;
-     *   sortColumn.forEach((col) => {
-     *    console.log(col.column, col.ascending);
-     *  });
+     *   console.log(params);
+     *   const { workbook, worksheet, range, sortColumn } = params;
      * });
+     *
+     * // Remove the event listener, use `callbackDisposable.dispose()`
      * ```
      */
     SheetRangeSorted: 'SheetRangeSorted';
+
     /**
      * This event will be emitted before sorting a range on a worksheet.
-     * Type of the event is {@link ISheetRangeSortParams}.
+     * @see {@link ISheetRangeSortParams}
      * @example
      * ```typescript
      * const callbackDisposable = univerAPI.addEvent(univerAPI.Event.SheetBeforeRangeSort, (params) => {
-     *   const { workbook, worksheet, sortColumn } = params;
-     *   sortColumn.forEach((col) => {
-     *    console.log(col.column, col.ascending);
-     *   });
+     *   console.log(params);
+     *   const { workbook, worksheet, range, sortColumn } = params;
+     *
+     *   // Cancel the sorting operation.
+     *   params.cancel = true;
      * });
+     *
+     * // Remove the event listener, use `callbackDisposable.dispose()`
      * ```
      */
     SheetBeforeRangeSort: 'SheetBeforeRangeSort';

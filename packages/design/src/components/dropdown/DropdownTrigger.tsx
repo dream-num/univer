@@ -22,6 +22,7 @@ interface IDropdownTriggerProps {
     children: ReactElement;
 }
 
+/** @deprecated */
 export function DropdownTrigger({ children }: IDropdownTriggerProps) {
     const { show, updateShow, triggerRef } = useDropdown();
 

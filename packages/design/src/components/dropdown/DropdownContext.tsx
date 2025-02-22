@@ -25,6 +25,7 @@ interface IDropdownContextType {
     triggerRef: RefObject<HTMLElement>;
 }
 
+/** @deprecated */
 export const DropdownContext = createContext<IDropdownContextType | null>(null);
 
 export const useDropdown = () => {

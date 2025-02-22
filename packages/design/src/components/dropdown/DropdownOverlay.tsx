@@ -33,6 +33,7 @@ export interface IDropdownOverlayProps {
     };
 }
 
+/** @deprecated */
 export function DropdownOverlay({ children, className, offset, anchor: anchorPos = { x: 'left', y: 'bottom' } }: IDropdownOverlayProps) {
     if (!canUseDom) {
         return null;

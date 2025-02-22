@@ -15,6 +15,10 @@
  */
 
 export { Dropdown } from './Dropdown';
+
+/** @deprecated */
 export { DropdownOverlay, type IDropdownOverlayProps } from './DropdownOverlay';
-export { DropdownProvider } from './DropdownProvider';
-export { DropdownTrigger } from './DropdownTrigger';
+
+/** @deprecated */export { DropdownProvider } from './DropdownProvider';
+
+/** @deprecated */export { DropdownTrigger } from './DropdownTrigger';

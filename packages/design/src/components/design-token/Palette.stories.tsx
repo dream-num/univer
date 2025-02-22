@@ -15,7 +15,6 @@
  */
 
 import type { Meta, StoryObj } from '@storybook/react';
-import React from 'react';
 
 import { defaultTheme, greenTheme } from '../../themes';
 

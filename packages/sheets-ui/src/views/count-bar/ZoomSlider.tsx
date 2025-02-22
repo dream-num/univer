@@ -21,10 +21,9 @@ import {
     IUniverInstanceService,
     UniverInstanceType,
 } from '@univerjs/core';
-import { Slider } from '@univerjs/design';
 import { SetWorksheetActiveOperation } from '@univerjs/sheets';
-import { useDependency, useObservable } from '@univerjs/ui';
-import React, { useCallback, useEffect, useState } from 'react';
+import { Slider, useDependency, useObservable } from '@univerjs/ui';
+import { useCallback, useEffect, useState } from 'react';
 
 import { SetZoomRatioCommand } from '../../commands/commands/set-zoom-ratio.command';
 import { SetZoomRatioOperation } from '../../commands/operations/set-zoom-ratio.operation';

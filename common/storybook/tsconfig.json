@@ -1,9 +1,6 @@
 {
     "extends": "@univerjs-infra/shared/tsconfigs/base",
     "compilerOptions": {
-        "target": "ESNext",
-        "jsx": "react",
-        "lib": ["ESNext", "dom", "dom.iterable"],
         "useDefineForClassFields": false,
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,

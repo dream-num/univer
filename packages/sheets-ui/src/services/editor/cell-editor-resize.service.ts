@@ -22,7 +22,7 @@ import { DOCS_COMPONENT_MAIN_LAYER_INDEX, VIEWPORT_KEY } from '@univerjs/docs-ui
 import { convertTextRotation, fixLineWidthByScale, IRenderManagerService, Rect, ScrollBar } from '@univerjs/engine-render';
 import { ILayoutService } from '@univerjs/ui';
 import { getEditorObject } from '../../basics/editor/get-editor-object';
-import styles from '../../views/sheet-container/index.module.less';
+import { SHEET_FOOTER_BAR_HEIGHT } from '../../views/sheet-container/SheetContainer';
 import { IEditorBridgeService } from '../editor-bridge.service';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import { ICellEditorManagerService } from './cell-editor-manager.service';
@@ -217,7 +217,7 @@ export class SheetCellEditorResizeService extends Disposable implements IRenderM
         const clientHeight =
             document.body.clientHeight -
             startY -
-            Number.parseFloat(styles.sheetFooterBarHeight) -
+            SHEET_FOOTER_BAR_HEIGHT -
             canvasOffset.top -
             EDITOR_BORDER_SIZE * 2;
 

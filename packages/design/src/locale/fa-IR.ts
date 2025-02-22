@@ -24,9 +24,6 @@ const locale: ILocale = {
             cancel: 'لغو',
             confirm: 'باشه',
         },
-        Slider: {
-            resetTo: 'بازنشانی به',
-        },
         Picker: {
             ...dajsEnUS,
             ...PickerEnUs,

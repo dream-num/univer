@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import React from 'react';
 import type { Meta } from '@storybook/react';
 import { Segmented } from './Segmented';
 
@@ -33,10 +32,11 @@ export const SegmentedBasic = {
     render() {
         return (
             <div style={{ width: 280 }}>
-                <Segmented options={[
-                    { label: 'By Values', value: 'Values' },
-                    { label: 'By Conditions', value: 'Conditions' },
-                ]}
+                <Segmented
+                    options={[
+                        { label: 'By Values', value: 'Values' },
+                        { label: 'By Conditions', value: 'Conditions' },
+                    ]}
                 />
             </div>
         );

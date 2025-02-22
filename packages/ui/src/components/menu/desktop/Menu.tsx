@@ -15,6 +15,8 @@
  */
 
 import type {
+    MenuRef } from '@univerjs/design';
+import type {
     IDisplayMenuItem,
     IMenuButtonItem,
     IMenuItem,
@@ -186,9 +188,15 @@ export const Menu = (props: IBaseMenuProps) => {
 
     useScrollYOverContainer(overViewport === 'scroll' ? menuEl : null, layoutService.rootContainerElement);
 
+    function handleSetMenuEl(ref: MenuRef | null) {
+        if (ref) {
+            setMenuEl(ref.list);
+        }
+    }
+
     return (
         <DesignMenu
-            ref={(ref) => ref?.list && setMenuEl(ref.list)}
+            ref={handleSetMenuEl}
             selectable={false}
         >
             <MenuOptionsWrapper {...restProps} />

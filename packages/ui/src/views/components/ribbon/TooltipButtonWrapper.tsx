@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import type { IDropdownOverlayProps, ITooltipProps } from '@univerjs/design';
-import { DropdownOverlay, DropdownProvider, DropdownTrigger, Tooltip } from '@univerjs/design';
-import React, { createContext, forwardRef, useContext, useImperativeHandle, useMemo, useRef, useState } from 'react';
+import type { ITooltipProps } from '@univerjs/design';
+import type { ReactNode } from 'react';
+import { Dropdown, Tooltip } from '@univerjs/design';
+import { createContext, forwardRef, useContext, useImperativeHandle, useMemo, useRef, useState } from 'react';
 
 const TooltipWrapperContext = createContext({
     dropdownVisible: false,
@@ -72,7 +73,7 @@ export const TooltipWrapper = forwardRef<ITooltipWrapperRef, ITooltipProps>((pro
     );
 });
 
-export function DropdownWrapper({ children, overlay, disabled, offset }: IDropdownOverlayProps & { overlay: React.ReactNode; disabled?: boolean }) {
+export function DropdownWrapper({ children, overlay, disabled }: { children: ReactNode; overlay: ReactNode; disabled?: boolean }) {
     const { setDropdownVisible } = useContext(TooltipWrapperContext);
 
     function handleVisibleChange(visible: boolean) {
@@ -80,18 +81,19 @@ export function DropdownWrapper({ children, overlay, disabled, offset }: IDropdo
     }
 
     return (
-        <DropdownProvider disabled={disabled} onVisibleChange={handleVisibleChange}>
-            <DropdownTrigger>
-                <div className="univer-h-full" onClick={(e) => e.stopPropagation()}>
-                    {children}
-                </div>
-            </DropdownTrigger>
-            <DropdownOverlay offset={offset}>
-                {/* TODO: When the new Menu Component is ready, plz remove the univer-theme class */}
+        <Dropdown
+            align="start"
+            overlay={(
                 <div className="univer-grid univer-gap-2 univer-theme">
                     {overlay}
                 </div>
-            </DropdownOverlay>
-        </DropdownProvider>
+            )}
+            disabled={disabled}
+            onOpenChange={handleVisibleChange}
+        >
+            <div className="univer-h-full" onClick={(e) => e.stopPropagation()}>
+                {children}
+            </div>
+        </Dropdown>
     );
 }

@@ -15,7 +15,6 @@
  */
 
 import type { Meta } from '@storybook/react';
-import React from 'react';
 
 import { Button } from '../button/Button';
 import { DropdownLegacy } from './DropdownLegacy';

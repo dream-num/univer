@@ -76,6 +76,9 @@ const locale: typeof zhCN = {
         cancel: 'انصراف',
     },
     'global-shortcut': 'کلید میانبر جهانی',
+    'zoom-slider': {
+        resetTo: 'بازنشانی به',
+    },
 };
 
 export default locale;

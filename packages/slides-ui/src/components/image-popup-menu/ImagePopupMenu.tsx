@@ -16,7 +16,7 @@
 
 import type { IDrawingSearch } from '@univerjs/core';
 import { ICommandService, LocaleService } from '@univerjs/core';
-import { DropdownLegacy } from '@univerjs/design';
+import { Dropdown } from '@univerjs/design';
 import { Autofill, MoreDownSingle } from '@univerjs/icons';
 import { useDependency } from '@univerjs/ui';
 import clsx from 'clsx';
@@ -80,11 +80,14 @@ export const SlideImagePopupMenu: React.FC<IImagePopupMenuProps> = (props: IImag
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
         >
-            <DropdownLegacy
-                placement="bottomLeft"
-                trigger={['click']}
+            <Dropdown
+                align="start"
                 overlay={(
-                    <ul className={styles.imagePopupMenu}>
+                    <ul
+                        className={clsx(styles.imagePopupMenu, `
+                          univer-box-border univer-p-2 univer-text-sm univer-theme
+                        `)}
+                    >
                         {availableMenu.map((item) => (
                             <li
                                 key={item.index}
@@ -96,8 +99,8 @@ export const SlideImagePopupMenu: React.FC<IImagePopupMenuProps> = (props: IImag
                         ))}
                     </ul>
                 )}
-                visible={visible}
-                onVisibleChange={onVisibleChange}
+                open={visible}
+                onOpenChange={onVisibleChange}
             >
                 <div
                     className={clsx(styles.btnContainer, {
@@ -110,7 +113,7 @@ export const SlideImagePopupMenu: React.FC<IImagePopupMenuProps> = (props: IImag
                     />
                     {showMore && <MoreDownSingle style={{ color: '#CCCCCC', fontSize: '8px', marginLeft: '8px' }} />}
                 </div>
-            </DropdownLegacy>
+            </Dropdown>
         </div>
     );
 };

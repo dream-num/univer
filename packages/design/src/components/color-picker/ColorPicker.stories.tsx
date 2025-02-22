@@ -33,7 +33,7 @@ export default meta;
 
 export const Playground = {
     render() {
-        const [value, setValue] = useState('rgba(100,150,200,0.8)');
+        const [value, setValue] = useState('#FF0000');
         const [format] = useState<'hex' | 'rgb' | 'hsl'>('rgb');
 
         return (

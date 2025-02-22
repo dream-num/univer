@@ -36,7 +36,6 @@ import {
     LocaleType,
     LocalUndoRedoService,
     PermissionService,
-    RediContext,
     ResourceManagerService,
     ThemeService,
     UniverInstanceService,
@@ -44,7 +43,7 @@ import {
 import { ConfigProvider, defaultTheme, greenTheme, themeInstance } from '@univerjs/design';
 import enUS from '@univerjs/design/locale/en-US';
 import zhCN from '@univerjs/design/locale/zh-CN';
-import { DesktopLocalStorageService } from '@univerjs/ui';
+import { DesktopLocalStorageService, RediContext } from '@univerjs/ui';
 import React, { useMemo } from 'react';
 
 import './global.css';

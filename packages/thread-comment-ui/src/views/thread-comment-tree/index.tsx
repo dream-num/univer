@@ -18,7 +18,7 @@ import type { IUser, UniverInstanceType } from '@univerjs/core';
 import type { IAddCommentCommandParams, IThreadComment, IUpdateCommentCommandParams } from '@univerjs/thread-comment';
 import type { IThreadCommentEditorInstance } from '../thread-comment-editor';
 import { generateRandomId, ICommandService, LocaleService, UserManagerService } from '@univerjs/core';
-import { DropdownLegacy, Menu, MenuItem, Tooltip } from '@univerjs/design';
+import { Dropdown, Tooltip } from '@univerjs/design';
 import { DeleteSingle, MoreHorizontalSingle, ReplyToCommentSingle, ResolvedSingle, SolveSingle } from '@univerjs/icons';
 import { AddCommentCommand, DeleteCommentCommand, DeleteCommentTreeCommand, getDT, ResolveCommentCommand, ThreadCommentModel, UpdateCommentCommand } from '@univerjs/thread-comment';
 import { useDependency, useObservable } from '@univerjs/ui';
@@ -118,18 +118,40 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                         )}
                     {isCommentBySelf && !isMock && !resolved
                         ? (
-                            <DropdownLegacy
+                            <Dropdown
                                 overlay={(
-                                    <Menu>
-                                        <MenuItem key="edit" onClick={() => onEditingChange?.(true)}>{localeService.t('threadCommentUI.item.edit')}</MenuItem>
-                                        <MenuItem key="delete" onClick={handleDeleteItem}>{localeService.t('threadCommentUI.item.delete')}</MenuItem>
-                                    </Menu>
+                                    <div className="univer-rounded-lg univer-p-4 univer-theme">
+                                        <ul
+                                            className={`
+                                              univer-m-0 univer-grid univer-list-none univer-gap-2 univer-p-0
+                                              univer-text-sm
+                                              [&_a]:univer-cursor-pointer [&_a]:univer-rounded [&_a]:univer-p-1
+                                            `}
+                                        >
+                                            <li>
+                                                <a
+                                                    className="hover:univer-bg-gray-200"
+                                                    onClick={() => onEditingChange?.(true)}
+                                                >
+                                                    {localeService.t('threadCommentUI.item.edit')}
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a
+                                                    className="hover:univer-bg-gray-200"
+                                                    onClick={handleDeleteItem}
+                                                >
+                                                    {localeService.t('threadCommentUI.item.delete')}
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
                                 )}
                             >
                                 <div className={styles.threadCommentIcon}>
                                     <MoreHorizontalSingle />
                                 </div>
-                            </DropdownLegacy>
+                            </Dropdown>
                         )
                         : null}
                 </div>

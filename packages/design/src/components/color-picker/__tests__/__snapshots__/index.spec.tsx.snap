@@ -53,12 +53,18 @@ exports[`ColorPicker > should render correctly 1`] = `
             "
     >
       <a
+        aria-controls="radix-:r0:"
+        aria-expanded="false"
+        aria-haspopup="dialog"
         class="
-                          univer-box-border univer-flex univer-h-8 univer-flex-1 univer-cursor-pointer
-                          univer-items-center univer-justify-between univer-gap-1 univer-rounded univer-border
-                          univer-border-solid univer-border-gray-200 univer-px-1.5 univer-text-sm univer-text-gray-700
-                          dark:univer-border-gray-600 dark:univer-text-white
-                        "
+                      univer-box-border univer-flex univer-h-8 univer-w-32 univer-cursor-pointer univer-items-center
+                      univer-justify-between univer-gap-1 univer-rounded univer-border univer-border-solid
+                      univer-border-gray-200 univer-px-1.5 univer-text-sm univer-text-gray-700
+                      dark:univer-border-gray-600 dark:univer-text-white
+                    "
+        data-slot="popover-trigger"
+        data-state="closed"
+        type="button"
       >
         <span>
           HEX
@@ -79,7 +85,7 @@ exports[`ColorPicker > should render correctly 1`] = `
         </svg>
       </a>
       <div
-        class="univer-relative univer-flex univer-gap-2"
+        class="univer-relative univer-flex univer-flex-1 univer-gap-2"
       >
         <input
           class="
@@ -429,12 +435,18 @@ exports[`ColorPicker > should render with showAlpha 1`] = `
             "
     >
       <a
+        aria-controls="radix-:r2:"
+        aria-expanded="false"
+        aria-haspopup="dialog"
         class="
-                          univer-box-border univer-flex univer-h-8 univer-flex-1 univer-cursor-pointer
-                          univer-items-center univer-justify-between univer-gap-1 univer-rounded univer-border
-                          univer-border-solid univer-border-gray-200 univer-px-1.5 univer-text-sm univer-text-gray-700
-                          dark:univer-border-gray-600 dark:univer-text-white
-                        "
+                      univer-box-border univer-flex univer-h-8 univer-w-32 univer-cursor-pointer univer-items-center
+                      univer-justify-between univer-gap-1 univer-rounded univer-border univer-border-solid
+                      univer-border-gray-200 univer-px-1.5 univer-text-sm univer-text-gray-700
+                      dark:univer-border-gray-600 dark:univer-text-white
+                    "
+        data-slot="popover-trigger"
+        data-state="closed"
+        type="button"
       >
         <span>
           HEX
@@ -455,7 +467,7 @@ exports[`ColorPicker > should render with showAlpha 1`] = `
         </svg>
       </a>
       <div
-        class="univer-relative univer-flex univer-gap-2"
+        class="univer-relative univer-flex univer-flex-1 univer-gap-2"
       >
         <input
           class="
@@ -801,12 +813,18 @@ exports[`ColorPicker > should render with value 1`] = `
             "
     >
       <a
+        aria-controls="radix-:r1:"
+        aria-expanded="false"
+        aria-haspopup="dialog"
         class="
-                          univer-box-border univer-flex univer-h-8 univer-flex-1 univer-cursor-pointer
-                          univer-items-center univer-justify-between univer-gap-1 univer-rounded univer-border
-                          univer-border-solid univer-border-gray-200 univer-px-1.5 univer-text-sm univer-text-gray-700
-                          dark:univer-border-gray-600 dark:univer-text-white
-                        "
+                      univer-box-border univer-flex univer-h-8 univer-w-32 univer-cursor-pointer univer-items-center
+                      univer-justify-between univer-gap-1 univer-rounded univer-border univer-border-solid
+                      univer-border-gray-200 univer-px-1.5 univer-text-sm univer-text-gray-700
+                      dark:univer-border-gray-600 dark:univer-text-white
+                    "
+        data-slot="popover-trigger"
+        data-state="closed"
+        type="button"
       >
         <span>
           HEX
@@ -827,7 +845,7 @@ exports[`ColorPicker > should render with value 1`] = `
         </svg>
       </a>
       <div
-        class="univer-relative univer-flex univer-gap-2"
+        class="univer-relative univer-flex univer-flex-1 univer-gap-2"
       >
         <input
           class="

@@ -272,6 +272,7 @@ export function RangeSelectorNew(props: IRangeSelectorProps) {
                 supportAcrossSheet={supportAcrossSheet}
                 onShowBySelection={() => {
                     if (focusing) {
+                        setRangeSelectorRanges([]);
                         setPopupVisible(true);
                     } else {
                         return true;

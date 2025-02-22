@@ -68,9 +68,12 @@ export function RangeSelectorDialog(props: IRangeSelectorDialogProps) {
 
     useEffect(() => {
         if (visible && initialValue.length) {
-            setRanges(initialValue.map((range) => range.sheetName ? serializeRangeWithSheet(range.sheetName, range.range) : serializeRange(range.range)));
+            const newRanges = initialValue.map((range) => range.sheetName ? serializeRangeWithSheet(range.sheetName, range.range) : serializeRange(range.range));
+            setRanges(newRanges);
+            setFocusIndex(newRanges.length - 1);
         } else {
             setRanges(['']);
+            setFocusIndex(0);
         }
     }, [visible]);
 

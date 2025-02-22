@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+export * from './base-scroll-bar';
 export * from './checkbox';
 export * from './circle';
 export * from './control';
@@ -24,5 +25,4 @@ export * from './path';
 export * from './rect';
 export * from './regular-polygon';
 export * from './rich-text';
-export * from './scroll-bar';
 export * from './shape';

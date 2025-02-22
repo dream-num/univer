@@ -16,6 +16,7 @@
 
 import type { IAccessor } from '@univerjs/core';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
+import { ICommandService, IUniverInstanceService } from '@univerjs/core';
 import {
     InsertColAfterCommand,
     InsertColBeforeCommand,
@@ -25,6 +26,8 @@ import {
     InsertRowAfterCommand,
     InsertRowBeforeCommand,
     RangeProtectionPermissionEditPoint,
+    SetSelectionsOperation,
+    SheetsSelectionsService,
     WorkbookEditablePermission,
     WorksheetEditPermission, WorksheetInsertColumnPermission, WorksheetInsertRowPermission,
 } from '@univerjs/sheets';
@@ -34,7 +37,7 @@ import { Observable } from 'rxjs';
 import { InsertRangeMoveDownConfirmCommand } from '../../commands/commands/insert-range-move-down-confirm.command';
 import { InsertRangeMoveRightConfirmCommand } from '../../commands/commands/insert-range-move-right-confirm.command';
 import { MENU_ITEM_INPUT_COMPONENT } from '../../components/menu-item-input';
-import { getBaseRangeMenuHidden$, getCellMenuHidden$, getCurrentRangeDisable$, getInsertAfterMenuHidden$, getInsertBeforeMenuHidden$, getObservableWithExclusiveRange$ } from './menu-util';
+import { deriveStateFromActiveSheet$, getBaseRangeMenuHidden$, getCellMenuHidden$, getCurrentRangeDisable$, getInsertAfterMenuHidden$, getInsertBeforeMenuHidden$, getObservableWithExclusiveRange$ } from './menu-util';
 
 export const COL_INSERT_MENU_ID = 'sheet.menu.col-insert';
 export function ColInsertMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
@@ -139,6 +142,10 @@ export function InsertRangeMoveDownMenuItemFactory(accessor: IAccessor): IMenuBu
 }
 
 export function InsertMultiRowsAfterMenuItemFactory(accessor: IAccessor): IMenuButtonItem<number> {
+    const univerInstanceService = accessor.get(IUniverInstanceService);
+    const selectionManagerService = accessor.get(SheetsSelectionsService);
+    const commandService = accessor.get(ICommandService);
+    const defaultValue = 1;
     return {
         id: InsertMultiRowsAfterCommand.id,
         type: MenuItemType.BUTTON,
@@ -152,16 +159,42 @@ export function InsertMultiRowsAfterMenuItemFactory(accessor: IAccessor): IMenuB
                 suffix: 'rightClick.insertRowsAfterSuffix',
             },
         },
-        value$: new Observable<number>((subscriber) => {
-            subscriber.next(1);
-            subscriber.complete();
-        }),
+        // value$: new Observable<number>((subscriber) => {
+        //     subscriber.next(1);
+        //     subscriber.complete();
+        // }),
+        value$: deriveStateFromActiveSheet$(univerInstanceService, defaultValue, () => new Observable((subscriber) => {
+            function update() {
+                const range = selectionManagerService.getCurrentLastSelection()?.range;
+                let countSelectedRange = defaultValue;
+                if (range) {
+                    countSelectedRange = range?.endRow - range?.startRow + 1;
+                }
+
+                subscriber.next(countSelectedRange);
+            }
+
+            const disposable = commandService.onCommandExecuted((c) => {
+                const id = c.id;
+                if (id === SetSelectionsOperation.id) {
+                    return update();
+                }
+            });
+
+            update();
+            return disposable.dispose;
+        })),
+
         disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetInsertRowPermission, WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
         hidden$: getInsertAfterMenuHidden$(accessor, 'row'),
     };
 }
 
 export function InsertMultiRowsAboveMenuItemFactory(accessor: IAccessor): IMenuButtonItem<number> {
+    const univerInstanceService = accessor.get(IUniverInstanceService);
+    const selectionManagerService = accessor.get(SheetsSelectionsService);
+    const commandService = accessor.get(ICommandService);
+    const defaultValue = 1;
     return {
         id: InsertMultiRowsAboveCommand.id,
         type: MenuItemType.BUTTON,
@@ -175,16 +208,37 @@ export function InsertMultiRowsAboveMenuItemFactory(accessor: IAccessor): IMenuB
                 suffix: 'rightClick.insertRowsAboveSuffix',
             },
         },
-        value$: new Observable<number>((subscriber) => {
-            subscriber.next(1);
-            subscriber.complete();
-        }),
+        value$: deriveStateFromActiveSheet$(univerInstanceService, defaultValue, () => new Observable((subscriber) => {
+            function update() {
+                const range = selectionManagerService.getCurrentLastSelection()?.range;
+                let countSelectedRange = defaultValue;
+                if (range) {
+                    countSelectedRange = range?.endRow - range?.startRow + 1;
+                }
+
+                subscriber.next(countSelectedRange);
+            }
+
+            const disposable = commandService.onCommandExecuted((c) => {
+                const id = c.id;
+                if (id === SetSelectionsOperation.id) {
+                    return update();
+                }
+            });
+
+            update();
+            return disposable.dispose;
+        })),
         disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetInsertRowPermission, WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
         hidden$: getInsertAfterMenuHidden$(accessor, 'row'),
     };
 }
 
 export function InsertMultiColsLeftMenuItemFactory(accessor: IAccessor): IMenuButtonItem<number> {
+    const univerInstanceService = accessor.get(IUniverInstanceService);
+    const selectionManagerService = accessor.get(SheetsSelectionsService);
+    const commandService = accessor.get(ICommandService);
+    const defaultValue = 1;
     return {
         id: InsertMultiColsLeftCommand.id,
         type: MenuItemType.BUTTON,
@@ -198,16 +252,37 @@ export function InsertMultiColsLeftMenuItemFactory(accessor: IAccessor): IMenuBu
                 suffix: 'rightClick.insertColsLeftSuffix',
             },
         },
-        value$: new Observable<number>((subscriber) => {
-            subscriber.next(1);
-            subscriber.complete();
-        }),
+        value$: deriveStateFromActiveSheet$(univerInstanceService, defaultValue, () => new Observable((subscriber) => {
+            function update() {
+                const range = selectionManagerService.getCurrentLastSelection()?.range;
+                let countSelectedRange = defaultValue;
+                if (range) {
+                    countSelectedRange = range?.endColumn - range?.startColumn + 1;
+                }
+
+                subscriber.next(countSelectedRange);
+            }
+
+            const disposable = commandService.onCommandExecuted((c) => {
+                const id = c.id;
+                if (id === SetSelectionsOperation.id) {
+                    return update();
+                }
+            });
+
+            update();
+            return disposable.dispose;
+        })),
         disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetInsertRowPermission, WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
         hidden$: getInsertAfterMenuHidden$(accessor, 'col'),
     };
 }
 
 export function InsertMultiColsRightMenuItemFactory(accessor: IAccessor): IMenuButtonItem<number> {
+    const univerInstanceService = accessor.get(IUniverInstanceService);
+    const selectionManagerService = accessor.get(SheetsSelectionsService);
+    const commandService = accessor.get(ICommandService);
+    const defaultValue = 1;
     return {
         id: InsertMultiRowsAboveCommand.id,
         type: MenuItemType.BUTTON,
@@ -221,10 +296,27 @@ export function InsertMultiColsRightMenuItemFactory(accessor: IAccessor): IMenuB
                 suffix: 'rightClick.insertColsRightSuffix',
             },
         },
-        value$: new Observable<number>((subscriber) => {
-            subscriber.next(1);
-            subscriber.complete();
-        }),
+        value$: deriveStateFromActiveSheet$(univerInstanceService, defaultValue, () => new Observable((subscriber) => {
+            function update() {
+                const range = selectionManagerService.getCurrentLastSelection()?.range;
+                let countSelectedRange = defaultValue;
+                if (range) {
+                    countSelectedRange = range?.endColumn - range?.startColumn + 1;
+                }
+
+                subscriber.next(countSelectedRange);
+            }
+
+            const disposable = commandService.onCommandExecuted((c) => {
+                const id = c.id;
+                if (id === SetSelectionsOperation.id) {
+                    return update();
+                }
+            });
+
+            update();
+            return disposable.dispose;
+        })),
         disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetInsertRowPermission, WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
         hidden$: getInsertAfterMenuHidden$(accessor, 'col'),
     };

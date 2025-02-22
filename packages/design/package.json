@@ -68,6 +68,7 @@
         "react-dom": ">=16.9.0 || >=17 || >=18 || >=19"
     },
     "dependencies": {
+        "@radix-ui/react-popover": "^1.1.6",
         "@rc-component/color-picker": "^2.0.1",
         "@rc-component/trigger": "^2.2.6",
         "@univerjs/icons": "^0.2.20",

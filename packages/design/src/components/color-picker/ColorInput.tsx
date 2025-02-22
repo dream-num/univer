@@ -16,9 +16,7 @@
 
 import { ChevronSortSingle } from '@univerjs/icons';
 import React, { useEffect, useMemo, useState } from 'react';
-import { DropdownOverlay } from '../dropdown/DropdownOverlay';
-import { DropdownProvider } from '../dropdown/DropdownProvider';
-import { DropdownTrigger } from '../dropdown/DropdownTrigger';
+import { Popover } from '../popover';
 import { hexToHsv, hslToHsv, hsvToHex, hsvToHsl, hsvToRgb, rgbToHsv } from './color-conversion';
 
 interface IColorInputProps {
@@ -310,6 +308,7 @@ function AlphaInput({ alpha, onChange }: IAlphaInputProps) {
 
 export function ColorInput({ hsv, alpha, showAlpha, onChangeColor, onChangeAlpha }: IColorInputProps) {
     const [format, setFormat] = useState<ColorFormat>('hex');
+    const [formatPanelVisible, setFormatPanelVisible] = useState(false);
 
     function renderInput(format: ColorFormat) {
         switch (format) {
@@ -324,6 +323,11 @@ export function ColorInput({ hsv, alpha, showAlpha, onChangeColor, onChangeAlpha
         }
     }
 
+    function handleSelectFormat(format: ColorFormat) {
+        setFormatPanelVisible(false);
+        setFormat(format);
+    }
+
     return (
         <div
             className={`
@@ -335,36 +339,39 @@ export function ColorInput({ hsv, alpha, showAlpha, onChangeColor, onChangeAlpha
               dark:[&_input]:univer-border-gray-600 dark:[&_input]:univer-text-white
             `}
         >
-            <DropdownProvider>
-                <DropdownTrigger>
-                    <a
-                        className={`
-                          univer-box-border univer-flex univer-h-8 univer-flex-1 univer-cursor-pointer
-                          univer-items-center univer-justify-between univer-gap-1 univer-rounded univer-border
-                          univer-border-solid univer-border-gray-200 univer-px-1.5 univer-text-sm univer-text-gray-700
-                          dark:univer-border-gray-600 dark:univer-text-white
-                        `}
-                    >
-                        <span>{format.toUpperCase()}</span>
-                        <ChevronSortSingle className="univer-size-5 univer-text-gray-400" />
-                    </a>
-                </DropdownTrigger>
-                <DropdownOverlay>
+            <Popover
+                align="start"
+                overlay={(
                     <div
                         className={`
-                          univer-grid univer-w-16
+                          univer-grid univer-w-32
                           [&>a]:univer-cursor-pointer [&>a]:univer-px-2 [&>a]:univer-py-1 [&>a]:univer-text-sm
                           dark:univer-text-white
+                          focus-visible:univer-outline-none
                         `}
                     >
-                        <a onClick={() => setFormat('hex')}>HEX</a>
-                        <a onClick={() => setFormat('hsl')}>HSL</a>
-                        <a onClick={() => setFormat('rgb')}>RGB</a>
+                        <a onClick={() => handleSelectFormat('hex')}>HEX</a>
+                        <a onClick={() => handleSelectFormat('hsl')}>HSL</a>
+                        <a onClick={() => handleSelectFormat('rgb')}>RGB</a>
                     </div>
-                </DropdownOverlay>
-            </DropdownProvider>
+                )}
+                open={formatPanelVisible}
+                onOpenChange={setFormatPanelVisible}
+            >
+                <a
+                    className={`
+                      univer-box-border univer-flex univer-h-8 univer-w-32 univer-cursor-pointer univer-items-center
+                      univer-justify-between univer-gap-1 univer-rounded univer-border univer-border-solid
+                      univer-border-gray-200 univer-px-1.5 univer-text-sm univer-text-gray-700
+                      dark:univer-border-gray-600 dark:univer-text-white
+                    `}
+                >
+                    <span>{format.toUpperCase()}</span>
+                    <ChevronSortSingle className="univer-size-5 univer-text-gray-400" />
+                </a>
+            </Popover>
 
-            <div className="univer-relative univer-flex univer-gap-2">
+            <div className="univer-relative univer-flex univer-flex-1 univer-gap-2">
                 {renderInput(format)}
             </div>
 

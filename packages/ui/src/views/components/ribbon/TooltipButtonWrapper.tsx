@@ -15,7 +15,7 @@
  */
 
 import type { IDropdownOverlayProps, ITooltipProps } from '@univerjs/design';
-import { DropdownOverlay, DropdownProvider, DropdownTrigger, Tooltip } from '@univerjs/design';
+import { Popover, Tooltip } from '@univerjs/design';
 import React, { createContext, forwardRef, useContext, useImperativeHandle, useMemo, useRef, useState } from 'react';
 
 const TooltipWrapperContext = createContext({
@@ -80,18 +80,19 @@ export function DropdownWrapper({ children, overlay, disabled, offset }: IDropdo
     }
 
     return (
-        <DropdownProvider disabled={disabled} onVisibleChange={handleVisibleChange}>
-            <DropdownTrigger>
-                <div className="univer-h-full" onClick={(e) => e.stopPropagation()}>
-                    {children}
-                </div>
-            </DropdownTrigger>
-            <DropdownOverlay offset={offset}>
-                {/* TODO: When the new Menu Component is ready, plz remove the univer-theme class */}
+        <Popover
+            align="start"
+            overlay={(
                 <div className="univer-grid univer-gap-2 univer-theme">
                     {overlay}
                 </div>
-            </DropdownOverlay>
-        </DropdownProvider>
+            )}
+            disabled={disabled}
+            onOpenChange={handleVisibleChange}
+        >
+            <div className="univer-h-full" onClick={(e) => e.stopPropagation()}>
+                {children}
+            </div>
+        </Popover>
     );
 }

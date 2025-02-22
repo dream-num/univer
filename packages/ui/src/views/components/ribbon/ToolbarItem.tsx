@@ -136,10 +136,8 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
 
                     <DropdownWrapper
                         disabled={disabled}
-                        offset={{ x: -24 }}
                         overlay={(
                             <Menu
-                                overViewport="scroll"
                                 menuType={id}
                                 options={options}
                                 onOptionSelect={handleSelect}

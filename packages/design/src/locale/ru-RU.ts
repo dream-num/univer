@@ -24,9 +24,6 @@ const locale: ILocale = {
             cancel: 'отмена',
             confirm: 'ок',
         },
-        Slider: {
-            resetTo: 'Сбросить до',
-        },
         Picker: {
             ...dajsRuRU,
             ...PickerRuRU,

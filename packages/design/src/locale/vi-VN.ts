@@ -24,9 +24,6 @@ const locale: ILocale = {
             cancel: 'Hủy bỏ',
             confirm: 'Xác nhận',
         },
-        Slider: {
-            resetTo: 'Khôi phục đến',
-        },
         Picker: {
             ...dajsViVN,
             ...PickerViVN,

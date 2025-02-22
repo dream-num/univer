@@ -74,6 +74,9 @@ const locale = {
         cancel: '取消',
     },
     'global-shortcut': '全局快捷键',
+    'zoom-slider': {
+        resetTo: '恢复至',
+    },
 };
 
 export default locale;

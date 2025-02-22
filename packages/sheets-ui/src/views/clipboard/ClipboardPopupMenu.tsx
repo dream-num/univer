@@ -17,15 +17,14 @@
 import type { IDiscreteRange } from '../../controllers/utils/range-tools';
 import type { IPasteHookKeyType } from '../../services/clipboard/type';
 import { ICommandService, IUniverInstanceService, LocaleService } from '@univerjs/core';
-import { DropdownOverlay, DropdownProvider, DropdownTrigger } from '@univerjs/design';
+import { clsx, Popover } from '@univerjs/design';
 import { convertTransformToOffsetX, convertTransformToOffsetY, IRenderManagerService } from '@univerjs/engine-render';
 import { CheckMarkSingle, MoreDownSingle, PasteSpecial } from '@univerjs/icons';
 import { useDependency, useObservable } from '@univerjs/ui';
-import clsx from 'clsx';
 import { useState } from 'react';
 import { SheetOptionalPasteCommand } from '../../commands/commands/clipboard.command';
 import { useActiveWorkbook } from '../../components/hook';
-import { SheetClipboardController } from '../../controllers/clipboard/clipboard.controller';
+// import { SheetClipboardController } from '../../controllers/clipboard/clipboard.controller';
 import { getSheetObject } from '../../controllers/utils/component-tools';
 import { ISheetClipboardService, PREDEFINED_HOOK_NAME } from '../../services/clipboard/clipboard.service';
 import { ISheetSelectionRenderService } from '../../services/selection/base-selection-render.service';
@@ -112,7 +111,7 @@ const useMenuPosition = (range?: IDiscreteRange) => {
 export const ClipboardPopupMenu = () => {
     const clipboardService = useDependency(ISheetClipboardService);
     const showMenu = useObservable(clipboardService.showMenu$, false);
-    const clipboardController = useDependency(SheetClipboardController);
+    // const clipboardController = useDependency(SheetClipboardController);
     const pasteOptionsCache = useObservable(clipboardService.pasteOptionsCache$, null);
     const localeService = useDependency(LocaleService);
     const commandService = useDependency(ICommandService);
@@ -120,7 +119,7 @@ export const ClipboardPopupMenu = () => {
     const [menuHovered, setMenuHovered] = useState(false);
     const [menuVisible, setMenuVisible] = useState(false);
 
-    const version = useObservable(clipboardController.refreshOptionalPaste$, Math.random());
+    // const version = useObservable(clipboardController.refreshOptionalPaste$, Math.random());
 
     const range = pasteOptionsCache?.target.pastedRange;
 
@@ -133,6 +132,7 @@ export const ClipboardPopupMenu = () => {
     const iconVisible = menuHovered || menuVisible;
 
     const handleClick = (type: string) => {
+        setMenuVisible(false);
         commandService.executeCommand(SheetOptionalPasteCommand.id, { type });
     };
 
@@ -146,52 +146,58 @@ export const ClipboardPopupMenu = () => {
             onMouseEnter={() => setMenuHovered(true)}
             onMouseLeave={() => setMenuHovered(false)}
         >
-            <DropdownProvider
-                visible={menuVisible}
-                onVisibleChange={(visible) => {
-                    setMenuVisible(visible);
-                }}
-            >
-                <DropdownTrigger>
+            <Popover
+                overlay={(
                     <div
-                        className={styles.sheetPasteOptionsIconWrapper}
-                        onClick={() => {
-                            setMenuVisible(!menuVisible);
-                        }}
+                        className={clsx(styles.sheetPasteOptionsMenu, `
+                          univer-border univer-border-solid univer-border-gray-200 univer-opacity-100
+                        `)}
                     >
-                        <PasteSpecial
-                            style={{ color: '#35322B' }}
-                            extend={{ colorChannel1: 'rgb(var(--green-700))' }}
-                        />
-                        {iconVisible && <MoreDownSingle />}
+                        <ul>
+                            {SheetPasteOptions.map((item) => {
+                                const itemType = PREDEFINED_HOOK_NAME[item.value as IPasteHookKeyType];
+                                const selected = pasteOptionsCache?.pasteType === itemType;
+                                return (
+                                    <li
+                                        key={item.value}
+                                        className={clsx(styles.sheetPasteOptionsMenuItem, 'hover:univer-bg-neutral-100')}
+                                        onClick={() => handleClick(item.value)}
+                                    >
+                                        <span>
+                                            {selected && (
+                                                <CheckMarkSingle className={styles.sheetPasteOptionsMenuItemIcon} style={{ color: 'rgb(var(--green-700, #409f11))' }} />
+                                            )}
+                                        </span>
+                                        <div
+                                            className={clsx(styles.sheetPasteOptionsMenuItemTitle, `
+                                              univer-text-gray-700
+                                            `)}
+                                        >
+                                            {localeService.t(item.label)}
+                                        </div>
+                                    </li>
+                                );
+                            })}
+                        </ul>
                     </div>
-                </DropdownTrigger>
-                <DropdownOverlay className={clsx(styles.sheetPasteOptionsMenu, `
-                  univer-border univer-border-solid univer-border-gray-200 univer-opacity-100
-                `)}
+                )}
+                open={menuVisible}
+                onOpenChange={setMenuVisible}
+            >
+
+                <div
+                    className={styles.sheetPasteOptionsIconWrapper}
+                    onClick={() => {
+                        setMenuVisible(!menuVisible);
+                    }}
                 >
-                    <ul>
-                        {SheetPasteOptions.map((item) => {
-                            const itemType = PREDEFINED_HOOK_NAME[item.value as IPasteHookKeyType];
-                            const selected = pasteOptionsCache?.pasteType === itemType;
-                            return (
-                                <li
-                                    key={item.value}
-                                    onClick={() => handleClick(item.value)}
-                                    className={clsx(styles.sheetPasteOptionsMenuItem, 'hover:univer-bg-neutral-100')}
-                                >
-                                    <span>
-                                        {selected && (
-                                            <CheckMarkSingle className={styles.sheetPasteOptionsMenuItemIcon} style={{ color: 'rgb(var(--green-700, #409f11))' }} />
-                                        )}
-                                    </span>
-                                    <div className={clsx(styles.sheetPasteOptionsMenuItemTitle, 'univer-text-gray-700')}>{localeService.t(item.label)}</div>
-                                </li>
-                            );
-                        })}
-                    </ul>
-                </DropdownOverlay>
-            </DropdownProvider>
+                    <PasteSpecial
+                        style={{ color: '#35322B' }}
+                        extend={{ colorChannel1: 'rgb(var(--green-700))' }}
+                    />
+                    {iconVisible && <MoreDownSingle />}
+                </div>
+            </Popover>
         </div>
     );
 };

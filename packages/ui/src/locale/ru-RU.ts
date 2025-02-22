@@ -76,6 +76,9 @@ const locale: typeof zhCN = {
         cancel: 'Отменить',
     },
     'global-shortcut': 'Глобальные ярлыки',
+    'zoom-slider': {
+        resetTo: 'Сбросить до',
+    },
 };
 
 export default locale;

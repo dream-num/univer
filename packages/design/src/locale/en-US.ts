@@ -24,9 +24,6 @@ const locale: ILocale = {
             cancel: 'cancel',
             confirm: 'ok',
         },
-        Slider: {
-            resetTo: 'Reset to',
-        },
         Picker: {
             ...dajsEnUS,
             ...PickerEnUs,

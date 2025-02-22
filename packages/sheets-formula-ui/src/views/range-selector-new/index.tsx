@@ -22,7 +22,7 @@ import { IEditorService, RichTextEditor } from '@univerjs/docs-ui';
 import { deserializeRangeWithSheet, LexerTreeBuilder, matchToken, sequenceNodeType, serializeRange, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { CloseSingle, DeleteSingle, IncreaseSingle, SelectRangeSingle } from '@univerjs/icons';
 import { useDependency, useEvent } from '@univerjs/ui';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useStateRef } from '../formula-editor/hooks/use-state-ref';
 import { rangePreProcess } from '../range-selector/utils/range-pre-process';
 import { useRangesHighlight } from './hooks/use-ranges-highlight';
@@ -66,6 +66,7 @@ export function RangeSelectorDialog(props: IRangeSelectorDialogProps) {
     const lexerTreeBuilder = useDependency(LexerTreeBuilder);
     const [ranges, setRanges] = useState<string[]>([]);
     const [focusIndex, setFocusIndex] = useState(0);
+    const scrollbarRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         if (visible && initialValue.length) {
@@ -103,12 +104,25 @@ export function RangeSelectorDialog(props: IRangeSelectorDialogProps) {
                     return;
                 }
             }
-            const addedRanges = selections.map((range) => !range.sheetName ? serializeRange(range.range) : serializeRangeWithSheet(range.sheetName, range.range));
+            const current = new Set(ranges);
+            const addedRangesOrigin = selections.map((range) => !range.sheetName ? serializeRange(range.range) : serializeRangeWithSheet(range.sheetName, range.range));
+            const addedRanges = addedRangesOrigin.filter((item) => !current.has(item));
+            if (!addedRanges.length) return;
             const newRanges = [...ranges];
-            const lastLength = Math.max(_lastLength, 1);
-            newRanges.splice(focusIndex + 1 - lastLength, lastLength, ...addedRanges);
-            setRanges(newRanges);
-            setFocusIndex(focusIndex + addedRanges.length - lastLength);
+            const focusNode = newRanges[focusIndex];
+            if (addedRangesOrigin.indexOf(focusNode) > -1) {
+                newRanges.push(...addedRanges);
+                setRanges(newRanges);
+                setFocusIndex(newRanges.length - 1);
+                requestAnimationFrame(() => {
+                    scrollbarRef.current?.scrollTo({ top: scrollbarRef.current.scrollHeight });
+                });
+            } else {
+                // modify
+                newRanges.splice(focusIndex, 1, ...addedRanges);
+                setRanges(newRanges);
+                setFocusIndex(focusIndex + addedRanges.length - 1);
+            }
         },
     });
 
@@ -142,7 +156,7 @@ export function RangeSelectorDialog(props: IRangeSelectorDialogProps) {
             )}
             onClose={onClose}
         >
-            <div className={styles.sheetRangeSelectorDialog}>
+            <div ref={scrollbarRef} className={styles.sheetRangeSelectorDialog}>
                 {ranges.map((text, index) => (
                     <div key={index} className={styles.sheetRangeSelectorDialogItem}>
                         <Input

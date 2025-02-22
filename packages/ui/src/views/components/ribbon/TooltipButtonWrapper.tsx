@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import type { IDropdownOverlayProps, ITooltipProps } from '@univerjs/design';
+import type { ITooltipProps } from '@univerjs/design';
+import type { ReactNode } from 'react';
 import { Dropdown, Tooltip } from '@univerjs/design';
-import React, { createContext, forwardRef, useContext, useImperativeHandle, useMemo, useRef, useState } from 'react';
+import { createContext, forwardRef, useContext, useImperativeHandle, useMemo, useRef, useState } from 'react';
 
 const TooltipWrapperContext = createContext({
     dropdownVisible: false,
@@ -72,7 +73,7 @@ export const TooltipWrapper = forwardRef<ITooltipWrapperRef, ITooltipProps>((pro
     );
 });
 
-export function DropdownWrapper({ children, overlay, disabled, offset }: IDropdownOverlayProps & { overlay: React.ReactNode; disabled?: boolean }) {
+export function DropdownWrapper({ children, overlay, disabled }: { children: ReactNode; overlay: ReactNode; disabled?: boolean }) {
     const { setDropdownVisible } = useContext(TooltipWrapperContext);
 
     function handleVisibleChange(visible: boolean) {

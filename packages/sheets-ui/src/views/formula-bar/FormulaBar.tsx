@@ -160,12 +160,14 @@ export function FormulaBar(props: IProps) {
     }, [editorBridgeService.currentEditCellState$]);
 
     useEffect(() => {
-        if (ref.current) {
-            const handleResize = () => {
-                const editorRect = ref.current!.getBoundingClientRect();
-                formulaEditorManagerService.setPosition(editorRect);
-            };
+        const handleResize = () => {
+            if (!ref.current) return;
 
+            const editorRect = ref.current.getBoundingClientRect();
+            formulaEditorManagerService.setPosition(editorRect);
+        };
+
+        if (ref.current) {
             handleResize();
             const a = new ResizeObserver(handleResize);
 

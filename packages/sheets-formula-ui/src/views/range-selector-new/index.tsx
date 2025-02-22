@@ -180,7 +180,19 @@ export function stringifyRanges(ranges: IUnitRangeName[]) {
 
 export function RangeSelectorNew(props: IRangeSelectorProps) {
     const [editor, setEditor] = useState<Editor | null>(null);
-    const { onVerify, selectorRef, unitId, subUnitId, maxRangeCount, supportAcrossSheet, autoFocus, onChange, onRangeSelectorDialogVisibleChange } = props;
+    const {
+        onVerify,
+        selectorRef,
+        unitId,
+        subUnitId,
+        maxRangeCount,
+        supportAcrossSheet,
+        autoFocus,
+        onChange,
+        onRangeSelectorDialogVisibleChange,
+        onClickOutside,
+        onFocusChange,
+    } = props;
     const [focusing, setFocusing] = useState(autoFocus ?? false);
     const [popupVisible, setPopupVisible] = useState(false);
     const [rangeSelectorRanges, setRangeSelectorRanges] = useState<IUnitRangeName[]>([]);
@@ -236,13 +248,13 @@ export function RangeSelectorNew(props: IRangeSelectorProps) {
                 {...props}
                 onFocusChange={(focusing) => {
                     setFocusing(focusing);
-                    props.onFocusChange?.(focusing);
+                    onFocusChange?.(focusing);
                 }}
                 editorRef={setEditor}
                 onClickOutside={() => {
                     setFocusing(false);
                     blurEditor();
-                    props.onClickOutside?.();
+                    onClickOutside?.();
                 }}
                 icon={(
                     <Tooltip title={localeService.t('rangeSelector.buttonTooltip')} placement="bottom">

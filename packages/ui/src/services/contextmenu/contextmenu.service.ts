@@ -36,8 +36,6 @@ export interface IContextMenuService {
     triggerContextMenu(event: IPointerEvent | IMouseEvent, menuType: string): void;
     hideContextMenu(): void;
     registerContextMenuHandler(handler: IContextMenuHandler): IDisposable;
-
-    trigger$: BehaviorSubject<number>;
 }
 
 export const IContextMenuService = createIdentifier<IContextMenuService>('ui.contextmenu.service');

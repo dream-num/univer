@@ -262,10 +262,6 @@ export function InsertMultiRowsAfterMenuItemFactory(accessor: IAccessor): IMenuB
                 suffix: 'rightClick.insertRowsAfterSuffix',
             },
         },
-        // value$: new Observable<number>((subscriber) => {
-        //     subscriber.next(1);
-        //     subscriber.complete();
-        // }),
         value$: deriveStateFromActiveSheet$(univerInstanceService, defaultValue, () => new Observable((subscriber) => {
             function update() {
                 const range = selectionManagerService.getCurrentLastSelection()?.range;

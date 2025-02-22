@@ -17,7 +17,7 @@
 import type { IDiscreteRange } from '../../controllers/utils/range-tools';
 import type { IPasteHookKeyType } from '../../services/clipboard/type';
 import { ICommandService, IUniverInstanceService, LocaleService } from '@univerjs/core';
-import { clsx, Popover } from '@univerjs/design';
+import { clsx, Dropdown } from '@univerjs/design';
 import { convertTransformToOffsetX, convertTransformToOffsetY, IRenderManagerService } from '@univerjs/engine-render';
 import { CheckMarkSingle, MoreDownSingle, PasteSpecial } from '@univerjs/icons';
 import { useDependency, useObservable } from '@univerjs/ui';
@@ -146,7 +146,7 @@ export const ClipboardPopupMenu = () => {
             onMouseEnter={() => setMenuHovered(true)}
             onMouseLeave={() => setMenuHovered(false)}
         >
-            <Popover
+            <Dropdown
                 overlay={(
                     <div
                         className={clsx(styles.sheetPasteOptionsMenu, `
@@ -197,7 +197,7 @@ export const ClipboardPopupMenu = () => {
                     />
                     {iconVisible && <MoreDownSingle />}
                 </div>
-            </Popover>
+            </Dropdown>
         </div>
     );
 };

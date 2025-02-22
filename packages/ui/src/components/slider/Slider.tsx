@@ -15,7 +15,7 @@
  */
 
 import { LocaleService } from '@univerjs/core';
-import { Button, clsx, Popover, Tooltip } from '@univerjs/design';
+import { Button, clsx, Dropdown, Tooltip } from '@univerjs/design';
 import { CheckMarkSingle, IncreaseSingle, ReduceSingle } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useMemo, useRef, useState } from 'react';
@@ -190,7 +190,7 @@ export function Slider(props: ISliderProps) {
                 <IncreaseSingle />
             </Button>
 
-            <Popover
+            <Dropdown
                 align="end"
                 overlay={(
                     <div
@@ -242,7 +242,7 @@ export function Slider(props: ISliderProps) {
                     {value}
                     %
                 </a>
-            </Popover>
+            </Dropdown>
         </div>
     );
 }

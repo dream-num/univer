@@ -15,7 +15,7 @@
  */
 
 import type { IDropdownOverlayProps, ITooltipProps } from '@univerjs/design';
-import { Popover, Tooltip } from '@univerjs/design';
+import { Dropdown, Tooltip } from '@univerjs/design';
 import React, { createContext, forwardRef, useContext, useImperativeHandle, useMemo, useRef, useState } from 'react';
 
 const TooltipWrapperContext = createContext({
@@ -80,7 +80,7 @@ export function DropdownWrapper({ children, overlay, disabled, offset }: IDropdo
     }
 
     return (
-        <Popover
+        <Dropdown
             align="start"
             overlay={(
                 <div className="univer-grid univer-gap-2 univer-theme">
@@ -93,6 +93,6 @@ export function DropdownWrapper({ children, overlay, disabled, offset }: IDropdo
             <div className="univer-h-full" onClick={(e) => e.stopPropagation()}>
                 {children}
             </div>
-        </Popover>
+        </Dropdown>
     );
 }

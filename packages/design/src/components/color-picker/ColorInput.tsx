@@ -16,7 +16,7 @@
 
 import { ChevronSortSingle } from '@univerjs/icons';
 import React, { useEffect, useMemo, useState } from 'react';
-import { Popover } from '../popover';
+import { Dropdown } from '../dropdown';
 import { hexToHsv, hslToHsv, hsvToHex, hsvToHsl, hsvToRgb, rgbToHsv } from './color-conversion';
 
 interface IColorInputProps {
@@ -339,7 +339,7 @@ export function ColorInput({ hsv, alpha, showAlpha, onChangeColor, onChangeAlpha
               dark:[&_input]:univer-border-gray-600 dark:[&_input]:univer-text-white
             `}
         >
-            <Popover
+            <Dropdown
                 align="start"
                 overlay={(
                     <div
@@ -369,7 +369,7 @@ export function ColorInput({ hsv, alpha, showAlpha, onChangeColor, onChangeAlpha
                     <span>{format.toUpperCase()}</span>
                     <ChevronSortSingle className="univer-size-5 univer-text-gray-400" />
                 </a>
-            </Popover>
+            </Dropdown>
 
             <div className="univer-relative univer-flex univer-flex-1 univer-gap-2">
                 {renderInput(format)}

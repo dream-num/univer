@@ -190,7 +190,7 @@ export const StatusBar = () => {
                     [styles.singleMode]: isSingle,
                 })}
             >
-                <div className={clsx(styles.statisticList)}>{renderContent}</div>
+                <div className="univer-flex">{renderContent}</div>
                 <div className={styles.statusBarDiv} />
             </div>
         )

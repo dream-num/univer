@@ -44,8 +44,8 @@ function PopoverContent({
                 sideOffset={sideOffset}
                 className={clsx(
                     `
-                      univer-z-[1080] univer-rounded-md univer-border univer-bg-white univer-text-gray-900
-                      univer-shadow-md univer-outline-hidden
+                      univer-z-[1080] univer-rounded-md univer-border univer-border-solid univer-bg-white
+                      univer-text-gray-900 univer-shadow-md univer-outline-hidden univer-border-gray-200
                       data-[side=bottom]:univer-slide-in-from-top-2
                       data-[side=left]:univer-slide-in-from-right-2
                       data-[side=right]:univer-slide-in-from-left-2

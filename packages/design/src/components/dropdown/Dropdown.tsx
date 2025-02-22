@@ -19,7 +19,7 @@ import type { ComponentProps, ReactNode } from 'react';
 import { useState } from 'react';
 import { PopoverContent, PopoverPrimitive, PopoverTrigger } from './Popover';
 
-interface IPopoverProps {
+interface IDropdownProps {
     children: ReactNode;
     overlay: ReactNode;
     disabled?: boolean;
@@ -27,7 +27,7 @@ interface IPopoverProps {
     onOpenChange?: (open: boolean) => void;
 }
 
-export function Popover(props: IPopoverProps & ComponentProps<typeof Content>) {
+export function Dropdown(props: IDropdownProps & ComponentProps<typeof Content>) {
     const {
         children,
         overlay,

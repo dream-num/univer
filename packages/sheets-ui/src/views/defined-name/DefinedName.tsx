@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Popover } from '@univerjs/design';
+import { Dropdown } from '@univerjs/design';
 import { IDefinedNamesService } from '@univerjs/engine-formula';
 import { MoreDownSingle } from '@univerjs/icons';
 import { useDependency } from '@univerjs/ui';
@@ -63,7 +63,7 @@ export function DefinedName({ disable }: { disable: boolean }) {
                 onChange={handleChangeSelection}
             />
 
-            <Popover
+            <Dropdown
                 overlay={(
                     <div className="univer-z-[1001]">
                         <DefinedNameOverlay />
@@ -82,7 +82,7 @@ export function DefinedName({ disable }: { disable: boolean }) {
                 >
                     <MoreDownSingle />
                 </a>
-            </Popover>
+            </Dropdown>
         </div>
     );
 }

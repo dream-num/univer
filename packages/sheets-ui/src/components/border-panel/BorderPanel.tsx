@@ -17,7 +17,7 @@
 import type { IBorderInfo } from '@univerjs/sheets';
 import type { IBorderPanelProps } from './interface';
 import { BorderStyleTypes } from '@univerjs/core';
-import { ColorPicker, DropdownLegacy, Menu, MenuItem } from '@univerjs/design';
+import { ColorPicker, Dropdown, Menu, MenuItem } from '@univerjs/design';
 import { MoreDownSingle, PaintBucket } from '@univerjs/icons';
 import { BorderStyleManagerService } from '@univerjs/sheets';
 import { ComponentManager, useDependency } from '@univerjs/ui';
@@ -121,14 +121,11 @@ export function BorderPanel(props: IBorderPanelProps) {
 
             <div className={styles.uiPluginSheetsBorderPanelStyles}>
                 <div>
-                    <DropdownLegacy
-                        align={{
-                            offset: [0, 18],
-                        }}
+                    <Dropdown
                         overlay={(
-                            <section className={styles.uiPluginSheetsBorderPanelBoard} onClick={stopPropagation}>
+                            <div className="univer-rounded-lg univer-p-4" onClick={stopPropagation}>
                                 <ColorPicker onChange={(value) => handleClick(value, 'color')} />
-                            </section>
+                            </div>
                         )}
                     >
                         <a className={styles.uiPluginSheetsBorderPanelButton} onClick={stopPropagation}>
@@ -137,16 +134,13 @@ export function BorderPanel(props: IBorderPanelProps) {
                                 <MoreDownSingle />
                             </span>
                         </a>
-                    </DropdownLegacy>
+                    </Dropdown>
                 </div>
 
                 <div>
-                    <DropdownLegacy
-                        align={{
-                            offset: [0, 18],
-                        }}
+                    <Dropdown
                         overlay={(
-                            <section onClick={stopPropagation}>
+                            <section className="univer-rounded-lg univer-p-4" onClick={stopPropagation}>
                                 <Menu>
                                     {BORDER_SIZE_CHILDREN.map((item) => (
                                         <MenuItem
@@ -167,7 +161,7 @@ export function BorderPanel(props: IBorderPanelProps) {
                                 <MoreDownSingle />
                             </span>
                         </a>
-                    </DropdownLegacy>
+                    </Dropdown>
                 </div>
             </div>
         </section>

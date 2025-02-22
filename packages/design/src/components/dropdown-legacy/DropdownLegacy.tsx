@@ -79,6 +79,7 @@ export interface IDropdownLegacyProps {
     disabled?: boolean;
 }
 
+/** @deprecated */
 export function DropdownLegacy(props: IDropdownLegacyProps) {
     const {
         className,

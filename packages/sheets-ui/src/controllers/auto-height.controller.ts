@@ -81,8 +81,18 @@ export class AutoHeightController extends Disposable {
             };
         }
         const config = configService.getConfig<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY);
-        const count = this._getRangesScope(ranges);
-        if (config?.maxAutoHeightCount! < count) {
+        let rangeList = ranges;
+        if (!Array.isArray(ranges)) {
+            // The code "const params = command.params as ISetRangeValuesRangeMutationParams;" of _initialize() method may make IRange as IRange[]. so need adjust here.
+            if ((ranges as IRange).startRow !== undefined && (ranges as IRange).startRow !== undefined) {
+                rangeList = [ranges];
+            } else {
+                rangeList = [];
+            }
+        }
+        const count = this._getRangesScope(rangeList);
+        const maxLimit = config?.maxAutoHeightCount ?? 1000;
+        if (maxLimit < count) {
             return {
                 redos: [],
                 undos: [],

@@ -45,11 +45,16 @@ export function DefinedName({ disable }: { disable: boolean }) {
     }
 
     return (
-        <div className={styles.definedName}>
+        <div
+            className={`
+              univer-relative univer-box-border univer-flex univer-h-full univer-w-24 univer-border-r-gray-200
+              univer-py-1.5 univer-transition-all
+            `}
+        >
             <input
                 className={clsx(`
-                  univer-absolute univer-box-border univer-h-full univer-w-full univer-appearance-none
-                  univer-border-none univer-px-1.5
+                  univer-box-border univer-h-full univer-w-full univer-appearance-none univer-border-0 univer-border-r
+                  univer-border-r-gray-200 univer-px-1.5
                   focus:univer-outline-none
                 `, {
                     [styles.defineNameInputDisable]: disable,
@@ -63,7 +68,7 @@ export function DefinedName({ disable }: { disable: boolean }) {
                 <DropdownTrigger>
                     <a
                         className={clsx(`
-                          univer-absolute univer-right-0 univer-flex univer-h-full univer-cursor-pointer
+                          univer-absolute univer-right-0 univer-top-0 univer-flex univer-h-full univer-cursor-pointer
                           univer-items-center univer-justify-center univer-px-1 univer-transition-colors
                           univer-duration-200
                           hover:univer-bg-gray-100

@@ -57,9 +57,6 @@ export function RenderSheetFooter() {
                         child?.item && (
                             <ToolbarItem
                                 key={child.key}
-                                align={{
-                                    offset: [-32, 18],
-                                }}
                                 {...child.item}
                             />
                         )

@@ -98,7 +98,7 @@ export function RangeSelectorDialog(props: IRangeSelectorDialogProps) {
         unitId,
         subUnitId,
         supportAcrossSheet,
-        onChange: (selections, _lastLength) => {
+        onChange: (selections) => {
             if (!visible) {
                 if (onShowBySelection?.()) {
                     return;

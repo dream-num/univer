@@ -21,8 +21,9 @@ import { Button, Dialog, Input, Tooltip } from '@univerjs/design';
 import { IEditorService, RichTextEditor } from '@univerjs/docs-ui';
 import { deserializeRangeWithSheet, LexerTreeBuilder, matchToken, sequenceNodeType, serializeRange, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { CloseSingle, DeleteSingle, IncreaseSingle, SelectRangeSingle } from '@univerjs/icons';
-import { useDependency } from '@univerjs/ui';
+import { useDependency, useEvent } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
+import { useStateRef } from '../formula-editor/hooks/use-state-ref';
 import { rangePreProcess } from '../range-selector/utils/range-pre-process';
 import { useRangesHighlight } from './hooks/use-ranges-highlight';
 import { useRangeSelectorSelectionChange } from './hooks/use-selection-change';
@@ -199,18 +200,19 @@ export function RangeSelectorNew(props: IRangeSelectorProps) {
     const localeService = useDependency(LocaleService);
     const editorService = useDependency(IEditorService);
     const { sequenceNodes } = useRangesHighlight(editor, focusing);
+    const sequenceNodesRef = useStateRef(sequenceNodes);
 
-    const blurEditor = () => {
+    const blurEditor = useEvent(() => {
         editor?.setSelectionRanges([]);
         editor?.blur();
         editorService.blur();
-    };
+    });
 
-    const handleOpenModal = () => {
+    const handleOpenModal = useEvent(() => {
         blurEditor();
         setRangeSelectorRanges(parseRanges(editor?.getDocumentDataModel().getPlainText() ?? ''));
         setPopupVisible(true);
-    };
+    });
 
     useEffect(() => {
         if (!selectorRef) return;
@@ -222,7 +224,7 @@ export function RangeSelectorNew(props: IRangeSelectorProps) {
                 editorService.focus(editor!.getEditorId());
             },
             blur: blurEditor,
-            verify: () => verifyRange(sequenceNodes),
+            verify: () => verifyRange(sequenceNodesRef.current),
             changePopupVisible: (visible) => {
                 if (visible) {
                     handleOpenModal();
@@ -231,7 +233,7 @@ export function RangeSelectorNew(props: IRangeSelectorProps) {
                 }
             },
         };
-    }, []);
+    }, [blurEditor, editor, editorService, handleOpenModal, selectorRef, sequenceNodesRef]);
 
     useEffect(() => {
         onVerify?.(verifyRange(sequenceNodes), editor?.getDocumentDataModel().getPlainText() ?? '');

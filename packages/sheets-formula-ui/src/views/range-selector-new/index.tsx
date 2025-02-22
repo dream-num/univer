@@ -93,16 +93,18 @@ export function RangeSelectorDialog(props: IRangeSelectorDialogProps) {
         unitId,
         subUnitId,
         supportAcrossSheet,
-        onChange: (range) => {
+        onChange: (selections, _lastLength) => {
             if (!visible) {
                 if (onShowBySelection?.()) {
                     return;
                 }
             }
-
+            const addedRanges = selections.map((range) => !range.sheetName ? serializeRange(range.range) : serializeRangeWithSheet(range.sheetName, range.range));
             const newRanges = [...ranges];
-            newRanges[focusIndex] = !range.sheetName ? serializeRange(range.range) : serializeRangeWithSheet(range.sheetName, range.range);
+            const lastLength = Math.max(_lastLength, 1);
+            newRanges.splice(focusIndex + 1 - lastLength, lastLength, ...addedRanges);
             setRanges(newRanges);
+            setFocusIndex(focusIndex + addedRanges.length - lastLength);
         },
     });
 

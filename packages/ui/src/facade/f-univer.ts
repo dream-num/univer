@@ -75,26 +75,74 @@ export interface IFUniverUIMixin {
      * @returns the {@link FSubmenu} object
      */
     createSubmenu(submenuItem: IFacadeSubmenuItem): FSubmenu;
+
     /**
      * Open a sidebar.
-     * @deprecated Please use `openSidebar` instead.
-     * @param params the sidebar options
-     * @returns the disposable object
+     * @deprecated Please use `univerAPI.openSidebar` instead.
+     * @param {ISidebarMethodOptions} params the sidebar options
+     * @returns {IDisposable} the disposable object
      */
     openSiderbar(params: ISidebarMethodOptions): IDisposable;
+
     /**
      * Open a sidebar.
-     * @deprecated Please use `openSidebar` instead.
-     * @param params the sidebar options
-     * @returns the disposable object
+     * @param {ISidebarMethodOptions} params the sidebar options
+     * @returns {IDisposable} the disposable object
+     * @example
+     * ```ts
+     * univerAPI.openSidebar({
+     *   id: 'mock-sidebar-id',
+     *   width: 300,
+     *   header: {
+     *     label: 'Sidebar Header',
+     *   },
+     *   children: {
+     *     label: 'Sidebar Content',
+     *   },
+     *   footer: {
+     *     label: 'Sidebar Footer',
+     *   },
+     *   onClose: () => {
+     *     console.log('Sidebar closed')
+     *   },
+     * });
+     * ```
      */
     openSidebar(params: ISidebarMethodOptions): IDisposable;
+
     /**
      * Open a dialog.
-     * @param dialog the dialog options
-     * @returns the disposable object
+     * @param {IDialogPartMethodOptions} dialog the dialog options
+     * @returns {IDisposable} the disposable object
+     * @example
+     * ```ts
+     * import { Button } from '@univerjs/design';
+     *
+     * univerAPI.openDialog({
+     *   id: 'mock-dialog-id',
+     *   width: 500,
+     *   title: {
+     *     label: 'Dialog Title',
+     *   },
+     *   children: {
+     *     label: 'Dialog Content',
+     *   },
+     *   footer: {
+     *     title: (
+     *       <>
+     *         <Button onClick={() => { console.log('Cancel clicked') }}>Cancel</Button>
+     *         <Button type="primary" onClick={() => { console.log('Confirm clicked') }} style={{marginLeft: '10px'}}>Confirm</Button>
+     *       </>
+     *     )
+     *   },
+     *   draggable: true,
+     *   mask: true,
+     *   maskClosable: true,
+     * });
+     * ```
      */
     openDialog(dialog: IDialogPartMethodOptions): IDisposable;
+
     /**
      * Get the component manager
      * @returns The component manager

@@ -29,7 +29,7 @@ import type {
 import type { CommandListenerSkeletonChange } from '@univerjs/sheets';
 import type { IEditorBridgeServiceVisibleParam, ISetZoomRatioCommandParams, ISheetPasteByShortKeyParams, IViewportScrollState } from '@univerjs/sheets-ui';
 import type { FRange } from '@univerjs/sheets/facade';
-import type { IBeforeClipboardChangeParam, IBeforeClipboardPasteParam, IBeforeSheetEditEndEventParams, IBeforeSheetEditStartEventParams, ISheetEditChangingEventParams, ISheetEditEndedEventParams, ISheetEditStartedEventParams } from './f-event';
+import type { IBeforeClipboardChangeParam, IBeforeClipboardPasteParam, IBeforeSheetEditEndEventParams, IBeforeSheetEditStartEventParams, ISheetEditChangingEventParams, ISheetEditEndedEventParams, ISheetEditStartedEventParams, ISheetZoomEvent } from './f-event';
 import { CanceledError, DisposableCollection, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, ICommandService, ILogService, IUniverInstanceService, LifecycleService, LifecycleStages, RichTextValue, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
 import { RichTextEditingMutation } from '@univerjs/docs';
@@ -266,11 +266,15 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
                 if (!target) return;
 
                 const { workbook, worksheet } = target;
-                this.fireEvent(this.Event.BeforeSheetZoomChange, {
+                const eventParams: ISheetZoomEvent = {
                     zoom: (commandInfo.params as ISetZoomRatioCommandParams).zoomRatio,
                     workbook,
                     worksheet,
-                });
+                };
+                this.fireEvent(this.Event.BeforeSheetZoomChange, eventParams);
+                if (eventParams.cancel) {
+                    throw new CanceledError();
+                }
             })
         );
 
@@ -768,7 +772,7 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
 
         this.fireEvent(this.Event.BeforeClipboardChange, eventParams);
         if (eventParams.cancel) {
-            throw new Error('Clipboard change is canceled');
+            throw new CanceledError();
         }
     }
 
@@ -833,7 +837,7 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
         if (!eventParams) return;
         this.fireEvent(this.Event.BeforeClipboardPaste, eventParams);
         if (eventParams.cancel) {
-            throw new Error('Before clipboard paste is canceled');
+            throw new CanceledError();
         }
     }
 
@@ -842,7 +846,7 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
         if (!eventParams) return;
         this.fireEvent(this.Event.ClipboardPasted, eventParams);
         if (eventParams.cancel) {
-            throw new Error('Clipboard pasted is canceled');
+            throw new CanceledError();
         }
     }
 
@@ -856,7 +860,7 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
         if (!eventParams) return;
         this.fireEvent(this.Event.BeforeClipboardPaste, eventParams);
         if (eventParams.cancel) {
-            throw new Error('Before clipboard paste is canceled');
+            throw new CanceledError();
         }
     }
 
@@ -870,7 +874,7 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
         if (!eventParams) return;
         this.fireEvent(this.Event.ClipboardPasted, eventParams);
         if (eventParams.cancel) {
-            throw new Error('Clipboard pasted is canceled');
+            throw new CanceledError();
         }
     }
 

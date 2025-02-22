@@ -101,14 +101,14 @@ import { ToggleGridlinesMenuFactory } from './menu/gridlines.menu';
 import {
     CELL_INSERT_MENU_ID,
     CellInsertMenuItemFactory,
-    InsertColBeforeMenuItemFactory,
+    InsertColLeftCellMenuItemFactory,
     InsertMultiColsLeftMenuItemFactory,
     InsertMultiColsRightMenuItemFactory,
     InsertMultiRowsAboveMenuItemFactory,
     InsertMultiRowsAfterMenuItemFactory,
     InsertRangeMoveDownMenuItemFactory,
     InsertRangeMoveRightMenuItemFactory,
-    InsertRowBeforeMenuItemFactory,
+    InsertRowBeforeCellMenuItemFactory,
     ROW_INSERT_MENU_ID,
     RowInsertMenuItemFactory,
 } from './menu/insert.menu';
@@ -331,11 +331,11 @@ export const menuSchema: MenuSchemaType = {
                 menuItemFactory: CellInsertMenuItemFactory,
                 [InsertRowBeforeCommand.id]: {
                     order: 0,
-                    menuItemFactory: InsertRowBeforeMenuItemFactory,
+                    menuItemFactory: InsertRowBeforeCellMenuItemFactory,
                 },
                 [InsertColBeforeCommand.id]: {
                     order: 1,
-                    menuItemFactory: InsertColBeforeMenuItemFactory,
+                    menuItemFactory: InsertColLeftCellMenuItemFactory,
                 },
                 [InsertRangeMoveRightConfirmCommand.id]: {
                     order: 2,

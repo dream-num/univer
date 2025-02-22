@@ -68,12 +68,15 @@ export function DesktopContextMenu() {
             setMenuType(menuType);
             setOffset([event.clientX, event.clientY]);
             setVisible(true);
+
+            // for refresh react comp input value after context menu open
             contextMenuService.trigger$.next(1);
         });
     }
 
     function handleClose() {
         setVisible(false);
+        // for refresh input value after context menu close
         contextMenuService.trigger$.next(0);
     }
 

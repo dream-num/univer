@@ -21,14 +21,14 @@ import { SheetsSelectionsService } from '@univerjs/sheets';
 import { useDependency, useEvent } from '@univerjs/ui';
 import { useEffect } from 'react';
 
-export function useRangeSelectorSelectionChange(opts: { supportAcrossSheet?: boolean; unitId: string; subUnitId: string; onChange: (ranges: IUnitRangeName[]) => void }) {
+export function useRangeSelectorSelectionChange(opts: { supportAcrossSheet?: boolean; unitId: string; subUnitId: string; onChange: (ranges: IUnitRangeName[], isStart: boolean) => void }) {
     const sheetsSelectionsService = useDependency(SheetsSelectionsService);
     const { supportAcrossSheet = false, unitId, subUnitId, onChange: _onChange } = opts;
     const univerInstanceService = useDependency(IUniverInstanceService);
     const workbook = univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
     const onChange = useEvent(_onChange);
 
-    const handleSelectionChange = useEvent((selections: Nullable<ISelectionWithStyle[]>) => {
+    const handleSelectionChange = useEvent((selections: Nullable<ISelectionWithStyle[]>, isStart: boolean) => {
         const currentSheet = workbook?.getActiveSheet();
         if (!currentSheet) return;
         if (!supportAcrossSheet && currentSheet.getSheetId() !== subUnitId) return;
@@ -39,21 +39,21 @@ export function useRangeSelectorSelectionChange(opts: { supportAcrossSheet?: boo
             sheetName: currentSheet.getSheetId() === subUnitId ? '' : currentSheet.getName(),
         }));
 
-        onChange(ranges);
+        onChange(ranges, isStart);
     });
 
     useEffect(() => {
         const disposableCollection = new DisposableCollection();
         disposableCollection.add(sheetsSelectionsService.selectionMoveStart$.subscribe((selections) => {
-            handleSelectionChange(selections);
+            handleSelectionChange(selections, true);
         }));
 
         disposableCollection.add(sheetsSelectionsService.selectionMoving$.subscribe((selections) => {
-            handleSelectionChange(selections);
+            handleSelectionChange(selections, false);
         }));
 
         disposableCollection.add(sheetsSelectionsService.selectionMoveEnd$.subscribe((selections) => {
-            handleSelectionChange(selections);
+            handleSelectionChange(selections, false);
         }));
 
         return () => {

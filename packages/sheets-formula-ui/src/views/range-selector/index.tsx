@@ -102,7 +102,7 @@ export function RangeSelectorDialog(props: IRangeSelectorDialogProps) {
         unitId,
         subUnitId,
         supportAcrossSheet,
-        onChange: (selections) => {
+        onChange: (selections, isStart) => {
             if (!visible) {
                 if (onShowBySelection?.()) {
                     return;
@@ -113,8 +113,12 @@ export function RangeSelectorDialog(props: IRangeSelectorDialogProps) {
             const addedRanges = addedRangesOrigin.filter((item) => !current.has(item));
             if (!addedRanges.length) return;
             const newRanges = [...ranges];
-            const focusNode = newRanges[focusIndex];
-            if (addedRangesOrigin.indexOf(focusNode) > -1) {
+
+            if (addedRangesOrigin.length > 1) {
+                if (!isStart) {
+                    newRanges.splice(focusIndex, 1);
+                }
+
                 newRanges.push(...addedRanges);
                 const finalRanges = newRanges.slice(0, maxRangeCount);
                 setRanges(finalRanges);
@@ -127,7 +131,7 @@ export function RangeSelectorDialog(props: IRangeSelectorDialogProps) {
                 newRanges.splice(focusIndex, 1, ...addedRanges);
                 const finalRanges = newRanges.slice(0, maxRangeCount);
                 setRanges(finalRanges);
-                setFocusIndex(focusIndex + finalRanges.length - 1);
+                setFocusIndex(focusIndex + addedRanges.length - 1);
             }
         },
     });

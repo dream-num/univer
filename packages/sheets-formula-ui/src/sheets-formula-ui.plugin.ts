@@ -21,7 +21,7 @@ import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
 import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY, RANGE_SELECTOR_COMPONENT_KEY } from '@univerjs/sheets-ui';
-import { ComponentManager } from '@univerjs/ui';
+import { builtInGlobalComponents, ComponentManager } from '@univerjs/ui';
 import { FORMULA_UI_PLUGIN_NAME } from './common/plugin-name';
 import {
     defaultPluginBaseConfig,
@@ -34,9 +34,13 @@ import { FormulaEditorShowController } from './controllers/formula-editor-show.c
 import { FormulaRenderManagerController } from './controllers/formula-render.controller';
 import { FormulaUIController } from './controllers/formula-ui.controller';
 import { FormulaPromptService, IFormulaPromptService } from './services/prompt.service';
+import { GlobalRangeSelectorService } from './services/range-selector.service';
 import { RefSelectionsRenderService } from './services/render-services/ref-selections.render-service';
 import { FormulaEditor } from './views/formula-editor/index';
 import { RangeSelector } from './views/range-selector-new';
+import { GlobalRangeSelector } from './views/range-selector-new/global';
+
+builtInGlobalComponents.add(GlobalRangeSelector);
 
 /**
  * The configuration of the formula UI plugin.
@@ -69,6 +73,7 @@ export class UniverSheetsFormulaUIPlugin extends Plugin {
         const j = this._injector;
         const dependencies: Dependency[] = [
             [IFormulaPromptService, { useClass: FormulaPromptService }],
+            [GlobalRangeSelectorService],
             [FormulaUIController],
             [FormulaAutoFillController],
             [FormulaClipboardController],

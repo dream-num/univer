@@ -26,7 +26,7 @@ export { SearchFunctionOperation } from './commands/operations/search-function.o
 export { FormulaEditor } from './views/formula-editor/index';
 export { type IRangeSelectorInstance, type IRangeSelectorProps, RangeSelector } from './views/range-selector-new/index';
 export { RefSelectionsRenderService } from './services/render-services/ref-selections.render-service';
-
+export { GlobalRangeSelectorService, type IShowRangeSelectorDialogOptions } from './services/range-selector.service';
 // #region - all commands
 
 export { FORMULA_PROMPT_ACTIVATED } from './services/prompt.service';

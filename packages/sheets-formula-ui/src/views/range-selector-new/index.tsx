@@ -44,7 +44,7 @@ export interface IRangeSelectorProps extends IRichTextEditorProps {
     subUnitId: string;
     maxRangeCount?: number;
     supportAcrossSheet?: boolean;
-    selectorRef?: React.RefObject<IRangeSelectorInstance>;
+    selectorRef?: React.RefObject<IRangeSelectorInstance | null>;
     onVerify?: (res: boolean, rangeText: string) => void;
     onRangeSelectorDialogVisibleChange?: (visible: boolean) => void;
     hideEditor?: boolean;

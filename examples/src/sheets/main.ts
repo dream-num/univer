@@ -42,10 +42,11 @@ import { UniverSheetsThreadCommentUIPlugin } from '@univerjs/sheets-thread-comme
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 import { UniverSheetsZenEditorPlugin } from '@univerjs/sheets-zen-editor';
 import { UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
-import { UniverUIPlugin } from '@univerjs/ui';
+import { BuiltInUIPart, UniverUIPlugin } from '@univerjs/ui';
 
 import { enUS, faIR, frFR, ruRU, viVN, zhCN, zhTW } from '../locales';
 
+import { ButtonRangeSelector } from './button';
 import '@univerjs/sheets/facade';
 import '@univerjs/ui/facade';
 import '@univerjs/docs-ui/facade';
@@ -63,8 +64,8 @@ import '@univerjs/sheets-drawing-ui/facade';
 import '@univerjs/sheets-zen-editor/facade';
 import '@univerjs/sheets-source-binding/facade';
 import '@univerjs/sheets-crosshair-highlight/facade';
+import '@univerjs/sheets-formula-ui/facade';
 import '@univerjs/sheets-sort/facade';
-
 import '../global.css';
 import './styles';
 
@@ -578,3 +579,22 @@ function initEvent() {
 }
 
 // initEvent();
+function initFacadeBtns() {
+    window.univerAPI?.registerUIPart(BuiltInUIPart.CUSTOM_HEADER, ButtonRangeSelector);
+}
+
+// setTimeout(() => {
+//     const active = window.univerAPI?.getActiveSheet();
+//     console.log('==active', active,window.univerAPI);
+//     if (!active) {
+//         return;
+//     }
+
+//     window.univerAPI?.showRangeSelectorDialog({
+//         unitId: active.workbook.getId(),
+//         subUnitId: active.worksheet.getSheetId(),
+//         callback: (ranges, isCancel) => {
+//             console.log('===range selector dialog result', ranges, isCancel);
+//         }
+//     })
+// }, 5000)

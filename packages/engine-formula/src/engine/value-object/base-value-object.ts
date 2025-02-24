@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
+import type { CustomData, Nullable } from '@univerjs/core';
 import { FormulaAstLRU } from '../../basics/cache-lru';
 import { ConcatenateType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
@@ -33,6 +33,8 @@ export interface IArrayValueObject {
     column: number;
 }
 export class BaseValueObject extends ObjectClassType {
+    private _customData: CustomData;
+
     constructor(private _rawValue: string | number | boolean) {
         super();
     }
@@ -70,6 +72,15 @@ export class BaseValueObject extends ObjectClassType {
 
     setArrayValue(value: BaseValueObject[][]) {
         /** abstract */
+    }
+
+    withCustomData(data: CustomData) {
+        this._customData = data;
+        return this;
+    }
+
+    getCustomData() {
+        return this._customData;
     }
 
     isCube() {

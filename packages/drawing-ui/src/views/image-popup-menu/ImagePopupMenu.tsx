@@ -16,11 +16,10 @@
 
 import type { IDrawingSearch } from '@univerjs/core';
 import { ICommandService, LocaleService } from '@univerjs/core';
-import { clsx, Dropdown } from '@univerjs/design';
+import { clsx, DropdownMenu } from '@univerjs/design';
 import { Autofill, MoreDownSingle } from '@univerjs/icons';
 import { useDependency } from '@univerjs/ui';
 import React, { useState } from 'react';
-import styles from './index.module.less';
 
 export interface IImagePopupMenuItem {
     label: string;
@@ -41,11 +40,11 @@ export interface IImagePopupMenuProps {
 }
 
 export const ImagePopupMenu: React.FC<IImagePopupMenuProps> = (props: IImagePopupMenuProps) => {
-    const menuItems = props.popup?.extraProps?.menuItems;
+    const { popup } = props;
 
-    if (!menuItems) {
-        return null;
-    }
+    const menuItems = popup?.extraProps?.menuItems;
+
+    if (!menuItems) return null;
 
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
@@ -79,40 +78,33 @@ export const ImagePopupMenu: React.FC<IImagePopupMenuProps> = (props: IImagePopu
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
         >
-            <Dropdown
+            <DropdownMenu
                 align="start"
-                overlay={(
-                    <ul
-                        className={clsx(styles.imagePopupMenu, `
-                          univer-box-border univer-p-2 univer-text-sm univer-theme
-                        `)}
-                    >
-                        {availableMenu.map((item) => (
-                            <li
-                                key={item.index}
-                                onClick={() => handleClick(item)}
-                                className={styles.imagePopupMenuItem}
-                            >
-                                <span className={styles.imagePopupMenuItemTitle}>{localeService.t(item.label)}</span>
-                            </li>
-                        ))}
-                    </ul>
-                )}
+                items={availableMenu.map((item) => ({
+                    type: 'item',
+                    children: localeService.t(item.label),
+                    onSelect: () => handleClick(item),
+                }))}
                 open={visible}
                 onOpenChange={onVisibleChange}
             >
                 <div
-                    className={clsx(styles.btnContainer, {
-                        [styles.btnContainerExpand]: visible,
+                    className={clsx(`
+                      univer-flex univer-items-center univer-gap-2 univer-rounded univer-border univer-border-solid
+                      univer-border-gray-200 univer-p-1
+                      hover:univer-bg-gray-100
+                    `, {
+                        'univer-bg-gray-100': visible,
+                        'univer-bg-white': !visible,
                     })}
                 >
                     <Autofill
                         style={{ color: '#35322B' }}
                         extend={{ colorChannel1: 'rgb(var(--green-700, #409f11))' }}
                     />
-                    {showMore && <MoreDownSingle style={{ color: '#CCCCCC', fontSize: '8px', marginLeft: '8px' }} />}
+                    {showMore && <MoreDownSingle className="univer-text-[10px] univer-text-gray-400" />}
                 </div>
-            </Dropdown>
+            </DropdownMenu>
         </div>
     );
 };

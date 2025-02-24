@@ -20,7 +20,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { ComponentManager } from '../../../common/component-manager';
 import { IZenZoneService } from '../../../services/zen-zone/zen-zone.service';
 import { useDependency, useObservable } from '../../../utils/di';
-import styles from './index.module.less';
 
 export function ZenZone() {
     const zenZoneService = useDependency(IZenZoneService);
@@ -47,8 +46,6 @@ export function ZenZone() {
         };
     }, []);
 
-    const _className = clsx(styles.zenZone, visible ? styles.zenZoneOpen : styles.zenZoneClose);
-
     const Component = useMemo(() => {
         const Component = componentManager.get(componentKey ?? '');
         if (Component) {
@@ -57,8 +54,13 @@ export function ZenZone() {
     }, [componentKey]);
 
     return (
-        <section style={hidden ? { opacity: 0, zIndex: -1 } : undefined} className={_className}>
-            <div className={styles.zenZoneEditorContainer}>
+        <section
+            className={clsx('univer-absolute univer-z-[-1] univer-flex', {
+                'univer-inset-0 univer-z-[100] univer-bg-gray-100 univer-animate-in univer-fade-in': visible,
+                'univer-hidden': hidden,
+            })}
+        >
+            <div className="univer-relative univer-flex-1">
                 {Component && <Component />}
             </div>
         </section>

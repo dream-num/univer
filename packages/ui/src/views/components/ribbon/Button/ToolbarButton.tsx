@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-import clsx from 'clsx';
-import React from 'react';
-
-import styles from './index.module.less';
+import { clsx } from '@univerjs/design';
 
 export interface IBaseToolbarButtonProps {
     children?: React.ReactNode;
@@ -86,23 +83,21 @@ export function ToolbarButton(props: IBaseToolbarButtonProps) {
         onDoubleClick && onDoubleClick(e);
     };
 
-    const _className = clsx(
-        styles.toolbarBtn,
-        {
-            [`
-              ${styles.toolbarBtnActive}
-            `]: active,
-            [`
-              ${styles.toolbarBtnNoIcon}
-            `]: noIcon,
-        },
-        className
-    );
-
     return (
         <button
             type="button"
-            className={_className}
+            className={clsx(`
+              univer-flex univer-h-6 univer-min-w-6 univer-cursor-pointer univer-items-center univer-justify-center
+              univer-rounded univer-border-none univer-bg-transparent univer-p-0 univer-text-base univer-text-gray-900
+              univer-outline-none
+              [&:disabled]:univer-cursor-not-allowed [&:disabled]:univer-text-gray-200
+              [&:disabled]:hover:univer-bg-transparent
+              hover:univer-bg-gray-100
+            `, {
+                'univer-p-4': noIcon,
+                '!univer-bg-gray-200': active,
+                'univer-text-gray-100': disabled,
+            })}
             style={style}
             disabled={disabled}
             onClick={handleClick}

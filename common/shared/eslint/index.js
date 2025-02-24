@@ -61,6 +61,7 @@ exports.baseRules = {
     'perfectionist/sort-imports': 'warn',
     'perfectionist/sort-named-exports': 'warn',
     'antfu/consistent-chaining': 'warn',
+    'react-hooks/exhaustive-deps': 'off',
     'sort-imports': [
         'error',
         {
@@ -77,6 +78,18 @@ exports.baseRules = {
     'command/command': 'off',
     'jsdoc/tag-lines': 'off',
     'import/consistent-type-specifier-style': 'warn',
+
+    'no-restricted-imports': [
+        'warn',
+        {
+            paths: [
+                {
+                    name: 'clsx',
+                    message: 'Please use `import { clsx } from \'@univerjs/design\'` instead.',
+                },
+            ],
+        },
+    ],
 
     // IMPORTANT: To ensure compatibility, some features of React 19 will be disabled.
     'react/no-forward-ref': 'off',

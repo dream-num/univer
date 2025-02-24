@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import React, { createContext, useMemo } from 'react';
-import canUseDom from 'rc-util/lib/Dom/canUseDom';
-
 import type { ILocale } from '../../locale/interface';
+import React, { createContext, useMemo } from 'react';
+import { isBrowser } from '../../helper/is-browser';
 
 export interface IConfigProviderProps {
     children: React.ReactNode;
@@ -26,7 +25,7 @@ export interface IConfigProviderProps {
 }
 
 export const ConfigContext = createContext<Omit<IConfigProviderProps, 'children'>>({
-    mountContainer: canUseDom() ? document.body : null,
+    mountContainer: isBrowser() ? document.body : null,
 });
 
 export function ConfigProvider(props: IConfigProviderProps) {

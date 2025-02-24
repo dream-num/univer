@@ -15,8 +15,9 @@
  */
 
 import type { ICommandInfo, Workbook } from '@univerjs/core';
+import type { IDropdownProps } from '@univerjs/design';
 import { BooleanNumber, DisposableCollection, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { DropdownLegacy } from '@univerjs/design';
+import { clsx, DropdownMenu } from '@univerjs/design';
 import { CheckMarkSingle, ConvertSingle, EyelashSingle } from '@univerjs/icons';
 import {
     InsertSheetMutation,
@@ -30,11 +31,10 @@ import {
     WorksheetProtectionRuleModel,
 } from '@univerjs/sheets';
 import { useDependency, useObservable } from '@univerjs/ui';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { ISheetBarService } from '../../../services/sheet-bar/sheet-bar.service';
 import { SheetBarButton } from '../sheet-bar-button/SheetBarButton';
-import styles from './index.module.less';
 
 export interface ISheetBarMenuItem {
     label?: React.ReactNode;
@@ -44,14 +44,7 @@ export interface ISheetBarMenuItem {
     sheetId?: string;
 }
 
-export interface ISheetBarMenuProps {
-    style?: React.CSSProperties;
-    onClick?: (e?: MouseEvent) => void;
-}
-
-export function SheetBarMenu(props: ISheetBarMenuProps) {
-    const { style } = props;
-
+export function SheetBarMenu() {
     const [menu, setMenu] = useState<ISheetBarMenuItem[]>([]);
     const [visible, setVisible] = useState(false);
 
@@ -97,7 +90,6 @@ export function SheetBarMenu(props: ISheetBarMenuProps) {
         });
 
         setMenu(worksheetMenuItems);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [workbook, worksheetProtectionRuleModel]);
 
     const setupStatusUpdate = useCallback(() =>
@@ -134,48 +126,43 @@ export function SheetBarMenu(props: ISheetBarMenuProps) {
         return () => disposables.dispose();
     }, [setupStatusUpdate, sheetBarService, statusInit, workbook]);
 
+    const items: IDropdownProps['items'] = useMemo(() => menu.map((item) => ({
+        type: 'item',
+        children: (
+            <div className="univer-pl-6 univer-box-border univer-relative">
+                {(item.selected || item.hidden) && (
+                    <span className="univer-absolute univer-left-1 univer-top-0.5">
+                        {item.selected && <CheckMarkSingle className="univer-text-primary-600  univer-size-4" />}
+                        {item.hidden && <EyelashSingle className="univer-text-gray-400 univer-size-4" />}
+                    </span>
+                )}
+
+                <span
+                    className={clsx({
+                        'univer-text-primary-600': item.selected,
+                    })}
+                >
+                    {item.label}
+                </span>
+            </div>
+        ),
+        onSelect: () => {
+            handleClick(item);
+        },
+    })), [menu]);
+
     return (
-        <DropdownLegacy
-            placement="topLeft"
-            trigger={['click']}
-            overlay={(
-                <ul className={styles.sheetBarMenu} style={{ ...style }}>
-                    {menu.map((item) => (
-                        <li
-                            key={item.index}
-                            onClick={() => handleClick(item)}
-                            className={item.selected
-                                ? `
-                                  ${styles.sheetBarMenuItem}
-                                  ${styles.sheetBarMenuItemSelect}
-                                `
-                                : item.hidden
-                                    ? `
-                                      ${styles.sheetBarMenuItem}
-                                      ${styles.sheetBarMenuItemHide}
-                                    `
-                                    : styles.sheetBarMenuItem}
-                        >
-                            <span className={styles.sheetBarMenuItemIcon}>
-                                {item.selected
-                                    ? <CheckMarkSingle />
-                                    : item.hidden
-                                        ? <EyelashSingle />
-                                        : <CheckMarkSingle />}
-                            </span>
-                            <div className={styles.sheetBarMenuItemLabel}>{item.label}</div>
-                        </li>
-                    ))}
-                </ul>
-            )}
-            visible={visible}
-            onVisibleChange={onVisibleChange}
+        <DropdownMenu
+            align="start"
+            items={items}
+            open={visible}
+            onOpenChange={onVisibleChange}
         >
             <div>
                 <SheetBarButton>
                     <ConvertSingle />
                 </SheetBarButton>
             </div>
-        </DropdownLegacy>
+        </DropdownMenu>
     );
 }

@@ -53,7 +53,14 @@ export function SheetBarButton(props: IBaseSheetBarButtonProps) {
     };
 
     return (
-        <button className={styles.sheetBarBtn} style={style} disabled={disabled} onClick={handleClick} {...restProps}>
+        <button
+            type="button"
+            className={styles.sheetBarBtn}
+            style={style}
+            disabled={disabled}
+            onClick={handleClick}
+            {...restProps}
+        >
             {children}
         </button>
     );

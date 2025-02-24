@@ -191,7 +191,7 @@ export const WatermarkTextSetting: React.FC<IWatermarkTextSettingProps> = (props
                         />
                     </div>
 
-                    <div className={styles.watermarkTextSettingLayoutFontWrapper}>
+                    <div className="univer-grid univer-gap-1">
                         <div>{localeService.t('univer-watermark.startY')}</div>
                         <InputNumber
                             className="univer-box-border univer-h-7"

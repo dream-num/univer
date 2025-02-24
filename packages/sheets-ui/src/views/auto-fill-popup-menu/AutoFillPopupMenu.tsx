@@ -16,9 +16,9 @@
 
 import type { ICommandInfo, IExecutionOptions } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, LocaleService, toDisposable } from '@univerjs/core';
-import { clsx, Dropdown } from '@univerjs/design';
+import { clsx, DropdownMenu } from '@univerjs/design';
 import { convertTransformToOffsetX, convertTransformToOffsetY, IRenderManagerService } from '@univerjs/engine-render';
-import { Autofill, CheckMarkSingle, MoreDownSingle } from '@univerjs/icons';
+import { Autofill, MoreDownSingle } from '@univerjs/icons';
 import { useDependency } from '@univerjs/ui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { RefillCommand } from '../../commands/commands/refill.command';
@@ -29,7 +29,6 @@ import { IAutoFillService } from '../../services/auto-fill/auto-fill.service';
 import { APPLY_TYPE } from '../../services/auto-fill/type';
 import { ISheetSelectionRenderService } from '../../services/selection/base-selection-render.service';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
-import styles from './index.module.less';
 
 export interface IAnchorPoint {
     row: number;
@@ -38,7 +37,7 @@ export interface IAnchorPoint {
 
 export interface IAutoFillPopupMenuItem {
     label: string;
-    value?: APPLY_TYPE;
+    value: APPLY_TYPE;
     index: number;
     disable: boolean;
 }
@@ -180,51 +179,41 @@ export const AutoFillPopupMenu: React.FC<{}> = () => {
     const availableMenu = menu.filter((item) => !item.disable);
 
     return (
-        <div
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
-            style={{ left: `${relativeX + 2}px`, top: `${relativeY + 2}px`, position: 'absolute' }}
-        >
-            <Dropdown
-                align="start"
-                overlay={(
-                    <ul
-                        className={`
-                          univer-rounded-lg univer-p-2 univer-theme univer-m-0 univer-box-border univer-grid
-                          univer-list-none univer-gap-1
-                        `}
-                    >
-                        {availableMenu.map((item) => (
-                            <li
-                                key={item.index}
-                                className={styles.autoFillPopupMenuItem}
-                                onClick={() => handleClick(item)}
-                            >
-                                <span className={styles.autoFillPopupMenuItemIcon}>
-                                    {item.value === selected && (
-                                        <CheckMarkSingle style={{ color: 'rgb(var(--green-700, #409f11))' }} />
-                                    )}
-                                </span>
-                                <span className={styles.autoFillPopupMenuItemTitle}>{localeService.t(item.label)}</span>
-                            </li>
-                        ))}
-                    </ul>
-                )}
-                open={visible}
-                onOpenChange={onVisibleChange}
+        <div className="univer-absolute univer-inset-0 univer-z-10 univer-size-0">
+            <div
+                style={{ left: `${relativeX + 2}px`, top: `${relativeY + 2}px`, position: 'absolute' }}
+                onMouseEnter={handleMouseEnter}
+                onMouseLeave={handleMouseLeave}
             >
-                <div
-                    className={clsx(styles.btnContainer, {
-                        [styles.btnContainerExpand]: visible,
-                    })}
+                <DropdownMenu
+                    align="start"
+                    items={availableMenu.map((item) => ({
+                        type: 'radio',
+                        value: selected,
+                        options: [{ label: localeService.t(item.label), value: item.value }],
+                        onSelect: () => handleClick(item),
+                    }))}
+                    open={visible}
+                    onOpenChange={onVisibleChange}
                 >
-                    <Autofill
-                        style={{ color: '#35322B' }}
-                        extend={{ colorChannel1: 'rgb(var(--green-700, #409f11))' }}
-                    />
-                    {showMore && <MoreDownSingle style={{ color: '#CCCCCC', fontSize: '8px', marginLeft: '8px' }} />}
-                </div>
-            </Dropdown>
+                    <div
+                        className={clsx(`
+                          univer-flex univer-items-center univer-gap-2 univer-rounded univer-border univer-border-solid
+                          univer-border-gray-200 univer-p-1
+                          hover:univer-bg-gray-100
+                        `, {
+                            'univer-bg-gray-100': visible,
+                            'univer-bg-white': !visible,
+                        })}
+                    >
+                        <Autofill
+                            style={{ color: '#35322B' }}
+                            extend={{ colorChannel1: 'rgb(var(--green-700, #409f11))' }}
+                        />
+                        {showMore && <MoreDownSingle className="univer-text-[10px] univer-text-gray-400" />}
+                    </div>
+                </DropdownMenu>
+            </div>
         </div>
     );
 };

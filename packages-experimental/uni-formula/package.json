@@ -56,8 +56,7 @@
         "build": "univer-cli build"
     },
     "dependencies": {
-        "@univerjs/core": "workspace:*",
-        "clsx": "^2.1.1"
+        "@univerjs/core": "workspace:*"
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",

@@ -15,10 +15,9 @@
  */
 
 import { ICommandService } from '@univerjs/core';
-import { Button } from '@univerjs/design';
+import { Button, clsx } from '@univerjs/design';
 import { RecordSingle } from '@univerjs/icons';
 import { useDependency, useObservable } from '@univerjs/ui';
-import clsx from 'clsx';
 import React, { useCallback } from 'react';
 import { CompleteRecordingActionCommand, StartRecordingActionCommand, StopRecordingActionCommand } from '../../commands/commands/record.command';
 import { CloseRecordPanelOperation } from '../../commands/operations/operation';

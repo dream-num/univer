@@ -82,8 +82,7 @@
         "@wendellhu/redi": "0.17.1",
         "clsx": "^2.1.1",
         "localforage": "^1.10.0",
-        "rc-notification": "^5.6.2",
-        "rc-util": "^5.43.0"
+        "rc-notification": "^5.6.2"
     },
     "optionalDependencies": {
         "vue": ">=3.0.0"
@@ -97,6 +96,7 @@
         "react-dom": "18.3.1",
         "rxjs": "^7.8.1",
         "tailwindcss": "^3.4.17",
+        "tailwindcss-animate": "^1.0.7",
         "typescript": "^5.7.3",
         "vite": "^6.1.1",
         "vitest": "^3.0.6",

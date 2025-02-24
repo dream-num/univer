@@ -19,7 +19,7 @@ import type { ITooltipWrapperRef } from './TooltipButtonWrapper';
 import { ICommandService, LocaleService } from '@univerjs/core';
 import { MoreDownSingle } from '@univerjs/icons';
 import clsx from 'clsx';
-import React, { forwardRef, useMemo } from 'react';
+import { forwardRef, useMemo } from 'react';
 import { isObservable, Observable } from 'rxjs';
 import { ComponentManager } from '../../../common/component-manager';
 import { CustomLabel } from '../../../components/custom-label/CustomLabel';
@@ -45,7 +45,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
         commandService.executeCommand(commandId, params);
     };
 
-    const { tooltip, shortcut, icon, title, label, id, commandId } = props;
+    const { tooltip, shortcut, icon, title, label, id, commandId, type } = props;
 
     const tooltipTitle = localeService.t(tooltip ?? '') + (shortcut ? ` (${shortcut})` : '');
 
@@ -224,11 +224,11 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
     }
 
     function renderItem() {
-        switch (props.type) {
+        switch (type) {
             case MenuItemType.BUTTON_SELECTOR:
             case MenuItemType.SELECTOR:
             case MenuItemType.SUBITEMS:
-                return renderSelectorType(props.type);
+                return renderSelectorType(type);
             case MenuItemType.BUTTON:
             default:
                 return renderButtonType();

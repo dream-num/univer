@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
+import type { IDropdownProps } from '@univerjs/design';
 import { LocaleService } from '@univerjs/core';
-import { Button, clsx, Dropdown, Tooltip } from '@univerjs/design';
-import { CheckMarkSingle, IncreaseSingle, ReduceSingle } from '@univerjs/icons';
+import { Button, clsx, DropdownMenu, Tooltip } from '@univerjs/design';
+import { IncreaseSingle, ReduceSingle } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useMemo, useRef, useState } from 'react';
 import styles from './index.module.less';
@@ -50,7 +51,7 @@ export interface ISliderProps {
     resetPoint?: number;
 
     /** Shortcuts of slider */
-    shortcuts?: number[];
+    shortcuts: number[];
 
     /** (value) => void */
     onChange?: (value: number) => void;
@@ -150,6 +151,13 @@ export function Slider(props: ISliderProps) {
         onChange && onChange(value);
     }
 
+    const items: IDropdownProps['items'] = [{
+        type: 'radio',
+        value: value.toString(),
+        options: shortcuts.map((item) => ({ value: item.toString(), label: `${item}%` })),
+        onSelect: (value: string) => handleSelectZoomLevel(+value),
+    }];
+
     return (
         <div
             className={clsx(styles.slider, {
@@ -190,45 +198,9 @@ export function Slider(props: ISliderProps) {
                 <IncreaseSingle />
             </Button>
 
-            <Dropdown
+            <DropdownMenu
                 align="end"
-                overlay={(
-                    <div
-                        className={`
-                          univer-box-border univer-grid univer-w-32 univer-items-center univer-gap-1 univer-p-2
-                          univer-text-sm univer-text-gray-800
-                        `}
-                    >
-                        {shortcuts?.map((item) => (
-                            <a
-                                key={item}
-                                className={clsx(`
-                                  univer-relative univer-cursor-pointer univer-rounded-md univer-px-2 univer-py-1
-                                  univer-text-center univer-transition-colors univer-duration-200
-                                  hover:univer-bg-gray-100
-                                `, {
-                                    'univer-bg-gray-100': item === value,
-                                })}
-                                onClick={() => handleSelectZoomLevel(item)}
-                            >
-                                {item === value && (
-                                    <span
-                                        className={`
-                                          univer-absolute univer-left-2 univer-top-0 univer-flex univer-h-full
-                                          univer-items-center univer-text-green-500
-                                        `}
-                                    >
-                                        <CheckMarkSingle />
-                                    </span>
-                                )}
-                                <span>
-                                    {item}
-                                    %
-                                </span>
-                            </a>
-                        ))}
-                    </div>
-                )}
+                items={items}
                 open={zoomListVisible}
                 onOpenChange={setZoomListVisible}
             >
@@ -242,7 +214,7 @@ export function Slider(props: ISliderProps) {
                     {value}
                     %
                 </a>
-            </Dropdown>
+            </DropdownMenu>
         </div>
     );
 }

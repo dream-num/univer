@@ -19,10 +19,10 @@ import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { ContextMenuPosition, IMenuManagerService, ToolbarItem, useDependency, useObservable } from '@univerjs/ui';
 import { useMemo } from 'react';
 import { useActiveWorkbook } from '../../components/hook';
+import { AutoFillPopupMenu } from '../auto-fill-popup-menu/AutoFillPopupMenu';
 import { CountBar } from '../count-bar/CountBar';
 import { EditorContainer } from '../editor-container/EditorContainer';
 import { FormulaBar } from '../formula-bar/FormulaBar';
-import { OperateContainer } from '../operate-container/OperateContainer';
 import { SheetBar } from '../sheet-bar/SheetBar';
 import { StatusBar } from '../status-bar/StatusBar';
 
@@ -88,7 +88,7 @@ export function RenderSheetContent() {
     return (
         <>
             <EditorContainer />
-            <OperateContainer />
+            <AutoFillPopupMenu />
         </>
     );
 }
@@ -99,7 +99,7 @@ function useHasWorkbook(): boolean {
     const hasWorkbook = !!workbook;
     return useMemo(
         () => univerInstanceService.getAllUnitsForType(UniverInstanceType.UNIVER_SHEET).length > 0,
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+
         [univerInstanceService, hasWorkbook]
     );
 }

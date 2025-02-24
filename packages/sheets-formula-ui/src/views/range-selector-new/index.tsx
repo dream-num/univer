@@ -24,11 +24,11 @@ import { CloseSingle, DeleteSingle, IncreaseSingle, SelectRangeSingle } from '@u
 import { useDependency, useEvent } from '@univerjs/ui';
 import { useEffect, useRef, useState } from 'react';
 import { useStateRef } from '../formula-editor/hooks/use-state-ref';
-import { rangePreProcess } from '../range-selector/utils/range-pre-process';
 import { useRangesHighlight } from './hooks/use-ranges-highlight';
 import { useRangeSelectorSelectionChange } from './hooks/use-selection-change';
 import styles from './index.module.less';
 import { verifyRange } from './util';
+import { rangePreProcess } from './utils/range-pre-process';
 
 export interface IRangeSelectorInstance {
     editor: Nullable<Editor>;

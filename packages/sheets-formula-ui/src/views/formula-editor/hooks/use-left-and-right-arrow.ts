@@ -21,7 +21,7 @@ import { DeviceInputEventType } from '@univerjs/engine-render';
 import { ExpandSelectionCommand, JumpOver, MoveSelectionCommand } from '@univerjs/sheets-ui';
 import { IShortcutService, KeyCode, MetaKeys, useDependency } from '@univerjs/ui';
 import { useEffect, useRef } from 'react';
-import { FormulaSelectingType } from '../../formula-editor/hooks/use-formula-selection';
+import { FormulaSelectingType } from './use-formula-selection';
 
 // eslint-disable-next-line max-lines-per-function
 export const useLeftAndRightArrow = (isNeed: boolean, shouldMoveSelection: FormulaSelectingType, editor?: Editor, onMoveInEditor?: (keyCode: KeyCode, metaKey?: MetaKeys) => void) => {

@@ -20,7 +20,7 @@ import type { IRange, Workbook } from '@univerjs/core';
 import type { Editor } from '@univerjs/docs-ui';
 import type { ISelectionWithCoord, ISetSelectionsOperationParams } from '@univerjs/sheets';
 import type { RefObject } from 'react';
-import type { IRefSelection } from '../../range-selector/hooks/use-highlight';
+import type { IRefSelection } from './use-highlight';
 import { DisposableCollection, ICommandService, IUniverInstanceService, ThemeService } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { deserializeRangeWithSheet, generateStringWithSequence, LexerTreeBuilder, sequenceNodeType, serializeRange, serializeRangeWithSheet } from '@univerjs/engine-formula';
@@ -32,13 +32,13 @@ import { useEffect, useMemo } from 'react';
 import { merge } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render-service';
-import { calcHighlightRanges } from '../../range-selector/hooks/use-highlight';
-import { findIndexFromSequenceNodes, findRefSequenceIndex } from '../../range-selector/utils/find-index-from-sequence-nodes';
-import { getOffsetFromSequenceNodes } from '../../range-selector/utils/get-offset-from-sequence-nodes';
-import { sequenceNodeToText } from '../../range-selector/utils/sequence-node-to-text';
-import { unitRangesToText } from '../../range-selector/utils/unit-ranges-to-text';
+import { findIndexFromSequenceNodes, findRefSequenceIndex } from '../../range-selector-new/utils/find-index-from-sequence-nodes';
+import { getOffsetFromSequenceNodes } from '../../range-selector-new/utils/get-offset-from-sequence-nodes';
+import { sequenceNodeToText } from '../../range-selector-new/utils/sequence-node-to-text';
+import { unitRangesToText } from '../../range-selector-new/utils/unit-ranges-to-text';
 import { useStateRef } from '../hooks/use-state-ref';
 import { FormulaSelectingType } from './use-formula-selection';
+import { calcHighlightRanges } from './use-highlight';
 
 const prepareSelectionChangeContext = (opts: { editor?: Editor; lexerTreeBuilder: LexerTreeBuilder }) => {
     const { editor, lexerTreeBuilder } = opts;

@@ -22,7 +22,7 @@ import { deserializeRangeWithSheet, LexerTreeBuilder } from '@univerjs/engine-fo
 import { IMarkSelectionService } from '@univerjs/sheets-ui';
 import { useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useRef, useState } from 'react';
-import { useDocHight } from '../../range-selector/hooks/use-highlight';
+import { useDocHight } from '../../formula-editor/hooks/use-highlight';
 
 export function useRangesHighlight(editor: Nullable<Editor>, focusing: boolean) {
     const lexerTreeBuilder = useDependency(LexerTreeBuilder);

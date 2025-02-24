@@ -37,6 +37,7 @@ export interface IRangeSelectorInstance {
     showDialog: (ranges: IUnitRangeName[]) => void;
     hideDialog: () => void;
     verify: () => boolean;
+    getValue: () => string;
 }
 
 export interface IRangeSelectorProps extends IRichTextEditorProps {
@@ -255,6 +256,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
                 setRangeSelectorRanges([]);
                 setPopupVisible(false);
             },
+            getValue: () => editor?.getDocumentDataModel().getPlainText() ?? '',
         };
     }, [blurEditor, editor, editorService, selectorRef, sequenceNodesRef]);
 
@@ -273,9 +275,9 @@ export function RangeSelector(props: IRangeSelectorProps) {
                     <RichTextEditor
                         isSingle
                         {...props}
-                        onFocusChange={(focusing) => {
+                        onFocusChange={(focusing, newValue) => {
                             setFocusing(focusing);
-                            onFocusChange?.(focusing);
+                            onFocusChange?.(focusing, newValue);
                         }}
                         editorRef={setEditor}
                         onClickOutside={() => {

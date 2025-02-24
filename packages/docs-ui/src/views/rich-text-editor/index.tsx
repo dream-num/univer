@@ -35,7 +35,7 @@ import styles from './index.module.less';
 export interface IRichTextEditorProps {
     className?: string;
     autoFocus?: boolean;
-    onFocusChange?: (isFocus: boolean) => void;
+    onFocusChange?: (isFocus: boolean, newValue?: string) => void;
     initialValue?: IDocumentData | string;
     onClickOutside?: () => void;
     keyboardEventConfig?: IKeyboardEventConfig;
@@ -127,7 +127,8 @@ export const RichTextEditor = (props: IRichTextEditorProps) => {
     useObservable(editor?.focus$);
 
     useEffect(() => {
-        onFocusChange?.(isFocusing);
+        const data = editor?.getDocumentData();
+        onFocusChange?.(isFocusing, getPlainText(data?.body?.dataStream ?? ''));
     }, [isFocusing, onFocusChange]);
 
     useEffect(() => {

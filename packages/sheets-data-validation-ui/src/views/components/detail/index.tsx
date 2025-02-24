@@ -16,6 +16,7 @@
 
 import type { DataValidationOperator, DataValidationType, IDataValidationRuleBase, IDataValidationRuleOptions, IExecutionOptions, ISheetDataValidationRule, IUnitRange, Workbook } from '@univerjs/core';
 import type { IUpdateSheetDataValidationRangeCommandParams } from '@univerjs/sheets-data-validation';
+import type { IRangeSelectorInstance } from '@univerjs/sheets-formula-ui';
 import { debounce, ICommandService, isUnitRangesEqual, IUniverInstanceService, LocaleService, RedoCommand, shallowEqual, UndoCommand, UniverInstanceType } from '@univerjs/core';
 import { DataValidationModel, DataValidatorRegistryScope, DataValidatorRegistryService, getRuleOptions, getRuleSetting, TWO_FORMULA_OPERATOR_COUNT } from '@univerjs/data-validation';
 import { Button, Checkbox, FormLayout, Select } from '@univerjs/design';
@@ -24,7 +25,7 @@ import { SheetsSelectionsService } from '@univerjs/sheets';
 import { RemoveSheetDataValidationCommand, UpdateSheetDataValidationOptionsCommand, UpdateSheetDataValidationRangeCommand, UpdateSheetDataValidationSettingCommand } from '@univerjs/sheets-data-validation';
 import { RangeSelector } from '@univerjs/sheets-formula-ui';
 import { ComponentManager, useDependency, useEvent, useObservable } from '@univerjs/ui';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { DataValidationPanelService } from '../../../services/data-validation-panel.service';
 import { DataValidationOptions } from '../options';
 
@@ -54,7 +55,6 @@ export function DataValidationDetail() {
     const ruleId = rule.uid;
     const validatorService = useDependency(DataValidatorRegistryService);
     const univerInstanceService = useDependency(IUniverInstanceService);
-
     const componentManager = useDependency(ComponentManager);
     const commandService = useDependency(ICommandService);
     const dataValidationModel = useDependency(DataValidationModel);
@@ -67,7 +67,7 @@ export function DataValidationDetail() {
     const debounceExecute = useMemo(() => debounceExecuteFactory(commandService), [commandService]);
     const [isRangeError, setIsRangeError] = useState(false);
     const [isFocusRangeSelector, isFocusRangeSelectorSet] = useState(false);
-
+    const rangeSelectorInstance = useRef<IRangeSelectorInstance>(null);
     const sheetSelectionService = useDependency(SheetsSelectionsService);
 
     useEffect(() => {
@@ -103,6 +103,9 @@ export function DataValidationDetail() {
     const isTwoFormula = localRule.operator ? TWO_FORMULA_OPERATOR_COUNT.includes(localRule.operator) : false;
 
     const handleOk = () => {
+        if (rangeSelectorInstance.current?.editor?.isFocus()) {
+            handleUpdateRuleRanges(rangeSelectorInstance.current?.getValue());
+        }
         if (!localRule.ranges.length || isRangeError) {
             return;
         }
@@ -250,12 +253,21 @@ export function DataValidationDetail() {
                 error={(!localRule.ranges.length || isRangeError) ? localeService.t('dataValidation.panel.rangeError') : ''}
             >
                 <RangeSelector
+                    selectorRef={rangeSelectorInstance}
                     unitId={unitId}
                     subUnitId={subUnitId}
                     initialValue={rangeStr}
-                    onChange={(doc, str) => handleUpdateRuleRanges(str)}
-                    onFocusChange={(focusing) => isFocusRangeSelectorSet(focusing)}
-                    autoFocus={isFocusRangeSelector}
+                    onChange={(doc, str) => {
+                        if (!isFocusRangeSelector && rangeSelectorInstance.current?.verify()) {
+                            handleUpdateRuleRanges(str);
+                        }
+                    }}
+                    onFocusChange={(focusing, str) => {
+                        isFocusRangeSelectorSet(focusing);
+                        if (!focusing && str && rangeSelectorInstance.current?.verify()) {
+                            handleUpdateRuleRanges(str);
+                        }
+                    }}
                     onVerify={(isValid) => setIsRangeError(!isValid)}
                 />
             </FormLayout>

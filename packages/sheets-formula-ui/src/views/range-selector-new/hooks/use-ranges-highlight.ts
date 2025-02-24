@@ -21,7 +21,7 @@ import { ColorKit, DisposableCollection } from '@univerjs/core';
 import { deserializeRangeWithSheet, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { IMarkSelectionService } from '@univerjs/sheets-ui';
 import { useDependency, useObservable } from '@univerjs/ui';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useDocHight } from '../../range-selector/hooks/use-highlight';
 
 export function useRangesHighlight(editor: Nullable<Editor>, focusing: boolean) {
@@ -30,10 +30,15 @@ export function useRangesHighlight(editor: Nullable<Editor>, focusing: boolean) 
     const change = useObservable(editor?.getDocumentDataModel().change$);
     const [sequenceNodes, setSequenceNodes] = useState<(string | ISequenceNode)[]>([]);
     const markSelectionService = useDependency(IMarkSelectionService);
+    const last = useRef('');
 
     useEffect(() => {
         if (!editor) return;
         const text = editor.getDocumentDataModel().getPlainText();
+        if (last.current === text) {
+            return;
+        }
+        last.current = text;
         const nodes = lexerTreeBuilder.sequenceNodesBuilder(text);
         setSequenceNodes(nodes ?? []);
     }, [change, editor, lexerTreeBuilder]);

@@ -131,6 +131,9 @@ const config: StorybookConfig = {
                     dynamicImport: true,
                 },
                 transform: {
+                    react: {
+                        runtime: 'automatic',
+                    },
                     legacyDecorator: true,
                     decoratorMetadata: true,
                 },

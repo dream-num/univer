@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import type { IImageWatermarkConfig, ITextWatermarkConfig } from '@univerjs/watermark';
-import { FUniver } from '@univerjs/core/facade';
-import { IWatermarkTypeEnum, WatermarkImageBaseConfig, WatermarkService, WatermarkTextBaseConfig } from '@univerjs/watermark';
+import type { IImageWatermarkConfig, ITextWatermarkConfig } from '@univerjs/engine-render';
+import { FEnum, FUniver } from '@univerjs/core/facade';
+import { IWatermarkTypeEnum } from '@univerjs/engine-render';
+import { WatermarkImageBaseConfig, WatermarkService, WatermarkTextBaseConfig } from '@univerjs/watermark';
 
 /**
  * @ignore
@@ -89,8 +90,17 @@ export class FUniverWatermarkMixin extends FUniver {
     }
 }
 
+export class FWatermarkEnum {
+    get IWatermarkTypeEnum(): typeof IWatermarkTypeEnum {
+        return IWatermarkTypeEnum;
+    };
+}
+
 FUniver.extend(FUniverWatermarkMixin);
+FEnum.extend(FWatermarkEnum);
+
 declare module '@univerjs/core/facade' {
     // eslint-disable-next-line ts/naming-convention
-    interface FUniver extends IFUniverWatermarkMixin {}
+    interface FUniver extends IFUniverWatermarkMixin { }
+    interface FEnum extends FWatermarkEnum { }
 }

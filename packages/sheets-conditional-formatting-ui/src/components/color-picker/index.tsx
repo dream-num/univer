@@ -15,7 +15,7 @@
  */
 
 import { ColorKit } from '@univerjs/core';
-import { DropdownLegacy, ColorPicker as OriginColorPicker } from '@univerjs/design';
+import { Dropdown, ColorPicker as OriginColorPicker } from '@univerjs/design';
 import { MoreDownSingle } from '@univerjs/icons';
 import { ComponentManager, useDependency } from '@univerjs/ui';
 import React, { useMemo } from 'react';
@@ -40,26 +40,23 @@ export const ColorPicker = (props: IColorPickerProps) => {
 
     return Icon && (!disable
         ? (
-            <DropdownLegacy
+            <Dropdown
                 overlay={(
-                    <div className={`
-                      ${styles.cfColorPicker}
-                    `}
-                    >
+                    <div className="univer-rounded-lg univer-p-4">
                         <OriginColorPicker value={color} onChange={onChange} />
                     </div>
                 )}
             >
-                <span className={`
-                  ${styles.cfColorPickerIcon}
-                  ${className}
-                `}
+                <span
+                    className={`
+                      ${styles.cfColorPickerIcon}
+                      ${className}
+                    `}
                 >
                     <Icon extend={{ colorChannel1: colorKit.isValid ? color : 'rgb(var(--primary-color))' }} />
                     {isNeedDropdownIcon && <MoreDownSingle className={styles.iconDropdown} />}
                 </span>
-
-            </DropdownLegacy>
+            </Dropdown>
         )
         : <Icon className={className} extend={{ colorChannel1: colorKit.isValid ? color : 'rgb(var(--primary-color))' }} />);
 };

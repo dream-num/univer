@@ -16,8 +16,6 @@
 
 import { hashAlgorithm, LRUMap } from '@univerjs/core';
 
-// export const CACHE_FORMULA_AST = new LRUMap<string, AstRootNode>(100000);
-
 export class FormulaAstLRU<T> {
     private _cache: LRUMap<string, T>;
 

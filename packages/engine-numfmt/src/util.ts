@@ -14,28 +14,12 @@
  * limitations under the License.
  */
 
-import type { BuildOptions, SameShape } from 'esbuild';
-import esbuild from 'esbuild';
+import { DEFAULT_NUMBER_FORMAT, DEFAULT_TEXT_FORMAT, DEFAULT_TEXT_FORMAT_EXCEL } from './const';
 
-const config: SameShape<BuildOptions, BuildOptions> = {
-    bundle: true,
-    color: true,
-    minify: false,
-    target: 'chrome70',
-    entryPoints: [
-        './src/cases/basic.ts',
-        './src/sdk/worker.ts',
-    ],
-    platform: 'node',
-    outdir: './dist',
-    define: {
-        'process.env.NODE_ENV': '"production"',
-
-    },
-};
-
-async function main() {
-    await esbuild.build(config);
+export function isTextFormat(pattern: string | undefined) {
+    return pattern === DEFAULT_TEXT_FORMAT || pattern === DEFAULT_TEXT_FORMAT_EXCEL;
 }
 
-main();
+export function isDefaultFormat(pattern: string | undefined | null) {
+    return pattern === null || pattern === undefined || pattern === DEFAULT_NUMBER_FORMAT;
+}

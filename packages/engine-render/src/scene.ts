@@ -39,11 +39,11 @@ export const MAIN_VIEW_PORT_KEY = 'viewMain';
 
 export interface ISceneInputControlOptions {
     enableDown: boolean;
-    enableUp: boolean ;
-    enableMove: boolean ;
-    enableWheel: boolean ;
-    enableEnter: boolean ;
-    enableLeave: boolean ;
+    enableUp: boolean;
+    enableMove: boolean;
+    enableWheel: boolean;
+    enableEnter: boolean;
+    enableLeave: boolean;
 }
 export class Scene extends Disposable {
     private _sceneKey: string = '';
@@ -964,7 +964,7 @@ export class Scene extends Disposable {
     }
 
     /**
-     * Get the object under the pointer, if scene.event is disabled, the object is null.
+     * Get the object under the pointer, if scene.event is disabled, return null.
      * @param {Vector2} coord
      * @return {Nullable<BaseObject | Scene>} object under the pointer
      */
@@ -1239,11 +1239,27 @@ export class Scene extends Disposable {
      * Then only scene itself can response to pointer event, all objects under the scene would not.
      * see sceneInputManager@_onPointerMove
      */
+    // 禁用对象事件
     disableObjectsEvent() {
+        // 将_evented属性设置为false
         this._evented = false;
     }
 
     enableObjectsEvent() {
         this._evented = true;
+    }
+
+    _capturedObject: BaseObject | null = null;
+
+    get capturedObject() {
+        return this._capturedObject;
+    }
+
+    setCaptureObject(o: BaseObject) {
+        this._capturedObject = o;
+    }
+
+    releaseCapturedObject() {
+        this._capturedObject = null;
     }
 }

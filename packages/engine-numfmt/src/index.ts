@@ -14,4 +14,5 @@
  * limitations under the License.
  */
 
-export { DEFAULT_TEXT_FORMAT } from './const';
+export { DEFAULT_NUMBER_FORMAT, DEFAULT_TEXT_FORMAT, DEFAULT_TEXT_FORMAT_EXCEL } from './const';
+export { isDefaultFormat, isTextFormat } from './util';

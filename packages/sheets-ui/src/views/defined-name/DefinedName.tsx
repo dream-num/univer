@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import { DropdownOverlay, DropdownProvider, DropdownTrigger } from '@univerjs/design';
-
+import { Dropdown } from '@univerjs/design';
 import { IDefinedNamesService } from '@univerjs/engine-formula';
 import { MoreDownSingle } from '@univerjs/icons';
 import { useDependency } from '@univerjs/ui';
@@ -45,11 +44,16 @@ export function DefinedName({ disable }: { disable: boolean }) {
     }
 
     return (
-        <div className={styles.definedName}>
+        <div
+            className={`
+              univer-relative univer-box-border univer-flex univer-h-full univer-w-24 univer-border-r-gray-200
+              univer-py-1.5 univer-transition-all
+            `}
+        >
             <input
                 className={clsx(`
-                  univer-absolute univer-box-border univer-h-full univer-w-full univer-appearance-none
-                  univer-border-none univer-px-1.5
+                  univer-box-border univer-h-full univer-w-full univer-appearance-none univer-border-0 univer-border-r
+                  univer-border-r-gray-200 univer-px-1.5
                   focus:univer-outline-none
                 `, {
                     [styles.defineNameInputDisable]: disable,
@@ -59,27 +63,26 @@ export function DefinedName({ disable }: { disable: boolean }) {
                 onChange={handleChangeSelection}
             />
 
-            <DropdownProvider>
-                <DropdownTrigger>
-                    <a
-                        className={clsx(`
-                          univer-absolute univer-right-0 univer-flex univer-h-full univer-cursor-pointer
-                          univer-items-center univer-justify-center univer-px-1 univer-transition-colors
-                          univer-duration-200
-                          hover:univer-bg-gray-100
-                        `,
-                        {
-                            'univer-cursor-not-allowed univer-text-gray-300 hover:univer-bg-transparent': disable,
-                        })}
-                    >
-                        <MoreDownSingle />
-                    </a>
-                </DropdownTrigger>
-
-                <DropdownOverlay className="univer-z-[1001]" offset={{ x: -75, y: 2 }}>
-                    <DefinedNameOverlay />
-                </DropdownOverlay>
-            </DropdownProvider>
+            <Dropdown
+                overlay={(
+                    <div className="univer-z-[1001]">
+                        <DefinedNameOverlay />
+                    </div>
+                )}
+            >
+                <a
+                    className={clsx(`
+                      univer-absolute univer-right-0 univer-top-0 univer-flex univer-h-full univer-cursor-pointer
+                      univer-items-center univer-justify-center univer-px-1 univer-transition-colors univer-duration-200
+                      hover:univer-bg-gray-100
+                    `,
+                    {
+                        'univer-cursor-not-allowed univer-text-gray-300 hover:univer-bg-transparent': disable,
+                    })}
+                >
+                    <MoreDownSingle />
+                </a>
+            </Dropdown>
         </div>
     );
 }

@@ -25,8 +25,23 @@ import { FDataValidation } from './f-data-validation';
  * @example
  * ```typescript
  * // Set the data validation for cell A1 to require a value from B1:B10
- * const range = FRange.create('Sheet1', 'B1:B10');
- * const rule = univerAPI.newDataValidation().requireValueInRange(range).build();
+ * const fWorkbook = univerAPI.getActiveWorkbook();
+ * const fWorksheet = fWorkbook.getActiveSheet();
+ * const fRange = fWorksheet.getRange('B1:B2');
+ * fRange.setValues([
+ *   ['Yes'],
+ *   ['No']
+ * ]);
+ *
+ * const rule = univerAPI.newDataValidation()
+ *   .requireValueInRange(fRange)
+ *   .setOptions({
+ *     allowBlank: false,
+ *     showErrorMessage: true,
+ *     error: 'Please enter a value from the list'
+ *   })
+ *   .build();
+ * const cell = fWorksheet.getRange('A1');
  * cell.setDataValidation(rule);
  * ```
  * @hideconstructor
@@ -47,8 +62,18 @@ export class FDataValidationBuilder {
      * @returns {FDataValidation} A new instance of the FDataValidation class
      * @example
      * ```typescript
-     * const builder = univerAPI.newDataValidation();
-     * const validation = builder.requireNumberBetween(1, 10).build();
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:B10');
+     * const rule = univerAPI.newDataValidation()
+     *   .requireNumberBetween(1, 10)
+     *   .setOptions({
+     *     allowBlank: true,
+     *     showErrorMessage: true,
+     *     error: 'Please enter a number between 1 and 10'
+     *   })
+     *   .build();
+     * fRange.setDataValidation(rule);
      * ```
      */
     build(): FDataValidation {
@@ -60,8 +85,9 @@ export class FDataValidationBuilder {
      * @returns {FDataValidationBuilder} A new instance of the DataValidationBuilder class
      * @example
      * ```typescript
-     * const builder = univerAPI.newDataValidation();
-     * const copy = builder.requireNumberBetween(1, 10).copy();
+     * const builder = univerAPI.newDataValidation().requireNumberBetween(1, 10);
+     * const copyBuilder = builder.copy();
+     * console.log(copyBuilder);
      * ```
      */
     copy(): FDataValidationBuilder {
@@ -76,8 +102,8 @@ export class FDataValidationBuilder {
      * @returns {boolean} True if invalid data is allowed, False otherwise
      * @example
      * ```typescript
-     * const builder = univerAPI.newDataValidation();
-     * const allowsInvalid = builder.getAllowInvalid();
+     * const builder = univerAPI.newDataValidation().requireNumberBetween(1, 10);
+     * console.log(builder.getAllowInvalid());
      * ```
      */
     getAllowInvalid(): boolean {
@@ -90,7 +116,13 @@ export class FDataValidationBuilder {
      * @example
      * ```typescript
      * const builder = univerAPI.newDataValidation();
-     * const type = builder.getCriteriaType();
+     * console.log(builder.getCriteriaType());
+     *
+     * builder.requireNumberBetween(1, 10);
+     * console.log(builder.getCriteriaType());
+     *
+     * builder.requireValueInList(['Yes', 'No']);
+     * console.log(builder.getCriteriaType());
      * ```
      */
     getCriteriaType(): DataValidationType | string {
@@ -102,8 +134,12 @@ export class FDataValidationBuilder {
      * @returns {[string | undefined, string | undefined, string | undefined]} An array containing the operator, formula1, and formula2 values
      * @example
      * ```typescript
-     * const builder = univerAPI.newDataValidation();
+     * const builder = univerAPI.newDataValidation().requireNumberBetween(1, 10);
      * const [operator, formula1, formula2] = builder.getCriteriaValues();
+     * console.log(operator, formula1, formula2);
+     *
+     * builder.requireValueInList(['Yes', 'No']);
+     * console.log(builder.getCriteriaValues());
      * ```
      */
     getCriteriaValues(): [string | undefined, string | undefined, string | undefined] {
@@ -115,8 +151,11 @@ export class FDataValidationBuilder {
      * @returns {string | undefined} Returns the help text information. If there is no error message, it returns an undefined value
      * @example
      * ```typescript
-     * const builder = univerAPI.newDataValidation();
-     * const helpText = builder.getHelpText();
+     * const builder = univerAPI.newDataValidation().setOptions({
+     *   showErrorMessage: true,
+     *   error: 'Please enter a valid value'
+     * });
+     * console.log(builder.getHelpText()); // 'Please enter a valid value'
      * ```
      */
     getHelpText(): string | undefined {
@@ -130,8 +169,22 @@ export class FDataValidationBuilder {
      * @returns {FDataValidationBuilder} The current instance for method chaining
      * @example
      * ```typescript
-     * const builder = univerAPI.newDataValidation();
-     * const rule = builder.requireCheckbox('Yes', 'No').build();
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // Set the data validation for cell A1:A10 to require a checkbox with default 1 and 0 values
+     * const fRange = fWorksheet.getRange('A1:A10');
+     * const rule = univerAPI.newDataValidation()
+     *   .requireCheckbox()
+     *   .build();
+     * fRange.setDataValidation(rule);
+     *
+     * // Set the data validation for cell B1:B10 to require a checkbox with 'Yes' and 'No' values
+     * const fRange2 = fWorksheet.getRange('B1:B10');
+     * const rule2 = univerAPI.newDataValidation()
+     *   .requireCheckbox('Yes', 'No')
+     *   .build();
+     * fRange2.setDataValidation(rule2);
      * ```
      */
     requireCheckbox(checkedValue?: string, uncheckedValue?: string): FDataValidationBuilder {
@@ -148,8 +201,20 @@ export class FDataValidationBuilder {
      * @returns {FDataValidationBuilder} The current instance for method chaining
      * @example
      * ```typescript
-     * const builder = univerAPI.newDataValidation();
-     * const rule = builder.requireDateAfter(new Date('2024-01-01')).build();
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:B2');
+     * fRange.setValues([
+     *   ['2024-01-01', '2024-12-31'],
+     *   ['2025-01-01', '2025-12-31']
+     * ]);
+     * const rule = univerAPI.newDataValidation()
+     *   .requireDateAfter(new Date('2025-01-01'))
+     *   .build();
+     * fRange.setDataValidation(rule);
+     *
+     * const status = await fRange.getValidatorStatus();
+     * console.log(status); // [['invalid', 'invalid', 'invalid', 'valid']]
      * ```
      */
     requireDateAfter(date: Date): FDataValidationBuilder {
@@ -166,8 +231,20 @@ export class FDataValidationBuilder {
      * @returns {FDataValidationBuilder} The current instance for method chaining
      * @example
      * ```typescript
-     * const builder = univerAPI.newDataValidation();
-     * const rule = builder.requireDateBefore(new Date('2024-12-31')).build();
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:B2');
+     * fRange.setValues([
+     *   ['2024-01-01', '2024-12-31'],
+     *   ['2025-01-01', '2025-12-31']
+     * ]);
+     * const rule = univerAPI.newDataValidation()
+     *   .requireDateBefore(new Date('2025-01-01'))
+     *   .build();
+     * fRange.setDataValidation(rule);
+     *
+     * const status = await fRange.getValidatorStatus();
+     * console.log(status); // [['valid', 'valid', 'invalid', 'invalid']]
      * ```
      */
     requireDateBefore(date: Date): FDataValidationBuilder {
@@ -186,10 +263,20 @@ export class FDataValidationBuilder {
      * @returns {FDataValidationBuilder} The current instance for method chaining
      * @example
      * ```typescript
-     * const builder = univerAPI.newDataValidation();
-     * const rule = builder
-     *   .requireDateBetween(new Date('2024-01-01'), new Date('2024-12-31'))
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:B2');
+     * fRange.setValues([
+     *   ['2024-01-01', '2024-12-31'],
+     *   ['2025-01-01', '2025-12-31']
+     * ]);
+     * const rule = univerAPI.newDataValidation()
+     *   .requireDateBetween(new Date('2024-06-01'), new Date('2025-06-01'))
      *   .build();
+     * fRange.setDataValidation(rule);
+     *
+     * const status = await fRange.getValidatorStatus();
+     * console.log(status); // [['invalid', 'valid', 'valid', 'invalid']]
      * ```
      */
     requireDateBetween(start: Date, end: Date): FDataValidationBuilder {
@@ -207,8 +294,23 @@ export class FDataValidationBuilder {
      * @returns {FDataValidationBuilder} The current instance for method chaining
      * @example
      * ```typescript
-     * const builder = univerAPI.newDataValidation();
-     * const rule = builder.requireDateEqualTo(new Date('2024-01-01')).build();
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:B2');
+     * fRange.setValues([
+     *   ['2024-01-01', '2024-12-31'],
+     *   ['2025-01-01', '2025-12-31']
+     * ]);
+     * const rule = univerAPI.newDataValidation()
+     *   .requireDateEqualTo(new Date('2025-01-01'))
+     *   .build();
+     * fRange.setDataValidation(rule);
+     *
+     * const status = await fWorksheet.getRange('A2').getValidatorStatus();
+     * console.log(status?.[0]?.[0]); // 'valid'
+     *
+     * const status2 = await fWorksheet.getRange('B2').getValidatorStatus();
+     * console.log(status2?.[0]?.[0]); // 'invalid'
      * ```
      */
     requireDateEqualTo(date: Date): FDataValidationBuilder {
@@ -227,10 +329,20 @@ export class FDataValidationBuilder {
      * @returns {FDataValidationBuilder} The current instance for method chaining
      * @example
      * ```typescript
-     * const builder = univerAPI.newDataValidation();
-     * const rule = builder
-     *   .requireDateNotBetween(new Date('2024-01-01'), new Date('2024-12-31'))
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:B2');
+     * fRange.setValues([
+     *   ['2024-01-01', '2024-12-31'],
+     *   ['2025-01-01', '2025-12-31']
+     * ]);
+     * const rule = univerAPI.newDataValidation()
+     *   .requireDateNotBetween(new Date('2024-06-01'), new Date('2025-06-01'))
      *   .build();
+     * fRange.setDataValidation(rule);
+     *
+     * const status = await fRange.getValidatorStatus();
+     * console.log(status); // [['valid', 'invalid', 'invalid', 'valid']]
      * ```
      */
     requireDateNotBetween(start: Date, end: Date): FDataValidationBuilder {
@@ -248,8 +360,20 @@ export class FDataValidationBuilder {
      * @returns {FDataValidationBuilder} The current instance for method chaining
      * @example
      * ```typescript
-     * const builder = univerAPI.newDataValidation();
-     * const rule = builder.requireDateOnOrAfter(new Date('2024-01-01')).build();
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:B2');
+     * fRange.setValues([
+     *   ['2024-01-01', '2024-12-31'],
+     *   ['2025-01-01', '2025-12-31']
+     * ]);
+     * const rule = univerAPI.newDataValidation()
+     *   .requireDateOnOrAfter(new Date('2025-01-01'))
+     *   .build();
+     * fRange.setDataValidation(rule);
+     *
+     * const status = await fRange.getValidatorStatus();
+     * console.log(status); // [['invalid', 'invalid', 'valid', 'valid']]
      * ```
      */
     requireDateOnOrAfter(date: Date): FDataValidationBuilder {
@@ -267,8 +391,20 @@ export class FDataValidationBuilder {
      * @returns {FDataValidationBuilder} The current instance for method chaining
      * @example
      * ```typescript
-     * const builder = univerAPI.newDataValidation();
-     * const rule = builder.requireDateOnOrBefore(new Date('2024-12-31')).build();
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:B2');
+     * fRange.setValues([
+     *   ['2024-01-01', '2024-12-31'],
+     *   ['2025-01-01', '2025-12-31']
+     * ]);
+     * const rule = univerAPI.newDataValidation()
+     *   .requireDateOnOrBefore(new Date('2025-01-01'))
+     *   .build();
+     * fRange.setDataValidation(rule);
+     *
+     * const status = await fRange.getValidatorStatus();
+     * console.log(status); // [['valid', 'valid', 'valid', 'invalid']]
      * ```
      */
     requireDateOnOrBefore(date: Date): FDataValidationBuilder {
@@ -282,12 +418,33 @@ export class FDataValidationBuilder {
 
     /**
      * Requires that a custom formula be satisfied
-     * @param {string} formula - The formula string that needs to be satisfied
+     * @param {string} formula - The formula string that needs to be satisfied, formula result should be TRUE or FALSE, and references range will relative offset
      * @returns {FDataValidationBuilder} The current instance for method chaining
      * @example
      * ```typescript
-     * const builder = univerAPI.newDataValidation();
-     * const rule = builder.requireFormulaSatisfied('=A1>0').build();
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const cell = fWorksheet.getRange('A1:B2');
+     * cell.setValues([
+     *   [4, 3],
+     *   [2, 1]
+     * ]);
+     * const fRange = fWorksheet.getRange('C1:D2');
+     * fRange.setValues([
+     *   [1, 2],
+     *   [3, 4]
+     * ]);
+     * const rule = univerAPI.newDataValidation()
+     *   .requireFormulaSatisfied('=A1>2')
+     *   .setOptions({
+     *     showErrorMessage: true,
+     *     error: 'Please enter a value equal to A1'
+     *   })
+     *   .build();
+     * fRange.setDataValidation(rule);
+     *
+     * const status = await fRange.getValidatorStatus();
+     * console.log(status); // [['valid', 'valid', 'invalid', 'invalid']]
      * ```
      */
     requireFormulaSatisfied(formula: string): FDataValidationBuilder {
@@ -305,8 +462,18 @@ export class FDataValidationBuilder {
      * @returns {FDataValidationBuilder} The current instance for method chaining
      * @example
      * ```typescript
-     * const builder = univerAPI.newDataValidation();
-     * const rule = builder.requireNumberBetween(1, 10).build();
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:B10');
+     * const rule = univerAPI.newDataValidation()
+     *   .requireNumberBetween(1, 10)
+     *   .setOptions({
+     *     allowBlank: false,
+     *     showErrorMessage: true,
+     *     error: 'Please enter a number between 1 and 10'
+     *   })
+     *   .build();
+     * fRange.setDataValidation(rule);
      * ```
      */
     requireNumberBetween(start: number, end: number, isInteger?: boolean): FDataValidationBuilder {
@@ -325,8 +492,18 @@ export class FDataValidationBuilder {
      * @returns {FDataValidationBuilder} The current instance for method chaining
      * @example
      * ```typescript
-     * const builder = univerAPI.newDataValidation();
-     * const rule = builder.requireNumberEqualTo(10).build();
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:B10');
+     * const rule = univerAPI.newDataValidation()
+     *   .requireNumberEqualTo(10)
+     *   .setOptions({
+     *     allowBlank: false,
+     *     showErrorMessage: true,
+     *     error: 'Please enter a number equal to 10'
+     *   })
+     *   .build();
+     * fRange.setDataValidation(rule);
      * ```
      */
     requireNumberEqualTo(num: number, isInteger?: boolean): FDataValidationBuilder {
@@ -344,8 +521,18 @@ export class FDataValidationBuilder {
      * @returns {FDataValidationBuilder} The current instance for method chaining
      * @example
      * ```typescript
-     * const builder = univerAPI.newDataValidation();
-     * const rule = builder.requireNumberGreaterThan(10).build();
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:B10');
+     * const rule = univerAPI.newDataValidation()
+     *   .requireNumberGreaterThan(10)
+     *   .setOptions({
+     *     allowBlank: false,
+     *     showErrorMessage: true,
+     *     error: 'Please enter a number greater than 10'
+     *   })
+     *   .build();
+     * fRange.setDataValidation(rule);
      * ```
      */
     requireNumberGreaterThan(num: number, isInteger?: boolean): FDataValidationBuilder {
@@ -363,8 +550,18 @@ export class FDataValidationBuilder {
      * @returns {FDataValidationBuilder} The current instance for method chaining
      * @example
      * ```typescript
-     * const builder = univerAPI.newDataValidation();
-     * const rule = builder.requireNumberGreaterThanOrEqualTo(10).build();
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:B10');
+     * const rule = univerAPI.newDataValidation()
+     *   .requireNumberGreaterThanOrEqualTo(10)
+     *   .setOptions({
+     *     allowBlank: false,
+     *     showErrorMessage: true,
+     *     error: 'Please enter a number greater than 10 or equal to 10'
+     *   })
+     *   .build();
+     * fRange.setDataValidation(rule);
      * ```
      */
     requireNumberGreaterThanOrEqualTo(num: number, isInteger?: boolean): FDataValidationBuilder {
@@ -382,8 +579,18 @@ export class FDataValidationBuilder {
      * @returns {FDataValidationBuilder} The current instance for method chaining
      * @example
      * ```typescript
-     * const builder = univerAPI.newDataValidation();
-     * const rule = builder.requireNumberLessThan(10).build();
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:B10');
+     * const rule = univerAPI.newDataValidation()
+     *   .requireNumberLessThan(10)
+     *   .setOptions({
+     *     allowBlank: false,
+     *     showErrorMessage: true,
+     *     error: 'Please enter a number less than 10'
+     *   })
+     *   .build();
+     * fRange.setDataValidation(rule);
      * ```
      */
     requireNumberLessThan(num: number, isInteger?: boolean): FDataValidationBuilder {
@@ -402,8 +609,18 @@ export class FDataValidationBuilder {
      * @returns {FDataValidationBuilder} The current instance for method chaining
      * @example
      * ```typescript
-     * const builder = univerAPI.newDataValidation();
-     * const rule = builder.requireNumberLessThanOrEqualTo(10).build();
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:B10');
+     * const rule = univerAPI.newDataValidation()
+     *   .requireNumberLessThanOrEqualTo(10)
+     *   .setOptions({
+     *     allowBlank: false,
+     *     showErrorMessage: true,
+     *     error: 'Please enter a number less than 10 or equal to 10'
+     *   })
+     *   .build();
+     * fRange.setDataValidation(rule);
      * ```
      */
     requireNumberLessThanOrEqualTo(num: number, isInteger?: boolean): FDataValidationBuilder {
@@ -423,8 +640,18 @@ export class FDataValidationBuilder {
      * @returns {FDataValidationBuilder} The current instance for method chaining
      * @example
      * ```typescript
-     * const builder = univerAPI.newDataValidation();
-     * const rule = builder.requireNumberNotBetween(1, 10).build();
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:B10');
+     * const rule = univerAPI.newDataValidation()
+     *   .requireNumberNotBetween(1, 10)
+     *   .setOptions({
+     *     allowBlank: false,
+     *     showErrorMessage: true,
+     *     error: 'Please enter a number not between 1 and 10'
+     *   })
+     *   .build();
+     * fRange.setDataValidation(rule);
      * ```
      */
     requireNumberNotBetween(start: number, end: number, isInteger?: boolean): FDataValidationBuilder {
@@ -444,8 +671,18 @@ export class FDataValidationBuilder {
      * @returns {FDataValidationBuilder} The current instance for method chaining
      * @example
      * ```typescript
-     * const builder = univerAPI.newDataValidation();
-     * const rule = builder.requireNumberNotEqualTo(10).build();
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:B10');
+     * const rule = univerAPI.newDataValidation()
+     *   .requireNumberNotEqualTo(10)
+     *   .setOptions({
+     *     allowBlank: false,
+     *     showErrorMessage: true,
+     *     error: 'Please enter a number not equal to 10'
+     *   })
+     *   .build();
+     * fRange.setDataValidation(rule);
      * ```
      */
     requireNumberNotEqualTo(num: number, isInteger?: boolean): FDataValidationBuilder {
@@ -465,8 +702,18 @@ export class FDataValidationBuilder {
      * @returns {FDataValidationBuilder} The current instance for method chaining
      * @example
      * ```typescript
-     * const builder = univerAPI.newDataValidation();
-     * const rule = builder.requireValueInList(['Yes', 'No']).build();
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:B10');
+     * const rule = univerAPI.newDataValidation()
+     *   .requireValueInList(['Yes', 'No'])
+     *   .setOptions({
+     *     allowBlank: true,
+     *     showErrorMessage: true,
+     *     error: 'Please enter a value from the list'
+     *   })
+     *   .build();
+     * fRange.setDataValidation(rule);
      * ```
      */
     requireValueInList(values: string[], multiple?: boolean, showDropdown?: boolean): FDataValidationBuilder {
@@ -487,9 +734,24 @@ export class FDataValidationBuilder {
      * @returns {FDataValidationBuilder} The current instance for method chaining
      * @example
      * ```typescript
-     * const builder = univerAPI.newDataValidation();
-     * const range = FRange.create('Sheet1', 'B1:B10');
-     * const rule = builder.requireValueInRange(range).build();
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('B1:B2');
+     * fRange.setValues([
+     *   ['Yes'],
+     *   ['No']
+     * ]);
+     *
+     * const rule = univerAPI.newDataValidation()
+     *   .requireValueInRange(fRange)
+     *   .setOptions({
+     *     allowBlank: false,
+     *     showErrorMessage: true,
+     *     error: 'Please enter a value from the list'
+     *   })
+     *   .build();
+     * const cell = fWorksheet.getRange('A1');
+     * cell.setDataValidation(rule);
      * ```
      */
     requireValueInRange(range: FRange, multiple?: boolean, showDropdown?: boolean): FDataValidationBuilder {
@@ -513,8 +775,24 @@ export class FDataValidationBuilder {
      * @returns {FDataValidationBuilder} The current instance for method chaining
      * @example
      * ```typescript
-     * const builder = univerAPI.newDataValidation();
-     * const rule = builder.setAllowInvalid(true).build();
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // Set the data validation for cell A1:B2 to allow invalid data, so A1:B2 will display a warning when invalid data is entered
+     * const fRange = fWorksheet.getRange('A1:B2');
+     * const rule = univerAPI.newDataValidation()
+     *   .requireValueInList(['Yes', 'No'])
+     *   .setAllowInvalid(true)
+     *   .build();
+     * fRange.setDataValidation(rule);
+     *
+     * // Set the data validation for cell C1:D2 to not allow invalid data, so C1:D2 will stop data entry when invalid data is entered
+     * const fRange2 = fWorksheet.getRange('C1:D2');
+     * const rule2 = univerAPI.newDataValidation()
+     *   .requireValueInList(['Yes', 'No'])
+     *   .setAllowInvalid(false)
+     *   .build();
+     * fRange2.setDataValidation(rule2);
      * ```
      */
     setAllowInvalid(allowInvalidData: boolean): FDataValidationBuilder {
@@ -528,8 +806,25 @@ export class FDataValidationBuilder {
      * @returns {FDataValidationBuilder} The current instance for method chaining
      * @example
      * ```typescript
-     * const builder = univerAPI.newDataValidation();
-     * const rule = builder.setAllowBlank(true).build();
+     * // Assume current sheet is empty data
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // Set the data validation for cell A1:B2 to allow blank values
+     * const fRange = fWorksheet.getRange('A1:B2');
+     * const rule = univerAPI.newDataValidation()
+     *   .requireValueInList(['Yes', 'No'])
+     *   .setAllowBlank(true)
+     *   .build();
+     * fRange.setDataValidation(rule);
+     *
+     * // Set the data validation for cell C1:D2 to not allow blank values
+     * const fRange2 = fWorksheet.getRange('C1:D2');
+     * const rule2 = univerAPI.newDataValidation()
+     *   .requireValueInList(['Yes', 'No'])
+     *   .setAllowBlank(false)
+     *   .build();
+     * fRange2.setDataValidation(rule2);
      * ```
      */
     setAllowBlank(allowBlank: boolean): FDataValidationBuilder {
@@ -543,12 +838,18 @@ export class FDataValidationBuilder {
      * @returns {FDataValidationBuilder} The current instance for method chaining
      * @example
      * ```typescript
-     * const builder = univerAPI.newDataValidation();
-     * const rule = builder.setOptions({
-     *   allowBlank: true,
-     *   showErrorMessage: true,
-     *   error: 'Please enter a valid value'
-     * }).build();
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:B10');
+     * const rule = univerAPI.newDataValidation()
+     *   .requireValueInList(['Yes', 'No'])
+     *   .setOptions({
+     *     allowBlank: true,
+     *     showErrorMessage: true,
+     *     error: 'Please enter a value from the list'
+     *   })
+     *   .build();
+     * fRange.setDataValidation(rule);
      * ```
      */
     setOptions(options: Partial<IDataValidationRuleOptions>): this {

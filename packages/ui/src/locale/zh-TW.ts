@@ -76,6 +76,9 @@ const locale: typeof zhCN = {
         cancel: '取消',
     },
     'global-shortcut': '全域快捷鍵',
+    'zoom-slider': {
+        resetTo: '恢復至',
+    },
 };
 
 export default locale;

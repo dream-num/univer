@@ -38,40 +38,48 @@ import { FConditionalFormattingBuilder } from './conditional-formatting-builder'
  * @ignore
  */
 export interface IFRangeConditionalFormattingMixin {
-
     /**
      * Gets all the conditional formatting for the current range
-     * @returns {*}  {IConditionFormattingRule[]}
-     * @memberof IFWorksheetConditionalFormattingMixin
+     * @returns {IConditionFormattingRule[]} conditional formatting rules for the current range
      * @example
      * ```ts
-     *  const workbook = univerAPI.getActiveWorkbook();
-     *  const worksheet = workbook?.getActiveSheet();
-     *  workbook?.setActiveRange(worksheet?.getRange(5, 5, 3, 3)!);
-     *  const rules = univerAPI.getActiveWorkbook()?.getActiveRange()?.getConditionalFormattingRules();
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:T100');
+     * const rule = fWorksheet.newConditionalFormattingRule()
+     *   .whenCellNotEmpty()
+     *   .setRanges([fRange.getRange()])
+     *   .setItalic(true)
+     *   .setBackground('red')
+     *   .setFontColor('green')
+     *   .build();
+     * fWorksheet.addConditionalFormattingRule(rule);
+     *
+     * const targetRange = fWorksheet.getRange('F6:H8');
+     * const rules = targetRange.getConditionalFormattingRules();
+     * console.log(rules);
      * ```
      */
     getConditionalFormattingRules(): IConditionFormattingRule[];
+
     /**
      * Creates a constructor for conditional formatting
-     * @returns {*}  {ConditionalFormatRuleBuilder}
-     * @memberof IFWorksheetConditionalFormattingMixin
+     * @returns {FConditionalFormattingBuilder} The conditional formatting builder
      * @example
      * ```ts
-     *  const workbook = univerAPI.getActiveWorkbook();
-     *  const worksheet = workbook?.getActiveSheet();
-     *  const rule = worksheet?.createConditionalFormattingRule()
-     *       .whenCellNotEmpty()
-     *       .setRanges([{ startRow: 0, endRow: 100, startColumn: 0, endColumn: 100 }])
-     *       .setItalic(true)
-     *       .setItalic(true)
-     *       .setBackground('red')
-     *       .setFontColor('green')
-     *       .build();
-     *  worksheet?.addConditionalFormattingRule(rule!);
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:T100');
+     * const rule = fRange.createConditionalFormattingRule()
+     *   .whenCellNotEmpty()
+     *   .setItalic(true)
+     *   .setBackground('red')
+     *   .setFontColor('green')
+     *   .build();
+     * fWorksheet.addConditionalFormattingRule(rule);
+     * console.log(fRange.getConditionalFormattingRules());
      * ```
      */
-
     createConditionalFormattingRule(): FConditionalFormattingBuilder;
 
     /**

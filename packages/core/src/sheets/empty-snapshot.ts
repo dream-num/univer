@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { LocaleType } from '../types/enum/locale-type';
-import { version } from '../../package.json';
 import type { IWorkbookData } from './typedef';
+import pkg from '../../package.json';
+import { LocaleType } from '../types/enum/locale-type';
 
 export function getEmptySnapshot(
     unitID = '',
@@ -27,7 +27,7 @@ export function getEmptySnapshot(
         id: unitID,
         sheetOrder: [],
         name,
-        appVersion: version,
+        appVersion: pkg.version,
         locale,
         styles: {},
         sheets: {},

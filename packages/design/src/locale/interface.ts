@@ -19,7 +19,6 @@ import type PickerZhCN from 'rc-picker/lib/locale/zh_CN';
 export interface ILocale {
     design: {
         Confirm: Record<string, any>;
-        Slider: Record<string, any>;
         Picker: typeof PickerZhCN;
         CascaderList: Record<string, any>;
         Select: Record<string, any>;

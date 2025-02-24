@@ -156,7 +156,7 @@ export function SelectFunction(props: ISelectFunctionProps) {
                     onKeyDown={handleSelectListKeyDown}
                     value={searchText}
                     onChange={handleSearchInputChange}
-                    size="large"
+                    size="small"
                     allowClear
                 />
             </div>
@@ -200,9 +200,9 @@ export function SelectFunction(props: ISelectFunctionProps) {
                     />
 
                     {functionInfo.functionParameter &&
-                        functionInfo.functionParameter.map((item: IFunctionParam, i: number) => (
+                        functionInfo.functionParameter.map((item: IFunctionParam) => (
                             <FunctionParams
-                                key={i}
+                                key={item.name}
                                 title={item.name}
                                 value={`${item.require ? required : optional} ${item.detail}`}
                             />

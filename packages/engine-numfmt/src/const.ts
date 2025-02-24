@@ -14,4 +14,6 @@
  * limitations under the License.
  */
 
-export const DEFAULT_TEXT_FORMAT = '@@@';
+export const DEFAULT_TEXT_FORMAT = '@@@'; // Compatible with old data
+export const DEFAULT_TEXT_FORMAT_EXCEL = '@'; // The default text format in Excel, recommended
+export const DEFAULT_NUMBER_FORMAT = 'General'; // null or General are considered the default format

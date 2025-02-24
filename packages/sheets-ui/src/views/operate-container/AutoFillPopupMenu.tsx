@@ -16,11 +16,10 @@
 
 import type { ICommandInfo, IExecutionOptions } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, LocaleService, toDisposable } from '@univerjs/core';
-import { DropdownLegacy } from '@univerjs/design';
+import { clsx, Dropdown } from '@univerjs/design';
 import { convertTransformToOffsetX, convertTransformToOffsetY, IRenderManagerService } from '@univerjs/engine-render';
 import { Autofill, CheckMarkSingle, MoreDownSingle } from '@univerjs/icons';
 import { useDependency } from '@univerjs/ui';
-import clsx from 'clsx';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { RefillCommand } from '../../commands/commands/refill.command';
 import { SetScrollOperation } from '../../commands/operations/scroll.operation';
@@ -186,16 +185,20 @@ export const AutoFillPopupMenu: React.FC<{}> = () => {
             onMouseLeave={handleMouseLeave}
             style={{ left: `${relativeX + 2}px`, top: `${relativeY + 2}px`, position: 'absolute' }}
         >
-            <DropdownLegacy
-                placement="bottomLeft"
-                trigger={['click']}
+            <Dropdown
+                align="start"
                 overlay={(
-                    <ul className={styles.autoFillPopupMenu}>
+                    <ul
+                        className={`
+                          univer-rounded-lg univer-p-2 univer-theme univer-m-0 univer-box-border univer-grid
+                          univer-list-none univer-gap-1
+                        `}
+                    >
                         {availableMenu.map((item) => (
                             <li
                                 key={item.index}
-                                onClick={() => handleClick(item)}
                                 className={styles.autoFillPopupMenuItem}
+                                onClick={() => handleClick(item)}
                             >
                                 <span className={styles.autoFillPopupMenuItemIcon}>
                                     {item.value === selected && (
@@ -207,8 +210,8 @@ export const AutoFillPopupMenu: React.FC<{}> = () => {
                         ))}
                     </ul>
                 )}
-                visible={visible}
-                onVisibleChange={onVisibleChange}
+                open={visible}
+                onOpenChange={onVisibleChange}
             >
                 <div
                     className={clsx(styles.btnContainer, {
@@ -221,7 +224,7 @@ export const AutoFillPopupMenu: React.FC<{}> = () => {
                     />
                     {showMore && <MoreDownSingle style={{ color: '#CCCCCC', fontSize: '8px', marginLeft: '8px' }} />}
                 </div>
-            </DropdownLegacy>
+            </Dropdown>
         </div>
     );
 };

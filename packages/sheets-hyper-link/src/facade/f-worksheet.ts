@@ -22,7 +22,15 @@ import { FWorksheet } from '@univerjs/sheets/facade';
  */
 export interface IFWorksheetHyperlinkMixin {
     /**
-     * Get the url of this sheet
+     * Create a hyperlink url to this sheet
+     * @returns {string} The url of this sheet
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const url = fWorksheet.getUrl();
+     * console.log(url);
+     * ```
      */
     getUrl(): string;
 }

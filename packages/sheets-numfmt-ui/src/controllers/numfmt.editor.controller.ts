@@ -32,7 +32,7 @@ import {
     toDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
-import { DEFAULT_TEXT_FORMAT } from '@univerjs/engine-numfmt';
+import { isTextFormat } from '@univerjs/engine-numfmt';
 import {
     AFTER_CELL_EDIT,
     BEFORE_CELL_EDIT,
@@ -170,7 +170,7 @@ export class NumfmtEditorController extends Disposable {
                             }
 
                             // if the cell is text format or force string, do not convert the value
-                            if (currentNumfmtValue?.pattern === DEFAULT_TEXT_FORMAT || value.t === CellValueType.FORCE_STRING) {
+                            if (isTextFormat(currentNumfmtValue?.pattern) || value.t === CellValueType.FORCE_STRING) {
                                 return next(value);
                             }
 

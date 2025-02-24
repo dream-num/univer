@@ -56,8 +56,9 @@ class CalculateValueSet {
     private _max: number = Number.NEGATIVE_INFINITY;
 
     add(value: Nullable<ICellData>, styles: Styles, patternInfoRecord: Record<string, any>) {
-        const v = value?.v;
+        let v = value?.v;
         const t = value?.t;
+        if (t === CellValueType.NUMBER) v = Number(v);
         if (v !== undefined && v !== null) {
             if (typeof v === 'number' && t !== CellValueType.STRING) {
                 this._sum += v;

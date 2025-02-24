@@ -42,7 +42,7 @@ interface ISelectListProps {
     value: string[];
     onChange: (val: string[]) => void;
     multiple?: boolean;
-    options: { label: string;value: string; color?: string }[];
+    options: { label: string; value: string; color?: string }[];
     title?: string;
     onEdit?: () => void;
     style?: React.CSSProperties;

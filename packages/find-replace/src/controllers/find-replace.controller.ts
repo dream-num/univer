@@ -26,7 +26,7 @@ import {
     RxDisposable,
     toDisposable,
 } from '@univerjs/core';
-import { SearchSingle16 } from '@univerjs/icons';
+import { SearchSingle } from '@univerjs/icons';
 import { ComponentManager,
     IDialogService,
     ILayoutService,
@@ -111,7 +111,7 @@ export class FindReplaceController extends RxDisposable {
 
     private _initUI(): void {
         this.disposeWithMe(this._componentManager.register('FindReplaceDialog', FindReplaceDialog));
-        this.disposeWithMe(this._componentManager.register('SearchIcon', SearchSingle16));
+        this.disposeWithMe(this._componentManager.register('SearchIcon', SearchSingle));
 
         this._menuManagerService.mergeMenu(menuSchema);
 

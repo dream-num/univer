@@ -15,8 +15,8 @@
  */
 
 import type { ISidebarMethodOptions } from './interface';
+import { clsx } from '@univerjs/design';
 import { CloseSingle } from '@univerjs/icons';
-import clsx from 'clsx';
 import React, { useEffect, useMemo, useRef } from 'react';
 import { CustomLabel } from '../../../components/custom-label/CustomLabel';
 import { ISidebarService } from '../../../services/sidebar/sidebar.service';
@@ -111,7 +111,7 @@ export function Sidebar() {
                     </a>
                 </header>
 
-                <section className={styles.sidebarBody} style={options?.bodyStyle}>{options?.children}</section>
+                <section className={clsx(styles.sidebarBody, 'univer-py-1')} style={options?.bodyStyle}>{options?.children}</section>
 
                 {options?.footer && <footer className={styles.sidebarFooter}>{options.footer}</footer>}
             </section>

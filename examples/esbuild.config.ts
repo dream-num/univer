@@ -139,6 +139,24 @@ function generateAliases() {
     return aliases;
 }
 
+function nodeBuildTask() {
+    return esbuild.build({
+        bundle: true,
+        color: true,
+        minify: false,
+        target: 'chrome70',
+        entryPoints: [
+            './src/node/cases/basic.ts',
+            './src/node/sdk/worker.ts',
+        ],
+        platform: 'node',
+        outdir: './dist',
+        define: {
+            'process.env.NODE_ENV': '"production"',
+        },
+    });
+}
+
 /**
  * Build monaco editor's resources for web worker
  */
@@ -183,6 +201,9 @@ const entryPoints = [
 
     // sheets-multi
     './src/sheets-multi/main.tsx',
+
+    // sheets-multi-units
+    './src/sheets-multi-units/main.ts',
 
     // sheets-uniscript
     './src/sheets-uniscript/main.ts',
@@ -245,7 +266,7 @@ const config: SameShape<BuildOptions, BuildOptions> = {
         ...(LINK_TO_LIB ? [] : [skipLibCssEsbuildPlugin]),
         stylePlugin({
             postcss: {
-                plugins: [tailwindcss],
+                plugins: [tailwindcss as any],
             },
             cssModulesOptions: {
                 localsConvention: 'camelCaseOnly',
@@ -272,6 +293,7 @@ async function main() {
     if (args.watch) {
         const ctx = await esbuild.context(config);
         await monacoBuildTask();
+        await nodeBuildTask();
         await ctx.watch();
 
         const port = isE2E ? 3000 : await detect(3002);

@@ -33,9 +33,9 @@ export interface IFWorksheetFilter {
      * const workbook = univerAPI.getActiveWorkbook();
      * const worksheet = workbook.getActiveSheet();
      * const filter = worksheet.getFilter();
-     * ````
+     * console.log(filter, filter?.getRange().getA1Notation());
+     * ```
      */
-
     getFilter(): FFilter | null;
 }
 

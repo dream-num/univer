@@ -59,7 +59,7 @@ export { HoverRenderController } from './controllers/hover-render.controller';
 export { DragRenderController } from './controllers/drag-render.controller';
 export { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY, RANGE_SELECTOR_COMPONENT_KEY, SHEET_VIEW_KEY } from './common/keys';
 export type { IDiscreteRange } from './controllers/utils/range-tools';
-export { discreteRangeToRange, rangeToDiscreteRange, virtualizeDiscreteRanges } from './controllers/utils/range-tools';
+export { discreteRangeToRange, virtualizeDiscreteRanges } from './controllers/utils/range-tools';
 export { AFFECT_LAYOUT_STYLES, AutoHeightController } from './controllers/auto-height.controller';
 export { AutoWidthController } from './controllers/auto-width.controller';
 export { FormulaEditorController } from './controllers/editor/formula-editor.controller';
@@ -172,4 +172,10 @@ export { SidebarDefinedNameOperation } from './commands/operations/sidebar-defin
 export { UNIVER_SHEET_PERMISSION_BACKGROUND, UNIVER_SHEET_PERMISSION_USER_PART } from './consts/permission';
 export { convertPositionCellToSheetOverGrid, convertPositionSheetOverGridToAbsolute } from './services/utils/drawing-position-util';
 export type { IScrollState, IViewportScrollState } from './services/scroll-manager.service';
+
+export { IStatusBarService, StatusBarService } from './services/status-bar.service';
+
+export { type IStatisticItem } from './views/status-bar/CopyableStatisticItem';
+
+export { functionDisplayNames } from './views/status-bar/CopyableStatisticItem';
 // #endregion

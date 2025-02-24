@@ -21,11 +21,17 @@ export const SHEETS_UI_PLUGIN_CONFIG_KEY = 'sheets-ui.config';
 
 export const configSymbol = Symbol(SHEETS_UI_PLUGIN_CONFIG_KEY);
 
+export const HIDE_STATUS_BAR_STATISTIC = Symbol('HIDE_STATUS_BAR_STATISTIC');
 export interface IUniverSheetsUIConfig {
     menu?: MenuConfig;
     disableAutoFocus?: true;
     override?: DependencyOverride;
     customComponents?: Set<string>;
+    /**
+     * The maximum count of rows triggering auto height. This is used to avoid performance issue.
+     * @default 1000
+     */
+    maxAutoHeightCount?: number;
 
     /**
      * Whether to show the formula bar.
@@ -35,8 +41,11 @@ export interface IUniverSheetsUIConfig {
     clipboardConfig?: {
         hidePasteOptions?: boolean;
     };
+
+    hideStatusBarStatistic?: boolean;
 }
 
 export const defaultPluginConfig: IUniverSheetsUIConfig = {
     formulaBar: true,
+    maxAutoHeightCount: 1000,
 };

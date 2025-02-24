@@ -50,6 +50,9 @@ function Examples() {
         title: '🗂️ Sheets Multi Instance',
         href: './sheets-multi/',
     }, {
+        title: '🏡 Sheets Multi Units',
+        href: './sheets-multi-units/',
+    }, {
         title: '📄 Sheets Uniscript',
         href: './sheets-uniscript/',
     }, {

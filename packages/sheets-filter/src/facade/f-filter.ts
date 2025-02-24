@@ -40,6 +40,43 @@ export class FFilter {
     /**
      * Get the filtered out rows by this filter.
      * @returns {number[]} Filtered out rows by this filter.
+     * @example
+     * ```typescript
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:D10');
+     * fRange.setValues([
+     *   [1, 2, 3, 4],
+     *   [2, 3, 4, 5],
+     *   [3, 4, 5, 6],
+     *   [4, 5, 6, 7],
+     *   [5, 6, 7, 8],
+     *   [6, 7, 8, 9],
+     *   [7, 8, 9, 10],
+     *   [8, 9, 10, 11],
+     *   [9, 10, 11, 12],
+     *   [10, 11, 12, 13],
+     * ]);
+     *
+     * // Create a filter on the range
+     * let fFilter = fRange.createFilter();
+     *
+     * // If the filter already exists, remove it and create a new one
+     * if (!fFilter) {
+     *   fRange.getFilter().remove();
+     *   fFilter = fRange.createFilter();
+     * }
+     *
+     * // Set the filter criteria of the column A
+     * fFilter?.setColumnFilterCriteria(0, {
+     *   colId: 0,
+     *   filters: {
+     *     filters: ['1', '5', '9'],
+     *   },
+     * });
+     *
+     * console.log(fFilter?.getFilteredOutRows()); // [1, 2, 3, 5, 6, 7, 9]
+     * ```
      */
     getFilteredOutRows(): number[] {
         return Array.from(this._filterModel.filteredOutRows).sort();
@@ -47,23 +84,101 @@ export class FFilter {
 
     /**
      * Get the filter criteria of a column.
-     * @param {number} col The column number.
+     * @param {number} column - The column index.
      * @returns {Nullable<IFilterColumn>} The filter criteria of the column.
+     * @example
+     * ```typescript
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:D10');
+     * fRange.setValues([
+     *   [1, 2, 3, 4],
+     *   [2, 3, 4, 5],
+     *   [3, 4, 5, 6],
+     *   [4, 5, 6, 7],
+     *   [5, 6, 7, 8],
+     *   [6, 7, 8, 9],
+     *   [7, 8, 9, 10],
+     *   [8, 9, 10, 11],
+     *   [9, 10, 11, 12],
+     *   [10, 11, 12, 13],
+     * ]);
+     *
+     * // Create a filter on the range
+     * let fFilter = fRange.createFilter();
+     *
+     * // If the filter already exists, remove it and create a new one
+     * if (!fFilter) {
+     *   fRange.getFilter().remove();
+     *   fFilter = fRange.createFilter();
+     * }
+     *
+     * // Set the filter criteria of the column A
+     * fFilter?.setColumnFilterCriteria(0, {
+     *   colId: 0,
+     *   filters: {
+     *     filters: ['1', '5', '9'],
+     *   },
+     * });
+     *
+     * console.log(fFilter?.getColumnFilterCriteria(0)); // { colId: 0, filters: { filters: ['1', '5', '9'] } }
+     * console.log(fFilter?.getColumnFilterCriteria(1)); // undefined
+     * ```
      */
-    getColumnFilterCriteria(col: number): Nullable<IFilterColumn> {
-        return this._filterModel.getFilterColumn(col)?.getColumnData();
+    getColumnFilterCriteria(column: number): Nullable<IFilterColumn> {
+        return this._filterModel.getFilterColumn(column)?.getColumnData();
     }
 
     /**
      * Clear the filter criteria of a column.
-     * @param {number} col The column number.
-     * @returns {FFilter} The interface class to handle the filter.
+     * @param {number} column - The column index.
+     * @returns {FFilter} The FFilter instance for chaining.
+     * @example
+     * ```typescript
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:D10');
+     * fRange.setValues([
+     *   [1, 2, 3, 4],
+     *   [2, 3, 4, 5],
+     *   [3, 4, 5, 6],
+     *   [4, 5, 6, 7],
+     *   [5, 6, 7, 8],
+     *   [6, 7, 8, 9],
+     *   [7, 8, 9, 10],
+     *   [8, 9, 10, 11],
+     *   [9, 10, 11, 12],
+     *   [10, 11, 12, 13],
+     * ]);
+     *
+     * // Create a filter on the range
+     * let fFilter = fRange.createFilter();
+     *
+     * // If the filter already exists, remove it and create a new one
+     * if (!fFilter) {
+     *   fRange.getFilter().remove();
+     *   fFilter = fRange.createFilter();
+     * }
+     *
+     * // Set the filter criteria of the column A
+     * fFilter?.setColumnFilterCriteria(0, {
+     *   colId: 0,
+     *   filters: {
+     *     filters: ['1', '5', '9'],
+     *   },
+     * });
+     *
+     * // Clear the filter criteria of the column A after 3 seconds
+     * setTimeout(() => {
+     *   fFilter?.removeColumnFilterCriteria(0);
+     * }, 3000);
+     * ```
      */
-    removeColumnFilterCriteria(col: number): FFilter {
+    removeColumnFilterCriteria(column: number): FFilter {
         this._commandSrv.syncExecuteCommand(SetSheetsFilterCriteriaCommand.id, {
             unitId: this._workbook.getUnitId(),
             subUnitId: this._worksheet.getSheetId(),
-            col,
+            col: column,
             criteria: null,
         } as ISetSheetsFilterCriteriaCommandParams);
         return this;
@@ -71,15 +186,50 @@ export class FFilter {
 
     /**
      * Set the filter criteria of a column.
-     * @param {number} col  The column number.
-     * @param {ISetSheetsFilterCriteriaCommandParams['criteria']} criteria The new filter criteria.
-     * @returns {FFilter} The interface class to handle the filter.
+     * @param {number} column - The column index.
+     * @param {ISetSheetsFilterCriteriaCommandParams['criteria']} criteria - The new filter criteria.
+     * @returns {FFilter} The FFilter instance for chaining.
+     * @example
+     * ```typescript
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:D10');
+     * fRange.setValues([
+     *   [1, 2, 3, 4],
+     *   [2, 3, 4, 5],
+     *   [3, 4, 5, 6],
+     *   [4, 5, 6, 7],
+     *   [5, 6, 7, 8],
+     *   [6, 7, 8, 9],
+     *   [7, 8, 9, 10],
+     *   [8, 9, 10, 11],
+     *   [9, 10, 11, 12],
+     *   [10, 11, 12, 13],
+     * ]);
+     *
+     * // Create a filter on the range
+     * let fFilter = fRange.createFilter();
+     *
+     * // If the filter already exists, remove it and create a new one
+     * if (!fFilter) {
+     *   fRange.getFilter().remove();
+     *   fFilter = fRange.createFilter();
+     * }
+     *
+     * // Set the filter criteria of the column A
+     * fFilter?.setColumnFilterCriteria(0, {
+     *   colId: 0,
+     *   filters: {
+     *     filters: ['1', '5', '9'],
+     *   },
+     * });
+     * ```
      */
-    setColumnFilterCriteria(col: number, criteria: ISetSheetsFilterCriteriaCommandParams['criteria']): FFilter {
+    setColumnFilterCriteria(column: number, criteria: ISetSheetsFilterCriteriaCommandParams['criteria']): FFilter {
         this._commandSrv.syncExecuteCommand(SetSheetsFilterCriteriaCommand.id, {
             unitId: this._workbook.getUnitId(),
             subUnitId: this._worksheet.getSheetId(),
-            col,
+            col: column,
             criteria,
         } as ISetSheetsFilterCriteriaCommandParams);
         return this;
@@ -88,6 +238,13 @@ export class FFilter {
     /**
      * Get the range of the filter.
      * @returns {FRange} The range of the filter.
+     * @example
+     * ```typescript
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fFilter = fWorksheet.getFilter();
+     * console.log(fFilter?.getRange().getA1Notation());
+     * ```
      */
     getRange(): FRange {
         const range = this._filterModel.getRange();
@@ -96,7 +253,47 @@ export class FFilter {
 
     /**
      * Remove the filter criteria of all columns.
-     * @returns {Promise<boolean>} If the filter criteria is removed.
+     * @returns {FFilter} The FFilter instance for chaining.
+     * @example
+     * ```typescript
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:D10');
+     * fRange.setValues([
+     *   [1, 2, 3, 4],
+     *   [2, 3, 4, 5],
+     *   [3, 4, 5, 6],
+     *   [4, 5, 6, 7],
+     *   [5, 6, 7, 8],
+     *   [6, 7, 8, 9],
+     *   [7, 8, 9, 10],
+     *   [8, 9, 10, 11],
+     *   [9, 10, 11, 12],
+     *   [10, 11, 12, 13],
+     * ]);
+     *
+     * // Create a filter on the range
+     * let fFilter = fRange.createFilter();
+     *
+     * // If the filter already exists, remove it and create a new one
+     * if (!fFilter) {
+     *   fRange.getFilter().remove();
+     *   fFilter = fRange.createFilter();
+     * }
+     *
+     * // Set the filter criteria of the column A
+     * fFilter?.setColumnFilterCriteria(0, {
+     *   colId: 0,
+     *   filters: {
+     *     filters: ['1', '5', '9'],
+     *   },
+     * });
+     *
+     * // Clear the filter criteria of all columns after 3 seconds
+     * setTimeout(() => {
+     *   fFilter?.removeFilterCriteria();
+     * }, 3000);
+     * ```
      */
     removeFilterCriteria(): FFilter {
         this._commandSrv.syncExecuteCommand(ClearSheetsFilterCriteriaCommand.id);
@@ -105,7 +302,21 @@ export class FFilter {
 
     /**
      * Remove the filter from the worksheet.
-     * @returns {boolean} If the filter is removed.
+     * @returns {boolean} True if the filter is removed successfully; otherwise, false.
+     * @example
+     * ```typescript
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:D14');
+     * let fFilter = fRange.createFilter();
+     *
+     * // If the worksheet already has a filter, remove it and create a new filter.
+     * if (!fFilter) {
+     *   fWorksheet.getFilter().remove();
+     *   fFilter = fRange.createFilter();
+     * }
+     * console.log(fFilter);
+     * ```
      */
     remove(): boolean {
         return this._commandSrv.syncExecuteCommand(RemoveSheetFilterCommand.id, {

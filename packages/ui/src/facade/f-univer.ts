@@ -30,127 +30,323 @@ import { FShortcut } from './f-shortcut';
 export interface IFUniverUIMixin {
     /**
      * Return the URL of the current page.
-     * @returns the [URL](https://developer.mozilla.org/en-US/docs/Web/API/URL) object
+     * @returns {URL} the [URL](https://developer.mozilla.org/en-US/docs/Web/API/URL) object
+     * @example
+     * ```ts
+     * console.log(univerAPI.getURL());
+     * ```
      */
     getURL(): URL;
+
     /**
      * Get the Shortcut handler to interact with Univer's shortcut functionalities.
+     * @returns the {@link FShortcut} object
+     * @example
+     * ```ts
+     * const fShortcut = univerAPI.getShortcut();
+     *
+     * // Disable shortcuts of Univer
+     * fShortcut.disableShortcut();
+     *
+     * // Enable shortcuts of Univer
+     * fShortcut.enableShortcut();
+     *
+     * // Trigger a shortcut
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1');
+     * fRange.activate();
+     * fRange.setValue('Hello Univer');
+     * console.log(fRange.getCellStyle().bold); // false
+     * const pseudoEvent = new KeyboardEvent('keydown', {
+     *   key: 'b',
+     *   ctrlKey: true,
+     *   keyCode: univerAPI.Enum.KeyCode.B
+     * });
+     * const ifShortcutItem = fShortcut.triggerShortcut(pseudoEvent);
+     * if (ifShortcutItem) {
+     *   const commandId = ifShortcutItem.id;
+     *   console.log(fRange.getCellStyle().bold); // true
+     * }
+     * ```
      */
     getShortcut(): FShortcut;
+
     /**
      * Copy the current selected content of the currently focused unit into your system clipboard.
      */
     copy(): Promise<boolean>;
+
     /**
      * Paste into the current selected position of the currently focused unit from your system clipboard.
+     * ```
      */
     paste(): Promise<boolean>;
+
     /**
      * Create a menu build object. You can insert new menus into the UI.
      * @param {IFacadeMenuItem} menuItem the menu item
+     * @returns the {@link FMenu} object
      * @example
      * ```ts
+     * // Univer Icon can be viewed at https://univer.ai/en-US/icons
+     * import { SmileSingle } from '@univerjs/icons'
+     *
+     * // Create a custom menu with an univer icon
+     * univerAPI.registerComponent('custom-menu-icon', SmileSingle);
+     * univerAPI.createMenu({
+     *   id: 'custom-menu',
+     *   icon: 'custom-menu-icon',
+     *   title: 'Custom Menu',
+     *   tooltip: 'Custom Menu Tooltip',
+     *   action: () => {
+     *     console.log('Custom Menu Clicked');
+     *   },
+     * }).appendTo('ribbon.start.others');
+     *
+     * // Or
+     * // Create a custom menu with an image icon
+     * univerAPI.registerComponent('custom-menu-icon', () => {
+     *   return <img src="https://avatars.githubusercontent.com/u/61444807?s=48&v=4" alt="" style={{ width: '16px', height: '16px' }} />;
+     * });
+     * univerAPI.createMenu({
+     *   id: 'custom-menu',
+     *   icon: 'custom-menu-icon',
+     *   title: 'Custom Menu',
+     *   tooltip: 'Custom Menu Tooltip',
+     *   action: () => {
+     *     console.log('Custom Menu Clicked');
+     *   },
+     * }).appendTo('ribbon.start.others');
+     *
+     * // Or
+     * // Create a custom menu without an icon
      * univerAPI.createMenu({
      *   id: 'custom-menu',
      *   title: 'Custom Menu',
-     *   action: () => {},
+     *   tooltip: 'Custom Menu Tooltip',
+     *   action: () => {
+     *     console.log('Custom Menu Clicked');
+     *   },
      * }).appendTo('ribbon.start.others');
      * ```
-     * @returns the {@link FMenu} object
      */
     createMenu(menuItem: IFacadeMenuItem): FMenu;
+
     /**
      * Create a menu that contains submenus, and later you can append this menu and its submenus to the UI.
-     * @param submenuItem the submenu item
+     * @param {IFacadeSubmenuItem} submenuItem the submenu item
+     * @returns the {@link FSubmenu} object
      * @example
      * ```ts
+     * // Create two leaf menus.
+     * const menu1 = univerAPI.createMenu({
+     *   id: 'submenu-nested-1',
+     *   title: 'Item 1',
+     *   action: () => {
+     *     console.log('Item 1 clicked');
+     *   }
+     * });
+     * const menu2 = univerAPI.createMenu({
+     *   id: 'submenu-nested-2',
+     *   title: 'Item 2',
+     *   action: () => {
+     *     console.log('Item 2 clicked');
+     *   }
+     * });
+     *
+     * // Add the leaf menus to a submenu.
+     * const submenu = univerAPI.createSubmenu({ id: 'submenu-nested', title: 'Nested Submenu' })
+     *   .addSubmenu(menu1)
+     *   .addSeparator()
+     *   .addSubmenu(menu2);
+     *
+     * // Create a root submenu append to the `contextMenu.others` section.
      * univerAPI.createSubmenu({ id: 'custom-submenu', title: 'Custom Submenu' })
-     *   .addSubmenu(univerAPI.createSubmenu({ id: 'submenu-nested', title: 'Nested Submenu' })
-     *     .addSubmenu(univerAPI.createMenu({ id: 'submenu-nested-1', title: 'Item 1', action: () => {} }))
-     *     .addSeparator()
-     *     .addSubmenu(univerAPI.createMenu({ id: 'submenu-nested-2', title: 'Item 2', action: () => {} }))
-     *   )
+     *   .addSubmenu(submenu)
      *   .appendTo('contextMenu.others');
      * ```
-     * @returns the {@link FSubmenu} object
      */
     createSubmenu(submenuItem: IFacadeSubmenuItem): FSubmenu;
+
     /**
      * Open a sidebar.
-     * @deprecated Please use `openSidebar` instead.
-     * @param params the sidebar options
-     * @returns the disposable object
+     * @deprecated Please use `univerAPI.openSidebar` instead.
+     * @param {ISidebarMethodOptions} params the sidebar options
+     * @returns {IDisposable} the disposable object
      */
     openSiderbar(params: ISidebarMethodOptions): IDisposable;
+
     /**
      * Open a sidebar.
-     * @deprecated Please use `openSidebar` instead.
-     * @param params the sidebar options
-     * @returns the disposable object
-     */
-    openSidebar(params: ISidebarMethodOptions): IDisposable;
-    /**
-     * Open a dialog.
-     * @param dialog the dialog options
-     * @returns the disposable object
-     */
-    openDialog(dialog: IDialogPartMethodOptions): IDisposable;
-    /**
-     * Get the component manager
-     * @returns The component manager
-     */
-    getComponentManager(): ComponentManager;
-    /**
-     * Show a message.
+     * @param {ISidebarMethodOptions} params the sidebar options
+     * @returns {IDisposable} the disposable object
      * @example
      * ```ts
-     * const message = univerAPI.showMessage({ key: 'my-message', content: 'Warning', duration: 0 });
-     *
-     * someAction().then(() => message.dispose());
+     * univerAPI.openSidebar({
+     *   id: 'mock-sidebar-id',
+     *   width: 300,
+     *   header: {
+     *     label: 'Sidebar Header',
+     *   },
+     *   children: {
+     *     label: 'Sidebar Content',
+     *   },
+     *   footer: {
+     *     label: 'Sidebar Footer',
+     *   },
+     *   onClose: () => {
+     *     console.log('Sidebar closed')
+     *   },
+     * });
      * ```
      */
-    showMessage(options: IMessageProps): void;
+    openSidebar(params: ISidebarMethodOptions): IDisposable;
+
+    /**
+     * Open a dialog.
+     * @param {IDialogPartMethodOptions} dialog the dialog options
+     * @returns {IDisposable} the disposable object
+     * @example
+     * ```ts
+     * import { Button } from '@univerjs/design';
+     *
+     * univerAPI.openDialog({
+     *   id: 'mock-dialog-id',
+     *   width: 500,
+     *   title: {
+     *     label: 'Dialog Title',
+     *   },
+     *   children: {
+     *     label: 'Dialog Content',
+     *   },
+     *   footer: {
+     *     title: (
+     *       <>
+     *         <Button onClick={() => { console.log('Cancel clicked') }}>Cancel</Button>
+     *         <Button type="primary" onClick={() => { console.log('Confirm clicked') }} style={{marginLeft: '10px'}}>Confirm</Button>
+     *       </>
+     *     )
+     *   },
+     *   draggable: true,
+     *   mask: true,
+     *   maskClosable: true,
+     * });
+     * ```
+     */
+    openDialog(dialog: IDialogPartMethodOptions): IDisposable;
+
+    /**
+     * Get the component manager
+     * @returns {ComponentManager} The component manager
+     * @example
+     * ```ts
+     * const componentManager = univerAPI.getComponentManager();
+     * console.log(componentManager);
+     * ```
+     */
+    getComponentManager(): ComponentManager;
+
+    /**
+     * Show a message.
+     * @returns {FUniver} the {@link FUniver} instance for chaining
+     * @example
+     * ```ts
+     * univerAPI.showMessage({
+     *   content: 'Success',
+     *   type: 'success',
+     *   duration: 3000,
+     * });
+     * ```
+     */
+    showMessage(options: IMessageProps): FUniver;
 
     /**
      * Set the visibility of a built-in UI part.
-     * @param key the built-in UI part
-     * @param visible the visibility
-     * @returns the {@link FUniver} object
+     * @param {BuiltInUIPart} key the built-in UI part
+     * @param {boolean} visible the visibility
+     * @returns the {@link FUniver} instance for chaining
      * example
      * ```ts
-     * univerAPI.setUIVisible(BuiltInUIPart.HEADER, false);
+     * // Hide header, footer, and toolbar
+     * univerAPI.setUIVisible(univerAPI.Enum.BuiltInUIPart.HEADER, false)
+     *   .setUIVisible(univerAPI.Enum.BuiltInUIPart.FOOTER, false)
+     *   .setUIVisible(univerAPI.Enum.BuiltInUIPart.TOOLBAR, false);
+     *
+     * // Show in 3 seconds
+     * setTimeout(() => {
+     *   univerAPI.setUIVisible(univerAPI.Enum.BuiltInUIPart.HEADER, true)
+     *     .setUIVisible(univerAPI.Enum.BuiltInUIPart.FOOTER, true)
+     *     .setUIVisible(univerAPI.Enum.BuiltInUIPart.TOOLBAR, true);
+     * }, 3000);
      * ```
      */
     setUIVisible(key: BuiltInUIPart, visible: boolean): FUniver;
 
     /**
      * Get the visibility of a built-in UI part.
-     * @param key the built-in UI part
-     * @returns the visibility
-     * example
+     * @param {BuiltInUIPart} key the built-in UI part
+     * @returns {boolean} the visibility
+     * @example
      * ```ts
-     * univerAPI.isUIVisible(BuiltInUIPart.HEADER);
+     * // Hide header
+     * univerAPI.setUIVisible(univerAPI.Enum.BuiltInUIPart.HEADER, false);
+     * console.log(univerAPI.isUIVisible(univerAPI.Enum.BuiltInUIPart.HEADER)); // false
      * ```
      */
     isUIVisible(key: BuiltInUIPart): boolean;
 
     /**
-     * register an component to a built-in UI part
-     * @param key the built-in UI part
+     * Register an component to a built-in UI part
+     * @param {BuiltInUIPart} key the built-in UI part
      * @param component the react component
      * @example
      * ```ts
-     * univerAPI.registerUIPart(BuiltInUIPart.CUSTOM_HEADER, () => React.createElement('h1', null, 'Custom Header'));
+     * univerAPI.registerUIPart(univerAPI.Enum.BuiltInUIPart.CUSTOM_HEADER, () => React.createElement('h1', null, 'Custom Header'));
      * ```
      */
     registerUIPart(key: BuiltInUIPart, component: any): IDisposable;
 
     /**
-     * register an component.
-     * @param component
+     * Register an component.
+     * @param {string} name - The name of the component.
+     * @param {ComponentType} component - The component.
+     * @param {IComponentOptions} [options] - The options of the component.
+     * @returns {IDisposable} The disposable object.
      * @example
      * ```ts
-     * univerAPI.registerComponent('my-comp', () => React.createElement('h1', null, 'Custom Header'));
+     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     *
+     * // Register a range loading component
+     * const RangeLoading = () => {
+     *   const divStyle = {
+     *     width: '100%',
+     *     height: '100%',
+     *     backgroundColor: '#fff',
+     *     border: '1px solid #ccc',
+     *     boxSizing: 'border-box' as const,
+     *     display: 'flex',
+     *     justifyContent: 'center',
+     *     alignItems: 'center',
+     *     textAlign: 'center' as const,
+     *     transformOrigin: 'top left',
+     *   };
+     *
+     *   return (
+     *     <div style={divStyle}>
+     *       Loading...
+     *     </div>
+     *   );
+     * };
+     * univerAPI.registerComponent('RangeLoading', RangeLoading);
+     *
+     * // Add the range loading component covering the range A1:C3
+     * const range = fWorksheet.getRange('A1:C3');
+     * const disposeable = fWorksheet.addFloatDomToRange(range, { componentKey: 'RangeLoading' }, {}, 'myRangeLoading');
+     *
+     * setTimeout(() => {
+     *   disposeable?.dispose();
+     * }, 2000);
      * ```
      */
     registerComponent(name: string, component: ComponentType, options?: IComponentOptions): IDisposable;
@@ -158,7 +354,7 @@ export interface IFUniverUIMixin {
     /**
      * Set a unit as the current unit and render a unit in the workbench's main area. If you have multiple units in Univer,
      * you should call this method to render the unit.
-     * @param unitId Unit to be rendered.
+     * @param {string} unitId Unit to be rendered.
      *
      * @example
      * Let's assume you have created two units, `unit1` and `unit2`. Univer is rendering `unit1` and you want to

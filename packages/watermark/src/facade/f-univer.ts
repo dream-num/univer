@@ -25,13 +25,35 @@ import { WatermarkImageBaseConfig, WatermarkService, WatermarkTextBaseConfig } f
 export interface IFUniverWatermarkMixin {
     /**
      * Adds a watermark to the unit. Supports both text and image watermarks based on the specified type.
-     * @param {IWatermarkTypeEnum.Text | IWatermarkTypeEnum.Image} type - The type of watermark to add. Can be either 'Text' or 'Image'.
-     * @param {ITextWatermarkConfig | IImageWatermarkConfig} config - The configuration object for the watermark.
-     * - If the type is 'Text', the config should follow the ITextWatermarkConfig interface.
-     * - If the type is 'Image', the config should follow the IImageWatermarkConfig interface.
+     * @param {IWatermarkTypeEnum.Text} type - The type of watermark to add is Text.
+     * @param {ITextWatermarkConfig} config - The configuration object for the text type watermark.
+     * @returns {FUniver} The {@link FUniver} instance for chaining.
      * @throws {Error} Throws an error if the watermark type is unknown.
+     * @example
+     * ```ts
+     * univerAPI.addWatermark('text', {
+     *   content: 'Univer',
+     *   fontSize: 20,
+     *   repeat: true,
+     * });
+     * ```
      */
     addWatermark(type: IWatermarkTypeEnum.Text, config: ITextWatermarkConfig): FUniver;
+    /**
+     * Adds a watermark to the unit. Supports both text and image watermarks based on the specified type.
+     * @param {IWatermarkTypeEnum.Image} type - The type of watermark to add is Image.
+     * @param {IImageWatermarkConfig} config - The configuration object for the image type watermark.
+     * @returns {FUniver} The {@link FUniver} instance for chaining.
+     * @throws {Error} Throws an error if the watermark type is unknown.
+     * @example
+     * ```ts
+     * univerAPI.addWatermark('image', {
+     *   url: 'https://avatars.githubusercontent.com/u/61444807?s=48&v=4',
+     *   width: 100,
+     *   height: 100,
+     * });
+     * ```
+     */
     addWatermark(type: IWatermarkTypeEnum.Image, config: IImageWatermarkConfig): FUniver;
     addWatermark(
         type: IWatermarkTypeEnum.Text | IWatermarkTypeEnum.Image,
@@ -40,8 +62,12 @@ export interface IFUniverWatermarkMixin {
 
     /**
      * Deletes the currently applied watermark from the unit.
-     *
      * This function retrieves the watermark service and invokes the method to remove any existing watermark configuration.
+     * @returns {FUniver} The {@link FUniver} instance for chaining.
+     * @example
+     * ```ts
+     * univerAPI.deleteWatermark();
+     * ```
      */
     deleteWatermark(): FUniver;
 }

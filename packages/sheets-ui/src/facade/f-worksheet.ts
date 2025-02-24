@@ -20,7 +20,7 @@ import type { IColumnsHeaderCfgParam, IRowsHeaderCfgParam, RenderComponentType, 
 import type { IScrollState, IViewportScrollState } from '@univerjs/sheets-ui';
 import { ICommandService, toDisposable } from '@univerjs/core';
 import { IRenderManagerService, SHEET_VIEWPORT_KEY, sheetContentViewportKeys } from '@univerjs/engine-render';
-import { ChangeZoomRatioCommand, SetColumnHeaderHeightCommand, SetRowHeaderWidthCommand, SetWorksheetColAutoWidthCommand, SHEET_VIEW_KEY, SheetScrollManagerService, SheetSkeletonManagerService, SheetsScrollRenderController } from '@univerjs/sheets-ui';
+import { SetColumnHeaderHeightCommand, SetRowHeaderWidthCommand, SetWorksheetColAutoWidthCommand, SetZoomRatioCommand, SHEET_VIEW_KEY, SheetScrollManagerService, SheetSkeletonManagerService, SheetsScrollRenderController } from '@univerjs/sheets-ui';
 import { FWorksheet } from '@univerjs/sheets/facade';
 
 /**
@@ -29,25 +29,36 @@ import { FWorksheet } from '@univerjs/sheets/facade';
 export interface IFWorksheetSkeletonMixin {
     /**
      * Refresh the canvas.
-     */
-    refreshCanvas(): FWorksheet;
-    /**
-     * Set zoom ratio of the worksheet.
-     * @param {number} zoomRatio The zoom ratio to set.It should be in the range of 10 to 400.
-     * @returns True if the command was successful, false otherwise.
+     * @returns {FWorksheet} The FWorksheet instance for chaining.
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getActiveSheet();
-     * fWorksheet.zoom(200);
+     * fWorksheet.refreshCanvas();
+     * ```
+     */
+    refreshCanvas(): FWorksheet;
+
+    /**
+     * Set zoom ratio of the worksheet.
+     * @param {number} zoomRatio The zoom ratio to set.It should be in the range of 0.1 to 4.0.
+     * @returns {FWorksheet} The FWorksheet instance for chaining.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // Set zoom ratio to 200%
+     * fWorksheet.zoom(2);
      * const zoomRatio = fWorksheet.getZoom();
-     * console.log(zoomRatio); // 200
+     * console.log(zoomRatio); // 2
      * ```
      */
     zoom(zoomRatio: number): FWorksheet;
+
     /**
      * Get the zoom ratio of the worksheet.
-     * @returns The zoom ratio of the worksheet.
+     * @returns {number} The zoom ratio of the worksheet.
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
@@ -62,10 +73,12 @@ export interface IFWorksheetSkeletonMixin {
      * Return visible range, sum view range of 4 viewports.
      * @returns {IRange} - visible range
      * @example
-     * ``` ts
+     * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getActiveSheet();
      * const visibleRange = fWorksheet.getVisibleRange();
+     * console.log(visibleRange);
+     * console.log(fWorksheet.getRange(visibleRange).getA1Notation());
      * ```
      */
     getVisibleRange(): IRange;
@@ -75,10 +88,17 @@ export interface IFWorksheetSkeletonMixin {
      * Based on the limitations of viewport and the number of rows and columns, you can only scroll to the maximum scrollable range.
      * @param {number} row - Cell row index
      * @param {number} column - Cell column index
-     * @returns {FWorksheet} - Current worksheet
+     * @returns {FWorksheet} - The FWorksheet instance for chaining.
      * @example
-     * ``` ts
-     * univerAPI.getActiveWorkbook().getActiveSheet().scrollToCell(1, 1);
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // Scroll to cell D10
+     * const fRange = fWorksheet.getRange('D10');
+     * const row = fRange.getRow();
+     * const column = fRange.getColumn();
+     * fWorksheet.scrollToCell(row, column);
      * ```
      */
     scrollToCell(row: number, column: number): FWorksheet;
@@ -87,8 +107,20 @@ export interface IFWorksheetSkeletonMixin {
      * Get scroll state of current sheet.
      * @returns {IScrollState} curr scroll state
      * @example
-     * ``` ts
-     * univerAPI.getActiveWorkbook().getActiveSheet().getScrollState()
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // Scroll to cell D10
+     * const fRange = fWorksheet.getRange('D10');
+     * const row = fRange.getRow();
+     * const column = fRange.getColumn();
+     * fWorksheet.scrollToCell(row, column);
+     *
+     * // Get scroll state
+     * const scrollState = fWorksheet.getScrollState();
+     * const { offsetX, offsetY, sheetViewStartColumn, sheetViewStartRow } = scrollState;
+     * console.log(scrollState); // sheetViewStartRow: 9, sheetViewStartColumn: 3, offsetX: 0, offsetY: 0
      * ```
      */
     getScrollState(): IScrollState;
@@ -107,13 +139,16 @@ export interface IFWorksheetSkeletonMixin {
     getSkeleton(): Nullable<SpreadsheetSkeleton>;
 
     /**
-     * Set the given column width to fix-content.
-     * @param {number} columnPosition - Column position
+     * Set the column width to auto width.
+     * @param {number} columnPosition - Column position index
      * @param {number} numColumn - Number of columns
+     * @returns {FWorksheet} - The FWorksheet instance for chaining.
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // Set A:C columns to auto width
      * fWorksheet.setColumnAutoWidth(0, 3);
      * ```
      */
@@ -173,31 +208,34 @@ export interface IFWorksheetSkeletonMixin {
 
     /**
      * Set column height for column header.
-     * @param height
+     * @param {number} height - The height to set.
+     * @returns {FWorksheet} - The FWorksheet instance for chaining.
      * @example
      * ```ts
-        const sheet = univerAPI.getActiveWorkbook().getActiveSheet();
-        sheet.setColumnHeaderHeight(100);
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * fWorksheet.setColumnHeaderHeight(100);
      * ```
      */
     setColumnHeaderHeight(height: number): FWorksheet;
 
     /**
      * Set column height for column header.
-     * @param width
+     * @param {number} width - The width to set.
+     * @returns {FWorksheet} - The FWorksheet instance for chaining.
      * @example
      * ```ts
-        const sheet = univerAPI.getActiveWorkbook().getActiveSheet();
-        sheet.setRowHeaderWidth(100);
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * fWorksheet.setRowHeaderWidth(100);
      * ```
      */
     setRowHeaderWidth(width: number): FWorksheet;
 
     /**
-     * @deprecated use `univerAPI.addEvent(univerAPI.Event.Scroll, () => {})` instead
+     * @deprecated use `univerAPI.addEvent(univerAPI.Event.Scroll, (params) => {})` instead
      */
     onScroll(callback: (params: Nullable<IViewportScrollState>) => void): IDisposable;
-
 }
 
 export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSkeletonMixin {
@@ -225,10 +263,11 @@ export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSk
 
     override zoom(zoomRatio: number): FWorksheet {
         const commandService = this._injector.get(ICommandService);
-        commandService.syncExecuteCommand(ChangeZoomRatioCommand.id, {
+        const _zoomRatio = Math.min(Math.max(zoomRatio, 0.1), 4);
+        commandService.executeCommand(SetZoomRatioCommand.id, {
             unitId: this._workbook.getUnitId(),
             subUnitId: this._worksheet.getSheetId(),
-            zoomRatio,
+            zoomRatio: _zoomRatio,
         });
         return this;
     }

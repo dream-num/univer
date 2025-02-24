@@ -468,8 +468,8 @@ function initEvent() {
     });
 
     // checked
-    window.univerAPI?.addEvent(window.univerAPI.Event.BeforeCommentDeleted, (params) => {
-        logService.log('===BeforeCommentDeleted', params);
+    window.univerAPI?.addEvent(window.univerAPI.Event.BeforeCommentDelete, (params) => {
+        logService.log('===BeforeCommentDelete', params);
     });
 
     // checked

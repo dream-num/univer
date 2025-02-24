@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
+import type { IDocumentBody, Nullable } from '@univerjs/core';
 import type { IThreadComment } from '@univerjs/thread-comment';
-import { generateRandomId, ICommandService, type IDocumentBody, type Nullable, Range, Tools, UserManagerService } from '@univerjs/core';
+import { generateRandomId, ICommandService, Range, Tools, UserManagerService } from '@univerjs/core';
 import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment';
 import { FRange } from '@univerjs/sheets/facade';
 import { AddCommentCommand, DeleteCommentTreeCommand, getDT } from '@univerjs/thread-comment';

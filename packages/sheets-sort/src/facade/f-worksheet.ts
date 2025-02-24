@@ -27,7 +27,7 @@ export interface IFWorksheetSort {
     /**
      * Sort the worksheet by the specified column.
      * @param {number} colIndex The column index to sort by.
-     * @param {boolean} [asc=true] The sort order. `true` for ascending, `false` for descending.
+     * @param {boolean} [asc=true] The sort order. `true` for ascending, `false` for descending. The column A index is 0.
      * @returns {FWorksheet} The worksheet itself for chaining.
      * @example
      * ```typescript
@@ -47,7 +47,6 @@ export interface IFWorksheetSort {
 export class FWorksheetSort extends FWorksheet implements IFWorksheetSort {
     override sort(colIndex: number, asc = true): FWorksheet {
         const orderRules: IOrderRule[] = [{
-            // real column index should be colIndex - 1.
             colIndex,
             type: asc ? SortType.ASC : SortType.DESC,
         }];

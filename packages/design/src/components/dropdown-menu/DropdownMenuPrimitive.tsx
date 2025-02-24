@@ -15,7 +15,23 @@
  */
 
 import type { ComponentProps } from 'react';
-import { CheckboxItem, Content, Group, Item, ItemIndicator, Label, Portal, RadioGroup, RadioItem, Root, Separator, Sub, SubContent, SubTrigger, Trigger } from '@radix-ui/react-dropdown-menu';
+import {
+    CheckboxItem,
+    Content,
+    Group,
+    Item,
+    ItemIndicator,
+    Label,
+    Portal,
+    RadioGroup,
+    RadioItem,
+    Root,
+    Separator,
+    Sub,
+    SubContent,
+    SubTrigger,
+    Trigger,
+} from '@radix-ui/react-dropdown-menu';
 import { CheckMarkSingle, MoreRightSingle } from '@univerjs/icons';
 import { clsx } from '../../helper/clsx';
 
@@ -109,9 +125,9 @@ function DropdownMenuSubContent({
             data-slot="dropdown-menu-sub-content"
             className={clsx(
                 `
-                  univer-z-50 univer-box-border univer-max-h-[var(--radix-popper-available-height)] univer-min-w-[8rem]
+                  univer-z-50 univer-box-border univer-max-h-[var(--radix-popper-available-height)]
                   univer-overflow-y-auto univer-rounded-md univer-border univer-border-solid univer-border-gray-200
-                  univer-bg-white univer-p-2 univer-text-gray-900 univer-shadow-md univer-scrollbar-thin
+                  univer-bg-white univer-p-1.5 univer-text-gray-900 univer-shadow-md univer-scrollbar-thin
                   univer-scrollbar-track-gray-50 univer-scrollbar-thumb-gray-300
                   dark:univer-border-gray-600 dark:univer-bg-gray-700 dark:univer-text-white
                   data-[side=bottom]:univer-slide-in-from-top-2
@@ -143,9 +159,9 @@ function DropdownMenuContent({
                 className={clsx(
                     `
                       univer-z-50 univer-box-border univer-max-h-[var(--radix-popper-available-height)]
-                      univer-min-w-[8rem] univer-overflow-y-auto univer-rounded-md univer-border univer-border-solid
-                      univer-border-gray-200 univer-bg-white univer-p-2 univer-text-gray-900 univer-shadow-md
-                      univer-scrollbar-thin univer-scrollbar-track-gray-50 univer-scrollbar-thumb-gray-300
+                      univer-overflow-y-auto univer-rounded-md univer-border univer-border-solid univer-border-gray-200
+                      univer-bg-white univer-p-1.5 univer-text-gray-900 univer-shadow-md univer-scrollbar-thin
+                      univer-scrollbar-track-gray-50 univer-scrollbar-thumb-gray-300
                       dark:univer-border-gray-600 dark:univer-bg-gray-700 dark:univer-text-white
                       data-[side=bottom]:univer-slide-in-from-top-2
                       data-[side=left]:univer-slide-in-from-right-2

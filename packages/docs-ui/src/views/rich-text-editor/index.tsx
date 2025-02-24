@@ -87,7 +87,8 @@ export const RichTextEditor = (props: IRichTextEditorProps) => {
     const renderManagerService = useDependency(IRenderManagerService);
     const renderer = renderManagerService.getRenderById(editorId);
     const docSelectionRenderService = renderer?.with(DocSelectionRenderService);
-    const isFocusing = docSelectionRenderService?.isFocusing ?? false;
+    const selections = useObservable(docSelectionRenderService?.textSelectionInner$);
+    const isFocusing = (docSelectionRenderService?.isFocusing ?? false) && selections?.textRanges.some((r) => r.collapsed);
     const sheetEmbeddingRef = React.useRef<HTMLDivElement>(null);
     const [showPlaceholder, setShowPlaceholder] = useState(() => !BuildTextUtils.transform.getPlainText(editor?.getDocumentData().body?.dataStream ?? ''));
     const { checkScrollBar } = useResize(editor, isSingle, true, true);

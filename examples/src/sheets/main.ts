@@ -587,7 +587,7 @@ function initFacadeBtns() {
 
 // setTimeout(() => {
 //     const active = window.univerAPI?.getActiveSheet();
-//     console.log('==active', active,window.univerAPI);
+//     console.log('==active', active, window.univerAPI);
 //     if (!active) {
 //         return;
 //     }
@@ -597,6 +597,6 @@ function initFacadeBtns() {
 //         subUnitId: active.worksheet.getSheetId(),
 //         callback: (ranges, isCancel) => {
 //             console.log('===range selector dialog result', ranges, isCancel);
-//         }
-//     })
-// }, 5000)
+//         },
+//     });
+// }, 5000);

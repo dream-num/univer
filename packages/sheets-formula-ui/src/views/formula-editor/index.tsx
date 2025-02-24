@@ -27,7 +27,7 @@ import { EMBEDDING_FORMULA_EDITOR } from '@univerjs/sheets-ui';
 import { useDependency, useEvent, useObservable, useUpdateEffect } from '@univerjs/ui';
 import clsx from 'clsx';
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { findIndexFromSequenceNodes, findRefSequenceIndex } from '../range-selector-new/utils/find-index-from-sequence-nodes';
+import { findIndexFromSequenceNodes, findRefSequenceIndex } from '../range-selector/utils/find-index-from-sequence-nodes';
 import { HelpFunction } from './help-function/HelpFunction';
 import { useFocus } from './hooks/use-focus';
 import { useFormulaSelecting } from './hooks/use-formula-selection';

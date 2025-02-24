@@ -24,7 +24,7 @@ export { MoreFunctionsOperation } from './commands/operations/more-functions.ope
 export { ReferenceAbsoluteOperation } from './commands/operations/reference-absolute.operation';
 export { SearchFunctionOperation } from './commands/operations/search-function.operation';
 export { FormulaEditor } from './views/formula-editor/index';
-export { type IRangeSelectorInstance, type IRangeSelectorProps, RangeSelector } from './views/range-selector-new/index';
+export { type IRangeSelectorInstance, type IRangeSelectorProps, RangeSelector } from './views/range-selector/index';
 export { RefSelectionsRenderService } from './services/render-services/ref-selections.render-service';
 export { GlobalRangeSelectorService, type IShowRangeSelectorDialogOptions } from './services/range-selector.service';
 // #region - all commands

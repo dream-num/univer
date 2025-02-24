@@ -37,8 +37,8 @@ import { FormulaPromptService, IFormulaPromptService } from './services/prompt.s
 import { GlobalRangeSelectorService } from './services/range-selector.service';
 import { RefSelectionsRenderService } from './services/render-services/ref-selections.render-service';
 import { FormulaEditor } from './views/formula-editor/index';
-import { RangeSelector } from './views/range-selector-new';
-import { GlobalRangeSelector } from './views/range-selector-new/global';
+import { RangeSelector } from './views/range-selector';
+import { GlobalRangeSelector } from './views/range-selector/global';
 
 builtInGlobalComponents.add(GlobalRangeSelector);
 

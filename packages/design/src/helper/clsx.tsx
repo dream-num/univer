@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+/* eslint-disable no-restricted-imports */
 import type { ClassValue } from 'clsx';
 import { clsx as cn } from 'clsx';
 import { twMerge } from 'tailwind-merge';

@@ -61,6 +61,7 @@ exports.baseRules = {
     'perfectionist/sort-imports': 'warn',
     'perfectionist/sort-named-exports': 'warn',
     'antfu/consistent-chaining': 'warn',
+    'react-hooks/exhaustive-deps': 'off',
     'sort-imports': [
         'error',
         {

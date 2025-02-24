@@ -33,7 +33,7 @@ export const SegmentedBasic = {
         return (
             <div style={{ width: 280 }}>
                 <Segmented
-                    options={[
+                    items={[
                         { label: 'By Values', value: 'Values' },
                         { label: 'By Conditions', value: 'Conditions' },
                     ]}

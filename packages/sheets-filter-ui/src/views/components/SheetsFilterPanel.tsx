@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { ISegmentedProps } from '@univerjs/design';
 import type { ByConditionsModel, ByValuesModel } from '../../services/sheets-filter-panel.service';
 import { ICommandService, LocaleService } from '@univerjs/core';
 import { Button, Segmented } from '@univerjs/design';
@@ -43,7 +42,7 @@ export function FilterPanel() {
     const filterBy = useObservable(sheetsFilterPanelService.filterBy$, undefined, true);
     const filterByModel = useObservable(sheetsFilterPanelService.filterByModel$, undefined, false);
     const canApply = useObservable(() => filterByModel?.canApply$ || of(false), undefined, false, [filterByModel]);
-    const options = useFilterByOptions(localeService);
+    const items = useFilterByOptions(localeService);
 
     // only can disable clear when there is no criteria
     const clearFilterDisabled = !useObservable(sheetsFilterPanelService.hasCriteria$);
@@ -78,7 +77,11 @@ export function FilterPanel() {
                 sharedProps={{ range, colIndex, onClose: onCancel }}
             />
             <div className={styles.sheetsFilterPanelHeader}>
-                <Segmented value={filterBy} options={options} onChange={(value) => onFilterByTypeChange(value as FilterBy)} />
+                <Segmented
+                    value={filterBy}
+                    items={items}
+                    onChange={(value) => onFilterByTypeChange(value as FilterBy)}
+                />
             </div>
             {filterByModel
                 ? (
@@ -102,12 +105,11 @@ export function FilterPanel() {
     );
 }
 
-function useFilterByOptions(localeService: LocaleService): ISegmentedProps['options'] {
+function useFilterByOptions(localeService: LocaleService) {
     const locale = localeService.getCurrentLocale();
     return useMemo(() => [
         { label: localeService.t('sheets-filter.panel.by-values'), value: FilterBy.VALUES },
         { label: localeService.t('sheets-filter.panel.by-conditions'), value: FilterBy.CONDITIONS },
     ],
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     [locale, localeService]);
 }

@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export { Segmented, type ISegmentedProps } from './Segmented';
+export { Segmented } from './Segmented';

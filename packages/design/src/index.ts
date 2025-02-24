@@ -40,7 +40,7 @@ export { type IRadioGroupProps, RadioGroup } from './components/radio-group';
 export { type IScrollbarProps, Scrollbar } from './components/scrollbar';
 export { type ISelectProps, Select } from './components/select';
 export { type ISelectListProps, SelectList } from './components/select-list';
-export { type ISegmentedProps, Segmented } from './components/segmented';
+export { Segmented } from './components/segmented';
 export { type ITooltipProps, Tooltip } from './components/tooltip';
 export { filterLeafNode, findNodePathFromTree, findSubTreeFromPath, type ITreeNodeProps, type ITreeProps, mergeTreeSelected, Tree, TreeSelectionMode } from './components/tree';
 export { Switch } from './components/switch';

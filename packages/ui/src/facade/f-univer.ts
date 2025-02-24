@@ -89,7 +89,23 @@ export interface IFUniverUIMixin {
      * @returns the {@link FMenu} object
      * @example
      * ```ts
-     * // Create a custom menu with an icon
+     * // Univer Icon can be viewed at https://univer.ai/en-US/icons
+     * import { SmileSingle } from '@univerjs/icons'
+     *
+     * // Create a custom menu with an univer icon
+     * univerAPI.registerComponent('custom-menu-icon', SmileSingle);
+     * univerAPI.createMenu({
+     *   id: 'custom-menu',
+     *   icon: 'custom-menu-icon',
+     *   title: 'Custom Menu',
+     *   tooltip: 'Custom Menu Tooltip',
+     *   action: () => {
+     *     console.log('Custom Menu Clicked');
+     *   },
+     * }).appendTo('ribbon.start.others');
+     *
+     * // Or
+     * // Create a custom menu with an image icon
      * univerAPI.registerComponent('custom-menu-icon', () => {
      *   return <img src="https://avatars.githubusercontent.com/u/61444807?s=48&v=4" alt="" style={{ width: '16px', height: '16px' }} />;
      * });

@@ -50,8 +50,10 @@ export interface IScrollBarProps {
 }
 
 const MIN_THUMB_SIZE = 17;
-const DEFAULT_TRACK_SIZE = 10;
+const DEFAULT_TRACK_SIZE = 14;
 const HOVER_TRACK_SIZE = 14;
+const DEFAULT_THUMB_MARGIN = 4;
+const HOVER_THUMB_MARGIN = 2;
 
 export class ScrollBar extends Disposable {
     enableHorizontal: boolean = true;
@@ -100,17 +102,19 @@ export class ScrollBar extends Disposable {
      * ThumbSize = trackSize - thumbMargin * 2
      */
     private _trackThickness: number = DEFAULT_TRACK_SIZE;
-    private _trackHThickness: number = DEFAULT_TRACK_SIZE;
-    private _trackVThickness: number = DEFAULT_TRACK_SIZE;
+    // private _hTrackThickness: number = DEFAULT_TRACK_SIZE;
+    // private _vTrackThickness: number = DEFAULT_TRACK_SIZE;
+
     /**
      * The margin between thumb and bar.
      * ThumbSize = barSize - thumbMargin * 2
      */
-    private _thumbMargin = 2;
+    // private _thumbMargin = DEFAULT_THUMB_MARGIN;
+    private _vThumbMargin = DEFAULT_THUMB_MARGIN;
+    private _hThumbMargin = DEFAULT_THUMB_MARGIN;
 
     // origin: barBorder
     private _trackBorderThickness = 1;
-
     private _thumbLengthRatio = 1;
 
     /**
@@ -232,13 +236,12 @@ export class ScrollBar extends Disposable {
     }
 
     get scrollHorizonThumbThickness() {
-        return Math.max(0, this._trackHThickness - this._thumbMargin * 2);
+        return Math.max(0, this._trackThickness - this._hThumbMargin * 2);
     }
 
     get scrollVerticalThumbThickness() {
-        return Math.max(0, this._trackVThickness - this._thumbMargin * 2);
+        return Math.max(0, this._trackThickness - this._vThumbMargin * 2);
     }
-
 
     set barSize(v: number) {
         this._trackThickness = v;
@@ -331,9 +334,9 @@ export class ScrollBar extends Disposable {
 
         this.horizonScrollTrack?.transformByState({
             left: 0,
-            top: viewportH - this._trackHThickness,
+            top: viewportH - this._trackThickness,
             width: this.horizontalTrackWidth,
-            height: Math.max(0, this._trackHThickness - this._trackBorderThickness),
+            height: Math.max(0, this._trackThickness - this._trackBorderThickness),
         });
 
         if (this.horizontalThumbSize >= viewportW - this._trackThickness) {
@@ -350,7 +353,7 @@ export class ScrollBar extends Disposable {
 
             this.horizonThumbRect?.transformByState({
                 left: this._viewport.scrollX,
-                top: viewportH - this._trackHThickness + this._thumbMargin,
+                top: viewportH - this._trackThickness + this._hThumbMargin,
                 width: this.horizontalThumbSize,
                 height: this.scrollHorizonThumbThickness,
             });
@@ -367,7 +370,7 @@ export class ScrollBar extends Disposable {
         }
 
         this.verticalMinusMiniThumb = 0;
-        this.verticalTrackHeight = viewportH - (this.enableHorizontal ? this._trackHThickness : 0) - this._trackBorderThickness;
+        this.verticalTrackHeight = viewportH - (this.enableHorizontal ? this._trackThickness : 0) - this._trackBorderThickness;
         this.verticalThumbSize =
             ((this.verticalTrackHeight * this.verticalTrackHeight) / contentHeight) * this._thumbLengthRatio;
         // this._verticalThumbHeight = this._verticalThumbHeight < MINI_THUMB_SIZE ? MINI_THUMB_SIZE : this._verticalThumbHeight;
@@ -377,9 +380,9 @@ export class ScrollBar extends Disposable {
         }
 
         this.verticalScrollTrack?.transformByState({
-            left: viewportW - this._trackVThickness,
+            left: viewportW - this._trackThickness,
             top: 0,
-            width: Math.max(0, this._trackVThickness - this._trackBorderThickness),
+            width: Math.max(0, this._trackThickness - this._trackBorderThickness),
             height: this.verticalTrackHeight,
         });
 
@@ -394,9 +397,8 @@ export class ScrollBar extends Disposable {
                     visible: true,
                 });
             }
-            console.log('scrollY', this._viewport.scrollY, this.verticalThumbSize)
             this.verticalThumbRect?.transformByState({
-                left: viewportW - this._trackVThickness  + this._thumbMargin,
+                left: viewportW - this._trackThickness + this._vThumbMargin,
                 top: this._viewport.scrollY,
                 width: this.scrollVerticalThumbThickness,
                 height: this.verticalThumbSize,
@@ -409,10 +411,10 @@ export class ScrollBar extends Disposable {
         const viewportW = this._viewportW;
         if (this.enableHorizontal && this.enableVertical) {
             this.placeholderBarRect?.transformByState({
-                left: viewportW - this._trackHThickness,
-                top: viewportH - this._trackVThickness,
-                width: Math.max(0, this._trackHThickness - this._trackBorderThickness),
-                height: Math.max(0, this._trackVThickness - this._trackBorderThickness),
+                left: viewportW - this._trackThickness,
+                top: viewportH - this._trackThickness,
+                width: Math.max(0, this._trackThickness - this._trackBorderThickness),
+                height: Math.max(0, this._trackThickness - this._trackBorderThickness),
             });
         }
     }
@@ -446,7 +448,6 @@ export class ScrollBar extends Disposable {
         this._resizeHorizontal();
         this._resizeVertical();
         this._resizeRightBottomCorner();
-
     }
 
     makeDirty(state: boolean) {
@@ -513,12 +514,6 @@ export class ScrollBar extends Disposable {
                 radius: 6,
                 fill: this._thumbDefaultBackgroundColor!,
             });
-
-            // const originprops = (this.horizonThumbRect.setProps).bind(this);
-            // this.horizonThumbRect.setProps = (props: any) => {
-            //     console.log('horizonThumbRect', props);
-            //     return originprops(props);
-            // };
         }
 
         if (this.enableVertical) {
@@ -620,30 +615,33 @@ export class ScrollBar extends Disposable {
     }
 
     private _horizonHoverFunc(color: string, evt: unknown, state: EventState) {
-        this._trackHThickness = HOVER_TRACK_SIZE;
+        // this._trackThickness = HOVER_TRACK_SIZE;
+        this._hThumbMargin = HOVER_THUMB_MARGIN;
         this._resizeHorizontal();
         this._resizeRightBottomCorner();
         this._hoverFunc(color, this.horizonThumbRect!)(evt, state);
     }
 
     private _horizonHoverLeaveFunc(color: string, evt: unknown, state: EventState) {
-        this._trackHThickness = DEFAULT_TRACK_SIZE;
+        // this._trackThickness = DEFAULT_TRACK_SIZE;
+        this._hThumbMargin = DEFAULT_THUMB_MARGIN;
         this._resizeHorizontal();
         this._resizeRightBottomCorner();
         this._hoverFunc(color, this.horizonThumbRect!)(evt, state);
     }
 
     private _verticalHoverFunc(color: string, evt: unknown, state: EventState) {
-        this._trackVThickness = HOVER_TRACK_SIZE;
+        this._vThumbMargin = HOVER_THUMB_MARGIN;
         this._resizeVertical();
+        this._resizeRightBottomCorner();
         this._hoverFunc(color, this.verticalThumbRect!)(evt, state);
     }
 
     private _verticalHoverLeaveFunc(color: string, evt: unknown, state: EventState) {
-        this._trackVThickness = DEFAULT_TRACK_SIZE;
+        this._vThumbMargin = DEFAULT_THUMB_MARGIN;
         this._resizeVertical();
+        this._resizeRightBottomCorner();
         this._hoverFunc(color, this.verticalThumbRect!)(evt, state);
-
     }
 
     private _hoverFunc(color: string, thumb: Rect): (evt: unknown, state: EventState) => void {
@@ -652,7 +650,7 @@ export class ScrollBar extends Disposable {
                 fill: color,
             });
             this._trackThickness = HOVER_TRACK_SIZE;
-            this._resizeHorizontal()
+            this._resizeHorizontal();
             this.makeViewDirty(true);
         };
     }
@@ -666,7 +664,7 @@ export class ScrollBar extends Disposable {
 
         if (this.horizonThumbRect) {
             this._eventSub.add(this.horizonThumbRect.onPointerEnter$.subscribeEvent((evt: unknown, state: EventState) => {
-                this._horizonHoverFunc(this._thumbHoverBackgroundColor,evt, state);
+                this._horizonHoverFunc(this._thumbHoverBackgroundColor, evt, state);
             }));
         }
         if (this.horizonThumbRect) {

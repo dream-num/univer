@@ -59,7 +59,7 @@ export { HoverRenderController } from './controllers/hover-render.controller';
 export { DragRenderController } from './controllers/drag-render.controller';
 export { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY, RANGE_SELECTOR_COMPONENT_KEY, SHEET_VIEW_KEY } from './common/keys';
 export type { IDiscreteRange } from './controllers/utils/range-tools';
-export { discreteRangeToRange, rangeToDiscreteRange, virtualizeDiscreteRanges } from './controllers/utils/range-tools';
+export { discreteRangeToRange, virtualizeDiscreteRanges } from './controllers/utils/range-tools';
 export { AFFECT_LAYOUT_STYLES, AutoHeightController } from './controllers/auto-height.controller';
 export { AutoWidthController } from './controllers/auto-width.controller';
 export { FormulaEditorController } from './controllers/editor/formula-editor.controller';

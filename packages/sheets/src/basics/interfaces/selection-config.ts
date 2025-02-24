@@ -24,3 +24,8 @@ export interface ISelectionConfig {
 export interface ISelectionsConfig {
     [subUnitId: string]: ISelectionConfig[];
 }
+
+export interface IDiscreteRange {
+    rows: number[];
+    cols: number[];
+}

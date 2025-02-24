@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import { ObjectMatrix, UniverInstanceType } from '@univerjs/core';
-import type { ICellData, IObjectMatrixPrimitiveType, IRange, Nullable, UniverInstanceService, Workbook, Worksheet } from '@univerjs/core';
+import type { IAccessor, ICellData, IObjectMatrixPrimitiveType, IRange, Nullable, UniverInstanceService, Workbook, Worksheet } from '@univerjs/core';
 import type { IExpandParams } from '../commands/commands/utils/selection-utils';
+import type { IDiscreteRange } from './interfaces';
+import { IUniverInstanceService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
 
 export const groupByKey = <T = Record<string, unknown>>(arr: T[], key: string, blankKey = '') => {
     return arr.reduce(
@@ -226,4 +227,92 @@ export function getActiveWorksheet(instanceService: UniverInstanceService): [Nul
     const workbook = instanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
     const worksheet = workbook?.getActiveSheet();
     return [workbook, worksheet];
+}
+
+export function rangeToDiscreteRange(range: IRange, accessor: IAccessor, unitId?: string, subUnitId?: string, considerHide?: boolean): IDiscreteRange | null {
+    const univerInstanceService = accessor.get(IUniverInstanceService);
+    const workbook = unitId
+        ? univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET)
+        : univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+    const worksheet = subUnitId ? workbook?.getSheetBySheetId(subUnitId) : workbook?.getActiveSheet();
+    if (!worksheet) {
+        return null;
+    }
+    const { startRow, endRow, startColumn, endColumn } = range;
+
+    const rows = [];
+    const cols = [];
+    for (let r = startRow; r <= endRow; r++) {
+        if (!worksheet.getRowFiltered(r)) {
+            if (considerHide) {
+                if (worksheet.getRowRawVisible(r)) {
+                    rows.push(r);
+                }
+            } else {
+                rows.push(r);
+            }
+        }
+    }
+    for (let c = startColumn; c <= endColumn; c++) {
+        if (considerHide) {
+            if (worksheet.getColVisible(c)) {
+                cols.push(c);
+            }
+        } else {
+            cols.push(c);
+        }
+    }
+    return {
+        rows,
+        cols,
+    };
+}
+
+export function getVisibleRanges(ranges: IRange[], accessor: IAccessor, unitId?: string, subUnitId?: string): IRange[] {
+    const allRows: number[] = [];
+    const allCols: number[] = [];
+
+    for (const range of ranges) {
+        const discreteRange = rangeToDiscreteRange(range, accessor, unitId, subUnitId, true);
+
+        if (discreteRange) {
+            allRows.push(...discreteRange.rows);
+            allCols.push(...discreteRange.cols);
+        }
+    }
+
+    const uniqueRows = Array.from(new Set(allRows)).sort((a, b) => a - b);
+    const uniqueCols = Array.from(new Set(allCols)).sort((a, b) => a - b);
+
+    const visibleRanges: IRange[] = [];
+
+    function findContinuousSegments(arr: number[]): number[][] {
+        const segments: number[][] = [];
+        let start = arr[0];
+
+        for (let i = 1; i < arr.length; i++) {
+            if (arr[i] !== arr[i - 1] + 1) {
+                segments.push([start, arr[i - 1]]);
+                start = arr[i];
+            }
+        }
+        segments.push([start, arr[arr.length - 1]]);
+        return segments;
+    }
+
+    const rowSegments = findContinuousSegments(uniqueRows);
+    const colSegments = findContinuousSegments(uniqueCols);
+
+    for (const [startRow, endRow] of rowSegments) {
+        for (const [startCol, endCol] of colSegments) {
+            visibleRanges.push({
+                startRow,
+                endRow,
+                startColumn: startCol,
+                endColumn: endCol,
+            });
+        }
+    }
+
+    return visibleRanges;
 }

@@ -221,7 +221,7 @@ export abstract class BaseDataValidator {
         return cellInfo.value <= formula1;
     }
 
-    async validator(cellInfo: IValidatorCellInfo, rule: IDataValidationRule): Promise<boolean> {
+    async validator(cellInfo: IValidatorCellInfo, rule: IDataValidationRule, rejectInput?: boolean): Promise<boolean> {
         const { value: cellValue, unitId, subUnitId } = cellInfo;
         const isEmpty = this.isEmptyCellValue(cellValue);
         const { allowBlank = true, operator } = rule;

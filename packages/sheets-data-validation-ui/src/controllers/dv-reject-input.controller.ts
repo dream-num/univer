@@ -18,7 +18,7 @@ import { DataValidationErrorStyle, Disposable, Inject, LocaleService } from '@un
 import { DataValidatorRegistryService } from '@univerjs/data-validation';
 import { Button } from '@univerjs/design';
 import { AFTER_CELL_EDIT_ASYNC, SheetInterceptorService } from '@univerjs/sheets';
-import { getCellValueOrigin, SheetDataValidationModel } from '@univerjs/sheets-data-validation';
+import { CustomFormulaValidator, getCellValueOrigin, SheetDataValidationModel } from '@univerjs/sheets-data-validation';
 import { IDialogService } from '@univerjs/ui';
 import React from 'react';
 
@@ -51,20 +51,23 @@ export class DataValidationRejectInputController extends Disposable {
                     if (!validator) {
                         return next(Promise.resolve(cell));
                     }
-
-                    const success = await validator.validator(
-                        {
-                            value: getCellValueOrigin(cell),
-                            interceptValue: getCellValueOrigin(context?.origin ?? cell),
-                            row,
-                            column: col,
-                            unitId,
-                            subUnitId,
-                            worksheet,
-                            workbook,
-                            t: cell?.t,
-                        }, rule
-                    );
+                    const cellInfo = {
+                        value: getCellValueOrigin(cell),
+                        interceptValue: getCellValueOrigin(context?.origin ?? cell),
+                        row,
+                        column: col,
+                        unitId,
+                        subUnitId,
+                        worksheet,
+                        workbook,
+                        t: cell?.t,
+                    };
+                    let success: boolean;
+                    if (validator instanceof CustomFormulaValidator) {
+                        success = validator.isValidTypeSync(cellInfo as any, { formula1: rule.formula1, formula2: rule.formula2, isFormulaValid: true }, rule);
+                    } else {
+                        success = await validator.validator(cellInfo, rule);
+                    }
 
                     if (success) {
                         return next(Promise.resolve(cell));

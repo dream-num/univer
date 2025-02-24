@@ -15,7 +15,10 @@
  */
 
 export { CHECKBOX_FORMULA_1, CHECKBOX_FORMULA_2, CheckboxValidator } from './checkbox-validator';
+export { CustomFormulaValidator } from './custom-validator';
 export { DateValidator } from './date-validator';
 export { DecimalValidator } from './decimal-validator';
+export { ListMultipleValidator } from './list-multiple-validator';
 export { ListValidator } from './list-validator';
 export { TextLengthValidator } from './text-length-validator';
+export { WholeValidator } from './whole-validator';

@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-import type { CellValue, DataValidationOperator, IDataValidationRule, IDataValidationRuleBase } from '@univerjs/core';
+import type { CellValue, DataValidationOperator, ICellData, IDataValidationRule, IDataValidationRuleBase, ObjectMatrix, Workbook } from '@univerjs/core';
 import type { IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation';
-import { CellValueType, DataValidationType, isFormulaString, Tools } from '@univerjs/core';
+import type { ISheetData } from '@univerjs/engine-formula';
+import { CellValueType, DataValidationType, isFormulaString, IUniverInstanceService, Tools, UniverInstanceType } from '@univerjs/core';
 import { BaseDataValidator } from '@univerjs/data-validation';
 import { LexerTreeBuilder, operatorToken } from '@univerjs/engine-formula';
+import { calculateFormula } from '@univerjs/sheets-formula';
 import { DataValidationCustomFormulaService } from '../services/dv-custom-formula.service';
 import { isLegalFormulaResult } from '../utils/formula';
 
@@ -73,6 +75,49 @@ export class CustomFormulaValidator extends BaseDataValidator {
                 return Boolean(formulaResult);
             }
 
+            if (typeof formulaResult === 'string') {
+                return isLegalFormulaResult(formulaResult);
+            }
+
+            return Boolean(formulaResult);
+        }
+
+        return false;
+    }
+
+    isValidTypeSync(cellInfo: IValidatorCellInfo<CellValue>, formulaInfo: IFormulaResult, _rule: IDataValidationRule): boolean {
+        const { column, row, unitId, subUnitId, value } = cellInfo;
+        const orginRow = _rule.ranges[0].startRow;
+        const orginColumn = _rule.ranges[0].startColumn;
+        const x = column - orginColumn;
+        const y = row - orginRow;
+        const workbook = this.injector.get(IUniverInstanceService).getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
+        const data: ISheetData = {};
+        const formula = this._lexerTreeBuilder.moveFormulaRefOffset(formulaInfo.formula1, x, y);
+        workbook?.getSheets().forEach((sheet) => {
+            const cellData = (sheet.getSheetId() === subUnitId ? Tools.deepClone(sheet.getCellMatrix()) : sheet.getCellMatrix()) as ObjectMatrix<ICellData>;
+            data[sheet.getSheetId()] = {
+                cellData,
+                rowCount: sheet.getRowCount(),
+                columnCount: sheet.getColumnCount(),
+                rowData: sheet.getRowManager().getRowData(),
+                columnData: sheet.getColumnManager().getColumnData(),
+            };
+            if (sheet.getSheetId() === subUnitId) {
+                cellData.setValue(row, column, {
+                    v: value,
+                    t: typeof value === 'number' ? CellValueType.NUMBER : CellValueType.STRING,
+                });
+            }
+        });
+
+        const result = calculateFormula(this.injector, formula, unitId, data);
+        const formulaResult = Array.isArray(result) ? result[0][0] : result;
+        if (!isLegalFormulaResult(String(formulaResult))) {
+            return false;
+        }
+
+        if (Tools.isDefine(formulaResult) && formulaResult !== '') {
             if (typeof formulaResult === 'string') {
                 return isLegalFormulaResult(formulaResult);
             }

@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import type { LocaleService } from '@univerjs/core';
-import type { IFunctionInfo, IFunctionParam } from '@univerjs/engine-formula';
+import type { Injector, LocaleService } from '@univerjs/core';
+import type { BaseAstNode, IFunctionInfo, IFunctionParam, ISheetData, LexerNode } from '@univerjs/engine-formula';
+import { AstTreeBuilder, generateExecuteAstNodeData, getObjectValue, IFormulaCurrentConfigService, Interpreter, Lexer } from '@univerjs/engine-formula';
 
 export function getFunctionTypeValues(
     enumObj: any,
@@ -55,4 +56,31 @@ export function generateParam(param: IFunctionParam) {
     } else if (param.require && param.repeat) {
         return `${param.name},...`;
     }
+}
+
+export function calculateFormula(inject: Injector, formulaString: string, unitId: string, sheetData: ISheetData) {
+    const formulaCurrentConfigService = inject.get(IFormulaCurrentConfigService);
+    const lexer = inject.get(Lexer);
+    const astTreeBuilder = inject.get(AstTreeBuilder);
+    const interpreter = inject.get(Interpreter);
+    formulaCurrentConfigService.load({
+        formulaData: {},
+        arrayFormulaCellData: {},
+        arrayFormulaRange: {},
+        forceCalculate: false,
+        dirtyRanges: [],
+        dirtyNameMap: {},
+        dirtyDefinedNameMap: {},
+        dirtyUnitFeatureMap: {},
+        excludedCell: {},
+        allUnitData: {
+            [unitId]: sheetData,
+        },
+        dirtyUnitOtherFormulaMap: {},
+    });
+
+    const lexerNode = lexer.treeBuilder(formulaString);
+    const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
+    const result = interpreter.execute(generateExecuteAstNodeData(astNode as BaseAstNode));
+    return getObjectValue(result);
 }

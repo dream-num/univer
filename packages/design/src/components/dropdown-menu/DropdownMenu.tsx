@@ -17,22 +17,27 @@
 import type { Content } from '@radix-ui/react-popover';
 import type { ComponentProps, ReactNode } from 'react';
 import { useState } from 'react';
-import { DropdownMenuContent, DropdownMenuItem, DropdownMenuPrimitive, DropdownMenuSeparator, DropdownMenuTrigger } from './DropdownMenuPrimitive';
+import { DropdownMenuContent, DropdownMenuItem, DropdownMenuPrimitive, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuTrigger } from './DropdownMenuPrimitive';
 // import { DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuPortal, DropdownMenuPrimitive, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger } from './DropdownMenuPrimitive';
 
-export interface IDropdownMenu {
-    type?: 'item' | 'separator' | 'checkbox' | 'radio';
+type DropdownMenu = {
+    type: 'item';
     children: ReactNode;
-    icon?: ReactNode;
-    checked?: boolean;
-    hidden?: boolean;
-    onSelect?: (item: IDropdownMenu) => void;
-}
+    onSelect?: (item: DropdownMenu) => void;
+} | {
+    type?: 'separator';
+} | {
+    type?: 'radio';
+    options: { value: string; label: string }[];
+    value: string;
+    onSelect?: (item: string) => void;
+};
 
-interface IDropdownProps {
+export interface IDropdownProps {
     children: ReactNode;
-    // overlay: ReactNode;
-    items: IDropdownMenu[];
+    /** @deprecated */
+    overlay?: ReactNode;
+    items: DropdownMenu[];
     disabled?: boolean;
     open?: boolean;
     onOpenChange?: (open: boolean) => void;
@@ -41,7 +46,7 @@ interface IDropdownProps {
 export function DropdownMenu(props: IDropdownProps & ComponentProps<typeof Content>) {
     const {
         children,
-        // overlay,
+        overlay,
         items,
         disabled,
         open: controlledOpen,
@@ -69,13 +74,30 @@ export function DropdownMenu(props: IDropdownProps & ComponentProps<typeof Conte
     // const [showPanel, setShowPanel] = useState<boolean>(false);
     // const [position, setPosition] = useState('bottom');
 
-    function renderMenuItem(item: IDropdownMenu, index: number) {
+    function renderMenuItem(item: DropdownMenu, index: number) {
         // const { type, children, icon, checked, hidden, onSelect } = item;
         const { type } = item;
 
         if (type === 'separator') {
             return <DropdownMenuSeparator key={index} />;
-        } else {
+        } else if (type === 'radio') {
+            return (
+                <DropdownMenuRadioGroup
+                    key={index}
+                    value={item.value}
+                    onValueChange={item.onSelect}
+                >
+                    {item.options.map((option) => (
+                        <DropdownMenuRadioItem
+                            key={option.value}
+                            value={option.value}
+                        >
+                            {option.label}
+                        </DropdownMenuRadioItem>
+                    ))}
+                </DropdownMenuRadioGroup>
+            );
+        } else if (type === 'item') {
             return (
                 <DropdownMenuItem
                     key={index}
@@ -96,7 +118,7 @@ export function DropdownMenu(props: IDropdownProps & ComponentProps<typeof Conte
             </DropdownMenuTrigger>
             <DropdownMenuContent {...restProps}>
 
-                {/* {overlay} */}
+                {overlay}
                 {items.map((item, index) => renderMenuItem(item, index))}
                 {/*
                 <DropdownMenuLabel>Appearance</DropdownMenuLabel>

@@ -88,8 +88,6 @@ export class TriggerCalculationController extends Disposable {
 
     private _restartCalculation = false;
 
-    private _calculationMode: CalculationMode = CalculationMode.WHEN_EMPTY;
-
     /**
      * The mark of forced calculation. If a new mutation triggers dirty area calculation during the forced calculation process, forced calculation is still required.
      */
@@ -149,9 +147,6 @@ export class TriggerCalculationController extends Disposable {
     ) {
         super();
 
-        const config = this._configService.getConfig<IUniverSheetsFormulaBaseConfig>(PLUGIN_CONFIG_KEY_BASE);
-        this._calculationMode = config?.initialFormulaComputing ?? CalculationMode.WHEN_EMPTY;
-
         this._commandExecutedListener();
         this._initialExecuteFormulaProcessListener();
         this._initialExecuteFormula();
@@ -164,6 +159,11 @@ export class TriggerCalculationController extends Disposable {
         this._progress$.complete();
         // clear timer when disposed
         clearTimeout(this._setTimeoutKey);
+    }
+
+    private _getCalculationMode(): CalculationMode {
+        const config = this._configService.getConfig<IUniverSheetsFormulaBaseConfig>(PLUGIN_CONFIG_KEY_BASE);
+        return config?.initialFormulaComputing ?? CalculationMode.WHEN_EMPTY;
     }
 
     private _commandExecutedListener() {
@@ -391,11 +391,6 @@ export class TriggerCalculationController extends Disposable {
                     } = params.stageInfo;
 
                     if (stage === FormulaExecuteStageType.START) {
-                        // In NO_CALCULATION mode, the following processes will not be triggered, so there is no need to start
-                        if (this._calculationMode === CalculationMode.NO_CALCULATION) {
-                            return;
-                        }
-
                         // When calculations are started multiple times in succession, only the first time is recognized
                         if (calculationProcessCount === 0) {
                             this._startExecutionTime = performance.now();
@@ -519,7 +514,8 @@ export class TriggerCalculationController extends Disposable {
     }
 
     private _initialExecuteFormula() {
-        const params = this._getDirtyDataByCalculationMode(this._calculationMode);
+        const calculationMode = this._getCalculationMode();
+        const params = this._getDirtyDataByCalculationMode(calculationMode);
         this._commandService.executeCommand(SetFormulaCalculationStartMutation.id, params, lo);
 
         this._registerOtherFormulaService.calculateStarted$.next(true);

@@ -93,7 +93,7 @@ export class UniverSheetsFormulaPlugin extends Plugin {
             defaultPluginBaseConfig,
             this._config
         );
-        this._configService.setConfig(PLUGIN_CONFIG_KEY_BASE, rest);
+        this._configService.setConfig(PLUGIN_CONFIG_KEY_BASE, rest, { merge: true });
     }
 
     override onStarting(): void {

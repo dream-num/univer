@@ -193,7 +193,7 @@ export function stringifyRanges(ranges: IUnitRangeName[]) {
         .join(matchToken.COMMA);
 }
 
-export function RangeSelectorNew(props: IRangeSelectorProps) {
+export function RangeSelector(props: IRangeSelectorProps) {
     const [editor, setEditor] = useState<Editor | null>(null);
     const {
         onVerify,

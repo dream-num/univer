@@ -36,7 +36,7 @@ import { FormulaUIController } from './controllers/formula-ui.controller';
 import { FormulaPromptService, IFormulaPromptService } from './services/prompt.service';
 import { RefSelectionsRenderService } from './services/render-services/ref-selections.render-service';
 import { FormulaEditor } from './views/formula-editor/index';
-import { RangeSelectorNew } from './views/range-selector-new';
+import { RangeSelector } from './views/range-selector-new';
 
 /**
  * The configuration of the formula UI plugin.
@@ -79,7 +79,7 @@ export class UniverSheetsFormulaUIPlugin extends Plugin {
         dependencies.forEach((dependency) => j.add(dependency));
 
         const componentManager = this._injector.get(ComponentManager);
-        componentManager.register(RANGE_SELECTOR_COMPONENT_KEY, RangeSelectorNew);
+        componentManager.register(RANGE_SELECTOR_COMPONENT_KEY, RangeSelector);
         componentManager.register(EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY, FormulaEditor);
     }
 

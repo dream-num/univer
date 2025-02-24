@@ -16,17 +16,15 @@
 
 import type { DataValidationOperator, DataValidationType, IDataValidationRuleBase, IDataValidationRuleOptions, IExecutionOptions, ISheetDataValidationRule, IUnitRange, Workbook } from '@univerjs/core';
 import type { IUpdateSheetDataValidationRangeCommandParams } from '@univerjs/sheets-data-validation';
-import type { RangeSelector } from '@univerjs/sheets-formula-ui';
 import { debounce, ICommandService, isUnitRangesEqual, IUniverInstanceService, LocaleService, RedoCommand, shallowEqual, UndoCommand, UniverInstanceType } from '@univerjs/core';
 import { DataValidationModel, DataValidatorRegistryScope, DataValidatorRegistryService, getRuleOptions, getRuleSetting, TWO_FORMULA_OPERATOR_COUNT } from '@univerjs/data-validation';
 import { Button, Checkbox, FormLayout, Select } from '@univerjs/design';
 import { deserializeRangeWithSheet, serializeRange } from '@univerjs/engine-formula';
 import { SheetsSelectionsService } from '@univerjs/sheets';
 import { RemoveSheetDataValidationCommand, UpdateSheetDataValidationOptionsCommand, UpdateSheetDataValidationRangeCommand, UpdateSheetDataValidationSettingCommand } from '@univerjs/sheets-data-validation';
-import { RangeSelectorNew } from '@univerjs/sheets-formula-ui';
+import { RangeSelector } from '@univerjs/sheets-formula-ui';
 import { ComponentManager, useDependency, useEvent, useObservable } from '@univerjs/ui';
-
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { DataValidationPanelService } from '../../../services/data-validation-panel.service';
 import { DataValidationOptions } from '../options';
 
@@ -68,8 +66,6 @@ export function DataValidationDetail() {
     const [localRanges, setLocalRanges] = useState<IUnitRange[]>(() => localRule.ranges.map((i) => ({ unitId: '', sheetId: '', range: i })));
     const debounceExecute = useMemo(() => debounceExecuteFactory(commandService), [commandService]);
     const [isRangeError, setIsRangeError] = useState(false);
-
-    const rangeSelectorActionsRef = useRef<Parameters<typeof RangeSelector>[0]['actions']>({});
     const [isFocusRangeSelector, isFocusRangeSelectorSet] = useState(false);
 
     const sheetSelectionService = useDependency(SheetsSelectionsService);
@@ -253,7 +249,7 @@ export function DataValidationDetail() {
                 label={localeService.t('dataValidation.panel.range')}
                 error={(!localRule.ranges.length || isRangeError) ? localeService.t('dataValidation.panel.rangeError') : ''}
             >
-                <RangeSelectorNew
+                <RangeSelector
                     unitId={unitId}
                     subUnitId={subUnitId}
                     initialValue={rangeStr}

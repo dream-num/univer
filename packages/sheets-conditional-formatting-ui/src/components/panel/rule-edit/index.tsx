@@ -26,7 +26,7 @@ import { Button, Select } from '@univerjs/design';
 import { deserializeRangeWithSheet, serializeRange } from '@univerjs/engine-formula';
 import { RemoveSheetMutation, setEndForRange, SetWorksheetActiveOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { CFRuleType, CFSubRuleType, ConditionalFormattingRuleModel } from '@univerjs/sheets-conditional-formatting';
-import { RangeSelectorNew } from '@univerjs/sheets-formula-ui';
+import { RangeSelector } from '@univerjs/sheets-formula-ui';
 import { useDependency } from '@univerjs/ui';
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
@@ -244,7 +244,7 @@ export const RuleEdit = (props: IRuleEditProps) => {
                   ${styleBase.mTBase}
                 `}
             >
-                <RangeSelectorNew
+                <RangeSelector
                     unitId={unitId}
                     subUnitId={subUnitId}
                     initialValue={rangeString}

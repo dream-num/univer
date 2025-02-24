@@ -23,7 +23,7 @@ import { DocBackScrollRenderController, DocSelectionRenderService } from '@unive
 import { deserializeRangeWithSheet, IDefinedNamesService, serializeRange, serializeRangeToRefString, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SetSelectionsOperation, SetWorksheetActiveOperation } from '@univerjs/sheets';
-import { RangeSelectorNew } from '@univerjs/sheets-formula-ui';
+import { RangeSelector } from '@univerjs/sheets-formula-ui';
 import { AddHyperLinkCommand, AddRichHyperLinkCommand, SheetHyperLinkType, SheetsHyperLinkParserService, UpdateHyperLinkCommand, UpdateRichHyperLinkCommand } from '@univerjs/sheets-hyper-link';
 import { IEditorBridgeService, IMarkSelectionService, ScrollToRangeOperation } from '@univerjs/sheets-ui';
 import { IZenZoneService, KeyCode, useDependency, useEvent, useObservable } from '@univerjs/ui';
@@ -468,7 +468,7 @@ export const CellLinkEdit = () => {
             )}
             {type === SheetHyperLinkType.RANGE && (
                 <FormLayout error={showError && !payload ? localeService.t('hyperLink.form.inputError') : ''}>
-                    <RangeSelectorNew
+                    <RangeSelector
                         unitId={workbook.getUnitId()}
                         subUnitId={subUnitId}
                         maxRangeCount={1}

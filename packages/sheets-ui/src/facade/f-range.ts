@@ -16,11 +16,11 @@
 
 import type { ICellWithCoord, IDisposable, ISelectionCell, Nullable } from '@univerjs/core';
 import type { ISelectionStyle, ISheetLocation } from '@univerjs/sheets';
+import type { ICanvasPopup, ICellAlert } from '@univerjs/sheets-ui';
 import type { ComponentType } from '@univerjs/ui';
 import { DisposableCollection, generateRandomId, ILogService, toDisposable } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { CellAlertManagerService, type ICanvasPopup, type ICellAlert, IMarkSelectionService, SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
-import { ISheetClipboardService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { CellAlertManagerService, IMarkSelectionService, ISheetClipboardService, SheetCanvasPopManagerService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { FRange } from '@univerjs/sheets/facade';
 import { ComponentManager } from '@univerjs/ui';
 
@@ -47,30 +47,41 @@ interface IFRangeSheetsUIMixin {
      * Return this cell information, including whether it is merged and cell coordinates
      * @returns {ICellWithCoord} cell location and coordinate.
      * @example
-     * ``` ts
-     * let sheet = univerAPI.getActiveWorkbook().getActiveSheet();
-     * sheet.getRange(5, 7).getCell();
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('H6');
+     * console.log(fRange.getCell());
      * ```
      */
     getCell(this: FRange): ICellWithCoord;
 
     /**
      * Returns the coordinates of this cell,does not include units
-     * @returns coordinates of the cell， top, right, bottom, left
+     * @returns {DOMRect} coordinates of the cell， top, right, bottom, left
      * @example
-     * ``` ts
-     * let sheet = univerAPI.getActiveWorkbook().getActiveSheet();
-     * sheet.getRange(5, 7).getCellRect();
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('H6');
+     * console.log(fRange.getCellRect());
      * ```
      */
     getCellRect(this: FRange): DOMRect;
 
     /**
      * Generate HTML content for the range.
+     * @returns {string} HTML content of the range.
      * @example
-     * ``` ts
-     * let sheet = univerAPI.getActiveWorkbook().getActiveSheet();
-     * sheet.getRange(5, 7).generateHTML();
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:B2');
+     * fRange.setValues([
+     *   [1, 2],
+     *   [3, 4]
+     * ]);
+     * console.log(fRange.generateHTML());
      * ```
      */
     generateHTML(this: FRange): string;
@@ -79,78 +90,113 @@ interface IFRangeSheetsUIMixin {
      * Attach a popup to the start cell of current range.
      * If current worksheet is not active, the popup will not be shown.
      * Be careful to manager the detach disposable object, if not dispose correctly, it might memory leaks.
-     * @param popup The popup to attach
-     * @returns The disposable object to detach the popup, if the popup is not attached, return `null`.
+     * @param {IFCanvasPopup} popup The popup to attach
+     * @returns {Nullable<IDisposable>} The disposable object to detach the popup, if the popup is not attached, return `null`.
      * @example
-    ```
-        univerAPI.getComponentManager().register(
-            'myPopup',
-            () => React.createElement('div', {
-                style: {
-                    color: 'red',
-                    fontSize: '14px'
-                }
-            }, 'Custom Popup')
-        );
-
-        let sheet = univerAPI.getActiveWorkbook().getActiveSheet();
-        let range = sheet.getRange(2, 2, 3, 3);
-        univerAPI.getActiveWorkbook().setActiveRange(range);
-        let disposable = range.attachPopup({
-            componentKey: 'myPopup'
-        });
-    ```
+     * ```ts
+     * // Register a custom popup component
+     * univerAPI.registerComponent(
+     *   'myPopup',
+     *   () => React.createElement('div', {
+     *     style: {
+     *       color: 'red',
+     *       fontSize: '14px'
+     *     }
+     *   }, 'Custom Popup')
+     * );
+     *
+     * // Attach the popup to the start cell of range C3:E5
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('C3:E5');
+     * const disposable = fRange.attachPopup({
+     *   componentKey: 'myPopup'
+     * });
+     *
+     * // Detach the popup after 5 seconds
+     * setTimeout(() => {
+     *   disposable.dispose();
+     * }, 5000);
+     * ```
      */
     attachPopup(popup: IFCanvasPopup): Nullable<IDisposable>;
 
     /**
      * Attach an alert popup to the start cell of current range.
-     * @param alert The alert to attach
-     * @returns The disposable object to detach the alert.
+     * @param {Omit<ICellAlert, 'location'>} alert The alert to attach
+     * @returns {IDisposable} The disposable object to detach the alert.
      * @example
      * ```ts
-     * let sheet = univerAPI.getActiveWorkbook().getActiveSheet();
-     * let range = sheet.getRange(2, 2, 3, 3);
-     * range.attachAlertPopup({ message: 'This is an alert', type: 'warning' });
+     * // Attach an alert popup to the start cell of range C3:E5
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('C3:E5');
+     *
+     * const disposable = fRange.attachAlertPopup({
+     *   title: 'Warning',
+     *   message: 'This is an warning message',
+     *   type: 1
+     * });
+     *
+     * // Detach the alert after 5 seconds
+     * setTimeout(() => {
+     *   disposable.dispose();
+     * }, 5000);
      * ```
      */
     attachAlertPopup(alert: Omit<ICellAlert, 'location'>): IDisposable;
+
     /**
      * Attach a DOM popup to the current range.
-     * @param alert The alert to attach
-     * @returns The disposable object to detach the alert.
+     * @param {IFCanvasPopup} alert The alert to attach
+     * @returns {Nullable<IDisposable>} The disposable object to detach the alert.
      * @example
      * ```ts
-        let sheet = univerAPI.getActiveWorkbook().getActiveSheet();
-        let range = sheet.getRange(2, 2, 3, 3);
-        univerAPI.getActiveWorkbook().setActiveRange(range);
-
-        univerAPI.getComponentManager().register(
-            'myPopup',
-            () => React.createElement('div', {
-                style: {
-                    background: 'red',
-                    fontSize: '14px'
-                }
-            }, 'Custom Popup')
-        );
-        let disposable = range.attachRangePopup({
-            componentKey: 'myPopup',
-            direction: 'top' // 'vertical' | 'horizontal' | 'top' | 'right' | 'left' | 'bottom' | 'bottom-center' | 'top-center';
-        });
+     * // Register a custom popup component
+     * univerAPI.registerComponent(
+     *   'myPopup',
+     *   () => React.createElement('div', {
+     *     style: {
+     *       background: 'red',
+     *       fontSize: '14px'
+     *     }
+     *   }, 'Custom Popup')
+     * );
+     *
+     * // Attach the popup to the range C3:E5
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('C3:E5');
+     * const disposable = fRange.attachRangePopup({
+     *   componentKey: 'myPopup',
+     *   direction: 'top' // 'vertical' | 'horizontal' | 'top' | 'right' | 'left' | 'bottom' | 'bottom-center' | 'top-center'
+     * });
      * ```
      */
     attachRangePopup(popup: IFCanvasPopup): Nullable<IDisposable>;
 
     /**
-     *  Highlight the range with the specified style and primary cell.
-     * @param style - style for highlight range.
-     * @param primary - primary cell for highlight range.
+     * Highlight the range with the specified style and primary cell.
+     * @param {Nullable<Partial<ISelectionStyle>>} style - style for highlight range.
+     * @param {Nullable<ISelectionCell>} primary - primary cell for highlight range.
+     * @returns {IDisposable} The disposable object to remove the highlight.
      * @example
      * ```ts
-     * let sheet = univerAPI.getActiveWorkbook().getActiveSheet();
-     * let range = sheet.getRange(2, 2, 3, 3);
-     * range.highlight({ stroke: 'red' }, { startRow: 2, startColumn: 2 });
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // Highlight the range C3:E5 with default style
+     * const fRange = fWorksheet.getRange('C3:E5');
+     * fRange.highlight();
+     *
+     * // Highlight the range C7:E9 with custom style
+     * const fRange2 = fWorksheet.getRange('C7:E9');
+     * const disposable = fRange2.highlight({ stroke: 'red', fill: 'yellow' });
+     *
+     * // Remove the range C7:E9 highlight after 5 seconds
+     * setTimeout(() => {
+     *   disposable.dispose();
+     * }, 5000);
      * ```
      */
     highlight(style?: Nullable<Partial<ISelectionStyle>>, primary?: Nullable<ISelectionCell>): IDisposable;

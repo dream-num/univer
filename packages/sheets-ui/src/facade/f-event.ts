@@ -160,12 +160,15 @@ export interface IFSheetsUIEventNameMixin {
      * Type of the event parameter is {@link IBeforeClipboardChangeParam}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.BeforeClipboardChange, (param) => {
-     *   const {text, html} = param;
-     *   console.log('debugger', text, html); // {text: '...', html: '...'}
-     *   // if want to cancel the clipboard change
-     *   param.cancel = true;
+     * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeClipboardChange, (params) => {
+     *   const { workbook, worksheet, text, html, fromSheet, fromRange } = params;
+     *   console.log(params);
+     *
+     *   // Cancel the clipboard change operation
+     *   params.cancel = true;
      * })
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly BeforeClipboardChange: 'BeforeClipboardChange';
@@ -175,36 +178,45 @@ export interface IFSheetsUIEventNameMixin {
      * Type of the event parameter is {@link IClipboardChangedParam}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.ClipboardChanged, (param) => {
-     *  const {text, html} = param;
-     *  console.log('debugger', text, html); // {text: '...', html: '...'}
+     * const disposable = univerAPI.addEvent(univerAPI.Event.ClipboardChanged, (params) => {
+     *   const { workbook, worksheet, text, html, fromSheet, fromRange } = params;
+     *   console.log(params);
      * })
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly ClipboardChanged: 'ClipboardChanged';
+
     /**
      * Trigger this event before pasting.
      * Type of the event parameter is {@link IBeforeClipboardPasteParam}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.BeforeClipboardPaste, (param) => {
-     *   const {text, html} = param;
-     *   console.log('debugger', text, html);
-     *   // if want to cancel the clipboard paste
-     *   param.cancel = true;
+     * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeClipboardPaste, (params) => {
+     *   const { workbook, worksheet, text, html } = params;
+     *   console.log(params);
+     *
+     *   // Cancel the clipboard paste operation
+     *   params.cancel = true;
      * })
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly BeforeClipboardPaste: 'BeforeClipboardPaste';
+
     /**
      * Trigger this event after pasting.
      * Type of the event parameter is {@link IClipboardPastedParam}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.ClipboardPasted, (param) => {
-     *   const {text, html} = param;
-     *   console.log('debugger', text, html); // {text: '...', html: '...'}
+     * const disposable = univerAPI.addEvent(univerAPI.Event.ClipboardPasted, (params) => {
+     *   const { workbook, worksheet, text, html } = params;
+     *   console.log(params);
      * })
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly ClipboardPasted: 'ClipboardPasted';
@@ -214,53 +226,78 @@ export interface IFSheetsUIEventNameMixin {
      * @see {@link IBeforeSheetEditStartEventParams}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.BeforeSheetEditStart, (params) => {
+     * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeSheetEditStart, (params) => {
      *   const { worksheet, workbook, row, column, eventType, keycode, isZenEditor } = params;
+     *   console.log(params);
+     *
+     *   // Cancel the cell edit start operation
+     *   params.cancel = true;
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly BeforeSheetEditStart: 'BeforeSheetEditStart';
+
     /**
      * Event fired after a cell is edited
-     * @see {@link ISheetEditEndedEventParams}
+     * @see {@link ISheetEditStartedEventParams}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.SheetEditStarted, (params) => {
+     * const disposable = univerAPI.addEvent(univerAPI.Event.SheetEditStarted, (params) => {
      *   const { worksheet, workbook, row, column, eventType, keycode, isZenEditor } = params;
+     *   console.log(params);
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly SheetEditStarted: 'SheetEditStarted';
+
     /**
      * Event fired when a cell is being edited
      * @see {@link ISheetEditChangingEventParams}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.SheetEditChanging, (params) => {
+     * const disposable = univerAPI.addEvent(univerAPI.Event.SheetEditChanging, (params) => {
      *   const { worksheet, workbook, row, column, value, isZenEditor } = params;
+     *   console.log(params);
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly SheetEditChanging: 'SheetEditChanging';
+
     /**
      * Event fired before a cell edit ends
      * @see {@link IBeforeSheetEditEndEventParams}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.BeforeSheetEditEnd, (params) => {
-     *   const { worksheet, workbook, row, column, value, eventType, keycode, isZenEditor } = params;
+     * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeSheetEditEnd, (params) => {
+     *   const { worksheet, workbook, row, column, value, eventType, keycode, isZenEditor, isConfirm } = params;
+     *   console.log(params);
+     *
+     *   // Cancel the cell edit end operation
+     *   params.cancel = true;
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly BeforeSheetEditEnd: 'BeforeSheetEditEnd';
+
     /**
      * Event fired after a cell edit ends
      * @see {@link ISheetEditEndedEventParams}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.SheetEditEnded, (params) => {
-     *   const { worksheet, workbook, row, column, eventType, keycode, isZenEditor } = params;
+     * const disposable = univerAPI.addEvent(univerAPI.Event.SheetEditEnded, (params) => {
+     *   const { worksheet, workbook, row, column, eventType, keycode, isZenEditor, isConfirm } = params;
+     *   console.log(params);
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly SheetEditEnded: 'SheetEditEnded';
@@ -270,20 +307,27 @@ export interface IFSheetsUIEventNameMixin {
      * @see {@link ICellEventParam}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.CellClicked, (params) => {
-     *      const { worksheet, workbook, row, column, value, isZenEditor } = params;
+     * const disposable = univerAPI.addEvent(univerAPI.Event.CellClicked, (params) => {
+     *   const { worksheet, workbook, row, column } = params;
+     *   console.log(params);
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly CellClicked: 'CellClicked';
+
     /**
      * Event fired when a cell is pointer down
      * @see {@link ICellEventParam}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.CellPointerDown, (params) => {
+     * const disposable = univerAPI.addEvent(univerAPI.Event.CellPointerDown, (params) => {
      *   const { worksheet, workbook, row, column } = params;
+     *   console.log(params);
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly CellPointerDown: 'CellPointerDown';
@@ -293,9 +337,12 @@ export interface IFSheetsUIEventNameMixin {
      * @see {@link ICellEventParam}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.CellPointerUp, (params) => {
+     * const disposable = univerAPI.addEvent(univerAPI.Event.CellPointerUp, (params) => {
      *   const { worksheet, workbook, row, column } = params;
+     *   console.log(params);
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly CellPointerUp: 'CellPointerUp';
@@ -305,140 +352,177 @@ export interface IFSheetsUIEventNameMixin {
      * @see {@link ICellEventParam}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.CellHover, (params) => {
+     * const disposable = univerAPI.addEvent(univerAPI.Event.CellHover, (params) => {
      *   const { worksheet, workbook, row, column } = params;
+     *   console.log(params);
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly CellHover: 'CellHover';
+
     /**
      * Event fired when move on spreadsheet cells
      * @see {@link ICellEventParam}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.CellPointerMove, (params) => {
+     * const disposable = univerAPI.addEvent(univerAPI.Event.CellPointerMove, (params) => {
      *   const { worksheet, workbook, row, column } = params;
+     *   console.log(params);
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly CellPointerMove: 'CellPointerMove';
 
     /**
      * Triggered when a row header is clicked
-     * @param {ISheetRowHeaderEvent} params - Event parameters containing unitId, subUnitId, and row index
+     * @see {@link ISheetRowHeaderEvent}
      * @example
      * ```typescript
-     * univerAPI.onSheetEvent(Event.RowHeaderClick, (params) => {
-     *   console.log(`Row ${params.row} header clicked in sheet ${params.worksheet.getSheetId()}`);
+     * const disposable = univerAPI.addEvent(univerAPI.Event.RowHeaderClick, (params) => {
+     *   const { worksheet, workbook, row } = params;
+     *   console.log(params);
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly RowHeaderClick: 'RowHeaderClick';
 
     /**
      * Triggered when pointer is pressed down on a row header
-     * @param {ISheetRowHeaderEvent} params - Event parameters containing unitId, subUnitId, and row index
+     * @see {@link ISheetRowHeaderEvent}
      * @example
      * ```typescript
-     * univerAPI.onSheetEvent(Event.RowHeaderPointerDown, (params) => {
-     *   console.log(`Pointer down on row ${params.row} header in sheet ${params.worksheet.getSheetId()}`);
+     * const disposable = univerAPI.addEvent(univerAPI.Event.RowHeaderPointerDown, (params) => {
+     *   const { worksheet, workbook, row } = params;
+     *   console.log(params);
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly RowHeaderPointerDown: 'RowHeaderPointerDown';
 
     /**
      * Triggered when pointer is released on a row header
-     * @param {ISheetRowHeaderEvent} params - Event parameters containing unitId, subUnitId, and row index
+     * @see {@link ISheetRowHeaderEvent}
      * @example
      * ```typescript
-     * univerAPI.onSheetEvent(Event.RowHeaderPointerUp, (params) => {
-     *   console.log(`Pointer up on row ${params.row} header in sheet ${params.worksheet.getSheetId()}`);
+     * const disposable = univerAPI.addEvent(univerAPI.Event.RowHeaderPointerUp, (params) => {
+     *   const { worksheet, workbook, row } = params;
+     *   console.log(params);
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly RowHeaderPointerUp: 'RowHeaderPointerUp';
 
     /**
      * Triggered when pointer hovers over a row header
-     * @param {ISheetRowHeaderEvent} params - Event parameters containing unitId, subUnitId, and row index
+     * @see {@link ISheetRowHeaderEvent}
      * @example
      * ```typescript
-     * univerAPI.onSheetEvent(Event.RowHeaderHover, (params) => {
-     *   console.log(`Hovering over row ${params.row} header in sheet ${params.worksheet.getSheetId()}`);
+     * const disposable = univerAPI.addEvent(univerAPI.Event.RowHeaderHover, (params) => {
+     *   const { worksheet, workbook, row } = params;
+     *   console.log(params);
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly RowHeaderHover: 'RowHeaderHover';
 
     /**
      * Triggered when a column header is clicked
-     * @param {ISheetColumnHeaderEvent} params - Event parameters containing unitId, subUnitId, and column index
+     * @see {@link ISheetColumnHeaderEvent}
      * @example
      * ```typescript
-     * univerAPI.onSheetEvent(Event.ColumnHeaderClick, (params) => {
-     *   console.log(`Column ${params.column} header clicked in sheet ${params.worksheet.getSheetId()}`);
+     * const disposable = univerAPI.addEvent(univerAPI.Event.ColumnHeaderClick, (params) => {
+     *   const { worksheet, workbook, column } = params;
+     *   console.log(params);
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly ColumnHeaderClick: 'ColumnHeaderClick';
 
     /**
      * Triggered when pointer is pressed down on a column header
-     * @param {ISheetColumnHeaderEvent} params - Event parameters containing unitId, subUnitId, and column index
+     * @see {@link ISheetColumnHeaderEvent}
      * @example
      * ```typescript
-     * univerAPI.onSheetEvent(Event.ColumnHeaderPointerDown, (params) => {
-     *   console.log(`Pointer down on column ${params.column} header in sheet ${params.worksheet.getSheetId()}`);
+     * const disposable = univerAPI.addEvent(univerAPI.Event.ColumnHeaderPointerDown, (params) => {
+     *   const { worksheet, workbook, column } = params;
+     *   console.log(params);
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly ColumnHeaderPointerDown: 'ColumnHeaderPointerDown';
 
     /**
      * Triggered when pointer is released on a column header
-     * @param {ISheetColumnHeaderEvent} params - Event parameters containing unitId, subUnitId, and column index
+     * @see {@link ISheetColumnHeaderEvent}
      * @example
      * ```typescript
-     * univerAPI.onSheetEvent(Event.ColumnHeaderPointerUp, (params) => {
-     *   console.log(`Pointer up on column ${params.column} header in sheet ${params.worksheet.getSheetId()}`);
+     * const disposable = univerAPI.addEvent(univerAPI.Event.ColumnHeaderPointerUp, (params) => {
+     *   const { worksheet, workbook, column } = params;
+     *   console.log(params);
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly ColumnHeaderPointerUp: 'ColumnHeaderPointerUp';
 
     /**
      * Triggered when pointer hovers over a column header
-     * @param {ISheetColumnHeaderEvent} params - Event parameters containing unitId, subUnitId, and column index
+     * @see {@link ISheetColumnHeaderEvent}
      * @example
      * ```typescript
-     * univerAPI.onSheetEvent(Event.ColumnHeaderHover, (params) => {
-     *   console.log(`Hovering over column ${params.column} header in sheet ${params.worksheet.getSheetId()}`);
+     * const disposable = univerAPI.addEvent(univerAPI.Event.ColumnHeaderHover, (params) => {
+     *   const { worksheet, workbook, column } = params;
+     *   console.log(params);
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly ColumnHeaderHover: 'ColumnHeaderHover';
 
     /**
-     * Event fired when drag over spreadsheet cells
+     * Event fired when the drag element passes over the spreadsheet cells
      * @see {@link ICellEventParam}
      * @example
      * ```ts
-     * univerAPI.getActiveWorkbook().addEvent(univerAPI.Event.DragOver, (params) => {
+     * const disposable = univerAPI.addEvent(univerAPI.Event.DragOver, (params) => {
      *   const { worksheet, workbook, row, column } = params;
+     *   console.log(params);
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly DragOver: 'DragOver';
 
     /**
-     * Event fired when drop on spreadsheet cells
+     * Event fired when the drag element is dropped on the spreadsheet cells
      * @see {@link ICellEventParam}
      * @example
      * ```ts
-     * univerAPI.getActiveWorkbook().addEvent(univerAPI.Event.Drop, (params) => {
-     *      const { worksheet, workbook, row, column } = params;
+     * const disposable = univerAPI.addEvent(univerAPI.Event.Drop, (params) => {
+     *   const { worksheet, workbook, row, column } = params;
+     *   console.log(params);
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly Drop: 'Drop';
@@ -448,9 +532,12 @@ export interface IFSheetsUIEventNameMixin {
      * @see {@link IScrollEventParam}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.Scroll, (params) => {
+     * const disposable = univerAPI.addEvent(univerAPI.Event.Scroll, (params) => {
      *   const { worksheet, workbook, scrollX, scrollY } = params;
+     *   console.log(params);
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly Scroll: 'Scroll';
@@ -460,9 +547,12 @@ export interface IFSheetsUIEventNameMixin {
      * @see {@link ISelectionEventParam}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.SelectionChanged, (p)=> {
-     *   const { worksheet, workbook, selections } = p;
+     * const disposable = univerAPI.addEvent(univerAPI.Event.SelectionChanged, (params)=> {
+     *   const { worksheet, workbook, selections } = params;
+     *   console.log(params);
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly SelectionChanged: 'SelectionChanged';
@@ -472,9 +562,12 @@ export interface IFSheetsUIEventNameMixin {
      * @see {@link ISelectionEventParam}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.SelectionMoveStart, (p)=> {
-     *   const { worksheet, workbook, selections } = p;
+     * const disposable = univerAPI.addEvent(univerAPI.Event.SelectionMoveStart, (params)=> {
+     *   const { worksheet, workbook, selections } = params;
+     *   console.log(params);
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly SelectionMoveStart: 'SelectionMoveStart';
@@ -484,9 +577,12 @@ export interface IFSheetsUIEventNameMixin {
      * @see {@link ISelectionEventParam}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.SelectionMoving, (p)=> {
-     *   const { worksheet, workbook, selections } = p;
+     * const disposable = univerAPI.addEvent(univerAPI.Event.SelectionMoving, (params)=> {
+     *   const { worksheet, workbook, selections } = params;
+     *   console.log(params);
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly SelectionMoving: 'SelectionMoving';
@@ -496,9 +592,12 @@ export interface IFSheetsUIEventNameMixin {
      * @see {@link ISelectionEventParam}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.SelectionMoveEnd, (p)=> {
-     *   const { worksheet, workbook, selections } = p;
+     * const disposable = univerAPI.addEvent(univerAPI.Event.SelectionMoveEnd, (params)=> {
+     *   const { worksheet, workbook, selections } = params;
+     *   console.log(params);
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly SelectionMoveEnd: 'SelectionMoveEnd';
@@ -508,9 +607,12 @@ export interface IFSheetsUIEventNameMixin {
      * @see {@link ISheetZoomEvent}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.SheetZoomChanged, (p)=> {
-     *   const { worksheet, workbook, zoom } = p;
+     * const disposable = univerAPI.addEvent(univerAPI.Event.SheetZoomChanged, (params)=> {
+     *   const { worksheet, workbook, zoom } = params;
+     *   console.log(params);
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly SheetZoomChanged: 'SheetZoomChanged';
@@ -520,9 +622,15 @@ export interface IFSheetsUIEventNameMixin {
      * @see {@link ISheetZoomEvent}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.BeforeSheetZoomChange, (p)=> {
-     *   const { worksheet, workbook, zoom } = p;
+     * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeSheetZoomChange, (params)=> {
+     *   const { worksheet, workbook, zoom } = params;
+     *   console.log(params);
+     *
+     *   // Cancel the zoom change operation
+     *   params.cancel = true;
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly BeforeSheetZoomChange: 'BeforeSheetZoomChange';
@@ -532,13 +640,15 @@ export interface IFSheetsUIEventNameMixin {
      * @see {@link ISheetSkeletonChangedEvent}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.SheetSkeletonChanged, (p)=> {
-     *   const { worksheet, workbook } = p;
+     * const disposable = univerAPI.addEvent(univerAPI.Event.SheetSkeletonChanged, (params)=> {
+     *   const { worksheet, workbook, skeleton, payload, effectedRanges } = params;
+     *   console.log(params);
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly SheetSkeletonChanged: 'SheetSkeletonChanged';
-
 }
 
 export class FSheetsUIEventName implements IFSheetsUIEventNameMixin {

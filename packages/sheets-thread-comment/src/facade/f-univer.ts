@@ -27,31 +27,45 @@ import { FTheadCommentBuilder, FTheadCommentItem } from './f-thread-comment';
  */
 export interface IFUniverCommentMixin {
     /**
-     * @deprecated use `univerAPI.addEvent(univerAPI.Event.CommentAdded, () => {})` as instead
+     * @deprecated use `univerAPI.addEvent(univerAPI.Event.CommentAdded, (params) => {})` as instead
      */
     onCommentAdded(callback: (event: ISheetCommentAddEvent) => void): IDisposable;
 
     /**
-     * @deprecated use `univerAPI.addEvent(univerAPI.Event.CommentUpdated, () => {})` as instead
+     * @deprecated use `univerAPI.addEvent(univerAPI.Event.CommentUpdated, (params) => {})` as instead
      */
     onCommentUpdated(callback: (event: ISheetCommentUpdateEvent) => void): IDisposable;
 
     /**
-     * @deprecated use `univerAPI.addEvent(univerAPI.Event.CommentDeleted, () => {})` as instead
+     * @deprecated use `univerAPI.addEvent(univerAPI.Event.CommentDeleted, (params) => {})` as instead
      */
     onCommentDeleted(callback: (event: ISheetCommentDeleteEvent) => void): IDisposable;
 
     /**
-     * @deprecated use `univerAPI.addEvent(univerAPI.Event.CommentResolved, () => {})` as instead
+     * @deprecated use `univerAPI.addEvent(univerAPI.Event.CommentResolved, (params) => {})` as instead
      */
     onCommentResolved(callback: (event: ISheetCommentResolveEvent) => void): IDisposable;
 
     /**
-     * create a new thread comment
-     * @returns {FTheadCommentBuilder} thead comment builder
+     * Create a new thread comment
+     * @returns {FTheadCommentBuilder} The thead comment builder
      * @example
      * ```ts
-     * const comment = univerAPI.newTheadComment().setContent(univerAPI.newRichText().insertText('hello zhangsan'));
+     * // Create a new comment
+     * const richText = univerAPI.newRichText().insertText('hello univer');
+     * const commentBuilder = univerAPI.newTheadComment()
+     *   .setContent(richText)
+     *   .setPersonId('mock-user-id')
+     *   .setDateTime(new Date('2025-02-21 14:22:22'))
+     *   .setId('mock-comment-id')
+     *   .setThreadId('mock-thread-id');
+     *
+     * // Add the comment to the cell A1
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const cell = fWorksheet.getRange('A1');
+     * const result = await cell.addCommentAsync(commentBuilder);
+     * console.log(result);
      * ```
      */
     newTheadComment(): FTheadCommentBuilder;
@@ -228,7 +242,7 @@ export class FUniverCommentMixin extends FUniver implements IFUniverCommentMixin
         );
 
         this.registerEventHandler(
-            this.Event.BeforeCommentDeleted,
+            this.Event.BeforeCommentDelete,
             () => commandService.beforeCommandExecuted((commandInfo) => {
                 if (commandInfo.id !== DeleteCommentCommand.id && commandInfo.id !== DeleteCommentTreeCommand.id) return;
                 const params = commandInfo.params as { unitId: string; subUnitId: string; sheetId: string };
@@ -249,7 +263,7 @@ export class FUniverCommentMixin extends FUniver implements IFUniverCommentMixin
                         col: threadComment.getRange()?.getColumn() ?? 0,
                         comment: threadComment,
                     };
-                    this.fireEvent(this.Event.BeforeCommentDeleted, eventParams);
+                    this.fireEvent(this.Event.BeforeCommentDelete, eventParams);
                     if (eventParams.cancel) {
                         throw new CanceledError();
                     }

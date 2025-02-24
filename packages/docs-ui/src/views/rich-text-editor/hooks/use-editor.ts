@@ -17,6 +17,7 @@
 import type { IDocumentData, Nullable } from '@univerjs/core';
 import type { RefObject } from 'react';
 import type { Editor } from '../../../services/editor/editor';
+import { Tools } from '@univerjs/core';
 import { useDependency } from '@univerjs/ui';
 import { useLayoutEffect, useMemo, useState } from 'react';
 import { IEditorService } from '../../../services/editor/editor-manager.service';
@@ -37,6 +38,8 @@ export function useEditor(opts: IUseEditorProps) {
 
     useLayoutEffect(() => {
         if (container.current) {
+            const _initialValue = Tools.deepClone(initialValue);
+
             const snapshot: IDocumentData = {
                 body: {
                     dataStream: '\r\n',
@@ -48,9 +51,9 @@ export function useEditor(opts: IUseEditorProps) {
                         startIndex: 0,
                     }],
                 },
-                ...initialValue,
+                ..._initialValue,
                 documentStyle: {
-                    ...initialValue?.documentStyle,
+                    ..._initialValue?.documentStyle,
                     pageSize: {
                         width: !isSingle ? container.current.clientWidth : Infinity,
                         height: Infinity,

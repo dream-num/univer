@@ -101,14 +101,18 @@ abstract class FMenuBase extends FBase {
      * univerAPI.createMenu({
      *   id: 'custom-menu-id-1',
      *   title: 'Custom Menu 1',
-     *   action: () => {},
+     *   action: () => {
+     *     console.log('Custom Menu 1 clicked');
+     *   },
      * }).appendTo('contextMenu.others');
      *
      * // This menu item will only appear on the `contextMenu.others` section on the main area.
      * univerAPI.createMenu({
      *   id: 'custom-menu-id-2',
      *   title: 'Custom Menu 2',
-     *   action: () => { console.log(123); },
+     *   action: () => {
+     *     console.log('Custom Menu 2 clicked');
+     *   },
      * }).appendTo(['contextMenu.mainArea', 'contextMenu.others']);
      * ```
      */
@@ -249,6 +253,35 @@ export class FSubmenu extends FMenuBase {
      * Add a menu to the submenu. It can be a {@link FMenu} or a {@link FSubmenu}.
      * @param {FMenu | FSubmenu} submenu - Menu to add to the submenu.
      * @returns {FSubmenu} The FSubmenu itself for chaining calls.
+     * @example
+     * ```typescript
+     * // Create two leaf menus.
+     * const menu1 = univerAPI.createMenu({
+     *   id: 'submenu-nested-1',
+     *   title: 'Item 1',
+     *   action: () => {
+     *     console.log('Item 1 clicked');
+     *   }
+     * });
+     * const menu2 = univerAPI.createMenu({
+     *   id: 'submenu-nested-2',
+     *   title: 'Item 2',
+     *   action: () => {
+     *     console.log('Item 2 clicked');
+     *   }
+     * });
+     *
+     * // Add the leaf menus to a submenu.
+     * const submenu = univerAPI.createSubmenu({ id: 'submenu-nested', title: 'Nested Submenu' })
+     *   .addSubmenu(menu1)
+     *   .addSeparator()
+     *   .addSubmenu(menu2);
+     *
+     * // Create a root submenu append to the `contextMenu.others` section.
+     * univerAPI.createSubmenu({ id: 'custom-submenu', title: 'Custom Submenu' })
+     *   .addSubmenu(submenu)
+     *   .appendTo('contextMenu.others');
+     * ```
      */
     addSubmenu(submenu: FMenu | FSubmenu): this {
         this._submenus.push(submenu);
@@ -258,6 +291,32 @@ export class FSubmenu extends FMenuBase {
     /**
      * Add a separator to the submenu.
      * @returns {FSubmenu} The FSubmenu itself for chaining calls.
+     * @example
+     * ```typescript
+     * // Create two leaf menus.
+     * const menu1 = univerAPI.createMenu({
+     *   id: 'submenu-nested-1',
+     *   title: 'Item 1',
+     *   action: () => {
+     *     console.log('Item 1 clicked');
+     *   }
+     * });
+     * const menu2 = univerAPI.createMenu({
+     *   id: 'submenu-nested-2',
+     *   title: 'Item 2',
+     *   action: () => {
+     *     console.log('Item 2 clicked');
+     *   }
+     * });
+     *
+     * // Add the leaf menus to a submenu and add a separator between them.
+     * // Append the submenu to the `contextMenu.others` section.
+     * univerAPI.createSubmenu({ id: 'submenu-nested', title: 'Nested Submenu' })
+     *   .addSubmenu(menu1)
+     *   .addSeparator()
+     *   .addSubmenu(menu2)
+     *   .appendTo('contextMenu.others');
+     * ```
      */
     addSeparator(): this {
         this._menuByGroups.push(this._submenus);

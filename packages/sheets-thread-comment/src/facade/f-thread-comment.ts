@@ -45,7 +45,8 @@ export class FTheadCommentItem {
      * @returns {FTheadCommentItem} A new instance of FTheadCommentItem
      * @example
      * ```ts
-     * const comment = univerAPI.newTheadComment();
+     * const commentBuilder = univerAPI.newTheadComment();
+     * console.log(commentBuilder);
      * ```
      */
     static create(comment?: IThreadComment): FTheadCommentItem {
@@ -63,10 +64,8 @@ export class FTheadCommentItem {
      * @returns {string} The person id of the comment
      * @example
      * ```ts
-     * const comment = univerAPI.getActiveWorkbook()
-     *   .getSheetById(sheetId)
-     *   .getCommentById(commentId);
-     * const personId = comment.personId;
+     * const commentBuilder = univerAPI.newTheadComment();
+     * console.log(commentBuilder.personId);
      * ```
      */
     get personId(): string {
@@ -78,10 +77,8 @@ export class FTheadCommentItem {
      * @returns {string} The date time of the comment
      * @example
      * ```ts
-     * const comment = univerAPI.getActiveWorkbook()
-     *   .getSheetById(sheetId)
-     *   .getCommentById(commentId);
-     * const dateTime = comment.dateTime;
+     * const commentBuilder = univerAPI.newTheadComment();
+     * console.log(commentBuilder.dateTime);
      * ```
      */
     get dateTime(): string {
@@ -93,10 +90,8 @@ export class FTheadCommentItem {
      * @returns {RichTextValue} The content of the comment
      * @example
      * ```ts
-     * const comment = univerAPI.getActiveWorkbook()
-     *   .getSheetById(sheetId)
-     *   .getCommentById(commentId);
-     * const content = comment.content;
+     * const commentBuilder = univerAPI.newTheadComment();
+     * console.log(commentBuilder.content);
      * ```
      */
     get content(): RichTextValue {
@@ -108,10 +103,8 @@ export class FTheadCommentItem {
      * @returns {string} The id of the comment
      * @example
      * ```ts
-     * const comment = univerAPI.getActiveWorkbook()
-     *   .getSheetById(sheetId)
-     *   .getCommentById(commentId);
-     * const id = comment.id;
+     * const commentBuilder = univerAPI.newTheadComment();
+     * console.log(commentBuilder.id);
      * ```
      */
     get id(): string {
@@ -123,10 +116,8 @@ export class FTheadCommentItem {
      * @returns {string} The thread id of the comment
      * @example
      * ```ts
-     * const comment = univerAPI.getActiveWorkbook()
-     *   .getSheetById(sheetId)
-     *   .getCommentById(commentId);
-     * const threadId = comment.threadId;
+     * const commentBuilder = univerAPI.newTheadComment();
+     * console.log(commentBuilder.threadId);
      * ```
      */
     get threadId(): string {
@@ -138,10 +129,9 @@ export class FTheadCommentItem {
      * @returns {FTheadCommentBuilder} The comment builder
      * @example
      * ```ts
-     * const comment = univerAPI.getActiveWorkbook()
-     *   .getSheetById(sheetId)
-     *   .getCommentById(commentId);
-     * const newComment = comment.copy();
+     * const commentBuilder = univerAPI.newTheadComment();
+     * const newCommentBuilder = commentBuilder.copy();
+     * console.log(newCommentBuilder);
      * ```
      */
     copy(): FTheadCommentBuilder {
@@ -160,11 +150,21 @@ export class FTheadCommentBuilder extends FTheadCommentItem {
     /**
      * Set the content of the comment
      * @param {IDocumentBody | RichTextValue} content The content of the comment
-     * @returns {FTheadCommentBuilder} The comment builder
+     * @returns {FTheadCommentBuilder} The comment builder for chaining
      * @example
      * ```ts
-     * const comment = univerAPI.newTheadComment()
-     *   .setContent(univerAPI.newRichText().insertText('hello zhangsan'));
+     * // Create a new comment
+     * const richText = univerAPI.newRichText().insertText('hello univer');
+     * const commentBuilder = univerAPI.newTheadComment()
+     *   .setContent(richText);
+     * console.log(commentBuilder.content);
+     *
+     * // Add the comment to the cell A1
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const cell = fWorksheet.getRange('A1');
+     * const result = await cell.addCommentAsync(commentBuilder);
+     * console.log(result);
      * ```
      */
     setContent(content: IDocumentBody | RichTextValue): FTheadCommentBuilder {
@@ -179,11 +179,22 @@ export class FTheadCommentBuilder extends FTheadCommentItem {
     /**
      * Set the person id of the comment
      * @param {string} userId The person id of the comment
-     * @returns {FTheadCommentBuilder} The comment builder
+     * @returns {FTheadCommentBuilder} The comment builder for chaining
      * @example
      * ```ts
-     * const comment = univerAPI.newTheadComment()
-     *   .setPersonId('123');
+     * // Create a new comment
+     * const richText = univerAPI.newRichText().insertText('hello univer');
+     * const commentBuilder = univerAPI.newTheadComment()
+     *   .setContent(richText)
+     *   .setPersonId('mock-user-id');
+     * console.log(commentBuilder.personId);
+     *
+     * // Add the comment to the cell A1
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const cell = fWorksheet.getRange('A1');
+     * const result = await cell.addCommentAsync(commentBuilder);
+     * console.log(result);
      * ```
      */
     setPersonId(userId: string): FTheadCommentBuilder {
@@ -194,11 +205,22 @@ export class FTheadCommentBuilder extends FTheadCommentItem {
     /**
      * Set the date time of the comment
      * @param {Date} date The date time of the comment
-     * @returns {FTheadCommentBuilder} The comment builder
+     * @returns {FTheadCommentBuilder} The comment builder for chaining
      * @example
      * ```ts
-     * const comment = univerAPI.newTheadComment()
-     *   .setDateTime(new Date());
+     * // Create a new comment
+     * const richText = univerAPI.newRichText().insertText('hello univer');
+     * const commentBuilder = univerAPI.newTheadComment()
+     *   .setContent(richText)
+     *   .setDateTime(new Date('2025-02-21 14:22:22'));
+     * console.log(commentBuilder.dateTime);
+     *
+     * // Add the comment to the cell A1
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const cell = fWorksheet.getRange('A1');
+     * const result = await cell.addCommentAsync(commentBuilder);
+     * console.log(result);
      * ```
      */
     setDateTime(date: Date): FTheadCommentBuilder {
@@ -209,11 +231,22 @@ export class FTheadCommentBuilder extends FTheadCommentItem {
     /**
      * Set the id of the comment
      * @param {string} id The id of the comment
-     * @returns {FTheadCommentBuilder} The comment builder
+     * @returns {FTheadCommentBuilder} The comment builder for chaining
      * @example
      * ```ts
-     * const comment = univerAPI.newTheadComment()
-     *   .setId('123');
+     * // Create a new comment
+     * const richText = univerAPI.newRichText().insertText('hello univer');
+     * const commentBuilder = univerAPI.newTheadComment()
+     *   .setContent(richText)
+     *   .setId('mock-comment-id');
+     * console.log(commentBuilder.id);
+     *
+     * // Add the comment to the cell A1
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const cell = fWorksheet.getRange('A1');
+     * const result = await cell.addCommentAsync(commentBuilder);
+     * console.log(result);
      * ```
      */
     setId(id: string): FTheadCommentBuilder {
@@ -227,8 +260,19 @@ export class FTheadCommentBuilder extends FTheadCommentItem {
      * @returns {FTheadCommentBuilder} The comment builder
      * @example
      * ```ts
-     * const comment = univerAPI.newTheadComment()
-     *   .setThreadId('123');
+     * // Create a new comment
+     * const richText = univerAPI.newRichText().insertText('hello univer');
+     * const commentBuilder = univerAPI.newTheadComment()
+     *   .setContent(richText)
+     *   .setThreadId('mock-thread-id');
+     * console.log(commentBuilder.threadId);
+     *
+     * // Add the comment to the cell A1
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const cell = fWorksheet.getRange('A1');
+     * const result = await cell.addCommentAsync(commentBuilder);
+     * console.log(result);
      * ```
      */
     setThreadId(threadId: string): FTheadCommentBuilder {
@@ -241,9 +285,15 @@ export class FTheadCommentBuilder extends FTheadCommentItem {
      * @returns {IThreadComment} The comment
      * @example
      * ```ts
+     * const richText = univerAPI.newRichText().insertText('hello univer');
      * const comment = univerAPI.newTheadComment()
-     *   .setContent(univerAPI.newRichText().insertText('hello zhangsan'))
+     *   .setContent(richText)
+     *   .setPersonId('mock-user-id')
+     *   .setDateTime(new Date('2025-02-21 14:22:22'))
+     *   .setId('mock-comment-id')
+     *   .setThreadId('mock-thread-id')
      *   .build();
+     * console.log(comment);
      * ```
      */
     build(): IThreadComment {
@@ -281,10 +331,12 @@ export class FThreadComment {
      * @returns {boolean} Whether the comment is a root comment
      * @example
      * ```ts
-     * const comment = univerAPI.getActiveWorkbook()
-     *   .getSheetById(sheetId)
-     *   .getCommentById(commentId);
-     * const isRoot = comment.getIsRoot();
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const comments = fWorksheet.getComments();
+     * comments.forEach((comment) => {
+     *   console.log(comment.getIsRoot());
+     * });
      * ```
      */
     getIsRoot(): boolean {
@@ -296,10 +348,12 @@ export class FThreadComment {
      * @returns {IBaseComment} The comment data
      * @example
      * ```ts
-     * const comment = univerAPI.getActiveWorkbook()
-     *   .getSheetById(sheetId)
-     *   .getCommentById(commentId);
-     * const commentData = comment.getCommentData();
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const comments = fWorksheet.getComments();
+     * comments.forEach((comment) => {
+     *   console.log(comment.getCommentData());
+     * });
      * ```
      */
     getCommentData(): IBaseComment {
@@ -312,10 +366,17 @@ export class FThreadComment {
      * @returns {FThreadComment[]} the replies of the comment
      * @example
      * ```ts
-     * const comment = univerAPI.getActiveWorkbook()
-     *   .getSheetById(sheetId)
-     *   .getCommentById(commentId);
-     * const replies = comment.getReplies();
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const comments = fWorksheet.getComments();
+     * comments.forEach((comment) => {
+     *   if (comment.getIsRoot()) {
+     *     const replies = comment.getReplies();
+     *     replies.forEach((reply) => {
+     *       console.log(reply.getCommentData());
+     *     });
+     *   }
+     * });
      * ```
      */
     getReplies(): FThreadComment[] | undefined {
@@ -330,10 +391,12 @@ export class FThreadComment {
      * @returns {FRange | null} The range of the comment
      * @example
      * ```ts
-     * const comment = univerAPI.getActiveWorkbook()
-     *   .getSheetById(sheetId)
-     *   .getCommentById(commentId);
-     * const range = comment.getRange();
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const comments = fWorksheet.getComments();
+     * comments.forEach((comment) => {
+     *   console.log(comment.getRange().getA1Notation());
+     * });
      * ```
      */
     getRange(): FRange | null {
@@ -362,10 +425,12 @@ export class FThreadComment {
      * @returns {RichTextValue} The rich text of the comment
      * @example
      * ```ts
-     * const comment = univerAPI.getActiveWorkbook()
-     *   .getSheetById(sheetId)
-     *   .getCommentById(commentId);
-     * const richText = comment.getRichText();
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const comments = fWorksheet.getComments();
+     * comments.forEach((comment) => {
+     *   console.log(comment.getRichText());
+     * });
      * ```
      */
     getRichText(): RichTextValue {
@@ -375,13 +440,16 @@ export class FThreadComment {
 
     /**
      * Delete the comment and it's replies
-     * @returns {Promise<boolean>} success or not
+     * @returns {Promise<boolean>} Whether the comment is deleted successfully
      * @example
      * ```ts
-     * const comment = univerAPI.getActiveWorkbook()
-     *   .getSheetById(sheetId)
-     *   .getCommentById(commentId);
-     * const success = await comment.deleteAsync();
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const comments = fWorksheet.getComments();
+     *
+     * // Delete the first comment
+     * const result = await comments[0]?.deleteAsync();
+     * console.log(result);
      * ```
      */
     deleteAsync(): Promise<boolean> {
@@ -414,13 +482,27 @@ export class FThreadComment {
     /**
      * Update the comment content
      * @param {IDocumentBody | RichTextValue} content The new content of the comment
-     * @returns {Promise<boolean>} success or not
+     * @returns {Promise<boolean>} Whether the comment is updated successfully
      * @example
      * ```ts
-     * const comment = univerAPI.getActiveWorkbook()
-     *   .getSheetById(sheetId)
-     *   .getCommentById(commentId);
-     * const success = await comment.updateAsync(univerAPI.newRichText().insertText('hello zhangsan'));
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // Create a new comment
+     * const richText = univerAPI.newRichText().insertText('hello univer');
+     * const commentBuilder = univerAPI.newTheadComment()
+     *   .setContent(richText)
+     *   .setId('mock-comment-id');
+     * const cell = fWorksheet.getRange('A1');
+     * await cell.addCommentAsync(commentBuilder);
+     *
+     * // Update the comment after 3 seconds
+     * setTimeout(async () => {
+     *   const comment = fWorksheet.getCommentById('mock-comment-id');
+     *   const newRichText = univerAPI.newRichText().insertText('Hello Univer AI');
+     *   const result = await comment.updateAsync(newRichText);
+     *   console.log(result);
+     * }, 3000);
      * ```
      */
     async updateAsync(content: IDocumentBody | RichTextValue): Promise<boolean> {
@@ -451,18 +533,31 @@ export class FThreadComment {
         return this.resolveAsync(resolved);
     }
 
-     /**
-      * Resolve the comment
-      * @param {boolean} resolved Whether the comment is resolved
-      * @returns {Promise<boolean>} success or not
-      * @example
-      * ```ts
-      * const comment = univerAPI.getActiveWorkbook()
-      *   .getSheetById(sheetId)
-      *   .getCommentById(commentId);
-      * const success = await comment.resolveAsync(true);
-      * ```
-      */
+    /**
+     * Resolve the comment
+     * @param {boolean} resolved Whether the comment is resolved
+     * @returns {Promise<boolean>} Set the comment to resolved or not operation result
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // Create a new comment
+     * const richText = univerAPI.newRichText().insertText('hello univer');
+     * const commentBuilder = univerAPI.newTheadComment()
+     *   .setContent(richText)
+     *   .setId('mock-comment-id');
+     * const cell = fWorksheet.getRange('A1');
+     * await cell.addCommentAsync(commentBuilder);
+     *
+     * // Resolve the comment after 3 seconds
+     * setTimeout(async () => {
+     *   const comment = fWorksheet.getCommentById('mock-comment-id');
+     *   const result = await comment.resolveAsync(true);
+     *   console.log(result);
+     * }, 3000);
+     * ```
+     */
     resolveAsync(resolved?: boolean): Promise<boolean> {
         return this._commandService.executeCommand(
             ResolveCommentCommand.id,
@@ -478,20 +573,29 @@ export class FThreadComment {
     /**
      * Reply to the comment
      * @param {FTheadCommentBuilder} comment The comment to reply to
-     * @returns {Promise<boolean>} success or not
+     * @returns {Promise<boolean>} Whether the comment is replied successfully
      * @example
      * ```ts
-     * const comment = univerAPI.getActiveWorkbook()
-     *   .getSheetById(sheetId)
-     *   .getCommentById(commentId);
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
      *
-     * const reply = univerAPI.newTheadComment()
-     *   .setContent(univerAPI.newRichText().insertText('hello zhangsan'));
+     * // Create a new comment
+     * const richText = univerAPI.newRichText().insertText('hello univer');
+     * const commentBuilder = univerAPI.newTheadComment()
+     *   .setContent(richText)
+     *   .setId('mock-comment-id');
+     * const cell = fWorksheet.getRange('A1');
+     * await cell.addCommentAsync(commentBuilder);
      *
-     * const success = await comment.replyAsync(reply);
+     * // Reply to the comment
+     * const replyText = univerAPI.newRichText().insertText('Hello Univer AI');
+     * const reply = univerAPI.newTheadComment().setContent(replyText);
+     * const comment = fWorksheet.getCommentById('mock-comment-id');
+     * const result = await comment.replyAsync(reply);
+     * console.log(result);
      * ```
      */
-    async replyAsync(comment: FTheadCommentBuilder): Promise<boolean> {
+    replyAsync(comment: FTheadCommentBuilder): Promise<boolean> {
         const commentData = comment.build();
         return this._commandService.executeCommand(
             AddCommentCommand.id,
@@ -499,11 +603,10 @@ export class FThreadComment {
                 unitId: this._thread.unitId,
                 subUnitId: this._thread.subUnitId,
                 comment: {
-
                     id: generateRandomId(),
                     parentId: this._thread.id,
                     threadId: this._thread.threadId,
-                    ref: this._parent?.ref,
+                    ref: this._parent?.ref || (this._thread as IThreadComment).ref,
                     unitId: this._thread.unitId,
                     subUnitId: this._thread.subUnitId,
                     text: commentData.text,

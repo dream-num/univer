@@ -30,34 +30,47 @@ type IUpdateCommandParams = any;
  */
 export interface IFWorkbookThreadCommentMixin {
     /**
-     * Get all comments in the current sheet
-     * @returns all comments in the current sheet
+     * Get all comments in the current workbook
+     * @returns {FThreadComment[]} All comments in the current workbook
      * @example
      * ```ts
-     * const workbook = univerAPI.getActiveWorkbook();
-     * const comments = workbook.getComments();
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const comments = fWorkbook.getComments();
+     * comments.forEach((comment) => {
+     *   const isRoot = comment.getIsRoot();
+     *
+     *   if (isRoot) {
+     *     console.log('root comment:', comment.getCommentData());
+     *
+     *     const replies = comment.getReplies();
+     *     replies.forEach((reply) => {
+     *       console.log('reply comment:', reply.getCommentData());
+     *     });
+     *   }
+     * });
      * ```
      */
     getComments(): FThreadComment[];
 
     /**
-     * Clear all comments in the current sheet
-     * @returns Whether the comments are cleared successfully.
+     * Clear all comments in the current workbook
+     * @returns {Promise<boolean>} Whether the comments are cleared successfully.
      * @example
      * ```ts
-     * const workbook = univerAPI.getActiveWorkbook();
-     * const success = await workbook.clearComments();
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const result = await fWorkbook.clearComments();
+     * console.log(result);
      * ```
      */
     clearComments(): Promise<boolean>;
 
     /**
-     * @deprecated use `univerAPI.addEvent(univerAPI.Event.CommentUpdated, () => {})` as instead
+     * @deprecated use `univerAPI.addEvent(univerAPI.Event.CommentUpdated, (params) => {})` as instead
      */
     onThreadCommentChange(callback: (commentUpdate: CommentUpdate) => void | false): IDisposable;
 
     /**
-     * @deprecated use `univerAPI.addEvent(univerAPI.Event.BeforeCommentAdd, () => {})` as instead
+     * @deprecated use `univerAPI.addEvent(univerAPI.Event.BeforeCommentAdd, (params) => {})` as instead
      */
     onBeforeAddThreadComment(
         this: FWorkbook,
@@ -65,7 +78,7 @@ export interface IFWorkbookThreadCommentMixin {
     ): IDisposable;
 
     /**
-     * @deprecated use `univerAPI.addEvent(univerAPI.Event.BeforeCommentUpdate, () => {})` as instead
+     * @deprecated use `univerAPI.addEvent(univerAPI.Event.BeforeCommentUpdate, (params) => {})` as instead
      */
     onBeforeUpdateThreadComment(
         this: FWorkbook,
@@ -73,7 +86,7 @@ export interface IFWorkbookThreadCommentMixin {
     ): IDisposable;
 
     /**
-     * @deprecated use `univerAPI.addEvent(univerAPI.Event.BeforeCommentDelete, () => {})` as instead
+     * @deprecated use `univerAPI.addEvent(univerAPI.Event.BeforeCommentDelete, (params) => {})` as instead
      */
     onBeforeDeleteThreadComment(
         this: FWorkbook,

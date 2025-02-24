@@ -903,12 +903,12 @@ describe('Test update formula ', () => {
 
         it('Remove row, update reference', async () => {
             const params: IRemoveRowColCommandParams = {
-                range: {
+                ranges: [{
                     startRow: 1,
                     endRow: 1,
                     startColumn: 0,
                     endColumn: 19,
-                },
+                }],
             };
 
             expect(await commandService.executeCommand(RemoveRowCommand.id, params)).toBeTruthy();
@@ -926,12 +926,12 @@ describe('Test update formula ', () => {
 
         it('Remove row, update reference and position', async () => {
             const params: IRemoveRowColCommandParams = {
-                range: {
+                ranges: [{
                     startRow: 1,
                     endRow: 1,
                     startColumn: 0,
                     endColumn: 19,
-                },
+                }],
             };
 
             expect(await commandService.executeCommand(RemoveRowCommand.id, params)).toBeTruthy();
@@ -955,12 +955,12 @@ describe('Test update formula ', () => {
 
         it('Remove row, update reference and position, adjacent formula', async () => {
             const params: IRemoveRowColCommandParams = {
-                range: {
+                ranges: [{
                     startRow: 8,
                     endRow: 8,
                     startColumn: 0,
                     endColumn: 19,
-                },
+                }],
             };
 
             expect(await commandService.executeCommand(RemoveRowCommand.id, params)).toBeTruthy();
@@ -978,12 +978,12 @@ describe('Test update formula ', () => {
 
         it('Remove row, removed row contains formula', async () => {
             const params: IRemoveRowColCommandParams = {
-                range: {
+                ranges: [{
                     startRow: 10,
                     endRow: 10,
                     startColumn: 0,
                     endColumn: 19,
-                },
+                }],
             };
 
             expect(await commandService.executeCommand(RemoveRowCommand.id, params)).toBeTruthy();
@@ -1001,12 +1001,12 @@ describe('Test update formula ', () => {
 
         it('Remove row, changes to other sheet reference ranges', async () => {
             const params: IRemoveRowColCommandParams = {
-                range: {
+                ranges: [{
                     startRow: 1,
                     endRow: 1,
                     startColumn: 0,
                     endColumn: 19,
-                },
+                }],
             };
 
             expect(await commandService.executeCommand(RemoveRowCommand.id, params)).toBeTruthy();
@@ -1037,12 +1037,12 @@ describe('Test update formula ', () => {
 
         it('Remove column, update reference', async () => {
             const params: IRemoveRowColCommandParams = {
-                range: {
+                ranges: [{
                     startColumn: 1,
                     endColumn: 1,
                     startRow: 0,
                     endRow: 2,
-                },
+                }],
             };
 
             expect(await commandService.executeCommand(RemoveColCommand.id, params)).toBeTruthy();
@@ -1060,12 +1060,12 @@ describe('Test update formula ', () => {
 
         it('Remove column, update reference and position', async () => {
             const params: IRemoveRowColCommandParams = {
-                range: {
+                ranges: [{
                     startColumn: 1,
                     endColumn: 1,
                     startRow: 0,
                     endRow: 2,
-                },
+                }],
             };
 
             expect(await commandService.executeCommand(RemoveColCommand.id, params)).toBeTruthy();
@@ -1095,12 +1095,12 @@ describe('Test update formula ', () => {
 
         it('Remove column, update reference and position, contains #REF', async () => {
             const params: IRemoveRowColCommandParams = {
-                range: {
+                ranges: [{
                     startColumn: 0,
                     endColumn: 1,
                     startRow: 0,
                     endRow: 2,
-                },
+                }],
             };
 
             expect(await commandService.executeCommand(RemoveColCommand.id, params)).toBeTruthy();
@@ -1157,12 +1157,12 @@ describe('Test update formula ', () => {
 
         it('Remove column, removed column contains formula', async () => {
             const params: IRemoveRowColCommandParams = {
-                range: {
+                ranges: [{
                     startColumn: 3,
                     endColumn: 3,
                     startRow: 0,
                     endRow: 2,
-                },
+                }],
             };
 
             expect(await commandService.executeCommand(RemoveColCommand.id, params)).toBeTruthy();

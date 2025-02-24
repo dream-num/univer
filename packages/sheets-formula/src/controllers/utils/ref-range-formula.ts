@@ -43,7 +43,8 @@ export interface IFormulaReferenceMoveParam {
     type: FormulaReferenceMoveType;
     unitId: string;
     sheetId: string;
-    range?: IRange;
+    range?: IRange; // insert/delete range, insert rowss/columns
+    ranges?: IRange[]; // remove rows/columns
     from?: IRange;
     to?: IRange;
     sheetName?: string;
@@ -214,7 +215,7 @@ export function refRangeFormula(oldFormulaData: IFormulaData,
     const redoFormulaData: Record<string, Record<string, IObjectMatrixPrimitiveType<Nullable<ICellData>>>> = {};
     const undoFormulaData: Record<string, Record<string, IObjectMatrixPrimitiveType<Nullable<ICellData>>>> = {};
 
-    const { type, unitId: targetUnitId, sheetId, range, from, to } = formulaReferenceMoveParam;
+    const { type, unitId: targetUnitId, sheetId, range, ranges, from, to } = formulaReferenceMoveParam;
 
     // Iterate over all unitId in oldFormulaData
     const allUnitIds = new Set([...Object.keys(oldFormulaData), ...Object.keys(newFormulaData)]);
@@ -243,7 +244,7 @@ export function refRangeFormula(oldFormulaData: IFormulaData,
             if (unitId !== targetUnitId || currentSheetId !== sheetId) {
                 rangeList = processFormulaRange(newFormulaMatrix);
             } else {
-                rangeList = processFormulaChanges(oldFormulaMatrix, type, from, to, range);
+                rangeList = processFormulaChanges(oldFormulaMatrix, type, from, to, range, ranges);
             }
 
             const sheetRedoFormulaData = getRedoFormulaData(rangeList, oldFormulaMatrix, newFormulaMatrix);
@@ -273,7 +274,7 @@ export function refRangeFormula(oldFormulaData: IFormulaData,
     };
 }
 
-function processFormulaChanges(oldFormulaMatrix: ObjectMatrix<Nullable<IFormulaDataItem>>, type: FormulaReferenceMoveType, from: Nullable<IRange>, to: Nullable<IRange>, range: Nullable<IRange>) {
+function processFormulaChanges(oldFormulaMatrix: ObjectMatrix<Nullable<IFormulaDataItem>>, type: FormulaReferenceMoveType, from: Nullable<IRange>, to: Nullable<IRange>, range: Nullable<IRange>, ranges: Nullable<IRange[]>) {
     // When undoing and redoing, the traversal order may be different. Record the range list of all single formula offsets, and then retrieve the traversal as needed.
     const rangeList: IRangeChange[] = [];
 
@@ -290,6 +291,11 @@ function processFormulaChanges(oldFormulaMatrix: ObjectMatrix<Nullable<IFormulaD
             newCell = handleMove(type, from, to, oldCell);
         } else if (range !== undefined && range !== null) { // Handle inserts and deletes
             const result = handleInsertDelete(type, range, oldCell);
+            // When removing a cell containing a formula, newCell is null, but the formula value of oldCell is required when undoing it, newCell can be null
+            newCell = result.newCell;
+            isReverse = result.isReverse;
+        } else if (ranges !== undefined && ranges !== null) { // Handle multiple row or column deletions
+            const result = handleRemove(type, ranges, oldCell);
             // When removing a cell containing a formula, newCell is null, but the formula value of oldCell is required when undoing it, newCell can be null
             newCell = result.newCell;
             isReverse = result.isReverse;
@@ -351,12 +357,6 @@ function handleInsertDelete(type: FormulaReferenceMoveType, range: IRange, oldCe
             newCell = handleRefInsertCol(range, oldCell);
             isReverse = true;
             break;
-        case FormulaReferenceMoveType.RemoveRow:
-            newCell = handleRefRemoveRow(range, oldCell);
-            break;
-        case FormulaReferenceMoveType.RemoveColumn:
-            newCell = handleRefRemoveCol(range, oldCell);
-            break;
         case FormulaReferenceMoveType.DeleteMoveLeft:
             newCell = handleRefDeleteMoveLeft(range, oldCell);
             break;
@@ -371,6 +371,24 @@ function handleInsertDelete(type: FormulaReferenceMoveType, range: IRange, oldCe
             newCell = handleRefInsertMoveRight(range, oldCell);
             isReverse = true;
             break;
+        default:
+            break;
+    }
+
+    return { newCell, isReverse };
+}
+function handleRemove(type: FormulaReferenceMoveType, ranges: IRange[], oldCell: IRange) {
+    let newCell: IRange | null = null;
+    const isReverse = false;
+
+    switch (type) {
+        case FormulaReferenceMoveType.RemoveRow:
+            newCell = handleRefRemoveRow(ranges, oldCell);
+            break;
+        case FormulaReferenceMoveType.RemoveColumn:
+            newCell = handleRefRemoveCol(ranges, oldCell);
+            break;
+
         default:
             break;
     }
@@ -438,11 +456,11 @@ function handleRefInsertCol(range: IRange, oldCell: IRange) {
     return runRefRangeMutations(operators, oldCell);
 }
 
-function handleRefRemoveRow(range: IRange, oldCell: IRange) {
+function handleRefRemoveRow(ranges: IRange[], oldCell: IRange) {
     const operators = handleIRemoveRow(
         {
             id: EffectRefRangId.RemoveRowCommandId,
-            params: { range },
+            params: { ranges },
         },
         oldCell
     );
@@ -450,11 +468,11 @@ function handleRefRemoveRow(range: IRange, oldCell: IRange) {
     return runRefRangeMutations(operators, oldCell);
 }
 
-function handleRefRemoveCol(range: IRange, oldCell: IRange) {
+function handleRefRemoveCol(ranges: IRange[], oldCell: IRange) {
     const operators = handleIRemoveCol(
         {
             id: EffectRefRangId.RemoveColCommandId,
-            params: { range },
+            params: { ranges },
         },
         oldCell
     );

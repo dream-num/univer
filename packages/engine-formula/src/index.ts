@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+export { getObjectValue } from './functions/util';
+export { BaseAstNode } from './engine/ast-node/base-ast-node';
+export { generateExecuteAstNodeData } from './engine/utils/ast-node-tool';
+
 export type {
     IArrayFormulaRangeType,
     IArrayFormulaUnitCellType,

@@ -95,7 +95,7 @@ interface IFRangeSheetsUIMixin {
      * @example
      * ```ts
      * // Register a custom popup component
-     * univerAPI.getComponentManager().register(
+     * univerAPI.registerComponent(
      *   'myPopup',
      *   () => React.createElement('div', {
      *     style: {
@@ -153,7 +153,7 @@ interface IFRangeSheetsUIMixin {
      * @example
      * ```ts
      * // Register a custom popup component
-     * univerAPI.getComponentManager().register(
+     * univerAPI.registerComponent(
      *   'myPopup',
      *   () => React.createElement('div', {
      *     style: {

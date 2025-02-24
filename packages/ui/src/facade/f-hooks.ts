@@ -25,20 +25,15 @@ import { CopyCommand, PasteCommand, SheetPasteShortKeyCommandName } from '@unive
 export interface IFHooksSheetsUIMixin {
     /**
      * The onBeforeCopy event is fired before a copy operation is performed.
+     * @deprecated use `univerAPI.addEvent(univerAPI.Event.BeforeClipboardChange, (params) => {})` instead
      * @param callback Callback function that will be called when the event is fired
      * @returns A disposable object that can be used to unsubscribe from the event
      */
     onBeforeCopy(callback: () => void): IDisposable;
 
     /**
-     * The onBeforeCopy event is fired before a copy operation is performed.
-     * @param callback Callback function that will be called when the event is fired
-     * @returns A disposable object that can be used to unsubscribe from the event
-     */
-    onBeforePaste(callback: () => void): IDisposable;
-
-    /**
      * The onCopy event is fired after a copy operation is performed.
+     * @deprecated use `univerAPI.addEvent(univerAPI.Event.ClipboardChanged, (params) => {})` instead
      * @param callback Callback function that will be called when the event is fired
      * @returns A disposable object that can be used to unsubscribe from the event
      */
@@ -46,6 +41,7 @@ export interface IFHooksSheetsUIMixin {
 
     /**
      * The onBeforePaste event is fired before a paste operation is performed.
+     * @deprecated use `univerAPI.addEvent(univerAPI.Event.BeforeClipboardPaste, (params) => {})` instead
      * @param callback Callback function that will be called when the event is fired
      * @returns A disposable object that can be used to unsubscribe from the event
      */
@@ -53,6 +49,7 @@ export interface IFHooksSheetsUIMixin {
 
     /**
      * The onPaste event is fired after a paste operation is performed.
+     * @deprecated use `univerAPI.addEvent(univerAPI.Event.ClipboardPasted, (params) => {})` instead
      * @param callback Callback function that will be called when the event is fired
      * @returns A disposable object that can be used to unsubscribe from the event
      */

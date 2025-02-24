@@ -15,13 +15,21 @@
  */
 
 import { FEnum } from '@univerjs/core/facade';
-import { BuiltInUIPart } from '@univerjs/ui';
+import { BuiltInUIPart, KeyCode } from '@univerjs/ui';
 
 /**
  * @ignore
  */
 interface IFUIEnumMixin {
+    /**
+     * Built-in UI parts.
+     */
     get BuiltInUIPart(): typeof BuiltInUIPart;
+
+    /**
+     * Key codes.
+     */
+    get KeyCode(): typeof KeyCode;
 }
 
 /**
@@ -31,6 +39,10 @@ export class FUIEnum extends FEnum implements IFUIEnumMixin {
     override get BuiltInUIPart(): typeof BuiltInUIPart {
         return BuiltInUIPart;
     };
+
+    override get KeyCode(): typeof KeyCode {
+        return KeyCode;
+    }
 }
 
 FEnum.extend(FUIEnum);

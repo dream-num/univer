@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import type { IDisposable } from '@univerjs/core';
+import type { IDisposable, Workbook } from '@univerjs/core';
 import type { IShortcutItem } from '@univerjs/ui';
-import { Inject, Injector } from '@univerjs/core';
+import { Inject, Injector, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { FBase } from '@univerjs/core/facade';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { IShortcutService } from '@univerjs/ui';
 
 /**
@@ -29,6 +30,8 @@ export class FShortcut extends FBase {
 
     constructor(
         @Inject(Injector) protected readonly _injector: Injector,
+        @Inject(IRenderManagerService) private _renderManagerService: IRenderManagerService,
+        @IUniverInstanceService protected readonly _univerInstanceService: IUniverInstanceService,
         @IShortcutService protected readonly _shortcutService: IShortcutService
     ) {
         super();
@@ -65,6 +68,54 @@ export class FShortcut extends FBase {
         }
 
         return this;
+    }
+
+    /**
+     * Trigger shortcut of Univer by a KeyboardEvent and return the matched shortcut item.
+     * @param {KeyboardEvent} e - The KeyboardEvent to trigger.
+     * @returns {IShortcutItem<object> | undefined} The matched shortcut item.
+     *
+     * @example
+     * ```typescript
+     * // Assum the current sheet is empty sheet.
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1');
+     *
+     * // Set A1 cell active and set value to 'Hello Univer'.
+     * fRange.activate();
+     * fRange.setValue('Hello Univer');
+     * console.log(fRange.getCellStyle().bold); // false
+     *
+     * // Set A1 cell bold by shortcut.
+     * const fShortcut = univerAPI.getShortcut();
+     * const pseudoEvent = new KeyboardEvent('keydown', {
+     *   key: 'b',
+     *   ctrlKey: true,
+     *   keyCode: univerAPI.Enum.KeyCode.B
+     * });
+     * const ifShortcutItem = fShortcut.triggerShortcut(pseudoEvent);
+     * if (ifShortcutItem) {
+     *   const commandId = ifShortcutItem.id;
+     *   console.log(fRange.getCellStyle().bold); // true
+     * }
+     * ```
+     */
+    triggerShortcut(e: KeyboardEvent): IShortcutItem<object> | undefined {
+        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        if (!workbook) {
+            return;
+        }
+
+        const renderUnit = this._renderManagerService.getRenderById(workbook.getUnitId());
+        if (!renderUnit) {
+            return;
+        }
+
+        const canvas = renderUnit.engine.getCanvasElement();
+        canvas.dispatchEvent(e);
+
+        return this._shortcutService.dispatch(e);
     }
 
     /**

@@ -24,10 +24,12 @@ import { FWorkbook } from '@univerjs/sheets/facade';
 export interface IFWorkbookSheetsZenEditorMixin {
      /**
       * Start the zen editing process
-      * @returns A promise that resolves to a boolean indicating whether the zen editing process was started successfully.
+      * @returns {Promise<boolean>} A promise that resolves to a boolean indicating whether the zen editing process was started successfully.
       * @example
       * ```ts
-      * univerAPI.getActiveWorkbook().startZenEditingAsync();
+      * const fWorkbook = univerAPI.getActiveWorkbook();
+      * const success = await fWorkbook.startZenEditingAsync();
+      * console.log(success);
       * ```
       */
     startZenEditingAsync(): Promise<boolean>;
@@ -36,10 +38,12 @@ export interface IFWorkbookSheetsZenEditorMixin {
       * End the zen editing process
       * @async
       * @param {boolean} save - Whether to save the changes, default is true
-      * @returns A promise that resolves to a boolean indicating whether the zen editing process was ended successfully.
+      * @returns {Promise<boolean>} A promise that resolves to a boolean indicating whether the zen editing process was ended successfully.
       * @example
       * ```ts
-      * univerAPI.getActiveWorkbook().endZenEditingAsync(false);
+      * const fWorkbook = univerAPI.getActiveWorkbook();
+      * const success = await fWorkbook.endZenEditingAsync(false);
+      * console.log(success);
       * ```
       */
     endZenEditingAsync(save?: boolean): Promise<boolean>;

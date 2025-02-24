@@ -97,6 +97,45 @@ export function drawLineByBorderType(ctx: UniverRenderingContext, type: BORDER_L
     ctx.stroke();
 }
 
+export function getLineLengthByBorderType(type: BORDER_LTRB, lineWidthBuffer: number, position: IPosition) {
+    let drawStartX = 0;
+    let drawStartY = 0;
+    let drawEndX = 0;
+    let drawEndY = 0;
+    let length = 0;
+    const { startX, startY, endX, endY } = position;
+    if (type === BORDER_LTRB.TOP) {
+        drawStartX = startX - lineWidthBuffer;
+        drawStartY = startY;
+        drawEndX = endX + lineWidthBuffer;
+        drawEndY = startY;
+
+        length = drawEndX - drawStartX;
+    } else if (type === BORDER_LTRB.BOTTOM) {
+        drawStartX = startX - lineWidthBuffer;
+        drawStartY = endY;
+        drawEndX = endX - lineWidthBuffer;
+        drawEndY = endY;
+
+        length = drawEndX - drawStartX;
+    } else if (type === BORDER_LTRB.LEFT) {
+        drawStartX = startX;
+        drawStartY = startY - lineWidthBuffer;
+        drawEndX = startX;
+        drawEndY = endY + lineWidthBuffer;
+
+        length = drawEndY - drawStartY;
+    } else if (type === BORDER_LTRB.RIGHT) {
+        drawStartX = endX;
+        drawStartY = startY - lineWidthBuffer;
+        drawEndX = endX;
+        drawEndY = endY + lineWidthBuffer;
+
+        length = drawEndY - drawStartY;
+    }
+
+    return length;
+}
 export function drawDiagonalLineByBorderType(ctx: UniverRenderingContext, type: BORDER_LTRB, position: IPosition) {
     let drawStartX = 0;
     let drawStartY = 0;
@@ -194,7 +233,51 @@ export function clearLineByBorderType(ctx: UniverRenderingContext, type: BORDER_
     ctx.clearRectForTexture(drawStartX, drawStartY, drawEndX - drawStartX, drawEndY - drawStartY);
 }
 
-export function setLineType(ctx: UniverRenderingContext, style: BorderStyleTypes) {
+const borderStyles = {
+    [BorderStyleTypes.NONE]: [0],
+    [BorderStyleTypes.THIN]: [0],
+    [BorderStyleTypes.HAIR]: [1, 2], // Adjusted for visibility
+    [BorderStyleTypes.DOTTED]: [2],
+    [BorderStyleTypes.DASHED]: [3],
+    [BorderStyleTypes.DASH_DOT]: [2, 5, 2],
+    [BorderStyleTypes.DASH_DOT_DOT]: [2, 2, 5, 2, 2],
+    [BorderStyleTypes.DOUBLE]: [0],
+    [BorderStyleTypes.MEDIUM]: [0],
+    [BorderStyleTypes.MEDIUM_DASHED]: [3],
+    [BorderStyleTypes.MEDIUM_DASH_DOT]: [2, 5, 2],
+    [BorderStyleTypes.MEDIUM_DASH_DOT_DOT]: [2, 2, 5, 2, 2],
+    [BorderStyleTypes.SLANT_DASH_DOT]: [2, 5, 2],
+    [BorderStyleTypes.THICK]: [0],
+};
+
+export function setLineType(ctx: UniverRenderingContext, style: BorderStyleTypes, cellWidth?: number) {
+    const transform = ctx.getTransform();
+    const scale = transform.a;
+    const devicePixelRatio = getDevicePixelRatio();
+    const totalScale = scale * devicePixelRatio;
+
+    // 基础虚线模式
+    const pattern = (borderStyles[style] || [0]).map((val) => val / totalScale);
+
+    if (cellWidth && pattern[0] !== 0) {
+        // 计算单个完整虚线模式的总长度
+        const patternLength = pattern.reduce((sum, val) => sum + val, 0);
+
+        // 计算在当前单元格宽度下会重复几次
+        const repeatCount = Math.floor(cellWidth / patternLength);
+
+        // 如果正好是整数倍，稍微调整间隔确保有空隙
+        if (repeatCount > 0 && Math.abs(cellWidth - (patternLength * repeatCount)) < 0.1) {
+            // 微调间隔宽度，确保最后有空隙
+            const adjustedGap = pattern[1] * 1.1; // 增加 10% 的间隔
+            pattern[1] = adjustedGap;
+        }
+    }
+
+    ctx.setLineDash(pattern);
+}
+
+export function setLineType_back(ctx: UniverRenderingContext, style: BorderStyleTypes) {
     if (style === BorderStyleTypes.HAIR) {
         ctx.setLineDash([1, 2]);
     } else if (style === BorderStyleTypes.DASH_DOT_DOT || style === BorderStyleTypes.MEDIUM_DASH_DOT_DOT) {

@@ -363,7 +363,7 @@ export const ExpandSelectionCommand: ICommand<IExpandSelectionCommandParams> = {
         return accessor.get(ICommandService).syncExecuteCommand(SetSelectionsOperation.id, {
             unitId,
             subUnitId,
-            type: SelectionMoveType.ONLY_SET,
+            type: SelectionMoveType.MOVE_END,
             selections: [
                 {
                     range: destRange,
@@ -371,6 +371,7 @@ export const ExpandSelectionCommand: ICommand<IExpandSelectionCommandParams> = {
                 },
             ],
             extra,
+            reveal: true,
         });
     },
 };

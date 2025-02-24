@@ -31,7 +31,7 @@ import {
     WorksheetProtectionRuleModel,
 } from '@univerjs/sheets';
 import { useDependency, useObservable } from '@univerjs/ui';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { ISheetBarService } from '../../../services/sheet-bar/sheet-bar.service';
 import { SheetBarButton } from '../sheet-bar-button/SheetBarButton';
@@ -126,10 +126,10 @@ export function SheetBarMenu() {
         return () => disposables.dispose();
     }, [setupStatusUpdate, sheetBarService, statusInit, workbook]);
 
-    const items: IDropdownProps['items'] = menu.map((item) => ({
+    const items: IDropdownProps['items'] = useMemo(() => menu.map((item) => ({
         type: 'item',
         children: (
-            <div className="univer-px-6 univer-box-border univer-relative">
+            <div className="univer-pl-6 univer-box-border univer-relative">
                 {(item.selected || item.hidden) && (
                     <span className="univer-absolute univer-left-1 univer-top-0.5">
                         {item.selected && <CheckMarkSingle className="univer-text-primary-600  univer-size-4" />}
@@ -149,7 +149,7 @@ export function SheetBarMenu() {
         onSelect: () => {
             handleClick(item);
         },
-    }));
+    })), [menu]);
 
     return (
         <DropdownMenu

@@ -17,7 +17,7 @@
 import type { Content } from '@radix-ui/react-popover';
 import type { ComponentProps, ReactNode } from 'react';
 import { useState } from 'react';
-import { PopoverContent, PopoverPrimitive, PopoverTrigger } from './Popover';
+import { PopoverContent, PopoverPrimitive, PopoverTrigger } from './PopoverPrimitive';
 
 interface IDropdownProps {
     children: ReactNode;

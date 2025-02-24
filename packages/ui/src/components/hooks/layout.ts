@@ -15,11 +15,10 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { resizeObserverCtor } from '@univerjs/design';
-
-import canUseDom from 'rc-util/lib/Dom/canUseDom';
+import { isBrowser, resizeObserverCtor } from '@univerjs/design';
 import { useEffect } from 'react';
 import { useEvent } from './event';
+
 /**
  * These hooks are used for browser layout
  * Prefer to client-side
@@ -60,9 +59,8 @@ export function useScrollYOverContainer(element: Nullable<HTMLElement>, containe
     });
 
     useEffect(() => {
-        if (!canUseDom() || !element || !container) {
-            return;
-        }
+        if (!isBrowser() || !element || !container) return;
+
         updater();
 
         const resizeObserver = resizeObserverCtor(updater);

@@ -16,11 +16,15 @@
 
 import type { Config } from 'tailwindcss';
 import preset from '@univerjs-infra/shared/tailwind';
+import animate from 'tailwindcss-animate';
 
 const config: Config = {
     presets: [preset],
     content: [
         './src/**/*.{js,ts,jsx,tsx}',
+    ],
+    plugins: [
+        animate,
     ],
 };
 

@@ -17,10 +17,10 @@
 import type { IDocumentData, Nullable } from '@univerjs/core';
 import type { IUniFormulaPopupInfo } from '../../services/formula-popup.service';
 import { BooleanNumber, createInternalEditorID, DEFAULT_EMPTY_DOCUMENT_VALUE, DocumentFlavor, HorizontalAlign, ICommandService, LocaleService, VerticalAlign, WrapStrategy } from '@univerjs/core';
+import { clsx } from '@univerjs/design';
 // import { TextEditor } from '@univerjs/docs-ui';
 import { CheckMarkSingle, CloseSingle } from '@univerjs/icons';
 import { useDependency, useObservable } from '@univerjs/ui';
-import clsx from 'clsx';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { CloseFormulaPopupOperation, ConfirmFormulaPopupCommand } from '../../commands/operations/operation';

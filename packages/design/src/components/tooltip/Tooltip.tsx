@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import canUseDom from 'rc-util/lib/Dom/canUseDom';
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { clsx } from '../../helper/clsx';
+import { isBrowser } from '../../helper/is-browser';
 
 export interface ITooltipProps {
     /**
@@ -57,10 +57,10 @@ export interface ITooltipProps {
     className?: string;
 }
 
-export function Tooltip({ visible, asChild = false, title, children, placement = 'bottom', showIfEllipsis = false, onVisibleChange, className }: ITooltipProps) {
-    if (!canUseDom || title === undefined) {
-        return null;
-    }
+export function Tooltip(props: ITooltipProps) {
+    const { visible, asChild = false, title, children, placement = 'bottom', showIfEllipsis = false, onVisibleChange, className } = props;
+
+    if (!isBrowser() || title === undefined) return;
 
     const [mounted, setMounted] = useState(false);
     const [position, setPosition] = useState({ x: 0, y: 0 });

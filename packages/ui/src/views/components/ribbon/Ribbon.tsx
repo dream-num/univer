@@ -152,8 +152,8 @@ export function Ribbon(props: IRibbonProps) {
             <header className="univer-relative univer-select-none">
                 <div
                     className={clsx(`
-                      univer-animate-in univer-flex univer-h-0 univer-items-center univer-justify-center univer-gap-2
-                      univer-overflow-hidden univer-transition-all
+                      univer-flex univer-h-0 univer-items-center univer-justify-center univer-gap-2
+                      univer-overflow-hidden univer-transition-all univer-animate-in
                     `, {
                         'univer-h-8 univer-slide-in-from-top-full': ribbon.length > 1 || (headerMenuComponents && headerMenuComponents.size > 0),
                     })}

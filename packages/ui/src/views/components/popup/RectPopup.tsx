@@ -17,9 +17,9 @@
 import type { Nullable } from '@univerjs/core';
 import type { RefObject } from 'react';
 import type { Observable } from 'rxjs';
-import { useEvent } from 'rc-util';
 import React, { createContext, useContext, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import { useEvent } from '../../../components/hooks/event';
 import styles from './index.module.less';
 
 interface IAbsolutePosition {

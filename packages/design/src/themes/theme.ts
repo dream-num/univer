@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import canUseDom from 'rc-util/lib/Dom/canUseDom';
-
+import { isBrowser } from '../helper/is-browser';
 import styles from './theme-root.module.less';
 
 function convertToDashCase(input: string): string {
@@ -43,7 +42,7 @@ class Theme {
     private _themeRootName = styles.theme;
 
     private constructor() {
-        if (!canUseDom()) return;
+        if (!isBrowser()) return;
 
         const $style = document.createElement('style');
         $style.id = this._themeRootName;

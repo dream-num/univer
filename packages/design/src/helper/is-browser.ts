@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-import type { ClassValue } from 'clsx';
-import { clsx as cn } from 'clsx';
-import { twMerge } from 'tailwind-merge';
-
-export function clsx(...inputs: ClassValue[]) {
-    return twMerge(cn(inputs));
+export function isBrowser() {
+    return typeof window !== 'undefined' && typeof document !== 'undefined';
 }

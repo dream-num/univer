@@ -15,9 +15,9 @@
  */
 
 import type { ISidebarMethodOptions } from '@univerjs/ui';
+import { clsx } from '@univerjs/design';
 import { CloseSingle } from '@univerjs/icons';
 import { CustomLabel, ILeftSidebarService, ISidebarService, useDependency, useObservable } from '@univerjs/ui';
-import clsx from 'clsx';
 import React, { useEffect, useMemo, useRef } from 'react';
 import styles from './index.module.less';
 

@@ -21,7 +21,6 @@ import { distinctUntilChanged, first } from 'rxjs';
 import { ComponentManager } from '../../../common';
 import { CanvasFloatDomService } from '../../../services/dom/canvas-dom-layer.service';
 import { useDependency, useObservable } from '../../../utils/di';
-import styles from './index.module.less';
 
 const FloatDomSingle = memo((props: { layer: IFloatDom; id: string }) => {
     const { layer, id } = props;
@@ -105,7 +104,7 @@ const FloatDomSingle = memo((props: { layer: IFloatDom; id: string }) => {
     return (
         <div
             ref={domRef}
-            className={styles.floatDomWrapper}
+            className="univer-z-10"
             style={{
                 position: 'absolute',
                 top: topRef.current,
@@ -132,7 +131,7 @@ const FloatDomSingle = memo((props: { layer: IFloatDom; id: string }) => {
             <div
                 id={id}
                 ref={innerDomRef}
-                className={styles.floatDom}
+                className="univer-overflow-hidden"
                 style={{ position: 'absolute', ...innerStyle.current }}
             >
                 {component}

@@ -78,6 +78,18 @@ exports.baseRules = {
     'jsdoc/tag-lines': 'off',
     'import/consistent-type-specifier-style': 'warn',
 
+    'no-restricted-imports': [
+        'warn',
+        {
+            paths: [
+                {
+                    name: 'clsx',
+                    message: 'Please use `import { clsx } from \'@univerjs/design\'` instead.',
+                },
+            ],
+        },
+    ],
+
     // IMPORTANT: To ensure compatibility, some features of React 19 will be disabled.
     'react/no-forward-ref': 'off',
     'react/no-context-provider': 'off',

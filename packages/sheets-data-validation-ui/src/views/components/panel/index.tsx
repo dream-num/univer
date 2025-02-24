@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
+import type { Workbook } from '@univerjs/core';
+import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { useDependency, useObservable } from '@univerjs/ui';
+import { of } from 'rxjs';
 import { DataValidationPanelService } from '../../../services/data-validation-panel.service';
 import { DataValidationDetail } from '../detail';
 import { DataValidationList } from '../list';
@@ -22,10 +25,19 @@ import { DataValidationList } from '../list';
 export const DataValidationPanel = () => {
     const dataValidationPanelService = useDependency(DataValidationPanelService);
     const activeRule = useObservable(dataValidationPanelService.activeRule$, dataValidationPanelService.activeRule);
+    const univerInstanceService = useDependency(IUniverInstanceService);
+    const workbook = useObservable(
+        () => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET),
+        undefined,
+        undefined,
+        []
+    );
+    const worksheet = useObservable(() => workbook?.activeSheet$ ?? of(null), undefined, undefined, []);
+    if (!workbook || !worksheet) return null;
 
     return (
-        activeRule
+        activeRule && activeRule.subUnitId === worksheet.getSheetId()
             ? <DataValidationDetail key={activeRule.rule.uid} />
-            : <DataValidationList />
+            : <DataValidationList workbook={workbook} />
     );
 };

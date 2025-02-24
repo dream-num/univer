@@ -115,16 +115,18 @@ export function RangeSelectorDialog(props: IRangeSelectorDialogProps) {
             const focusNode = newRanges[focusIndex];
             if (addedRangesOrigin.indexOf(focusNode) > -1) {
                 newRanges.push(...addedRanges);
-                setRanges(newRanges);
-                setFocusIndex(newRanges.length - 1);
+                const finalRanges = newRanges.slice(0, maxRangeCount);
+                setRanges(finalRanges);
+                setFocusIndex(finalRanges.length - 1);
                 requestAnimationFrame(() => {
                     scrollbarRef.current?.scrollTo({ top: scrollbarRef.current.scrollHeight });
                 });
             } else {
                 // modify
                 newRanges.splice(focusIndex, 1, ...addedRanges);
-                setRanges(newRanges);
-                setFocusIndex(focusIndex + addedRanges.length - 1);
+                const finalRanges = newRanges.slice(0, maxRangeCount);
+                setRanges(finalRanges);
+                setFocusIndex(focusIndex + finalRanges.length - 1);
             }
         },
     });

@@ -62,6 +62,7 @@ export const CellLinkEdit = () => {
     const contextService = useDependency(IContextService);
     const themeService = useDependency(ThemeService);
     const docSelectionManagerService = useDependency(DocSelectionManagerService);
+    const [selectorDialogVisible, setSelectorDialogVisible] = useState(false);
 
     const customHyperLinkSidePanel = useMemo(() => {
         if (sidePanelService.isBuiltInLinkType(type)) {
@@ -250,11 +251,15 @@ export const CellLinkEdit = () => {
     }, [editing?.type, editorBridgeService, renderManagerService]);
 
     useEffect(() => {
-        popupService.setIsKeepVisible(isFocusRangeSelector);
+        if (isFocusRangeSelector) {
+            popupService.setIsKeepVisible(isFocusRangeSelector);
+        }
+        popupService.setIsKeepVisible(selectorDialogVisible);
+
         return () => {
             popupService.setIsKeepVisible(false);
         };
-    }, [isFocusRangeSelector, popupService]);
+    }, [isFocusRangeSelector, selectorDialogVisible, popupService]);
 
     useEffect(() => {
         return () => {
@@ -476,6 +481,7 @@ export const CellLinkEdit = () => {
                         initialValue={payload}
                         onChange={(_, text) => handleRangeChange(text)}
                         onRangeSelectorDialogVisibleChange={async (visible) => {
+                            setSelectorDialogVisible(visible);
                             if (visible) {
                                 if (editing.type === HyperLinkEditSourceType.ZEN_EDITOR) {
                                     zenZoneService.hide();

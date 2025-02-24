@@ -34,7 +34,8 @@ export interface IRangeSelectorInstance {
     editor: Nullable<Editor>;
     blur: () => void;
     focus: () => void;
-    changePopupVisible: (visible: boolean) => void;
+    showDialog: (ranges: IUnitRangeName[]) => void;
+    hideDialog: () => void;
     verify: () => boolean;
 }
 
@@ -46,6 +47,8 @@ export interface IRangeSelectorProps extends IRichTextEditorProps {
     selectorRef?: React.RefObject<IRangeSelectorInstance>;
     onVerify?: (res: boolean, rangeText: string) => void;
     onRangeSelectorDialogVisibleChange?: (visible: boolean) => void;
+    hideEditor?: boolean;
+    forceShowDialogWhenSelectionChanged?: boolean;
 };
 
 export interface IRangeSelectorDialogProps {
@@ -207,6 +210,8 @@ export function RangeSelector(props: IRangeSelectorProps) {
         onRangeSelectorDialogVisibleChange,
         onClickOutside,
         onFocusChange,
+        forceShowDialogWhenSelectionChanged,
+        hideEditor,
     } = props;
     const [focusing, setFocusing] = useState(autoFocus ?? false);
     const [popupVisible, setPopupVisible] = useState(false);
@@ -239,15 +244,17 @@ export function RangeSelector(props: IRangeSelectorProps) {
             },
             blur: blurEditor,
             verify: () => verifyRange(sequenceNodesRef.current),
-            changePopupVisible: (visible) => {
-                if (visible) {
-                    handleOpenModal();
-                } else {
-                    setPopupVisible(false);
-                }
+            showDialog: (ranges) => {
+                blurEditor();
+                setRangeSelectorRanges(ranges);
+                setPopupVisible(true);
+            },
+            hideDialog: () => {
+                setRangeSelectorRanges([]);
+                setPopupVisible(false);
             },
         };
-    }, [blurEditor, editor, editorService, handleOpenModal, selectorRef, sequenceNodesRef]);
+    }, [blurEditor, editor, editorService, selectorRef, sequenceNodesRef]);
 
     useEffect(() => {
         onVerify?.(verifyRange(sequenceNodes), editor?.getDocumentDataModel().getPlainText() ?? '');
@@ -259,25 +266,29 @@ export function RangeSelector(props: IRangeSelectorProps) {
 
     return (
         <>
-            <RichTextEditor
-                isSingle
-                {...props}
-                onFocusChange={(focusing) => {
-                    setFocusing(focusing);
-                    onFocusChange?.(focusing);
-                }}
-                editorRef={setEditor}
-                onClickOutside={() => {
-                    setFocusing(false);
-                    blurEditor();
-                    onClickOutside?.();
-                }}
-                icon={(
-                    <Tooltip title={localeService.t('rangeSelector.buttonTooltip')} placement="bottom">
-                        <SelectRangeSingle className={styles.sheetRangeSelectorIcon} onClick={handleOpenModal} />
-                    </Tooltip>
-                )}
-            />
+            {!hideEditor
+                ? (
+                    <RichTextEditor
+                        isSingle
+                        {...props}
+                        onFocusChange={(focusing) => {
+                            setFocusing(focusing);
+                            onFocusChange?.(focusing);
+                        }}
+                        editorRef={setEditor}
+                        onClickOutside={() => {
+                            setFocusing(false);
+                            blurEditor();
+                            onClickOutside?.();
+                        }}
+                        icon={(
+                            <Tooltip title={localeService.t('rangeSelector.buttonTooltip')} placement="bottom">
+                                <SelectRangeSingle className={styles.sheetRangeSelectorIcon} onClick={handleOpenModal} />
+                            </Tooltip>
+                        )}
+                    />
+                )
+                : null}
             <RangeSelectorDialog
                 initialValue={rangeSelectorRanges}
                 unitId={unitId}
@@ -302,7 +313,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
                 }}
                 supportAcrossSheet={supportAcrossSheet}
                 onShowBySelection={() => {
-                    if (focusing) {
+                    if (focusing || forceShowDialogWhenSelectionChanged) {
                         setRangeSelectorRanges([]);
                         setPopupVisible(true);
                     } else {

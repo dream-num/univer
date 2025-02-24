@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import canUseDom from 'rc-util/lib/Dom/canUseDom';
-import { useEffect } from 'react';
-
 import type { Nullable } from '@univerjs/core';
 import { resizeObserverCtor } from '@univerjs/design';
+
+import canUseDom from 'rc-util/lib/Dom/canUseDom';
+import { useEffect } from 'react';
 import { useEvent } from './event';
 /**
  * These hooks are used for browser layout
@@ -40,12 +40,12 @@ export function useScrollYOverContainer(element: Nullable<HTMLElement>, containe
 
         const elStyle = element.style;
         const elRect = element.getBoundingClientRect();
-        const { y } = elRect;
+        const { y, height } = elRect;
         const containerRect = container.getBoundingClientRect();
 
-        const scrolled = element.scrollHeight > elRect.height;
+        const scrolled = element.scrollHeight > height;
 
-        const isOverViewport = y < 0 || (y + elRect.height > containerRect.height);
+        const isOverViewport = y < 0 || (y + height > containerRect.height);
 
         if (!isOverViewport && !scrolled) {
             elStyle.overflowY = '';
@@ -54,7 +54,7 @@ export function useScrollYOverContainer(element: Nullable<HTMLElement>, containe
         }
 
         if (isOverViewport) {
-            elStyle.overflowY = 'scroll';
+            elStyle.overflowY = 'auto';
             elStyle.maxHeight = y < 0 ? `${element.scrollHeight + y}px` : `${containerRect.height - y}px`;
         }
     });

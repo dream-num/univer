@@ -76,6 +76,9 @@ const locale: typeof zhCN = {
         cancel: 'Hủy',
     },
     'global-shortcut': 'Phím tắt toàn cầu',
+    'zoom-slider': {
+        resetTo: 'Khôi phục đến',
+    },
 };
 
 export default locale;

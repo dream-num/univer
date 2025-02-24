@@ -76,6 +76,9 @@ const locale: typeof enUS = {
         cancel: 'Annuler',
     },
     'global-shortcut': 'Raccourci global',
+    'zoom-slider': {
+        resetTo: 'Réinitialiser à',
+    },
 };
 
 export default locale;

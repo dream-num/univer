@@ -18,7 +18,7 @@ import type { Workbook } from '@univerjs/core';
 import type { IColorScale, IConditionalFormattingRuleConfig } from '@univerjs/sheets-conditional-formatting';
 import type { IStyleEditorProps } from './type';
 import { IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
-import { InputNumber, Select } from '@univerjs/design';
+import { clsx, InputNumber, Select } from '@univerjs/design';
 import { CFRuleType, CFValueType, createDefaultValueByValueType } from '@univerjs/sheets-conditional-formatting';
 import { FormulaEditor } from '@univerjs/sheets-formula-ui';
 import { useDependency, useSidebarClick } from '@univerjs/ui';
@@ -222,17 +222,19 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
     return (
         <div>
             <div className={stylesBase.title}>{localeService.t('sheet.cf.panel.styleRule')}</div>
-            <div className={`
-              ${styles.cfPreviewWrap}
-            `}
+            <div
+                className={`
+                  ${styles.cfPreviewWrap}
+                `}
             >
                 <Preview rule={getResult({ minType, medianType, maxType, minValue, medianValue, maxValue, minColor, medianColor, maxColor }) as IConditionalFormattingRuleConfig} />
             </div>
             <div className={stylesBase.label}>{localeService.t('sheet.cf.valueType.min')}</div>
-            <div className={`
-              ${stylesBase.labelContainer}
-              ${stylesBase.mTSm}
-            `}
+            <div
+                className={clsx(`
+                  ${stylesBase.labelContainer}
+                  ${stylesBase.mTSm}
+                `, 'univer-box-border univer-h-7')}
             >
                 <Select
                     style={{ flexShrink: 0 }}
@@ -267,10 +269,11 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
                 />
             </div>
             <div className={stylesBase.label}>{localeService.t('sheet.cf.panel.medianValue')}</div>
-            <div className={`
-              ${stylesBase.labelContainer}
-              ${stylesBase.mTSm}
-            `}
+            <div
+                className={clsx(`
+                  ${stylesBase.labelContainer}
+                  ${stylesBase.mTSm}
+                `, 'univer-box-border univer-h-7')}
             >
                 <Select
                     style={{ flexShrink: 0 }}
@@ -309,10 +312,11 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
 
             </div>
             <div className={stylesBase.label}>{localeService.t('sheet.cf.valueType.max')}</div>
-            <div className={`
-              ${stylesBase.labelContainer}
-              ${stylesBase.mTSm}
-            `}
+            <div
+                className={clsx(`
+                  ${stylesBase.labelContainer}
+                  ${stylesBase.mTSm}
+                `, 'univer-box-border univer-h-7')}
             >
                 <Select
                     style={{ flexShrink: 0 }}

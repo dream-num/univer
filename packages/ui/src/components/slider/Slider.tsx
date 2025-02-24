@@ -14,16 +14,11 @@
  * limitations under the License.
  */
 
+import { LocaleService } from '@univerjs/core';
+import { Button, clsx, Dropdown, Tooltip } from '@univerjs/design';
 import { CheckMarkSingle, IncreaseSingle, ReduceSingle } from '@univerjs/icons';
-import clsx from 'clsx';
-import React, { useContext, useMemo, useRef } from 'react';
-
-import { Button } from '../button/Button';
-import { ConfigContext } from '../config-provider/ConfigProvider';
-import { DropdownOverlay } from '../dropdown/DropdownOverlay';
-import { DropdownProvider } from '../dropdown/DropdownProvider';
-import { DropdownTrigger } from '../dropdown/DropdownTrigger';
-import { Tooltip } from '../tooltip/Tooltip';
+import { useDependency } from '@wendellhu/redi/react-bindings';
+import React, { useMemo, useRef, useState } from 'react';
 import styles from './index.module.less';
 
 export interface ISliderProps {
@@ -65,11 +60,12 @@ export interface ISliderProps {
  * Slider Component
  */
 export function Slider(props: ISliderProps) {
+    const localeService = useDependency(LocaleService);
+
     const { value, min = 0, max = 400, disabled = false, resetPoint = 100, shortcuts, onChange } = props;
 
     const sliderInnerRailRef = useRef<HTMLDivElement>(null);
-
-    const { locale } = useContext(ConfigContext);
+    const [zoomListVisible, setZoomListVisible] = useState(false);
 
     function handleReset() {
         if (disabled) return;
@@ -147,6 +143,13 @@ export function Slider(props: ISliderProps) {
         window.addEventListener('pointerout', onMouseOut);
     }
 
+    function handleSelectZoomLevel(value: number) {
+        if (disabled) return;
+
+        setZoomListVisible(false);
+        onChange && onChange(value);
+    }
+
     return (
         <div
             className={clsx(styles.slider, {
@@ -159,13 +162,13 @@ export function Slider(props: ISliderProps) {
 
             <div className={styles.sliderRail}>
                 <div ref={sliderInnerRailRef} role="track" className={styles.sliderInnerRail}>
-                    <Tooltip title={`${locale?.Slider.resetTo} ${resetPoint}%`} placement="top" asChild>
+                    <Tooltip title={`${localeService.t('zoom-slider.resetTo')} ${resetPoint}%`} placement="top" asChild>
                         <a
                             key="reset-button"
                             className={`
-                              univer-cursor-pointer univer-absolute univer-left-1/2 univer-top-1/2
-                              -univer-translate-x-1/2 -univer-translate-y-1/2 univer-box-border univer-w-0.5
-                              univer-h-0.5 univer-bg-white univer-rounded-full univer-block
+                              univer-absolute univer-left-1/2 univer-top-1/2 univer-box-border univer-block univer-h-0.5
+                              univer-w-0.5 -univer-translate-x-1/2 -univer-translate-y-1/2 univer-cursor-pointer
+                              univer-rounded-full univer-bg-white
                             `}
                             role="button"
                             onClick={handleReset}
@@ -187,44 +190,32 @@ export function Slider(props: ISliderProps) {
                 <IncreaseSingle />
             </Button>
 
-            <DropdownProvider>
-                <DropdownTrigger>
-                    <a
-                        className={`
-                          univer-text-gray-800 univer-h-7 univer-text-sm univer-flex univer-items-center
-                          univer-cursor-pointer univer-rounded univer-transition-all univer-w-[55px]
-                          univer-justify-center
-                          hover:univer-bg-gray-100
-                        `}
-                    >
-                        {value}
-                        %
-                    </a>
-                </DropdownTrigger>
-                <DropdownOverlay offset={{ y: -20 }}>
+            <Dropdown
+                align="end"
+                overlay={(
                     <div
                         className={`
-                          univer-gap-1 univer-items-center univer-w-32 univer-p-2 univer-text-sm univer-text-gray-800
-                          univer-box-border univer-grid
+                          univer-box-border univer-grid univer-w-32 univer-items-center univer-gap-1 univer-p-2
+                          univer-text-sm univer-text-gray-800
                         `}
                     >
                         {shortcuts?.map((item) => (
                             <a
                                 key={item}
                                 className={clsx(`
-                                  univer-cursor-pointer univer-rounded-md univer-transition-colors univer-duration-200
-                                  univer-px-2 univer-py-1 univer-relative univer-text-center
+                                  univer-relative univer-cursor-pointer univer-rounded-md univer-px-2 univer-py-1
+                                  univer-text-center univer-transition-colors univer-duration-200
                                   hover:univer-bg-gray-100
                                 `, {
                                     'univer-bg-gray-100': item === value,
                                 })}
-                                onClick={() => onChange && onChange(item)}
+                                onClick={() => handleSelectZoomLevel(item)}
                             >
                                 {item === value && (
                                     <span
                                         className={`
-                                          univer-text-green-500 univer-absolute univer-left-2 univer-top-0 univer-h-full
-                                          univer-items-center univer-flex
+                                          univer-absolute univer-left-2 univer-top-0 univer-flex univer-h-full
+                                          univer-items-center univer-text-green-500
                                         `}
                                     >
                                         <CheckMarkSingle />
@@ -237,8 +228,21 @@ export function Slider(props: ISliderProps) {
                             </a>
                         ))}
                     </div>
-                </DropdownOverlay>
-            </DropdownProvider>
+                )}
+                open={zoomListVisible}
+                onOpenChange={setZoomListVisible}
+            >
+                <a
+                    className={`
+                      univer-flex univer-h-7 univer-w-[55px] univer-cursor-pointer univer-items-center
+                      univer-justify-center univer-rounded univer-text-sm univer-text-gray-800 univer-transition-all
+                      hover:univer-bg-gray-100
+                    `}
+                >
+                    {value}
+                    %
+                </a>
+            </Dropdown>
         </div>
     );
 }

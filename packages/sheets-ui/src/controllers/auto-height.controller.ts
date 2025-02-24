@@ -83,8 +83,9 @@ export class AutoHeightController extends Disposable {
         const config = configService.getConfig<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY);
         let rangeList = ranges;
         if (!Array.isArray(ranges)) {
+            // TODO: @weird94 after we resolve the performance issue of auto hight, we can remove this code.
             // The code "const params = command.params as ISetRangeValuesRangeMutationParams;" of _initialize() method may make IRange as IRange[]. so need adjust here.
-            if ((ranges as IRange).startRow !== undefined && (ranges as IRange).startRow !== undefined) {
+            if (ranges && (ranges as IRange).startRow !== undefined && (ranges as IRange).startRow !== undefined) {
                 rangeList = [ranges];
             } else {
                 rangeList = [];

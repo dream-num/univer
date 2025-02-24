@@ -24,9 +24,6 @@ const locale: ILocale = {
             cancel: '取消',
             confirm: '確定',
         },
-        Slider: {
-            resetTo: '恢復至',
-        },
         Picker: {
             ...dajsZhTw,
             ...PickerZhTw,

@@ -17,8 +17,7 @@
 import type { Workbook } from '@univerjs/core';
 import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { ContextMenuPosition, IMenuManagerService, ToolbarItem, useDependency, useObservable } from '@univerjs/ui';
-import React, { useMemo } from 'react';
-
+import { useMemo } from 'react';
 import { useActiveWorkbook } from '../../components/hook';
 import { CountBar } from '../count-bar/CountBar';
 import { EditorContainer } from '../editor-container/EditorContainer';
@@ -26,7 +25,8 @@ import { FormulaBar } from '../formula-bar/FormulaBar';
 import { OperateContainer } from '../operate-container/OperateContainer';
 import { SheetBar } from '../sheet-bar/SheetBar';
 import { StatusBar } from '../status-bar/StatusBar';
-import styles from './index.module.less';
+
+export const SHEET_FOOTER_BAR_HEIGHT = 36;
 
 export function RenderSheetFooter() {
     const menuManagerService = useDependency(IMenuManagerService);
@@ -37,20 +37,33 @@ export function RenderSheetFooter() {
     const footerMenus = menuManagerService.getMenuByPositionKey(ContextMenuPosition.FOOTER_MENU);
 
     return (
-        <section className={styles.sheetContainer} data-range-selector>
+        <section
+            className={`
+              univer-box-border univer-flex univer-items-center univer-justify-between univer-bg-white univer-px-5
+              univer-text-gray-900
+              dark:univer-bg-gray-900 dark:univer-text-gray-200
+            `}
+            style={{
+                height: SHEET_FOOTER_BAR_HEIGHT,
+            }}
+            data-range-selector
+        >
             <SheetBar />
             <StatusBar />
-            {footerMenus.map((item) => item.children?.map((child) => (
-                child?.item && (
-                    <ToolbarItem
-                        key={child.key}
-                        align={{
-                            offset: [-32, 18],
-                        }}
-                        {...child.item}
-                    />
-                )
-            )))}
+
+            {footerMenus.length && (
+                <div className="univer-mr-2 univer-flex univer-gap-2">
+                    {footerMenus.map((item) => item.children?.map((child) => (
+                        child?.item && (
+                            <ToolbarItem
+                                key={child.key}
+                                {...child.item}
+                            />
+                        )
+                    )))}
+                </div>
+            )}
+
             <CountBar />
         </section>
     );

@@ -14,23 +14,13 @@
  * limitations under the License.
  */
 
-import type { RefObject } from 'react';
-import { createContext, useContext } from 'react';
-
-interface IDropdownContextType {
-    show: boolean;
-    updateShow: (value: boolean) => void;
-    disabled: boolean;
-    overlayRef: RefObject<HTMLDivElement>;
-    triggerRef: RefObject<HTMLElement>;
-}
-
-export const DropdownContext = createContext<IDropdownContextType | null>(null);
-
-export const useDropdown = () => {
-    const context = useContext(DropdownContext);
-    if (!context) {
-        throw new Error('useDropdown must be used within a DropdownProvider');
-    }
-    return context;
+export default {
+    customMenu: {
+        button: 'Button',
+        singleButton: 'Single button',
+        dropdown: 'Dropdown',
+        dropdownList: 'Dropdown list',
+        itemOne: 'Item 1',
+        itemTwo: 'Item 2',
+    },
 };

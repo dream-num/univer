@@ -109,17 +109,15 @@ export const Input = ({
                 <button
                     type="button"
                     onClick={handleClear}
-                    className={clsx(
-                        'univer-absolute univer-right-2 univer-rounded-full univer-p-1',
-                        `
-                          univer-text-gray-400
-                          hover:univer-text-gray-500
-                        `,
-                        'univer-transition-colors univer-duration-200',
-                        'focus:univer-outline-none focus:univer-ring-2 focus:univer-ring-blue-500/20'
-                    )}
+                    className={`
+                      univer-absolute univer-right-2 univer-flex univer-items-center univer-rounded-full
+                      univer-border-none univer-bg-transparent univer-p-1 univer-text-gray-400 univer-transition-colors
+                      univer-duration-200
+                      focus:univer-outline-none
+                      hover:univer-text-gray-500
+                    `}
                 >
-                    <CloseSingle className="univer-h-4 univer-w-4" />
+                    <CloseSingle className="univer-size-4" />
                 </button>
             )}
         </div>

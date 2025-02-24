@@ -52,7 +52,7 @@ export function useRangesHighlight(editor: Nullable<Editor>, focusing: boolean) 
             });
             return;
         }
-        const selections = highlightDoc(editor, sequenceNodes);
+        const selections = highlightDoc(editor, sequenceNodes, false);
         const disposable = new DisposableCollection();
         selections.forEach((selection) => {
             const rgb = new ColorKit(selection.themeColor).toRgb();

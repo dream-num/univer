@@ -16,7 +16,7 @@
 
 import type { ICommandInfo, Workbook } from '@univerjs/core';
 import { BooleanNumber, DisposableCollection, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { DropdownLegacy } from '@univerjs/design';
+import { clsx, Dropdown } from '@univerjs/design';
 import { CheckMarkSingle, ConvertSingle, EyelashSingle } from '@univerjs/icons';
 import {
     InsertSheetMutation,
@@ -135,11 +135,10 @@ export function SheetBarMenu(props: ISheetBarMenuProps) {
     }, [setupStatusUpdate, sheetBarService, statusInit, workbook]);
 
     return (
-        <DropdownLegacy
-            placement="topLeft"
-            trigger={['click']}
+        <Dropdown
+            align="start"
             overlay={(
-                <ul className={styles.sheetBarMenu} style={{ ...style }}>
+                <ul className={clsx(styles.sheetBarMenu, 'univer-theme')} style={{ ...style }}>
                     {menu.map((item) => (
                         <li
                             key={item.index}
@@ -168,14 +167,14 @@ export function SheetBarMenu(props: ISheetBarMenuProps) {
                     ))}
                 </ul>
             )}
-            visible={visible}
-            onVisibleChange={onVisibleChange}
+            open={visible}
+            onOpenChange={onVisibleChange}
         >
             <div>
                 <SheetBarButton>
                     <ConvertSingle />
                 </SheetBarButton>
             </div>
-        </DropdownLegacy>
+        </Dropdown>
     );
 }

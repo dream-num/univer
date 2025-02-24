@@ -120,7 +120,6 @@ export { UNIVER_UI_PLUGIN_NAME } from './ui-plugin';
 export * from './utils';
 export { ComponentContainer, type IComponentContainerProps, useComponentsOfPart } from './views/components/ComponentContainer';
 export { ZenZone } from './views/components/zen-zone/ZenZone';
-export { builtInGlobalComponents } from './views/parts';
 
 // #region - workbench components
 

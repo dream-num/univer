@@ -157,7 +157,6 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
     private _handleBgMatrix = new ObjectMatrix<boolean>();
     private _handleBorderMatrix = new ObjectMatrix<boolean>();
     private _handleFontMatrix = new ObjectMatrix<boolean>();
-
     private _showGridlines: BooleanNumber = BooleanNumber.TRUE;
     private _gridlinesColor: string | undefined = undefined;
 
@@ -171,9 +170,6 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         @Inject(Injector) _injector: Injector
     ) {
         super(worksheet, _styles, _localeService, _contextService, _configService, _injector);
-    }
-
-    override initConfig() {
         this._updateLayout();
         this.disposeWithMe(
             this._contextService.subscribeContextValue$(RENDER_RAW_FORMULA_KEY).pipe(

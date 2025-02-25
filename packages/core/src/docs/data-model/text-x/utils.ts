@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,19 +26,13 @@ export enum SliceBodyType {
     cut,
 }
 
-// eslint-disable-next-line max-lines-per-function, complexity
-export function getBodySlice(
+export function getTextRunSlice(
     body: IDocumentBody,
     startOffset: number,
     endOffset: number,
-    returnEmptyArray = true,
-    type = SliceBodyType.cut
-): IDocumentBody {
-    const { dataStream, textRuns, paragraphs = [], customBlocks = [], tables = [], sectionBreaks = [] } = body;
-
-    const docBody: IDocumentBody = {
-        dataStream: dataStream.slice(startOffset, endOffset),
-    };
+    returnEmptyTextRuns = true
+) {
+    const { textRuns } = body;
 
     if (textRuns) {
         const newTextRuns: ITextRun[] = [];
@@ -66,7 +60,7 @@ export function getBodySlice(
             }
         }
 
-        docBody.textRuns = normalizeTextRuns(
+        return normalizeTextRuns(
             newTextRuns.map((tr) => {
                 const { st, ed } = tr;
                 return {
@@ -76,18 +70,24 @@ export function getBodySlice(
                 };
             })
         );
-    } else if (returnEmptyArray) {
+    } else if (returnEmptyTextRuns) {
         // In the case of no style before, add the style, removeTextRuns will be empty,
         // in this case, you need to add an empty textRun for undo.
-        docBody.textRuns = [{
+        return [{
             st: 0,
             ed: endOffset - startOffset,
             ts: {},
         }];
     }
+}
 
+export function getTableSlice(
+    body: IDocumentBody,
+    startOffset: number,
+    endOffset: number
+) {
+    const { tables = [] } = body;
     const newTables = [];
-
     for (const table of tables) {
         const clonedTable = Tools.deepClone(table);
         const { startIndex, endIndex } = clonedTable;
@@ -100,11 +100,15 @@ export function getBodySlice(
             });
         }
     }
+    return newTables;
+}
 
-    if (newTables.length) {
-        docBody.tables = newTables;
-    }
-
+export function getParagraphsSlice(
+    body: IDocumentBody,
+    startOffset: number,
+    endOffset: number
+) {
+    const { paragraphs = [] } = body;
     const newParagraphs: IParagraph[] = [];
 
     for (const paragraph of paragraphs) {
@@ -115,12 +119,19 @@ export function getBodySlice(
     }
 
     if (newParagraphs.length) {
-        docBody.paragraphs = newParagraphs.map((p) => ({
+        return newParagraphs.map((p) => ({
             ...p,
             startIndex: p.startIndex - startOffset,
         }));
     }
+}
 
+export function getSectionBreakSlice(
+    body: IDocumentBody,
+    startOffset: number,
+    endOffset: number
+) {
+    const { sectionBreaks = [] } = body;
     const newSectionBreaks: ISectionBreak[] = [];
 
     for (const sectionBreak of sectionBreaks) {
@@ -131,11 +142,57 @@ export function getBodySlice(
     }
 
     if (newSectionBreaks.length) {
-        docBody.sectionBreaks = newSectionBreaks.map((sb) => ({
+        return newSectionBreaks.map((sb) => ({
             ...sb,
             startIndex: sb.startIndex - startOffset,
         }));
     }
+}
+
+export function getCustomBlockSlice(
+    body: IDocumentBody,
+    startOffset: number,
+    endOffset: number
+) {
+    const { customBlocks = [] } = body;
+    const newCustomBlocks: ICustomBlock[] = [];
+
+    for (const block of customBlocks) {
+        const { startIndex } = block;
+        if (startIndex >= startOffset && startIndex <= endOffset) {
+            newCustomBlocks.push(Tools.deepClone(block));
+        }
+    }
+
+    if (newCustomBlocks.length) {
+        return newCustomBlocks.map((b) => ({
+            ...b,
+            startIndex: b.startIndex - startOffset,
+        }));
+    }
+}
+
+export function getBodySlice(
+    body: IDocumentBody,
+    startOffset: number,
+    endOffset: number,
+    returnEmptyArray = true,
+    type = SliceBodyType.cut
+): IDocumentBody {
+    const { dataStream } = body;
+
+    const docBody: IDocumentBody = {
+        dataStream: dataStream.slice(startOffset, endOffset),
+    };
+
+    docBody.textRuns = getTextRunSlice(body, startOffset, endOffset, returnEmptyArray);
+
+    const newTables = getTableSlice(body, startOffset, endOffset);
+    if (newTables.length) {
+        docBody.tables = newTables;
+    }
+
+    docBody.paragraphs = getParagraphsSlice(body, startOffset, endOffset);
 
     if (type === SliceBodyType.cut) {
         const customDecorations = getCustomDecorationSlice(body, startOffset, endOffset);
@@ -152,21 +209,7 @@ export function getBodySlice(
         docBody.customRanges = [];
     }
 
-    const newCustomBlocks: ICustomBlock[] = [];
-
-    for (const block of customBlocks) {
-        const { startIndex } = block;
-        if (startIndex >= startOffset && startIndex <= endOffset) {
-            newCustomBlocks.push(Tools.deepClone(block));
-        }
-    }
-
-    if (newCustomBlocks.length) {
-        docBody.customBlocks = newCustomBlocks.map((b) => ({
-            ...b,
-            startIndex: b.startIndex - startOffset,
-        }));
-    }
+    docBody.customBlocks = getCustomBlockSlice(body, startOffset, endOffset);
 
     return docBody;
 }

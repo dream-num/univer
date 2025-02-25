@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 import type { IAccessor, ICommand } from '@univerjs/core';
+import type { ISetWorksheetHideMutationParams } from '../mutations/set-worksheet-hide.mutation';
+
 import {
     BooleanNumber,
     CommandType,
@@ -24,8 +26,6 @@ import {
     IUniverInstanceService,
     LocaleService,
 } from '@univerjs/core';
-
-import type { ISetWorksheetHideMutationParams } from '../mutations/set-worksheet-hide.mutation';
 import { SetWorksheetHideMutation, SetWorksheetHideMutationFactory } from '../mutations/set-worksheet-hide.mutation';
 import { getSheetCommandTarget } from './utils/target-util';
 
@@ -37,7 +37,7 @@ export const SetWorksheetHideCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-worksheet-hidden',
 
-    handler: async (accessor: IAccessor, params?: ISetWorksheetHiddenCommandParams) => {
+    handler: (accessor: IAccessor, params?: ISetWorksheetHiddenCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const errorService = accessor.get(ErrorService);

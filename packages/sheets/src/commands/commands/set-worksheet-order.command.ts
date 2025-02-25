@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,9 @@
  */
 
 import type { IAccessor, ICommand } from '@univerjs/core';
-import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
-
 import type { ISetWorksheetOrderMutationParams } from '../mutations/set-worksheet-order.mutation';
+
+import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
 import {
     SetWorksheetOrderMutation,
     SetWorksheetOrderUndoMutationFactory,
@@ -34,7 +34,7 @@ export const SetWorksheetOrderCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-worksheet-order',
 
-    handler: async (accessor: IAccessor, params: ISetWorksheetOrderCommandParams) => {
+    handler: (accessor: IAccessor, params: ISetWorksheetOrderCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
 

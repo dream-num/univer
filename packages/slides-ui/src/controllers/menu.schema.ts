@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,12 @@
 
 import type { MenuSchemaType } from '@univerjs/ui';
 import { RibbonStartGroup } from '@univerjs/ui';
-import { SlideAddTextCommand } from '../commands/operations/insert-text.operation';
 import { InsertSlideFloatImageCommand } from '../commands/operations/insert-image.operation';
 import { InsertSlideShapeRectangleCommand } from '../commands/operations/insert-shape.operation';
-import { SlideAddTextMenuItemFactory } from './text.menu';
-import { IMAGE_MENU_ID, SlideImageMenuFactory, UploadSlideFloatImageMenuFactory } from './image.menu';
+import { SlideAddTextCommand } from '../commands/operations/insert-text.operation';
+import { SlideImageMenuFactory, SLIDES_IMAGE_MENU_ID, UploadSlideFloatImageMenuFactory } from './image.menu';
 import { SHAPE_MENU_ID, SlideShapeMenuFactory, UploadSlideFloatShapeMenuFactory } from './shape.menu';
+import { SlideAddTextMenuItemFactory } from './text.menu';
 
 export const menuSchema: MenuSchemaType = {
     [RibbonStartGroup.FORMAT]: {
@@ -29,7 +29,7 @@ export const menuSchema: MenuSchemaType = {
             order: 0,
             menuItemFactory: SlideAddTextMenuItemFactory,
         },
-        [IMAGE_MENU_ID]: {
+        [SLIDES_IMAGE_MENU_ID]: {
             order: 0,
             menuItemFactory: SlideImageMenuFactory,
             [InsertSlideFloatImageCommand.id]: {

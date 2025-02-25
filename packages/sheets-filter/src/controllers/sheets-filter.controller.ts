@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -199,7 +199,7 @@ export class SheetsFilterController extends Disposable {
         const filterColumn = filterModel.getAllFilterColumns();
         const effected = filterColumn.filter((column) => column[0] >= anchor);
         if (effected.length !== 0) {
-            const { newRange, oldRange } = this.moveCriteria(unitId, subUnitId, effected, count);
+            const { newRange, oldRange } = this._moveCriteria(unitId, subUnitId, effected, count);
             redos.push(...newRange.redos, ...oldRange.redos);
             undos.push(...newRange.undos, ...oldRange.undos);
         }
@@ -281,7 +281,7 @@ export class SheetsFilterController extends Disposable {
 
         let newRangeCriteria: { undos: IMutationInfo[]; redos: IMutationInfo[] } = { undos: [], redos: [] };
         if (shifted.length > 0) {
-            const { oldRange, newRange } = this.moveCriteria(unitId, subUnitId, shifted, -removeCount);
+            const { oldRange, newRange } = this._moveCriteria(unitId, subUnitId, shifted, -removeCount);
             newRangeCriteria = newRange;
             redos.push(...oldRange.redos);
             undos.unshift(...oldRange.undos);
@@ -693,7 +693,7 @@ export class SheetsFilterController extends Disposable {
         }));
     }
 
-    private moveCriteria(unitId: string, subUnitId: string, target: [number, FilterColumn][], step: number) {
+    private _moveCriteria(unitId: string, subUnitId: string, target: [number, FilterColumn][], step: number) {
         const defaultSetCriteriaMutationParams: ISetSheetsFilterCriteriaMutationParams = {
             unitId,
             subUnitId,

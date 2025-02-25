@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,4 +16,21 @@
 
 export function awaitTime(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+export function delayAnimationFrame(frames: number = 1): Promise<void> {
+    return new Promise((resolve) => {
+        let count = 0;
+
+        const callback = () => {
+            count++;
+            if (count >= frames) {
+                resolve();
+            } else {
+                requestAnimationFrame(callback);
+            }
+        };
+
+        requestAnimationFrame(callback);
+    });
 }

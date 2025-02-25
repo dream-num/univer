@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,8 @@ import { InsertColMutation, InsertRowMutation } from '../../mutations/insert-row
 import { RemoveColMutation, RemoveRowMutation } from '../../mutations/remove-row-col.mutation';
 import { SetRangeValuesMutation } from '../../mutations/set-range-values.mutation';
 import { SetSelectionsOperation } from '../../operations/selection.operation';
-import { RemoveColCommand, RemoveRowCommand } from '../remove-row-col.command';
+import { InsertColByRangeCommand, InsertRowByRangeCommand } from '../insert-row-col.command';
+import { RemoveColByRangeCommand, RemoveColCommand, RemoveRowByRangeCommand, RemoveRowCommand } from '../remove-row-col.command';
 import { createCommandTestBed } from './create-command-test-bed';
 
 describe('Test remove rows cols', () => {
@@ -53,10 +54,14 @@ describe('Test remove rows cols', () => {
         [
             RemoveRowCommand,
             RemoveColCommand,
+            RemoveRowByRangeCommand,
+            RemoveColByRangeCommand,
             RemoveColMutation,
             RemoveRowMutation,
             InsertRowMutation,
             InsertColMutation,
+            InsertRowByRangeCommand,
+            InsertColByRangeCommand,
             SetSelectionsOperation,
             SetRangeValuesMutation,
         ].forEach((c) => commandService.registerCommand(c));
@@ -152,10 +157,6 @@ const TEST_ROWS_COLS_MOVE_DEMO: IWorkbookData = {
     id: 'test',
     appVersion: '3.0.0-alpha',
     sheets: {
-        // 1
-        //  2-3-
-        // 	4
-        //  |
         sheet1: {
             id: 'sheet1',
             cellData: {

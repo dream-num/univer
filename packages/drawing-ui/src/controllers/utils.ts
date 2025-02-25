@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { IUniverInstanceService, Nullable, Workbook } from '@univerjs/core';
-import { UniverInstanceType } from '@univerjs/core';
-import type { IDrawingManagerService, IDrawingSearch } from '@univerjs/drawing';
-import { getDrawingShapeKeyByDrawingSearch } from '@univerjs/drawing';
+import type { IDrawingSearch, IUniverInstanceService, Nullable, Workbook } from '@univerjs/core';
+import type { IDrawingManagerService } from '@univerjs/drawing';
 import type { BaseObject, Scene } from '@univerjs/engine-render';
+import { UniverInstanceType } from '@univerjs/core';
+import { getDrawingShapeKeyByDrawingSearch } from '@univerjs/drawing';
 import { DRAWING_OBJECT_LAYER_INDEX, Group } from '@univerjs/engine-render';
 
 export function insertGroupObject(objectParam: IDrawingSearch, object: BaseObject, scene: Scene, drawingManagerService: IDrawingManagerService) {

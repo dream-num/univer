@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-import { FUniver } from '@univerjs/core';
+import { FUniver } from '@univerjs/core/facade';
 import { FFormula } from './f-formula';
 
+/**
+ * @ignore
+ */
 export interface IFUniverEngineFormulaMixin {
     getFormula(): FFormula;
 }
@@ -28,7 +31,7 @@ export class FUniverEngineFormulaMixin extends FUniver implements IFUniverEngine
 }
 
 FUniver.extend(FUniverEngineFormulaMixin);
-declare module '@univerjs/core' {
+declare module '@univerjs/core/facade' {
     // eslint-disable-next-line ts/naming-convention
     interface FUniver extends IFUniverEngineFormulaMixin {}
 }

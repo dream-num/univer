@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { IOperation } from '@univerjs/core';
+import type { IOperation, Workbook } from '@univerjs/core';
 import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 
-import { CommandType, ICommandService } from '@univerjs/core';
+import { CommandType, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 
 export const SetCellEditVisibleOperation: IOperation<IEditorBridgeServiceVisibleParam> = {
@@ -40,7 +40,16 @@ export const SetCellEditVisibleWithF2Operation: IOperation<IEditorBridgeServiceV
     type: CommandType.OPERATION,
     handler: (accessor, params) => {
         const commandService = accessor.get(ICommandService);
-        commandService.syncExecuteCommand(SetCellEditVisibleOperation.id, params);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        if (!workbook) {
+            return false;
+        }
+        commandService.syncExecuteCommand(SetCellEditVisibleOperation.id, {
+            ...params,
+            unitId: workbook.getUnitId(),
+        });
+
         return true;
     },
 };

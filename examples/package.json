@@ -4,12 +4,17 @@
     "description": "Univer vanilla ts demo project",
     "author": "DreamNum <developer@univer.ai>",
     "license": "Apache-2.0",
+    "exports": {
+        "./*": "./src/*"
+    },
     "scripts": {
-        "build:demo": "node ./esbuild.config.mjs",
-        "dev:demo": "node ./esbuild.config.mjs --watch",
-        "dev:e2e": "node ./esbuild.config.mjs --watch --e2e",
-        "build:e2e": "node ./esbuild.config.mjs --e2e",
-        "lint:types": "node ./scripts/generate-locales.mjs && tsc --noEmit"
+        "prepare": "tsx ./scripts/generate-locales.ts && tsx ./scripts/generate-html.ts",
+        "build:demo": "tsx ./esbuild.config.ts",
+        "dev:demo": "tsx ./esbuild.config.ts --watch",
+        "dev:demo-libs": "cross-env LINK_TO_LIB=true tsx ./esbuild.config.ts --watch",
+        "dev:e2e": "tsx ./esbuild.config.ts --watch --e2e",
+        "build:e2e": "tsx ./esbuild.config.ts --e2e",
+        "lint:types": "tsc --noEmit"
     },
     "dependencies": {
         "@univerjs/action-recorder": "workspace:*",
@@ -29,9 +34,10 @@
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/find-replace": "workspace:*",
-        "@univerjs/icons": "^0.2.7",
+        "@univerjs/icons": "0.2.20",
         "@univerjs/mockdata": "workspace:*",
         "@univerjs/rpc": "workspace:*",
+        "@univerjs/rpc-node": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-conditional-formatting": "workspace:*",
         "@univerjs/sheets-conditional-formatting-ui": "workspace:*",
@@ -51,6 +57,7 @@
         "@univerjs/sheets-numfmt-ui": "workspace:*",
         "@univerjs/sheets-sort": "workspace:*",
         "@univerjs/sheets-sort-ui": "workspace:*",
+        "@univerjs/sheets-source-binding": "workspace:*",
         "@univerjs/sheets-thread-comment": "workspace:*",
         "@univerjs/sheets-thread-comment-ui": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
@@ -68,25 +75,28 @@
         "@univerjs/uniscript": "workspace:*",
         "@univerjs/uniui": "workspace:*",
         "@univerjs/watermark": "workspace:*",
-        "clsx": "^2.1.1",
-        "monaco-editor": "0.52.0",
-        "react": "18.3.1",
-        "react-dom": "18.3.1",
-        "react-mosaic-component": "^6.1.0",
-        "rxjs": "^7.8.1"
+        "monaco-editor": "0.52.2",
+        "react": "19.0.0",
+        "react-dom": "19.0.0",
+        "react-mosaic-component": "^6.1.1"
     },
     "devDependencies": {
-        "@types/react": "^18.3.12",
-        "@types/react-dom": "^18.3.1",
+        "@types/fs-extra": "^11.0.4",
         "@univerjs-infra/shared": "workspace:*",
-        "detect-port": "^1.6.1",
-        "esbuild": "^0.24.0",
+        "cross-env": "^7.0.3",
+        "detect-port": "^2.1.0",
+        "esbuild": "^0.25.0",
         "esbuild-plugin-clean": "^1.0.1",
         "esbuild-plugin-copy": "^2.1.1",
         "esbuild-plugin-vue3": "^0.4.2",
         "esbuild-style-plugin": "^1.6.3",
-        "less": "^4.2.0",
+        "fast-glob": "^3.3.3",
+        "fs-extra": "^11.3.0",
+        "less": "^4.2.2",
         "minimist": "^1.2.8",
-        "typescript": "^5.6.3"
+        "postcss": "^8.5.3",
+        "tailwindcss": "^3.4.17",
+        "tailwindcss-animate": "^1.0.7",
+        "typescript": "^5.7.3"
     }
 }

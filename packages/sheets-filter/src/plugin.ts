@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import { IConfigService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@univerjs/core';
-
-import { SHEET_FILTER_SNAPSHOT_ID, SheetsFilterService } from './services/sheet-filter.service';
-import { SheetsFilterController } from './controllers/sheets-filter.controller';
 import type { IUniverSheetsFilterConfig } from './controllers/config.schema';
-import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+
+import { IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
+import { defaultPluginConfig, SHEETS_FILTER_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { SheetsFilterController } from './controllers/sheets-filter.controller';
+import { SHEET_FILTER_SNAPSHOT_ID, SheetsFilterService } from './services/sheet-filter.service';
 
 export class UniverSheetsFilterPlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_SHEET;
@@ -34,8 +34,12 @@ export class UniverSheetsFilterPlugin extends Plugin {
         super();
 
         // Manage the plugin configuration.
-        const { ...rest } = this._config;
-        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
+        const { ...rest } = merge(
+            {},
+            defaultPluginConfig,
+            this._config
+        );
+        this._configService.setConfig(SHEETS_FILTER_PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {

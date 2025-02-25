@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 
 import type { Meta } from '@storybook/react';
-import React from 'react';
+import React, { useState } from 'react';
 
 import { ColorPicker } from './ColorPicker';
 
@@ -33,6 +33,14 @@ export default meta;
 
 export const Playground = {
     render() {
-        return <ColorPicker />;
+        const [value, setValue] = useState('#FF0000');
+        const [format] = useState<'hex' | 'rgb' | 'hsl'>('rgb');
+
+        return (
+            <>
+                {value}
+                <ColorPicker showAlpha value={value} onChange={setValue} />
+            </>
+        );
     },
 };

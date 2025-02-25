@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ export class ForceStringRenderController extends RxDisposable implements IRender
                     priority: 10,
                     effect: InterceptorEffectEnum.Style,
                     handler: (cell, pos, next) => {
-                        const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+                        const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
                         if (!skeleton) {
                             return next(cell);
                         }

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,12 @@ import type { BaseAstNode } from '../ast-node/base-ast-node';
 import type { LambdaParameterNode } from '../ast-node/lambda-parameter-node';
 import type { Interpreter } from '../interpreter/interpreter';
 import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
+import type { PrimitiveValueType } from './primitive-object';
 import { ErrorType } from '../../basics/error-type';
 import { DEFAULT_TOKEN_TYPE_LAMBDA_RUNTIME_PARAMETER } from '../../basics/token-type';
 import { AsyncObject } from '../reference-object/base-reference-object';
 import { generateExecuteAstNodeData } from '../utils/ast-node-tool';
+import { ValueObjectFactory } from './array-value-object';
 import { BaseValueObject, ErrorValueObject } from './base-value-object';
 
 function getRootLexerHasValueNode(node: Nullable<BaseAstNode>): Nullable<BaseAstNode> {
@@ -108,6 +110,16 @@ export class LambdaValueObjectObject extends BaseValueObject {
         this._lambdaNode.setNotEmpty(true);
 
         return value;
+    }
+
+    /**
+     * Execute custom lambda function, handle basic types
+     * @param variants
+     */
+    executeCustom(...variants: PrimitiveValueType[]) {
+        // Create base value object from primitive value, then execute
+        const baseValueObjects = variants.map((variant) => ValueObjectFactory.create(variant));
+        return this.execute(...baseValueObjects);
     }
 
     private _setLambdaNodeValue(node: Nullable<BaseAstNode>) {

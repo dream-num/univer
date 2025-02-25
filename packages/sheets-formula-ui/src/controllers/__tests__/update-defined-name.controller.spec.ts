@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,8 @@
 import type { ICellData, Injector, IWorkbookData, Nullable, Univer } from '@univerjs/core';
 import type { IDeleteRangeMoveLeftCommandParams, IDeleteRangeMoveUpCommandParams, IInsertColCommandParams, IInsertRowCommandParams, IMoveColsCommandParams, IMoveRangeCommandParams, IMoveRowsCommandParams, InsertRangeMoveDownCommandParams, InsertRangeMoveRightCommandParams, IRemoveRowColCommandParams, IRemoveSheetCommandParams, ISetWorksheetNameCommandParams } from '@univerjs/sheets';
 import { Direction, ICommandService, IUniverInstanceService, LocaleType, RANGE_TYPE, RedoCommand, UndoCommand } from '@univerjs/core';
-import { IDefinedNamesService, RemoveDefinedNameMutation, SetArrayFormulaDataMutation, SetDefinedNameController, SetDefinedNameMutation, SetFormulaDataMutation } from '@univerjs/engine-formula';
-import { DeleteRangeMoveLeftCommand, DeleteRangeMoveUpCommand, InsertColCommand, InsertColMutation, InsertRangeMoveDownCommand, InsertRangeMoveRightCommand, InsertRowCommand, InsertRowMutation, MoveColsCommand, MoveColsMutation, MoveRangeCommand, MoveRangeMutation, MoveRowsCommand, MoveRowsMutation, RemoveColCommand, RemoveColMutation, RemoveRowCommand, RemoveRowMutation, RemoveSheetCommand, RemoveSheetMutation, SetDefinedNameCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetSelectionsOperation, SetWorksheetNameCommand, SetWorksheetNameMutation, SheetsSelectionsService } from '@univerjs/sheets';
+import { IDefinedNamesService, RemoveDefinedNameMutation, SetArrayFormulaDataMutation, SetDefinedNameMutation, SetFormulaDataMutation } from '@univerjs/engine-formula';
+import { DeleteRangeMoveLeftCommand, DeleteRangeMoveUpCommand, InsertColByRangeCommand, InsertColCommand, InsertColMutation, InsertRangeMoveDownCommand, InsertRangeMoveRightCommand, InsertRowByRangeCommand, InsertRowCommand, InsertRowMutation, MoveColsCommand, MoveColsMutation, MoveRangeCommand, MoveRangeMutation, MoveRowsCommand, MoveRowsMutation, RemoveColByRangeCommand, RemoveColCommand, RemoveColMutation, RemoveRowByRangeCommand, RemoveRowCommand, RemoveRowMutation, RemoveSheetCommand, RemoveSheetMutation, SetDefinedNameCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetSelectionsOperation, SetWorksheetNameCommand, SetWorksheetNameMutation, SheetsSelectionsService } from '@univerjs/sheets';
 
 import { UpdateDefinedNameController } from '@univerjs/sheets-formula';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -67,13 +67,11 @@ describe('Test update defined name', () => {
     beforeEach(() => {
         const testBed = createCommandTestBed(TEST_WORKBOOK_DATA_DEMO(), [
             [UpdateDefinedNameController],
-            [SetDefinedNameController],
         ]);
         univer = testBed.univer;
         get = testBed.get;
 
         get(UpdateDefinedNameController);
-        get(SetDefinedNameController);
 
         commandService = get(ICommandService);
         commandService.registerCommand(MoveRangeCommand);
@@ -117,6 +115,15 @@ describe('Test update defined name', () => {
         commandService.registerCommand(SetDefinedNameCommand);
         commandService.registerCommand(SetDefinedNameMutation);
         commandService.registerCommand(RemoveDefinedNameMutation);
+
+        [
+            RemoveColByRangeCommand,
+            RemoveRowByRangeCommand,
+            InsertRowByRangeCommand,
+            InsertColByRangeCommand,
+        ].forEach((command) => {
+            commandService.registerCommand(command);
+        });
 
         getValues = (
             startRow: number,

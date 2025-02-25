@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,9 @@ import { DOC_RANGE_TYPE, ICommandService,
 import { DocSelectionRenderService, InsertCommand } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 
+/**
+ * @hideconstructor
+ */
 export class FDocument {
     readonly id: string;
 
@@ -68,7 +71,7 @@ export class FDocument {
 
     /**
      * Adds the specified text to the end of this text region.
-     * @param text
+     * @param text - The text to be added to the end of this text region.
      */
     appendText(text: string): Promise<boolean> {
         const unitId = this.id;
@@ -102,10 +105,8 @@ export class FDocument {
 
     /**
      * Sets the selection to a specified text range in the document.
-     *
      * @param startOffset - The starting offset of the selection in the document.
      * @param endOffset - The ending offset of the selection in the document.
-     *
      * @example
      * ```typescript
      * document.setSelection(10, 20);
@@ -122,8 +123,8 @@ export class FDocument {
                     endOffset,
                     rangeType: DOC_RANGE_TYPE.TEXT,
                 },
-            ]
-            , true
+            ],
+            true
         );
     }
 }

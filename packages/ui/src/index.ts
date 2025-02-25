@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
+import './global.css';
+
 export * from './common';
 export { getHeaderFooterMenuHiddenObservable, getMenuHiddenObservable } from './common/menu-hidden-observable';
 export { mergeMenuConfigs } from './common/menu-merge-configs';
 export * from './components';
-export { useEvent } from './components/hooks/event';
 export { t } from './components/hooks/locale';
-export { useObservable, useObservableRef } from './components/hooks/observable';
+export * from './components/hooks';
 export { RectPopup } from './views/components/popup/RectPopup';
-export { useVirtualList } from './components/hooks/virtual-list';
-export { Menu } from './components/menu/desktop/Menu';
+export { Menu as UIMenu } from './components/menu/desktop/Menu';
 export { type INotificationOptions, type NotificationType } from './components/notification/Notification';
 export { ProgressBar } from './components/progress-bar/ProgressBar';
 export { UNI_DISABLE_CHANGING_FOCUS_KEY } from './const';
-export { type IUniverUIConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+export { type IUniverUIConfig, UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 export { ErrorController } from './controllers/error/error.controller';
-export { menuSchema } from './controllers/menus/menu.schema';
+export { menuSchema as UIMenuSchema } from './controllers/menus/menu.schema';
 export {
     CopyShortcutItem,
     CutShortcutItem,
@@ -42,7 +42,8 @@ export { IUIController, type IWorkbenchOptions } from './controllers/ui/ui.contr
 export { DesktopUIController } from './controllers/ui/ui-desktop.controller';
 export { UniverMobileUIPlugin } from './mobile-ui-plugin';
 export { DesktopBeforeCloseService, IBeforeCloseService } from './services/before-close/before-close.service';
-export { CopyCommand, CutCommand, PasteCommand } from './services/clipboard/clipboard.command';
+export { CopyCommand, CutCommand, PasteCommand, SheetPasteShortKeyCommandName } from './services/clipboard/clipboard.command';
+export { supportClipboardAPI } from './services/clipboard/clipboard-utils';
 export {
     BrowserClipboardService,
     FILE__BMP_CLIPBOARD_MIME_TYPE,
@@ -52,6 +53,7 @@ export {
     FILE_SVG_XML_CLIPBOARD_MIME_TYPE,
     HTML_CLIPBOARD_MIME_TYPE,
     IClipboardInterfaceService,
+    imageMimeTypeSet,
     PLAIN_TEXT_CLIPBOARD_MIME_TYPE,
 } from './services/clipboard/clipboard-interface.service';
 export { IConfirmService } from './services/confirm/confirm.service';
@@ -63,7 +65,7 @@ export {
 } from './services/contextmenu/contextmenu.service';
 export { DesktopDialogService } from './services/dialog/desktop-dialog.service';
 export { IDialogService } from './services/dialog/dialog.service';
-export { CanvasFloatDomService, type IFloatDomLayout } from './services/dom/canvas-dom-layer.service';
+export { CanvasFloatDomService, type IFloatDom, type IFloatDomLayout } from './services/dom/canvas-dom-layer.service';
 export { DesktopGlobalZoneService } from './services/global-zone/desktop-global-zone.service';
 export { IGlobalZoneService } from './services/global-zone/global-zone.service';
 export { DesktopLayoutService, ILayoutService } from './services/layout/layout.service';
@@ -107,7 +109,7 @@ export { KeyCode, MetaKeys } from './services/shortcut/keycode';
 export { type IShortcutItem, IShortcutService, ShortcutService } from './services/shortcut/shortcut.service';
 export { ShortcutPanelService } from './services/shortcut/shortcut-panel.service';
 export { DesktopSidebarService } from './services/sidebar/desktop-sidebar.service';
-export { useSidebarClick } from './services/sidebar/hooks/useSidebarClick';
+export { useSidebarClick } from './services/sidebar/hooks/use-sidebar-click';
 export { ILeftSidebarService, ISidebarService } from './services/sidebar/sidebar.service';
 export { DesktopZenZoneService } from './services/zen-zone/desktop-zen-zone.service';
 export { IZenZoneService } from './services/zen-zone/zen-zone.service';
@@ -118,7 +120,6 @@ export { UNIVER_UI_PLUGIN_NAME } from './ui-plugin';
 export * from './utils';
 export { ComponentContainer, type IComponentContainerProps, useComponentsOfPart } from './views/components/ComponentContainer';
 export { ZenZone } from './views/components/zen-zone/ZenZone';
-export { builtInGlobalComponents } from './views/parts';
 
 // #region - workbench components
 

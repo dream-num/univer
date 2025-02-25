@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-data-validation",
-    "version": "0.5.0",
+    "version": "0.6.1",
     "private": false,
     "description": "Data validation for Univer Sheets",
     "author": "DreamNum <developer@univer.ai>",
@@ -68,38 +68,19 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@flatten-js/interval-tree": "^1.1.3",
         "@univerjs/core": "workspace:*",
         "@univerjs/data-validation": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
-        "@univerjs/protocol": "0.1.39-alpha.45",
+        "@univerjs/protocol": "0.1.43",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-formula": "workspace:*"
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
-        "less": "^4.2.0",
+        "less": "^4.2.2",
         "rxjs": "^7.8.1",
-        "typescript": "^5.6.3",
-        "vite": "^5.4.11",
-        "vitest": "^2.1.5"
-    },
-    "space": {
-        ".": {
-            "import": "./lib/es/index.js",
-            "require": "./lib/cjs/index.js",
-            "types": "./lib/types/index.d.ts"
-        },
-        "./*": {
-            "import": "./lib/es/*",
-            "require": "./lib/cjs/*",
-            "types": "./lib/types/index.d.ts"
-        },
-        "./facade": {
-            "import": "./lib/es/facade.js",
-            "require": "./lib/cjs/facade.js",
-            "types": "./lib/types/facade/index.d.ts"
-        },
-        "./lib/*": "./lib/*"
+        "typescript": "^5.7.3",
+        "vite": "^6.1.1",
+        "vitest": "^3.0.6"
     }
 }

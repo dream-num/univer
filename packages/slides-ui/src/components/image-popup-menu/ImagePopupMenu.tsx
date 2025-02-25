@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,10 @@
  */
 
 import type { IDrawingSearch } from '@univerjs/core';
-import { ICommandService, LocaleService, useDependency } from '@univerjs/core';
+import { ICommandService, LocaleService } from '@univerjs/core';
 import { Dropdown } from '@univerjs/design';
 import { Autofill, MoreDownSingle } from '@univerjs/icons';
+import { useDependency } from '@univerjs/ui';
 import clsx from 'clsx';
 import React, { useState } from 'react';
 import styles from './index.module.less';
@@ -80,10 +81,13 @@ export const SlideImagePopupMenu: React.FC<IImagePopupMenuProps> = (props: IImag
             onMouseLeave={handleMouseLeave}
         >
             <Dropdown
-                placement="bottomLeft"
-                trigger={['click']}
+                align="start"
                 overlay={(
-                    <ul className={styles.imagePopupMenu}>
+                    <ul
+                        className={clsx(styles.imagePopupMenu, `
+                          univer-box-border univer-p-2 univer-text-sm univer-theme
+                        `)}
+                    >
                         {availableMenu.map((item) => (
                             <li
                                 key={item.index}
@@ -95,8 +99,8 @@ export const SlideImagePopupMenu: React.FC<IImagePopupMenuProps> = (props: IImag
                         ))}
                     </ul>
                 )}
-                visible={visible}
-                onVisibleChange={onVisibleChange}
+                open={visible}
+                onOpenChange={onVisibleChange}
             >
                 <div
                     className={clsx(styles.btnContainer, {

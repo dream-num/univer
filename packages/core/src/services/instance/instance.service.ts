@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-import { BehaviorSubject, distinctUntilChanged, filter, map, Subject } from 'rxjs';
 import type { Observable } from 'rxjs';
+import type { IDisposable } from '../../common/di';
 
+import type { UnitModel, UnitType } from '../../common/unit';
+import type { Nullable } from '../../shared';
+import { BehaviorSubject, distinctUntilChanged, filter, map, Subject } from 'rxjs';
 import { createIdentifier, Inject, Injector } from '../../common/di';
 import { UniverInstanceType } from '../../common/unit';
 import { DocumentDataModel } from '../../docs/data-model/document-data-model';
@@ -25,9 +28,6 @@ import { Workbook } from '../../sheets/workbook';
 import { SlideDataModel } from '../../slides/slide-model';
 import { FOCUSING_DOC, FOCUSING_SHEET, FOCUSING_SLIDE, FOCUSING_UNIT } from '../context/context';
 import { IContextService } from '../context/context.service';
-import type { IDisposable } from '../../common/di';
-import type { UnitModel, UnitType } from '../../common/unit';
-import type { Nullable } from '../../shared';
 
 export type UnitCtor = new (...args: any[]) => UnitModel;
 

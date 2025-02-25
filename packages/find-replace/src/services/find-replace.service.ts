@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,9 @@
  */
 
 import type { IDisposable, Nullable } from '@univerjs/core';
+import type { Observable } from 'rxjs';
 import { createIdentifier, Disposable, DisposableCollection, IContextService, Inject, Injector, IUniverInstanceService, toDisposable } from '@univerjs/core';
 import { RENDER_RAW_FORMULA_KEY } from '@univerjs/engine-render';
-import type { Observable } from 'rxjs';
 import { BehaviorSubject, combineLatest, debounceTime, Subject, throttleTime } from 'rxjs';
 import { FIND_REPLACE_REPLACE_REVEALED } from './context-keys';
 
@@ -111,7 +111,6 @@ export interface IFindReplaceService {
     /**
      * Register a find replace provider to the service. The provider is the actual bearer to
      * perform the find in different kinds of documents or different environments.
-     *
      * @param provider the find replace provider
      */
     registerFindReplaceProvider(provider: IFindReplaceProvider): IDisposable;
@@ -123,7 +122,6 @@ export interface IFindReplaceService {
 
     /**
      * Start a find & replace session.
-     *
      * @returns execution result
      */
     start(revealReplace?: boolean): boolean;
@@ -155,6 +153,8 @@ export interface IFindReplaceService {
 
     replace(): Promise<boolean>;
     replaceAll(): Promise<IReplaceAllResult>;
+
+    getProviders(): Set<IFindReplaceProvider>;
 }
 export const IFindReplaceService = createIdentifier<IFindReplaceService>('find-replace.service');
 
@@ -172,6 +172,10 @@ export interface IFindQuery extends Pick<
     | 'matchesTheWholeCell'
 > { }
 
+/**
+ *
+ * @param statusUpdate
+ */
 function shouldStateUpdateTriggerResearch(statusUpdate: Partial<IFindReplaceState>): boolean {
     if (typeof statusUpdate.findString !== 'undefined') return true;
     if (typeof statusUpdate.inputtingFindString !== 'undefined') return true;
@@ -363,7 +367,7 @@ export class FindReplaceModel extends Disposable {
         this._state.changeState({ matchesPosition: index + 1 });
     }
 
-    moveToNextMatch(): void {
+    moveToNextMatch() {
         if (!this._matchingModel) {
             return;
         }
@@ -372,13 +376,14 @@ export class FindReplaceModel extends Disposable {
         const nextMatch = this._matchingModel.moveToNextMatch({ loop: loopInCurrentUnit });
         if (nextMatch) {
             this._markMatch(nextMatch);
+            return nextMatch;
         } else {
             const currentModelIndex = this._findModels.findIndex((m) => m === this._matchingModel);
-            this._moveToNextUnitMatch(currentModelIndex);
+            return this._moveToNextUnitMatch(currentModelIndex);
         }
     }
 
-    private _moveToNextUnitMatch(startingIndex: number): void {
+    private _moveToNextUnitMatch(startingIndex: number) {
         const l = this._findModels.length;
         for (let i = (startingIndex + 1) % l; i !== startingIndex;) {
             const nextPositionModel = this._findModels[i];
@@ -386,7 +391,7 @@ export class FindReplaceModel extends Disposable {
             if (nextMatch) {
                 this._matchingModel = nextPositionModel;
                 this._markMatch(nextMatch);
-                return;
+                return nextMatch;
             }
 
             i = (i + 1) % l;
@@ -395,10 +400,11 @@ export class FindReplaceModel extends Disposable {
         if (this._matchingModel) {
             const nextMatch = this._matchingModel.moveToNextMatch({ ignoreSelection: true });
             if (nextMatch) this._markMatch(nextMatch);
+            return nextMatch;
         }
     }
 
-    moveToPreviousMatch(): void {
+    moveToPreviousMatch() {
         if (!this._matchingModel) {
             return;
         }
@@ -409,6 +415,7 @@ export class FindReplaceModel extends Disposable {
             const index = this._matches.findIndex((value) => value === nextMatch);
             this.currentMatch$.next(nextMatch);
             this._state.changeState({ matchesPosition: index + 1 });
+            return nextMatch;
         } else {
             const l = this._findModels.length;
             const currentModelIndex = this._findModels.findIndex((m) => m === this._matchingModel);
@@ -418,7 +425,7 @@ export class FindReplaceModel extends Disposable {
                 if (nextMatch) {
                     this._matchingModel = nextPositionModel;
                     this._markMatch(nextMatch);
-                    return;
+                    return nextMatch;
                 }
 
                 i = (i - 1) % l;
@@ -426,6 +433,7 @@ export class FindReplaceModel extends Disposable {
 
             const nextMatch = this._matchingModel.moveToPreviousMatch({ ignoreSelection: true });
             if (nextMatch) this._markMatch(nextMatch);
+            return nextMatch;
         }
     }
 
@@ -494,7 +502,10 @@ export interface IFindReplaceState {
     findBy: FindBy;
 }
 
-function createInitFindReplaceState(): IFindReplaceState {
+/**
+ *
+ */
+export function createInitFindReplaceState(): IFindReplaceState {
     return {
         caseSensitive: false,
         findBy: FindBy.VALUE,
@@ -696,6 +707,10 @@ export class FindReplaceService extends Disposable implements IFindReplaceServic
         this._replaceables$.complete();
 
         this._focusSignal$.complete();
+    }
+
+    getProviders(): Set<IFindReplaceProvider> {
+        return this._providers;
     }
 
     getCurrentMatch(): Nullable<IFindMatch> {

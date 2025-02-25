@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import type { ICellDataForSheetInterceptor, Workbook, Worksheet } from '@univerjs/core';
+import type { ICellDataForSheetInterceptor, Injector, Univer, Workbook, Worksheet } from '@univerjs/core';
 import type { ISetNumfmtMutationParams, ISheetLocation } from '@univerjs/sheets';
-import { createInterceptorKey, ICommandService, InterceptorManager, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { CellModeEnum, createInterceptorKey, ICommandService, InterceptorManager, IUniverInstanceService, LocaleType, UniverInstanceType } from '@univerjs/core';
 import { SetNumfmtMutation, SheetInterceptorService } from '@univerjs/sheets';
 
 import { SheetsNumfmtCellContentController } from '@univerjs/sheets-numfmt';
-import { IEditorBridgeService } from '@univerjs/sheets-ui';
+import { getMatrixPlainText, IEditorBridgeService } from '@univerjs/sheets-ui';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { NumfmtEditorController } from '../numfmt.editor.controller';
 import { createTestBed } from './test.util';
@@ -44,7 +44,7 @@ describe('test editor', () => {
     let commandService: ICommandService;
 
     beforeEach(() => {
-        testBed = createTestBed([
+        testBed = createTestBed(undefined, [
             [NumfmtEditorController],
             [SheetsNumfmtCellContentController],
             [IEditorBridgeService, { useClass: MockEditorBridgeService }],
@@ -317,5 +317,143 @@ describe('test editor', () => {
         const result = sheetInterceptorService.writeCellInterceptor.fetchThroughInterceptors(AFTER_CELL_EDIT)(cellData, location);
         expect(result?.p).toEqual(richTextParams);
         expect(result?.v).toBeFalsy();
+    });
+});
+
+describe('test get cell text/plain', () => {
+    let univer: Univer;
+    let get: Injector['get'];
+    let commandService: ICommandService;
+
+    beforeEach(async () => {
+        const testBed = createTestBed({
+            id: 'test',
+            appVersion: '3.0.0-alpha',
+            sheets: {
+                sheet1: {
+                    id: 'sheet1',
+                    cellData: {
+                        0: {
+                            0: {
+                                v: 44876,
+                                t: 2,
+                            },
+                            1: {
+                                p: {
+                                    id: '__INTERNAL_EDITOR__DOCS_NORMAL',
+                                    documentStyle: {
+                                        pageSize: {
+                                            width: 72.90791320800781,
+                                        },
+                                        marginTop: 0,
+                                        marginBottom: 2,
+                                        marginRight: 2,
+                                        marginLeft: 2,
+                                        renderConfig: {
+                                            verticalAlign: 0,
+                                            horizontalAlign: 0,
+                                            wrapStrategy: 0,
+                                            background: {},
+                                            centerAngle: 0,
+                                            vertexAngle: 0,
+                                            zeroWidthParagraphBreak: 1,
+                                        },
+                                    },
+                                    body: {
+                                        dataStream: 'univer\r\n',
+                                        textRuns: [
+                                            {
+                                                st: 0,
+                                                ed: 1,
+                                                ts: {
+                                                    ff: 'Arial',
+                                                    fs: 11,
+                                                },
+                                            },
+                                            {
+                                                st: 1,
+                                                ed: 4,
+                                                ts: {
+                                                    ff: 'Arial',
+                                                    fs: 28,
+                                                },
+                                            },
+                                            {
+                                                st: 4,
+                                                ed: 6,
+                                                ts: {
+                                                    ff: 'Arial',
+                                                    fs: 11,
+                                                },
+                                            },
+                                        ],
+                                        paragraphs: [
+                                            {
+                                                startIndex: 6,
+                                                paragraphStyle: {
+                                                    horizontalAlign: 0,
+                                                },
+                                            },
+                                        ],
+                                        customRanges: [],
+                                        customDecorations: [],
+                                        customBlocks: [],
+                                    },
+                                    drawings: {},
+                                    drawingsOrder: [],
+                                    settings: {
+                                        zoomRatio: 1,
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+            locale: LocaleType.ZH_CN,
+            name: '',
+            sheetOrder: [],
+            styles: {},
+        }, [
+            [NumfmtEditorController],
+            [SheetsNumfmtCellContentController],
+            [IEditorBridgeService, { useClass: MockEditorBridgeService }],
+        ]);
+
+        univer = testBed.univer;
+        get = testBed.get;
+        commandService = get(ICommandService);
+        testBed.get(NumfmtEditorController);
+        testBed.get(SheetsNumfmtCellContentController);
+        testBed.get(SheetInterceptorService);
+    });
+
+    it('when the cell has a numfmt should use both to get displayV', () => {
+        const univerInstanceService = get(IUniverInstanceService);
+
+        const workbook = univerInstanceService.getUnit<Workbook>('test');
+        const worksheet = workbook?.getActiveSheet();
+        if (worksheet) {
+            const unitId = 'test';
+            const subUnitId = worksheet.getSheetId();
+            const params: ISetNumfmtMutationParams = {
+                unitId,
+                subUnitId,
+                values: {
+                    1: {
+                        ranges: [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }],
+                    },
+                },
+                refMap: {
+                    1: {
+                        pattern: 'yyyy-mm-dd',
+                    },
+                },
+            };
+            commandService.syncExecuteCommand(SetNumfmtMutation.id, params);
+            const matrix = worksheet.getMatrixWithMergedCells(0, 0, 0, 1, CellModeEnum.Both);
+            const plain = getMatrixPlainText(matrix);
+            expect(plain).toBe('2022-11-11\tuniver');
+        }
     });
 });

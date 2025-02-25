@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -171,7 +171,7 @@ export interface ISetSheetsFilterCriteriaCommandParams extends ISheetCommandShar
 export const SetSheetsFilterCriteriaCommand: ICommand<ISetSheetsFilterCriteriaCommandParams> = {
     id: 'sheet.command.set-filter-criteria',
     type: CommandType.COMMAND,
-    handler: async (accessor: IAccessor, params: ISetSheetsFilterCriteriaCommandParams) => {
+    handler: (accessor: IAccessor, params: ISetSheetsFilterCriteriaCommandParams) => {
         const sheetsFilterService = accessor.get(SheetsFilterService);
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);

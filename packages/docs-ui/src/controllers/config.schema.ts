@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,9 @@ import type { MenuConfig } from '@univerjs/ui';
 import type { ILayout } from '../basics';
 import { DefaultDocContainerConfig, DefaultToolbarConfig } from '../basics';
 
-export const PLUGIN_CONFIG_KEY = 'docs-ui.config';
+export const DOCS_UI_PLUGIN_CONFIG_KEY = 'docs-ui.config';
 
-export const configSymbol = Symbol(PLUGIN_CONFIG_KEY);
+export const configSymbol = Symbol(DOCS_UI_PLUGIN_CONFIG_KEY);
 
 export interface IUniverDocsUIConfig {
     menu?: MenuConfig;

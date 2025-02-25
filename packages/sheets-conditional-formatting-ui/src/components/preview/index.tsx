@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import React, { useMemo } from 'react';
+import type { IConditionalFormattingRuleConfig } from '@univerjs/sheets-conditional-formatting';
 import { BooleanNumber, ColorKit } from '@univerjs/core';
 import { SlashSingle } from '@univerjs/icons';
-import type { IConditionalFormattingRuleConfig } from '@univerjs/sheets-conditional-formatting';
 import { CFRuleType, DEFAULT_BG_COLOR, DEFAULT_FONT_COLOR, defaultDataBarNativeColor, defaultDataBarPositiveColor, getColorScaleFromValue, iconMap } from '@univerjs/sheets-conditional-formatting';
+import React, { useMemo } from 'react';
 import styles from './index.module.less';
 
 export const Preview = (props: { rule?: IConditionalFormattingRuleConfig }) => {
@@ -52,8 +52,8 @@ export const Preview = (props: { rule?: IConditionalFormattingRuleConfig }) => {
             const nativeColor = isGradient ? `linear-gradient(to right,  rgb(255 255 255),${rule.config.nativeColor || defaultDataBarNativeColor})` : rule.config.nativeColor;
             return (
                 <div className={styles.cfPreview}>
-                    <div style={{ ...commonStyle, background: nativeColor, border: `1px solid ${rule.config.nativeColor || defaultDataBarNativeColor}` }}></div>
-                    <div style={{ ...commonStyle, background: positiveColor, border: `1px solid ${rule.config.positiveColor || defaultDataBarPositiveColor}` }}></div>
+                    <div style={{ ...commonStyle, background: nativeColor, border: `1px solid ${rule.config.nativeColor || defaultDataBarNativeColor}` }} />
+                    <div style={{ ...commonStyle, background: positiveColor, border: `1px solid ${rule.config.positiveColor || defaultDataBarPositiveColor}` }} />
                 </div>
             );
         }
@@ -62,8 +62,7 @@ export const Preview = (props: { rule?: IConditionalFormattingRuleConfig }) => {
             return colorList && (
                 <div className={styles.cfPreview}>
                     {colorList.map((item, index) => (
-                        <div key={index} style={{ width: `${100 / colorList.length}%`, height: '100%', background: item }}>
-                        </div>
+                        <div key={index} style={{ width: `${100 / colorList.length}%`, height: '100%', background: item }} />
                     ))}
                 </div>
             );

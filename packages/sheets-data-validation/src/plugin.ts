@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
+import type { Dependency } from '@univerjs/core';
 import type { IUniverSheetsDataValidationConfig } from './controllers/config.schema';
 import {
     DependentOn,
     ICommandService,
     IConfigService,
-    Plugin,
-    UniverInstanceType,
+    Inject,
+    Injector,
+    merge, Plugin, UniverInstanceType,
 } from '@univerjs/core';
-import { type Dependency, Inject, Injector } from '@univerjs/core';
 import { UniverDataValidationPlugin } from '@univerjs/data-validation';
 import {
     AddSheetDataValidationCommand,
@@ -34,12 +35,12 @@ import {
     UpdateSheetDataValidationSettingCommand,
 } from './commands/commands/data-validation.command';
 import { DATA_VALIDATION_PLUGIN_NAME } from './common/const';
-import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
-import { DataValidationController } from './controllers/dv.controller';
-import { DataValidationFormulaController } from './controllers/dv-formula.controller';
+import { defaultPluginConfig, SHEETS_DATA_VALIDATION_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { DataValidationFormulaRefRangeController } from './controllers/dv-formula-ref-range.controller';
+import { DataValidationFormulaController } from './controllers/dv-formula.controller';
 import { DataValidationRefRangeController } from './controllers/dv-ref-range.controller';
 import { SheetDataValidationSheetController } from './controllers/dv-sheet.controller';
+import { DataValidationController } from './controllers/dv.controller';
 import { SheetDataValidationModel } from './models/sheet-data-validation-model';
 import { DataValidationCacheService } from './services/dv-cache.service';
 import { DataValidationCustomFormulaService } from './services/dv-custom-formula.service';
@@ -59,9 +60,13 @@ export class UniverSheetsDataValidationPlugin extends Plugin {
     ) {
         super();
 
-        // Manage the plugin configuration..
-        const { ...rest } = this._config;
-        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
+        // Manage the plugin configuration.
+        const { ...rest } = merge(
+            {},
+            defaultPluginConfig,
+            this._config
+        );
+        this._configService.setConfig(SHEETS_DATA_VALIDATION_PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting() {
@@ -94,6 +99,7 @@ export class UniverSheetsDataValidationPlugin extends Plugin {
 
         this._injector.get(DataValidationCacheService);
         this._injector.get(SheetsDataValidationValidatorService);
+        this._injector.get(DataValidationController);
         this._injector.get(DataValidationFormulaRefRangeController);
         this._injector.get(DataValidationRefRangeController);
     }
@@ -103,7 +109,6 @@ export class UniverSheetsDataValidationPlugin extends Plugin {
     }
 
     override onRendered(): void {
-        this._injector.get(DataValidationController);
         this._injector.get(DataValidationFormulaController);
     }
 }

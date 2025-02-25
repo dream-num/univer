@@ -1,1 +1,4 @@
 src/locales.ts
+public
+!public/index.html
+!public/favicon.svg

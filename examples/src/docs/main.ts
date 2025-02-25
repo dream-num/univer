@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { FUniver, LocaleType, LogLevel, Univer, UniverInstanceType, UserManagerService } from '@univerjs/core';
+import { LocaleType, LogLevel, Univer, UniverInstanceType, UserManagerService } from '@univerjs/core';
+import { FUniver } from '@univerjs/core/facade';
 import { UniverDebuggerPlugin } from '@univerjs/debugger';
 import { defaultTheme } from '@univerjs/design';
 import { UniverDocsPlugin } from '@univerjs/docs';
@@ -28,6 +29,8 @@ import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { DEFAULT_DOCUMENT_DATA_SIMPLE } from '@univerjs/mockdata';
 import { UniverUIPlugin } from '@univerjs/ui';
 import { enUS, faIR, ruRU, zhCN } from '../locales';
+
+import '../global.css';
 
 /* eslint-disable node/prefer-global/process */
 const IS_E2E: boolean = !!process.env.IS_E2E;

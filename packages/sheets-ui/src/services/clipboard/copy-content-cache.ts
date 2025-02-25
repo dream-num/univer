@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,10 @@
  */
 
 import type { Nullable, ObjectMatrix } from '@univerjs/core';
-import { LRUMap, Tools } from '@univerjs/core';
-
 import type { IDiscreteRange } from '../../controllers/utils/range-tools';
+
 import type { COPY_TYPE, ICellDataWithSpanInfo } from './type';
+import { LRUMap, Tools } from '@univerjs/core';
 
 const COPY_CONTENT_CACHE_LIMIT = 10;
 const ID_LENGTH = 6;
@@ -62,6 +62,14 @@ export class CopyContentCache {
 
     clear() {
         this._cache.clear();
+    }
+
+    clearWithUnitId(unitId: string) {
+        this._cache.forEach((value, key) => {
+            if (value.unitId === unitId) {
+                this._cache.delete(key);
+            }
+        });
     }
 }
 

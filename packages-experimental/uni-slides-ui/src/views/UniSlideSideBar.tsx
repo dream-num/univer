@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,13 @@
  */
 
 import type { SlideDataModel } from '@univerjs/core';
-import clsx from 'clsx';
-import { ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
-import type { RefObject } from 'react';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { useObservable } from '@univerjs/ui';
+import { ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
+import { clsx } from '@univerjs/design';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { ActivateSlidePageOperation, AppendSlideOperation, SetSlidePageThumbOperation } from '@univerjs/slides-ui';
 import { IncreaseSingle } from '@univerjs/icons';
+import { ActivateSlidePageOperation, AppendSlideOperation, SetSlidePageThumbOperation } from '@univerjs/slides-ui';
+import { useDependency, useObservable } from '@univerjs/ui';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import styles from './index.module.less';
 
@@ -52,13 +51,10 @@ export function UniSlideSideBar() {
 
     const slideList = pageOrder.map((id) => pages[id]);
 
-    const [divRefs, setDivRefs] = useState<RefObject<HTMLDivElement>[]>([]);
     const [activatePageId, setActivatePageId] = useState<string | null>(pageOrder[0]);
     const [barHeight, setBarHeight] = useState(0);
 
-    useEffect(() => {
-        setDivRefs(slideList.map((_) => React.createRef()));
-    }, [slideList.length]);
+    const divRefs = useMemo(() => slideList.map(() => React.createRef<HTMLDivElement>()), [slideList]);
 
     useEffect(() => {
         const subscriber = currentSlide?.activePage$.subscribe((page) => {
@@ -119,7 +115,7 @@ export function UniSlideSideBar() {
                     </div>
                 ))}
             </div>
-            <button className={styles.newSlideButton} onClick={handleAppendSlide}>
+            <button type="button" className={styles.newSlideButton} onClick={handleAppendSlide}>
                 <IncreaseSingle className={styles.newSlideButtonIcon} />
                 <span>{localeService.t('slide.append')}</span>
             </button>

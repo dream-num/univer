@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,9 @@
 
 import type { Dependency } from '@univerjs/core';
 import type { IUniverDebuggerConfig } from './controllers/config.schema';
-import { IConfigService, Inject, Injector, Plugin } from '@univerjs/core';
-import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { IConfigService, Inject, Injector, merge, Plugin } from '@univerjs/core';
+import { DEBUGGER_PLUGIN_CONFIG_KEY, defaultPluginConfig } from './controllers/config.schema';
+import { DarkModeController } from './controllers/dark-mode.controller';
 import { DebuggerController } from './controllers/debugger.controller';
 import { E2EController } from './controllers/e2e/e2e.controller';
 import { PerformanceMonitorController } from './controllers/performance-monitor.controller';
@@ -36,16 +37,21 @@ export class UniverDebuggerPlugin extends Plugin {
         super();
 
         // Manage the plugin configuration.
-        const { menu, ...rest } = this._config;
+        const { menu, ...rest } = merge(
+            {},
+            defaultPluginConfig,
+            this._config
+        );
         if (menu) {
             this._configService.setConfig('menu', menu, { merge: true });
         }
-        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
+        this._configService.setConfig(DEBUGGER_PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {
         ([
             [PerformanceMonitorController],
+            [DarkModeController],
             [DebuggerController],
             [E2EController],
             [UniverWatermarkMenuController],
@@ -59,6 +65,7 @@ export class UniverDebuggerPlugin extends Plugin {
     }
 
     override onRendered(): void {
+        this._injector.get(DarkModeController);
         this._injector.get(PerformanceMonitorController);
         this._injector.get(UniverWatermarkMenuController);
     }

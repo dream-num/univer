@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,11 @@
  */
 
 import type { IAccessor, ICommand, IRange } from '@univerjs/core';
-import { CommandType, ICommandService, IUndoRedoService, sequenceExecute } from '@univerjs/core';
-import type { ISheetCommandSharedParams } from '../utils/interface';
 import type { IReorderRangeMutationParams } from '../mutations/reorder-range.mutation';
-import { ReorderRangeMutation, ReorderRangeUndoMutationFactory } from '../mutations/reorder-range.mutation';
+import type { ISheetCommandSharedParams } from '../utils/interface';
+import { CommandType, ICommandService, IUndoRedoService, sequenceExecute } from '@univerjs/core';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
+import { ReorderRangeMutation, ReorderRangeUndoMutationFactory } from '../mutations/reorder-range.mutation';
 
 export interface IReorderRangeCommandParams extends ISheetCommandSharedParams {
     range: IRange;
@@ -64,12 +64,17 @@ export const ReorderRangeCommand: ICommand<IReorderRangeCommandParams> = {
             ...interceptorCommands.undos,
         ];
         const result = sequenceExecute(redos, commandService);
+
+        const reoderAfterIntercepted = sheetInterceptorService.afterCommandExecute({ id: ReorderRangeCommand.id, params });
+
         if (result.result) {
+            sequenceExecute(reoderAfterIntercepted.redos, commandService);
+
             const undoRedoService = accessor.get(IUndoRedoService);
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
-                undoMutations: undos,
-                redoMutations: redos,
+                undoMutations: [...undos, ...reoderAfterIntercepted.undos],
+                redoMutations: [...redos, ...reoderAfterIntercepted.redos],
             });
             return true;
         }

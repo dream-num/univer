@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import { AbsoluteRefType, type IRange } from '@univerjs/core';
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 
+import { AbsoluteRefType, type IRange } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
+import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import { serializeRangeToR1C1 } from '../../../engine/utils/r1c1-reference';
-import { needsQuoting, serializeRange } from '../../../engine/utils/reference';
+import { addQuotesBothSides, serializeRange } from '../../../engine/utils/reference';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BooleanValueObject, NumberValueObject, StringValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
-import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
-import { expandArrayValueObject } from '../../../engine/utils/array-object';
 
 export class Address extends BaseFunction {
     override minParams = 2;
@@ -132,7 +132,7 @@ export class Address extends BaseFunction {
         const absType = transformAbsoluteRefType(absNumberValue);
         const a1Value = this.getZeroOrOneByOneDefault(a1);
         const sheetTextValue = `${sheetText.getValue()}`;
-        const sheetName = needsQuoting(sheetTextValue) ? `'${sheetTextValue}'` : sheetTextValue;
+        const sheetName = addQuotesBothSides(sheetTextValue);
 
         const range: IRange = {
             startRow: row,

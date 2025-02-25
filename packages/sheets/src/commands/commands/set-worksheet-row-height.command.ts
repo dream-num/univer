@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,8 +80,8 @@ export const DeltaRowHeightCommand: ICommand = {
 
         let redoMutationParams: ISetWorksheetRowHeightMutationParams;
         if (rangeType === RANGE_TYPE.ALL) {
-            const colCount = worksheet.getRowCount();
-            const allRowRanges = new Array(worksheet.getColumnCount())
+            const colCount = worksheet.getColumnCount();
+            const allRowRanges = new Array(worksheet.getRowCount())
                 .fill(undefined)
                 .map(
                     (_, index) =>
@@ -295,7 +295,7 @@ export interface ISetWorksheetRowIsAutoHeightCommandParams {
 export const SetWorksheetRowIsAutoHeightCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-row-is-auto-height',
-    handler: async (accessor: IAccessor, params?: ISetWorksheetRowIsAutoHeightCommandParams) => {
+    handler: (accessor: IAccessor, params?: ISetWorksheetRowIsAutoHeightCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const selectionManagerService = accessor.get(SheetsSelectionsService);

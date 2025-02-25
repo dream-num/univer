@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,7 @@ describe('Test paste with formula', () => {
         ]);
         univer = testBed.univer;
         get = testBed.get;
+        has = testBed.has;
         commandService = get(ICommandService);
         lexerTreeBuilder = get(LexerTreeBuilder);
         formulaDataModel = get(FormulaDataModel);

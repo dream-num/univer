@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,14 @@
  */
 
 import type { ICommand } from '@univerjs/core';
+import type { ISheetHyperLink } from '../../types/interfaces/i-hyper-link';
 import { CommandType } from '@univerjs/core';
 import { HyperLinkModel } from '../../models/hyper-link.model';
-import type { ICellHyperLink } from '../../types/interfaces/i-hyper-link';
 
 export interface IAddHyperLinkMutationParams {
     unitId: string;
     subUnitId: string;
-    link: ICellHyperLink;
+    link: ISheetHyperLink;
 }
 
 export const AddHyperLinkMutation: ICommand<IAddHyperLinkMutationParams> = {

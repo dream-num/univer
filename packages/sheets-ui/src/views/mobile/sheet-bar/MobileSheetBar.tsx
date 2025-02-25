@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
-import clsx from 'clsx';
-import { ICommandService, useDependency } from '@univerjs/core';
 import type { ICommandInfo, Workbook } from '@univerjs/core';
 import type { ISetWorksheetActiveOperationParams } from '@univerjs/sheets';
+import type { IBaseSheetBarProps } from '../../sheet-bar/sheet-bar-tabs/SheetBarItem';
+import { ICommandService } from '@univerjs/core';
 import {
     InsertSheetMutation,
     RemoveSheetMutation,
@@ -27,9 +26,11 @@ import {
     SetWorksheetNameMutation,
     SetWorksheetOrderMutation,
 } from '@univerjs/sheets';
-import type { IBaseSheetBarProps } from '../../sheet-bar/sheet-bar-tabs/SheetBarItem';
-import { useActiveWorkbook } from '../../../components/hook';
+import { useDependency } from '@univerjs/ui';
+import clsx from 'clsx';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
+import { useActiveWorkbook } from '../../../components/hook';
 import styles from './index.module.less';
 
 export function MobileSheetBar() {
@@ -45,7 +46,7 @@ function MobileSheetBarImpl(props: { workbook: Workbook }) {
     const { workbook } = props;
     const [sheetList, setSheetList] = useState<IBaseSheetBarProps[]>([]);
     const [activeKey, setActiveKey] = useState('');
-    const tabMapRef = React.useRef<Map<string, HTMLElement | null>>(new Map());
+    const tabMapRef = useRef<Map<string, HTMLElement | null>>(new Map());
 
     const commandService = useDependency(ICommandService);
 
@@ -119,7 +120,9 @@ function MobileSheetBarImpl(props: { workbook: Workbook }) {
                         )}
                         key={sheet.sheetId}
                         onClick={() => onTabClick(sheet.sheetId!)}
-                        ref={(element) => tabMapRef.current.set(sheet.sheetId!, element)}
+                        ref={(element) => {
+                            tabMapRef.current.set(sheet.sheetId!, element);
+                        }}
                     >
                         {sheet.label}
                     </div>

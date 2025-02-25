@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 import type { Dependency } from '@univerjs/core';
 import type { IUniverUIConfig } from '@univerjs/ui';
-import { DependentOn, ICommandService, IContextService, ILocalStorageService, Inject, Injector, mergeOverrideWithDependencies, Plugin, Tools } from '@univerjs/core';
+import { DependentOn, ICommandService, IContextService, ILocalStorageService, Inject, Injector, merge, mergeOverrideWithDependencies, Plugin } from '@univerjs/core';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import {
     BrowserClipboardService,
@@ -90,7 +90,7 @@ export class UniverUniUIPlugin extends Plugin {
     ) {
         super();
 
-        this._config = Tools.deepMerge({}, this._config);
+        this._config = merge({}, this._config);
         if (this._config.disableAutoFocus) {
             this._contextService.setContextValue(DISABLE_AUTO_FOCUS_KEY, true);
         }

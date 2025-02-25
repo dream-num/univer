@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import './global.css';
+
 export { DocAutoFormatService } from '../../docs-ui/src/services/doc-auto-format.service';
 export * from './basics';
 export type { IDocObjectParam } from './basics/component-tools';
@@ -22,14 +24,14 @@ export { addCustomDecorationBySelectionFactory, addCustomDecorationFactory, dele
 export * from './basics/docs-view-key';
 export { hasParagraphInTable } from './basics/paragraph';
 export { docDrawingPositionToTransform, transformToDocDrawingPosition } from './basics/transform-position';
-
+export { type IKeyboardEventConfig, useKeyboardEvent, useResize } from './views/rich-text-editor/hooks';
+export { type IRichTextEditorProps, RichTextEditor } from './views/rich-text-editor';
 export { getCommandSkeleton, getRichTextEditPath } from './commands/util';
-export { TextEditor } from './components/editor/TextEditor';
-export { RangeSelector } from './components/range-selector/RangeSelector';
+// export { TextEditor } from './components/editor/TextEditor';
+// export { RangeSelector as DocRangeSelector } from './components/range-selector/RangeSelector';
 export { DocUIController } from './controllers/doc-ui.controller';
-export { menuSchema } from './controllers/menu.schema';
+export { menuSchema as DocsUIMenuSchema } from './controllers/menu.schema';
 export { DocBackScrollRenderController } from './controllers/render-controllers/back-scroll.render-controller';
-
 export { DocRenderController } from './controllers/render-controllers/doc.render-controller';
 export * from './docs-ui-plugin';
 export * from './services';
@@ -112,7 +114,8 @@ export {
     AlignOperationCommand,
     AlignRightCommand,
 } from './commands/commands/paragraph-align.command';
-export { CoverContentCommand, ReplaceContentCommand, ReplaceSnapshotCommand } from './commands/commands/replace-content.command';
+export { ReplaceTextRunsCommand } from './commands/commands/replace-content.command';
+export { CoverContentCommand, type IReplaceSelectionCommandParams, type IReplaceSnapshotCommandParams, ReplaceContentCommand, ReplaceSnapshotCommand } from './commands/commands/replace-content.command';
 export { SetDocZoomRatioCommand } from './commands/commands/set-doc-zoom-ratio.command';
 export { CreateDocTableCommand, type ICreateDocTableCommandParams } from './commands/commands/table/doc-table-create.command';
 export { DocTableDeleteColumnsCommand, DocTableDeleteRowsCommand, DocTableDeleteTableCommand } from './commands/commands/table/doc-table-delete.command';

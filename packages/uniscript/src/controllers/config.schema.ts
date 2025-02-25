@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,9 @@
 
 import type { MenuConfig } from '@univerjs/ui';
 
-export const PLUGIN_CONFIG_KEY = 'uniscript.config';
+export const UNISCRIPT_PLUGIN_CONFIG_KEY = 'uniscript.config';
 
-export const configSymbol = Symbol(PLUGIN_CONFIG_KEY);
+export const configSymbol = Symbol(UNISCRIPT_PLUGIN_CONFIG_KEY);
 
 export interface IUniverUniscriptConfig {
     menu?: MenuConfig;

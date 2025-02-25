@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { MenuConfig } from '@univerjs/ui';
 import type { DependencyOverride } from '@univerjs/core';
+import type { MenuConfig } from '@univerjs/ui';
 
-export const PLUGIN_CONFIG_KEY = 'slides-ui.config';
+export const SLIDES_UI_PLUGIN_CONFIG_KEY = 'slides-ui.config';
 
-export const configSymbol = Symbol(PLUGIN_CONFIG_KEY);
+export const configSymbol = Symbol(SLIDES_UI_PLUGIN_CONFIG_KEY);
 
 export interface IUniverSlidesUIConfig {
     override?: DependencyOverride;

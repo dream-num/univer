@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,11 @@
 
 import type { Workbook } from '@univerjs/core';
 import type { IThreadComment } from '@univerjs/thread-comment';
-import { ICommandService, IUniverInstanceService, UniverInstanceType, useDependency } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { singleReferenceToGrid } from '@univerjs/engine-formula';
 import { IMarkSelectionService } from '@univerjs/sheets-ui';
 import { ThreadCommentPanel, ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
-import { useObservable } from '@univerjs/ui';
+import { useDependency, useObservable } from '@univerjs/ui';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { map } from 'rxjs';
 import { ShowAddSheetCommentModalOperation } from '../../commands/operations/comment.operation';
@@ -35,7 +35,7 @@ export const SheetsThreadCommentPanel = () => {
     const commandService = useDependency(ICommandService);
     const subUnitId$ = useMemo(() => workbook.activeSheet$.pipe(map((i) => i?.getSheetId())), [workbook.activeSheet$]);
     const subUnitId = useObservable(subUnitId$, workbook.getActiveSheet()?.getSheetId());
-    const hoverShapeId = useRef<string | null>();
+    const hoverShapeId = useRef<string | null>(null);
     const panelService = useDependency(ThreadCommentPanelService);
     const activeCommentId = useObservable(panelService.activeCommentId$);
     const panelVisible = useObservable(panelService.panelVisible$, panelService.panelVisible);
@@ -93,6 +93,7 @@ export const SheetsThreadCommentPanel = () => {
                 });
             }
         }
+        return null;
     }, [markSelectionService, subUnitId, unitId]);
 
     const getSubUnitName = (id: string) => {

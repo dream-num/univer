@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -137,6 +137,13 @@ describe('Test epochtodate function', () => {
             });
             const result8 = testFunction.calculate(timestamp, unit8);
             expect(getObjectValue(result8)).toBe(ErrorType.NUM);
+        });
+
+        it('More test', () => {
+            const timestamp = NumberValueObject.create(1656356678000410);
+            const unit = NumberValueObject.create(1);
+            const result = testFunction.calculate(timestamp, unit);
+            expect(getObjectValue(result)).toBe(19170820453.264008);
         });
     });
 });

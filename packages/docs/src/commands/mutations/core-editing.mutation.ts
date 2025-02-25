@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -101,7 +101,7 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
         documentViewModel.reset(documentDataModel);
         // Step 3: Update cursor & selection.
         // Make sure update cursor & selection after doc skeleton is calculated.
-        if (!noNeedSetTextRange && textRanges && trigger != null) {
+        if (!noNeedSetTextRange && textRanges && trigger != null && !isSync) {
             queueMicrotask(() => {
                 docSelectionManagerService.replaceDocRanges(textRanges, { unitId, subUnitId: unitId }, isEditing, params.options);
             });

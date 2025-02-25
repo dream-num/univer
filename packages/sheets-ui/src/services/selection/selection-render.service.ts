@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,14 +21,15 @@ import type { ISheetObjectParam } from '../../controllers/utils/component-tools'
 import type { SelectionControl } from './selection-control';
 import { ICommandService, IContextService, ILogService, Inject, Injector, RANGE_TYPE, ThemeService, toDisposable } from '@univerjs/core';
 import { ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
-import { convertSelectionDataToRange, DISABLE_NORMAL_SELECTIONS, SelectionMoveType, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
+import { convertSelectionDataToRange, REF_SELECTIONS_ENABLED, SelectionMoveType, SELECTIONS_ENABLED, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { IShortcutService } from '@univerjs/ui';
-import { distinctUntilChanged, startWith } from 'rxjs';
+import { distinctUntilChanged, merge, startWith } from 'rxjs';
 import { getCoordByOffset, getSheetObject } from '../../controllers/utils/component-tools';
+
 import { isThisColSelected, isThisRowSelected } from '../../controllers/utils/selections-tools';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
-
 import { BaseSelectionRenderService, getTopLeftSelectionOfCurrSheet, selectionDataForSelectAll } from './base-selection-render.service';
+import { genNormalSelectionStyle } from './const';
 import { attachSelectionWithCoord } from './util';
 
 /**
@@ -49,13 +50,14 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
         @Inject(SheetSkeletonManagerService) sheetSkeletonManagerService: SheetSkeletonManagerService,
         @ILogService private readonly _logService: ILogService,
         @ICommandService private readonly _commandService: ICommandService,
-        @IContextService private readonly _contextService: IContextService
+        @IContextService protected readonly _contextService: IContextService
     ) {
         super(
             injector,
             themeService,
             shortcutService,
-            sheetSkeletonManagerService
+            sheetSkeletonManagerService,
+            _contextService
         );
 
         this._workbookSelections = selectionManagerService.getWorkbookSelections(this._context.unitId);
@@ -64,9 +66,9 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
 
     private _init(): void {
         const sheetObject = this._getSheetObject();
-
+        this._contextService.setContextValue(SELECTIONS_ENABLED, true);
         this._initEventListeners(sheetObject);
-        this._initSelectionChangeListener();
+        this._initSelectionModelChangeListener();
         this._initThemeChangeListener();
         this._initSkeletonChangeListener();
         this._initUserActionSyncListener();
@@ -77,7 +79,8 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
         const { scene } = this._context;
 
         this.disposeWithMe(spreadsheet?.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
-            if (this._normalSelectionDisabled()) return;
+            if (this.isSelectionDisabled()) return;
+            if (this.inRefSelectionMode()) return;
             this._onPointerDown(evt, spreadsheet.zIndex + 1, RANGE_TYPE.NORMAL, this._getActiveViewport(evt));
             if (evt.button !== 2) {
                 state.stopPropagation();
@@ -86,9 +89,10 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
 
         this.disposeWithMe(
             spreadsheetRowHeader?.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
-                if (this._normalSelectionDisabled()) return;
+                if (this.isSelectionDisabled()) return;
+                if (this.inRefSelectionMode()) return;
 
-                const skeleton = this._sheetSkeletonManagerService.getCurrent()!.skeleton;
+                const skeleton = this._sheetSkeletonManagerService.getCurrentParam()!.skeleton;
                 const { row } = getCoordByOffset(evt.offsetX, evt.offsetY, scene, skeleton);
                 const matchSelectionData = isThisRowSelected(this._workbookSelections.getCurrentSelections(), row);
                 if (matchSelectionData) return;
@@ -101,9 +105,10 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
         );
 
         this.disposeWithMe(spreadsheetColumnHeader?.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
-            if (this._normalSelectionDisabled()) return;
+            if (this.isSelectionDisabled()) return;
+            if (this.inRefSelectionMode()) return;
 
-            const skeleton = this._sheetSkeletonManagerService.getCurrent()!.skeleton;
+            const skeleton = this._sheetSkeletonManagerService.getCurrentParam()!.skeleton;
             const { column } = getCoordByOffset(evt.offsetX, evt.offsetY, scene, skeleton);
             const matchSelectionData = isThisColSelected(this._workbookSelections.getCurrentSelections(), column);
             if (matchSelectionData) return;
@@ -116,11 +121,12 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
         }));
 
         this.disposeWithMe(spreadsheetLeftTopPlaceholder?.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
-            if (this._normalSelectionDisabled()) return;
+            if (this.isSelectionDisabled()) return;
+            if (this.inRefSelectionMode()) return;
 
             this._reset(); // remove all other selections
 
-            const skeleton = this._sheetSkeletonManagerService.getCurrent()!.skeleton;
+            const skeleton = this._sheetSkeletonManagerService.getCurrentParam()!.skeleton;
             const selectionWithStyle = selectionDataForSelectAll(skeleton);
             this._addSelectionControlByModelData(selectionWithStyle);
             this.refreshSelectionMoveEnd();
@@ -133,38 +139,97 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
 
     private _initThemeChangeListener(): void {
         this.disposeWithMe(this._themeService.currentTheme$.subscribe(() => {
-            this._resetSelectionStyle();
+            this._initSelectionThemeFromThemeService();
             const selections = this._workbookSelections.getCurrentSelections();
             if (!selections) return;
             this.resetSelectionsByModelData(selections);
         }));
     }
 
-    private _normalSelectionDisabled(): boolean {
-        return this._contextService.getContextValue(DISABLE_NORMAL_SELECTIONS);
-    }
-
-    private _initSelectionChangeListener(): void {
-        // normal selection: after dragging selection(move end)
-        this.disposeWithMe(this._workbookSelections.selectionMoveEnd$.subscribe((selectionWithStyleList) => {
+    /**
+     * Response for selection model changing.
+     */
+    private _initSelectionModelChangeListener(): void {
+        this.disposeWithMe(merge(
+            this._workbookSelections.selectionMoveEnd$, // triggered by keyboard(e.g. arrow key tab enter)
+            this._workbookSelections.selectionSet$ // shift + arrow key
+        ).subscribe((selectionWithStyleList) => {
             this.resetSelectionsByModelData(selectionWithStyleList);
         }));
     }
 
+    disableSelection() {
+        this._contextService.setContextValue(SELECTIONS_ENABLED, false);
+    }
+
+    enableSelection() {
+        this._contextService.setContextValue(SELECTIONS_ENABLED, true);
+    }
+
+    transparentSelection() {
+        this.setSelectionTheme({
+            primaryColor: 'transparent',
+        });
+        const selectionsWithStyle = this._workbookSelections.getCurrentSelections();
+        for (let index = 0; index < selectionsWithStyle.length; index++) {
+            const selectionWithStyle = selectionsWithStyle[index];
+            selectionWithStyle.style = genNormalSelectionStyle(this._selectionTheme);
+        }
+        this.resetSelectionsByModelData(selectionsWithStyle);
+    }
+
+    showSelection() {
+        const currTheme = this._themeService.getCurrentTheme();
+        this.setSelectionTheme(currTheme);
+        const selectionsWithStyle = this._workbookSelections.getCurrentSelections();
+        for (let index = 0; index < selectionsWithStyle.length; index++) {
+            const selectionWithStyle = selectionsWithStyle[index];
+            if (selectionWithStyle.style) {
+                selectionWithStyle.style = genNormalSelectionStyle(this._selectionTheme);
+            }
+        }
+        this.resetSelectionsByModelData(selectionsWithStyle);
+    }
+
+    /**
+     * Handle events in spreadsheet. (e.g. drag and move to make a selection)
+     */
     private _initUserActionSyncListener(): void {
         this.disposeWithMe(this.selectionMoveStart$.subscribe((params) => this._updateSelections(params, SelectionMoveType.MOVE_START)));
         this.disposeWithMe(this.selectionMoving$.subscribe((params) => this._updateSelections(params, SelectionMoveType.MOVING)));
 
-        this.disposeWithMe(this._contextService.subscribeContextValue$(DISABLE_NORMAL_SELECTIONS)
+        this.disposeWithMe(this._contextService.subscribeContextValue$(REF_SELECTIONS_ENABLED)
             .pipe(startWith(false), distinctUntilChanged())
-            .subscribe((disabled) => {
-                if (disabled) {
+            .subscribe((enabled) => {
+                if (enabled) {
+                    // this._renderDisposable?.dispose();
+                    // this._renderDisposable = null;
+
+                    // clear curr normal selections when ref turn enabled, only view selections are cleared, selection data still exist.
+                    this._reset();
+                } else {
+                    // DO not bind again !!! or there would be two selectionMoveEnd$ after pointer up.
+                    // #univer-pro/issues/3763
+                    // this._renderDisposable = toDisposable(
+                    //     this.selectionMoveEnd$.pipe(skip(1)).subscribe((params) => {
+                    //         // this._updateSelections(params, SelectionMoveType.MOVE_END);
+                    //     })
+                    // );
+                }
+            }));
+
+        this.disposeWithMe(this._contextService.subscribeContextValue$(SELECTIONS_ENABLED)
+            .pipe(startWith(true), distinctUntilChanged())
+            .subscribe((enabled) => {
+                if (!enabled) {
                     this._renderDisposable?.dispose();
                     this._renderDisposable = null;
                     this._reset();
                 } else {
                     this._renderDisposable = toDisposable(
-                        this.selectionMoveEnd$.subscribe((params) => this._updateSelections(params, SelectionMoveType.MOVE_END))
+                        this.selectionMoveEnd$.subscribe((params) => {
+                            this._updateSelections(params, SelectionMoveType.MOVE_END);
+                        })
                     );
                 }
             }));
@@ -172,6 +237,10 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
 
     /**
      * Update selectionData to selectionDataModel (WorkBookSelections) by SetSelectionsOperation.
+     *
+     * Unlike baseSelectionRenderService@resetSelectionsByModelData, this method is for update WorkbookSelectionModel.
+     *
+     *
      * @param selectionDataWithStyleList
      * @param type
      */
@@ -184,13 +253,15 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
             return;
         }
 
+        const selectionWithStyles = selectionDataWithStyleList.map((selectionDataWithStyle) =>
+            convertSelectionDataToRange(selectionDataWithStyle)
+        );
+
         this._commandService.executeCommand(SetSelectionsOperation.id, {
             unitId,
             subUnitId: sheetId,
             type,
-            selections: selectionDataWithStyleList.map((selectionDataWithStyle) =>
-                convertSelectionDataToRange(selectionDataWithStyle)
-            ),
+            selections: selectionWithStyles,
         });
     }
 
@@ -210,8 +281,6 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
             const viewportMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
             const prevSheetId = this._skeleton?.worksheet?.getSheetId();
             this._changeRuntime(skeleton, scene, viewportMain);
-
-            if (this._normalSelectionDisabled()) return;
 
             if (prevSheetId !== skeleton.worksheet.getSheetId()) {
                 // If there is no initial selection, add one by default in the top left corner.
@@ -253,7 +322,7 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
      * @param viewport
      * @param scrollTimerType
      */
-    // eslint-disable-next-line max-lines-per-function, complexity
+    // eslint-disable-next-line complexity, max-lines-per-function
     protected _onPointerDown(
         evt: IPointerEvent | IMouseEvent,
         _zIndex = 0,
@@ -293,10 +362,14 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
             case RANGE_TYPE.ROW:
                 selectCell.startColumn = 0;
                 selectCell.endColumn = this._skeleton.getColumnCount() - 1;
+                selectCell.startRow = selectCell.actualRow;
+                selectCell.endRow = selectCell.actualRow;
                 break;
             case RANGE_TYPE.COLUMN:
                 selectCell.startRow = 0;
                 selectCell.endRow = this._skeleton.getRowCount() - 1;
+                selectCell.startColumn = selectCell.actualColumn;
+                selectCell.endColumn = selectCell.actualColumn;
                 break;
             case RANGE_TYPE.ALL:
                 selectCell.startRow = 0;
@@ -308,9 +381,6 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
         selectionWithStyle.range.rangeType = rangeType;
         const selectionCellWithCoord = attachSelectionWithCoord(selectionWithStyle, this._skeleton);
         this._startRangeWhenPointerDown = { ...selectionCellWithCoord.rangeWithCoord };
-        // const selectionCellWithCoord: Nullable<ISelectionWithCoord> = this._getSelectionWithCoordByOffset(offsetX, offsetY, scaleX, scaleY, scrollXY);
-        // if (!selectionCellWithCoord) return;
-        // const { rangeWithCoord: cursorCellRange, primaryWithCoord: _primaryCursorCellRange } = selectionCellWithCoord;
 
         let activeSelectionControl: Nullable<SelectionControl> = this.getActiveSelectionControl();
         const cursorRangeWidthCoord: IRangeWithCoord = { ...selectionCellWithCoord.rangeWithCoord, rangeType };
@@ -350,14 +420,11 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
             );
         } else if (remainLastEnable && activeSelectionControl) {
             // Supports the formula ref text selection feature,
-            // under the condition of preserving all previous selections, it modifies the position of the latest selection.
 
             activeSelectionControl.updateRangeBySelectionWithCoord(selectionCellWithCoord);// (cursorRangeWidthCoord, primaryCursorCellRange);
         } else {
             // In normal situation, pointerdown ---> Create new SelectionControl,
             activeSelectionControl = this.newSelectionControl(scene, skeleton, selectionWithStyle);
-
-            // activeSelectionControl.updateRangeBySelectionWithCoord(selectionCellWithCoord); //(cursorRangeWidthCoord, primaryCursorCellRange);
         }
         // clear highlight except last one.
         for (let i = 0; i < this.getSelectionControls().length - 1; i++) {
@@ -369,6 +436,7 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
         this._clearUpdatingListeners();
         this._addEndingListeners();
         scene.getTransformer()?.clearSelectedObjects();
+
         this._setupPointerMoveListener(viewportMain, activeSelectionControl!, rangeType, scrollTimerType, offsetX, offsetY);
         this._escapeShortcutDisposable = this._shortcutService.forceEscape();
 
@@ -384,5 +452,7 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
             this._escapeShortcutDisposable?.dispose();
             this._escapeShortcutDisposable = null;
         });
+
+        this._scene.getEngine()?.setCapture();
     }
 }

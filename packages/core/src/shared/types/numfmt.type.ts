@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -218,9 +218,8 @@ interface Formatter {
     (value: number): string;
 }
 
-type LocaleTag =
+export type LocaleTag =
     | 'zh-CN'
-    | 'zh'
     | 'zh-TW'
     | 'cs'
     | 'da'
@@ -244,7 +243,8 @@ type LocaleTag =
     | 'es'
     | 'sv'
     | 'th'
-    | 'tr';
+    | 'tr'
+    | 'vi';
 
 export interface ParsedReturnType {
     /**

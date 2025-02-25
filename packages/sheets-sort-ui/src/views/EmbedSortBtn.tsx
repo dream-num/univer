@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import React, { useCallback } from 'react';
-import { type IRange, IUniverInstanceService, LocaleService } from '@univerjs/core';
-import { useDependency } from '@univerjs/core';
-import { getSheetCommandTarget } from '@univerjs/sheets';
+import type { IRange } from '@univerjs/core';
+import { IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { AscendingSingle, DescendingSingle } from '@univerjs/icons';
+import { getSheetCommandTarget } from '@univerjs/sheets';
+import { useDependency } from '@univerjs/ui';
+import React, { useCallback } from 'react';
 import { SheetsSortUIService } from '../services/sheets-sort-ui.service';
 import styles from './index.module.less';
 
@@ -48,11 +49,23 @@ export default function EmbedSortBtn(props: any) {
 
     return (
         <div className={styles.embedSortBtnContainer}>
-            <div className={`${styles.embedSortBtn} ${styles.embedSortBtnAsc}`} onClick={() => apply(true)}>
+            <div
+                className={`
+                  ${styles.embedSortBtn}
+                  ${styles.embedSortBtnAsc}
+                `}
+                onClick={() => apply(true)}
+            >
                 <AscendingSingle className={styles.embedSortBtnIcon} />
                 {localeService.t('sheets-sort.general.sort-asc')}
             </div>
-            <div className={`${styles.embedSortBtn} ${styles.embedSortBtnDesc}`} onClick={() => apply(false)}>
+            <div
+                className={`
+                  ${styles.embedSortBtn}
+                  ${styles.embedSortBtnDesc}
+                `}
+                onClick={() => apply(false)}
+            >
                 <DescendingSingle className={styles.embedSortBtnIcon} />
                 {localeService.t('sheets-sort.general.sort-desc')}
             </div>

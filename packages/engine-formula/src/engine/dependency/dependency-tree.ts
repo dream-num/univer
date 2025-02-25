@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import type {
 import type { IFormulaDirtyData } from '../../services/current-data.service';
 import type { IAllRuntimeData } from '../../services/runtime.service';
 
-import type { AstRootNode } from '../ast-node';
+import type { AstRootNode, FunctionNode } from '../ast-node';
 import { type IRange, type IUnitRange, moveRangeByOffset, type Nullable } from '@univerjs/core';
 
 export enum FDtreeStateType {
@@ -100,6 +100,8 @@ export class FormulaDependencyTreeVirtual extends FormulaDependencyTreeCalculato
     refOffsetY: number = -1;
     isCache: boolean = false;
     isDirty: boolean = false;
+
+    addressFunctionNodes: FunctionNode[] = [];
 
     get isVirtual() {
         return true;
@@ -313,6 +315,8 @@ export class FormulaDependencyTree extends FormulaDependencyTreeCalculator {
 
     node: Nullable<AstRootNode>;
 
+    addressFunctionNodes: FunctionNode[] = [];
+
     constructor(treeId: number) {
         super();
         this.treeId = treeId;
@@ -344,6 +348,8 @@ export class FormulaDependencyTree extends FormulaDependencyTreeCalculator {
         this.featureDirtyRanges = [];
 
         this.rangeList = [];
+
+        this.addressFunctionNodes = [];
 
         // this.nodeData?.node.dispose();
 

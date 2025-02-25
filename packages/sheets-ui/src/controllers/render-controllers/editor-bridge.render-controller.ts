@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 import type { ICommandInfo, IDisposable, IExecutionOptions, ISelectionCell, Nullable, Workbook } from '@univerjs/core';
 import type { IEditorInputConfig } from '@univerjs/docs-ui';
 import type { IRender, IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import type { ISelectionWithStyle } from '@univerjs/sheets';
+import type { ISelectionWithStyle, ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import type { ICurrentEditCellParam, IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 import { DisposableCollection, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, FOCUSING_FX_BAR_EDITOR, FOCUSING_SHEET, ICommandService, IContextService, Inject, IUniverInstanceService, RxDisposable, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionRenderService, IEditorService, IRangeSelectorService } from '@univerjs/docs-ui';
@@ -86,6 +86,7 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
     private _initSelectionChangeListener(d: DisposableCollection) {
         d.add(merge(
             this._selectionManagerService.selectionMoveEnd$,
+            this._selectionManagerService.selectionSet$,
             this._selectionManagerService.selectionMoveStart$
         ).subscribe((params) => this._updateEditorPosition(params)));
     }
@@ -101,7 +102,7 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
             const unitId = this._context.unitId;
             const sheetId = this._context.unit.getActiveSheet()?.getSheetId();
             if (!sheetId) return;
-            const mergeInfo = this._sheetSkeletonManagerService.getWorksheetSkeleton(sheetId)?.skeleton.getCellWithCoordByIndex(primary.actualRow, primary.actualColumn);
+            const mergeInfo = this._sheetSkeletonManagerService.getSkeletonParam(sheetId)?.skeleton.getCellWithCoordByIndex(primary.actualRow, primary.actualColumn);
             const newPrimary: ISelectionCell = mergeInfo
                 ? {
                     actualRow: mergeInfo.actualRow,
@@ -171,13 +172,11 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
                     if (!this._isCurrentSheetFocused()) {
                         return;
                     }
-
                     const isFocusFormulaEditor = this._contextService.getContextValue(FOCUSING_FX_BAR_EDITOR);
                     const isFocusSheets = this._contextService.getContextValue(FOCUSING_SHEET);
                     const unitId = render.unitId;
                     if (this._editorBridgeService.isVisible().visible) return;
-
-                    if (unitId && isFocusSheets && !isFocusFormulaEditor && this._editorService.isSheetEditor(unitId)) {
+                    if (unitId && isFocusSheets && !isFocusFormulaEditor) {
                         this._showEditorByKeyboard(config);
                     }
                 }));
@@ -198,11 +197,24 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
     }
 
     private _commandExecutedListener(d: DisposableCollection) {
-        const refreshCommandSet = new Set([ClearSelectionFormatCommand.id, SetRangeValuesMutation.id, SetZoomRatioCommand.id]);
+        const refreshCommandSet = new Set([ClearSelectionFormatCommand.id, SetZoomRatioCommand.id]);
         d.add(this._commandService.onCommandExecuted((command: ICommandInfo) => {
             if (refreshCommandSet.has(command.id)) {
                 if (this._editorBridgeService.isVisible().visible) return;
                 this._editorBridgeService.refreshEditCellState();
+            }
+
+            if (command.id === SetRangeValuesMutation.id) {
+                const params = command.params as ISetRangeValuesMutationParams;
+                const { cellValue, unitId, subUnitId } = params;
+                if (!cellValue) return;
+                const editCell = this._editorBridgeService.getEditLocation();
+                if (editCell) {
+                    const { unitId: editingUnitId, sheetId: editingSheetId, row, column } = editCell;
+                    if (unitId === editingUnitId && subUnitId === editingSheetId && cellValue && cellValue[row] && Object.prototype.hasOwnProperty.call(cellValue[row], column)) {
+                        this._editorBridgeService.refreshEditCellState();
+                    }
+                }
             }
         }));
 
@@ -215,13 +227,12 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
     }
 
     private _showEditorByKeyboard(config: Nullable<IEditorInputConfig>) {
-        if (config == null) {
+        const event = config?.event as InputEvent;
+        if (config == null || (!event.data && event.inputType !== 'InsertParagraph')) {
             return;
         }
 
-        const event = config.event as KeyboardEvent;
-
-        this._commandService.executeCommand(SetCellEditVisibleOperation.id, {
+        this._commandService.syncExecuteCommand(SetCellEditVisibleOperation.id, {
             visible: true,
             eventType: DeviceInputEventType.Keyboard,
             keycode: event.which,

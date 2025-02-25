@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,6 +74,9 @@ const locale = {
         cancel: '取消',
     },
     'global-shortcut': '全局快捷键',
+    'zoom-slider': {
+        resetTo: '恢复至',
+    },
 };
 
 export default locale;

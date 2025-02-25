@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,10 @@
 
 import type { FC } from 'react';
 import type { IBusinessComponentProps } from '../interface';
-import { LocaleService, useDependency } from '@univerjs/core';
+import { LocaleService } from '@univerjs/core';
 import { InputNumber, Select } from '@univerjs/design';
 import { getCurrencyType, getDecimalFromPattern, setPatternDecimal } from '@univerjs/sheets-numfmt';
+import { useDependency } from '@univerjs/ui';
 import React, { useContext, useMemo, useState } from 'react';
 import { UserHabitCurrencyContext } from '../../../controllers/user-habit.controller';
 
@@ -53,7 +54,7 @@ export const AccountingPanel: FC<IBusinessComponentProps> = (props) => {
 
     return (
         <div>
-            <div className="m-t-16 options ">
+            <div className="m-t-16 options">
                 <div className="option">
                     <div className="label">{t('sheet.numfmt.decimalLength')}</div>
 

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -699,15 +699,6 @@ export class ObjectMatrix<T> {
         });
 
         return ranges;
-    }
-
-    merge(newObject: ObjectMatrix<T>) {
-        this.forValue((row, column) => {
-            const cellValue = newObject.getValue(row, column);
-            if (cellValue != null) {
-                this.setValue(row, column, cellValue);
-            }
-        });
     }
 
     private _setOriginValue(matrix: IObjectMatrixPrimitiveType<T> = {}) {

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { CommandType, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, ICommandService, IUniverInstanceService } from '@univerjs/core';
-import { getSheetCommandTarget } from '@univerjs/sheets';
-
 import type { ICommand } from '@univerjs/core';
+import { CommandType, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, ICommandService, IUniverInstanceService } from '@univerjs/core';
+
+import { getSheetCommandTarget } from '@univerjs/sheets';
 import { SHEET_ZOOM_RANGE } from '../../common/keys';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { SetZoomRatioOperation } from '../operations/set-zoom-ratio.operation';
@@ -39,7 +39,7 @@ export interface IChangeZoomRatioCommandParams {
 export const ChangeZoomRatioCommand: ICommand<IChangeZoomRatioCommandParams> = {
     id: 'sheet.command.change-zoom-ratio',
     type: CommandType.COMMAND,
-    handler: async (accessor, params) => {
+    handler: (accessor, params) => {
         if (!params) {
             return false;
         }
@@ -71,7 +71,7 @@ export const ChangeZoomRatioCommand: ICommand<IChangeZoomRatioCommandParams> = {
 export const SetZoomRatioCommand: ICommand<ISetZoomRatioCommandParams> = {
     id: 'sheet.command.set-zoom-ratio',
     type: CommandType.COMMAND,
-    handler: async (accessor, params) => {
+    handler: (accessor, params) => {
         if (!params) {
             return false;
         }

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,17 @@
  */
 
 import { Disposable, ICommandService, Inject } from '@univerjs/core';
-import { AddImageSingle } from '@univerjs/icons';
+import { IDrawingManagerService } from '@univerjs/drawing';
 
+import { AddImageSingle } from '@univerjs/icons';
+import { SheetsSelectionsService } from '@univerjs/sheets';
 import { ComponentManager, IMenuManagerService, IShortcutService } from '@univerjs/ui';
 import { DeleteDrawingsCommand } from '../commands/commands/delete-drawings.command';
 import { GroupSheetDrawingCommand } from '../commands/commands/group-sheet-drawing.command';
-import { InsertFloatImageCommand } from '../commands/commands/insert-image.command';
+import { InsertCellImageCommand, InsertFloatImageCommand } from '../commands/commands/insert-image.command';
 import { InsertSheetDrawingCommand } from '../commands/commands/insert-sheet-drawing.command';
 import { MoveDrawingsCommand } from '../commands/commands/move-drawings.command';
+
 import { RemoveSheetDrawingCommand } from '../commands/commands/remove-sheet-drawing.command';
 import { SetDrawingArrangeCommand } from '../commands/commands/set-drawing-arrange.command';
 import { SetSheetDrawingCommand } from '../commands/commands/set-sheet-drawing.command';
@@ -41,7 +44,9 @@ export class SheetDrawingUIController extends Disposable {
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
         @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,
         @ICommandService private readonly _commandService: ICommandService,
-        @IShortcutService private readonly _shortcutService: IShortcutService
+        @IShortcutService private readonly _shortcutService: IShortcutService,
+        @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
+        @Inject(SheetsSelectionsService) private readonly _sheetsSelectionsService: SheetsSelectionsService
     ) {
         super();
 
@@ -61,6 +66,7 @@ export class SheetDrawingUIController extends Disposable {
     private _initCommands() {
         [
             InsertFloatImageCommand,
+            InsertCellImageCommand,
             InsertSheetDrawingCommand,
             RemoveSheetDrawingCommand,
             SetSheetDrawingCommand,

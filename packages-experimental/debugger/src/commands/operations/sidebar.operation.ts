@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+import type { IAccessor, ICommand, Workbook } from '@univerjs/core';
 import { CommandType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { IEditorService } from '@univerjs/docs-ui';
 import { ISidebarService } from '@univerjs/ui';
-import type { IAccessor, ICommand, Workbook } from '@univerjs/core';
 import { TEST_EDITOR_CONTAINER_COMPONENT } from '../../views/test-editor/component-name';
 
 export interface IUIComponentCommandParams {
@@ -34,25 +34,17 @@ export const SidebarOperation: ICommand = {
         const unit = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         switch (params.value) {
             case 'open':
-                editorService.setOperationSheetUnitId(unit.getUnitId());
-                editorService.setOperationSheetSubUnitId(unit.getActiveSheet()?.getSheetId());
                 sidebarService.open({
                     header: { title: 'Sidebar title' },
                     children: { label: TEST_EDITOR_CONTAINER_COMPONENT },
                     footer: { title: 'Sidebar Footer' },
                     onClose: () => {
-                        editorService.setOperationSheetUnitId(null);
-                        editorService.setOperationSheetSubUnitId(null);
-                        editorService.closeRangePrompt();
                     },
                 });
                 break;
 
             case 'close':
             default:
-                editorService.setOperationSheetUnitId(null);
-                editorService.setOperationSheetSubUnitId(null);
-                editorService.closeRangePrompt();
                 sidebarService.close();
                 break;
         }

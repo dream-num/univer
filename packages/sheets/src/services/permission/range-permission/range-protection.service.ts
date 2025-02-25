@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,9 @@ import type { UnitAction } from '@univerjs/protocol';
 import type { IObjectModel } from '../../../model/range-protection-rule.model';
 import { Disposable, Inject, IPermissionService, IResourceManagerService, IUniverInstanceService } from '@univerjs/core';
 import { UnitObject, UniverType } from '@univerjs/protocol';
-import { RangeProtectionCache } from '../../../model/range-protection.cache';
-
 import { RangeProtectionRuleModel } from '../../../model/range-protection-rule.model';
+
+import { RangeProtectionCache } from '../../../model/range-protection.cache';
 import { baseProtectionActions, getAllRangePermissionPoint } from './util';
 
 const PLUGIN_NAME = 'SHEET_RANGE_PROTECTION_PLUGIN';
@@ -132,4 +132,3 @@ export class RangeProtectionService extends Disposable {
         );
     }
 }
-

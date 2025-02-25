@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,13 @@
 import type { Workbook } from '@univerjs/core';
 
 import type { IDefinedNamesServiceParam } from '@univerjs/engine-formula';
-import { ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { IDefinedNamesService } from '@univerjs/engine-formula';
 import { SetWorksheetShowCommand } from '@univerjs/sheets';
-import { ISidebarService } from '@univerjs/ui';
+import { ISidebarService, useDependency } from '@univerjs/ui';
 import React, { useEffect, useState } from 'react';
 import { SidebarDefinedNameOperation } from '../../commands/operations/sidebar-defined-name.operation';
 import { DEFINED_NAME_CONTAINER } from './component-name';
-import styles from './index.module.less';
 
 export interface IDefinedNameOverlayProps {
 
@@ -97,20 +96,69 @@ export function DefinedNameOverlay(props: IDefinedNameOverlayProps) {
     };
 
     return (
-        <div className={styles.definedNameOverlay}>
-            <div className={styles.definedNameOverlayContainer}>
+        <div className="univer-w-[300px]">
+            <ul
+                className={`
+                  univer-m-0 univer-max-h-[360px] univer-list-none univer-overflow-y-auto univer-p-0
+                  univer-scrollbar-thin univer-scrollbar-track-transparent univer-scrollbar-thumb-gray-300
+                  univer-scrollbar-w-[4px]
+                `}
+            >
                 {definedNames.map((definedName, index) => {
                     return (
-                        <div key={index} className={styles.definedNameOverlayItem} onClick={() => { focusDefinedName(definedName); }}>
-                            <div className={styles.definedNameOverlayItemName} title={definedName.name}>{definedName.name}</div>
-                            <div className={styles.definedNameOverlayItemFormula} title={definedName.formulaOrRefString}>{definedName.formulaOrRefString}</div>
-                        </div>
+                        <li
+                            key={index}
+                            className={`
+                              univer-cursor-pointer univer-px-2 univer-transition-colors univer-duration-200
+                              dark:hover:univer-bg-gray-600
+                              hover:univer-bg-gray-100
+                            `}
+                            onClick={() => { focusDefinedName(definedName); }}
+                        >
+                            <div
+                                className={`
+                                  univer-flex univer-items-center univer-justify-between univer-gap-2 univer-border-0
+                                  univer-border-b univer-border-solid univer-border-gray-200 univer-py-1
+                                `}
+                            >
+                                <div
+                                    className={`
+                                      univer-w-[50%] univer-flex-shrink-0 univer-overflow-hidden univer-text-ellipsis
+                                      univer-whitespace-nowrap univer-text-sm univer-text-gray-600
+                                    `}
+                                    title={definedName.name}
+                                >
+                                    {definedName.name}
+                                </div>
+                                <div
+                                    className={`
+                                      univer-w-[50%] univer-flex-shrink-0 univer-overflow-hidden univer-text-ellipsis
+                                      univer-whitespace-nowrap univer-text-xs univer-text-gray-400
+                                    `}
+                                    title={definedName.formulaOrRefString}
+                                >
+                                    {definedName.formulaOrRefString}
+                                </div>
+                            </div>
+                        </li>
                     );
                 })}
-            </div>
-            <div className={styles.definedNameOverlayManager} onClick={openSlider}>
-                <div className={styles.definedNameOverlayManagerTitle}>{localeService.t('definedName.managerTitle')}</div>
-                <div className={styles.definedNameOverlayManagerContent}>{localeService.t('definedName.managerDescription')}</div>
+            </ul>
+
+            <div
+                className={`
+                  univer-cursor-pointer univer-p-2 univer-transition-colors univer-duration-200
+                  dark:hover:univer-bg-gray-600
+                  hover:univer-bg-gray-100
+                `}
+                onClick={openSlider}
+            >
+                <div className="univer-mb-2 univer-text-sm univer-font-semibold univer-text-gray-600">
+                    {localeService.t('definedName.managerTitle')}
+                </div>
+                <div className="univer-text-xs univer-text-gray-400">
+                    {localeService.t('definedName.managerDescription')}
+                </div>
             </div>
         </div>
     );

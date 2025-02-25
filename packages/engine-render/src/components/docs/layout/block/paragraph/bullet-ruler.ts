@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,47 +14,47 @@
  * limitations under the License.
  */
 
-import { GlyphType, numberToListABC } from '@univerjs/core';
+import { ListGlyphType, numberToListABC } from '@univerjs/core';
 
-export function getBulletOrderedSymbol(startIndex: number, startNumber: number, glyphType: GlyphType | string) {
+export function getBulletOrderedSymbol(startIndex: number, startNumber: number, glyphType: ListGlyphType | string) {
     // if (!(glyphType in GlyphType)) {
     //     return dealWidthCustomBulletOrderedSymbol(startIndex, startNumber, glyphType as string); // 插件定义更多类型的bullet
     // }
 
-    return generateOrderedSymbol(startIndex, startNumber, glyphType as GlyphType);
+    return generateOrderedSymbol(startIndex, startNumber, glyphType as ListGlyphType);
 }
 
-function generateOrderedSymbol(startIndex: number, startNumber: number, glyphType: GlyphType) {
+function generateOrderedSymbol(startIndex: number, startNumber: number, glyphType: ListGlyphType) {
     // startIndex从0开始，startNumber为用户输入默认是1
-    if (glyphType === GlyphType.DECIMAL) {
+    if (glyphType === ListGlyphType.DECIMAL) {
         return decimal(startIndex, startNumber);
     }
-    if (glyphType === GlyphType.DECIMAL_ZERO) {
+    if (glyphType === ListGlyphType.DECIMAL_ZERO) {
         return zeroDecimal(startIndex, startNumber);
     }
-    if (glyphType === GlyphType.UPPER_LETTER) {
+    if (glyphType === ListGlyphType.UPPER_LETTER) {
         return upperAlpha(startIndex, startNumber);
     }
-    if (glyphType === GlyphType.LOWER_LETTER) {
+    if (glyphType === ListGlyphType.LOWER_LETTER) {
         return alpha(startIndex, startNumber);
     }
-    if (glyphType === GlyphType.UPPER_ROMAN) {
+    if (glyphType === ListGlyphType.UPPER_ROMAN) {
         return upperRoman(startIndex, startNumber);
     }
-    if (glyphType === GlyphType.LOWER_ROMAN) {
+    if (glyphType === ListGlyphType.LOWER_ROMAN) {
         return roman(startIndex, startNumber);
     }
 
     return decimal(startIndex, startNumber);
 }
 
-// 	A number, like 1, 2, or 3.
+// A number, like 1, 2, or 3.
 function decimal(startIndex: number, startNumber: number) {
     const currentIndex = startIndex + startNumber;
     return currentIndex.toString();
 }
 
-// 	// 	A number where single digit numbers are prefixed with a zero, like 01, 02, or 03. Numbers with more than one digit are not prefixed with a zero.
+// A number where single digit numbers are prefixed with a zero, like 01, 02, or 03. Numbers with more than one digit are not prefixed with a zero.
 function zeroDecimal(startIndex: number, startNumber: number) {
     const currentIndex = startIndex + startNumber;
 
@@ -64,22 +64,22 @@ function zeroDecimal(startIndex: number, startNumber: number) {
     return currentIndex.toString();
 }
 
-// 	An uppercase letter, like A, B, or C.
+// An uppercase letter, like A, B, or C.
 function upperAlpha(startIndex: number, startNumber: number) {
     return numberToListABC(startIndex + startNumber - 1, true);
 }
 
-// 	A lowercase letter, like a, b, or c.
+// A lowercase letter, like a, b, or c.
 function alpha(startIndex: number, startNumber: number) {
     return numberToListABC(startIndex + startNumber - 1, false);
 }
 
-// 	An uppercase Roman numeral, like I, II, or III.
+// An uppercase Roman numeral, like I, II, or III.
 function upperRoman(startIndex: number, startNumber: number) {
     return _convertRoman(startIndex + startNumber, true);
 }
 
-// 	A lowercase Roman numeral, like i, ii, or iii.
+// A lowercase Roman numeral, like i, ii, or iii.
 function roman(startIndex: number, startNumber: number) {
     return _convertRoman(startIndex + startNumber, false);
 }

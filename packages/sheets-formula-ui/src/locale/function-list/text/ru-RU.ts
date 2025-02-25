@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -303,6 +303,20 @@ export default {
             text: { name: 'текст', detail: 'Текстовая строка, содержащая символы, которые требуется извлечь.' },
             startNum: { name: 'стартовая позиция', detail: 'Позиция первого знака, извлекаемого из текста.' },
             numBytes: { name: 'количество_байтов', detail: 'Указывает в байтах количество символов, извлекаемых функцией MIDB.' },
+        },
+    },
+    NUMBERSTRING: {
+        description: 'Преобразовать числа в китайские строки',
+        abstract: 'Преобразовать числа в китайские строки',
+        links: [
+            {
+                title: 'Инструкция',
+                url: 'https://www.wps.cn/learning/course/detail/id/340.html?chan=pc_kdocs_function',
+            },
+        ],
+        functionParameter: {
+            number: { name: 'Числовой', detail: 'Числовое значение, преобразуемое в китайскую строку.' },
+            type: { name: 'тип', detail: 'Тип возвращаемого результата. \n1. Китайские иероглифы в нижнем регистре \n2. Китайские иероглифы в верхнем регистре \n3. Чтение и написание китайских иероглифов' },
         },
     },
     NUMBERVALUE: {
@@ -729,4 +743,3 @@ export default {
         },
     },
 };
-

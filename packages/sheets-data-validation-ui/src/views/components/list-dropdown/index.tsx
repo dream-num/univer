@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,28 +21,28 @@ import type { ListMultipleValidator } from '@univerjs/sheets-data-validation';
 import type { IEditorBridgeServiceVisibleParam } from '@univerjs/sheets-ui';
 import type { IUniverSheetsDataValidationUIConfig } from '../../../controllers/config.schema';
 import type { IDropdownComponentProps } from '../../../services/dropdown-manager.service';
-import { BuildTextUtils, DataValidationRenderMode, DataValidationType, ICommandService, IConfigService, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
+import { BuildTextUtils, DataValidationRenderMode, DataValidationType, ICommandService, IConfigService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { DataValidationModel } from '@univerjs/data-validation';
 import { Scrollbar } from '@univerjs/design';
 import { RichTextEditingMutation } from '@univerjs/docs';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { CheckMarkSingle } from '@univerjs/icons';
-import { RangeProtectionPermissionEditPoint, SetRangeValuesCommand, WorkbookEditablePermission, WorksheetEditPermission } from '@univerjs/sheets';
+import { RangeProtectionPermissionEditPoint, SetRangeValuesCommand, SheetPermissionCheckController, WorkbookEditablePermission, WorksheetEditPermission } from '@univerjs/sheets';
 import { deserializeListOptions, getDataValidationCellValue, serializeListOptions, SheetDataValidationModel } from '@univerjs/sheets-data-validation';
-import { IEditorBridgeService, SetCellEditVisibleOperation, SheetPermissionInterceptorBaseController } from '@univerjs/sheets-ui';
-import { KeyCode, RectPopup, useObservable } from '@univerjs/ui';
+import { IEditorBridgeService, SetCellEditVisibleOperation } from '@univerjs/sheets-ui';
+import { KeyCode, RectPopup, useDependency, useObservable } from '@univerjs/ui';
 import React, { useEffect, useMemo, useState } from 'react';
 import { debounceTime } from 'rxjs';
 import { OpenValidationPanelOperation } from '../../../commands/operations/data-validation.operation';
 import { DROP_DOWN_DEFAULT_COLOR } from '../../../const';
-import { PLUGIN_CONFIG_KEY } from '../../../controllers/config.schema';
+import { SHEETS_DATA_VALIDATION_UI_PLUGIN_CONFIG_KEY } from '../../../controllers/config.schema';
 import styles from './index.module.less';
 
 interface ISelectListProps {
     value: string[];
     onChange: (val: string[]) => void;
     multiple?: boolean;
-    options: { label: string;value: string; color?: string }[];
+    options: { label: string; value: string; color?: string }[];
     title?: string;
     onEdit?: () => void;
     style?: React.CSSProperties;
@@ -57,9 +57,9 @@ const SelectList = (props: ISelectListProps) => {
     const lowerFilter = filter?.toLowerCase();
     const { row, col, unitId, subUnitId } = location;
     const filteredOptions = options.filter((item) => lowerFilter ? item.label.toLowerCase().includes(lowerFilter) : true);
-    const showEditOnDropdown = configService.getConfig<IUniverSheetsDataValidationUIConfig>(PLUGIN_CONFIG_KEY)?.showEditOnDropdown ?? true;
-    const sheetPermissionInterceptorBaseController = useDependency(SheetPermissionInterceptorBaseController);
-    const hasPermission = useMemo(() => sheetPermissionInterceptorBaseController.permissionCheckWithRanges(
+    const showEditOnDropdown = configService.getConfig<IUniverSheetsDataValidationUIConfig>(SHEETS_DATA_VALIDATION_UI_PLUGIN_CONFIG_KEY)?.showEditOnDropdown ?? true;
+    const sheetPermissionCheckController = useDependency(SheetPermissionCheckController);
+    const hasPermission = useMemo(() => sheetPermissionCheckController.permissionCheckWithRanges(
         {
             workbookTypes: [WorkbookEditablePermission],
             rangeTypes: [RangeProtectionPermissionEditPoint],
@@ -68,7 +68,7 @@ const SelectList = (props: ISelectListProps) => {
         [{ startColumn: col, startRow: row, endColumn: col, endRow: row }],
         unitId,
         subUnitId
-    ), [sheetPermissionInterceptorBaseController, col, row, unitId, subUnitId]);
+    ), [sheetPermissionCheckController, col, row, unitId, subUnitId]);
 
     return (
         <div className={styles.dvListDropdown} style={style}>
@@ -156,9 +156,7 @@ export function ListDropDown(props: IDropdownComponentProps) {
                 const params = command.params as IRichTextEditingMutationParams;
                 const { unitId } = params;
                 const unit = instanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
-                if (!unit) {
-                    return;
-                }
+                if (!unit || !editorBridgeService.isVisible().visible) return;
                 const text = BuildTextUtils.transform.getPlainText(unit.getSnapshot().body?.dataStream ?? '');
                 setEditingText(text);
             }
@@ -167,7 +165,7 @@ export function ListDropDown(props: IDropdownComponentProps) {
         return () => {
             dispose.dispose();
         };
-    }, [commandService, instanceService]);
+    }, [commandService, editorBridgeService, instanceService]);
 
     if (!worksheet) {
         return null;
@@ -234,11 +232,11 @@ export function ListDropDown(props: IDropdownComponentProps) {
                 };
 
                 if (editorBridgeService.isVisible()) {
-                    editorBridgeService.changeVisible({
+                    commandService.executeCommand(SetCellEditVisibleOperation.id, {
                         visible: false,
-                        keycode: KeyCode.ESC,
                         eventType: DeviceInputEventType.Keyboard,
                         unitId,
+                        keycode: KeyCode.ESC,
                     });
                 }
                 setLocalValue(str);

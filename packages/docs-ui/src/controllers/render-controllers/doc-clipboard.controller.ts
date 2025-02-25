@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,11 +24,8 @@ import {
     RxDisposable,
 } from '@univerjs/core';
 import {
-    FILE__BMP_CLIPBOARD_MIME_TYPE,
-    FILE__JPEG_CLIPBOARD_MIME_TYPE,
-    FILE__WEBP_CLIPBOARD_MIME_TYPE,
-    FILE_PNG_CLIPBOARD_MIME_TYPE,
     HTML_CLIPBOARD_MIME_TYPE,
+    imageMimeTypeSet,
     PLAIN_TEXT_CLIPBOARD_MIME_TYPE,
 } from '@univerjs/ui';
 import { takeUntil } from 'rxjs';
@@ -67,15 +64,8 @@ export class DocClipboardController extends RxDisposable implements IRenderModul
             let htmlContent = clipboardEvent.clipboardData?.getData(HTML_CLIPBOARD_MIME_TYPE);
             const textContent = clipboardEvent.clipboardData?.getData(PLAIN_TEXT_CLIPBOARD_MIME_TYPE);
 
-            const imageTypes = [
-                FILE__BMP_CLIPBOARD_MIME_TYPE,
-                FILE__JPEG_CLIPBOARD_MIME_TYPE,
-                FILE__WEBP_CLIPBOARD_MIME_TYPE,
-                FILE_PNG_CLIPBOARD_MIME_TYPE,
-            ];
-
             const files = [...(clipboardEvent.clipboardData?.items || [])]
-                .filter((item) => imageTypes.includes(item.type))
+                .filter((item) => imageMimeTypeSet.has(item.type))
                 .map((item) => item.getAsFile()!)
                 .filter((e) => !!e);
 

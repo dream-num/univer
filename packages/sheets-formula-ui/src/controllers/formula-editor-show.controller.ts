@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -175,6 +175,8 @@ export class FormulaEditorShowController extends Disposable implements IRenderMo
     }
 
     private _displayArrayFormulaRangeShape(matrixRange: IObjectMatrixPrimitiveType<IRange>, row: number, col: number, unitId: string, subUnitId: string, worksheet: Worksheet, cellInfo: Nullable<ICellDataForSheetInterceptor>): Nullable<ICellDataForSheetInterceptor> {
+        const sheetFormulaData = this._formulaDataModel.getSheetFormulaData(unitId, subUnitId);
+
         new ObjectMatrix(matrixRange).forValue((rowIndex, columnIndex, range) => {
             if (range == null) {
                 return true;
@@ -191,12 +193,7 @@ export class FormulaEditorShowController extends Disposable implements IRenderMo
                     return;
                 }
 
-                const formulaDataItem = this._formulaDataModel.getFormulaDataItem(
-                    rowIndex,
-                    columnIndex,
-                    subUnitId,
-                    unitId
-                );
+                const formulaDataItem = sheetFormulaData?.[rowIndex]?.[columnIndex];
 
                 if (formulaDataItem == null || formulaDataItem.f == null) {
                     return true;

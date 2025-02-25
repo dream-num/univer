@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -167,15 +167,12 @@ export class SelectionRenderModel implements IRangeWithCoord {
 
     /**
      * Set primary cell.
-     *
      * @TODO lumixraku there are 3 concepts for same thing, primary and current and highlight
      * highlight is best. primary sometimes means the actual cell(actual means ignore merge)
      * @param currentCell
      */
     setCurrentCell(currentCell: Nullable<ICellWithCoord>) {
-        if (currentCell) {
-            this._primary = currentCell;
-        }
+        this._primary = currentCell;
     }
 
     clearCurrentCell() {

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,15 +17,14 @@
 import type { ICommandInfo } from '@univerjs/core';
 import type { IUpdateSheetDataValidationRangeCommandParams } from '@univerjs/sheets-data-validation';
 import { Disposable, ICommandService, Inject, LocaleService } from '@univerjs/core';
-import { RangeProtectionPermissionEditPoint, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetCellStylePermission } from '@univerjs/sheets';
+import { RangeProtectionPermissionEditPoint, SheetPermissionCheckController, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetCellStylePermission } from '@univerjs/sheets';
 import { AddSheetDataValidationCommand, UpdateSheetDataValidationRangeCommand } from '@univerjs/sheets-data-validation';
-import { SheetPermissionInterceptorBaseController } from '@univerjs/sheets-ui';
 
 export class DataValidationPermissionController extends Disposable {
     constructor(
         @Inject(LocaleService) private _localeService: LocaleService,
         @ICommandService private readonly _commandService: ICommandService,
-        @Inject(SheetPermissionInterceptorBaseController) private readonly _sheetPermissionInterceptorBaseController: SheetPermissionInterceptorBaseController
+        @Inject(SheetPermissionCheckController) private readonly _sheetPermissionCheckController: SheetPermissionCheckController
     ) {
         super();
         this._commandExecutedListener();
@@ -35,23 +34,23 @@ export class DataValidationPermissionController extends Disposable {
         this.disposeWithMe(
             this._commandService.beforeCommandExecuted((command: ICommandInfo) => {
                 if (command.id === AddSheetDataValidationCommand.id) {
-                    const permission = this._sheetPermissionInterceptorBaseController.permissionCheckWithRanges({
+                    const permission = this._sheetPermissionCheckController.permissionCheckWithRanges({
                         workbookTypes: [WorkbookEditablePermission],
                         rangeTypes: [RangeProtectionPermissionEditPoint],
                         worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission],
                     });
                     if (!permission) {
-                        this._sheetPermissionInterceptorBaseController.haveNotPermissionHandle(this._localeService.t('permission.dialog.setStyleErr'));
+                        this._sheetPermissionCheckController.blockExecuteWithoutPermission(this._localeService.t('permission.dialog.setStyleErr'));
                     }
                 }
                 if (command.id === UpdateSheetDataValidationRangeCommand.id) {
-                    const permission = this._sheetPermissionInterceptorBaseController.permissionCheckWithRanges({
+                    const permission = this._sheetPermissionCheckController.permissionCheckWithRanges({
                         workbookTypes: [WorkbookEditablePermission],
                         rangeTypes: [RangeProtectionPermissionEditPoint],
                         worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission],
                     }, (command.params as IUpdateSheetDataValidationRangeCommandParams).ranges);
                     if (!permission) {
-                        this._sheetPermissionInterceptorBaseController.haveNotPermissionHandle(this._localeService.t('permission.dialog.setStyleErr'));
+                        this._sheetPermissionCheckController.blockExecuteWithoutPermission(this._localeService.t('permission.dialog.setStyleErr'));
                     }
                 }
             })

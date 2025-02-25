@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,8 @@
  */
 
 import type { IDisposable } from '@univerjs/core';
-import { createIdentifier } from '@univerjs/core';
-
 import type { IChannel, IMessageProtocol } from './rpc.service';
+import { createIdentifier } from '@univerjs/core';
 import { ChannelClient, ChannelServer } from './rpc.service';
 
 export interface IRPCChannelService {

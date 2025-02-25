@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,13 +45,16 @@ export class DataValidationAlertController extends Disposable {
     private _initCellAlertPopup() {
         this.disposeWithMe(this._hoverManagerService.currentCell$.pipe(debounceTime(100)).subscribe((cellPos) => {
             if (cellPos) {
-                const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-                const worksheet = workbook.getActiveSheet();
+                const workbook = this._univerInstanceService.getUnit<Workbook>(cellPos.location.unitId, UniverInstanceType.UNIVER_SHEET)!;
+                const worksheet = workbook.getSheetBySheetId(cellPos.location.subUnitId);
                 if (!worksheet) return;
                 const rule = this._dataValidationModel.getRuleByLocation(cellPos.location.unitId, cellPos.location.subUnitId, cellPos.location.row, cellPos.location.col);
-                if (!rule) return;
+                if (!rule) {
+                    this._cellAlertManagerService.removeAlert(ALERT_KEY);
+                    return;
+                }
 
-                const validStatus = this._dataValidationModel.validator(rule, cellPos.location);
+                const validStatus = this._dataValidationModel.validator(rule, { ...cellPos.location, workbook, worksheet });
                 if (validStatus === DataValidationStatus.INVALID) {
                     const currentAlert = this._cellAlertManagerService.currentAlert.get(ALERT_KEY);
                     const currentLoc = currentAlert?.alert?.location;
@@ -62,11 +65,13 @@ export class DataValidationAlertController extends Disposable {
                         currentLoc.subUnitId === cellPos.location.subUnitId &&
                         currentLoc.unitId === cellPos.location.unitId
                     ) {
+                        this._cellAlertManagerService.removeAlert(ALERT_KEY);
                         return;
                     }
 
                     const validator = this._dataValidationModel.getValidator(rule.type) as BaseDataValidator;
                     if (!validator) {
+                        this._cellAlertManagerService.removeAlert(ALERT_KEY);
                         return;
                     }
                     this._cellAlertManagerService.showAlert({

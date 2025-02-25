@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,11 @@ export const ListTypePicker = (props: IListTypePickerProps) => {
                 return (
                     <img
                         key={item.value}
-                        className={styles.docListTypePickerItem + (value === item.value ? ` ${styles.docListTypePickerItemActive}` : '')}
+                        className={styles.docListTypePickerItem + (value === item.value
+                            ? `
+                              ${styles.docListTypePickerItemActive}
+                            `
+                            : '')}
                         onClick={() => {
                             onChange(item.value);
                         }}

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -116,7 +116,7 @@ export class HeaderUnhideRenderController extends RxDisposable {
     }
 
     private _update(workbook: Workbook, worksheet: Worksheet): void {
-        const skeleton = this._sheetSkeletonManagerService.getWorksheetSkeleton(worksheet.getSheetId())?.skeleton;
+        const skeleton = this._sheetSkeletonManagerService.getSkeletonParam(worksheet.getSheetId())?.skeleton;
         if (!skeleton) return;
 
         // steps to render the unhide button for the current worksheet

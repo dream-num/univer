@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,30 +21,24 @@ import type {
     IRuntimeOtherUnitDataType,
     IRuntimeUnitDataType,
 } from '../basics/common';
-
 import type { BaseAstNode } from '../engine/ast-node/base-ast-node';
 import type { BaseReferenceObject, FunctionVariantType } from '../engine/reference-object/base-reference-object';
 import type { ArrayValueObject } from '../engine/value-object/array-value-object';
-import { createIdentifier, Disposable, isNullCell, ObjectMatrix } from '@univerjs/core';
+import type { BaseValueObject } from '../engine/value-object/base-value-object';
+import { createIdentifier, Disposable, ObjectMatrix } from '@univerjs/core';
 import { isInDirtyRange } from '../basics/dirty';
 import { ErrorType } from '../basics/error-type';
-
+import { isNullCellForFormula } from '../basics/is-null-cell';
 import { getRuntimeFeatureCell } from '../engine/utils/get-runtime-feature-cell';
-
 import { clearNumberFormatTypeCache, clearStringToNumberPatternCache } from '../engine/utils/numfmt-kit';
 import { clearReferenceToRangeCache } from '../engine/utils/reference-cache';
-import { clearReferenceObjectCache, objectValueToCellValue } from '../engine/utils/value-object';
-import { type BaseValueObject, ErrorValueObject } from '../engine/value-object/base-value-object';
+import { objectValueToCellValue } from '../engine/utils/value-object';
+import { ErrorValueObject } from '../engine/value-object/base-value-object';
 import { IFormulaCurrentConfigService } from './current-data.service';
 
 /**
- * IDLE: Idle phase of the formula engine.
- *
- * DEPENDENCY: Dependency calculation phase, where the formulas that need to be calculated are determined by the modified area,
- * as well as their dependencies. This outputs an array of formulas to execute.
- *
- * INTERPRETER：Formula execution phase, where the calculation of formulas begins.
- *
+ * The formula engine has a lot of stages. IDLE and CALCULATION_COMPLETED can be considered as
+ * the computing has completed.
  */
 export enum FormulaExecuteStageType {
     IDLE,
@@ -227,7 +221,9 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
 
     private _isCycleDependency: boolean = false;
 
-    constructor(@IFormulaCurrentConfigService private readonly _currentConfigService: IFormulaCurrentConfigService) {
+    constructor(
+        @IFormulaCurrentConfigService private readonly _currentConfigService: IFormulaCurrentConfigService
+    ) {
         super();
     }
 
@@ -256,6 +252,8 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
     }
 
     override dispose(): void {
+        super.dispose();
+
         this.reset();
         this._runtimeFeatureCellData = {};
         this._runtimeFeatureRange = {};
@@ -374,7 +372,6 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         clearNumberFormatTypeCache();
         clearStringToNumberPatternCache();
         clearReferenceToRangeCache();
-        clearReferenceObjectCache();
     }
 
     setCurrent(row: number, column: number, rowCount: number, columnCount: number, sheetId: string, unitId: string) {
@@ -701,10 +698,10 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
 
                 // arrayDataCell may display 0 as {v: null}. Although it is an empty cell, it is considered to have a value.
                 if (
-                    !isNullCell(cell) ||
+                    !isNullCellForFormula(cell) ||
                     this._isInOtherArrayFormulaRange(formulaUnitId, formulaSheetId, formulaRow, formulaColumn, r, c) ||
-                    !isNullCell(currentCell) ||
-                    !isNullCell(featureCell)
+                    !isNullCellForFormula(currentCell) ||
+                    !isNullCellForFormula(featureCell)
                 ) {
                     return true;
                 }

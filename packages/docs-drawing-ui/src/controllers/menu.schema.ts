@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 import type { MenuSchemaType } from '@univerjs/ui';
 import { RibbonStartGroup } from '@univerjs/ui';
 import {
-    IMAGE_MENU_ID,
+    DOCS_IMAGE_MENU_ID,
     IMAGE_MENU_UPLOAD_FLOAT_ID,
     ImageMenuFactory,
     UploadFloatImageMenuFactory,
@@ -25,7 +25,7 @@ import {
 
 export const menuSchema: MenuSchemaType = {
     [RibbonStartGroup.LAYOUT]: {
-        [IMAGE_MENU_ID]: {
+        [DOCS_IMAGE_MENU_ID]: {
             order: 0,
             menuItemFactory: ImageMenuFactory,
             [IMAGE_MENU_UPLOAD_FLOAT_ID]: {

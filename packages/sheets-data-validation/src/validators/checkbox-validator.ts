@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,6 +53,8 @@ export class CheckboxValidator extends BaseDataValidator {
     override title: string = 'dataValidation.checkbox.title';
     override operators: DataValidationOperator[] = [];
     override scopes: string | string[] = ['sheet'];
+
+    override readonly offsetFormulaByRange = false;
 
     private _formulaService = this.injector.get(DataValidationFormulaService);
 

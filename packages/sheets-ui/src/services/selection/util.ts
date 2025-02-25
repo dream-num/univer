@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,8 +35,8 @@ export function attachRangeWithCoord(skeleton: SpreadsheetSkeleton, range: IRang
     const _startColumn = endColumn < startColumn ? endColumn : startColumn;
     const _endColumn = endColumn < startColumn ? startColumn : endColumn;
 
-    const startCell = skeleton.getNoMergeCellPositionByIndex(_startRow, _startColumn);
-    const endCell = skeleton.getNoMergeCellPositionByIndex(_endRow, _endColumn);
+    const startCell = skeleton.getNoMergeCellWithCoordByIndex(_startRow, _startColumn);
+    const endCell = skeleton.getNoMergeCellWithCoordByIndex(_endRow, _endColumn);
 
     return {
         startRow,
@@ -61,7 +61,7 @@ export function attachRangeWithCoord(skeleton: SpreadsheetSkeleton, range: IRang
 export function attachSelectionWithCoord(selection: ISelectionWithStyle, skeleton: SpreadsheetSkeleton): ISelectionWithCoord {
     const { range, primary, style } = selection;
     const rangeWithCoord = attachRangeWithCoord(skeleton, range);
-    const primaryWithCoord = primary ? attachPrimaryWithCoord(skeleton, primary) : undefined;
+    const primaryWithCoord = primary ? attachPrimaryWithCoord(skeleton, primary) : primary;
     return {
         rangeWithCoord,
         primaryWithCoord,
@@ -71,9 +71,9 @@ export function attachSelectionWithCoord(selection: ISelectionWithStyle, skeleto
 
 export function attachPrimaryWithCoord(skeleton: SpreadsheetSkeleton, primary: ISelectionCell): ICellWithCoord {
     const { actualRow, actualColumn, isMerged, isMergedMainCell, startRow, startColumn, endRow, endColumn } = primary;
-    const cellPosition = skeleton.getNoMergeCellPositionByIndex(actualRow, actualColumn);
-    const startCell = skeleton.getNoMergeCellPositionByIndex(startRow, startColumn);
-    const endCell = skeleton.getNoMergeCellPositionByIndex(endRow, endColumn);
+    const cellPosition = skeleton.getNoMergeCellWithCoordByIndex(actualRow, actualColumn);
+    const startCell = skeleton.getNoMergeCellWithCoordByIndex(startRow, startColumn);
+    const endCell = skeleton.getNoMergeCellWithCoordByIndex(endRow, endColumn);
 
     return {
         actualRow,

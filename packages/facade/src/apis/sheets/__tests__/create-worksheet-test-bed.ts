@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,13 +32,14 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { UniverDataValidationPlugin } from '@univerjs/data-validation';
-import { ActiveDirtyManagerService, FormulaDataModel, FunctionService, IActiveDirtyManagerService, IFunctionService, LexerTreeBuilder } from '@univerjs/engine-formula';
+import { ActiveDirtyManagerService, DefinedNamesService, FormulaDataModel, FunctionService, IActiveDirtyManagerService, IDefinedNamesService, IFunctionService, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { Engine, IRenderingEngine, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { ISocketService, WebSocketService } from '@univerjs/network';
 import {
     RangeProtectionRuleModel,
     RefRangeService,
     SheetInterceptorService,
+    SheetSkeletonService,
     SheetsSelectionsService,
     WorkbookPermissionService,
     WorksheetPermissionService,
@@ -159,6 +160,7 @@ export function createWorksheetTestBed(workbookData?: IWorkbookData, dependencie
             injector.add([SheetsRenderService]);
             injector.add([IShortcutService, { useClass: ShortcutService }]);
             injector.add([IPlatformService, { useClass: PlatformService }]);
+            injector.add([SheetSkeletonService]);
             injector.add([SheetSkeletonManagerService]);
             injector.add([FormulaDataModel]);
             injector.add([LexerTreeBuilder]);
@@ -168,6 +170,7 @@ export function createWorksheetTestBed(workbookData?: IWorkbookData, dependencie
             injector.add([WorksheetProtectionPointModel]);
             injector.add([RangeProtectionRuleModel]);
             injector.add([WorksheetProtectionRuleModel]);
+            injector.add([IDefinedNamesService, { useClass: DefinedNamesService }]);
 
             const renderManagerService = injector.get(IRenderManagerService);
             renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, [SheetSkeletonManagerService] as Dependency);

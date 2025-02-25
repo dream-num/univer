@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-import type { ICellData, ICommandInfo, IRange, ISelectionCell, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type { ICellData, ICommandInfo, IRange, ISelectionCell, Nullable, Styles, Workbook, Worksheet } from '@univerjs/core';
 import type { ArrayValueObject, ISheetData } from '@univerjs/engine-formula';
-import type {
-    ISelectionWithStyle,
-} from '@univerjs/sheets';
+import type { ISelectionWithStyle } from '@univerjs/sheets';
 import type { IStatusBarServiceStatus } from '../services/status-bar.service';
 import {
     CellValueType,
@@ -29,6 +27,7 @@ import {
     Inject,
     InterceptorManager,
     IUniverInstanceService,
+    numfmt,
     ObjectMatrix,
     RANGE_TYPE,
     splitIntoGrid,
@@ -56,16 +55,36 @@ class CalculateValueSet {
     private _min: number = Number.POSITIVE_INFINITY;
     private _max: number = Number.NEGATIVE_INFINITY;
 
-    add(value: Nullable<ICellData>) {
-        const v = value?.v;
+    add(value: Nullable<ICellData>, styles: Styles, patternInfoRecord: Record<string, any>) {
+        let v = value?.v;
         const t = value?.t;
+        if (t === CellValueType.NUMBER) v = Number(v);
         if (v !== undefined && v !== null) {
             if (typeof v === 'number' && t !== CellValueType.STRING) {
                 this._sum += v;
                 this._countNumber++;
                 this._min = Math.min(this._min, v);
                 this._max = Math.max(this._max, v);
+            } else if (t === CellValueType.NUMBER && value?.s) {
+                const style = styles.get(value.s);
+                if (style && t === CellValueType.NUMBER && style.n) {
+                    const { pattern } = style.n;
+                    if (!patternInfoRecord[pattern]) {
+                        patternInfoRecord[pattern] = numfmt.getInfo(pattern);
+                    }
+                    const formatInfo = patternInfoRecord[pattern];
+                    const isDate = formatInfo.isDate;
+
+                    if (isDate) {
+                        const dateValue = numfmt.parseDate(v as string).v as number;
+                        this._sum += Number(dateValue);
+                        this._countNumber++;
+                        this._min = Math.min(this._min, Number(dateValue));
+                        this._max = Math.max(this._max, Number(dateValue));
+                    }
+                }
             }
+
             this._count++;
         }
     }
@@ -139,11 +158,19 @@ export class StatusBarController extends Disposable {
             );
         }, 100);
 
+        const _statisticsMovingHandler = debounce((selections: ISelectionWithStyle[]) => {
+            const primary = selections[selections.length - 1]?.primary;
+            this._calculateSelection(
+                selections.map((selection) => selection.range),
+                primary
+            );
+        }, 500);
+
         this.disposeWithMe(
             toDisposable(
                 this._selectionManagerService.selectionMoving$.subscribe((selections) => {
                     if (selections) {
-                        _statisticsHandler(selections);
+                        _statisticsMovingHandler(selections);
                     }
                 })
             )
@@ -263,12 +290,15 @@ export class StatusBarController extends Disposable {
             const noDuplicate = splitIntoGrid(realSelections);
             // const matrix = sheet.getCellMatrix();
             const calculateValueSet = new CalculateValueSet();
+            const styles = workbook.getStyles();
+            const patternInfoRecord: Record<string, any> = {};
+
             for (const range of noDuplicate) {
                 const { startRow, startColumn, endColumn, endRow } = this.getRangeStartEndInfo(range, sheet);
                 for (let r = startRow; r <= endRow; r++) {
                     for (let c = startColumn; c <= endColumn; c++) {
                         const value = sheet.getCell(r, c);
-                        calculateValueSet.add(value);
+                        calculateValueSet.add(value, styles, patternInfoRecord);
                     }
                 }
             }
@@ -293,4 +323,3 @@ export class StatusBarController extends Disposable {
         }
     }
 }
-

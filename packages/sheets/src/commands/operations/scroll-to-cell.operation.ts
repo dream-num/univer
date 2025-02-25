@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,12 @@
 import type { IOperation, IRange } from '@univerjs/core';
 import { CommandType } from '@univerjs/core';
 
-export const ScrollToCellOperation: IOperation<IRange> = {
+export interface IScrollToCellOperationParams {
+    range: IRange;
+    unitId: string;
+}
+
+export const ScrollToCellOperation: IOperation<IScrollToCellOperationParams> = {
     id: 'sheet.operation.scroll-to-cell',
     type: CommandType.OPERATION,
     handler: () => true,

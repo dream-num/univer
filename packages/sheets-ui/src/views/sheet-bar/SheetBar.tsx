@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,20 @@
  * limitations under the License.
  */
 
-import { ICommandService, IPermissionService, useDependency } from '@univerjs/core';
+import type { IScrollState } from './sheet-bar-tabs/utils/slide-tab-bar';
+import { ICommandService, IPermissionService } from '@univerjs/core';
+import { clsx } from '@univerjs/design';
 import { IncreaseSingle, MoreSingle } from '@univerjs/icons';
 import { InsertSheetCommand, WorkbookCreateSheetPermission, WorkbookEditablePermission } from '@univerjs/sheets';
-import React, { useEffect, useState } from 'react';
 
-import { useObservable } from '@univerjs/ui';
-import { ISheetBarService } from '../../services/sheet-bar/sheet-bar.service';
+import { useDependency, useObservable } from '@univerjs/ui';
+import React, { useEffect, useState } from 'react';
 import { useActiveWorkbook } from '../../components/hook';
+import { ISheetBarService } from '../../services/sheet-bar/sheet-bar.service';
 import styles from './index.module.less';
 import { SheetBarButton } from './sheet-bar-button/SheetBarButton';
 import { SheetBarMenu } from './sheet-bar-menu/SheetBarMenu';
 import { SheetBarTabs } from './sheet-bar-tabs/SheetBarTabs';
-import type { IScrollState } from './sheet-bar-tabs/utils/slide-tab-bar';
 
 const SCROLL_WIDTH = 100;
 
@@ -77,7 +78,7 @@ export const SheetBar = () => {
     };
 
     return (
-        <div className={styles.sheetBar}>
+        <div className={clsx(styles.sheetBar, 'univer-relative univer-flex univer-h-full univer-flex-1')}>
             <div className={styles.sheetBarOptions}>
                 {/* Add sheet button */}
                 <SheetBarButton onClick={addSheet} disabled={!(workbookCreateSheetPermission?.value && workbookEditablePermission?.value)}>
@@ -92,7 +93,12 @@ export const SheetBar = () => {
 
             {/* Scroll arrows */}
             {(!leftScrollState || !rightScrollState) && (
-                <div className={`${styles.sheetBarOptions} ${styles.sheetBarOptionsDivider}`}>
+                <div
+                    className={`
+                      ${styles.sheetBarOptions}
+                      ${styles.sheetBarOptionsDivider}
+                    `}
+                >
                     <SheetBarButton disabled={leftScrollState} onClick={handleScrollLeft}>
                         <MoreSingle style={{ transform: 'rotateZ(180deg)' }} />
                     </SheetBarButton>

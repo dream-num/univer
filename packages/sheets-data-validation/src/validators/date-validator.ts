@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ const transformDate2SerialNumber = (value: Nullable<CellValue>) => {
     return numfmt.parseDate(dayjs(value).format('YYYY-MM-DD HH:mm:ss'))?.v as number | undefined;
 };
 
-export class DateValidator extends BaseDataValidator<number> {
+export class DateValidator extends BaseDataValidator {
     id: string = DataValidationType.DATE;
     title: string = 'dataValidation.date.title';
     operators: DataValidationOperator[] = [
@@ -154,78 +154,6 @@ export class DateValidator extends BaseDataValidator<number> {
             ...cellInfo,
             value: transformDate2SerialNumber(value)!,
         };
-    }
-
-    override async validatorIsEqual(cellInfo: IValidatorCellInfo<CellValue>, formula: IFormulaResult, rule: IDataValidationRule) {
-        const { formula1 } = formula;
-        const { value: cellValue } = cellInfo;
-        if (Number.isNaN(formula1)) {
-            return true;
-        }
-
-        return cellValue === formula1;
-    }
-
-    override async validatorIsNotEqual(cellInfo: IValidatorCellInfo<number>, formula: IFormulaResult, _rule: IDataValidationRule) {
-        const { formula1 } = formula;
-        if (Number.isNaN(formula1)) {
-            return true;
-        }
-
-        return cellInfo.value !== formula1;
-    }
-
-    override async validatorIsBetween(cellInfo: IValidatorCellInfo<number>, formula: IFormulaResult, _rule: IDataValidationRule) {
-        const { formula1, formula2 } = formula;
-        if (Number.isNaN(formula1) || Number.isNaN(formula2)) {
-            return true;
-        }
-
-        const start = Math.min(formula1, formula2);
-        const end = Math.max(formula1, formula2);
-        return cellInfo.value >= start && cellInfo.value <= end;
-    }
-
-    override async validatorIsNotBetween(cellInfo: IValidatorCellInfo<number>, formula: IFormulaResult, _rule: IDataValidationRule) {
-        const { formula1, formula2 } = formula;
-        if (Number.isNaN(formula1) || Number.isNaN(formula2)) {
-            return true;
-        }
-        const start = Math.min(formula1, formula2);
-        const end = Math.max(formula1, formula2);
-        return cellInfo.value < start || cellInfo.value > end;
-    }
-
-    override async validatorIsGreaterThan(cellInfo: IValidatorCellInfo<number>, formula: IFormulaResult, _rule: IDataValidationRule) {
-        const { formula1 } = formula;
-        if (Number.isNaN(formula1)) {
-            return true;
-        }
-        return cellInfo.value > formula1;
-    }
-
-    override async validatorIsGreaterThanOrEqual(cellInfo: IValidatorCellInfo<number>, formula: IFormulaResult, _rule: IDataValidationRule) {
-        const { formula1 } = formula;
-        if (Number.isNaN(formula1)) {
-            return true;
-        }
-        return cellInfo.value >= formula1;
-    }
-
-    override async validatorIsLessThan(cellInfo: IValidatorCellInfo<number>, formula: IFormulaResult, _rule: IDataValidationRule) {
-        const { formula1 } = formula;
-        if (Number.isNaN(formula1)) {
-            return true;
-        }
-        return cellInfo.value < formula1;
-    }
-
-    override async validatorIsLessThanOrEqual(cellInfo: IValidatorCellInfo<number>, formula: IFormulaResult, _rule: IDataValidationRule) {
-        const { formula1 } = formula;
-        if (Number.isNaN(formula1)) {
-            return true;
-        }
-        return cellInfo.value <= formula1;
     }
 
     override get operatorNames() {

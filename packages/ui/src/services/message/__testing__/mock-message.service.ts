@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import type { IMessageOptions, IMessageProps } from '@univerjs/design';
 import type { IDisposable } from '@univerjs/core';
+import type { IMessageProps } from '@univerjs/design';
 
-import { toDisposable } from '@univerjs/core';
 import type { IMessageService } from '../message.service';
+import { toDisposable } from '@univerjs/core';
 
 /**
  * This is a mocked message service for testing purposes.
  */
 export class MockMessageService implements IMessageService {
-    show(_options: IMessageOptions & Omit<IMessageProps, 'key'>): IDisposable {
+    show(_options: IMessageProps): IDisposable {
         return toDisposable(() => { /* empty */ });
     }
 

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,11 @@
  */
 
 import type { IDrawingParam } from '@univerjs/core';
-import { ICommandService, LocaleService, useDependency } from '@univerjs/core';
-import React, { useState } from 'react';
+import { ICommandService, LocaleService } from '@univerjs/core';
 import { Select } from '@univerjs/design';
+import { useDependency } from '@univerjs/ui';
 import clsx from 'clsx';
+import React, { useState } from 'react';
 import { AlignType, SetDrawingAlignOperation } from '../../commands/operations/drawing-align.operation';
 import styles from './index.module.less';
 

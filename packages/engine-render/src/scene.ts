@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 import type { IKeyValue, Nullable } from '@univerjs/core';
 import type { BaseObject } from './base-object';
 import type { IDragEvent, IKeyboardEvent, IMouseEvent, IPointerEvent, IWheelEvent } from './basics/i-events';
-import type { IObjectFullState, ISceneTransformState, ITransformChangeState } from './basics/interfaces';
+import type { ISceneTransformState, ITransformChangeState } from './basics/interfaces';
 import type { ITransformerConfig } from './basics/transformer-config';
 import type { Vector2 } from './basics/vector2';
 import type { Canvas } from './canvas';
@@ -39,15 +39,21 @@ export const MAIN_VIEW_PORT_KEY = 'viewMain';
 
 export interface ISceneInputControlOptions {
     enableDown: boolean;
-    enableUp: boolean ;
-    enableMove: boolean ;
-    enableWheel: boolean ;
-    enableEnter: boolean ;
-    enableLeave: boolean ;
+    enableUp: boolean;
+    enableMove: boolean;
+    enableWheel: boolean;
+    enableEnter: boolean;
+    enableLeave: boolean;
 }
 export class Scene extends Disposable {
     private _sceneKey: string = '';
+    /**
+     * Width of scene content, does not affected by zoom.
+     */
     private _width: number = 100;
+    /**
+     * Height of scene content, does not affected by zoom.
+     */
     private _height: number = 100;
     private _scaleX: number = 1;
     private _scaleY: number = 1;
@@ -79,7 +85,15 @@ export class Scene extends Disposable {
     onDblclick$ = new EventSubject<IPointerEvent | IMouseEvent>();
     onTripleClick$ = new EventSubject<IPointerEvent | IMouseEvent>();
     onMouseWheel$ = new EventSubject<IWheelEvent>();
+
+    /**
+     * @deprecated  use `fromGlobalEvent('keydown')` from rx.js instead.
+     */
     onKeyDown$ = new EventSubject<IKeyboardEvent>();
+
+    /**
+     * @deprecated  use `fromGlobalEvent('keyup')` from rx.js instead.
+     */
     onKeyUp$ = new EventSubject<IKeyboardEvent>();
 
     private _beforeRender$ = new BehaviorSubject<Nullable<Canvas>>(null);
@@ -123,7 +137,7 @@ export class Scene extends Disposable {
         this.disposeWithMe(
             toDisposable(
                 this._parent?.onTransformChange$.subscribeEvent((_change: ITransformChangeState) => {
-                    this._setTransForm();
+                    this._transformHandler();
                 })
             )
         );
@@ -181,6 +195,9 @@ export class Scene extends Disposable {
         this._scaleY = scaleY;
     }
 
+    /**
+     * ancestorScaleX means this.scaleX * ancestorScaleX
+     */
     get ancestorScaleX() {
         const p = this.getParent();
         let pScale = 1;
@@ -190,6 +207,9 @@ export class Scene extends Disposable {
         return this.scaleX * pScale;
     }
 
+    /**
+     * ancestorScaleY means this.scaleY * ancestorScaleY
+     */
     get ancestorScaleY() {
         const p = this.getParent();
         let pScale = 1;
@@ -197,6 +217,20 @@ export class Scene extends Disposable {
             pScale = (p as SceneViewer).ancestorScaleY;
         }
         return this.scaleY * pScale;
+    }
+
+    getAncestorScale() {
+        // const { scaleX = 1, scaleY = 1 } = this;
+        // this.classType is always 'Scene', this if is always false
+        // if (this.classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
+        //     scaleX = this.ancestorScaleX || 1;
+        //     scaleY = this.ancestorScaleY || 1;
+        // }
+
+        return {
+            scaleX: this.ancestorScaleX || 1,
+            scaleY: this.ancestorScaleY || 1,
+        };
     }
 
     get ancestorLeft() {
@@ -298,6 +332,11 @@ export class Scene extends Disposable {
         this.resetCursor();
     }
 
+    /**
+     * @deprecated use transformByState instead.
+     * @param width
+     * @param height
+     */
     resize(width?: number, height?: number) {
         const preWidth = this.width;
         if (width !== undefined) {
@@ -309,7 +348,7 @@ export class Scene extends Disposable {
             this.height = height;
         }
 
-        this._setTransForm();
+        this._transformHandler();
         this.onTransformChange$.emitEvent({
             type: TRANSFORM_CHANGE_OBSERVABLE_TYPE.resize,
             value: {
@@ -322,7 +361,12 @@ export class Scene extends Disposable {
         return this;
     }
 
-    setScaleValue(scaleX: number, scaleY: number) {
+    /**
+     * Unlike @scale, this method doesn't emit event.
+     * @param scaleX
+     * @param scaleY
+     */
+    setScaleValueOnly(scaleX: number, scaleY: number) {
         if (scaleX !== undefined) {
             this.scaleX = scaleX;
         }
@@ -340,16 +384,10 @@ export class Scene extends Disposable {
      */
     scale(scaleX?: number, scaleY?: number) {
         const preScaleX = this.scaleX;
-        if (scaleX !== undefined) {
-            this.scaleX = scaleX;
-        }
-
         const preScaleY = this.scaleY;
-        if (scaleY !== undefined) {
-            this.scaleY = scaleY;
-        }
+        this.setScaleValueOnly(scaleX || 1, scaleY || 1);
 
-        this._setTransForm();
+        this._transformHandler();
         this.onTransformChange$.emitEvent({
             type: TRANSFORM_CHANGE_OBSERVABLE_TYPE.scale,
             value: {
@@ -362,22 +400,22 @@ export class Scene extends Disposable {
     }
 
     /**
-     * current scale plus offset, relative
+     * Apply scaleXY base on current scaleX and scaleY
      */
-    scaleBy(scaleX?: number, scaleY?: number) {
+    scaleBy(deltaScaleX?: number, deltaScaleY?: number) {
         const preScaleX = this.scaleX;
-        if (scaleX !== undefined) {
-            this.scaleX += scaleX;
+        if (deltaScaleX !== undefined) {
+            this.scaleX += deltaScaleX; // @TODO lumixraku why not this.scaleX *= deltaScaleX  ???
         }
         const preScaleY = this.scaleY;
-        if (scaleY !== undefined) {
-            this.scaleY += scaleY;
+        if (deltaScaleY !== undefined) {
+            this.scaleY += deltaScaleY;
         }
 
         this.scaleX = precisionTo(this.scaleX, 1);
         this.scaleY = precisionTo(this.scaleY, 1);
 
-        this._setTransForm();
+        this._transformHandler();
         this.onTransformChange$.emitEvent({
             type: TRANSFORM_CHANGE_OBSERVABLE_TYPE.scale,
             value: {
@@ -394,20 +432,20 @@ export class Scene extends Disposable {
      * @param state
      */
     transformByState(state: ISceneTransformState) {
-        const optionKeys = Object.keys(state);
-        const preKeys: IObjectFullState = {};
-        if (optionKeys.length === 0) {
+        const transformStateKeys = Object.keys(state);
+        const preKeys: ISceneTransformState = {};
+        if (transformStateKeys.length === 0) {
             return;
         }
 
-        optionKeys.forEach((pKey) => {
+        transformStateKeys.forEach((pKey) => {
             if (state[pKey as keyof ISceneTransformState] !== undefined) {
                 (preKeys as IKeyValue)[pKey] = this[pKey as keyof Scene];
                 (this as IKeyValue)[pKey] = state[pKey as keyof ISceneTransformState];
             }
         });
 
-        this._setTransForm();
+        this._transformHandler();
 
         this.onTransformChange$.emitEvent({
             type: TRANSFORM_CHANGE_OBSERVABLE_TYPE.all,
@@ -616,6 +654,11 @@ export class Scene extends Disposable {
         return objects;
     }
 
+    /**
+     * Get object in all layers by okey.
+     * @param oKey
+     * @returns
+     */
     getObject(oKey: string): Nullable<BaseObject> {
         for (const layer of this._layers) {
             const objects = layer.getObjectsByOrder();
@@ -863,20 +906,6 @@ export class Scene extends Disposable {
         this._viewports = [];
     }
 
-    getAncestorScale() {
-        let { scaleX = 1, scaleY = 1 } = this;
-
-        if (this.classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
-            scaleX = this.ancestorScaleX || 1;
-            scaleY = this.ancestorScaleY || 1;
-        }
-
-        return {
-            scaleX,
-            scaleY,
-        };
-    }
-
     getPrecisionScale() {
         const pixelRatio = this.getEngine()?.getPixelRatio() || 1;
         const { scaleX, scaleY } = this.getAncestorScale();
@@ -935,7 +964,7 @@ export class Scene extends Disposable {
     }
 
     /**
-     * Get the object under the pointer, if scene.event is disabled, the object is null.
+     * Get the object under the pointer, if scene.event is disabled, return null.
      * @param {Vector2} coord
      * @return {Nullable<BaseObject | Scene>} object under the pointer
      */
@@ -1004,19 +1033,19 @@ export class Scene extends Disposable {
         return isPickedObject;
     }
 
-    triggerKeyDown(evt: IKeyboardEvent) {
-        this.onKeyDown$.emitEvent(evt);
+    // triggerKeyDown(evt: IKeyboardEvent) {
+    //     this.onKeyDown$.emitEvent(evt);
         // if (this._parent instanceof SceneViewer) {
         //     this._parent?.triggerKeyDown(evt);
         // }
-    }
+    // }
 
-    triggerKeyUp(evt: IKeyboardEvent) {
-        this.onKeyUp$.emitEvent(evt);
+    // triggerKeyUp(evt: IKeyboardEvent) {
+    //     this.onKeyUp$.emitEvent(evt);
         // if (this._parent instanceof SceneViewer) {
         //     this._parent?.triggerKeyUp(evt);
         // }
-    }
+    // }
 
     triggerPointerUp(evt: IPointerEvent | IMouseEvent) {
         if (
@@ -1115,6 +1144,14 @@ export class Scene extends Disposable {
         return true;
     }
 
+    triggerPointerCancel(evt: IPointerEvent) {
+        if (this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
+            (this._parent as SceneViewer)?.triggerPointerCancel(evt);
+            return false;
+        }
+        return true;
+    }
+
     triggerPointerEnter(evt: IPointerEvent | IMouseEvent) {
         // this.onPointerEnter$.emitEvent(evt);
         if (
@@ -1177,7 +1214,14 @@ export class Scene extends Disposable {
         return defaultLayer;
     }
 
-    private _setTransForm() {
+    /**
+     * Triggered when scale, resize of scene.
+     * origin name: _setTransForm
+     *
+     */
+    private _transformHandler() {
+        // why not use this.ancestorScaleXY ?
+        // if parent scale changed, this.ancestorScaleXY will remain same.
         const composeResult = Transform.create().composeMatrix({
             scaleX: this.scaleX,
             scaleY: this.scaleY,
@@ -1195,11 +1239,27 @@ export class Scene extends Disposable {
      * Then only scene itself can response to pointer event, all objects under the scene would not.
      * see sceneInputManager@_onPointerMove
      */
+    // 禁用对象事件
     disableObjectsEvent() {
+        // 将_evented属性设置为false
         this._evented = false;
     }
 
     enableObjectsEvent() {
         this._evented = true;
+    }
+
+    _capturedObject: BaseObject | null = null;
+
+    get capturedObject() {
+        return this._capturedObject;
+    }
+
+    setCaptureObject(o: BaseObject) {
+        this._capturedObject = o;
+    }
+
+    releaseCapturedObject() {
+        this._capturedObject = null;
     }
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,16 +17,16 @@
 import { describe, expect, it } from 'vitest';
 
 import { ErrorType } from '../../../../basics/error-type';
+import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import {
     BooleanValueObject,
     NumberValueObject,
     StringValueObject,
 } from '../../../../engine/value-object/primitive-object';
+import { getObjectValue } from '../../../__tests__/create-function-test-bed';
 import { FUNCTION_NAMES_LOOKUP } from '../../function-names';
 import { Address } from '../index';
-import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
-import { getObjectValue } from '../../../__tests__/create-function-test-bed';
 
 describe('Test address', () => {
     const testFunction = new Address(FUNCTION_NAMES_LOOKUP.ADDRESS);
@@ -63,6 +63,10 @@ describe('Test address', () => {
 
         it('Absolute reference to another workbook and worksheet', async () => {
             expect(calculate(2, 3, 1, false, '[Book1]Sheet1')).toBe("'[Book1]Sheet1'!R2C3");
+        });
+
+        it('Absolute reference to sheet name with single quote', async () => {
+            expect(calculate(1, 1, 1, true, "Sheet'1")).toBe("'Sheet''1'!$A$1");
         });
 
         it('Absolute reference to another worksheet', async () => {

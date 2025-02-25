@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,23 +17,27 @@
 import type {
     ICellInfo,
     ICellWithCoord,
+    IContextService,
     IDisposable,
     IFreeze,
     IInterceptor,
     Injector,
     IRange,
     IRangeWithCoord,
+    IStyleSheet,
     Nullable,
-    ThemeService,
 } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, IRenderModule, Scene, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
 import type { ISelectionStyle, ISelectionWithCoord, ISelectionWithStyle } from '@univerjs/sheets';
 import type { IShortcutService } from '@univerjs/ui';
 import type { Observable, Subscription } from 'rxjs';
 import type { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
-import { convertCellToRange, createIdentifier, Disposable, InterceptorManager, RANGE_TYPE } from '@univerjs/core';
+import {
+    convertCellToRange, createIdentifier, Disposable, InterceptorManager, RANGE_TYPE, ThemeService,
+} from '@univerjs/core';
 
 import { ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
+import { REF_SELECTIONS_ENABLED, SELECTIONS_ENABLED } from '@univerjs/sheets';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { SHEET_COMPONENT_SELECTION_LAYER_INDEX } from '../../common/keys';
 import { genNormalSelectionStyle, RANGE_FILL_PERMISSION_CHECK, RANGE_MOVE_PERMISSION_CHECK } from './const';
@@ -79,11 +83,13 @@ export interface ISheetSelectionRenderService {
      */
     getSelectionCellByPosition(x: number, y: number): ICellWithCoord;
 
-    getCellWithCoordByOffset(x: number, y: number): Nullable<ICellWithCoord>; // drawing
+    getCellWithCoordByOffset(x: number, y: number, skeleton?: SpreadsheetSkeleton): Nullable<ICellWithCoord>; // drawing
 
     setSingleSelectionEnabled(enabled: boolean): void;
 
     refreshSelectionMoveEnd(): void;
+
+    resetSelectionsByModelData(selectionsWithStyleList: readonly ISelectionWithStyle[]): void;
 }
 
 export const ISheetSelectionRenderService = createIdentifier<ISheetSelectionRenderService>('univer.sheet.selection-render-service');
@@ -113,6 +119,8 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         startColumn: -1,
         endColumn: -1,
     };
+
+    protected _activeControlIndex = -1;
 
     /**
      * the posX of viewport when the pointer down
@@ -154,20 +162,26 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     // #endregion
 
     /**
-     * Mainly emit by pointerup (pointerup is handled in _onPointerdown)
+     * Mainly emit by pointerup in spreadsheet. (pointerup is handled in _onPointerdown)
      */
     protected readonly _selectionMoveEnd$ = new BehaviorSubject<ISelectionWithCoord[]>([]);
-    readonly selectionMoveEnd$ = this._selectionMoveEnd$.asObservable();
-    protected readonly _selectionMoving$ = new Subject<ISelectionWithCoord[]>();
-    readonly selectionMoving$ = this._selectionMoving$.asObservable();
-
     /**
-     * Mainly emit by pointerdown
+     * Pointerup in spreadsheet
      */
+    readonly selectionMoveEnd$ = this._selectionMoveEnd$.asObservable();
+    /**
+     * Mainly emit by pointermove in spreadsheet
+     */
+    protected readonly _selectionMoving$ = new Subject<ISelectionWithCoord[]>();
+    /**
+     * Pointermove in spreadsheet
+     */
+    readonly selectionMoving$ = this._selectionMoving$.asObservable();
     protected readonly _selectionMoveStart$ = new Subject<ISelectionWithCoord[]>();
     readonly selectionMoveStart$ = this._selectionMoveStart$.asObservable();
 
     private _selectionMoving = false;
+    protected _selectionTheme: ThemeService;
     get selectionMoving(): boolean {
         return this._selectionMoving;
     }
@@ -183,10 +197,13 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         protected readonly _themeService: ThemeService,
         // WTF: why shortcutService is injected here?
         protected readonly _shortcutService: IShortcutService,
-        protected readonly _sheetSkeletonManagerService: SheetSkeletonManagerService
+        protected readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
+        protected readonly contextService: IContextService
+
     ) {
         super();
-        this._resetSelectionStyle();
+        // this._resetSelectionStyle();
+        this._initSelectionThemeFromThemeService();
         this._initMoving();
     }
 
@@ -214,9 +231,9 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     /**
      * Reset this._selectionStyle to default normal selection style
      */
-    protected _resetSelectionStyle(): void {
-        this._setSelectionStyle(genNormalSelectionStyle(this._themeService));
-    }
+    // protected _resetSelectionStyle(): void {
+    //     this._setSelectionStyle(genNormalSelectionStyle(this._themeService));
+    // }
 
     /** @deprecated This should not be provided by the selection render service. */
     getViewPort(): Viewport {
@@ -230,19 +247,18 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     newSelectionControl(scene: Scene, skeleton: SpreadsheetSkeleton, selection: ISelectionWithStyle): SelectionControl {
         const zIndex = this.getSelectionControls().length;
         const { rowHeaderWidth, columnHeaderHeight } = skeleton;
-        const control = new SelectionControl(scene, zIndex, this._themeService, {
+        const control = new SelectionControl(scene, zIndex, this._selectionTheme, {
             highlightHeader: this._highlightHeader,
             rowHeaderWidth,
             columnHeaderHeight,
         });
         this._selectionControls.push(control);
         const selectionWithCoord = attachSelectionWithCoord(selection, skeleton);
-        control.updateRangeBySelectionWithCoord(selectionWithCoord);
-
+        control.updateRangeBySelectionWithCoord(selectionWithCoord, skeleton);
         control.setControlExtension({
             skeleton,
             scene,
-            themeService: this._themeService,
+            themeService: this._selectionTheme,
             injector: this._injector,
             selectionHooks: {
                 selectionMoveEnd: (): void => {
@@ -255,9 +271,9 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     }
 
     /**
-     * Update the corresponding selectionControl based on selectionsData.
-     * selectionData[i] syncs selectionControls[i]
-     * @param selectionsWithCoord
+     * Update the corresponding selectionControl based on selectionsData from WorkbookSelectionModel
+     * selectionData[i] --> selectionControls[i]
+     * @param selectionsWithStyleList {ISelectionWithStyle[]} selectionsData from WorkbookSelectionModel
      */
     resetSelectionsByModelData(selectionsWithStyleList: readonly ISelectionWithStyle[]): void {
         const allSelectionControls = this.getSelectionControls();
@@ -270,10 +286,13 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
             const selectionWithStyle = selectionsWithStyleList[i];
             const selectionWithCoord = attachSelectionWithCoord(selectionWithStyle, this._skeleton);
             const control = allSelectionControls[i];
+
             if (control) {
-                control.updateRangeBySelectionWithCoord(selectionWithCoord);
+                control.updateRangeBySelectionWithCoord(selectionWithCoord, skeleton);
             } else {
-                this.newSelectionControl(this._scene!, skeleton, selectionWithStyle);
+                if (this.isSelectionEnabled()) {
+                    this.newSelectionControl(this._scene!, skeleton, selectionWithStyle);
+                }
             }
         }
         if (selectionsWithStyleList.length < allSelectionControls.length) {
@@ -288,6 +307,16 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
 
     refreshSelectionMoveEnd(): void {
         this._selectionMoveEnd$.next(this.getSelectionDataWithStyle());
+    }
+
+    _initSelectionThemeFromThemeService() {
+        const currTheme = this._themeService.getCurrentTheme();
+        this._selectionTheme = new ThemeService();
+        this._selectionTheme.setTheme(currTheme);
+    }
+
+    setSelectionTheme(prop: IStyleSheet) {
+        this._selectionTheme.setTheme(prop);
     }
 
     protected _changeRuntime(skeleton: SpreadsheetSkeleton, scene: Scene, viewport?: Viewport): void {
@@ -332,7 +361,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
      */
     protected _addSelectionControlByModelData(selectionWithStyle: ISelectionWithStyle): SelectionControl {
         const skeleton = this._skeleton;
-        const style = selectionWithStyle.style ?? genNormalSelectionStyle(this._themeService);
+        const style = selectionWithStyle.style ?? genNormalSelectionStyle(this._selectionTheme);
         const scene = this._scene;
 
         selectionWithStyle.style = style;
@@ -350,7 +379,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     }
 
     protected _getFreeze(): Nullable<IFreeze> {
-        const freeze = this._sheetSkeletonManagerService.getCurrent()?.skeleton.getWorksheetConfig().freeze;
+        const freeze = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton.getWorksheetConfig().freeze;
         return freeze;
     }
 
@@ -396,6 +425,14 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         );
     }
 
+    setActiveSelectionIndex(index: number) {
+        this._activeControlIndex = index;
+    }
+
+    resetActiveSelectionIndex(): void {
+        this._activeControlIndex = -1;
+    }
+
     /**
      * get active(actually last) selection control
      * @returns T extends SelectionControl
@@ -403,7 +440,11 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     getActiveSelectionControl<T extends SelectionControl = SelectionControl>(): Nullable<T> {
         const controls = this.getSelectionControls();
         if (controls) {
-            return controls[controls.length - 1] as T;
+            if (this._activeControlIndex < 0) {
+                return controls[controls.length - 1] as T;
+            }
+
+            return controls[this._activeControlIndex] as T;
         }
     }
 
@@ -425,13 +466,6 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         this._downObserver = null;
     }
 
-    // resetAndEndSelection(): void {
-    //     this.endSelection();
-    //     this._reset();
-    // }
-
-    // TODO: @wzhudev: refactor the method to make it more readable
-
     /**
      * Init pointer move listener in each pointer down, unbind in each pointer up.
      * Both cell selections and row-column selections are supported by this method.
@@ -442,7 +476,6 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
      * @param moveStartPosX
      * @param moveStartPosY
      */
-    // eslint-disable-next-line max-lines-per-function
     protected _setupPointerMoveListener(
         viewportMain: Nullable<Viewport>,
         activeSelectionControl: SelectionControl,
@@ -462,7 +495,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         const startViewport = scene.getActiveViewportByCoord(Vector2.FromArray([moveStartPosX, moveStartPosY]));
 
         // #region onPointerMove$
-        // eslint-disable-next-line max-lines-per-function, complexity
+        // eslint-disable-next-line complexity
         this._scenePointerMoveSub = scene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
             const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
 
@@ -630,9 +663,9 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         return this.getCellWithCoordByOffset(x, y);
     }
 
-    getCellWithCoordByOffset(x: number, y: number): ICellWithCoord {
+    getCellWithCoordByOffset(x: number, y: number, skeletonParam?: SpreadsheetSkeleton): ICellWithCoord {
         const scene = this._scene;
-        const skeleton = this._skeleton;
+        const skeleton = skeletonParam ?? this._skeleton;
         const scrollXY = scene.getViewportScrollXY(scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN)!);
         const { scaleX, scaleY } = scene.getAncestorScale();
 
@@ -661,10 +694,8 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
             unitId,
             sheetId,
         };
-        this._scene.getEngine()?.setRemainCapture();
 
         const viewportMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN)!;
-
         const targetViewport = this._getViewportByCell(currSelectionRange.endRow, currSelectionRange.endColumn) ?? viewportMain;
 
         const scrollXY = scene.getScrollXYInfoByViewport(
@@ -795,7 +826,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
 
         //@region other range type
         const { row, column } = skeleton.getCellIndexByOffset(offsetX, offsetY, scaleX, scaleY, scrollXY);
-        const startCell = skeleton.getNoMergeCellPositionByIndex(row, column);
+        const startCell = skeleton.getNoMergeCellWithCoordByIndex(row, column);
         const { startX, startY, endX, endY } = startCell;
 
         const rangeWithCoord: IRangeWithCoord = {
@@ -897,6 +928,18 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         // const activeCell = skeleton.getCellWithCoordByIndex(actualRow, actualColumn);
 
         // activeControl.updateRange(newSelectionRange, currentCell);
+    }
+
+    isSelectionEnabled(): boolean {
+        return this.contextService.getContextValue(SELECTIONS_ENABLED);
+    }
+
+    isSelectionDisabled(): boolean {
+        return this.contextService.getContextValue(SELECTIONS_ENABLED) === false;
+    }
+
+    inRefSelectionMode(): boolean {
+        return this.contextService.getContextValue(REF_SELECTIONS_ENABLED);
     }
 }
 

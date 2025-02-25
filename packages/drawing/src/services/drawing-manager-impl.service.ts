@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
+import type { IDrawingParam, IDrawingSearch, Nullable } from '@univerjs/core';
 import type { JSONOp, JSONOpList } from 'ot-json1';
-import type { IDrawingGroupUpdateParam, IDrawingMap, IDrawingMapItemData, IDrawingOrderMapParam, IDrawingOrderUpdateParam, IDrawingParam, IDrawingSearch, IDrawingSubunitMap, IDrawingVisibleParam, IUnitDrawingService } from './drawing-manager.service';
+import type { IDrawingGroupUpdateParam, IDrawingMap, IDrawingMapItemData, IDrawingOrderMapParam, IDrawingOrderUpdateParam, IDrawingSubunitMap, IDrawingVisibleParam, IUnitDrawingService } from './drawing-manager.service';
 import { sortRules, sortRulesByDesc } from '@univerjs/core';
 import * as json1 from 'ot-json1';
 import { type Observable, Subject } from 'rxjs';
@@ -237,7 +237,7 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
              * ops: [[unit, sheetUnit, order, 0, { r: true }], [unit, sheetUnit, order, 1, { r: true }]]
              * We expected them to composed as [unit, sheetUnit, order, [0, { r: true }], [1, { r: true }]]
              * But extremely confusing to get [unit, sheetUnit, order, 0, { r: true }, 2, { r: true }]
-             * And We apply this composed op to data, it's not a 2-index item for us to remove.
+             * And We apply this composed op to data, it's no item with index 2 can be removed.
              * So use unshift api instead of push here.
              */
             ops.unshift(op);
@@ -470,7 +470,7 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
     }
 
     focusDrawing(params: Nullable<IDrawingSearch[]>): void {
-        if (params == null) {
+        if (params == null || params.length === 0) {
             this._focusDrawings = [];
             this._focus$.next([]);
             return;

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import { SetSelectionsOperation, SetWorksheetActiveOperation } from '@univerjs/s
 import { ERROR_RANGE, SheetHyperLinkType } from '@univerjs/sheets-hyper-link';
 import { ScrollToRangeOperation } from '@univerjs/sheets-ui';
 import { IMessageService } from '@univerjs/ui';
-import { PLUGIN_CONFIG_KEY } from '../controllers/config.schema';
+import { SHEETS_HYPER_LINK_UI_PLUGIN_CONFIG_KEY } from '../controllers/config.schema';
 
 function getContainRange(range: IRange, worksheet: Worksheet) {
     const mergedCells = worksheet.getMergeData();
@@ -141,6 +141,7 @@ export class SheetsHyperLinkResolverService {
 
                     selections: [{
                         range: realRange,
+                        primary: null,
                     }],
                 } as ISetSelectionsOperationParams
             );
@@ -195,7 +196,7 @@ export class SheetsHyperLinkResolverService {
     }
 
     async navigateToOtherWebsite(url: string) {
-        const config = this._configService.getConfig<IUniverSheetsHyperLinkUIConfig>(PLUGIN_CONFIG_KEY);
+        const config = this._configService.getConfig<IUniverSheetsHyperLinkUIConfig>(SHEETS_HYPER_LINK_UI_PLUGIN_CONFIG_KEY);
 
         if (config?.urlHandler?.navigateToOtherWebsite) {
             return config.urlHandler.navigateToOtherWebsite(url);

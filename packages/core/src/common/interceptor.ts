@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+/* eslint-disable ts/no-explicit-any */
+
 import type { Nullable } from '../shared/types';
 import { remove } from './array';
 
@@ -27,12 +29,19 @@ export enum InterceptorEffectEnum {
     Style = 1, // 1<< 0
     Value = 2, // 1<< 1
 }
+
 export interface IInterceptor<M, C> {
+    id?: string;
     priority?: number;
     handler: InterceptorHandler<M, C>;
 }
 
 export interface ICellInterceptor<M, C> extends IInterceptor<M, C> {
+    /**
+     * The effect of the interceptor handler.
+     * If the effect is 'Style', the worksheet@getCellValueOnly will bypass this interceptor.
+     * If the effect is 'Value', the worksheet@getStyleOnly will bypass this interceptor.
+     */
     effect?: InterceptorEffectEnum;
 }
 
@@ -89,9 +98,21 @@ export class InterceptorManager<P extends Record<string, IInterceptor<any, any>>
         this._interceptorPoints = interceptorPoints;
     }
 
-    public fetchThroughInterceptors<T, C>(name: IInterceptor<T, C>) {
+    /**
+     * Get the interceptors.
+     * @param name Name of the intercepted point.
+     * @param filter A callback function to filter the interceptors.
+     * @returns It will return a composed interceptor function. If you will perform the interceptor repeatedly,
+     * you should cache the result instead of calling this function multiple times.
+     */
+    public fetchThroughInterceptors<T, C>(name: IInterceptor<T, C>, filter?: (interceptor: IInterceptor<any, any>) => boolean) {
         const key = name as unknown as string;
-        const interceptors = this._interceptorsByName.get(key) as unknown as Array<typeof name>;
+        let interceptors = this._interceptorsByName.get(key) as unknown as Array<typeof name>;
+
+        if (filter) {
+            interceptors = interceptors.filter(filter);
+        }
+
         return composeInterceptors(interceptors || []);
     }
 
@@ -131,6 +152,10 @@ export type AsyncInterceptorHandler<M = unknown, C = unknown> = (
 ) => Promise<Nullable<M>>;
 
 export interface IAsyncInterceptor<M, C> {
+    /**
+     * The priority of the interceptor, the larger the number, the higher the priority.
+     * @default 0
+     */
     priority?: number;
     handler: AsyncInterceptorHandler<M, C>;
 }
@@ -182,9 +207,21 @@ export class AsyncInterceptorManager<P extends Record<string, IAsyncInterceptor<
         this._asyncInterceptorPoints = asyncInterceptorPoints;
     }
 
-    public fetchThroughAsyncInterceptors<T, C>(name: IAsyncInterceptor<T, C>) {
+    /**
+     * Get the interceptors.
+     * @param name Name of the intercepted point.
+     * @param filter A callback function to filter the interceptors.
+     * @returns It will return a composed interceptor function. If you will perform the interceptor repeatedly,
+     * you should cache the result instead of calling this function multiple times.
+     */
+    public fetchThroughAsyncInterceptors<T, C>(name: IAsyncInterceptor<T, C>, filter?: (interceptor: IAsyncInterceptor<any, any>) => boolean) {
         const key = name as unknown as string;
-        const interceptors = this._asyncInterceptorsByName.get(key) as unknown as Array<typeof name>;
+        let interceptors = this._asyncInterceptorsByName.get(key) as unknown as Array<typeof name>;
+
+        if (filter) {
+            interceptors = interceptors.filter(filter);
+        }
+
         return composeAsyncInterceptors(interceptors || []);
     }
 
@@ -193,6 +230,7 @@ export class AsyncInterceptorManager<P extends Record<string, IAsyncInterceptor<
         if (!this._asyncInterceptorsByName.has(key)) {
             this._asyncInterceptorsByName.set(key, []);
         }
+
         const interceptors = this._asyncInterceptorsByName.get(key)!;
         interceptors.push(interceptor);
 

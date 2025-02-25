@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,8 +29,8 @@ import { ChangeFilterByOperation, CloseFilterPanelOperation, FILTER_PANEL_OPENED
 import { SheetsFilterPanelService } from '../services/sheets-filter-panel.service';
 import { FilterPanel } from '../views/components/SheetsFilterPanel';
 import { menuSchema } from './menu.schema';
-import { SmartToggleFilterShortcut } from './sheets-filter.shortcut';
 import { SheetsFilterUIMobileController } from './sheets-filter-ui-mobile.controller';
+import { SmartToggleFilterShortcut } from './sheets-filter.shortcut';
 
 export const FILTER_PANEL_POPUP_KEY = 'FILTER_PANEL_POPUP';
 

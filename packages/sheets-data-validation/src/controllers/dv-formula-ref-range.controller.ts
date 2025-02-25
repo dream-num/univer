@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,17 +17,18 @@
 import type { IDisposable, IMutationInfo, ISheetDataValidationRule } from '@univerjs/core';
 import type { IUpdateDataValidationMutationParams } from '@univerjs/data-validation';
 import { Disposable, generateRandomId, Inject, toDisposable } from '@univerjs/core';
-import { AddDataValidationMutation, RemoveDataValidationMutation, UpdateDataValidationMutation, UpdateRuleType } from '@univerjs/data-validation';
+import { AddDataValidationMutation, DataValidatorRegistryService, RemoveDataValidationMutation, UpdateDataValidationMutation, UpdateRuleType } from '@univerjs/data-validation';
 import { FormulaRefRangeService } from '@univerjs/sheets-formula';
 import { SheetDataValidationModel } from '../models/sheet-data-validation-model';
-import { isCustomFormulaType } from '../utils/formula';
+import { shouldOffsetFormulaByRange } from '../utils/formula';
 
 export class DataValidationFormulaRefRangeController extends Disposable {
     private _disposableMap: Map<string, IDisposable> = new Map();
 
     constructor(
         @Inject(SheetDataValidationModel) private _dataValidationModel: SheetDataValidationModel,
-        @Inject(FormulaRefRangeService) private _formulaRefRangeService: FormulaRefRangeService
+        @Inject(FormulaRefRangeService) private _formulaRefRangeService: FormulaRefRangeService,
+        @Inject(DataValidatorRegistryService) private _validatorRegistryService: DataValidatorRegistryService
     ) {
         super();
         this._initRefRange();
@@ -38,7 +39,7 @@ export class DataValidationFormulaRefRangeController extends Disposable {
     }
 
     registerRule = (unitId: string, subUnitId: string, rule: ISheetDataValidationRule) => {
-        if (!isCustomFormulaType(rule.type)) {
+        if (!shouldOffsetFormulaByRange(rule.type, this._validatorRegistryService)) {
             return;
         }
 
@@ -60,6 +61,7 @@ export class DataValidationFormulaRefRangeController extends Disposable {
                             unitId,
                             subUnitId,
                             rule,
+                            source: 'patched',
                         },
                     }],
                     redos: [{
@@ -68,6 +70,7 @@ export class DataValidationFormulaRefRangeController extends Disposable {
                             unitId,
                             subUnitId,
                             ruleId: rule.uid,
+                            source: 'patched',
                         },
                     }],
                 };
@@ -89,6 +92,7 @@ export class DataValidationFormulaRefRangeController extends Disposable {
                             formula2: first.formulas[1],
                         },
                     },
+                    source: 'patched',
                 } as IUpdateDataValidationMutationParams,
             });
             undos.push({
@@ -105,6 +109,7 @@ export class DataValidationFormulaRefRangeController extends Disposable {
                             formula2: oldFormula2,
                         },
                     },
+                    source: 'patched',
                 },
             });
 
@@ -123,6 +128,7 @@ export class DataValidationFormulaRefRangeController extends Disposable {
                             formula2: item.formulas[1],
                             ranges: item.ranges,
                         },
+                        source: 'patched',
                     },
                 });
                 undos.push({
@@ -131,6 +137,7 @@ export class DataValidationFormulaRefRangeController extends Disposable {
                         unitId,
                         subUnitId,
                         ruleId: id,
+                        source: 'patched',
                     },
                 });
             }

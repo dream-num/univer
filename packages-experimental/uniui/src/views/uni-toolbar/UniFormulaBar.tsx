@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,15 @@
  */
 
 import type { Nullable, Workbook } from '@univerjs/core';
-import { BooleanNumber, DEFAULT_EMPTY_DOCUMENT_VALUE, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DocumentFlavor, HorizontalAlign, IPermissionService, IUniverInstanceService, Rectangle, ThemeService, UniverInstanceType, useDependency, useObservable, VerticalAlign, WrapStrategy } from '@univerjs/core';
-import { TextEditor } from '@univerjs/docs-ui';
+import { BooleanNumber, DEFAULT_EMPTY_DOCUMENT_VALUE, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DocumentFlavor, HorizontalAlign, ICommandService, IPermissionService, IUniverInstanceService, Rectangle, ThemeService, UniverInstanceType, VerticalAlign, WrapStrategy } from '@univerjs/core';
+import { clsx } from '@univerjs/design';
+// import { TextEditor } from '@univerjs/docs-ui';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { CheckMarkSingle, CloseSingle, FxSingle } from '@univerjs/icons';
 import { RangeProtectionPermissionEditPoint, RangeProtectionRuleModel, SheetsSelectionsService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetProtectionRuleModel, WorksheetSetCellValuePermission } from '@univerjs/sheets';
-import { IEditorBridgeService, IFormulaEditorManagerService, useActiveWorkbook } from '@univerjs/sheets-ui';
-import { KeyCode } from '@univerjs/ui';
-import clsx from 'clsx';
+import { IEditorBridgeService, IFormulaEditorManagerService, SetCellEditVisibleOperation, useActiveWorkbook } from '@univerjs/sheets-ui';
+// import { TextEditor } from '@univerjs/docs-ui';
+import { KeyCode, useDependency, useObservable } from '@univerjs/ui';
 import React, { useCallback, useLayoutEffect, useState } from 'react';
 import { EMPTY, merge, switchMap } from 'rxjs';
 import styles from './index.module.less';
@@ -30,6 +31,7 @@ import styles from './index.module.less';
 export const UniFormulaBar = () => {
     const editorBridgeService = useDependency(IEditorBridgeService);
     const univerInstanceService = useDependency(IUniverInstanceService);
+    const commandService = useDependency(ICommandService);
 
     const visibleInfo = useObservable(editorBridgeService.visible$);
     const focusedId = useObservable(univerInstanceService.focused$);
@@ -37,7 +39,7 @@ export const UniFormulaBar = () => {
 
     const handleOpenWrite = useCallback(() => {
         if (focusedId) {
-            editorBridgeService.changeVisible({
+            commandService.executeCommand(SetCellEditVisibleOperation.id, {
                 visible: true,
                 eventType: DeviceInputEventType.PointerDown,
                 unitId: focusedId,
@@ -74,6 +76,7 @@ export function FormulaBar() {
     const editorBridgeService = useDependency(IEditorBridgeService);
     const themeService = useDependency(ThemeService);
     const progressBarColor = themeService.getCurrentTheme().primaryColor;
+    const commandService = useDependency(ICommandService);
     const [disable, setDisable] = useState<boolean>(false);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const selectionManager = useDependency(SheetsSelectionsService);
@@ -96,6 +99,7 @@ export function FormulaBar() {
             worksheetProtectionRuleModel.ruleChange$,
             rangeProtectionRuleModel.ruleChange$,
             selectionManager.selectionMoveEnd$,
+            selectionManager.selectionSet$,
             workbook.activeSheet$
         ).pipe(
             switchMap(() => {
@@ -178,7 +182,7 @@ export function FormulaBar() {
     function handleCloseBtnClick() {
         const visibleState = editorBridgeService.isVisible();
         if (visibleState.visible) {
-            editorBridgeService.changeVisible({
+            commandService.executeCommand(SetCellEditVisibleOperation.id, {
                 visible: false,
                 eventType: DeviceInputEventType.Keyboard,
                 keycode: KeyCode.ESC,
@@ -191,7 +195,7 @@ export function FormulaBar() {
     function handleConfirmBtnClick() {
         const visibleState = editorBridgeService.isVisible();
         if (visibleState.visible) {
-            editorBridgeService.changeVisible({
+            commandService.executeCommand(SetCellEditVisibleOperation.id, {
                 visible: false,
                 eventType: DeviceInputEventType.PointerDown,
                 unitId: currentWorkbook?.getUnitId() ?? '',
@@ -205,16 +209,16 @@ export function FormulaBar() {
 
     return (
         <div className={styles.uniFormulaBox}>
-            <TextEditor
+            {/* <TextEditor
                 id={DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY}
-                isSheetEditor={true}
+                isSheetEditor
                 resizeCallBack={resizeCallBack}
-                cancelDefaultResizeListener={true}
+                cancelDefaultResizeListener
                 onContextMenu={(e) => e.preventDefault()}
                 className={clsx(styles.uniFormulaInput, styles.formulaContent)}
                 snapshot={INITIAL_SNAPSHOT}
-                isSingle={true}
-            />
+                isSingle
+            /> */}
             <div className={clsx(styles.formulaIcon, { [styles.formulaIconDisable]: disable })}>
                 <span
                     className={clsx(styles.iconContainer, styles.iconContainerError)}

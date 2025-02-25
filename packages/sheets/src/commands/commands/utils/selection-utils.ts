@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import type { ICellData, IObjectMatrixPrimitiveType, IRange, ISelectionCell, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type { ICellData, IInterceptor, IObjectMatrixPrimitiveType, IRange, ISelectionCell, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import type { ISelectionWithStyle } from '../../../basics/selection';
 
 import type { ISetSelectionsOperationParams } from '../../operations/selection.operation';
 import { RANGE_TYPE, Rectangle, selectionToArray } from '@univerjs/core';
+import { IgnoreRangeThemeInterceptorKey, RangeThemeInterceptorId } from '../../../services/sheet-interceptor/interceptor-const';
 import { SetSelectionsOperation } from '../../operations/selection.operation';
 
 export interface IExpandParams {
@@ -234,6 +235,8 @@ export function createRangeIteratorWithSkipFilteredRows(sheet: Worksheet) {
     };
 }
 
+const ignoreRangeThemeInterceptorFilter = (interceptor: IInterceptor<unknown, unknown>) => interceptor.id !== RangeThemeInterceptorId;
+
 /**
  * Copy the styles of a range of cells to another range. Used for insert row and insert column.
  * @param worksheet
@@ -256,7 +259,10 @@ export function copyRangeStyles(
     const cellValue: IObjectMatrixPrimitiveType<ICellData> = {};
     for (let row = startRow; row <= endRow; row++) {
         for (let column = startColumn; column <= endColumn; column++) {
-            const cell = isRow ? worksheet.getCell(styleRowOrColumn, column) : worksheet.getCell(row, styleRowOrColumn);
+            const cell = isRow ?
+                worksheet.getCellWithFilteredInterceptors(styleRowOrColumn, column, IgnoreRangeThemeInterceptorKey, ignoreRangeThemeInterceptorFilter)
+                : worksheet.getCellWithFilteredInterceptors(row, styleRowOrColumn, IgnoreRangeThemeInterceptorKey, ignoreRangeThemeInterceptorFilter);
+
             if (!cell || !cell.s) {
                 continue;
             }
@@ -281,7 +287,10 @@ export function copyRangeStylesWithoutBorder(
     const cellValue: IObjectMatrixPrimitiveType<ICellData> = {};
     for (let row = startRow; row <= endRow; row++) {
         for (let column = startColumn; column <= endColumn; column++) {
-            const cell = isRow ? worksheet.getCell(styleRowOrColumn, column) : worksheet.getCell(row, styleRowOrColumn);
+            const cell = isRow
+                ? worksheet.getCellWithFilteredInterceptors(styleRowOrColumn, column, IgnoreRangeThemeInterceptorKey, ignoreRangeThemeInterceptorFilter)
+                : worksheet.getCellWithFilteredInterceptors(row, styleRowOrColumn, IgnoreRangeThemeInterceptorKey, ignoreRangeThemeInterceptorFilter);
+
             if (!cell || !cell.s) {
                 continue;
             }

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-export const PLUGIN_CONFIG_KEY = 'data-validation.config';
+export const DATA_VALIDATION_PLUGIN_CONFIG_KEY = 'data-validation.config';
 
-export const configSymbol = Symbol(PLUGIN_CONFIG_KEY);
+export const configSymbol = Symbol(DATA_VALIDATION_PLUGIN_CONFIG_KEY);
 
 export interface IUniverDataValidationConfig {
 }

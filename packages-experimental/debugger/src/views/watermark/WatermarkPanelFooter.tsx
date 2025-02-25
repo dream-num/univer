@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import { LocaleService, useDependency } from '@univerjs/core';
+import { LocaleService } from '@univerjs/core';
 import { Button } from '@univerjs/design';
-import { IClipboardInterfaceService, ISidebarService } from '@univerjs/ui';
-import { IWatermarkTypeEnum, WatermarkService, WatermarkTextBaseConfig } from '@univerjs/watermark';
+import { IWatermarkTypeEnum } from '@univerjs/engine-render';
+import { IClipboardInterfaceService, ISidebarService, useDependency } from '@univerjs/ui';
+import { WatermarkService, WatermarkTextBaseConfig } from '@univerjs/watermark';
 import React from 'react';
 import styles from './index.module.less';
 
@@ -58,15 +59,16 @@ export const WatermarkPanelFooter: React.FC = () => {
                 >
                     {localeService.t('univer-watermark.copy')}
                 </Button>
-                <Button onClick={async () => {
-                    const watermarkConfig = await watermarkService.getWatermarkConfig();
-                    if (watermarkConfig?.type === IWatermarkTypeEnum.Text && !watermarkConfig.config.text?.content) {
-                        watermarkService.deleteWatermarkConfig();
-                    } else if (watermarkConfig?.type === IWatermarkTypeEnum.Image && !watermarkConfig.config.image?.url) {
-                        watermarkService.deleteWatermarkConfig();
-                    }
-                    sidebarService.close();
-                }}
+                <Button
+                    onClick={async () => {
+                        const watermarkConfig = await watermarkService.getWatermarkConfig();
+                        if (watermarkConfig?.type === IWatermarkTypeEnum.Text && !watermarkConfig.config.text?.content) {
+                            watermarkService.deleteWatermarkConfig();
+                        } else if (watermarkConfig?.type === IWatermarkTypeEnum.Image && !watermarkConfig.config.image?.url) {
+                            watermarkService.deleteWatermarkConfig();
+                        }
+                        sidebarService.close();
+                    }}
                 >
                     {localeService.t('univer-watermark.close')}
                 </Button>

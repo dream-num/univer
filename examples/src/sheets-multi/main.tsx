@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { LocaleType, LogLevel, Tools, Univer } from '@univerjs/core';
-import { defaultTheme } from '@univerjs/design';
+import { LocaleType, LogLevel, Tools, Univer, UniverInstanceType } from '@univerjs/core';
+import { defaultTheme, render } from '@univerjs/design';
 
 import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
@@ -24,17 +24,18 @@ import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '@univerjs/mockdata';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
+import { UniverSheetsFormulaUIPlugin } from '@univerjs/sheets-formula-ui';
 import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
 import { UniverSheetsNumfmtUIPlugin } from '@univerjs/sheets-numfmt-ui';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 import { UniverUIPlugin } from '@univerjs/ui';
 import React, { useEffect } from 'react';
-import { createRoot } from 'react-dom/client';
 import { Mosaic, MosaicWindow } from 'react-mosaic-component';
-import { enUS, faIR, ruRU, zhCN } from '../locales';
+import { enUS, faIR, frFR, ruRU, zhCN } from '../locales';
 
 import 'react-mosaic-component/react-mosaic-component.css';
-import './index.css';
+
+import '../global.css';
 
 function factory(id: string) {
     return function createUniverOnContainer() {
@@ -44,6 +45,7 @@ function factory(id: string) {
             locales: {
                 [LocaleType.ZH_CN]: zhCN,
                 [LocaleType.EN_US]: enUS,
+                [LocaleType.FR_FR]: frFR,
                 [LocaleType.RU_RU]: ruRU,
                 [LocaleType.FA_IR]: faIR,
             },
@@ -61,14 +63,16 @@ function factory(id: string) {
         // sheets plugin
         univer.registerPlugin(UniverSheetsPlugin);
         univer.registerPlugin(UniverSheetsUIPlugin);
-
+        univer.registerPlugin(UniverSheetsFormulaUIPlugin);
         // sheet feature plugins
         univer.registerPlugin(UniverSheetsNumfmtPlugin);
         univer.registerPlugin(UniverSheetsNumfmtUIPlugin);
         univer.registerPlugin(UniverSheetsFormulaPlugin);
 
+        const data = Tools.deepClone(DEFAULT_WORKBOOK_DATA_DEMO);
+        data.id = id;
         // create univer sheet instance
-        univer.createUniverSheet(Tools.deepClone(DEFAULT_WORKBOOK_DATA_DEMO));
+        univer.createUnit(UniverInstanceType.UNIVER_SHEET, data);
     };
 }
 
@@ -112,4 +116,5 @@ export function App() {
         />
     );
 };
-createRoot(document.getElementById('container')!).render(<App />);
+
+render(<App />, document.getElementById('app')!);

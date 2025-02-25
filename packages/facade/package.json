@@ -1,7 +1,7 @@
 {
     "name": "@univerjs/facade",
-    "version": "0.5.0",
-    "private": false,
+    "version": "0.6.1",
+    "private": true,
     "description": "",
     "author": "DreamNum <developer@univer.ai>",
     "license": "Apache-2.0",
@@ -66,6 +66,7 @@
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/network": "workspace:*",
         "@univerjs/sheets": "workspace:*",
+        "@univerjs/sheets-conditional-formatting": "workspace:*",
         "@univerjs/sheets-data-validation": "workspace:*",
         "@univerjs/sheets-filter": "workspace:*",
         "@univerjs/sheets-formula": "workspace:*",
@@ -74,6 +75,7 @@
         "@univerjs/sheets-numfmt": "workspace:*",
         "@univerjs/sheets-thread-comment": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
+        "@univerjs/sheets-zen-editor": "workspace:*",
         "@univerjs/ui": "workspace:*"
     },
     "devDependencies": {
@@ -87,21 +89,8 @@
         "jest-canvas-mock": "^2.5.2",
         "jsdom": "^24.1.1",
         "rxjs": "^7.8.1",
-        "typescript": "^5.6.3",
-        "vite": "^5.4.11",
-        "vitest": "^2.1.5"
-    },
-    "space": {
-        ".": {
-            "import": "./lib/es/index.js",
-            "require": "./lib/cjs/index.js",
-            "types": "./lib/types/index.d.ts"
-        },
-        "./*": {
-            "import": "./lib/es/*",
-            "require": "./lib/cjs/*",
-            "types": "./lib/types/index.d.ts"
-        },
-        "./lib/*": "./lib/*"
+        "typescript": "^5.7.3",
+        "vite": "^6.1.1",
+        "vitest": "^3.0.6"
     }
 }

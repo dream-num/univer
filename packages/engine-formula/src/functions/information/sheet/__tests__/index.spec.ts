@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -148,7 +148,7 @@ describe('Test rank function', () => {
             const result = await calculate('=SHEET(A1)');
             expect(result).toBe(1);
 
-            const result2 = await calculate(`=SHEET('工作表2'!A1)`);
+            const result2 = await calculate('=SHEET(\'工作表2\'!A1)');
             expect(result2).toBe(2);
         });
 

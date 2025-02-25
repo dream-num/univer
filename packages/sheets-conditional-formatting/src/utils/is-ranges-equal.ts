@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,4 @@
  * limitations under the License.
  */
 
-import type { IRange } from '@univerjs/core';
-import { Rectangle } from '@univerjs/core';
-
-export const isRangesEqual = (oldRanges: IRange[], ranges: IRange[]) => {
-    return ranges.length === oldRanges.length && !oldRanges.some((oldRange) => ranges.some((range) => !Rectangle.equals(range, oldRange)));
-};
+export { isRangesEqual } from '@univerjs/core';

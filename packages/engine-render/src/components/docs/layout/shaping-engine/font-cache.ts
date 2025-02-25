@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -225,7 +225,15 @@ export class FontCache {
             const canvas = document.createElement('canvas');
             this._context = canvas.getContext('2d')!;
         }
-
+        if (!this._context) {
+            return {
+                width: 0,
+                fontBoundingBoxAscent: 0,
+                fontBoundingBoxDescent: 0,
+                actualBoundingBoxAscent: 0,
+                actualBoundingBoxDescent: 0,
+            };
+        }
         // const { fontString, fontSize, fontFamily } = fontStyle;
 
         const ctx = this._context;

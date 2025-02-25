@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,15 @@
 
 import type { Dependency, SlideDataModel } from '@univerjs/core';
 import type { IUniverSlidesUIConfig } from './controllers/config.schema';
-import { IConfigService, Inject, Injector, IUniverInstanceService, mergeOverrideWithDependencies, Plugin, UniverInstanceType } from '@univerjs/core';
+import { IConfigService, Inject, Injector, IUniverInstanceService, merge, mergeOverrideWithDependencies, Plugin, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { CanvasView } from './controllers/canvas-view';
-import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { defaultPluginConfig, SLIDES_UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { SlidePopupMenuController } from './controllers/popup-menu.controller';
-import { SlideRenderController } from './controllers/slide.render-controller';
 import { SlideEditingRenderController } from './controllers/slide-editing.render-controller';
 import { SlideEditorBridgeRenderController } from './controllers/slide-editor-bridge.render-controller';
 import { SlidesUIController } from './controllers/slide-ui.controller';
+import { SlideRenderController } from './controllers/slide.render-controller';
 import { ISlideEditorBridgeService, SlideEditorBridgeService } from './services/slide-editor-bridge.service';
 import { ISlideEditorManagerService, SlideEditorManagerService } from './services/slide-editor-manager.service';
 import { SlideCanvasPopMangerService } from './services/slide-popup-manager.service';
@@ -46,11 +46,15 @@ export class UniverSlidesUIPlugin extends Plugin {
         super();
 
         // Manage the plugin configuration.
-        const { menu, ...rest } = this._config;
+        const { menu, ...rest } = merge(
+            {},
+            defaultPluginConfig,
+            this._config
+        );
         if (menu) {
             this._configService.setConfig('menu', menu, { merge: true });
         }
-        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
+        this._configService.setConfig(SLIDES_UI_PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {

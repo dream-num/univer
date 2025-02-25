@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,10 @@
  */
 
 import type { IUniverFindReplaceConfig } from './controllers/config.schema';
-import { IConfigService, Plugin } from '@univerjs/core';
+import { IConfigService, merge, Plugin } from '@univerjs/core';
 
 import { type Dependency, Inject, Injector } from '@univerjs/core';
-import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { defaultPluginConfig, FIND_REPLACE_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { FindReplaceController } from './controllers/find-replace.controller';
 import { FindReplaceService, IFindReplaceService } from './services/find-replace.service';
 
@@ -35,8 +35,12 @@ export class UniverFindReplacePlugin extends Plugin {
         super();
 
         // Manage the plugin configuration.
-        const { ...rest } = this._config;
-        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
+        const { ...rest } = merge(
+            {},
+            defaultPluginConfig,
+            this._config
+        );
+        this._configService.setConfig(FIND_REPLACE_PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {

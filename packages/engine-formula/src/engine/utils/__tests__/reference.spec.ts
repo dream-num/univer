@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,6 +110,19 @@ describe('Test Reference', () => {
                     endRow: 10,
                     rangeType: RANGE_TYPE.COLUMN,
                 },
+                sheetName: '',
+                unitId: '',
+            })
+        ).toEqual('A:K');
+        expect(
+            serializeRangeToRefString({
+                range: {
+                    startColumn: 0,
+                    endColumn: 10,
+                    startRow: 5,
+                    endRow: 10,
+                    rangeType: RANGE_TYPE.COLUMN,
+                },
                 sheetName: 'sheet1',
                 unitId: 'workbook1',
             })
@@ -140,6 +153,45 @@ describe('Test Reference', () => {
                 unitId: 'workbook-1',
             })
         ).toEqual("'[workbook-1]sheet1'!16:16");
+        expect(
+            serializeRangeToRefString({
+                range: {
+                    startColumn: Number.NaN,
+                    endColumn: Number.NaN,
+                    startRow: 15,
+                    endRow: 15,
+                    rangeType: RANGE_TYPE.ROW,
+                },
+                sheetName: "sheet'1",
+                unitId: '',
+            })
+        ).toEqual("'sheet''1'!16:16");
+        expect(
+            serializeRangeToRefString({
+                range: {
+                    startColumn: Number.NaN,
+                    endColumn: Number.NaN,
+                    startRow: 15,
+                    endRow: 15,
+                    rangeType: RANGE_TYPE.ROW,
+                },
+                sheetName: "sheet''1",
+                unitId: '',
+            })
+        ).toEqual("'sheet''''1'!16:16");
+        expect(
+            serializeRangeToRefString({
+                range: {
+                    startColumn: Number.NaN,
+                    endColumn: Number.NaN,
+                    startRow: 15,
+                    endRow: 15,
+                    rangeType: RANGE_TYPE.ROW,
+                },
+                sheetName: "sheet'1",
+                unitId: 'workbook-1',
+            })
+        ).toEqual("'[workbook-1]sheet''1'!16:16");
     });
 
     it('deserializeRangeWithSheet', () => {
@@ -259,9 +311,11 @@ describe('Test Reference', () => {
             '12a',
             '💩a',
             '❤️b',
-            "Sheet'",
+            "Sheet'1",
             '!Sheet',
             '！Sheet',
+            'Sheet1（副本）',
+            'Sheet4(Copy)',
         ];
         const testFalseCase = ['Sheet1', '工作表1'];
 
@@ -303,11 +357,40 @@ describe('Test Reference', () => {
             unitId: '',
         });
 
+        // with single quote
+        expect(handleRefStringInfo("'sheet''1'!A1")).toStrictEqual({
+            refBody: 'A1',
+            sheetName: "sheet'1",
+            unitId: '',
+        });
+
+        // with double quote
+        expect(handleRefStringInfo("'sheet''''1'!A1")).toStrictEqual({
+            refBody: 'A1',
+            sheetName: "sheet''1",
+            unitId: '',
+        });
+
         expect(handleRefStringInfo("'[Book-1.xlsx]Sheet1'!$A$4")).toStrictEqual({
             refBody: '$A$4',
             sheetName: 'Sheet1',
             unitId: 'Book-1.xlsx',
         });
+
+        // with single quote
+        expect(handleRefStringInfo("'[Book''1.xlsx]Sheet1'!$A$4")).toStrictEqual({
+            refBody: '$A$4',
+            sheetName: 'Sheet1',
+            unitId: "Book'1.xlsx",
+        });
+
+        // with double quote
+        expect(handleRefStringInfo("'[Book''''1.xlsx]Sheet1'!$A$4")).toStrictEqual({
+            refBody: '$A$4',
+            sheetName: 'Sheet1',
+            unitId: "Book''1.xlsx",
+        });
+
         expect(handleRefStringInfo("'[Book-1.xlsx]sheet-1'!$A$4")).toStrictEqual({
             refBody: '$A$4',
             sheetName: 'sheet-1',

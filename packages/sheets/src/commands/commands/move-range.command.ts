@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICellData, ICommand, IMutationInfo, IRange, IStyleData, Nullable } from '@univerjs/core';
+import type { IAccessor, ICellData, ICommand, IMutationInfo, IRange, ISelectionCell, IStyleData, Nullable, Worksheet } from '@univerjs/core';
 import type { IMoveRangeMutationParams } from '../mutations/move-range.mutation';
 
 import type { ISetSelectionsOperationParams } from '../operations/selection.operation';
@@ -32,6 +32,7 @@ import {
     sequenceExecute,
     Tools,
 } from '@univerjs/core';
+import { SelectionMoveType } from '../../services/selections/type';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import { MoveRangeMutation } from '../mutations/move-range.mutation';
 import { SetSelectionsOperation } from '../operations/selection.operation';
@@ -43,9 +44,11 @@ export interface IMoveRangeCommandParams {
     fromRange: IRange;
 }
 export const MoveRangeCommandId = 'sheet.command.move-range';
+
 export const MoveRangeCommand: ICommand = {
     type: CommandType.COMMAND,
     id: MoveRangeCommandId,
+
     handler: async (accessor: IAccessor, params: IMoveRangeCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
@@ -88,8 +91,8 @@ export const MoveRangeCommand: ICommand = {
                 params: {
                     unitId,
                     subUnitId,
-
-                    selections: [{ range: params.toRange, primary: getPrimaryForRange(params.toRange, worksheet) }],
+                    selections: [{ range: params.toRange, primary: getPrimaryAfterMove(params.fromRange, params.toRange, worksheet) }],
+                    type: SelectionMoveType.MOVE_END,
                 } as ISetSelectionsOperationParams,
             },
         ];
@@ -102,18 +105,25 @@ export const MoveRangeCommand: ICommand = {
                 params: {
                     unitId,
                     subUnitId,
-
                     selections: [{ range: params.fromRange, primary: getPrimaryForRange(params.fromRange, worksheet) }],
+                    type: SelectionMoveType.MOVE_END,
                 } as ISetSelectionsOperationParams,
             },
         ];
 
         const result = sequenceExecute(redos, commandService).result;
+
+        const afterInterceptors = sheetInterceptorService.afterCommandExecute({
+            id: MoveRangeCommand.id,
+            params: { ...params },
+        });
+
         if (result) {
+            sequenceExecute(afterInterceptors.redos, commandService);
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
-                undoMutations: undos,
-                redoMutations: redos,
+                undoMutations: [...undos, ...afterInterceptors.undos],
+                redoMutations: [...redos, ...afterInterceptors.redos],
             });
             return true;
         }
@@ -219,4 +229,26 @@ export function getMoveRangeUndoRedoMutations(
         redos,
         undos,
     };
+}
+
+// Before moveRange is executed, the target area has no merge cell yet.
+// So need to get the merge info of the start cell and then transform it
+function getPrimaryAfterMove(fromRange: IRange, toRange: IRange, worksheet: Worksheet): ISelectionCell {
+    const startRow = fromRange.startRow;
+    const startColumn = fromRange.startColumn;
+    const mergeInfo = worksheet.getMergedCell(startRow, startColumn);
+
+    const res = getPrimaryForRange(toRange, worksheet);
+    if (mergeInfo) {
+        const mergeRowCount = mergeInfo.endRow - mergeInfo.startRow + 1;
+        const mergeColCount = mergeInfo.endColumn - mergeInfo.startColumn + 1;
+        res.endRow = res.startRow + mergeRowCount - 1;
+        res.endColumn = res.startColumn + mergeColCount - 1;
+        res.actualRow = res.startRow;
+        res.actualColumn = res.startColumn;
+        res.isMerged = false;
+        res.isMergedMainCell = true;
+    }
+
+    return res;
 }

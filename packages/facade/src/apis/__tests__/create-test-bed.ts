@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,10 @@
 
 /* eslint-disable max-lines-per-function */
 
-import type { Dependency, IWorkbookData, UnitModel } from '@univerjs/core';
+import type { Dependency, IWorkbookData, Nullable, UnitModel } from '@univerjs/core';
 import type { IRender } from '@univerjs/engine-render';
+import type { ICellPosWithEvent, IHoverCellPosition, IHoverRichTextInfo, IHoverRichTextPosition } from '@univerjs/sheets-ui';
+import type { IHoverHeaderPosition } from '@univerjs/sheets-ui/services/hover-manager.service.js';
 import {
     ILogService,
     Inject,
@@ -32,13 +34,14 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { UniverDataValidationPlugin } from '@univerjs/data-validation';
-import { ActiveDirtyManagerService, FormulaDataModel, FunctionService, IActiveDirtyManagerService, IFunctionService, LexerTreeBuilder } from '@univerjs/engine-formula';
+import { ActiveDirtyManagerService, DefinedNamesService, FormulaDataModel, FunctionService, IActiveDirtyManagerService, IDefinedNamesService, IFunctionService, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { Engine, IRenderingEngine, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { ISocketService, WebSocketService } from '@univerjs/network';
 import {
     RangeProtectionRuleModel,
     RefRangeService,
     SheetInterceptorService,
+    SheetSkeletonService,
     SheetsSelectionsService,
     WorkbookPermissionService,
     WorksheetPermissionService,
@@ -58,9 +61,10 @@ import {
 import enUS from '@univerjs/sheets-formula-ui/locale/en-US';
 import zhCN from '@univerjs/sheets-formula-ui/locale/zh-CN';
 import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment';
-import { ISheetSelectionRenderService, SheetRenderController, SheetSelectionRenderService, SheetSkeletonManagerService, SheetsRenderService } from '@univerjs/sheets-ui';
+import { DragManagerService, HoverManagerService, ISheetSelectionRenderService, SheetRenderController, SheetScrollManagerService, SheetSelectionRenderService, SheetSkeletonManagerService, SheetsRenderService } from '@univerjs/sheets-ui';
 import { IThreadCommentDataSourceService, ThreadCommentDataSourceService, ThreadCommentModel } from '@univerjs/thread-comment';
 import { IPlatformService, IShortcutService, PlatformService, ShortcutService } from '@univerjs/ui';
+import { Subject } from 'rxjs';
 import { FUniver } from '../everything';
 
 function getTestWorkbookDataDemo(): IWorkbookData {
@@ -76,6 +80,10 @@ function getTestWorkbookDataDemo(): IWorkbookData {
                         3: {
                             f: '=SUM(A1)',
                             si: '3e4r5t',
+                        },
+                        4: {
+                            v: 123,
+                            t: 2,
                         },
                     },
                     1: {
@@ -106,7 +114,7 @@ function getTestWorkbookDataDemo(): IWorkbookData {
         resources: [
             {
                 name: 'SHEET_CONDITIONAL_FORMATTING_PLUGIN',
-                data: '{"sheet-0011":[{"cfId":"AEGZdW8C","ranges":[{"startRow":2,"startColumn":1,"endRow":11,"endColumn":5,"startAbsoluteRefType":0,"endAbsoluteRefType":0,"rangeType":0}],"rule":{"type":"highlightCell","subType":"text","operator":"containsText","style":{"cl":{"rgb":"#2f56ef"},"bg":{"rgb":"#e8ecfc"}},"value":""},"stopIfTrue":false},{"cfId":"4ICEXdJj","ranges":[{"startRow":2,"startColumn":1,"endRow":11,"endColumn":5,"startAbsoluteRefType":0,"endAbsoluteRefType":0,"rangeType":0}],"rule":{"type":"highlightCell","subType":"text","operator":"containsText","style":{"cl":{"rgb":"#2f56ef"},"bg":{"rgb":"#e8ecfc"}},"value":""},"stopIfTrue":false},{"cfId":"geCv018z","ranges":[{"startRow":2,"startColumn":1,"endRow":11,"endColumn":5,"startAbsoluteRefType":0,"endAbsoluteRefType":0,"rangeType":0}],"rule":{"type":"highlightCell","subType":"text","operator":"containsText","style":{"cl":{"rgb":"#2f56ef"},"bg":{"rgb":"#e8ecfc"}},"value":""},"stopIfTrue":false}]}',
+                data: '{"sheet1":[{"cfId":"AEGZdW8C","ranges":[{"startRow":2,"startColumn":1,"endRow":5,"endColumn":5,"startAbsoluteRefType":0,"endAbsoluteRefType":0,"rangeType":0}],"rule":{"type":"highlightCell","subType":"text","operator":"containsText","style":{"cl":{"rgb":"#2f56ef"},"bg":{"rgb":"#e8ecfc"}},"value":""},"stopIfTrue":false},{"cfId":"4ICEXdJj","ranges":[{"startRow":4,"startColumn":1,"endRow":7,"endColumn":7,"startAbsoluteRefType":0,"endAbsoluteRefType":0,"rangeType":0}],"rule":{"type":"highlightCell","subType":"text","operator":"containsText","style":{"cl":{"rgb":"#2f56ef"},"bg":{"rgb":"#e8ecfc"}},"value":""},"stopIfTrue":false},{"cfId":"geCv018z","ranges":[{"startRow":11,"startColumn":1,"endRow":12,"endColumn":5,"startAbsoluteRefType":0,"endAbsoluteRefType":0,"rangeType":0}],"rule":{"type":"highlightCell","subType":"text","operator":"containsText","style":{"cl":{"rgb":"#2f56ef"},"bg":{"rgb":"#e8ecfc"}},"value":""},"stopIfTrue":false}]}',
             },
         ],
     };
@@ -162,6 +170,7 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
             injector.add([SheetsRenderService]);
             injector.add([IShortcutService, { useClass: ShortcutService }]);
             injector.add([IPlatformService, { useClass: PlatformService }]);
+            injector.add([SheetSkeletonService]);
             injector.add([SheetSkeletonManagerService]);
             injector.add([FormulaDataModel]);
             injector.add([LexerTreeBuilder]);
@@ -171,10 +180,35 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
             injector.add([WorksheetProtectionPointModel]);
             injector.add([RangeProtectionRuleModel]);
             injector.add([WorksheetProtectionRuleModel]);
+            injector.add([IDefinedNamesService, { useClass: DefinedNamesService }]);
+            // Create a mock HoverManagerService with currentCell$
+            const mockHoverManagerService = {
+                currentCell$: new Subject<Nullable<IHoverCellPosition>>().asObservable(),
+                currentRichText$: new Subject<Nullable<IHoverRichTextPosition>>().asObservable(),
+                currentClickedCell$: new Subject<IHoverRichTextInfo>().asObservable(),
+                currentDbClickedCell$: new Subject<IHoverRichTextInfo>().asObservable(),
+                currentCellPosWithEvent$: new Subject<Nullable<ICellPosWithEvent>>().asObservable(),
+                currentPointerDownCell$: new Subject<ICellPosWithEvent>().asObservable(),
+                currentPointerUpCell$: new Subject<ICellPosWithEvent>().asObservable(),
+                currentPosition$: new Subject<Nullable<IHoverCellPosition>>().asObservable(),
+                currentHoveredRowHeader$: new Subject<Nullable<IHoverHeaderPosition>>().asObservable(),
+                currentHoveredColHeader$: new Subject<Nullable<IHoverHeaderPosition>>().asObservable(),
+                currentRowHeaderClick$: new Subject<IHoverHeaderPosition>().asObservable(),
+                currentColHeaderClick$: new Subject<IHoverHeaderPosition>().asObservable(),
+                currentRowHeaderDbClick$: new Subject<IHoverHeaderPosition>().asObservable(),
+                currentColHeaderDbClick$: new Subject<IHoverHeaderPosition>().asObservable(),
+                currentRowHeaderPointerDown$: new Subject<IHoverHeaderPosition>().asObservable(),
+                currentColHeaderPointerDown$: new Subject<IHoverHeaderPosition>().asObservable(),
+                currentRowHeaderPointerUp$: new Subject<IHoverHeaderPosition>().asObservable(),
+                currentColHeaderPointerUp$: new Subject<IHoverHeaderPosition>().asObservable(),
+            };
+            injector.add([HoverManagerService, { useValue: mockHoverManagerService as unknown as HoverManagerService }]);
+            injector.add([DragManagerService, { useValue: mockHoverManagerService as unknown as DragManagerService }]);
 
             const renderManagerService = injector.get(IRenderManagerService);
             renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, [SheetSkeletonManagerService] as Dependency);
             renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, [SheetRenderController] as Dependency);
+            renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, [SheetScrollManagerService] as Dependency);
 
             // register feature modules
             ([
@@ -208,6 +242,7 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
             this._injector.get(WorkbookPermissionService);
             this._injector.get(WorksheetPermissionService);
             this._injector.get(ConditionalFormattingService);
+            this._injector.get(ConditionalFormattingViewModel);
         }
 
         override onReady(): void {

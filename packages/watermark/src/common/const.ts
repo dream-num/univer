@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,13 @@
  * limitations under the License.
  */
 
-import type { IImageWatermarkConfig, ITextWatermarkConfig, IUserInfoWatermarkConfig } from './type';
+import type { IImageWatermarkConfig, ITextWatermarkConfig, IUserInfoWatermarkConfig } from '@univerjs/engine-render';
 
 export const UNIVER_WATERMARK_MENU = 'UNIVER_WATERMARK_MENU';
 
 export const WATERMARK_PANEL = 'WATERMARK_PANEL';
 
 export const WATERMARK_PANEL_FOOTER = 'WATERMARK_PANEL_FOOTER';
-
-export const UNIVER_WATERMARK_STORAGE_KEY = 'UNIVER_WATERMARK_STORAGE_KEY';
-
-export const UNIVER_WATERMARK_LAYER_INDEX = 10;
 
 export const WATERMARK_IMAGE_ALLOW_IMAGE_LIST = ['image/png', 'image/jpeg', 'image/jpg', 'image/bmp'];
 

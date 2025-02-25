@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IUniverRPCMainThreadConfig } from '@univerjs/rpc';
-import { FUniver, Injector, LocaleType, LogLevel, Univer, UniverInstanceType } from '@univerjs/core';
+import { Injector, LocaleType, LogLevel, Univer, UniverInstanceType } from '@univerjs/core';
+import { FUniver } from '@univerjs/core/facade';
 import { UniverDebuggerPlugin } from '@univerjs/debugger';
 import { defaultTheme } from '@univerjs/design';
 import { UniverDocsPlugin } from '@univerjs/docs';
@@ -46,6 +46,8 @@ import { UniSheetsUIController } from '@univerjs/uni-sheets-ui';
 import { UniSlidesUIController } from '@univerjs/uni-slides-ui';
 import { UniverUniUIPlugin } from '@univerjs/uniui';
 import { enUS, faIR } from '../locales';
+
+import '../global.css';
 
 const LOAD_LAZY_PLUGINS_TIMEOUT = 4_000;
 
@@ -114,9 +116,10 @@ function registerBasicPlugins(univer: Univer) {
         ],
     });
 
-    univer.registerPlugin(UniverRPCMainThreadPlugin, {
-        workerURL: new Worker(new URL('./worker.js', import.meta.url), { type: 'module' }),
-    } as IUniverRPCMainThreadConfig);
+    const worker = new Worker(new URL('./worker.js', import.meta.url), { type: 'module' });
+    univer.registerPlugin(UniverRPCMainThreadPlugin, { workerURL: worker });
+    univer.onDispose(() => worker.terminate());
+
     univer.registerPlugin(UniverThreadCommentUIPlugin);
 
     univer.registerPlugin(UniverDocsDrawingUIPlugin);

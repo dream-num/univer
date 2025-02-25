@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,13 +80,15 @@ describe('Test FPermission', () => {
 
     it('set range protection point false', async () => {
         const permission = univerAPI.getPermission();
-        const unitId = univerAPI.getActiveWorkbook()?.getId();
-        const subUnitId = univerAPI.getActiveWorkbook()?.getActiveSheet().getSheetId();
-        const ranges = [{ startRow: 0, endRow: 1, startColumn: 0, endColumn: 1 }];
-        const newRanges = [{ startRow: 0, endRow: 2, startColumn: 0, endColumn: 2 }];
+        const workbook = univerAPI.getActiveWorkbook();
+        const worksheet = workbook?.getActiveSheet();
+        const unitId = workbook?.getId();
+        const subUnitId = worksheet?.getSheetId();
+        const rangeFirst = worksheet?.getRange(0, 0, 2, 2);
+        const rangeSecond = worksheet?.getRange(0, 0, 3, 3);
 
-        if (unitId && subUnitId) {
-            const res = await permission.addRangeBaseProtection(unitId, subUnitId, ranges);
+        if (unitId && subUnitId && rangeFirst && rangeSecond) {
+            const res = await permission.addRangeBaseProtection(unitId, subUnitId, [rangeFirst]);
             if (!res?.permissionId || !res?.ruleId) {
                 return;
             }
@@ -103,9 +105,9 @@ describe('Test FPermission', () => {
                 catchErr = true;
             }
             expect(catchErr).toBe(true);
-            permission.setRangeProtectionRanges(unitId, subUnitId, res.ruleId, newRanges);
+            permission.setRangeProtectionRanges(unitId, subUnitId, res.ruleId, [rangeSecond]);
             let rule = rangeProtectionRuleModel.getRule(unitId, subUnitId, res.ruleId);
-            expect(rule?.ranges).toStrictEqual(newRanges);
+            expect(rule?.ranges).toStrictEqual([rangeSecond].map((range) => range.getRange()));
             permission.removeRangeProtection(unitId, subUnitId, [res.ruleId]);
             rule = rangeProtectionRuleModel.getRule(unitId, subUnitId, res.ruleId);
             expect(rule).toBeUndefined();

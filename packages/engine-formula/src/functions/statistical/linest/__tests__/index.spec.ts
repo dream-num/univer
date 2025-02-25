@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -416,6 +416,41 @@ describe('Test linest function', () => {
             });
             const result2 = testFunction.calculate(knownYs2, knownXs2);
             expect(getObjectValue(result2)).toStrictEqual(ErrorType.VALUE);
+        });
+
+        it('More test1', () => {
+            const knownYs = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [2, 2],
+                ]),
+                rowCount: 1,
+                columnCount: 2,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const knownXs = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [20, 14200],
+                ]),
+                rowCount: 1,
+                columnCount: 2,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const constb = BooleanValueObject.create(true);
+            const stats = BooleanValueObject.create(true);
+            const result = testFunction.calculate(knownYs, knownXs, constb, stats);
+            expect(getObjectValue(result)).toStrictEqual([
+                [0, 2],
+                [0, 0],
+                [1, 0],
+                [ErrorType.NUM, 0],
+                [0, 0],
+            ]);
         });
     });
 });

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -613,7 +613,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
         marginRight: ptToPixel(50),
         marginLeft: ptToPixel(50),
         renderConfig: {
-            zeroWidthParagraphBreak: BooleanNumber.TRUE,
+            zeroWidthParagraphBreak: BooleanNumber.FALSE,
             vertexAngle: 0,
             centerAngle: 0,
             background: {

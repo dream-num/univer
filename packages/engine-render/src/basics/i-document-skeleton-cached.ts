@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -144,6 +144,7 @@ export interface IDocumentSkeletonRow {
     ed: number; // endIndex 文本结束索引
     rowSource: ITableRow;
     parent?: IDocumentSkeletonTable;
+    isRepeatRow: boolean; // 是否是标题重复行
 }
 
 export interface IDocumentSkeletonColumn {

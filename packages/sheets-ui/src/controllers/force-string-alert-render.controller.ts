@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 import type { Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { CellValueType, Disposable, Inject, isRealNum, LocaleService } from '@univerjs/core';
+import { IZenZoneService } from '@univerjs/ui';
 import { CellAlertManagerService, CellAlertType } from '../services/cell-alert-manager.service';
 import { HoverManagerService } from '../services/hover-manager.service';
 
@@ -27,7 +28,8 @@ export class ForceStringAlertRenderController extends Disposable implements IRen
         private readonly _context: IRenderContext<Workbook>,
         @Inject(HoverManagerService) private readonly _hoverManagerService: HoverManagerService,
         @Inject(CellAlertManagerService) private readonly _cellAlertManagerService: CellAlertManagerService,
-        @Inject(LocaleService) private readonly _localeService: LocaleService
+        @Inject(LocaleService) private readonly _localeService: LocaleService,
+        @IZenZoneService private readonly _zenZoneService: IZenZoneService
     ) {
         super();
         this._init();
@@ -35,6 +37,7 @@ export class ForceStringAlertRenderController extends Disposable implements IRen
 
     private _init() {
         this._initCellAlertPopup();
+        this._initZenService();
     }
 
     private _initCellAlertPopup() {
@@ -73,7 +76,19 @@ export class ForceStringAlertRenderController extends Disposable implements IRen
                 }
             }
 
-            this._cellAlertManagerService.removeAlert(ALERT_KEY);
+            this._hideAlert();
         }));
+    }
+
+    private _initZenService() {
+        this.disposeWithMe(this._zenZoneService.visible$.subscribe((visible) => {
+            if (visible) {
+                this._hideAlert();
+            }
+        }));
+    }
+
+    private _hideAlert() {
+        this._cellAlertManagerService.removeAlert(ALERT_KEY);
     }
 }

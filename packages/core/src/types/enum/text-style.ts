@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+/**
+ * An enum that specifies the text direction of a cell.
+ */
 export enum TextDirection {
     UNSPECIFIED,
     LEFT_TO_RIGHT,
@@ -49,13 +52,13 @@ export enum TextDecoration {
  * An enum that specifies the horizontal alignment of text.
  */
 export enum HorizontalAlign {
-    UNSPECIFIED, //	The horizontal alignment is not specified. Do not use this.
-    LEFT, //	The text is explicitly aligned to the left of the cell.
-    CENTER, //	The text is explicitly aligned to the center of the cell.
-    RIGHT, //	The text is explicitly aligned to the right of the cell.
-    JUSTIFIED, //	The paragraph is justified.
-    BOTH, //	The paragraph is justified.
-    DISTRIBUTED, //	The text is distributed across the width of the cell.
+    UNSPECIFIED, // The horizontal alignment is not specified. Do not use this.
+    LEFT, // The text is explicitly aligned to the left of the cell.
+    CENTER, // text is explicitly aligned to the center of the cell.
+    RIGHT, // The text is explicitly aligned to the right of the cell.
+    JUSTIFIED, // The paragraph is justified.
+    BOTH, // The paragraph is justified.
+    DISTRIBUTED, // The text is distributed across the width of the cell.
 }
 
 /**
@@ -63,9 +66,9 @@ export enum HorizontalAlign {
  */
 export enum VerticalAlign {
     UNSPECIFIED,
-    TOP, //	The text is explicitly aligned to the top of the cell.
-    MIDDLE, //	The text is explicitly aligned to the middle of the cell.
-    BOTTOM, //	The text is explicitly aligned to the bottom of the cell.
+    TOP, // The text is explicitly aligned to the top of the cell.
+    MIDDLE, // The text is explicitly aligned to the middle of the cell.
+    BOTTOM, // The text is explicitly aligned to the bottom of the cell.
 }
 
 /**

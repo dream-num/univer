@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,6 +95,7 @@ describe('test case in replaceInDocumentBody utils', () => {
         const expectedBody = {
             customRanges: [],
             customDecorations: [],
+            customBlocks: [],
             dataStream: '荷塘Jocs\r作者：朱Jocs\r\n',
             textRuns: [
                 {
@@ -154,6 +155,7 @@ describe('test case in replaceInDocumentBody utils', () => {
         const documentBody = getTestDocumentBody();
         const expectedBody = {
             dataStream: '荷塘\r作者：朱\r\n',
+            customBlocks: [],
             textRuns: [
                 {
                     st: 0,

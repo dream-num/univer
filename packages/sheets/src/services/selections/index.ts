@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,6 @@
  */
 
 export { IRefSelectionsService, RefSelectionsService } from './ref-selections.service';
-export { DISABLE_NORMAL_SELECTIONS, SheetsSelectionsService } from './selection.service';
 export { WorkbookSelectionModel } from './selection-data-model';
+export { DISABLE_NORMAL_SELECTIONS, REF_SELECTIONS_ENABLED, SELECTIONS_ENABLED, SheetsSelectionsService } from './selection.service';
 export { type ISelectionManagerSearchParam, SelectionMoveType } from './type';

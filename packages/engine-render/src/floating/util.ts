@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,15 @@ import { floor, max, min } from '@floating-ui/utils';
 import { getDocumentElement } from '@floating-ui/utils/dom';
 import { Observable } from 'rxjs';
 
+/**
+ * Tracks position and size changes of an element by monitoring:
+ * - Ancestor scrolling and resizing
+ * - Layout shifts
+ * - Element's bounding rectangle changes
+ *
+ * @param containerElement
+ * @returns Observable<void>
+ */
 export function observeClientRect(containerElement: HTMLElement): Observable<void> {
     return new Observable<void>((observer) => {
         const disposable = autoClientRect(containerElement, () => observer.next());
@@ -116,6 +125,14 @@ function getBoundingClientRect(reference: Element) {
     return reference.getBoundingClientRect();
 }
 
+/**
+ * Tracks position and size changes of an element by monitoring:
+ * - Ancestor scrolling and resizing
+ * - Layout shifts
+ * - Element's bounding rectangle changes
+ *
+ * Returns a cleanup function to remove all listeners.
+ */
 function autoClientRect(
     reference: Element,
     update: () => void

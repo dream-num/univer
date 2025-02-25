@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -125,6 +125,16 @@ export interface IFormulaData {
     [unitId: string]: Nullable<{ [sheetId: string]: Nullable<IObjectMatrixPrimitiveType<Nullable<IFormulaDataItem>>> }>;
 }
 
+export interface IFormulaIdMap {
+    f: string;
+    r: number;
+    c: number;
+}
+
+export interface IFormulaIdMapData {
+    [unitId: string]: Nullable<{ [subUnitId: string]: Nullable<{ [formulaId: string]: IFormulaIdMap }> }>;
+}
+
 export interface IOtherFormulaData {
     [unitId: string]: Nullable<{ [subUnitId: string]: Nullable<{ [formulaId: string]: IOtherFormulaDataItem }> }>;
 }
@@ -180,6 +190,7 @@ export interface IFormulaDatasetConfig {
     allUnitData?: IUnitData;
     unitStylesData?: IUnitStylesData;
     unitSheetNameMap?: IUnitSheetNameMap;
+    maxIteration?: number;
 }
 
 export enum ConcatenateType {

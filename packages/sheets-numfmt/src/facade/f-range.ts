@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,31 +15,45 @@
  */
 
 import type { ISetNumfmtCommandParams } from '@univerjs/sheets-numfmt';
-import { FRange } from '@univerjs/sheets/facade';
 import { SetNumfmtCommand } from '@univerjs/sheets-numfmt';
+import { FRange } from '@univerjs/sheets/facade';
 
+/**
+ * @ignore
+ */
 export interface IFRangeSheetsNumfmtMixin {
     // TODO@wzhudev: should separate numfmt package to two
 
     /**
      * Set the number format of the range.
-     * @param pattern number format pattern.
-     * @returns Execution result.
+     * @param {string} pattern - The number format pattern.
+     * @returns {FRange} The FRange instance for chaining.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1');
+     * fRange.setValue(1234.567).setNumberFormat('#,##0.00');
+     * console.log(fRange.getValue()); // 1,234.57
+     * ```
      */
-    setNumberFormat(pattern: string): Promise<boolean>;
+    setNumberFormat(pattern: string): FRange;
 }
 
 export class FRangeLegacy extends FRange implements IFRangeSheetsNumfmtMixin {
-    override setNumberFormat(pattern: string): Promise<boolean> {
+    override setNumberFormat(pattern: string): FRange {
         // TODO@Gggpound: the API should support other types of parameters
         const values: ISetNumfmtCommandParams['values'] = [];
 
         // Add number format info to the `values` array.
         this.forEach((row, col) => values.push({ row, col, pattern }));
-        return this._commandService.executeCommand(SetNumfmtCommand.id, {
+        this._commandService.syncExecuteCommand(SetNumfmtCommand.id, {
             unitId: this._workbook.getUnitId(),
             subUnitId: this._worksheet.getSheetId(),
+            values,
         } as ISetNumfmtCommandParams);
+
+        return this;
     }
 }
 

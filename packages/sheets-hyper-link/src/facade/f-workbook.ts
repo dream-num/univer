@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,23 +16,52 @@
 
 import type { IRange } from '@univerjs/core';
 import type { ISheetHyperLinkInfo } from '@univerjs/sheets-hyper-link';
-import { FWorkbook } from '@univerjs/sheets/facade';
+import type { FRange } from '@univerjs/sheets/facade';
+import { Inject } from '@univerjs/core';
 import { SheetsHyperLinkParserService } from '@univerjs/sheets-hyper-link';
+import { FWorkbook } from '@univerjs/sheets/facade';
 
+/**
+ * @hideconstructor
+ */
+export class SheetHyperLinkBuilder {
+    constructor(
+        private _workbook: FWorkbook,
+        @Inject(SheetsHyperLinkParserService) private readonly _parserService: SheetsHyperLinkParserService
+    ) {}
+
+    getRangeUrl(range: FRange): this {
+        this._parserService.buildHyperLink(this._workbook.getId(), range.getSheetId(), range.getRange());
+        return this;
+    }
+}
+
+/**
+ * @ignore
+ */
 export interface IFWorkbookHyperlinkMixin {
     /**
-     * create a hyperlink for the sheet
-     * @param sheetId the sheet id to link
-     * @param range the range to link, or define-name id
-     * @returns the hyperlink string
+     * @deprecated use `getUrl` method in `FRange` or `FWorksheet` instead.
      */
     createSheetHyperlink(this: FWorkbook, sheetId: string, range?: string | IRange): string;
+
     /**
-     * parse the hyperlink string to get the hyperlink info
-     * @param hyperlink the hyperlink string
-     * @returns the hyperlink info
+     * Parse the hyperlink string to get the hyperlink info.
+     * @param {string} hyperlink - The hyperlink string.
+     * @returns {ISheetHyperLinkInfo} The hyperlink info.
+     * @example
+     * ``` ts
+     * // Create a hyperlink to the range A1:D10 of the current sheet
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:D10');
+     * const hyperlink = fRange.getUrl();
+     *
+     * // Parse the hyperlink
+     * const hyperlinkInfo = fWorkbook.parseSheetHyperlink(hyperlink);
+     * console.log(hyperlinkInfo);
+     * ```
      */
-    // TODO@weird94: this should be moved to hyperlink plugin
     parseSheetHyperlink(this: FWorkbook, hyperlink: string): ISheetHyperLinkInfo;
 }
 
@@ -43,9 +72,9 @@ export class FWorkbookHyperLinkMixin extends FWorkbook implements IFWorkbookHype
     }
 
     /**
-     * parse the hyperlink string to get the hyperlink info
-     * @param hyperlink the hyperlink string
-     * @returns the hyperlink info
+     * Parse the hyperlink string to get the hyperlink info.
+     * @param {string} hyperlink the hyperlink string
+     * @returns {ISheetHyperLinkInfo} the hyperlink info
      */
     override parseSheetHyperlink(hyperlink: string): ISheetHyperLinkInfo {
         const resolverService = this._injector.get(SheetsHyperLinkParserService);

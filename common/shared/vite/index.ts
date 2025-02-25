@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ interface IBuildExecuterOptions {
 }
 
 async function buildESM(sharedConfig: InlineConfig, options: IBuildExecuterOptions) {
-    const { entry } = options;
+    const { pkg, entry } = options;
 
     return Promise.all(Object.keys(entry).map((key) => {
         const basicConfig: InlineConfig = {
@@ -68,6 +68,7 @@ async function buildESM(sharedConfig: InlineConfig, options: IBuildExecuterOptio
                     entryRoot: 'src',
                     outDir: 'lib/types',
                     clearPureImport: false,
+                    exclude: ['**/__tests__/**'],
                 })
             );
         }
@@ -137,10 +138,39 @@ export interface IBuildOptions {
      * @description If true, UMD build will be skipped. Useful for packages that run in Node.js environment.
      */
     skipUMD?: boolean;
+
+    /**
+     * Cleanup all compiled files
+     * @default false
+     */
+    cleanup?: boolean;
+
+    /**
+     * Condition to build node first
+     * @default false
+     */
+    nodeFirst?: boolean;
+}
+
+export function remove() {
+    const __dirname = process.cwd();
+
+    [
+        path.resolve(__dirname, './lib'),
+        path.resolve(__dirname, './coverage'),
+    ].forEach((dir) => {
+        if (fs.existsSync(dir)) {
+            fs.removeSync(dir);
+        }
+    });
 }
 
 export async function build(options?: IBuildOptions) {
-    const { skipUMD = false } = options ?? {};
+    const { skipUMD = false, cleanup = false, nodeFirst = false } = options ?? {};
+
+    if (cleanup) {
+        remove();
+    }
 
     const __dirname = process.cwd();
 
@@ -171,6 +201,9 @@ export async function build(options?: IBuildOptions) {
         configFile: false,
         build: {
             target: 'chrome70',
+        },
+        resolve: {
+            conditions: nodeFirst ? ['node', 'default'] : undefined,
         },
         define: {
             'process.env.NODE_ENV': JSON.stringify('production'),

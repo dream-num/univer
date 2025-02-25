@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,6 +71,7 @@ export function isSingleValueObject(valueObject: FunctionVariantType) {
 export function objectValueToCellValue(objectValue: Nullable<BaseValueObject>): ICellData | undefined {
     const pattern = objectValue?.getPattern();
     let cellWithStyle: ICellData = {};
+    let cellWithCustomData: ICellData = {};
 
     if (pattern) {
         cellWithStyle = {
@@ -79,6 +80,12 @@ export function objectValueToCellValue(objectValue: Nullable<BaseValueObject>): 
                     pattern,
                 },
             },
+        };
+    }
+
+    if (objectValue?.getCustomData()) {
+        cellWithCustomData = {
+            custom: objectValue.getCustomData(),
         };
     }
 
@@ -93,6 +100,7 @@ export function objectValueToCellValue(objectValue: Nullable<BaseValueObject>): 
             v: (objectValue as ErrorValueObject).getErrorType() as string,
             t: CellValueType.STRING,
             ...cellWithStyle,
+            ...cellWithCustomData,
         };
     }
     if (objectValue.isValueObject()) {
@@ -103,6 +111,7 @@ export function objectValueToCellValue(objectValue: Nullable<BaseValueObject>): 
                 v,
                 t: CellValueType.NUMBER,
                 ...cellWithStyle,
+                ...cellWithCustomData,
             };
         }
         if (vo.isBoolean()) {
@@ -110,6 +119,7 @@ export function objectValueToCellValue(objectValue: Nullable<BaseValueObject>): 
                 v: v ? 1 : 0,
                 t: CellValueType.BOOLEAN,
                 ...cellWithStyle,
+                ...cellWithCustomData,
             };
         }
         // String "00"
@@ -119,6 +129,7 @@ export function objectValueToCellValue(objectValue: Nullable<BaseValueObject>): 
                 v,
                 t: CellValueType.STRING,
                 ...cellWithStyle,
+                ...cellWithCustomData,
             };
         }
 
@@ -126,6 +137,7 @@ export function objectValueToCellValue(objectValue: Nullable<BaseValueObject>): 
             return {
                 v: null,
                 ...cellWithStyle,
+                ...cellWithCustomData,
             };
         }
 
@@ -133,6 +145,7 @@ export function objectValueToCellValue(objectValue: Nullable<BaseValueObject>): 
             v,
             t: CellValueType.STRING,
             ...cellWithStyle,
+            ...cellWithCustomData,
         };
     }
 }
@@ -199,11 +212,9 @@ export function getBooleanResults(variants: BaseValueObject[], maxRowLength: num
             // range must be an ArrayValueObject, criteria must be a BaseValueObject
             let resultArrayObject = valueObjectCompare(range, criteriaValueObject);
 
-            const [, criteriaStringObject] = findCompareToken(`${criteriaValueObject.getValue()}`);
-
             // When comparing non-numbers and numbers, countifs does not take the result
             if (isNumberSensitive) {
-                resultArrayObject = filterSameValueObjectResult(resultArrayObject as ArrayValueObject, range as ArrayValueObject, criteriaStringObject);
+                resultArrayObject = filterSameValueObjectResult(resultArrayObject as ArrayValueObject, range as ArrayValueObject, criteriaValueObject);
             }
 
             if (booleanResults[rowIndex] === undefined) {
@@ -230,11 +241,34 @@ export function getBooleanResults(variants: BaseValueObject[], maxRowLength: num
  * @returns
  */
 export function filterSameValueObjectResult(array: ArrayValueObject, range: ArrayValueObject, criteria: BaseValueObject) {
+    const [operator, criteriaObject] = findCompareToken(`${criteria.getValue()}`);
+
     return array.mapValue((valueObject, r, c) => {
         const rangeValueObject = range.get(r, c);
-        if (rangeValueObject && isSameValueObjectType(rangeValueObject, criteria)) {
+
+        if (rangeValueObject && isSameValueObjectType(rangeValueObject, criteriaObject)) {
             return valueObject;
-        } else if (rangeValueObject?.isError() && criteria.isError() && rangeValueObject.getValue() === criteria.getValue()) {
+        } else if (rangeValueObject?.isNumber()) {
+            if (criteriaObject.isString()) {
+                const criteriaNumber = criteriaObject.convertToNumberObjectValue();
+
+                if (criteriaNumber.isNumber()) {
+                    return rangeValueObject.compare(criteriaNumber, operator);
+                }
+            }
+
+            return BooleanValueObject.create(false);
+        } else if (criteriaObject.isNumber()) {
+            if (rangeValueObject?.isString()) {
+                const rangeNumber = rangeValueObject.convertToNumberObjectValue();
+
+                if (rangeNumber.isNumber()) {
+                    return rangeNumber.compare(criteriaObject, operator);
+                }
+            }
+
+            return BooleanValueObject.create(false);
+        } else if (rangeValueObject?.isError() && criteriaObject.isError() && rangeValueObject.getValue() === criteriaObject.getValue()) {
             return BooleanValueObject.create(true);
         } else {
             return BooleanValueObject.create(false);
@@ -278,14 +312,7 @@ export enum ReferenceObjectType {
     ROW,
 }
 
-const referenceObjectFromCache: Map<string, BaseReferenceObject> = new Map();
-
 export function getReferenceObjectFromCache(trimToken: string, type: ReferenceObjectType) {
-    const o = referenceObjectFromCache.get(trimToken);
-    if (o) {
-        return o;
-    }
-
     let referenceObject: BaseReferenceObject;
     switch (type) {
         case ReferenceObjectType.CELL:
@@ -301,34 +328,18 @@ export function getReferenceObjectFromCache(trimToken: string, type: ReferenceOb
             throw new Error('Unknown reference object type');
     }
 
-    referenceObjectFromCache.set(trimToken, referenceObject);
-
     return referenceObject;
 }
 
 export function getRangeReferenceObjectFromCache(variant1: BaseReferenceObject, variant2: BaseReferenceObject) {
-    const key = `${variant1.getToken()}:${variant2.getToken()}`;
-    const o = referenceObjectFromCache.get(key);
-    if (o) {
-        const { x, y } = variant1.getRefOffset();
-        o.setRefOffset(x, y);
-        return o;
-    }
     let referenceObject: FunctionVariantType = ErrorValueObject.create(ErrorType.NAME);
     if (variant1.isCell() && variant2.isCell()) {
         referenceObject = variant1.unionBy(variant2) as BaseReferenceObject;
-        referenceObjectFromCache.set(key, referenceObject as BaseReferenceObject);
     } else if (variant1.isRow() && variant2.isRow()) {
         referenceObject = variant1.unionBy(variant2) as BaseReferenceObject;
-        referenceObjectFromCache.set(key, referenceObject as BaseReferenceObject);
     } else if (variant1.isColumn() && variant2.isColumn()) {
         referenceObject = variant1.unionBy(variant2) as BaseReferenceObject;
-        referenceObjectFromCache.set(key, referenceObject as BaseReferenceObject);
     }
 
     return referenceObject;
-}
-
-export function clearReferenceObjectCache() {
-    referenceObjectFromCache.clear();
 }

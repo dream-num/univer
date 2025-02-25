@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,12 @@ import './f-range';
 import './f-univer';
 import './f-workbook';
 import './f-worksheet';
+import './f-event';
 
 export { FDataValidation } from './f-data-validation';
 export { FDataValidationBuilder } from './f-data-validation-builder';
 
+export type * from './f-event';
 export type * from './f-range';
 export type * from './f-univer';
 export type * from './f-workbook';

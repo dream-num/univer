@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,40 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommandInfo, IDocumentBody, IParagraph, Nullable } from '@univerjs/core';
+import type { DocumentDataModel, ICommandInfo, IDocumentBody, IDocumentStyle, IDrawings, IParagraph, Nullable } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { DocumentViewModel } from '@univerjs/engine-render';
 import type { IMoveRangeMutationParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import type { ICellEditorState } from '../../services/editor-bridge.service';
-import { BooleanNumber, Disposable, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, HorizontalAlign, ICommandService, Inject, IUniverInstanceService, Tools, UniverInstanceType } from '@univerjs/core';
+import { BooleanNumber, Disposable, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DocumentFlavor, HorizontalAlign, ICommandService, Inject, IUniverInstanceService, Tools, UniverInstanceType, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import { ReplaceSnapshotCommand } from '@univerjs/docs-ui';
 import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
 import { MoveRangeMutation, RangeProtectionRuleModel, SetRangeValuesMutation, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
+import { IFormulaEditorManagerService } from '../../services/editor/formula-editor-manager.service';
 import { FormulaEditorController } from './formula-editor.controller';
+
+const formulaEditorStyle: IDocumentStyle = {
+    pageSize: {
+        width: Number.POSITIVE_INFINITY,
+        height: Number.POSITIVE_INFINITY,
+    },
+    documentFlavor: DocumentFlavor.UNSPECIFIED,
+    marginTop: 5,
+    marginBottom: 5,
+    marginRight: 0,
+    marginLeft: 0,
+    paragraphLineGapDefault: 0,
+    renderConfig: {
+        horizontalAlign: HorizontalAlign.UNSPECIFIED,
+        verticalAlign: VerticalAlign.TOP,
+        centerAngle: 0,
+        vertexAngle: 0,
+        wrapStrategy: WrapStrategy.WRAP,
+        isRenderStyle: BooleanNumber.FALSE,
+    },
+};
 
 /**
  * sync data between cell editor and formula editor
@@ -37,7 +60,8 @@ export class EditorDataSyncController extends Disposable {
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(RangeProtectionRuleModel) private readonly _rangeProtectionRuleModel: RangeProtectionRuleModel,
         @Inject(WorksheetProtectionRuleModel) private readonly _worksheetProtectionRuleModel: WorksheetProtectionRuleModel,
-        @Inject(FormulaEditorController) private readonly _formulaEditorController: FormulaEditorController
+        @Inject(FormulaEditorController) private readonly _formulaEditorController: FormulaEditorController,
+        @IFormulaEditorManagerService private readonly _formulaEditorManagerService: IFormulaEditorManagerService
     ) {
         super();
 
@@ -73,12 +97,12 @@ export class EditorDataSyncController extends Disposable {
     // Sync cell content to formula editor bar when sheet selection changed or visible changed.
     private _editorSyncHandler(param: ICellEditorState) {
         let body = Tools.deepClone(param.documentLayoutObject.documentModel?.getBody());
+        const drawings = Tools.deepClone(param.documentLayoutObject.documentModel?.drawings);
+        const drawingsOrder = Tools.deepClone(param.documentLayoutObject.documentModel?.getDrawingsOrder());
 
         if (
-            !body || (
-                param.isInArrayFormulaRange === true &&
-                this._editorBridgeService.isVisible().eventType === DeviceInputEventType.Dblclick
-            )
+            !body ||
+            (param.isInArrayFormulaRange === true && this._editorBridgeService.isVisible().eventType === DeviceInputEventType.Dblclick)
         ) {
             body = {
                 dataStream: '\r\n',
@@ -91,7 +115,7 @@ export class EditorDataSyncController extends Disposable {
             };
         }
 
-        this._syncContentAndRender(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, body);
+        this._syncContentAndRender(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, body, drawings, drawingsOrder);
     }
 
     private _commandExecutedListener() {
@@ -101,10 +125,11 @@ export class EditorDataSyncController extends Disposable {
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (command.id === RichTextEditingMutation.id) {
                     const params = command.params as IRichTextEditingMutationParams;
-                    const { unitId } = params;
-                    if (params.isSync) {
+                    const { unitId, trigger, isSync } = params;
+                    if (isSync || trigger === ReplaceSnapshotCommand.id) {
                         return;
                     }
+
                     if (INCLUDE_LIST.includes(unitId)) {
                         // sync cell content to formula editor bar when edit cell editor and vice verse.
                         const editorDocDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
@@ -149,12 +174,14 @@ export class EditorDataSyncController extends Disposable {
                     }
 
                     if (needUpdate) {
-                        const body = editCellState.documentLayoutObject.documentModel?.getBody();
+                        const body = Tools.deepClone(editCellState.documentLayoutObject.documentModel?.getBody());
+                        const drawings = Tools.deepClone(editCellState.documentLayoutObject.documentModel?.drawings);
+                        const drawingsOrder = Tools.deepClone(editCellState.documentLayoutObject.documentModel?.getDrawingsOrder());
 
                         if (body == null) {
                             return;
                         }
-                        this._syncContentAndRender(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, Tools.deepClone(body));
+                        this._syncContentAndRender(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, body, drawings, drawingsOrder);
                     }
                 }
             })
@@ -173,7 +200,7 @@ export class EditorDataSyncController extends Disposable {
         }
 
         const skeleton = currentRender.with(DocSkeletonManagerService).getSkeleton();
-        const docDataModel = this._univerInstanceService.getUniverDocInstance(unitId);
+        const docDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
         const docViewModel = this._getEditorViewModel(unitId);
 
         if (docDataModel == null || docViewModel == null) {
@@ -182,6 +209,7 @@ export class EditorDataSyncController extends Disposable {
 
         this._commandService.syncExecuteCommand(RichTextEditingMutation.id, {
             ...parmas,
+            textRanges: null,
             isSync: true,
             unitId,
             syncer: parmas.unitId,
@@ -198,7 +226,9 @@ export class EditorDataSyncController extends Disposable {
 
     private _syncContentAndRender(
         unitId: string,
-        body: IDocumentBody
+        body: IDocumentBody,
+        drawings: Nullable<IDrawings>,
+        drawingsOrder: Nullable<string[]>
     ) {
         if (unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) {
             if (body.paragraphs) {
@@ -208,7 +238,7 @@ export class EditorDataSyncController extends Disposable {
         const INCLUDE_LIST = [DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY];
 
         const skeleton = this._renderManagerService.getRenderById(unitId)?.with(DocSkeletonManagerService).getSkeleton();
-        const docDataModel = this._univerInstanceService.getUniverDocInstance(unitId);
+        const docDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
         const docViewModel = this._getEditorViewModel(unitId);
 
         if (docDataModel == null || docViewModel == null || skeleton == null) {
@@ -216,12 +246,12 @@ export class EditorDataSyncController extends Disposable {
         }
 
         docDataModel.getSnapshot().body = body;
+        docDataModel.getSnapshot().drawings = drawings ?? {};
+        docDataModel.getSnapshot().drawingsOrder = drawingsOrder ?? [];
 
         this._checkAndSetRenderStyleConfig(docDataModel);
-
         docViewModel.reset(docDataModel);
         const currentRender = this._renderManagerService.getRenderById(unitId);
-
         if (currentRender == null) {
             return;
         }
@@ -245,13 +275,21 @@ export class EditorDataSyncController extends Disposable {
             return;
         }
 
+        snapshot.documentStyle = formulaEditorStyle;
         let renderConfig = snapshot.documentStyle.renderConfig;
 
         if (renderConfig == null) {
             renderConfig = {};
             snapshot.documentStyle.renderConfig = renderConfig;
         }
-
+        const position = this._formulaEditorManagerService.getPosition();
+        if (position) {
+            const width = position.width;
+            snapshot.documentStyle.pageSize = {
+                width,
+                height: Infinity,
+            };
+        }
         if ((body?.dataStream ?? '').startsWith('=')) {
             renderConfig.isRenderStyle = BooleanNumber.TRUE;
         } else {

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 import type { IDisposable, IRangeWithCoord, Nullable, Workbook } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, Scene, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
 import type { ISelectionStyle, ISelectionWithCoord, ISelectionWithStyle, SheetsSelectionsService, WorkbookSelectionModel } from '@univerjs/sheets';
-import { DisposableCollection, Inject, Injector, RANGE_TYPE, ThemeService, toDisposable } from '@univerjs/core';
+import { DisposableCollection, IContextService, Inject, Injector, RANGE_TYPE, ThemeService, toDisposable } from '@univerjs/core';
 import { ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 import { convertSelectionDataToRange, IRefSelectionsService, SelectionMoveType } from '@univerjs/sheets';
 import { attachSelectionWithCoord, BaseSelectionRenderService, checkInHeaderRanges, genNormalSelectionStyle, getAllSelection, getCoordByOffset, getSheetObject, SelectionControl, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
@@ -44,13 +44,15 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
         @Inject(ThemeService) themeService: ThemeService,
         @IShortcutService shortcutService: IShortcutService,
         @Inject(SheetSkeletonManagerService) sheetSkeletonManagerService: SheetSkeletonManagerService,
+        @IContextService protected readonly _contextService: IContextService,
         @IRefSelectionsService private readonly _refSelectionsService: SheetsSelectionsService
     ) {
         super(
             injector,
             themeService,
             shortcutService,
-            sheetSkeletonManagerService
+            sheetSkeletonManagerService,
+            _contextService
         );
 
         this._workbookSelections = this._refSelectionsService.getWorkbookSelections(this._context.unitId);
@@ -103,6 +105,10 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
         this._eventDisposables = null;
     }
 
+    disableSelectionChanging(): void {
+        this._disableSelectionChanging();
+    }
+
     private _initCanvasEventListeners(): IDisposable {
         const sheetObject = this._getSheetObject();
         const { spreadsheetRowHeader, spreadsheetColumnHeader, spreadsheet, spreadsheetLeftTopPlaceholder } = sheetObject;
@@ -110,6 +116,8 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
 
         const listenerDisposables = new DisposableCollection();
         listenerDisposables.add(spreadsheet?.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
+            if (!this.inRefSelectionMode()) return;
+
             this._onPointerDown(evt, spreadsheet.zIndex + 1, RANGE_TYPE.NORMAL, this._getActiveViewport(evt));
             if (evt.button !== 2) {
                 state.stopPropagation();
@@ -118,6 +126,7 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
 
         listenerDisposables.add(
             spreadsheetRowHeader?.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
+                if (!this.inRefSelectionMode()) return;
                 const skeleton = this._sheetSkeletonManagerService.getCurrent()!.skeleton;
                 const { row } = getCoordByOffset(evt.offsetX, evt.offsetY, scene, skeleton);
                 const matchSelectionData = checkInHeaderRanges(this._workbookSelections.getCurrentSelections(), row, RANGE_TYPE.ROW);
@@ -131,6 +140,7 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
         );
 
         listenerDisposables.add(spreadsheetColumnHeader?.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
+            if (!this.inRefSelectionMode()) return;
             const skeleton = this._sheetSkeletonManagerService.getCurrent()!.skeleton;
             const { column } = getCoordByOffset(evt.offsetX, evt.offsetY, scene, skeleton);
             const matchSelectionData = checkInHeaderRanges(this._workbookSelections.getCurrentSelections(), column, RANGE_TYPE.COLUMN);
@@ -146,7 +156,7 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
         listenerDisposables.add(spreadsheetLeftTopPlaceholder?.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
             // remove all other selections
             this._reset();
-
+            if (!this.inRefSelectionMode()) return;
             const skeleton = this._sheetSkeletonManagerService.getCurrent()!.skeleton;
             const selectionWithStyle = getAllSelection(skeleton);
             this._addSelectionControlByModelData(selectionWithStyle);
@@ -178,6 +188,19 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
         return control;
     }
 
+    private _initSelectionChangeListener(): void {
+        // used for refresh selection when focus in formula editor.
+        // TODO @lumixraku The response of the formula selection to keyboard events is different from that of a regular selection; I believe they should be consistent.
+        // unlike normal selection, there is no need to listen selectionService.selectionMoveEnd$ for keyboard moving event. prompt@highlightFormula would refresh selection.
+        this.disposeWithMe(this._refSelectionsService.selectionSet$.subscribe((selectionsWithStyles) => {
+            this._reset();
+            const skeleton = this._skeleton;
+            if (!skeleton) return;
+            // The selections' style would be colorful here. PromptController would change the color of selections later.
+            this.resetSelectionsByModelData(selectionsWithStyles || []);
+        }));
+    }
+
     /**
      * Update selectionModel in this._workbookSelections by user action in spreadsheet area.
      */
@@ -203,22 +226,6 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
             selectionDataWithStyleList.map((selectionDataWithStyle) => convertSelectionDataToRange(selectionDataWithStyle)),
             type
         );
-    }
-
-    private _initSelectionChangeListener(): void {
-        // selectionMoveEnd$ beforeSelectionMoveEnd$ was triggered when pointerup after dragging to change selection area.
-        // Changing the selection area through the 8 control points of the ref selection will not trigger this subscriber.
-
-        // beforeSelectionMoveEnd$ & selectionMoveEnd$ would triggered when change skeleton(change sheet).
-        this.disposeWithMe(this._workbookSelections.selectionSet$.subscribe((selectionsWithStyles) => {
-            this._reset();
-            const skeleton = this._skeleton;
-            if (!skeleton) return;
-            // The selections' style would be colorful here. PromptController would change the color of selections later.
-            for (const selectionWithStyle of selectionsWithStyles) {
-                this._addSelectionControlByModelData(selectionWithStyle);
-            }
-        }));
     }
 
     private _initSkeletonChangeListener(): void {
@@ -266,7 +273,7 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
      * @param viewport
      * @param scrollTimerType
      */
-    // eslint-disable-next-line max-lines-per-function, complexity
+    // eslint-disable-next-line complexity, max-lines-per-function
     protected _onPointerDown(
         evt: IPointerEvent | IMouseEvent,
         _zIndex = 0,

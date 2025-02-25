@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { RedoCommand, UndoCommand } from '@univerjs/core';
 import type { MenuSchemaType } from '../../services/menu/menu-manager.service';
-import { RibbonStartGroup } from '../../services/menu/types';
+import { RedoCommand, UndoCommand } from '@univerjs/core';
 import { ToggleShortcutPanelOperation } from '../../commands/operations/toggle-shortcut-panel.operation';
+import { RibbonStartGroup } from '../../services/menu/types';
 import { ShortcutPanelMenuItemFactory } from '../shortcut-display/menu';
 import { RedoMenuItemFactory, UndoMenuItemFactory } from './menus';
 

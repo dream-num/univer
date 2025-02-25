@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,13 @@
 import type { MenuItemGroupProps, MenuItemProps, MenuProps, MenuRef, SubMenuProps } from 'rc-menu';
 import RcMenu, { MenuItem as RcMenuItem, MenuItemGroup as RcMenuItemGroup, SubMenu as RcSubMenu } from 'rc-menu';
 import React, { useContext } from 'react';
-
+import { clsx } from '../../helper/clsx';
 import { ConfigContext } from '../config-provider/ConfigProvider';
 import styles from './index.module.less';
 
 export const Menu = React.forwardRef<MenuRef, MenuProps>((props, ref) => {
     const { mountContainer } = useContext(ConfigContext);
-    return mountContainer && React.cloneElement(<RcMenu ref={ref} prefixCls={styles.menu} getPopupContainer={() => mountContainer} />, {
+    return mountContainer && React.cloneElement(<RcMenu ref={ref} prefixCls={clsx(styles.menu, props.className)} getPopupContainer={() => mountContainer} />, {
         ...props,
     });
 });

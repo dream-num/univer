@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,10 @@ import {
 export type FHorizontalAlignment = 'left' | 'center' | 'normal';
 export type FVerticalAlignment = 'top' | 'middle' | 'bottom';
 
+/**
+ *
+ * @param value
+ */
 export function transformFacadeHorizontalAlignment(value: FHorizontalAlignment): HorizontalAlign {
     switch (value) {
         case 'left':
@@ -42,6 +46,10 @@ export function transformFacadeHorizontalAlignment(value: FHorizontalAlignment):
     }
 }
 
+/**
+ *
+ * @param value
+ */
 export function transformCoreHorizontalAlignment(value: HorizontalAlign): FHorizontalAlignment {
     switch (value) {
         case HorizontalAlign.LEFT:
@@ -55,6 +63,10 @@ export function transformCoreHorizontalAlignment(value: HorizontalAlign): FHoriz
     }
 }
 
+/**
+ *
+ * @param value
+ */
 export function transformFacadeVerticalAlignment(value: FVerticalAlignment): VerticalAlign {
     switch (value) {
         case 'top':
@@ -68,6 +80,10 @@ export function transformFacadeVerticalAlignment(value: FVerticalAlignment): Ver
     }
 }
 
+/**
+ *
+ * @param value
+ */
 export function transformCoreVerticalAlignment(value: VerticalAlign): FVerticalAlignment {
     switch (value) {
         case VerticalAlign.TOP:
@@ -82,7 +98,7 @@ export function transformCoreVerticalAlignment(value: VerticalAlign): FVerticalA
 }
 
 /**
- * covert cell value to cell data
+ * Covert cell value to cell data.
  * @param value
  * @returns
  */
@@ -90,11 +106,15 @@ export function covertCellValue(value: CellValue | ICellData): ICellData {
     if (isFormulaString(value)) {
         return {
             f: value as string,
+            v: null,
+            p: null,
         };
     }
     if (isCellV(value)) {
         return {
             v: value as Nullable<CellValue>,
+            p: null,
+            f: null,
         };
     }
     if (isICellData(value)) {
@@ -106,7 +126,7 @@ export function covertCellValue(value: CellValue | ICellData): ICellData {
 }
 
 /**
- * covert cell value array or matrix to cell data
+ * Covert cell value array or matrix to cell data.
  * @param value
  * @param range
  * @returns
@@ -138,6 +158,11 @@ export function covertCellValues(
     return cellValue.getMatrix();
 }
 
+/**
+ *
+ * @param mergeInfo
+ * @param range
+ */
 export function isCellMerged(mergeInfo: IRangeWithCoord, range: IRange): boolean {
     if (!isSingleCell(mergeInfo, range)) {
         return false;
@@ -145,6 +170,11 @@ export function isCellMerged(mergeInfo: IRangeWithCoord, range: IRange): boolean
     return range.startColumn !== range.endColumn || range.startRow !== range.endRow;
 }
 
+/**
+ *
+ * @param mergeInfo
+ * @param range
+ */
 export function isSingleCell(mergeInfo: IRangeWithCoord, range: IRange): boolean {
     return mergeInfo.startColumn === range.startColumn
         && mergeInfo.endColumn === range.endColumn
@@ -152,6 +182,11 @@ export function isSingleCell(mergeInfo: IRangeWithCoord, range: IRange): boolean
         && mergeInfo.endRow === range.endRow;
 }
 
+/**
+ *
+ * @param range
+ * @param worksheet
+ */
 export function covertToRowRange(range: IRange, worksheet: Worksheet): IRange {
     return {
         startRow: range.startRow,
@@ -162,6 +197,11 @@ export function covertToRowRange(range: IRange, worksheet: Worksheet): IRange {
     };
 }
 
+/**
+ *
+ * @param range
+ * @param worksheet
+ */
 export function covertToColRange(range: IRange, worksheet: Worksheet): IRange {
     return {
         startRow: 0,

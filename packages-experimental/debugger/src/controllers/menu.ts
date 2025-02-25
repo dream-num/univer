@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import { CreateEmptySheetCommand, DisposeCurrentUnitCommand, DisposeUniverComman
 import { ShowCellContentOperation } from '../commands/operations/cell.operation';
 import { ChangeUserCommand, UnitRole } from '../commands/operations/change-user.operation';
 import { ConfirmOperation } from '../commands/operations/confirm.operation';
+import { DarkModeOperation } from '../commands/operations/dark-mode.operation';
 import { DialogOperation } from '../commands/operations/dialog.operation';
 import { LocaleOperation } from '../commands/operations/locale.operation';
 import { MessageOperation } from '../commands/operations/message.operation';
@@ -48,6 +49,10 @@ export function LocaleMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
                 value: LocaleType.EN_US,
             },
             {
+                label: 'Français',
+                value: LocaleType.FR_FR,
+            },
+            {
                 label: '简体中文',
                 value: LocaleType.ZH_CN,
             },
@@ -62,6 +67,29 @@ export function LocaleMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
             {
                 label: 'Tiếng Việt',
                 value: LocaleType.VI_VN,
+            },
+        ],
+    };
+}
+
+export function DarkModeMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
+    return {
+        id: DarkModeOperation.id,
+        title: '🌓',
+        tooltip: 'Dark Mode',
+        type: MenuItemType.SELECTOR,
+        selections: [
+            {
+                label: 'System',
+                value: 'auto',
+            },
+            {
+                label: 'Light',
+                value: 'light',
+            },
+            {
+                label: 'Dark',
+                value: 'dark',
             },
         ],
     };

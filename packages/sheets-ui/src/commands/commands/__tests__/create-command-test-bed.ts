@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 
 import type { Dependency, IWorkbookData, Workbook } from '@univerjs/core';
+import type { IRenderContext } from '@univerjs/engine-render';
 import {
     BooleanNumber,
     DisposableCollection,
@@ -30,6 +31,8 @@ import {
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
+
+import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import {
     BorderStyleManagerService,
     IRefSelectionsService,
@@ -38,9 +41,7 @@ import {
 
     SheetsSelectionsService, WorkbookPermissionService, WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel,
 } from '@univerjs/sheets';
-
-import { LexerTreeBuilder } from '@univerjs/engine-formula';
-import type { IRenderContext } from '@univerjs/engine-render';
+import { BehaviorSubject } from 'rxjs';
 import enUS from '../../../locale/en-US';
 import { ISheetSelectionRenderService } from '../../../services/selection/base-selection-render.service';
 import { SheetSelectionRenderService } from '../../../services/selection/selection-render.service';
@@ -139,6 +140,9 @@ export function createCommandTestBed(
             mainComponent: null as any,
             components: new Map(),
             isMainScene: true,
+            activated$: new BehaviorSubject(true),
+            activate: () => { },
+            deactivate: () => { },
         };
 
         injector.add([ISheetSelectionRenderService, { useFactory: () => injector.createInstance(SheetSelectionRenderService, context) }]);

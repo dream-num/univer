@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import { DataSyncPrimaryController } from '@univerjs/rpc';
 
 import { AddRangeProtectionCommand } from '../commands/commands/add-range-protection.command';
 import { AddWorksheetProtectionCommand } from '../commands/commands/add-worksheet-protection.command';
+import { SetWorksheetRangeThemeStyleCommand } from '../commands/commands/add-worksheet-range-theme.command';
 import { ClearSelectionAllCommand } from '../commands/commands/clear-selection-all.command';
 import { ClearSelectionContentCommand } from '../commands/commands/clear-selection-content.command';
 import { ClearSelectionFormatCommand } from '../commands/commands/clear-selection-format.command';
@@ -28,22 +29,26 @@ import { DeleteRangeMoveLeftCommand } from '../commands/commands/delete-range-mo
 import { DeleteRangeMoveUpCommand } from '../commands/commands/delete-range-move-up.command';
 import { DeleteRangeProtectionCommand } from '../commands/commands/delete-range-protection.command';
 import { DeleteWorksheetProtectionCommand } from '../commands/commands/delete-worksheet-protection.command';
+import { DeleteWorksheetRangeThemeStyleCommand } from '../commands/commands/delete-worksheet-range-theme.command';
 import { InsertDefinedNameCommand } from '../commands/commands/insert-defined-name.command';
 import { InsertRangeMoveDownCommand } from '../commands/commands/insert-range-move-down.command';
 import { InsertRangeMoveRightCommand } from '../commands/commands/insert-range-move-right.command';
 import {
     InsertColAfterCommand,
     InsertColBeforeCommand,
+    InsertColByRangeCommand,
     InsertColCommand,
     InsertRowAfterCommand,
     InsertRowBeforeCommand,
+    InsertRowByRangeCommand,
     InsertRowCommand,
 } from '../commands/commands/insert-row-col.command';
 import { InsertSheetCommand } from '../commands/commands/insert-sheet.command';
 import { MoveRangeCommand } from '../commands/commands/move-range.command';
 import { MoveColsCommand, MoveRowsCommand } from '../commands/commands/move-rows-cols.command';
+import { RegisterWorksheetRangeThemeStyleCommand } from '../commands/commands/register-range-theme.command';
 import { RemoveDefinedNameCommand } from '../commands/commands/remove-defined-name.command';
-import { RemoveColCommand, RemoveRowCommand } from '../commands/commands/remove-row-col.command';
+import { RemoveColByRangeCommand, RemoveColCommand, RemoveRowByRangeCommand, RemoveRowCommand } from '../commands/commands/remove-row-col.command';
 import { RemoveSheetCommand } from '../commands/commands/remove-sheet.command';
 import { RemoveWorksheetMergeCommand } from '../commands/commands/remove-worksheet-merge.command';
 import { ReorderRangeCommand } from '../commands/commands/reorder-range.command';
@@ -62,6 +67,7 @@ import {
 } from '../commands/commands/set-col-visible.command';
 import { SetDefinedNameCommand } from '../commands/commands/set-defined-name.command';
 import { CancelFrozenCommand, SetFrozenCommand } from '../commands/commands/set-frozen.command';
+import { SetGridlinesColorCommand } from '../commands/commands/set-gridlines-color.command';
 import { SetProtectionCommand } from '../commands/commands/set-protection.command';
 import { SetRangeValuesCommand } from '../commands/commands/set-range-values.command';
 import { SetRowDataCommand } from '../commands/commands/set-row-data.command';
@@ -97,28 +103,34 @@ import {
     SetWorksheetRowIsAutoHeightCommand,
 } from '../commands/commands/set-worksheet-row-height.command';
 import { SetWorksheetShowCommand } from '../commands/commands/set-worksheet-show.command';
+import { SplitTextToColumnsCommand } from '../commands/commands/split-text-to-columns.command';
 import { ToggleCellCheckboxCommand } from '../commands/commands/toggle-checkbox.command';
 import { ToggleGridlinesCommand } from '../commands/commands/toggle-gridlines.command';
+import { UnregisterWorksheetRangeThemeStyleCommand } from '../commands/commands/unregister-range-theme.command';
 import { AddRangeProtectionMutation } from '../commands/mutations/add-range-protection.mutation';
 import { AddWorksheetMergeMutation } from '../commands/mutations/add-worksheet-merge.mutation';
 import { AddWorksheetProtectionMutation } from '../commands/mutations/add-worksheet-protection.mutation';
+import { SetWorksheetRangeThemeStyleMutation } from '../commands/mutations/add-worksheet-range-theme.mutation';
 import { DeleteRangeProtectionMutation } from '../commands/mutations/delete-range-protection.mutation';
 import { DeleteWorksheetProtectionMutation } from '../commands/mutations/delete-worksheet-protection.mutation';
+import { DeleteWorksheetRangeThemeStyleMutation } from '../commands/mutations/delete-worksheet-range-theme.mutation';
 import { EmptyMutation } from '../commands/mutations/empty.mutation';
+
 import { InsertColMutation, InsertRowMutation } from '../commands/mutations/insert-row-col.mutation';
 import { InsertSheetMutation } from '../commands/mutations/insert-sheet.mutation';
 import { MoveRangeMutation } from '../commands/mutations/move-range.mutation';
+
 import { MoveColsMutation, MoveRowsMutation } from '../commands/mutations/move-rows-cols.mutation';
 import { RemoveNumfmtMutation, SetNumfmtMutation } from '../commands/mutations/numfmt-mutation';
+import { RegisterWorksheetRangeThemeStyleMutation } from '../commands/mutations/register-range-theme.mutation';
 import { RemoveColMutation, RemoveRowMutation } from '../commands/mutations/remove-row-col.mutation';
 import { RemoveSheetMutation } from '../commands/mutations/remove-sheet.mutation';
 import { RemoveWorksheetMergeMutation } from '../commands/mutations/remove-worksheet-merge.mutation';
-
 import { ReorderRangeMutation } from '../commands/mutations/reorder-range.mutation';
 import { SetColDataMutation } from '../commands/mutations/set-col-data.mutation';
 import { SetColHiddenMutation, SetColVisibleMutation } from '../commands/mutations/set-col-visible.mutation';
-
 import { SetFrozenMutation } from '../commands/mutations/set-frozen.mutation';
+import { SetGridlinesColorMutation } from '../commands/mutations/set-gridlines-color.mutation';
 import { SetRangeProtectionMutation } from '../commands/mutations/set-range-protection.mutation';
 import { SetRangeValuesMutation } from '../commands/mutations/set-range-values.mutation';
 import { SetRowDataMutation } from '../commands/mutations/set-row-data.mutation';
@@ -138,6 +150,7 @@ import {
     SetWorksheetRowIsAutoHeightMutation,
 } from '../commands/mutations/set-worksheet-row-height.mutation';
 import { ToggleGridlinesMutation } from '../commands/mutations/toggle-gridlines.mutation';
+import { UnregisterWorksheetRangeThemeStyleMutation } from '../commands/mutations/unregister-range-theme-style.mutation';
 import { ScrollToCellOperation } from '../commands/operations/scroll-to-cell.operation';
 import { SetSelectionsOperation } from '../commands/operations/selection.operation';
 import { SetWorksheetActiveOperation } from '../commands/operations/set-worksheet-active.operation';
@@ -180,6 +193,10 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             SetNumfmtMutation,
             ReorderRangeMutation,
             EmptyMutation,
+            SetRowHiddenMutation, // formula SUBTOTAL
+            SetRowVisibleMutation,
+            SetColHiddenMutation,
+            SetColVisibleMutation,
         ] as IMutation<object>[]).forEach((mutation) => {
             this._commandService.registerCommand(mutation);
             this._dataSyncPrimaryController?.registerSyncingMutations(mutation);
@@ -198,17 +215,21 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
                 DeltaRowHeightCommand,
                 InsertColAfterCommand,
                 InsertColBeforeCommand,
+                InsertColByRangeCommand,
                 InsertColCommand,
                 InsertRangeMoveDownCommand,
                 InsertRangeMoveRightCommand,
                 InsertRowAfterCommand,
                 InsertRowBeforeCommand,
+                InsertRowByRangeCommand,
                 InsertRowCommand,
                 InsertSheetCommand,
                 MoveColsCommand,
                 MoveRangeCommand,
                 MoveRowsCommand,
+                RemoveRowByRangeCommand,
                 RemoveColCommand,
+                RemoveColByRangeCommand,
                 RemoveRowCommand,
                 RemoveSheetCommand,
                 ReorderRangeCommand,
@@ -223,8 +244,6 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
                 SetBorderPositionCommand,
                 SetBorderStyleCommand,
                 SetColHiddenCommand,
-                SetColHiddenMutation,
-                SetColVisibleMutation,
                 SetColWidthCommand,
                 SetColDataCommand,
                 SetColDataMutation,
@@ -235,8 +254,6 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
                 SetRangeValuesCommand,
                 SetRowHeightCommand,
                 SetRowHiddenCommand,
-                SetRowHiddenMutation,
-                SetRowVisibleMutation,
                 SetRowDataCommand,
                 SetRowDataMutation,
                 SetSelectedColsVisibleCommand,
@@ -276,6 +293,8 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
 
                 ToggleGridlinesCommand,
                 ToggleGridlinesMutation,
+                SetGridlinesColorCommand,
+                SetGridlinesColorMutation,
 
                 // permissions range protection
                 SetWorksheetPermissionPointsCommand,
@@ -296,6 +315,20 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
                 ToggleCellCheckboxCommand,
                 SetWorksheetDefaultStyleMutation,
                 SetWorksheetDefaultStyleCommand,
+
+                SplitTextToColumnsCommand,
+
+                // range theme
+
+                DeleteWorksheetRangeThemeStyleMutation,
+                SetWorksheetRangeThemeStyleMutation,
+                UnregisterWorksheetRangeThemeStyleMutation,
+                RegisterWorksheetRangeThemeStyleMutation,
+                UnregisterWorksheetRangeThemeStyleCommand,
+                RegisterWorksheetRangeThemeStyleCommand,
+                SetWorksheetRangeThemeStyleCommand,
+                DeleteWorksheetRangeThemeStyleCommand,
+
             ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
         }
 

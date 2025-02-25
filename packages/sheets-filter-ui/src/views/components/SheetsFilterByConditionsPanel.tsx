@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,10 @@
 import type { ISelectProps } from '@univerjs/design';
 import type { FilterOperator, IFilterConditionFormParams } from '../../models/conditions';
 import type { ByConditionsModel } from '../../services/sheets-filter-panel.service';
-import { LocaleService, useDependency } from '@univerjs/core';
+import { LocaleService } from '@univerjs/core';
 import { Input, Radio, RadioGroup, Select } from '@univerjs/design';
+import { useDependency, useObservable } from '@univerjs/ui';
 
-import { useObservable } from '@univerjs/ui';
 import React, { useCallback, useMemo } from 'react';
 import { FilterConditionItems } from '../../models/conditions';
 
@@ -35,12 +35,10 @@ export function FilterByCondition(props: { model: ByConditionsModel }) {
     const localeService = useDependency(LocaleService);
 
     // form state is from the model
-    const condition = useObservable(model.conditionItem$, undefined, true);
-    const formParams = useObservable(model.filterConditionFormParams$, undefined, true);
-    const { operator, numOfParameters } = condition;
-    const { operator1, operator2, val1, val2, and } = formParams;
+    const condition = useObservable(model.conditionItem$, undefined);
+    const formParams = useObservable(model.filterConditionFormParams$, undefined);
 
-    const radioValue = and ? 'AND' : 'OR';
+    const radioValue = formParams?.and ? 'AND' : 'OR';
     const onRadioChange = useCallback((key: string | number | boolean) => {
         model.onConditionFormChange({ and: key === 'AND' });
     }, [model]);
@@ -79,20 +77,24 @@ export function FilterByCondition(props: { model: ByConditionsModel }) {
     return (
         <div className={styles.sheetsFilterPanelConditionsContainer}>
             {/* primary condition */}
-            <Select value={operator} options={primaryOptions} onChange={onPrimaryConditionChange} />
-            {FilterConditionItems.getItemByOperator(operator).numOfParameters !== 0
-                ? (
-                    <div className={styles.sheetsFilterPanelConditionsContainerInner}>
-                        {numOfParameters >= 1 && renderSecondaryCondition(operator1!, val1 ?? '', 'operator1')}
-                        {numOfParameters >= 2 && renderSecondaryCondition(operator2!, val2 ?? '', 'operator2')}
-                        <div className={styles.sheetsFilterPanelConditionsDesc}>
-                            {localeService.t('sheets-filter.panel.?')}
-                            <br></br>
-                            {localeService.t('sheets-filter.panel.*')}
-                        </div>
-                    </div>
-                )
-                : null}
+            {(condition && formParams) && (
+                <>
+                    <Select value={condition.operator} options={primaryOptions} onChange={onPrimaryConditionChange} />
+                    {FilterConditionItems.getItemByOperator(condition.operator).numOfParameters !== 0
+                        ? (
+                            <div className={styles.sheetsFilterPanelConditionsContainerInner}>
+                                {condition.numOfParameters >= 1 && renderSecondaryCondition(formParams.operator1!, formParams.val1 ?? '', 'operator1')}
+                                {condition.numOfParameters >= 2 && renderSecondaryCondition(formParams.operator2!, formParams.val2 ?? '', 'operator2')}
+                                <div className={styles.sheetsFilterPanelConditionsDesc}>
+                                    {localeService.t('sheets-filter.panel.?')}
+                                    <br />
+                                    {localeService.t('sheets-filter.panel.*')}
+                                </div>
+                            </div>
+                        )
+                        : null}
+                </>
+            )}
         </div>
     );
 }

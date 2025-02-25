@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,9 @@
  */
 
 import type { MenuSchemaType } from '@univerjs/ui';
+import { DocsUIMenuSchema } from '@univerjs/docs-ui';
 import { RibbonStartGroup } from '@univerjs/ui';
 import { FONT_GROUP_MENU_ID, UNI_MENU_POSITIONS } from '@univerjs/uniui';
-import { menuSchema as docsUIMenuSchema } from '@univerjs/docs-ui';
 import {
     DOC_BOLD_MUTATION_ID,
     DOC_ITALIC_MUTATION_ID,
@@ -30,7 +30,7 @@ import {
 } from './menu';
 
 export const menuSchema: MenuSchemaType = {
-    [UNI_MENU_POSITIONS.TOOLBAR_MAIN]: (docsUIMenuSchema as any)[RibbonStartGroup.FORMAT],
+    [UNI_MENU_POSITIONS.TOOLBAR_MAIN]: (DocsUIMenuSchema as any)[RibbonStartGroup.FORMAT],
     [FONT_GROUP_MENU_ID]: {
         [DOC_BOLD_MUTATION_ID]: {
             order: 0,

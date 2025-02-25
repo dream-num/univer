@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -164,7 +164,7 @@ export class DesktopLayoutService extends Disposable implements ILayoutService {
             fromEvent(window, 'focusin').subscribe((event) => {
                 const target = event.target as HTMLElement;
 
-                if (givingBackFocusElements.some((item) => target.classList.contains(item))) {
+                if (this._rootContainerElement?.contains(target) && givingBackFocusElements.some((item) => target.classList.contains(item))) {
                     queueMicrotask(() => this.focus());
                     return;
                 }

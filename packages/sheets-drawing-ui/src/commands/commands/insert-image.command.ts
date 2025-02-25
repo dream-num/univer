@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,9 +26,33 @@ export interface IInsertImageCommandParams {
 export const InsertFloatImageCommand: ICommand<IInsertImageCommandParams> = {
     id: 'sheet.command.insert-float-image',
     type: CommandType.COMMAND,
+    handler: async (accessor, params) => {
+        const renderManagerService = accessor.get(IRenderManagerService);
+        const sheetDrawingUpdateController = renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET)
+            ?.with(SheetDrawingUpdateController);
+
+        if (!sheetDrawingUpdateController) {
+            return false;
+        }
+        const files = params?.files;
+
+        if (files) {
+            const awaitFiles = files.map((file) => sheetDrawingUpdateController.insertFloatImageByFile(file));
+
+            return (await Promise.all(awaitFiles)).every((result) => result);
+        } else {
+            return sheetDrawingUpdateController.insertFloatImage() ?? false;
+        }
+    },
+};
+
+export const InsertCellImageCommand: ICommand = {
+    id: 'sheet.command.insert-cell-image',
+    type: CommandType.COMMAND,
     handler: (accessor) => {
         const renderManagerService = accessor.get(IRenderManagerService);
         return renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET)
-            ?.with(SheetDrawingUpdateController).insertFloatImage() ?? false;
+            ?.with(SheetDrawingUpdateController)
+            .insertCellImage() ?? false;
     },
 };

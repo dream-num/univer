@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,3 +18,4 @@ export { UniverDocsDrawingPlugin } from './plugin';
 export { DocDrawingService, type IDocDrawing, IDocDrawingService, type IDocImage } from './services/doc-drawing.service';
 
 export { DOCS_DRAWING_PLUGIN, type IDocDrawingModel } from './controllers/doc-drawing.controller';
+export { DocDrawingController } from './controllers/doc-drawing.controller';

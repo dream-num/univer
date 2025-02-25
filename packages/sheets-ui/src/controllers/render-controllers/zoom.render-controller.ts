@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,9 @@ import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import { getSheetObject } from '../utils/component-tools';
 
+/**
+ * Zoom render controller, registered in a render module.
+ */
 export class SheetsZoomRenderController extends Disposable implements IRenderModule {
     constructor(
         private readonly _context: IRenderContext<Workbook>,
@@ -52,6 +55,7 @@ export class SheetsZoomRenderController extends Disposable implements IRenderMod
         const scene = this._getSheetObject().scene;
 
         this.disposeWithMe(
+            // hold ctrl & mousewheel ---> zoom
             scene.onMouseWheel$.subscribeEvent((e: IWheelEvent) => {
                 if (!e.ctrlKey || !this._contextService.getContextValue(FOCUSING_SHEET)) {
                     return;
@@ -90,8 +94,9 @@ export class SheetsZoomRenderController extends Disposable implements IRenderMod
         );
     }
 
+    private _zoom: number;
     private _initSkeletonListener() {
-        this.disposeWithMe(this._sheetSkeletonManagerService.currentSkeletonBefore$.subscribe((param) => {
+        this.disposeWithMe(this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param) => {
             if (param == null) {
                 return;
             }
@@ -101,17 +106,21 @@ export class SheetsZoomRenderController extends Disposable implements IRenderMod
             if (!worksheet) return;
 
             const zoomRatio = worksheet.getZoomRatio() || 1;
-            this._updateViewZoom(zoomRatio);
+            if (this._zoom !== zoomRatio) {
+                this._updateViewZoom(zoomRatio);
+            }
+            this._zoom = zoomRatio;
         }));
     }
 
     /**
-     * Zoom scene, resize viewport and then setScrollInfo
+     * Triggered when zoom and switch sheet.
      * @param zoomRatio
      */
     private _updateViewZoom(zoomRatio: number) {
         const sheetObject = this._getSheetObject();
         sheetObject?.scene.scale(zoomRatio, zoomRatio);
+        // sheetObject?.scene.transformByState({ scaleX: zoomRatio, scaleY: zoomRatio });
         sheetObject?.spreadsheet.makeForceDirty();
     }
 

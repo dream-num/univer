@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,14 @@
  * limitations under the License.
  */
 
-import { ICommandService, IConfigService, IPermissionService, LocaleService, nameCharacterCheck, Quantity, useDependency } from '@univerjs/core';
-import { Dropdown } from '@univerjs/design';
+import type { ICommandInfo } from '@univerjs/core';
+import type { IUniverUIConfig } from '@univerjs/ui';
+import type { IBaseSheetBarProps } from './SheetBarItem';
+import type { IScrollState } from './utils/slide-tab-bar';
+import { ICommandService, IConfigService, IPermissionService, LocaleService, nameCharacterCheck, Quantity } from '@univerjs/core';
+import { DropdownLegacy } from '@univerjs/design';
 import { LockSingle } from '@univerjs/icons';
+
 import {
     InsertSheetMutation,
     RangeProtectionRuleModel,
@@ -32,20 +37,15 @@ import {
     WorkbookRenameSheetPermission,
     WorksheetProtectionRuleModel,
 } from '@univerjs/sheets';
-import { ContextMenuPosition, IConfirmService, Menu, PLUGIN_CONFIG_KEY as UI_PLUGIN_CONFIG_KEY, useObservable } from '@univerjs/ui';
+import { ContextMenuPosition, IConfirmService, UI_PLUGIN_CONFIG_KEY, UIMenu, useDependency, useObservable } from '@univerjs/ui';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-
 import { merge } from 'rxjs';
-import type { ICommandInfo } from '@univerjs/core';
-import type { IUniverUIConfig } from '@univerjs/ui';
 import { useActiveWorkbook } from '../../../components/hook';
 import { IEditorBridgeService } from '../../../services/editor-bridge.service';
 import { ISheetBarService } from '../../../services/sheet-bar/sheet-bar.service';
 import styles from './index.module.less';
 import { SheetBarItem } from './SheetBarItem';
 import { SlideTabBar } from './utils/slide-tab-bar';
-import type { IBaseSheetBarProps } from './SheetBarItem';
-import type { IScrollState } from './utils/slide-tab-bar';
 
 export function SheetBarTabs() {
     const [sheetList, setSheetList] = useState<IBaseSheetBarProps[]>([]);
@@ -105,7 +105,7 @@ export function SheetBarTabs() {
 
     useEffect(() => {
         updateSheetItems();
-        const slideTabBar = setupSlideTabBarInit();
+        const { slideTabBar, disconnectResizeObserver } = setupSlideTabBarInit();
         const disposable = setupStatusUpdate();
         const subscribeList = [
             setupSubscribeScroll(),
@@ -118,6 +118,7 @@ export function SheetBarTabs() {
             disposable.dispose();
             slideTabBar.destroy();
             subscribeList.forEach((subscribe) => subscribe.unsubscribe());
+            disconnectResizeObserver && disconnectResizeObserver();
         };
     }, [resetOrder, workbook]);
 
@@ -199,9 +200,9 @@ export function SheetBarTabs() {
         slideTabBarRef.current.slideTabBar = slideTabBar;
 
         // FIXME@Dushusir: First time asynchronous rendering will cause flickering problems
-        resizeInit(slideTabBar);
+        const disconnectResizeObserver = resizeInit(slideTabBar);
 
-        return slideTabBar;
+        return { slideTabBar, disconnectResizeObserver };
     };
 
     const config = configService.getConfig<IUniverUIConfig>(UI_PLUGIN_CONFIG_KEY);
@@ -385,6 +386,9 @@ export function SheetBarTabs() {
 
         // Start the observer
         observer.observe(slideTabBarContainer);
+
+        // Return the cleanup function that disconnects the observer
+        return () => observer.disconnect();
     };
 
     const onVisibleChange = (visible: boolean) => {
@@ -408,13 +412,13 @@ export function SheetBarTabs() {
     };
 
     return (
-        <Dropdown
+        <DropdownLegacy
             className={styles.slideTabItemDropdown}
             visible={visible}
             align={{ offset }}
             trigger={['contextMenu']}
             overlay={(
-                <Menu
+                <UIMenu
                     menuType={ContextMenuPosition.FOOTER_TABS}
                     onOptionSelect={(params) => {
                         const { label: id, value, commandId } = params;
@@ -437,6 +441,6 @@ export function SheetBarTabs() {
                     ))}
                 </div>
             </div>
-        </Dropdown>
+        </DropdownLegacy>
     );
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
+type ValidParamType = string | number | boolean;
+
 export class HTTPParams {
-    constructor(readonly params?: { [key: string]: string | number | boolean }) {
+    constructor(readonly params?: { [key: string]: ValidParamType | ValidParamType[] }) {
         // empty
     }
 
@@ -25,7 +27,16 @@ export class HTTPParams {
         }
 
         return Object.keys(this.params)
-            .map((key) => `${key}=${this.params![key]}`)
+            .map((key) => {
+                const value = this.params![key];
+                if (Array.isArray(value)) {
+                    return value
+                        .map((v) => `${key}=${v}`)
+                        .join('&');
+                }
+
+                return `${key}=${value}`;
+            })
             .join('&');
     }
 }

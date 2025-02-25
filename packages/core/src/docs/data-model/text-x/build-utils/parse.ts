@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,8 +32,7 @@ const tags = [
     // DataStreamTreeTokenType.PAGE_BREAK, // 换页
     // DataStreamTreeTokenType.DOCS_END, // 文档结尾
     // DataStreamTreeTokenType.TAB, // 制表符
-    DataStreamTreeTokenType.CUSTOM_BLOCK, // 图片 mention 等不参与文档流的场景
-
+    // DataStreamTreeTokenType.CUSTOM_BLOCK, // 图片 mention 等不参与文档流的场景
 ];
 
 export const getPlainText = (dataStream: string) => {
@@ -94,7 +93,7 @@ export const fromPlainText = (text: string): IDocumentBody => {
         }
     }
 
-    if (end !== dataStream.length - 1) {
+    if (end !== dataStream.length - 1 || dataStream.length === 1) {
         loopParagraph(dataStream.length, false);
     }
     return {

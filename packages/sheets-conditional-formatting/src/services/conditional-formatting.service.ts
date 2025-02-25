@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,44 +19,21 @@ import type { IInsertColMutationParams, IMoveColumnsMutationParams, IMoveRangeMu
 import type { IDeleteConditionalRuleMutationParams } from '../commands/mutations/delete-conditional-rule.mutation';
 import type { IConditionFormattingRule, IHighlightCell, IRuleModelJson } from '../models/type';
 import type { IDataBarCellData, IDataBarRenderParams, IIconSetCellData, IIconSetRenderParams } from '../render/type';
-import type { ICalculateUnit, IContext } from './calculate-unit/type';
-import { createInterceptorKey, Disposable, ICommandService, Inject, Injector, InterceptorManager, IResourceManagerService, IUniverInstanceService, ObjectMatrix, Rectangle, Tools, UniverInstanceType } from '@univerjs/core';
+import { Disposable, ICommandService, Inject, Injector, IResourceManagerService, IUniverInstanceService, ObjectMatrix, Rectangle, Tools, UniverInstanceType } from '@univerjs/core';
 import { InsertColMutation, InsertRowMutation, MoveColsMutation, MoveRangeMutation, MoveRowsMutation, RemoveColMutation, RemoveRowMutation, RemoveSheetCommand, ReorderRangeMutation, SetRangeValuesMutation, SheetInterceptorService } from '@univerjs/sheets';
-import { Subject } from 'rxjs';
-import { bufferTime, filter, map } from 'rxjs/operators';
 import { CFRuleType, SHEET_CONDITIONAL_FORMATTING_PLUGIN } from '../base/const';
 import { DeleteConditionalRuleMutation, DeleteConditionalRuleMutationUndoFactory } from '../commands/mutations/delete-conditional-rule.mutation';
 import { ConditionalFormattingRuleModel } from '../models/conditional-formatting-rule-model';
 import { ConditionalFormattingViewModel } from '../models/conditional-formatting-view-model';
-import { colorScaleCellCalculateUnit } from './calculate-unit/color-scale';
-import { dataBarCellCalculateUnit } from './calculate-unit/data-bar';
-import { highlightCellCalculateUnit } from './calculate-unit/highlight-cell';
-import { iconSetCalculateUnit } from './calculate-unit/icon-set';
-import { EMPTY_STYLE } from './calculate-unit/type';
-
-type ComputeStatus = 'computing' | 'end' | 'error';
-
-interface IComputeCache { status: ComputeStatus };
-
-const beforeUpdateRuleResult = createInterceptorKey<{ subUnitId: string; unitId: string; cfId: string }, undefined>('conditional-formatting-before-update-rule-result');
 
 export class ConditionalFormattingService extends Disposable {
-    // <unitId,<subUnitId,<cfId,IComputeCache>>>
-    private _ruleCacheMap: Map<string, Map<string, Map<string, IComputeCache>>> = new Map();
-
-    private _calculateUnit$ = new Subject<{ unitId: string; subUnitId: string; rule: IConditionFormattingRule }>();
-
-    private _ruleComputeStatus$: Subject<{ status: ComputeStatus; result?: ObjectMatrix<any>; unitId: string; subUnitId: string; cfId: string }> = new Subject();
-    public ruleComputeStatus$ = this._ruleComputeStatus$.asObservable();
-
-    public interceptorManager = new InterceptorManager({ beforeUpdateRuleResult });
-
-    private _calculationUnitMap: Map<IConditionFormattingRule['rule']['type'], ICalculateUnit> = new Map();
+    get _conditionalFormattingViewModelV2() {
+        return this._injector.get(ConditionalFormattingViewModel);
+    }
 
     constructor(
         @Inject(ConditionalFormattingRuleModel) private _conditionalFormattingRuleModel: ConditionalFormattingRuleModel,
         @Inject(Injector) private _injector: Injector,
-        @Inject(ConditionalFormattingViewModel) private _conditionalFormattingViewModel: ConditionalFormattingViewModel,
         @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
         @Inject(IResourceManagerService) private _resourceManagerService: IResourceManagerService,
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
@@ -64,71 +41,41 @@ export class ConditionalFormattingService extends Disposable {
     ) {
         super();
         this._initCellChange();
-        this._initCacheManager();
-        this._initRemoteCalculate();
         this._initSnapshot();
         this._initSheetChange();
-        this._registerCalculationUnit(dataBarCellCalculateUnit);
-        this._registerCalculationUnit(colorScaleCellCalculateUnit);
-        this._registerCalculationUnit(highlightCellCalculateUnit);
-        this._registerCalculationUnit(iconSetCalculateUnit);
-        this._calculateUnit$.pipe(bufferTime(100), filter((list) => !!list.length), map((list) => {
-            const createKey = (config: typeof list[0]) => `${config.unitId}_${config.subUnitId}_${config.rule.cfId}`;
-            const result = list.reduce((a, b) => {
-                const key = createKey(b);
-                if (!a.map[key]) {
-                    a.map[key] = b;
-                    a.list.push(b);
-                }
-                return a;
-            }, {
-                map: {} as Record<string, typeof list[0]>,
-                list: [] as typeof list,
-            });
-            return result.list;
-        })).subscribe((configList) => {
-            configList.forEach((config) => {
-                this._handleCalculateUnit(config.unitId, config.subUnitId, config.rule);
-            });
-        });
-
-        this.disposeWithMe(() => {
-            this.interceptorManager.dispose();
-        });
     }
 
     public composeStyle(unitId: string, subUnitId: string, row: number, col: number) {
-        const cell = this._conditionalFormattingViewModel.getCellCf(unitId, subUnitId, row, col);
-        if (cell) {
+        const cellCfs = this._conditionalFormattingViewModelV2.getCellCfs(unitId, subUnitId, row, col);
+
+        if (cellCfs && cellCfs?.length) {
             // High priority should be applied at the back, overwriting the previous results.
             // reverse is a side-effect function that changes the original array.
-            const ruleList = cell.cfList.map((item) => this._conditionalFormattingRuleModel.getRule(unitId, subUnitId, item.cfId)!).filter((rule) => !!rule).reverse();
+            const ruleList = cellCfs.map((item) => this._conditionalFormattingRuleModel.getRule(unitId, subUnitId, item.cfId)!).filter((rule) => !!rule).reverse();
             const endIndex = ruleList.findIndex((rule) => rule?.stopIfTrue);
             if (endIndex > -1) {
                 ruleList.splice(endIndex + 1);
             }
             const result = ruleList.reduce((pre, rule) => {
                 const type = rule.rule.type;
-                const ruleCacheItem = cell.cfList.find((cache) => cache.cfId === rule.cfId);
-                if (ruleCacheItem?.isDirty) {
-                    this._calculateUnit$.next({ unitId, subUnitId, rule });
-                }
+                const ruleCacheItem = cellCfs.find((cache) => cache.cfId === rule.cfId);
+
                 if (type === CFRuleType.highlightCell) {
-                    ruleCacheItem!.ruleCache && Tools.deepMerge(pre, { style: ruleCacheItem!.ruleCache });
+                    ruleCacheItem!.result && Tools.deepMerge(pre, { style: ruleCacheItem!.result });
                 } else if (type === CFRuleType.colorScale) {
-                    const ruleCache = ruleCacheItem?.ruleCache;
+                    const ruleCache = ruleCacheItem?.result;
                     if (ruleCache && typeof ruleCache === 'string') {
                         pre.style = { ...(pre.style ?? {}), bg: { rgb: ruleCache } };
                     }
                 } else if (type === CFRuleType.dataBar) {
-                    const ruleCache = ruleCacheItem?.ruleCache as IDataBarRenderParams;
-                    if (ruleCache && ruleCache !== EMPTY_STYLE) {
+                    const ruleCache = ruleCacheItem?.result as IDataBarRenderParams;
+                    if (ruleCache) {
                         pre.dataBar = ruleCache;
                         pre.isShowValue = ruleCache.isShowValue;
                     }
                 } else if (type === CFRuleType.iconSet) {
-                    const ruleCache = ruleCacheItem?.ruleCache as IIconSetRenderParams;
-                    if (ruleCache && ruleCache !== EMPTY_STYLE) {
+                    const ruleCache = ruleCacheItem?.result as IIconSetRenderParams;
+                    if (ruleCache) {
                         pre.iconSet = ruleCache;
                         pre.isShowValue = ruleCache.isShowValue;
                     }
@@ -226,59 +173,16 @@ export class ConditionalFormattingService extends Disposable {
         );
     }
 
-    private _registerCalculationUnit(unit: ICalculateUnit) {
-        this._calculationUnitMap.set(unit.type, unit);
-    }
-
-    private _getComputedCache(unitId: string, subUnitId: string, cfId: string) {
-        return this._ruleCacheMap.get(unitId)?.get(subUnitId)?.get(cfId);
-    }
-
-    private _setComputedCache(unitId: string, subUnitId: string, cfId: string, value: IComputeCache) {
-        let unitMap = this._ruleCacheMap.get(unitId);
-        if (!unitMap) {
-            unitMap = new Map();
-            this._ruleCacheMap.set(unitId, unitMap);
-        }
-        let subUnitMap = unitMap.get(subUnitId);
-        if (!subUnitMap) {
-            subUnitMap = new Map();
-            unitMap.set(subUnitId, subUnitMap);
-        }
-        subUnitMap.set(cfId, value);
-    }
-
-    private _deleteComputeCache(unitId: string, subUnitId: string, cfId: string) {
-        const unitCache = this._ruleCacheMap.get(unitId);
-        const subUnitCache = unitCache?.get(subUnitId);
-        if (subUnitCache) {
-            subUnitCache.delete(cfId);
-            const size = subUnitCache.size;
-            if (!size) {
-                unitCache?.delete(subUnitId);
-            }
-        }
-    }
-
-    private _initCacheManager() {
-        this.disposeWithMe(this._conditionalFormattingViewModel.markDirty$.subscribe((item) => {
-            this._deleteComputeCache(item.unitId, item.subUnitId, item.rule.cfId);
-        }));
-
-        this.disposeWithMe(this._conditionalFormattingRuleModel.$ruleChange.pipe(filter((item) => item.type !== 'sort')).subscribe((item) => {
-            const { unitId, subUnitId, rule } = item;
-            this._deleteComputeCache(unitId, subUnitId, rule.cfId);
-        }));
-    }
-
+    // eslint-disable-next-line max-lines-per-function
     private _initCellChange() {
         this.disposeWithMe(
+            // eslint-disable-next-line max-lines-per-function
             this._commandService.onCommandExecuted((commandInfo) => {
                 const collectRule = (unitId: string, subUnitId: string, cellData: [number, number][]) => {
                     const ruleIds: Set<string> = new Set();
                     cellData.forEach(([row, col]) => {
-                        const ruleItem = this._conditionalFormattingViewModel.getCellCf(unitId, subUnitId, row, col);
-                        ruleItem?.cfList.forEach((item) => ruleIds.add(item.cfId));
+                        const ruleItem = this._conditionalFormattingViewModelV2.getCellCfs(unitId, subUnitId, row, col);
+                        ruleItem?.forEach((item) => ruleIds.add(item.cfId));
                     });
                     return [...ruleIds].map((cfId) => this._conditionalFormattingRuleModel.getRule(unitId, subUnitId, cfId) as IConditionFormattingRule).filter((rule) => !!rule);
                 };
@@ -297,8 +201,7 @@ export class ConditionalFormattingService extends Disposable {
                         });
                         const rules = collectRule(unitId, subUnitId, cellMatrix);
                         rules.forEach((rule) => {
-                            this._conditionalFormattingViewModel.markRuleDirty(unitId, subUnitId, rule);
-                            this._deleteComputeCache(unitId, subUnitId, rule.cfId);
+                            this._conditionalFormattingViewModelV2.markRuleDirty(unitId, subUnitId, rule.cfId);
                         });
                         break;
                     }
@@ -310,8 +213,7 @@ export class ConditionalFormattingService extends Disposable {
                         if (allRules) {
                             const effectRule = allRules.filter((rule) => rule.ranges.some((ruleRange) => Rectangle.intersects(ruleRange, effectRange)));
                             effectRule.forEach((rule) => {
-                                this._conditionalFormattingViewModel.markRuleDirty(unitId, subUnitId, rule);
-                                this._deleteComputeCache(unitId, subUnitId, rule.cfId);
+                                this._conditionalFormattingViewModelV2.markRuleDirty(unitId, subUnitId, rule.cfId);
                             });
                         }
                         break;
@@ -324,8 +226,7 @@ export class ConditionalFormattingService extends Disposable {
                         if (allRules) {
                             const effectRule = allRules.filter((rule) => rule.ranges.some((ruleRange) => Rectangle.intersects(ruleRange, effectRange)));
                             effectRule.forEach((rule) => {
-                                this._conditionalFormattingViewModel.markRuleDirty(unitId, subUnitId, rule);
-                                this._deleteComputeCache(unitId, subUnitId, rule.cfId);
+                                this._conditionalFormattingViewModelV2.markRuleDirty(unitId, subUnitId, rule.cfId);
                             });
                         }
                         break;
@@ -342,8 +243,7 @@ export class ConditionalFormattingService extends Disposable {
                         if (allRules) {
                             const effectRule = allRules.filter((rule) => rule.ranges.some((ruleRange) => Rectangle.intersects(ruleRange, effectRange)));
                             effectRule.forEach((rule) => {
-                                this._conditionalFormattingViewModel.markRuleDirty(unitId, subUnitId, rule);
-                                this._deleteComputeCache(unitId, subUnitId, rule.cfId);
+                                this._conditionalFormattingViewModelV2.markRuleDirty(unitId, subUnitId, rule.cfId);
                             });
                         }
                         break;
@@ -360,8 +260,7 @@ export class ConditionalFormattingService extends Disposable {
                         if (allRules) {
                             const effectRule = allRules.filter((rule) => rule.ranges.some((ruleRange) => Rectangle.intersects(ruleRange, effectRange)));
                             effectRule.forEach((rule) => {
-                                this._conditionalFormattingViewModel.markRuleDirty(unitId, subUnitId, rule);
-                                this._deleteComputeCache(unitId, subUnitId, rule.cfId);
+                                this._conditionalFormattingViewModelV2.markRuleDirty(unitId, subUnitId, rule.cfId);
                             });
                         }
                         break;
@@ -375,8 +274,7 @@ export class ConditionalFormattingService extends Disposable {
                             });
                             const rules = collectRule(unitId, value.subUnitId, cellMatrix);
                             rules.forEach((rule) => {
-                                this._conditionalFormattingViewModel.markRuleDirty(unitId, value.subUnitId, rule);
-                                this._deleteComputeCache(unitId, value.subUnitId, rule.cfId);
+                                this._conditionalFormattingViewModelV2.markRuleDirty(unitId, value.subUnitId, rule.cfId);
                             });
                         };
                         handleSubUnit(to);
@@ -389,54 +287,13 @@ export class ConditionalFormattingService extends Disposable {
                         if (allRules) {
                             const effectRule = allRules.filter((rule) => rule.ranges.some((ruleRange) => Rectangle.intersects(ruleRange, range)));
                             effectRule.forEach((rule) => {
-                                this._conditionalFormattingViewModel.markRuleDirty(unitId, subUnitId, rule);
-                                this._deleteComputeCache(unitId, subUnitId, rule.cfId);
+                                this._conditionalFormattingViewModelV2.markRuleDirty(unitId, subUnitId, rule.cfId);
                             });
                         }
                         break;
                     }
                 }
             }));
-    }
-
-    private _initRemoteCalculate() {
-        this.disposeWithMe(this._ruleComputeStatus$.subscribe(({ status, subUnitId, unitId, cfId, result }) => {
-            const cache = this._getComputedCache(unitId, subUnitId, cfId) || {} as IComputeCache;
-            cache.status = status;
-            this._setComputedCache(unitId, subUnitId, cfId, cache);
-            if (status === 'end' && result) {
-                this.interceptorManager.fetchThroughInterceptors(this.interceptorManager.getInterceptPoints().beforeUpdateRuleResult)({
-                    subUnitId, unitId, cfId,
-                }, undefined);
-                result.forValue((row, col, value) => {
-                    this._conditionalFormattingViewModel.setCellCfRuleCache(unitId, subUnitId, row, col, cfId, value);
-                });
-            }
-        }));
-    }
-
-    private async _handleCalculateUnit(unitId: string, subUnitId: string, rule: IConditionFormattingRule) {
-        // We need to perform a secondary verification, as the rule may have been deleted after initApply.
-        if (!this._conditionalFormattingRuleModel.getRule(unitId, subUnitId, rule.cfId)) {
-            return;
-        }
-        const workbook = this._univerInstanceService.getUnit<Workbook>(unitId);
-        const worksheet = workbook?.getSheetBySheetId(subUnitId);
-        let cache = this._getComputedCache(unitId, subUnitId, rule.cfId);
-        if (cache && ['computing', 'end'].includes(cache.status)) {
-            return;
-        }
-        if (!cache) {
-            cache = { status: 'computing' };
-            this._setComputedCache(unitId, subUnitId, rule.cfId, cache);
-        }
-        const unit = this._calculationUnitMap.get(rule.rule.type);
-        if (!unit || !worksheet) {
-            return;
-        }
-        const context: IContext = { unitId, subUnitId, accessor: this._injector, workbook: workbook!, worksheet };
-        const result = await unit.handle(rule, context);
-        this._ruleComputeStatus$.next({ status: 'end', unitId, subUnitId, cfId: rule.cfId, result });
     }
 }
 

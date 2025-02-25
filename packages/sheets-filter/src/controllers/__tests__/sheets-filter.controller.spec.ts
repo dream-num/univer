@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import type { IWorkbookData, Workbook } from '@univerjs/core';
 import { ICommandService, Inject, Injector, IUniverInstanceService, LocaleService, LocaleType, Plugin, RANGE_TYPE, UndoCommand, Univer, UniverInstanceType } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import { CopySheetCommand, InsertColMutation, InsertSheetMutation, MoveColsCommand, MoveColsMutation, MoveRangeCommand, MoveRangeMutation, MoveRowsCommand, MoveRowsMutation, RefRangeService, RemoveColCommand, RemoveColMutation, RemoveRowCommand, RemoveRowMutation, SetRangeValuesMutation, SetSelectionsOperation, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
+import { CopySheetCommand, InsertColByRangeCommand, InsertColMutation, InsertRowByRangeCommand, InsertSheetMutation, MoveColsCommand, MoveColsMutation, MoveRangeCommand, MoveRangeMutation, MoveRowsCommand, MoveRowsMutation, RefRangeService, RemoveColByRangeCommand, RemoveColCommand, RemoveColMutation, RemoveRowByRangeCommand, RemoveRowCommand, RemoveRowMutation, SetRangeValuesMutation, SetSelectionsOperation, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
 import { SHEET_FILTER_SNAPSHOT_ID, SheetsFilterService } from '../../services/sheet-filter.service';
 import { SheetsFilterController } from '../sheets-filter.controller';
 import { SetSheetsFilterCriteriaMutation } from '../../commands/mutations/sheets-filter.mutation';
@@ -156,10 +156,14 @@ function createFilterControllerTestBed(workbookData?: IWorkbookData) {
         MoveColsCommand,
         MoveColsMutation,
         InsertColMutation,
+        InsertColByRangeCommand,
+        InsertRowByRangeCommand,
         RemoveRowCommand,
         RemoveRowMutation,
         RemoveColCommand,
         RemoveColMutation,
+        RemoveColByRangeCommand,
+        RemoveRowByRangeCommand,
         SetSelectionsOperation,
         SetRangeValuesMutation,
         CopySheetCommand,

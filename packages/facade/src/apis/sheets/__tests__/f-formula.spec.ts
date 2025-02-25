@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import type { FUniver, ICellData, Injector, IStyleData, Nullable } from '@univerjs/core';
+import type { ICellData, Injector, IStyleData, Nullable } from '@univerjs/core';
+import type { FUniver } from '@univerjs/core/facade';
 import type { IUniverSheetsFormulaBaseConfig } from '@univerjs/sheets-formula';
 import { ICommandService, IConfigService, IUniverInstanceService } from '@univerjs/core';
 

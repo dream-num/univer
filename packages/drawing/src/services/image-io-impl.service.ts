@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,11 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { Tools } from '@univerjs/core';
 import type { Observable } from 'rxjs';
+import type { IImageIoService, IImageIoServiceParam } from './image-io.service';
+import { Tools } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { DRAWING_IMAGE_ALLOW_IMAGE_LIST, DRAWING_IMAGE_ALLOW_SIZE } from '../basics/config';
-import type { IImageIoService, IImageIoServiceParam } from './image-io.service';
 import { ImageSourceType, ImageUploadStatusType } from './image-io.service';
 
 export class ImageIoService implements IImageIoService {
@@ -96,4 +96,3 @@ export class ImageIoService implements IImageIoService {
         this._change$.next(this._waitCount);
     }
 }
-

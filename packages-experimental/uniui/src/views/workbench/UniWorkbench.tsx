@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,24 +17,25 @@
 // Refer to packages/ui/src/views/App.tsx
 
 import type { ILocale } from '@univerjs/design';
+import type { IWorkbenchOptions } from '@univerjs/ui';
 import type {
     NodeTypes,
     ReactFlowInstance,
     Viewport,
 } from '@xyflow/react';
-import { debounce, ICommandService, IContextService, IUniverInstanceService, LocaleService, ThemeService, useDependency } from '@univerjs/core';
-import { ConfigContext, ConfigProvider, defaultTheme, themeInstance } from '@univerjs/design';
+import type { IFloatingToolbarRef } from '../uni-toolbar/UniFloatToolbar';
+import { debounce, ICommandService, IContextService, IUniverInstanceService, LocaleService, ThemeService } from '@univerjs/core';
+import { clsx, ConfigContext, ConfigProvider, defaultTheme, themeInstance } from '@univerjs/design';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { MenuSingle } from '@univerjs/icons';
 import {
-    builtInGlobalComponents,
     BuiltInUIPart,
     ComponentContainer,
     ContextMenu,
-    IMessageService,
-    type IWorkbenchOptions,
+    GlobalZone,
     UNI_DISABLE_CHANGING_FOCUS_KEY,
     useComponentsOfPart,
+    useDependency,
     useObservable,
 } from '@univerjs/ui';
 import {
@@ -44,9 +45,7 @@ import {
     ReactFlowProvider,
     useNodesState,
 } from '@xyflow/react';
-import clsx from 'clsx';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-
 import { createPortal } from 'react-dom';
 import { UniFocusUnitOperation } from '../../commands/operations/uni-focus-unit.operation';
 import { FlowManagerService } from '../../services/flow/flow-manager.service';
@@ -54,7 +53,7 @@ import { IUnitGridService } from '../../services/unit-grid/unit-grid.service';
 import { useUnitFocused, useUnitTitle } from '../hooks/title';
 import { DEFAULT_ZOOM, MAX_ZOOM, MIN_ZOOM, UniControlItem, UniControls } from '../uni-controls/UniControls';
 import { LeftSidebar, RightSidebar } from '../uni-sidebar/UniSidebar';
-import { type IFloatingToolbarRef, UniFloatingToolbar } from '../uni-toolbar/UniFloatToolbar';
+import { UniFloatingToolbar } from '../uni-toolbar/UniFloatToolbar';
 import { UniToolbar } from '../uni-toolbar/UniToolbar';
 import styles from './workbench.module.less';
 import '@xyflow/react/dist/style.css';
@@ -76,7 +75,6 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
 
     const localeService = useDependency(LocaleService);
     const themeService = useDependency(ThemeService);
-    const messageService = useDependency(IMessageService);
     const unitGridService = useDependency(IUnitGridService);
     const instanceService = useDependency(IUniverInstanceService);
     const renderManagerService = useDependency(IRenderManagerService);
@@ -127,7 +125,6 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
 
     useEffect(() => {
         document.body.appendChild(portalContainer);
-        messageService.setContainer(portalContainer);
 
         const subscriptions = [
             localeService.localeChanged$.subscribe(() => {
@@ -146,7 +143,7 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
             // cleanup
             document.body.removeChild(portalContainer);
         };
-    }, [localeService, messageService, mountContainer, portalContainer, themeService.currentTheme$]);
+    }, [localeService, mountContainer, portalContainer, themeService.currentTheme$]);
 
     const nodeTypes: NodeTypes = {
         customNode: UnitNode,
@@ -240,7 +237,7 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
                                 onMove={onMove}
                                 onInit={onFlowInit}
                             >
-                                <Background bgColor="#f4f6f8" color="#d9d9d9"></Background>
+                                <Background bgColor="#f4f6f8" color="#d9d9d9" />
                             </ReactFlow>
 
                             {/* Sheet cell editors etc. Their size would not be affected the scale of ReactFlow. */}
@@ -267,7 +264,7 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
                     </div>
                 </div>
                 <ComponentContainer key="global" components={globalComponents} />
-                <ComponentContainer key="built-in-global" components={builtInGlobalComponents} />
+                <GlobalZone />
                 {contextMenu && <ContextMenu />}
                 <FloatingContainer />
             </ReactFlowProvider>
@@ -353,8 +350,7 @@ function UnitRenderer(props: IUnitRendererProps) {
             // We bind these focusing events on capture phrase so the
             // other event handlers would have correct currently focused unit.
             onWheel={(event) => event.stopPropagation()}
-        >
-        </div>
+        />
     );
 }
 

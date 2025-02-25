@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { IImageWatermarkConfig } from '@univerjs/watermark';
-import { LocaleService, useDependency } from '@univerjs/core';
+import type { IImageWatermarkConfig } from '@univerjs/engine-render';
+import { LocaleService } from '@univerjs/core';
 import { Button, Checkbox, InputNumber } from '@univerjs/design';
-import { ILocalFileService } from '@univerjs/ui';
+import { ILocalFileService, useDependency } from '@univerjs/ui';
 import { WATERMARK_IMAGE_ALLOW_IMAGE_LIST } from '@univerjs/watermark';
 import React from 'react';
 import styles from './index.module.less';
@@ -105,9 +105,7 @@ export const WatermarkImageSetting: React.FC<IWatermarkImageSettingProps> = ({ c
                                     onChange({ ...config, maintainAspectRatio: val as boolean });
                                 }
                             }}
-                        >
-
-                        </Checkbox>
+                        />
                     </div>
                 </div>
             </div>
@@ -178,9 +176,7 @@ export const WatermarkImageSetting: React.FC<IWatermarkImageSettingProps> = ({ c
                         <Checkbox
                             checked={config.repeat}
                             onChange={(val) => onChange({ ...config, repeat: val as boolean })}
-                        >
-
-                        </Checkbox>
+                        />
                     </div>
                 </div>
                 <div className={styles.watermarkTextSettingFontStylePart}>

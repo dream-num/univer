@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,19 +30,31 @@ export interface IScrollState {
      */
     offsetY: number;
     /**
-     * currrent start row in viewport visible area
+     * Current start row in viewportMain in canvas, NOT the first row of visible area of current viewport after freeze.
+     * e.g. If no freeze, it's the same as startRow in current viewport.
+     * If freeze, this value is smaller than the first row of visible area.  Just pretend that viewMainTop does not exist.
+     *
+     * e.g. If row 1 ~ 2 is frozen, the first row if viewMain is 3, but sheetViewStartRow still 0.
      */
     sheetViewStartRow: number;
     /**
-     * current start column in viewport visible area
+     * Current start column in viewportMain in canvas, NOT the first column of visible area of current viewport after freeze.
+     * e.g. If no freeze, it's the same as startColumn in current viewport.
+     * If freeze, this value is smaller than the first column of visible area.  Just pretend that viewMainLeft does not exist.
+     *
+     * e.g. If column A ~ C is frozen, the first column of viewMain is D, but sheetViewStartColumn still 0.
      */
     sheetViewStartColumn: number;
 }
 
 export interface IViewportScrollState extends IScrollState {
+    /** scroll value in scrollbar */
     scrollX: number;
+    /** scroll value in scrollbar */
     scrollY: number;
+    /** scroll value on viewport */
     viewportScrollX: number;
+    /** scroll value on viewport */
     viewportScrollY: number;
 }
 
@@ -63,7 +75,7 @@ export type IScrollStateMap = Map<string, Map<string, IScrollState>>;
  */
 export class SheetScrollManagerService implements IRenderModule {
     /**
-     * a map holds all scroll info for each sheet
+     * a map holds all scroll info for each sheet(valid value)
      */
     private readonly _scrollStateMap: IScrollStateMap = new Map();
     /**
@@ -99,70 +111,6 @@ export class SheetScrollManagerService implements IRenderModule {
         this._rawScrollInfo$.complete();
     }
 
-    setSearchParam(param: IScrollStateSearchParam) {
-        this._searchParamForScroll = param;
-    }
-
-    setSearchParamAndRefresh(param: IScrollStateSearchParam) {
-        this._searchParamForScroll = param;
-        this._scrollStateNext(param);
-    }
-
-    getScrollStateByParam(param: IScrollStateSearchParam): Readonly<Nullable<IScrollState>> {
-        return this._getCurrentScroll(param);
-    }
-
-    getCurrentScrollState(): Readonly<Nullable<IScrollState>> {
-        return this._getCurrentScroll(this._searchParamForScroll);
-    }
-
-    /**
-     * Set scrollInfo by SetScrollOperation, call by ScrollCommand.id.
-     * @param param
-     */
-    setScrollInfoAndEmitEvent(param: IScrollStateWithSearchParam) {
-        this._setScrollState(param);
-        this._scrollStateNext(param);
-    }
-
-    /**
-     * call by set frozen
-     * @param scrollInfo
-     */
-    setScrollStateToCurrSheetAndEmitEvent(scrollInfo: IScrollState) {
-        if (this._searchParamForScroll == null) {
-            return;
-        }
-
-        this._setScrollState({
-            ...this._searchParamForScroll,
-            ...scrollInfo,
-        });
-        this._scrollStateNext(this._searchParamForScroll);
-    }
-
-    /**
-     * set _scrollStateMap but no _scrollInfo$.next
-     * @param scroll
-     */
-    setScrollStateToCurrSheet(scroll: IScrollState) {
-        if (this._searchParamForScroll == null) {
-            return;
-        }
-
-        this._setScrollState({
-            ...this._searchParamForScroll,
-            ...scroll,
-        });
-    }
-
-    clear(): void {
-        if (this._searchParamForScroll == null) {
-            return;
-        }
-        this._clearByParamAndNotify(this._searchParamForScroll);
-    }
-
     calcViewportScrollFromRowColOffset(scrollInfo: Nullable<IViewportScrollState>) {
         if (!scrollInfo) {
             return {
@@ -187,6 +135,63 @@ export class SheetScrollManagerService implements IRenderModule {
         };
     }
 
+    setSearchParam(param: IScrollStateSearchParam) {
+        this._searchParamForScroll = param;
+    }
+
+    getScrollStateByParam(param: IScrollStateSearchParam): Readonly<Nullable<IScrollState>> {
+        return this._getCurrentScroll(param);
+    }
+
+    getCurrentScrollState(): Readonly<IScrollState> {
+        return this._getCurrentScroll(this._searchParamForScroll);
+    }
+
+    setValidScrollState(param: IScrollStateWithSearchParam) {
+        this._setScrollState(param);
+    }
+
+    /**
+     * emit raw scrollInfo by SetScrollOperation, call by ScrollCommand.id.
+     * raw scrollInfo means not handled by limit scroll method.
+     * @param param
+     */
+    emitRawScrollParam(param: IScrollStateWithSearchParam) {
+        this._emitRawScroll(param);
+    }
+
+    /**
+     * Set _scrollStateMap
+     * @param scroll
+     */
+    setValidScrollStateToCurrSheet(scroll: IViewportScrollState) {
+        if (this._searchParamForScroll == null) {
+            return;
+        }
+
+        this._setScrollState({
+            ...this._searchParamForScroll,
+            ...scroll,
+        });
+
+        const sheetId = this._searchParamForScroll.sheetId;
+        const sheetSkeleton = this._sheetSkeletonManagerService.getSkeleton(sheetId);
+        if (sheetSkeleton) {
+            sheetSkeleton.setScroll(scroll.viewportScrollX, scroll.viewportScrollY);
+        }
+    }
+
+    clear(): void {
+        if (this._searchParamForScroll == null) {
+            return;
+        }
+        this._clearByParamAndNotify(this._searchParamForScroll);
+    }
+
+    /**
+     * scroll
+     * @param scrollInfo
+     */
     private _setScrollState(scrollInfo: IScrollStateWithSearchParam): void {
         const { unitId, sheetId, sheetViewStartColumn, sheetViewStartRow, offsetX, offsetY } = scrollInfo;
 
@@ -213,21 +218,30 @@ export class SheetScrollManagerService implements IRenderModule {
             offsetY: 0,
         });
 
-        this._scrollStateNext(param);
+        this._emitRawScroll({
+            sheetViewStartRow: 0,
+            sheetViewStartColumn: 0,
+            offsetX: 0,
+            offsetY: 0,
+        });
     }
 
-    private _getCurrentScroll(param: Nullable<IScrollStateSearchParam>) {
+    private _getCurrentScroll(param: Nullable<IScrollStateSearchParam>): IScrollState {
+        const emptyState = {
+            sheetViewStartRow: 0,
+            sheetViewStartColumn: 0,
+            offsetX: 0,
+            offsetY: 0,
+        };
         if (param == null) {
-            return;
+            return emptyState;
         }
         const { unitId, sheetId } = param;
-        return this._scrollStateMap.get(unitId)?.get(sheetId);
+        const currScrollState = this._scrollStateMap.get(unitId)?.get(sheetId);
+        return currScrollState || emptyState;
     }
 
-    private _scrollStateNext(param: IScrollStateSearchParam): void {
-        const scrollInfo = this._getCurrentScroll(param);
-
-        // subscriber can be found in scrollManagerService.rawScrollInfo$.subscribe
-        this._rawScrollInfo$.next(scrollInfo);
+    private _emitRawScroll(param: IScrollState): void {
+        this._rawScrollInfo$.next(param);
     }
 }

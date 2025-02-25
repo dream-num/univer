@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,6 +76,9 @@ const locale: typeof zhCN = {
         cancel: 'Hủy',
     },
     'global-shortcut': 'Phím tắt toàn cầu',
+    'zoom-slider': {
+        resetTo: 'Khôi phục đến',
+    },
 };
 
 export default locale;

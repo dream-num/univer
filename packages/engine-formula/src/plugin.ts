@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,11 @@
 
 import type { Dependency } from '@univerjs/core';
 import type { IUniverEngineFormulaConfig } from './controller/config.schema';
-import { IConfigService, Inject, Injector, Plugin, touchDependencies } from '@univerjs/core';
+import { IConfigService, Inject, Injector, merge, Plugin, touchDependencies } from '@univerjs/core';
 import { CalculateController } from './controller/calculate.controller';
-import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controller/config.schema';
+import { ComputingStatusReporterController } from './controller/computing-status.controller';
+import { defaultPluginConfig, ENGINE_FORMULA_PLUGIN_CONFIG_KEY } from './controller/config.schema';
 import { FormulaController } from './controller/formula.controller';
-import { SetDefinedNameController } from './controller/set-defined-name.controller';
 import { SetDependencyController } from './controller/set-dependency.controller';
 import { SetFeatureCalculationController } from './controller/set-feature-calculation.controller';
 import { SetOtherFormulaController } from './controller/set-other-formula.controller';
@@ -51,6 +51,7 @@ import {
     IFeatureCalculationManagerService,
 } from './services/feature-calculation-manager.service';
 import { FunctionService, IFunctionService } from './services/function.service';
+import { GlobalComputingStatusService } from './services/global-computing-status.service';
 import { IOtherFormulaManagerService, OtherFormulaManagerService } from './services/other-formula-manager.service';
 import { FormulaRuntimeService, IFormulaRuntimeService } from './services/runtime.service';
 import { ISuperTableService, SuperTableService } from './services/super-table.service';
@@ -68,8 +69,12 @@ export class UniverFormulaEnginePlugin extends Plugin {
         super();
 
         // Manage the plugin configuration.
-        const { ...rest } = this._config;
-        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
+        const { ...rest } = merge(
+            {},
+            defaultPluginConfig,
+            this._config
+        );
+        this._configService.setConfig(ENGINE_FORMULA_PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {
@@ -80,7 +85,6 @@ export class UniverFormulaEnginePlugin extends Plugin {
     override onReady(): void {
         touchDependencies(this._injector, [
             [FormulaController],
-            [SetDefinedNameController],
             [SetSuperTableController],
         ]);
 
@@ -104,6 +108,7 @@ export class UniverFormulaEnginePlugin extends Plugin {
     }
 
     private _initialize() {
+        const shouldPerformComputing = !this._config.notExecuteFormula;
         // worker and main thread
         const dependencies: Dependency[] = [
             // Services
@@ -111,38 +116,30 @@ export class UniverFormulaEnginePlugin extends Plugin {
             [IDefinedNamesService, { useClass: DefinedNamesService }],
             [IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }],
             [ISuperTableService, { useClass: SuperTableService }],
-
+            [GlobalComputingStatusService],
             // Models
             [FormulaDataModel],
-
             // Engine
             [LexerTreeBuilder],
-
             //Controllers
             [FormulaController],
-            [SetDefinedNameController],
             [SetSuperTableController],
+            [ComputingStatusReporterController],
         ];
 
-        if (!this._config?.notExecuteFormula) {
-            // only worker
+        if (shouldPerformComputing) {
             dependencies.push(
                 // Services
-
                 [IOtherFormulaManagerService, { useClass: OtherFormulaManagerService }],
                 [IFormulaRuntimeService, { useClass: FormulaRuntimeService }],
                 [IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }],
-
                 [IFeatureCalculationManagerService, { useClass: FeatureCalculationManagerService }],
-
                 //Controller
                 [CalculateController],
                 [SetOtherFormulaController],
                 [SetDependencyController],
                 [SetFeatureCalculationController],
-
                 // Calculation engine
-
                 [Interpreter],
                 [AstTreeBuilder],
                 [Lexer],

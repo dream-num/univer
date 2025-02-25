@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,8 @@
  */
 
 import type { ICellData, Injector, Nullable, Univer } from '@univerjs/core';
+import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
 import { ICommandService, IUniverInstanceService, LocaleType, RANGE_TYPE, ThemeService } from '@univerjs/core';
-import type {
-    ISetSelectionsOperationParams } from '@univerjs/sheets';
 import {
     AddWorksheetMergeMutation,
     RemoveWorksheetMergeMutation,
@@ -28,8 +27,8 @@ import {
 } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { ISheetClipboardService } from '../clipboard.service';
 import { SheetCopyCommand, SheetPasteCommand } from '../../../commands/commands/clipboard.command';
+import { ISheetClipboardService } from '../clipboard.service';
 import { clipboardTestBed } from './clipboard-test-bed';
 
 const theme = {

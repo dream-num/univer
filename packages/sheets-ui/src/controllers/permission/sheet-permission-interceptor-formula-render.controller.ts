@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,6 @@ import { NullValueObject } from '@univerjs/engine-formula';
 import { UnitAction } from '@univerjs/protocol';
 import { getSheetCommandTarget, RangeProtectionCache, WorksheetViewPermission } from '@univerjs/sheets';
 import { StatusBarController } from '../status-bar.controller';
-
-export const SHEET_PERMISSION_PASTE_PLUGIN = 'SHEET_PERMISSION_PASTE_PLUGIN';
 
 export class SheetPermissionInterceptorFormulaRenderController extends RxDisposable implements IRenderModule {
     disposableCollection = new DisposableCollection();

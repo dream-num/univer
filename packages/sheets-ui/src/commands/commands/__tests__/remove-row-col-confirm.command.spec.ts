@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,12 @@ import type { IDisposable, Injector, Univer } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, LocaleService, RANGE_TYPE } from '@univerjs/core';
 import {
     AddWorksheetMergeMutation,
+    InsertColByRangeCommand,
+    InsertRowByRangeCommand,
+    RemoveColByRangeCommand,
     RemoveColCommand,
     RemoveColMutation,
+    RemoveRowByRangeCommand,
     RemoveRowCommand,
     RemoveRowMutation,
     RemoveWorksheetMergeCommand,
@@ -89,6 +93,15 @@ describe('Test remove row col confirm commands', () => {
         commandService.registerCommand(RemoveColCommand);
         commandService.registerCommand(RemoveColMutation);
         commandService.registerCommand(SetSelectionsOperation);
+
+        [
+            RemoveColByRangeCommand,
+            RemoveRowByRangeCommand,
+            InsertRowByRangeCommand,
+            InsertColByRangeCommand,
+        ].forEach((command) => {
+            commandService.registerCommand(command);
+        });
 
         get(LocaleService).load({});
     });

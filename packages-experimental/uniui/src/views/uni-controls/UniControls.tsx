@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,14 @@
  * limitations under the License.
  */
 
-import {
-    useReactFlow,
-} from '@xyflow/react';
-import React, { useCallback, useEffect, useLayoutEffect } from 'react';
-import { CheckMarkSingle, FullscreenSingle, IncreaseSingle, ZoomReduceSingle } from '@univerjs/icons';
-import { Dropdown, Tooltip } from '@univerjs/design';
-import clsx from 'clsx';
-import { useDependency } from '@univerjs/core';
-import { ISidebarService } from '@univerjs/ui';
-import { UniDiv } from '../uni-toolbar/UniFloatToolbar';
 import type { IProjectNode } from '../../services/unit-grid/unit-grid.service';
+import { clsx, Dropdown, Tooltip } from '@univerjs/design';
+import { CheckMarkSingle, FullscreenSingle, IncreaseSingle, ZoomReduceSingle } from '@univerjs/icons';
+import { ISidebarService, useDependency } from '@univerjs/ui';
+import { useReactFlow } from '@xyflow/react';
+import React, { useCallback, useEffect, useLayoutEffect } from 'react';
 import { IUnitGridService } from '../../services/unit-grid/unit-grid.service';
+import { UniDiv } from '../uni-toolbar/UniFloatToolbar';
 import styles from './index.module.less';
 
 export const UniControlButton = (props: { tooltips: string; children?: React.ReactElement; onClick: () => void; style?: React.CSSProperties }) => {
@@ -129,9 +125,8 @@ export const UniControls = ({ zoom, onItemClick }: { zoom: number; onItemClick?:
                 <IncreaseSingle />
             </UniControlButton>
             <Dropdown
-                placement="topLeft"
                 overlay={(
-                    <div className={styles.sliderShortcuts}>
+                    <div className={clsx(styles.sliderShortcuts, 'univer-rounded-lg univer-p-4')}>
                         {shortcuts?.map((item) => (
                             <a
                                 key={item}

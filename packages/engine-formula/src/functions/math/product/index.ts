@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,53 +26,66 @@ export class Product extends BaseFunction {
 
     override calculate(...variants: BaseValueObject[]) {
         let accumulatorAll: BaseValueObject = NumberValueObject.create(1);
+        let noCalculate = true;
+
         for (let i = 0; i < variants.length; i++) {
             let variant = variants[i];
 
-            if (variant.isNull()) {
-                continue;
-            }
-
-            if (variant.isString()) {
-                variant = variant.convertToNumberObjectValue();
+            if (variant.isError()) {
+                return variant;
             }
 
             if (variant.isArray()) {
-                variant = this._multiplyArray(variant as ArrayValueObject);
-            }
+                let isError = false;
+                let errorObject: ErrorValueObject | null = null;
 
-            if (variant.isError()) {
-                return variant as ErrorValueObject;
-            }
+                (variant as ArrayValueObject).iterator((valueObject) => {
+                    if (valueObject?.isError()) {
+                        isError = true;
+                        errorObject = valueObject as ErrorValueObject;
+                        return false;
+                    }
 
-            accumulatorAll = accumulatorAll.multiply(variant);
+                    // cell range ignore string, boolean, blank cell
+                    if (!valueObject || valueObject.isNull() || valueObject.isString() || valueObject.isBoolean()) {
+                        return true;
+                    }
+
+                    accumulatorAll = accumulatorAll.multiply(valueObject);
+                    noCalculate = false;
+                });
+
+                if (isError) {
+                    return errorObject!;
+                }
+            } else {
+                if (variant.isNull()) {
+                    continue;
+                }
+
+                // not cell reference, number string and boolean can be calculated
+                if (variant.isString()) {
+                    variant = variant.convertToNumberObjectValue();
+                }
+
+                if (variant.isError()) {
+                    return variant;
+                }
+
+                accumulatorAll = accumulatorAll.multiply(variant);
+                noCalculate = false;
+            }
 
             if (accumulatorAll.isError()) {
                 return accumulatorAll;
             }
         }
 
+        // if all params is ignored, return 0
+        if (noCalculate) {
+            return NumberValueObject.create(0);
+        }
+
         return accumulatorAll;
-    }
-
-    private _multiplyArray(array: ArrayValueObject) {
-        let result: BaseValueObject = NumberValueObject.create(1);
-        array.iterator((valueObject) => {
-            // 'test', ' ',  blank cell, TRUE and FALSE are ignored
-            if (valueObject == null || valueObject.isString() || valueObject.isBoolean() || valueObject.isNull()) {
-                return true; // continue
-            }
-
-            if (valueObject.isError()) {
-                result = valueObject;
-                return false; // break
-            }
-
-            result = (result as NumberValueObject).multiply(
-                valueObject as BaseValueObject
-            ) as BaseValueObject;
-        });
-
-        return result;
     }
 }

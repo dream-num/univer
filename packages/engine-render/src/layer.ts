@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -125,7 +125,7 @@ export class Layer extends Disposable {
         this._objects.push(o);
         this.scene.setObjectBehavior(o);
         this._layerBehavior(o);
-
+        this.makeDirty(true);
         return this;
     }
 
@@ -189,7 +189,6 @@ export class Layer extends Disposable {
 
     makeDirty(state: boolean = true) {
         this._dirty = state;
-
         /**
          * parent is SceneViewer, make it dirty
          */

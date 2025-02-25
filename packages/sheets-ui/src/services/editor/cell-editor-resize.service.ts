@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import type { IPosition, Nullable, Workbook } from '@univerjs/core';
+import type { DocumentDataModel, IPosition, Nullable, Workbook } from '@univerjs/core';
 import type { DocumentSkeleton, IDocumentLayoutObject, IRenderContext, IRenderModule, Scene } from '@univerjs/engine-render';
-import { Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, HorizontalAlign, Inject, VerticalAlign, WrapStrategy } from '@univerjs/core';
+import { Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, HorizontalAlign, Inject, IUniverInstanceService, UniverInstanceType, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
-import { VIEWPORT_KEY as DOC_VIEWPORT_KEY, DOCS_COMPONENT_MAIN_LAYER_INDEX } from '@univerjs/docs-ui';
-import { convertTextRotation, FIX_ONE_PIXEL_BLUR_OFFSET, fixLineWidthByScale, IRenderManagerService, Rect, ScrollBar } from '@univerjs/engine-render';
+import { DOCS_COMPONENT_MAIN_LAYER_INDEX, VIEWPORT_KEY } from '@univerjs/docs-ui';
+import { convertTextRotation, fixLineWidthByScale, IRenderManagerService, Rect, ScrollBar } from '@univerjs/engine-render';
 import { ILayoutService } from '@univerjs/ui';
 import { getEditorObject } from '../../basics/editor/get-editor-object';
-import styles from '../../views/sheet-container/index.module.less';
+import { SHEET_FOOTER_BAR_HEIGHT } from '../../views/sheet-container/SheetContainer';
 import { IEditorBridgeService } from '../editor-bridge.service';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import { ICellEditorManagerService } from './cell-editor-manager.service';
@@ -43,18 +43,20 @@ export class SheetCellEditorResizeService extends Disposable implements IRenderM
         @ICellEditorManagerService private readonly _cellEditorManagerService: ICellEditorManagerService,
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService
+        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();
     }
 
+    // eslint-disable-next-line complexity
     fitTextSize(callback?: () => void) {
         const param = this._editorBridgeService.getEditCellState();
         if (!param) return;
         const { position, documentLayoutObject, canvasOffset, scaleX, scaleY } = param;
 
         const { startX, startY, endX, endY } = position;
-        const documentDataModel = documentLayoutObject.documentModel;
+        const documentDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(DOCS_NORMAL_EDITOR_UNIT_ID_KEY, UniverInstanceType.UNIVER_DOC);
 
         if (documentDataModel == null) {
             return;
@@ -63,7 +65,7 @@ export class SheetCellEditorResizeService extends Disposable implements IRenderM
         const documentSkeleton = this._getEditorSkeleton();
         if (!documentSkeleton) return;
 
-        const { actualWidth, actualHeight } = this._predictingSize(
+        const info = this._predictingSize(
             position,
             canvasOffset,
             documentSkeleton,
@@ -71,43 +73,62 @@ export class SheetCellEditorResizeService extends Disposable implements IRenderM
             scaleX,
             scaleY
         );
-        const { verticalAlign, paddingData, fill } = documentLayoutObject;
+        if (!info) return;
+        let { actualWidth, actualHeight } = info;
+        const { verticalAlign, horizontalAlign, paddingData, fill } = documentLayoutObject;
+        actualWidth = actualWidth + (paddingData.l ?? 0) + (paddingData.r ?? 0);
+        actualHeight = actualHeight + (paddingData.t ?? 0) + (paddingData.b ?? 0);
 
         let editorWidth = endX - startX;
         let editorHeight = endY - startY;
-
         if (editorWidth < actualWidth) {
-            editorWidth = actualWidth;
+            editorWidth = Math.ceil(actualWidth);
         }
 
         if (editorHeight < actualHeight) {
-            editorHeight = actualHeight;
-            // To restore the page margins for the skeleton.
-            documentDataModel.updateDocumentDataMargin(paddingData);
-        } else {
-            // Set the top margin under vertical alignment.
-            let offsetTop = 0;
-
-            if (verticalAlign === VerticalAlign.MIDDLE) {
-                offsetTop = (editorHeight - actualHeight) / 2 / scaleY;
-            } else if (verticalAlign === VerticalAlign.TOP) {
-                offsetTop = paddingData.t || 0;
-            } else { // VerticalAlign.UNSPECIFIED follow the same rule as HorizontalAlign.BOTTOM.
-                offsetTop = (editorHeight - actualHeight) / scaleY - (paddingData.b || 0);
-            }
-
-            // offsetTop /= scaleY;
-            offsetTop = offsetTop < (paddingData.t || 0) ? paddingData.t || 0 : offsetTop;
-
-            documentDataModel.updateDocumentDataMargin({
-                t: offsetTop,
-            });
+            editorHeight = Math.ceil(actualHeight);
         }
 
-        // re-calculate skeleton(viewModel for component)
-        documentSkeleton.calculate();
+        // Set the top margin under vertical alignment.
+        let offsetTop = 0;
 
-        this._editAreaProcessing(editorWidth, editorHeight, position, canvasOffset, fill, scaleX, scaleY, callback);
+        if (verticalAlign === VerticalAlign.MIDDLE) {
+            offsetTop = (editorHeight - actualHeight) / 2 / scaleY;
+        } else if (verticalAlign === VerticalAlign.TOP) {
+            offsetTop = paddingData.t || 0;
+        } else {
+            // VerticalAlign.UNSPECIFIED follow the same rule as HorizontalAlign.BOTTOM.
+            offsetTop = (editorHeight - actualHeight) / scaleY;
+        }
+
+        let offsetLeft = 0;
+        if (horizontalAlign === HorizontalAlign.CENTER) {
+            offsetLeft = (editorWidth - actualWidth) / 2 / scaleX;
+        } else if (horizontalAlign === HorizontalAlign.RIGHT) {
+            offsetLeft = (editorWidth - actualWidth) / scaleX;
+        } else {
+            offsetLeft = paddingData.l || 0;
+        }
+
+        offsetTop = offsetTop < (paddingData.t || 0) ? paddingData.t || 0 : offsetTop;
+        offsetLeft = offsetLeft < (paddingData.l || 0) ? paddingData.l || 0 : offsetLeft;
+        documentDataModel.updateDocumentDataMargin({
+            t: offsetTop,
+            l: offsetLeft,
+        });
+
+        documentSkeleton.calculate();
+        this._editAreaProcessing(
+            editorWidth,
+            editorHeight,
+            position,
+            canvasOffset,
+            fill,
+            scaleX,
+            scaleY,
+            horizontalAlign,
+            callback
+        );
     }
 
     /**
@@ -125,15 +146,16 @@ export class SheetCellEditorResizeService extends Disposable implements IRenderM
         // startX and startY are the width and height after scaling.
         const { startX, endX } = actualRangeWithCoord;
 
-        const { textRotation, wrapStrategy } = documentLayoutObject;
+        const { textRotation, wrapStrategy, paddingData } = documentLayoutObject;
 
-        const documentDataModel = documentLayoutObject.documentModel;
+        const documentDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(DOCS_NORMAL_EDITOR_UNIT_ID_KEY, UniverInstanceType.UNIVER_DOC);
 
         const { vertexAngle: angle } = convertTextRotation(textRotation);
 
-        const clientWidth = document.body.clientWidth;
-
         if (wrapStrategy === WrapStrategy.WRAP && angle === 0) {
+            documentDataModel?.updateDocumentDataPageSize(endX - startX);
+            documentDataModel?.updateDocumentDataMargin({ l: paddingData.l, t: paddingData.t });
+            documentSkeleton.calculate();
             const { actualWidth, actualHeight } = documentSkeleton.getActualSize();
             // The skeleton obtains the original volume, which needs to be multiplied by the magnification factor.
             return {
@@ -142,7 +164,9 @@ export class SheetCellEditorResizeService extends Disposable implements IRenderM
             };
         }
 
-        documentDataModel?.updateDocumentDataPageSize((clientWidth - startX - canvasOffset.left) / scaleX);
+        const maxSize = this._getEditorMaxSize(actualRangeWithCoord, canvasOffset, documentLayoutObject.horizontalAlign);
+        if (!maxSize) return;
+        documentDataModel?.updateDocumentDataPageSize(maxSize.width / scaleX);
         documentSkeleton.calculate();
 
         const size = documentSkeleton.getActualSize();
@@ -165,12 +189,12 @@ export class SheetCellEditorResizeService extends Disposable implements IRenderM
         });
 
         return {
-            actualWidth: editorWidth,
+            actualWidth: size.actualWidth * scaleX,
             actualHeight: size.actualHeight * scaleY,
         };
     }
 
-    private _getEditorMaxSize(position: IPosition, canvasOffset: ICanvasOffset) {
+    private _getEditorMaxSize(position: IPosition, canvasOffset: ICanvasOffset, horizontalAlign: HorizontalAlign) {
         const editorObject = this._getEditorObject();
         if (editorObject == null) {
             return;
@@ -187,21 +211,29 @@ export class SheetCellEditorResizeService extends Disposable implements IRenderM
         const widthOfCanvas = pxToNum(canvasElement.style.width); // declared width
         const { width } = canvasClientRect; // real width affected by scale
         const scaleAdjust = width / widthOfCanvas;
-
-        const { startX, startY } = position;
+        const { startX, startY, endX } = position;
+        const enginWidth = this._context.engine.width;
 
         const clientHeight =
             document.body.clientHeight -
             startY -
-            Number.parseFloat(styles.sheetFooterBarHeight) -
+            SHEET_FOOTER_BAR_HEIGHT -
             canvasOffset.top -
             EDITOR_BORDER_SIZE * 2;
 
-        const clientWidth = document.body.clientWidth - startX - canvasOffset.left;
+        let clientWidth = width - startX;
+
+        if (horizontalAlign === HorizontalAlign.CENTER) {
+            const rightGap = enginWidth - endX;
+            const leftGap = startX;
+            clientWidth = (endX - startX) + Math.min(leftGap, rightGap) * 2;
+        } else if (horizontalAlign === HorizontalAlign.RIGHT) {
+            clientWidth = endX;
+        }
 
         return {
             height: clientHeight,
-            width: clientWidth,
+            width: clientWidth - EDITOR_BORDER_SIZE,
             scaleAdjust,
         };
     }
@@ -220,6 +252,7 @@ export class SheetCellEditorResizeService extends Disposable implements IRenderM
         fill: Nullable<string>,
         scaleX: number = 1,
         scaleY: number = 1,
+        horizontalAlign: HorizontalAlign,
         callback?: () => void
     ) {
         const editorObject = this._getEditorObject();
@@ -231,14 +264,13 @@ export class SheetCellEditorResizeService extends Disposable implements IRenderM
         const canvasElement = engine.getCanvasElement();
 
         // We should take the scale into account when canvas is scaled by CSS.
-
         let { startX, startY } = actualRangeWithCoord;
 
         const { document: documentComponent, scene: editorScene, engine: docEngine } = editorObject;
-        const viewportMain = editorScene.getViewport(DOC_VIEWPORT_KEY.VIEW_MAIN);
+        const viewportMain = editorScene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
 
-        const info = this._getEditorMaxSize(actualRangeWithCoord, canvasOffset);
-        if (!info) return;
+        const info = this._getEditorMaxSize(actualRangeWithCoord, canvasOffset, horizontalAlign)!;
+
         const { height: clientHeight, width: clientWidth, scaleAdjust } = info;
 
         let physicHeight = editorHeight;
@@ -246,13 +278,16 @@ export class SheetCellEditorResizeService extends Disposable implements IRenderM
         let scrollBar = viewportMain?.getScrollBar() as Nullable<ScrollBar>;
 
         if (physicHeight > clientHeight) {
-            physicHeight = clientHeight;
-
             if (scrollBar == null) {
                 viewportMain && new ScrollBar(viewportMain, { enableHorizontal: false, barSize: 8 });
             } else {
                 viewportMain?.resetCanvasSizeAndUpdateScroll();
             }
+            viewportMain?.scrollToViewportPos({
+                viewportScrollY: physicHeight - clientHeight,
+            });
+
+            physicHeight = clientHeight;
         } else {
             scrollBar = null;
             viewportMain?.getScrollBar()?.dispose();
@@ -263,9 +298,6 @@ export class SheetCellEditorResizeService extends Disposable implements IRenderM
         if (editorWidth > clientWidth) {
             editorWidth = clientWidth;
         }
-
-        startX -= FIX_ONE_PIXEL_BLUR_OFFSET;
-        startY -= FIX_ONE_PIXEL_BLUR_OFFSET;
 
         this._addBackground(editorScene, editorWidth / scaleX, editorHeight / scaleY, fill);
 
@@ -298,6 +330,13 @@ export class SheetCellEditorResizeService extends Disposable implements IRenderM
         const canvasBoundingRect = canvasElement.getBoundingClientRect();
         startX = startX * scaleAdjust + (canvasBoundingRect.left - contentBoundingRect.left);
         startY = startY * scaleAdjust + (canvasBoundingRect.top - contentBoundingRect.top);
+
+        const cellWidth = actualRangeWithCoord.endX - actualRangeWithCoord.startX;
+        if (horizontalAlign === HorizontalAlign.RIGHT) {
+            startX += (cellWidth - editorWidth) * scaleAdjust;
+        } else if (horizontalAlign === HorizontalAlign.CENTER) {
+            startX += (cellWidth - editorWidth * scaleAdjust) / 2;
+        }
 
         // Update cell editor container position and size.
         this._cellEditorManagerService.setState({
@@ -355,10 +394,11 @@ export class SheetCellEditorResizeService extends Disposable implements IRenderM
         const editCellState = this._editorBridgeService.getEditCellState();
         if (!editCellState) return;
 
-        const skeleton = this._sheetSkeletonManagerService.getWorksheetSkeleton(editCellState.sheetId)?.skeleton;
+        const skeleton = this._sheetSkeletonManagerService.getSkeletonParam(editCellState.sheetId)?.skeleton;
         if (!skeleton) return;
-        const { row, column, scaleX, scaleY, position, canvasOffset } = editCellState;
-        const maxSize = this._getEditorMaxSize(position, canvasOffset);
+        const { row, column, scaleX, scaleY, position, canvasOffset, documentLayoutObject } = editCellState;
+        const { horizontalAlign } = documentLayoutObject;
+        const maxSize = this._getEditorMaxSize(position, canvasOffset, horizontalAlign);
         if (!maxSize) return;
         const { height: clientHeight, width: clientWidth, scaleAdjust } = maxSize;
 

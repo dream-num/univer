@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ describe('test cell-content', () => {
     let testBed: any;
     let commandService: ICommandService;
     beforeEach(() => {
-        testBed = createTestBed([[SheetsNumfmtCellContentController]]);
+        testBed = createTestBed(undefined, [[SheetsNumfmtCellContentController]]);
         unitId = testBed.unitId;
         subUnitId = testBed.subUnitId;
         commandService = testBed.get(ICommandService);

@@ -132,6 +132,7 @@
         "Unprotect",
         "unsync",
         "Verdana",
+        "viewbound",
         "viewports",
         "vlookup",
         "wendellhu",
@@ -156,7 +157,9 @@
         "source.fixAll.eslint": "explicit",
         "source.organizeImports": "never"
     },
-
+    "eslint.workingDirectories": [
+        { "mode": "auto" }
+    ],
     // Enable the ESlint flat config support
     "eslint.useFlatConfig": true,
     // Silent the stylistic rules in you IDE, but still auto fix them
@@ -187,5 +190,9 @@
         "toml",
         "less",
         "css"
-    ]
+    ],
+
+    "editor.quickSuggestions": {
+        "strings": "on"
+    }
 }

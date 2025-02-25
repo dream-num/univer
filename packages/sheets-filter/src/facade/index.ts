@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,12 @@
 import './f-filter';
 import './f-range';
 import './f-worksheet';
+import './f-enum';
+import './f-event';
 
+export type * from './f-enum';
+export type * from './f-event';
 export { FFilter } from './f-filter';
-
 export type * from './f-filter';
 export type * from './f-range';
 export type * from './f-worksheet';

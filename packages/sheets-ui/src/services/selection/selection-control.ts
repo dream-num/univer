@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 
 import type { ICellWithCoord, IRangeWithCoord, Nullable, ThemeService } from '@univerjs/core';
-import type { IObjectFullState, IRectProps, Scene } from '@univerjs/engine-render';
+import type { IObjectFullState, IRectProps, Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { ISelectionStyle, ISelectionWidgetConfig, ISelectionWithCoord } from '@univerjs/sheets';
 import type { ISelectionShapeExtensionOption } from './selection-shape-extension';
 import { ColorKit, Disposable, RANGE_TYPE, toDisposable } from '@univerjs/core';
@@ -133,7 +133,6 @@ export class SelectionControl extends Disposable {
     protected _columnHeaderHeight: number = 0;
 
     protected _widgetRects: Rect[] = [];
-
     protected _controlExtension: Nullable<SelectionShapeExtension>;
 
     private _dispose$ = new BehaviorSubject<SelectionControl>(this);
@@ -144,7 +143,7 @@ export class SelectionControl extends Disposable {
      * Observer: prompt.controller
      */
     readonly selectionMoving$ = new Subject<IRangeWithCoord>();
-    readonly selectionMoved$ = new Subject<IRangeWithCoord>();
+    readonly selectionMoveEnd$ = new Subject<IRangeWithCoord>();
     readonly selectionScaling$ = new Subject<IRangeWithCoord>();
     readonly selectionScaled$ = new Subject<Nullable<IRangeWithCoord>>();
     readonly selectionFilling$ = new Subject<Nullable<IRangeWithCoord>>();
@@ -173,7 +172,6 @@ export class SelectionControl extends Disposable {
         this._initialHeader();
     }
 
-    // eslint-disable-next-line max-lines-per-function
     private _initializeSheetBody(): void {
         this._defaultStyle = genNormalSelectionStyle(this._themeService);
         this._currentStyle = genNormalSelectionStyle(this._themeService);
@@ -517,7 +515,6 @@ export class SelectionControl extends Disposable {
      * Update Control Style And Position of SelectionControl
      * @param selectionStyle
      */
-    // eslint-disable-next-line max-lines-per-function
     protected _updateLayoutOfSelectionControl(selectionStyle?: Nullable<Partial<ISelectionStyle>>): void {
         if (selectionStyle) {
             this.currentStyle = Object.assign({}, this._defaultStyle, selectionStyle);
@@ -664,31 +661,41 @@ export class SelectionControl extends Disposable {
     }
 
     /**
-     * Update range, primary may be null, especially for moving handler.
-     * @param range
-     * @param primaryCell
+     * Update range and primary range.
+     *
+     * highlight cell would update if primaryWithCoord has value.
+     * highlight cell would be cleared if primaryWithCoord is null.
+     * highlight would keep prev value if primaryWithCoord is undefined.
+     * @param rangeWithCoord
+     * @param primaryWithCoord
      */
-    updateRange(range: IRangeWithCoord, primaryCell: Nullable<ICellWithCoord>): void {
-        this._selectionRenderModel.setValue(range, primaryCell);
-        this._showAutoFill = primaryCell !== null;
+    updateRange(rangeWithCoord: IRangeWithCoord, primaryWithCoord: Nullable<ICellWithCoord>): void {
+        this._selectionRenderModel.setValue(rangeWithCoord, primaryWithCoord);
+        this._showAutoFill = primaryWithCoord !== null;
         this._updateLayoutOfSelectionControl();
         this._updateControlCoord();
     }
 
-    updateRangeBySelectionWithCoord(selectionWthCoord: ISelectionWithCoord) {
-        this._selectionRenderModel.setValue(selectionWthCoord.rangeWithCoord, selectionWthCoord.primaryWithCoord);
-        // if undefined, then keeps the previous value
-        if (selectionWthCoord.primaryWithCoord === null) {
-            this._showAutoFill = false;
-        } else {
-            this._showAutoFill = true;
+    /**
+     * Update range and primary range and style.
+     * @param selectionWthCoord
+     */
+    updateRangeBySelectionWithCoord(selectionWthCoord: ISelectionWithCoord, sk?: SpreadsheetSkeleton) {
+        if (sk) {
+            this._rowHeaderWidth = sk.getWorksheetConfig().rowHeader.width;
+            this._columnHeaderHeight = sk.getWorksheetConfig().columnHeader.height;
         }
+        this._selectionRenderModel.setValue(selectionWthCoord.rangeWithCoord, selectionWthCoord.primaryWithCoord);
+        // if primaryWithCoord is undefined, that means keeps the previous value.
+        this._showAutoFill = selectionWthCoord.primaryWithCoord !== null;
         this._updateLayoutOfSelectionControl(selectionWthCoord.style);
         this._updateControlCoord();
     }
 
     /**
      * Update selection model with new range & primary cell(aka: highlight/current), also update row/col selection size & style.
+     *
+     * @deprecated  use `updateRangeBySelectionWithCoord` and `updateStyle` to do same thing.
      *
      * @param newSelectionRange
      * @param rowHeaderWidth
@@ -716,9 +723,15 @@ export class SelectionControl extends Disposable {
     }
 
     /**
-     * update primary range
+     * Update primary range.
+     * highlight cell would update if primary cell has value.
+     * highlight cell would be cleared if primary cell is null.
+     * highlight would keep prev value if primary cell is undefined.
+     *
      * @param primaryCell model.current (aka: highlight)
      */
+    // @TODO lumixraku there are 3 concepts for same thing, primary and current and highlight
+    // highlight is best. primary sometimes means the actual cell(actual means ignore merge)
     updateCurrCell(primaryCell: Nullable<ICellWithCoord>): void {
         // in multiple selection shape, only shape with highlight has auto fill.
         this._showAutoFill = primaryCell !== null;

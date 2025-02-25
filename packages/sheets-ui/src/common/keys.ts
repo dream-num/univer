@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ export const SHEET_ZOOM_RANGE = [10, 400];
  */
 export const RANGE_SELECTOR_COMPONENT_KEY = 'RANGE_SELECTOR_COMPONENT_KEY';
 export const EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY = 'EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY';
+export const EMBEDDING_CELL_EDITOR_COMPONENT_KEY = 'EMBEDDING_CELL_EDITOR_COMPONENT_KEY';
 // end
 
 export enum SHEET_VIEW_KEY {
@@ -28,22 +29,6 @@ export enum SHEET_VIEW_KEY {
     ROW = '__SpreadsheetRowHeader__',
     COLUMN = '__SpreadsheetColumnHeader__',
     LEFT_TOP = '__SpreadsheetLeftTopPlaceholder__',
-}
-
-/**
- * @deprecated. use SHEET_VIEWPORT_KEY from engine-render instead.
- */
-export enum SHEET_VIEWPORT_KEY {
-    VIEW_MAIN = 'viewMain',
-    VIEW_MAIN_LEFT_TOP = 'viewMainLeftTop',
-    VIEW_MAIN_TOP = 'viewMainTop',
-    VIEW_MAIN_LEFT = 'viewMainLeft',
-
-    VIEW_ROW_TOP = 'viewRowTop',
-    VIEW_ROW_BOTTOM = 'viewRowBottom',
-    VIEW_COLUMN_LEFT = 'viewColumnLeft',
-    VIEW_COLUMN_RIGHT = 'viewColumnRight',
-    VIEW_LEFT_TOP = 'viewLeftTop',
 }
 
 export const SHEET_COMPONENT_MAIN_LAYER_INDEX = 0;

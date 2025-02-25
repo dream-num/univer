@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/ui",
-    "version": "0.5.0",
+    "version": "0.6.1",
     "private": false,
     "description": "UniverSheet normal plugin UI manager",
     "author": "DreamNum <developer@univer.ai>",
@@ -70,58 +70,36 @@
         "build": "univer-cli build"
     },
     "peerDependencies": {
-        "react": "^16.9.0 || ^17.0.0 || ^18.0.0",
-        "react-dom": "^16.9.0 || ^17.0.0 || ^18.0.0",
+        "react": ">=16.9.0 || >=17 || >=18 || >=19",
+        "react-dom": ">=16.9.0 || >=17 || >=18 || >=19",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons": "^0.2.7",
+        "@univerjs/icons": "^0.2.20",
+        "@wendellhu/redi": "0.17.1",
         "clsx": "^2.1.1",
         "localforage": "^1.10.0",
-        "rc-notification": "^5.6.2",
-        "rc-util": "^5.43.0"
+        "rc-notification": "^5.6.2"
     },
     "optionalDependencies": {
         "vue": ">=3.0.0"
     },
     "devDependencies": {
-        "@testing-library/react": "^16.0.1",
-        "@testing-library/react-hooks": "^8.0.1",
-        "@types/react-transition-group": "^4.4.11",
+        "@testing-library/react": "^16.2.0",
         "@univerjs-infra/shared": "workspace:*",
-        "less": "^4.2.0",
+        "less": "^4.2.2",
+        "postcss": "^8.5.3",
         "react": "18.3.1",
         "react-dom": "18.3.1",
         "rxjs": "^7.8.1",
-        "typescript": "^5.6.3",
-        "vite": "^5.4.11",
-        "vitest": "^2.1.5",
-        "vue": "^3.5.12"
-    },
-    "space": {
-        ".": {
-            "import": "./lib/es/index.js",
-            "require": "./lib/cjs/index.js",
-            "types": "./lib/types/index.d.ts"
-        },
-        "./*": {
-            "import": "./lib/es/*",
-            "require": "./lib/cjs/*",
-            "types": "./lib/types/index.d.ts"
-        },
-        "./locale/*": {
-            "import": "./lib/es/locale/*.js",
-            "require": "./lib/cjs/locale/*.js",
-            "types": "./lib/types/locale/*.d.ts"
-        },
-        "./facade": {
-            "import": "./lib/es/facade.js",
-            "require": "./lib/cjs/facade.js",
-            "types": "./lib/types/facade/index.d.ts"
-        },
-        "./lib/*": "./lib/*"
+        "tailwindcss": "^3.4.17",
+        "tailwindcss-animate": "^1.0.7",
+        "typescript": "^5.7.3",
+        "vite": "^6.1.1",
+        "vitest": "^3.0.6",
+        "vue": "^3.5.13"
     }
 }

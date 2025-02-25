@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,10 @@
  */
 
 import type { DocumentDataModel, ITypeMentionList } from '@univerjs/core';
-import { ICommandService, IMentionIOService, IUniverInstanceService, Tools, UniverInstanceType, useDependency, useObservable } from '@univerjs/core';
+import { ICommandService, IMentionIOService, IUniverInstanceService, Tools, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
+import { IEditorService } from '@univerjs/docs-ui';
+import { useDependency, useObservable } from '@univerjs/ui';
 import React, { useEffect, useMemo, useState } from 'react';
 import { filter } from 'rxjs';
 import { AddDocMentionCommand } from '../../commands/commands/doc-mention.command';
@@ -29,6 +31,7 @@ export const MentionEditPopup = () => {
     const univerInstanceService = useDependency(IUniverInstanceService);
     const editPopup = useObservable(popupService.editPopup$);
     const mentionIOService = useDependency(IMentionIOService);
+    const editorService = useDependency(IEditorService);
     const documentDataModel = editPopup ? univerInstanceService.getUnit<DocumentDataModel>(editPopup.unitId) : null;
     const textSelectionService = useDependency(DocSelectionManagerService);
     const [mentions, setMentions] = useState<ITypeMentionList[]>([]);
@@ -48,17 +51,20 @@ export const MentionEditPopup = () => {
             }
         })();
     }, [mentionIOService, editPopup, search]);
-
     if (!editPopup) {
         return null;
     }
 
     return (
         <MentionList
-            onClick={() => popupService.closeEditPopup()}
+            editorId={editPopup.unitId}
+            onClick={() => {
+                popupService.closeEditPopup();
+                editorService.focus(editPopup.unitId);
+            }}
             mentions={mentions}
-            onSelect={(mention) => {
-                commandService.executeCommand(AddDocMentionCommand.id, {
+            onSelect={async (mention) => {
+                await commandService.executeCommand(AddDocMentionCommand.id, {
                     unitId: univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC)!.getUnitId(),
                     mention: {
                         ...mention,
@@ -66,6 +72,7 @@ export const MentionEditPopup = () => {
                     },
                     startIndex: editPopup.anchor,
                 });
+                editorService.focus(editPopup.unitId);
             }}
         />
     );

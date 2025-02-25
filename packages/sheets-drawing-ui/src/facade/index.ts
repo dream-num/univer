@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
+import './f-over-grid-image';
 import './f-worksheet';
+import './f-enum';
+import './f-event';
+import './f-univer';
 
+export type * from './f-enum';
+export type * from './f-event';
+export type * from './f-over-grid-image';
+export type * from './f-univer';
 export type * from './f-worksheet';

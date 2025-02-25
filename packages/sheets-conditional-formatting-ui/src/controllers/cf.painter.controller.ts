@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -140,14 +140,14 @@ export class ConditionalFormattingPainterController extends Disposable {
                     targetRange
                 );
 
-                const sourceCellCf = this._conditionalFormattingViewModel.getCellCf(
+                const sourceCellCf = this._conditionalFormattingViewModel.getCellCfs(
                     sourceUnitId,
                     sourceSubUnitId,
                     sourcePositionRange.startRow,
                     sourcePositionRange.startColumn
                 );
 
-                const targetCellCf = this._conditionalFormattingViewModel.getCellCf(
+                const targetCellCf = this._conditionalFormattingViewModel.getCellCfs(
                     targetUnitId,
                     targetSubUnitId,
                     targetPositionRange.startRow,
@@ -155,7 +155,7 @@ export class ConditionalFormattingPainterController extends Disposable {
                 );
 
                 if (targetCellCf) {
-                    targetCellCf.cfList.forEach((cf) => {
+                    targetCellCf.forEach((cf) => {
                         let matrix = matrixMap.get(cf.cfId);
                         if (!matrixMap.get(cf.cfId)) {
                             const rule = this._conditionalFormattingRuleModel.getRule(targetUnitId, targetSubUnitId, cf.cfId);
@@ -175,7 +175,7 @@ export class ConditionalFormattingPainterController extends Disposable {
                 }
 
                 if (sourceCellCf) {
-                    sourceCellCf.cfList.forEach((cf) => {
+                    sourceCellCf.forEach((cf) => {
                         const matrix = matrixMap.get(cf.cfId);
                         matrix && matrix.setValue(targetPositionRange.startRow, targetPositionRange.startColumn, 1);
                     });

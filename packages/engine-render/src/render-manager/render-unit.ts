@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,12 @@
  */
 
 import type { Dependency, DependencyIdentifier, IDisposable, Nullable, UnitModel, UnitType, UniverInstanceType } from '@univerjs/core';
+import type { Observable } from 'rxjs';
 import type { Engine } from '../engine';
 import type { Scene } from '../scene';
 import type { RenderComponentType } from './render-manager.service';
 import { Disposable, Inject, Injector, isClassDependencyItem } from '@univerjs/core';
+import { BehaviorSubject, distinctUntilChanged } from 'rxjs';
 
 /**
  * Public interface of a {@link RenderUnit}.
@@ -35,7 +37,24 @@ export interface IRender {
     isMainScene: boolean;
     isThumbNail?: boolean;
 
+    /**
+     * Whether the render unit is activated. It should emit value when subscribed immediately.
+     * When created, the render unit is activated by default.
+     */
+    activated$: Observable<boolean>;
+
     with<T>(dependency: DependencyIdentifier<T>): T;
+    getRenderContext?(): IRenderContext;
+    /**
+     * Deactivate the render unit, means the render unit would be freezed and not updated,
+     * even removed from the webpage. However, the render unit is still in the memory and
+     * could be activated again.
+     */
+    deactivate(): void;
+    /**
+     * Activate the render unit, means the render unit would be updated and rendered.
+     */
+    activate(): void;
 }
 
 /**
@@ -58,6 +77,9 @@ export interface IRenderContext<T extends UnitModel = UnitModel> extends Omit<IR
  */
 export class RenderUnit extends Disposable implements IRender {
     readonly isRenderUnit: boolean = true;
+
+    private readonly _activated$ = new BehaviorSubject<boolean>(true);
+    readonly activated$ = this._activated$.pipe(distinctUntilChanged());
 
     get unitId(): string { return this._renderContext.unitId; }
     get type(): UnitType { return this._renderContext.type; }
@@ -93,12 +115,19 @@ export class RenderUnit extends Disposable implements IRender {
             isMainScene: init.isMainScene,
             engine: init.engine,
             scene: init.scene,
+            activated$: this.activated$,
+            activate: () => this._activated$.next(true),
+            deactivate: () => this._activated$.next(false),
         };
     }
 
     override dispose(): void {
         this._injector.dispose();
+
         super.dispose();
+
+        this._activated$.next(false);
+        this._activated$.complete();
     }
 
     /**
@@ -140,5 +169,16 @@ export class RenderUnit extends Disposable implements IRender {
             j.get(identifier);
         });
     }
-}
 
+    getRenderContext(): IRenderContext {
+        return this._renderContext;
+    }
+
+    activate(): void {
+        this._renderContext.activate();
+    }
+
+    deactivate(): void {
+        this._renderContext.deactivate();
+    }
+}

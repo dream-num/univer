@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 export { HyperLinkModel } from './models/hyper-link.model';
 export { SheetHyperLinkType } from './types/enums/hyper-link-type';
 export { UniverSheetsHyperLinkPlugin } from './plugin';
-export type { ICellHyperLink, ICellLinkContent } from './types/interfaces/i-hyper-link';
+export type { ICellLinkContent, ISheetHyperLink } from './types/interfaces/i-hyper-link';
 export { type ISheetHyperLinkInfo, type ISheetUrlParams, SheetsHyperLinkParserService } from './services/parser.service';
 export { ERROR_RANGE } from './types/const';
 

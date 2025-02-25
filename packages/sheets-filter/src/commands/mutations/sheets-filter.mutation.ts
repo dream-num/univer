@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import { CommandType } from '@univerjs/core';
 import type { IMutation, IRange, Nullable } from '@univerjs/core';
 import type { ISheetCommandSharedParams } from '@univerjs/sheets';
-
-import { SheetsFilterService } from '../../services/sheet-filter.service';
 import type { IFilterColumn } from '../../models/types';
+
+import { CommandType } from '@univerjs/core';
+import { ReCalcSheetsFilterMutationId, RemoveSheetsFilterMutationId, SetSheetsFilterCriteriaMutationId, SetSheetsFilterRangeMutationId } from '../../common/const';
+import { SheetsFilterService } from '../../services/sheet-filter.service';
 
 /**
  * Parameters of mutation {@link SetSheetsFilterRangeMutation}.
@@ -37,7 +38,7 @@ export interface ISetSheetsFilterRangeMutationParams extends ISheetCommandShared
  * don't necessarily need to remove the filter first, you can just execute this mutation.
  */
 export const SetSheetsFilterRangeMutation: IMutation<ISetSheetsFilterRangeMutationParams> = {
-    id: 'sheet.mutation.set-filter-range',
+    id: SetSheetsFilterRangeMutationId,
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
         const { subUnitId, unitId, range } = params;
@@ -67,7 +68,7 @@ export interface ISetSheetsFilterCriteriaMutationParams extends ISheetCommandSha
  * A {@link CommandType.MUTATION} to set filter criteria of a given column of a {@link FilterModel}.
  */
 export const SetSheetsFilterCriteriaMutation: IMutation<ISetSheetsFilterCriteriaMutationParams> = {
-    id: 'sheet.mutation.set-filter-criteria',
+    id: SetSheetsFilterCriteriaMutationId,
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
         const { subUnitId, unitId, criteria, col, reCalc = true } = params;
@@ -85,7 +86,7 @@ export const SetSheetsFilterCriteriaMutation: IMutation<ISetSheetsFilterCriteria
  * A {@link CommandType.MUTATION} to remove a {@link FilterModel} in a {@link Worksheet}.
  */
 export const RemoveSheetsFilterMutation: IMutation<ISheetCommandSharedParams> = {
-    id: 'sheet.mutation.remove-filter',
+    id: RemoveSheetsFilterMutationId,
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
         const { unitId, subUnitId } = params;
@@ -98,7 +99,7 @@ export const RemoveSheetsFilterMutation: IMutation<ISheetCommandSharedParams> = 
  * A {@link CommandType.MUTATION} to re-calculate a {@link FilterModel}.
  */
 export const ReCalcSheetsFilterMutation: IMutation<ISheetCommandSharedParams> = {
-    id: 'sheet.mutation.re-calc-filter',
+    id: ReCalcSheetsFilterMutationId,
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
         const { unitId, subUnitId } = params;

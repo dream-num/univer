@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 
 import type { MenuSchemaType } from '@univerjs/ui';
-import { RibbonStartGroup, menuSchema as UIMenuSchema } from '@univerjs/ui';
+import { RibbonStartGroup, UIMenuSchema } from '@univerjs/ui';
 import { FONT_GROUP_MENU_ID } from '@univerjs/uniui';
 import {
     DELETE_MENU_ID,

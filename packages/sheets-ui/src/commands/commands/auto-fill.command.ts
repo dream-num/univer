@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,15 +15,15 @@
  */
 
 import type { IAccessor, ICommand, IRange } from '@univerjs/core';
-import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
-import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import { generateNullCellValue, getSheetCommandTarget, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory, SetSelectionsOperation } from '@univerjs/sheets';
+import type { ISetRangeValuesMutationParams, ISetSelectionsOperationParams } from '@univerjs/sheets';
+import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, sequenceExecute } from '@univerjs/core';
+import { generateNullCellValue, getSheetCommandTarget, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory, SetSelectionsOperation, SheetInterceptorService } from '@univerjs/sheets';
 
 import { IAutoFillService } from '../../services/auto-fill/auto-fill.service';
 
 export interface IAutoFillCommandParams {
-    unitId: string;
-    subUnitId: string;
+    sourceRange: IRange;
+    targetRange: IRange;
 }
 
 export const AutoFillCommand: ICommand = {
@@ -32,7 +32,15 @@ export const AutoFillCommand: ICommand = {
 
     handler: async (accessor: IAccessor, params: IAutoFillCommandParams) => {
         const autoFillService = accessor.get(IAutoFillService);
-        return autoFillService.fillData(params.unitId, params.subUnitId);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+
+        const { sourceRange, targetRange } = params;
+
+        const commandTarget = getSheetCommandTarget(univerInstanceService);
+        if (!commandTarget) return false;
+
+        const { subUnitId, unitId } = commandTarget;
+        return autoFillService.triggerAutoFill(unitId, subUnitId, sourceRange, targetRange);
     },
 };
 
@@ -48,6 +56,7 @@ export const AutoClearContentCommand: ICommand = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
+        const sheetInterceptorService = accessor.get(SheetInterceptorService);
 
         const target = getSheetCommandTarget(univerInstanceService);
         if (!target) return false;
@@ -65,7 +74,7 @@ export const AutoClearContentCommand: ICommand = {
             clearMutationParams
         );
         const { startColumn, startRow } = selectionRange;
-        commandService.executeCommand(SetSelectionsOperation.id, {
+        const param: ISetSelectionsOperationParams = {
             selections: [
                 {
                     primary: {
@@ -75,7 +84,7 @@ export const AutoClearContentCommand: ICommand = {
                         endRow: startRow,
                         actualRow: startRow,
                         actualColumn: startColumn,
-                        isMerge: false,
+                        isMerged: false,
                         isMergedMainCell: false,
                     },
                     range: {
@@ -85,16 +94,23 @@ export const AutoClearContentCommand: ICommand = {
             ],
             unitId,
             subUnitId,
-        });
+        };
+        commandService.executeCommand(SetSelectionsOperation.id, param);
 
         const result = commandService.syncExecuteCommand(SetRangeValuesMutation.id, clearMutationParams);
         if (result) {
+            const afterInterceptors = sheetInterceptorService.afterCommandExecute({
+                id: SetRangeValuesMutation.id,
+                params: clearMutationParams,
+            });
+
+            sequenceExecute(afterInterceptors.redos, commandService);
             undoRedoService.pushUndoRedo({
                 // If there are multiple mutations that form an encapsulated project, they must be encapsulated in the same undo redo element.
                 // Hooks can be used to hook the code of external controllers to add new actions.
                 unitID: unitId,
-                undoMutations: [{ id: SetRangeValuesMutation.id, params: undoClearMutationParams }],
-                redoMutations: [{ id: SetRangeValuesMutation.id, params: clearMutationParams }],
+                undoMutations: [{ id: SetRangeValuesMutation.id, params: undoClearMutationParams }, ...afterInterceptors.undos],
+                redoMutations: [{ id: SetRangeValuesMutation.id, params: clearMutationParams }, ...afterInterceptors.redos],
             });
 
             return true;

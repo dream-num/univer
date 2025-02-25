@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
+import type { Workbook } from '@univerjs/core';
+import type { ICellLinkContent, ISheetHyperLink } from '../types/interfaces/i-hyper-link';
 import { Disposable, IUniverInstanceService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
 import { Subject } from 'rxjs';
-import type { Workbook } from '@univerjs/core';
-import type { ICellHyperLink, ICellLinkContent } from '../types/interfaces/i-hyper-link';
 
 type LinkUpdate = {
     type: 'add';
-    payload: ICellHyperLink;
+    payload: ISheetHyperLink;
     unitId: string;
     subUnitId: string;
     silent?: boolean;
 } | {
     type: 'remove';
-    payload: ICellHyperLink;
+    payload: ISheetHyperLink;
     unitId: string;
     subUnitId: string;
     silent?: boolean;
@@ -51,7 +51,7 @@ type LinkUpdate = {
     unitLinks: {
         unitId: string;
         subUnitId: string;
-        links: ICellHyperLink[];
+        links: ISheetHyperLink[];
     }[];
     silent?: boolean;
 };
@@ -60,8 +60,8 @@ export class HyperLinkModel extends Disposable {
     private _linkUpdate$ = new Subject<LinkUpdate>();
     linkUpdate$ = this._linkUpdate$.asObservable();
 
-    private _linkMap: Map<string, Map<string, ObjectMatrix<ICellHyperLink>>> = new Map();
-    private _linkPositionMap: Map<string, Map<string, Map<string, { row: number; column: number; link: ICellHyperLink }>>> = new Map();
+    private _linkMap: Map<string, Map<string, ObjectMatrix<ISheetHyperLink>>> = new Map();
+    private _linkPositionMap: Map<string, Map<string, Map<string, { row: number; column: number; link: ISheetHyperLink }>>> = new Map();
 
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
@@ -104,7 +104,7 @@ export class HyperLinkModel extends Disposable {
         };
     }
 
-    addHyperLink(unitId: string, subUnitId: string, link: ICellHyperLink) {
+    addHyperLink(unitId: string, subUnitId: string, link: ISheetHyperLink) {
         const { matrix, positionMap } = this._ensureMap(unitId, subUnitId);
         matrix.setValue(link.row, link.column, link);
         positionMap.set(link.id, { row: link.row, column: link.column, link });
@@ -208,7 +208,7 @@ export class HyperLinkModel extends Disposable {
         return matrix.getValue(position.row, position.column);
     }
 
-    getHyperLinkByLocation(unitId: string, subUnitId: string, row: number, column: number): ICellHyperLink | undefined {
+    getHyperLinkByLocation(unitId: string, subUnitId: string, row: number, column: number): ISheetHyperLink | undefined {
         const { matrix } = this._ensureMap(unitId, subUnitId);
         return matrix.getValue(row, column)!;
     }
@@ -232,7 +232,7 @@ export class HyperLinkModel extends Disposable {
     getSubUnit(unitId: string, subUnitId: string) {
         const { matrix } = this._ensureMap(unitId, subUnitId);
 
-        const links: ICellHyperLink[] = [];
+        const links: ISheetHyperLink[] = [];
         matrix.forValue((row, col, value) => {
             if (value) {
                 links.push(value);

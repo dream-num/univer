@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,9 @@
 
 import type { IDisposable } from '../../common/di';
 import type { Nullable } from '../../shared/types';
+import { merge } from 'lodash-es';
 import { filter, Observable, Subject } from 'rxjs';
 import { createIdentifier } from '../../common/di';
-
-import { Tools } from '../../shared';
 
 // WARNING!!! Do not set per unit config here! You can definitely find a better place to do that.
 
@@ -44,7 +43,7 @@ interface IConfigOptions {
 }
 
 export interface IConfigService {
-    getConfig<T>(id: string): Nullable<T>;
+    getConfig<T>(id: string | symbol): Nullable<T>;
     setConfig(id: string | symbol, value: unknown, options?: IConfigOptions): void;
     deleteConfig(id: string): boolean;
     subscribeConfigValue$<T = unknown>(key: string): Observable<T>;
@@ -66,12 +65,12 @@ export class ConfigService implements IConfigService, IDisposable {
     }
 
     setConfig(id: string, value: unknown, options?: IConfigOptions): void {
-        const { merge = false } = options || {};
+        const { merge: isMerge = false } = options || {};
 
         let nextValue = this._config.get(id) ?? {};
 
-        if (merge) {
-            nextValue = Tools.deepMerge(nextValue, value);
+        if (isMerge) {
+            nextValue = merge(nextValue, value);
         } else {
             nextValue = value;
         }

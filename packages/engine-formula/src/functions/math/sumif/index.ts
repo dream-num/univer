@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { ErrorType } from '../../../basics/error-type';
-import { findCompareToken, valueObjectCompare } from '../../../engine/utils/object-compare';
+import { valueObjectCompare } from '../../../engine/utils/object-compare';
 import { filterSameValueObjectResult } from '../../../engine/utils/value-object';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
@@ -70,9 +70,8 @@ export class Sumif extends BaseFunction {
 
         let resultArrayObject = valueObjectCompare(_range, criteria);
 
-        const [, criteriaStringObject] = findCompareToken(`${criteria.getValue()}`);
         // When comparing non-numbers and numbers, it does not take the result
-        resultArrayObject = filterSameValueObjectResult(resultArrayObject as ArrayValueObject, _range, criteriaStringObject);
+        resultArrayObject = filterSameValueObjectResult(resultArrayObject as ArrayValueObject, _range, criteria);
 
         const rangeRowCount = _range.getRowCount();
         const rangeColumnCount = _range.getColumnCount();

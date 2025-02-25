@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,10 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import { IUniverInstanceService, Tools, UniverInstanceType, useDependency } from '@univerjs/core';
+import { IUniverInstanceService, Tools, UniverInstanceType } from '@univerjs/core';
 import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment';
 import { ThreadCommentTree } from '@univerjs/thread-comment-ui';
-import { useObservable } from '@univerjs/ui';
-import React from 'react';
+import { useDependency, useObservable } from '@univerjs/ui';
 import { SheetsThreadCommentPopupService } from '../../services/sheets-thread-comment-popup.service';
 
 export const SheetsThreadCommentCell = () => {

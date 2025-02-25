@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,26 +15,25 @@
  */
 
 import type { IDisposable } from '@univerjs/core';
-import { FHooks, ICommandService } from '@univerjs/core';
-import { CopyCommand, PasteCommand } from '@univerjs/ui';
+import { ICommandService } from '@univerjs/core';
+import { FHooks } from '@univerjs/core/facade';
+import { CopyCommand, PasteCommand, SheetPasteShortKeyCommandName } from '@univerjs/ui';
 
+/**
+ * @ignore
+ */
 export interface IFHooksSheetsUIMixin {
     /**
      * The onBeforeCopy event is fired before a copy operation is performed.
+     * @deprecated use `univerAPI.addEvent(univerAPI.Event.BeforeClipboardChange, (params) => {})` instead
      * @param callback Callback function that will be called when the event is fired
      * @returns A disposable object that can be used to unsubscribe from the event
      */
     onBeforeCopy(callback: () => void): IDisposable;
 
     /**
-     * The onBeforeCopy event is fired before a copy operation is performed.
-     * @param callback Callback function that will be called when the event is fired
-     * @returns A disposable object that can be used to unsubscribe from the event
-     */
-    onBeforePaste(callback: () => void): IDisposable;
-
-    /**
      * The onCopy event is fired after a copy operation is performed.
+     * @deprecated use `univerAPI.addEvent(univerAPI.Event.ClipboardChanged, (params) => {})` instead
      * @param callback Callback function that will be called when the event is fired
      * @returns A disposable object that can be used to unsubscribe from the event
      */
@@ -42,6 +41,7 @@ export interface IFHooksSheetsUIMixin {
 
     /**
      * The onBeforePaste event is fired before a paste operation is performed.
+     * @deprecated use `univerAPI.addEvent(univerAPI.Event.BeforeClipboardPaste, (params) => {})` instead
      * @param callback Callback function that will be called when the event is fired
      * @returns A disposable object that can be used to unsubscribe from the event
      */
@@ -49,12 +49,16 @@ export interface IFHooksSheetsUIMixin {
 
     /**
      * The onPaste event is fired after a paste operation is performed.
+     * @deprecated use `univerAPI.addEvent(univerAPI.Event.ClipboardPasted, (params) => {})` instead
      * @param callback Callback function that will be called when the event is fired
      * @returns A disposable object that can be used to unsubscribe from the event
      */
     onPaste(callback: () => void): IDisposable;
 }
 
+/**
+ * @ignore
+ */
 export class FHooksSheetsMixin extends FHooks implements IFHooksSheetsUIMixin {
     override onBeforeCopy(callback: () => void): IDisposable {
         const commandService = this._injector.get(ICommandService);
@@ -90,7 +94,7 @@ export class FHooksSheetsMixin extends FHooks implements IFHooksSheetsUIMixin {
         const commandService = this._injector.get(ICommandService);
 
         return commandService.onCommandExecuted((command) => {
-            if (command.id === PasteCommand.id) {
+            if (command.id === PasteCommand.id || command.id === SheetPasteShortKeyCommandName) {
                 callback();
             }
         });
@@ -98,7 +102,7 @@ export class FHooksSheetsMixin extends FHooks implements IFHooksSheetsUIMixin {
 }
 
 FHooks.extend(FHooksSheetsMixin);
-declare module '@univerjs/core' {
+declare module '@univerjs/core/facade' {
     // eslint-disable-next-line ts/naming-convention
     interface FHooks extends IFHooksSheetsUIMixin {}
 }

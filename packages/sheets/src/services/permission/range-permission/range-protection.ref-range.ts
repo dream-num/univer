@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,42 +15,32 @@
  */
 
 import type { ICommandInfo, IMutationInfo, IRange, Workbook } from '@univerjs/core';
-
-import type {
-    IInsertColMutationParams,
-} from '../../../basics/interfaces/mutation-interface';
+import type { IInsertColMutationParams } from '../../../basics/interfaces/mutation-interface';
 import type { IInsertColCommandParams, IInsertRowCommandParams } from '../../../commands/commands/insert-row-col.command';
-import type {
-    IMoveColsCommandParams,
-    IMoveRowsCommandParams,
-} from '../../../commands/commands/move-rows-cols.command';
+import type { IMoveColsCommandParams, IMoveRowsCommandParams } from '../../../commands/commands/move-rows-cols.command';
 import type { IRemoveRowColCommandParams } from '../../../commands/commands/remove-row-col.command';
+import type { ISetWorksheetActivateCommandParams } from '../../../commands/commands/set-worksheet-activate.command';
 import type { IAddRangeProtectionMutationParams } from '../../../commands/mutations/add-range-protection.mutation';
 import type { IDeleteRangeProtectionMutationParams } from '../../../commands/mutations/delete-range-protection.mutation';
+import type { IMoveRowsMutationParams } from '../../../commands/mutations/move-rows-cols.mutation';
 import type { ISetRangeProtectionMutationParams } from '../../../commands/mutations/set-range-protection.mutation';
 import type { IRangeProtectionRule } from '../../../model/range-protection-rule.model';
 import type { EffectRefRangeParams } from '../../../services/ref-range/type';
 import { Disposable, DisposableCollection, ICommandService, Inject, IUniverInstanceService, Rectangle, Tools, UniverInstanceType } from '@univerjs/core';
 import { InsertColCommand, InsertRowCommand } from '../../../commands/commands/insert-row-col.command';
-import {
-    MoveColsCommand,
-    MoveRowsCommand,
-} from '../../../commands/commands/move-rows-cols.command';
+import { MoveColsCommand, MoveRowsCommand } from '../../../commands/commands/move-rows-cols.command';
 import { RemoveColCommand, RemoveRowCommand } from '../../../commands/commands/remove-row-col.command';
 import { RemoveSheetCommand } from '../../../commands/commands/remove-sheet.command';
-import {
-    type ISetWorksheetActivateCommandParams,
-    SetWorksheetActivateCommand,
-} from '../../../commands/commands/set-worksheet-activate.command';
+import { SetWorksheetActivateCommand } from '../../../commands/commands/set-worksheet-activate.command';
 import { AddRangeProtectionMutation } from '../../../commands/mutations/add-range-protection.mutation';
 import { DeleteRangeProtectionMutation } from '../../../commands/mutations/delete-range-protection.mutation';
 import { InsertColMutation, InsertRowMutation } from '../../../commands/mutations/insert-row-col.mutation';
-import { type IMoveRowsMutationParams, MoveColsMutation, MoveRowsMutation } from '../../../commands/mutations/move-rows-cols.mutation';
+import { MoveColsMutation, MoveRowsMutation } from '../../../commands/mutations/move-rows-cols.mutation';
 import { RemoveColMutation, RemoveRowMutation } from '../../../commands/mutations/remove-row-col.mutation';
 import { SetRangeProtectionMutation } from '../../../commands/mutations/set-range-protection.mutation';
-import { RangeProtectionCache } from '../../../model/range-protection.cache';
 import { RangeProtectionRenderModel } from '../../../model/range-protection-render.model';
 import { RangeProtectionRuleModel } from '../../../model/range-protection-rule.model';
+import { RangeProtectionCache } from '../../../model/range-protection.cache';
 import { RefRangeService } from '../../../services/ref-range/ref-range.service';
 import { SheetInterceptorService } from '../../sheet-interceptor/sheet-interceptor.service';
 
@@ -589,4 +579,3 @@ export class RangeProtectionRefRangeService extends Disposable {
         );
     }
 }
-

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,8 @@
  */
 
 import type { IMutationInfo } from '@univerjs/core';
-import { Tools } from '@univerjs/core';
 import type { IRemoveNumfmtMutationParams, ISetNumfmtMutationParams } from '@univerjs/sheets';
+import { Tools } from '@univerjs/core';
 import { rangeMerge, RemoveNumfmtMutation, SetNumfmtMutation } from '@univerjs/sheets';
 
 export const mergeNumfmtMutations = (list: IMutationInfo[]) => {

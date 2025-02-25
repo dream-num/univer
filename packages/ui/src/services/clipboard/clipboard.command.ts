@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ export const CopyCommand: IMultiCommand = {
     priority: 0,
     type: CommandType.COMMAND,
     preconditions: () => false,
-    handler: async () => true,
+    handler: () => true,
 };
 
 const CutCommandName = 'univer.command.cut';
@@ -47,5 +47,7 @@ export const PasteCommand: IMultiCommand = {
     priority: 0,
     type: CommandType.COMMAND,
     preconditions: () => false,
-    handler: async () => true,
+    handler: () => true,
 };
+
+export const SheetPasteShortKeyCommandName = 'sheet.command.paste-by-short-key';

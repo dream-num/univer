@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,6 @@ describe('Test auto fill with formula', () => {
     let univer: Univer;
     let get: Injector['get'];
     let commandService: ICommandService;
-    let autoFillController: AutoFillController;
     let themeService: ThemeService;
     let getValues: (
         startRow: number,
@@ -88,7 +87,7 @@ describe('Test auto fill with formula', () => {
         commandService = get(ICommandService);
         themeService = get(ThemeService);
         themeService.setTheme(theme);
-        autoFillController = get(AutoFillController);
+        get(AutoFillController);
 
         commandService.registerCommand(SetRangeValuesMutation);
         commandService.registerCommand(SetSelectionsOperation);
@@ -126,21 +125,21 @@ describe('Test auto fill with formula', () => {
                     style: null,
                 },
             ]);
+            const sourceRange = {
+                startColumn: 1,
+                endColumn: 1,
+                startRow: 0,
+                endRow: 0,
+            };
 
-            (autoFillController as any)._triggerAutoFill(
-                {
-                    startColumn: 1,
-                    endColumn: 1,
-                    startRow: 0,
-                    endRow: 0,
-                },
-                {
-                    startColumn: 1,
-                    endColumn: 1,
-                    startRow: 0,
-                    endRow: 2,
-                }
-            );
+            const targetRange = {
+                startColumn: 1,
+                endColumn: 1,
+                startRow: 0,
+                endRow: 2,
+            };
+
+            commandService.executeCommand(AutoFillCommand.id, { sourceRange, targetRange });
 
             // B1:B3 values will be in the following format
             // [
@@ -177,19 +176,20 @@ describe('Test auto fill with formula', () => {
             expect(B2?.f).toStrictEqual('=SUM(A2)');
             expect(B2?.si).toEqual(B3?.si);
 
-            // drop to right
-            (autoFillController as any)._triggerAutoFill(
+            commandService.executeCommand(AutoFillCommand.id,
                 {
-                    startColumn: 1,
-                    endColumn: 1,
-                    startRow: 0,
-                    endRow: 2,
-                },
-                {
-                    startColumn: 1,
-                    endColumn: 3,
-                    startRow: 0,
-                    endRow: 2,
+                    sourceRange: {
+                        startColumn: 1,
+                        endColumn: 1,
+                        startRow: 0,
+                        endRow: 2,
+                    },
+                    targetRange: {
+                        startColumn: 1,
+                        endColumn: 3,
+                        startRow: 0,
+                        endRow: 2,
+                    },
                 }
             );
 
@@ -289,6 +289,150 @@ describe('Test auto fill with formula', () => {
 
             // Restore the original data
             expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+        });
+
+        it('fill up with formula', async () => {
+            const selectionManager = get(SheetsSelectionsService);
+
+            selectionManager.addSelections([
+                {
+                    range: { startRow: 9, startColumn: 0, endRow: 9, endColumn: 0, rangeType: RANGE_TYPE.NORMAL },
+                    primary: null,
+                    style: null,
+                },
+            ]);
+
+            commandService.executeCommand(AutoFillCommand.id,
+                {
+                    sourceRange: {
+                        startColumn: 0,
+                        endColumn: 0,
+                        startRow: 9,
+                        endRow: 9,
+                    },
+                    targetRange: {
+                        startColumn: 0,
+                        endColumn: 0,
+                        startRow: 6,
+                        endRow: 9,
+                    },
+                }
+            );
+
+            // B1:B3 values will be in the following format
+            // [
+            //     [ { f: '=B7', si: '1ZMZWH' } ],
+            //     [ { si: '1ZMZWH' } ]
+            //     [ { si: '1ZMZWH' } ]
+            //     [ { f: '=B10' } ],
+            //   ]
+            let values = getValues(6, 0, 8, 0);
+            let A7 = values && values[0][0];
+            let A8 = values && values[1][0];
+            let A9 = values && values[2][0];
+
+            expect(A7?.f).toStrictEqual('=B7');
+            expect(A7?.si).toEqual(A8?.si);
+            expect(A7?.si).toEqual(A9?.si);
+
+            // undo
+            expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+
+            values = getValues(6, 0, 8, 0);
+            A7 = values && values[0][0];
+            A8 = values && values[1][0];
+            A9 = values && values[2][0];
+
+            expect(A7).toStrictEqual({});
+            expect(A8).toStrictEqual({});
+            expect(A9).toStrictEqual({});
+
+            // redo
+            expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+            values = getValues(6, 0, 8, 0);
+            A7 = values && values[0][0];
+            A8 = values && values[1][0];
+            A9 = values && values[2][0];
+
+            expect(A7?.f).toStrictEqual('=B7');
+            expect(A7?.si).toEqual(A8?.si);
+            expect(A7?.si).toEqual(A9?.si);
+        });
+
+        it('fill up with formula and number', async () => {
+            const selectionManager = get(SheetsSelectionsService);
+
+            selectionManager.addSelections([
+                {
+                    range: { startRow: 19, startColumn: 0, endRow: 20, endColumn: 0, rangeType: RANGE_TYPE.NORMAL },
+                    primary: null,
+                    style: null,
+                },
+            ]);
+
+            commandService.executeCommand(AutoFillCommand.id,
+                {
+                    sourceRange: {
+                        startColumn: 0,
+                        endColumn: 0,
+                        startRow: 19,
+                        endRow: 20,
+                    },
+                    targetRange: {
+                        startColumn: 0,
+                        endColumn: 0,
+                        startRow: 15,
+                        endRow: 20,
+                    },
+                }
+            );
+
+            // B1:B3 values will be in the following format
+            // [
+            //     [ { v: 18 } ]
+            //     [ { f: '=B17', si: '1ZMZWH' } ],
+            //     [ { v: 19 } ]
+            //     [ { si: '1ZMZWH' } ]
+            //     [ { v: 20 } ]
+            //     [ { f: '=B21' } ],
+            //   ]
+            let values = getValues(15, 0, 18, 0);
+            let A16 = values && values[0][0];
+            let A17 = values && values[1][0];
+            let A18 = values && values[2][0];
+            let A19 = values && values[3][0];
+
+            expect(A16?.v).toStrictEqual(18);
+            expect(A17?.f).toEqual('=B17');
+            expect(A18?.v).toEqual(19);
+            expect(A19?.si).toEqual(A17?.si);
+
+            // undo
+            expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+
+            values = getValues(15, 0, 18, 0);
+            A16 = values && values[0][0];
+            A17 = values && values[1][0];
+            A18 = values && values[2][0];
+            A19 = values && values[3][0];
+
+            expect(A16).toStrictEqual({});
+            expect(A17).toStrictEqual({});
+            expect(A18).toStrictEqual({});
+            expect(A19).toStrictEqual({});
+
+            // redo
+            expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+            values = getValues(15, 0, 18, 0);
+            A16 = values && values[0][0];
+            A17 = values && values[1][0];
+            A18 = values && values[2][0];
+            A19 = values && values[3][0];
+
+            expect(A16?.v).toStrictEqual(18);
+            expect(A17?.f).toEqual('=B17');
+            expect(A18?.v).toEqual(19);
+            expect(A19?.si).toEqual(A17?.si);
         });
     });
 });

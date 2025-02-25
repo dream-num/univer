@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import { LocaleType } from '../../types/enum';
 import { Univer } from '../../univer';
 import { ICommandService } from '../command/command.service';
 import { IUniverInstanceService } from '../instance/instance.service';
-import { Plugin } from '../plugin/plugin';
+import { Plugin } from '../plugin/plugin.service';
 
 const TEST_WORKBOOK_DATA_DEMO: () => IWorkbookData = () => ({
     id: 'test',

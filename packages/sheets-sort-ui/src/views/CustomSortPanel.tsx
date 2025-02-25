@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,13 @@
  */
 
 import type { IRange, Nullable } from '@univerjs/core';
-import { LocaleService, LocaleType, throttle, useDependency } from '@univerjs/core';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { type IOrderRule, SheetsSortService, SortType } from '@univerjs/sheets-sort';
-import { Button, Checkbox, DraggableList, Dropdown, Radio, RadioGroup } from '@univerjs/design';
+import type { IOrderRule } from '@univerjs/sheets-sort';
+import { LocaleService, LocaleType, throttle } from '@univerjs/core';
+import { Button, Checkbox, clsx, DraggableList, Dropdown, Radio, RadioGroup } from '@univerjs/design';
 import { CheckMarkSingle, DeleteEmptySingle, IncreaseSingle, MoreDownSingle, SequenceSingle } from '@univerjs/icons';
+import { SheetsSortService, SortType } from '@univerjs/sheets-sort';
+import { useDependency } from '@univerjs/ui';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { SheetsSortUIService } from '../services/sheets-sort-ui.service';
 
 import styles from './index.module.less';
@@ -116,7 +118,12 @@ export function CustomSortPanel() {
                             </div>
                         )
                         : (
-                            <div className={`${styles.addCondition} ${styles.addConditionDisable}`}>
+                            <div
+                                className={`
+                                  ${styles.addCondition}
+                                  ${styles.addConditionDisable}
+                                `}
+                            >
                                 <IncreaseSingle />
                                 <span className={styles.addConditionText}>{localeService.t('sheets-sort.dialog.add-condition')}</span>
                             </div>
@@ -200,12 +207,9 @@ export function SortOptionItem(props: ISortOptionItemProps) {
                 </div>
                 <div className={styles.customSortPanelItemColumn}>
                     <Dropdown
-                        placement="bottomLeft"
-                        trigger={['click']}
-                        visible={visible}
-                        onVisibleChange={onVisibleChange}
+                        align="start"
                         overlay={(
-                            <ul className={styles.customSortColMenu}>
+                            <ul className={clsx(styles.customSortColMenu, 'univer-theme')}>
                                 {availableMenu.map((menuItem) => (
                                     <li
                                         key={menuItem.index}
@@ -224,6 +228,8 @@ export function SortOptionItem(props: ISortOptionItemProps) {
                                 ))}
                             </ul>
                         )}
+                        open={visible}
+                        onOpenChange={onVisibleChange}
                     >
                         <div className={styles.customSortPanelItemColumnInput}>
                             <span className={styles.customSortPanelItemColumnInputText}>{itemLabel}</span>
@@ -261,4 +267,3 @@ function findNextColIndex(range: IRange, list: Nullable<IOrderRule>[]): number |
     }
     return null;
 }
-

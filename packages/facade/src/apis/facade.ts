@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,10 @@ import type {
 } from '@univerjs/core';
 import type { ISocket } from '@univerjs/network';
 import {
-    FUniver,
     Quantity,
     Univer,
 } from '@univerjs/core';
+import { FUniver } from '@univerjs/core/facade';
 import { ISocketService, WebSocketService } from '@univerjs/network';
 
 interface IFUniverLegacy {
@@ -85,7 +85,7 @@ class FUniverLegacy extends FUniver implements IFUniverLegacy {
 }
 
 FUniver.extend(FUniverLegacy);
-declare module '@univerjs/core' {
+declare module '@univerjs/core/facade' {
     // eslint-disable-next-line ts/naming-convention
     interface FUniver extends IFUniverLegacy {}
 }

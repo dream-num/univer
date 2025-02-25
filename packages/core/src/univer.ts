@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-import type { Dependency } from './common/di';
+import type { Dependency, IDisposable } from './common/di';
 import type { UnitModel, UnitType } from './common/unit';
-
 import type { LogLevel } from './services/log/log.service';
-import type { Plugin, PluginCtor } from './services/plugin/plugin';
 import type { DependencyOverride } from './services/plugin/plugin-override';
+import type { Plugin, PluginCtor } from './services/plugin/plugin.service';
 import type { IStyleSheet } from './services/theme/theme.service';
 import type { ILocales } from './shared';
 import type { IWorkbookData } from './sheets/typedef';
@@ -30,7 +29,6 @@ import { UniverInstanceType } from './common/unit';
 import { DocumentDataModel } from './docs/data-model/document-data-model';
 import { AuthzIoLocalService } from './services/authz-io/authz-io-local.service';
 import { IAuthzIoService } from './services/authz-io/type';
-
 import { CommandService, ICommandService } from './services/command/command.service';
 import { ConfigService, IConfigService } from './services/config/config.service';
 import { ContextService, IContextService } from './services/context/context.service';
@@ -44,8 +42,8 @@ import { MentionIOLocalService } from './services/mention-io/mention-io-local.se
 import { IMentionIOService } from './services/mention-io/type';
 import { PermissionService } from './services/permission/permission.service';
 import { IPermissionService } from './services/permission/type';
-import { PluginService } from './services/plugin/plugin.service';
 import { mergeOverrideWithDependencies } from './services/plugin/plugin-override';
+import { PluginService } from './services/plugin/plugin.service';
 import { ResourceLoaderService } from './services/resource-loader/resource-loader.service';
 import { IResourceLoaderService } from './services/resource-loader/type';
 import { ResourceManagerService } from './services/resource-manager/resource-manager.service';
@@ -53,6 +51,7 @@ import { IResourceManagerService } from './services/resource-manager/type';
 import { ThemeService } from './services/theme/theme.service';
 import { IUndoRedoService, LocalUndoRedoService } from './services/undoredo/undoredo.service';
 import { UserManagerService } from './services/user-manager/user-manager.service';
+import { DisposableCollection, toDisposable } from './shared';
 import { Workbook } from './sheets/workbook';
 import { SlideDataModel } from './slides/slide-model';
 
@@ -65,7 +64,10 @@ export interface IUniverConfig {
     override?: DependencyOverride;
 }
 
-export class Univer {
+/**
+ * @hideconstructor
+ */
+export class Univer implements IDisposable {
     private _startedTypes = new Set<UnitType>();
     private _injector: Injector;
 
@@ -76,6 +78,8 @@ export class Univer {
     private get _pluginService(): PluginService {
         return this._injector.get(PluginService);
     }
+
+    private _disposingCallbacks = new DisposableCollection();
 
     /**
      * Create a Univer instance.
@@ -94,11 +98,28 @@ export class Univer {
         this._init(injector);
     }
 
+    /**
+     * @ignore
+     */
     __getInjector(): Injector {
         return this._injector;
     }
 
+    /**
+     * Register a callback function which will be called when this Univer instance is disposing.
+     *
+     * @ignore
+     *
+     * @param callback The callback function.
+     * @returns To remove this callback function from this Univer instance's on disposing list.
+     */
+    onDispose(callback: () => void): IDisposable {
+        const d = this._disposingCallbacks.add(toDisposable(callback));
+        return toDisposable(() => d.dispose(true));
+    }
+
     dispose(): void {
+        this._disposingCallbacks.dispose();
         this._injector.dispose();
     }
 
@@ -145,7 +166,7 @@ export class Univer {
         univerInstanceService.__setCreateHandler(
             (type: UnitType, data, ctor, options) => {
                 if (!this._startedTypes.has(type)) {
-                    this._pluginService.startPluginForType(type);
+                    this._pluginService.startPluginsForType(type);
                     this._startedTypes.add(type);
 
                     const model = injector.createInstance(ctor, data);
@@ -195,7 +216,7 @@ function createUniverInjector(parentInjector?: Injector, override?: DependencyOv
         [IContextService, { useClass: ContextService }],
         [IResourceManagerService, { useClass: ResourceManagerService, lazy: true }],
         [IResourceLoaderService, { useClass: ResourceLoaderService, lazy: true }],
-        [IAuthzIoService, { useClass: AuthzIoLocalService, lazy: true }],
+        [IAuthzIoService, { useClass: AuthzIoLocalService }],
         [IMentionIOService, { useClass: MentionIOLocalService, lazy: true }],
     ], override);
 

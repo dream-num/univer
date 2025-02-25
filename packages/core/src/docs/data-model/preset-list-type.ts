@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 import type { IListData, INestingLevel, ITextStyle } from '../../types/interfaces/i-document-data';
 import { Tools } from '../../shared';
 import { BooleanNumber } from '../../types/enum';
-import { BulletAlignment, GlyphType } from '../../types/interfaces/i-document-data';
+import { BulletAlignment, ListGlyphType } from '../../types/interfaces/i-document-data';
 
 export enum QuickListType {
     ORDER_LIST_QUICK_1 = '1.',
@@ -73,12 +73,12 @@ export enum PresetListType {
 }
 
 const orderListSymbolMap = {
-    'a)': { glyphFormat: '%1)', glyphType: GlyphType.DECIMAL },
-    '1.': { glyphFormat: '%1.', glyphType: GlyphType.DECIMAL },
-    'a.': { glyphFormat: '%1.', glyphType: GlyphType.LOWER_LETTER },
-    'A.': { glyphFormat: '%1.', glyphType: GlyphType.UPPER_LETTER },
-    'i.': { glyphFormat: '%1.', glyphType: GlyphType.LOWER_ROMAN },
-    'I.': { glyphFormat: '%1.', glyphType: GlyphType.UPPER_LETTER },
+    'a)': { glyphFormat: '%1)', glyphType: ListGlyphType.DECIMAL },
+    '1.': { glyphFormat: '%1.', glyphType: ListGlyphType.DECIMAL },
+    'a.': { glyphFormat: '%1.', glyphType: ListGlyphType.LOWER_LETTER },
+    'A.': { glyphFormat: '%1.', glyphType: ListGlyphType.UPPER_LETTER },
+    'i.': { glyphFormat: '%1.', glyphType: ListGlyphType.LOWER_ROMAN },
+    'I.': { glyphFormat: '%1.', glyphType: ListGlyphType.UPPER_LETTER },
 };
 
 type BulletSymbols = [string, string, string];
@@ -102,7 +102,7 @@ const bulletListFactory = (symbols: BulletSymbols): INestingLevel[] => {
     }));
 };
 
-const orderListFactory = (options: { glyphFormat: string; glyphType: GlyphType }[]): INestingLevel[] => {
+const orderListFactory = (options: { glyphFormat: string; glyphType: ListGlyphType }[]): INestingLevel[] => {
     return options.map((format, i) => ({
         ...format,
         bulletAlignment: BulletAlignment.START,
@@ -163,29 +163,29 @@ export const PRESET_LIST_TYPE: Record<string, IListData> = {
     [PresetListType.ORDER_LIST]: {
         listType: PresetListType.ORDER_LIST,
         nestingLevel: orderListFactory([
-            { glyphFormat: '%1.', glyphType: GlyphType.DECIMAL },
-            { glyphFormat: '%2.', glyphType: GlyphType.LOWER_LETTER },
-            { glyphFormat: '%3.', glyphType: GlyphType.LOWER_ROMAN },
-            { glyphFormat: '%4.', glyphType: GlyphType.DECIMAL },
-            { glyphFormat: '%5.', glyphType: GlyphType.LOWER_LETTER },
-            { glyphFormat: '%6.', glyphType: GlyphType.LOWER_ROMAN },
-            { glyphFormat: '%7.', glyphType: GlyphType.DECIMAL },
-            { glyphFormat: '%8.', glyphType: GlyphType.LOWER_LETTER },
-            { glyphFormat: '%9.', glyphType: GlyphType.LOWER_ROMAN },
+            { glyphFormat: '%1.', glyphType: ListGlyphType.DECIMAL },
+            { glyphFormat: '%2.', glyphType: ListGlyphType.LOWER_LETTER },
+            { glyphFormat: '%3.', glyphType: ListGlyphType.LOWER_ROMAN },
+            { glyphFormat: '%4.', glyphType: ListGlyphType.DECIMAL },
+            { glyphFormat: '%5.', glyphType: ListGlyphType.LOWER_LETTER },
+            { glyphFormat: '%6.', glyphType: ListGlyphType.LOWER_ROMAN },
+            { glyphFormat: '%7.', glyphType: ListGlyphType.DECIMAL },
+            { glyphFormat: '%8.', glyphType: ListGlyphType.LOWER_LETTER },
+            { glyphFormat: '%9.', glyphType: ListGlyphType.LOWER_ROMAN },
         ]),
     } as IListData,
     [PresetListType.ORDER_LIST_1]: {
         listType: PresetListType.ORDER_LIST,
         nestingLevel: orderListFactory([
-            { glyphFormat: '%1)', glyphType: GlyphType.DECIMAL },
-            { glyphFormat: '%2)', glyphType: GlyphType.LOWER_LETTER },
-            { glyphFormat: '%3)', glyphType: GlyphType.LOWER_ROMAN },
-            { glyphFormat: '%4)', glyphType: GlyphType.DECIMAL },
-            { glyphFormat: '%5)', glyphType: GlyphType.LOWER_LETTER },
-            { glyphFormat: '%6)', glyphType: GlyphType.LOWER_ROMAN },
-            { glyphFormat: '%7)', glyphType: GlyphType.DECIMAL },
-            { glyphFormat: '%8)', glyphType: GlyphType.LOWER_LETTER },
-            { glyphFormat: '%9)', glyphType: GlyphType.LOWER_ROMAN },
+            { glyphFormat: '%1)', glyphType: ListGlyphType.DECIMAL },
+            { glyphFormat: '%2)', glyphType: ListGlyphType.LOWER_LETTER },
+            { glyphFormat: '%3)', glyphType: ListGlyphType.LOWER_ROMAN },
+            { glyphFormat: '%4)', glyphType: ListGlyphType.DECIMAL },
+            { glyphFormat: '%5)', glyphType: ListGlyphType.LOWER_LETTER },
+            { glyphFormat: '%6)', glyphType: ListGlyphType.LOWER_ROMAN },
+            { glyphFormat: '%7)', glyphType: ListGlyphType.DECIMAL },
+            { glyphFormat: '%8)', glyphType: ListGlyphType.LOWER_LETTER },
+            { glyphFormat: '%9)', glyphType: ListGlyphType.LOWER_ROMAN },
         ]),
     } as IListData,
     [PresetListType.ORDER_LIST_2]: {
@@ -198,48 +198,48 @@ export const PRESET_LIST_TYPE: Record<string, IListData> = {
             '%1.%2.%3.%4.%5.',
             '%1.%2.%3.%4.%5.%6.',
             '%1.%2.%3.%4.%5.%6.%7.',
-        ].map((format) => ({ glyphFormat: format, glyphType: GlyphType.DECIMAL }))),
+        ].map((format) => ({ glyphFormat: format, glyphType: ListGlyphType.DECIMAL }))),
     } as IListData,
     [PresetListType.ORDER_LIST_3]: {
         listType: PresetListType.ORDER_LIST,
         nestingLevel: orderListFactory([
-            { glyphFormat: '%1.', glyphType: GlyphType.UPPER_LETTER },
-            { glyphFormat: '%2.', glyphType: GlyphType.LOWER_LETTER },
-            { glyphFormat: '%3.', glyphType: GlyphType.LOWER_ROMAN },
-            { glyphFormat: '%4.', glyphType: GlyphType.UPPER_LETTER },
-            { glyphFormat: '%5.', glyphType: GlyphType.LOWER_LETTER },
-            { glyphFormat: '%6.', glyphType: GlyphType.LOWER_ROMAN },
-            { glyphFormat: '%7.', glyphType: GlyphType.UPPER_LETTER },
-            { glyphFormat: '%8.', glyphType: GlyphType.LOWER_LETTER },
-            { glyphFormat: '%9.', glyphType: GlyphType.LOWER_ROMAN },
+            { glyphFormat: '%1.', glyphType: ListGlyphType.UPPER_LETTER },
+            { glyphFormat: '%2.', glyphType: ListGlyphType.LOWER_LETTER },
+            { glyphFormat: '%3.', glyphType: ListGlyphType.LOWER_ROMAN },
+            { glyphFormat: '%4.', glyphType: ListGlyphType.UPPER_LETTER },
+            { glyphFormat: '%5.', glyphType: ListGlyphType.LOWER_LETTER },
+            { glyphFormat: '%6.', glyphType: ListGlyphType.LOWER_ROMAN },
+            { glyphFormat: '%7.', glyphType: ListGlyphType.UPPER_LETTER },
+            { glyphFormat: '%8.', glyphType: ListGlyphType.LOWER_LETTER },
+            { glyphFormat: '%9.', glyphType: ListGlyphType.LOWER_ROMAN },
         ]),
     } as IListData,
     [PresetListType.ORDER_LIST_4]: {
         listType: PresetListType.ORDER_LIST,
         nestingLevel: orderListFactory([
-            { glyphFormat: '%1.', glyphType: GlyphType.UPPER_LETTER },
-            { glyphFormat: '%2.', glyphType: GlyphType.DECIMAL },
-            { glyphFormat: '%3.', glyphType: GlyphType.LOWER_ROMAN },
-            { glyphFormat: '%4.', glyphType: GlyphType.UPPER_LETTER },
-            { glyphFormat: '%5.', glyphType: GlyphType.DECIMAL },
-            { glyphFormat: '%6.', glyphType: GlyphType.LOWER_ROMAN },
-            { glyphFormat: '%7.', glyphType: GlyphType.UPPER_LETTER },
-            { glyphFormat: '%8.', glyphType: GlyphType.DECIMAL },
-            { glyphFormat: '%9.', glyphType: GlyphType.LOWER_ROMAN },
+            { glyphFormat: '%1.', glyphType: ListGlyphType.UPPER_LETTER },
+            { glyphFormat: '%2.', glyphType: ListGlyphType.DECIMAL },
+            { glyphFormat: '%3.', glyphType: ListGlyphType.LOWER_ROMAN },
+            { glyphFormat: '%4.', glyphType: ListGlyphType.UPPER_LETTER },
+            { glyphFormat: '%5.', glyphType: ListGlyphType.DECIMAL },
+            { glyphFormat: '%6.', glyphType: ListGlyphType.LOWER_ROMAN },
+            { glyphFormat: '%7.', glyphType: ListGlyphType.UPPER_LETTER },
+            { glyphFormat: '%8.', glyphType: ListGlyphType.DECIMAL },
+            { glyphFormat: '%9.', glyphType: ListGlyphType.LOWER_ROMAN },
         ]),
     } as IListData,
     [PresetListType.ORDER_LIST_5]: {
         listType: PresetListType.ORDER_LIST,
         nestingLevel: orderListFactory([
-            { glyphFormat: '%1.', glyphType: GlyphType.DECIMAL_ZERO },
-            { glyphFormat: '%2.', glyphType: GlyphType.LOWER_LETTER },
-            { glyphFormat: '%3.', glyphType: GlyphType.LOWER_ROMAN },
-            { glyphFormat: '%4.', glyphType: GlyphType.DECIMAL_ZERO },
-            { glyphFormat: '%5.', glyphType: GlyphType.LOWER_LETTER },
-            { glyphFormat: '%6.', glyphType: GlyphType.LOWER_ROMAN },
-            { glyphFormat: '%7.', glyphType: GlyphType.DECIMAL_ZERO },
-            { glyphFormat: '%8.', glyphType: GlyphType.LOWER_LETTER },
-            { glyphFormat: '%9.', glyphType: GlyphType.LOWER_ROMAN },
+            { glyphFormat: '%1.', glyphType: ListGlyphType.DECIMAL_ZERO },
+            { glyphFormat: '%2.', glyphType: ListGlyphType.LOWER_LETTER },
+            { glyphFormat: '%3.', glyphType: ListGlyphType.LOWER_ROMAN },
+            { glyphFormat: '%4.', glyphType: ListGlyphType.DECIMAL_ZERO },
+            { glyphFormat: '%5.', glyphType: ListGlyphType.LOWER_LETTER },
+            { glyphFormat: '%6.', glyphType: ListGlyphType.LOWER_ROMAN },
+            { glyphFormat: '%7.', glyphType: ListGlyphType.DECIMAL_ZERO },
+            { glyphFormat: '%8.', glyphType: ListGlyphType.LOWER_LETTER },
+            { glyphFormat: '%9.', glyphType: ListGlyphType.LOWER_ROMAN },
         ]),
     } as IListData,
 
@@ -260,7 +260,7 @@ export const PRESET_LIST_TYPE: Record<string, IListData> = {
     } as IListData,
 };
 
-const generateOrderList = (opt: { glyphFormat: string; glyphType: GlyphType }) => {
+const generateOrderList = (opt: { glyphFormat: string; glyphType: ListGlyphType }) => {
     const { glyphFormat, glyphType } = opt;
 
     const data = Tools.deepClone(PRESET_LIST_TYPE[PresetListType.ORDER_LIST]);

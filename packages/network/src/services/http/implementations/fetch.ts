@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,15 @@
 /* eslint-disable no-case-declarations */
 
 import type { Subscriber } from 'rxjs';
-import { Observable } from 'rxjs';
 import type { HTTPRequest } from '../request';
 import type { HTTPEvent, HTTPResponseBody } from '../response';
-import { HTTPProgress, HTTPResponse, HTTPResponseError } from '../response';
+import type { IHTTPImplementation } from './implementation';
+import { ILogService } from '@univerjs/core';
+import { Observable } from 'rxjs';
 import { HTTPHeaders } from '../headers';
 import { HTTPStatusCode } from '../http';
-import type { IHTTPImplementation } from './implementation';
+import { HTTPProgress, HTTPResponse, HTTPResponseError } from '../response';
+import { parseFetchParamsFromRequest } from './util';
 
 /**
  * An HTTP implementation using Fetch API. This implementation can both run in browser and Node.js.
@@ -32,13 +34,17 @@ import type { IHTTPImplementation } from './implementation';
  * It does not support streaming response yet (May 12, 2024).
  */
 export class FetchHTTPImplementation implements IHTTPImplementation {
+    constructor(
+        @ILogService private readonly _logService: ILogService
+    ) { }
+
     send(request: HTTPRequest): Observable<HTTPEvent<any>> {
         return new Observable((subscriber) => {
             const abortController = new AbortController();
-            this._send(request, subscriber, abortController).then(() => {}, (error) => {
+            this._send(request, subscriber, abortController).catch((error) => {
                 subscriber.error(new HTTPResponseError({
                     error,
-
+                    request,
                 }));
             });
 
@@ -50,20 +56,28 @@ export class FetchHTTPImplementation implements IHTTPImplementation {
         let response: Response;
 
         try {
-            const fetchParams = this._parseFetchParamsFromRequest(request);
-            const fetchPromise = fetch(request.getUrlWithParams(), {
+            const fetchParams = parseFetchParamsFromRequest(request);
+            const urlWithParams = request.getUrlWithParams();
+            const fetchPromise = fetch(urlWithParams, {
                 signal: abortController.signal,
                 ...fetchParams,
             });
 
+            this._logService.debug(`[FetchHTTPImplementation]: sending request to url ${urlWithParams} with params ${fetchParams}`);
+
             response = await fetchPromise;
         } catch (error: any) {
-            subscriber.error(new HTTPResponseError({
+            const e = new HTTPResponseError({
+                request,
                 error,
                 status: error.status ?? 0,
                 statusText: error.statusText ?? 'Unknown Error',
                 headers: error.headers,
-            }));
+            });
+
+            this._logService.error('[FetchHTTPImplementation]: network error', e);
+
+            subscriber.error(e);
 
             return;
         }
@@ -86,12 +100,17 @@ export class FetchHTTPImplementation implements IHTTPImplementation {
                 statusText,
             }));
         } else {
-            subscriber.error(new HTTPResponseError({
+            const e = new HTTPResponseError({
+                request,
                 error: body,
                 status,
                 statusText,
                 headers: responseHeaders,
-            }));
+            });
+
+            this._logService.error('[FetchHTTPImplementation]: network error', e);
+
+            subscriber.error(e);
         }
 
         subscriber.complete();
@@ -136,25 +155,20 @@ export class FetchHTTPImplementation implements IHTTPImplementation {
             const body = deserialize(request, all, contentType);
             return body;
         } catch (error) {
-            subscriber.error(new HTTPResponseError({
+            const e = new HTTPResponseError({
+                request,
                 error,
                 status: response.status,
                 statusText: response.statusText,
                 headers: new HTTPHeaders(response.headers),
-            }));
+            });
+
+            this._logService.error('[FetchHTTPImplementation]: network error', e);
+
+            subscriber.error(e);
+
             return null;
         }
-    }
-
-    private _parseFetchParamsFromRequest(request: HTTPRequest): RequestInit {
-        const fetchParams: RequestInit = {
-            method: request.method,
-            headers: request.getHeadersInit(),
-            body: request.getBody(),
-            credentials: request.withCredentials ? 'include' : undefined,
-        };
-
-        return fetchParams;
     }
 }
 

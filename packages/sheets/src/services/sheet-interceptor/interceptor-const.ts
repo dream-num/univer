@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,4 +30,9 @@ export const INTERCEPTOR_POINT = {
 export enum InterceptCellContentPriority {
     DATA_VALIDATION = 9,
     NUMFMT = 10,
+    CELL_IMAGE = 11,
 }
+// used for define the range theme interceptor, it will also use to ignore the range theme interceptor
+export const RangeThemeInterceptorId = 'sheet.interceptor.range-theme-id';
+
+export const IgnoreRangeThemeInterceptorKey = 'sheet.interceptor.ignore-range-theme';

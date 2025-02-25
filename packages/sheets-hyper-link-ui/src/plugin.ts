@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,12 @@
 
 import type { Dependency, Workbook } from '@univerjs/core';
 import type { IUniverSheetsHyperLinkUIConfig } from './controllers/config.schema';
-import { DependentOn, IConfigService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
+import { DependentOn, IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { UniverSheetsHyperLinkPlugin } from '@univerjs/sheets-hyper-link';
 import { SheetsHyperLinkAutoFillController } from './controllers/auto-fill.controller';
-import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { defaultPluginConfig, SHEETS_HYPER_LINK_UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { SheetsHyperLinkCopyPasteController } from './controllers/copy-paste.controller';
 import { SheetsHyperLinkPermissionController } from './controllers/hyper-link-permission.controller';
 import { SheetsHyperLinkPopupController } from './controllers/popup.controller';
@@ -46,11 +46,15 @@ export class UniverSheetsHyperLinkUIPlugin extends Plugin {
         super();
 
         // Manage the plugin configuration.
-        const { menu, ...rest } = this._config;
+        const { menu, ...rest } = merge(
+            {},
+            defaultPluginConfig,
+            this._config
+        );
         if (menu) {
             this._configService.setConfig('menu', menu, { merge: true });
         }
-        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
+        this._configService.setConfig(SHEETS_HYPER_LINK_UI_PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {

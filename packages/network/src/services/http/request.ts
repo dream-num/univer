@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,9 @@
  */
 
 import type { HTTPHeaders } from './headers';
-import { ApplicationJSONType } from './headers';
 import type { HTTPResponseType } from './http';
 import type { HTTPParams } from './params';
+import { ApplicationJSONType } from './headers';
 
 export type HTTPRequestMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
 
@@ -51,7 +51,7 @@ export class HTTPRequest {
         readonly method: HTTPRequestMethod,
         readonly url: string,
         readonly requestParams?: IHTTPRequestParams
-    ) {}
+    ) { }
 
     getUrlWithParams(): string {
         const params = this.requestParams?.params?.toString();

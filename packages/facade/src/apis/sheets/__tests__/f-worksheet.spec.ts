@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import type { FUniver, Injector, Workbook } from '@univerjs/core';
+import type { Injector, Workbook } from '@univerjs/core';
+import type { FUniver } from '@univerjs/core/facade';
 import { ICommandService, IUniverInstanceService, RANGE_TYPE, UniverInstanceType } from '@univerjs/core';
-import { AddWorksheetMergeCommand, AddWorksheetMergeMutation, CancelFrozenCommand, InsertColCommand, InsertColMutation, InsertRowCommand, InsertRowMutation, MoveColsCommand, MoveColsMutation, MoveRowsCommand, MoveRowsMutation, RemoveColCommand, RemoveColMutation, RemoveRowCommand, RemoveRowMutation, RemoveWorksheetMergeCommand, RemoveWorksheetMergeMutation, SetColDataCommand, SetColDataMutation, SetColHiddenCommand, SetColHiddenMutation, SetColVisibleMutation, SetColWidthCommand, SetFrozenCommand, SetFrozenMutation, SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetRowDataCommand, SetRowDataMutation, SetRowHeightCommand, SetRowHiddenCommand, SetRowHiddenMutation, SetRowVisibleMutation, SetSelectionsOperation, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetStyleCommand, SetTextWrapCommand, SetVerticalTextAlignCommand, SetWorksheetColWidthMutation, SetWorksheetRowHeightMutation, SetWorksheetRowIsAutoHeightCommand, SetWorksheetRowIsAutoHeightMutation, SheetsSelectionsService } from '@univerjs/sheets';
+import { AddWorksheetMergeCommand, AddWorksheetMergeMutation, CancelFrozenCommand, InsertColByRangeCommand, InsertColCommand, InsertColMutation, InsertRowByRangeCommand, InsertRowCommand, InsertRowMutation, MoveColsCommand, MoveColsMutation, MoveRowsCommand, MoveRowsMutation, RemoveColByRangeCommand, RemoveColCommand, RemoveColMutation, RemoveRowByRangeCommand, RemoveRowCommand, RemoveRowMutation, RemoveWorksheetMergeCommand, RemoveWorksheetMergeMutation, SetColDataCommand, SetColDataMutation, SetColHiddenCommand, SetColHiddenMutation, SetColVisibleMutation, SetColWidthCommand, SetFrozenCommand, SetFrozenMutation, SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetRowDataCommand, SetRowDataMutation, SetRowHeightCommand, SetRowHiddenCommand, SetRowHiddenMutation, SetRowVisibleMutation, SetSelectionsOperation, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetStyleCommand, SetTextWrapCommand, SetVerticalTextAlignCommand, SetWorksheetColWidthMutation, SetWorksheetRowHeightMutation, SetWorksheetRowIsAutoHeightCommand, SetWorksheetRowIsAutoHeightMutation, SheetsSelectionsService } from '@univerjs/sheets';
 
 import { beforeEach, describe, expect, it } from 'vitest';
 import { createWorksheetTestBed } from './create-worksheet-test-bed';
@@ -88,6 +89,15 @@ describe('Test FWorksheet', () => {
         commandService.registerCommand(SetFrozenCommand);
         commandService.registerCommand(SetFrozenMutation);
         commandService.registerCommand(CancelFrozenCommand);
+
+        [
+            RemoveColByRangeCommand,
+            RemoveRowByRangeCommand,
+            InsertRowByRangeCommand,
+            InsertColByRangeCommand,
+        ].forEach((command) => {
+            commandService.registerCommand(command);
+        });
 
         setSelection = (startRow: number, endRow: number, startColumn: number, endColumn: number, rangeType: RANGE_TYPE = RANGE_TYPE.NORMAL) => {
             const selectionManagerService = get(SheetsSelectionsService);
@@ -516,6 +526,11 @@ describe('Test FWorksheet', () => {
 
         const freeze = activeSheet?.getFreeze();
         expect(freeze).toEqual({ startRow: -1, startColumn: 2, xSplit: 2, ySplit: 0 });
+
+        activeSheet?.cancelFreeze();
+        activeSheet?.setFrozenColumns(2, 3);
+        expect(activeSheet?.getFreeze()).toEqual({ startRow: -1, startColumn: 4, xSplit: 2, ySplit: 0 });
+        expect(activeSheet?.getFrozenColumnRange()).toEqual({ startColumn: 2, endColumn: 3 });
     });
 
     it('Worksheet setFrozenRows and getFrozenRows', () => {
@@ -526,6 +541,11 @@ describe('Test FWorksheet', () => {
 
         const freeze = activeSheet?.getFreeze();
         expect(freeze).toEqual({ startRow: 3, startColumn: -1, xSplit: 0, ySplit: 3 });
+
+        activeSheet?.cancelFreeze();
+        activeSheet?.setFrozenRows(2, 3);
+        expect(activeSheet?.getFreeze()).toEqual({ startRow: 4, startColumn: -1, xSplit: 0, ySplit: 2 });
+        expect(activeSheet?.getFrozenRowRange()).toEqual({ startRow: 2, endRow: 3 });
     });
 
     it('Worksheet combined frozen rows and columns', () => {

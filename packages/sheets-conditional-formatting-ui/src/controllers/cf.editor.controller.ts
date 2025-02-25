@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
  */
 
 import {
-    BuildTextUtils,
     Disposable,
     Inject,
     toDisposable,
@@ -45,21 +44,29 @@ export class ConditionalFormattingEditorController extends Disposable {
                     AFTER_CELL_EDIT,
                     {
                         handler: (value, context, next) => {
-                            const result = this._conditionalFormattingService.composeStyle(context.unitId, context.subUnitId, context.row, context.col);
-                            if (result?.style && value?.p) {
-                                const keys = Object.keys(result?.style);
-                                if (keys.length > 0) {
-                                    const v = BuildTextUtils.transform.getPlainText(value.p.body?.dataStream ?? '');
-                                    const s = { ...(typeof value.s === 'string' ? context.workbook.getStyles().get(value.s) : value.s) || {} };
-                                    keys.forEach((key) => {
-                                        delete s[key as keyof typeof s];
-                                    });
-                                    const cellData = { ...value, s: { ...s }, v };
-                                    delete cellData.p;
-                                    return next(cellData);
-                                }
+                            if (!value) {
+                                next(value);
                             }
-                            return next(value);
+                            const result = this._conditionalFormattingService.composeStyle(context.unitId, context.subUnitId, context.row, context.col);
+                            const cfStyle = result?.style ?? {};
+                            const keys = Object.keys(cfStyle);
+                            if (value?.p) {
+                                value.p.body?.textRuns?.forEach((item) => {
+                                    if (item.ts) {
+                                        keys.forEach((key) => {
+                                            delete item.ts?.[key as keyof typeof item.ts];
+                                        });
+                                    }
+                                });
+                                return next(value);
+                            } else {
+                                const s = { ...(typeof value?.s === 'string' ? context.workbook.getStyles().get(value.s) : value?.s) || {} };
+                                keys.forEach((key) => {
+                                    delete s[key as keyof typeof s];
+                                });
+                                const cellData = { ...value, s: { ...s } };
+                                return next(cellData);
+                            }
                         },
                     }
                 )

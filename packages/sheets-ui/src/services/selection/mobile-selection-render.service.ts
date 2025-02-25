@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ import {
     toDisposable,
 } from '@univerjs/core';
 import { ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
-import { convertSelectionDataToRange, DISABLE_NORMAL_SELECTIONS, SelectionMoveType, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
+import { convertSelectionDataToRange, REF_SELECTIONS_ENABLED, SelectionMoveType, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { IShortcutService } from '@univerjs/ui';
 import { distinctUntilChanged, startWith } from 'rxjs';
 import { getCoordByOffset, getSheetObject } from '../../controllers/utils/component-tools';
@@ -77,14 +77,16 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
         @Inject(SheetSkeletonManagerService) sheetSkeletonManagerService: SheetSkeletonManagerService,
         @ILogService private readonly _logService: ILogService,
         @ICommandService private readonly _commandService: ICommandService,
-        @IContextService private readonly _contextService: IContextService,
+        @IContextService protected readonly _contextService: IContextService,
         @Inject(SheetScrollManagerService) private readonly _scrollManagerService: SheetScrollManagerService
+
     ) {
         super(
             injector,
             themeService,
             shortcutService,
-            sheetSkeletonManagerService
+            sheetSkeletonManagerService,
+            _contextService
         );
         this._workbookSelections = selectionManagerService.getWorkbookSelections(this._context.unitId);
         this._init();
@@ -146,7 +148,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
             spreadsheetRowHeader?.onPointerUp$.subscribeEvent((evt: IPointerEvent | IMouseEvent, _state: EventState) => {
                 if (this._normalSelectionDisabled()) return;
 
-                const skeleton = this._sheetSkeletonManagerService.getCurrent()!.skeleton;
+                const skeleton = this._sheetSkeletonManagerService.getCurrentParam()!.skeleton;
                 const { row } = getCoordByOffset(evt.offsetX, evt.offsetY, scene, skeleton);
                 const matchSelectionData = isThisRowSelected(this._workbookSelections.getCurrentSelections(), row);
                 if (matchSelectionData) return;
@@ -160,7 +162,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
             spreadsheetColumnHeader?.onPointerUp$.subscribeEvent((evt: IPointerEvent | IMouseEvent, _state: EventState) => {
                 if (this._normalSelectionDisabled()) return;
 
-                const skeleton = this._sheetSkeletonManagerService.getCurrent()!.skeleton;
+                const skeleton = this._sheetSkeletonManagerService.getCurrentParam()!.skeleton;
                 const { column } = getCoordByOffset(evt.offsetX, evt.offsetY, scene, skeleton);
                 const matchSelectionData = isThisColSelected(this._workbookSelections.getCurrentSelections(), column);
                 if (matchSelectionData) return;
@@ -177,7 +179,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
 
             this._reset(); // remove all other selections
 
-            const skeleton = this._sheetSkeletonManagerService.getCurrent()!.skeleton;
+            const skeleton = this._sheetSkeletonManagerService.getCurrentParam()!.skeleton;
             const selectionWithStyle = selectionDataForSelectAll(skeleton);
             this._addSelectionControlByModelData(selectionWithStyle);
             // pointerup --> create selection
@@ -251,7 +253,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
         this.disposeWithMe(this.selectionMoveStart$.subscribe((params) => this._updateSelections(params, SelectionMoveType.MOVE_START)));
         this.disposeWithMe(this.selectionMoving$.subscribe((params) => this._updateSelections(params, SelectionMoveType.MOVING)));
 
-        this.disposeWithMe(this._contextService.subscribeContextValue$(DISABLE_NORMAL_SELECTIONS)
+        this.disposeWithMe(this._contextService.subscribeContextValue$(REF_SELECTIONS_ENABLED)
             .pipe(startWith(false), distinctUntilChanged())
             .subscribe((disabled) => {
                 if (disabled) {
@@ -463,7 +465,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
 
     // same as PC
     private _normalSelectionDisabled(): boolean {
-        return this._contextService.getContextValue(DISABLE_NORMAL_SELECTIONS);
+        return this._contextService.getContextValue(REF_SELECTIONS_ENABLED);
     }
 
     override getSelectionControls() {
@@ -705,7 +707,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
             if (activeControl == null) {
                 return;
             }
-            const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+            const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
             const sheetContentHeight = skeleton?.rowTotalHeight;
             const sheetContentWidth = skeleton?.columnTotalWidth;
             const rangeType = activeControl.rangeType;

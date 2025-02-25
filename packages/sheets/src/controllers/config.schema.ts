@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,9 @@
 
 import type { DependencyOverride } from '@univerjs/core';
 
-export const PLUGIN_CONFIG_KEY = 'sheets.config';
+export const SHEETS_PLUGIN_CONFIG_KEY = 'sheets.config';
 
-export const configSymbol = Symbol(PLUGIN_CONFIG_KEY);
+export const configSymbol = Symbol(SHEETS_PLUGIN_CONFIG_KEY);
 
 export interface IUniverSheetsConfig {
     notExecuteFormula?: boolean;
@@ -32,6 +32,11 @@ export interface IUniverSheetsConfig {
       * If the row style and column style be set both, and the row style should precede the column style or not.
       */
     isRowStylePrecedeColumnStyle?: boolean;
+
+    /**
+     * default false, auto height works for merged cells
+     */
+    autoHeightForMergedCells?: boolean;
 }
 
 export const defaultPluginConfig: IUniverSheetsConfig = {};

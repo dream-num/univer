@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,6 +73,33 @@ export const InsertRowCommand: ICommand = {
     id: InsertRowCommandId,
     handler: async (accessor: IAccessor, params: IInsertRowCommandParams) => {
         const commandService = accessor.get(ICommandService);
+        const sheetInterceptorService = accessor.get(SheetInterceptorService);
+
+        const { range, direction, unitId, subUnitId, cellValue } = params;
+        const canPerform = await sheetInterceptorService.beforeCommandExecute({
+            id: InsertRowCommand.id,
+            params,
+        });
+
+        if (!canPerform) {
+            return false;
+        }
+
+        return commandService.syncExecuteCommand(InsertRowByRangeCommand.id, {
+            range,
+            direction,
+            unitId,
+            subUnitId,
+            cellValue,
+        });
+    },
+};
+
+export const InsertRowByRangeCommand: ICommand = {
+    type: CommandType.COMMAND,
+    id: 'sheet.command.insert-row-by-range',
+    handler: (accessor: IAccessor, params: IInsertRowCommandParams) => {
+        const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
@@ -102,8 +129,6 @@ export const InsertRowCommand: ICommand = {
             accessor,
             insertRowParams
         );
-
-        if (!await sheetInterceptorService.beforeCommandExecute({ id: InsertRowCommand.id, params: insertRowParams })) return false;
 
         const redos: IMutationInfo[] = [{ id: InsertRowMutation.id, params: insertRowParams }];
         const undos: IMutationInfo[] = [{ id: RemoveRowMutation.id, params: undoRowInsertionParams }];
@@ -250,6 +275,34 @@ export const InsertColCommand: ICommand<IInsertColCommandParams> = {
 
     handler: async (accessor: IAccessor, params: IInsertColCommandParams) => {
         const commandService = accessor.get(ICommandService);
+        const sheetInterceptorService = accessor.get(SheetInterceptorService);
+
+        const { range, direction, subUnitId, unitId, cellValue } = params;
+        const canPerform = await sheetInterceptorService.beforeCommandExecute({
+            id: InsertColCommand.id,
+            params,
+        });
+
+        if (!canPerform) {
+            return false;
+        }
+
+        return commandService.syncExecuteCommand(InsertColByRangeCommand.id, {
+            range,
+            direction,
+            unitId,
+            subUnitId,
+            cellValue,
+        });
+    },
+};
+
+export const InsertColByRangeCommand: ICommand<IInsertColCommandParams> = {
+    type: CommandType.COMMAND,
+    id: 'sheet.command.insert-col-by-range',
+
+    handler: (accessor: IAccessor, params: IInsertColCommandParams) => {
+        const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
@@ -278,14 +331,6 @@ export const InsertColCommand: ICommand<IInsertColCommandParams> = {
             accessor,
             insertColParams
         );
-        const canPerform = await sheetInterceptorService.beforeCommandExecute({
-            id: InsertColCommand.id,
-            params: insertColParams,
-        });
-
-        if (!canPerform) {
-            return false;
-        }
 
         const redos: IMutationInfo[] = [{ id: InsertColMutation.id, params: insertColParams }];
         const undos: IMutationInfo[] = [{ id: RemoveColMutation.id, params: undoColInsertionParams }];

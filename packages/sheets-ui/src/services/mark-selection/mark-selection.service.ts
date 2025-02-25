@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 
 export interface IMarkSelectionService {
     addShape(selection: ISelectionWithStyle, exits?: string[], zIndex?: number): string | null;
+    addShapeWithNoFresh(selection: ISelectionWithStyle, exits?: string[], zIndex?: number): string | null;
     removeShape(id: string): void;
     removeAllShapes(): void;
     refreshShapes(): void;
@@ -47,7 +48,7 @@ export const IMarkSelectionService = createIdentifier<IMarkSelectionService>('un
 /**
  * For copy and cut selection.
  * also for selection when hover on conditional format items in the cf panel on the right.
- * but hover on panel if data validation, uses another method to draw selection.
+ * NOT FOR hovering on panel in data validation.
  */
 export class MarkSelectionService extends Disposable implements IMarkSelectionService {
     private _shapeMap: Map<string, IMarkSelectionInfo> = new Map();
@@ -77,6 +78,23 @@ export class MarkSelectionService extends Disposable implements IMarkSelectionSe
         this._shapeMap.set(id, markSelectionInfo);
 
         this.refreshShapes();
+        return id;
+    }
+
+    addShapeWithNoFresh(selection: ISelectionWithStyle, exits: string[] = [], zIndex: number = DEFAULT_Z_INDEX): string | null {
+        const workbook = this._currentService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        const subUnitId = workbook.getActiveSheet()?.getSheetId();
+        if (!subUnitId) return null;
+        const id = Tools.generateRandomId();
+        this._shapeMap.set(id, {
+            selection,
+            subUnitId,
+            unitId: workbook.getUnitId(),
+            zIndex,
+            control: null,
+            exits,
+        });
+
         return id;
     }
 

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,7 +63,7 @@ export const UpdateHyperLinkCommand: ICommand<IUpdateHyperLinkCommandParams> = {
         if (!doc?.documentModel) return false;
 
         const snapshot = doc.documentModel.getSnapshot();
-        const range = snapshot.body?.customRanges?.find((range) => range.rangeId === id);
+        const range = snapshot.body?.customRanges?.find((range) => `${range.rangeId}` === id);
         if (!range) return false;
 
         const newId = generateRandomId();

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,17 +81,23 @@ export interface ICustomFilter {
 }
 
 /**
- * These basic operators are defined in 18.18.31.
+ * Basic custom filter operators.
  *
- * Some comparison such as startsWith, endsWith, contains, doesNotContain, isBlank, isNotBlank are not defined in OOXML.
- * They are represented by regex-like values.
+ * @internal
+ * doesNotContain, isBlank, isNotBlank are not defined in OOXML. They are represented by regex-like values.
  */
 export enum CustomFilterOperator {
+    /** "EQUAL" operator. */
     EQUAL = 'equal',
+    /** "GREATER_THAN" operator. */
     GREATER_THAN = 'greaterThan',
+    /** "GREATER_THAN_OR_EQUAL" operator. */
     GREATER_THAN_OR_EQUAL = 'greaterThanOrEqual',
+    /** "LESS_THAN" operator. */
     LESS_THAN = 'lessThan',
+    /** "LESS_THAN_OR_EQUAL" operator. */
     LESS_THAN_OR_EQUAL = 'lessThanOrEqual',
+    /** "NOT_EQUALS" operator. */
     NOT_EQUALS = 'notEqual',
 }
 

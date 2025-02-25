@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +15,12 @@
  */
 
 import type { IFloatDom } from '../../../services/dom/canvas-dom-layer.service';
-import { IUniverInstanceService, UniverInstanceType, useDependency } from '@univerjs/core';
+import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import React, { memo, useEffect, useMemo, useRef } from 'react';
 import { distinctUntilChanged, first } from 'rxjs';
 import { ComponentManager } from '../../../common';
-import { useObservable } from '../../../components/hooks/observable';
 import { CanvasFloatDomService } from '../../../services/dom/canvas-dom-layer.service';
-import styles from './index.module.less';
+import { useDependency, useObservable } from '../../../utils/di';
 
 const FloatDomSingle = memo((props: { layer: IFloatDom; id: string }) => {
     const { layer, id } = props;
@@ -100,10 +99,12 @@ const FloatDomSingle = memo((props: { layer: IFloatDom; id: string }) => {
         return null;
     }
 
+    //domRef univer-float-dom-wrapper
+    //innerDomRef univer-float-dom
     return (
         <div
             ref={domRef}
-            className={styles.floatDomWrapper}
+            className="univer-z-10"
             style={{
                 position: 'absolute',
                 top: topRef.current,
@@ -130,7 +131,7 @@ const FloatDomSingle = memo((props: { layer: IFloatDom; id: string }) => {
             <div
                 id={id}
                 ref={innerDomRef}
-                className={styles.floatDom}
+                className="univer-overflow-hidden"
                 style={{ position: 'absolute', ...innerStyle.current }}
             >
                 {component}

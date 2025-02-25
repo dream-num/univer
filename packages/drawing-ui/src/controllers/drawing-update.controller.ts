@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,8 @@
  * limitations under the License.
  */
 
-import type {
-    ICommandInfo,
-    Nullable,
-} from '@univerjs/core';
-import type { DrawingTypeEnum, IDrawingGroupUpdateParam, IDrawingOrderMapParam, IDrawingParam, IDrawingSearch, ITransformState } from '@univerjs/drawing';
+import type { DrawingTypeEnum, ICommandInfo, IDrawingParam, IDrawingSearch, ITransformState, Nullable } from '@univerjs/core';
+import type { IDrawingGroupUpdateParam, IDrawingOrderMapParam } from '@univerjs/drawing';
 import type { BaseObject, Image, IShapeProps, Scene, Shape } from '@univerjs/engine-render';
 import type { ISetDrawingAlignOperationParams } from '../commands/operations/drawing-align.operation';
 import {
@@ -28,7 +25,7 @@ import {
     IUniverInstanceService,
     toDisposable,
 } from '@univerjs/core';
-import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
+import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService, SetDrawingSelectedOperation } from '@univerjs/drawing';
 import { DRAWING_OBJECT_LAYER_INDEX, Group, IRenderManagerService, RENDER_CLASS_TYPE } from '@univerjs/engine-render';
 import { AlignType, SetDrawingAlignOperation } from '../commands/operations/drawing-align.operation';
 import { CloseImageCropOperation } from '../commands/operations/image-crop.operation';
@@ -666,6 +663,8 @@ export class DrawingUpdateController extends Disposable {
                     }
 
                     drawingShape.transformByState({ left, top, width, height, angle, flipX, flipY, skewX, skewY });
+
+                    scene.getTransformer()?.debounceRefreshControls();
                 });
             })
         );
@@ -796,9 +795,9 @@ export class DrawingUpdateController extends Disposable {
                     }).filter((transform) => transform != null) as ITransformState[];
 
                     if (drawings.length > 0) {
-                        this._drawingManagerService.focusDrawing(drawings);
+                        this._commandService.syncExecuteCommand(SetDrawingSelectedOperation.id, drawings);
                     } else {
-                        this._drawingManagerService.focusDrawing(null);
+                        this._commandService.syncExecuteCommand(SetDrawingSelectedOperation.id, []);
                     }
                 })
             )

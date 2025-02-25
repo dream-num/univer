@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import type { ITextRange } from '../../../../../sheets/typedef';
 import { describe, expect, it } from 'vitest';
 import { makeSelection, normalizeSelection } from '../selection';
-import type { ITextRange } from '../../../../../sheets/typedef';
 
 describe('makeSelection', () => {
     it('should create a collapsed selection when only startOffset is provided', () => {
@@ -80,4 +80,3 @@ describe('normalizeSelection', () => {
         expect(result).toEqual(expected);
     });
 });
-

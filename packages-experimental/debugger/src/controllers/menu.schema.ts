@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import { CreateEmptySheetCommand, DisposeCurrentUnitCommand, DisposeUniverComman
 import { ShowCellContentOperation } from '../commands/operations/cell.operation';
 import { ChangeUserCommand } from '../commands/operations/change-user.operation';
 import { ConfirmOperation } from '../commands/operations/confirm.operation';
+import { DarkModeOperation } from '../commands/operations/dark-mode.operation';
 import { DialogOperation } from '../commands/operations/dialog.operation';
 import { LocaleOperation } from '../commands/operations/locale.operation';
 import { MessageOperation } from '../commands/operations/message.operation';
@@ -34,6 +35,7 @@ import {
     ConfirmMenuItemFactory,
     CreateEmptySheetMenuItemFactory,
     CreateFloatDOMMenuItemFactory,
+    DarkModeMenuItemFactory,
     DialogMenuItemFactory,
     DisposeCurrentUnitMenuItemFactory,
     DisposeUniverItemFactory,
@@ -58,6 +60,10 @@ export const menuSchema: MenuSchemaType = {
         [LocaleOperation.id]: {
             order: 0,
             menuItemFactory: LocaleMenuItemFactory,
+        },
+        [DarkModeOperation.id]: {
+            order: 0.9,
+            menuItemFactory: DarkModeMenuItemFactory,
         },
         [ThemeOperation.id]: {
             order: 1,

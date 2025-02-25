@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,21 @@ const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
                         v: 1,
                     },
                 },
+                9: {
+                    0: {
+                        f: '=B10',
+                    },
+                },
+                19: {
+                    0: {
+                        v: 20,
+                    },
+                },
+                20: {
+                    0: {
+                        f: '=B21',
+                    },
+                },
             },
         },
     },
@@ -55,6 +70,7 @@ const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
 export interface ITestBed {
     univer: Univer;
     get: Injector['get'];
+    has: Injector['has'];
     sheet: Workbook;
 }
 
@@ -62,6 +78,7 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
     const univer = new Univer();
     const injector = univer.__getInjector();
     const get = injector.get.bind(injector);
+    const has = injector.has.bind(injector);
 
     class TestPlugin extends Plugin {
         static override pluginName = 'test-plugin';
@@ -109,7 +126,6 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
 
         override onReady(): void {
             this._formulaDataModel = get(FormulaDataModel);
-            this._formulaDataModel.initFormulaData();
         }
     }
 
@@ -125,6 +141,7 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
     return {
         univer,
         get,
+        has,
         sheet,
     };
 }

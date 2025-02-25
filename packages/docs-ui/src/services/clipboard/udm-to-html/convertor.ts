@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,8 @@
 import type { IDocumentBody, IDocumentData, IParagraph, ITextRun } from '@univerjs/core';
 import type { IDocImage } from '@univerjs/docs-drawing';
 import type { DataStreamTreeNode } from '@univerjs/engine-render';
-import { BaselineOffset, BooleanNumber, CustomRangeType, DataStreamTreeNodeType, Tools } from '@univerjs/core';
-import { DrawingTypeEnum, ImageSourceType } from '@univerjs/drawing';
+import { BaselineOffset, BooleanNumber, CustomRangeType, DataStreamTreeNodeType, DrawingTypeEnum, Tools } from '@univerjs/core';
+import { ImageSourceType } from '@univerjs/drawing';
 import { parseDataStreamToTree } from '@univerjs/engine-render';
 
 function covertImageToHtml(item: IDocImage) {

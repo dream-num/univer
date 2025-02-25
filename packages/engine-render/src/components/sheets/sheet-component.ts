@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ import type { IRange, Nullable } from '@univerjs/core';
 import type { IViewportInfo, Vector2 } from '../../basics/vector2';
 import type { UniverRenderingContext } from '../../context';
 import type { SHEET_EXTENSION_TYPE } from './extensions/sheet-extension';
-import type { SpreadsheetSkeleton } from './sheet-skeleton';
+import type { SpreadsheetSkeleton } from './sheet.render-skeleton';
 import { RENDER_CLASS_TYPE } from '../../basics/const';
 import { RenderComponent } from '../component';
 

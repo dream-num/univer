@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,13 @@
 /* eslint-disable ts/no-non-null-asserted-optional-chain */
 
 import type { ICellData, Injector, IRange, IStyleData, Nullable } from '@univerjs/core';
+import type { FUniver } from '../../everything';
 import { DataValidationType, HorizontalAlign, ICommandService, IUniverInstanceService, VerticalAlign, WrapStrategy } from '@univerjs/core';
-import { FormulaDataModel } from '@univerjs/engine-formula';
 import { AddWorksheetMergeCommand, SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetStyleCommand, SetTextWrapCommand, SetVerticalTextAlignCommand } from '@univerjs/sheets';
 import { AddSheetDataValidationCommand } from '@univerjs/sheets-data-validation';
 import { ClearSheetsFilterCriteriaCommand, RemoveSheetFilterCommand, SetSheetFilterRangeCommand, SetSheetsFilterCriteriaCommand } from '@univerjs/sheets-filter';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { createFacadeTestBed } from '../../__tests__/create-test-bed';
-import { FUniver } from '../../everything';
 
 describe('Test FRange', () => {
     let get: Injector['get'];
@@ -313,9 +312,6 @@ describe('Test FRange', () => {
     });
 
     it('Range getFormulas', () => {
-        const formulaDataModel = get(FormulaDataModel);
-        formulaDataModel.initFormulaData();
-
         const activeSheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
         const formulas = activeSheet?.getRange(0, 3, 5, 1)?.getFormulas();
         expect(formulas).toStrictEqual([
@@ -616,8 +612,8 @@ describe('Test FRange', () => {
         const activeSheet = univerAPI.getActiveWorkbook()?.getActiveSheet()!;
         const range = activeSheet.getRange(0, 0, 10, 10);
         const range2 = activeSheet.getRange(11, 11, 2, 2);
-        await range.setDataValidation(FUniver.newDataValidation().requireCheckbox().build());
-        await range2?.setDataValidation(FUniver.newDataValidation().requireNumberEqualTo(1).build());
+        await range.setDataValidation(univerAPI.newDataValidation().requireCheckbox().build());
+        await range2?.setDataValidation(univerAPI.newDataValidation().requireNumberEqualTo(1).build());
         const range3 = activeSheet.getRange(0, 0, 100, 100);
 
         expect(range.getDataValidation()).toBeTruthy();
@@ -812,5 +808,15 @@ describe('Test FRange', () => {
         expect(activeSheet?.getRange('A1:Z100').getValues()).toEqual(expect.arrayContaining([
             expect.arrayContaining([1, 2, 3, 4, null, null, null, null, null, null]),
         ]));
+    });
+
+    it('Range setNumberFormat', () => {
+        univerAPI.getHooks().onRendered(() => {
+            const activeSheet = univerAPI.getActiveWorkbook()!.getActiveSheet();
+            const range = activeSheet.getRange(0, 0, 1, 1);
+            range.setValue(1234.5678);
+            range.setNumberFormat('#,###');
+            expect(range.getValue()).toBe('1,234.5678');
+        });
     });
 });

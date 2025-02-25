@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,10 @@
  */
 
 import type { IPermissionPanelRule } from '../../../services/permission/sheet-permission-panel.model';
-import { IUniverInstanceService, useDependency } from '@univerjs/core';
+import { IUniverInstanceService } from '@univerjs/core';
 import { serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { getSheetCommandTarget, SheetsSelectionsService } from '@univerjs/sheets';
-import React from 'react';
+import { useDependency } from '@univerjs/ui';
 import { SheetPermissionPanelModel } from '../../../services/permission/sheet-permission-panel.model';
 import { SheetPermissionPanelDetail } from '../panel-detail/PermissionDetailPanel';
 import { SheetPermissionPanelList } from '../panel-list';
@@ -51,6 +51,7 @@ export const SheetPermissionPanel = ({ showDetail, fromSheetBar, rule, oldRule }
                     fromSheetBar={fromSheetBar}
                     rule={rule}
                     oldRule={oldRule}
+                    key={fromSheetBar ? 'sheet-bar' : 'normal'}
                 />
             )
             : <SheetPermissionPanelList key={key} />

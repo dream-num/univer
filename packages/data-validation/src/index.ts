@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,7 @@ export {
 } from './common/util';
 export { DataValidationResourceController } from './controllers/dv-resource.controller';
 
-export { type DataValidationChangeSource, DataValidationModel, type IRuleChange } from './models/data-validation-model';
-
+export { type DataValidationChangeSource, type DataValidationChangeType, DataValidationModel, type IRuleChange } from './models/data-validation-model';
 export { UniverDataValidationPlugin } from './plugin';
 export { DataValidatorRegistryScope, DataValidatorRegistryService } from './services/data-validator-registry.service';
 export { TextLengthErrorTitleMap } from './types/const/operator-text-map';

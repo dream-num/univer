@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,12 @@
 
 import { describe, expect, it } from 'vitest';
 
+import { ErrorType } from '../../../../basics/error-type';
+import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
+import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
+import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { FUNCTION_NAMES_LOGICAL } from '../../function-names';
 import { Iferror } from '../index';
-import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
-import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
-import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
-import { ErrorType } from '../../../../basics/error-type';
 
 describe('Test iferror function', () => {
     const testFunction = new Iferror(FUNCTION_NAMES_LOGICAL.IFERROR);
@@ -38,7 +38,7 @@ describe('Test iferror function', () => {
             const value = ErrorValueObject.create(ErrorType.NA);
             const valueIfError = StringValueObject.create('error');
             const result = testFunction.calculate(value, valueIfError);
-            expect(result.getValue()).toBe(ErrorType.NA);
+            expect(result.getValue()).toBe('error');
         });
 
         it('Value is array', () => {

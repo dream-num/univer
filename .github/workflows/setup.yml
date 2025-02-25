@@ -21,19 +21,19 @@ jobs:
                   echo ${{ github.event.pull_request.head.repo.full_name || github.repository }} >> ./pr-repo.txt
 
             - name: Upload PR number
-              uses: actions/upload-artifact@v3
+              uses: actions/upload-artifact@v4
               with:
                   name: pr-id
                   path: ./pr-id.txt
 
             - name: Upload PR ref
-              uses: actions/upload-artifact@v3
+              uses: actions/upload-artifact@v4
               with:
                   name: pr-ref
                   path: ./pr-ref.txt
 
             - name: Upload PR repo
-              uses: actions/upload-artifact@v3
+              uses: actions/upload-artifact@v4
               with:
                   name: pr-repo
                   path: ./pr-repo.txt

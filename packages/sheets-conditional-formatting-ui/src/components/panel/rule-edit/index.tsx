@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,26 +21,26 @@ import type { IAddCfCommandParams } from '../../../commands/commands/add-cf.comm
 import type { ISetCfCommandParams } from '../../../commands/commands/set-cf.command';
 
 import type { IStyleEditorProps } from './type';
-import { ICommandService, InterceptorManager, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
+import { ICommandService, InterceptorManager, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { Button, Select } from '@univerjs/design';
 import { deserializeRangeWithSheet, serializeRange } from '@univerjs/engine-formula';
 import { RemoveSheetMutation, setEndForRange, SetWorksheetActiveOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { CFRuleType, CFSubRuleType, ConditionalFormattingRuleModel } from '@univerjs/sheets-conditional-formatting';
 import { RangeSelector } from '@univerjs/sheets-formula-ui';
-import { useSidebarClick } from '@univerjs/ui';
+import { useDependency } from '@univerjs/ui';
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { AddCfCommand } from '../../../commands/commands/add-cf.command';
 
 import { SetCfCommand } from '../../../commands/commands/set-cf.command';
 import styleBase from '../index.module.less';
-import { ColorScaleStyleEditor } from './colorScale';
-import { DataBarStyleEditor } from './dataBar';
-import { FormulaStyleEditor } from './formula';
-import { HighlightCellStyleEditor } from './highlightCell';
-import { IconSet } from './iconSet';
+import { ColorScaleStyleEditor } from './ColorScale';
+import { DataBarStyleEditor } from './DataBar';
+import { FormulaStyleEditor } from './Formula';
+import { HighlightCellStyleEditor } from './HighlightCell';
+import { IconSet } from './IconSet';
 import styles from './index.module.less';
-import { RankStyleEditor } from './rank';
+import { RankStyleEditor } from './Rank';
 import { beforeSubmit, submit } from './type';
 
 interface IRuleEditProps {
@@ -60,8 +60,6 @@ export const RuleEdit = (props: IRuleEditProps) => {
     const unitId = getUnitId(univerInstanceService);
     const subUnitId = getSubUnitId(univerInstanceService);
 
-    const [isFocusRangeSelector, isFocusRangeSelectorSet] = useState(true);
-    const rangeSelectorActionsRef = useRef<Parameters<typeof RangeSelector>[0]['actions']>({});
     const [errorText, errorTextSet] = useState<string | undefined>(undefined);
     const rangeResult = useRef<IRange[]>(props.rule?.ranges ?? []);
 
@@ -127,7 +125,7 @@ export const RuleEdit = (props: IRuleEditProps) => {
         }
         return defaultType;
     });
-    const result = useRef<Parameters<IStyleEditorProps['onChange']>>();
+    const result = useRef<Parameters<IStyleEditorProps['onChange']>>(undefined);
     const interceptorManager = useMemo(() => {
         const _interceptorManager = new InterceptorManager({ beforeSubmit, submit });
         return _interceptorManager;
@@ -238,34 +236,34 @@ export const RuleEdit = (props: IRuleEditProps) => {
             errorTextSet(localeService.t('sheet.cf.errorMessage.rangeError'));
         }
     };
-
-    useSidebarClick((e: MouseEvent) => {
-        const handleOutClick = rangeSelectorActionsRef.current?.handleOutClick;
-        handleOutClick && handleOutClick(e, () => isFocusRangeSelectorSet(false));
-    });
-
     return (
         <div className={styles.cfRuleStyleEditor}>
             <div className={styleBase.title}>{localeService.t('sheet.cf.panel.range')}</div>
-            <div className={`${styleBase.mTBase}`}>
+            <div
+                className={`
+                  ${styleBase.mTBase}
+                `}
+            >
                 <RangeSelector
                     unitId={unitId}
-                    errorText={errorText}
                     subUnitId={subUnitId}
-                    initValue={rangeString}
-                    onChange={onRangeSelectorChange}
+                    initialValue={rangeString}
+                    onChange={(_, text) => onRangeSelectorChange(text)}
                     onVerify={handleVerify}
-                    onFocus={() => isFocusRangeSelectorSet(true)}
-                    isFocus={isFocusRangeSelector}
-                    actions={rangeSelectorActionsRef.current}
                 />
+                {errorText && <div className={styles.cfErrorText}>{errorText}</div>}
             </div>
             <div className={styleBase.title}>{localeService.t('sheet.cf.panel.styleType')}</div>
             <div className={styleBase.mTBase}>
                 <Select className={styles.width100} value={ruleType} options={options} onChange={(e) => ruleTypeSet(e)} />
             </div>
             <StyleEditor interceptorManager={interceptorManager} rule={props.rule?.rule as any} onChange={onStyleChange} />
-            <div className={`${styleBase.mTBase} ${styles.btnList}`}>
+            <div
+                className={`
+                  ${styleBase.mTBase}
+                  ${styles.btnList}
+                `}
+            >
                 <Button size="small" onClick={handleCancel}>{localeService.t('sheet.cf.panel.cancel')}</Button>
                 <Button className={styleBase.mLSm} size="small" type="primary" onClick={handleSubmit}>{localeService.t('sheet.cf.panel.submit')}</Button>
             </div>

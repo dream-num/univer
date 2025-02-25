@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,15 +15,15 @@
  */
 
 import type { SlideDataModel } from '@univerjs/core';
-import clsx from 'clsx';
-import { ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { Scrollbar } from '@univerjs/design';
-import type { RefObject } from 'react';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import { useDependency } from '@univerjs/ui';
+import clsx from 'clsx';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ActivateSlidePageOperation } from '../../commands/operations/activate.operation';
-import { SetSlidePageThumbOperation } from '../../commands/operations/set-thumb.operation';
 import { AppendSlideOperation } from '../../commands/operations/append-slide.operation';
+import { SetSlidePageThumbOperation } from '../../commands/operations/set-thumb.operation';
 import styles from './index.module.less';
 
 /**
@@ -53,12 +53,9 @@ export function SlideSideBar() {
 
     const slideList = pageOrder.map((id) => pages[id]);
 
-    const [divRefs, setDivRefs] = useState<RefObject<HTMLDivElement>[]>([]);
     const [activatePageId, setActivatePageId] = useState<string | null>(currentSlide?.getActivePage()?.id ?? null);
 
-    useEffect(() => {
-        setDivRefs(slideList.map((_) => React.createRef()));
-    }, [slideList.length]);
+    const divRefs = useMemo(() => slideList.map(() => React.createRef<HTMLDivElement>()), [slideList]);
 
     useEffect(() => {
         const subscriber = currentSlide?.activePage$.subscribe((page) => {

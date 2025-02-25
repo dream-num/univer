@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,4 +43,3 @@ export function normalizeSelection(selection: ITextRange): ITextRange {
 export function isSegmentIntersects(start: number, end: number, start2: number, end2: number) {
     return Math.max(start, start2) <= Math.min(end, end2);
 }
-

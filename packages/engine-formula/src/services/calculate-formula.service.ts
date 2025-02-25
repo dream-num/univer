@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import type {
 
 import type { IUniverEngineFormulaConfig } from '../controller/config.schema';
 import type { LexerNode } from '../engine/analysis/lexer-node';
+import type { FunctionVariantType } from '../engine/reference-object/base-reference-object';
 import type { IAllRuntimeData, IExecutionInProgressParams } from './runtime.service';
 import {
     createIdentifier,
@@ -38,17 +39,17 @@ import {
 import { Subject } from 'rxjs';
 import { ErrorType } from '../basics/error-type';
 import { CELL_INVERTED_INDEX_CACHE } from '../basics/inverted-index-cache';
-import { PLUGIN_CONFIG_KEY } from '../controller/config.schema';
+import { DEFAULT_CYCLE_REFERENCE_COUNT, ENGINE_FORMULA_PLUGIN_CONFIG_KEY } from '../controller/config.schema';
 import { Lexer } from '../engine/analysis/lexer';
 import { AstTreeBuilder } from '../engine/analysis/parser';
 import { ErrorNode } from '../engine/ast-node/base-ast-node';
 import { IFormulaDependencyGenerator } from '../engine/dependency/formula-dependency';
 import { Interpreter } from '../engine/interpreter/interpreter';
-import { FORMULA_REF_TO_ARRAY_CACHE, type FunctionVariantType } from '../engine/reference-object/base-reference-object';
+import { FORMULA_REF_TO_ARRAY_CACHE } from '../engine/reference-object/base-reference-object';
+import { ErrorValueObjectCache } from '../engine/value-object/base-value-object';
+import { StringValueObjectCache } from '../engine/value-object/primitive-object';
 import { IFormulaCurrentConfigService } from './current-data.service';
 import { FormulaExecuteStageType, IFormulaRuntimeService } from './runtime.service';
-
-export const DEFAULT_CYCLE_REFERENCE_COUNT = 1;
 
 export const DEFAULT_INTERVAL_COUNT = 500;
 
@@ -94,6 +95,17 @@ export class CalculateFormulaService extends Disposable {
         super();
     }
 
+    override dispose() {
+        super.dispose();
+
+        this._executionInProgressListener$.complete();
+        this._executionCompleteListener$.complete();
+        FORMULA_REF_TO_ARRAY_CACHE.clear();
+        CELL_INVERTED_INDEX_CACHE.clear();
+        ErrorValueObjectCache.clear();
+        StringValueObjectCache.clear();
+    }
+
     /**
      * Stop the execution of the formula.
      */
@@ -124,8 +136,7 @@ export class CalculateFormulaService extends Disposable {
 
         this._runtimeService.reset();
 
-        const cycleReferenceCount = (this._configService.getConfig('CYCLE_REFERENCE_COUNT') ||
-            DEFAULT_CYCLE_REFERENCE_COUNT) as number;
+        const cycleReferenceCount = (formulaDatasetConfig.maxIteration || DEFAULT_CYCLE_REFERENCE_COUNT) as number;
 
         for (let i = 0; i < cycleReferenceCount; i++) {
             this._runtimeService.setFormulaCycleIndex(i);
@@ -265,7 +276,7 @@ export class CalculateFormulaService extends Disposable {
 
         let pendingTasks: (() => void)[] = [];
 
-        const config = this._configService.getConfig(PLUGIN_CONFIG_KEY) as IUniverEngineFormulaConfig;
+        const config = this._configService.getConfig(ENGINE_FORMULA_PLUGIN_CONFIG_KEY) as IUniverEngineFormulaConfig;
         const intervalCount = config?.intervalCount || DEFAULT_INTERVAL_COUNT;
 
         const treeCount = treeList.length;

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,8 @@ import { ComponentManager } from './common/component-manager';
 import { ZIndexManager } from './common/z-index-manager';
 import { ErrorController } from './controllers/error/error.controller';
 import { SharedController } from './controllers/shared-shortcut.controller';
-import { IUIController } from './controllers/ui/ui.controller';
 import { MobileUIController } from './controllers/ui/ui-mobile.controller';
+import { IUIController } from './controllers/ui/ui.controller';
 import { DesktopBeforeCloseService, IBeforeCloseService } from './services/before-close/before-close.service';
 import { BrowserClipboardService, IClipboardInterfaceService } from './services/clipboard/clipboard-interface.service';
 import { IConfirmService } from './services/confirm/confirm.service';
@@ -44,8 +44,8 @@ import { INotificationService } from './services/notification/notification.servi
 import { IUIPartsService, UIPartsService } from './services/parts/parts.service';
 import { IPlatformService, PlatformService } from './services/platform/platform.service';
 import { CanvasPopupService, ICanvasPopupService } from './services/popup/canvas-popup.service';
-import { IShortcutService, ShortcutService } from './services/shortcut/shortcut.service';
 import { ShortcutPanelService } from './services/shortcut/shortcut-panel.service';
+import { IShortcutService, ShortcutService } from './services/shortcut/shortcut.service';
 import { DesktopSidebarService } from './services/sidebar/desktop-sidebar.service';
 import { ISidebarService } from './services/sidebar/sidebar.service';
 import { DesktopZenZoneService } from './services/zen-zone/desktop-zen-zone.service';

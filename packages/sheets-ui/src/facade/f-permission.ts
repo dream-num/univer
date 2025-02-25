@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,19 @@
 
 import { FPermission } from '@univerjs/sheets/facade';
 
+/**
+ * @ignore
+ */
 export interface IFPermissionSheetsUIMixin {
     /**
      * Set visibility of unauthorized pop-up window
-     *
-     * @param {boolean} visible
+     * @param {boolean} visible - visibility of unauthorized pop-up window
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const permission = fWorkbook.getPermission();
+     * permission.setPermissionDialogVisible(false);
+     * ```
      */
     setPermissionDialogVisible(visible: boolean): void;
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,16 +15,19 @@
  */
 
 import type { IDisposable, ILocales } from '@univerjs/core';
+import type { FormulaFunctionResultValueType, FormulaFunctionValueType, IFunctionInfo } from '@univerjs/engine-formula';
 import { createIdentifier, Disposable, DisposableCollection, Inject, LocaleService, Optional, toDisposable } from '@univerjs/core';
-import type { IFunctionInfo, PrimitiveValueType } from '@univerjs/engine-formula';
-import { CustomFunction, FunctionType, IFunctionService } from '@univerjs/engine-formula';
-
+import { AsyncCustomFunction, CustomFunction, FunctionType, IFunctionService } from '@univerjs/engine-formula';
 import { IDescriptionService } from './description.service';
 import { IRemoteRegisterFunctionService } from './remote/remote-register-function.service';
 
 export type IRegisterFunction = (
-    ...arg: Array<PrimitiveValueType | PrimitiveValueType[][]>
-) => PrimitiveValueType | PrimitiveValueType[][];
+    ...arg: Array<FormulaFunctionValueType>
+) => FormulaFunctionResultValueType;
+
+export type IRegisterAsyncFunction = (
+    ...arg: Array<FormulaFunctionValueType>
+) => Promise<FormulaFunctionResultValueType>;
 
 // [[Function, FunctionName, Description]]
 export type IRegisterFunctionList = [[IRegisterFunction, string, string?]];
@@ -81,11 +84,46 @@ export interface IRegisterFunctionService {
      * @param params
      */
     registerFunctions(params: IRegisterFunctionParams): IDisposable;
+
+    /**
+     * register a single function
+     * @param params
+     */
+    registerFunction(params: ISingleFunctionRegisterParams): IDisposable;
+
+    /**
+     * register a single async function
+     * @param params
+     */
+    registerAsyncFunction(params: ISingleFunctionRegisterParams): IDisposable;
 }
 
 export const IRegisterFunctionService = createIdentifier<IRegisterFunctionService>(
     'sheets-formula.register-function-service'
 );
+
+export interface ISingleFunctionRegisterParams {
+    /**
+     * function name
+     */
+    name: string;
+    /**
+     * function calculation
+     */
+    func: IRegisterFunction | IRegisterAsyncFunction;
+    /**
+     * function description
+     */
+    description: string | IFunctionInfo;
+    /**
+     * function locales
+     */
+    locales?: ILocales;
+    /**
+     * function async
+     */
+    async?: boolean;
+}
 
 export class RegisterFunctionService extends Disposable implements IRegisterFunctionService {
     constructor(
@@ -96,6 +134,14 @@ export class RegisterFunctionService extends Disposable implements IRegisterFunc
         private readonly _remoteRegisterFunctionService?: IRemoteRegisterFunctionService
     ) {
         super();
+    }
+
+    registerFunction(params: ISingleFunctionRegisterParams): IDisposable {
+        return this._registerSingleFunction(params);
+    }
+
+    registerAsyncFunction(params: ISingleFunctionRegisterParams): IDisposable {
+        return this._registerSingleFunction({ ...params, async: true });
     }
 
     registerFunctions(params: IRegisterFunctionParams): IDisposable {
@@ -128,6 +174,46 @@ export class RegisterFunctionService extends Disposable implements IRegisterFunc
         disposables.add(this._registerLocalExecutors(calculate));
         if (this._remoteRegisterFunctionService) {
             disposables.add(this._registerRemoteExecutors(calculate));
+        }
+
+        return disposables;
+    }
+
+    private _registerSingleFunction(params: ISingleFunctionRegisterParams): IDisposable {
+        const { name, func, description, locales, async = false } = params;
+        const disposables = new DisposableCollection();
+
+        // Handle i18n
+        if (locales) {
+            this._localeService.load(locales);
+        }
+
+        // Handle description
+        if (typeof description === 'string') {
+            const functionInfo: IFunctionInfo = {
+                functionName: name,
+                functionType: FunctionType.User,
+                description,
+                abstract: description || '',
+                functionParameter: [],
+            };
+            disposables.add(this._descriptionService.registerDescriptions([functionInfo]));
+        } else {
+            disposables.add(this._descriptionService.registerDescriptions([description]));
+        }
+
+        // Handle function registration
+        const instance = async ? new AsyncCustomFunction(name) : new CustomFunction(name);
+        instance.calculateCustom = func;
+        this._functionService.registerExecutors(instance);
+        disposables.add(toDisposable(() => this._functionService.unregisterExecutors(name)));
+
+        // Handle remote registration if available
+        if (this._remoteRegisterFunctionService) {
+            this._remoteRegisterFunctionService.registerAsyncFunctions([[func.toString(), name]]);
+            disposables.add(
+                toDisposable(() => this._remoteRegisterFunctionService!.unregisterFunctions([name]))
+            );
         }
 
         return disposables;

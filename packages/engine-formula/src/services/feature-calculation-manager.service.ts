@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,14 @@
  */
 
 import type { IUnitRange, Nullable } from '@univerjs/core';
-import { createIdentifier, Disposable } from '@univerjs/core';
-
 import type { Observable } from 'rxjs';
-import { Subject } from 'rxjs';
+
 import type { IFeatureDirtyRangeType, IRuntimeUnitDataType } from '../basics/common';
 import type { IRemoveFeatureCalculationMutationParam } from '../commands/mutations/set-feature-calculation.mutation';
-import type { IAllRuntimeData } from './runtime.service';
 import type { IFormulaDirtyData } from './current-data.service';
+import type { IAllRuntimeData } from './runtime.service';
+import { createIdentifier, Disposable } from '@univerjs/core';
+import { Subject } from 'rxjs';
 
 export interface IFeatureCalculationManagerParam {
     unitId: string;
@@ -63,7 +63,9 @@ export class FeatureCalculationManagerService extends Disposable implements IFea
     readonly onChanged$ = this._onChanged$.asObservable();
 
     override dispose(): void {
+        super.dispose();
         this._referenceExecutorMap.clear();
+        this._onChanged$.complete();
     }
 
     remove(unitId: string, subUnitId: string, featureIds: string[]) {

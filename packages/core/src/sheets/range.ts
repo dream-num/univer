@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -390,7 +390,7 @@ export class Range {
     }
 
     /**
-     * 	Returns the font family of the cell in the top-left corner of the range.
+     * Returns the font family of the cell in the top-left corner of the range.
      */
     getFontFamily(): string {
         return this.getFontFamilies()[0][0];
@@ -567,7 +567,7 @@ export class Range {
     }
 
     /**
-     * 	Returns the horizontal alignment of the text (left/center/right) of the cell in the top-left corner of the range.
+     *     Returns the horizontal alignment of the text (left/center/right) of the cell in the top-left corner of the range.
      */
     getHorizontalAlignment(): HorizontalAlign {
         return this.getHorizontalAlignments()[0][0];
@@ -588,7 +588,7 @@ export class Range {
     }
 
     /**
-     * 	Returns the end row position.
+     *     Returns the end row position.
      */
     getLastRow(): number {
         return this._range.endRow;
@@ -669,7 +669,7 @@ export class Range {
     }
 
     /**
-     * 	Returns the text style for the top left cell of the range.
+     *     Returns the text style for the top left cell of the range.
      */
     getTextStyle(): Nullable<IStyleData> {
         return this.getTextStyles()[0][0];

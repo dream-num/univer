@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,7 +56,7 @@ export class Background extends docExtension {
 
         if (background && content !== '\r') {
             ctx.fillStyle = background;
-            ctx.fillRectByPrecision(spanStartPoint.x - 0.5, spanStartPoint.y + 1, width + 1, contentHeight + 2 * DELTA);
+            ctx.fillRect(spanStartPoint.x - 0.5, spanStartPoint.y + 1, width + 1, contentHeight + 2 * DELTA);
         }
     }
 

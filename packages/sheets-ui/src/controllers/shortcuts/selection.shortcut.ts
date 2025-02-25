@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-import { Direction } from '@univerjs/core';
 import type { IShortcutItem } from '@univerjs/ui';
-import { KeyCode, MetaKeys } from '@univerjs/ui';
-
 import type {
     IExpandSelectionCommandParams,
     IMoveSelectionCommandParams,
     IMoveSelectionEnterAndTabCommandParams,
     ISelectAllCommandParams,
 } from '../../commands/commands/set-selection.command';
+import { Direction } from '@univerjs/core';
+import { KeyCode, MetaKeys } from '@univerjs/ui';
 import {
     ExpandSelectionCommand,
     JumpOver,

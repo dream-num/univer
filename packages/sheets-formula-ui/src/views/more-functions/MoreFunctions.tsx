@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,13 @@
  */
 
 import type { IFunctionInfo } from '@univerjs/engine-formula';
-import { LocaleService, useDependency } from '@univerjs/core';
+import { DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, ICommandService, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { Button } from '@univerjs/design';
 import { IEditorService } from '@univerjs/docs-ui';
-import { useActiveWorkbook } from '@univerjs/sheets-ui';
+import { DeviceInputEventType } from '@univerjs/engine-render';
+import { getSheetCommandTarget } from '@univerjs/sheets';
+import { IEditorBridgeService, SetCellEditVisibleOperation, useActiveWorkbook } from '@univerjs/sheets-ui';
+import { useDependency } from '@univerjs/ui';
 import React, { useState } from 'react';
 import styles from './index.module.less';
 import { InputParams } from './input-params/InputParams';
@@ -30,9 +33,11 @@ export function MoreFunctions() {
     const [inputParams, setInputParams] = useState<boolean>(false);
     // const [params, setParams] = useState<string[]>([]); // TODO@Dushusir: bind setParams to InputParams's onChange
     const [functionInfo, setFunctionInfo] = useState<IFunctionInfo | null>(null);
-
+    const editorBridgeService = useDependency(IEditorBridgeService);
     const localeService = useDependency(LocaleService);
     const editorService = useDependency(IEditorService);
+    const univerInstanceService = useDependency(IUniverInstanceService);
+    const commandService = useDependency(ICommandService);
 
     function handleClickNextPrev() {
         if (selectFunction) {
@@ -44,8 +49,18 @@ export function MoreFunctions() {
     }
 
     function handleConfirm() {
-        // TODO@Dushusir: save function  `=${functionInfo?.functionName}(${params.join(',')})`
-        editorService.setFormula(`=${functionInfo?.functionName}(`);
+        const sheetTarget = getSheetCommandTarget(univerInstanceService);
+        if (!sheetTarget) return;
+        commandService.executeCommand(SetCellEditVisibleOperation.id, {
+            visible: true,
+            unitId: sheetTarget.unitId,
+            eventType: DeviceInputEventType.Dblclick,
+        });
+        const editor = editorService.getEditor(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+        const formulaEditor = editorService.getEditor(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
+        const formulaText = `=${functionInfo?.functionName}(`;
+        editor?.replaceText(formulaText);
+        formulaEditor?.replaceText(formulaText, false);
     }
 
     return (

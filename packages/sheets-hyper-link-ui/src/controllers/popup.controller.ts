@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import {
     ClearSelectionFormatCommand,
     RangeProtectionPermissionEditPoint,
     RangeProtectionPermissionViewPoint,
+    SheetPermissionCheckController,
     WorkbookCopyPermission,
     WorkbookEditablePermission,
     WorkbookViewPermission,
@@ -35,7 +36,7 @@ import {
     WorksheetInsertHyperlinkPermission,
     WorksheetViewPermission,
 } from '@univerjs/sheets';
-import { HoverManagerService, HoverRenderController, IEditorBridgeService, SheetPermissionInterceptorBaseController, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { HoverManagerService, HoverRenderController, IEditorBridgeService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { IZenZoneService } from '@univerjs/ui';
 import { debounceTime, map, Observable, switchMap } from 'rxjs';
 import { SheetsHyperLinkPopupService } from '../services/popup.service';
@@ -47,7 +48,7 @@ export class SheetsHyperLinkPopupController extends Disposable {
         @Inject(SheetsHyperLinkPopupService) private readonly _sheetsHyperLinkPopupService: SheetsHyperLinkPopupService,
         @Inject(IRenderManagerService) private readonly _renderManagerService: IRenderManagerService,
         @Inject(IPermissionService) private readonly _permissionService: IPermissionService,
-        @Inject(SheetPermissionInterceptorBaseController) private readonly _sheetPermissionInterceptorBaseController: SheetPermissionInterceptorBaseController,
+        @Inject(SheetPermissionCheckController) private readonly _sheetPermissionCheckController: SheetPermissionCheckController,
         @ICommandService private readonly _commandService: ICommandService,
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
         @Inject(DocSelectionManagerService) private readonly _textSelectionManagerService: DocSelectionManagerService,
@@ -75,13 +76,13 @@ export class SheetsHyperLinkPopupController extends Disposable {
             };
         }
 
-        const viewPermission = this._sheetPermissionInterceptorBaseController.permissionCheckWithRanges({
+        const viewPermission = this._sheetPermissionCheckController.permissionCheckWithRanges({
             workbookTypes: [WorkbookViewPermission],
             worksheetTypes: [WorksheetViewPermission],
             rangeTypes: [RangeProtectionPermissionViewPoint],
         }, [{ startRow: currentRow, startColumn: currentCol, endRow: currentRow, endColumn: currentCol }]);
 
-        const editPermission = this._sheetPermissionInterceptorBaseController.permissionCheckWithRanges({
+        const editPermission = this._sheetPermissionCheckController.permissionCheckWithRanges({
             workbookTypes: [WorkbookEditablePermission],
             worksheetTypes: [WorksheetEditPermission, WorksheetInsertHyperlinkPermission],
             rangeTypes: [RangeProtectionPermissionEditPoint],
@@ -121,7 +122,7 @@ export class SheetsHyperLinkPopupController extends Disposable {
                 }
 
                 const skeleton = renderer?.with(SheetSkeletonManagerService)
-                    .getWorksheetSkeleton(subUnitId)
+                    .getSkeletonParam(subUnitId)
                     ?.skeleton;
 
                 const currentCol = col;
@@ -209,7 +210,7 @@ export class SheetsHyperLinkPopupController extends Disposable {
                         const rect = customRange.rects[customRange.rects.length - 1];
                         const skeleton = this._renderManagerService.getRenderById(unitId)
                             ?.with(SheetSkeletonManagerService)
-                            .getWorksheetSkeleton(sheetId)
+                            .getSkeletonParam(sheetId)
                             ?.skeleton;
                         if (!skeleton || !rect) {
                             return;

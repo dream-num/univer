@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -108,6 +108,10 @@ export class SheetsDataValidationValidatorService extends Disposable {
     }
 
     validatorRanges(unitId: string, subUnitId: string, ranges: IRange[]) {
+        if (!ranges.length) {
+            return Promise.resolve([]);
+        }
+
         const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
         if (!workbook) {
             throw new Error(`cannot find current workbook, unitId: ${unitId}`);
@@ -123,7 +127,7 @@ export class SheetsDataValidationValidatorService extends Disposable {
             Range.foreach(range, (row, col) => {
                 promises.push(this._validatorByCell(workbook, worksheet, row, col));
             });
-            return promises;
+            return Promise.all(promises);
         }));
     }
 

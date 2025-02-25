@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -153,10 +153,7 @@ export function serializeRange(range: IRange): string {
  * @param range
  */
 export function serializeRangeWithSheet(sheetName: string, range: IRange): string {
-    if (needsQuoting(sheetName)) {
-        return `'${sheetName}'!${serializeRange(range)}`;
-    }
-    return `${sheetName}!${serializeRange(range)}`;
+    return `${addQuotesBothSides(sheetName)}!${serializeRange(range)}`;
 }
 
 /**
@@ -167,7 +164,7 @@ export function serializeRangeWithSheet(sheetName: string, range: IRange): strin
  */
 export function serializeRangeWithSpreadsheet(unit: string, sheetName: string, range: IRange): string {
     if (needsQuoting(unit) || needsQuoting(sheetName)) {
-        return `'[${unit}]${sheetName}'!${serializeRange(range)}`;
+        return `'[${quoteSheetName(unit)}]${quoteSheetName(sheetName)}'!${serializeRange(range)}`;
     }
 
     return `[${unit}]${sheetName}!${serializeRange(range)}`;
@@ -206,7 +203,7 @@ export function handleRefStringInfo(refString: string) {
 
     if (unitIdMatch != null) {
         unitId = unitIdMatch[0].trim();
-        unitId = unitId.slice(1, unitId.length - 1);
+        unitId = unquoteSheetName(unitId.slice(1, unitId.length - 1));
         refString = refString.replace(UNIT_NAME_REGEX_PRECOMPILING, '');
     }
 
@@ -218,6 +215,8 @@ export function handleRefStringInfo(refString: string) {
         if (sheetName[0] === "'" && sheetName[sheetName.length - 1] === "'") {
             sheetName = sheetName.substring(1, sheetName.length - 1);
         }
+
+        sheetName = unquoteSheetName(sheetName);
         refBody = refString.substring(sheetNameIndex + 1);
     } else {
         refBody = refString;
@@ -419,11 +418,36 @@ export function needsQuoting(name: string) {
 
     // Check for spaces, punctuation and special characters
 
-    if (/[\s!$%^&*()+\-=\[\]{};':"\\|,.<>\/?]/.test(name)) {
+    if (/[\s!$%^&*()+\-=\[\]{};':"\\|,.<>\/?（）]/.test(name)) {
         return true;
     }
 
     return false;
+}
+
+/**
+ * Add quotes to the sheet name
+ */
+export function addQuotesBothSides(name: string) {
+    return needsQuoting(name) ? `'${quoteSheetName(name)}'` : name;
+}
+
+/**
+ * Add a single quote before the single quote
+ * @param name
+ * @returns Quoted name
+ */
+function quoteSheetName(name: string) {
+    return name.replace(/'/g, "''");
+}
+
+/**
+ * Replace double single quotes with single quotes
+ * @param name
+ * @returns Unquoted name
+ */
+function unquoteSheetName(name: string) {
+    return name.replace(/''/g, "'");
 }
 
 function isA1Notation(name: string) {

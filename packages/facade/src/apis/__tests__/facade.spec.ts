@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 import type { ICellData, Injector, Nullable } from '@univerjs/core';
+import type { FUniver } from '@univerjs/core/facade';
+import type { LambdaValueObjectObject, PrimitiveValueType } from '@univerjs/engine-formula';
 import type {
     ColumnHeaderLayout,
     RenderComponentType,
@@ -23,9 +25,8 @@ import type {
     SpreadsheetColumnHeader,
     SpreadsheetRowHeader,
 } from '@univerjs/engine-render';
-import type { FUniver } from '../everything';
-import { ICommandService, IUniverInstanceService } from '@univerjs/core';
 
+import { ICommandService, IUniverInstanceService } from '@univerjs/core';
 import { RegisterFunctionMutation, SetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SetRangeValuesCommand, SetRangeValuesMutation, SetStyleCommand } from '@univerjs/sheets';
@@ -178,10 +179,21 @@ describe('Test FUniver', () => {
 
     it('Function registerFunction', () => {
         const funcionName = 'CUSTOMSUM';
+
         const functionsDisposable = univerAPI.registerFunction({
             calculate: [
                 [function (...variants) {
                     let sum = 0;
+
+                    const last = variants[variants.length - 1] as LambdaValueObjectObject;
+
+                    if (last.isLambda()) {
+                        variants.pop();
+
+                        const variantsList = variants.map((variant) => Array.isArray(variant) ? variant[0][0] : variant) as PrimitiveValueType[];
+
+                        sum += +last.executeCustom(...variantsList).getValue();
+                    }
 
                     for (const variant of variants) {
                         sum += Number(variant) || 0;
@@ -281,7 +293,7 @@ describe('Test FUniver', () => {
             },
             {
                 name: 'SHEET_CONDITIONAL_FORMATTING_PLUGIN',
-                data: '{"sheet-0011":[{"cfId":"AEGZdW8C","ranges":[{"startRow":2,"startColumn":1,"endRow":11,"endColumn":5,"startAbsoluteRefType":0,"endAbsoluteRefType":0,"rangeType":0}],"rule":{"type":"highlightCell","subType":"text","operator":"containsText","style":{"cl":{"rgb":"#2f56ef"},"bg":{"rgb":"#e8ecfc"}},"value":""},"stopIfTrue":false},{"cfId":"4ICEXdJj","ranges":[{"startRow":2,"startColumn":1,"endRow":11,"endColumn":5,"startAbsoluteRefType":0,"endAbsoluteRefType":0,"rangeType":0}],"rule":{"type":"highlightCell","subType":"text","operator":"containsText","style":{"cl":{"rgb":"#2f56ef"},"bg":{"rgb":"#e8ecfc"}},"value":""},"stopIfTrue":false},{"cfId":"geCv018z","ranges":[{"startRow":2,"startColumn":1,"endRow":11,"endColumn":5,"startAbsoluteRefType":0,"endAbsoluteRefType":0,"rangeType":0}],"rule":{"type":"highlightCell","subType":"text","operator":"containsText","style":{"cl":{"rgb":"#2f56ef"},"bg":{"rgb":"#e8ecfc"}},"value":""},"stopIfTrue":false}]}',
+                data: '{"sheet1":[{"cfId":"AEGZdW8C","ranges":[{"startRow":2,"startColumn":1,"endRow":5,"endColumn":5,"startAbsoluteRefType":0,"endAbsoluteRefType":0,"rangeType":0}],"rule":{"type":"highlightCell","subType":"text","operator":"containsText","style":{"cl":{"rgb":"#2f56ef"},"bg":{"rgb":"#e8ecfc"}},"value":""},"stopIfTrue":false},{"cfId":"4ICEXdJj","ranges":[{"startRow":4,"startColumn":1,"endRow":7,"endColumn":7,"startAbsoluteRefType":0,"endAbsoluteRefType":0,"rangeType":0}],"rule":{"type":"highlightCell","subType":"text","operator":"containsText","style":{"cl":{"rgb":"#2f56ef"},"bg":{"rgb":"#e8ecfc"}},"value":""},"stopIfTrue":false},{"cfId":"geCv018z","ranges":[{"startRow":11,"startColumn":1,"endRow":12,"endColumn":5,"startAbsoluteRefType":0,"endAbsoluteRefType":0,"rangeType":0}],"rule":{"type":"highlightCell","subType":"text","operator":"containsText","style":{"cl":{"rgb":"#2f56ef"},"bg":{"rgb":"#e8ecfc"}},"value":""},"stopIfTrue":false}]}',
             },
             {
                 data: '{}',
@@ -366,5 +378,39 @@ describe('Test FUniver', () => {
         await newComment.delete();
         expect(worksheet.getComments().length).toBe(0);
         expect(range.getComment()).toBeNull();
+    });
+
+    it('Function registerFunction should handle function', () => {
+        const functionName = 'CUSTOMFUNC';
+        const functionsDisposable = univerAPI.getFormula().registerFunction(functionName, () => {
+            return 42;
+        }, 'Custom function');
+
+        const descriptionService = get(IDescriptionService);
+        const functionInfo = descriptionService.getFunctionInfo(functionName);
+
+        expect(functionInfo?.functionName).toBe(functionName);
+
+        functionsDisposable.dispose();
+
+        const functionInfoAfterDispose = descriptionService.getFunctionInfo(functionName);
+        expect(functionInfoAfterDispose).toBeUndefined();
+    });
+
+    it('Function registerFunction should handle async array function', () => {
+        const functionName = 'ASYNCARRAY';
+        const functionsDisposable = univerAPI.getFormula().registerAsyncFunction(functionName, async () => {
+            return [[1, 2], [3, 4]];
+        }, 'Async array function');
+
+        const descriptionService = get(IDescriptionService);
+        const functionInfo = descriptionService.getFunctionInfo(functionName);
+
+        expect(functionInfo?.functionName).toBe(functionName);
+
+        functionsDisposable.dispose();
+
+        const functionInfoAfterDispose = descriptionService.getFunctionInfo(functionName);
+        expect(functionInfoAfterDispose).toBeUndefined();
     });
 });

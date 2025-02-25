@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import { LocaleService, useDependency } from '@univerjs/core';
+import type { IMenuItemInputProps } from './interface';
+import { LocaleService } from '@univerjs/core';
 import { InputNumber } from '@univerjs/design';
-import { IContextMenuService } from '@univerjs/ui';
+import { IContextMenuService, useDependency } from '@univerjs/ui';
 
 import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
-import type { IMenuItemInputProps } from './interface';
 
 export const MenuItemInput = (props: IMenuItemInputProps) => {
     const { prefix, suffix, value, onChange, min = Number.MIN_SAFE_INTEGER, max = Number.MAX_SAFE_INTEGER } = props;

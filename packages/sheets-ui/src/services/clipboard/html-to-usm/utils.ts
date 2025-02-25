@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -99,7 +99,7 @@ export function generateParagraphs(dataStream: string, prevParagraph?: IParagrap
 export function convertToCellStyle(cell: ICellDataWithSpanInfo, dataStream: string, textRuns: ITextRun[] | undefined) {
     const dataStreamLength = dataStream.length;
     const textRunsLength = textRuns?.length ?? 0;
-    const canConvertToCellStyle = !textRunsLength || (textRunsLength === 1 && textRuns![0].st === 0 && textRuns![0].ed === dataStreamLength);
+    const canConvertToCellStyle = textRunsLength === 1 && textRuns![0].st === 0 && textRuns![0].ed === dataStreamLength;
 
     if (cell.p) {
         if (canConvertToCellStyle && cell.p.body?.textRuns?.length) {

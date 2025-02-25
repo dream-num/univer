@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
+import type { IUser, UniverInstanceType } from '@univerjs/core';
 import type { IAddCommentCommandParams, IThreadComment, IUpdateCommentCommandParams } from '@univerjs/thread-comment';
 import type { IThreadCommentEditorInstance } from '../thread-comment-editor';
-import { generateRandomId, useDependency } from '@univerjs/core';
-import { ICommandService, type IUser, LocaleService, type UniverInstanceType, UserManagerService } from '@univerjs/core';
-import { Dropdown, Menu, MenuItem, Tooltip } from '@univerjs/design';
+import { generateRandomId, ICommandService, LocaleService, UserManagerService } from '@univerjs/core';
+import { Dropdown, Tooltip } from '@univerjs/design';
 import { DeleteSingle, MoreHorizontalSingle, ReplyToCommentSingle, ResolvedSingle, SolveSingle } from '@univerjs/icons';
 import { AddCommentCommand, DeleteCommentCommand, DeleteCommentTreeCommand, getDT, ResolveCommentCommand, ThreadCommentModel, UpdateCommentCommand } from '@univerjs/thread-comment';
-import { useObservable } from '@univerjs/ui';
+import { useDependency, useObservable } from '@univerjs/ui';
 import cs from 'clsx';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { debounceTime } from 'rxjs';
@@ -63,12 +63,13 @@ export interface IThreadCommentItemProps {
     onClose?: () => void;
     onAddComment?: (comment: IThreadComment) => boolean;
     onDeleteComment?: (comment: IThreadComment) => boolean;
+    type: UniverInstanceType;
 }
 
 const MOCK_ID = '__mock__';
 
 const ThreadCommentItem = (props: IThreadCommentItemProps) => {
-    const { item, unitId, subUnitId, editing, onEditingChange, onReply, resolved, isRoot, onClose, onDeleteComment } = props;
+    const { item, unitId, subUnitId, editing, onEditingChange, onReply, resolved, isRoot, onClose, onDeleteComment, type } = props;
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
     const userManagerService = useDependency(UserManagerService);
@@ -119,10 +120,32 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                         ? (
                             <Dropdown
                                 overlay={(
-                                    <Menu>
-                                        <MenuItem key="edit" onClick={() => onEditingChange?.(true)}>{localeService.t('threadCommentUI.item.edit')}</MenuItem>
-                                        <MenuItem key="delete" onClick={handleDeleteItem}>{localeService.t('threadCommentUI.item.delete')}</MenuItem>
-                                    </Menu>
+                                    <div className="univer-rounded-lg univer-p-4 univer-theme">
+                                        <ul
+                                            className={`
+                                              univer-m-0 univer-grid univer-list-none univer-gap-2 univer-p-0
+                                              univer-text-sm
+                                              [&_a]:univer-cursor-pointer [&_a]:univer-rounded [&_a]:univer-p-1
+                                            `}
+                                        >
+                                            <li>
+                                                <a
+                                                    className="hover:univer-bg-gray-200"
+                                                    onClick={() => onEditingChange?.(true)}
+                                                >
+                                                    {localeService.t('threadCommentUI.item.edit')}
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a
+                                                    className="hover:univer-bg-gray-200"
+                                                    onClick={handleDeleteItem}
+                                                >
+                                                    {localeService.t('threadCommentUI.item.delete')}
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
                                 )}
                             >
                                 <div className={styles.threadCommentIcon}>
@@ -137,6 +160,7 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
             {editing
                 ? (
                     <ThreadCommentEditor
+                        type={type}
                         id={item.id}
                         comment={item}
                         onCancel={() => onEditingChange?.(false)}
@@ -162,20 +186,23 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                 )
                 : (
                     <div className={styles.threadCommentItemContent}>
-                        {transformDocument2TextNodes(item.text).map((item, i) => {
-                            switch (item.type) {
-                                case 'mention':
-                                    return (
-                                        <a className={styles.threadCommentItemAt} key={i}>
-                                            @
-                                            {item.content.label}
-                                            {' '}
-                                        </a>
-                                    );
-                                default:
-                                    return item.content;
-                            }
-                        })}
+                        {transformDocument2TextNodes(item.text).map((paragraph, i) => (
+                            <div key={i}>
+                                {paragraph.map((item, i) => {
+                                    switch (item.type) {
+                                        case 'mention':
+                                            return (
+                                                <a className={styles.threadCommentItemAt} key={i}>
+                                                    {item.content.label}
+                                                    {' '}
+                                                </a>
+                                            );
+                                        default:
+                                            return item.content;
+                                    }
+                                })}
+                            </div>
+                        ))}
                     </div>
                 )}
         </div>
@@ -200,6 +227,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
         onAddComment,
         onDeleteComment,
         onResolve,
+        type,
     } = props;
     const threadCommentModel = useDependency(ThreadCommentModel);
     const [isHover, setIsHover] = useState(false);
@@ -338,6 +366,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                             isRoot={item.id === comments?.root.id}
                             editing={editingId === item.id}
                             resolved={comments?.root.resolved}
+                            type={type}
                             onEditingChange={(editing) => {
                                 if (editing) {
                                     setEditingId(item.id);
@@ -371,6 +400,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                         <ThreadCommentEditor
                             key={`${autoFocus}`}
                             ref={editorRef}
+                            type={type}
                             unitId={unitId}
                             subUnitId={subUnitId}
                             onSave={async ({ text, attachments }) => {

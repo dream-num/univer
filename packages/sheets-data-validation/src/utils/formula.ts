@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { DataValidationType, type ICellData, type Nullable } from '@univerjs/core';
+import type { DataValidationType, ICellData, Nullable } from '@univerjs/core';
+import type { DataValidatorRegistryService } from '@univerjs/data-validation';
 import { ERROR_TYPE_SET } from '@univerjs/engine-formula';
 
 export function getFormulaResult(result: Nullable<Nullable<ICellData>[][]>) {
@@ -32,14 +33,7 @@ export function isLegalFormulaResult(res: string) {
 /**
  * Judge if the data-validation's formula need to be offseted by ranges
  */
-export function isCustomFormulaType(type: DataValidationType) {
-    // types not in this list is formula type
-    const invalidTypes = [
-        DataValidationType.LIST,
-        DataValidationType.LIST_MULTIPLE,
-        DataValidationType.CHECKBOX,
-        DataValidationType.ANY,
-    ];
-
-    return !invalidTypes.includes(type);
+export function shouldOffsetFormulaByRange(type: DataValidationType | string, validatorRegistryService: DataValidatorRegistryService) {
+    const validator = validatorRegistryService.getValidatorItem(type);
+    return validator?.offsetFormulaByRange ?? false;
 }

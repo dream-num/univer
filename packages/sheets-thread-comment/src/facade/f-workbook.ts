@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,23 +20,57 @@ import { toDisposable } from '@univerjs/core';
 import { FWorkbook } from '@univerjs/sheets/facade';
 import { AddCommentCommand, DeleteCommentCommand, DeleteCommentTreeCommand, ThreadCommentModel, UpdateCommentCommand } from '@univerjs/thread-comment';
 import { filter } from 'rxjs';
+import { FThreadComment } from './f-thread-comment';
 
-// FIXME@weird94: this plugin should not rely on docs-ui
 // eslint-disable-next-line ts/no-explicit-any
 type IUpdateCommandParams = any;
 
+/**
+ * @ignore
+ */
 export interface IFWorkbookThreadCommentMixin {
     /**
-     * The onThreadCommentChange event is fired when the thread comment of this sheet is changed.
-     * @param callback Callback function that will be called when the event is fired
-     * @returns A disposable object that can be used to unsubscribe from the event
+     * Get all comments in the current workbook
+     * @returns {FThreadComment[]} All comments in the current workbook
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const comments = fWorkbook.getComments();
+     * comments.forEach((comment) => {
+     *   const isRoot = comment.getIsRoot();
+     *
+     *   if (isRoot) {
+     *     console.log('root comment:', comment.getCommentData());
+     *
+     *     const replies = comment.getReplies();
+     *     replies.forEach((reply) => {
+     *       console.log('reply comment:', reply.getCommentData());
+     *     });
+     *   }
+     * });
+     * ```
+     */
+    getComments(): FThreadComment[];
+
+    /**
+     * Clear all comments in the current workbook
+     * @returns {Promise<boolean>} Whether the comments are cleared successfully.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const result = await fWorkbook.clearComments();
+     * console.log(result);
+     * ```
+     */
+    clearComments(): Promise<boolean>;
+
+    /**
+     * @deprecated use `univerAPI.addEvent(univerAPI.Event.CommentUpdated, (params) => {})` as instead
      */
     onThreadCommentChange(callback: (commentUpdate: CommentUpdate) => void | false): IDisposable;
 
     /**
-     * The onThreadCommentChange event is fired when the thread comment of this sheet is changed.
-     * @param callback Callback function that will be called when the event is fired
-     * @returns A disposable object that can be used to unsubscribe from the event
+     * @deprecated use `univerAPI.addEvent(univerAPI.Event.BeforeCommentAdd, (params) => {})` as instead
      */
     onBeforeAddThreadComment(
         this: FWorkbook,
@@ -44,9 +78,7 @@ export interface IFWorkbookThreadCommentMixin {
     ): IDisposable;
 
     /**
-     * The onBeforeUpdateThreadComment event is fired before the thread comment is updated.
-     * @param callback Callback function that will be called when the event is fired
-     * @returns A disposable object that can be used to unsubscribe from the event
+     * @deprecated use `univerAPI.addEvent(univerAPI.Event.BeforeCommentUpdate, (params) => {})` as instead
      */
     onBeforeUpdateThreadComment(
         this: FWorkbook,
@@ -54,9 +86,7 @@ export interface IFWorkbookThreadCommentMixin {
     ): IDisposable;
 
     /**
-     * The onBeforeDeleteThreadComment event is fired before the thread comment is deleted.
-     * @param callback Callback function that will be called when the event is fired
-     * @returns A disposable object that can be used to unsubscribe from the event
+     * @deprecated use `univerAPI.addEvent(univerAPI.Event.BeforeCommentDelete, (params) => {})` as instead
      */
     onBeforeDeleteThreadComment(
         this: FWorkbook,
@@ -64,9 +94,15 @@ export interface IFWorkbookThreadCommentMixin {
     ): IDisposable;
 }
 
+/**
+ * @ignore
+ */
 export class FWorkbookThreadCommentMixin extends FWorkbook implements IFWorkbookThreadCommentMixin {
     declare _threadCommentModel: ThreadCommentModel;
 
+    /**
+     * @ignore
+     */
     override _initialize(): void {
         Object.defineProperty(this, '_threadCommentModel', {
             get() {
@@ -75,12 +111,31 @@ export class FWorkbookThreadCommentMixin extends FWorkbook implements IFWorkbook
         });
     }
 
+    override getComments(): FThreadComment[] {
+        return this._threadCommentModel.getUnit(this._workbook.getUnitId()).map((i) => this._injector.createInstance(FThreadComment, i.root));
+    }
+
+    override clearComments(): Promise<boolean> {
+        const comments = this.getComments();
+        const promises = comments.map((comment) => comment.deleteAsync());
+
+        return Promise.all(promises).then(() => true);
+    }
+
+    /**
+     * @param callback
+     * @deprecated
+     */
     override onThreadCommentChange(callback: (commentUpdate: CommentUpdate) => void | false): IDisposable {
         return toDisposable(this._threadCommentModel.commentUpdate$
             .pipe(filter((change) => change.unitId === this._workbook.getUnitId()))
             .subscribe(callback));
     }
 
+    /**
+     * @param callback
+     * @deprecated
+     */
     override onBeforeAddThreadComment(callback: (params: IAddCommentCommandParams, options: IExecutionOptions | undefined) => void | false): IDisposable {
         return toDisposable(this._commandService.beforeCommandExecuted((commandInfo, options) => {
             const params = commandInfo.params as IAddCommentCommandParams;
@@ -95,6 +150,10 @@ export class FWorkbookThreadCommentMixin extends FWorkbook implements IFWorkbook
         }));
     }
 
+    /**
+     * @param callback
+     * @deprecated
+     */
     override onBeforeUpdateThreadComment(callback: (params: IUpdateCommandParams, options: IExecutionOptions | undefined) => void | false): IDisposable {
         return toDisposable(this._commandService.beforeCommandExecuted((commandInfo, options) => {
             const params = commandInfo.params as IUpdateCommandParams;
@@ -109,6 +168,10 @@ export class FWorkbookThreadCommentMixin extends FWorkbook implements IFWorkbook
         }));
     }
 
+    /**
+     * @param callback
+     * @deprecated
+     */
     override onBeforeDeleteThreadComment(callback: (params: IDeleteCommentCommandParams, options: IExecutionOptions | undefined) => void | false): IDisposable {
         return toDisposable(this._commandService.beforeCommandExecuted((commandInfo, options) => {
             const params = commandInfo.params as IDeleteCommentCommandParams;

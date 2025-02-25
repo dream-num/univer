@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,3 +18,4 @@ export * from './custom-label';
 export * from './font-family';
 export * from './font-size';
 export { useScrollYOverContainer } from './hooks/layout';
+export { type ISliderProps, Slider } from './slider';

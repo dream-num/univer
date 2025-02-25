@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,13 +40,11 @@ export const SidebarDefinedNameOperation: ICommand = {
         const { unitId } = target;
         switch (params.value) {
             case 'open':
-                editorService.setOperationSheetUnitId(unitId);
                 sidebarService.open({
                     id: DEFINED_NAME_CONTAINER,
                     header: { title: localeService.t('definedName.featureTitle') },
                     children: { label: DEFINED_NAME_CONTAINER },
                     onClose: () => {
-                        editorService.closeRangePrompt();
                     },
                     width: 333,
                 });

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -346,7 +346,7 @@ export abstract class Shape<T extends IShapeProps> extends BaseObject {
     }
 
     /**
-     * this[_key] = props[key]
+     * if BASE_OBJECT_ARRAY_Set.has(key) not exist, then this[_key] = props[key],
      * @param props
      */
     setProps(props?: T): Shape<T> {

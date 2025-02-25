@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,14 +53,17 @@ interface IAddCustomDecorationFactoryParam {
     segmentId?: string;
     id: string;
     type: CustomDecorationType;
+    unitId?: string;
 }
 
 export function addCustomDecorationBySelectionFactory(accessor: IAccessor, param: IAddCustomDecorationFactoryParam) {
-    const { segmentId, id, type } = param;
+    const { segmentId, id, type, unitId: propUnitId } = param;
     const docSelectionManagerService = accessor.get(DocSelectionManagerService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
 
-    const documentDataModel = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+    const documentDataModel = propUnitId ?
+        univerInstanceService.getUnit<DocumentDataModel>(propUnitId, UniverInstanceType.UNIVER_DOC)
+        : univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
     if (!documentDataModel) {
         return false;
     }

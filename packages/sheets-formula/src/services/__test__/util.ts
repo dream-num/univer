@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ import type { Dependency, IWorkbookData, Workbook } from '@univerjs/core';
 import { ICommandService, ILogService, Inject, Injector, IUniverInstanceService, LocaleType, LogLevel, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { CalculateFormulaService, DefinedNamesService, FormulaCurrentConfigService, FormulaDataModel, FormulaRuntimeService, ICalculateFormulaService, IDefinedNamesService, IFormulaCurrentConfigService, IFormulaRuntimeService, LexerTreeBuilder } from '@univerjs/engine-formula';
-import { DefinedNameDataController, InsertColCommand, IRefSelectionsService, MoveColsCommand, MoveRangeCommand, RangeProtectionRuleModel, RefRangeService, RemoveColCommand, SheetInterceptorService, SheetsSelectionsService, WorkbookPermissionService, WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
+import { DefinedNameDataController, InsertColByRangeCommand, InsertColCommand, InsertRowByRangeCommand, IRefSelectionsService, MoveColsCommand, MoveRangeCommand, RangeProtectionRuleModel, RefRangeService, RemoveColByRangeCommand, RemoveColCommand, RemoveRowByRangeCommand, SheetInterceptorService, SheetsSelectionsService, WorkbookPermissionService, WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import { FormulaRefRangeService } from '../formula-ref-range.service';
 
 const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
@@ -56,6 +56,7 @@ export interface ITestBed {
     sheet: Workbook;
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?: Dependency[]): ITestBed {
     const univer = new Univer();
     const injector = univer.__getInjector();
@@ -108,6 +109,10 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
                 RemoveColCommand,
                 InsertColCommand,
                 MoveColsCommand,
+                RemoveColByRangeCommand,
+                RemoveRowByRangeCommand,
+                InsertColByRangeCommand,
+                InsertRowByRangeCommand,
             ].forEach((command) => {
                 this._injector.get(ICommandService).registerCommand(command);
             });
@@ -115,7 +120,6 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
 
         override onReady(): void {
             this._formulaDataModel = get(FormulaDataModel);
-            this._formulaDataModel.initFormulaData();
         }
     }
 

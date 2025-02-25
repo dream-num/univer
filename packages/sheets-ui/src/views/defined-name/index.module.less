@@ -1,54 +1,8 @@
 .defined-name {
-    display: flex;
-
-    position: relative;
-
-    transition: height 0.15s;
-
-    border-right: 1px solid rgb(var(--border-color));
-
-    height: 100%;
-
-    width: 100px;
-
-    box-sizing: border-box;
-
-    &-drop-down {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-
-        padding: 0 var(--padding-xs);
-
-        cursor: pointer;
-
-        position: absolute;
-
-        right: 0;
-
-        height: 100%;
-
-        &:hover {
-            background-color: rgb(var(--grey-50));
-            color: rgb(var(--primary-color));
-        }
-
-        &-disable {
-            color: rgb(var(--grey-200));
-            cursor: not-allowed;
-
-            &:hover {
-                color: rgb(var(--grey-200));
-            }
-        }
-    }
-
     &-overlay {
         position: relative;
-        border: 1px solid rgb(var(--border-color));
         width: 300px;
         background-color: rgb(var(--color-white));
-        transform: translateX(-75px);
 
         &-container {
             position: relative;
@@ -103,7 +57,7 @@
         }
 
         &-manager {
-            position: absolute;
+            // position: absolute;
             display: flex;
             flex-direction: column;
             overflow-y: auto;

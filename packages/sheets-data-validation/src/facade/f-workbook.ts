@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,21 @@
  * limitations under the License.
  */
 
+import type { DataValidationStatus, IDisposable, IExecutionOptions, Nullable, ObjectMatrix } from '@univerjs/core';
 import type { IRuleChange } from '@univerjs/data-validation';
-import type { IAddSheetDataValidationCommandParams,
+import type {
+    IAddSheetDataValidationCommandParams,
     IRemoveSheetAllDataValidationCommandParams,
     IRemoveSheetDataValidationCommandParams,
     IUpdateSheetDataValidationOptionsCommandParams,
     IUpdateSheetDataValidationRangeCommandParams,
     IUpdateSheetDataValidationSettingCommandParams,
-    IValidStatusChange } from '@univerjs/sheets-data-validation';
-import { type DataValidationStatus, type IDisposable, type IExecutionOptions, type Nullable, type ObjectMatrix, toDisposable } from '@univerjs/core';
+    IValidStatusChange,
+} from '@univerjs/sheets-data-validation';
+import { toDisposable } from '@univerjs/core';
 
-import { FWorkbook } from '@univerjs/sheets/facade';
-import { AddSheetDataValidationCommand,
+import {
+    AddSheetDataValidationCommand,
     RemoveSheetAllDataValidationCommand,
     RemoveSheetDataValidationCommand,
     SheetDataValidationModel,
@@ -34,37 +37,41 @@ import { AddSheetDataValidationCommand,
     UpdateSheetDataValidationRangeCommand,
     UpdateSheetDataValidationSettingCommand,
 } from '@univerjs/sheets-data-validation';
+import { FWorkbook } from '@univerjs/sheets/facade';
 import { filter } from 'rxjs';
 
+/**
+ * @ignore
+ */
 export interface IFWorkbookDataValidationMixin {
     /**
-     * get data validation validator status for current workbook
-     * @returns matrix of validator status
+     * Get data validation validator status for current workbook.
+     * @returns A promise that resolves to a matrix of validator status.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const status = await fWorkbook.getValidatorStatus();
+     * console.log(status);
+     * ```
      */
-    getValidatorStatus(this: FWorkbook): Promise<Record<string, ObjectMatrix<Nullable<DataValidationStatus>>>>;
+    getValidatorStatus(): Promise<Record<string, ObjectMatrix<Nullable<DataValidationStatus>>>>;
 
     /**
-     * The onDataValidationChange event is fired when the data validation rule of this sheet is changed.
-     * @param callback Callback function that will be called when the event is fired
-     * @returns A disposable object that can be used to unsubscribe from the event
+     * @deprecated Use `univerAPI.addEvent(univerAPI.Event.SheetDataValidationChanged, (event) => { ... })` instead
      */
     onDataValidationChange(
         callback: (ruleChange: IRuleChange) => void
     ): IDisposable;
 
     /**
-     * The onDataValidationStatusChange event is fired when the data validation status of this sheet is changed.
-     * @param callback Callback function that will be called when the event is fired
-     * @returns A disposable object that can be used to unsubscribe from the event
+     * @deprecated Use `univerAPI.addEvent(univerAPI.Event.SheetDataValidatorStatusChanged, (event) => { ... })` instead
      */
     onDataValidationStatusChange(
         callback: (statusChange: IValidStatusChange) => void
     ): IDisposable;
 
     /**
-     * The onBeforeAddDataValidation event is fired before the data validation rule is added.
-     * @param callback Callback function that will be called when the event is fired
-     * @returns A disposable object that can be used to unsubscribe from the event
+     * @deprecated Use `univerAPI.addEvent(univerAPI.Event.BeforeSheetDataValidationAdd, (event) => { ... })` instead
      */
     onBeforeAddDataValidation(
         this: FWorkbook,
@@ -72,9 +79,7 @@ export interface IFWorkbookDataValidationMixin {
     ): IDisposable;
 
     /**
-     * The onBeforeUpdateDataValidationCriteria event is fired before the data validation rule is updated.
-     * @param callback Callback function that will be called when the event is fired
-     * @returns A disposable object that can be used to unsubscribe from the event
+     * @deprecated Use `univerAPI.addEvent(univerAPI.Event.BeforeSheetDataValidationCriteriaUpdate, (event) => { ... })` instead
      */
     onBeforeUpdateDataValidationCriteria(
         this: FWorkbook,
@@ -82,18 +87,15 @@ export interface IFWorkbookDataValidationMixin {
     ): IDisposable;
 
     /**
-     * The onBeforeUpdateDataValidationRange event is fired before the data validation rule is updated.
-     * @param callback Callback function that will be called when the event is fired
-     * @returns A disposable object that can be used to unsubscribe from the event
+     * @deprecated Use `univerAPI.addEvent(univerAPI.Event.BeforeSheetDataValidationRangeUpdate, (event) => { ... })` instead
      */
     onBeforeUpdateDataValidationRange(
         this: FWorkbook,
         callback: (params: IUpdateSheetDataValidationRangeCommandParams, options: IExecutionOptions | undefined) => void | false
     ): IDisposable;
+
     /**
-     * The onBeforeUpdateDataValidationOptions event is fired before the data validation rule is updated.
-     * @param callback Callback function that will be called when the event is fired
-     * @returns A disposable object that can be used to unsubscribe from the event
+     * @deprecated Use `univerAPI.addEvent(univerAPI.Event.BeforeSheetDataValidationOptionsUpdate, (event) => { ... })` instead
      */
     onBeforeUpdateDataValidationOptions(
         this: FWorkbook,
@@ -101,9 +103,7 @@ export interface IFWorkbookDataValidationMixin {
     ): IDisposable;
 
     /**
-     * The onBeforeDeleteDataValidation event is fired before the data validation rule is deleted.
-     * @param callback Callback function that will be called when the event is fired
-     * @returns A disposable object that can be used to unsubscribe from the event
+     * @deprecated Use `univerAPI.addEvent(univerAPI.Event.BeforeSheetDataValidationDelete, (event) => { ... })` instead
      */
     onBeforeDeleteDataValidation(
         this: FWorkbook,
@@ -111,9 +111,7 @@ export interface IFWorkbookDataValidationMixin {
     ): IDisposable;
 
     /**
-     * The onBeforeDeleteAllDataValidation event is fired before delete all data validation rules.
-     * @param callback Callback function that will be called when the event is fired
-     * @returns A disposable object that can be used to unsubscribe from the event
+     * @deprecated Use `univerAPI.addEvent(univerAPI.Event.BeforeSheetDataValidationDeleteAll, (event) => { ... })` instead
      */
     onBeforeDeleteAllDataValidation(
         this: FWorkbook,
@@ -121,6 +119,9 @@ export interface IFWorkbookDataValidationMixin {
     ): IDisposable;
 }
 
+/**
+ * @ignore
+ */
 export class FWorkbookDataValidationMixin extends FWorkbook implements IFWorkbookDataValidationMixin {
     declare _dataValidationModel: SheetDataValidationModel;
 
@@ -132,21 +133,12 @@ export class FWorkbookDataValidationMixin extends FWorkbook implements IFWorkboo
         });
     }
 
-    /**
-     * get data validation validator status for current workbook
-     * @returns matrix of validator status
-     */
     override getValidatorStatus(): Promise<Record<string, ObjectMatrix<Nullable<DataValidationStatus>>>> {
         const validatorService = this._injector.get(SheetsDataValidationValidatorService);
         return validatorService.validatorWorkbook(this._workbook.getUnitId());
     }
 
     // region DataValidationHooks
-    /**
-     * The onDataValidationChange event is fired when the data validation rule of this sheet is changed.
-     * @param callback Callback function that will be called when the event is fired
-     * @returns A disposable object that can be used to unsubscribe from the event
-     */
     override onDataValidationChange(
         callback: (ruleChange: IRuleChange) => void
     ): IDisposable {
@@ -156,11 +148,6 @@ export class FWorkbookDataValidationMixin extends FWorkbook implements IFWorkboo
             .subscribe(callback));
     }
 
-    /**
-     * The onDataValidationStatusChange event is fired when the data validation status of this sheet is changed.
-     * @param callback Callback function that will be called when the event is fired
-     * @returns A disposable object that can be used to unsubscribe from the event
-     */
     override onDataValidationStatusChange(
         callback: (statusChange: IValidStatusChange) => void
     ): IDisposable {
@@ -169,11 +156,6 @@ export class FWorkbookDataValidationMixin extends FWorkbook implements IFWorkboo
             .subscribe(callback));
     }
 
-    /**
-     * The onBeforeAddDataValidation event is fired before the data validation rule is added.
-     * @param callback Callback function that will be called when the event is fired
-     * @returns A disposable object that can be used to unsubscribe from the event
-     */
     override onBeforeAddDataValidation(
         callback: (params: IAddSheetDataValidationCommandParams, options: IExecutionOptions | undefined) => void | false
     ): IDisposable {

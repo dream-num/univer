@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import './global.css';
+
 export { SheetOnlyPasteFormulaCommand } from './commands/commands/formula-clipboard.command';
 export { SelectEditorFormulaOperation } from './commands/operations/editor-formula.operation';
 export { HelpFunctionOperation } from './commands/operations/help-function.operation';
@@ -21,13 +23,12 @@ export { InsertFunctionOperation } from './commands/operations/insert-function.o
 export { MoreFunctionsOperation } from './commands/operations/more-functions.operation';
 export { ReferenceAbsoluteOperation } from './commands/operations/reference-absolute.operation';
 export { SearchFunctionOperation } from './commands/operations/search-function.operation';
-export { RangeSelector } from './views/range-selector/index';
 export { FormulaEditor } from './views/formula-editor/index';
+export { type IRangeSelectorInstance, type IRangeSelectorProps, RangeSelector } from './views/range-selector/index';
 export { RefSelectionsRenderService } from './services/render-services/ref-selections.render-service';
-
+export { GlobalRangeSelectorService, type IShowRangeSelectorDialogOptions } from './services/range-selector.service';
 // #region - all commands
 
-export type { IFormulaInfo, IOtherFormulaResult } from './services/formula-common';
 export { FORMULA_PROMPT_ACTIVATED } from './services/prompt.service';
 export { UniverSheetsFormulaUIPlugin } from './sheets-formula-ui.plugin';
 

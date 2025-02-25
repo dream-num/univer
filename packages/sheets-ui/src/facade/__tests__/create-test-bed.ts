@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 import type { Dependency, IWorkbookData, UnitModel } from '@univerjs/core';
 import type { IRender } from '@univerjs/engine-render';
 import {
-    FUniver,
     ILogService,
     Inject,
     Injector,
@@ -28,8 +27,10 @@ import {
     ThemeService,
     Univer,
     UniverInstanceType } from '@univerjs/core';
+import { FUniver } from '@univerjs/core/facade';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { Engine, IRenderingEngine, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
+
 import {
     SheetInterceptorService,
 } from '@univerjs/sheets';
@@ -95,7 +96,10 @@ export interface ITestBed {
 
 class RenderManagerServiceTestBed extends RenderManagerService {
     override createRender(unitId: string): IRender {
-        const renderer = this._createRender(unitId, new Engine(100, 100));
+        const renderer = this._createRender(unitId, new Engine(unitId, {
+            elementWidth: 100,
+            elementHeight: 100,
+        }));
         return renderer;
     }
 }

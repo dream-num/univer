@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 import type { DocumentDataModel, ITextRange } from '@univerjs/core';
 import type { ISetTextSelectionsOperationParams } from '@univerjs/docs';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
-import { Disposable, ICommandService, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { Disposable, ICommandService, Inject, isInternalEditorID, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { SetTextSelectionsOperation } from '@univerjs/docs';
 import { DocBackScrollRenderController } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -49,6 +49,7 @@ export class DocThreadCommentSelectionController extends Disposable {
                 if (commandInfo.id === SetTextSelectionsOperation.id) {
                     const params = commandInfo.params as ISetTextSelectionsOperationParams;
                     const { unitId, ranges } = params;
+                    if (isInternalEditorID(unitId)) return;
                     const doc = this._univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
                     const primary = ranges[0] as ITextRangeWithStyle | undefined;
                     if (lastSelection?.startOffset === primary?.startOffset && lastSelection?.endOffset === primary?.endOffset) {

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 
 import { ICommandService, IConfigService, Inject, Injector, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { IMAGE_MENU_ID as DocsImageMenuId } from '@univerjs/docs-drawing-ui';
+import { DOCS_IMAGE_MENU_ID } from '@univerjs/docs-drawing-ui';
 import { BulletListCommand, DocCreateTableOperation, DocUIController, OrderListCommand, SetInlineFormatBoldCommand, SetInlineFormatFontFamilyCommand, SetInlineFormatFontSizeCommand, SetInlineFormatItalicCommand, SetInlineFormatStrikethroughCommand, SetInlineFormatTextBackgroundColorCommand, SetInlineFormatTextColorCommand, SetInlineFormatUnderlineCommand } from '@univerjs/docs-ui';
 import { ComponentManager, ILayoutService, IMenuManagerService, IShortcutService, IUIPartsService } from '@univerjs/ui';
 import { BuiltinUniToolbarItemId, generateCloneMutation, UniToolbarService } from '@univerjs/uniui';
@@ -58,7 +58,7 @@ export class UniDocsUIController extends DocUIController {
             [BuiltinUniToolbarItemId.FONT_SIZE, SetInlineFormatFontSizeCommand.id],
             [BuiltinUniToolbarItemId.COLOR, SetInlineFormatTextColorCommand.id],
             [BuiltinUniToolbarItemId.BACKGROUND, SetInlineFormatTextBackgroundColorCommand.id],
-            [BuiltinUniToolbarItemId.IMAGE, DocsImageMenuId],
+            [BuiltinUniToolbarItemId.IMAGE, DOCS_IMAGE_MENU_ID],
             [BuiltinUniToolbarItemId.TABLE, DOC_TABLE_MUTATION_ID],
             [BuiltinUniToolbarItemId.ORDER_LIST, OrderListCommand.id],
             [BuiltinUniToolbarItemId.UNORDER_LIST, BulletListCommand.id],
@@ -79,4 +79,3 @@ export class UniDocsUIController extends DocUIController {
         });
     }
 }
-

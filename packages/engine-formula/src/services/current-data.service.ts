@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ export interface IFormulaDirtyData {
     dirtyUnitFeatureMap: IDirtyUnitFeatureMap;
     dirtyUnitOtherFormulaMap: IDirtyUnitOtherFormulaMap;
     clearDependencyTreeCache: IDirtyUnitSheetNameMap; // unitId -> sheetId
+    maxIteration?: number;
 }
 
 export interface IFormulaCurrentConfigService {
@@ -149,19 +150,21 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
     }
 
     override dispose(): void {
+        super.dispose();
         this._unitData = {};
         this._unitStylesData = {};
-        this._formulaData = {};
         this._arrayFormulaCellData = {};
         this._arrayFormulaRange = {};
+        this._formulaData = {};
         this._sheetNameMap = {};
+        this._clearDependencyTreeCache = {};
         this._dirtyRanges = [];
         this._dirtyNameMap = {};
         this._dirtyDefinedNameMap = {};
         this._dirtyUnitFeatureMap = {};
+        this._dirtyUnitOtherFormulaMap = {};
         this._excludedCell = {};
         this._sheetIdToNameMap = {};
-        this._dirtyUnitOtherFormulaMap = {};
     }
 
     getExecuteUnitId() {

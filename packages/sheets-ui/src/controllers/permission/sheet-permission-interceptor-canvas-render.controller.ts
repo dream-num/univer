@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,6 @@ import { HeaderResizeRenderController } from '../render-controllers/header-resiz
 import { getTransformCoord } from '../utils/component-tools';
 
 type ICellPermission = Record<UnitAction, boolean> & { ruleId?: string; ranges?: IRange[] };
-
-export const SHEET_PERMISSION_PASTE_PLUGIN = 'SHEET_PERMISSION_PASTE_PLUGIN';
 
 export class SheetPermissionInterceptorCanvasRenderController extends RxDisposable implements IRenderModule {
     disposableCollection = new DisposableCollection();

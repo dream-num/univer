@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 import type { ICellData, ICommand, IDocumentData, IMutationInfo } from '@univerjs/core';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import type { ICellHyperLink } from '../../types/interfaces/i-hyper-link';
+import type { ISheetHyperLink } from '../../types/interfaces/i-hyper-link';
 import { BuildTextUtils, CellValueType, CommandType, CustomRangeType, generateRandomId, ICommandService, IUndoRedoService, IUniverInstanceService, sequenceExecuteAsync, TextX, Tools } from '@univerjs/core';
 import { addCustomRangeBySelectionFactory } from '@univerjs/docs';
 import { getSheetCommandTarget, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory, SheetInterceptorService } from '@univerjs/sheets';
@@ -27,7 +27,7 @@ import { RemoveHyperLinkMutation } from '../mutations/remove-hyper-link.mutation
 export interface IAddHyperLinkCommandParams {
     unitId: string;
     subUnitId: string;
-    link: ICellHyperLink;
+    link: ISheetHyperLink;
 }
 /**
  * Command for add hyperlink
@@ -65,7 +65,7 @@ export const AddHyperLinkCommand: ICommand<IAddHyperLinkCommandParams> = {
                 selection: {
                     startOffset: 0,
                     endOffset: body.dataStream.length - 2,
-                    collapsed: true,
+                    collapsed: body.dataStream.length - 2 === 0,
                 },
                 body: {
                     dataStream: `${display}`,
@@ -170,7 +170,7 @@ export interface IAddRichHyperLinkCommandParams {
      * url of link
      */
     documentId: string;
-    link: ICellHyperLink;
+    link: ISheetHyperLink;
 }
 
 export const AddRichHyperLinkCommand: ICommand<IAddRichHyperLinkCommandParams> = {

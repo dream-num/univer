@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,17 +15,17 @@
  */
 
 import type { Nullable, Workbook } from '@univerjs/core';
-
-import { AbsoluteRefType, IUniverInstanceService, LocaleService, Tools, UniverInstanceType, useDependency } from '@univerjs/core';
+import type { IDefinedNamesServiceParam } from '@univerjs/engine-formula';
+import type { IRangeSelectorProps } from '../../basics/editor/range';
+import { AbsoluteRefType, IUniverInstanceService, LocaleService, Tools, UniverInstanceType } from '@univerjs/core';
 import { Button, Input, Radio, RadioGroup, Select } from '@univerjs/design';
-import { IDefinedNamesService, type IDefinedNamesServiceParam, IFunctionService, isReferenceStrings, isReferenceStringWithEffectiveColumn, LexerTreeBuilder, operatorToken } from '@univerjs/engine-formula';
+import { IDefinedNamesService, IFunctionService, isReferenceStrings, isReferenceStringWithEffectiveColumn, LexerTreeBuilder, operatorToken } from '@univerjs/engine-formula';
 import { hasCJKText } from '@univerjs/engine-render';
 import { ErrorSingle } from '@univerjs/icons';
-import { ComponentManager, useSidebarClick } from '@univerjs/ui';
+import { SCOPE_WORKBOOK_VALUE_DEFINED_NAME } from '@univerjs/sheets';
+import { ComponentManager, useDependency, useSidebarClick } from '@univerjs/ui';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY, RANGE_SELECTOR_COMPONENT_KEY } from '../../common/keys';
-import { SCOPE_WORKBOOK_VALUE } from './component-name';
-
 import styles from './index.module.less';
 
 export interface IDefinedNameInputProps extends Omit<IDefinedNamesServiceParam, 'id'> {
@@ -51,7 +51,7 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
         name,
         formulaOrRefString,
         comment = '',
-        localSheetId = SCOPE_WORKBOOK_VALUE,
+        localSheetId = SCOPE_WORKBOOK_VALUE_DEFINED_NAME,
         hidden = false, // 是否对用户隐藏，与excel兼容，暂时用不上。
         id,
 
@@ -64,7 +64,7 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
     const lexerTreeBuilder = useDependency(LexerTreeBuilder);
     const componentManager = useDependency(ComponentManager);
 
-    const RangeSelector = useMemo(() => componentManager.get(RANGE_SELECTOR_COMPONENT_KEY), []);
+    const RangeSelector: React.ComponentType<IRangeSelectorProps> = useMemo(() => componentManager.get(RANGE_SELECTOR_COMPONENT_KEY), []) as any;
     const FormulaEditor = useMemo(() => componentManager.get(EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY), []);
     if (workbook == null) {
         return;
@@ -88,21 +88,14 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
 
     const [validFormulaOrRange, setValidFormulaOrRange] = useState(true);
 
-    const rangeSelectorActionsRef = useRef<any>({});
-    const [isFocusRangeSelector, isFocusRangeSelectorSet] = useState(false);
-
     const options = [{
         label: localeService.t('definedName.scopeWorkbook'),
-        value: SCOPE_WORKBOOK_VALUE,
+        value: SCOPE_WORKBOOK_VALUE_DEFINED_NAME,
     }];
 
     const isFormula = (token: string) => {
         return !isReferenceStrings(token);
     };
-
-    useEffect(() => {
-        isFocusRangeSelectorSet(false);
-    }, [subUnitId]);
 
     useEffect(() => {
         setValidFormulaOrRange(true);
@@ -180,10 +173,11 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
             return;
         }
 
+        const currentSheetName = workbook.getActiveSheet().getName();
         confirm && confirm({
             id: id || '',
             name: nameValue,
-            formulaOrRefString: lexerTreeBuilder.convertRefersToAbsolute(formulaOrRefStringValue, AbsoluteRefType.ALL, AbsoluteRefType.ALL),
+            formulaOrRefString: lexerTreeBuilder.convertRefersToAbsolute(formulaOrRefStringValue, AbsoluteRefType.ALL, AbsoluteRefType.ALL, currentSheetName),
             comment: commentValue,
             localSheetId: localSheetIdValue,
         });
@@ -211,11 +205,6 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
     const [isFocusFormulaEditor, isFocusFormulaEditorSet] = useState(false);
 
     useSidebarClick((e: MouseEvent) => {
-        const handleOutClick = rangeSelectorActionsRef.current?.handleOutClick;
-        handleOutClick && handleOutClick(e, () => isFocusRangeSelectorSet(false));
-    });
-
-    useSidebarClick((e: MouseEvent) => {
         const handleOutClick = formulaEditorActionsRef.current?.handleOutClick;
         handleOutClick && handleOutClick(e, () => isFocusFormulaEditorSet(false));
     });
@@ -237,12 +226,10 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
                         <RangeSelector
                             unitId={unitId}
                             subUnitId={subUnitId}
-                            initValue={formulaOrRefStringValue}
-                            onChange={rangeSelectorChange}
-                            isFocus={isFocusRangeSelector}
-                            onFocus={() => isFocusRangeSelectorSet(true)}
-                            actions={rangeSelectorActionsRef.current}
-                            isSupportAcrossSheet
+                            initialValue={formulaOrRefStringValue}
+                            onChange={(_, text) => rangeSelectorChange(text)}
+
+                            supportAcrossSheet
                         />
                     )
                 )
@@ -278,9 +265,10 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
                 <ErrorSingle />
             </div>
             <div>
-                <Button onClick={() => {
-                    cancel && cancel();
-                }}
+                <Button
+                    onClick={() => {
+                        cancel && cancel();
+                    }}
                 >
                     {localeService.t('definedName.cancel')}
                 </Button>

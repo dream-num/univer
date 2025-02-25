@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -355,19 +355,19 @@ export function stringIsNumberPattern(input: string) {
 
     const numberPattern = numfmt.parseNumber(_input);
 
-    if (numberPattern) {
+    if (numberPattern && numberPattern.z) {
         return setNumberPatternCache(_input, numberPattern.v as number, numberPattern.z as string);
     }
 
     const datePattern = numfmt.parseDate(_input);
 
-    if (datePattern) {
+    if (datePattern && datePattern.z) {
         return setNumberPatternCache(_input, datePattern.v as number, datePattern.z as string);
     }
 
     const timePattern = numfmt.parseTime(_input);
 
-    if (timePattern) {
+    if (timePattern && timePattern.z) {
         return setNumberPatternCache(_input, timePattern.v as number, timePattern.z as string);
     }
 

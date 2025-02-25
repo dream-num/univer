@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ const TEST_WORKBOOK_DATA_DEMO: () => IWorkbookData = () => ({
     styles: {},
 });
 
-export const createTestBed = (dependencies?: Dependency[]) => {
+export const createTestBed = (defaultWorkbook?: IWorkbookData, dependencies?: Dependency[]) => {
     const univer = new Univer();
     const injector = univer.__getInjector();
     const get = injector.get.bind(injector);
@@ -81,7 +81,7 @@ export const createTestBed = (dependencies?: Dependency[]) => {
 
     univer.registerPlugin(TestPlugin);
 
-    const workbookJson = TEST_WORKBOOK_DATA_DEMO();
+    const workbookJson = defaultWorkbook ?? TEST_WORKBOOK_DATA_DEMO();
     const sheet = univer.createUniverSheet(workbookJson);
 
     const univerInstanceService = injector.get(IUniverInstanceService);

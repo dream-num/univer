@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,26 @@
 
 import type { Nullable } from '@univerjs/core';
 import type { FilterModel } from '@univerjs/sheets-filter';
-import { FWorksheet } from '@univerjs/sheets/facade';
 import { SheetsFilterService } from '@univerjs/sheets-filter';
+import { FWorksheet } from '@univerjs/sheets/facade';
 import { FFilter } from './f-filter';
 
+/**
+ * @ignore
+ */
 export interface IFWorksheetFilter {
+    /**
+     * Get the filter for the current worksheet.
+     * @returns {FFilter | null} The interface class to handle the filter. If the worksheet does not have a filter,
+     * this method would return `null`.
+     * @example
+     * ```typescript
+     * const workbook = univerAPI.getActiveWorkbook();
+     * const worksheet = workbook.getActiveSheet();
+     * const filter = worksheet.getFilter();
+     * console.log(filter, filter?.getRange().getA1Notation());
+     * ```
+     */
     getFilter(): FFilter | null;
 }
 
@@ -43,5 +58,5 @@ export class FWorksheetFilter extends FWorksheet implements IFWorksheetFilter {
 FWorksheet.extend(FWorksheetFilter);
 declare module '@univerjs/sheets/facade' {
     // eslint-disable-next-line ts/naming-convention
-    interface FWorksheet extends IFWorksheetFilter {}
+    interface FWorksheet extends IFWorksheetFilter { }
 }

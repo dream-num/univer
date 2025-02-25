@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -191,14 +191,18 @@ export function lineBreaking(
         ctx.paragraphConfigCache.set(segmentId, segmentParagraphCache);
     }
 
-    segmentParagraphCache.set(endIndex, paragraphConfig);
+    if (segmentParagraphCache.has(endIndex)) {
+        const bulletSkeleton = segmentParagraphCache.get(endIndex)?.bulletSkeleton;
 
-    const listLevelAncestors = _getListLevelAncestors(bullet, skeListLevel); // 取得列表所有 level 的缓存
-    const bulletSkeleton = dealWithBullet(bullet, lists, listLevelAncestors, localeService); // 生成 bullet
+        paragraphConfig.bulletSkeleton = bulletSkeleton;
+    } else {
+        const listLevelAncestors = _getListLevelAncestors(bullet, skeListLevel); // 取得列表所有 level 的缓存
+        const bulletSkeleton = dealWithBullet(bullet, lists, listLevelAncestors, localeService); // 生成 bullet
 
-    _updateListLevelAncestors(paragraph, bullet, bulletSkeleton, skeListLevel); // 更新最新的 level 缓存列表
+        _updateListLevelAncestors(paragraph, bullet, bulletSkeleton, skeListLevel); // 更新最新的 level 缓存列表
 
-    paragraphConfig.bulletSkeleton = bulletSkeleton;
+        paragraphConfig.bulletSkeleton = bulletSkeleton;
+    }
 
     for (let i = 0, len = blocks.length; i < len; i++) {
         const charIndex = blocks[i];
@@ -217,6 +221,8 @@ export function lineBreaking(
             paragraphNonInlineSkeDrawings.set(blockId, _getDrawingSkeletonFormat(drawingOrigin));
         }
     }
+
+    segmentParagraphCache.set(endIndex, paragraphConfig);
 
     let allPages = [curPage];
     let isParagraphFirstShapedText = true; // 第一个分词

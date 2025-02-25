@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,8 @@
  */
 
 import type { BooleanNumber } from '@univerjs/core';
-import { ColorKit, ThemeService, useDependency } from '@univerjs/core';
+import { ColorKit, ThemeService } from '@univerjs/core';
+import { useDependency } from '@univerjs/ui';
 import React, { useEffect, useState } from 'react';
 
 import styles from './index.module.less';
@@ -54,7 +55,12 @@ export function SheetBarItem(props: IBaseSheetBarProps) {
         <div
             key={sheetId}
             data-id={sheetId}
-            className={currentSelected ? `${styles.slideTabActive} ${styles.slideTabItem}` : styles.slideTabItem}
+            className={currentSelected
+                ? `
+                  ${styles.slideTabActive}
+                  ${styles.slideTabItem}
+                `
+                : styles.slideTabItem}
             style={{
                 backgroundColor: !currentSelected && color ? color : '',
                 color: !currentSelected && color ? getTextColor(color) : '',

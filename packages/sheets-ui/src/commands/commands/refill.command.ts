@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,10 @@
  */
 
 import type { IAccessor, ICommand } from '@univerjs/core';
-import { CommandType } from '@univerjs/core';
-
-import { IAutoFillService } from '../../services/auto-fill/auto-fill.service';
 import type { APPLY_TYPE } from '../../services/auto-fill/type';
+
+import { CommandType } from '@univerjs/core';
+import { IAutoFillService } from '../../services/auto-fill/auto-fill.service';
 
 interface IRefillCommandParams {
     type: APPLY_TYPE;
@@ -29,7 +29,6 @@ export const RefillCommand: ICommand = {
     type: CommandType.COMMAND,
     handler: async (accessor: IAccessor, params: IRefillCommandParams) => {
         const autoFillService = accessor.get(IAutoFillService);
-        autoFillService.applyType = params.type;
-        return true;
+        return autoFillService.fillData(params.type);
     },
 };

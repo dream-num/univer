@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,23 +20,34 @@ import { DocSelectionManagerService } from '@univerjs/docs';
 import { SheetsSelectionsService } from '@univerjs/sheets';
 import { SheetDataValidationModel } from '@univerjs/sheets-data-validation';
 
+export enum DisableLinkType {
+    ALLOWED = 0,
+    DISABLED_BY_CELL = 1,
+    ALLOW_ON_EDITING = 2,
+}
+const disables = new Set<string>([
+    DataValidationType.CHECKBOX,
+    DataValidationType.LIST,
+    DataValidationType.LIST_MULTIPLE,
+]);
+
 export const getShouldDisableCellLink = (accessor: IAccessor, worksheet: Worksheet, row: number, col: number) => {
     const cell = worksheet.getCell(row, col);
     if (cell?.f || cell?.si) {
-        return true;
+        return DisableLinkType.DISABLED_BY_CELL;
     }
-    const disables = [
-        DataValidationType.CHECKBOX,
-        DataValidationType.LIST,
-        DataValidationType.LIST_MULTIPLE,
-    ];
+
     const dataValidationModel = accessor.has(SheetDataValidationModel) ? accessor.get(SheetDataValidationModel) : null;
     const rule = dataValidationModel?.getRuleByLocation(worksheet.getUnitId(), worksheet.getSheetId(), row, col);
-    if (rule && disables.includes(rule.type)) {
+    if (rule && disables.has(rule.type)) {
         return true;
     }
 
-    return false;
+    if (cell?.p?.drawingsOrder?.length) {
+        return DisableLinkType.ALLOW_ON_EDITING;
+    }
+
+    return DisableLinkType.ALLOWED;
 };
 
 export const getShouldDisableCurrentCellLink = (accessor: IAccessor) => {
@@ -51,7 +62,7 @@ export const getShouldDisableCurrentCellLink = (accessor: IAccessor) => {
     }
     const row = selections[0].range.startRow;
     const col = selections[0].range.startColumn;
-    return getShouldDisableCellLink(accessor, worksheet, row, col);
+    return getShouldDisableCellLink(accessor, worksheet, row, col) === DisableLinkType.DISABLED_BY_CELL;
 };
 
 export const shouldDisableAddLink = (accessor: IAccessor) => {

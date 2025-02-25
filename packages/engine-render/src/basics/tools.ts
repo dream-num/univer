@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -523,21 +523,24 @@ export function getCellPositionByIndex(
 }
 
 /**
+ * @deprecated use same function in @univerjs/core
  * @description Get the cell position information of the specified row and column, including the position information of the cell and the merge information of the cell
  * @param {number} row The row index of the cell
  * @param {number} column The column index of the cell
  * @param {number[]} rowHeightAccumulation The accumulated height of each row
  * @param {number[]} columnWidthAccumulation The accumulated width of each column
- * @param {ICellInfo} mergeData The merge information of the cell
+ * @param {ICellInfo} mergeDataInfo The merge information of the cell
  * @returns {ICellWithCoord} The cell position information of the specified row and column, including the position information of the cell and the merge information of the cell
  */
-export function getCellWithCoordByIndexCore(
+function getCellWithCoordByIndexCore(
     row: number,
     column: number,
     rowHeightAccumulation: number[],
     columnWidthAccumulation: number[],
     mergeDataInfo: ICellInfo
 ): ICellWithCoord {
+    row = Tools.clamp(row, 0, rowHeightAccumulation.length - 1);
+    column = Tools.clamp(column, 0, columnWidthAccumulation.length - 1);
     // eslint-disable-next-line prefer-const
     let { startY, endY, startX, endX } = getCellPositionByIndex(
         row,
@@ -561,7 +564,6 @@ export function getCellWithCoordByIndexCore(
     };
 
     const rowAccumulationCount = rowHeightAccumulation.length - 1;
-
     const columnAccumulationCount = columnWidthAccumulation.length - 1;
 
     if (isMerged && startRow !== -1 && startColumn !== -1) {
@@ -604,7 +606,7 @@ export function getCellWithCoordByIndexCore(
 }
 
 /**
- * @deprecated please use getCellWithCoordByIndexCore instead
+ * @deprecated please use getCellWithCoordByIndexCore in @univerjs/core instead
  */
 const getCellByIndexWithMergeInfo = getCellWithCoordByIndexCore;
 export { getCellByIndexWithMergeInfo };
@@ -705,13 +707,13 @@ export function pixelToPt(px: number) {
 }
 
 /**
- * 当前单元格在任意一个 viewRanges 中
+ * Is cell in view ranges.
  * @param ranges
  * @param rowIndex
  * @param colIndex
- * @returns
+ * @returns boolean
  */
-export function inViewRanges(ranges: IRange[], rowIndex: number, colIndex: number) {
+export function inViewRanges(ranges: IRange[], rowIndex: number, colIndex: number): boolean {
     for (const range of ranges) {
         if (rowIndex >= range.startRow && rowIndex <= range.endRow &&
             colIndex >= range.startColumn && colIndex <= range.endColumn) {
@@ -719,38 +721,6 @@ export function inViewRanges(ranges: IRange[], rowIndex: number, colIndex: numbe
         }
     }
     return false;
-}
-
-/**
- * 在非下方区域中
- * @param ranges
- * @param rowIndex
- * @returns
- */
-export function inCurrentAndAboveViewRanges(ranges: IRange[], rowIndex: number) {
-    for (const range of ranges) {
-        if (rowIndex > range.endRow) {
-            return false;
-        }
-    }
-    return true;
-}
-
-/**
- * row 在任意一个 Range 中
- * @param ranges
- * @param rowIndex
- * @returns
- */
-export function inRowViewRanges(ranges: IRange[], rowIndex: number) {
-    let flag = false;
-    for (const range of ranges) {
-        if (rowIndex >= range.startRow && rowIndex <= range.endRow) {
-            flag = true;
-            break;
-        }
-    }
-    return flag;
 }
 
 /**
@@ -779,7 +749,9 @@ export function clampRange(range: IRange, maxRow: number, maxColumn: number) {
     };
 }
 
-// Get system highlight color in rgb format.
+/**
+ * Get system highlight color in rgb format.
+ */
 export function getSystemHighlightColor() {
     const hiddenEle = document.createElement('div');
     hiddenEle.style.width = '0';

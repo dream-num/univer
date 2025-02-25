@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,10 +42,10 @@ import {
     SheetInterceptorService,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
-import { getPatternPreviewIgnoreGeneral, getPatternType, SetNumfmtCommand } from '@univerjs/sheets-numfmt';
+import { getPatternPreviewIgnoreGeneral, getPatternType, SetNumfmtCommand, SheetsNumfmtCellContentController } from '@univerjs/sheets-numfmt';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { ComponentManager, ISidebarService } from '@univerjs/ui';
-import { combineLatest, Observable } from 'rxjs';
+import { combineLatest, merge, Observable } from 'rxjs';
 import { debounceTime, map, switchMap, tap } from 'rxjs/operators';
 import { CloseNumfmtPanelOperator } from '../commands/operations/close.numfmt.panel.operation';
 import { OpenNumfmtPanelOperator } from '../commands/operations/open.numfmt.panel.operation';
@@ -71,7 +71,8 @@ export class SheetNumfmtUIController extends Disposable {
         @INumfmtService private _numfmtService: INumfmtService,
         @Inject(ComponentManager) private _componentManager: ComponentManager,
         @ISidebarService private _sidebarService: ISidebarService,
-        @Inject(LocaleService) private _localeService: LocaleService
+        @Inject(LocaleService) private _localeService: LocaleService,
+        @Inject(SheetsNumfmtCellContentController) private _sheetsNumfmtCellContentController: SheetsNumfmtCellContentController
     ) {
         super();
 
@@ -80,6 +81,13 @@ export class SheetNumfmtUIController extends Disposable {
         this._initCommands();
         this._initCloseListener();
         this._commandExecutedListener();
+        this._initNumfmtLocalChange();
+    }
+
+    private _initNumfmtLocalChange() {
+        this.disposeWithMe(merge(this._sheetsNumfmtCellContentController.local$, this._localeService.currentLocale$).subscribe(() => {
+            this._forceUpdate();
+        }));
     }
 
     openPanel(): boolean {
@@ -182,6 +190,7 @@ export class SheetNumfmtUIController extends Disposable {
         this._componentManager.register(SHEET_NUMFMT_PANEL, SheetNumfmtPanel);
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _initRealTimeRenderingInterceptor() {
         const isPanelOpenObserver = new Observable<boolean>((subscriber) => {
             this._commandService.onCommandExecuted((commandInfo) => {
@@ -257,7 +266,7 @@ export class SheetNumfmtUIController extends Disposable {
                                         ) {
                                             return defaultValue;
                                         }
-                                        const info = getPatternPreviewIgnoreGeneral(this._previewPattern, value as number, this._localeService.getCurrentLocale());
+                                        const info = getPatternPreviewIgnoreGeneral(this._previewPattern, value as number, this._sheetsNumfmtCellContentController.local);
                                         if (info.color) {
                                             const colorMap = this._themeService.getCurrentTheme();
                                             const color = colorMap[`${info.color}500`];

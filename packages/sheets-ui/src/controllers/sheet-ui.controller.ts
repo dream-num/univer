@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 
 import type { IUniverSheetsUIConfig } from './config.schema';
-import { connectInjector, Disposable, ICommandService, IConfigService, Inject, Injector, UniverInstanceType } from '@univerjs/core';
+import { Disposable, ICommandService, IConfigService, Inject, Injector, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 
@@ -28,7 +28,7 @@ import {
     SetStrikeThroughCommand,
     SetUnderlineCommand,
 } from '@univerjs/sheets';
-import { BuiltInUIPart, ComponentManager, ILayoutService, IMenuManagerService, IShortcutService, IUIPartsService } from '@univerjs/ui';
+import { BuiltInUIPart, ComponentManager, connectInjector, ILayoutService, IMenuManagerService, IShortcutService, IUIPartsService } from '@univerjs/ui';
 import {
     AddWorksheetMergeAllCommand,
     AddWorksheetMergeCommand,
@@ -38,6 +38,7 @@ import {
 import { AutoClearContentCommand, AutoFillCommand } from '../commands/commands/auto-fill.command';
 import { DeleteRangeMoveLeftConfirmCommand } from '../commands/commands/delete-range-move-left-confirm.command';
 import { DeleteRangeMoveUpConfirmCommand } from '../commands/commands/delete-range-move-up-confirm.command';
+import { SetColumnHeaderHeightCommand, SetRowHeaderWidthCommand } from '../commands/commands/headersize-changed.command';
 import { HideColConfirmCommand, HideRowConfirmCommand } from '../commands/commands/hide-row-col-confirm.command';
 import {
     ResetRangeTextColorCommand,
@@ -85,15 +86,15 @@ import {
     SetCellEditVisibleWithF2Operation,
 } from '../commands/operations/cell-edit.operation';
 import { RenameSheetOperation } from '../commands/operations/rename-sheet.operation';
-import { SetScrollOperation } from '../commands/operations/scroll.operation';
 import { ScrollToRangeOperation } from '../commands/operations/scroll-to-range.operation';
+import { SetScrollOperation } from '../commands/operations/scroll.operation';
 import { SetFormatPainterOperation } from '../commands/operations/set-format-painter.operation';
 import { SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.operation';
 import { SheetPermissionOpenDialogOperation } from '../commands/operations/sheet-permission-open-dialog.operation';
 import { SheetPermissionOpenPanelOperation } from '../commands/operations/sheet-permission-open-panel.operation';
 import { SidebarDefinedNameOperation } from '../commands/operations/sidebar-defined-name.operation';
-import { BorderPanel } from '../components/border-panel/BorderPanel';
 
+import { BorderPanel } from '../components/border-panel/BorderPanel';
 import { BORDER_PANEL_COMPONENT } from '../components/border-panel/interface';
 import { COLOR_PICKER_COMPONENT, ColorPicker } from '../components/color-picker';
 import {
@@ -107,7 +108,7 @@ import { MENU_ITEM_INPUT_COMPONENT, MenuItemInput } from '../components/menu-ite
 import { DEFINED_NAME_CONTAINER } from '../views/defined-name/component-name';
 import { DefinedNameContainer } from '../views/defined-name/DefinedNameContainer';
 import { RenderSheetContent, RenderSheetFooter, RenderSheetHeader } from '../views/sheet-container/SheetContainer';
-import { PLUGIN_CONFIG_KEY } from './config.schema';
+import { SHEETS_UI_PLUGIN_CONFIG_KEY } from './config.schema';
 import { menuSchema } from './menu.schema';
 import {
     EditorBreakLineShortcut,
@@ -275,6 +276,8 @@ export class SheetUIController extends Disposable {
             SetRangeProtectionFromContextMenuCommand,
             DeleteWorksheetProtectionFormSheetBarCommand,
             SetWorksheetColAutoWidthCommand,
+            SetRowHeaderWidthCommand,
+            SetColumnHeaderHeightCommand,
         ].forEach((c) => {
             this.disposeWithMe(this._commandService.registerCommand(c));
         });
@@ -347,7 +350,7 @@ export class SheetUIController extends Disposable {
         const uiController = this._uiPartsService;
         const injector = this._injector;
 
-        const config = this._configService.getConfig<IUniverSheetsUIConfig>(PLUGIN_CONFIG_KEY);
+        const config = this._configService.getConfig<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY);
         if (config?.formulaBar !== false) {
             this.disposeWithMe(uiController.registerComponent(BuiltInUIPart.HEADER, () => connectInjector(RenderSheetHeader, injector)));
         }

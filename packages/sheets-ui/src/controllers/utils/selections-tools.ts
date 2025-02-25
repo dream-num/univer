@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,8 @@
  */
 
 import type { IAccessor, Nullable, Workbook } from '@univerjs/core';
-import { IUniverInstanceService, RANGE_TYPE, Rectangle, UniverInstanceType } from '@univerjs/core';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
+import { IUniverInstanceService, RANGE_TYPE, Rectangle, UniverInstanceType } from '@univerjs/core';
 import { MERGE_CELL_INTERCEPTOR_CHECK, MergeCellController, RangeProtectionRuleModel, SheetsSelectionsService } from '@univerjs/sheets';
 import { combineLatest, map, of, switchMap } from 'rxjs';
 
@@ -45,7 +45,8 @@ export function getSheetSelectionsDisabled$(accessor: IAccessor) {
             }
 
             const subUnitRuleRange = rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId)
-                .map((rule) => rule.ranges).flat();
+                .map((rule) => rule.ranges)
+                .flat();
 
             if (selection.length < 2) {
                 const range = selection[0].range;

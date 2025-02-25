@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 import type { IContextService } from '@univerjs/core';
 import type { IShortcutItem } from '../services/shortcut/shortcut.service';
 
-import { Disposable, FOCUSING_UNIVER_EDITOR, ICommandService, RedoCommand, UndoCommand } from '@univerjs/core';
+import { Disposable, EDITOR_ACTIVATED, FOCUSING_FX_BAR_EDITOR, FOCUSING_UNIVER_EDITOR, ICommandService, RedoCommand, UndoCommand } from '@univerjs/core';
 import { CopyCommand, CutCommand, PasteCommand } from '../services/clipboard/clipboard.command';
 import { KeyCode, MetaKeys } from '../services/shortcut/keycode';
 import { IShortcutService } from '../services/shortcut/shortcut.service';
@@ -28,6 +28,13 @@ import { IShortcutService } from '../services/shortcut/shortcut.service';
 
 function whenEditorFocused(contextService: IContextService): boolean {
     return contextService.getContextValue(FOCUSING_UNIVER_EDITOR);
+}
+
+function whenEditorFocusedButNotCellEditor(contextService: IContextService): boolean {
+    return (
+        contextService.getContextValue(FOCUSING_UNIVER_EDITOR) &&
+        !(contextService.getContextValue(EDITOR_ACTIVATED) || contextService.getContextValue(FOCUSING_FX_BAR_EDITOR))
+    );
 }
 
 export const CopyShortcutItem: IShortcutItem = {
@@ -72,7 +79,7 @@ export const UndoShortcutItem: IShortcutItem = {
     description: 'shortcut.undo',
     group: '1_common-edit',
     binding: KeyCode.Z | MetaKeys.CTRL_COMMAND,
-    preconditions: whenEditorFocused,
+    preconditions: whenEditorFocusedButNotCellEditor,
 };
 
 export const RedoShortcutItem: IShortcutItem = {
@@ -80,7 +87,7 @@ export const RedoShortcutItem: IShortcutItem = {
     description: 'shortcut.redo',
     group: '1_common-edit',
     binding: KeyCode.Y | MetaKeys.CTRL_COMMAND,
-    preconditions: whenEditorFocused,
+    preconditions: whenEditorFocusedButNotCellEditor,
 };
 
 /**

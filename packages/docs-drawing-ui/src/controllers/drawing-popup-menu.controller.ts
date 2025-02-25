@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 import type { DocumentDataModel, IDisposable, Nullable } from '@univerjs/core';
 import type { BaseObject, Scene } from '@univerjs/engine-render';
-import { FOCUSING_COMMON_DRAWINGS, IContextService, Inject, IUniverInstanceService, RxDisposable, toDisposable, UniverInstanceType } from '@univerjs/core';
+import { FOCUSING_COMMON_DRAWINGS, IContextService, Inject, IUniverInstanceService, RxDisposable, SHEET_EDITOR_UNITS, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { COMPONENT_IMAGE_POPUP_MENU, ImageCropperObject, ImageResetSizeOperation, OpenImageCropOperation } from '@univerjs/drawing-ui';
@@ -183,7 +183,7 @@ export class DocDrawingPopupMenuController extends RxDisposable {
                 index: 0,
                 commandId: EditDocDrawingOperation.id,
                 commandParams: { unitId, subUnitId, drawingId },
-                disable: false,
+                disable: !!SHEET_EDITOR_UNITS.includes(unitId),
             },
             {
                 label: 'image-popup.delete',

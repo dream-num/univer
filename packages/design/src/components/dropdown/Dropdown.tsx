@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,102 +14,52 @@
  * limitations under the License.
  */
 
-import type { ActionType, AlignType } from '@rc-component/trigger';
-import RcDropdown from 'rc-dropdown';
-import type Placements from 'rc-dropdown/lib/placements';
-import React, { useContext } from 'react';
+import type { Content } from '@radix-ui/react-popover';
+import type { ComponentProps, ReactNode } from 'react';
+import { useState } from 'react';
+import { PopoverContent, PopoverPrimitive, PopoverTrigger } from './PopoverPrimitive';
 
-import { ConfigContext } from '../config-provider/ConfigProvider';
-import styles from './index.module.less';
-
-export interface IDropdownProps {
-    /** Semantic DOM class */
-    className?: string;
-
-    /**
-     * The dropdown content
-     */
-    children: React.ReactElement;
-
-    /**
-     * Whether the dropdown is visible
-     */
-    visible?: boolean;
-
-    /**
-     * Whether to force render the dropdown
-     * @default false
-     */
-    forceRender?: boolean;
-
-    /**
-     * The trigger mode which executes the dropdown action
-     * @default ['click']
-     */
-    trigger?: ActionType | ActionType[];
-
-    /**
-     * The placement of the dropdown
-     */
-    placement?: keyof typeof Placements;
-
-    /**
-     * The dropdown overlay
-     */
-    overlay: React.ReactElement;
-
-    /**
-     * Whether the dropdown aligns to the point
-     * @default false
-     */
-    alignPoint?: boolean;
-
-    /**
-     * The align of the dropdown
-     */
-    align?: AlignType;
-
-    /**
-     * Triggered after the dropdown visibility changes
-     * @param visible
-     */
-    onVisibleChange?: (visible: boolean) => void;
-
-    /** Disable dropdown from showing up. */
+interface IDropdownProps {
+    children: ReactNode;
+    overlay: ReactNode;
     disabled?: boolean;
+    open?: boolean;
+    onOpenChange?: (open: boolean) => void;
 }
 
-export function Dropdown(props: IDropdownProps) {
+export function Dropdown(props: IDropdownProps & ComponentProps<typeof Content>) {
     const {
-        className,
-        placement,
         children,
         overlay,
-        alignPoint = false,
-        align,
         disabled,
-        onVisibleChange,
+        open: controlledOpen,
+        onOpenChange: controlledOnOpenChange,
+        ...restProps
     } = props;
 
-    const trigger = disabled ? [] : (props.trigger || ['click']);
+    const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
 
-    const { mountContainer } = useContext(ConfigContext);
+    const isControlled = controlledOpen !== undefined;
+    const open = isControlled ? controlledOpen : uncontrolledOpen;
 
-    return mountContainer && (
-        <RcDropdown
-            {...props}
-            overlayClassName={className}
-            prefixCls={styles.dropdown}
-            getPopupContainer={() => mountContainer}
-            trigger={trigger}
-            animation="slide-up"
-            placement={placement}
-            overlay={overlay}
-            alignPoint={alignPoint}
-            align={align}
-            onVisibleChange={onVisibleChange}
-        >
-            {children}
-        </RcDropdown>
+    function handleChangeOpen(newOpen: boolean) {
+        if (disabled) return;
+
+        if (!isControlled) {
+            setUncontrolledOpen(newOpen);
+        }
+
+        controlledOnOpenChange?.(newOpen);
+    }
+
+    return (
+        <PopoverPrimitive open={open} onOpenChange={handleChangeOpen}>
+            <PopoverTrigger asChild>
+                {children}
+            </PopoverTrigger>
+            <PopoverContent {...restProps}>
+                {overlay}
+            </PopoverContent>
+        </PopoverPrimitive>
     );
 }

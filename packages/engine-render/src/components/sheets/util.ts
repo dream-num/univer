@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 import type { CellValueType, IDocumentData, IPaddingData, IStyleBase, IStyleData, ITextRotation, ITextStyle, Nullable, TextDirection } from '@univerjs/core';
 import { DEFAULT_EMPTY_DOCUMENT_VALUE, DocumentDataModel, HorizontalAlign, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import { convertTextRotation } from '../../basics/text-rotation';
-import { DEFAULT_PADDING_DATA } from './sheet-skeleton';
+import { DEFAULT_PADDING_DATA } from './sheet.render-skeleton';
 
 export interface ICellStyle {
     textRotation?: ITextRotation;

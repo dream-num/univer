@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -351,8 +351,7 @@ function updateCustomBlocks(
     currentIndex: number,
     coverType: UpdateDocsAttributeType
 ) {
-    const { customBlocks } = body;
-
+    const { customBlocks = [] } = body;
     const { customBlocks: updateDataCustomBlocks } = updateBody;
 
     if (customBlocks == null || updateDataCustomBlocks == null) {
@@ -389,6 +388,9 @@ function updateCustomBlocks(
     }
     insertCustomBlocks(body, updateBody, textLength, currentIndex);
 
+    if (customBlocks.length && !body.customBlocks) {
+        body.customBlocks = customBlocks;
+    }
     return removeCustomBlocks;
 }
 

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,14 @@
  */
 
 import './f-workbook';
+import './f-worksheet';
 import './f-range';
+import './f-event';
+import './f-univer';
 
-export { FWorkbookHyperLinkMixin } from './f-workbook';
-
-// eslint-disable-next-line perfectionist/sort-exports
+export type * from './f-event';
 export type * from './f-range';
+export type * from './f-univer';
+export { FWorkbookHyperLinkMixin } from './f-workbook';
 export type * from './f-workbook';
+export type * from './f-worksheet';

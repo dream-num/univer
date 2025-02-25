@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { BaseValueObject } from '../../../../engine/value-object/base-value-object';
-
 import { describe, expect, it } from 'vitest';
+
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject } from '../../../../engine/value-object/array-value-object';
+import { type BaseValueObject, ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import {
     NullValueObject,
     NumberValueObject,
@@ -62,6 +62,20 @@ const arrayValueObject4 = ArrayValueObject.create(/*ts*/ `{
     201, 1200;
     101, 1700;
     801, 3500
+}`);
+
+const arrayValueObject5 = ArrayValueObject.create(/*ts*/ `{
+    Red, 15;
+    Blue, 16;
+    Red, 17;
+    Blue, 16.5;
+    Gray, 28;
+    Blue, 29;
+    Black, 30;
+    Black, 25;
+    Gray, 26;
+    Black2, 25;
+    Red, 34
 }`);
 
 describe('Test xlookup', () => {
@@ -187,7 +201,7 @@ describe('Test xlookup', () => {
                 NumberValueObject.create(0),
                 NumberValueObject.create(2)
             ) as BaseValueObject;
-            expect(getObjectValue(resultObject).toString()).toBe('0');
+            expect(getObjectValue(resultObject)).toBe(ErrorType.NA);
 
             // match_mode 0 matched
             resultObject = testFunction.calculate(
@@ -198,7 +212,7 @@ describe('Test xlookup', () => {
                 NumberValueObject.create(0),
                 NumberValueObject.create(2)
             ) as BaseValueObject;
-            expect(getObjectValue(resultObject).toString()).toBe('0');
+            expect(getObjectValue(resultObject)).toBe(ErrorType.NA);
 
             // match_mode -1
             resultObject = testFunction.calculate(
@@ -220,7 +234,7 @@ describe('Test xlookup', () => {
                 NumberValueObject.create(-1),
                 NumberValueObject.create(2)
             ) as BaseValueObject;
-            expect(getObjectValue(resultObject).toString()).toBe('0');
+            expect(getObjectValue(resultObject)).toBe(ErrorType.NA);
 
             // match_mode 1
             resultObject = testFunction.calculate(
@@ -277,7 +291,7 @@ describe('Test xlookup', () => {
                 NumberValueObject.create(0),
                 NumberValueObject.create(-2)
             ) as BaseValueObject;
-            expect(getObjectValue(resultObject).toString()).toBe('0');
+            expect(getObjectValue(resultObject)).toBe(ErrorType.NA);
 
             // match_mode 0, matched
             resultObject = testFunction.calculate(
@@ -367,7 +381,7 @@ describe('Test xlookup', () => {
                 NumberValueObject.create(0),
                 NumberValueObject.create(1)
             ) as BaseValueObject;
-            expect(getObjectValue(resultObject).toString()).toBe('0');
+            expect(getObjectValue(resultObject)).toBe(ErrorType.NA);
 
             // match_mode 0 matched
             resultObject = testFunction.calculate(
@@ -433,7 +447,7 @@ describe('Test xlookup', () => {
                 NumberValueObject.create(2),
                 NumberValueObject.create(1)
             ) as BaseValueObject;
-            expect(getObjectValue(resultObject).toString()).toBe('0');
+            expect(getObjectValue(resultObject)).toBe(ErrorType.NA);
 
             // match_mode 2 matched
             resultObject = testFunction.calculate(
@@ -457,7 +471,7 @@ describe('Test xlookup', () => {
                 NumberValueObject.create(0),
                 NumberValueObject.create(-1)
             ) as BaseValueObject;
-            expect(getObjectValue(resultObject).toString()).toBe('0');
+            expect(getObjectValue(resultObject)).toBe(ErrorType.NA);
 
             // match_mode 0 matched
             resultObject = testFunction.calculate(
@@ -523,7 +537,7 @@ describe('Test xlookup', () => {
                 NumberValueObject.create(2),
                 NumberValueObject.create(-1)
             ) as BaseValueObject;
-            expect(getObjectValue(resultObject).toString()).toBe('0');
+            expect(getObjectValue(resultObject)).toBe(ErrorType.NA);
 
             // match_mode 2 matched
             resultObject = testFunction.calculate(
@@ -535,6 +549,45 @@ describe('Test xlookup', () => {
                 NumberValueObject.create(-1)
             ) as BaseValueObject;
             expect(getObjectValue(resultObject).toString()).toBe('1200');
+        });
+    });
+
+    describe('More test', () => {
+        it('MatchMode and searchMode default value test', async () => {
+            const lookupValue = NumberValueObject.create(25);
+            const lookupArray = arrayValueObject5.slice(undefined, [1])!;
+            const returnArray = arrayValueObject5.slice(undefined, [0, 1])!;
+            const nullObject = NullValueObject.create();
+            const matchMode = NumberValueObject.create(0);
+            const searchMode = NumberValueObject.create(1);
+            const searchMode2 = NumberValueObject.create(-1);
+
+            const result = testFunction.calculate(lookupValue, lookupArray, returnArray);
+            expect(getObjectValue(result)).toBe('Black');
+
+            const result2 = testFunction.calculate(lookupValue, lookupArray, returnArray, nullObject, matchMode);
+            expect(getObjectValue(result2)).toBe('Black');
+
+            const result3 = testFunction.calculate(lookupValue, lookupArray, returnArray, nullObject, nullObject, searchMode);
+            expect(getObjectValue(result3)).toBe('Black');
+
+            const result4 = testFunction.calculate(lookupValue, lookupArray, returnArray, nullObject, nullObject, searchMode2);
+            expect(getObjectValue(result4)).toBe('Black2');
+        });
+
+        it('MatchMode and searchMode is error', async () => {
+            const lookupValue = NumberValueObject.create(25);
+            const lookupArray = arrayValueObject5.slice(undefined, [1])!;
+            const returnArray = arrayValueObject5.slice(undefined, [0, 1])!;
+            const nullObject = NullValueObject.create();
+            const matchMode = ErrorValueObject.create(ErrorType.NAME);
+            const searchMode = ErrorValueObject.create(ErrorType.NAME);
+
+            const result = testFunction.calculate(lookupValue, lookupArray, returnArray, nullObject, matchMode);
+            expect(getObjectValue(result)).toBe(ErrorType.NAME);
+
+            const result2 = testFunction.calculate(lookupValue, lookupArray, returnArray, nullObject, nullObject, searchMode);
+            expect(getObjectValue(result2)).toBe(ErrorType.NAME);
         });
     });
 });

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,15 +15,15 @@
  */
 
 import type { IUniverSheetsHyperLinkConfig } from './controllers/config.schema';
-import { DependentOn, IConfigService, Inject, Injector, Plugin, registerDependencies, touchDependencies, UniverInstanceType } from '@univerjs/core';
+import { DependentOn, IConfigService, Inject, Injector, merge, Plugin, registerDependencies, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
-import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { defaultPluginConfig, SHEETS_HYPER_LINK_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { SheetsHyperLinkRefRangeController } from './controllers/ref-range.controller';
 import { SheetsHyperLinkRemoveSheetController } from './controllers/remove-sheet.controller';
 import { SheetsHyperLinkRichTextRefRangeController } from './controllers/rich-text-ref-range.controller';
 import { SheetHyperLinkSetRangeController } from './controllers/set-range.controller';
-import { SheetsHyperLinkController } from './controllers/sheet-hyper-link.controller';
 import { SheetsHyperLinkResourceController } from './controllers/sheet-hyper-link-resource.controller';
+import { SheetsHyperLinkController } from './controllers/sheet-hyper-link.controller';
 import { HyperLinkModel } from './models/hyper-link.model';
 import { SheetsHyperLinkParserService } from './services/parser.service';
 import { SHEET_HYPER_LINK_PLUGIN } from './types/const';
@@ -41,8 +41,12 @@ export class UniverSheetsHyperLinkPlugin extends Plugin {
         super();
 
         // Manage the plugin configuration.
-        const { ...rest } = this._config;
-        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
+        const { ...rest } = merge(
+            {},
+            defaultPluginConfig,
+            this._config
+        );
+        this._configService.setConfig(SHEETS_HYPER_LINK_PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import type { IUniverSheetsFormulaBaseConfig } from './config.schema';
 import { Disposable, ICommandService, IConfigService, ILogService, Inject, LocaleService } from '@univerjs/core';
 import {
+    ENGINE_FORMULA_CYCLE_REFERENCE_COUNT,
     FormulaDataModel,
     FormulaExecutedStateType,
     FormulaExecuteStageType,
@@ -86,8 +87,6 @@ export class TriggerCalculationController extends Disposable {
     private _executionInProgressParams: Nullable<IExecutionInProgressParams> = null;
 
     private _restartCalculation = false;
-
-    private _calculationMode: CalculationMode = CalculationMode.WHEN_EMPTY;
 
     /**
      * The mark of forced calculation. If a new mutation triggers dirty area calculation during the forced calculation process, forced calculation is still required.
@@ -148,9 +147,6 @@ export class TriggerCalculationController extends Disposable {
     ) {
         super();
 
-        const config = this._configService.getConfig<IUniverSheetsFormulaBaseConfig>(PLUGIN_CONFIG_KEY_BASE);
-        this._calculationMode = config?.initialFormulaComputing ?? CalculationMode.WHEN_EMPTY;
-
         this._commandExecutedListener();
         this._initialExecuteFormulaProcessListener();
         this._initialExecuteFormula();
@@ -161,6 +157,13 @@ export class TriggerCalculationController extends Disposable {
 
         this._progress$.next(NilProgress);
         this._progress$.complete();
+        // clear timer when disposed
+        clearTimeout(this._setTimeoutKey);
+    }
+
+    private _getCalculationMode(): CalculationMode {
+        const config = this._configService.getConfig<IUniverSheetsFormulaBaseConfig>(PLUGIN_CONFIG_KEY_BASE);
+        return config?.initialFormulaComputing ?? CalculationMode.WHEN_EMPTY;
     }
 
     private _commandExecutedListener() {
@@ -258,6 +261,7 @@ export class TriggerCalculationController extends Disposable {
             dirtyUnitOtherFormulaMap: allDirtyUnitOtherFormulaMap,
             forceCalculation: false,
             clearDependencyTreeCache: allClearDependencyTreeCache,
+            maxIteration: (this._configService.getConfig(ENGINE_FORMULA_CYCLE_REFERENCE_COUNT)) as number | undefined,
             // numfmtItemMap,
         };
     }
@@ -276,6 +280,8 @@ export class TriggerCalculationController extends Disposable {
         this._mergeDirtyUnitFeatureOrOtherFormulaMap(allDirtyUnitOtherFormulaMap, dirtyData2.dirtyUnitOtherFormulaMap);
         this._mergeDirtyNameMap(allClearDependencyTreeCache, dirtyData2.clearDependencyTreeCache);
 
+        const maxIteration = dirtyData1.maxIteration || dirtyData2.maxIteration;
+
         return {
             dirtyRanges: allDirtyRanges,
             dirtyNameMap: allDirtyNameMap,
@@ -284,6 +290,7 @@ export class TriggerCalculationController extends Disposable {
             dirtyUnitOtherFormulaMap: allDirtyUnitOtherFormulaMap,
             forceCalculation: !!this._forceCalculating,
             clearDependencyTreeCache: allClearDependencyTreeCache,
+            maxIteration,
         };
     }
 
@@ -384,11 +391,6 @@ export class TriggerCalculationController extends Disposable {
                     } = params.stageInfo;
 
                     if (stage === FormulaExecuteStageType.START) {
-                        // In NO_CALCULATION mode, the following processes will not be triggered, so there is no need to start
-                        if (this._calculationMode === CalculationMode.NO_CALCULATION) {
-                            return;
-                        }
-
                         // When calculations are started multiple times in succession, only the first time is recognized
                         if (calculationProcessCount === 0) {
                             this._startExecutionTime = performance.now();
@@ -512,13 +514,14 @@ export class TriggerCalculationController extends Disposable {
     }
 
     private _initialExecuteFormula() {
-        const params = this._getDiryDataByCalculationMode(this._calculationMode);
+        const calculationMode = this._getCalculationMode();
+        const params = this._getDirtyDataByCalculationMode(calculationMode);
         this._commandService.executeCommand(SetFormulaCalculationStartMutation.id, params, lo);
 
         this._registerOtherFormulaService.calculateStarted$.next(true);
     }
 
-    private _getDiryDataByCalculationMode(calculationMode: CalculationMode): IFormulaDirtyData {
+    private _getDirtyDataByCalculationMode(calculationMode: CalculationMode): IFormulaDirtyData {
         const forceCalculation = calculationMode === CalculationMode.FORCED;
 
         // loop all sheets cell data, and get the dirty data
@@ -538,6 +541,7 @@ export class TriggerCalculationController extends Disposable {
             dirtyUnitFeatureMap,
             dirtyUnitOtherFormulaMap,
             clearDependencyTreeCache,
+            maxIteration: this._configService.getConfig(ENGINE_FORMULA_CYCLE_REFERENCE_COUNT) as number | undefined,
         };
     }
 }

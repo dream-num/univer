@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 /* eslint-disable no-console */
 
 import { createIdentifier } from '../../common/di';
-
 import { Disposable } from '../../shared/lifecycle';
 
 export enum LogLevel {
@@ -28,13 +27,17 @@ export enum LogLevel {
     VERBOSE = 4,
 }
 
+// eslint-disable-next-line ts/no-explicit-any
 type ArgsType = any[];
+
+type ConsoleType = typeof console.log | typeof console.error | typeof console.warn | typeof console.debug;
 
 export interface ILogService {
     debug(...args: ArgsType): void;
     log(...args: ArgsType): void;
     warn(...args: ArgsType): void;
     error(...args: ArgsType): void;
+    deprecate(...args: ArgsType): void;
 
     setLogLevel(enabled: LogLevel): void;
 }
@@ -43,6 +46,7 @@ export const ILogService = createIdentifier<ILogService>('univer.log');
 
 export class DesktopLogService extends Disposable implements ILogService {
     private _logLevel: LogLevel = LogLevel.INFO;
+    private _deduction = new Set<string>();
 
     debug(...args: ArgsType): void {
         if (this._logLevel >= LogLevel.VERBOSE) {
@@ -68,12 +72,18 @@ export class DesktopLogService extends Disposable implements ILogService {
         }
     }
 
+    deprecate(...args: ArgsType): void {
+        if (this._logLevel >= LogLevel.WARN) {
+            this._logWithDeduplication(console.error, ...args);
+        }
+    }
+
     setLogLevel(logLevel: LogLevel): void {
         this._logLevel = logLevel;
     }
 
     private _log(
-        method: typeof console.log | typeof console.error | typeof console.warn | typeof console.debug,
+        method: ConsoleType,
         ...args: ArgsType
     ): void {
         const firstArg = args[0];
@@ -84,4 +94,21 @@ export class DesktopLogService extends Disposable implements ILogService {
             method(...args);
         }
     }
+
+    private _logWithDeduplication(
+        method: ConsoleType,
+        ...args: ArgsType
+    ): void {
+        const hashed = hashLogContent(...args);
+        if (this._deduction.has(hashed)) {
+            return;
+        }
+
+        this._deduction.add(hashed);
+        this._log(method, ...args);
+    }
+}
+
+function hashLogContent(...args: ArgsType): string {
+    return args.map((a) => JSON.stringify(a)).join('');
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ import { Disposable, ICommandService, Inject, Tools } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { DeleteLeftCommand, InsertCommand, MoveCursorOperation } from '@univerjs/docs-ui';
 import { CloseMentionEditPopupOperation, ShowMentionEditPopupOperation } from '../commands/operations/mention-popup.operation';
-import { DocMentionService } from '../services/doc-mention.service';
 import { DocMentionPopupService } from '../services/doc-mention-popup.service';
+import { DocMentionService } from '../services/doc-mention.service';
 
 export class DocMentionTriggerController extends Disposable {
     constructor(

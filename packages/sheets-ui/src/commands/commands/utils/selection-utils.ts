@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -517,13 +517,13 @@ export function checkIfShrink(selection: ISelection, direction: Direction, works
     switch (direction) {
         case Direction.UP:
         case Direction.DOWN:
-            startRange.startRow = primary!.startRow;
-            startRange.endRow = primary!.endRow;
+            startRange.startRow = primary?.startRow ?? range.startRow;
+            startRange.endRow = primary?.endRow ?? range.startRow;
             break;
         case Direction.LEFT:
         case Direction.RIGHT:
-            startRange.startColumn = primary!.startColumn;
-            startRange.endColumn = primary!.endColumn;
+            startRange.startColumn = primary?.startColumn ?? range.startColumn;
+            startRange.endColumn = primary?.endColumn ?? range.startColumn;
             break;
     }
 

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { BaseObject } from '../base-object';
 import type { IViewportInfo, Vector2 } from '../basics/vector2';
 import type { UniverRenderingContext } from '../context';
+import { BaseObject } from '../base-object';
 
 export class CustomObject extends BaseObject {
     constructor(

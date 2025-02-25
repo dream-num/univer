@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import type { ICellData, IDocumentData, Injector, Univer, Workbook } from '@univerjs/core';
+import type { ICellData, IDocumentData, Univer, Workbook } from '@univerjs/core';
 import type { IFunctionService } from '@univerjs/engine-formula';
-import { CellValueType, IConfigService, IContextService, LocaleService, LocaleType, Tools } from '@univerjs/core';
+import { CellValueType, IConfigService, IContextService, Injector, LocaleService, LocaleType, Tools } from '@univerjs/core';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
+import { DEFAULT_TEXT_FORMAT_EXCEL } from '@univerjs/engine-numfmt';
 import { SpreadsheetSkeleton } from '@univerjs/engine-render';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { normalizeString } from '../../utils/char-tools';
@@ -62,6 +63,7 @@ const richTextDemo: IDocumentData = {
             vertexAngle: 0,
             verticalAlign: 0,
             wrapStrategy: 0,
+            zeroWidthParagraphBreak: 1,
         },
         marginTop: 0,
         marginBottom: 2,
@@ -108,17 +110,16 @@ describe('Test EndEditController', () => {
         contextService = get(IContextService);
         lexerTreeBuilder = new LexerTreeBuilder();
         configService = get(IConfigService);
+        const injector = get(Injector);
 
         const worksheet = workbook.getActiveSheet()!;
-        const config = worksheet.getConfig();
         spreadsheetSkeleton = new SpreadsheetSkeleton(
             worksheet,
-            config,
-            worksheet.getCellMatrix(),
             workbook.getStyles(),
             localeService,
             contextService,
-            configService
+            configService,
+            injector
         );
 
         getCellDataByInputCell = (cell: ICellData, inputCell: ICellData) => {
@@ -129,9 +130,8 @@ describe('Test EndEditController', () => {
 
             return getCellDataByInput(
                 cell,
-                documentLayoutObject.documentModel,
+                documentLayoutObject.documentModel?.getSnapshot(),
                 lexerTreeBuilder,
-                (model) => model.getSnapshot(),
                 localeService,
                 get(IMockFunctionService) as IFunctionService,
                 workbook.getStyles()
@@ -169,7 +169,7 @@ describe('Test EndEditController', () => {
             const cell: ICellData = {
                 s: {
                     n: {
-                        pattern: '@@@',
+                        pattern: DEFAULT_TEXT_FORMAT_EXCEL,
                     },
                 },
                 t: null,
@@ -185,7 +185,7 @@ describe('Test EndEditController', () => {
                 t: CellValueType.STRING,
                 s: {
                     n: {
-                        pattern: '@@@',
+                        pattern: DEFAULT_TEXT_FORMAT_EXCEL,
                     },
                 },
                 f: null,
@@ -201,7 +201,7 @@ describe('Test EndEditController', () => {
             const cell: ICellData = {
                 s: {
                     n: {
-                        pattern: '@@@',
+                        pattern: DEFAULT_TEXT_FORMAT_EXCEL,
                     },
                 },
                 t: null,
@@ -217,7 +217,7 @@ describe('Test EndEditController', () => {
                 t: CellValueType.STRING,
                 s: {
                     n: {
-                        pattern: '@@@',
+                        pattern: DEFAULT_TEXT_FORMAT_EXCEL,
                     },
                 },
                 f: null,
@@ -233,7 +233,7 @@ describe('Test EndEditController', () => {
             const cell: ICellData = {
                 s: {
                     n: {
-                        pattern: '@@@',
+                        pattern: DEFAULT_TEXT_FORMAT_EXCEL,
                     },
                 },
                 t: null,
@@ -249,12 +249,124 @@ describe('Test EndEditController', () => {
                 t: CellValueType.STRING,
                 s: {
                     n: {
-                        pattern: '@@@',
+                        pattern: DEFAULT_TEXT_FORMAT_EXCEL,
                     },
                 },
                 f: null,
                 si: null,
                 p: null,
+            };
+
+            expect(cellData).toEqual({
+                ...target,
+            });
+        });
+        it('Text cell input richText', () => {
+            const cell: ICellData = {
+                s: {
+                    n: {
+                        pattern: DEFAULT_TEXT_FORMAT_EXCEL,
+                    },
+                },
+                t: 1,
+                v: '10',
+            };
+
+            const inputCell = {
+                p: {
+                    id: '__INTERNAL_EDITOR__DOCS_NORMAL',
+                    documentStyle: {
+                        pageSize: {
+                            width: 73,
+                            height: undefined,
+                        },
+                        marginTop: 1,
+                        marginBottom: 2,
+                        marginRight: 2,
+                        marginLeft: 2,
+                        renderConfig: {
+                            horizontalAlign: 0,
+                            verticalAlign: 0,
+                            centerAngle: 0,
+                            vertexAngle: 0,
+                            wrapStrategy: 0,
+                        },
+                    },
+                    body: {
+                        dataStream: '10\r\n',
+                        textRuns: [
+                            { ts: { ff: 'Arial', fs: 11 }, st: 0, ed: 1 },
+                            { st: 1, ed: 2, ts: { ff: 'Arial', fs: 11, cl: { rgb: '#B20000' } } },
+                        ],
+                        paragraphs: [
+                            { startIndex: 2, paragraphStyle: { horizontalAlign: 0 } },
+                        ],
+                        sectionBreaks: [
+                            { startIndex: 3 },
+                        ],
+                        customRanges: [],
+                        customDecorations: [],
+                    },
+                    drawings: {},
+                    drawingsOrder: [],
+                    settings: {
+                        zoomRatio: 1,
+                    },
+                },
+            };
+
+            const cellData = getCellDataByInputCell(cell, inputCell);
+            const target = {
+                v: '10',
+                t: CellValueType.STRING,
+                s: {
+                    n: {
+                        pattern: DEFAULT_TEXT_FORMAT_EXCEL,
+                    },
+                },
+                f: null,
+                si: null,
+                p: {
+                    id: '__INTERNAL_EDITOR__DOCS_NORMAL',
+                    documentStyle: {
+                        pageSize: {
+                            width: Infinity,
+                            height: Infinity,
+                        },
+                        marginTop: 0,
+                        marginBottom: 2,
+                        marginRight: 2,
+                        marginLeft: 2,
+                        renderConfig: {
+                            horizontalAlign: 0,
+                            verticalAlign: 0,
+                            centerAngle: 0,
+                            vertexAngle: 0,
+                            wrapStrategy: 0,
+                            zeroWidthParagraphBreak: 1,
+                        },
+                    },
+                    body: {
+                        dataStream: '10\r\n',
+                        textRuns: [
+                            { ts: { ff: 'Arial', fs: 11 }, st: 0, ed: 1 },
+                            { st: 1, ed: 2, ts: { ff: 'Arial', fs: 11, cl: { rgb: '#B20000' } } },
+                        ],
+                        paragraphs: [
+                            { startIndex: 2, paragraphStyle: { horizontalAlign: 0 } },
+                        ],
+                        sectionBreaks: [
+                            { startIndex: 3 },
+                        ],
+                        customRanges: [],
+                        customDecorations: [],
+                    },
+                    drawings: {},
+                    drawingsOrder: [],
+                    settings: {
+                        zoomRatio: 1,
+                    },
+                },
             };
 
             expect(cellData).toEqual({
@@ -270,7 +382,7 @@ describe('Test EndEditController', () => {
             };
 
             const cellData = getCellDataByInputCell(cell, inputCell);
-            const target = { v: null, f: null, si: null, p: richTextDemo };
+            const target = { v: null, f: null, si: null, p: richTextDemo, t: undefined };
             expect(cellData).toEqual({
                 ...target,
             });
@@ -391,6 +503,9 @@ describe('Test EndEditController', () => {
             expect(normalizeStringByLexer('１００％＋２－×＝＜＞％＄＠＆＊＃')).toEqual('１００％＋２－×＝＜＞％＄＠＆＊＃');
             expect(normalizeStringByLexer('＄ｗ')).toEqual('＄ｗ');
             expect(normalizeStringByLexer('ｔｒｕｅ＋１')).toEqual('ｔｒｕｅ＋１');
+
+            // sheet name
+            expect(normalizeStringByLexer("='Sheet1（副本）'!F20:H29")).toEqual("='Sheet1（副本）'!F20:H29");
 
             // TODO@Dushusir: Differences from Excel, pending,
             // '＝＠＠ｉｆ＠ｓ'
@@ -599,6 +714,10 @@ describe('Test EndEditController', () => {
 
             it('should handle escaped quotes in strings', () => {
                 expect(normalizeStringByLexer('="He said, ""Hello, .5!"""')).toBe('="He said, ""Hello, .5!"""');
+            });
+            it('Illegal strings should not be modified', () => {
+                expect(normalizeStringByLexer('=SUM(11, 2 2, 33)')).toBe('=SUM(11, 2 2, 33)');
+                expect(normalizeStringByLexer('=SUM(11, 123 123, 33)')).toBe('=SUM(11, 123 123, 33)');
             });
         });
     });

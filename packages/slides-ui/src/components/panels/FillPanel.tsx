@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-import React from 'react';
-
 import type { Nullable } from '@univerjs/core';
-import { ICommandService, LocaleService, useDependency } from '@univerjs/core';
-import clsx from 'clsx';
-import { ColorPicker, Dropdown } from '@univerjs/design';
-import { MoreDownSingle, PaintBucket } from '@univerjs/icons';
 
 import type { Rect } from '@univerjs/engine-render';
+import { ICommandService, LocaleService } from '@univerjs/core';
+import { ColorPicker, Dropdown } from '@univerjs/design';
+import { MoreDownSingle, PaintBucket } from '@univerjs/icons';
+import { useDependency } from '@univerjs/ui';
+import clsx from 'clsx';
+
+import React from 'react';
 import { UpdateSlideElementOperation } from '../../commands/operations/update-element.operation';
 import { CanvasView } from '../../controllers/canvas-view';
 import styles from './index.module.less';
@@ -32,6 +33,10 @@ interface IProps {
     unitId: string;
 }
 
+/**
+ *
+ * @param props
+ */
 export default function ArrangePanel(props: IProps) {
     const { pageId, unitId } = props;
 
@@ -52,6 +57,10 @@ export default function ArrangePanel(props: IProps) {
 
     const [color, setColor] = React.useState<string>(object.fill?.toString() ?? '');
 
+    /**
+     *
+     * @param color
+     */
     function handleChangeColor(color: string) {
         object?.setProps({
             fill: color,
@@ -85,16 +94,13 @@ export default function ArrangePanel(props: IProps) {
                 <div className={styles.imageCommonPanelRow}>
                     <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSpan2)}>
                         <Dropdown
-                            align={{
-                                offset: [0, 18],
-                            }}
                             overlay={(
-                                <section className={styles.slidePanelColorPicker}>
+                                <div className="univer-rounded-lg univer-p-4">
                                     <ColorPicker
-                                        color="#fff"
+                                        value="#fff"
                                         onChange={handleChangeColor}
                                     />
-                                </section>
+                                </div>
                             )}
                         >
                             <a className={styles.uiPluginSheetsBorderPanelButton}>

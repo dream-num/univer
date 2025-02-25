@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -106,9 +106,21 @@ export class UpdateFormulaController extends Disposable {
         }));
 
         this.disposeWithMe(
-            this._commandService.onCommandExecuted((command: ICommandInfo, options?: IExecutionOptions) => {
+            this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (!command.params) return;
 
+                if (command.id === RemoveSheetMutation.id) {
+                    const { subUnitId: sheetId, unitId } = command.params as IRemoveSheetMutationParams;
+                    this._handleWorkbookDisposed(unitId, sheetId);
+                } else if (command.id === InsertSheetMutation.id) {
+                    this._handleInsertSheetMutation(command.params as IInsertSheetMutationParams);
+                }
+            })
+        );
+
+        // Make sure to get the complete formula history data before updating, which contains the complete mapping of f and si
+        this.disposeWithMe(
+            this._commandService.beforeCommandExecuted((command: ICommandInfo, options?: IExecutionOptions) => {
                 if (command.id === SetRangeValuesMutation.id) {
                     const params = command.params as ISetRangeValuesMutationParams;
 
@@ -121,11 +133,6 @@ export class UpdateFormulaController extends Disposable {
                         return;
                     }
                     this._handleSetRangeValuesMutation(params as ISetRangeValuesMutationParams);
-                } else if (command.id === RemoveSheetMutation.id) {
-                    const { subUnitId: sheetId, unitId } = command.params as IRemoveSheetMutationParams;
-                    this._handleWorkbookDisposed(unitId, sheetId);
-                } else if (command.id === InsertSheetMutation.id) {
-                    this._handleInsertSheetMutation(command.params as IInsertSheetMutationParams);
                 }
             })
         );
@@ -249,7 +256,7 @@ export class UpdateFormulaController extends Disposable {
     }
 
     private _handleWorkbookAdded(unit: Workbook) {
-        const formulaData = this._formulaDataModel.getFormulaData();
+        const formulaData: IFormulaData = {};
         const unitId = unit.getUnitId();
         const newFormulaData: IFormulaData = { [unitId]: {} };
 

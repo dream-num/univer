@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ export interface ISetSelectionsOperationParams {
 
     /** If should scroll to the selected range. */
     reveal?: boolean;
+    extra?: string;
 }
 
 /**
@@ -38,7 +39,6 @@ export const SetSelectionsOperation: IOperation<ISetSelectionsOperationParams> =
     type: CommandType.OPERATION,
     handler: (accessor, params) => {
         if (!params) return false;
-
         const { selections, type, unitId, subUnitId } = params;
         const selectionManagerService = getSelectionsService(accessor);
 

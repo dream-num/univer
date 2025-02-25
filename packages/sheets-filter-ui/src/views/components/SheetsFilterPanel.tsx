@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,12 @@
  */
 
 import type { ByConditionsModel, ByValuesModel } from '../../services/sheets-filter-panel.service';
-import { ICommandService, LocaleService, useDependency } from '@univerjs/core';
-import { Button, type ISegmentedProps, Segmented } from '@univerjs/design';
+import { ICommandService, LocaleService } from '@univerjs/core';
+import { Button, Segmented } from '@univerjs/design';
 import { SheetsFilterService } from '@univerjs/sheets-filter';
-
 import { SheetsUIPart } from '@univerjs/sheets-ui';
-import { ComponentContainer, useComponentsOfPart, useObservable } from '@univerjs/ui';
+
+import { ComponentContainer, useComponentsOfPart, useDependency, useObservable } from '@univerjs/ui';
 import React, { useCallback, useMemo } from 'react';
 import { of } from 'rxjs';
 import { ChangeFilterByOperation, CloseFilterPanelOperation } from '../../commands/operations/sheets-filter.operation';
@@ -42,7 +42,7 @@ export function FilterPanel() {
     const filterBy = useObservable(sheetsFilterPanelService.filterBy$, undefined, true);
     const filterByModel = useObservable(sheetsFilterPanelService.filterByModel$, undefined, false);
     const canApply = useObservable(() => filterByModel?.canApply$ || of(false), undefined, false, [filterByModel]);
-    const options = useFilterByOptions(localeService);
+    const items = useFilterByOptions(localeService);
 
     // only can disable clear when there is no criteria
     const clearFilterDisabled = !useObservable(sheetsFilterPanelService.hasCriteria$);
@@ -77,7 +77,11 @@ export function FilterPanel() {
                 sharedProps={{ range, colIndex, onClose: onCancel }}
             />
             <div className={styles.sheetsFilterPanelHeader}>
-                <Segmented value={filterBy} options={options} onChange={(value) => onFilterByTypeChange(value as FilterBy)}></Segmented>
+                <Segmented
+                    value={filterBy}
+                    items={items}
+                    onChange={(value) => onFilterByTypeChange(value as FilterBy)}
+                />
             </div>
             {filterByModel
                 ? (
@@ -101,13 +105,11 @@ export function FilterPanel() {
     );
 }
 
-function useFilterByOptions(localeService: LocaleService): ISegmentedProps['options'] {
+function useFilterByOptions(localeService: LocaleService) {
     const locale = localeService.getCurrentLocale();
     return useMemo(() => [
         { label: localeService.t('sheets-filter.panel.by-values'), value: FilterBy.VALUES },
         { label: localeService.t('sheets-filter.panel.by-conditions'), value: FilterBy.CONDITIONS },
-    ]
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    , [locale, localeService]);
+    ],
+    [locale, localeService]);
 }
-

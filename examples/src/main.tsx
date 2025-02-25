@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+import { render } from '@univerjs/design';
 import React from 'react';
-import { createRoot } from 'react-dom/client';
 import pkg from '../../package.json';
 
-import styles from './styles.module.less';
+import './global.css';
 
 // package info
 // eslint-disable-next-line node/prefer-global/process
@@ -50,6 +50,9 @@ function Examples() {
         title: '🗂️ Sheets Multi Instance',
         href: './sheets-multi/',
     }, {
+        title: '🏡 Sheets Multi Units',
+        href: './sheets-multi-units/',
+    }, {
         title: '📄 Sheets Uniscript',
         href: './sheets-uniscript/',
     }, {
@@ -64,20 +67,44 @@ function Examples() {
     }];
 
     return (
-        <section className={styles.examples}>
-            <header className={styles.header}>
-                <img className={styles.logo} src="/favicon.svg" alt="Univer" draggable={false} />
-                <h1 className={styles.title}>
-                    <span>Univer</span>
-                    <sup>{pkg.version}</sup>
+        <section
+            className="univer-flex univer-h-full univer-flex-col univer-items-center univer-justify-center univer-gap-6"
+        >
+            <header className="univer-flex univer-items-center">
+                <img className="univer-w-24" src="/favicon.svg" alt="Univer" draggable={false} />
+                <h1 className="univer-text-slate-700">
+                    <span
+                        className={`
+                          univer-bg-[linear-gradient(121deg,#0048ff_18.89%,#0c81ed_39.58%,#029dce_59.87%,#00bbb0_74.37%,#00c5a8_79.64%)]
+                          univer-bg-clip-text univer-text-4xl univer-text-transparent
+                        `}
+                    >
+                        Univer
+                    </span>
+                    <sup
+                        className={`
+                          univer-relative -univer-top-1 univer-left-2 univer-rounded-xl univer-border
+                          univer-border-solid univer-border-current univer-px-2 univer-py-0.5 univer-text-xs
+                        `}
+                    >
+                        {pkg.version}
+                    </sup>
                 </h1>
             </header>
 
-            <section className={styles.list}>
+            <section className="univer-flex univer-flex-wrap univer-justify-center univer-gap-6">
                 {demos.map((demo) => (
-                    <a key={demo.title} className={styles.btn} href={demo.href}>
-                        <span className={styles.text}>{demo.title}</span>
-                        <span className={styles.shimmer} />
+                    <a
+                        key={demo.title}
+                        className={`
+                          univer-rounded-lg univer-bg-blue-500 univer-px-6 univer-py-2.5 univer-font-medium
+                          univer-text-white univer-no-underline univer-shadow-sm univer-transition-all
+                          univer-duration-300 univer-ease-in-out
+                          hover:univer-scale-105 hover:univer-bg-emerald-500
+                        `}
+                        href={demo.href}
+                    >
+                        <span>{demo.title}</span>
                     </a>
                 ))}
             </section>
@@ -85,4 +112,4 @@ function Examples() {
     );
 }
 
-createRoot(document.getElementById('app')!).render(<Examples />);
+render(<Examples />, document.getElementById('app')!);

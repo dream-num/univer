@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,10 @@
 
 import type { FormatType } from '@univerjs/sheets';
 
-import { ICommandService, LocaleService, Range, useDependency, useInjector } from '@univerjs/core';
+import { ICommandService, LocaleService, Range } from '@univerjs/core';
 import { SheetsSelectionsService } from '@univerjs/sheets';
-import { getPatternPreview, getPatternType, SetNumfmtCommand } from '@univerjs/sheets-numfmt';
-import { ILayoutService } from '@univerjs/ui';
-import React from 'react';
+import { getPatternPreview, getPatternType, SetNumfmtCommand, SheetsNumfmtCellContentController } from '@univerjs/sheets-numfmt';
+import { ILayoutService, useDependency } from '@univerjs/ui';
 import { OpenNumfmtPanelOperator } from '../../../commands/operations/open.numfmt.panel.operation';
 
 import { MENU_OPTIONS } from '../../../controllers/menu';
@@ -40,7 +39,7 @@ export const Options = () => {
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
     const layoutService = useDependency(ILayoutService);
-    const injector = useInjector();
+    const sheetsNumfmtCellContentController = useDependency(SheetsNumfmtCellContentController);
 
     const selectionManagerService = useDependency(SheetsSelectionsService);
     const setNumfmt = (pattern: string | null) => {
@@ -91,7 +90,7 @@ export const Options = () => {
                     >
                         <div>{localeService.t(item.label)}</div>
                         <div className="m-l-26">
-                            {item.pattern ? getPatternPreview(item.pattern || '', defaultValue, localeService.getCurrentLocale()).result : ''}
+                            {item.pattern ? getPatternPreview(item.pattern || '', defaultValue, sheetsNumfmtCellContentController.local).result : ''}
                         </div>
                     </div>
                 );

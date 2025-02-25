@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,22 +19,24 @@ import React from 'react';
 import { describe, expect, it } from 'vitest';
 
 import { Button } from '../../button/Button';
-import { Message } from '../Message';
+import { message, Messager, MessageType } from '../Message';
 
 describe('Message', () => {
     it('renders correctly', () => {
-        const message = new Message(document.body);
-
         const { container } = render(
-            <Button
-                onClick={() => {
-                    message.success({
-                        content: 'success content',
-                    });
-                }}
-            >
-                btn2
-            </Button>
+            <>
+                <Button
+                    onClick={() => {
+                        message({
+                            type: MessageType.Success,
+                            content: 'success content',
+                        });
+                    }}
+                >
+                    btn2
+                </Button>
+                <Messager />
+            </>
         );
 
         fireEvent.click(container.querySelector('button')!);

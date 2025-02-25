@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 import type { IUniverDocsUIConfig } from './config.schema';
 import {
-    connectInjector,
     Disposable,
     ICommandService,
     IConfigService,
@@ -28,7 +27,7 @@ import {
 
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { TodoList } from '@univerjs/icons';
-import { BuiltInUIPart, ComponentManager, ILayoutService, IMenuManagerService, IShortcutService, IUIPartsService } from '@univerjs/ui';
+import { BuiltInUIPart, ComponentManager, connectInjector, ILayoutService, IMenuManagerService, IShortcutService, IUIPartsService } from '@univerjs/ui';
 import { CoreHeaderFooterCommand, OpenHeaderFooterPanelCommand } from '../commands/commands/doc-header-footer.command';
 import { SidebarDocHeaderFooterPanelOperation } from '../commands/operations/doc-header-footer-panel.operation';
 import { COLOR_PICKER_COMPONENT, ColorPicker } from '../components/color-picker';
@@ -57,7 +56,7 @@ import {
     UnderlineShortCut,
 } from '../shortcuts/toolbar.shortcut';
 import { DocFooter } from '../views/doc-footer';
-import { PLUGIN_CONFIG_KEY } from './config.schema';
+import { DOCS_UI_PLUGIN_CONFIG_KEY } from './config.schema';
 import { menuSchema } from './menu.schema';
 
 export class DocUIController extends Disposable {
@@ -92,7 +91,7 @@ export class DocUIController extends Disposable {
     // TODO: @zhangwei, why add workbook to docs-ui?
     private _initUiParts() {
         const workbook = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SHEET);
-        const config = this._configService.getConfig<IUniverDocsUIConfig>(PLUGIN_CONFIG_KEY);
+        const config = this._configService.getConfig<IUniverDocsUIConfig>(DOCS_UI_PLUGIN_CONFIG_KEY);
         if (config?.layout?.docContainerConfig?.footer && !workbook) {
             this.disposeWithMe(this._uiPartsService.registerComponent(BuiltInUIPart.FOOTER, () => connectInjector(DocFooter, this._injector)));
         }

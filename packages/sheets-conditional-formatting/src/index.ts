@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,11 +23,9 @@ export { UniverSheetsConditionalFormattingPlugin } from './plugin';
 export * from './render/data-bar.render';
 export * from './render/icon.render';
 export * from './render/type';
-export * from './services/calculate-unit/type';
-export * from './services/calculate-unit/utils';
 export * from './services/conditional-formatting.service';
 export * from './services/conditional-formatting-formula.service';
-
+export * from './models/calculate-unit-v2/utils';
 export * from './utils/anchor';
 export * from './utils/create-cf-id';
 export * from './utils/is-ranges-equal';

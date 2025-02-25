@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,16 @@
  * limitations under the License.
  */
 
-import { debounce, useDependency } from '@univerjs/core';
-import clsx from 'clsx';
-import React, { useEffect, useState } from 'react';
-
-import { IStatusBarService } from '../../services/status-bar.service';
+import type { Nullable } from '@univerjs/core';
+import type { IStatusBarServiceStatus, StatusBarService } from '../../services/status-bar.service';
 import type { IStatisticItem } from './CopyableStatisticItem';
+import { debounce, IConfigService } from '@univerjs/core';
+import { useDependency } from '@univerjs/ui';
+
+import clsx from 'clsx';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { HIDE_STATUS_BAR_STATISTIC } from '../../controllers/config.schema';
+import { IStatusBarService } from '../../services/status-bar.service';
 import { CopyableStatisticItem } from './CopyableStatisticItem';
 import styles from './index.module.less';
 
@@ -27,10 +31,13 @@ const SINGLE_MODE_WIDTH = 800;
 const ROW_COUNT_THRESHOLD = 3;
 
 export const StatusBar = () => {
+    const configService = useDependency(IConfigService);
+    const hideStatistic = configService.getConfig<boolean>(HIDE_STATUS_BAR_STATISTIC) || false;
+
     const [isSingle, setIsSingle] = useState(window.innerWidth < SINGLE_MODE_WIDTH);
-    const [show, setShow] = useState(true);
 
     const statusBarService = useDependency(IStatusBarService);
+    // items is six functions: MAX MIN ALL ...
     const items = statusBarService.getFunctions().map((item, index) => ({
         name: item.func,
         value: 0,
@@ -38,36 +45,70 @@ export const StatusBar = () => {
         disable: false,
         pattern: null,
     }));
-    const [statistics, setStatistics] = useState<IStatisticItem[]>(items);
-    const firstItem = statistics.find((item) => item.show && !item.disable);
-    const showList = isSingle && firstItem ? [firstItem] : statistics.filter((item) => item.show && !item.disable);
 
-    useEffect(() => {
-        const subscription = statusBarService.state$.subscribe((state) => {
-            const item = state?.values;
-            if (!item || item.length === 0) {
+    const useStatistics = (
+        initialItems: IStatisticItem[],
+        statusBarService: StatusBarService,
+        isSingle: boolean,
+        hideStatistic: boolean
+    ) => {
+        const [statistics, setStatistics] = useState<IStatisticItem[]>(initialItems);
+        const [show, setShow] = useState(true);
+
+        const filteredStatistics = useMemo(() =>
+            statistics.filter((item) => item.show && !item.disable),
+        [statistics]
+        );
+
+        const firstItem = useMemo(() =>
+            filteredStatistics.find((item) => item.show && !item.disable),
+        [filteredStatistics]
+        );
+
+        const showList = useMemo(() =>
+            isSingle && firstItem ? [firstItem] : filteredStatistics,
+        [isSingle, firstItem, filteredStatistics]
+        );
+
+        const updateStatistics = useCallback((state: Nullable<IStatusBarServiceStatus>) => {
+            const items = state?.values;
+            if (!items?.length) {
                 setShow(false);
-            } else {
-                setShow(true);
-                const newStatistics = statistics.map((stat) => {
-                    const target = item.find((i) => i.func === stat.name);
-                    if (target) {
-                        stat.value = target.value;
-                        stat.disable = false;
-                    } else {
-                        stat.disable = true;
-                    }
-                    stat.pattern = state?.pattern ?? null;
-                    return stat;
-                });
-                setStatistics(newStatistics);
+                return;
             }
-        });
-        return () => {
-            subscription.unsubscribe();
-        };
-    }, [statusBarService]);
 
+            setShow(true);
+            setStatistics((prevStats) =>
+                prevStats.map((stat) => ({
+                    ...stat,
+                    value: items.find((i) => i.func === stat.name)?.value ?? stat.value,
+                    disable: !items.some((i) => i.func === stat.name),
+                    pattern: state?.pattern ?? null,
+                }))
+            );
+        }, []);
+
+        useEffect(() => {
+            if (hideStatistic) return;
+
+            const subscription = statusBarService.state$.subscribe(updateStatistics);
+
+            return () => subscription.unsubscribe();
+        }, [hideStatistic, statusBarService, updateStatistics]);
+
+        return {
+            statistics,
+            showList,
+            show,
+        };
+    };
+
+    const { showList, show } = useStatistics(
+        items,
+        statusBarService,
+        isSingle,
+        hideStatistic
+    );
     const handleResize = debounce(() => {
         const newSingleState = window.innerWidth < SINGLE_MODE_WIDTH;
         if (isSingle !== newSingleState) {
@@ -83,35 +124,64 @@ export const StatusBar = () => {
         };
     }, [isSingle]);
 
-    let renderContent = null;
-    if (showList.length > ROW_COUNT_THRESHOLD) {
-        const doubleLineList: IStatisticItem[][] = [];
-        showList.forEach((_, index) => {
-            if (index % 2 === 0) {
-                doubleLineList.push(showList.slice(index, index + 2));
+    const useStatisticLayout = (
+        showList: IStatisticItem[],
+        rowCountThreshold: number,
+        CopyableStatisticItem: React.ComponentType<IStatisticItem>
+    ) => {
+        if (hideStatistic) return null;
+        const renderContent = React.useMemo(() => {
+            if (showList.length > rowCountThreshold) {
+                const doubleLineList = showList.reduce<IStatisticItem[][]>((acc, _, index) => {
+                    if (index % 2 === 0) {
+                        acc.push(showList.slice(index, index + 2));
+                    }
+                    return acc;
+                }, []);
+
+                return (
+                    <>
+                        {doubleLineList.map((item, index) => (
+                            <div
+                                key={`stat-col-${index}`}
+                                className={styles.statisticListColumn}
+                            >
+                                {item[0] && (
+                                    <CopyableStatisticItem
+                                        key={item[0].name}
+                                        {...item[0]}
+                                    />
+                                )}
+                                {item[1] && (
+                                    <CopyableStatisticItem
+                                        key={item[1].name}
+                                        {...item[1]}
+                                    />
+                                )}
+                            </div>
+                        ))}
+                    </>
+                );
             }
-        });
-        renderContent = (
-            <>
-                {' '}
-                {doubleLineList!.map((item: IStatisticItem[], index: number) => (
-                    <div key={`stat-col-${index}`} className={styles.statisticListColumn}>
-                        {item?.[0] && <CopyableStatisticItem key={item?.[0].name} {...item?.[0]} />}
-                        {item?.[1] && <CopyableStatisticItem key={item?.[1].name} {...item?.[1]} />}
-                    </div>
-                ))}
-                {' '}
-            </>
-        );
-    } else {
-        renderContent = (
-            <>
-                {showList.map((item) => (
-                    <CopyableStatisticItem key={item.name} {...item} />
-                ))}
-            </>
-        );
-    }
+
+            return (
+                <>
+                    {showList.map((item) => (
+                        <CopyableStatisticItem
+                            key={item.name}
+                            {...item}
+                        />
+                    ))}
+                </>
+            );
+        }, [showList, rowCountThreshold, CopyableStatisticItem]);
+
+        return renderContent;
+    };
+
+    const renderContent = useStatisticLayout(showList,
+        ROW_COUNT_THRESHOLD,
+        CopyableStatisticItem);
 
     return (
         show && (
@@ -120,7 +190,7 @@ export const StatusBar = () => {
                     [styles.singleMode]: isSingle,
                 })}
             >
-                <div className={clsx(styles.statisticList)}>{renderContent}</div>
+                <div className="univer-flex">{renderContent}</div>
                 <div className={styles.statusBarDiv} />
             </div>
         )

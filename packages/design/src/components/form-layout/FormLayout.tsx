@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ export const FormLayout = (props: IFormLayoutProps) => {
     const isInner = useContext(FormLayoutContext);
 
     return (
-        <FormLayoutContext.Provider value={true}>
+        <FormLayoutContext.Provider value>
             <div className={clsx(styles.formLayout, isInner ? styles.formLayoutInner : '', className)} style={style}>
                 {label && (
                     <div style={{ cursor: collapsable ? 'pointer' : 'default' }} className={styles.formLayoutLabel} onClick={() => setCollapsed(!collapsed)}>

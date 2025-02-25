@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import { getCurrentRangeDisable$, IEditorBridgeService, whenSheetEditorFocused }
 import { getMenuHiddenObservable, KeyCode, MenuItemType, MetaKeys } from '@univerjs/ui';
 import { combineLatest, distinctUntilChanged, filter, map, of, switchMap } from 'rxjs';
 import { InsertHyperLinkOperation, InsertHyperLinkToolbarOperation } from '../commands/operations/popup.operations';
-import { getShouldDisableCellLink, shouldDisableAddLink } from '../utils';
+import { DisableLinkType, getShouldDisableCellLink, shouldDisableAddLink } from '../utils';
 
 const getEditingLinkDisable$ = (accessor: IAccessor, unitId = DOCS_ZEN_EDITOR_UNIT_ID_KEY) => {
     const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -45,7 +45,7 @@ const getEditingLinkDisable$ = (accessor: IAccessor, unitId = DOCS_ZEN_EDITOR_UN
             return true;
         }
 
-        if (getShouldDisableCellLink(accessor, target.worksheet, state.row, state.column)) {
+        if (getShouldDisableCellLink(accessor, target.worksheet, state.row, state.column) === 1) {
             return true;
         }
 
@@ -67,21 +67,19 @@ const getLinkDisable$ = (accessor: IAccessor) => {
         switchMap((sheet) => sheetSelectionService.selectionMoveEnd$.pipe(map((selections) => sheet && { selections, sheet }))),
         map((sheetWithSelection) => {
             if (!sheetWithSelection) {
-                return true;
+                return DisableLinkType.DISABLED_BY_CELL;
             }
             const { selections, sheet } = sheetWithSelection;
             if (!selections.length) {
-                return true;
+                return DisableLinkType.DISABLED_BY_CELL;
             }
             const row = selections[0].range.startRow;
             const col = selections[0].range.startColumn;
 
-            if (getShouldDisableCellLink(accessor, sheet, row, col)) {
-                return true;
-            }
+            return getShouldDisableCellLink(accessor, sheet, row, col);
         }),
         switchMap((disableCell) => {
-            if (disableCell) {
+            if (disableCell === DisableLinkType.DISABLED_BY_CELL) {
                 return of(true);
             }
 
@@ -96,7 +94,7 @@ const getLinkDisable$ = (accessor: IAccessor) => {
                             focusingFxBarEditor
                                 ? of(true)
                                 : getEditingLinkDisable$(accessor, editing)
-                            : of(false);
+                            : of(disableCell === DisableLinkType.ALLOW_ON_EDITING);
                     }
                 )
             );

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { DataValidationOperator } from '../enum/data-validation-operator';
-import type { DataValidationType } from '../enum/data-validation-type';
-import type { DataValidationImeMode } from '../enum/data-validation-ime-mode';
-import type { DataValidationErrorStyle } from '../enum/data-validation-error-style';
-import type { DataValidationRenderMode } from '../enum/data-validation-render-mode';
 import type { IRange } from '../../sheets/typedef';
+import type { DataValidationErrorStyle } from '../enum/data-validation-error-style';
+import type { DataValidationImeMode } from '../enum/data-validation-ime-mode';
+import type { DataValidationOperator } from '../enum/data-validation-operator';
+import type { DataValidationRenderMode } from '../enum/data-validation-render-mode';
+import type { DataValidationType } from '../enum/data-validation-type';
 
 // TODO@weird94: should be moved outside of the or package
 
@@ -27,7 +27,7 @@ export interface IDataValidationRuleBase {
     /**
      * data validation type
      */
-    type: DataValidationType;
+    type: DataValidationType | string;
     allowBlank?: boolean;
     /**
      * data validation creteria

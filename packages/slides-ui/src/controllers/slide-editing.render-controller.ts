@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,25 @@
  * limitations under the License.
  */
 
+import type {
+    ICommandInfo,
+    IDisposable,
+    IDocumentBody,
+    IPosition,
+    Nullable,
+    SlideDataModel,
+    UnitModel } from '@univerjs/core';
+import type { IDocObjectParam, IEditorInputConfig } from '@univerjs/docs-ui';
+import type {
+    DocBackground,
+    Documents,
+    DocumentSkeleton,
+    IDocumentLayoutObject,
+    IRenderContext,
+    IRenderModule,
+    Scene,
+} from '@univerjs/engine-render';
+import type { IEditorBridgeServiceVisibleParam } from '../services/slide-editor-bridge.service';
 import {
     DEFAULT_EMPTY_DOCUMENT_VALUE,
     Direction,
@@ -52,30 +71,11 @@ import {
 } from '@univerjs/engine-render';
 import { ILayoutService, KeyCode } from '@univerjs/ui';
 import { filter } from 'rxjs';
-import type {
-    ICommandInfo,
-    IDisposable,
-    IDocumentBody,
-    IPosition,
-    Nullable,
-    SlideDataModel,
-    UnitModel } from '@univerjs/core';
-import type { IDocObjectParam, IEditorInputConfig } from '@univerjs/docs-ui';
-import type {
-    DocBackground,
-    Documents,
-    DocumentSkeleton,
-    IDocumentLayoutObject,
-    IRenderContext,
-    IRenderModule,
-    Scene,
-} from '@univerjs/engine-render';
 import { SetTextEditArrowOperation } from '../commands/operations/text-edit.operation';
 import { SLIDE_EDITOR_ID } from '../const';
 import { ISlideEditorBridgeService } from '../services/slide-editor-bridge.service';
 import { ISlideEditorManagerService } from '../services/slide-editor-manager.service';
 import { CursorChange } from '../type';
-import type { IEditorBridgeServiceVisibleParam } from '../services/slide-editor-bridge.service';
 
 const HIDDEN_EDITOR_POSITION = -1000;
 
@@ -745,26 +745,12 @@ export class SlideEditingRenderController extends Disposable implements IRenderM
         this._handleEditorVisible({ visible: true, eventType: 3, unitId });
     }
 
-    private _setOpenForCurrent(unitId: Nullable<string>, subUnitId: Nullable<string>) {
-        const editors = this._editorService.getAllEditor();
-        for (const [_, ed] of editors) {
-            // if (!ed.isSheetEditor()) {
-            //     continue;
-            // }
-
-            ed.setOpenForSheetUnitId(unitId);
-            ed.setOpenForSheetSubUnitId(subUnitId);
-        }
-    }
-
     private _getEditorObject() {
         return getEditorObject(this._editorBridgeService.getCurrentEditorId(), this._renderManagerService);
     }
 
     private async _handleEditorInvisible(param: IEditorBridgeServiceVisibleParam) {
         const { keycode } = param;
-
-        this._setOpenForCurrent(null, null);
 
         this._cursorChange = CursorChange.InitialState;
 
@@ -836,7 +822,10 @@ export class SlideEditingRenderController extends Disposable implements IRenderM
      * The logic here predicts the user's first cursor movement behavior based on this rule
      */
     private _cursorStateListener(d: DisposableCollection) {
-        const editorObject = this._getEditorObject()!;
+        const editorObject = this._getEditorObject();
+        if (!editorObject) {
+            return;
+        }
         const { document: documentComponent } = editorObject;
 
         d.add(toDisposable(documentComponent.onPointerDown$.subscribeEvent(() => {

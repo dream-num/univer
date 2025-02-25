@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,12 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { FUNCTION_NAMES_DATE } from '../../function-names';
-import { Datevalue } from '../index';
-import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
-import { ErrorType } from '../../../../basics/error-type';
+import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { FUNCTION_NAMES_DATE } from '../../function-names';
+import { Datevalue } from '../index';
 
 describe('Test datevalue function', () => {
     const testFunction = new Datevalue(FUNCTION_NAMES_DATE.DATEVALUE);
@@ -34,7 +34,7 @@ describe('Test datevalue function', () => {
 
             const dateText2 = StringValueObject.create('5-Jul');
             const result2 = testFunction.calculate(dateText2);
-            expect(result2.getValue()).toStrictEqual(45478);
+            expect(result2.getValue()).toStrictEqual(45843); // NOTE: this should be updated annually
 
             const dateText3 = StringValueObject.create('2020-01-02 13:14:15');
             const result3 = testFunction.calculate(dateText3);

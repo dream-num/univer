@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ export * from './delete-direction';
 export * from './developer-metadata-visibility';
 export * from './dimension';
 export * from './direction';
-export * from './format-type';
 export * from './interpolation-point-type';
 export * from './locale-type';
 export * from './mention-type';

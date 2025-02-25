@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { MergeCellController } from '../../../controllers/merge-cell.controller';
 import { RefRangeService } from '../../../services/ref-range/ref-range.service';
+import { SheetsSelectionsService } from '../../../services/selections';
 import { AddWorksheetMergeMutation } from '../../mutations/add-worksheet-merge.mutation';
 import { MoveRangeMutation } from '../../mutations/move-range.mutation';
 import { RemoveWorksheetMergeMutation } from '../../mutations/remove-worksheet-merge.mutation';
@@ -32,6 +33,7 @@ describe('Test move range commands', () => {
     let univer: Univer;
     let get: Injector['get'];
     let commandService: ICommandService;
+    let sheetsSelectionsService: SheetsSelectionsService;
 
     beforeEach(() => {
         const testBed = createInsertRowColTestBed();
@@ -39,6 +41,7 @@ describe('Test move range commands', () => {
         get = testBed.get;
         get(MergeCellController);
         commandService = get(ICommandService);
+        sheetsSelectionsService = get(SheetsSelectionsService);
 
         [
             AddWorksheetMergeMutation,
@@ -107,6 +110,27 @@ describe('Test move range commands', () => {
             expect(result).toBeFalsy();
         });
 
+        it('move merged cells requires setting the correct selection', async () => {
+            const fromRange: IRange = {
+                startRow: 2,
+                endRow: 3,
+                startColumn: 2,
+                endColumn: 2,
+            };
+            const toRange: IRange = {
+                startRow: 5,
+                endRow: 6,
+                startColumn: 2,
+                endColumn: 2,
+            };
+            const result = await commandService.executeCommand(MoveRangeCommand.id, { fromRange, toRange });
+            expect(result).toBeTruthy();
+            const selections = sheetsSelectionsService.getCurrentSelections();
+            expect(selections.length).toBe(1);
+            const selection = selections[0];
+            expect(selection.range).toEqual(toRange);
+        });
+
         it('move c1:d2 to c3 ,should be replace', async () => {
             const fromRange: IRange = {
                 startRow: 0,
@@ -147,10 +171,6 @@ const TEST_ROW_COL_INSERTION_DEMO: IWorkbookData = {
     id: 'test',
     appVersion: '3.0.0-alpha',
     sheets: {
-        // 1
-        //  2-3-
-        // 	4
-        //  |
         sheet1: {
             id: 'sheet1',
             cellData: {

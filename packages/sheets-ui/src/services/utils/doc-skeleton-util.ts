@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -137,14 +137,25 @@ export const calculateDocSkeletonRects = (docSkeleton: DocumentSkeleton, padding
     const docModel = docSkeleton.getViewModel().getDataModel();
     const hyperLinks = docModel.getBody()?.customRanges?.filter((range) => range.rangeType === CustomRangeType.HYPERLINK) ?? [];
     const checkLists = docModel.getBody()?.paragraphs?.filter((p) => p.bullet?.listType.indexOf(PresetListType.CHECK_LIST) === 0) ?? [];
-
+    const drawings = docSkeleton.getSkeletonData()?.pages[0].skeDrawings;
     return {
         links: hyperLinks.map((link) => calcLinkPosition(docSkeleton, link, paddingLeft, paddingTop)!).filter(Boolean),
         checkLists: checkLists.map((list) => calcBulletPosition(docSkeleton, list, paddingLeft, paddingTop)!).filter(Boolean),
+        drawings: drawings
+            ? Array.from(drawings.keys()).map((key) => ({
+                drawingId: key,
+                rect: {
+                    top: drawings!.get(key)!.aTop,
+                    bottom: drawings!.get(key)!.aTop + drawings!.get(key)!.width,
+                    left: drawings!.get(key)!.aLeft,
+                    right: drawings!.get(key)!.aLeft + drawings!.get(key)!.height,
+                },
+            }))
+            : [],
     };
 };
 
-export function calcPadding(cell: ICellWithCoord, font: IFontCacheItem) {
+export function calcPadding(cell: ICellWithCoord, font: IFontCacheItem, isNum: boolean) {
     const height = font.documentSkeleton.getSkeletonData()?.pages[0].height ?? 0;
     const width = font.documentSkeleton.getSkeletonData()?.pages[0].width ?? 0;
     const vt = font.verticalAlign;
@@ -171,6 +182,12 @@ export function calcPadding(cell: ICellWithCoord, font: IFontCacheItem) {
         case HorizontalAlign.CENTER:
             paddingLeft = (cell.mergeInfo.endX - cell.mergeInfo.startX - width) / 2;
             break;
+        case HorizontalAlign.UNSPECIFIED:{
+            if (isNum) {
+                paddingLeft = cell.mergeInfo.endX - cell.mergeInfo.startX - width;
+            }
+            break;
+        }
         default:
             break;
     }
@@ -195,7 +212,7 @@ export const getCustomRangePosition = (injector: Injector, unitId: string, subUn
     }
 
     const currentRender = renderManagerService.getRenderById(workbook.getUnitId());
-    const skeletonParam = currentRender?.with(SheetSkeletonManagerService).getWorksheetSkeleton(worksheet.getSheetId());
+    const skeletonParam = currentRender?.with(SheetSkeletonManagerService).getSkeletonParam(worksheet.getSheetId());
 
     const skeleton = skeletonParam?.skeleton;
 
@@ -226,7 +243,7 @@ export const getCustomRangePosition = (injector: Injector, unitId: string, subUn
     const actualCell = skeleton.getCellWithCoordByIndex(actualRow, actualColumn);
     const cellData = worksheet.getCell(actualCell.actualRow, actualCell.actualColumn);
     const { topOffset = 0, leftOffset = 0 } = cellData?.fontRenderExtension ?? {};
-    const { paddingLeft, paddingTop } = calcPadding(actualCell, font);
+    const { paddingLeft, paddingTop } = calcPadding(actualCell, font, false);
     const rects = calcDocRangePositions({ startOffset: customRange.startIndex, endOffset: customRange.endIndex, collapsed: false }, docSkeleton);
 
     return {
@@ -265,7 +282,7 @@ export const getEditingCustomRangePosition = (injector: Injector, unitId: string
     }
 
     const docSkeleton = renderer.with(DocSkeletonManagerService).getSkeleton();
-    const sheetSkeleton = sheetRenderer.with(SheetSkeletonManagerService).getWorksheetSkeleton(sheetId)?.skeleton;
+    const sheetSkeleton = sheetRenderer.with(SheetSkeletonManagerService).getSkeletonParam(sheetId)?.skeleton;
 
     if (!docSkeleton || !sheetSkeleton) {
         return null;

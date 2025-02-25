@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { Disposable } from '@univerjs/core';
-import type { ICellHyperLink } from '@univerjs/sheets-hyper-link';
-import { SheetHyperLinkType } from '@univerjs/sheets-hyper-link';
+import type { ISheetHyperLink } from '@univerjs/sheets-hyper-link';
 import type React from 'react';
+import { Disposable } from '@univerjs/core';
+import { SheetHyperLinkType } from '@univerjs/sheets-hyper-link';
 
 export interface ICustomHyperLinkFormProps {
     linkId: string;
@@ -36,8 +36,8 @@ export interface ICustomHyperLinkView {
         value: string;
     };
     Form: React.FC<ICustomHyperLinkFormProps>;
-    convert: (link: ICellHyperLink) => { display: string; payload: string; type: string };
-    match: (link: ICellHyperLink) => boolean;
+    convert: (link: ISheetHyperLink) => { display: string; payload: string; type: string };
+    match: (link: ISheetHyperLink) => boolean;
 }
 
 export class SheetsHyperLinkSidePanelService extends Disposable {
@@ -51,7 +51,7 @@ export class SheetsHyperLinkSidePanelService extends Disposable {
         return Array.from(this._customHyperLinks.values()).map(({ option }) => option);
     }
 
-    findCustomHyperLink(link: ICellHyperLink) {
+    findCustomHyperLink(link: ISheetHyperLink) {
         const customLink = Array.from(this._customHyperLinks.values()).find((item) => item.match(link));
 
         return customLink;

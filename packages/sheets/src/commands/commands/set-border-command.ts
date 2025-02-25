@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import type {
     IStyleData,
 } from '@univerjs/core';
 
+import type { IBorderInfo } from '../../services/border-style-manager.service';
 import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
 import type { IResult } from './utils/target-util';
 import {
@@ -36,7 +37,7 @@ import {
     ObjectMatrix,
     Tools,
 } from '@univerjs/core';
-import { BorderStyleManagerService, type IBorderInfo } from '../../services/border-style-manager.service';
+import { BorderStyleManagerService } from '../../services/border-style-manager.service';
 import { SheetsSelectionsService } from '../../services/selections/selection.service';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
 import { getSheetCommandTarget } from './utils/target-util';
@@ -53,8 +54,9 @@ function forEach(range: IRange, action: (row: number, column: number) => void): 
 export interface ISetBorderBasicCommandParams {
     unitId?: string;
     subUnitId?: string;
-
+    ranges: IRange[];
     value: IBorderInfo;
+
 }
 
 export interface ISetBorderPositionCommandParams {
@@ -68,6 +70,7 @@ export interface ISetBorderStyleCommandParams {
 export interface ISetBorderCommandParams {
     unitId?: string;
     subUnitId?: string;
+    ranges?: IRange[];
 }
 
 export interface ISetBorderColorCommandParams {
@@ -430,11 +433,12 @@ const clearBorder = (borderContext: ReturnType<typeof getBorderContext>) => {
         !ml_tr &&
         !bc_tr
     ) {
-        // eslint-disable-next-line max-lines-per-function, complexity
+        // eslint-disable-next-line complexity
         forEach(range, (row, column) => {
             const mergedRange = worksheet.getMergedCell(row, column);
+            // If this cell has border setting before merge, then we need clear settings of edge border.
             if (mergedRange) {
-                // Clear the right border of all columns except the last column
+                // Remove the right border from all cells except for the right border of the rightmost cell.
                 if (mergedRange.endColumn !== range.endColumn) {
                     const style = mr.getValue(mergedRange.startRow, mergedRange.startColumn)?.s as IStyleData;
                     mr.setValue(row, column, {
@@ -443,7 +447,7 @@ const clearBorder = (borderContext: ReturnType<typeof getBorderContext>) => {
                         },
                     });
                 }
-                // Clear the left border of all columns except the first column
+                // Remove the left border from all cells except for the left border of the leftmost cell.
                 if (mergedRange.startColumn !== range.startColumn) {
                     const style = mr.getValue(mergedRange.startRow, mergedRange.startColumn)?.s as IStyleData;
                     mr.setValue(row, column, {
@@ -452,11 +456,8 @@ const clearBorder = (borderContext: ReturnType<typeof getBorderContext>) => {
                         },
                     });
                 }
-                // Clear all the bottom border except the last line
                 // see https://github.com/dream-num/univer/pull/3506
-                // this is not right!! why set not last row to topleft cell border? why?
-                // topleft border doesn't have { right: null }
-                // after exec this, the endColumn lost { right: null } when clear border.
+                // Remove the top border from all cells except for the top border of the topmost cell.
                 if (mergedRange.endRow !== range.endRow) {
                     const style = mr.getValue(mergedRange.startRow, mergedRange.startColumn)?.s as IStyleData;
                     mr.setValue(row, column, {
@@ -465,7 +466,7 @@ const clearBorder = (borderContext: ReturnType<typeof getBorderContext>) => {
                         },
                     });
                 }
-                // Clear the top border of all lines except the first line
+                // Remove the bottom border from all cells except for the bottom border of the bottommost cell.
                 if (mergedRange.startRow !== range.startRow) {
                     const style = mr.getValue(mergedRange.startRow, mergedRange.startColumn)?.s as IStyleData;
                     mr.setValue(row, column, {
@@ -538,7 +539,7 @@ export const SetBorderCommand: ICommand = {
     id: 'sheet.command.set-border',
     type: CommandType.COMMAND,
 
-    handler: async (accessor: IAccessor, params?: ISetBorderCommandParams) => {
+    handler: (accessor: IAccessor, params?: ISetBorderCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -548,15 +549,15 @@ export const SetBorderCommand: ICommand = {
         const target = getSheetCommandTarget(univerInstanceService, params);
         if (!target) return false;
 
-        const selections = selectionManagerService.getCurrentSelections()?.map((s) => s.range);
-        if (!selections?.length) {
+        const ranges = params?.ranges || selectionManagerService.getCurrentSelections()?.map((s) => s.range);
+        if (!ranges?.length) {
             return false;
         }
 
         const { activeBorderType } = borderStyleManagerService.getBorderInfo();
         if (!activeBorderType) return false;
 
-        const borderContext = getBorderContext(borderStyleManagerService, target, selections);
+        const borderContext = getBorderContext(borderStyleManagerService, target, ranges);
         innerBorder(borderContext);
         outlineBorder(borderContext);
         otherBorders(borderContext);
@@ -593,42 +594,42 @@ export const SetBorderCommand: ICommand = {
 export const SetBorderPositionCommand: ICommand<ISetBorderPositionCommandParams> = {
     id: 'sheet.command.set-border-position',
     type: CommandType.COMMAND,
-    handler: async (accessor: IAccessor, params: ISetBorderPositionCommandParams) => {
+    handler: (accessor: IAccessor, params: ISetBorderPositionCommandParams) => {
         if (!params.value) return false;
         const commandService = accessor.get(ICommandService);
         const borderManager = accessor.get(BorderStyleManagerService);
         borderManager.setType(params.value);
-        return commandService.executeCommand(SetBorderCommand.id);
+        return commandService.syncExecuteCommand(SetBorderCommand.id);
     },
 };
 
 export const SetBorderStyleCommand: ICommand = {
     id: 'sheet.command.set-border-style',
     type: CommandType.COMMAND,
-    handler: async (accessor: IAccessor, params: ISetBorderStyleCommandParams) => {
+    handler: (accessor: IAccessor, params: ISetBorderStyleCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const borderManager = accessor.get(BorderStyleManagerService);
         borderManager.setStyle(params.value);
-        return commandService.executeCommand(SetBorderCommand.id);
+        return commandService.syncExecuteCommand(SetBorderCommand.id);
     },
 };
 
 export const SetBorderColorCommand: ICommand<ISetBorderColorCommandParams> = {
     id: 'sheet.command.set-border-color',
     type: CommandType.COMMAND,
-    handler: async (accessor: IAccessor, params: ISetBorderColorCommandParams) => {
+    handler: (accessor: IAccessor, params: ISetBorderColorCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const borderManager = accessor.get(BorderStyleManagerService);
         borderManager.setColor(params.value);
-        return commandService.executeCommand(SetBorderCommand.id);
+        return commandService.syncExecuteCommand(SetBorderCommand.id);
     },
 };
 
 export const SetBorderBasicCommand: ICommand<ISetBorderBasicCommandParams> = {
     id: 'sheet.command.set-border-basic',
     type: CommandType.COMMAND,
-    handler: async (accessor: IAccessor, params: ISetBorderBasicCommandParams) => {
-        const { unitId, subUnitId, value } = params;
+    handler: (accessor: IAccessor, params: ISetBorderBasicCommandParams) => {
+        const { unitId, subUnitId, value, ranges } = params;
         const { type, color, style } = value;
 
         const commandService = accessor.get(ICommandService);
@@ -638,9 +639,10 @@ export const SetBorderBasicCommand: ICommand<ISetBorderBasicCommandParams> = {
         if (color) borderManager.setColor(color);
         borderManager.setStyle(style);
 
-        return commandService.executeCommand(SetBorderCommand.id, {
+        return commandService.syncExecuteCommand(SetBorderCommand.id, {
             unitId,
             subUnitId,
+            ranges,
         });
     },
 };

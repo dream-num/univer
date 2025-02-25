@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -174,6 +174,6 @@ export const InsertRangeMoveRightCommand: ICommand = {
 
         return false;
     },
-    // all subsequent mutations should succeed inorder to make the whole process succeed
+    // all subsequent mutations should succeed in order to make the whole process succeed
     // Promise.all([]).then(() => true),
 };

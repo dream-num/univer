@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { IDisposable, Injector, IRange, Univer, Workbook } from '@univerjs/core';
 import {
     ICommandService,
     IUniverInstanceService,
@@ -27,10 +28,12 @@ import {
     AddWorksheetMergeMutation,
     InsertColAfterCommand,
     InsertColBeforeCommand,
+    InsertColByRangeCommand,
     InsertColCommand,
     InsertColMutation,
     InsertRowAfterCommand,
     InsertRowBeforeCommand,
+    InsertRowByRangeCommand,
     InsertRowCommand,
     InsertRowMutation,
     MergeCellController,
@@ -38,8 +41,10 @@ import {
     MoveColsMutation,
     MoveRangeMutation,
     RefRangeService,
+    RemoveColByRangeCommand,
     RemoveColCommand,
     RemoveColMutation,
+    RemoveRowByRangeCommand,
     RemoveRowCommand,
     RemoveRowMutation,
     RemoveWorksheetMergeCommand,
@@ -51,7 +56,6 @@ import {
 import { type IConfirmPartMethodOptions, IConfirmService } from '@univerjs/ui';
 import { Subject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import type { IDisposable, Injector, IRange, Univer, Workbook } from '@univerjs/core';
 
 import { getClearContentMutationParamForRange } from '../../../common/utils';
 import {
@@ -106,6 +110,15 @@ describe('Test add worksheet merge commands', () => {
         commandService.registerCommand(RemoveWorksheetMergeCommand);
         commandService.registerCommand(AddWorksheetMergeMutation);
         commandService.registerCommand(RemoveWorksheetMergeMutation);
+
+        [
+            RemoveColByRangeCommand,
+            RemoveRowByRangeCommand,
+            InsertRowByRangeCommand,
+            InsertColByRangeCommand,
+        ].forEach((command) => {
+            commandService.registerCommand(command);
+        });
 
         [
             InsertRowCommand,

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,6 @@
  * limitations under the License.
  */
 
-import { BooleanNumber, BulletAlignment, DataStreamTreeTokenType as DT, GridType } from '@univerjs/core';
-
-import { GlyphType } from '../../../../basics/i-document-skeleton-cached';
-import { hasCJK, hasCJKText, isCjkCenterAlignedPunctuation, isCjkLeftAlignedPunctuation, isCjkRightAlignedPunctuation, ptToPixel } from '../../../../basics/tools';
-import { FontCache } from '../shaping-engine/font-cache';
-import { validationGrid } from '../tools';
 import type {
     IAdjustability,
     IDocumentSkeletonBoundingBox,
@@ -27,8 +21,14 @@ import type {
     IDocumentSkeletonDivide,
     IDocumentSkeletonGlyph,
 } from '../../../../basics/i-document-skeleton-cached';
+
 import type { IFontCreateConfig } from '../../../../basics/interfaces';
 import type { IOpenTypeGlyphInfo } from '../shaping-engine/text-shaping';
+import { BooleanNumber, BulletAlignment, DataStreamTreeTokenType as DT, GridType } from '@univerjs/core';
+import { GlyphType } from '../../../../basics/i-document-skeleton-cached';
+import { hasCJK, hasCJKText, isCjkCenterAlignedPunctuation, isCjkLeftAlignedPunctuation, isCjkRightAlignedPunctuation, ptToPixel } from '../../../../basics/tools';
+import { FontCache } from '../shaping-engine/font-cache';
+import { validationGrid } from '../tools';
 
 export function isSpace(char: string) {
     const SPACE_CHARS = [' ', '\u{00A0}', '　'];

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,8 @@
 import type { IDocumentBody, IDocumentData, ITable, ITextStyle, Nullable } from '@univerjs/core';
 import type { IAfterProcessRule, IPastePlugin, IStyleRule } from './paste-plugins/type';
 
-import { CustomRangeType, DataStreamTreeTokenType, generateRandomId, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, skipParseTagNames, Tools } from '@univerjs/core';
-import { DrawingTypeEnum, ImageSourceType } from '@univerjs/drawing';
+import { CustomRangeType, DataStreamTreeTokenType, DrawingTypeEnum, generateRandomId, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, skipParseTagNames, Tools } from '@univerjs/core';
+import { ImageSourceType } from '@univerjs/drawing';
 import { genTableSource, getEmptyTableCell, getEmptyTableRow, getTableColumn } from '../../../commands/commands/table/table';
 import { extractNodeStyle } from './parse-node-style';
 import parseToDom from './parse-to-dom';
@@ -38,7 +38,7 @@ function matchFilter(node: HTMLElement, filter: IStyleRule['filter']) {
 }
 
 // TODO: get from page width.
-const DEFAULT_TABLE_WIDTH = 600;
+const DEFAULT_TABLE_WIDTH = 660;
 
 interface ITableCache {
     table: ITable;

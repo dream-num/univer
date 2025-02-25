@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,25 +14,28 @@
  * limitations under the License.
  */
 
+import type { ICommand, Nullable } from '@univerjs/core';
+import type { IOffsets } from './table';
 import { CommandType, ICommandService, IUniverInstanceService } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
-import type { ICommand, Nullable } from '@univerjs/core';
 import { getCommandSkeleton } from '../../util';
 import { DocTableInsertRowCommand } from './doc-table-insert.command';
 import { CellPosition, getCellOffsets, INSERT_ROW_POSITION } from './table';
-import type { IOffsets } from './table';
 
 export interface IDocTableTabCommandParams {
     shift: boolean;
 }
 
 export const DocTableTabCommand: ICommand<IDocTableTabCommandParams> = {
+
     id: 'doc.table.tab-in-table',
+
     type: CommandType.COMMAND,
+
     handler: async (accessor, params: IDocTableTabCommandParams) => {
         const { shift } = params;
         const textSelectionManager = accessor.get(DocSelectionManagerService);
-        const activeTextRange = textSelectionManager.getActiveTextRange();
+        const docRanges = textSelectionManager.getDocRanges();
         const commandService = accessor.get(ICommandService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
@@ -41,25 +44,26 @@ export const DocTableTabCommand: ICommand<IDocTableTabCommandParams> = {
             return false;
         }
 
+        const activeRange = docRanges.find((range) => range.isActive) ?? docRanges[0];
         const unitId = docDataModel.getUnitId();
         const docSkeletonManagerService = getCommandSkeleton(accessor, unitId);
         const skeleton = docSkeletonManagerService?.getSkeleton();
-        const viewModel = skeleton?.getViewModel().getSelfOrHeaderFooterViewModel(activeTextRange?.segmentId);
+        const viewModel = skeleton?.getViewModel().getSelfOrHeaderFooterViewModel(activeRange?.segmentId);
 
         if (viewModel == null) {
             return false;
         }
 
-        if (activeTextRange == null) {
+        if (activeRange == null) {
             return false;
         }
 
         let offsets: Nullable<IOffsets> = null;
 
         if (shift) {
-            offsets = getCellOffsets(viewModel, activeTextRange, CellPosition.PREV);
+            offsets = getCellOffsets(viewModel, activeRange, CellPosition.PREV);
         } else {
-            offsets = getCellOffsets(viewModel, activeTextRange, CellPosition.NEXT);
+            offsets = getCellOffsets(viewModel, activeRange, CellPosition.NEXT);
         }
 
         if (offsets) {

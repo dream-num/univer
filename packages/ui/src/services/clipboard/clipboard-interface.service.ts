@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,13 @@ export const FILE__JPEG_CLIPBOARD_MIME_TYPE = 'image/jpeg';
 export const FILE__BMP_CLIPBOARD_MIME_TYPE = 'image/bmp';
 export const FILE__WEBP_CLIPBOARD_MIME_TYPE = 'image/webp';
 export const FILE_SVG_XML_CLIPBOARD_MIME_TYPE = 'image/svg+xml';
+
+export const imageMimeTypeSet = new Set([
+    FILE__BMP_CLIPBOARD_MIME_TYPE,
+    FILE__JPEG_CLIPBOARD_MIME_TYPE,
+    FILE__WEBP_CLIPBOARD_MIME_TYPE,
+    FILE_PNG_CLIPBOARD_MIME_TYPE,
+]);
 
 /**
  * This interface provides an interface to access system's clipboard.

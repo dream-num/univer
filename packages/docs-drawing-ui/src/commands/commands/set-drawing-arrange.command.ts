@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,17 +15,17 @@
  */
 
 import type { IAccessor, ICommand, IMutationInfo, JSONXActions, Nullable } from '@univerjs/core';
+import type { IRichTextEditingMutationParams } from '@univerjs/docs';
+import type { IDrawingJsonUndo1, IDrawingOrderMapParam } from '@univerjs/drawing';
 import {
+    ArrangeTypeEnum,
     CommandType,
     ICommandService,
     JSONX,
     Tools,
 } from '@univerjs/core';
-import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { RichTextEditingMutation } from '@univerjs/docs';
 import { IDocDrawingService } from '@univerjs/docs-drawing';
-import type { IDrawingJsonUndo1, IDrawingOrderMapParam } from '@univerjs/drawing';
-import { ArrangeTypeEnum } from '@univerjs/drawing';
 
 export interface ISetDrawingArrangeCommandParams extends IDrawingOrderMapParam {
     arrangeType: ArrangeTypeEnum;

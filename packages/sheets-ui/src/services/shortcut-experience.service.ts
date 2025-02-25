@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,8 @@
  */
 
 import type { IDisposable, ISelection, ITextRangeParam, Nullable } from '@univerjs/core';
-import { Inject, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import type { KeyCode } from '@univerjs/ui';
+import { Inject, IUniverInstanceService, LocaleService } from '@univerjs/core';
 
 export interface IShortcutExperienceSearch {
     unitId: string;
@@ -33,7 +33,6 @@ export interface IShortcutExperienceParam extends IShortcutExperienceSearch {
  * This service is prepared for shortcut experience optimization,
  * including the combined use of enter and tab, the highlighting experience of formulas in the editor, and so on.
  *
- * @deprecated this class looks weired
  */
 export class ShortcutExperienceService implements IDisposable {
     private _current: Nullable<IShortcutExperienceSearch> = null;

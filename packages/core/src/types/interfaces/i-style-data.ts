@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,10 +31,22 @@ import type { ThemeColorType } from '../enum/theme-color-type';
  * Properties of text decoration
  */
 export interface ITextDecoration {
-    s: BooleanNumber; // show
-    c?: BooleanNumber; // color is follow the font color. the default value is TRUE, it's also TRUE if it is undefined. the cl has no effect when `c` is TRUE.
-    cl?: IColorStyle; // color
-    t?: TextDecoration; // lineType
+    /**
+     * show
+     */
+    s: BooleanNumber;
+    /**
+     * color is follow the font color. the default value is TRUE, it's also TRUE if it is undefined. the cl has no effect when `c` is TRUE.
+     */
+    c?: BooleanNumber;
+    /**
+     * color
+     */
+    cl?: IColorStyle;
+    /**
+     * lineType
+     */
+    t?: TextDecoration;
 }
 
 /**

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ export type SocketBodyType = string | ArrayBufferLike | Blob | ArrayBufferView;
 /**
  * This service is responsible for establishing bidi-directional connection to a remote server.
  */
-export const ISocketService = createIdentifier<ISocketService>('univer.socket');
+export const ISocketService = createIdentifier<ISocketService>('univer.network.socket.service');
 export interface ISocketService {
     createSocket(url: string): Nullable<ISocket>;
 }
@@ -42,7 +42,7 @@ export interface ISocket {
      */
     send(data: SocketBodyType): void;
 
-    close$: Observable<CloseEvent>;
+    close$: Observable<Event>;
     error$: Observable<Event>;
     message$: Observable<MessageEvent>;
     open$: Observable<Event>;
@@ -71,8 +71,8 @@ export class WebSocketService extends Disposable implements ISocketService {
                     connection.addEventListener('open', callback);
                     disposables.add(toDisposable(() => connection.removeEventListener('open', callback)));
                 }).pipe(share()),
-                close$: new Observable<CloseEvent>((subscriber) => {
-                    const callback = (event: CloseEvent) => subscriber.next(event);
+                close$: new Observable<Event>((subscriber) => {
+                    const callback = (event: Event) => subscriber.next(event);
                     connection.addEventListener('close', callback);
                     disposables.add(toDisposable(() => connection.removeEventListener('close', callback)));
                 }).pipe(share()),

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,13 @@ import type { Ctor } from '@univerjs/core';
 import type { IFunctionNames } from '../basics/function';
 import type { BaseFunction } from '../functions/base-function';
 
-export const PLUGIN_CONFIG_KEY = 'engine-formula.config';
+export const ENGINE_FORMULA_PLUGIN_CONFIG_KEY = 'engine-formula.config';
 
-export const configSymbol = Symbol(PLUGIN_CONFIG_KEY);
+export const DEFAULT_CYCLE_REFERENCE_COUNT = 1;
+
+export const ENGINE_FORMULA_CYCLE_REFERENCE_COUNT = 'CYCLE_REFERENCE_COUNT';
+
+export const configSymbol = Symbol(ENGINE_FORMULA_PLUGIN_CONFIG_KEY);
 
 export interface IUniverEngineFormulaConfig {
     notExecuteFormula?: boolean;

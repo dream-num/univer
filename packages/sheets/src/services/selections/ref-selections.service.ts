@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,7 @@ export class RefSelectionsService extends SheetsSelectionsService {
         this.selectionMoveStart$ = $.pipe(switchMap((ss) => merge(...ss.map((s) => s.selectionMoveStart$))));
         this.selectionMoving$ = $.pipe(switchMap((ss) => merge(...ss.map((s) => s.selectionMoving$))));
         this.selectionMoveEnd$ = $.pipe(switchMap((ss) => merge(...ss.map((s) => s.selectionMoveEnd$))));
+        this.selectionSet$ = $.pipe(switchMap((ss) => merge(...ss.map((s) => s.selectionSet$))));
     }
 
     private _getAliveWorkbooks$(): Observable<WorkbookSelectionModel[]> {

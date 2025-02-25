@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,9 @@
 import type { ISheetDataValidationRule, Nullable } from '@univerjs/core';
 import type { IFormulaInfo, IOtherFormulaResult } from '@univerjs/sheets-formula';
 import { DataValidationType, Disposable, Inject, isFormulaString, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { DataValidationModel } from '@univerjs/data-validation';
+import { DataValidationModel, DataValidatorRegistryService } from '@univerjs/data-validation';
 import { RegisterOtherFormulaService } from '@univerjs/sheets-formula';
-import { isCustomFormulaType } from '../utils/formula';
+import { shouldOffsetFormulaByRange } from '../utils/formula';
 import { DataValidationCacheService } from './dv-cache.service';
 
 type RuleId = string;
@@ -33,7 +33,8 @@ export class DataValidationFormulaService extends Disposable {
         @IUniverInstanceService private readonly _instanceService: IUniverInstanceService,
         @Inject(RegisterOtherFormulaService) private _registerOtherFormulaService: RegisterOtherFormulaService,
         @Inject(DataValidationCacheService) private readonly _dataValidationCacheService: DataValidationCacheService,
-        @Inject(DataValidationModel) private readonly _dataValidationModel: DataValidationModel
+        @Inject(DataValidationModel) private readonly _dataValidationModel: DataValidationModel,
+        @Inject(DataValidatorRegistryService) private readonly _validatorRegistryService: DataValidatorRegistryService
     ) {
         super();
         this._initFormulaResultHandler();
@@ -87,7 +88,7 @@ export class DataValidationFormulaService extends Disposable {
     }
 
     addRule(unitId: string, subUnitId: string, rule: ISheetDataValidationRule) {
-        if (!isCustomFormulaType(rule.type) && rule.type !== DataValidationType.CHECKBOX) {
+        if (!shouldOffsetFormulaByRange(rule.type, this._validatorRegistryService) && rule.type !== DataValidationType.CHECKBOX) {
             const { formula1, formula2, uid: ruleId } = rule;
             const isFormula1Legal = isFormulaString(formula1);
             const isFormula2Legal = isFormulaString(formula2);

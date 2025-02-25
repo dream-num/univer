@@ -15,6 +15,12 @@ if (command === 'build') {
     if (args.includes('--skipUMD')) {
         options.skipUMD = true;
     }
+    if (args.includes('--cleanup')) {
+        options.cleanup = true;
+    }
+    if (args.includes('--nodeFirst')) {
+        options.nodeFirst = true;
+    }
 
     build(options);
 }

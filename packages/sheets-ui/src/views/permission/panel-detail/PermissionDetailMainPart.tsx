@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,12 @@
  */
 
 import type { IRange, Workbook } from '@univerjs/core';
-import { Injector, isValidRange, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
+import type { IRangeSelectorProps } from '../../../basics/editor/range';
+import { Injector, isValidRange, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { FormLayout, Input } from '@univerjs/design';
 import { deserializeRangeWithSheet, serializeRange } from '@univerjs/engine-formula';
 import { setEndForRange } from '@univerjs/sheets';
-import { ComponentManager } from '@univerjs/ui';
+import { ComponentManager, useDependency } from '@univerjs/ui';
 import React, { useMemo } from 'react';
 import { RANGE_SELECTOR_COMPONENT_KEY } from '../../../common/keys';
 import { checkRangeValid } from '../util';
@@ -29,17 +30,15 @@ interface IPermissionDetailMainPartProps {
     permissionId: string;
     ranges: IRange[];
     onRangesChange: (ranges: IRange[], err?: string) => void;
-    isFocusRangeSelector: boolean;
     rangesErrMsg?: string;
     desc?: string;
     onDescChange: (desc: string) => void;
-    rangeSelectorRef: React.MutableRefObject<any>;
 }
 
 export const PermissionDetailMainPart = (props: IPermissionDetailMainPartProps) => {
-    const { ranges, onRangesChange, rangeSelectorRef, desc, onDescChange, rangesErrMsg, isFocusRangeSelector, permissionId } = props;
+    const { ranges, onRangesChange, desc, onDescChange, rangesErrMsg, permissionId } = props;
     const componentManager = useDependency(ComponentManager);
-    const RangeSelector = useMemo(() => componentManager.get(RANGE_SELECTOR_COMPONENT_KEY), []);
+    const RangeSelector: React.ComponentType<IRangeSelectorProps> = useMemo(() => componentManager.get(RANGE_SELECTOR_COMPONENT_KEY), []) as any;
     const univerInstanceService = useDependency(IUniverInstanceService);
     const localeService = useDependency(LocaleService);
     const injector = useDependency(Injector);
@@ -77,16 +76,17 @@ export const PermissionDetailMainPart = (props: IPermissionDetailMainPartProps) 
 
     return (
         <>
-            <FormLayout className={styles.sheetPermissionPanelTitle} label={localeService.t('permission.panel.protectedRange')}>
+            <FormLayout
+                className={styles.sheetPermissionPanelTitle}
+                label={localeService.t('permission.panel.protectedRange')}
+                error={rangesErrMsg}
+            >
                 {RangeSelector && (
                     <RangeSelector
                         unitId={unitId}
-                        errorText={rangesErrMsg}
                         subUnitId={subUnitId}
-                        initValue={ranges?.map((i) => serializeRange(i)).join(',')}
-                        onChange={handleRangeChange}
-                        isFocus={isFocusRangeSelector}
-                        actions={rangeSelectorRef.current}
+                        initialValue={ranges?.map((i) => serializeRange(i)).join(',')}
+                        onChange={(_, text) => handleRangeChange(text)}
                     />
                 )}
             </FormLayout>

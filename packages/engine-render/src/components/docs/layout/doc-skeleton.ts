@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,10 +25,9 @@ import type { IDocsConfig, INodeInfo, INodePosition, INodeSearch } from '../../.
 import type { IViewportInfo, Vector2 } from '../../../basics/vector2';
 import type { DocumentViewModel } from '../view-model/document-view-model';
 import type { ILayoutContext } from './tools';
-import { PRESET_LIST_TYPE, SectionType } from '@univerjs/core';
+import { PRESET_LIST_TYPE, SectionType, Skeleton } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { DocumentSkeletonPageType, GlyphType, LineType, PageLayoutType } from '../../../basics/i-document-skeleton-cached';
-import { Skeleton } from '../../skeleton';
 import { Liquid } from '../liquid';
 import { DocumentEditArea } from '../view-model/document-view-model';
 import { dealWithSection } from './block/section';
@@ -886,7 +885,12 @@ export class DocumentSkeleton extends Skeleton {
                 this._findLiquid?.translate(tableLeft, tableTop);
 
                 for (const row of rows) {
-                    const { top: rowTop, cells } = row;
+                    const { top: rowTop, cells, isRepeatRow } = row;
+
+                    // Cursor should not in repeat row.
+                    if (isRepeatRow) {
+                        continue;
+                    }
 
                     this._findLiquid?.translateSave();
                     this._findLiquid?.translate(0, rowTop);

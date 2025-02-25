@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,8 @@ export const DOCS_ZEN_EDITOR_UNIT_ID_KEY = `${PREFIX}ZEN_EDITOR`;
 export const DEFAULT_EMPTY_DOCUMENT_VALUE = '\r\n';
 
 export const IS_ROW_STYLE_PRECEDE_COLUMN_STYLE = 'isRowStylePrecedeColumnStyle';
+
+export const AUTO_HEIGHT_FOR_MERGED_CELLS = Symbol('AUTO_HEIGHT_FOR_MERGED_CELLS');
 
 export function createInternalEditorID(id: string) {
     return `${PREFIX}${id}`;

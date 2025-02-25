@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -154,7 +154,7 @@ export class SheetHyperLinkSetRangeController extends Disposable {
                         return next(cell);
                     }
                     // const renderer = this._renderManagerService.getRenderById(unitId);
-                    // const skeleton = renderer?.with(SheetSkeletonManagerService).getWorksheetSkeleton(subUnitId);
+                    // const skeleton = renderer?.with(SheetSkeletonManagerService).getSkeletonParam(subUnitId);
                     // if (!skeleton) {
                     //     return next(cell);
                     // }

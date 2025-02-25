@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-hyper-link-ui",
-    "version": "0.5.0",
+    "version": "0.6.1",
     "private": false,
     "description": "",
     "author": "DreamNum <developer@univer.ai>",
@@ -70,7 +70,7 @@
         "build": "univer-cli build"
     },
     "peerDependencies": {
-        "react": "^16.9.0 || ^17.0.0 || ^18.0.0",
+        "react": ">=16.9.0 || >=17 || >=18 || >=19",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
@@ -80,7 +80,7 @@
         "@univerjs/docs-ui": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons": "^0.2.7",
+        "@univerjs/icons": "^0.2.20",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-data-validation": "workspace:*",
         "@univerjs/sheets-formula-ui": "workspace:*",
@@ -91,33 +91,12 @@
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
+        "postcss": "^8.5.3",
         "react": "18.3.1",
         "rxjs": "^7.8.1",
-        "typescript": "^5.6.3",
-        "vite": "^5.4.11",
-        "vitest": "^2.1.5"
-    },
-    "space": {
-        ".": {
-            "import": "./lib/es/index.js",
-            "require": "./lib/cjs/index.js",
-            "types": "./lib/types/index.d.ts"
-        },
-        "./*": {
-            "import": "./lib/es/*",
-            "require": "./lib/cjs/*",
-            "types": "./lib/types/index.d.ts"
-        },
-        "./locale/*": {
-            "import": "./lib/es/locale/*.js",
-            "require": "./lib/cjs/locale/*.js",
-            "types": "./lib/types/locale/*.d.ts"
-        },
-        "./facade": {
-            "import": "./lib/es/facade.js",
-            "require": "./lib/cjs/facade.js",
-            "types": "./lib/types/facade/index.d.ts"
-        },
-        "./lib/*": "./lib/*"
+        "tailwindcss": "^3.4.17",
+        "typescript": "^5.7.3",
+        "vite": "^6.1.1",
+        "vitest": "^3.0.6"
     }
 }

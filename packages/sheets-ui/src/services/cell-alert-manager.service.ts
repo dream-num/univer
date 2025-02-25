@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+import type { IDisposable } from '@univerjs/core';
+import type { ISheetLocationBase } from '@univerjs/sheets';
 import { Disposable, Inject } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { Subject } from 'rxjs';
-import type { IDisposable } from '@univerjs/core';
-import type { ISheetLocation } from '@univerjs/sheets';
 import { CELL_ALERT_KEY } from '../views/cell-alert';
 import { SheetCanvasPopManagerService } from './canvas-pop-manager.service';
 
@@ -32,7 +32,7 @@ export interface ICellAlert {
     type: CellAlertType;
     title: React.ReactNode;
     message: React.ReactNode;
-    location: ISheetLocation;
+    location: ISheetLocationBase;
     width: number;
     height: number;
     key: string;

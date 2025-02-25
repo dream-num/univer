@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ import type { ComponentType } from '../../common/component-manager';
 import { createIdentifier, Disposable, toDisposable } from '@univerjs/core';
 import { type Observable, Subject } from 'rxjs';
 
-type ComponentRenderer = () => ComponentType;
+export type ComponentRenderer = () => ComponentType;
 type ComponentPartKey = BuiltInUIPart | string;
 
 export enum BuiltInUIPart {
@@ -31,13 +31,23 @@ export enum BuiltInUIPart {
     LEFT_SIDEBAR = 'left-sidebar',
     FLOATING = 'floating',
     UNIT = 'unit',
+    CUSTOM_HEADER = 'custom-header',
+    CUSTOM_LEFT = 'custom-left',
+    CUSTOM_RIGHT = 'custom-right',
+    CUSTOM_FOOTER = 'custom-footer',
+    TOOLBAR = 'toolbar',
 }
 
 export interface IUIPartsService {
     componentRegistered$: Observable<ComponentPartKey>;
+    uiVisibleChange$: Observable<{ ui: ComponentPartKey; visible: boolean }>;
 
     registerComponent(part: ComponentPartKey, componentFactory: () => ComponentType): IDisposable;
     getComponents(part: ComponentPartKey): Set<ComponentRenderer>;
+
+    setUIVisible(part: ComponentPartKey, visible: boolean): void;
+
+    isUIVisible(part: ComponentPartKey): boolean;
 }
 
 export const IUIPartsService = createIdentifier<IUIPartsService>('ui.parts.service');
@@ -47,11 +57,23 @@ export class UIPartsService extends Disposable implements IUIPartsService {
 
     private readonly _componentRegistered$ = new Subject<ComponentPartKey>();
     readonly componentRegistered$ = this._componentRegistered$.asObservable();
+    private readonly _uiVisible = new Map<ComponentPartKey, boolean>();
+    private readonly _uiVisibleChange$ = new Subject<{ ui: ComponentPartKey; visible: boolean }>();
+    readonly uiVisibleChange$ = this._uiVisibleChange$.asObservable();
 
     override dispose(): void {
         super.dispose();
 
         this._componentRegistered$.complete();
+    }
+
+    setUIVisible(part: ComponentPartKey, visible: boolean): void {
+        this._uiVisible.set(part, visible);
+        this._uiVisibleChange$.next({ ui: part, visible });
+    }
+
+    isUIVisible(part: ComponentPartKey): boolean {
+        return this._uiVisible.get(part) ?? true;
     }
 
     registerComponent(part: ComponentPartKey, componentFactory: () => React.ComponentType): IDisposable {

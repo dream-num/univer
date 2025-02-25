@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,10 @@
  */
 
 import type { Observable } from 'rxjs';
-import { BehaviorSubject } from 'rxjs';
-
-import { Disposable, toDisposable } from '../../shared/lifecycle';
 import type { Nullable } from '../../shared/types';
+
+import { BehaviorSubject } from 'rxjs';
+import { Disposable, toDisposable } from '../../shared/lifecycle';
 
 export interface IStyleSheet {
     [key: string]: string;

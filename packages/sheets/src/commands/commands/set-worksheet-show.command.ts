@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,11 @@
  */
 
 import type { IAccessor, ICommand, Workbook } from '@univerjs/core';
-import { BooleanNumber, CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-
 import type { ISetWorksheetHideMutationParams } from '../mutations/set-worksheet-hide.mutation';
-import { SetWorksheetHideMutation, SetWorksheetHideMutationFactory } from '../mutations/set-worksheet-hide.mutation';
+
 import type { ISetWorksheetActiveOperationParams } from '../operations/set-worksheet-active.operation';
+import { BooleanNumber, CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { SetWorksheetHideMutation, SetWorksheetHideMutationFactory } from '../mutations/set-worksheet-hide.mutation';
 import {
     SetWorksheetActiveOperation,
     // SetWorksheetUnActivateMutationFactory,
@@ -29,14 +29,13 @@ import { getSheetCommandTarget } from './utils/target-util';
 export interface ISetWorksheetShowCommandParams {
     unitId: string;
     subUnitId: string;
-    value?: string;
 }
 
 export const SetWorksheetShowCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-worksheet-show',
 
-    handler: async (accessor: IAccessor, params: ISetWorksheetShowCommandParams) => {
+    handler: (accessor: IAccessor, params: ISetWorksheetShowCommandParams) => {
         const { unitId, subUnitId } = params;
 
         const commandService = accessor.get(ICommandService);

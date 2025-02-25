@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,11 +59,37 @@ export const SetDefinedNameMutationFactory = (
 export const SetDefinedNameMutation: IMutation<ISetDefinedNameMutationParam> = {
     id: 'formula.mutation.set-defined-name',
     type: CommandType.MUTATION,
-    handler: () => true,
+    handler: (accessor, params) => {
+        if (params == null) {
+            return false;
+        }
+
+        const definedNamesService = accessor.get(IDefinedNamesService);
+        const { id, unitId, name, formulaOrRefString, comment, hidden, localSheetId } = params as ISetDefinedNameMutationParam;
+        definedNamesService.registerDefinedName(unitId, {
+            id,
+            name: name.trim(),
+            formulaOrRefString: formulaOrRefString.trim(),
+            comment: comment?.trim(),
+            hidden,
+            localSheetId,
+        });
+
+        return true;
+    },
 };
 
 export const RemoveDefinedNameMutation: IMutation<ISetDefinedNameMutationParam> = {
     id: 'formula.mutation.remove-defined-name',
     type: CommandType.MUTATION,
-    handler: () => true,
+    handler: (accessor, params) => {
+        if (params == null) {
+            return false;
+        }
+        const definedNamesService = accessor.get(IDefinedNamesService);
+        const { unitId, id } = params as ISetDefinedNameMutationSearchParam;
+        definedNamesService.removeDefinedName(unitId, id);
+
+        return true;
+    },
 };

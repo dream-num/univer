@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,29 +14,25 @@
  * limitations under the License.
  */
 
-import { ICommandService, LocaleService, useDependency } from '@univerjs/core';
+import type { IDisplayMenuItem, IMenuItem, IMenuSelectorItem, IValueOption } from '../../../services/menu/menu';
+import type { ITooltipWrapperRef } from './TooltipButtonWrapper';
+import { ICommandService, LocaleService } from '@univerjs/core';
 import { MoreDownSingle } from '@univerjs/icons';
 import clsx from 'clsx';
-import React, { forwardRef, useMemo } from 'react';
+import { forwardRef, useMemo } from 'react';
 import { isObservable, Observable } from 'rxjs';
-import type { IDropdownProps } from '@univerjs/design';
-import type { Ref } from 'react';
-
 import { ComponentManager } from '../../../common/component-manager';
 import { CustomLabel } from '../../../components/custom-label/CustomLabel';
-import { useObservable } from '../../../components/hooks/observable';
 import { Menu } from '../../../components/menu/desktop/Menu';
 import { ILayoutService } from '../../../services/layout/layout.service';
 import { MenuItemType } from '../../../services/menu/menu';
+import { useDependency, useObservable } from '../../../utils/di';
 import { ToolbarButton } from './Button/ToolbarButton';
 import { useToolbarItemStatus } from './hook';
 import styles from './index.module.less';
 import { DropdownWrapper, TooltipWrapper } from './TooltipButtonWrapper';
-import type { IDisplayMenuItem, IMenuItem, IMenuSelectorItem, IValueOption } from '../../../services/menu/menu';
 
-export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem> & { align?: IDropdownProps['align'] }, ref: Ref<any>) => {
-    const { align } = props;
-
+export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenuItem>>((props, ref) => {
     const localeService = useDependency(LocaleService);
     const commandService = useDependency(ICommandService);
     const layoutService = useDependency(ILayoutService);
@@ -49,7 +45,7 @@ export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem> & { al
         commandService.executeCommand(commandId, params);
     };
 
-    const { tooltip, shortcut, icon, title, label, id, commandId } = props;
+    const { tooltip, shortcut, icon, title, label, id, commandId, type } = props;
 
     const tooltipTitle = localeService.t(tooltip ?? '') + (shortcut ? ` (${shortcut})` : '');
 
@@ -110,13 +106,24 @@ export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem> & { al
         if (menuType === MenuItemType.BUTTON_SELECTOR) {
             return (
                 <div
-                    className={clsx(styles.toolbarItemSelectButton, {
-                        [styles.toolbarItemSelectButtonDisabled]: disabled,
-                        [styles.toolbarItemSelectButtonActivated]: activated,
+                    className={clsx(styles.toolbarItemSelectButton, `
+                      univer-group univer-h-6 univer-pr-5 univer-transition-colors
+                      hover:univer-bg-gray-100
+                    `, {
+                        'univer-pointer-events-none univer-cursor-not-allowed univer-text-gray-200': disabled,
                     })}
                     data-disabled={disabled}
                 >
-                    <div className={styles.toolbarItemSelectButtonLabel} onClick={handleClick}>
+                    <div
+                        className={clsx(styles.toolbarItemSelectButtonLabel, `
+                          univer-transition-colors
+                          hover:univer-bg-gray-200
+                        `, {
+                            'univer-bg-gray-200': activated,
+                            'univer-bg-gray-50': activated && disabled,
+                        })}
+                        onClick={handleClick}
+                    >
                         <CustomLabel
                             icon={iconToDisplay}
                             title={title!}
@@ -125,14 +132,11 @@ export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem> & { al
                             onChange={handleSelectionsValueChange}
                         />
                     </div>
+
                     <DropdownWrapper
                         disabled={disabled}
-                        align={align ?? {
-                            targetOffset: [32, -12],
-                        }}
                         overlay={(
                             <Menu
-                                overViewport="scroll"
                                 menuType={id}
                                 options={options}
                                 onOptionSelect={handleSelect}
@@ -141,13 +145,18 @@ export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem> & { al
                         )}
                     >
                         <div
-                            className={clsx(styles.toolbarItemSelectButtonArrow, {
-                                [styles.toolbarItemSelectButtonArrowDisabled]: disabled,
-                                [styles.toolbarItemSelectButtonArrowActivated]: activated,
+                            className={clsx(`
+                              univer-absolute univer-right-0 univer-top-0 univer-box-border text-gray-400 univer-flex
+                              univer-h-6 univer-w-5 univer-items-center univer-justify-center univer-transition-colors
+                              hover:univer-bg-gray-200
+                            `, {
+                                'univer-pointer-events-none univer-cursor-not-allowed univer-text-gray-400': disabled,
+                                'univer-bg-gray-200': activated,
+                                'univer-bg-gray-50': activated && disabled,
                             })}
                             data-disabled={disabled}
                         >
-                            <MoreDownSingle style={{ height: '100%' }} />
+                            <MoreDownSingle className="univer-text-gray-400" />
                         </div>
                     </DropdownWrapper>
                 </div>
@@ -168,7 +177,7 @@ export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem> & { al
                 >
                     <div
                         className={clsx(styles.toolbarItemSelect, {
-                            [styles.toolbarItemSelectDisabled]: disabled,
+                            'univer-pointer-events-none univer-cursor-not-allowed univer-text-gray-200': disabled,
                             [styles.toolbarItemSelectActivated]: activated,
                         })}
                     >
@@ -181,10 +190,10 @@ export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem> & { al
                         />
                         <div
                             className={clsx(styles.toolbarItemSelectArrow, {
-                                [styles.toolbarItemSelectArrowDisabled]: disabled,
+                                'univer-pointer-events-none univer-cursor-not-allowed univer-text-gray-200': disabled,
                             })}
                         >
-                            <MoreDownSingle />
+                            <MoreDownSingle className="univer-text-gray-400" />
                         </div>
                     </div>
                 </DropdownWrapper>
@@ -196,32 +205,30 @@ export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem> & { al
         const isCustomComponent = componentManager.get(typeof label === 'string' ? label : label?.name ?? '');
 
         return (
-            <span>
-                <ToolbarButton
-                    className={styles.toolbarItemTextButton}
-                    active={activated}
-                    disabled={disabled}
-                    onClick={() => executeCommand(props.commandId ?? props.id)}
-                    onDoubleClick={() => props.subId && executeCommand(props.subId)}
-                >
-                    {isCustomComponent
-                        ? (
-                            <CustomLabel title={title!} value={value} label={label} />
-                        )
-                        : (
-                            <CustomLabel icon={icon} />
-                        )}
-                </ToolbarButton>
-            </span>
+            <ToolbarButton
+                noIcon={!icon}
+                active={activated}
+                disabled={disabled}
+                onClick={() => executeCommand(props.commandId ?? props.id)}
+                onDoubleClick={() => props.subId && executeCommand(props.subId)}
+            >
+                {isCustomComponent
+                    ? (
+                        <CustomLabel title={title!} value={value} label={label} />
+                    )
+                    : (
+                        icon ? <CustomLabel icon={icon} /> : <CustomLabel title={title!} />
+                    )}
+            </ToolbarButton>
         );
     }
 
     function renderItem() {
-        switch (props.type) {
+        switch (type) {
             case MenuItemType.BUTTON_SELECTOR:
             case MenuItemType.SELECTOR:
             case MenuItemType.SUBITEMS:
-                return renderSelectorType(props.type);
+                return renderSelectorType(type);
             case MenuItemType.BUTTON:
             default:
                 return renderButtonType();
@@ -229,7 +236,11 @@ export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem> & { al
     }
 
     return !hidden && (
-        <TooltipWrapper ref={ref} title={tooltipTitle} placement="bottom">
+        <TooltipWrapper
+            ref={ref}
+            title={tooltipTitle}
+            placement="bottom"
+        >
             {renderItem()}
         </TooltipWrapper>
     );

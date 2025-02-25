@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 import type { Observable } from 'rxjs';
 import type { Nullable } from '../shared';
 
-import type { IRangeType, IWorkbookData, IWorksheetData } from './typedef';
+import type { CustomData, IRangeType, IWorkbookData, IWorksheetData } from './typedef';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { UnitModel, UniverInstanceType } from '../common/unit';
 import { ILogService } from '../services/log/log.service';
@@ -423,5 +423,21 @@ export class Workbook extends UnitModel<IWorkbookData, UniverInstanceType.UNIVER
 
         // Active the first sheet.
         this.ensureActiveSheet();
+    }
+
+    /**
+     * Get custom metadata of workbook
+     * @returns {CustomData | undefined} custom metadata
+     */
+    getCustomMetadata(): CustomData | undefined {
+        return this._snapshot.custom;
+    }
+
+    /**
+     * Set custom metadata of workbook
+     * @param {CustomData | undefined} custom custom metadata
+     */
+    setCustomMetadata(custom: CustomData | undefined) {
+        this._snapshot.custom = custom;
     }
 }

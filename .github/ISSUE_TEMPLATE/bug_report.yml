@@ -1,6 +1,6 @@
 name: 🐛 Bug report
 description: Create a report to help us improve.
-labels: bug
+type: Bug
 title: '[Bug] '
 
 body:
@@ -22,26 +22,14 @@ body:
       validations:
           required: true
 
-    # - type: checkboxes
-    #   id: affected-productions
-    #   attributes:
-    #       label: Affected productions
-    #       options:
-    #           - label: Univer Sheet
-    #             value: sheet
-    #           - label: Univer Doc
-    #             value: doc
-    #           - label: Univer Slide
-    #             value: slide
-    #   validations:
-    #       required: true
-
     - type: textarea
       id: steps-to-reproduce
       attributes:
           label: Reproduction link
           description: |
-              We provide an [online template](https://stackblitz.com/~/github.com/awesome-univer/sheets-vite-demo), if your issue can be reproduced in this template, please provide the reproduction link here.
+              **Please note that it is essential to provide a reproduction and describe the reproduction steps in detail. If you cannot provide a reproduction link, your issue may be closed directly.**
+
+              We provide a [Vite online template](https://stackblitz.com/edit/univer-sheets-vite) and a [UMD online template](https://stackblitz.com/edit/univer-sheets-umd). If your issue can be reproduced in one of these templates, please provide the reproduction link here.
               We also provide some other [template repositories](https://github.com/awesome-univer), you can choose one of them to reproduce your issue.
               If your issue cannot be reproduced in the template, please provide as detailed reproduction steps as possible.
       validations:

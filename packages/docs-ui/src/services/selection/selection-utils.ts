@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -254,13 +254,13 @@ export function getRangeListFromSelection(
                 }
             }
 
-            if ((end >= startIndex && end <= endIndex + 1) || endInTable) {
-                // TO fix https://github.com/dream-num/univer-pro/issues/3437.
-                if (end === endIndex + 1 && !endInTable && nextParagraph && nextParagraph.children.length) {
-                    end = endIndex;
-                    endInTable = true;
-                }
+            // TO fix https://github.com/dream-num/univer-pro/issues/3437.
+            if (end === endIndex + 1 && !endInTable && nextParagraph && nextParagraph.children.length) {
+                end = endIndex;
+                endInTable = true;
+            }
 
+            if ((end >= startIndex && end <= endIndex) || endInTable) {
                 const sp = skeleton.findNodePositionByCharIndex(start, true, segmentId, segmentPage);
                 const ep = skeleton.findNodePositionByCharIndex(end, !endInTable, segmentId, segmentPage);
                 const ap = direction === RANGE_DIRECTION.FORWARD ? sp : ep;

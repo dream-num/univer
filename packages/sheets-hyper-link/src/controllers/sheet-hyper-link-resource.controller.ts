@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import type { ICellHyperLink } from '../types/interfaces/i-hyper-link';
+import type { ISheetHyperLink } from '../types/interfaces/i-hyper-link';
 import { Disposable, Inject, IResourceManagerService } from '@univerjs/core';
 import { UniverType } from '@univerjs/protocol';
 import { HyperLinkModel } from '../models/hyper-link.model';
 import { SHEET_HYPER_LINK_PLUGIN } from '../types/const';
 
-type UnitHyperLinkJSON = Record<string, ICellHyperLink[]>;
+type UnitHyperLinkJSON = Record<string, ISheetHyperLink[]>;
 
 export class SheetsHyperLinkResourceController extends Disposable {
     constructor(

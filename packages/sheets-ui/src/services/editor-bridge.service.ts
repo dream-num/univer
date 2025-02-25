@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import {
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     EDITOR_ACTIVATED,
     FOCUSING_EDITOR_STANDALONE,
-    FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE,
     IContextService,
     Inject,
     IUniverInstanceService,
@@ -36,7 +35,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { getCanvasOffsetByEngine, IEditorService } from '@univerjs/docs-ui';
-import { convertTextRotation, DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
+import { convertTextRotation, convertTransformToOffsetX, convertTransformToOffsetY, DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
 import { BEFORE_CELL_EDIT, IRefSelectionsService, SheetInterceptorService } from '@univerjs/sheets';
 import { BehaviorSubject, map, switchMap } from 'rxjs';
 import { ISheetSelectionRenderService } from './selection/base-selection-render.service';
@@ -83,8 +82,8 @@ export interface IEditorBridgeService {
     currentEditCellState$: Observable<Nullable<ICellEditorState>>;
     currentEditCellLayout$: Observable<Nullable<ICellEditorLayout>>;
     currentEditCell$: Observable<Nullable<IEditorBridgeServiceParam>>;
-
     visible$: Observable<IEditorBridgeServiceVisibleParam>;
+    forceKeepVisible$: Observable<boolean>;
 
     dispose(): void;
     refreshEditCellState(): void;
@@ -93,8 +92,12 @@ export interface IEditorBridgeService {
     getEditCellState(): Readonly<Nullable<IEditorBridgeServiceParam>>;
     getEditCellLayout(): Readonly<Nullable<ICellEditorLayout>>;
     getEditLocation(): Readonly<Nullable<ICellEditorState>>;
+    updateEditLocation(row: number, col: number): void;
     // Gets the DocumentDataModel of the latest table cell based on the latest cell contents
     getLatestEditCellState(): Readonly<Nullable<IEditorBridgeServiceParam>>;
+    /**
+     * @deprecated do not use it directly, use command SetCellEditVisibleOperation as instead.
+     */
     changeVisible(param: IEditorBridgeServiceVisibleParam): void;
     changeEditorDirty(dirtyStatus: boolean): void;
     getEditorDirty(): boolean;
@@ -107,9 +110,6 @@ export interface IEditorBridgeService {
 
 export class EditorBridgeService extends Disposable implements IEditorBridgeService, IDisposable {
     private _editorUnitId: string = DOCS_NORMAL_EDITOR_UNIT_ID_KEY;
-
-    private _isForceKeepVisible: boolean = false;
-
     private _editorIsDirty: boolean = false;
 
     private _isDisabled: boolean = false;
@@ -139,6 +139,9 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
 
     private readonly _afterVisible$ = new BehaviorSubject<IEditorBridgeServiceVisibleParam>(this._visible);
     readonly afterVisible$ = this._afterVisible$.asObservable();
+
+    private readonly _forceKeepVisible$ = new BehaviorSubject(false);
+    readonly forceKeepVisible$ = this._forceKeepVisible$.asObservable();
 
     constructor(
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
@@ -188,7 +191,7 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
         const ru = this._renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET);
         if (!ru) return;
 
-        const skeleton = ru.with(SheetSkeletonManagerService).getWorksheetSkeleton(currentEditCell.sheetId)?.skeleton;
+        const skeleton = ru.with(SheetSkeletonManagerService).getSkeletonParam(currentEditCell.sheetId)?.skeleton;
         const selectionRenderService = ru.with(ISheetSelectionRenderService);
         if (!skeleton) return;
         if (!this._currentEditCellState) return;
@@ -207,10 +210,10 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
         const { scaleX, scaleY } = scene.getAncestorScale();
 
         const scrollXY = scene.getViewportScrollXY(selectionRenderService.getViewPort());
-        startX = skeleton.convertTransformToOffsetX(startX, scaleX, scrollXY);
-        startY = skeleton.convertTransformToOffsetY(startY, scaleY, scrollXY);
-        endX = skeleton.convertTransformToOffsetX(endX, scaleX, scrollXY);
-        endY = skeleton.convertTransformToOffsetY(endY, scaleY, scrollXY);
+        startX = convertTransformToOffsetX(startX, scaleX, scrollXY);
+        startY = convertTransformToOffsetY(startY, scaleY, scrollXY);
+        endX = convertTransformToOffsetX(endX, scaleX, scrollXY);
+        endY = convertTransformToOffsetY(endY, scaleY, scrollXY);
 
         if (resetSizeOnly && this._currentEditCellLayout) {
             endX = endX - startX + this._currentEditCellLayout.position.startX;
@@ -218,10 +221,6 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
             startX = this._currentEditCellLayout.position.startX;
             startY = this._currentEditCellLayout.position.startY;
         }
-
-        this._editorService.setOperationSheetUnitId(unitId);
-
-        this._editorService.setOperationSheetSubUnitId(sheetId);
 
         this._currentEditCellLayout = {
             position: {
@@ -251,7 +250,6 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
              */
             this._contextService.setContextValue(EDITOR_ACTIVATED, false);
             this._contextService.setContextValue(FOCUSING_EDITOR_STANDALONE, false);
-            this._contextService.setContextValue(FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE, false);
         }
 
         const editCellState = this.getLatestEditCellState();
@@ -293,6 +291,16 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
         return this._currentEditCellState;
     }
 
+    updateEditLocation(row: number, column: number) {
+        if (this._currentEditCellState) {
+            this._currentEditCellState = {
+                ...this._currentEditCellState,
+                row,
+                column,
+            };
+        }
+    }
+
     // eslint-disable-next-line max-lines-per-function
     getLatestEditCellState() {
         const currentEditCell = this._currentEditCell;
@@ -322,10 +330,10 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
         const { scaleX, scaleY } = scene.getAncestorScale();
 
         const scrollXY = scene.getViewportScrollXY(selectionRenderService.getViewPort());
-        startX = skeleton.convertTransformToOffsetX(startX, scaleX, scrollXY);
-        startY = skeleton.convertTransformToOffsetY(startY, scaleY, scrollXY);
-        endX = skeleton.convertTransformToOffsetX(endX, scaleX, scrollXY);
-        endY = skeleton.convertTransformToOffsetY(endY, scaleY, scrollXY);
+        startX = convertTransformToOffsetX(startX, scaleX, scrollXY);
+        startY = convertTransformToOffsetY(startY, scaleY, scrollXY);
+        endX = convertTransformToOffsetX(endX, scaleX, scrollXY);
+        endY = convertTransformToOffsetY(endY, scaleY, scrollXY);
 
         const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet();
@@ -362,6 +370,7 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
                 const { verticalAlign, horizontalAlign, wrapStrategy, textRotation, fill } = documentLayoutObject;
                 const { centerAngle, vertexAngle } = convertTextRotation(textRotation);
                 blankModel.documentModel!.documentStyle.renderConfig = {
+                    ...renderConfig,
                     verticalAlign, horizontalAlign, wrapStrategy, background: { rgb: fill }, centerAngle, vertexAngle,
                 };
             }
@@ -388,10 +397,6 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
             }
         }
 
-        this._editorService.setOperationSheetUnitId(unitId);
-
-        this._editorService.setOperationSheetSubUnitId(sheetId);
-
         return {
             position: {
                 startX,
@@ -417,15 +422,6 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
     }
 
     changeVisible(param: IEditorBridgeServiceVisibleParam) {
-        /**
-         * Non-sheetEditor and formula selection mode,
-         * double-clicking cannot activate the sheet editor.
-         */
-        const editor = this._editorService.getFocusEditor();
-        if (this._refSelectionsService.getCurrentSelections().length > 0 && editor && !editor.isSheetEditor()) {
-            return;
-        }
-
         this._visible = param;
 
         // Reset the dirty status when the editor is visible.
@@ -442,15 +438,15 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
     }
 
     enableForceKeepVisible(): void {
-        this._isForceKeepVisible = true;
+        this._forceKeepVisible$.next(true);
     }
 
     disableForceKeepVisible(): void {
-        this._isForceKeepVisible = false;
+        this._forceKeepVisible$.next(false);
     }
 
     isForceKeepVisible(): boolean {
-        return this._isForceKeepVisible;
+        return this._forceKeepVisible$.getValue();
     }
 
     changeEditorDirty(dirtyStatus: boolean) {

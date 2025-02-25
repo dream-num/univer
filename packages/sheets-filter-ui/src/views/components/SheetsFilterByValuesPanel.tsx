@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,9 @@
  */
 
 import type { ByValuesModel, IFilterByValueWithTreeItem } from '../../services/sheets-filter-panel.service';
-import { LocaleService, useDependency } from '@univerjs/core';
+import { LocaleService } from '@univerjs/core';
 import { Button, Checkbox, Input, Tree } from '@univerjs/design';
-import { useObservable } from '@univerjs/ui';
+import { useDependency, useObservable } from '@univerjs/ui';
 import React, { useCallback } from 'react';
 import { statisticFilterByValueItems } from '../../models/utils';
 import styles from './index.module.less';
@@ -73,8 +73,7 @@ export function FilterByValue(props: { model: ByValuesModel }) {
                             disabled={items.length === 0}
                             checked={allChecked}
                             onChange={onCheckAllToggled}
-                        >
-                        </Checkbox>
+                        />
                         <span className={styles.sheetsFilterPanelValuesItemText}>{`${localeService.t('sheets-filter.panel.select-all')}`}</span>
                         <span className={styles.sheetsFilterPanelValuesItemCount}>{`(${stat.checked}/${stat.checked + stat.unchecked})`}</span>
                     </div>
@@ -121,8 +120,7 @@ export function FilterByValue(props: { model: ByValuesModel }) {
                                 </Button>
                             </div>
                         )}
-                    >
-                    </Tree>
+                    />
                 </div>
             </div>
         </div>

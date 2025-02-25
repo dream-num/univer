@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,29 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
+import type { IDisposable, Nullable } from '@univerjs/core';
 
+import type { CURSOR_TYPE } from './basics/const';
 import type { IEvent, IKeyboardEvent, IPointerEvent } from './basics/i-events';
 import type { ITimeMetric, ITransformChangeState } from './basics/interfaces';
 import type { IBasicFrameInfo } from './basics/performance-monitor';
 import type { Scene } from './scene';
 import { Disposable, EventSubject, toDisposable, Tools } from '@univerjs/core';
 import { Observable, shareReplay, Subject } from 'rxjs';
-import { type CURSOR_TYPE, RENDER_CLASS_TYPE } from './basics/const';
+import { RENDER_CLASS_TYPE } from './basics/const';
 import { DeviceType, PointerInput } from './basics/i-events';
 import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from './basics/interfaces';
 import { PerformanceMonitor } from './basics/performance-monitor';
 import { getPointerPrefix, getSizeForDom, IsSafari, requestNewFrame } from './basics/tools';
 import { Canvas, CanvasRenderMode } from './canvas';
 import { observeClientRect } from './floating/util';
+
+export interface IEngineOption {
+    elementWidth: number;
+    elementHeight: number;
+    dpr?: number;
+    renderMode?: CanvasRenderMode;
+}
 
 export class Engine extends Disposable {
     renderEvenInBackground = true;
@@ -41,6 +49,9 @@ export class Engine extends Disposable {
     readonly renderFrameTimeMetric$ = new Subject<ITimeMetric>();
     readonly renderFrameTags$ = new Subject<[string, any]>();
 
+    /**
+     * Pass event to scene.input-manager
+     */
     onInputChanged$ = new EventSubject<IEvent>();
 
     onTransformChange$ = new EventSubject<ITransformChangeState>();
@@ -78,8 +89,6 @@ export class Engine extends Disposable {
     private _renderingQueueLaunched = false;
 
     private _renderFrameTasks = new Array<() => void>();
-
-    private _renderFunction = (_timestamp: number) => { /* empty */ };
 
     private _requestNewFrameHandler: number = -1;
 
@@ -140,10 +149,37 @@ export class Engine extends Disposable {
 
     private _unitId: string = ''; // unitId
 
-    constructor(elemWidth: number = 1, elemHeight: number = 1, pixelRatio?: number, mode?: CanvasRenderMode) {
+    constructor();
+    constructor(unitId: string, options?: IEngineOption);
+    constructor(elemW: number, elemH: number, dpr?: number, renderMode?: CanvasRenderMode);
+    constructor(...args: any[]) {
         super();
+        let elemWidth = 1;
+        let elemHeight = 1;
+        let pixelRatio = 1;
+        let renderMode = CanvasRenderMode.Rendering;
+
+        if (args[0] && typeof args[0] === 'string') {
+            this._unitId = args[0];
+            const options = args[1] ?? {
+                elemWidth: 1,
+                elemHeight: 1,
+                pixelRatio: 1,
+                renderMode: CanvasRenderMode.Rendering,
+            };
+            elemWidth = options.elementWidth;
+            elemHeight = options.elementHeight;
+            pixelRatio = options.pixelRatio ?? 1;
+            renderMode = options.renderMode ?? CanvasRenderMode.Rendering;
+        } else {
+            elemWidth = args[0] ?? 1;
+            elemHeight = args[1] ?? 1;
+            pixelRatio = args[2] ?? 1;
+            renderMode = args[3] ?? CanvasRenderMode.Rendering;
+        }
+
         this._canvas = new Canvas({
-            mode,
+            mode: renderMode,
             width: elemWidth,
             height: elemHeight,
             pixelRatio,
@@ -153,13 +189,17 @@ export class Engine extends Disposable {
         this._handlePointerAction();
         this._handleDragAction();
 
-        if (mode !== CanvasRenderMode.Printing) {
+        if (renderMode !== CanvasRenderMode.Printing) {
             this._matchMediaHandler();
         }
     }
 
     _init() {
         this._performanceMonitor = new PerformanceMonitor();
+    }
+
+    get unitId(): string {
+        return this._unitId;
     }
 
     get elapsedTime(): number {
@@ -195,7 +235,7 @@ export class Engine extends Disposable {
     }
 
     addScene(sceneInstance: Scene): Scene {
-        const sceneKey = (sceneInstance as any).sceneKey;
+        const sceneKey = sceneInstance.sceneKey;
         if (this.hasScene(sceneKey)) {
             console.warn('Scenes has same key, it will be covered');
         }
@@ -247,7 +287,7 @@ export class Engine extends Disposable {
      * To ensure mouse events remain bound to the host element,
      * preventing the events from becoming ineffective once the mouse leaves the host.
      */
-    setRemainCapture() {
+    setCapture() {
         try {
             this.getCanvasElement().setPointerCapture(this._remainCapture);
         } catch {
@@ -259,19 +299,49 @@ export class Engine extends Disposable {
         return this.getCanvas().getPixelRatio();
     }
 
-    setContainer(elem: HTMLElement, resize = true) {
-        if (this._container === elem) {
+    private _resizeListenerDisposable: IDisposable | undefined;
+
+    /**
+     * Mount the canvas to the element so it would be rendered on UI.
+     * @param {HTMLElement} element - The element the canvas will mount on.
+     * @param {true} [resize] If should perform resize when mounted and observe resize event.
+     */
+    mount(element: HTMLElement, resize = true): void {
+        this.setContainer(element, resize);
+    }
+
+    /**
+     * Unmount the canvas without disposing it so it can be mounted again.
+     */
+    unmount(): void {
+        this._clearResizeListener();
+
+        if (!this._container) {
+            throw new Error('[Engine]: cannot unmount when container is not set!');
+        }
+
+        this._container.removeChild(this.getCanvasElement());
+        this._container = null;
+    }
+
+    /**
+     * Mount the canvas to the element so it would be rendered on UI.
+     * @deprecated Please use `mount` instead.
+     * @param {HTMLElement} element - The element the canvas will mount on.
+     * @param {true} [resize] If should perform resize when mounted and observe resize event.
+     */
+    setContainer(element: HTMLElement, resize = true) {
+        if (this._container === element) {
             return;
         }
 
-        this._container = elem;
+        this._container = element;
         this._container.appendChild(this.getCanvasElement());
+
+        this._clearResizeListener();
 
         if (resize) {
             this.resize();
-
-            this._resizeObserver?.unobserve(this._container as HTMLElement);
-            this._resizeObserver = null;
 
             let timer: number | undefined;
             this._resizeObserver = new ResizeObserver(() => {
@@ -284,11 +354,16 @@ export class Engine extends Disposable {
             });
             this._resizeObserver.observe(this._container);
 
-            this.disposeWithMe(() => {
-                this._resizeObserver?.unobserve(this._container as HTMLElement);
+            this._resizeListenerDisposable = toDisposable(() => {
+                this._resizeObserver!.unobserve(this._container as HTMLElement);
                 if (timer !== undefined) window.cancelIdleCallback(timer);
             });
         }
+    }
+
+    private _clearResizeListener(): void {
+        this._resizeListenerDisposable?.dispose();
+        this._resizeListenerDisposable = undefined;
     }
 
     resize() {
@@ -297,15 +372,18 @@ export class Engine extends Disposable {
         }
 
         const { width, height } = getSizeForDom(this._container);
-
         if (width === this._previousWidth && height === this._previousHeight) {
             return;
         }
 
         this._previousWidth = width;
-
         this._previousHeight = height;
+        this.resizeBySize(width, height);
+    }
 
+    dprChange() {
+        const width = this._previousWidth;
+        const height = this._previousHeight;
         this.resizeBySize(width, height);
     }
 
@@ -366,7 +444,7 @@ export class Engine extends Disposable {
         this._beginFrame$.complete();
         this._endFrame$.complete();
 
-        this._resizeObserver?.disconnect();
+        this._clearResizeListener();
         this._container = null;
     }
 
@@ -380,7 +458,7 @@ export class Engine extends Disposable {
         if (!this._renderingQueueLaunched) {
             this._renderStartTime = performance.now();
             this._renderingQueueLaunched = true;
-            this._renderFunction = this._renderFunctionCore.bind(this);
+            // this._renderFunction = this._renderFunctionCore.bind(this);
             this._requestNewFrameHandler = requestNewFrame(this._renderFunction);
         }
     }
@@ -393,6 +471,31 @@ export class Engine extends Disposable {
         this.addFunction2RenderLoop(renderFunction);
         this.startRenderLoop();
     }
+
+    /**
+     * call itself by raf
+     * Exec all function in _renderFrameTasks in _renderFrame()
+     */
+    private _renderFunction = (timestamp: number) => {
+        let shouldRender = true;
+        if (!this.renderEvenInBackground) {
+            shouldRender = false;
+        }
+
+        if (shouldRender) {
+            // Start new frame
+            this._beginFrame(timestamp);
+            // exec functions in _renderFrameTasks
+            this._renderFrame(timestamp);
+            this._endFrame(timestamp);
+        }
+
+        if (this._renderFrameTasks.length > 0) {
+            this._requestNewFrameHandler = requestNewFrame(this._renderFunction);
+        } else {
+            this._renderingQueueLaunched = false;
+        }
+    };
 
     /**
      * stop executing a render loop function and remove it from the execution array
@@ -492,38 +595,11 @@ export class Engine extends Disposable {
         return window;
     }
 
-    /**
-     * call itself by raf
-     * Exec all function in _renderFrameTasks in _renderFrame()
-     */
-    private _renderFunctionCore(timestamp: number): void {
-        let shouldRender = true;
-        if (!this.renderEvenInBackground) {
-            shouldRender = false;
-        }
-
-        if (shouldRender) {
-            // Start new frame
-            this._beginFrame(timestamp);
-            this._renderFrame(timestamp);
-            this._endFrame(timestamp);
-        }
-
-        if (this._renderFrameTasks.length > 0) {
-            this._requestNewFrameHandler = requestNewFrame(this._renderFunction);
-        } else {
-            this._renderingQueueLaunched = false;
-        }
-    }
-
     private _handleKeyboardAction() {
         const keyboardDownEvent = (evt: KeyboardEvent) => {
             const deviceEvent = evt as unknown as IKeyboardEvent;
             deviceEvent.deviceType = DeviceType.Keyboard;
             deviceEvent.inputIndex = evt.keyCode;
-            // deviceEvent.previousState = 0;
-            // deviceEvent.currentState = 1;
-
             this.onInputChanged$.emitEvent(deviceEvent);
         };
 
@@ -531,9 +607,6 @@ export class Engine extends Disposable {
             const deviceEvent = evt as unknown as IKeyboardEvent;
             deviceEvent.deviceType = DeviceType.Keyboard;
             deviceEvent.inputIndex = evt.keyCode;
-            // deviceEvent.previousState = 1;
-            // deviceEvent.currentState = 0;
-
             this.onInputChanged$.emitEvent(deviceEvent);
         };
 
@@ -964,7 +1037,7 @@ export class Engine extends Disposable {
         const mediaQueryList = window.matchMedia(`(resolution: ${window.devicePixelRatio}dppx)`);
 
         const _handleMediaChange = () => {
-            this.resize();
+            this.dprChange();
         };
 
         mediaQueryList.addEventListener('change', _handleMediaChange);

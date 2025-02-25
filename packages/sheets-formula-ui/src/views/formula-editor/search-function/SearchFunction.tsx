@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,52 +14,50 @@
  * limitations under the License.
  */
 
-import type { ISearchItem } from '@univerjs/sheets-formula';
-import { CommandType, DisposableCollection, ICommandService, useDependency } from '@univerjs/core';
-import { Popup } from '@univerjs/design';
-import { IEditorService } from '@univerjs/docs-ui';
+import type { Editor } from '@univerjs/docs-ui';
+import type { ISequenceNode } from '@univerjs/engine-formula';
+import { CommandType, DisposableCollection, ICommandService } from '@univerjs/core';
 import { DeviceInputEventType } from '@univerjs/engine-render';
-import { IShortcutService, KeyCode } from '@univerjs/ui';
+import { IShortcutService, KeyCode, RectPopup, useDependency } from '@univerjs/ui';
 import React, { forwardRef, useEffect, useMemo, useRef, useState } from 'react';
-import { useStateRef } from '../hooks/useStateRef';
+import { useEditorPosition } from '../hooks/use-editor-position';
+import { useFormulaSearch } from '../hooks/use-formula-search';
+import { useStateRef } from '../hooks/use-state-ref';
 import styles from './index.module.less';
 
 interface ISearchFunctionProps {
-    searchList: ISearchItem[];
-    searchText: string;
-    onSelect: (functionName: string) => void;
+    isFocus: boolean;
+    sequenceNodes: (string | ISequenceNode)[];
+    onSelect: (data: {
+        text: string;
+        offset: number;
+    }) => void;
     onChange?: (functionName: string) => void;
-    editorId: string;
+    editor: Editor;
     onClose?: () => void;
 };
 const noop = () => { };
 export const SearchFunction = forwardRef<HTMLElement, ISearchFunctionProps>(SearchFunctionFactory);
 function SearchFunctionFactory(props: ISearchFunctionProps, ref: any) {
-    const { searchText, searchList, onSelect, editorId, onClose = noop } = props;
-    const editorService = useDependency(IEditorService);
+    const { isFocus, sequenceNodes, onSelect, editor, onClose = noop } = props;
+    const editorId = editor.getEditorId();
     const shortcutService = useDependency(IShortcutService);
     const commandService = useDependency(ICommandService);
-
+    const { searchList, searchText, handlerFormulaReplace, reset: resetFormulaSearch } = useFormulaSearch(isFocus, sequenceNodes, editor);
     const visible = useMemo(() => !!searchList.length, [searchList]);
-    const ulRef = useRef<HTMLUListElement>();
+    const ulRef = useRef<HTMLUListElement>(undefined);
     const [active, activeSet] = useState(0);
-    const [offset, setOffset] = useState<[number, number]>([0, 0]);
     const isEnableMouseEnterOrOut = useRef(false);
-
+    const [position$] = useEditorPosition(editorId, visible, [searchText, searchList]);
     const stateRef = useStateRef({ searchList, active });
-    const editor = editorService.getEditor(editorId);
 
-    useEffect(() => {
-        const editor = editorService.getEditor(editorId);
-        const position = editor?.getBoundingClientRect();
-        if (position == null) {
-            return;
+    const handleFunctionSelect = (v: string) => {
+        const res = handlerFormulaReplace(v);
+        if (res) {
+            resetFormulaSearch();
+            onSelect(res);
         }
-        const { left, top, height } = position;
-
-        setOffset([left, top + height]);
-        activeSet(0); // Reset active state
-    }, [searchText, searchList]);
+    };
 
     function handleLiMouseEnter(index: number) {
         if (!isEnableMouseEnterOrOut.current) {
@@ -106,11 +104,12 @@ function SearchFunctionFactory(props: ISearchFunctionProps, ref: any) {
                 case KeyCode.TAB:
                 case KeyCode.ENTER: {
                     const item = searchList[active];
-                    onSelect(item.name);
+                    handleFunctionSelect(item.name);
                     break;
                 }
                 case KeyCode.ESC: {
-                    onSelect('');
+                    resetFormulaSearch();
+                    onClose();
                     break;
                 }
             }
@@ -193,8 +192,8 @@ function SearchFunctionFactory(props: ISearchFunctionProps, ref: any) {
         };
     }, []);
 
-    return searchList.length > 0 && (
-        <Popup visible={visible} offset={offset}>
+    return searchList.length > 0 && visible && (
+        <RectPopup portal anchorRect$={position$} direction="vertical">
             <ul
                 className={styles.formulaSearchFunction}
                 ref={(v) => {
@@ -206,15 +205,18 @@ function SearchFunctionFactory(props: ISearchFunctionProps, ref: any) {
             >
                 {searchList.map((item, index) => (
                     <li
-                        key={index}
+                        key={item.name}
                         className={active === index
-                            ? `${styles.formulaSearchFunctionItem} ${styles.formulaSearchFunctionItemActive}`
+                            ? `
+                              ${styles.formulaSearchFunctionItem}
+                              ${styles.formulaSearchFunctionItemActive}
+                            `
                             : styles.formulaSearchFunctionItem}
                         onMouseEnter={() => handleLiMouseEnter(index)}
                         onMouseLeave={handleLiMouseLeave}
                         onMouseMove={debounceResetMouseState}
                         onClick={() => {
-                            onSelect(item.name);
+                            handleFunctionSelect(item.name);
                             if (editor) {
                                 editor.focus();
                             }
@@ -228,6 +230,6 @@ function SearchFunctionFactory(props: ISearchFunctionProps, ref: any) {
                     </li>
                 ))}
             </ul>
-        </Popup>
+        </RectPopup>
     );
 }

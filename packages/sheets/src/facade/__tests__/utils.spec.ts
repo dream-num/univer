@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,11 @@ import { covertCellValue, covertCellValues } from '../utils';
 
 describe('Test utils', () => {
     it('function covertCellValue', () => {
-        expect(covertCellValue('=SUM(1)')).toStrictEqual({ f: '=SUM(1)' });
+        expect(covertCellValue('=SUM(1)')).toStrictEqual({ f: '=SUM(1)', v: null, p: null });
 
-        expect(covertCellValue('1')).toStrictEqual({ v: '1' });
-        expect(covertCellValue(1)).toStrictEqual({ v: 1 });
-        expect(covertCellValue(true)).toStrictEqual({ v: true });
+        expect(covertCellValue('1')).toStrictEqual({ v: '1', f: null, p: null });
+        expect(covertCellValue(1)).toStrictEqual({ v: 1, f: null, p: null });
+        expect(covertCellValue(true)).toStrictEqual({ v: true, f: null, p: null });
 
         expect(covertCellValue({})).toStrictEqual({});
     });
@@ -38,8 +38,8 @@ describe('Test utils', () => {
                 { startRow: 1, startColumn: 1, endRow: 2, endColumn: 2 }
             )
         ).toStrictEqual({
-            1: { 1: { v: 1 }, 2: { v: 2 } },
-            2: { 1: { v: 3 }, 2: { v: 4 } },
+            1: { 1: { v: 1, f: null, p: null }, 2: { v: 2, f: null, p: null } },
+            2: { 1: { v: 3, f: null, p: null }, 2: { v: 4, f: null, p: null } },
         });
 
         expect(
@@ -51,8 +51,8 @@ describe('Test utils', () => {
                 { startRow: 1, startColumn: 1, endRow: 2, endColumn: 2 }
             )
         ).toStrictEqual({
-            1: { 1: { v: 1 }, 2: { v: 2 } },
-            2: { 1: { v: 3 }, 2: { v: 4 } },
+            1: { 1: { v: 1, f: null, p: null }, 2: { v: 2, f: null, p: null } },
+            2: { 1: { v: 3, f: null, p: null }, 2: { v: 4, f: null, p: null } },
         });
 
         expect(

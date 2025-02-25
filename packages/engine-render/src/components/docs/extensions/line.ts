@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -150,8 +150,8 @@ export class Line extends docExtension {
         );
 
         ctx.beginPath();
-        ctx.moveToByPrecision(start.x, start.y);
-        ctx.lineToByPrecision(end.x, end.y);
+        ctx.moveTo(start.x, start.y);
+        ctx.lineTo(end.x, end.y);
         ctx.stroke();
         ctx.restore();
     }

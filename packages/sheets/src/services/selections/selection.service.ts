@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import type { ISelectionWithStyle } from '../../basics/selection';
 import type { ISelectionManagerSearchParam } from './type';
 
 import { IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
-import { of, shareReplay, switchMap, takeUntil } from 'rxjs';
+import { distinctUntilChanged, of, shareReplay, skip, switchMap, takeUntil } from 'rxjs';
 import { WorkbookSelectionModel } from './selection-data-model';
 import { SelectionMoveType } from './type';
 
@@ -37,9 +37,30 @@ export class SheetsSelectionsService extends RxDisposable {
         return this._currentSelectionPos;
     }
 
+    /**
+     * Selection Events, usually triggered when pointerdown in spreadsheet by selection render service after selectionModel has updated.
+     */
     selectionMoveStart$: Observable<Nullable<ISelectionWithStyle[]>>;
+
+    /**
+     * Selection Events, usually triggered when pointermove in spreadsheet by selection render service after selectionModel has updated.
+     */
     selectionMoving$: Observable<Nullable<ISelectionWithStyle[]>>;
+
+    /**
+     * Selection Events, usually triggered when pointerup in spreadsheet by selection render service after selectionModel has updated.
+     */
     selectionMoveEnd$: Observable<ISelectionWithStyle[]>;
+
+    /**
+     * Selection Events, usually triggered when changing unit.(focus in formula editor)
+     */
+    selectionSet$: Observable<Nullable<ISelectionWithStyle[]>>;
+
+    /**
+     * Selection Events, merge moveEnd$ and selectionSet$
+     */
+    selectionChanged$: Observable<Nullable<ISelectionWithStyle[]>>;
 
     constructor(
         @IUniverInstanceService protected readonly _instanceSrv: IUniverInstanceService
@@ -50,10 +71,21 @@ export class SheetsSelectionsService extends RxDisposable {
 
     protected _init(): void {
         const c$ = this._instanceSrv.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_SHEET).pipe(shareReplay(1), takeUntil(this.dispose$));
-
+        // When workbook changed, unsubscribe the previous workbook selection$ and subscribe the new workbook selection$.
         this.selectionMoveStart$ = c$.pipe(switchMap((workbook) => !workbook ? of() : this._ensureWorkbookSelection(workbook.getUnitId()).selectionMoveStart$));
         this.selectionMoving$ = c$.pipe(switchMap((workbook) => !workbook ? of() : this._ensureWorkbookSelection(workbook.getUnitId()).selectionMoving$));
         this.selectionMoveEnd$ = c$.pipe(switchMap((workbook) => !workbook ? of([]) : this._ensureWorkbookSelection(workbook.getUnitId()).selectionMoveEnd$));
+        this.selectionSet$ = c$.pipe(switchMap((workbook) => !workbook ? of([]) : this._ensureWorkbookSelection(workbook.getUnitId()).selectionSet$));
+        this.selectionChanged$ = c$.pipe(switchMap((workbook) => !workbook ? of([]) : this._ensureWorkbookSelection(workbook.getUnitId()).selectionChanged$)).pipe(
+            distinctUntilChanged((prev, curr) => {
+                if (prev.length !== curr.length) return false;
+                if (prev.length === 0 && curr.length === 0) return true;
+                return prev.every((item, index) => {
+                    return JSON.stringify(item) === JSON.stringify(curr[index]);
+                });
+            }),
+            skip(1)
+        );
 
         this._instanceSrv.getTypeOfUnitDisposed$(UniverInstanceType.UNIVER_SHEET).pipe(takeUntil(this.dispose$)).subscribe((workbook) => {
             this._removeWorkbookSelection(workbook.getUnitId());
@@ -95,7 +127,7 @@ export class SheetsSelectionsService extends RxDisposable {
 
     /**
      * Set selection data to WorkbookSelectionModel.
-     * If type is not specified, this method would clear all existing selections.
+     *
      * @param unitIdOrSelections
      * @param worksheetIdOrType
      * @param selectionDatas
@@ -110,7 +142,12 @@ export class SheetsSelectionsService extends RxDisposable {
         type?: SelectionMoveType
     ): void {
         if (typeof unitIdOrSelections === 'string' && typeof worksheetIdOrType === 'string') {
-            this._ensureWorkbookSelection(unitIdOrSelections).setSelections(worksheetIdOrType, selectionDatas!, type ?? SelectionMoveType.MOVE_END);
+            const unitId = unitIdOrSelections as string;
+            this._ensureWorkbookSelection(unitId).setSelections(
+                worksheetIdOrType,
+                selectionDatas || [],
+                type ?? SelectionMoveType.ONLY_SET
+            );
             return;
         }
 
@@ -194,4 +231,12 @@ export class SheetsSelectionsService extends RxDisposable {
 }
 
 /** An context key to disable normal selections if its value is set to `true`. */
+// so Bad! why not enableXXX
 export const DISABLE_NORMAL_SELECTIONS = 'DISABLE_NORMAL_SELECTIONS';
+export const SELECTIONS_ENABLED = 'SELECTIONS_ENABLED';
+export const REF_SELECTIONS_ENABLED = 'REF_SELECTIONS_ENABLED';
+export const SELECTION_MODE = '__SELECTION_MODE__';
+export enum SelectionMode {
+    NORMAL,
+    REF,
+}

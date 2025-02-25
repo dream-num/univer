@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { FUNCTION_NAMES_TEXT, FunctionType, type IFunctionInfo } from '@univerjs/engine-formula';
+import type { IFunctionInfo } from '@univerjs/engine-formula';
+import { FUNCTION_NAMES_TEXT, FunctionType } from '@univerjs/engine-formula';
 
 export const FUNCTION_LIST_TEXT: IFunctionInfo[] = [
     {
@@ -446,6 +447,28 @@ export const FUNCTION_LIST_TEXT: IFunctionInfo[] = [
                 name: 'formula.functionList.MIDB.functionParameter.numBytes.name',
                 detail: 'formula.functionList.MIDB.functionParameter.numBytes.detail',
                 example: '3',
+                require: 1,
+                repeat: 0,
+            },
+        ],
+    },
+    {
+        functionName: FUNCTION_NAMES_TEXT.NUMBERSTRING,
+        functionType: FunctionType.Text,
+        description: 'formula.functionList.NUMBERSTRING.description',
+        abstract: 'formula.functionList.NUMBERSTRING.abstract',
+        functionParameter: [
+            {
+                name: 'formula.functionList.NUMBERSTRING.functionParameter.number.name',
+                detail: 'formula.functionList.NUMBERSTRING.functionParameter.number.detail',
+                example: '123',
+                require: 1,
+                repeat: 0,
+            },
+            {
+                name: 'formula.functionList.NUMBERSTRING.functionParameter.type.name',
+                detail: 'formula.functionList.NUMBERSTRING.functionParameter.type.detail',
+                example: '1',
                 require: 1,
                 repeat: 0,
             },

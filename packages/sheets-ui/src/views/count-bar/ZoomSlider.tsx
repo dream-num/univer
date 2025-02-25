@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
+import type { Workbook } from '@univerjs/core';
 import {
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     ICommandService,
     IUniverInstanceService,
     UniverInstanceType,
-    useDependency,
-    useObservable,
 } from '@univerjs/core';
-import { Slider } from '@univerjs/design';
 import { SetWorksheetActiveOperation } from '@univerjs/sheets';
-import React, { useCallback, useEffect, useState } from 'react';
-import type { Workbook } from '@univerjs/core';
+import { Slider, useDependency, useObservable } from '@univerjs/ui';
+import { useCallback, useEffect, useState } from 'react';
 
 import { SetZoomRatioCommand } from '../../commands/commands/set-zoom-ratio.command';
 import { SetZoomRatioOperation } from '../../commands/operations/set-zoom-ratio.operation';
@@ -33,7 +31,7 @@ import { SHEET_ZOOM_RANGE } from '../../common/keys';
 import { useActiveWorkbook } from '../../components/hook';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 
-const ZOOM_MAP = [50, 80, 100, 130, 150, 170, 200, 400];
+const ZOOM_MAP = [50, 75, 100, 125, 150, 175, 200, 400];
 
 export function ZoomSlider() {
     const commandService = useDependency(ICommandService);

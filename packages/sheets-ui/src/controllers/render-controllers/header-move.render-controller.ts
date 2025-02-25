@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -126,7 +126,7 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
 
         // only style cursor style when pointer move
         const pointerMoveHandler = (evt: IPointerEvent | IMouseEvent) => {
-            const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+            const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
             if (skeleton == null) {
                 return;
             }
@@ -166,7 +166,7 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
         const pointerDownHandler = (evt: IPointerEvent | IMouseEvent, state: EventState) => {
             if (state.isStopPropagation) return;
 
-            const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+            const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
             if (skeleton == null) {
                 return;
             }
@@ -356,7 +356,7 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
         initialType: RANGE_TYPE.ROW | RANGE_TYPE.COLUMN
     ) {
         const scene = this._context.scene;
-        const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+        const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
         if (skeleton == null) {
             return;
         }
@@ -377,7 +377,7 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
 
         const { row, column } = moveActualSelection;
 
-        const startCell = skeleton.getNoMergeCellPositionByIndex(row, column);
+        const startCell = skeleton.getNoMergeCellWithCoordByIndex(row, column);
 
         const { startX: cellStartX, startY: cellStartY, endX: cellEndX, endY: cellEndY } = startCell;
 

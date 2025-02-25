@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -99,7 +99,7 @@ export const StartAddCommentOperation: ICommand = {
         }
 
         const docSelectionRenderManager = renderManagerService.getRenderById(doc.getUnitId())?.with(DocSelectionRenderService);
-
+        docSelectionRenderManager?.setReserveRangesStatus(true);
         if (textRange.collapsed) {
             if (panelService.panelVisible) {
                 panelService.setPanelVisible(false);
@@ -132,7 +132,7 @@ export const StartAddCommentOperation: ICommand = {
             threadId: commentId,
         };
 
-        docSelectionRenderManager?.blurEditor();
+        docSelectionRenderManager?.blur();
         docCommentService.startAdd(comment);
         panelService.setActiveComment({
             unitId,

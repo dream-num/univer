@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,10 @@
  */
 
 import type { IRange } from '@univerjs/core';
-import { createIdentifier, Disposable, Rectangle } from '@univerjs/core';
+import type { Observable } from 'rxjs';
 import type { ISelectionWithStyle } from '../../basics/selection';
+import { createIdentifier, Disposable, Rectangle } from '@univerjs/core';
+import { Subject } from 'rxjs';
 
 interface IFeatureRange {
     groupId: string;
@@ -24,6 +26,8 @@ interface IFeatureRange {
 }
 
 export interface IExclusiveRangeService {
+    exclusiveRangesChange$: Observable<{ unitId: string; subUnitId: string; ranges: IRange[] }>;
+
     /**
      * @description Add an exclusive range to the service
      * @param {string} unitId The unitId of the exclusive range
@@ -70,6 +74,9 @@ export class ExclusiveRangeService extends Disposable implements IExclusiveRange
      */
     private _exclusiveRanges: Map<string, Map<string, Map<string, IFeatureRange[]>>> = new Map();
 
+    private _exclusiveRangesChange$ = new Subject<{ unitId: string; subUnitId: string; ranges: IRange[] }>();
+    public exclusiveRangesChange$ = this._exclusiveRangesChange$.asObservable();
+
     private _ensureUnitMap(unitId: string) {
         if (!this._exclusiveRanges.has(unitId)) {
             this._exclusiveRanges.set(unitId, new Map());
@@ -96,6 +103,7 @@ export class ExclusiveRangeService extends Disposable implements IExclusiveRange
     public addExclusiveRange(unitId: string, sheetId: string, feature: string, ranges: IFeatureRange[]) {
         const featureMap = this._ensureFeature(unitId, sheetId, feature);
         featureMap.push(...ranges);
+        this._exclusiveRangesChange$.next({ unitId, subUnitId: sheetId, ranges: featureMap.map((item) => item.range) });
     }
 
     public getExclusiveRanges(unitId: string, sheetId: string, feature: string): undefined | IFeatureRange[] {
@@ -103,11 +111,16 @@ export class ExclusiveRangeService extends Disposable implements IExclusiveRange
     }
 
     public clearExclusiveRanges(unitId: string, sheetId: string, feature: string) {
+        const ranges = this.getExclusiveRanges(unitId, sheetId, feature);
+        this._exclusiveRangesChange$.next({ unitId, subUnitId: sheetId, ranges: ranges?.map((item) => item.range) || [] });
+
         this._ensureFeature(unitId, sheetId, feature);
         this._exclusiveRanges.get(unitId)!.get(sheetId)!.set(feature, []);
     }
 
     public clearExclusiveRangesByGroupId(unitId: string, sheetId: string, feature: string, groupId: string) {
+        const ranges = this.getExclusiveRanges(unitId, sheetId, feature);
+        this._exclusiveRangesChange$.next({ unitId, subUnitId: sheetId, ranges: ranges?.map((item) => item.range) || [] });
         const featureMap = this.getExclusiveRanges(unitId, sheetId, feature);
         if (featureMap) {
             const newFeatureMap = featureMap.filter((item) => item.groupId !== groupId);

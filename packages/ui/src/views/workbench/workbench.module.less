@@ -8,6 +8,14 @@
         position: relative;
     }
 
+    &-custom-header {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        background-color: rgb(var(--color-white));
+    }
+
     &-header {
         // height: 32px;
     }
@@ -40,7 +48,6 @@
             display: grid;
             grid-template-rows: auto 1fr;
             flex: 1;
-
             background-color: rgb(var(--bg-color-secondary));
             border-bottom: 1px solid rgb(var(--border-color));
         }

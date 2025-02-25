@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/* eslint-disable complexity */
 
 import type { ICustomRange, IDocumentBody, IDocumentData, ITextRun, ITextStyle, Nullable } from '@univerjs/core';
 import type { SpreadsheetSkeleton } from '@univerjs/engine-render';
@@ -248,7 +250,6 @@ export class HtmlToUSMService {
         return css;
     }
 
-    // eslint-disable-next-line complexity
     private _getStyle(node: HTMLElement, styleStr: string) {
         const recordStyle: Record<string, string> = turnToStyleObject(styleStr);
         const style = node.style;
@@ -446,6 +447,12 @@ export class HtmlToUSMService {
                 }
             } else if (node.nodeType === Node.COMMENT_NODE || node.nodeName === 'STYLE') {
                 continue;
+            } else if (node.nodeName.toLowerCase() === 'br') {
+                if (!doc.paragraphs) {
+                    doc.paragraphs = [];
+                }
+                doc.paragraphs.push({ startIndex: doc.dataStream.length });
+                doc.dataStream += '\r';
             } else if (node.nodeType === Node.ELEMENT_NODE) {
                 const currentNodeStyle = this._getStyle(node as HTMLElement, styleStr);
                 const parentStyles = parent ? styleCache.get(parent) : {};
@@ -551,6 +558,12 @@ export class HtmlToUSMService {
                 }
             } else if (skipParseTagNames.includes(node.nodeName.toLowerCase())) {
                 continue;
+            } else if (node.nodeName.toLowerCase() === 'br') {
+                if (!doc.paragraphs) {
+                    doc.paragraphs = [];
+                }
+                doc.paragraphs.push({ startIndex: doc.dataStream.length });
+                doc.dataStream += '\r';
             } else if (node.nodeType === Node.ELEMENT_NODE) {
                 if (node.nodeName === 'STYLE') {
                     continue;

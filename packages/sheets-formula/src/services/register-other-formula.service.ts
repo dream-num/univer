@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,12 @@
 import type { IRange, Nullable } from '@univerjs/core';
 import type { IRemoveOtherFormulaMutationParams, ISetFormulaCalculationResultMutation, ISetOtherFormulaMutationParams } from '@univerjs/engine-formula';
 import type { IOtherFormulaMarkDirtyParams } from '../commands/mutations/formula.mutation';
+import type { IOtherFormulaResult } from './formula-common';
 import { Disposable, ICommandService, Inject, LifecycleService, ObjectMatrix, Tools } from '@univerjs/core';
 import { IActiveDirtyManagerService, RemoveOtherFormulaMutation, SetFormulaCalculationResultMutation, SetOtherFormulaMutation } from '@univerjs/engine-formula';
 import { BehaviorSubject, bufferWhen, filter, Subject } from 'rxjs';
 import { OtherFormulaMarkDirty } from '../commands/mutations/formula.mutation';
-import { FormulaResultStatus, type IOtherFormulaResult } from './formula-common';
+import { FormulaResultStatus } from './formula-common';
 
 export class RegisterOtherFormulaService extends Disposable {
     private _formulaCacheMap: Map<string, Map<string, Map<string, IOtherFormulaResult>>> = new Map();

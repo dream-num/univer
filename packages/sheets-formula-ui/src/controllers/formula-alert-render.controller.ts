@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import { Disposable, Inject, isICellData, LocaleService } from '@univerjs/core';
 import { ErrorType, FormulaDataModel } from '@univerjs/engine-formula';
 import { CellAlertManagerService, CellAlertType, HoverManagerService } from '@univerjs/sheets-ui';
 import { IZenZoneService } from '@univerjs/ui';
+import { debounceTime } from 'rxjs';
 import { extractFormulaError } from './utils/utils';
 
 const ALERT_KEY = 'SHEET_FORMULA_ALERT';
@@ -58,7 +59,7 @@ export class FormulaAlertRenderController extends Disposable implements IRenderM
     }
 
     private _initCellAlertPopup() {
-        this.disposeWithMe(this._hoverManagerService.currentCell$.subscribe((cellPos) => {
+        this.disposeWithMe(this._hoverManagerService.currentCell$.pipe(debounceTime(100)).subscribe((cellPos) => {
             if (cellPos) {
                 const workbook = this._context.unit;
                 const worksheet = workbook.getActiveSheet();
@@ -78,6 +79,8 @@ export class FormulaAlertRenderController extends Disposable implements IRenderM
                     const errorType = extractFormulaError(cellData, !!arrayFormulaCellData);
 
                     if (!errorType) {
+                        // fix #4002
+                        this._hideAlert();
                         return;
                     }
 
@@ -106,15 +109,19 @@ export class FormulaAlertRenderController extends Disposable implements IRenderM
                 }
             }
 
-            this._cellAlertManagerService.removeAlert(ALERT_KEY);
+            this._hideAlert();
         }));
     }
 
     private _initZenService() {
         this.disposeWithMe(this._zenZoneService.visible$.subscribe((visible) => {
             if (visible) {
-                this._cellAlertManagerService.removeAlert(ALERT_KEY);
+                this._hideAlert();
             }
         }));
+    }
+
+    private _hideAlert() {
+        this._cellAlertManagerService.removeAlert(ALERT_KEY);
     }
 }

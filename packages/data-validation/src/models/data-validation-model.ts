@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import { debounceTime, Subject } from 'rxjs';
 import { getRuleOptions, getRuleSetting } from '../common/util';
 import { UpdateRuleType } from '../types/enum/update-rule-type';
 
-type DataValidationChangeType = 'update' | 'add' | 'remove';
+export type DataValidationChangeType = 'update' | 'add' | 'remove';
 export type DataValidationChangeSource = 'command' | 'patched';
 
 export interface IRuleChange {

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,22 @@
  * limitations under the License.
  */
 
+import type { ICommandInfo, IFreeze, IRange, IStyleSheet, IWorksheetData, Nullable, Workbook } from '@univerjs/core';
+import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, Viewport } from '@univerjs/engine-render';
+import type {
+    IInsertColCommandParams,
+    IInsertRowCommandParams,
+    IMoveColsCommandParams,
+    IMoveRowsCommandParams,
+    IRemoveRowColCommandParams,
+    ISetColHiddenMutationParams,
+    ISetFrozenMutationParams,
+    ISetRowHiddenMutationParams,
+    ISetWorksheetColWidthMutationParams,
+    ISetWorksheetRowAutoHeightMutationParams,
+    ISetWorksheetRowHeightMutationParams,
+} from '@univerjs/sheets';
+import type { IViewportScrollState } from '../../services/scroll-manager.service';
 import {
     ColorKit,
     createInterceptorKey,
@@ -28,6 +44,7 @@ import {
     toDisposable,
 } from '@univerjs/core';
 import { CURSOR_TYPE, Rect, SHEET_VIEWPORT_KEY, TRANSFORM_CHANGE_OBSERVABLE_TYPE, Vector2 } from '@univerjs/engine-render';
+
 import {
     InsertColCommand,
     InsertRangeMoveDownCommand,
@@ -52,30 +69,14 @@ import {
     SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { Subscription } from 'rxjs';
-import type { ICommandInfo, IFreeze, IRange, IStyleSheet, IWorksheetData, Nullable, Workbook } from '@univerjs/core';
-import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, Viewport } from '@univerjs/engine-render';
-
-import type {
-    IInsertColCommandParams,
-    IInsertRowCommandParams,
-    IMoveColsCommandParams,
-    IMoveRowsCommandParams,
-    IRemoveRowColCommandParams,
-    ISetColHiddenMutationParams,
-    ISetFrozenMutationParams,
-    ISetRowHiddenMutationParams,
-    ISetWorksheetColWidthMutationParams,
-    ISetWorksheetRowAutoHeightMutationParams,
-    ISetWorksheetRowHeightMutationParams,
-} from '@univerjs/sheets';
+import { SetColumnHeaderHeightCommand, SetRowHeaderWidthCommand } from '../../commands/commands/headersize-changed.command';
 import { ScrollCommand } from '../../commands/commands/set-scroll.command';
+
 import { SetZoomRatioOperation } from '../../commands/operations/set-zoom-ratio.operation';
 import { SHEET_COMPONENT_HEADER_LAYER_INDEX } from '../../common/keys';
-
 import { SheetScrollManagerService } from '../../services/scroll-manager.service';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import { getCoordByOffset, getSheetObject } from '../utils/component-tools';
-import type { IViewportScrollState } from '../../services/scroll-manager.service';
 
 enum FREEZE_DIRECTION_TYPE {
     ROW,
@@ -89,13 +90,13 @@ enum ResetScrollType {
     ALL = 3,
 }
 
-const FREEZE_ROW_MAIN_NAME = '__SpreadsheetFreezeRowMainName__';
+export const FREEZE_ROW_MAIN_NAME = '__SpreadsheetFreezeRowMainName__';
 
-const FREEZE_ROW_HEADER_NAME = '__SpreadsheetFreezeRowHeaderName__';
+export const FREEZE_ROW_HEADER_NAME = '__SpreadsheetFreezeRowHeaderName__';
 
-const FREEZE_COLUMN_MAIN_NAME = '__SpreadsheetFreezeColumnMainName__';
+export const FREEZE_COLUMN_MAIN_NAME = '__SpreadsheetFreezeColumnMainName__';
 
-const FREEZE_COLUMN_HEADER_NAME = '__SpreadsheetFreezeColumnHeaderName__';
+export const FREEZE_COLUMN_HEADER_NAME = '__SpreadsheetFreezeColumnHeaderName__';
 
 const FREEZE_SIZE_NORMAL = 2;
 
@@ -189,7 +190,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
         this._zoomRefresh();
     }
 
-    // eslint-disable-next-line max-lines-per-function
+    // eslint-disable-next-line max-lines-per-function, complexity
     private _createFreeze(
         freezeDirectionType: FREEZE_DIRECTION_TYPE = FREEZE_DIRECTION_TYPE.ROW,
         freezeConfig?: IFreeze
@@ -197,7 +198,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
         const config = freezeConfig ?? this._getFreeze();
         if (config == null) return null;
 
-        const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+        const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
 
         const { startRow: freezeRow, startColumn: freezeColumn } = config;
         const position = this._getPositionByIndex(freezeRow, freezeColumn);
@@ -237,7 +238,10 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
 
             this._rowFreezeHeaderRect = new Rect(FREEZE_ROW_HEADER_NAME, {
                 fill: this._freezeNormalHeaderColor, width: rowHeaderWidthAndMarginLeft,
-                height: FREEZE_SIZE, left: 0, top: startY - FREEZE_OFFSET, zIndex: 3 });
+                height: FREEZE_SIZE, left: 0,
+                top: startY - FREEZE_OFFSET,
+                zIndex: 3,
+            });
 
             let fill = this._freezeNormalHeaderColor;
             if (freezeRow === -1 || freezeRow === 0) {
@@ -263,7 +267,8 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
 
             this._columnFreezeHeaderRect = new Rect(FREEZE_COLUMN_HEADER_NAME, {
                 fill: this._freezeNormalHeaderColor, width: FREEZE_SIZE, height: columnHeaderHeightAndMarginTop,
-                left: startX - FREEZE_OFFSET, top: 0, zIndex: 3 });
+                left: startX - FREEZE_OFFSET, top: 0, zIndex: 3,
+            });
 
             let fill = this._freezeNormalHeaderColor;
             if (freezeColumn === -1 || freezeColumn === 0) {
@@ -398,7 +403,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
             return;
         }
 
-        const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+        const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
         if (skeleton == null) {
             return;
         }
@@ -469,7 +474,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
         freezeObjectMainRect: Rect,
         freezeDirectionType: FREEZE_DIRECTION_TYPE = FREEZE_DIRECTION_TYPE.ROW
     ) {
-        const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+        const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
         if (skeleton == null) {
             return;
         }
@@ -794,7 +799,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
         xSplit: number = 0,
         resetScroll = ResetScrollType.ALL
     ) {
-        const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+        const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
         if (skeleton == null) {
             return;
         }
@@ -854,9 +859,9 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
         }
 
         // freeze start
-        const startSheetView = skeleton.getNoMergeCellPositionByIndexWithNoHeader(row - ySplit, column - xSplit);
+        const startSheetView = skeleton.getNoMergeCellWithCoordByIndex(row - ySplit, column - xSplit, false);
         // freeze end
-        const endSheetView = skeleton.getNoMergeCellPositionByIndexWithNoHeader(row, column);
+        const endSheetView = skeleton.getNoMergeCellWithCoordByIndex(row, column, false);
 
         viewMainLeftTop.disable();
         viewMainTop.disable();
@@ -879,6 +884,36 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
                 right: 0,
             });
             viewMain.resetPadding();
+            viewMainLeft.resizeWhenFreezeChange({
+                left: rowHeaderWidthAndMarginLeft,
+                top: columnHeaderHeightAndMarginTop,
+                bottom: 0,
+                width: 0,
+            });
+            viewMainTop.resizeWhenFreezeChange({
+                left: rowHeaderWidthAndMarginLeft,
+                top: columnHeaderHeightAndMarginTop,
+                height: 0,
+                right: 0,
+            });
+            viewMainLeftTop.resizeWhenFreezeChange({
+                left: rowHeaderWidthAndMarginLeft,
+                top: columnHeaderHeightAndMarginTop,
+                width: 0,
+                height: 0,
+            });
+            viewRowTop.resizeWhenFreezeChange({
+                left: 0,
+                top: columnHeaderHeightAndMarginTop,
+                width: rowHeaderWidthAndMarginLeft,
+                height: 0,
+            });
+            viewColumnLeft.resizeWhenFreezeChange({
+                left: 0,
+                top: 0,
+                height: columnHeaderHeightAndMarginTop,
+                width: 0,
+            });
         } else if (isTopView === true && isLeftView === false) {
             // freeze row
             const topGap = endSheetView.startY - startSheetView.startY;
@@ -1114,16 +1149,15 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
         this.disposeWithMe(
             toDisposable(
                 this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param) => {
-                    if (
-                        ![
-                            SetWorksheetActiveOperation.id,
-                            InsertRangeMoveDownCommand.id,
-                            InsertRangeMoveRightCommand.id,
-                        ].includes(param?.commandId || '')
-                    ) {
-                        return;
+                    const allowedCommands = [
+                        SetWorksheetActiveOperation.id,
+                        InsertRangeMoveDownCommand.id,
+                        InsertRangeMoveRightCommand.id,
+                    ];
+
+                    if (allowedCommands.includes(param?.commandId || '')) {
+                        this._refreshCurrent();
                     }
-                    this._refreshCurrent();
                 })
             )
         );
@@ -1406,80 +1440,108 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
         );
     }
 
+    /**
+     * Update freeze line position when some cmds cause sk change.
+     */
+    // TODO @lumixraku But there is a _zoomRefresh method? Duplicated?
     private _commandExecutedListener() {
-        const updateCommandList = [SetFrozenMutation.id, SetZoomRatioOperation.id];
-
         this.disposeWithMe(
             // eslint-disable-next-line complexity
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
-                if (updateCommandList.includes(command.id)) {
-                    const lastFreeze = this._lastFreeze;
-                    const workbook = this._context.unit;
-                    const worksheet = workbook.getActiveSheet();
-                    const params = command.params as ISetFrozenMutationParams;
-                    const { unitId, subUnitId } = params;
-                    if (!(unitId === workbook.getUnitId() && subUnitId === worksheet?.getSheetId())) {
-                        return;
-                    }
+                switch (command.id) {
+                    case SetFrozenMutation.id:
+                    case SetZoomRatioOperation.id:
+                        {
+                            const lastFreeze = this._lastFreeze;
+                            const workbook = this._context.unit;
+                            const worksheet = workbook.getActiveSheet();
+                            const params = command.params as ISetFrozenMutationParams;
+                            const { unitId, subUnitId } = params;
+                            if (!(unitId === workbook.getUnitId() && subUnitId === worksheet?.getSheetId())) {
+                                return;
+                            }
 
-                    const freeze = worksheet.getConfig().freeze;
-                    this._lastFreeze = freeze;
-                    if (freeze == null) {
-                        return;
-                    }
+                            const freeze = worksheet.getConfig().freeze;
+                            this._lastFreeze = freeze;
+                            if (freeze == null) {
+                                return;
+                            }
 
-                    let resetScroll = ResetScrollType.NONE;
+                            let resetScroll = ResetScrollType.NONE;
 
-                    const { startRow = -1, startColumn = -1, ySplit = 0, xSplit = 0 } = freeze;
-                    if (!lastFreeze || lastFreeze.startRow !== startRow || lastFreeze.ySplit !== ySplit) {
-                        resetScroll |= ResetScrollType.Y;
-                    }
-                    if (!lastFreeze || lastFreeze.startColumn !== startColumn || lastFreeze.xSplit !== xSplit) {
-                        resetScroll |= ResetScrollType.X;
-                    }
-                    if (params.resetScroll === false) {
-                        resetScroll = ResetScrollType.NONE;
-                    }
-                    this._refreshFreeze(startRow, startColumn, ySplit, xSplit, resetScroll);
-                } else if (command.id === SetWorksheetRowHeightMutation.id) {
-                    const freeze = this._getFreeze();
-                    const isRefresh = freeze && (command.params as ISetWorksheetRowHeightMutationParams).ranges.some((i) => i.startRow < freeze.startRow);
-                    if (command.params && isRefresh) {
-                        this._refreshCurrent();
-                    }
-                } else if (command.id === SetWorksheetColWidthMutation.id) {
-                    const freeze = this._getFreeze();
-                    if (command.params && freeze && (command.params as ISetWorksheetColWidthMutationParams).ranges.some(
-                        (i) => i.startColumn < freeze.startColumn
-                    )) {
-                        this._refreshCurrent();
-                    }
-                } else if (command.id === SetWorksheetRowAutoHeightMutation.id) {
-                    const params = command.params as ISetWorksheetRowAutoHeightMutationParams;
-                    const freeze = this._getFreeze();
+                            const { startRow = -1, startColumn = -1, ySplit = 0, xSplit = 0 } = freeze;
+                            if (!lastFreeze || lastFreeze.startRow !== startRow || lastFreeze.ySplit !== ySplit) {
+                                resetScroll |= ResetScrollType.Y;
+                            }
+                            if (!lastFreeze || lastFreeze.startColumn !== startColumn || lastFreeze.xSplit !== xSplit) {
+                                resetScroll |= ResetScrollType.X;
+                            }
+                            if (params.resetScroll === false) {
+                                resetScroll = ResetScrollType.NONE;
+                            }
+                            this._refreshFreeze(startRow, startColumn, ySplit, xSplit, resetScroll);
+                        }
+                        break;
 
-                    if (freeze && freeze.startRow > -1 && params.rowsAutoHeightInfo.some((info) => info.row < freeze.startRow)) {
-                        const subscription = this._sheetSkeletonManagerService.currentSkeleton$.subscribe(() => {
-                            this._refreshCurrent();
-                            setTimeout(() => {
-                                subscription.unsubscribe();
-                            });
-                        });
-                    }
-                } else if (command.id === SetColHiddenMutation.id || command.id === SetColVisibleMutation.id) {
-                    const params = command.params as ISetColHiddenMutationParams;
-                    const freeze = this._getFreeze();
-                    const ranges = params.ranges;
-                    if (freeze && freeze.startColumn > -1 && ranges.some((range) => range.startColumn < freeze.startColumn)) {
+                    case SetWorksheetRowHeightMutation.id:
+                        {
+                            const freeze = this._getFreeze();
+                            const isRefresh = freeze && (command.params as ISetWorksheetRowHeightMutationParams).ranges.some((i) => i.startRow < freeze.startRow);
+                            if (command.params && isRefresh) {
+                                this._refreshCurrent();
+                            }
+                        }
+                        break;
+                    case SetWorksheetColWidthMutation.id:
+                        {
+                            const freeze = this._getFreeze();
+                            if (command.params && freeze && (command.params as ISetWorksheetColWidthMutationParams).ranges.some(
+                                (i) => i.startColumn < freeze.startColumn
+                            )) {
+                                this._refreshCurrent();
+                            }
+                        }
+                        break;
+                    case SetWorksheetRowAutoHeightMutation.id:
+                        {
+                            const params = command.params as ISetWorksheetRowAutoHeightMutationParams;
+                            const freeze = this._getFreeze();
+
+                            if (freeze && freeze.startRow > -1 && params.rowsAutoHeightInfo.some((info) => info.row < freeze.startRow)) {
+                                const subscription = this._sheetSkeletonManagerService.currentSkeleton$.subscribe(() => {
+                                    this._refreshCurrent();
+                                    setTimeout(() => {
+                                        subscription.unsubscribe();
+                                    });
+                                });
+                            }
+                        }
+                        break;
+                    case SetColHiddenMutation.id:
+                    case SetColVisibleMutation.id:
+                        {
+                            const params = command.params as ISetColHiddenMutationParams;
+                            const freeze = this._getFreeze();
+                            const ranges = params.ranges;
+                            if (freeze && freeze.startColumn > -1 && ranges.some((range) => range.startColumn < freeze.startColumn)) {
+                                this._refreshCurrent();
+                            }
+                        }
+                        break;
+                    case SetRowHiddenMutation.id:
+                    case SetRowVisibleMutation.id:
+                        {
+                            const params = command.params as ISetRowHiddenMutationParams;
+                            const freeze = this._getFreeze();
+                            const ranges = params.ranges;
+                            if (freeze && freeze.startRow > -1 && ranges.some((range) => range.startRow < freeze.startRow)) {
+                                this._refreshCurrent();
+                            }
+                        }
+                        break;
+                    case SetRowHeaderWidthCommand.id:
+                    case SetColumnHeaderHeightCommand.id:
                         this._refreshCurrent();
-                    }
-                } else if (command.id === SetRowHiddenMutation.id || command.id === SetRowVisibleMutation.id) {
-                    const params = command.params as ISetRowHiddenMutationParams;
-                    const freeze = this._getFreeze();
-                    const ranges = params.ranges;
-                    if (freeze && freeze.startRow > -1 && ranges.some((range) => range.startRow < freeze.startRow)) {
-                        this._refreshCurrent();
-                    }
                 }
             })
         );
@@ -1492,13 +1554,12 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
         }
         const { scene } = sheetObject;
 
-        scene.onTransformChange$.subscribeEvent((state) => {
-            if (state.type !== TRANSFORM_CHANGE_OBSERVABLE_TYPE.scale) {
+        this.disposeWithMe(scene.onTransformChange$.subscribeEvent((state) => {
+            if (![TRANSFORM_CHANGE_OBSERVABLE_TYPE.scale, TRANSFORM_CHANGE_OBSERVABLE_TYPE.all].includes(state.type)) {
                 return;
             }
-
             this._refreshCurrent();
-        });
+        }));
     }
 
     private _clearObserverEvent() {
@@ -1545,8 +1606,8 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
             return;
         }
 
-        const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
-        const position = skeleton?.getNoMergeCellPositionByIndex(row, column);
+        const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
+        const position = skeleton?.getNoMergeCellWithCoordByIndex(row, column);
         if (skeleton == null) {
             return;
         }
@@ -1566,7 +1627,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
 
     private _getFreeze() {
         const config: IWorksheetData | undefined = this._sheetSkeletonManagerService
-            .getCurrent()
+            .getCurrentParam()
             ?.skeleton
             .getWorksheetConfig();
 
@@ -1582,8 +1643,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
     }
 
     /**
-     * 调整冻结 & 缩放都会进入
-     * 但是窗口 resize 并不会进入
+     * Core function of _refreshCurrent
      * @param startRow
      * @param startColumn
      * @param ySplit

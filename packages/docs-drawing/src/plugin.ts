@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 
 import type { Dependency } from '@univerjs/core';
 import type { IUniverDocsDrawingConfig } from './controllers/config.schema';
-import { IConfigService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
-import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { IConfigService, Inject, Injector, merge, Plugin, touchDependencies, UniverInstanceType } from '@univerjs/core';
+import { defaultPluginConfig, DOCS_DRAWING_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { DocDrawingController, DOCS_DRAWING_PLUGIN } from './controllers/doc-drawing.controller';
 import { DocDrawingService, IDocDrawingService } from './services/doc-drawing.service';
 
@@ -33,8 +33,12 @@ export class UniverDocsDrawingPlugin extends Plugin {
         super();
 
         // Manage the plugin configuration.
-        const { ...rest } = this._config;
-        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
+        const { ...rest } = merge(
+            {},
+            defaultPluginConfig,
+            this._config
+        );
+        this._configService.setConfig(DOCS_DRAWING_PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {
@@ -42,10 +46,10 @@ export class UniverDocsDrawingPlugin extends Plugin {
             [DocDrawingController],
             [DocDrawingService],
             [IDocDrawingService, { useClass: DocDrawingService }],
-        ] as Dependency[
+        ] as Dependency[]).forEach((dependency) => this._injector.add(dependency));
 
-        ]).forEach((dependency) => this._injector.add(dependency));
-
-        this._injector.get(DocDrawingController);
+        touchDependencies(this._injector, [
+            [DocDrawingController],
+        ]);
     }
 }

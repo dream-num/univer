@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { StringValueObject } from '../../../engine/value-object/primitive-object';
@@ -24,21 +25,33 @@ export class T extends BaseFunction {
 
     override maxParams = 1;
 
-    override calculate(value: BaseValueObject): BaseValueObject {
+    override needsReferenceObject = true;
+
+    override calculate(value: FunctionVariantType): BaseValueObject {
         let _value = value;
 
-        if (value.isArray()) {
-            _value = (value as ArrayValueObject).get(0, 0) as BaseValueObject;
+        // If the parameter is a reference object, get the first value from the reference object
+        if (value.isReferenceObject()) {
+            _value = (value as BaseReferenceObject).toArrayValueObject().get(0, 0) as BaseValueObject;
         }
 
-        if (_value.isError()) {
-            return _value;
+        // If the parameter is an array, return an array result
+        if (_value.isArray()) {
+            return (_value as ArrayValueObject).mapValue((valueObject) => this._handleSingleObject(valueObject));
         }
 
-        if (_value.isNull() || _value.isBoolean() || _value.isNumber()) {
+        return this._handleSingleObject(_value as BaseValueObject);
+    }
+
+    private _handleSingleObject(value: BaseValueObject): BaseValueObject {
+        if (value.isError()) {
+            return value;
+        }
+
+        if (value.isNull() || value.isBoolean() || value.isNumber()) {
             return StringValueObject.create('');
         }
 
-        return _value;
+        return value;
     }
 }

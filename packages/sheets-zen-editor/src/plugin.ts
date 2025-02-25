@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,10 @@
 import type { Dependency } from '@univerjs/core';
 import type { IUniverSheetsZenEditorConfig } from './controllers/config.schema';
 
-import { IConfigService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
-import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
-import { ZenEditorController } from './controllers/zen-editor.controller';
+import { IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
+import { defaultPluginConfig, SHEETS_ZEN_EDITOR_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { ZenEditorUIController } from './controllers/zen-editor-ui.controller';
+import { ZenEditorController } from './controllers/zen-editor.controller';
 import { IZenEditorManagerService, ZenEditorManagerService } from './services/zen-editor.service';
 
 export class UniverSheetsZenEditorPlugin extends Plugin {
@@ -35,11 +35,15 @@ export class UniverSheetsZenEditorPlugin extends Plugin {
         super();
 
         // Manage the plugin configuration.
-        const { menu, ...rest } = this._config;
+        const { menu, ...rest } = merge(
+            {},
+            defaultPluginConfig,
+            this._config
+        );
         if (menu) {
             this._configService.setConfig('menu', menu, { merge: true });
         }
-        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
+        this._configService.setConfig(SHEETS_ZEN_EDITOR_PLUGIN_CONFIG_KEY, rest);
 
         this._initializeDependencies(this._injector);
     }

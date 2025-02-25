@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import type { ISrcRect, Nullable, PresetGeometryType } from '@univerjs/core';
-import type { IDrawingParam } from '../services/drawing-manager.service';
+import type { IDrawingParam, ISrcRect, Nullable, PresetGeometryType } from '@univerjs/core';
 import type { ImageSourceType } from '../services/image-io.service';
 
 export interface IImageData extends IDrawingParam {
@@ -30,4 +29,3 @@ export interface IImageData extends IDrawingParam {
      */
     prstGeom?: Nullable<PresetGeometryType>;
 }
-

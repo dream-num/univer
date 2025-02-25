@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,9 @@ import type { IDeleteCommentMutationParams } from '@univerjs/thread-comment';
 import { Disposable, ICommandService, Inject, IUniverInstanceService, RANGE_TYPE, Rectangle, UniverInstanceType } from '@univerjs/core';
 import { singleReferenceToGrid } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { RangeProtectionPermissionViewPoint, SetWorksheetActiveOperation, SheetsSelectionsService, WorkbookCommentPermission, WorksheetViewPermission } from '@univerjs/sheets';
+import { RangeProtectionPermissionViewPoint, SetWorksheetActiveOperation, SheetPermissionCheckController, SheetsSelectionsService, WorkbookCommentPermission, WorksheetViewPermission } from '@univerjs/sheets';
 import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment';
-import { IEditorBridgeService, IMarkSelectionService, ScrollToRangeOperation, SheetPermissionInterceptorBaseController, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { IEditorBridgeService, IMarkSelectionService, ScrollToRangeOperation, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { DeleteCommentMutation } from '@univerjs/thread-comment';
 import { SetActiveCommentOperation, ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
 import { debounceTime } from 'rxjs';
@@ -45,7 +45,7 @@ export class SheetsThreadCommentPopupController extends Disposable {
         @Inject(SheetsThreadCommentModel) private readonly _sheetsThreadCommentModel: SheetsThreadCommentModel,
         @Inject(ThreadCommentPanelService) private readonly _threadCommentPanelService: ThreadCommentPanelService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @Inject(SheetPermissionInterceptorBaseController) private readonly _sheetPermissionInterceptorBaseController: SheetPermissionInterceptorBaseController,
+        @Inject(SheetPermissionCheckController) private readonly _sheetPermissionCheckController: SheetPermissionCheckController,
         @IMarkSelectionService private readonly _markSelectionService: IMarkSelectionService,
         @Inject(SheetsSelectionsService) private readonly _sheetSelectionService: SheetsSelectionsService,
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
@@ -63,7 +63,7 @@ export class SheetsThreadCommentPopupController extends Disposable {
     private _handleSelectionChange(selections: ISelectionWithStyle[], unitId: string, subUnitId: string) {
         const range = selections[0]?.range;
         const render = this._renderManagerService.getRenderById(unitId);
-        const skeleton = render?.with(SheetSkeletonManagerService).getWorksheetSkeleton(subUnitId)?.skeleton;
+        const skeleton = render?.with(SheetSkeletonManagerService).getSkeletonParam(subUnitId)?.skeleton;
         if (!skeleton) {
             return;
         }
@@ -171,7 +171,7 @@ export class SheetsThreadCommentPopupController extends Disposable {
                 const location = singleReferenceToGrid(comment.ref);
 
                 const { row, column: col } = location;
-                const commentPermission = this._sheetPermissionInterceptorBaseController.permissionCheckWithRanges({
+                const commentPermission = this._sheetPermissionCheckController.permissionCheckWithRanges({
                     workbookTypes: [WorkbookCommentPermission],
                     worksheetTypes: [WorksheetViewPermission],
                     rangeTypes: [RangeProtectionPermissionViewPoint],

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,7 @@
  */
 
 import type { Meta } from '@storybook/react';
-import React from 'react';
 
-import { Button } from '../button/Button';
 import { Dropdown } from './Dropdown';
 
 const meta: Meta<typeof Dropdown> = {
@@ -34,9 +32,31 @@ export default meta;
 export const Playground = {
     render() {
         return (
-            <Dropdown overlay={<div>overlay</div>}>
-                <Button>Basic</Button>
-            </Dropdown>
+            <div className="univer-relative">
+                <Dropdown
+                    overlay={(
+                        <div className="univer-text-blue-500">
+                            Hello Univer
+                            <Dropdown
+                                overlay={(
+                                    <div className="univer-text-cyan-700">
+                                        <div>Nested Content</div>
+                                        <div>Nested Content</div>
+                                        <div>Nested Content</div>
+                                        <div>Nested Content</div>
+                                    </div>
+                                )}
+                            >
+                                <a>Nested Popover</a>
+                            </Dropdown>
+                        </div>
+                    )}
+                >
+                    <a className="univer-cursor-pointer univer-border univer-rounded-lg univer-border-gray-200 univer-px-4 univer-py-2 univer-border-solid hover:univer-bg-gray-100 univer-transition-all">
+                        Click me
+                    </a>
+                </Dropdown>
+            </div>
         );
     },
 };

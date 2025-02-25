@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,15 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import { IConfigService, Inject, Injector, mergeOverrideWithDependencies, Plugin } from '@univerjs/core';
-
-import { ImageIoService } from './services/image-io-impl.service';
-import { DrawingManagerService } from './services/drawing-manager-impl.service';
-import { IImageIoService } from './services/image-io.service';
-import { IDrawingManagerService } from './services/drawing-manager.service';
 import type { IUniverDrawingConfig } from './controllers/config.schema';
-import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+
+import { ICommandService, IConfigService, Inject, Injector, merge, mergeOverrideWithDependencies, Plugin } from '@univerjs/core';
+import { SetDrawingSelectedOperation } from './commands/operations/set-drawing-selected.operation';
+import { defaultPluginConfig, DRAWING_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { DrawingManagerService } from './services/drawing-manager-impl.service';
+import { IDrawingManagerService } from './services/drawing-manager.service';
+import { ImageIoService } from './services/image-io-impl.service';
+import { IImageIoService } from './services/image-io.service';
 
 const PLUGIN_NAME = 'UNIVER_DRAWING_PLUGIN';
 
@@ -32,16 +33,22 @@ export class UniverDrawingPlugin extends Plugin {
     constructor(
         private readonly _config: Partial<IUniverDrawingConfig> = defaultPluginConfig,
         @Inject(Injector) protected _injector: Injector,
-        @IConfigService private readonly _configService: IConfigService
+        @IConfigService private readonly _configService: IConfigService,
+        @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
 
         // Manage the plugin configuration.
-        const { ...rest } = this._config;
-        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
+        const { ...rest } = merge(
+            {},
+            defaultPluginConfig,
+            this._config
+        );
+        this._configService.setConfig(DRAWING_PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {
+        this._initCommands();
         this._initDependencies();
     }
 
@@ -53,5 +60,11 @@ export class UniverDrawingPlugin extends Plugin {
 
         const dependency = mergeOverrideWithDependencies(dependencies, this._config?.override);
         dependency.forEach((d) => this._injector.add(d));
+    }
+
+    private _initCommands() {
+        [
+            SetDrawingSelectedOperation,
+        ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 }

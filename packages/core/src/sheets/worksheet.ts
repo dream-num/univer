@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
+import type { IInterceptor } from '../common/interceptor';
 import type { IObjectMatrixPrimitiveType, Nullable } from '../shared';
 import type { IDocumentData, IDocumentRenderConfig, IPaddingData, IStyleData, ITextRotation } from '../types/interfaces';
 import type { Styles } from './styles';
-import type { ICellData, ICellDataForSheetInterceptor, IFreeze, IRange, ISelectionCell, IWorksheetData } from './typedef';
+import type { CustomData, ICellData, ICellDataForSheetInterceptor, ICellDataWithSpanAndDisplay, IFreeze, IRange, ISelectionCell, IWorksheetData } from './typedef';
 import { BuildTextUtils, DocumentDataModel } from '../docs';
 import { convertTextRotation, getFontStyleString } from '../docs/data-model/utils';
 import { composeStyles, ObjectMatrix, Tools } from '../shared';
@@ -29,7 +30,8 @@ import { Range } from './range';
 import { RowManager } from './row-manager';
 import { mergeWorksheetSnapshotWithDefault } from './sheet-snapshot-utils';
 import { SpanModel } from './span-model';
-import { addLinkToDocumentModel, createDocumentModelWithStyle, DEFAULT_PADDING_DATA, extractOtherStyle, getFontFormat } from './util';
+import { CellModeEnum } from './typedef';
+import { addLinkToDocumentModel, createDocumentModelWithStyle, DEFAULT_PADDING_DATA, extractOtherStyle, getFontFormat, isNotNullOrUndefined } from './util';
 import { SheetViewModel } from './view-model';
 
 export interface IDocumentLayoutObject {
@@ -376,6 +378,8 @@ export class Worksheet {
 
     /**
      * Get the merged cell Range of the sheet cell.
+     * If (row, col) is not in a merged cell, return null
+     *
      * @param {number} row The row index of test cell
      * @param {number} col The column index of test cell
      * @returns {Nullable<IRange>} The merged cell range of the cell, if the cell is not in a merged cell, return null
@@ -523,6 +527,11 @@ export class Worksheet {
         return this.getCellMatrix().getValue(row, col);
     }
 
+    // eslint-disable-next-line ts/no-explicit-any
+    getCellWithFilteredInterceptors(row: number, col: number, key: string, filter: (interceptor: IInterceptor<any, any>) => boolean): Nullable<ICellDataForSheetInterceptor> {
+        return this._viewModel.getCell(row, col, key, filter);
+    }
+
     getRowFiltered(row: number): boolean {
         return this._viewModel.getRowFiltered(row);
     }
@@ -532,25 +541,58 @@ export class Worksheet {
      *
      * Notice that `ICellData` here is not after copying. In another word, the object matrix here should be
      * considered as a slice of the original worksheet data matrix.
+     *
+     * Control the v attribute in the return cellData.v through dataMode
      */
+
+    getMatrixWithMergedCells(
+        row: number,
+        col: number,
+        endRow: number,
+        endCol: number
+    ): ObjectMatrix<ICellDataWithSpanAndDisplay>;
+
     getMatrixWithMergedCells(
         row: number,
         col: number,
         endRow: number,
         endCol: number,
-        isRaw = false
-    ): ObjectMatrix<ICellData & { rowSpan?: number; colSpan?: number }> {
+        dataMode: CellModeEnum
+    ): ObjectMatrix<ICellDataWithSpanAndDisplay>;
+
+    getMatrixWithMergedCells(
+        row: number,
+        col: number,
+        endRow: number,
+        endCol: number,
+        dataMode: CellModeEnum = CellModeEnum.Raw
+    ): ObjectMatrix<ICellDataWithSpanAndDisplay> {
         const matrix = this.getCellMatrix();
 
         // get all merged cells
         const mergedCellsInRange = this._spanModel.getMergedCellRange(row, col, endRow, endCol);
 
         // iterate all cells in the range
-        const returnCellMatrix = new ObjectMatrix<ICellData & { rowSpan?: number; colSpan?: number }>();
+        const returnCellMatrix = new ObjectMatrix<ICellDataWithSpanAndDisplay>();
         createRowColIter(row, endRow, col, endCol).forEach((row, col) => {
-            const v = isRaw ? this.getCellRaw(row, col) : this.getCell(row, col);
-            if (v) {
-                returnCellMatrix.setValue(row, col, v);
+            let cellData: Nullable<ICellDataWithSpanAndDisplay>;
+            if (dataMode === CellModeEnum.Raw) {
+                cellData = this.getCellRaw(row, col);
+            } else if (dataMode === CellModeEnum.Intercepted) {
+                cellData = this.getCell(row, col);
+            } else if (dataMode === CellModeEnum.Both) {
+                const cellDataRaw = this.getCellRaw(row, col);
+                if (cellDataRaw) {
+                    cellData = { ...cellDataRaw };
+                    const displayV = this.getCell(row, col)?.v;
+                    if (isNotNullOrUndefined(displayV) && cellData) {
+                        cellData.displayV = String(displayV);
+                    }
+                }
+            }
+
+            if (cellData) {
+                returnCellMatrix.setValue(row, col, cellData);
             }
         });
 
@@ -679,7 +721,7 @@ export class Worksheet {
 
     /**
      * Returns true if the sheet's gridlines are hidden; otherwise returns false. Gridlines are visible by default.
-     * @returns Gridlines Hidden Status
+     * @returns {boolean} Gridlines Hidden Status.
      */
     hasHiddenGridlines(): boolean {
         const { _snapshot: _config } = this;
@@ -689,6 +731,14 @@ export class Worksheet {
         }
 
         return false;
+    }
+
+    /**
+     * Returns the color of the gridlines, or undefined if the gridlines are not colored.
+     * @returns {string | undefined} returns the color of the gridlines, or undefined if the gridlines are default.
+     */
+    getGridlinesColor(): string | undefined {
+        return this.getConfig().gridlinesColor;
     }
 
     /**
@@ -813,6 +863,10 @@ export class Worksheet {
      */
     getLastColumnWithContent(): number {
         return this._cellData.getRange().endColumn;
+    }
+
+    getDataRangeScope(): IRange {
+        return this._cellData.getStartEndScope();
     }
 
     cellHasValue(value: ICellData) {
@@ -1019,6 +1073,7 @@ export class Worksheet {
                     centerAngle,
                     vertexAngle,
                     wrapStrategy,
+                    zeroWidthParagraphBreak: 1,
                 }
             );
         } else if (cell.v != null) {
@@ -1099,7 +1154,10 @@ export class Worksheet {
             height: Number.POSITIVE_INFINITY,
         };
 
-        documentData.documentStyle.renderConfig = renderConfig;
+        documentData.documentStyle.renderConfig = {
+            ...documentData.documentStyle.renderConfig,
+            ...renderConfig,
+        };
 
         const paragraphs = documentData.body.paragraphs || [];
 
@@ -1162,6 +1220,22 @@ export class Worksheet {
             displayRawFormula: true,
             ignoreTextRotation: true,
         });
+    }
+
+    /**
+     * Get custom metadata of worksheet
+     * @returns {CustomData | undefined} custom metadata
+     */
+    getCustomMetadata(): CustomData | undefined {
+        return this._snapshot.custom;
+    }
+
+    /**
+     * Set custom metadata of workbook
+     * @param {CustomData | undefined} custom custom metadata
+     */
+    setCustomMetadata(custom: CustomData | undefined) {
+        this._snapshot.custom = custom;
     }
 }
 

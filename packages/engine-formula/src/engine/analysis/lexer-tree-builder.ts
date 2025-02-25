@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -263,7 +263,7 @@ export class LexerTreeBuilder extends Disposable {
         return newSequenceNodes;
     }
 
-    convertRefersToAbsolute(formulaString: string, startAbsoluteRefType: AbsoluteRefType, endAbsoluteRefType: AbsoluteRefType) {
+    convertRefersToAbsolute(formulaString: string, startAbsoluteRefType: AbsoluteRefType, endAbsoluteRefType: AbsoluteRefType, currentSheetName: string = '') {
         const nodes = this.sequenceNodesBuilder(formulaString);
         if (nodes == null) {
             return formulaString;
@@ -298,7 +298,7 @@ export class LexerTreeBuilder extends Disposable {
                 const newToken = serializeRangeToRefString({
                     range: newRange,
                     unitId,
-                    sheetName,
+                    sheetName: sheetName || currentSheetName,
                 });
 
                 const minusCount = newToken.length - token.length;
@@ -1446,10 +1446,28 @@ export class LexerTreeBuilder extends Disposable {
             } else if (currentString === matchToken.SINGLE_QUOTATION && this.isDoubleQuotationClose()) {
                 if (this.isSingleQuotationClose()) {
                     this._openSingleQuotation();
+
+                    // If the current segment is blank, reset the segment.
+                    // Process the space before the double single quotes of sheet name.
+                    // e.g. = 'dv-test'!C27
+                    if (this._segmentCount() === 0) {
+                        this._resetSegment();
+                    }
                 } else {
                     const nextCurrentString = formulaStringArray[cur + 1];
                     if (nextCurrentString && nextCurrentString === matchToken.SINGLE_QUOTATION) {
+                        // handle 'Sheet'1'!A1
+
+                        // Add the first single quotation
+                        this._pushSegment(currentString);
+                        this._addSequenceArray(sequenceArray, currentString, cur);
                         cur++;
+
+                        // Add the second single quotation
+                        this._pushSegment(nextCurrentString);
+                        this._addSequenceArray(sequenceArray, nextCurrentString, cur);
+                        cur++;
+                        continue;
                     } else {
                         this._closeSingleQuotation();
                     }

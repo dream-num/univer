@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,12 +41,14 @@ import { SetSelectionsOperation } from '../../operations/selection.operation';
 import {
     InsertColAfterCommand,
     InsertColBeforeCommand,
+    InsertColByRangeCommand,
     InsertColCommand,
     InsertRowAfterCommand,
     InsertRowBeforeCommand,
+    InsertRowByRangeCommand,
     InsertRowCommand,
 } from '../insert-row-col.command';
-import { RemoveColCommand, RemoveRowCommand } from '../remove-row-col.command';
+import { RemoveColByRangeCommand, RemoveColCommand, RemoveRowByRangeCommand, RemoveRowCommand } from '../remove-row-col.command';
 import { createCommandTestBed } from './create-command-test-bed';
 
 describe('Test insert and remove rows cols commands', () => {
@@ -69,6 +71,10 @@ describe('Test insert and remove rows cols commands', () => {
             InsertColAfterCommand,
             InsertColBeforeCommand,
             InsertColCommand,
+            InsertColByRangeCommand,
+            InsertRowByRangeCommand,
+            RemoveColByRangeCommand,
+            RemoveRowByRangeCommand,
             RemoveRowCommand,
             RemoveColCommand,
 
@@ -343,10 +349,6 @@ const TEST_ROW_COL_INSERTION_DEMO: IWorkbookData = {
     id: 'test',
     appVersion: '3.0.0-alpha',
     sheets: {
-        // 1
-        //  2-3-
-        // 	4
-        //  |
         sheet1: {
             id: 'sheet1',
             cellData: {

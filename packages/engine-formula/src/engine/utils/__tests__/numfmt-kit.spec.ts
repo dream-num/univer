@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,8 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { compareNumfmtPriority, comparePatternPriority } from '../numfmt-kit';
 import { operatorToken } from '../../../basics/token';
+import { compareNumfmtPriority, comparePatternPriority } from '../numfmt-kit';
 
 const numfmtMap = {
     currency: '"¥"#,##0.00_);[Red]("¥"#,##0.00)',
@@ -28,7 +28,7 @@ const numfmtMap = {
     number: '0',
     percent: '0%',
     scientific: '0.00E+00',
-    text: '@@@',
+    text: '@',
     time: 'am/pm h":"mm":"ss',
     unknown: '#,##0',
     accounting: '_("¤"* #,##0.000_)',

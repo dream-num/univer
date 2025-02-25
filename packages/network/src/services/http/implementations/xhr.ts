@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,36 +19,37 @@
 
 import type { Nullable } from '@univerjs/core';
 import type { Observer } from 'rxjs';
-import { Observable } from 'rxjs';
-
-import { HTTPHeaders } from '../headers';
-import { ErrorStatusCodeLowerBound, HTTPStatusCode, SuccessStatusCodeLowerBound } from '../http';
 import type { HTTPRequest } from '../request';
 import type { HTTPEvent } from '../response';
-import { HTTPResponse, HTTPResponseError, ResponseHeader } from '../response';
 import type { IHTTPImplementation } from './implementation';
+import { ILogService } from '@univerjs/core';
+import { Observable } from 'rxjs';
+import { HTTPHeaders } from '../headers';
+import { ErrorStatusCodeLowerBound, HTTPStatusCode, SuccessStatusCodeLowerBound } from '../http';
+import { HTTPResponse, HTTPResponseError, ResponseHeader } from '../response';
+import { parseFetchParamsFromRequest } from './util';
 
 /**
  * An HTTP implementation using XHR. HTTP service provided by this service could only be async (we do not support sync XHR now).
  */
 export class XHRHTTPImplementation implements IHTTPImplementation {
+    constructor(
+        @ILogService private readonly _logService: ILogService
+    ) { }
+
     send(request: HTTPRequest): Observable<HTTPEvent<any>> {
         return new Observable((observer: Observer<HTTPEvent<any>>) => {
             const xhr = new XMLHttpRequest();
-            xhr.open(request.method, request.getUrlWithParams());
+            const urlWithParams = request.getUrlWithParams();
+            const fetchParams = parseFetchParamsFromRequest(request);
+
+            xhr.open(request.method, urlWithParams);
             if (request.withCredentials) {
                 xhr.withCredentials = true;
             }
 
-            // set default HTTP headers
-
-            request.headers.forEach((key, value) => xhr.setRequestHeader(key, value.join(',')));
-            if (!request.headers.has('Accept')) {
-                xhr.setRequestHeader('Accept', 'application/json, text/plain, */*');
-            }
-
-            if (!request.headers.has('Content-Type')) {
-                xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+            if (fetchParams.headers) {
+                Object.entries(fetchParams.headers).forEach(([key, value]) => xhr.setRequestHeader(key, value));
             }
 
             let responseHeader: Nullable<ResponseHeader>;
@@ -103,27 +104,32 @@ export class XHRHTTPImplementation implements IHTTPImplementation {
                         })
                     );
                 } else {
-                    observer.error(
-                        new HTTPResponseError({
-                            error,
-                            headers,
-                            status,
-                            statusText,
-                        })
-                    );
-                    // Handler server logic error here
+                    const e = new HTTPResponseError({
+                        request,
+                        error,
+                        headers,
+                        status,
+                        statusText,
+                    });
+
+                    this._logService.error('[XHRHTTPImplementation]: network error', e);
+
+                    observer.error(e);
                 }
             };
 
             const onErrorHandler = (error: ProgressEvent) => {
-                const res = new HTTPResponseError({
+                const e = new HTTPResponseError({
+                    request,
                     error,
                     status: xhr.status || 0,
                     statusText: xhr.statusText || 'Unknown Error',
                     headers: buildResponseHeader().headers,
                 });
 
-                observer.error(res);
+                this._logService.error('[XHRHTTPImplementation]: network error', e);
+
+                observer.error(e);
             };
 
             xhr.addEventListener('load', onLoadHandler);
@@ -133,6 +139,8 @@ export class XHRHTTPImplementation implements IHTTPImplementation {
 
             const body = request.getBody();
             xhr.send(body);
+
+            this._logService.debug('[XHRHTTPImplementation]', `sending request to url ${urlWithParams} with params ${fetchParams}`);
 
             // Abort the request if the subscription is disposed before the request completes.
             return () => {

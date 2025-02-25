@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 import type { IAccessor, ICommandInfo, IMutationInfo, IRange, Nullable } from '@univerjs/core';
 import type { IInsertColMutationParams, IInsertRowMutationParams, IRemoveColMutationParams, IRemoveRowsMutationParams, IRemoveSheetMutationParams } from '../../basics';
-
 import type { IInsertColCommandParams, IInsertRowCommandParams } from '../../commands/commands/insert-row-col.command';
 import type { IRemoveRowColCommandInterceptParams } from '../../commands/commands/remove-row-col.command';
 import type { ISheetCommandSharedParams } from '../../commands/utils/interface';
@@ -1090,7 +1089,7 @@ export const handleDefaultRangeChangeWithEffectRefCommandsSkipNoInterests = (ran
     return range;
 };
 
-type MutationsAffectRange =
+export type MutationsAffectRange =
     ISheetCommandSharedParams
     | IRemoveSheetMutationParams
     | IMoveRowsMutationParams

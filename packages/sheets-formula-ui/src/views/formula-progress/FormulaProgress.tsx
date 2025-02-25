@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { ICommandService, useDependency, useObservable } from '@univerjs/core';
+import { ICommandService } from '@univerjs/core';
 import { SetFormulaCalculationStopMutation } from '@univerjs/engine-formula';
 import { TriggerCalculationController } from '@univerjs/sheets-formula';
-import { ProgressBar } from '@univerjs/ui';
+import { ProgressBar, useDependency, useObservable } from '@univerjs/ui';
 import React, { useCallback } from 'react';
 
 export function FormulaProgressBar() {

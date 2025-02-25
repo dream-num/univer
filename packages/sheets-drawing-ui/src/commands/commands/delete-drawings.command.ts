@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,11 @@
  */
 
 import type { IAccessor, ICommand } from '@univerjs/core';
-import { CommandType, ICommandService } from '@univerjs/core';
 import type { ISheetDrawing } from '@univerjs/sheets-drawing';
+import type { IDeleteDrawingCommandParams } from './interfaces';
+import { CommandType, ICommandService } from '@univerjs/core';
 import { ISheetDrawingService } from '@univerjs/sheets-drawing';
 import { RemoveSheetDrawingCommand } from './remove-sheet-drawing.command';
-import type { IDeleteDrawingCommandParams } from './interfaces';
 
 export const DeleteDrawingsCommand: ICommand = {
     id: 'sheet.command.delete-drawing',

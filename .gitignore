@@ -86,6 +86,7 @@ typings/
 # examples
 
 screenshot
+*.heapsnapshot
 
 univer-custom-build
 universheet-custom-build
@@ -115,3 +116,6 @@ playwright-report.json
 
 *storybook.log
 typedoc.json
+
+# tsx
+**/tsx-0

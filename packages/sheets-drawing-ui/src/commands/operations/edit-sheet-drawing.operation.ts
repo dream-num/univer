@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,26 +14,26 @@
  * limitations under the License.
  */
 
-import type { IAccessor, IOperation } from '@univerjs/core';
+import type { IAccessor, IDrawingSearch, IOperation } from '@univerjs/core';
 import {
     CommandType,
     ICommandService,
 } from '@univerjs/core';
-import type { IDrawingSearch } from '@univerjs/drawing';
-import { IDrawingManagerService } from '@univerjs/drawing';
+import { SetDrawingSelectedOperation } from '@univerjs/drawing';
 import { SidebarSheetDrawingOperation } from './open-drawing-panel.operation';
 
 export const EditSheetDrawingOperation: IOperation<IDrawingSearch> = {
     id: 'sheet.operation.edit-sheet-image',
     type: CommandType.OPERATION,
     handler: (accessor: IAccessor, params?: IDrawingSearch) => {
-        const drawingManagerService = accessor.get(IDrawingManagerService);
+        // const drawingManagerService = accessor.get(IDrawingManagerService);
         const commandService = accessor.get(ICommandService);
 
         if (params == null) {
             return false;
         }
-        drawingManagerService.focusDrawing([params]);
+
+        commandService.syncExecuteCommand(SetDrawingSelectedOperation.id, [params]);
         commandService.executeCommand(SidebarSheetDrawingOperation.id, { value: 'open' });
         return true;
     },

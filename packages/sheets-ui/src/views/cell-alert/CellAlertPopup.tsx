@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,19 @@
  * limitations under the License.
  */
 
-import React from 'react';
+import type { ICanvasPopup } from '../../services/canvas-pop-manager.service';
+import type { ICellAlert } from '../../services/cell-alert-manager.service';
 import { ErrorSingle, WarningSingle } from '@univerjs/icons';
 import cs from 'clsx';
-import type { ICellAlert } from '../../services/cell-alert-manager.service';
+import React from 'react';
 import { CellAlertType } from '../../services/cell-alert-manager.service';
-import type { ICanvasPopup } from '../../services/canvas-pop-manager.service';
 import styles from './index.module.less';
 
+/**
+ *
+ * @param root0
+ * @param root0.popup
+ */
 export function CellAlert({ popup }: { popup: ICanvasPopup }) {
     const alert = popup.extraProps?.alert;
 

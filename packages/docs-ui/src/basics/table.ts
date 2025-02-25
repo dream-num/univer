@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,7 +110,7 @@ export function findBellowCell(cell: IDocumentSkeletonPage): Nullable<IDocumentS
                     if (skeTables.has(nextTableId)) {
                         const nextTable = skeTables.get(nextTableId);
                         if (nextTable?.rows.length) {
-                            bellowRow = nextTable.rows[0];
+                            bellowRow = nextTable.rows.find((r) => !r.isRepeatRow)!;
                             break;
                         }
                     }
@@ -138,7 +138,7 @@ export function findAboveCell(cell: IDocumentSkeletonPage): Nullable<IDocumentSk
 
     const col = row.cells.indexOf(cell);
 
-    if (aboveRow == null) {
+    if (aboveRow == null || aboveRow.isRepeatRow) {
         if (table.tableId.indexOf('#-#')) {
             const [id, index] = table.tableId.split('#-#');
             const pages = (table.parent?.parent as IDocumentSkeletonCached)?.pages;

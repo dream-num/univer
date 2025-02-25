@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,9 @@
 
 import type { IRange, ISheetDataValidationRule } from '@univerjs/core';
 import { Disposable, Inject, isFormulaString, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { DataValidationModel } from '@univerjs/data-validation';
+import { DataValidationModel, DataValidatorRegistryService } from '@univerjs/data-validation';
 import { RegisterOtherFormulaService } from '@univerjs/sheets-formula';
-import { getFormulaCellData, isCustomFormulaType } from '../utils/formula';
+import { getFormulaCellData, shouldOffsetFormulaByRange } from '../utils/formula';
 import { DataValidationCacheService } from './dv-cache.service';
 
 interface IFormulaData {
@@ -43,7 +43,8 @@ export class DataValidationCustomFormulaService extends Disposable {
         @IUniverInstanceService private readonly _instanceSrv: IUniverInstanceService,
         @Inject(RegisterOtherFormulaService) private _registerOtherFormulaService: RegisterOtherFormulaService,
         @Inject(DataValidationModel) private readonly _dataValidationModel: DataValidationModel,
-        @Inject(DataValidationCacheService) private readonly _dataValidationCacheService: DataValidationCacheService
+        @Inject(DataValidationCacheService) private readonly _dataValidationCacheService: DataValidationCacheService,
+        @Inject(DataValidatorRegistryService) private readonly _validatorRegistryService: DataValidatorRegistryService
     ) {
         super();
 
@@ -156,7 +157,7 @@ export class DataValidationCustomFormulaService extends Disposable {
     }
 
     addRule(unitId: string, subUnitId: string, rule: ISheetDataValidationRule) {
-        if (isCustomFormulaType(rule.type)) {
+        if (shouldOffsetFormulaByRange(rule.type, this._validatorRegistryService)) {
             const { ranges, formula1, formula2, uid: ruleId } = rule;
             this._addFormulaByRange(unitId, subUnitId, ruleId, formula1, formula2, ranges);
         }

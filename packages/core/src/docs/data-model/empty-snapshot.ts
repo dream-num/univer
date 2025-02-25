@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-import { Tools } from '../../shared/tools';
-import { LocaleType } from '../../types/enum/locale-type';
 import type { IDocumentData } from '../../types/interfaces';
+import { Tools } from '../../shared/tools';
+import { BooleanNumber } from '../../types/enum';
+import { LocaleType } from '../../types/enum/locale-type';
+import { DocumentFlavor } from '../../types/interfaces';
 
 export function getEmptySnapshot(
     unitID = Tools.generateRandomId(6),
@@ -27,9 +29,16 @@ export function getEmptySnapshot(
         id: unitID,
         locale,
         title, // title should get from request.
+        tableSource: {},
+        drawings: {},
+        drawingsOrder: [],
+        headers: {},
+        footers: {},
         body: {
             dataStream: '\r\n',
             textRuns: [],
+            customBlocks: [],
+            tables: [],
             paragraphs: [
                 {
                     startIndex: 0,
@@ -51,14 +60,32 @@ export function getEmptySnapshot(
                 width: 595 / 0.75,
                 height: 842 / 0.75,
             },
+            documentFlavor: DocumentFlavor.TRADITIONAL,
             marginTop: 50,
             marginBottom: 50,
-            marginRight: 40,
-            marginLeft: 40,
+            marginRight: 50,
+            marginLeft: 50,
             renderConfig: {
+                zeroWidthParagraphBreak: BooleanNumber.FALSE,
                 vertexAngle: 0,
                 centerAngle: 0,
+                background: {
+                    rgb: '#ccc',
+                },
             },
+            autoHyphenation: BooleanNumber.TRUE,
+            doNotHyphenateCaps: BooleanNumber.FALSE,
+            consecutiveHyphenLimit: 2,
+            defaultHeaderId: '',
+            defaultFooterId: '',
+            evenPageHeaderId: '',
+            evenPageFooterId: '',
+            firstPageHeaderId: '',
+            firstPageFooterId: '',
+            evenAndOddHeaders: BooleanNumber.FALSE,
+            useFirstPageHeaderFooter: BooleanNumber.FALSE,
+            marginHeader: 30,
+            marginFooter: 30,
         },
         settings: {},
 

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
+import type { Dependency } from '@univerjs/core';
 import type { IUniverSheetsNumfmtUIConfig } from './controllers/config.schema';
-import { DependentOn, IConfigService, Inject, Injector, Plugin, registerDependencies, touchDependencies, UniverInstanceType } from '@univerjs/core';
+import { DependentOn, IConfigService, Inject, Injector, merge, Plugin, registerDependencies, touchDependencies, UniverInstanceType } from '@univerjs/core';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
-import { PLUGIN_CONFIG_KEY } from '@univerjs/ui';
+import { UI_PLUGIN_CONFIG_KEY } from '@univerjs/ui';
 import { defaultPluginConfig } from './controllers/config.schema';
+import { NumfmtAlertRenderController } from './controllers/numfmt-alert-render.controller';
 import { SheetNumfmtUIController } from './controllers/numfmt.controller';
 import { NumfmtEditorController } from './controllers/numfmt.editor.controller';
 import { NumfmtMenuController } from './controllers/numfmt.menu.controller';
@@ -35,17 +38,22 @@ export class UniverSheetsNumfmtUIPlugin extends Plugin {
     constructor(
         private readonly _config: Partial<IUniverSheetsNumfmtUIConfig> = defaultPluginConfig,
         @Inject(Injector) override readonly _injector: Injector,
-        @IConfigService private readonly _configService: IConfigService
+        @IConfigService private readonly _configService: IConfigService,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
         super();
 
         // Manage the plugin configuration.
-        const { menu, ...rest } = this._config;
+        const { menu, ...rest } = merge(
+            {},
+            defaultPluginConfig,
+            this._config
+        );
         if (menu) {
             this._configService.setConfig('menu', menu, { merge: true });
         }
 
-        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
+        this._configService.setConfig(UI_PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {
@@ -58,10 +66,21 @@ export class UniverSheetsNumfmtUIPlugin extends Plugin {
     }
 
     override onRendered(): void {
+        this._registerRenderModules();
         touchDependencies(this._injector, [
             [SheetNumfmtUIController],
             [NumfmtEditorController],
             [NumfmtMenuController],
         ]);
+    }
+
+    private _registerRenderModules(): void {
+        const modules: Dependency[] = [
+            [NumfmtAlertRenderController],
+        ];
+
+        modules.forEach((m) => {
+            this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, m));
+        });
     }
 }

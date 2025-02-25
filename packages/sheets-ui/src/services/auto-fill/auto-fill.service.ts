@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDisposable, IMutationInfo, IRange, Nullable, Workbook } from '@univerjs/core';
+import type { IAccessor, IDisposable, IMutationInfo, IRange, Nullable, Workbook } from '@univerjs/core';
 import type { RenderManagerService } from '@univerjs/engine-render';
 import type { ISetRangeValuesMutationParams, ISetWorksheetRowAutoHeightMutationParams } from '@univerjs/sheets';
 import type { Observable } from 'rxjs';
@@ -34,8 +34,9 @@ import { createIdentifier, Direction,
 } from '@univerjs/core';
 
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { SetRangeValuesMutation, SetSelectionsOperation, SetWorksheetRowAutoHeightMutation, SetWorksheetRowAutoHeightMutationFactory, SheetsSelectionsService } from '@univerjs/sheets';
+import { rangeToDiscreteRange, SetRangeValuesMutation, SetSelectionsOperation, SetWorksheetRowAutoHeightMutation, SetWorksheetRowAutoHeightMutationFactory, SheetsSelectionsService } from '@univerjs/sheets';
 import { BehaviorSubject } from 'rxjs';
+import { AutoClearContentCommand } from '../../commands/commands/auto-fill.command';
 import { AFFECT_LAYOUT_STYLES } from '../../controllers/auto-height.controller';
 import { discreteRangeToRange } from '../../controllers/utils/range-tools';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
@@ -77,9 +78,9 @@ export interface IAutoFillService {
     getAllHooks(): ISheetAutoFillHook[];
     getActiveHooks(): ISheetAutoFillHook[];
     addHook(hook: ISheetAutoFillHook): IDisposable;
-    fillData(triggerUnitId: string, triggerSubUnitId: string): boolean;
+    fillData(applyType: APPLY_TYPE): boolean;
 
-    initPrevUndo(): void;
+    triggerAutoFill(unitId: string, subUnitId: string, source: IRange, target: IRange): Promise<boolean>;
 }
 
 export interface IApplyMenuItem {
@@ -169,8 +170,110 @@ export class AutoFillService extends Disposable implements IAutoFillService {
     }
 
     // a cache to undo commands of last apply-type
-    initPrevUndo() {
+    private _initPrevUndo() {
         this._prevUndos = [];
+    }
+
+    // eslint-disable-next-line max-lines-per-function
+    async triggerAutoFill(unitId: string, subUnitId: string, source: IRange, selection: IRange) {
+        // if source range === dest range, do nothing;
+        if (
+            source.startColumn === selection.startColumn &&
+                source.startRow === selection.startRow &&
+                source.endColumn === selection.endColumn &&
+                source.endRow === selection.endRow
+        ) {
+            return false;
+        }
+        // situation 1: drag to smaller range, horizontally.
+        if (selection.endColumn < source.endColumn && selection.endColumn > source.startColumn) {
+            return this._commandService.executeCommand(AutoClearContentCommand.id, {
+                clearRange: {
+                    startRow: selection.startRow,
+                    endRow: selection.endRow,
+                    startColumn: selection.endColumn + 1,
+                    endColumn: source.endColumn,
+                },
+                selectionRange: selection,
+            });
+        }
+        // situation 2: drag to smaller range, vertically.
+        if (selection.endRow < source.endRow && selection.endRow > source.startRow) {
+            return this._commandService.executeCommand(AutoClearContentCommand.id, {
+                clearRange: {
+                    startRow: selection.endRow + 1,
+                    endRow: source.endRow,
+                    startColumn: selection.startColumn,
+                    endColumn: selection.endColumn,
+                },
+                selectionRange: selection,
+            });
+        }
+        // situation 3: drag to larger range, expand to fill
+
+        // save ranges
+        const target = {
+            startRow: selection.startRow,
+            endRow: selection.endRow,
+            startColumn: selection.startColumn,
+            endColumn: selection.endColumn,
+        };
+        let direction: Nullable<Direction> = null;
+        if (selection.startRow < source.startRow) {
+            direction = Direction.UP;
+            target.endRow = source.startRow - 1;
+        } else if (selection.endRow > source.endRow) {
+            direction = Direction.DOWN;
+            target.startRow = source.endRow + 1;
+        } else if (selection.startColumn < source.startColumn) {
+            direction = Direction.LEFT;
+            target.endColumn = source.startColumn - 1;
+        } else if (selection.endColumn > source.endColumn) {
+            direction = Direction.RIGHT;
+            target.startColumn = source.endColumn + 1;
+        } else {
+            return false;
+        }
+
+        this.direction = direction;
+
+        const autoFillSource = this._injector.invoke((accessor: IAccessor) => rangeToDiscreteRange(source, accessor));
+        const autoFillTarget = this._injector.invoke((accessor: IAccessor) => rangeToDiscreteRange(target, accessor));
+
+        if (!autoFillSource || !autoFillTarget) {
+            return false;
+        }
+        this.autoFillLocation = {
+            source: autoFillSource,
+            target: autoFillTarget,
+            unitId,
+            subUnitId,
+        };
+
+        const preferTypes: APPLY_TYPE[] = [];
+        const activeHooks = this.getActiveHooks();
+        activeHooks.forEach((hook) => {
+            const type = hook?.onBeforeFillData?.({ source: autoFillSource, target: autoFillTarget, unitId, subUnitId }, direction!);
+            if (type) {
+                preferTypes.unshift(type);
+            }
+        });
+
+        this._initPrevUndo();
+        // set apply type will trigger fillData
+        for (let i = 0; i < preferTypes.length; i++) {
+            const menuItem = this.menu.find((m) => m.value === preferTypes[i]);
+            if (menuItem && !menuItem.disable) {
+                return this.fillData(preferTypes[i]);
+            }
+        }
+        // if no hook return apply type, use first available apply type
+        const first = this.menu.find((m) => m.disable === false)?.value;
+        if (first) {
+            return this.fillData(first);
+        }
+
+        return false;
     }
 
     addHook(hook: ISheetAutoFillHook) {
@@ -285,17 +388,19 @@ export class AutoFillService extends Disposable implements IAutoFillService {
         this._showMenu$.next(show);
     }
 
-    fillData(triggerUnitId: string, triggerSubUnitId: string) {
+    // eslint-disable-next-line max-lines-per-function
+    fillData(applyType: APPLY_TYPE) {
+        this.applyType = applyType;
         const { source, target,
                 unitId = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId(),
                 subUnitId = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()?.getSheetId(),
         } = this.autoFillLocation || {};
-        const direction = this.direction;
-        if (!source || !source.cols.length || !source.rows.length
-            || !target || !target.cols.length || !target.rows.length
-            || unitId !== triggerUnitId || subUnitId !== triggerSubUnitId) {
+
+        if (!source || !target || !unitId || !subUnitId) {
             return false;
         }
+
+        const direction = this.direction;
 
         if (this._prevUndos.length > 0) {
             this._prevUndos.forEach((undo) => {
@@ -305,8 +410,8 @@ export class AutoFillService extends Disposable implements IAutoFillService {
         this._prevUndos = [];
 
         const selection = Rectangle.union(discreteRangeToRange(source), discreteRangeToRange(target));
-        const applyType = this.applyType;
         const activeHooks = this.getActiveHooks();
+        const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET)!;
 
         this._commandService.syncExecuteCommand(SetSelectionsOperation.id, {
             selections: [
@@ -344,15 +449,16 @@ export class AutoFillService extends Disposable implements IAutoFillService {
                     const { cellValue } = m.params as ISetRangeValuesMutationParams;
                     const matrix = new ObjectMatrix(cellValue);
                     matrix.forValue((row, col, value) => {
-                        const style = Object.keys(value?.s || {});
-                        if (style.length && AFFECT_LAYOUT_STYLES.some((s) => style.includes(s))) {
+                        const style = Object.keys(workbook.getStyles().get(value?.s) || {});
+                        if (value?.p || (style.length && AFFECT_LAYOUT_STYLES.some((s) => style.includes(s)))) {
                             autoHeightRanges.push({ startRow: row, endRow: row, startColumn: col, endColumn: col });
                         }
                     });
                 }
             });
         }
-        const autoHeightUndoRedos = this._getAutoHeightUndoRedos(triggerUnitId, triggerSubUnitId, autoHeightRanges);
+
+        const autoHeightUndoRedos = this._getAutoHeightUndoRedos(unitId, subUnitId, autoHeightRanges);
         const autoHeightResult = autoHeightUndoRedos.redos.every((m) => this._commandService.syncExecuteCommand(m.id, m.params));
         if (autoHeightResult) {
             undos.push(...autoHeightUndoRedos.undos);
@@ -376,7 +482,7 @@ export class AutoFillService extends Disposable implements IAutoFillService {
 
     private _getAutoHeightUndoRedos(unitId: string, subUnitId: string, ranges: IRange[]) {
         const sheetSkeletonService = this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService);
-        const skeleton = sheetSkeletonService?.getCurrent()?.skeleton;
+        const skeleton = sheetSkeletonService?.getCurrentParam()?.skeleton;
         if (!skeleton) return { redos: [], undos: [] };
 
         const rowsAutoHeightInfo = skeleton.calculateAutoHeightInRange(ranges);
@@ -390,4 +496,4 @@ export class AutoFillService extends Disposable implements IAutoFillService {
     }
 }
 
-export const IAutoFillService = createIdentifier<AutoFillService>('univer.auto-fill-service');
+export const IAutoFillService = createIdentifier<IAutoFillService>('univer.auto-fill-service');

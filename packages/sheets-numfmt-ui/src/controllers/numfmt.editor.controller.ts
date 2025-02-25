@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import {
     toDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
-import { DEFAULT_TEXT_FORMAT } from '@univerjs/engine-numfmt';
+import { isTextFormat } from '@univerjs/engine-numfmt';
 import {
     AFTER_CELL_EDIT,
     BEFORE_CELL_EDIT,
@@ -114,7 +114,7 @@ export class NumfmtEditorController extends Disposable {
                                     case 'grouped':
                                     case 'number': {
                                         const cell = context.worksheet.getCellRaw(row, col);
-                                        return cell;
+                                        return next && next(cell);
                                     }
                                     case 'percent':
                                     case 'date':
@@ -148,7 +148,6 @@ export class NumfmtEditorController extends Disposable {
                         handler: (value, context, next) => {
                             // clear the effect
                             this._collectEffectMutation.clean();
-                            const { worksheet, row, col } = context;
                             const currentNumfmtValue = this._numfmtService.getValue(
                                 context.unitId,
                                 context.subUnitId,
@@ -170,7 +169,8 @@ export class NumfmtEditorController extends Disposable {
                                 return next(value);
                             }
 
-                            if (currentNumfmtValue?.pattern === DEFAULT_TEXT_FORMAT) {
+                            // if the cell is text format or force string, do not convert the value
+                            if (isTextFormat(currentNumfmtValue?.pattern) || value.t === CellValueType.FORCE_STRING) {
                                 return next(value);
                             }
 
@@ -204,9 +204,7 @@ export class NumfmtEditorController extends Disposable {
                                     );
                                 }
                                 const v = Number(numfmtInfo.v);
-                                // The format needs to discard the current style settings
-                                const originStyle = worksheet.getCellStyleOnly(row, col)?.s;
-                                return { ...value, v, p: null, s: originStyle, t: CellValueType.NUMBER };
+                                return next({ ...value, p: undefined, v, t: CellValueType.NUMBER });
                             } else if (['date', 'time', 'datetime', 'percent'].includes(currentNumfmtType) || !isNumeric(content)) {
                                 clean();
                             }

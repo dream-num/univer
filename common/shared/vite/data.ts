@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,22 @@ export const peerDepsMap = {
     react: {
         global: 'React',
         name: 'react',
-        version: '^16.9.0 || ^17.0.0 || ^18.0.0',
+        version: '>=16.9.0 || >=17 || >=18 || >=19',
+    },
+    'react/jsx-runtime': {
+        global: 'React',
+        name: 'react',
+        version: 'react',
     },
     'react-dom': {
         global: 'ReactDOM',
         name: 'react-dom',
-        version: '^16.9.0 || ^17.0.0 || ^18.0.0',
+        version: '>=16.9.0 || >=17 || >=18 || >=19',
+    },
+    'react-dom/client': {
+        global: 'ReactDOM',
+        name: 'react-dom',
+        version: 'react-dom',
     },
     rxjs: {
         global: 'rxjs',
@@ -34,6 +44,16 @@ export const peerDepsMap = {
         global: 'rxjs.operators',
         name: 'rxjs',
         version: 'rxjs',
+    },
+    '@wendellhu/redi': {
+        global: '@wendellhu/redi',
+        name: '@wendellhu/redi',
+        version: '0.17.1',
+    },
+    '@wendellhu/redi/react-bindings': {
+        global: '@wendellhu/redi/react-bindings',
+        name: '@wendellhu/redi',
+        version: '@wendellhu/redi',
     },
     vue: {
         global: 'Vue',

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ export class WorksheetPermissionService extends RxDisposable {
                     const instance = new F(unitId, subUnitId);
                     this._permissionService.addPermissionPoint(instance);
                 });
-                this._logService.log('[WorksheetPermissionService]', 'Initialization completed', unitId, subUnitId);
+                this._logService.debug('[WorksheetPermissionService]', 'Initialization completed', unitId, subUnitId);
             };
             workbook.getSheets().forEach((worksheet) => {
                 handleWorksheet(worksheet);

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ export interface ISetWorksheetColIsAutoWidthCommandParams {
 export const SetWorksheetColAutoWidthCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-col-auto-width',
-    handler: async (accessor: IAccessor, params?: ISetWorksheetColIsAutoWidthCommandParams) => {
+    handler: (accessor: IAccessor, params?: ISetWorksheetColIsAutoWidthCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const selectionManagerService = accessor.get(SheetsSelectionsService);

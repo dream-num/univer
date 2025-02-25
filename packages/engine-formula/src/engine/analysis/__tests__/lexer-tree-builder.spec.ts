@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -655,6 +655,13 @@ describe('lexer nodeMaker test', () => {
             const result = lexerTreeBuilder.convertRefersToAbsolute('=SUM(A1:B10) + LAMBDA(x, y, x*y*x)(A1:B10, A10) + MAX(A1:B10,SUM(A2))', AbsoluteRefType.ALL, AbsoluteRefType.ALL);
             expect(result).toStrictEqual('=SUM($A$1:$B$10) + LAMBDA(x, y, x*y*x)($A$1:$B$10,$A$10) + MAX($A$1:$B$10,SUM($A$2))');
         });
+
+        it('manually set current sheet name', () => {
+            let result = lexerTreeBuilder.convertRefersToAbsolute('=A1:B2', AbsoluteRefType.ALL, AbsoluteRefType.ALL, 'Sheet1');
+            expect(result).toStrictEqual('=Sheet1!$A$1:$B$2');
+            result = lexerTreeBuilder.convertRefersToAbsolute('=A1:B2,C1:D2,F3:G5', AbsoluteRefType.ALL, AbsoluteRefType.ALL, 'Sheet1');
+            expect(result).toStrictEqual('=Sheet1!$A$1:$B$2,Sheet1!$C$1:$D$2,Sheet1!$F$3:$G$5');
+        });
     });
 
     describe('moveFormulaRefOffset', () => {
@@ -706,6 +713,23 @@ describe('lexer nodeMaker test', () => {
         it('move omit absolute column', () => {
             const result = lexerTreeBuilder.moveFormulaRefOffset('=sum(A$1:B$3)', 1, 1, true);
             expect(result).toStrictEqual('=sum(B$2:C$4)');
+        });
+
+        it('sheet name quote', () => {
+            let result = lexerTreeBuilder.moveFormulaRefOffset("= 'dv-test'!F26", 0, 1, true);
+            expect(result).toStrictEqual("= 'dv-test'!F27");
+
+            result = lexerTreeBuilder.moveFormulaRefOffset("=SUM( 'dv-test'!F26)", 0, 1, true);
+            expect(result).toStrictEqual("=SUM( 'dv-test'!F27)");
+
+            result = lexerTreeBuilder.moveFormulaRefOffset("=SUM( 'dv-test'!F26)", 0, -1, true);
+            expect(result).toStrictEqual("=SUM( 'dv-test'!F25)");
+
+            result = lexerTreeBuilder.moveFormulaRefOffset("=SUM( 'dv-test'!F26)", 1, 0, true);
+            expect(result).toStrictEqual("=SUM( 'dv-test'!G26)");
+
+            result = lexerTreeBuilder.moveFormulaRefOffset("=SUM( 'dv-test'!F26)", -1, 0, true);
+            expect(result).toStrictEqual("=SUM( 'dv-test'!E26)");
         });
     });
 });

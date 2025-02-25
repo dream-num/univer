@@ -56,6 +56,7 @@ interface IMenuItemBase<V> {
     | {
         name: string;
         hoverable?: boolean;
+        selectable?: boolean;
         props?: Record<string, any>;
     }; // custom component, send to CustomLabel label property
 
@@ -80,6 +81,7 @@ export interface IValueOption<T = undefined> {
     | {
         name: string;
         hoverable?: boolean;
+        selectable?: boolean;
         props?: Record<string, string | number | Array<{ [x: string | number]: string }>>;
     }; // custom component, send to CustomLabel label property
     icon?: string;

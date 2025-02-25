@@ -18,13 +18,12 @@ import type { IDrawingParam, Nullable } from '@univerjs/core';
 import type { BaseObject } from '@univerjs/engine-render';
 import type { ISheetDrawing } from '@univerjs/sheets-drawing';
 import { ICommandService, LocaleService } from '@univerjs/core';
-import { Radio, RadioGroup } from '@univerjs/design';
+import { clsx, Radio, RadioGroup } from '@univerjs/design';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetDrawingAnchorType } from '@univerjs/sheets-drawing';
 import { useDependency } from '@univerjs/ui';
-import clsx from 'clsx';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { SetSheetDrawingCommand } from '../../commands/commands/set-sheet-drawing.command';
 import styles from './index.module.less';
 

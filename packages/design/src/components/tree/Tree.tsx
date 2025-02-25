@@ -15,11 +15,10 @@
  */
 
 import { DropdownSingle } from '@univerjs/icons';
-import clsx from 'clsx';
 import VirtualList from 'rc-virtual-list';
 import React, { useEffect, useMemo, useState } from 'react';
+import { clsx } from '../../helper/clsx';
 import { Checkbox } from '../checkbox';
-
 import { Tooltip } from '../tooltip';
 import styles from './index.module.less';
 import { createCacheWithFindNodePathFromTree, isIntermediated } from './util';

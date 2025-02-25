@@ -37,46 +37,77 @@ const commandList = [
 
 const commonSelections = [
     {
-        label: 'sheet.cf.ruleType.highlightCell',
+        label: {
+            name: 'sheet.cf.ruleType.highlightCell',
+            selectable: false,
+        },
         value: CF_MENU_OPERATION.highlightCell,
     },
     {
-        label: 'sheet.cf.panel.rankAndAverage',
+        label: {
+            name: 'sheet.cf.panel.rankAndAverage',
+            selectable: false,
+        },
         value: CF_MENU_OPERATION.rank,
     },
     {
-        label: 'sheet.cf.ruleType.formula',
+        label: {
+            name: 'sheet.cf.ruleType.formula',
+            selectable: false,
+        },
         value: CF_MENU_OPERATION.formula,
     },
     {
-        label: 'sheet.cf.ruleType.colorScale',
+        label: {
+            name: 'sheet.cf.ruleType.colorScale',
+            selectable: false,
+        },
         value: CF_MENU_OPERATION.colorScale,
     },
     {
-        label: 'sheet.cf.ruleType.dataBar',
+        label: {
+            name: 'sheet.cf.ruleType.dataBar',
+            selectable: false,
+        },
         value: CF_MENU_OPERATION.dataBar,
     }, {
-        label: 'sheet.cf.ruleType.iconSet',
+        label: {
+            name: 'sheet.cf.ruleType.iconSet',
+            selectable: false,
+        },
         value: CF_MENU_OPERATION.icon,
     },
     {
-        label: 'sheet.cf.menu.manageConditionalFormatting',
+        label: {
+            name: 'sheet.cf.menu.manageConditionalFormatting',
+            selectable: false,
+        },
         value: CF_MENU_OPERATION.viewRule,
     }, {
-        label: 'sheet.cf.menu.createConditionalFormatting',
+        label: {
+            name: 'sheet.cf.menu.createConditionalFormatting',
+            selectable: false,
+        },
         value: CF_MENU_OPERATION.createRule,
     },
     {
-        label: 'sheet.cf.menu.clearRangeRules',
+        label: {
+            name: 'sheet.cf.menu.clearRangeRules',
+            selectable: false,
+        },
         value: CF_MENU_OPERATION.clearRangeRules,
         disabled: false,
     },
     {
-        label: 'sheet.cf.menu.clearWorkSheetRules',
+        label: {
+            name: 'sheet.cf.menu.clearWorkSheetRules',
+            selectable: false,
+        },
         value: CF_MENU_OPERATION.clearWorkSheetRules,
     },
 ];
 
+// eslint-disable-next-line max-lines-per-function
 export const FactoryManageConditionalFormattingRule = (accessor: IAccessor): IMenuSelectorItem => {
     const selectionManagerService = accessor.get(SheetsSelectionsService);
     const commandService = accessor.get(ICommandService);

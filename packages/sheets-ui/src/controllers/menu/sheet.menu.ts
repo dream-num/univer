@@ -15,6 +15,8 @@
  */
 
 import type { IAccessor, Workbook } from '@univerjs/core';
+import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
+import type { Subscriber } from 'rxjs';
 import { BooleanNumber, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import {
     CopySheetCommand,
@@ -30,9 +32,7 @@ import {
     WorkbookHideSheetPermission,
     WorkbookRenameSheetPermission,
 } from '@univerjs/sheets';
-import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
-import type { Subscriber } from 'rxjs';
 import { combineLatest, combineLatestWith, map, Observable } from 'rxjs';
 
 import { RemoveSheetConfirmCommand } from '../../commands/commands/remove-sheet-confirm.command';

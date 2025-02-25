@@ -16,11 +16,10 @@
 
 import type { IDrawingParam } from '@univerjs/core';
 import { ICommandService, LocaleService } from '@univerjs/core';
-import { Button, Select } from '@univerjs/design';
+import { Button, clsx, Select } from '@univerjs/design';
 import { CreateCopySingle } from '@univerjs/icons';
 import { useDependency } from '@univerjs/ui';
-import clsx from 'clsx';
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AutoImageCropOperation, CloseImageCropOperation, CropType } from '../../commands/operations/image-crop.operation';
 import styles from './index.module.less';
 

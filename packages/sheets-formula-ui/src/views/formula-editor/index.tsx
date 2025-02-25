@@ -17,16 +17,16 @@
 import type { DocumentDataModel, IDisposable, ITextRange } from '@univerjs/core';
 import type { Editor, IKeyboardEventConfig } from '@univerjs/docs-ui';
 import type { KeyCode, MetaKeys } from '@univerjs/ui';
-import type { ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import type { FormulaSelectingType } from './hooks/use-formula-selection';
 import type { IRefSelection } from './hooks/use-highlight';
 import { BuildTextUtils, createInternalEditorID, generateRandomId, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { clsx } from '@univerjs/design';
 import { DocBackScrollRenderController, DocSelectionRenderService, IEditorService, useKeyboardEvent, useResize } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { EMBEDDING_FORMULA_EDITOR } from '@univerjs/sheets-ui';
 import { useDependency, useEvent, useObservable, useUpdateEffect } from '@univerjs/ui';
-import clsx from 'clsx';
-import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { findIndexFromSequenceNodes, findRefSequenceIndex } from '../range-selector/utils/find-index-from-sequence-nodes';
 import { HelpFunction } from './help-function/HelpFunction';
 import { useFocus } from './hooks/use-focus';
@@ -72,7 +72,7 @@ export interface IFormulaEditorProps {
      */
     disableSelectionOnClick?: boolean;
     disableContextMenu?: boolean;
-    style?: React.CSSProperties;
+    style?: CSSProperties;
 }
 
 const noop = () => { };

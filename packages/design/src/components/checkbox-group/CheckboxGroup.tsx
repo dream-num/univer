@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import React from 'react';
-import clsx from 'clsx';
-
+import type { CSSProperties, ReactNode } from 'react';
 import type { ICheckboxProps } from '../checkbox/Checkbox';
+import { Children, cloneElement, isValidElement } from 'react';
+import { clsx } from '../../helper/clsx';
 import styles from './index.module.less';
 
 export interface ICheckboxGroupProps {
-    children: React.ReactNode[];
+    children: ReactNode[];
 
     /**
      * The class name of the checkbox group
@@ -31,7 +31,7 @@ export interface ICheckboxGroupProps {
     /**
      * The style of the checkbox group
      */
-    style?: React.CSSProperties;
+    style?: CSSProperties;
 
     /**
      * Define which checkbox is selected
@@ -76,9 +76,9 @@ export function CheckboxGroup(props: ICheckboxGroupProps) {
 
     return (
         <div className={_className} style={style}>
-            {React.Children.map(children, (child, index) => {
-                if (React.isValidElement<ICheckboxProps>(child)) {
-                    return React.cloneElement(child, {
+            {Children.map(children, (child, index) => {
+                if (isValidElement<ICheckboxProps>(child)) {
+                    return cloneElement(child, {
                         key: index,
                         children: child.props.children,
                         checked: child.props.value ? value.includes(child.props.value) : false,

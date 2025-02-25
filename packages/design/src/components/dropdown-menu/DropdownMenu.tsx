@@ -30,14 +30,18 @@ import {
 
 type DropdownMenu = {
     type: 'item';
+    className?: string;
     children: ReactNode;
+    disabled?: boolean;
     onSelect?: (item: DropdownMenu) => void;
 } | {
     type?: 'separator';
+    className?: string;
 } | {
     type?: 'radio';
-    options: { value: string; label: string }[];
+    className?: string;
     value: string;
+    options: { value: string; label: ReactNode; disabled?: boolean }[];
     onSelect?: (item: string) => void;
 };
 
@@ -84,14 +88,15 @@ export function DropdownMenu(props: IDropdownProps & ComponentProps<typeof Conte
 
     function renderMenuItem(item: DropdownMenu, index: number) {
         // const { type, children, icon, checked, hidden, onSelect } = item;
-        const { type } = item;
+        const { className, type } = item;
 
         if (type === 'separator') {
-            return <DropdownMenuSeparator key={index} />;
+            return <DropdownMenuSeparator key={index} className={className} />;
         } else if (type === 'radio') {
             return (
                 <DropdownMenuRadioGroup
                     key={index}
+                    className={className}
                     value={item.value}
                     onValueChange={item.onSelect}
                 >
@@ -99,6 +104,7 @@ export function DropdownMenu(props: IDropdownProps & ComponentProps<typeof Conte
                         <DropdownMenuRadioItem
                             key={option.value}
                             value={option.value}
+                            disabled={option.disabled}
                         >
                             {option.label}
                         </DropdownMenuRadioItem>
@@ -109,6 +115,8 @@ export function DropdownMenu(props: IDropdownProps & ComponentProps<typeof Conte
             return (
                 <DropdownMenuItem
                     key={index}
+                    className={className}
+                    disabled={item.disabled}
                     onSelect={() => {
                         item.onSelect?.(item);
                     }}
@@ -125,92 +133,9 @@ export function DropdownMenu(props: IDropdownProps & ComponentProps<typeof Conte
                 {children}
             </DropdownMenuTrigger>
             <DropdownMenuContent {...restProps}>
-
+                {/* To be deleted */}
                 {overlay}
                 {items.map((item, index) => renderMenuItem(item, index))}
-                {/*
-                <DropdownMenuLabel>Appearance</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuCheckboxItem
-                    checked={showStatusBar}
-                    onCheckedChange={setShowStatusBar}
-                >
-                    Status Bar
-                </DropdownMenuCheckboxItem>
-                <DropdownMenuCheckboxItem
-                    checked={showActivityBar}
-                    onCheckedChange={setShowActivityBar}
-                    disabled
-                >
-                    Activity Bar
-                </DropdownMenuCheckboxItem>
-                <DropdownMenuCheckboxItem
-                    checked={showPanel}
-                    onCheckedChange={setShowPanel}
-                >
-                    Panel
-                </DropdownMenuCheckboxItem>
-
-                <DropdownMenuSeparator />
-
-                <DropdownMenuLabel>Panel Position</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuRadioGroup value={position} onValueChange={setPosition}>
-                    <DropdownMenuRadioItem value="top">Top</DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value="bottom">Bottom</DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value="right">Right</DropdownMenuRadioItem>
-                </DropdownMenuRadioGroup>
-
-                <DropdownMenuSeparator />
-
-                <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuGroup>
-                    <DropdownMenuItem>
-                        Profile
-                        <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                        Billing
-                        <DropdownMenuShortcut>⌘B</DropdownMenuShortcut>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                        Settings
-                        <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                        Keyboard shortcuts
-                        <DropdownMenuShortcut>⌘K</DropdownMenuShortcut>
-                    </DropdownMenuItem>
-                </DropdownMenuGroup>
-                <DropdownMenuSeparator />
-                <DropdownMenuGroup>
-                    <DropdownMenuItem>Team</DropdownMenuItem>
-                    <DropdownMenuSub>
-                        <DropdownMenuSubTrigger>Invite users</DropdownMenuSubTrigger>
-                        <DropdownMenuPortal>
-                            <DropdownMenuSubContent>
-                                <DropdownMenuItem>Email</DropdownMenuItem>
-                                <DropdownMenuItem>Message</DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem>More...</DropdownMenuItem>
-                            </DropdownMenuSubContent>
-                        </DropdownMenuPortal>
-                    </DropdownMenuSub>
-                    <DropdownMenuItem>
-                        New Team
-                        <DropdownMenuShortcut>⌘+T</DropdownMenuShortcut>
-                    </DropdownMenuItem>
-                </DropdownMenuGroup>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>GitHub</DropdownMenuItem>
-                <DropdownMenuItem>Support</DropdownMenuItem>
-                <DropdownMenuItem disabled>API</DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                    Log out
-                    <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
-                </DropdownMenuItem> */}
             </DropdownMenuContent>
         </DropdownMenuPrimitive>
     );

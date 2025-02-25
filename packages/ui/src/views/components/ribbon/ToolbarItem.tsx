@@ -17,8 +17,8 @@
 import type { IDisplayMenuItem, IMenuItem, IMenuSelectorItem, IValueOption } from '../../../services/menu/menu';
 import type { ITooltipWrapperRef } from './TooltipButtonWrapper';
 import { ICommandService, LocaleService } from '@univerjs/core';
+import { clsx } from '@univerjs/design';
 import { MoreDownSingle } from '@univerjs/icons';
-import clsx from 'clsx';
 import { forwardRef, useMemo } from 'react';
 import { isObservable, Observable } from 'rxjs';
 import { ComponentManager } from '../../../common/component-manager';
@@ -30,7 +30,7 @@ import { useDependency, useObservable } from '../../../utils/di';
 import { ToolbarButton } from './Button/ToolbarButton';
 import { useToolbarItemStatus } from './hook';
 import styles from './index.module.less';
-import { DropdownWrapper, TooltipWrapper } from './TooltipButtonWrapper';
+import { DropdownMenuWrapper, DropdownWrapper, TooltipWrapper } from './TooltipButtonWrapper';
 
 export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenuItem>>((props, ref) => {
     const localeService = useDependency(LocaleService);
@@ -163,16 +163,23 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
             );
         } else {
             return (
-                <DropdownWrapper
+                <DropdownMenuWrapper
+                    menuId={id}
+                    value={value}
+                    options={options}
                     disabled={disabled}
+                    onOptionSelect={handleSelect}
                     overlay={(
-                        <Menu
-                            overViewport="scroll"
-                            menuType={id}
-                            options={options}
-                            onOptionSelect={handleSelect}
-                            value={value}
-                        />
+                        <div>
+                            123
+                            <Menu
+                                overViewport="scroll"
+                                menuType={id}
+                                options={options}
+                                onOptionSelect={handleSelect}
+                                value={value}
+                            />
+                        </div>
                     )}
                 >
                     <div
@@ -196,7 +203,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
                             <MoreDownSingle className="univer-text-gray-400" />
                         </div>
                     </div>
-                </DropdownWrapper>
+                </DropdownMenuWrapper>
             );
         }
     }

@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import { type IAccessor, UniverInstanceType } from '@univerjs/core';
-import { getMenuHiddenObservable, type IMenuSelectorItem, MenuItemType } from '@univerjs/ui';
-import { SheetsCrosshairHighlightService } from '../services/crosshair.service';
+import type { IAccessor } from '@univerjs/core';
+import type { IMenuSelectorItem } from '@univerjs/ui';
+import { UniverInstanceType } from '@univerjs/core';
+import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { SetCrosshairHighlightColorOperation, ToggleCrosshairHighlightOperation } from '../commands/operations/operation';
+import { SheetsCrosshairHighlightService } from '../services/crosshair.service';
 
 export const CROSSHAIR_HIGHLIGHT_OVERLAY_COMPONENT = 'CROSSHAIR_HIGHLIGHT_OVERLAY_COMPONENT';
 

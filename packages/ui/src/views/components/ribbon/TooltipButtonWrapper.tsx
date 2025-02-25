@@ -14,10 +14,16 @@
  * limitations under the License.
  */
 
-import type { ITooltipProps } from '@univerjs/design';
+import type { IDropdownProps, ITooltipProps } from '@univerjs/design';
 import type { ReactNode } from 'react';
-import { Dropdown, Tooltip } from '@univerjs/design';
-import { createContext, forwardRef, useContext, useImperativeHandle, useMemo, useRef, useState } from 'react';
+import type { IValueOption } from '../../../services/menu/menu';
+import { clsx, Dropdown, DropdownMenu, Tooltip } from '@univerjs/design';
+import { CheckMarkSingle } from '@univerjs/icons';
+import { createContext, forwardRef, useContext, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
+import { combineLatest, of } from 'rxjs';
+import { CustomLabel } from '../../../components/custom-label/CustomLabel';
+import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
+import { useDependency } from '../../../utils/di';
 
 const TooltipWrapperContext = createContext({
     dropdownVisible: false,
@@ -95,5 +101,178 @@ export function DropdownWrapper({ children, overlay, disabled }: { children: Rea
                 {children}
             </div>
         </Dropdown>
+    );
+}
+
+function Label({ value, option, onOptionSelect }: {
+    value?: string | number;
+    option: IValueOption;
+    onOptionSelect?: (option: IValueOption) => void;
+}) {
+    const onChange = (v: string | number) => {
+        onOptionSelect?.({ value: v, label: option?.label, commandId: option?.commandId });
+    };
+
+    const hasCheckMark = typeof option.label === 'string' || (typeof option.label === 'object' && option.label?.selectable !== false);
+
+    return (
+        <div
+            className={clsx('univer-relative univer-flex univer-items-center univer-gap-2', {
+                'univer-pl-6': hasCheckMark,
+            })}
+        >
+            {hasCheckMark && String(value) === String(option.value) && (
+                <CheckMarkSingle
+                    className="univer-absolute univer-left-1 univer-top-0.5 univer-text-primary-600"
+                />
+            )}
+            <CustomLabel
+                value$={option.value$}
+                value={option.value}
+                label={option.label}
+                icon={option.icon}
+                onChange={onChange}
+            />
+        </div>
+    );
+}
+
+export function DropdownMenuWrapper({
+    menuId,
+    value,
+    options,
+    children,
+    overlay,
+    disabled,
+    onOptionSelect,
+}: {
+    menuId: string;
+    value?: string | number;
+    options: IValueOption[];
+    children: ReactNode;
+    overlay: ReactNode;
+    disabled?: boolean;
+    onOptionSelect: (option: IValueOption) => void;
+}) {
+    const { setDropdownVisible } = useContext(TooltipWrapperContext);
+
+    const menuManagerService = useDependency(IMenuManagerService);
+    const [hiddenStates, setHiddenStates] = useState<Record<string, boolean>>({});
+
+    const menuItems = useMemo(() => {
+        return menuId ? menuManagerService.getMenuByPositionKey(menuId) : [];
+    }, [menuId]);
+
+    const filteredMenuItems = useMemo(() => {
+        return menuItems.filter((item) => {
+            if (!item.children) return item;
+
+            const itemKey = item.key?.toString() || '';
+            return !hiddenStates[itemKey];
+        });
+    }, [menuItems, hiddenStates]);
+
+    function handleVisibleChange(visible: boolean) {
+        setDropdownVisible(visible);
+    }
+
+    useEffect(() => {
+        const subscriptions = menuItems.map((item) => {
+            if (!item.children) return null;
+
+            const hiddenObservables = item.children.map((subItem) => subItem.item?.hidden$ ?? of(false));
+
+            return combineLatest(hiddenObservables).subscribe((hiddenValues) => {
+                const isAllHidden = hiddenValues.every((hidden) => hidden === true);
+                setHiddenStates((prev) => ({
+                    ...prev,
+                    [item.key]: isAllHidden,
+                }));
+            });
+        });
+
+        return () => {
+            subscriptions.forEach((sub) => sub?.unsubscribe());
+            setHiddenStates({});
+        };
+    }, [menuItems]);
+
+    // options menu
+    if (options?.length) {
+        const items: IDropdownProps['items'] = options.map((option) => ({
+            type: 'item',
+            className: clsx({
+                'focus:univer-bg-white': typeof option.label !== 'string' && option.label?.hoverable === false,
+            }),
+            children: <Label value={value} option={option} />,
+            disabled: option.disabled,
+            onSelect: () => {
+                if (typeof option.value === 'undefined') return;
+
+                onOptionSelect?.({
+                    ...option,
+                });
+            },
+        }));
+
+        for (const menuItem of filteredMenuItems) {
+            if (!menuItem.item) continue;
+
+            const { title, id, commandId } = menuItem.item;
+
+            if (!title) {
+                throw new Error('Menu item title is required');
+            }
+
+            items.push({
+                type: 'item',
+                children: (
+                    <Label
+                        value={value}
+                        option={{
+                            label: {
+                                name: title,
+                                selectable: false,
+                            },
+                        }}
+                    />
+                ),
+                onSelect: () => {
+                    onOptionSelect?.({
+                        commandId,
+                        id,
+                    });
+                },
+            });
+        }
+
+        return (
+            <DropdownMenu
+                align="start"
+                items={items}
+                disabled={disabled}
+                onOpenChange={handleVisibleChange}
+            >
+                {children}
+            </DropdownMenu>
+        );
+    }
+
+    return (
+        <DropdownMenu
+            align="start"
+            items={[]}
+            overlay={(
+                <div className="univer-grid univer-gap-2 univer-theme">
+                    {overlay}
+                </div>
+            )}
+            disabled={disabled}
+            onOpenChange={handleVisibleChange}
+        >
+            <div className="univer-h-full" onClick={(e) => e.stopPropagation()}>
+                {children}
+            </div>
+        </DropdownMenu>
     );
 }

@@ -75,7 +75,7 @@ export const Options = () => {
     const defaultValue = 1220;
 
     return (
-        <div className="more-numfmt-type-options">
+        <div className="more-numfmt-type-options univer-theme">
             {MENU_OPTIONS.map((item, index) => {
                 if (item === '|') {
                     return <div key={index} className="line m-t-4" onClick={(e) => e.stopPropagation()} />;

@@ -218,6 +218,7 @@ export const FactoryOtherMenuItem = (accessor: IAccessor): IMenuSelectorItem => 
                 label: {
                     name: OPTIONS_KEY,
                     hoverable: false,
+                    selectable: false,
                 },
             },
         ],

@@ -464,7 +464,6 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
         selections: FONT_FAMILY_LIST.map((item) => ({
             label: {
                 name: FONT_FAMILY_ITEM_COMPONENT,
-                hoverable: true,
             },
             value: item.value,
         })),

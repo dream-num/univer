@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { CSSProperties, ReactNode } from 'react';
+import type { CSSProperties, MouseEvent, ReactNode } from 'react';
 import { clsx } from '../../helper/clsx';
 
 import styles from './index.module.less';

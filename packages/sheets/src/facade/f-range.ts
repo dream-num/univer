@@ -15,12 +15,13 @@
  */
 
 import type { BorderStyleTypes, BorderType, CellValue, CustomData, ICellData, IColorStyle, IDocumentData, IObjectMatrixPrimitiveType, IRange, IStyleData, ITextDecoration, Nullable, Workbook, Worksheet } from '@univerjs/core';
-import type { ISetBorderBasicCommandParams, ISetHorizontalTextAlignCommandParams, ISetRangeValuesCommandParams, ISetStyleCommandParams, ISetTextWrapCommandParams, ISetVerticalTextAlignCommandParams, IStyleTypeValue, SplitDelimiterEnum } from '@univerjs/sheets';
+import type { ISetBorderBasicCommandParams, ISetHorizontalTextAlignCommandParams, ISetRangeValuesCommandParams, ISetSelectionsOperationParams, ISetStyleCommandParams, ISetTextWrapCommandParams, ISetVerticalTextAlignCommandParams, IStyleTypeValue, SplitDelimiterEnum } from '@univerjs/sheets';
+import type { IFacadeClearOptions } from './f-worksheet';
 import type { FHorizontalAlignment, FVerticalAlignment } from './utils';
-import { BooleanNumber, Dimension, ICommandService, Inject, Injector, Rectangle, RichTextValue, TextStyleValue, WrapStrategy } from '@univerjs/core';
+import { BooleanNumber, DEFAULT_STYLES, Dimension, ICommandService, Inject, Injector, Rectangle, RichTextValue, TextStyleValue, WrapStrategy } from '@univerjs/core';
 import { FBaseInitialable } from '@univerjs/core/facade';
 import { FormulaDataModel, serializeRange, serializeRangeWithSheet } from '@univerjs/engine-formula';
-import { addMergeCellsUtil, DeleteWorksheetRangeThemeStyleCommand, getAddMergeMutationRangeByType, RemoveWorksheetMergeCommand, SetBorderBasicCommand, SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetStyleCommand, SetTextWrapCommand, SetVerticalTextAlignCommand, SetWorksheetRangeThemeStyleCommand, SheetRangeThemeService, SplitTextToColumnsCommand } from '@univerjs/sheets';
+import { addMergeCellsUtil, ClearSelectionAllCommand, ClearSelectionContentCommand, ClearSelectionFormatCommand, DeleteRangeMoveLeftCommand, DeleteRangeMoveUpCommand, DeleteWorksheetRangeThemeStyleCommand, getAddMergeMutationRangeByType, getPrimaryForRange, RemoveWorksheetMergeCommand, SetBorderBasicCommand, SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetSelectionsOperation, SetStyleCommand, SetTextWrapCommand, SetVerticalTextAlignCommand, SetWorksheetRangeThemeStyleCommand, SheetRangeThemeService, SplitTextToColumnsCommand } from '@univerjs/sheets';
 import { FWorkbook } from './f-workbook';
 import { covertCellValue, covertCellValues, transformCoreHorizontalAlignment, transformCoreVerticalAlignment, transformFacadeHorizontalAlignment, transformFacadeVerticalAlignment } from './utils';
 
@@ -658,6 +659,38 @@ export class FRange extends FBaseInitialable {
     }
 
     // #region editing
+
+    /**
+     * Returns the background color of the top-left cell in the range.
+     * @returns {string} The color code of the background.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:B2');
+     * console.log(fRange.getBackground());
+     * ```
+     */
+    getBackground(): string {
+        const style = this.getCellStyle();
+        return style?.background?.rgb ?? DEFAULT_STYLES.bg.rgb;
+    }
+
+    /**
+     * Returns the background colors of the cells in the range.
+     * @returns {string[][]} A two-dimensional array of color codes of the backgrounds.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:B2');
+     * console.log(fRange.getBackgrounds());
+     * ```
+     */
+    getBackgrounds(): string[][] {
+        const styles = this.getCellStyles();
+        return styles.map((row) => row.map((style) => style?.background?.rgb ?? DEFAULT_STYLES.bg.rgb));
+    }
 
     /**
      * Set background color for current range.
@@ -1408,11 +1441,26 @@ export class FRange extends FBaseInitialable {
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // Set the range A1:B2 as the active range, default active cell is A1
      * const fRange = fWorksheet.getRange('A1:B2');
      * fRange.activate();
+     * console.log(fWorksheet.getActiveRange().getA1Notation()); // A1:B2
+     * console.log(fWorksheet.getActiveCell().getA1Notation()); // A1
+     *
+     * // Set the cell B2 as the active cell
+     * // Because B2 is in the active range A1:B2, the active range will not change, and the active cell will be changed to B2
      * const cell = fWorksheet.getRange('B2');
-     * cell.activateAsCurrentCell(); // the active cell will be B2
-     * console.log(fWorksheet.getActiveRange().getA1Notation()); // B2
+     * cell.activateAsCurrentCell();
+     * console.log(fWorksheet.getActiveRange().getA1Notation()); // A1:B2
+     * console.log(fWorksheet.getActiveCell().getA1Notation()); // B2
+     *
+     * // Set the cell C3 as the active cell
+     * // Because C3 is not in the active range A1:B2, a new active range C3:C3 will be created, and the active cell will be changed to C3
+     * const cell2 = fWorksheet.getRange('C3');
+     * cell2.activateAsCurrentCell();
+     * console.log(fWorksheet.getActiveRange().getA1Notation()); // C3:C3
+     * console.log(fWorksheet.getActiveCell().getA1Notation()); // C3
      * ```
      */
     activateAsCurrentCell(): FRange {
@@ -1422,6 +1470,31 @@ export class FRange extends FBaseInitialable {
             (!mergeInfo && this._range.startRow === this._range.endRow && this._range.startColumn === this._range.endColumn);
 
         if (valid) {
+            const fWorkbook = this._injector.createInstance(FWorkbook, this._workbook);
+            const activeRange = fWorkbook.getActiveRange();
+
+            if (!activeRange || activeRange.getUnitId() !== this.getUnitId() || activeRange.getSheetId() !== this.getSheetId()) {
+                return this.activate();
+            }
+
+            if (Rectangle.contains(activeRange.getRange(), this._range)) {
+                const setSelectionOperationParams: ISetSelectionsOperationParams = {
+                    unitId: this.getUnitId(),
+                    subUnitId: this.getSheetId(),
+                    selections: [
+                        {
+                            range: activeRange.getRange(),
+                            primary: getPrimaryForRange(this.getRange(), this._worksheet),
+                            style: null,
+                        },
+                    ],
+                };
+
+                this._commandService.syncExecuteCommand(SetSelectionsOperation.id, setSelectionOperationParams);
+
+                return this;
+            }
+
             return this.activate();
         } else {
             throw new Error('The range is not a single cell');
@@ -1606,5 +1679,178 @@ export class FRange extends FBaseInitialable {
             subUnitId: this._worksheet.getSheetId(),
             range: this._range,
         });
+    }
+
+    /**
+     * Clears content and formatting information of the range. Or Optionally clears only the contents or only the formatting.
+     * @param {IFacadeClearOptions} [options] - Options for clearing the range. If not provided, the contents and formatting are cleared both.
+     * @param {boolean} [options.contentsOnly] - If true, the contents of the range are cleared. If false, the contents and formatting are cleared. Default is false.
+     * @param {boolean} [options.formatOnly] - If true, the formatting of the range is cleared. If false, the contents and formatting are cleared. Default is false.
+     * @returns {FWorksheet} Returns the current worksheet instance for method chaining
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorkSheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorkSheet.getRange('A1:D10');
+     *
+     * // clear the content and format of the range A1:D10
+     * fRange.clear();
+     *
+     * // clear the content only of the range A1:D10
+     * fRange.clear({ contentsOnly: true });
+     * ```
+     */
+    clear(options?: IFacadeClearOptions): FRange {
+        if (options && options.contentsOnly && !options.formatOnly) {
+            return this.clearContent();
+        }
+
+        if (options && options.formatOnly && !options.contentsOnly) {
+            return this.clearFormat();
+        }
+
+        this._commandService.syncExecuteCommand(ClearSelectionAllCommand.id, {
+            unitId: this._workbook.getUnitId(),
+            subUnitId: this._worksheet.getSheetId(),
+            ranges: [this._range],
+            options,
+        });
+        return this;
+    }
+
+    /**
+     * Clears content of the range, while preserving formatting information.
+     * @returns {FWorksheet} Returns the current worksheet instance for method chaining
+     * @example
+     * ```typescript
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorkSheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorkSheet.getRange('A1:D10');
+     *
+     * // clear the content only of the range A1:D10
+     * fRange.clearContent();
+     * ```
+     */
+    clearContent(): FRange {
+        this._commandService.syncExecuteCommand(ClearSelectionContentCommand.id, {
+            unitId: this._workbook.getUnitId(),
+            subUnitId: this._worksheet.getSheetId(),
+            ranges: [this._range],
+        });
+        return this;
+    }
+
+    /**
+     * Clears formatting information of the range, while preserving contents.
+     * @returns {FWorksheet} Returns the current worksheet instance for method chaining
+     * @example
+     * ```typescript
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorkSheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorkSheet.getRange('A1:D10');
+     * // clear the format only of the range A1:D10
+     * fRange.clearFormat();
+     * ```
+     */
+    clearFormat(): FRange {
+        this._commandService.syncExecuteCommand(ClearSelectionFormatCommand.id, {
+            unitId: this._workbook.getUnitId(),
+            subUnitId: this._worksheet.getSheetId(),
+            ranges: [this._range],
+        });
+        return this;
+    }
+
+    /**
+     * Deletes this range of cells. Existing data in the sheet along the provided dimension is shifted towards the deleted range.
+     * @param {Dimension} shiftDimension - The dimension along which to shift existing data.
+     * @example
+     * ```ts
+     * // Assume the active sheet empty sheet.
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const values = [
+     *   [1, 2, 3, 4],
+     *   [2, 3, 4, 5],
+     *   [3, 4, 5, 6],
+     *   [4, 5, 6, 7],
+     *   [5, 6, 7, 8],
+     * ];
+     *
+     * // Set the range A1:D5 with some values, the range A1:D5 will be:
+     * // 1 | 2 | 3 | 4
+     * // 2 | 3 | 4 | 5
+     * // 3 | 4 | 5 | 6
+     * // 4 | 5 | 6 | 7
+     * // 5 | 6 | 7 | 8
+     * const fRange = fWorksheet.getRange('A1:D5');
+     * fRange.setValues(values);
+     * console.log(fWorksheet.getRange('A1:D5').getValues()); // [[1, 2, 3, 4], [2, 3, 4, 5], [3, 4, 5, 6], [4, 5, 6, 7], [5, 6, 7, 8]]
+     *
+     * // Delete the range A1:B2 along the columns dimension, the range A1:D5 will be:
+     * // 3 | 4 |   |
+     * // 4 | 5 |   |
+     * // 3 | 4 | 5 | 6
+     * // 4 | 5 | 6 | 7
+     * // 5 | 6 | 7 | 8
+     * const fRange2 = fWorksheet.getRange('A1:B2');
+     * fRange2.deleteCells(univerAPI.Enum.Dimension.COLUMNS);
+     * console.log(fWorksheet.getRange('A1:D5').getValues()); // [[3, 4, null, null], [4, 5, null, null], [3, 4, 5, 6], [4, 5, 6, 7], [5, 6, 7, 8]]
+     *
+     * // Set the range A1:D5 values again, the range A1:D5 will be:
+     * // 1 | 2 | 3 | 4
+     * // 2 | 3 | 4 | 5
+     * // 3 | 4 | 5 | 6
+     * // 4 | 5 | 6 | 7
+     * // 5 | 6 | 7 | 8
+     * fRange.setValues(values);
+     *
+     * // Delete the range A1:B2 along the rows dimension, the range A1:D5 will be:
+     * // 3 | 4 | 3 | 4
+     * // 4 | 5 | 4 | 5
+     * // 5 | 6 | 5 | 6
+     * //   |   | 6 | 7
+     * //   |   | 7 | 8
+     * const fRange3 = fWorksheet.getRange('A1:B2');
+     * fRange3.deleteCells(univerAPI.Enum.Dimension.ROWS);
+     * console.log(fWorksheet.getRange('A1:D5').getValues()); // [[3, 4, 3, 4], [4, 5, 4, 5], [5, 6, 5, 6], [null, null, 6, 7], [null, null, 7, 8]]
+     * ```
+     */
+    deleteCells(shiftDimension: Dimension): void {
+        if (shiftDimension === Dimension.ROWS) {
+            this._commandService.executeCommand(DeleteRangeMoveUpCommand.id, {
+                range: this._range,
+            });
+        } else {
+            this._commandService.executeCommand(DeleteRangeMoveLeftCommand.id, {
+                range: this._range,
+            });
+        }
+    }
+
+    /**
+     * Returns a copy of the range expanded `Direction.UP` and `Direction.DOWN` if the specified dimension is `Dimension.ROWS`, or `Direction.NEXT` and `Direction.PREVIOUS` if the dimension is `Dimension.COLUMNS`.
+     * The expansion of the range is based on detecting data next to the range that is organized like a table.
+     * The expanded range covers all adjacent cells with data in them along the specified dimension including the table boundaries.
+     * If the original range is surrounded by empty cells along the specified dimension, the range itself is returned.
+     * @param {Dimension} [dimension] - The dimension along which to expand the range. If not provided, the range will be expanded in both dimensions.
+     * @returns {FRange} The range's data region or a range covering each column or each row spanned by the original range.
+     */
+    getDataRegion(dimension?: Dimension): FRange {
+        const { startRow, startColumn, endRow, endColumn } = this._range;
+        const maxRows = this._worksheet.getMaxRows();
+        const maxColumns = this._worksheet.getMaxColumns();
+        const cellMatrix = this._worksheet.getMatrixWithMergedCells(startRow, startColumn, endRow, endColumn);
+
+        if (dimension === Dimension.ROWS) {
+            const top = startRow;
+            const bottom = endRow;
+
+            cellMatrix.forRow((row, cols) => {
+
+            });
+        }
+
+        return this;
     }
 }

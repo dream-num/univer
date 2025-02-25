@@ -26,7 +26,7 @@ import { MobileContextMenu } from '../components/context-menu/MobileContextMenu'
 import { GlobalZone } from '../components/global-zone/GlobalZone';
 import { Sidebar } from '../components/sidebar/Sidebar';
 import { ZenZone } from '../components/zen-zone/ZenZone';
-import styles from './mobile-app.module.less';
+import styles from './mobile-workbench.module.less';
 
 export interface IUniverAppProps extends IWorkbenchOptions {
     mountContainer: HTMLElement;

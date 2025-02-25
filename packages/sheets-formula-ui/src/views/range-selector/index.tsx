@@ -16,11 +16,13 @@
 
 import type { IUnitRangeName, Nullable } from '@univerjs/core';
 import type { Editor, IRichTextEditorProps } from '@univerjs/docs-ui';
-import { LocaleService, RichTextBuilder } from '@univerjs/core';
+import type { ISelectionWithStyle, ISetSelectionsOperationParams } from '@univerjs/sheets';
+import { ICommandService, LocaleService, RichTextBuilder } from '@univerjs/core';
 import { Button, Dialog, Input, Tooltip } from '@univerjs/design';
 import { IEditorService, RichTextEditor } from '@univerjs/docs-ui';
 import { deserializeRangeWithSheet, LexerTreeBuilder, matchToken, sequenceNodeType, serializeRange, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { CloseSingle, DeleteSingle, IncreaseSingle, SelectRangeSingle } from '@univerjs/icons';
+import { SetSelectionsOperation } from '@univerjs/sheets';
 import { useDependency, useEvent } from '@univerjs/ui';
 import { useEffect, useRef, useState } from 'react';
 import { useStateRef } from '../formula-editor/hooks/use-state-ref';
@@ -50,6 +52,7 @@ export interface IRangeSelectorProps extends IRichTextEditorProps {
     onRangeSelectorDialogVisibleChange?: (visible: boolean) => void;
     hideEditor?: boolean;
     forceShowDialogWhenSelectionChanged?: boolean;
+    resetRange?: ISelectionWithStyle[];
 };
 
 export interface IRangeSelectorDialogProps {
@@ -219,6 +222,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
         onFocusChange,
         forceShowDialogWhenSelectionChanged,
         hideEditor,
+        resetRange,
     } = props;
     const [focusing, setFocusing] = useState(autoFocus ?? false);
     const [popupVisible, setPopupVisible] = useState(false);
@@ -227,6 +231,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
     const editorService = useDependency(IEditorService);
     const { sequenceNodes } = useRangesHighlight(editor, focusing, unitId, subUnitId);
     const sequenceNodesRef = useStateRef(sequenceNodes);
+    const commandService = useDependency(ICommandService);
 
     const blurEditor = useEvent(() => {
         editor?.setSelectionRanges([]);
@@ -270,6 +275,19 @@ export function RangeSelector(props: IRangeSelectorProps) {
 
     useEffect(() => {
         onRangeSelectorDialogVisibleChange?.(popupVisible);
+    }, [popupVisible]);
+
+    useEffect(() => {
+        if (popupVisible && resetRange) {
+            return () => {
+                const params: ISetSelectionsOperationParams = {
+                    unitId,
+                    subUnitId,
+                    selections: resetRange,
+                };
+                commandService.executeCommand(SetSelectionsOperation.id, params);
+            };
+        }
     }, [popupVisible]);
 
     return (

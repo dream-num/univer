@@ -15,14 +15,14 @@
  */
 
 import type { DocumentDataModel, Nullable, Workbook } from '@univerjs/core';
-import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
+import type { ISelectionWithStyle, ISetSelectionsOperationParams } from '@univerjs/sheets';
 import { BuildTextUtils, ColorKit, CustomRangeType, DataStreamTreeTokenType, DisposableCollection, DOCS_ZEN_EDITOR_UNIT_ID_KEY, FOCUSING_SHEET, generateRandomId, ICommandService, IContextService, isValidRange, IUniverInstanceService, LocaleService, ThemeService, Tools, UniverInstanceType } from '@univerjs/core';
 import { Button, FormLayout, Input, Select } from '@univerjs/design';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { DocBackScrollRenderController, DocSelectionRenderService } from '@univerjs/docs-ui';
 import { deserializeRangeWithSheet, IDefinedNamesService, serializeRange, serializeRangeToRefString, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { SetSelectionsOperation, SetWorksheetActiveOperation } from '@univerjs/sheets';
+import { SetSelectionsOperation, SetWorksheetActiveOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { RangeSelector } from '@univerjs/sheets-formula-ui';
 import { AddHyperLinkCommand, AddRichHyperLinkCommand, SheetHyperLinkType, SheetsHyperLinkParserService, UpdateHyperLinkCommand, UpdateRichHyperLinkCommand } from '@univerjs/sheets-hyper-link';
 import { IEditorBridgeService, IMarkSelectionService, ScrollToRangeOperation } from '@univerjs/sheets-ui';
@@ -63,6 +63,8 @@ export const CellLinkEdit = () => {
     const themeService = useDependency(ThemeService);
     const docSelectionManagerService = useDependency(DocSelectionManagerService);
     const [selectorDialogVisible, setSelectorDialogVisible] = useState(false);
+    const sheetsSelectionService = useDependency(SheetsSelectionsService);
+    const selections = useMemo(() => sheetsSelectionService.getCurrentSelections(), []);
 
     const customHyperLinkSidePanel = useMemo(() => {
         if (sidePanelService.isBuiltInLinkType(type)) {
@@ -479,6 +481,7 @@ export const CellLinkEdit = () => {
                         maxRangeCount={1}
                         supportAcrossSheet
                         initialValue={payload}
+                        resetRange={selections as ISelectionWithStyle[]}
                         onChange={(_, text) => handleRangeChange(text)}
                         onRangeSelectorDialogVisibleChange={async (visible) => {
                             setSelectorDialogVisible(visible);

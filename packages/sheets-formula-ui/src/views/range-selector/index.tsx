@@ -64,7 +64,7 @@ export interface IRangeSelectorDialogProps {
     supportAcrossSheet?: boolean;
     onConfirm: (ranges: IUnitRangeName[]) => void;
     onClose: () => void;
-    onShowBySelection?: () => void;
+    onShowBySelection?: (ranges: IUnitRangeName[]) => boolean;
 }
 
 export function RangeSelectorDialog(props: IRangeSelectorDialogProps) {
@@ -107,7 +107,7 @@ export function RangeSelectorDialog(props: IRangeSelectorDialogProps) {
         supportAcrossSheet,
         onChange: (selections, isStart) => {
             if (!visible) {
-                if (onShowBySelection?.()) {
+                if (onShowBySelection?.(selections)) {
                     return;
                 }
             }
@@ -338,10 +338,11 @@ export function RangeSelector(props: IRangeSelectorProps) {
                     setRangeSelectorRanges([]);
                 }}
                 supportAcrossSheet={supportAcrossSheet}
-                onShowBySelection={() => {
+                onShowBySelection={(ranges: IUnitRangeName[]) => {
                     if (focusing || forceShowDialogWhenSelectionChanged) {
-                        setRangeSelectorRanges([]);
+                        setRangeSelectorRanges(ranges);
                         setPopupVisible(true);
+                        return false;
                     } else {
                         return true;
                     }

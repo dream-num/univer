@@ -21,7 +21,7 @@ import type { IDrawInfo } from '../../extension';
 import type { BorderCache, BorderCacheItem } from '../interfaces';
 import type { SpreadsheetSkeleton } from '../sheet.render-skeleton';
 import { BorderStyleTypes, Range } from '@univerjs/core';
-import { BORDER_TYPE as BORDER_LTRB, COLOR_BLACK_RGB, FIX_ONE_PIXEL_BLUR_OFFSET } from '../../../basics/const';
+import { BORDER_TYPE as BORDER_LTRB, COLOR_BLACK_RGB } from '../../../basics/const';
 import { drawDiagonalLineByBorderType, drawLineByBorderType, getLineWidth, setLineType } from '../../../basics/draw';
 import { SpreadsheetExtensionRegistry } from '../../extension';
 import { SheetExtension } from './sheet-extension';

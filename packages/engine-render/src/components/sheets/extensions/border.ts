@@ -21,7 +21,7 @@ import type { IDrawInfo } from '../../extension';
 import type { BorderCache, BorderCacheItem } from '../interfaces';
 import type { SpreadsheetSkeleton } from '../sheet.render-skeleton';
 import { BorderStyleTypes, Range } from '@univerjs/core';
-import { BORDER_TYPE as BORDER_LTRB, COLOR_BLACK_RGB } from '../../../basics/const';
+import { BORDER_TYPE as BORDER_LTRB, COLOR_BLACK_RGB, FIX_ONE_PIXEL_BLUR_OFFSET } from '../../../basics/const';
 import { drawDiagonalLineByBorderType, drawLineByBorderType, getLineWidth, setLineType } from '../../../basics/draw';
 import { SpreadsheetExtensionRegistry } from '../../extension';
 import { SheetExtension } from './sheet-extension';
@@ -66,8 +66,9 @@ export class Border extends SheetExtension {
         }
         ctx.save();
 
-        // no need this, that would cause the dashed line ([1, 1]) style to be drawn incorrectly.(in zoom 100%)
-        // ctx.translateWithPrecisionRatio(FIX_ONE_PIXEL_BLUR_OFFSET, FIX_ONE_PIXEL_BLUR_OFFSET);
+        // this would cause the dashed line ([1, 1]) style to be drawn incorrectly.(in zoom 100%)
+        // but without this, lines looks thicker than before.
+        ctx.translateWithPrecisionRatio(FIX_ONE_PIXEL_BLUR_OFFSET, FIX_ONE_PIXEL_BLUR_OFFSET);
 
         const precisionScale = this._getScale(ctx.getScale());
         const { border } = stylesCache;

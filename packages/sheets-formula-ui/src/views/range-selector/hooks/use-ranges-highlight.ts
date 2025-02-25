@@ -65,10 +65,8 @@ export function useRangesHighlight(editor: Nullable<Editor>, focusing: boolean, 
             const range = deserializeRangeWithSheet(selection.token);
             const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
             const worksheet = workbook?.getActiveSheet();
-            const originWorkbook = univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
-            const originWorksheet = originWorkbook?.getSheetBySheetId(subUnitId);
             // range is not in the current worksheet
-            if ((!range.sheetName && originWorksheet?.getSheetId() !== worksheet?.getSheetId()) || worksheet?.getName() !== range.sheetName) {
+            if ((!range.sheetName && subUnitId !== worksheet?.getSheetId()) || (range.sheetName && worksheet?.getName() !== range.sheetName)) {
                 return;
             }
 
@@ -78,6 +76,7 @@ export function useRangesHighlight(editor: Nullable<Editor>, focusing: boolean, 
                 style: {
                     stroke: selection.themeColor,
                     fill: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.1)`,
+                    strokeDash: 12,
                 },
                 primary: null,
             });

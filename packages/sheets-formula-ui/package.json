@@ -19,13 +19,11 @@
     "keywords": [
         "univer"
     ],
-    "sideEffects": [
-        "**/*.css"
-    ],
     "exports": {
         ".": "./src/index.ts",
         "./*": "./src/*",
-        "./locale/*": "./src/locale/*.ts"
+        "./locale/*": "./src/locale/*.ts",
+        "./facade": "./src/facade/index.ts"
     },
     "main": "./src/index.ts",
     "types": "./lib/types/index.d.ts",
@@ -49,7 +47,12 @@
                 "require": "./lib/cjs/locale/*.js",
                 "types": "./lib/types/locale/*.d.ts"
             },
-            "./lib/*": "./lib/*"
+            "./lib/*": "./lib/*",
+            "./facade": {
+                "import": "./lib/es/facade.js",
+                "require": "./lib/cjs/facade.js",
+                "types": "./lib/types/facade/index.d.ts"
+            }
         }
     },
     "directories": {

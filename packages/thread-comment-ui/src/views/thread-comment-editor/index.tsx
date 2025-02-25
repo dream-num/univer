@@ -106,7 +106,7 @@ export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThr
     return (
         <div className={styles.threadCommentEditor} onClick={(e) => e.preventDefault()}>
             <RichTextEditor
-                ref={editor}
+                editorRef={editor}
                 autoFocus={autoFocus}
                 style={{ width: '100%' }}
                 keyboardEventConfig={keyboardEventConfig}

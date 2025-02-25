@@ -18,11 +18,6 @@
 
 import type { Dependency, IWorkbookData, Workbook } from '@univerjs/core';
 import type { ISheetData } from '../../basics/common';
-
-import type { BaseReferenceObject, FunctionVariantType } from '../../engine/reference-object/base-reference-object';
-import type { ArrayValueObject } from '../../engine/value-object/array-value-object';
-import type { BaseValueObject, ErrorValueObject } from '../../engine/value-object/base-value-object';
-
 import {
     CellValueType,
     ILogService,
@@ -239,17 +234,6 @@ export function createFunctionTestBed(workbookData?: IWorkbookData, dependencies
     };
 }
 
-export function getObjectValue(result: FunctionVariantType) {
-    if ((result as ErrorValueObject).isError()) {
-        return (result as ErrorValueObject).getValue();
-    } else if ((result as BaseReferenceObject).isReferenceObject()) {
-        return (result as BaseReferenceObject).toArrayValueObject().toValue();
-    } else if ((result as ArrayValueObject).isArray()) {
-        return (result as ArrayValueObject).toValue();
-    }
-    return (result as BaseValueObject).getValue();
-}
-
 export function stripArrayValue(array: (string | number | boolean | null)[][]) {
     return array.map((row) => row.map((cell) => {
         if (typeof cell === 'number') {
@@ -258,3 +242,5 @@ export function stripArrayValue(array: (string | number | boolean | null)[][]) {
         return cell;
     }));
 }
+
+export { getObjectValue } from '../util';

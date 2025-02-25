@@ -151,6 +151,10 @@ export function InsertRowAfterMenuItemFactory(accessor: IAccessor): IMenuButtonI
     };
 }
 
+/**
+ * context menu when right click cell
+ * @param accessor
+ */
 export function InsertColLeftCellMenuItemFactory(accessor: IAccessor): IMenuButtonItem<number> {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SheetsSelectionsService);
@@ -228,6 +232,10 @@ export function InsertRangeMoveRightMenuItemFactory(accessor: IAccessor): IMenuB
     };
 }
 
+/**
+ * For insert range in cell context menu
+ * @param accessor
+ */
 export function InsertRangeMoveDownMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: InsertRangeMoveDownConfirmCommand.id,
@@ -240,11 +248,10 @@ export function InsertRangeMoveDownMenuItemFactory(accessor: IAccessor): IMenuBu
 }
 
 /**
- * context menu in rowheader
+ * Context menu in rowheader.
  * @param accessor
- * @returns
  */
-export function InsertMultiRowsAfterMenuItemFactory(accessor: IAccessor): IMenuButtonItem<number> {
+export function InsertMultiRowsAfterHeaderMenuItemFactory(accessor: IAccessor): IMenuButtonItem<number> {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SheetsSelectionsService);
     const commandService = accessor.get(ICommandService);
@@ -285,11 +292,15 @@ export function InsertMultiRowsAfterMenuItemFactory(accessor: IAccessor): IMenuB
         })),
 
         disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetInsertRowPermission, WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
-        hidden$: getInsertAfterMenuHidden$(accessor, 'row'),
+        hidden$: getBaseRangeMenuHidden$(accessor),
     };
 }
 
-export function InsertMultiRowsAboveMenuItemFactory(accessor: IAccessor): IMenuButtonItem<number> {
+/**
+ * Context menu in rowheader.
+ * @param accessor
+ */
+export function InsertMultiRowsAboveHeaderMenuItemFactory(accessor: IAccessor): IMenuButtonItem<number> {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SheetsSelectionsService);
     const commandService = accessor.get(ICommandService);
@@ -329,11 +340,15 @@ export function InsertMultiRowsAboveMenuItemFactory(accessor: IAccessor): IMenuB
             return disposable.dispose;
         })),
         disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetInsertRowPermission, WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
-        hidden$: getInsertAfterMenuHidden$(accessor, 'row'),
+        hidden$: getBaseRangeMenuHidden$(accessor),
     };
 }
 
-export function InsertMultiColsLeftMenuItemFactory(accessor: IAccessor): IMenuButtonItem<number> {
+/**
+ * Context menu in rowheader.
+ * @param accessor
+ */
+export function InsertMultiColsLeftHeaderMenuItemFactory(accessor: IAccessor): IMenuButtonItem<number> {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SheetsSelectionsService);
     const commandService = accessor.get(ICommandService);
@@ -373,11 +388,15 @@ export function InsertMultiColsLeftMenuItemFactory(accessor: IAccessor): IMenuBu
             return disposable.dispose;
         })),
         disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetInsertRowPermission, WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
-        hidden$: getInsertAfterMenuHidden$(accessor, 'col'),
+        hidden$: getBaseRangeMenuHidden$(accessor),
     };
 }
 
-export function InsertMultiColsRightMenuItemFactory(accessor: IAccessor): IMenuButtonItem<number> {
+/**
+ * Context menu in rowheader.
+ * @param accessor
+ */
+export function InsertMultiColsRightHeaderMenuItemFactory(accessor: IAccessor): IMenuButtonItem<number> {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SheetsSelectionsService);
     const commandService = accessor.get(ICommandService);
@@ -417,6 +436,6 @@ export function InsertMultiColsRightMenuItemFactory(accessor: IAccessor): IMenuB
             return disposable.dispose;
         })),
         disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetInsertRowPermission, WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
-        hidden$: getInsertAfterMenuHidden$(accessor, 'col'),
+        hidden$: getBaseRangeMenuHidden$(accessor),
     };
 }

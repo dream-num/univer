@@ -102,10 +102,10 @@ import {
     CELL_INSERT_MENU_ID,
     CellInsertMenuItemFactory,
     InsertColLeftCellMenuItemFactory,
-    InsertMultiColsLeftMenuItemFactory,
-    InsertMultiColsRightMenuItemFactory,
-    InsertMultiRowsAboveMenuItemFactory,
-    InsertMultiRowsAfterMenuItemFactory,
+    InsertMultiColsLeftHeaderMenuItemFactory,
+    InsertMultiColsRightHeaderMenuItemFactory,
+    InsertMultiRowsAboveHeaderMenuItemFactory,
+    InsertMultiRowsAfterHeaderMenuItemFactory,
     InsertRangeMoveDownMenuItemFactory,
     InsertRangeMoveRightMenuItemFactory,
     InsertRowBeforeCellMenuItemFactory,
@@ -469,11 +469,11 @@ export const menuSchema: MenuSchemaType = {
             order: 1,
             [InsertMultiColsLeftCommand.id]: {
                 order: 0,
-                menuItemFactory: InsertMultiColsLeftMenuItemFactory,
+                menuItemFactory: InsertMultiColsLeftHeaderMenuItemFactory,
             },
             [InsertMultiColsRightCommand.id]: {
                 order: 0,
-                menuItemFactory: InsertMultiColsRightMenuItemFactory,
+                menuItemFactory: InsertMultiColsRightHeaderMenuItemFactory,
             },
             [HideColConfirmCommand.id]: {
                 order: 1,
@@ -590,11 +590,11 @@ export const menuSchema: MenuSchemaType = {
             order: 1,
             [InsertMultiRowsAboveCommand.id]: {
                 order: 0,
-                menuItemFactory: InsertMultiRowsAboveMenuItemFactory,
+                menuItemFactory: InsertMultiRowsAboveHeaderMenuItemFactory,
             },
             [InsertMultiRowsAfterCommand.id]: {
                 order: 1,
-                menuItemFactory: InsertMultiRowsAfterMenuItemFactory,
+                menuItemFactory: InsertMultiRowsAfterHeaderMenuItemFactory,
             },
             [RemoveRowConfirmCommand.id]: {
                 order: 1,

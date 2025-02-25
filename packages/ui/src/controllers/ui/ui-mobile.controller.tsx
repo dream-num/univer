@@ -19,17 +19,14 @@ import type { IUniverUIConfig } from '../config.schema';
 import type { IUIController, IWorkbenchOptions } from './ui.controller';
 import { Disposable, Inject, Injector, IUniverInstanceService, LifecycleService, LifecycleStages, Optional, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { render as createRoot, unmount } from '@univerjs/design';
-
 import { IRenderManagerService } from '@univerjs/engine-render';
-
-import React from 'react';
 import { ILayoutService } from '../../services/layout/layout.service';
 import { IMenuManagerService } from '../../services/menu/menu-manager.service';
 import { BuiltInUIPart, IUIPartsService } from '../../services/parts/parts.service';
 import { connectInjector } from '../../utils/di';
 import { FloatDom } from '../../views/components/dom/FloatDom';
 import { CanvasPopup } from '../../views/components/popup/CanvasPopup';
-import { MobileApp } from '../../views/MobileApp';
+import { MobileWorkbench } from '../../views/mobile-workbench/MobileWorkbench';
 import { menuSchema } from '../menus/menu.schema';
 
 const STEADY_TIMEOUT = 3000;
@@ -113,7 +110,7 @@ function bootstrap(
         mountContainer = createContainer('univer');
     }
 
-    const ConnectedApp = connectInjector(MobileApp, injector);
+    const ConnectedApp = connectInjector(MobileWorkbench, injector);
     const onRendered = (canvasElement: HTMLElement) => callback(canvasElement, mountContainer);
 
     function render() {

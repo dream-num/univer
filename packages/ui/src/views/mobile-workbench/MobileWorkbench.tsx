@@ -15,18 +15,18 @@
  */
 
 import type { ILocale } from '@univerjs/design';
-import type { IWorkbenchOptions } from '../controllers/ui/ui.controller';
+import type { IWorkbenchOptions } from '../../controllers/ui/ui.controller';
 import { LocaleService, ThemeService } from '@univerjs/core';
 import { ConfigProvider, defaultTheme, themeInstance } from '@univerjs/design';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { BuiltInUIPart } from '../services/parts/parts.service';
-import { useDependency } from '../utils/di';
-import { ComponentContainer, useComponentsOfPart } from './components/ComponentContainer';
-import { MobileContextMenu } from './components/context-menu/MobileContextMenu';
-import { Sidebar } from './components/sidebar/Sidebar';
-import { ZenZone } from './components/zen-zone/ZenZone';
-import styles from './mobile-app.module.less';
-import { builtInGlobalComponents } from './parts';
+import { BuiltInUIPart } from '../../services/parts/parts.service';
+import { useDependency } from '../../utils/di';
+import { ComponentContainer, useComponentsOfPart } from '../components/ComponentContainer';
+import { MobileContextMenu } from '../components/context-menu/MobileContextMenu';
+import { GlobalZone } from '../components/global-zone/GlobalZone';
+import { Sidebar } from '../components/sidebar/Sidebar';
+import { ZenZone } from '../components/zen-zone/ZenZone';
+import styles from './mobile-workbench.module.less';
 
 export interface IUniverAppProps extends IWorkbenchOptions {
     mountContainer: HTMLElement;
@@ -34,7 +34,7 @@ export interface IUniverAppProps extends IWorkbenchOptions {
     onRendered?: (container: HTMLElement) => void;
 }
 
-export function MobileApp(props: IUniverAppProps) {
+export function MobileWorkbench(props: IUniverAppProps) {
     const {
         header = true,
         footer = true,
@@ -139,12 +139,11 @@ export function MobileApp(props: IUniverAppProps) {
                             <ComponentContainer key="footer" components={footerComponents} />
                         </footer>
                     )}
-
+                    <GlobalZone />
                     <ZenZone />
                 </section>
             </div>
             <ComponentContainer key="global" components={globalComponents} />
-            <ComponentContainer key="built-in-global" components={builtInGlobalComponents} />
             {contextMenu && <MobileContextMenu />}
         </ConfigProvider>
     );

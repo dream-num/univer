@@ -28,10 +28,11 @@ import { debounce, ICommandService, IContextService, IUniverInstanceService, Loc
 import { clsx, ConfigContext, ConfigProvider, defaultTheme, themeInstance } from '@univerjs/design';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { MenuSingle } from '@univerjs/icons';
-import { builtInGlobalComponents,
+import {
     BuiltInUIPart,
     ComponentContainer,
     ContextMenu,
+    GlobalZone,
     UNI_DISABLE_CHANGING_FOCUS_KEY,
     useComponentsOfPart,
     useDependency,
@@ -263,7 +264,7 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
                     </div>
                 </div>
                 <ComponentContainer key="global" components={globalComponents} />
-                <ComponentContainer key="built-in-global" components={builtInGlobalComponents} />
+                <GlobalZone />
                 {contextMenu && <ContextMenu />}
                 <FloatingContainer />
             </ReactFlowProvider>

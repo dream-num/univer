@@ -26,10 +26,9 @@ import { BuiltInUIPart } from '../../services/parts/parts.service';
 import { useDependency } from '../../utils/di';
 import { ComponentContainer, useComponentsOfPart } from '../components/ComponentContainer';
 import { DesktopContextMenu } from '../components/context-menu/ContextMenu';
-
+import { GlobalZone } from '../components/global-zone/GlobalZone';
 import { Sidebar } from '../components/sidebar/Sidebar';
 import { ZenZone } from '../components/zen-zone/ZenZone';
-import { builtInGlobalComponents } from '../parts';
 import styles from './workbench.module.less';
 
 export interface IUniverWorkbenchProps extends IWorkbenchOptions {
@@ -197,7 +196,7 @@ export function DesktopWorkbench(props: IUniverWorkbenchProps) {
                 </section>
             </div>
             <ComponentContainer key="global" components={globalComponents} />
-            <ComponentContainer key="built-in-global" components={builtInGlobalComponents} />
+            <GlobalZone />
             {contextMenu && <DesktopContextMenu />}
             <FloatingContainer />
             <div id="univer-popup-portal" />

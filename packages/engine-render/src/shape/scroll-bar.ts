@@ -60,10 +60,10 @@ export interface IScrollBarProps {
 }
 
 const MIN_THUMB_SIZE = 17;
-const DEFAULT_TRACK_SIZE = 14;
-const HOVER_TRACK_SIZE = 14;
-const DEFAULT_THUMB_MARGIN = 4;
-const HOVER_THUMB_MARGIN = 2;
+const DEFAULT_TRACK_SIZE = 10;
+const HOVER_TRACK_SIZE = 10;
+const DEFAULT_THUMB_MARGIN = 2;
+const HOVER_THUMB_MARGIN = 1;
 
 export class ScrollBar extends Disposable {
     enableHorizontal: boolean = true;

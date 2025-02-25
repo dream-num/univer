@@ -92,6 +92,7 @@ import { DocAutoFormatController } from './controllers/doc-auto-format.controlle
 import { DocHeaderFooterController } from './controllers/doc-header-footer.controller';
 import { DocMoveCursorController } from './controllers/doc-move-cursor.controller';
 import { DocParagraphSettingController } from './controllers/doc-paragraph-setting.controller';
+import { DocTableWidgetController } from './controllers/doc-table-widget.controller';
 import { DocTableController } from './controllers/doc-table.controller';
 import { DocUIController } from './controllers/doc-ui.controller';
 import { DocBackScrollRenderController } from './controllers/render-controllers/back-scroll.render-controller';
@@ -349,6 +350,7 @@ export class UniverDocsUIPlugin extends Plugin {
             [DocInputController],
             [DocIMEInputController],
             [DocEditorBridgeController],
+            [DocTableWidgetController],
         ] as Dependency[]).forEach((m) => {
             this._renderManagerSrv.registerRenderModule(UniverInstanceType.UNIVER_DOC, m);
         });

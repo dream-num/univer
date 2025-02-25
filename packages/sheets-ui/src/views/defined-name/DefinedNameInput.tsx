@@ -16,6 +16,7 @@
 
 import type { Nullable, Workbook } from '@univerjs/core';
 import type { IDefinedNamesServiceParam } from '@univerjs/engine-formula';
+import type { IRangeSelectorProps } from '../../basics/editor/range';
 import { AbsoluteRefType, IUniverInstanceService, LocaleService, Tools, UniverInstanceType } from '@univerjs/core';
 import { Button, Input, Radio, RadioGroup, Select } from '@univerjs/design';
 import { IDefinedNamesService, IFunctionService, isReferenceStrings, isReferenceStringWithEffectiveColumn, LexerTreeBuilder, operatorToken } from '@univerjs/engine-formula';
@@ -63,7 +64,7 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
     const lexerTreeBuilder = useDependency(LexerTreeBuilder);
     const componentManager = useDependency(ComponentManager);
 
-    const RangeSelector = useMemo(() => componentManager.get(RANGE_SELECTOR_COMPONENT_KEY), []);
+    const RangeSelector: React.ComponentType<IRangeSelectorProps> = useMemo(() => componentManager.get(RANGE_SELECTOR_COMPONENT_KEY), []) as any;
     const FormulaEditor = useMemo(() => componentManager.get(EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY), []);
     if (workbook == null) {
         return;
@@ -87,9 +88,6 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
 
     const [validFormulaOrRange, setValidFormulaOrRange] = useState(true);
 
-    const rangeSelectorActionsRef = useRef<any>({});
-    const [isFocusRangeSelector, isFocusRangeSelectorSet] = useState(false);
-
     const options = [{
         label: localeService.t('definedName.scopeWorkbook'),
         value: SCOPE_WORKBOOK_VALUE_DEFINED_NAME,
@@ -98,10 +96,6 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
     const isFormula = (token: string) => {
         return !isReferenceStrings(token);
     };
-
-    useEffect(() => {
-        isFocusRangeSelectorSet(false);
-    }, [subUnitId]);
 
     useEffect(() => {
         setValidFormulaOrRange(true);
@@ -211,11 +205,6 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
     const [isFocusFormulaEditor, isFocusFormulaEditorSet] = useState(false);
 
     useSidebarClick((e: MouseEvent) => {
-        const handleOutClick = rangeSelectorActionsRef.current?.handleOutClick;
-        handleOutClick && handleOutClick(e, () => isFocusRangeSelectorSet(false));
-    });
-
-    useSidebarClick((e: MouseEvent) => {
         const handleOutClick = formulaEditorActionsRef.current?.handleOutClick;
         handleOutClick && handleOutClick(e, () => isFocusFormulaEditorSet(false));
     });
@@ -237,12 +226,10 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
                         <RangeSelector
                             unitId={unitId}
                             subUnitId={subUnitId}
-                            initValue={formulaOrRefStringValue}
-                            onChange={rangeSelectorChange}
-                            isFocus={isFocusRangeSelector}
-                            onFocus={() => isFocusRangeSelectorSet(true)}
-                            actions={rangeSelectorActionsRef.current}
-                            isSupportAcrossSheet
+                            initialValue={formulaOrRefStringValue}
+                            onChange={(_, text) => rangeSelectorChange(text)}
+
+                            supportAcrossSheet
                         />
                     )
                 )
@@ -278,9 +265,10 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
                 <ErrorSingle />
             </div>
             <div>
-                <Button onClick={() => {
-                    cancel && cancel();
-                }}
+                <Button
+                    onClick={() => {
+                        cancel && cancel();
+                    }}
                 >
                     {localeService.t('definedName.cancel')}
                 </Button>

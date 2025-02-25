@@ -17,12 +17,12 @@
 import type { IDocumentData } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { Editor } from '../../../services/editor/editor';
-import { ICommandService } from '@univerjs/core';
+import { getPlainText, ICommandService } from '@univerjs/core';
 import { RichTextEditingMutation } from '@univerjs/docs';
 import { useDependency } from '@univerjs/ui';
 import { useEffect } from 'react';
 
-export function useOnChange(editor: Editor | undefined, onChange: (data: IDocumentData) => void) {
+export function useOnChange(editor: Editor | undefined, onChange: (data: IDocumentData, str: string) => void) {
     const commandService = useDependency(ICommandService);
 
     useEffect(() => {
@@ -31,7 +31,8 @@ export function useOnChange(editor: Editor | undefined, onChange: (data: IDocume
             if (command.id === RichTextEditingMutation.id) {
                 const params = command.params as IRichTextEditingMutationParams;
                 if (params.unitId !== editor.getEditorId()) return;
-                onChange(editor.getDocumentData());
+                const data = editor.getDocumentData();
+                onChange(data, getPlainText(data.body?.dataStream ?? ''));
             }
         });
 

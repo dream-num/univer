@@ -260,7 +260,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
                     if (textRange) {
                         this._addTextRange(textRange);
                     }
-                // eslint-disable-next-line unused-imports/no-unused-vars
+                    // eslint-disable-next-line unused-imports/no-unused-vars
                 } catch (_e) {
                     generalAddRange(startOffset, endOffset);
                 }
@@ -279,6 +279,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
             options,
         });
 
+        if (!ranges.length || options?.shouldFocus === false) return;
         this._updateInputPosition(options?.forceFocus);
     }
 

@@ -15,14 +15,14 @@
  */
 
 import type { ISheetDataValidationRule } from '@univerjs/core';
-import { ICommandService } from '@univerjs/core';
+import { ColorKit, ICommandService, ThemeService } from '@univerjs/core';
 import { DataValidatorRegistryService } from '@univerjs/data-validation';
 import { serializeRange } from '@univerjs/engine-formula';
 import { DeleteSingle } from '@univerjs/icons';
 import { RemoveSheetDataValidationCommand } from '@univerjs/sheets-data-validation';
 import { IMarkSelectionService } from '@univerjs/sheets-ui';
-import { useDependency } from '@univerjs/ui';
-import React, { useEffect, useRef, useState } from 'react';
+import { useDependency, useObservable } from '@univerjs/ui';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import styles from './index.module.less';
 
 export interface IDataValidationDetailProps {
@@ -41,6 +41,16 @@ export const DataValidationItem = (props: IDataValidationDetailProps) => {
     const validator = validatorRegistry.getValidatorItem(rule.type);
     const ids = useRef<(string | null)[]>(undefined);
     const [isHover, setIsHover] = useState(false);
+    const themeService = useDependency(ThemeService);
+    const theme = useObservable(themeService.currentTheme$);
+    const style = useMemo(() => {
+        const color = theme?.loopColor2 ?? '#49B811';
+        const rgb = new ColorKit(color).toRgb();
+        return {
+            fill: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.1)`,
+            stroke: color,
+        };
+    }, [theme]);
     const handleDelete = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
         commandService.executeCommand(RemoveSheetDataValidationCommand.id, {
             ruleId: rule.uid,
@@ -69,13 +79,7 @@ export const DataValidationItem = (props: IDataValidationDetailProps) => {
                 setIsHover(true);
                 ids.current = rule.ranges.map((range) => markSelectionService.addShape({
                     range,
-                    style: {
-                        // hasAutoFill: false,
-                        fill: 'rgba(73, 184, 17, 0.05)',
-                        strokeWidth: 1,
-                        stroke: '#49B811',
-                        widgets: {},
-                    },
+                    style,
                     primary: null,
                 }));
             }}

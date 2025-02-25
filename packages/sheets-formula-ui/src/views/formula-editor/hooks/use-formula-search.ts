@@ -16,7 +16,7 @@
 
 import type { Editor } from '@univerjs/docs-ui';
 import type { ISearchItem } from '@univerjs/sheets-formula';
-import type { INode } from '../../range-selector/hooks/use-formula-token';
+import type { INode } from './use-formula-token';
 import { matchToken, sequenceNodeType } from '@univerjs/engine-formula';
 import { IDescriptionService } from '@univerjs/sheets-formula';
 import { useDependency } from '@univerjs/ui';

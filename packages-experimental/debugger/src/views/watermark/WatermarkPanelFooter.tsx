@@ -19,19 +19,17 @@ import { Button } from '@univerjs/design';
 import { IWatermarkTypeEnum } from '@univerjs/engine-render';
 import { IClipboardInterfaceService, ISidebarService, useDependency } from '@univerjs/ui';
 import { WatermarkService, WatermarkTextBaseConfig } from '@univerjs/watermark';
-import React from 'react';
-import styles from './index.module.less';
 
-export const WatermarkPanelFooter: React.FC = () => {
+export function WatermarkPanelFooter() {
     const sidebarService = useDependency(ISidebarService);
     const watermarkService = useDependency(WatermarkService);
     const localeService = useDependency(LocaleService);
     const clipboardService = useDependency(IClipboardInterfaceService);
 
     return (
-        <div className={styles.watermarkPanelFooter}>
-            <div
-                className={styles.watermarkPanelFooterReset}
+        <div className="univer-flex univer-items-center univer-justify-between">
+            <a
+                className="univer-text-sm univer-text-primary-600 univer-underline"
                 onClick={() => {
                     watermarkService.updateWatermarkConfig({
                         type: IWatermarkTypeEnum.Text,
@@ -41,11 +39,10 @@ export const WatermarkPanelFooter: React.FC = () => {
                 }}
             >
                 {localeService.t('univer-watermark.cancel')}
-            </div>
+            </a>
 
-            <div className={styles.watermarkPanelFooterButtonWrapper}>
+            <div className="univer-flex univer-items-center univer-gap-2">
                 <Button
-                    style={{ marginRight: 8 }}
                     onClick={async () => {
                         const watermarkConfig = await watermarkService.getWatermarkConfig();
                         let config;

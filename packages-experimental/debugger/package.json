@@ -20,7 +20,8 @@
     "keywords": [],
     "exports": {
         ".": "./src/index.ts",
-        "./*": "./src/*"
+        "./*": "./src/*",
+        "./locale/*": "./src/locale/*.ts"
     },
     "main": "./src/index.ts",
     "types": "./lib/types/index.d.ts",
@@ -38,6 +39,11 @@
                 "import": "./lib/es/*",
                 "require": "./lib/cjs/*",
                 "types": "./lib/types/index.d.ts"
+            },
+            "./locale/*": {
+                "import": "./lib/es/locale/*.js",
+                "require": "./lib/cjs/locale/*.js",
+                "types": "./lib/types/locale/*.d.ts"
             },
             "./lib/*": "./lib/*"
         }

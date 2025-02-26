@@ -528,7 +528,7 @@ export const SetTextWrapCommand: ICommand<ISetTextWrapCommandParams> = {
     },
 };
 
-export interface ISetTextRotationCommandParams {
+export interface ISetTextRotationCommandParams extends ISetStyleCommonParams {
     value: number | string;
 }
 
@@ -544,6 +544,9 @@ export const SetTextRotationCommand: ICommand<ISetTextRotationCommandParams> = {
 
         const commandService = accessor.get(ICommandService);
         const setStyleParams: ISetStyleCommandParams<ITextRotation> = {
+            unitId: params.unitId,
+            subUnitId: params.subUnitId,
+            range: params.range,
             style: {
                 type: 'tr',
                 value,

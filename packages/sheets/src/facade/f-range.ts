@@ -15,13 +15,13 @@
  */
 
 import type { BorderStyleTypes, BorderType, CellValue, CustomData, ICellData, IColorStyle, IDocumentData, IObjectMatrixPrimitiveType, IRange, IStyleData, ITextDecoration, Nullable, Workbook, Worksheet } from '@univerjs/core';
-import type { ISetBorderBasicCommandParams, ISetHorizontalTextAlignCommandParams, ISetRangeValuesCommandParams, ISetSelectionsOperationParams, ISetStyleCommandParams, ISetTextWrapCommandParams, ISetVerticalTextAlignCommandParams, IStyleTypeValue, SplitDelimiterEnum } from '@univerjs/sheets';
+import type { ISetBorderBasicCommandParams, ISetHorizontalTextAlignCommandParams, ISetRangeValuesCommandParams, ISetSelectionsOperationParams, ISetStyleCommandParams, ISetTextRotationCommandParams, ISetTextWrapCommandParams, ISetVerticalTextAlignCommandParams, IStyleTypeValue, SplitDelimiterEnum } from '@univerjs/sheets';
 import type { IFacadeClearOptions } from './f-worksheet';
 import type { FHorizontalAlignment, FVerticalAlignment } from './utils';
-import { BooleanNumber, DEFAULT_STYLES, Dimension, ICommandService, Inject, Injector, Rectangle, RichTextValue, TextStyleValue, WrapStrategy } from '@univerjs/core';
+import { BooleanNumber, DEFAULT_STYLES, Dimension, ICommandService, Inject, Injector, isNullCell, Rectangle, RichTextValue, TextStyleValue, WrapStrategy } from '@univerjs/core';
 import { FBaseInitialable } from '@univerjs/core/facade';
 import { FormulaDataModel, serializeRange, serializeRangeWithSheet } from '@univerjs/engine-formula';
-import { addMergeCellsUtil, ClearSelectionAllCommand, ClearSelectionContentCommand, ClearSelectionFormatCommand, DeleteRangeMoveLeftCommand, DeleteRangeMoveUpCommand, DeleteWorksheetRangeThemeStyleCommand, getAddMergeMutationRangeByType, getPrimaryForRange, RemoveWorksheetMergeCommand, SetBorderBasicCommand, SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetSelectionsOperation, SetStyleCommand, SetTextWrapCommand, SetVerticalTextAlignCommand, SetWorksheetRangeThemeStyleCommand, SheetRangeThemeService, SplitTextToColumnsCommand } from '@univerjs/sheets';
+import { addMergeCellsUtil, ClearSelectionAllCommand, ClearSelectionContentCommand, ClearSelectionFormatCommand, DeleteRangeMoveLeftCommand, DeleteRangeMoveUpCommand, DeleteWorksheetRangeThemeStyleCommand, getAddMergeMutationRangeByType, getPrimaryForRange, InsertRangeMoveDownCommand, InsertRangeMoveRightCommand, RemoveWorksheetMergeCommand, SetBorderBasicCommand, SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetSelectionsOperation, SetStyleCommand, SetTextRotationCommand, SetTextWrapCommand, SetVerticalTextAlignCommand, SetWorksheetRangeThemeStyleCommand, SheetRangeThemeService, SplitTextToColumnsCommand } from '@univerjs/sheets';
 import { FWorkbook } from './f-workbook';
 import { covertCellValue, covertCellValues, transformCoreHorizontalAlignment, transformCoreVerticalAlignment, transformFacadeHorizontalAlignment, transformFacadeVerticalAlignment } from './utils';
 
@@ -110,14 +110,14 @@ export class FRange extends FBaseInitialable {
     }
 
     /**
-     * Gets the starting row number of the applied area
-     * @returns {number} The starting row number of the area
+     * Gets the starting row index of the range. index starts at 0.
+     * @returns {number} The starting row index of the range.
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getActiveSheet();
      * const fRange = fWorksheet.getRange('A1:B2');
-     * console.log(fRange.getRow());
+     * console.log(fRange.getRow()); // 0
      * ```
      */
     getRow(): number {
@@ -125,18 +125,48 @@ export class FRange extends FBaseInitialable {
     }
 
     /**
-     * Gets the starting column number of the applied area
-     * @returns {number} The starting column number of the area
+     * Gets the ending row index of the range. index starts at 0.
+     * @returns {number} The ending row index of the range.
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getActiveSheet();
      * const fRange = fWorksheet.getRange('A1:B2');
-     * console.log(fRange.getColumn());
+     * console.log(fRange.getLastRow()); // 1
+     * ```
+     */
+    getLastRow(): number {
+        return this._range.endRow;
+    }
+
+    /**
+     * Gets the starting column index of the range. index starts at 0.
+     * @returns {number} The starting column index of the range.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:B2');
+     * console.log(fRange.getColumn()); // 0
      * ```
      */
     getColumn(): number {
         return this._range.startColumn;
+    }
+
+    /**
+     * Gets the ending column index of the range. index starts at 0.
+     * @returns {number} The ending column index of the range.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:B2');
+     * console.log(fRange.getLastColumn()); // 1
+     * ```
+     */
+    getLastColumn(): number {
+        return this._range.endColumn;
     }
 
     /**
@@ -263,7 +293,6 @@ export class FRange extends FBaseInitialable {
      * ```
      */
     getValue(): CellValue | null;
-
     /**
      * Return first cell value in this range
      * @param {boolean} includeRichText Should the returns of this func to include rich text
@@ -293,6 +322,58 @@ export class FRange extends FBaseInitialable {
     }
 
     /**
+     * Returns the raw value of the top-left cell in the range. Empty cells return `null`.
+     * @returns {Nullable<CellValue>} The raw value of the cell. Returns `null` if the cell is empty.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:B2');
+     * fRange.setValueForCell({
+     *   v: 0.2,
+     *   s: {
+     *     n: {
+     *       pattern: '0%',
+     *     },
+     *   },
+     * });
+     * console.log(fRange.getRawValue()); // 0.2
+     * ```
+     */
+    getRawValue(): Nullable<CellValue> {
+        const cell = this._worksheet.getCellMatrix().getValue(this._range.startRow, this._range.startColumn);
+        if (cell?.v) return cell.v;
+        if (cell?.p) return cell.p.body?.dataStream ?? '';
+        return null;
+    }
+
+    /**
+     * Returns the displayed value of the top-left cell in the range. The value is a String. Empty cells return an empty string.
+     * @returns {string} The displayed value of the cell. Returns an empty string if the cell is empty.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:B2');
+     * fRange.setValueForCell({
+     *   v: 0.2,
+     *   s: {
+     *     n: {
+     *       pattern: '0%',
+     *     },
+     *   },
+     * });
+     * console.log(fRange.getDisplayValue()); // 20%
+     * ```
+     */
+    getDisplayValue(): string {
+        const cell = this._worksheet.getCell(this._range.startRow, this._range.startColumn);
+        if (cell?.v) return String(cell.v);
+        if (cell?.p) return cell.p.body?.dataStream ?? '';
+        return '';
+    }
+
+    /**
      * Returns the cell values for the cells in the range.
      * @returns {Nullable<CellValue>[][]} A two-dimensional array of cell values.
      * @example
@@ -305,7 +386,6 @@ export class FRange extends FBaseInitialable {
      * ```
      */
     getValues(): Nullable<CellValue>[][];
-
     /**
      * Returns the cell values for the cells in the range.
      * @param {boolean} includeRichText Should the returns of this func to include rich text
@@ -338,6 +418,141 @@ export class FRange extends FBaseInitialable {
             range.push(row);
         }
         return range;
+    }
+
+    /**
+     * Returns a two-dimensional array of the range raw values. Empty cells return `null`.
+     * @returns {Array<Array<Nullable<CellValue>>>} The raw value of the cell. Returns `null` if the cell is empty.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:B2');
+     * fRange.setValues([
+     *   [
+     *     {
+     *       v: 0.2,
+     *       s: {
+     *         n: {
+     *           pattern: '0%',
+     *         },
+     *       },
+     *     },
+     *     {
+     *       v: 45658,
+     *       s: {
+     *         n: {
+     *           pattern: 'yyyy-mm-dd',
+     *         },
+     *       },
+     *     }
+     *   ],
+     *   [
+     *     {
+     *       v: 1234.567,
+     *       s: {
+     *         n: {
+     *           pattern: '#,##0.00',
+     *         }
+     *       }
+     *     },
+     *     null,
+     *   ],
+     * ]);
+     * console.log(fRange.getRawValues()); // [[0.2, 45658], [1234.567, null]]
+     * ```
+     */
+    getRawValues(): Array<Array<Nullable<CellValue>>> {
+        const cellMatrix = this._worksheet.getCellMatrix();
+        const { startRow, endRow, startColumn, endColumn } = this._range;
+        const values: Array<Array<Nullable<CellValue>>> = [];
+
+        for (let r = startRow; r <= endRow; r++) {
+            const row: Array<Nullable<CellValue>> = [];
+
+            for (let c = startColumn; c <= endColumn; c++) {
+                const cell = cellMatrix.getValue(r, c);
+
+                if (cell?.v) {
+                    row.push(cell.v);
+                } else if (cell?.p) {
+                    row.push(cell.p.body?.dataStream ?? '');
+                } else {
+                    row.push(null);
+                }
+            }
+
+            values.push(row);
+        }
+
+        return values;
+    }
+
+    /**
+     * Returns a two-dimensional array of the range displayed values. Empty cells return an empty string.
+     * @returns {string[][]} A two-dimensional array of values.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:B2');
+     * fRange.setValues([
+     *   [
+     *     {
+     *       v: 0.2,
+     *       s: {
+     *         n: {
+     *           pattern: '0%',
+     *         },
+     *       },
+     *     },
+     *     {
+     *       v: 45658,
+     *       s: {
+     *         n: {
+     *           pattern: 'yyyy-mm-dd',
+     *         },
+     *       },
+     *     }
+     *   ],
+     *   [
+     *     {
+     *       v: 1234.567,
+     *       s: {
+     *         n: {
+     *           pattern: '#,##0.00',
+     *         }
+     *       }
+     *     },
+     *     null,
+     *   ],
+     * ]);
+     * console.log(fRange.getDisplayValues()); // [['20%', '2025-01-01'], ['1,234.57', '']]
+     * ```
+     */
+    getDisplayValues(): string[][] {
+        const { startRow, endRow, startColumn, endColumn } = this._range;
+        const values: string[][] = [];
+
+        for (let r = startRow; r <= endRow; r++) {
+            const row: string[] = [];
+
+            for (let c = startColumn; c <= endColumn; c++) {
+                const cell = this._worksheet.getCell(r, c);
+
+                if (cell?.v) {
+                    row.push(String(cell.v));
+                } else if (cell?.p) {
+                    row.push(cell.p.body?.dataStream ?? '');
+                } else {
+                    row.push('');
+                }
+            }
+
+            values.push(row);
+        }
+
+        return values;
     }
 
     /**
@@ -470,6 +685,26 @@ export class FRange extends FBaseInitialable {
     }
 
     /**
+     * Returns the formula (A1 notation) of the top-left cell in the range, or an empty string if the cell is empty or doesn't contain a formula.
+     * @returns {string} The formula for the cell.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:B2');
+     * console.log(fRange.getFormula());
+     * ```
+     */
+    getFormula(): string {
+        return this._formulaDataModel.getFormulaStringByCell(
+            this._range.startRow,
+            this._range.startColumn,
+            this._worksheet.getSheetId(),
+            this._workbook.getUnitId()
+        ) ?? '';
+    }
+
+    /**
      * Returns the formulas (A1 notation) for the cells in the range. Entries in the 2D array are empty strings for cells with no formula.
      * @returns {string[][]} A two-dimensional array of formulas in string format.
      * @example
@@ -502,8 +737,8 @@ export class FRange extends FBaseInitialable {
     }
 
     /**
-     * Returns true if the cell wrap is enabled for the top left cell of the range.
-     * @returns {boolean} True if the cell wrap is enabled
+     * Gets whether text wrapping is enabled for top-left cell in the range.
+     * @returns {boolean} whether text wrapping is enabled for the cell.
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
@@ -514,6 +749,22 @@ export class FRange extends FBaseInitialable {
      */
     getWrap(): boolean {
         return this._worksheet.getRange(this._range).getWrap() === BooleanNumber.TRUE;
+    }
+
+    /**
+     * Gets whether text wrapping is enabled for cells in the range.
+     * @returns {boolean[][]} A two-dimensional array of whether text wrapping is enabled for each cell in the range.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:B2');
+     * console.log(fRange.getWraps());
+     */
+    getWraps(): boolean[][] {
+        const cells = this.getCellDatas();
+        const styles = this._workbook.getStyles();
+        return cells.map((row) => row.map((cell) => styles.getStyleByCell(cell)?.tb === WrapStrategy.WRAP));
     }
 
     /**
@@ -532,8 +783,8 @@ export class FRange extends FBaseInitialable {
     }
 
     /**
-     * Returns the horizontal alignment for the top left cell of the range.
-     * @returns {string} The horizontal alignment
+     * Returns the horizontal alignment of the text (left/center/right) of the top-left cell in the range.
+     * @returns {string} The horizontal alignment of the text in the cell.
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
@@ -543,12 +794,29 @@ export class FRange extends FBaseInitialable {
      * ```
      */
     getHorizontalAlignment(): string {
-        return transformCoreHorizontalAlignment(this._worksheet.getRange(this._range).getHorizontalAlignment());
+        const coreHorizontalAlignment = this._worksheet.getRange(this._range).getHorizontalAlignment();
+        return transformCoreHorizontalAlignment(coreHorizontalAlignment);
     }
 
     /**
-     * Returns the vertical alignment for the top left cell of the range.
-     * @returns {string} The vertical alignment
+     * Returns the horizontal alignments of the cells in the range.
+     * @returns {string[][]} A two-dimensional array of horizontal alignments of text associated with cells in the range.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:B2');
+     * console.log(fRange.getHorizontalAlignments());
+     * ```
+     */
+    getHorizontalAlignments(): string[][] {
+        const coreHorizontalAlignments = this._worksheet.getRange(this._range).getHorizontalAlignments();
+        return coreHorizontalAlignments.map((row) => row.map((alignment) => transformCoreHorizontalAlignment(alignment)));
+    }
+
+    /**
+     * Returns the vertical alignment (top/middle/bottom) of the top-left cell in the range.
+     * @returns {string} The vertical alignment of the text in the cell.
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
@@ -559,6 +827,22 @@ export class FRange extends FBaseInitialable {
      */
     getVerticalAlignment(): string {
         return transformCoreVerticalAlignment(this._worksheet.getRange(this._range).getVerticalAlignment());
+    }
+
+    /**
+     * Returns the vertical alignments of the cells in the range.
+     * @returns {string[][]} A two-dimensional array of vertical alignments of text associated with cells in the range.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:B2');
+     * console.log(fRange.getVerticalAlignments());
+     * ```
+     */
+    getVerticalAlignments(): string[][] {
+        const coreVerticalAlignments = this._worksheet.getRange(this._range).getVerticalAlignments();
+        return coreVerticalAlignments.map((row) => row.map((alignment) => transformCoreVerticalAlignment(alignment)));
     }
 
     /**
@@ -733,6 +1017,28 @@ export class FRange extends FBaseInitialable {
      */
     setBackground(color: string): FRange {
         this.setBackgroundColor(color);
+        return this;
+    }
+
+    /**
+     * Set rotation for text in current range.
+     * @param {number} rotation - The rotation angle in degrees
+     * @returns This range, for chaining
+     * @example
+     * ```typescript
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:B2');
+     * fRange.setTextRotation(45);
+     * ```
+     */
+    setTextRotation(rotation: number): FRange {
+        this._commandService.syncExecuteCommand(SetTextRotationCommand.id, {
+            unitId: this._workbook.getUnitId(),
+            subUnitId: this._worksheet.getSheetId(),
+            range: this._range,
+            value: rotation,
+        } as ISetTextRotationCommandParams);
         return this;
     }
 
@@ -1762,6 +2068,73 @@ export class FRange extends FBaseInitialable {
     }
 
     /**
+     * Inserts empty cells into this range. Existing data in the sheet along the provided dimension is shifted away from the inserted range.
+     * @param {Dimension} shiftDimension - The dimension along which to shift existing data.
+     * @example
+     * ```ts
+     * // Assume the active sheet empty sheet.
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const values = [
+     *   [1, 2, 3, 4],
+     *   [2, 3, 4, 5],
+     *   [3, 4, 5, 6],
+     *   [4, 5, 6, 7],
+     *   [5, 6, 7, 8],
+     * ];
+     *
+     * // Set the range A1:D5 with some values, the range A1:D5 will be:
+     * // 1 | 2 | 3 | 4
+     * // 2 | 3 | 4 | 5
+     * // 3 | 4 | 5 | 6
+     * // 4 | 5 | 6 | 7
+     * // 5 | 6 | 7 | 8
+     * const fRange = fWorksheet.getRange('A1:D5');
+     * fRange.setValues(values);
+     * console.log(fWorksheet.getRange('A1:D5').getValues()); // [[1, 2, 3, 4], [2, 3, 4, 5], [3, 4, 5, 6], [4, 5, 6, 7], [5, 6, 7, 8]]
+     *
+     * // Insert the empty cells into the range A1:B2 along the columns dimension, the range A1:D5 will be:
+     * //   |   | 1 | 2
+     * //   |   | 2 | 3
+     * // 3 | 4 | 5 | 6
+     * // 4 | 5 | 6 | 7
+     * // 5 | 6 | 7 | 8
+     * const fRange2 = fWorksheet.getRange('A1:B2');
+     * fRange2.insertCells(univerAPI.Enum.Dimension.COLUMNS);
+     * console.log(fWorksheet.getRange('A1:D5').getValues()); // [[null, null, 1, 2], [null, null, 2, 3], [3, 4, 5, 6], [4, 5, 6, 7], [5, 6, 7, 8]]
+     *
+     * // Set the range A1:D5 values again, the range A1:D5 will be:
+     * // 1 | 2 | 3 | 4
+     * // 2 | 3 | 4 | 5
+     * // 3 | 4 | 5 | 6
+     * // 4 | 5 | 6 | 7
+     * // 5 | 6 | 7 | 8
+     * fRange.setValues(values);
+     *
+     * // Insert the empty cells into the range A1:B2 along the rows dimension, the range A1:D5 will be:
+     * //   |   | 3 | 4
+     * //   |   | 4 | 5
+     * // 1 | 2 | 5 | 6
+     * // 2 | 3 | 6 | 7
+     * // 3 | 4 | 7 | 8
+     * const fRange3 = fWorksheet.getRange('A1:B2');
+     * fRange3.insertCells(univerAPI.Enum.Dimension.ROWS);
+     * console.log(fWorksheet.getRange('A1:D5').getValues()); // [[null, null, 3, 4], [null, null, 4, 5], [1, 2, 5, 6], [2, 3, 6, 7], [3, 4, 7, 8]]
+     * ```
+     */
+    insertCells(shiftDimension: Dimension): void {
+        if (shiftDimension === Dimension.ROWS) {
+            this._commandService.executeCommand(InsertRangeMoveDownCommand.id, {
+                range: this._range,
+            });
+        } else {
+            this._commandService.executeCommand(InsertRangeMoveRightCommand.id, {
+                range: this._range,
+            });
+        }
+    }
+
+    /**
      * Deletes this range of cells. Existing data in the sheet along the provided dimension is shifted towards the deleted range.
      * @param {Dimension} shiftDimension - The dimension along which to shift existing data.
      * @example
@@ -1835,22 +2208,263 @@ export class FRange extends FBaseInitialable {
      * If the original range is surrounded by empty cells along the specified dimension, the range itself is returned.
      * @param {Dimension} [dimension] - The dimension along which to expand the range. If not provided, the range will be expanded in both dimensions.
      * @returns {FRange} The range's data region or a range covering each column or each row spanned by the original range.
+     * @example
+     * ```ts
+     * // Assume the active sheet is a new sheet with no data.
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // Set the range A1:D4 with some values, the range A1:D4 will be:
+     * //  |     |     |
+     * //  |     | 100 |
+     * //  | 100 |     | 100
+     * //  |     | 100 |
+     * fWorksheet.getRange('C2').setValue(100);
+     * fWorksheet.getRange('B3').setValue(100);
+     * fWorksheet.getRange('D3').setValue(100);
+     * fWorksheet.getRange('C4').setValue(100);
+     *
+     * // Get C3 data region along the rows dimension, the range will be C2:D4
+     * const range = fWorksheet.getRange('C3').getDataRegion(univerAPI.Enum.Dimension.ROWS);
+     * console.log(range.getA1Notation()); // C2:C4
+     *
+     * // Get C3 data region along the columns dimension, the range will be B3:D3
+     * const range2 = fWorksheet.getRange('C3').getDataRegion(univerAPI.Enum.Dimension.COLUMNS);
+     * console.log(range2.getA1Notation()); // B3:D3
+     *
+     * // Get C3 data region along the both dimension, the range will be B2:D4
+     * const range3 = fWorksheet.getRange('C3').getDataRegion();
+     * console.log(range3.getA1Notation()); // B2:D4
+     * ```
      */
+    // eslint-disable-next-line complexity
     getDataRegion(dimension?: Dimension): FRange {
         const { startRow, startColumn, endRow, endColumn } = this._range;
         const maxRows = this._worksheet.getMaxRows();
         const maxColumns = this._worksheet.getMaxColumns();
-        const cellMatrix = this._worksheet.getMatrixWithMergedCells(startRow, startColumn, endRow, endColumn);
+        const cellMatrix = this._worksheet.getCellMatrix();
 
-        if (dimension === Dimension.ROWS) {
-            const top = startRow;
-            const bottom = endRow;
+        // If the original range is surrounded by empty cells along the specified dimension, the range itself is returned.
+        let newStartRow = startRow;
+        let newStartColumn = startColumn;
+        let newEndRow = endRow;
+        let newEndColumn = endColumn;
 
-            cellMatrix.forRow((row, cols) => {
+        // Four directions or dimension rows
+        if (dimension !== Dimension.COLUMNS) {
+            let topRowHasValue = false;
+            let bottomRowHasValue = false;
 
-            });
+            for (let c = startColumn; c <= endColumn; c++) {
+                if (startRow > 0 && !isNullCell(cellMatrix.getValue(startRow - 1, c))) {
+                    topRowHasValue = true;
+                }
+
+                if (endRow < maxRows - 1 && !isNullCell(cellMatrix.getValue(endRow + 1, c))) {
+                    bottomRowHasValue = true;
+                }
+
+                if (topRowHasValue && bottomRowHasValue) {
+                    break;
+                }
+            }
+
+            if (topRowHasValue) {
+                newStartRow = startRow - 1;
+            }
+
+            if (bottomRowHasValue) {
+                newEndRow = endRow + 1;
+            }
         }
 
-        return this;
+        // Four directions or dimension columns
+        if (dimension !== Dimension.ROWS) {
+            let leftColumnHasValue = false;
+            let rightColumnHasValue = false;
+
+            for (let r = startRow; r <= endRow; r++) {
+                if (startColumn > 0 && !isNullCell(cellMatrix.getValue(r, startColumn - 1))) {
+                    leftColumnHasValue = true;
+                }
+
+                if (endColumn < maxColumns - 1 && !isNullCell(cellMatrix.getValue(r, endColumn + 1))) {
+                    rightColumnHasValue = true;
+                }
+
+                if (leftColumnHasValue && rightColumnHasValue) {
+                    break;
+                }
+            }
+
+            if (leftColumnHasValue) {
+                newStartColumn = startColumn - 1;
+            }
+
+            if (rightColumnHasValue) {
+                newEndColumn = endColumn + 1;
+            }
+        }
+
+        return this._injector.createInstance(FRange, this._workbook, this._worksheet, {
+            startRow: newStartRow,
+            startColumn: newStartColumn,
+            endRow: newEndRow,
+            endColumn: newEndColumn,
+        });
+    }
+
+    /**
+     * Returns true if the range is totally blank.
+     * @returns {boolean} true if the range is blank; false otherwise.
+     * @example
+     * ```ts
+     * // Assume the active sheet is a new sheet with no data.
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:B2');
+     * console.log(fRange.isBlank()); // true
+     *
+     * // Set the range A1:B2 with some values
+     * fRange.setValueForCell(123);
+     * console.log(fRange.isBlank()); // false
+     * ```
+     */
+    isBlank(): boolean {
+        const cellMatrix = this._worksheet.getCellMatrix();
+        const { startRow, startColumn, endRow, endColumn } = this._range;
+
+        let isBlank = true;
+
+        for (let r = startRow; r <= endRow; r++) {
+            for (let c = startColumn; c <= endColumn; c++) {
+                if (!isNullCell(cellMatrix.getValue(r, c))) {
+                    isBlank = false;
+                    break;
+                }
+            }
+
+            if (!isBlank) {
+                break;
+            }
+        }
+
+        return isBlank;
+    }
+
+    /**
+     * Returns a new range that is offset from this range by the given number of rows and columns (which can be negative).
+     * The new range is the same size as the original range.
+     * @param {number} rowOffset - The number of rows down from the range's top-left cell; negative values represent rows up from the range's top-left cell.
+     * @param {number} columnOffset - The number of columns right from the range's top-left cell; negative values represent columns left from the range's top-left cell.
+     * @returns {FRange} The new range.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:B2');
+     * console.log(fRange.getA1Notation()); // A1:B2
+     *
+     * // Offset the range by 1 row and 1 column
+     * const newRange = fRange.offset(1, 1);
+     * console.log(newRange.getA1Notation()); // B2:C3
+     * ```
+     */
+    offset(rowOffset: number, columnOffset: number): FRange;
+    /**
+     * Returns a new range that is relative to the current range, whose upper left point is offset from the current range by the given rows and columns, and with the given height in cells.
+     * @param {number} rowOffset - The number of rows down from the range's top-left cell; negative values represent rows up from the range's top-left cell.
+     * @param {number} columnOffset - The number of columns right from the range's top-left cell; negative values represent columns left from the range's top-left cell.
+     * @param {number} numRows - The height in rows of the new range.
+     * @returns {FRange} The new range.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:B2');
+     * console.log(fRange.getA1Notation()); // A1:B2
+     *
+     * // Offset the range by 1 row and 1 column, and set the height of the new range to 3
+     * const newRange = fRange.offset(1, 1, 3);
+     * console.log(newRange.getA1Notation()); // B2:C4
+     * ```
+     */
+    offset(rowOffset: number, columnOffset: number, numRows: number): FRange;
+    /**
+     * Returns a new range that is relative to the current range, whose upper left point is offset from the current range by the given rows and columns, and with the given height and width in cells.
+     * @param {number} rowOffset - The number of rows down from the range's top-left cell; negative values represent rows up from the range's top-left cell.
+     * @param {number} columnOffset - The number of columns right from the range's top-left cell; negative values represent columns left from the range's top-left cell.
+     * @param {number} numRows - The height in rows of the new range.
+     * @param {number} numColumns - The width in columns of the new range.
+     * @returns {FRange} The new range.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:B2');
+     * console.log(fRange.getA1Notation()); // A1:B2
+     *
+     * // Offset the range by 1 row and 1 column, and set the height of the new range to 3 and the width to 3
+     * const newRange = fRange.offset(1, 1, 3, 3);
+     * console.log(newRange.getA1Notation()); // B2:D4
+     * ```
+     */
+    offset(rowOffset: number, columnOffset: number, numRows?: number, numColumns?: number): FRange {
+        const { startRow, startColumn, endRow, endColumn } = this._range;
+
+        const newStartRow = startRow + rowOffset;
+        const newStartColumn = startColumn + columnOffset;
+        const newEndRow = numRows ? newStartRow + numRows - 1 : endRow + rowOffset;
+        const newEndColumn = numColumns ? newStartColumn + numColumns - 1 : endColumn + columnOffset;
+
+        if (newStartRow < 0 || newStartColumn < 0 || newEndRow < 0 || newEndColumn < 0) {
+            throw new Error('The row or column index is out of range');
+        }
+
+        return this._injector.createInstance(FRange, this._workbook, this._worksheet, {
+            startRow: newStartRow,
+            startColumn: newStartColumn,
+            endRow: newEndRow,
+            endColumn: newEndColumn,
+        });
+    }
+
+    /**
+     * Updates the formula for this range. The given formula must be in A1 notation.
+     * @param {string} formula - A string representing the formula to set for the cell.
+     * @returns {FRange} This range instance for chaining.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1');
+     * fRange.setFormula('=SUM(A2:A5)');
+     * console.log(fRange.getFormula()); // '=SUM(A2:A5)'
+     * ```
+     */
+    setFormula(formula: string): FRange {
+        return this.setValue({
+            f: formula,
+        });
+    }
+
+    /**
+     * Sets a rectangular grid of formulas (must match dimensions of this range). The given formulas must be in A1 notation.
+     * @param {string[][]} formulas - A two-dimensional string array of formulas.
+     * @returns {FRange} This range instance for chaining.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:B2');
+     * fRange.setFormulas([
+     *   ['=SUM(A2:A5)', '=SUM(B2:B5)'],
+     *   ['=SUM(A6:A9)', '=SUM(B6:B9)'],
+     * ]);
+     * console.log(fRange.getFormulas()); // [['=SUM(A2:A5)', '=SUM(B2:B5)'], ['=SUM(A6:A9)', '=SUM(B6:B9)']]
+     * ```
+     */
+    setFormulas(formulas: string[][]): FRange {
+        return this.setValues(formulas.map((row) => row.map((formula) => ({ f: formula }))));
     }
 }

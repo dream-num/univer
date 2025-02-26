@@ -156,6 +156,26 @@ export function DropdownMenuWrapper({
 }) {
     const { setDropdownVisible } = useContext(TooltipWrapperContext);
 
+    if (overlay) {
+        return (
+            <DropdownMenu
+                align="start"
+                items={[]}
+                overlay={(
+                    <div className="univer-grid univer-gap-2 univer-theme">
+                        {overlay}
+                    </div>
+                )}
+                disabled={disabled}
+                onOpenChange={handleVisibleChange}
+            >
+                <div className="univer-h-full" onClick={(e) => e.stopPropagation()}>
+                    {children}
+                </div>
+            </DropdownMenu>
+        );
+    }
+
     const menuManagerService = useDependency(IMenuManagerService);
     const [hiddenStates, setHiddenStates] = useState<Record<string, boolean>>({});
 
@@ -244,6 +264,52 @@ export function DropdownMenuWrapper({
                     });
                 },
             });
+        }
+
+        return (
+            <DropdownMenu
+                align="start"
+                items={items}
+                disabled={disabled}
+                onOpenChange={handleVisibleChange}
+            >
+                {children}
+            </DropdownMenu>
+        );
+    } else {
+        const items: IDropdownProps['items'] = [];
+
+        for (const menuItem of filteredMenuItems) {
+            if (menuItem.item) {
+                const { title, id, commandId } = menuItem.item;
+
+                if (!title) {
+                    throw new Error('Menu item title is required');
+                }
+
+                items.push({
+                    type: 'item',
+                    children: (
+                        <Label
+                            value={value}
+                            option={{
+                                label: {
+                                    name: title,
+                                    selectable: false,
+                                },
+                            }}
+                        />
+                    ),
+                    onSelect: () => {
+                        onOptionSelect?.({
+                            commandId,
+                            id,
+                        });
+                    },
+                });
+            } else if (menuItem.children?.length) {
+            // sub menu
+            }
         }
 
         return (

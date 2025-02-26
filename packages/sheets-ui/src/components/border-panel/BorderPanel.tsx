@@ -92,15 +92,13 @@ export function BorderPanel(props: IBorderPanelProps) {
 
     return (
         <section className="univer-box-border univer-grid univer-gap-2 univer-p-1.5">
-            <div
-                className="univer-box-border univer-grid univer-grid-cols-5 univer-gap-2"
-            >
+            <div className="univer-box-border univer-grid univer-grid-cols-5 univer-gap-2">
                 {BORDER_LINE_CHILDREN.map((item) => (
                     <a
                         key={item.value}
                         className={clsx(`
-                          univer-flex univer-size-6 univer-items-center univer-justify-center univer-rounded
-                          univer-justify-self-center univer-cursor-pointer
+                          univer-flex univer-size-6 univer-cursor-pointer univer-items-center univer-justify-center
+                          univer-justify-self-center univer-rounded
                           hover:univer-bg-gray-100
                         `, {
                             'univer-bg-gray-200': borderStyleManagerService.getBorderInfo().type === item.value,
@@ -144,13 +142,13 @@ export function BorderPanel(props: IBorderPanelProps) {
                     <Dropdown
                         overlay={(
                             <section className="univer-rounded-lg univer-p-1.5">
-                                <ul className="univer-list-none univer-p-0 univer-m-0 univer-grid univer-gap-1">
+                                <ul className="univer-m-0 univer-grid univer-list-none univer-gap-1 univer-p-0">
                                     {BORDER_SIZE_CHILDREN.map((item) => (
                                         <li
                                             key={item.value}
                                             className={`
-                                              univer-cursor-pointer univer-px-1 univer-py-2 univer-rounded univer-flex
-                                              univer-items-center univer-justify-center
+                                              univer-flex univer-cursor-pointer univer-items-center
+                                              univer-justify-center univer-rounded univer-px-1 univer-py-2
                                               hover:univer-bg-gray-100
                                             `}
                                             onClick={() => handleClick(item.value, 'style')}

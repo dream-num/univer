@@ -201,9 +201,9 @@ export function DropdownMenuWrapper({
         return (
             <DropdownWrapper
                 disabled={disabled}
-                overlay={options.map((option) => (
+                overlay={options.map((option, index) => (
                     <Label
-                        key={option.value}
+                        key={index}
                         value={value}
                         option={option}
                         onOptionSelect={onOptionSelect}

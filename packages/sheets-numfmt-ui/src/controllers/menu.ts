@@ -213,6 +213,7 @@ export const FactoryOtherMenuItem = (accessor: IAccessor): IMenuSelectorItem => 
         id: OpenNumfmtPanelOperator.id,
         tooltip: 'sheet.numfmt.title',
         type: MenuItemType.SELECTOR,
+        slot: true,
         selections: [
             {
                 label: {

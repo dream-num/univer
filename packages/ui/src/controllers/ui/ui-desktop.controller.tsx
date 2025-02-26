@@ -77,6 +77,8 @@ export class DesktopUIController extends Disposable {
                 this._renderManagerService.currentRender$.subscribe((renderId) => {
                     if (renderId) {
                         this._changeRenderUnit(renderId, contentElement);
+                    } else {
+                        this._currentRenderId = null;
                     }
                 });
 

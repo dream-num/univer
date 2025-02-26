@@ -87,6 +87,8 @@ export class SheetsRenderService extends RxDisposable {
                 .subscribe((workbook) => {
                     if (workbook) {
                         this._renderManagerService.setCurrent(workbook.getUnitId());
+                    } else {
+                        this._renderManagerService.setCurrent('');
                     }
                 }));
     }

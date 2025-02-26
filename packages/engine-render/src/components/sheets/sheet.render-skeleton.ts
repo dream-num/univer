@@ -157,6 +157,8 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
     private _handleBgMatrix = new ObjectMatrix<boolean>();
     private _handleBorderMatrix = new ObjectMatrix<boolean>();
     private _handleFontMatrix = new ObjectMatrix<boolean>();
+    private _cachedCellMatrix = new ObjectMatrix<Nullable<ICellData>>();
+
     private _showGridlines: BooleanNumber = BooleanNumber.TRUE;
     private _gridlinesColor: string | undefined = undefined;
 
@@ -309,6 +311,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
     }
 
     /**
+     * invoked in each render
      * Set border background and font to this._stylesCache by visible range, which derives from bounds)
      * @param vpInfo viewBounds
      */
@@ -1143,6 +1146,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             border: new ObjectMatrix<BorderCache>(),
         };
 
+        this._cachedCellMatrix.reset();
         this._handleBgMatrix?.reset();
         this._handleBorderMatrix?.reset();
         this._overflowCache?.reset();
@@ -1269,14 +1273,6 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             return;
         }
 
-        // const handledBgCell = Tools.isDefine(this._handleBgMatrix.getValue(row, col));
-        // const handledBorderCell = Tools.isDefine(this._handleBorderMatrix.getValue(row, col));
-
-        // // worksheet.getCell has significant performance overhead, if we had handled this cell then return first.
-        // if (handledBgCell && handledBorderCell) {
-        //     return;
-        // }
-
         if (!options) {
             options = { cacheItem: { bg: true, border: true } };
         }
@@ -1297,7 +1293,15 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             }
         }
 
-        const cell = this.worksheet.getCell(row, col) || this.worksheet.getCellRaw(row, col);
+        const cell = (() => {
+            const cacheCell = this._cachedCellMatrix.getValue(row, col);
+            if (cacheCell) {
+                return cacheCell;
+            }
+            return this.worksheet.getCell(row, col) || this.worksheet.getCellRaw(row, col);
+        })();
+        this._cachedCellMatrix.setValue(row, col, cell);
+
         const cellStyle = this._styles.getStyleByCell(cell);
         const columnStyle = this.worksheet.getColumnStyle(col) as IStyleData;
         const rowStyle = this.worksheet.getRowStyle(row) as IStyleData;

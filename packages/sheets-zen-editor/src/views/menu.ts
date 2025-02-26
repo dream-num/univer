@@ -16,9 +16,11 @@
 
 import type { IAccessor } from '@univerjs/core';
 
+import type { IMenuButtonItem } from '@univerjs/ui';
 import { RangeProtectionPermissionEditPoint, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetCellStylePermission, WorksheetSetCellValuePermission } from '@univerjs/sheets';
-import { getCurrentExclusiveRangeInterest$, getCurrentRangeDisable$ } from '@univerjs/sheets-ui';
-import { type IMenuButtonItem, MenuItemType } from '@univerjs/ui';
+import { getCurrentExclusiveRangeInterest$, getCurrentRangeDisable$, getHiddenOnCellImage$ } from '@univerjs/sheets-ui';
+import { MenuItemType } from '@univerjs/ui';
+import { combineLatest, map } from 'rxjs';
 import { OpenZenEditorCommand } from '../commands/commands/zen-editor.command';
 
 export function ZenEditorMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
@@ -28,6 +30,11 @@ export function ZenEditorMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         title: 'rightClick.zenEditor',
         icon: 'AmplifySingle',
         hidden$: getCurrentExclusiveRangeInterest$(accessor),
-        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetSetCellValuePermission, WorksheetSetCellStylePermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
+        disabled$: combineLatest([
+            getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetSetCellValuePermission, WorksheetSetCellStylePermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
+            getHiddenOnCellImage$(accessor),
+        ]).pipe(map(([rangeDisable, hiddenOnCellImage]) => {
+            return rangeDisable || hiddenOnCellImage;
+        })),
     };
 }

@@ -18,7 +18,8 @@ import type { IAccessor, IPermissionTypes, IRange, Nullable, Workbook, WorkbookP
 import type { Observable } from 'rxjs';
 import { FOCUSING_COMMON_DRAWINGS, FOCUSING_FX_BAR_EDITOR, IContextService, IPermissionService, IUniverInstanceService, Rectangle, Tools, UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { IExclusiveRangeService, RangeProtectionPermissionEditPoint, RangeProtectionRuleModel, SheetsSelectionsService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetProtectionRuleModel } from '@univerjs/sheets';
-import { combineLatest, debounceTime, map, merge, of, startWith, switchMap } from 'rxjs';
+import { BehaviorSubject, combineLatest, merge, of } from 'rxjs';
+import { debounceTime, finalize, map, startWith, switchMap } from 'rxjs/operators';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 
 interface IActive {
@@ -103,10 +104,18 @@ export function getCurrentRangeDisable$(accessor: IAccessor, permissionTypes: IP
     const userManagerService = accessor.get(UserManagerService);
     const editorBridgeService = accessor.has(IEditorBridgeService) ? accessor.get(IEditorBridgeService) : null;
     const contextService = accessor.get(IContextService);
-    const formulaEditorFocus$ = contextService.subscribeContextValue$(FOCUSING_FX_BAR_EDITOR);
+    const formulaEditorFocus$ = new BehaviorSubject<boolean>(false);
     const editorVisible$ = editorBridgeService?.visible$ ?? of(null);
 
-    return combineLatest([userManagerService.currentUser$, workbook$, editorVisible$, formulaEditorFocus$]).pipe(
+    const subscription = contextService.subscribeContextValue$(FOCUSING_FX_BAR_EDITOR).subscribe((visible) => {
+        formulaEditorFocus$.next(visible);
+    });
+
+    const observable = combineLatest([userManagerService.currentUser$, workbook$, editorVisible$, formulaEditorFocus$]).pipe(
+        finalize(() => {
+            subscription.unsubscribe();
+            formulaEditorFocus$.complete();
+        }),
         switchMap(([_, workbook, visible, formulaEditorFocus]) => {
             if (
                 !workbook ||
@@ -181,6 +190,16 @@ export function getCurrentRangeDisable$(accessor: IAccessor, permissionTypes: IP
                 })
             );
         })
+    );
+
+    return observable;
+}
+
+export function getHiddenOnCellImage$(accessor: IAccessor) {
+    const editorBridgeService = accessor.get(IEditorBridgeService);
+
+    return editorBridgeService.currentEditCell$.pipe(
+        map((cell) => (cell?.documentLayoutObject.documentModel?.getDrawingsOrder()?.length ?? 0) > 0)
     );
 }
 

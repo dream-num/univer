@@ -77,20 +77,9 @@ export class SheetsRenderService extends RxDisposable {
             .subscribe((workbook) => this._createRenderer(workbook));
         this._instanceSrv.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET)
             .forEach((workbook) => this._createRenderer(workbook));
-
         this._instanceSrv.getTypeOfUnitDisposed$<Workbook>(UniverInstanceType.UNIVER_SHEET)
             .pipe(takeUntil(this.dispose$))
             .subscribe((workbook) => this._disposeRenderer(workbook));
-
-        this.disposeWithMe(
-            this._instanceSrv.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET)
-                .subscribe((workbook) => {
-                    if (workbook) {
-                        this._renderManagerService.setCurrent(workbook.getUnitId());
-                    } else {
-                        this._renderManagerService.setCurrent('');
-                    }
-                }));
     }
 
     private _createRenderer(workbook: Workbook): void {

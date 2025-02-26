@@ -16,7 +16,8 @@
 
 import type { DocumentDataModel, IAccessor, PresetListType } from '@univerjs/core';
 import type {
-    IRichTextEditingMutationParams } from '@univerjs/docs';
+    IRichTextEditingMutationParams,
+} from '@univerjs/docs';
 import type { IMenuButtonItem, IMenuItem, IMenuSelectorItem } from '@univerjs/ui';
 import type { Subscription } from 'rxjs';
 import {
@@ -70,8 +71,8 @@ function getInsertTableHiddenObservable(
             if (unitId == null) {
                 return subscriber.next(true);
             }
-            const univerType = univerInstanceService.getUnitType(unitId);
 
+            const univerType = univerInstanceService.getUnitType(unitId);
             if (univerType !== UniverInstanceType.UNIVER_DOC) {
                 return subscriber.next(true);
             }
@@ -87,15 +88,6 @@ function getInsertTableHiddenObservable(
                 subscriber.next(editArea === DocumentEditArea.HEADER || editArea === DocumentEditArea.FOOTER);
             });
         });
-
-        const currentRender = renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_DOC);
-        if (currentRender == null) {
-            return subscriber.next(true);
-        }
-
-        const viewModel = currentRender.with(DocSkeletonManagerService).getViewModel();
-
-        subscriber.next(viewModel.getEditArea() !== DocumentEditArea.BODY);
 
         return () => subscription.unsubscribe();
     });

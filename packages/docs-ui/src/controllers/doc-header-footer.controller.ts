@@ -17,7 +17,7 @@
 import type { DocumentDataModel, ICommandInfo } from '@univerjs/core';
 import type { Documents, DocumentViewModel, IMouseEvent, IPageRenderConfig, IPathProps, IPointerEvent, IRenderContext, IRenderModule, RenderComponentType } from '@univerjs/engine-render';
 import type { Nullable } from 'vitest';
-import { BooleanNumber, Disposable, DocumentFlavor, ICommandService, Inject, IUniverInstanceService, LocaleService, toDisposable, Tools } from '@univerjs/core';
+import { BooleanNumber, Disposable, DocumentFlavor, ICommandService, Inject, IUniverInstanceService, LocaleService, toDisposable, Tools, UniverInstanceType } from '@univerjs/core';
 
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { DocumentEditArea, IRenderManagerService, PageLayoutType, Path, Rect, Vector2 } from '@univerjs/engine-render';
@@ -293,11 +293,12 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
         const localeService = this._localeService;
 
         // eslint-disable-next-line max-lines-per-function
-        this._renderManagerService.currentRender$.subscribe((unitId) => {
-            if (unitId == null) {
+        this._instanceSrv.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_DOC).subscribe((unit) => {
+            if (unit == null) {
                 return;
             }
 
+            const unitId = unit.getUnitId();
             const currentRender = this._renderManagerService.getRenderById(unitId);
             if (this._editorService.isEditor(unitId) || this._instanceSrv.getUniverDocInstance(unitId) == null) {
                 return;

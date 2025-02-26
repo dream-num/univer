@@ -15,7 +15,7 @@
  */
 
 import type { Observable } from 'rxjs';
-import { BehaviorSubject, merge, of, skip } from 'rxjs';
+import { BehaviorSubject, filter, firstValueFrom, map, merge, of, skip } from 'rxjs';
 
 import { Disposable } from '../../shared/lifecycle';
 import { takeAfter } from '../../shared/rxjs';
@@ -57,6 +57,14 @@ export class LifecycleService extends Disposable {
     override dispose(): void {
         this._lifecycle$.complete();
         super.dispose();
+    }
+
+    onStage(stage: LifecycleStages): Promise<void> {
+        return firstValueFrom(this.lifecycle$.pipe(
+            filter((s) => s >= stage),
+            takeAfter((s) => s === stage),
+            map(() => void 0)
+        ));
     }
 
     /**

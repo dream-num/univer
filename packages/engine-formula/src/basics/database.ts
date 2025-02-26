@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
+import type { ArrayValueObject } from '../engine/value-object/array-value-object';
+import type { BaseValueObject } from '../engine/value-object/base-value-object';
 import { isRealNum } from '@univerjs/core';
 import { findCompareToken } from '../engine/utils/object-compare';
-import { type ArrayValueObject, ValueObjectFactory } from '../engine/value-object/array-value-object';
-import { type BaseValueObject, ErrorValueObject } from '../engine/value-object/base-value-object';
+import { ValueObjectFactory } from '../engine/value-object/array-value-object';
+import { ErrorValueObject } from '../engine/value-object/base-value-object';
 import { ErrorType } from './error-type';
 
 type DatabaseValueType = string | number | null;

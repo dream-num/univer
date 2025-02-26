@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Dependency, IDisposable, Nullable, UnitModel, UnitType } from '@univerjs/core';
+import type { Dependency, DependencyIdentifier, IDisposable, Nullable, UnitModel, UnitType } from '@univerjs/core';
 import type { Observable } from 'rxjs';
 import type { BaseObject } from '../base-object';
 import type { DocComponent } from '../components/docs/doc-component';
@@ -358,4 +358,15 @@ export function getCurrentTypeOfRenderer(
     }
 
     return renderManageService.getRenderUnitById(currentUnit.getUnitId());
+}
+
+export function withCurrentTypeOfRenderer<T>(
+    type: UniverInstanceType,
+    id: DependencyIdentifier<T>,
+    instanceService: IUniverInstanceService,
+    renderManagerService: IRenderManagerService
+): Nullable<T> {
+    const renderer = getCurrentTypeOfRenderer(type, instanceService, renderManagerService);
+    if (renderer) return renderer.with(id);
+    return null;
 }

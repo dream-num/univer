@@ -18,12 +18,13 @@ import type { ICellData, IDocDrawingBase, IRange, Nullable } from '@univerjs/cor
 import type { IReplaceSnapshotCommandParams } from '@univerjs/docs-ui';
 import type { IImageData } from '@univerjs/drawing';
 import type { IAddWorksheetMergeMutationParams, IRemoveWorksheetMergeMutationParams, ISetWorksheetColWidthMutationParams, ISetWorksheetRowAutoHeightMutationParams, ISetWorksheetRowHeightMutationParams, ISetWorksheetRowIsAutoHeightMutationParams, ISheetLocationBase } from '@univerjs/sheets';
+import type { IEditorBridgeServiceVisibleParam } from '@univerjs/sheets-ui';
 import { Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_ZEN_EDITOR_UNIT_ID_KEY, ICommandService, Inject, Injector, InterceptorEffectEnum, IUniverInstanceService, Range } from '@univerjs/core';
 import { DocDrawingController } from '@univerjs/docs-drawing';
 import { ReplaceSnapshotCommand } from '@univerjs/docs-ui';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { AddWorksheetMergeMutation, AFTER_CELL_EDIT, getSheetCommandTarget, InterceptCellContentPriority, INTERCEPTOR_POINT, RemoveWorksheetMergeMutation, SetWorksheetColWidthMutation, SetWorksheetRowAutoHeightMutation, SetWorksheetRowHeightMutation, SetWorksheetRowIsAutoHeightMutation, SheetInterceptorService } from '@univerjs/sheets';
-import { IEditorBridgeService } from '@univerjs/sheets-ui';
+import { IEditorBridgeService, SetCellEditVisibleOperation } from '@univerjs/sheets-ui';
 import { getDrawingSizeByCell } from './sheet-drawing-update.controller';
 
 export function resizeImageByCell(injector: Injector, location: ISheetLocationBase, cell: Nullable<ICellData>) {
@@ -77,6 +78,23 @@ export class SheetCellImageController extends Disposable {
         this._handleInitEditor();
         this._handleWriteCell();
         this._initCellContentInterceptor();
+        this._initDisableEdit();
+    }
+
+    private _initDisableEdit() {
+        this.disposeWithMe(this._commandService.beforeCommandExecuted((commandInfo) => {
+            if (commandInfo.id === SetCellEditVisibleOperation.id) {
+                const params = commandInfo.params as IEditorBridgeServiceVisibleParam;
+                const { visible } = params;
+                if (visible) {
+                    const editState = this._editorBridgeService.getEditCellState();
+                    const drawingCount = editState?.documentLayoutObject.documentModel?.getDrawingsOrder()?.length ?? 0;
+                    if (drawingCount > 0) {
+                        throw new Error('Can not edit when there are drawings.');
+                    }
+                }
+            }
+        }));
     }
 
     private _initHandleResize() {

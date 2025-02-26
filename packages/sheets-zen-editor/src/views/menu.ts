@@ -15,26 +15,24 @@
  */
 
 import type { IAccessor } from '@univerjs/core';
-
 import type { IMenuButtonItem } from '@univerjs/ui';
 import { RangeProtectionPermissionEditPoint, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetCellStylePermission, WorksheetSetCellValuePermission } from '@univerjs/sheets';
-import { getCurrentExclusiveRangeInterest$, getCurrentRangeDisable$, getHiddenOnCellImage$ } from '@univerjs/sheets-ui';
+import { getCurrentExclusiveRangeInterest$, getCurrentRangeDisable$, IEditorBridgeService } from '@univerjs/sheets-ui';
 import { MenuItemType } from '@univerjs/ui';
-import { combineLatest, map } from 'rxjs';
+import { map, switchMap } from 'rxjs';
 import { OpenZenEditorCommand } from '../commands/commands/zen-editor.command';
 
 export function ZenEditorMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    const editorBridgeService = accessor.get(IEditorBridgeService);
     return {
         id: OpenZenEditorCommand.id,
         type: MenuItemType.BUTTON,
         title: 'rightClick.zenEditor',
         icon: 'AmplifySingle',
         hidden$: getCurrentExclusiveRangeInterest$(accessor),
-        disabled$: combineLatest([
-            getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetSetCellValuePermission, WorksheetSetCellStylePermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
-            getHiddenOnCellImage$(accessor),
-        ]).pipe(map(([rangeDisable, hiddenOnCellImage]) => {
-            return rangeDisable || hiddenOnCellImage;
-        })),
+        disabled$: editorBridgeService.currentEditCell$.pipe(
+            switchMap((cell) => getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetSetCellValuePermission, WorksheetSetCellStylePermission], rangeTypes: [RangeProtectionPermissionEditPoint] })
+                .pipe(map((disabled) => disabled || (cell?.documentLayoutObject.documentModel?.getBody()?.customBlocks?.length ?? 0) > 0)))
+        ),
     };
 }

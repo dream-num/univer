@@ -24,7 +24,7 @@ export { AutoFillController } from './controllers/auto-fill.controller';
 export { CellCustomRenderController } from './controllers/cell-custom-render.controller';
 export { EditingRenderController } from './controllers/editor/editing.render-controller';
 export { PASTE_SPECIAL_MENU_ID, SheetMenuPosition } from './controllers/menu/menu';
-export { deriveStateFromActiveSheet$, getCurrentExclusiveRangeInterest$, getCurrentRangeDisable$, getHiddenOnCellImage$, getObservableWithExclusiveRange$ } from './controllers/menu/menu-util';
+export { deriveStateFromActiveSheet$, getCurrentExclusiveRangeInterest$, getCurrentRangeDisable$, getObservableWithExclusiveRange$ } from './controllers/menu/menu-util';
 export { HeaderFreezeRenderController } from './controllers/render-controllers/freeze.render-controller';
 export { HeaderMoveRenderController } from './controllers/render-controllers/header-move.render-controller';
 export { HeaderResizeRenderController } from './controllers/render-controllers/header-resize.render-controller';

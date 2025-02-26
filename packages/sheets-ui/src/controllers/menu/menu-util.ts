@@ -195,14 +195,6 @@ export function getCurrentRangeDisable$(accessor: IAccessor, permissionTypes: IP
     return observable;
 }
 
-export function getHiddenOnCellImage$(accessor: IAccessor) {
-    const editorBridgeService = accessor.get(IEditorBridgeService);
-
-    return editorBridgeService.currentEditCell$.pipe(
-        map((cell) => (cell?.documentLayoutObject.documentModel?.getDrawingsOrder()?.length ?? 0) > 0)
-    );
-}
-
 export function getBaseRangeMenuHidden$(accessor: IAccessor) {
     const univerInstanceService = accessor.get(IUniverInstanceService);
 

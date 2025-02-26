@@ -17,12 +17,11 @@
 import type { IDrawingParam, Nullable } from '@univerjs/core';
 import type { IChangeObserverConfig, Scene } from '@univerjs/engine-render';
 import { debounce, LocaleService } from '@univerjs/core';
-import { Checkbox, InputNumber } from '@univerjs/design';
+import { Checkbox, clsx, InputNumber } from '@univerjs/design';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { useDependency } from '@univerjs/ui';
-import clsx from 'clsx';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { MIN_DRAWING_HEIGHT_LIMIT, MIN_DRAWING_WIDTH_LIMIT, RANGE_DRAWING_ROTATION_LIMIT } from '../../utils/config';
 import { getUpdateParams } from '../../utils/get-update-params';
 import styles from './index.module.less';
@@ -237,7 +236,6 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
         return () => {
             subscriptions.forEach((sub) => sub.unsubscribe());
         };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const handleWidthChange = debounce((val: number | null) => {

@@ -16,10 +16,9 @@
 
 import type { SlideDataModel } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
-import { Scrollbar } from '@univerjs/design';
+import { clsx, Scrollbar } from '@univerjs/design';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { useDependency } from '@univerjs/ui';
-import clsx from 'clsx';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ActivateSlidePageOperation } from '../../commands/operations/activate.operation';
 import { AppendSlideOperation } from '../../commands/operations/append-slide.operation';
@@ -67,7 +66,6 @@ export function SlideSideBar() {
         return () => {
             subscriber?.unsubscribe();
         };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {

@@ -93,7 +93,7 @@ export function CustomLabel(props: ICustomLabelProps) {
             nodes.push(
                 <Icon
                     key={index++}
-                    extend={{ colorChannel1: isValid ? realValue : 'rgb(var(--primary-color))' }}
+                    extend={{ colorChannel1: isValid ? realValue : '#2c53f1' }}
                 />
             );
         }

@@ -16,11 +16,10 @@
 
 import type { IDrawingSearch } from '@univerjs/core';
 import { ICommandService, LocaleService } from '@univerjs/core';
-import { Dropdown } from '@univerjs/design';
+import { clsx, Dropdown } from '@univerjs/design';
 import { Autofill, MoreDownSingle } from '@univerjs/icons';
 import { useDependency } from '@univerjs/ui';
-import clsx from 'clsx';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import styles from './index.module.less';
 
 export interface IImagePopupMenuItem {
@@ -41,7 +40,7 @@ export interface IImagePopupMenuProps {
     };
 }
 
-export const SlideImagePopupMenu: React.FC<IImagePopupMenuProps> = (props: IImagePopupMenuProps) => {
+export function SlideImagePopupMenu(props: IImagePopupMenuProps) {
     const menuItems = props.popup?.extraProps?.menuItems;
 
     if (!menuItems) {

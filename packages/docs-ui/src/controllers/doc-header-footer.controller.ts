@@ -186,8 +186,9 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
     }
 
     private _initCustomComponents(): void {
-        const componentManager = this._componentManager;
-        this.disposeWithMe(componentManager.register(COMPONENT_DOC_HEADER_FOOTER_PANEL, DocHeaderFooterPanel));
+        if (!this._componentManager.get(COMPONENT_DOC_HEADER_FOOTER_PANEL)) {
+            this.disposeWithMe(this._componentManager.register(COMPONENT_DOC_HEADER_FOOTER_PANEL, DocHeaderFooterPanel));
+        }
     }
 
     private _init() {

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import { clsx } from '@univerjs/design';
 import { useDependency, useObservable } from '@univerjs/ui';
-import clsx from 'clsx';
-import React, { useCallback } from 'react';
+import { useCallback } from 'react';
 import { CROSSHAIR_HIGHLIGHT_COLORS, SheetsCrosshairHighlightService } from '../../services/crosshair.service';
 
 import styles from './index.module.less';
@@ -25,7 +25,7 @@ export interface ICrosshairOverlayProps {
     onChange?: (value: string) => void;
 }
 
-export function CrosshairOverlay(props: ICrosshairOverlayProps): React.JSX.Element {
+export function CrosshairOverlay(props: ICrosshairOverlayProps) {
     const { onChange } = props;
 
     const crosshairSrv = useDependency(SheetsCrosshairHighlightService);

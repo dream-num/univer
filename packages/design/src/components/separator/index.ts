@@ -14,18 +14,4 @@
  * limitations under the License.
  */
 
-import type zhCN from './zh-CN';
-
-const locale: typeof zhCN = {
-    rightClick: {
-        zenEditor: 'ویرایشگر تمام صفحه',
-    },
-    shortcut: {
-        sheet: {
-            'zen-edit-cancel': 'لغو ویرایش Zen',
-            'zen-edit-confirm': 'تایید ویرایش Zen',
-        },
-    },
-};
-
-export default locale;
+export { Separator } from './Separator';

@@ -17,13 +17,12 @@
 import type { ICommandInfo, IDrawingParam, Nullable } from '@univerjs/core';
 import type { IDocDrawing } from '@univerjs/docs-drawing';
 import { BooleanNumber, ICommandService, IUniverInstanceService, LocaleService, PositionedObjectLayoutType, WrapTextType } from '@univerjs/core';
-import { InputNumber, Radio, RadioGroup } from '@univerjs/design';
+import { clsx, InputNumber, Radio, RadioGroup } from '@univerjs/design';
 import { RichTextEditingMutation } from '@univerjs/docs';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { useDependency } from '@univerjs/ui';
-import clsx from 'clsx';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { TextWrappingStyle, UpdateDocDrawingDistanceCommand, UpdateDocDrawingWrappingStyleCommand, UpdateDocDrawingWrapTextCommand } from '../../commands/commands/update-doc-drawing.command';
 import styles from './index.module.less';
 
@@ -258,7 +257,6 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
             subscription.unsubscribe();
             mutationListener.dispose();
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (

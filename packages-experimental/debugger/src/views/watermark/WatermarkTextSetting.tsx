@@ -19,23 +19,21 @@ import { LocaleService } from '@univerjs/core';
 import { Checkbox, clsx, ColorPicker, Dropdown, Input, InputNumber, Select } from '@univerjs/design';
 import { BoldSingle, FontColor, ItalicSingle } from '@univerjs/icons';
 import { useDependency } from '@univerjs/ui';
-import React from 'react';
-import styles from './index.module.less';
 
 interface IWatermarkTextSettingProps {
     config?: ITextWatermarkConfig;
     onChange: (config: ITextWatermarkConfig) => void;
 }
 
-export const WatermarkTextSetting: React.FC<IWatermarkTextSettingProps> = (props) => {
+export function WatermarkTextSetting(props: IWatermarkTextSettingProps) {
     const { config, onChange } = props;
     const localeService = useDependency(LocaleService);
 
     if (!config) return null;
 
     return (
-        <div className={styles.watermarkTextSetting}>
-            <div className={styles.watermarkTextSettingHeader}>{localeService.t('univer-watermark.style')}</div>
+        <div className="univer-grid univer-gap-2">
+            <div className="univer-text-gray-400">{localeService.t('univer-watermark.style')}</div>
 
             <div className="univer-mb-4 univer-grid univer-gap-1">
                 <div>{localeService.t('univer-watermark.content')}</div>
@@ -46,8 +44,8 @@ export const WatermarkTextSetting: React.FC<IWatermarkTextSettingProps> = (props
                 />
             </div>
 
-            <div className={clsx(styles.watermarkTextSettingFontStyle, 'univer-grid univer-gap-4')}>
-                <div className={clsx(styles.watermarkTextSettingFontStylePart, 'univer-flex univer-gap-2')}>
+            <div className="univer-grid univer-gap-4">
+                <div className="univer-flex univer-gap-2">
                     <div className="univer-grid univer-gap-1">
                         <div>{localeService.t('univer-watermark.fontSize')}</div>
                         <InputNumber
@@ -94,32 +92,44 @@ export const WatermarkTextSetting: React.FC<IWatermarkTextSettingProps> = (props
                 </div>
 
                 <div
-                    className={clsx(styles.watermarkTextSettingFontStylePart, `
+                    className={`
                       univer-flex univer-justify-around univer-gap-4
-                    `)}
+                      [&_a]:univer-flex [&_a]:univer-size-6 [&_a]:univer-items-center [&_a]:univer-justify-center
+                      [&_a]:univer-rounded
+                    `}
                 >
-                    <div className={styles.watermarkIconWrapper}>
-                        <Dropdown
-                            overlay={(
-                                <div className="univer-rounded-lg univer-p-4">
-                                    <ColorPicker value={config.color} onChange={(val) => onChange({ ...config, color: val })} />
-                                </div>
-                            )}
-                        >
-                            <FontColor className={styles.watermarkIcon} extend={{ colorChannel1: config.color ?? 'rgb(var(--primary-color))' }} />
-                        </Dropdown>
-                    </div>
-                    <div className={clsx(styles.watermarkIconWrapper, { [styles.watermarkIconWrapperSelect]: config.bold })} onClick={() => { onChange({ ...config, bold: !config.bold }); }}>
-                        <BoldSingle className={styles.watermarkIcon} />
-                    </div>
-                    <div className={clsx(styles.watermarkIconWrapper, { [styles.watermarkIconWrapperSelect]: config.italic })} onClick={() => { onChange({ ...config, italic: !config.italic }); }}>
-                        <ItalicSingle className={styles.watermarkIcon} />
-                    </div>
+                    <Dropdown
+                        overlay={(
+                            <div className="univer-rounded-lg univer-p-4">
+                                <ColorPicker value={config.color} onChange={(val) => onChange({ ...config, color: val })} />
+                            </div>
+                        )}
+                    >
+                        <a className="hover:univer-bg-gray-100">
+                            <FontColor extend={{ colorChannel1: config.color ?? '#2c53f1' }} />
+                        </a>
+                    </Dropdown>
+                    <a
+                        className={clsx('hover:univer-bg-gray-100', {
+                            'univer-bg-gray-200': config.bold,
+                        })}
+                        onClick={() => { onChange({ ...config, bold: !config.bold }); }}
+                    >
+                        <BoldSingle />
+                    </a>
+                    <a
+                        className={clsx('hover:univer-bg-gray-100', {
+                            'univer-bg-gray-200': config.italic,
+                        })}
+                        onClick={() => { onChange({ ...config, italic: !config.italic }); }}
+                    >
+                        <ItalicSingle />
+                    </a>
                 </div>
             </div>
 
             {/* Layout */}
-            <div className={styles.watermarkTextSettingHeader}>{localeService.t('univer-watermark.layout')}</div>
+            <div className="univer-text-gray-400">{localeService.t('univer-watermark.layout')}</div>
 
             <div className="univer-grid univer-gap-2 univer-text-center">
                 <div className="univer-flex univer-gap-2">

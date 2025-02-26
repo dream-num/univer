@@ -15,8 +15,8 @@
  */
 
 import { CheckMarkSingle } from '@univerjs/icons';
-import clsx from 'clsx';
-import React, { useContext, useMemo } from 'react';
+import { useContext, useMemo } from 'react';
+import { clsx } from '../../helper/clsx';
 
 import { ConfigContext } from '../config-provider/ConfigProvider';
 import styles from './index.module.less';

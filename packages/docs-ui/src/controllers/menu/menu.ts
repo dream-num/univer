@@ -464,7 +464,6 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
         selections: FONT_FAMILY_LIST.map((item) => ({
             label: {
                 name: FONT_FAMILY_ITEM_COMPONENT,
-                hoverable: true,
             },
             value: item.value,
         })),
@@ -555,6 +554,7 @@ export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSele
                 label: {
                     name: COLOR_PICKER_COMPONENT,
                     hoverable: false,
+                    selectable: false,
                 },
             },
         ],
@@ -800,11 +800,13 @@ export function OrderListMenuItemFactory(accessor: IAccessor): IMenuSelectorItem
     return {
         id: OrderListCommand.id,
         type: MenuItemType.BUTTON_SELECTOR,
+        slot: true,
         selections: [
             {
                 label: {
                     name: ORDER_LIST_TYPE_COMPONENT,
                     hoverable: false,
+                    selectable: false,
                 },
                 value$: listValueFactory$(accessor),
             },
@@ -821,11 +823,13 @@ export function BulletListMenuItemFactory(accessor: IAccessor): IMenuSelectorIte
     return {
         id: BulletListCommand.id,
         type: MenuItemType.BUTTON_SELECTOR,
+        slot: true,
         selections: [
             {
                 label: {
                     name: BULLET_LIST_TYPE_COMPONENT,
                     hoverable: false,
+                    selectable: false,
                 },
                 value$: listValueFactory$(accessor),
             },
@@ -901,6 +905,7 @@ export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMe
                 label: {
                     name: COLOR_PICKER_COMPONENT,
                     hoverable: false,
+                    selectable: false,
                 },
             },
         ],

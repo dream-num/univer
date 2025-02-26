@@ -57,11 +57,13 @@ export function CellBorderSelectorMenuItemFactory(accessor: IAccessor): IMenuSel
         }),
         tooltip: 'toolbar.border.main',
         type: MenuItemType.BUTTON_SELECTOR,
+        slot: true,
         selections: [
             {
                 label: {
                     name: BORDER_PANEL_COMPONENT,
                     hoverable: false,
+                    selectable: false,
                 },
                 value$: borderStyleManagerService.borderInfo$,
             },

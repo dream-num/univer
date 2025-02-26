@@ -45,9 +45,8 @@ interface IMenuItemBase<V> {
     description?: string;
     icon?: string | Observable<string>;
     tooltip?: string;
-
+    slot?: boolean;
     type: MenuItemType;
-
     /**
      * Custom label component id.
      */
@@ -76,6 +75,7 @@ export interface IValueOption<T = undefined> {
     id?: string;
     value?: string | number;
     value$?: Observable<T>;
+    slot?: boolean;
     label?:
     | string
     | {

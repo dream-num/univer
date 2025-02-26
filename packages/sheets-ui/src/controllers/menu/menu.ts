@@ -526,13 +526,13 @@ export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSele
         id: SetRangeTextColorCommand.id,
         icon: 'FontColor',
         tooltip: 'toolbar.textColor.main',
-
         type: MenuItemType.BUTTON_SELECTOR,
         selections: [
             {
                 label: {
                     name: COLOR_PICKER_COMPONENT,
                     hoverable: false,
+                    selectable: false,
                 },
             },
         ],
@@ -577,6 +577,7 @@ export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMe
                 label: {
                     name: COLOR_PICKER_COMPONENT,
                     hoverable: false,
+                    selectable: false,
                 },
             },
         ],

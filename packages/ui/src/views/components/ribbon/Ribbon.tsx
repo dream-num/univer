@@ -27,7 +27,7 @@ import { ComponentContainer } from '../ComponentContainer';
 import { ToolbarButton } from '../ribbon/Button/ToolbarButton';
 import styles from './index.module.less';
 import { ToolbarItem } from './ToolbarItem';
-import { DropdownMenuWrapper, TooltipWrapper } from './TooltipButtonWrapper';
+import { DropdownWrapper, TooltipWrapper } from './TooltipButtonWrapper';
 
 interface IRibbonProps {
     headerMenuComponents?: Set<ComponentType>;
@@ -212,7 +212,7 @@ export function Ribbon(props: IRibbonProps) {
                     {/* overflow menu items */}
                     {collapsedIds.length > 0 && (
                         <TooltipWrapper title={localeService.t('ribbon.more')} placement="bottom">
-                            <DropdownMenuWrapper
+                            <DropdownWrapper
                                 overlay={(
                                     <div className={styles.toolbarMoreContainer}>
                                         {activeGroup.hiddenGroups.map((groupItem) => (
@@ -232,7 +232,7 @@ export function Ribbon(props: IRibbonProps) {
                                 <ToolbarButton className={styles.toolbarItemTextButton}>
                                     <MoreFunctionSingle />
                                 </ToolbarButton>
-                            </DropdownMenuWrapper>
+                            </DropdownWrapper>
                         </TooltipWrapper>
                     )}
                 </div>

@@ -139,42 +139,22 @@ function Label({ value, option, onOptionSelect }: {
 
 export function DropdownMenuWrapper({
     menuId,
+    slot,
     value,
     options,
     children,
-    overlay,
     disabled,
     onOptionSelect,
 }: {
     menuId: string;
+    slot?: boolean;
     value?: string | number;
     options: IValueOption[];
     children: ReactNode;
-    overlay: ReactNode;
     disabled?: boolean;
     onOptionSelect: (option: IValueOption) => void;
 }) {
     const { setDropdownVisible } = useContext(TooltipWrapperContext);
-
-    if (overlay) {
-        return (
-            <DropdownMenu
-                align="start"
-                items={[]}
-                overlay={(
-                    <div className="univer-grid univer-gap-2 univer-theme">
-                        {overlay}
-                    </div>
-                )}
-                disabled={disabled}
-                onOpenChange={handleVisibleChange}
-            >
-                <div className="univer-h-full" onClick={(e) => e.stopPropagation()}>
-                    {children}
-                </div>
-            </DropdownMenu>
-        );
-    }
 
     const menuManagerService = useDependency(IMenuManagerService);
     const [hiddenStates, setHiddenStates] = useState<Record<string, boolean>>({});
@@ -217,6 +197,24 @@ export function DropdownMenuWrapper({
         };
     }, [menuItems]);
 
+    if (slot) {
+        return (
+            <DropdownWrapper
+                disabled={disabled}
+                overlay={options.map((option) => (
+                    <Label
+                        key={option.value}
+                        value={value}
+                        option={option}
+                        onOptionSelect={onOptionSelect}
+                    />
+                ))}
+            >
+                {children}
+            </DropdownWrapper>
+        );
+    }
+
     // options menu
     if (options?.length) {
         const items: IDropdownProps['items'] = options.map((option) => ({
@@ -224,7 +222,13 @@ export function DropdownMenuWrapper({
             className: clsx({
                 'focus:univer-bg-white': typeof option.label !== 'string' && option.label?.hoverable === false,
             }),
-            children: <Label value={value} option={option} />,
+            children: (
+                <Label
+                    value={value}
+                    option={option}
+                    onOptionSelect={onOptionSelect}
+                />
+            ),
             disabled: option.disabled,
             onSelect: () => {
                 if (typeof option.value === 'undefined') return;
@@ -323,22 +327,4 @@ export function DropdownMenuWrapper({
             </DropdownMenu>
         );
     }
-
-    return (
-        <DropdownMenu
-            align="start"
-            items={[]}
-            overlay={(
-                <div className="univer-grid univer-gap-2 univer-theme">
-                    {overlay}
-                </div>
-            )}
-            disabled={disabled}
-            onOpenChange={handleVisibleChange}
-        >
-            <div className="univer-h-full" onClick={(e) => e.stopPropagation()}>
-                {children}
-            </div>
-        </DropdownMenu>
-    );
 }

@@ -47,8 +47,6 @@ type DropdownMenu = {
 
 export interface IDropdownProps {
     children: ReactNode;
-    /** @deprecated */
-    overlay?: ReactNode;
     items: DropdownMenu[];
     disabled?: boolean;
     open?: boolean;
@@ -58,7 +56,6 @@ export interface IDropdownProps {
 export function DropdownMenu(props: IDropdownProps & ComponentProps<typeof Content>) {
     const {
         children,
-        overlay,
         items,
         disabled,
         open: controlledOpen,
@@ -80,11 +77,6 @@ export function DropdownMenu(props: IDropdownProps & ComponentProps<typeof Conte
 
         controlledOnOpenChange?.(newOpen);
     }
-
-    // const [showStatusBar, setShowStatusBar] = useState<boolean>(true);
-    // const [showActivityBar, setShowActivityBar] = useState<boolean>(false);
-    // const [showPanel, setShowPanel] = useState<boolean>(false);
-    // const [position, setPosition] = useState('bottom');
 
     function renderMenuItem(item: DropdownMenu, index: number) {
         // const { type, children, icon, checked, hidden, onSelect } = item;
@@ -128,13 +120,11 @@ export function DropdownMenu(props: IDropdownProps & ComponentProps<typeof Conte
     }
 
     return (
-        <DropdownMenuPrimitive open={open} onOpenChange={handleChangeOpen}>
+        <DropdownMenuPrimitive modal={false} open={open} onOpenChange={handleChangeOpen}>
             <DropdownMenuTrigger asChild>
                 {children}
             </DropdownMenuTrigger>
             <DropdownMenuContent {...restProps}>
-                {/* To be deleted */}
-                {overlay}
                 {items.map((item, index) => renderMenuItem(item, index))}
             </DropdownMenuContent>
         </DropdownMenuPrimitive>

@@ -23,14 +23,13 @@ import { forwardRef, useMemo } from 'react';
 import { isObservable, Observable } from 'rxjs';
 import { ComponentManager } from '../../../common/component-manager';
 import { CustomLabel } from '../../../components/custom-label/CustomLabel';
-import { Menu } from '../../../components/menu/desktop/Menu';
 import { ILayoutService } from '../../../services/layout/layout.service';
 import { MenuItemType } from '../../../services/menu/menu';
 import { useDependency, useObservable } from '../../../utils/di';
 import { ToolbarButton } from './Button/ToolbarButton';
 import { useToolbarItemStatus } from './hook';
 import styles from './index.module.less';
-import { DropdownMenuWrapper, DropdownWrapper, TooltipWrapper } from './TooltipButtonWrapper';
+import { DropdownMenuWrapper, TooltipWrapper } from './TooltipButtonWrapper';
 
 export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenuItem>>((props, ref) => {
     const localeService = useDependency(LocaleService);
@@ -45,7 +44,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
         commandService.executeCommand(commandId, params);
     };
 
-    const { tooltip, shortcut, icon, title, label, id, commandId, type } = props;
+    const { tooltip, shortcut, icon, title, label, id, commandId, type, slot } = props;
 
     const tooltipTitle = localeService.t(tooltip ?? '') + (shortcut ? ` (${shortcut})` : '');
 
@@ -133,16 +132,13 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
                         />
                     </div>
 
-                    <DropdownWrapper
+                    <DropdownMenuWrapper
+                        menuId={id}
+                        slot={slot}
+                        value={value}
+                        options={options}
                         disabled={disabled}
-                        overlay={(
-                            <Menu
-                                menuType={id}
-                                options={options}
-                                onOptionSelect={handleSelect}
-                                value={value}
-                            />
-                        )}
+                        onOptionSelect={handleSelect}
                     >
                         <div
                             className={clsx(`
@@ -158,29 +154,18 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
                         >
                             <MoreDownSingle className="univer-text-gray-400" />
                         </div>
-                    </DropdownWrapper>
+                    </DropdownMenuWrapper>
                 </div>
             );
         } else {
             return (
                 <DropdownMenuWrapper
                     menuId={id}
+                    slot={slot}
                     value={value}
                     options={options}
                     disabled={disabled}
                     onOptionSelect={handleSelect}
-                    overlay={(
-                        <div>
-                            123
-                            <Menu
-                                overViewport="scroll"
-                                menuType={id}
-                                options={options}
-                                onOptionSelect={handleSelect}
-                                value={value}
-                            />
-                        </div>
-                    )}
                 >
                     <div
                         className={clsx(styles.toolbarItemSelect, {

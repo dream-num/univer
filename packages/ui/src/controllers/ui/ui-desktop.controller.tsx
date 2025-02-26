@@ -31,8 +31,6 @@ import { DesktopWorkbench } from '../../views/workbench/Workbench';
 import { menuSchema } from '../menus/menu.schema';
 import { SingleUnitUIController } from './ui-shared.controller';
 
-const STEADY_TIMEOUT = 3000;
-
 export class DesktopUIController extends SingleUnitUIController {
     constructor(
         private readonly _config: IUniverUIConfig,

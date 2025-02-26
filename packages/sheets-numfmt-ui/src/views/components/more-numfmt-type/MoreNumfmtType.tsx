@@ -27,10 +27,11 @@ export const MORE_NUMFMT_TYPE_KEY = 'sheet.numfmt.moreNumfmtType';
 export const OPTIONS_KEY = 'sheet.numfmt.moreNumfmtType.options';
 
 export const MoreNumfmtType = (props: { value?: string }) => {
+    const { value } = props;
     const localeService = useDependency(LocaleService);
-    const value = props.value ?? localeService.t('sheet.numfmt.general');
+    const text = value ?? localeService.t('sheet.numfmt.general');
 
-    return <span className="univer-text-sm">{value}</span>;
+    return <span className="univer-text-sm">{text}</span>;
 };
 
 export const Options = () => {
@@ -65,6 +66,7 @@ export const Options = () => {
         } else if (index === MENU_OPTIONS.length - 1) {
             // CATUION: This is a command, not a menu item
             commandService.executeCommand(OpenNumfmtPanelOperator.id);
+            layoutService.focus();
         } else {
             const item = MENU_OPTIONS[index] as { pattern: string };
             item.pattern && setNumfmt(item.pattern);

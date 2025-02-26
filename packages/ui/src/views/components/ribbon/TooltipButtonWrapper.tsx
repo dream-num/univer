@@ -16,7 +16,7 @@
 
 import type { IDropdownProps, ITooltipProps } from '@univerjs/design';
 import type { ReactNode } from 'react';
-import type { IValueOption } from '../../../services/menu/menu';
+import type { IMenuItem, IValueOption } from '../../../services/menu/menu';
 import { clsx, Dropdown, DropdownMenu, Tooltip } from '@univerjs/design';
 import { CheckMarkSingle } from '@univerjs/icons';
 import { createContext, forwardRef, useContext, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
@@ -104,7 +104,8 @@ export function DropdownWrapper({ children, overlay, disabled }: { children: Rea
     );
 }
 
-function Label({ value, option, onOptionSelect }: {
+function Label({ icon, value, option, onOptionSelect }: {
+    icon?: IMenuItem['icon'];
     value?: string | number;
     option: IValueOption;
     onOptionSelect?: (option: IValueOption) => void;
@@ -127,10 +128,10 @@ function Label({ value, option, onOptionSelect }: {
                 />
             )}
             <CustomLabel
+                icon={icon}
                 value$={option.value$}
                 value={option.value}
                 label={option.label}
-                icon={option.icon}
                 onChange={onChange}
             />
         </div>
@@ -224,6 +225,7 @@ export function DropdownMenuWrapper({
             }),
             children: (
                 <Label
+                    icon={option.icon}
                     value={value}
                     option={option}
                     onOptionSelect={onOptionSelect}
@@ -242,7 +244,7 @@ export function DropdownMenuWrapper({
         for (const menuItem of filteredMenuItems) {
             if (!menuItem.item) continue;
 
-            const { title, id, commandId } = menuItem.item;
+            const { title, id, commandId, icon } = menuItem.item;
 
             if (!title) {
                 throw new Error('Menu item title is required');
@@ -252,6 +254,7 @@ export function DropdownMenuWrapper({
                 type: 'item',
                 children: (
                     <Label
+                        icon={icon}
                         value={value}
                         option={{
                             label: {
@@ -285,7 +288,7 @@ export function DropdownMenuWrapper({
 
         for (const menuItem of filteredMenuItems) {
             if (menuItem.item) {
-                const { title, id, commandId } = menuItem.item;
+                const { title, id, commandId, icon } = menuItem.item;
 
                 if (!title) {
                     throw new Error('Menu item title is required');
@@ -295,6 +298,7 @@ export function DropdownMenuWrapper({
                     type: 'item',
                     children: (
                         <Label
+                            icon={icon}
                             value={value}
                             option={{
                                 label: {

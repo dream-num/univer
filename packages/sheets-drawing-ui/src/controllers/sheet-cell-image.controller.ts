@@ -15,11 +15,12 @@
  */
 
 import type { ICellData, IDocDrawingBase, IRange, Nullable } from '@univerjs/core';
+import type { IReplaceSnapshotCommandParams } from '@univerjs/docs-ui';
 import type { IImageData } from '@univerjs/drawing';
 import type { IAddWorksheetMergeMutationParams, IRemoveWorksheetMergeMutationParams, ISetWorksheetColWidthMutationParams, ISetWorksheetRowAutoHeightMutationParams, ISetWorksheetRowHeightMutationParams, ISetWorksheetRowIsAutoHeightMutationParams, ISheetLocationBase } from '@univerjs/sheets';
 import { Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_ZEN_EDITOR_UNIT_ID_KEY, ICommandService, Inject, Injector, InterceptorEffectEnum, IUniverInstanceService, Range } from '@univerjs/core';
 import { DocDrawingController } from '@univerjs/docs-drawing';
-import { type IReplaceSnapshotCommandParams, ReplaceSnapshotCommand } from '@univerjs/docs-ui';
+import { ReplaceSnapshotCommand } from '@univerjs/docs-ui';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { AddWorksheetMergeMutation, AFTER_CELL_EDIT, getSheetCommandTarget, InterceptCellContentPriority, INTERCEPTOR_POINT, RemoveWorksheetMergeMutation, SetWorksheetColWidthMutation, SetWorksheetRowAutoHeightMutation, SetWorksheetRowHeightMutation, SetWorksheetRowIsAutoHeightMutation, SheetInterceptorService } from '@univerjs/sheets';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';

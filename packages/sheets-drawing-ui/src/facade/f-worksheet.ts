@@ -547,6 +547,7 @@ export class FWorksheetLegacy extends FWorksheet implements IFWorksheetLegacy {
         }
 
         const param = await imageBuilder.buildAsync();
+        // param.drawingId
 
         return this._commandService.syncExecuteCommand(InsertSheetDrawingCommand.id, { unitId: this._fWorkbook.getId(), drawings: [param] });
     }

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { ClearSelectionContentCommand } from '@univerjs/sheets';
 import type { IShortcutItem } from '@univerjs/ui';
+import { ClearSelectionContentCommand } from '@univerjs/sheets';
 import { KeyCode } from '@univerjs/ui';
 
 import { whenSheetEditorFocused } from './utils';
@@ -26,4 +26,11 @@ export const ClearSelectionValueShortcutItem: IShortcutItem = {
     preconditions: (contextService) => whenSheetEditorFocused(contextService),
     binding: KeyCode.DELETE,
     mac: KeyCode.BACKSPACE,
+};
+
+export const ClearSelectionValueShortcutItemMac: IShortcutItem = {
+    id: ClearSelectionContentCommand.id,
+    // when focusing on any other input tag do not trigger this shortcut
+    preconditions: (contextService) => whenSheetEditorFocused(contextService),
+    mac: KeyCode.DELETE,
 };

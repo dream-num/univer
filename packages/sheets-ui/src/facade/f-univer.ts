@@ -562,7 +562,7 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
             if (created.type === UniverInstanceType.UNIVER_SHEET) {
                 sheetRenderUnit = created;
             }
-            if (lifecycle <= LifecycleStages.Rendered) return;
+            if (lifecycle !== LifecycleStages.Rendered) return;
             const disposable = new DisposableCollection();
 
             if (!sheetRenderUnit) return;

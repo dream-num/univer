@@ -18,12 +18,11 @@ import type { Workbook } from '@univerjs/core';
 
 import type { ICollaborator, UnitAction } from '@univerjs/protocol';
 import { IAuthzIoService, ICommandService, IPermissionService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
-import { Button, Switch } from '@univerjs/design';
+import { Button, clsx, Switch } from '@univerjs/design';
 import { ObjectScope, UnitObject, UnitRole } from '@univerjs/protocol';
 import { getAllWorksheetPermissionPoint, SetWorksheetPermissionPointsCommand, WorksheetProtectionPointModel } from '@univerjs/sheets';
 import { IDialogService, useDependency } from '@univerjs/ui';
-import clsx from 'clsx';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { defaultWorksheetUnitActionList, subUnitPermissionTypeMap, UNIVER_SHEET_PERMISSION_DIALOG_ID } from '../../../consts/permission';
 import Spin from '../spin';
 import styles from './index.module.less';

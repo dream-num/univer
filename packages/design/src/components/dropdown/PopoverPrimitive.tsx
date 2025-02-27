@@ -44,8 +44,10 @@ function PopoverContent({
                 sideOffset={sideOffset}
                 className={clsx(
                     `
-                      univer-z-[1080] univer-rounded-md univer-border univer-border-solid univer-bg-white
-                      univer-text-gray-900 univer-shadow-md univer-outline-hidden univer-border-gray-200
+                      univer-z-[1080] univer-max-h-[var(--radix-popper-available-height)] univer-overflow-y-auto
+                      univer-rounded-md univer-border univer-border-solid univer-border-gray-200 univer-bg-white
+                      univer-text-gray-900 univer-shadow-md univer-outline-hidden univer-scrollbar-thin
+                      univer-scrollbar-track-gray-50 univer-scrollbar-thumb-gray-300
                       data-[side=bottom]:univer-slide-in-from-top-2
                       data-[side=left]:univer-slide-in-from-right-2
                       data-[side=right]:univer-slide-in-from-left-2

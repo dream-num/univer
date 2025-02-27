@@ -18,7 +18,7 @@
 
 import type { ICellData, Injector, IRange, IStyleData, Nullable } from '@univerjs/core';
 import type { FUniver } from '../../everything';
-import { DataValidationType, HorizontalAlign, ICommandService, IUniverInstanceService, VerticalAlign, WrapStrategy } from '@univerjs/core';
+import { DataValidationType, HorizontalAlign, ICommandService, IUniverInstanceService, LifecycleStages, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import { AddWorksheetMergeCommand, SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetStyleCommand, SetTextWrapCommand, SetVerticalTextAlignCommand } from '@univerjs/sheets';
 import { AddSheetDataValidationCommand } from '@univerjs/sheets-data-validation';
 import { ClearSheetsFilterCriteriaCommand, RemoveSheetFilterCommand, SetSheetFilterRangeCommand, SetSheetsFilterCriteriaCommand } from '@univerjs/sheets-filter';
@@ -817,6 +817,81 @@ describe('Test FRange', () => {
             range.setValue(1234.5678);
             range.setNumberFormat('#,###');
             expect(range.getValue()).toBe('1,234.5678');
+        });
+    });
+
+    it('Range getRawValue and getDisplayValue', () => {
+        univerAPI.addEvent(univerAPI.Event.LifeCycleChanged, ({ stage }) => {
+            if (stage === LifecycleStages.Steady) {
+                const fWorkbook = univerAPI.getActiveWorkbook()!;
+                const fWorksheet = fWorkbook.getActiveSheet();
+                const fRange = fWorksheet.getRange('A1:B2');
+
+                fRange.setValueForCell({
+                    v: 0.2,
+                    s: {
+                        n: {
+                            pattern: '0%',
+                        },
+                    },
+                });
+
+                expect(fRange.getRawValue()).toEqual(0.2);
+                expect(fRange.getDisplayValue()).toEqual('20%');
+            }
+        });
+    });
+
+    it('Range getRawValues and getDisplayValues', () => {
+        univerAPI.addEvent(univerAPI.Event.LifeCycleChanged, ({ stage }) => {
+            if (stage === LifecycleStages.Steady) {
+                const fWorkbook = univerAPI.getActiveWorkbook()!;
+                const fWorksheet = fWorkbook.getActiveSheet();
+                const fRange = fWorksheet.getRange('A1:B2');
+
+                fRange.setValues([
+                    [
+                        {
+                            v: 0.2,
+                            s: {
+                                n: {
+                                    pattern: '0%',
+                                },
+                            },
+                        },
+                        {
+                            v: 45658,
+                            s: {
+                                n: {
+                                    pattern: 'yyyy-mm-dd',
+                                },
+                            },
+                        },
+                    ],
+                    [
+                        {
+                            v: 1234.567,
+                            s: {
+                                n: {
+                                    pattern: '#,##0.00',
+                                },
+                            },
+                        },
+                        {
+                            v: null,
+                        },
+                    ],
+                ]);
+
+                expect(fRange.getRawValues()).toEqual([
+                    [0.2, 45658],
+                    [1234.567, null],
+                ]);
+                expect(fRange.getDisplayValues()).toEqual([
+                    ['20%', '2025-01-01'],
+                    ['1,234.57', ''],
+                ]);
+            }
         });
     });
 });

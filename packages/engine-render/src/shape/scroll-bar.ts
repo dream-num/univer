@@ -66,8 +66,8 @@ const DEFAULT_THUMB_MARGIN = 2;
 const HOVER_THUMB_MARGIN = 1;
 
 export class ScrollBar extends Disposable {
-    enableHorizontal: boolean = true;
-    enableVertical: boolean = true;
+    _enableHorizontal: boolean = true;
+    _enableVertical: boolean = true;
 
     horizontalThumbSize: number = 0;
     horizontalMinusMiniThumb: number = 0;
@@ -180,6 +180,22 @@ export class ScrollBar extends Disposable {
         }
     }
 
+    get enableHorizontal() {
+        return this._enableHorizontal;
+    }
+
+    set enableHorizontal(val: boolean) {
+        this._enableHorizontal = val;
+    }
+
+    get enableVertical() {
+        return this._enableVertical;
+    }
+
+    set enableVertical(val: boolean) {
+        this._enableVertical = val;
+    }
+
     get limitX() {
         if (!this.horizonThumbRect?.visible) {
             return 0;
@@ -196,7 +212,7 @@ export class ScrollBar extends Disposable {
 
     get ratioScrollX(): number {
         if (
-            this.enableHorizontal === false ||
+            this._enableHorizontal === false ||
             this.horizontalThumbSize === undefined ||
             this.horizontalTrackWidth === undefined
         ) {
@@ -217,7 +233,7 @@ export class ScrollBar extends Disposable {
 
     get ratioScrollY(): number {
         if (
-            this.enableVertical === false ||
+            this._enableVertical === false ||
             this.verticalThumbSize === undefined ||
             this.verticalTrackHeight === undefined
         ) {
@@ -331,17 +347,17 @@ export class ScrollBar extends Disposable {
         const transform = new Transform([1, 0, 0, 1, left, top]);
         const m = transform.getMatrix();
         ctx.transform(m[0], m[1], m[2], m[3], m[4], m[5]);
-        if (this.enableHorizontal) {
+        if (this._enableHorizontal) {
             this.horizonScrollTrack!.render(ctx);
             this.horizonThumbRect!.translate(scrollX).render(ctx);
         }
 
-        if (this.enableVertical) {
+        if (this._enableVertical) {
             this.verticalScrollTrack!.render(ctx);
             this.verticalThumbRect!.translate(undefined, scrollY).render(ctx);
         }
 
-        if (this.enableHorizontal && this.enableVertical) {
+        if (this._enableHorizontal && this._enableVertical) {
             this.placeholderBarRect!.render(ctx);
         }
 
@@ -354,12 +370,12 @@ export class ScrollBar extends Disposable {
         const contentWidth = this._contentW;
 
         // ratioScrollY = 内容可视区高度/内容实际区高度= 滑动条的高度/滑道高度=滚动条的顶部距离/实际内容区域顶部距离；
-        if (!this.enableHorizontal) {
+        if (!this._enableHorizontal) {
             return;
         }
 
         this.horizontalMinusMiniThumb = 0;
-        this.horizontalTrackWidth = viewportW - (this.enableVertical ? this._trackThickness : 0) - this._trackBorderThickness;
+        this.horizontalTrackWidth = viewportW - (this._enableVertical ? this._trackThickness : 0) - this._trackBorderThickness;
 
         this.horizontalThumbSize =
             ((this.horizontalTrackWidth * (this.horizontalTrackWidth - this._trackBorderThickness)) / contentWidth) *
@@ -379,7 +395,7 @@ export class ScrollBar extends Disposable {
         });
 
         // content is smaller than viewport size
-        if (this.horizontalThumbSize >= viewportW - this._trackThickness) {
+        if (this.horizontalThumbSize >= viewportW - (this._trackThickness + 2)) {
             this.horizonThumbRect?.setProps({
                 visible: false,
             });
@@ -404,12 +420,12 @@ export class ScrollBar extends Disposable {
         const viewportW = this._viewportW;
         const contentHeight = this._contentH;
 
-        if (!this.enableVertical) {
+        if (!this._enableVertical) {
             return;
         }
 
         this.verticalMinusMiniThumb = 0;
-        this.verticalTrackHeight = viewportH - (this.enableHorizontal ? this._trackThickness : 0) - this._trackBorderThickness;
+        this.verticalTrackHeight = viewportH - (this._enableHorizontal ? this._trackThickness : 0) - this._trackBorderThickness;
         this.verticalThumbSize =
             ((this.verticalTrackHeight * this.verticalTrackHeight) / contentHeight) * this._thumbLengthRatio;
         // this._verticalThumbHeight = this._verticalThumbHeight < MINI_THUMB_SIZE ? MINI_THUMB_SIZE : this._verticalThumbHeight;
@@ -448,7 +464,7 @@ export class ScrollBar extends Disposable {
     private _resizeRightBottomCorner() {
         const viewportH = this._viewportH;
         const viewportW = this._viewportW;
-        if (this.enableHorizontal && this.enableVertical) {
+        if (this._enableHorizontal && this._enableVertical) {
             this.placeholderBarRect?.transformByState({
                 left: viewportW - this._trackThickness,
                 top: viewportH - this._trackThickness,
@@ -525,7 +541,7 @@ export class ScrollBar extends Disposable {
     }
 
     private _initialScrollRect() {
-        if (this.enableHorizontal) {
+        if (this._enableHorizontal) {
             this.horizonScrollTrack = new Rect('__horizonBarRect__', {
                 fill: this._trackBackgroundColor!,
                 strokeWidth: this._trackBorderThickness,
@@ -538,7 +554,7 @@ export class ScrollBar extends Disposable {
             });
         }
 
-        if (this.enableVertical) {
+        if (this._enableVertical) {
             this.verticalScrollTrack = new Rect('__verticalBarRect__', {
                 fill: this._trackBackgroundColor!,
                 strokeWidth: this._trackBorderThickness,
@@ -551,7 +567,7 @@ export class ScrollBar extends Disposable {
             });
         }
 
-        if (this.enableHorizontal && this.enableVertical) {
+        if (this._enableHorizontal && this._enableVertical) {
             this.placeholderBarRect = new Rect('__placeholderBarRect__', {
                 fill: this._trackBackgroundColor!,
                 strokeWidth: this._trackBorderThickness,
@@ -561,7 +577,7 @@ export class ScrollBar extends Disposable {
     }
 
     private _initialVerticalEvent() {
-        if (!this.enableVertical) {
+        if (!this._enableVertical) {
             return;
         }
 
@@ -678,7 +694,7 @@ export class ScrollBar extends Disposable {
     }
 
     private _initialHorizontalEvent() {
-        if (!this.enableHorizontal) {
+        if (!this._enableHorizontal) {
             return;
         }
 

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import clsx from 'clsx';
 import React, { useRef } from 'react';
+import { clsx } from '../../helper/clsx';
 
 import styles from './index.module.less';
 

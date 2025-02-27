@@ -207,6 +207,7 @@ export {
 } from './commands/commands/add-worksheet-merge.command';
 export { SetWorksheetRangeThemeStyleCommand } from './commands/commands/add-worksheet-range-theme.command';
 export { DeleteWorksheetRangeThemeStyleCommand } from './commands/commands/delete-worksheet-range-theme.command';
+export { AppendRowCommand, type IAppendRowCommandParams } from './commands/commands/append-row.command';
 export { ClearSelectionAllCommand } from './commands/commands/clear-selection-all.command';
 export { ClearSelectionContentCommand } from './commands/commands/clear-selection-content.command';
 export { ClearSelectionFormatCommand } from './commands/commands/clear-selection-format.command';
@@ -236,6 +237,7 @@ export {
     InsertRowByRangeCommand,
     InsertRowCommand,
 } from './commands/commands/insert-row-col.command';
+
 export { type IInsertSheetCommandParams, InsertSheetCommand } from './commands/commands/insert-sheet.command';
 export { getMoveRangeUndoRedoMutations, type IMoveRangeCommandParams, MoveRangeCommand } from './commands/commands/move-range.command';
 export {
@@ -447,4 +449,5 @@ export { SCOPE_WORKBOOK_VALUE_DEFINED_NAME } from './controllers/defined-name-da
 export type { ICellOverGridPosition, ISheetOverGridPosition } from './basics/cell-position';
 
 export { SheetSkeletonService } from './skeleton/skeleton.service';
+
 // #endregion

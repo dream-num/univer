@@ -225,7 +225,8 @@ class FRangeSheetsUIMixin extends FRange implements IFRangeSheetsUIMixin {
     }
 
     override generateHTML(): string {
-        const copyContent = this._injector.get(ISheetClipboardService).generateCopyContent(
+        const clipboardService = this._injector.get(ISheetClipboardService);
+        const copyContent = clipboardService.generateCopyContent(
             this._workbook.getUnitId(),
             this._worksheet.getSheetId(),
             this._range

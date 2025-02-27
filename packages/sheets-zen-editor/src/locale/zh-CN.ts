@@ -15,6 +15,9 @@
  */
 
 const locale = {
+    rightClick: {
+        zenEditor: '禅模式编辑',
+    },
     shortcut: {
         sheet: {
             'zen-edit-cancel': '取消编辑（禅模式状态）',

@@ -15,8 +15,7 @@
  */
 
 import { CheckMarkSingle } from '@univerjs/icons';
-import clsx from 'clsx';
-import React from 'react';
+import { clsx } from '../../helper/clsx';
 
 import styles from './index.module.less';
 

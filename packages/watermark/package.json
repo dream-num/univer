@@ -23,7 +23,6 @@
     "exports": {
         ".": "./src/index.ts",
         "./*": "./src/*",
-        "./locale/*": "./src/locale/*.ts",
         "./facade": "./src/facade/index.ts"
     },
     "main": "./src/index.ts",
@@ -42,11 +41,6 @@
                 "import": "./lib/es/*",
                 "require": "./lib/cjs/*",
                 "types": "./lib/types/index.d.ts"
-            },
-            "./locale/*": {
-                "import": "./lib/es/locale/*.js",
-                "require": "./lib/cjs/locale/*.js",
-                "types": "./lib/types/locale/*.d.ts"
             },
             "./facade": {
                 "import": "./lib/es/facade.js",
@@ -80,7 +74,7 @@
         "@univerjs-infra/shared": "workspace:*",
         "rxjs": "^7.8.1",
         "typescript": "^5.7.3",
-        "vite": "^6.1.1",
-        "vitest": "^3.0.6"
+        "vite": "^6.2.0",
+        "vitest": "^3.0.7"
     }
 }

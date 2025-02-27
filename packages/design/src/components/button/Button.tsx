@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import clsx from 'clsx';
-import React from 'react';
+import type { CSSProperties, MouseEvent, ReactNode } from 'react';
+import { clsx } from '../../helper/clsx';
 
 import styles from './index.module.less';
 
@@ -23,13 +23,13 @@ export type ButtonType = 'primary' | 'default' | 'text' | 'link';
 export type ButtonSize = 'small' | 'middle' | 'large';
 
 export interface IButtonProps {
-    children?: React.ReactNode;
+    children?: ReactNode;
 
     /** Semantic DOM class */
     className?: string;
 
     /** Semantic DOM style */
-    style?: React.CSSProperties;
+    style?: CSSProperties;
 
     /**
      * Set button type
@@ -59,7 +59,7 @@ export interface IButtonProps {
     disabled?: boolean;
 
     /** Set the handler to handle `click` event */
-    onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
+    onClick?: (e: MouseEvent<HTMLButtonElement>) => void;
 
     id?: string;
 }

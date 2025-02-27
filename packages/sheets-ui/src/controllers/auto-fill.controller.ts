@@ -44,7 +44,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 
-import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
+import { DeviceInputEventType, getCurrentTypeOfRenderer, IRenderManagerService } from '@univerjs/engine-render';
 import {
     AddMergeUndoMutationFactory,
     AddWorksheetMergeMutation,
@@ -184,7 +184,7 @@ export class AutoFillController extends Disposable {
             // Each range change requires re-listening.
             disposableCollection.dispose();
 
-            const currentRenderer = this._renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET);
+            const currentRenderer = getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SLIDE, this._univerInstanceService, this._renderManagerService);
             if (!currentRenderer) return;
 
             const selectionRenderService = currentRenderer.with(ISheetSelectionRenderService);

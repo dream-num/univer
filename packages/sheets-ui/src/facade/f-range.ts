@@ -20,7 +20,7 @@ import type { ICanvasPopup, ICellAlert } from '@univerjs/sheets-ui';
 import type { ComponentType } from '@univerjs/ui';
 import { DisposableCollection, generateRandomId, ILogService, toDisposable } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { CellAlertManagerService, COPY_TYPE, IMarkSelectionService, ISheetClipboardService, SheetCanvasPopManagerService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { CellAlertManagerService, IMarkSelectionService, ISheetClipboardService, SheetCanvasPopManagerService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { FRange } from '@univerjs/sheets/facade';
 import { ComponentManager } from '@univerjs/ui';
 
@@ -180,18 +180,11 @@ class FRangeSheetsUIMixin extends FRange implements IFRangeSheetsUIMixin {
 
     override generateHTML(): string {
         const clipboardService = this._injector.get(ISheetClipboardService);
-        const hooks = clipboardService.getClipboardHooks();
-        const unitId = this._workbook.getUnitId();
-        const subUnitId = this._worksheet.getSheetId();
-        const range = this._range;
-
-        hooks.forEach((h) => h.onBeforeCopy?.(unitId, subUnitId, range, COPY_TYPE.COPY));
         const copyContent = clipboardService.generateCopyContent(
             this._workbook.getUnitId(),
             this._worksheet.getSheetId(),
             this._range
         );
-        hooks.forEach((h) => h.onAfterCopy?.());
 
         return copyContent?.html ?? '';
     }

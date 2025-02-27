@@ -23,6 +23,8 @@ import { TC_PLUGIN_NAME } from '../types/const';
 
 export type UnitThreadCommentJSON = Record<string, IThreadComment[]>;
 
+export const SHEET_UNIVER_THREAD_COMMENT_PLUGIN = `SHEET_${TC_PLUGIN_NAME}`;
+
 export class ThreadCommentResourceController extends Disposable {
     constructor(
         @IResourceManagerService private readonly _resourceManagerService: IResourceManagerService,
@@ -64,7 +66,7 @@ export class ThreadCommentResourceController extends Disposable {
 
         this.disposeWithMe(
             this._resourceManagerService.registerPluginResource({
-                pluginName: `SHEET_${TC_PLUGIN_NAME}`,
+                pluginName: SHEET_UNIVER_THREAD_COMMENT_PLUGIN,
                 businesses: [UniverType.UNIVER_SHEET, UniverType.UNIVER_DOC],
                 toJson: (unitID) => toJson(unitID),
                 parseJson: (json) => parseJson(json),

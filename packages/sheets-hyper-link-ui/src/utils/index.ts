@@ -37,6 +37,10 @@ export const getShouldDisableCellLink = (accessor: IAccessor, worksheet: Workshe
         return DisableLinkType.DISABLED_BY_CELL;
     }
 
+    if (cell?.p?.body?.customBlocks?.length) {
+        return DisableLinkType.DISABLED_BY_CELL;
+    }
+
     const dataValidationModel = accessor.has(SheetDataValidationModel) ? accessor.get(SheetDataValidationModel) : null;
     const rule = dataValidationModel?.getRuleByLocation(worksheet.getUnitId(), worksheet.getSheetId(), row, col);
     if (rule && disables.has(rule.type)) {

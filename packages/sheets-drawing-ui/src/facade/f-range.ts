@@ -15,8 +15,8 @@
  */
 
 import type { ISheetLocationBase } from '@univerjs/sheets';
-import { UniverInstanceType } from '@univerjs/core';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { getCurrentTypeOfRenderer, IRenderManagerService } from '@univerjs/engine-render';
 import { SheetDrawingUpdateController } from '@univerjs/sheets-drawing-ui';
 import { FRange } from '@univerjs/sheets/facade';
 
@@ -41,7 +41,7 @@ export interface IFRangeSheetDrawingMixin {
 export class FRangeSheetDrawingUI extends FRange implements IFRangeSheetDrawingMixin {
     override async insertCellImageAsync(file: File | string): Promise<boolean> {
         const renderManagerService = this._injector.get(IRenderManagerService);
-        const controller = renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET)
+        const controller = getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET, this._injector.get(IUniverInstanceService), renderManagerService)
             ?.with(SheetDrawingUpdateController);
         if (!controller) {
             return false;

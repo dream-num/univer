@@ -15,24 +15,23 @@
  */
 
 import type { FormatType } from '@univerjs/sheets';
-
 import { ICommandService, LocaleService, Range } from '@univerjs/core';
+import { Separator } from '@univerjs/design';
 import { SheetsSelectionsService } from '@univerjs/sheets';
 import { getPatternPreview, getPatternType, SetNumfmtCommand, SheetsNumfmtCellContentController } from '@univerjs/sheets-numfmt';
 import { ILayoutService, useDependency } from '@univerjs/ui';
 import { OpenNumfmtPanelOperator } from '../../../commands/operations/open.numfmt.panel.operation';
-
 import { MENU_OPTIONS } from '../../../controllers/menu';
-// FIXME: DO NOT USE GLOBAL STYLES
-import './index.less';
 
 export const MORE_NUMFMT_TYPE_KEY = 'sheet.numfmt.moreNumfmtType';
 export const OPTIONS_KEY = 'sheet.numfmt.moreNumfmtType.options';
 
 export const MoreNumfmtType = (props: { value?: string }) => {
+    const { value } = props;
     const localeService = useDependency(LocaleService);
-    const value = props.value ?? localeService.t('sheet.numfmt.general');
-    return <span className="more-numfmt-type">{value}</span>;
+    const text = value ?? localeService.t('sheet.numfmt.general');
+
+    return <span className="univer-text-sm">{text}</span>;
 };
 
 export const Options = () => {
@@ -65,7 +64,9 @@ export const Options = () => {
         if (index === 0) {
             setNumfmt(null);
         } else if (index === MENU_OPTIONS.length - 1) {
+            // CATUION: This is a command, not a menu item
             commandService.executeCommand(OpenNumfmtPanelOperator.id);
+            layoutService.focus();
         } else {
             const item = MENU_OPTIONS[index] as { pattern: string };
             item.pattern && setNumfmt(item.pattern);
@@ -75,23 +76,28 @@ export const Options = () => {
     const defaultValue = 1220;
 
     return (
-        <div className="more-numfmt-type-options">
+        <div className="univer-grid univer-gap-1 univer-p-1.5">
             {MENU_OPTIONS.map((item, index) => {
                 if (item === '|') {
-                    return <div key={index} className="line m-t-4" onClick={(e) => e.stopPropagation()} />;
+                    return <Separator key={index} />;
                 }
                 return (
                     <div
-                        className="option-item m-t-4"
                         key={index}
+                        className={`
+                          univer-flex univer-h-7 univer-items-center univer-justify-between univer-gap-6 univer-rounded
+                          univer-px-2 univer-text-[13px]
+                          hover:univer-bg-gray-100
+                        `}
                         onClick={() => {
                             handleOnclick(index);
                         }}
                     >
-                        <div>{localeService.t(item.label)}</div>
-                        <div className="m-l-26">
-                            {item.pattern ? getPatternPreview(item.pattern || '', defaultValue, sheetsNumfmtCellContentController.local).result : ''}
-                        </div>
+                        <span>{localeService.t(item.label)}</span>
+
+                        <span className="univer-text-xs univer-text-gray-500">
+                            {item.pattern ? getPatternPreview(item.pattern || '', defaultValue, sheetsNumfmtCellContentController.local).result.trim() : ''}
+                        </span>
                     </div>
                 );
             })}

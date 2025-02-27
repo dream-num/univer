@@ -68,7 +68,7 @@ export function FormulaBar(props: IProps) {
     const componentManager = useDependency(ComponentManager);
     const workbook = useObservable(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET), undefined, undefined, [])!;
     const isRefSelecting = useRef<0 | 1 | 2>(0);
-    const editState = editorBridgeService.getEditLocation();
+    const editState = useObservable(editorBridgeService.currentEditCellState$);
     const keyCodeConfig = useKeyEventConfig(isRefSelecting, editState?.unitId ?? '');
     const FormulaEditor = componentManager.get(EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY);
     const formulaAuxUIParts = useComponentsOfPart(SheetsUIPart.FORMULA_AUX);
@@ -219,8 +219,6 @@ export function FormulaBar(props: IProps) {
     const disabled = editDisable || imageDisable;
     const shouldSkipFocus = useRef(false);
 
-    const unitId = currentWorkbook?.getUnitId() ?? '';
-
     const handlePointerDown = () => {
         try {
             // When clicking on the formula bar, the cell editor also needs to enter the edit state
@@ -253,6 +251,9 @@ export function FormulaBar(props: IProps) {
         }
         shouldSkipFocus.current = false;
     };
+
+    const isCellImage = (editState?.documentLayoutObject.documentModel?.getDrawingsOrder()?.length ?? 0) > 0;
+    const hideEditor = isCellImage || viewDisable;
 
     return (
         <div
@@ -295,6 +296,7 @@ export function FormulaBar(props: IProps) {
                         onPointerDown={handlePointerDown}
                         onPointerUp={handlePointerUp}
                         ref={ref}
+                        style={{ pointerEvents: hideEditor ? 'none' : 'auto' }}
                     >
                         {FormulaEditor && (
                             <FormulaEditor
@@ -322,6 +324,7 @@ export function FormulaBar(props: IProps) {
                                 disableContextMenu={false}
                             />
                         )}
+                        {hideEditor ? <div className={styles.formulaInputMask} /> : null}
                     </div>
                     <div className={clsx(styles.arrowContainer, { [styles.arrowContainerDisable]: editDisable })} onClick={handleArrowClick}>
                         {arrowDirection === ArrowDirection.Down

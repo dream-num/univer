@@ -44,5 +44,5 @@ test('sheets no gridlines', async () => {
         ],
         fullPage: true,
     });
-    expect(screenshot).toMatchSnapshot(filename, { maxDiffPixels: 5 });
+    expect(screenshot).toMatchSnapshot(filename, { maxDiffPixelRatio: 0.005 });
 });

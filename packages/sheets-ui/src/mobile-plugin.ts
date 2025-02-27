@@ -183,6 +183,7 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
         this.disposeWithMe(univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET)
             .pipe(filter((v) => !!v))
             .subscribe((workbook) => {
+                if (this._univerInstanceService.getFocusedUnit() === workbook) return;
                 univerInstanceService.focusUnit(workbook!.getUnitId());
             }));
     }

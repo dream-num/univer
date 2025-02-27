@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import clsx from 'clsx';
-import React, { useEffect, useMemo, useState } from 'react';
+import { clsx } from '@univerjs/design';
+import { useEffect, useMemo, useState } from 'react';
 import { ComponentManager } from '../../../common/component-manager';
 import { IGlobalZoneService } from '../../../services/global-zone/global-zone.service';
 import { useDependency, useObservable } from '../../../utils/di';

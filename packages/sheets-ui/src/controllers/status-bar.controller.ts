@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, ICommandInfo, IRange, ISelectionCell, Nullable, Styles, Workbook, Worksheet } from '@univerjs/core';
+import type { CellValue, ICellData, ICommandInfo, IRange, ISelectionCell, IStyleData, Nullable, Styles, Workbook, Worksheet } from '@univerjs/core';
 import type { ArrayValueObject, ISheetData } from '@univerjs/engine-formula';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
 import type { IStatusBarServiceStatus } from '../services/status-bar.service';
@@ -56,37 +56,55 @@ class CalculateValueSet {
     private _max: number = Number.NEGATIVE_INFINITY;
 
     add(value: Nullable<ICellData>, styles: Styles, patternInfoRecord: Record<string, any>) {
-        let v = value?.v;
+        if (!value?.v) {
+            return;
+        }
         const t = value?.t;
-        if (t === CellValueType.NUMBER) v = Number(v);
-        if (v !== undefined && v !== null) {
-            if (typeof v === 'number' && t !== CellValueType.STRING) {
-                this._sum += v;
-                this._countNumber++;
-                this._min = Math.min(this._min, v);
-                this._max = Math.max(this._max, v);
-            } else if (t === CellValueType.NUMBER && value?.s) {
-                const style = styles.get(value.s);
-                if (style && t === CellValueType.NUMBER && style.n) {
-                    const { pattern } = style.n;
-                    if (!patternInfoRecord[pattern]) {
-                        patternInfoRecord[pattern] = numfmt.getInfo(pattern);
-                    }
-                    const formatInfo = patternInfoRecord[pattern];
-                    const isDate = formatInfo.isDate;
+        let { v } = value;
 
-                    if (isDate) {
-                        const dateValue = numfmt.parseDate(v as string).v as number;
-                        this._sum += Number(dateValue);
-                        this._countNumber++;
-                        this._min = Math.min(this._min, Number(dateValue));
-                        this._max = Math.max(this._max, Number(dateValue));
-                    }
-                }
+        const updateNumberStats = (v: number) => {
+            this._sum += v;
+            this._countNumber++;
+            this._min = Math.min(this._min, v);
+            this._max = Math.max(this._max, v);
+        };
+
+        const processNumberWithStyle = (
+            style: Nullable<IStyleData>,
+            v: Nullable<CellValue>,
+            patternInfoRecord: Record<string, any>
+        ) => {
+            if (!style?.n?.pattern) {
+                return;
             }
 
-            this._count++;
+            const { pattern } = style.n;
+            if (!patternInfoRecord[pattern]) {
+                patternInfoRecord[pattern] = numfmt.getInfo(pattern);
+            }
+
+            const formatInfo = patternInfoRecord[pattern];
+            if (formatInfo.isDate) {
+                const dateValue = v as number;
+                updateNumberStats(dateValue);
+            }
+        };
+
+        // v = '123' type = 2
+        if (typeof v === 'string' && t === CellValueType.NUMBER) {
+            const numValue = Number(v);
+            if (!Number.isNaN(numValue)) {
+                v = numValue;
+            }
         }
+
+        if (typeof v === 'number' && t !== CellValueType.STRING) {
+            updateNumberStats(v);
+        } else if (t === CellValueType.NUMBER && value.s) {
+            const style = styles.get(value.s);
+            processNumberWithStyle(style, v, patternInfoRecord);
+        }
+        this._count++;
     }
 
     getResults() {
@@ -297,7 +315,7 @@ export class StatusBarController extends Disposable {
                 const { startRow, startColumn, endColumn, endRow } = this.getRangeStartEndInfo(range, sheet);
                 for (let r = startRow; r <= endRow; r++) {
                     for (let c = startColumn; c <= endColumn; c++) {
-                        const value = sheet.getCell(r, c);
+                        const value = sheet.getCellRaw(r, c);
                         calculateValueSet.add(value, styles, patternInfoRecord);
                     }
                 }

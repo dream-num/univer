@@ -16,8 +16,8 @@
 
 import type { PropsWithChildren } from 'react';
 import { MoreUpSingle } from '@univerjs/icons';
-import clsx from 'clsx';
 import React, { createContext, useContext, useState } from 'react';
+import { clsx } from '../../helper/clsx';
 
 import styles from './index.module.less';
 

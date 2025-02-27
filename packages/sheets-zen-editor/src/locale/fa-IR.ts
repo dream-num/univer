@@ -17,6 +17,9 @@
 import type zhCN from './zh-CN';
 
 const locale: typeof zhCN = {
+    rightClick: {
+        zenEditor: 'ویرایشگر تمام صفحه',
+    },
     shortcut: {
         sheet: {
             'zen-edit-cancel': 'لغو ویرایش Zen',

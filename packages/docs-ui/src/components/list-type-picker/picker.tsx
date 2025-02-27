@@ -15,7 +15,7 @@
  */
 
 import { PresetListType } from '@univerjs/core';
-import React from 'react';
+import { clsx } from '@univerjs/design';
 import styles from './index.module.less';
 
 export interface IListTypePickerBaseProps {
@@ -30,7 +30,7 @@ interface IListTypePickerProps extends IListTypePickerBaseProps {
 export const ListTypePicker = (props: IListTypePickerProps) => {
     const { value, onChange, options } = props;
     return (
-        <div className={styles.docListTypePicker}>
+        <div className={clsx(styles.docListTypePicker, 'univer-theme')}>
             {options.map((item) => {
                 return (
                     <img

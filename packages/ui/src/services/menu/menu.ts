@@ -45,9 +45,8 @@ interface IMenuItemBase<V> {
     description?: string;
     icon?: string | Observable<string>;
     tooltip?: string;
-
+    slot?: boolean;
     type: MenuItemType;
-
     /**
      * Custom label component id.
      */
@@ -56,6 +55,7 @@ interface IMenuItemBase<V> {
     | {
         name: string;
         hoverable?: boolean;
+        selectable?: boolean;
         props?: Record<string, any>;
     }; // custom component, send to CustomLabel label property
 
@@ -75,11 +75,13 @@ export interface IValueOption<T = undefined> {
     id?: string;
     value?: string | number;
     value$?: Observable<T>;
+    slot?: boolean;
     label?:
     | string
     | {
         name: string;
         hoverable?: boolean;
+        selectable?: boolean;
         props?: Record<string, string | number | Array<{ [x: string | number]: string }>>;
     }; // custom component, send to CustomLabel label property
     icon?: string;

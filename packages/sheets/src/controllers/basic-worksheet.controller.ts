@@ -21,6 +21,7 @@ import { DataSyncPrimaryController } from '@univerjs/rpc';
 import { AddRangeProtectionCommand } from '../commands/commands/add-range-protection.command';
 import { AddWorksheetProtectionCommand } from '../commands/commands/add-worksheet-protection.command';
 import { SetWorksheetRangeThemeStyleCommand } from '../commands/commands/add-worksheet-range-theme.command';
+import { AppendRowCommand } from '../commands/commands/append-row.command';
 import { ClearSelectionAllCommand } from '../commands/commands/clear-selection-all.command';
 import { ClearSelectionContentCommand } from '../commands/commands/clear-selection-content.command';
 import { ClearSelectionFormatCommand } from '../commands/commands/clear-selection-format.command';
@@ -205,6 +206,7 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
         const onlyRegisterFormulaRelatedMutations = this._configService.getConfig(ONLY_REGISTER_FORMULA_RELATED_MUTATIONS_KEY) ?? false;
         if (!onlyRegisterFormulaRelatedMutations) {
             [
+                AppendRowCommand,
                 ClearSelectionAllCommand,
                 ClearSelectionContentCommand,
                 ClearSelectionFormatCommand,

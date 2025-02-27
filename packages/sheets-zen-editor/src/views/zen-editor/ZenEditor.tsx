@@ -16,19 +16,17 @@
 
 import type { IDocumentData } from '@univerjs/core';
 import { DEFAULT_EMPTY_DOCUMENT_VALUE, DOCS_ZEN_EDITOR_UNIT_ID_KEY, DocumentFlavor, ICommandService } from '@univerjs/core';
+import { clsx } from '@univerjs/design';
 import { IEditorService } from '@univerjs/docs-ui';
 import { CheckMarkSingle, CloseSingle } from '@univerjs/icons';
 import { useDependency } from '@univerjs/ui';
-import clsx from 'clsx';
-
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { CancelZenEditCommand, ConfirmZenEditCommand } from '../../commands/commands/zen-editor.command';
-
 import { IZenEditorManagerService } from '../../services/zen-editor.service';
 import styles from './index.module.less';
 
 const COMPONENT_PREFIX = 'ZEN_EDITOR_PLUGIN_';
-// eslint-disable-next-line react-refresh/only-export-components
+
 export const ZEN_EDITOR_COMPONENT = `${COMPONENT_PREFIX}ZEN_EDITOR_COMPONENT`;
 
 const INITIAL_SNAPSHOT: IDocumentData = {
@@ -100,7 +98,6 @@ export function ZenEditor() {
             registerSubscription.dispose();
             resizeObserver.unobserve(editorDom);
         };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []); // Empty dependency array means this effect runs once on mount and clean up on unmount
 
     function handleCloseBtnClick() {

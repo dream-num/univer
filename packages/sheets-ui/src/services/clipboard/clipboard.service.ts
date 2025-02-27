@@ -52,7 +52,7 @@ import {
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { IRenderManagerService, withCurrentTypeOfRenderer } from '@univerjs/engine-render';
 
 import {
     getPrimaryForRange,
@@ -176,8 +176,13 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         @Inject(Injector) private readonly _injector: Injector
     ) {
         super();
+
         this._htmlToUSM = new HtmlToUSMService({
-            getCurrentSkeleton: () => this._renderManagerService.withCurrentTypeOfUnit(UniverInstanceType.UNIVER_SHEET, SheetSkeletonManagerService)?.getCurrentParam(),
+            getCurrentSkeleton: () => withCurrentTypeOfRenderer(
+                UniverInstanceType.UNIVER_SHEET,
+                SheetSkeletonManagerService,
+                this._univerInstanceService,
+                this._renderManagerService)?.getCurrentParam(),
         });
 
         this._usmToHtml = new USMToHtmlService();
@@ -203,8 +208,11 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         return this._copyContentCache;
     }
 
-    generateCopyContent(workbookId: string, worksheetId: string, range: IRange): Nullable<ICopyContent> {
+    generateCopyContent(workbookId: string, worksheetId: string, range: IRange, copyType: COPY_TYPE = COPY_TYPE.COPY): Nullable<ICopyContent> {
+        const hooks = this._clipboardHooks;
+        hooks.forEach((h) => h.onBeforeCopy?.(workbookId, worksheetId, range, copyType));
         const copyContent = this._generateCopyContent(workbookId, worksheetId, range, this._clipboardHooks);
+        hooks.forEach((h) => h.onAfterCopy?.());
 
         return copyContent;
     }
@@ -220,13 +228,10 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         if (!worksheet) {
             return false;
         }
-        const hooks = this._clipboardHooks;
         const workbookId = workbook.getUnitId();
         const worksheetId = worksheet.getSheetId();
 
-        hooks.forEach((h) => h.onBeforeCopy?.(workbookId, worksheetId, selection.range, copyType));
         const copyContent = this.generateCopyContent(workbookId, worksheetId, selection.range);
-        hooks.forEach((h) => h.onAfterCopy?.());
 
         if (!copyContent) {
             return false;

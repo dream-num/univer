@@ -309,7 +309,7 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
 
             // eslint-disable-next-line max-lines-per-function
             this.disposeWithMe(lifeCycleService.lifecycle$.subscribe((lifecycle) => {
-                if (lifecycle < LifecycleStages.Rendered) return;
+                if (lifecycle !== LifecycleStages.Rendered) return;
                 disposable.dispose();
                 const hoverManagerService = injector.get(HoverManagerService);
                 const dragManagerService = injector.get(DragManagerService);

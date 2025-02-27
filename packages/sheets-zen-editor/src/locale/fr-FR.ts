@@ -17,6 +17,9 @@
 import type enUS from './en-US';
 
 const locale: typeof enUS = {
+    rightClick: {
+        zenEditor: 'Éditeur plein écran',
+    },
     shortcut: {
         sheet: {
             'zen-edit-cancel': 'Annuler l\'édition plein écran',

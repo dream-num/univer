@@ -17,12 +17,11 @@
 import type { IDocumentStyle } from '@univerjs/core';
 import type { IHeaderFooterProps } from '../../../commands/commands/doc-header-footer.command';
 import { BooleanNumber, ICommandService, IUniverInstanceService, LocaleService, Tools } from '@univerjs/core';
-import { Button, Checkbox, InputNumber } from '@univerjs/design';
+import { Button, Checkbox, clsx, InputNumber } from '@univerjs/design';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
 import { ILayoutService, useDependency } from '@univerjs/ui';
-import clsx from 'clsx';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { CloseHeaderFooterCommand, CoreHeaderFooterCommandId } from '../../../commands/commands/doc-header-footer.command';
 import { DocSelectionRenderService } from '../../../services/selection/doc-selection-render.service';
 import styles from './index.module.less';

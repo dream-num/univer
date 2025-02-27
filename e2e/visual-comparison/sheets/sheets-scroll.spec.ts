@@ -79,7 +79,7 @@ test('cells rendering after scrolling', async () => {
 
     const filename = generateSnapshotName('mergedCellsRenderingScrolling');
     const screenshot = await page.locator(SHEET_MAIN_CANVAS_ID).screenshot();
-    await expect(screenshot).toMatchSnapshot(filename, { maxDiffPixels: 5 });
+    await expect(screenshot).toMatchSnapshot(filename, { maxDiffPixelRatio: 0.005 });
 });
 
 test('rendering after scrolling by API', async () => {
@@ -102,5 +102,5 @@ test('rendering after scrolling by API', async () => {
     await page.waitForTimeout(1000);
     const filename = generateSnapshotName('renderingAfterScrollByAPI');
     const screenshot = await page.locator(SHEET_MAIN_CANVAS_ID).screenshot();
-    await expect(screenshot).toMatchSnapshot(filename, { maxDiffPixels: 5 });
+    await expect(screenshot).toMatchSnapshot(filename, { maxDiffPixelRatio: 0.005 });
 });

@@ -17,75 +17,40 @@
 import type { IDisposable } from '@univerjs/core';
 import type { IUniverUIConfig } from '../config.schema';
 import type { IUIController, IWorkbenchOptions } from './ui.controller';
-import { Disposable, Inject, Injector, IUniverInstanceService, LifecycleService, LifecycleStages, Optional, toDisposable, UniverInstanceType } from '@univerjs/core';
+import { Inject, Injector, IUniverInstanceService, LifecycleService, toDisposable } from '@univerjs/core';
 import { render as createRoot, unmount } from '@univerjs/design';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { ILayoutService } from '../../services/layout/layout.service';
-import { IMenuManagerService } from '../../services/menu/menu-manager.service';
 import { BuiltInUIPart, IUIPartsService } from '../../services/parts/parts.service';
 import { connectInjector } from '../../utils/di';
 import { FloatDom } from '../../views/components/dom/FloatDom';
 import { CanvasPopup } from '../../views/components/popup/CanvasPopup';
 import { MobileWorkbench } from '../../views/mobile-workbench/MobileWorkbench';
-import { menuSchema } from '../menus/menu.schema';
+import { SingleUnitUIController } from './ui-shared.controller';
 
-const STEADY_TIMEOUT = 3000;
-
-export class MobileUIController extends Disposable implements IUIController {
+export class MobileUIController extends SingleUnitUIController implements IUIController {
     constructor(
         private readonly _config: IUniverUIConfig,
-        @IUniverInstanceService private readonly _instanceService: IUniverInstanceService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @Inject(Injector) private readonly _injector: Injector,
-        @Inject(LifecycleService) private readonly _lifecycleService: LifecycleService,
-        @IUIPartsService private readonly _uiPartsService: IUIPartsService,
-        @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,
-        @Optional(ILayoutService) private readonly _layoutService?: ILayoutService
+        @Inject(Injector) injector: Injector,
+        @Inject(LifecycleService) lifecycleService: LifecycleService,
+        @IRenderManagerService renderManagerService: IRenderManagerService,
+        @ILayoutService layoutService: ILayoutService,
+        @IUniverInstanceService instanceService: IUniverInstanceService,
+        @IUIPartsService uiPartsService: IUIPartsService
     ) {
-        super();
+        super(injector, instanceService, layoutService, lifecycleService, renderManagerService);
 
-        this._initBuiltinComponents();
-
-        Promise.resolve().then(() => this._bootstrapWorkbench());
+        this._initBuiltinComponents(uiPartsService);
+        this._bootstrapWorkbench();
     }
 
-    private _initMenus(): void {
-        this._menuManagerService.mergeMenu(menuSchema);
+    override bootstrap(callback: (contentElement: HTMLElement, containerElement: HTMLElement) => void): IDisposable {
+        return bootstrap(this._injector, this._config, callback);
     }
 
-    private _bootstrapWorkbench(): void {
-        this.disposeWithMe(
-            bootstrap(this._injector, this._config, (canvasElement, containerElement) => {
-                if (this._layoutService) {
-                    this.disposeWithMe(this._layoutService.registerRootContainerElement(containerElement));
-                    this.disposeWithMe(this._layoutService.registerContentElement(canvasElement as HTMLCanvasElement));
-                }
-
-                this._renderManagerService.currentRender$.subscribe((renderId) => {
-                    if (renderId) {
-                        const render = this._renderManagerService.getRenderById(renderId)!;
-                        if (!render.unitId) return;
-
-                        const unitType = this._instanceService.getUnitType(render.unitId);
-                        if (unitType !== UniverInstanceType.UNIVER_SHEET) return;
-
-                        render.engine.setContainer(canvasElement);
-                    }
-                });
-
-                setTimeout(() => {
-                    const engine = this._renderManagerService.getFirst()?.engine;
-                    engine?.setContainer(canvasElement);
-                    this._lifecycleService.stage = LifecycleStages.Rendered;
-                    setTimeout(() => this._lifecycleService.stage = LifecycleStages.Steady, STEADY_TIMEOUT);
-                }, 300);
-            })
-        );
-    }
-
-    private _initBuiltinComponents() {
-        this.disposeWithMe(this._uiPartsService.registerComponent(BuiltInUIPart.CONTENT, () => connectInjector(CanvasPopup, this._injector)));
-        this.disposeWithMe(this._uiPartsService.registerComponent(BuiltInUIPart.CONTENT, () => connectInjector(FloatDom, this._injector)));
+    private _initBuiltinComponents(uiPartsService: IUIPartsService) {
+        this.disposeWithMe(uiPartsService.registerComponent(BuiltInUIPart.CONTENT, () => connectInjector(CanvasPopup, this._injector)));
+        this.disposeWithMe(uiPartsService.registerComponent(BuiltInUIPart.CONTENT, () => connectInjector(FloatDom, this._injector)));
     }
 }
 

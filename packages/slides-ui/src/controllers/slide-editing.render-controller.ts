@@ -65,6 +65,7 @@ import {
     DeviceInputEventType,
     FIX_ONE_PIXEL_BLUR_OFFSET,
     fixLineWidthByScale,
+    getCurrentTypeOfRenderer,
     IRenderManagerService,
     Rect,
     ScrollBar,
@@ -199,11 +200,9 @@ export class SlideEditingRenderController extends Disposable implements IRenderM
 
     private _initialCursorSync(d: DisposableCollection) {
         d.add(this._cellEditorManagerService.focus$.pipe(filter((f) => !!f)).subscribe(() => {
-            const docSelectionRenderManager = this._renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_DOC)?.with(DocSelectionRenderService);
-
-            if (docSelectionRenderManager) {
-                docSelectionRenderManager.sync();
-            }
+            getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_DOC, this._instanceSrv, this._renderManagerService)
+                ?.with(DocSelectionRenderService)
+                .sync();
         }));
     }
 
@@ -252,11 +251,9 @@ export class SlideEditingRenderController extends Disposable implements IRenderM
             // ---> _focus$.next --> editingRenderController
             // _textSelectionRenderManager.sync() --> _updateInputPosition --> activate(left, top)
 
-            const docSelectionRenderManager = this._renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_DOC)?.with(DocSelectionRenderService);
-
-            if (docSelectionRenderManager) {
-                docSelectionRenderManager.activate(HIDDEN_EDITOR_POSITION, HIDDEN_EDITOR_POSITION);
-            }
+            getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_DOC, this._instanceSrv, this._renderManagerService)
+                ?.with(DocSelectionRenderService)
+                .activate(HIDDEN_EDITOR_POSITION, HIDDEN_EDITOR_POSITION);
         }));
     }
 

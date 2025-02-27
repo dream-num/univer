@@ -41,7 +41,7 @@ export * from './engine';
 export * from './group';
 export * from './layer';
 export { IRenderingEngine, UniverRenderEnginePlugin } from './plugin';
-export { IRenderManagerService, type RenderComponentType, RenderManagerService } from './render-manager/render-manager.service';
+export { getCurrentTypeOfRenderer, IRenderManagerService, type RenderComponentType, RenderManagerService, withCurrentTypeOfRenderer } from './render-manager/render-manager.service';
 export { type IRender, type IRenderContext, type IRenderModule, RenderUnit } from './render-manager/render-unit';
 export * from './scene';
 export { type IChangeObserverConfig } from './scene.transformer';

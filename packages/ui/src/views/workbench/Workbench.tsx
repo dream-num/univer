@@ -18,9 +18,8 @@ import type { DocumentDataModel, IDocumentData, Nullable } from '@univerjs/core'
 import type { ILocale } from '@univerjs/design';
 import type { IWorkbenchOptions } from '../../controllers/ui/ui.controller';
 import { DocumentFlavor, IUniverInstanceService, LocaleService, ThemeService, UniverInstanceType } from '@univerjs/core';
-import { ConfigContext, ConfigProvider, defaultTheme, themeInstance } from '@univerjs/design';
-import clsx from 'clsx';
-import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { clsx, ConfigContext, ConfigProvider, defaultTheme, themeInstance } from '@univerjs/design';
+import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { BuiltInUIPart } from '../../services/parts/parts.service';
 import { useDependency } from '../../utils/di';
@@ -79,14 +78,12 @@ export function DesktopWorkbench(props: IUniverWorkbenchProps) {
         return () => {
             sub.unsubscribe();
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {
         if (!themeService.getCurrentTheme()) {
             themeService.setTheme(defaultTheme);
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {

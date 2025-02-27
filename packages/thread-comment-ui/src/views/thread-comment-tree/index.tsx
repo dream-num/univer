@@ -18,12 +18,11 @@ import type { IUser, UniverInstanceType } from '@univerjs/core';
 import type { IAddCommentCommandParams, IThreadComment, IUpdateCommentCommandParams } from '@univerjs/thread-comment';
 import type { IThreadCommentEditorInstance } from '../thread-comment-editor';
 import { generateRandomId, ICommandService, LocaleService, UserManagerService } from '@univerjs/core';
-import { Dropdown, Tooltip } from '@univerjs/design';
+import { clsx, Dropdown, Tooltip } from '@univerjs/design';
 import { DeleteSingle, MoreHorizontalSingle, ReplyToCommentSingle, ResolvedSingle, SolveSingle } from '@univerjs/icons';
 import { AddCommentCommand, DeleteCommentCommand, DeleteCommentTreeCommand, getDT, ResolveCommentCommand, ThreadCommentModel, UpdateCommentCommand } from '@univerjs/thread-comment';
 import { useDependency, useObservable } from '@univerjs/ui';
-import cs from 'clsx';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { debounceTime } from 'rxjs';
 import { SetActiveCommentOperation } from '../../commands/operations/comment.operations';
 import { ThreadCommentEditor } from '../thread-comment-editor';
@@ -309,7 +308,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
 
     return (
         <div
-            className={cs(styles.threadComment, {
+            className={clsx(styles.threadComment, {
                 [styles.threadCommentActive]: !resolved && (showHighlight || isHover || prefix === 'cell'),
             })}
             onClick={onClick}

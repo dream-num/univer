@@ -17,8 +17,8 @@
 import type { IDisplayMenuItem, IMenuItem, IValueOption, MenuItemDefaultValueType } from '../../../services/menu/menu';
 import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
 import type { IBaseMenuProps } from '../desktop/Menu';
-import { clsx } from 'clsx';
-import React, { useMemo } from 'react';
+import { clsx } from '@univerjs/design';
+import { useMemo } from 'react';
 import { MenuItemType } from '../../../services/menu/menu';
 import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
 import { useDependency, useObservable } from '../../../utils/di';

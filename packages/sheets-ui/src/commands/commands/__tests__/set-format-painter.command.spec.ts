@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DependencyIdentifier, Injector, Univer, Workbook } from '@univerjs/core';
+import type { Injector, Univer, Workbook } from '@univerjs/core';
 import type { ISelectionWithCoord } from '@univerjs/sheets';
 import {
     Disposable,
@@ -201,7 +201,6 @@ describe('Test format painter rules in controller', () => {
     let get: Injector['get'];
     let commandService: ICommandService;
     let themeService: ThemeService;
-    let formatPainterController: FormatPainterController;
 
     beforeEach(() => {
         class SheetSelectionRenderService {
@@ -223,14 +222,6 @@ describe('Test format painter rules in controller', () => {
             getRenderById() {
                 return null;
             }
-
-            getCurrentTypeOfRenderer() {
-                return {
-                    with: <T>(identifier: DependencyIdentifier<T>) => {
-                        return get(identifier);
-                    },
-                };
-            }
         }
 
         const injector = univer.__getInjector();
@@ -241,7 +232,7 @@ describe('Test format painter rules in controller', () => {
         themeService = get(ThemeService);
         themeService.setTheme(theme);
 
-        formatPainterController = get(FormatPainterController);
+        get(FormatPainterController);
         commandService.registerCommand(SetFormatPainterOperation);
         commandService.registerCommand(SetInfiniteFormatPainterCommand);
         commandService.registerCommand(SetOnceFormatPainterCommand);

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { CommandType, UniverInstanceType } from '@univerjs/core';
-import { IRenderManagerService } from '@univerjs/engine-render';
 import type { ICommand, Nullable } from '@univerjs/core';
+import { CommandType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { getCurrentTypeOfRenderer, IRenderManagerService } from '@univerjs/engine-render';
 import { DocDrawingUpdateRenderController } from '../../controllers/render-controllers/doc-drawing-update.render-controller';
 
 export interface IInsertDocImageCommandParams {
@@ -27,8 +27,9 @@ export const InsertDocImageCommand: ICommand<IInsertDocImageCommandParams> = {
     id: 'doc.command.insert-float-image',
     type: CommandType.COMMAND,
     handler: (accessor) => {
+        const univerInstanceService = accessor.get(IUniverInstanceService);
         const renderManagerService = accessor.get(IRenderManagerService);
-        return renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_DOC)
+        return getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_DOC, univerInstanceService, renderManagerService)
             ?.with(DocDrawingUpdateRenderController)
             .insertDocImage() ?? false;
     },

@@ -18,7 +18,7 @@ import type { CommandListener, CustomData, ICommandInfo, IDisposable, IRange, IW
 import type { ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
 import type { IRangeThemeStyleJSON, ISetSelectionsOperationParams, ISheetCommandSharedParams } from '@univerjs/sheets';
 import type { FontLine as _FontLine } from './f-range';
-import { ICommandService, ILogService, Inject, Injector, IPermissionService, IResourceLoaderService, IUniverInstanceService, LocaleService, mergeWorksheetSnapshotWithDefault, RedoCommand, toDisposable, UndoCommand, UniverInstanceType } from '@univerjs/core';
+import { ICommandService, ILogService, Inject, Injector, IPermissionService, IResourceLoaderService, IUniverInstanceService, LocaleService, mergeWorksheetSnapshotWithDefault, RANGE_TYPE, RedoCommand, toDisposable, UndoCommand, UniverInstanceType } from '@univerjs/core';
 import { FBaseInitialable } from '@univerjs/core/facade';
 import { IDefinedNamesService } from '@univerjs/engine-formula';
 import { CopySheetCommand, getPrimaryForRange, InsertSheetCommand, RangeThemeStyle, RegisterWorksheetRangeThemeStyleCommand, RemoveSheetCommand, SCOPE_WORKBOOK_VALUE_DEFINED_NAME, SetDefinedNameCommand, SetSelectionsOperation, SetWorksheetActiveOperation, SetWorksheetOrderCommand, SheetRangeThemeService, SheetsSelectionsService, UnregisterWorksheetRangeThemeStyleCommand, WorkbookEditablePermission } from '@univerjs/sheets';
@@ -544,6 +544,31 @@ export class FWorkbook extends FBaseInitialable {
         }
 
         return this._injector.createInstance(FRange, this._workbook, activeSheet, active.range);
+    }
+
+    /**
+     * Returns the active cell in this spreadsheet.
+     * @returns {FRange | null} The active cell
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * console.log(fWorkbook.getActiveCell().getA1Notation());
+     * ```
+     */
+    getActiveCell(): FRange | null {
+        const activeSheet = this._workbook.getActiveSheet();
+        const selections = this._selectionManagerService.getCurrentSelections();
+        const active = selections.find((selection) => !!selection.primary);
+        if (!active) {
+            return null;
+        }
+
+        const cell: IRange = {
+            ...active.primary!,
+            rangeType: RANGE_TYPE.NORMAL,
+        };
+
+        return this._injector.createInstance(FRange, this._workbook, activeSheet, cell);
     }
 
     /**

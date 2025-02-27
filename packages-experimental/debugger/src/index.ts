@@ -16,4 +16,4 @@
 
 import './global.css';
 
-export * from './debugger-plugin';
+export { UniverDebuggerPlugin } from './plugin';

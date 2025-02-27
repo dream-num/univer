@@ -10,6 +10,10 @@
 
 `@univerjs/ui` defines basic UI services and provides a set of desktop Workbench implementations based on React.
 
+Please note that this implementation can only display only 1 unit in the workbench. If you would like to embed units
+into a rich text document, or a mind node, you should implement a new UI plugin for that. Refer to our uniui
+plugin for an example.
+
 ## Usage
 
 ### Installation

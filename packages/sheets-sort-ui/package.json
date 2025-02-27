@@ -73,9 +73,7 @@
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-sort": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
-        "@univerjs/ui": "workspace:*",
-        "clsx": "^2.1.1",
-        "rc-virtual-list": "^3.15.0"
+        "@univerjs/ui": "workspace:*"
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
@@ -85,7 +83,7 @@
         "rxjs": "^7.8.1",
         "tailwindcss": "^3.4.17",
         "typescript": "^5.7.3",
-        "vite": "^6.1.1",
-        "vitest": "^3.0.6"
+        "vite": "^6.2.0",
+        "vitest": "^3.0.7"
     }
 }

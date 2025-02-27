@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-import type { CustomData, ICellData, IColumnData, IColumnRange, IDisposable, IFreeze, IObjectArrayPrimitiveType, IRange, IRowData, IRowRange, IStyleData, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type { CellValue, CustomData, ICellData, IColumnData, IColumnRange, IDisposable, IFreeze, IObjectArrayPrimitiveType, IRange, IRowData, IRowRange, IStyleData, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import type { ISetColDataCommandParams, ISetGridlinesColorCommandParams, ISetRangeValuesMutationParams, ISetRowDataCommandParams, ISetTextWrapCommandParams, IToggleGridlinesCommandParams } from '@univerjs/sheets';
 import type { FDefinedName } from './f-defined-name';
 import type { FWorkbook } from './f-workbook';
 import { BooleanNumber, Direction, ICommandService, ILogService, Inject, Injector, ObjectMatrix, RANGE_TYPE, WrapStrategy } from '@univerjs/core';
 import { FBaseInitialable } from '@univerjs/core/facade';
 import { deserializeRangeWithSheet } from '@univerjs/engine-formula';
-import { CancelFrozenCommand, ClearSelectionAllCommand, ClearSelectionContentCommand, ClearSelectionFormatCommand, copyRangeStyles, InsertColByRangeCommand, InsertRowByRangeCommand, MoveColsCommand, MoveRowsCommand, RemoveColByRangeCommand, RemoveRowByRangeCommand, SetColDataCommand, SetColHiddenCommand, SetColWidthCommand, SetFrozenCommand, SetGridlinesColorCommand, SetRangeValuesMutation, SetRowDataCommand, SetRowHeightCommand, SetRowHiddenCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetTabColorCommand, SetTextWrapCommand, SetWorksheetDefaultStyleMutation, SetWorksheetHideCommand, SetWorksheetNameCommand, SetWorksheetRowIsAutoHeightCommand, SetWorksheetRowIsAutoHeightMutation, SetWorksheetShowCommand, SheetsSelectionsService, ToggleGridlinesCommand } from '@univerjs/sheets';
+import { AppendRowCommand, CancelFrozenCommand, ClearSelectionAllCommand, ClearSelectionContentCommand, ClearSelectionFormatCommand, copyRangeStyles, InsertColByRangeCommand, InsertRowByRangeCommand, MoveColsCommand, MoveRowsCommand, RemoveColByRangeCommand, RemoveRowByRangeCommand, SetColDataCommand, SetColHiddenCommand, SetColWidthCommand, SetFrozenCommand, SetGridlinesColorCommand, SetRangeValuesMutation, SetRowDataCommand, SetRowHeightCommand, SetRowHiddenCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetTabColorCommand, SetTextWrapCommand, SetWorksheetDefaultStyleMutation, SetWorksheetHideCommand, SetWorksheetNameCommand, SetWorksheetRowIsAutoHeightCommand, SetWorksheetRowIsAutoHeightMutation, SetWorksheetShowCommand, SheetsSelectionsService, ToggleGridlinesCommand } from '@univerjs/sheets';
 import { FDefinedNameBuilder } from './f-defined-name';
 import { FRange } from './f-range';
 import { FSelection } from './f-selection';
-import { covertToColRange, covertToRowRange } from './utils';
+import { covertCellValue, covertToColRange, covertToRowRange } from './utils';
 
-interface IFacadeClearOptions {
+export interface IFacadeClearOptions {
     contentsOnly?: boolean;
     formatOnly?: boolean;
 }
@@ -754,7 +754,7 @@ export class FWorksheet extends FBaseInitialable {
     /**
      * Scrolling sheet to make specific rows visible.
      * @param {number} rowIndex - The starting index of the rows
-     * @param {number} numRow - The number of rows
+     * @param {number} numRows - The number of rows
      * @returns {FWorksheet} This worksheet instance for chaining
      * @example
      * ```typescript
@@ -765,12 +765,12 @@ export class FWorksheet extends FBaseInitialable {
      * fWorksheet.showRows(0);
      * ```
      */
-    showRows(rowIndex: number, numRow: number = 1): FWorksheet {
+    showRows(rowIndex: number, numRows: number = 1): FWorksheet {
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
         const range: IRange = {
             startRow: rowIndex,
-            endRow: rowIndex + numRow - 1,
+            endRow: rowIndex + numRows - 1,
             startColumn: 0,
             endColumn: this._worksheet.getColumnCount() - 1,
             rangeType: RANGE_TYPE.ROW,
@@ -898,6 +898,27 @@ export class FWorksheet extends FBaseInitialable {
     }
 
     /**
+     * Gets the height in pixels of the given row.
+     * @param {number} rowPosition - The position of the row to examine. index starts at 0.
+     * @returns {number} The height in pixels of the given row.
+     * @example
+     * ```typescript
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // Set the value of the cell A1 to 'Hello, Univer!', set the font size to 30 and font weight to bold
+     * const fRange = fWorksheet.getRange('A1');
+     * fRange.setValue('Hello, Univer!').setFontSize(30).setFontWeight('bold');
+     *
+     * // Get the height of the first row
+     * console.log(fWorksheet.getRowHeight(0));
+     * ```
+     */
+    getRowHeight(rowPosition: number): number {
+        return this._worksheet.getRowHeight(rowPosition);
+    }
+
+    /**
      * Sets the height of the given rows to auto.
      * @param {number} startRow - The starting row position to change
      * @param {number} numRows - The number of rows to change
@@ -920,6 +941,32 @@ export class FWorksheet extends FBaseInitialable {
             },
         ];
 
+        this._commandService.syncExecuteCommand(SetWorksheetRowIsAutoHeightCommand.id, {
+            unitId,
+            subUnitId,
+            ranges,
+        });
+
+        return this;
+    }
+
+    /**
+     * Sets the height of the given ranges to auto.
+     * @param {IRange[]} ranges - The ranges to change
+     * @returns {FWorksheet} This worksheet instance for chaining
+     * @example
+     * ```typescript
+     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * const ranges = [
+     * { startRow: 1, endRow: 10, startColumn: 0, endColumn: 10 },
+     * { startRow: 11, endRow: 20, startColumn: 0, endColumn: 10 },
+     * ]
+     * fWorksheet.setRangesAutoHeight(ranges);
+     * ```
+     */
+    setRangesAutoHeight(ranges: IRange[]): FWorksheet {
+        const unitId = this._workbook.getUnitId();
+        const subUnitId = this._worksheet.getSheetId();
         this._commandService.syncExecuteCommand(SetWorksheetRowIsAutoHeightCommand.id, {
             unitId,
             subUnitId,
@@ -1319,7 +1366,7 @@ export class FWorksheet extends FBaseInitialable {
     /**
      * Show one or more consecutive columns starting at the given index. Use 0-index for this method
      * @param {number} columnIndex - The starting index of the columns to unhide
-     * @param {number} numColumn - The number of columns to unhide
+     * @param {number} numColumns - The number of columns to unhide
      * @returns {FWorksheet} This sheet, for chaining
      * @example
      * ```typescript
@@ -1330,14 +1377,14 @@ export class FWorksheet extends FBaseInitialable {
      * fWorksheet.showColumns(0, 1);
      * ```
      */
-    showColumns(columnIndex: number, numColumn: number = 1): FWorksheet {
+    showColumns(columnIndex: number, numColumns: number = 1): FWorksheet {
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
         const range: IRange = {
             startRow: 0,
             endRow: this._worksheet.getRowCount() - 1,
             startColumn: columnIndex,
-            endColumn: columnIndex + numColumn - 1,
+            endColumn: columnIndex + numColumns - 1,
             rangeType: RANGE_TYPE.COLUMN,
         };
 
@@ -1399,6 +1446,30 @@ export class FWorksheet extends FBaseInitialable {
         });
 
         return this;
+    }
+
+    /**
+     * Gets the width in pixels of the given column.
+     * @param {number} columnPosition - The position of the column to examine. index starts at 0.
+     * @returns {number} The width of the column in pixels
+     * @example
+     * ```typescript
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // Set the long text value in cell A1
+     * const fRange = fWorksheet.getRange('A1');
+     * fRange.setValue('Whenever it is a damp, drizzly November in my soul...');
+     *
+     * // Set the column A to a width which fits the text
+     * fWorksheet.autoResizeColumn(0);
+     *
+     * // Get the width of the column A
+     * console.log(fWorksheet.getColumnWidth(0));
+     * ```
+     */
+    getColumnWidth(columnPosition: number): number {
+        return this._worksheet.getColumnWidth(columnPosition);
     }
 
     // #endregion
@@ -1534,6 +1605,19 @@ export class FWorksheet extends FBaseInitialable {
 
         this._fWorkbook.setActiveRange(range);
         return this;
+    }
+
+    /**
+     * Returns the active cell in this sheet.
+     * @returns {FRange | null} The active cell
+     * @example
+     * ```typescript
+     * const fWorkSheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * console.log(fWorkSheet.getActiveCell().getA1Notation());
+     * ```
+     */
+    getActiveCell(): FRange | null {
+        return this._fWorkbook.getActiveCell();
     }
 
     /**
@@ -2370,5 +2454,43 @@ export class FWorksheet extends FBaseInitialable {
      */
     getColumnCustomMetadata(index: number): CustomData | undefined {
         return this._worksheet.getColumnManager().getCustomMetadata(index);
+    }
+
+    /**
+     * Appends a row to the bottom of the current data region in the sheet. If a cell's content begins with =, it's interpreted as a formula.
+     * @param {CellValue[]} rowContents - An array of values for the new row.
+     * @returns {FWorksheet} Returns the current worksheet instance for method chaining.
+     * @example
+     * ```ts
+     * // Appends a new row with 4 columns to the bottom of the current
+     * // data region in the sheet containing the values in the array.
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorkSheet = fWorkbook.getActiveSheet();
+     * fWorkSheet.appendRow([1, 'Hello Univer', true, '=A1']);
+     * ```
+     */
+    appendRow(rowContents: CellValue[]): FWorksheet {
+        const hasValue = this._worksheet.getCellMatrix().hasValue();
+        const lastRow = this._worksheet.getLastRowWithContent();
+        const maxRows = this._worksheet.getRowCount();
+        const maxColumns = this._worksheet.getColumnCount();
+
+        const row = hasValue ? lastRow + 1 : lastRow;
+        const cellMatrix = new ObjectMatrix<ICellData>();
+
+        for (let c = 0; c < rowContents.length; c++) {
+            cellMatrix.setValue(row, c, covertCellValue(rowContents[c]));
+        }
+
+        this._commandService.syncExecuteCommand(AppendRowCommand.id, {
+            unitId: this._workbook.getUnitId(),
+            subUnitId: this._worksheet.getSheetId(),
+            cellValue: cellMatrix.getMatrix(),
+            insertRowNums: row > maxRows - 1 ? 1 : 0,
+            insertColumnNums: rowContents.length > maxColumns ? rowContents.length - maxColumns : 0,
+            maxRows,
+            maxColumns,
+        });
+        return this;
     }
 }

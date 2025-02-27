@@ -17,6 +17,9 @@
 import type zhCN from './zh-CN';
 
 const locale: typeof zhCN = {
+    rightClick: {
+        zenEditor: 'Chế độ chỉnh sửa Zen',
+    },
     shortcut: {
         sheet: {
             'zen-edit-cancel': 'Hủy chỉnh sửa (trạng thái Zen mode)',

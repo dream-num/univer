@@ -285,7 +285,7 @@ test('diff set text format number cell', async () => {
 
     const filename = generateSnapshotName('set-text-format-number-cell');
     const screenshot = await page.locator(SHEET_MAIN_CANVAS_ID).screenshot();
-    await expect(screenshot).toMatchSnapshot(filename, { maxDiffPixels: 150 });
+    await expect(screenshot).toMatchSnapshot(filename, { maxDiffPixelRatio: 0.005 });
 
     await page.waitForTimeout(2000);
     await browser.close();

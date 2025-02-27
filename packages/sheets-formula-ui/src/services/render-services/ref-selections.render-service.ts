@@ -17,7 +17,7 @@
 import type { IDisposable, IRangeWithCoord, Nullable, Workbook } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, Scene, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
 import type { ISelectionStyle, ISelectionWithCoord, ISelectionWithStyle, SheetsSelectionsService, WorkbookSelectionModel } from '@univerjs/sheets';
-import { DisposableCollection, IContextService, Inject, Injector, RANGE_TYPE, ThemeService, toDisposable } from '@univerjs/core';
+import { DisposableCollection, IContextService, Inject, Injector, RANGE_TYPE, Rectangle, ThemeService, toDisposable } from '@univerjs/core';
 import { ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 import { convertSelectionDataToRange, IRefSelectionsService, SelectionMoveType } from '@univerjs/sheets';
 import { attachSelectionWithCoord, BaseSelectionRenderService, checkInHeaderRanges, genNormalSelectionStyle, getAllSelection, getCoordByOffset, getSheetObject, SelectionControl, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
@@ -336,8 +336,9 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
         let activeSelectionControl: Nullable<SelectionControl> = this.getActiveSelectionControl();
         const curControls = this.getSelectionControls();
         for (const control of curControls) {
-            // right click should not create a new selection, it pops up the context menu.
-            if (evt.button === 2 && control.model.isInclude(cursorCellRangeWithRangeType)) {
+            // If right click on a selection, we should not create a new selection control.
+            // Instead, the context menu will popup.
+            if (evt.button === 2 && Rectangle.contains(control.model, cursorCellRangeWithRangeType)) {
                 activeSelectionControl = control;
                 return;
             }

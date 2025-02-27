@@ -18,11 +18,9 @@ import type { IFreeze, Injector, IRange, IRangeWithCoord, Nullable, ThemeService
 import type { IMouseEvent, IPointerEvent, Scene, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
 import type { Subscription } from 'rxjs';
-
 import type { SelectionControl } from './selection-control';
-import { ColorKit, Quantity, UniverInstanceType } from '@univerjs/core';
-
-import { CURSOR_TYPE, IRenderManagerService, Rect, ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
+import { ColorKit, IUniverInstanceService, Quantity, UniverInstanceType } from '@univerjs/core';
+import { CURSOR_TYPE, IRenderManagerService, Rect, ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2, withCurrentTypeOfRenderer } from '@univerjs/engine-render';
 import { SELECTION_CONTROL_BORDER_BUFFER_WIDTH } from '@univerjs/sheets';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import { ISheetSelectionRenderService } from './base-selection-render.service';
@@ -96,6 +94,7 @@ export class SelectionShapeExtension {
     private readonly _themeService: ThemeService;
     private readonly _injector: Injector;
     private _selectionHooks: Record<string, () => void>;
+
     constructor(
         private _control: SelectionControl,
         options: ISelectionShapeExtensionOption
@@ -127,8 +126,12 @@ export class SelectionShapeExtension {
     }
 
     private _getFreeze() {
-        const renderManagerService = this._injector.get(IRenderManagerService);
-        const freeze = renderManagerService.withCurrentTypeOfUnit(UniverInstanceType.UNIVER_SHEET, SheetSkeletonManagerService)
+        const freeze = withCurrentTypeOfRenderer(
+            UniverInstanceType.UNIVER_SHEET,
+            SheetSkeletonManagerService,
+            this._injector.get(IUniverInstanceService),
+            this._injector.get(IRenderManagerService)
+        )
             ?.getCurrentParam()
             ?.skeleton
             .getWorksheetConfig()

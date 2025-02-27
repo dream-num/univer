@@ -52,7 +52,7 @@ import {
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { IRenderManagerService, withCurrentTypeOfRenderer } from '@univerjs/engine-render';
 
 import {
     getPrimaryForRange,
@@ -176,8 +176,13 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         @Inject(Injector) private readonly _injector: Injector
     ) {
         super();
+
         this._htmlToUSM = new HtmlToUSMService({
-            getCurrentSkeleton: () => this._renderManagerService.withCurrentTypeOfUnit(UniverInstanceType.UNIVER_SHEET, SheetSkeletonManagerService)?.getCurrentParam(),
+            getCurrentSkeleton: () => withCurrentTypeOfRenderer(
+                UniverInstanceType.UNIVER_SHEET,
+                SheetSkeletonManagerService,
+                this._univerInstanceService,
+                this._renderManagerService)?.getCurrentParam(),
         });
 
         this._usmToHtml = new USMToHtmlService();

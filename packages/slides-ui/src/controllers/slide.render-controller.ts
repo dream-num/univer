@@ -14,8 +14,12 @@
  * limitations under the License.
  */
 
+import type { EventState, IColorStyle, IPageElement, ISlidePage, Nullable, SlideDataModel, UnitModel } from '@univerjs/core';
+import type { BaseObject, IRenderContext, IRenderModule, IWheelEvent } from '@univerjs/engine-render';
+import type { PageID } from '../type';
 import { debounce, getColorStyle, Inject, Injector, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import {
+    getCurrentTypeOfRenderer,
     IRenderManagerService,
     Rect,
     Scene,
@@ -24,12 +28,7 @@ import {
     Viewport,
 } from '@univerjs/engine-render';
 import { ObjectProvider, SLIDE_KEY } from '@univerjs/slides';
-import type { EventState, IColorStyle, IPageElement, ISlidePage, Nullable, SlideDataModel, UnitModel } from '@univerjs/core';
 
-import type { BaseObject, IRenderContext, IRenderModule, IWheelEvent } from '@univerjs/engine-render';
-import type { PageID } from '../type';
-
-// export const ICanvasView = createIdentifier<IUniverInstanceService>('univer.slide.canvas-view');
 export class SlideRenderController extends RxDisposable implements IRenderModule {
     private _objectProvider: ObjectProvider | null = null;
 
@@ -106,7 +105,7 @@ export class SlideRenderController extends RxDisposable implements IRenderModule
         //#endregion
 
         ScrollBar.attachTo(viewMain);
-        this._renderManagerService.setCurrent(unitId);
+        // this._renderManagerService.setCurrent(unitId);
 
         // #region create slide
         const slide = this._createSlide(scene);
@@ -136,10 +135,7 @@ export class SlideRenderController extends RxDisposable implements IRenderModule
     }
 
     private _currentRender() {
-        const renderUnit = this._renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SLIDE);
-        return renderUnit;
-        // const slideDataModel = this._univerInstanceService.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE)!;
-        // return this._renderManagerService.getRenderById(slideDataModel.getUnitId());
+        return getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SLIDE, this._univerInstanceService, this._renderManagerService);
     }
 
     private _refreshThumb = debounce(() => {

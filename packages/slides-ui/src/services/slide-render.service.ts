@@ -74,9 +74,6 @@ export class SlideRenderService extends RxDisposable {
         }
 
         this._renderManagerService.createRender(unitId);
-
-        // NOTE@wzhudev: maybe not in univer mode
-        this._renderManagerService.setCurrent(unitId);
     }
 
     private _disposeRenderer(workbook: Workbook): void {

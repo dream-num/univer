@@ -20,8 +20,8 @@ import type { IMouseEvent, IPointerEvent, Spreadsheet, SpreadsheetSkeleton, Univ
 import type { ListMultipleValidator } from '@univerjs/sheets-data-validation';
 import type { IShowDataValidationDropdownParams } from '../../commands/operations/data-validation.operation';
 import type { IDropdownInfo } from './dropdown-widget';
-import { HorizontalAlign, ICommandService, Inject, UniverInstanceType, VerticalAlign } from '@univerjs/core';
-import { CURSOR_TYPE, getFontStyleString, IRenderManagerService } from '@univerjs/engine-render';
+import { HorizontalAlign, ICommandService, Inject, IUniverInstanceService, UniverInstanceType, VerticalAlign } from '@univerjs/core';
+import { CURSOR_TYPE, getCurrentTypeOfRenderer, getFontStyleString, IRenderManagerService } from '@univerjs/engine-render';
 import { getCellValueOrigin, SheetDataValidationModel } from '@univerjs/sheets-data-validation';
 import { ShowDataValidationDropdown } from '../../commands/operations/data-validation.operation';
 import { CELL_PADDING_H, CELL_PADDING_V, Dropdown, ICON_PLACE, layoutDropdowns, MARGIN_V } from './shape';
@@ -34,6 +34,7 @@ export class DropdownMultipleWidget implements IBaseDataValidationWidget {
 
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(IRenderManagerService) private readonly _renderManagerService: IRenderManagerService,
         @Inject(SheetDataValidationModel) private readonly _dataValidationModel: SheetDataValidationModel
     ) {
@@ -255,10 +256,14 @@ export class DropdownMultipleWidget implements IBaseDataValidationWidget {
     }
 
     onPointerEnter(info: ICellRenderContext, evt: IPointerEvent | IMouseEvent) {
-        this._renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET)?.mainComponent?.setCursor(CURSOR_TYPE.POINTER);
+        return getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET, this._univerInstanceService, this._renderManagerService)
+            ?.mainComponent
+            ?.setCursor(CURSOR_TYPE.POINTER);
     }
 
     onPointerLeave(info: ICellRenderContext, evt: IPointerEvent | IMouseEvent) {
-        this._renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET)?.mainComponent?.setCursor(CURSOR_TYPE.DEFAULT);
+        return getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET, this._univerInstanceService, this._renderManagerService)
+            ?.mainComponent
+            ?.setCursor(CURSOR_TYPE.DEFAULT);
     }
 }

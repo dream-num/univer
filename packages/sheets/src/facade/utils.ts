@@ -26,12 +26,14 @@ import {
     VerticalAlign,
 } from '@univerjs/core';
 
+export type FDefaultAlignment = 'general';
 export type FHorizontalAlignment = 'left' | 'center' | 'normal';
 export type FVerticalAlignment = 'top' | 'middle' | 'bottom';
 
 /**
- *
- * @param value
+ * Transform the Facade API horizontal alignment to the Univer Core horizontal alignment.
+ * @param {FHorizontalAlignment} value - The Facade API horizontal alignment.
+ * @returns {HorizontalAlign} The Univer Core horizontal alignment.
  */
 export function transformFacadeHorizontalAlignment(value: FHorizontalAlignment): HorizontalAlign {
     switch (value) {
@@ -47,10 +49,11 @@ export function transformFacadeHorizontalAlignment(value: FHorizontalAlignment):
 }
 
 /**
- *
- * @param value
+ * Transform the Univer Core horizontal alignment to the Facade API horizontal alignment.
+ * @param {HorizontalAlign} value - The Univer Core horizontal alignment.
+ * @returns {FHorizontalAlignment} The Facade API horizontal alignment.
  */
-export function transformCoreHorizontalAlignment(value: HorizontalAlign): FHorizontalAlignment {
+export function transformCoreHorizontalAlignment(value: HorizontalAlign): FHorizontalAlignment | FDefaultAlignment {
     switch (value) {
         case HorizontalAlign.LEFT:
             return 'left';
@@ -59,13 +62,14 @@ export function transformCoreHorizontalAlignment(value: HorizontalAlign): FHoriz
         case HorizontalAlign.RIGHT:
             return 'normal';
         default:
-            throw new Error(`Invalid horizontal alignment: ${value}`);
+            return 'general';
     }
 }
 
 /**
- *
- * @param value
+ * Transform the Facade API vertical alignment to the Univer Core vertical alignment.
+ * @param {FVerticalAlignment} value - The Facade API vertical alignment.
+ * @returns {VerticalAlign} The Univer Core vertical alignment.
  */
 export function transformFacadeVerticalAlignment(value: FVerticalAlignment): VerticalAlign {
     switch (value) {
@@ -81,10 +85,11 @@ export function transformFacadeVerticalAlignment(value: FVerticalAlignment): Ver
 }
 
 /**
- *
- * @param value
+ * Transform the Univer Core vertical alignment to the Facade API vertical alignment.
+ * @param {VerticalAlign} value - The Univer Core vertical alignment.
+ * @returns {FVerticalAlignment} The Facade API vertical alignment.
  */
-export function transformCoreVerticalAlignment(value: VerticalAlign): FVerticalAlignment {
+export function transformCoreVerticalAlignment(value: VerticalAlign): FVerticalAlignment | FDefaultAlignment {
     switch (value) {
         case VerticalAlign.TOP:
             return 'top';
@@ -93,14 +98,14 @@ export function transformCoreVerticalAlignment(value: VerticalAlign): FVerticalA
         case VerticalAlign.BOTTOM:
             return 'bottom';
         default:
-            throw new Error(`Invalid vertical alignment: ${value}`);
+            return 'general';
     }
 }
 
 /**
  * Covert cell value to cell data.
- * @param value
- * @returns
+ * @param {CellValue | ICellData} value - The cell value.
+ * @returns {ICellData} The cell data.
  */
 export function covertCellValue(value: CellValue | ICellData): ICellData {
     if (isFormulaString(value)) {
@@ -127,9 +132,9 @@ export function covertCellValue(value: CellValue | ICellData): ICellData {
 
 /**
  * Covert cell value array or matrix to cell data.
- * @param value
- * @param range
- * @returns
+ * @param {CellValue[][] | IObjectMatrixPrimitiveType<CellValue> | ICellData[][] | IObjectMatrixPrimitiveType<ICellData>} value - The cell value array or matrix.
+ * @param {IRange} range - The range.
+ * @returns {IObjectMatrixPrimitiveType<ICellData>} The cell data matrix.
  */
 export function covertCellValues(
     value:
@@ -159,9 +164,10 @@ export function covertCellValues(
 }
 
 /**
- *
- * @param mergeInfo
- * @param range
+ * Judge whether the range is merged.
+ * @param {IRangeWithCoord} mergeInfo - The merge info.
+ * @param {IRange} range - The range.
+ * @returns {boolean} Whether the range is merged.
  */
 export function isCellMerged(mergeInfo: IRangeWithCoord, range: IRange): boolean {
     if (!isSingleCell(mergeInfo, range)) {
@@ -171,9 +177,10 @@ export function isCellMerged(mergeInfo: IRangeWithCoord, range: IRange): boolean
 }
 
 /**
- *
- * @param mergeInfo
- * @param range
+ * Judge whether the range is single cell.
+ * @param {IRangeWithCoord} mergeInfo - The merge info.
+ * @param {IRange} range - The range.
+ * @returns {boolean} Whether the range is single cell.
  */
 export function isSingleCell(mergeInfo: IRangeWithCoord, range: IRange): boolean {
     return mergeInfo.startColumn === range.startColumn
@@ -183,9 +190,10 @@ export function isSingleCell(mergeInfo: IRangeWithCoord, range: IRange): boolean
 }
 
 /**
- *
- * @param range
- * @param worksheet
+ * Covert the range to row range.
+ * @param {IRange} range - The range.
+ * @param {Worksheet} worksheet - The worksheet.
+ * @returns {IRange} The row range.
  */
 export function covertToRowRange(range: IRange, worksheet: Worksheet): IRange {
     return {
@@ -198,9 +206,10 @@ export function covertToRowRange(range: IRange, worksheet: Worksheet): IRange {
 }
 
 /**
- *
- * @param range
- * @param worksheet
+ * Covert the range to column range.
+ * @param {IRange} range - The range.
+ * @param {Worksheet} worksheet - The worksheet.
+ * @returns {IRange} The column range.
  */
 export function covertToColRange(range: IRange, worksheet: Worksheet): IRange {
     return {

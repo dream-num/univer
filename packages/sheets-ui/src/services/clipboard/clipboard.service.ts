@@ -208,8 +208,11 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         return this._copyContentCache;
     }
 
-    generateCopyContent(workbookId: string, worksheetId: string, range: IRange): Nullable<ICopyContent> {
+    generateCopyContent(workbookId: string, worksheetId: string, range: IRange, copyType: COPY_TYPE = COPY_TYPE.COPY): Nullable<ICopyContent> {
+        const hooks = this._clipboardHooks;
+        hooks.forEach((h) => h.onBeforeCopy?.(workbookId, worksheetId, range, copyType));
         const copyContent = this._generateCopyContent(workbookId, worksheetId, range, this._clipboardHooks);
+        hooks.forEach((h) => h.onAfterCopy?.());
 
         return copyContent;
     }
@@ -225,13 +228,10 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         if (!worksheet) {
             return false;
         }
-        const hooks = this._clipboardHooks;
         const workbookId = workbook.getUnitId();
         const worksheetId = worksheet.getSheetId();
 
-        hooks.forEach((h) => h.onBeforeCopy?.(workbookId, worksheetId, selection.range, copyType));
         const copyContent = this.generateCopyContent(workbookId, worksheetId, selection.range);
-        hooks.forEach((h) => h.onAfterCopy?.());
 
         if (!copyContent) {
             return false;

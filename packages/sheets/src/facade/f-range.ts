@@ -342,8 +342,8 @@ export class FRange extends FBaseInitialable {
      */
     getRawValue(): Nullable<CellValue> {
         const cell = this._worksheet.getCellMatrix().getValue(this._range.startRow, this._range.startColumn);
+        if (cell?.p && cell.p.body?.dataStream) return cell.p.body.dataStream;
         if (cell?.v) return cell.v;
-        if (cell?.p) return cell.p.body?.dataStream ?? '';
         return null;
     }
 
@@ -368,8 +368,8 @@ export class FRange extends FBaseInitialable {
      */
     getDisplayValue(): string {
         const cell = this._worksheet.getCell(this._range.startRow, this._range.startColumn);
+        if (cell?.p && cell.p.body?.dataStream) return cell.p.body.dataStream;
         if (cell?.v) return String(cell.v);
-        if (cell?.p) return cell.p.body?.dataStream ?? '';
         return '';
     }
 
@@ -472,11 +472,10 @@ export class FRange extends FBaseInitialable {
 
             for (let c = startColumn; c <= endColumn; c++) {
                 const cell = cellMatrix.getValue(r, c);
-
-                if (cell?.v) {
+                if (cell?.p && cell.p.body?.dataStream) {
+                    row.push(cell.p.body.dataStream);
+                } else if (cell?.v) {
                     row.push(cell.v);
-                } else if (cell?.p) {
-                    row.push(cell.p.body?.dataStream ?? '');
                 } else {
                     row.push(null);
                 }
@@ -540,10 +539,10 @@ export class FRange extends FBaseInitialable {
             for (let c = startColumn; c <= endColumn; c++) {
                 const cell = this._worksheet.getCell(r, c);
 
-                if (cell?.v) {
+                if (cell?.p && cell.p.body?.dataStream) {
+                    row.push(cell.p.body.dataStream);
+                } else if (cell?.v) {
                     row.push(String(cell.v));
-                } else if (cell?.p) {
-                    row.push(cell.p.body?.dataStream ?? '');
                 } else {
                     row.push('');
                 }

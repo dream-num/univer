@@ -15,10 +15,11 @@
  */
 
 import type { IAccessor } from '@univerjs/core';
-import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { DocSelectionManagerService } from '@univerjs/docs';
+import type { IMenuItem } from '@univerjs/ui';
+import { DOCS_ZEN_EDITOR_UNIT_ID_KEY, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 
-import { getMenuHiddenObservable, type IMenuItem, MenuItemType } from '@univerjs/ui';
+import { DocSelectionManagerService } from '@univerjs/docs';
+import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { Observable } from 'rxjs';
 import { InsertDocImageCommand } from '../../commands/commands/insert-image.command';
 
@@ -68,7 +69,7 @@ export function ImageMenuFactory(accessor: IAccessor): IMenuItem {
         icon: ImageUploadIcon,
         tooltip: 'docImage.title',
         disabled$: getDisableWhenSelectionInTableObservable(accessor),
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC, undefined, DOCS_ZEN_EDITOR_UNIT_ID_KEY),
     };
 }
 
@@ -77,6 +78,6 @@ export function UploadFloatImageMenuFactory(_accessor: IAccessor): IMenuItem {
         id: IMAGE_MENU_UPLOAD_FLOAT_ID,
         title: 'docImage.upload.float',
         type: MenuItemType.BUTTON,
-        hidden$: getMenuHiddenObservable(_accessor, UniverInstanceType.UNIVER_DOC),
+        hidden$: getMenuHiddenObservable(_accessor, UniverInstanceType.UNIVER_DOC, undefined, DOCS_ZEN_EDITOR_UNIT_ID_KEY),
     };
 }

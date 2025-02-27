@@ -34,6 +34,7 @@ export function getMenuHiddenObservable(
             if (matchUnitId && matchUnitId !== unitId) {
                 return subscriber.next(true);
             }
+
             if (needHideUnitId && (Array.isArray(needHideUnitId) ? needHideUnitId.includes(unitId) : needHideUnitId === unitId)) {
                 return subscriber.next(true);
             }

@@ -19,7 +19,7 @@ import './global.css';
 export { UniverSheetsDrawingUIPlugin } from './plugin';
 export { type ICanvasFloatDom, type IDOMAnchor, SheetCanvasFloatDomManagerService } from './services/canvas-float-dom-manager.service';
 export { SHEETS_IMAGE_MENU_ID } from './views/menu/image.menu';
-
+export { SheetDrawingUpdateController } from './controllers/sheet-drawing-update.controller';
 // #region - all commands
 
 export { DeleteDrawingsCommand } from './commands/commands/delete-drawings.command';

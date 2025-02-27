@@ -120,9 +120,9 @@ export interface IShortcutService {
     /**
      * Get the display string of the shortcut item.
      * @param shortcut - the shortcut item to get the display string.
-     * @returns {string} the display string of the shortcut. For example `Ctrl+Enter`.
+     * @returns {string | null} The display string of the shortcut. For example `Ctrl+Enter`.
      */
-    getShortcutDisplay(shortcut: IShortcutItem): string;
+    getShortcutDisplay(shortcut: IShortcutItem): string | null;
     /**
      * Get the display string of the shortcut of the command.
      * @param id the id of the command to get the shortcut display.
@@ -177,6 +177,8 @@ export class ShortcutService extends Disposable implements IShortcutService {
     registerShortcut(shortcut: IShortcutItem): IDisposable {
         // first map shortcut to a number, so it could be converted and fetched quickly
         const binding = this._getBindingFromItem(shortcut);
+        if (!binding) return toDisposable(() => {});
+
         const bindingSet = this._shortCutMapping.get(binding);
         if (bindingSet) {
             bindingSet.add(shortcut);
@@ -210,7 +212,6 @@ export class ShortcutService extends Disposable implements IShortcutService {
 
     getShortcutDisplayOfCommand(id: string): string | null {
         const set = this._commandIDMapping.get(id);
-        // if (!set || set.size > 1) {
         if (!set) {
             return null;
         }
@@ -223,8 +224,10 @@ export class ShortcutService extends Disposable implements IShortcutService {
         return null;
     }
 
-    getShortcutDisplay(shortcut: IShortcutItem): string {
+    getShortcutDisplay(shortcut: IShortcutItem): string | null {
         const binding = this._getBindingFromItem(shortcut);
+        if (!binding) return null;
+
         const ctrlKey = binding & MetaKeys.CTRL_COMMAND;
         const shiftKey = binding & MetaKeys.SHIFT;
         const altKey = binding & MetaKeys.ALT;
@@ -293,7 +296,7 @@ export class ShortcutService extends Disposable implements IShortcutService {
         return candidateShortcut;
     }
 
-    private _getBindingFromItem(item: IShortcutItem): number {
+    private _getBindingFromItem(item: IShortcutItem): number | undefined {
         if (this._platformService.isMac && item.mac) {
             return item.mac;
         }
@@ -305,10 +308,6 @@ export class ShortcutService extends Disposable implements IShortcutService {
         if (this._platformService.isLinux && item.linux) {
             return item.linux;
         }
-
-        if (!item.binding) {
-            throw new Error('[ShortcutService]: shortcut item should have a binding, or at least a platform binding!');
-        };
 
         return item.binding;
     }

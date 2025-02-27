@@ -50,7 +50,7 @@ export interface IShortcutItem<P extends object = object> {
      *
      * @example { binding: KeyCode.ENTER | MetaKeys.ALT }
      */
-    binding: KeyCode | number;
+    binding?: KeyCode | number;
     /**
      * The binding of the shortcut for macOS. If the property is not specified, the default binding would be used.
      */
@@ -305,6 +305,10 @@ export class ShortcutService extends Disposable implements IShortcutService {
         if (this._platformService.isLinux && item.linux) {
             return item.linux;
         }
+
+        if (!item.binding) {
+            throw new Error('[ShortcutService]: shortcut item should have a binding, or at least a platform binding!');
+        };
 
         return item.binding;
     }

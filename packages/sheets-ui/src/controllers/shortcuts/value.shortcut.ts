@@ -32,5 +32,5 @@ export const ClearSelectionValueShortcutItemMac: IShortcutItem = {
     id: ClearSelectionContentCommand.id,
     // when focusing on any other input tag do not trigger this shortcut
     preconditions: (contextService) => whenSheetEditorFocused(contextService),
-    binding: KeyCode.DELETE,
+    mac: KeyCode.DELETE,
 };

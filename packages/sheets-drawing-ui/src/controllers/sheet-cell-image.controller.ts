@@ -23,6 +23,7 @@ import { Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_ZEN_EDITOR_UNIT_ID_KEY
 import { DocDrawingController } from '@univerjs/docs-drawing';
 import { ReplaceSnapshotCommand } from '@univerjs/docs-ui';
 import { IDrawingManagerService } from '@univerjs/drawing';
+import { DeviceInputEventType } from '@univerjs/engine-render';
 import { AddWorksheetMergeMutation, AFTER_CELL_EDIT, getSheetCommandTarget, InterceptCellContentPriority, INTERCEPTOR_POINT, RemoveWorksheetMergeMutation, SetWorksheetColWidthMutation, SetWorksheetRowAutoHeightMutation, SetWorksheetRowHeightMutation, SetWorksheetRowIsAutoHeightMutation, SheetInterceptorService } from '@univerjs/sheets';
 import { IEditorBridgeService, SetCellEditVisibleOperation } from '@univerjs/sheets-ui';
 import { getDrawingSizeByCell } from './sheet-drawing-update.controller';
@@ -85,8 +86,8 @@ export class SheetCellImageController extends Disposable {
         this.disposeWithMe(this._commandService.beforeCommandExecuted((commandInfo) => {
             if (commandInfo.id === SetCellEditVisibleOperation.id) {
                 const params = commandInfo.params as IEditorBridgeServiceVisibleParam;
-                const { visible } = params;
-                if (visible) {
+                const { visible, eventType } = params;
+                if (visible && eventType === DeviceInputEventType.Dblclick) {
                     const editState = this._editorBridgeService.getEditCellState();
                     const drawingCount = editState?.documentLayoutObject.documentModel?.getDrawingsOrder()?.length ?? 0;
                     if (drawingCount > 0) {

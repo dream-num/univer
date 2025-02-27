@@ -76,26 +76,6 @@ export class SelectionRenderModel implements IRangeWithCoord {
         return false;
     }
 
-    /**
-     * @deprecated, Duplicate with `Rectangle`
-     */
-    isInclude(rangeWithCoord: IRangeWithCoord) {
-        const { startColumn, startRow, endColumn, endRow } = this;
-        const {
-            startColumn: newStartColumn,
-            startRow: newStartRow,
-            endColumn: newEndColumn,
-            endRow: newEndRow,
-        } = rangeWithCoord;
-
-        if (
-            !(newEndColumn < startColumn || newStartColumn > endColumn || newStartRow > endRow || newEndRow < startRow)
-        ) {
-            return true;
-        }
-        return false;
-    }
-
     highlightToSelection(): Nullable<IRangeWithCoord> {
         if (!this._primary) return;
         return convertCellToRange(this._primary);

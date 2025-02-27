@@ -23,7 +23,7 @@ import styles from './index.module.less';
 
 interface IRenderShortcutItem {
     title: string;
-    shortcut: string;
+    shortcut: string | null;
 }
 
 interface IShortcutGroup {
@@ -76,7 +76,6 @@ export function ShortcutPanel() {
             .sort((a, b) => a.sequence - b.sequence);
 
         setShortcutItems(toRender);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [shortcutService, localeService, currentLocale]);
 
     useEffect(() => {

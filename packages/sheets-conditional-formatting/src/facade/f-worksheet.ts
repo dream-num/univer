@@ -15,19 +15,21 @@
  */
 
 import type {
-    IAddConditionalRuleMutationParams,
+    IAddCfCommandParams,
     IAnchor,
+    IClearWorksheetCfParams,
     IConditionFormattingRule,
-    IDeleteConditionalRuleMutationParams,
-    IMoveConditionalRuleMutationParams,
-    ISetConditionalRuleMutationParams,
+    IDeleteCfCommandParams,
+    IMoveCfCommandParams,
+    ISetCfCommandParams,
 } from '@univerjs/sheets-conditional-formatting';
 import {
-    AddConditionalRuleMutation,
+    AddCfCommand,
+    ClearWorksheetCfCommand,
     ConditionalFormattingRuleModel,
-    DeleteConditionalRuleMutation,
-    MoveConditionalRuleMutation,
-    SetConditionalRuleMutation,
+    DeleteCfCommand,
+    MoveCfCommand,
+    SetCfCommand,
 } from '@univerjs/sheets-conditional-formatting';
 import { FWorksheet } from '@univerjs/sheets/facade';
 import { FConditionalFormattingBuilder } from './conditional-formatting-builder';
@@ -175,6 +177,20 @@ export interface IFWorksheetConditionalFormattingMixin {
      * ```
      */
     setConditionalFormattingRule(cfId: string, rule: IConditionFormattingRule): FWorksheet;
+
+    /**
+     * Removes all conditional format rules from the sheet.
+     * @returns {FWorksheet} Returns the current worksheet instance for method chaining
+     * @memberof IFWorksheetConditionalFormattingMixin
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * fWorksheet.clearConditionalFormatRules();
+     * console.log(fWorksheet.getConditionalFormattingRules());
+     * ```
+     */
+    clearConditionalFormatRules(): FWorksheet;
 }
 
 export class FWorksheetConditionalFormattingMixin extends FWorksheet implements IFWorksheetConditionalFormattingMixin {
@@ -196,38 +212,53 @@ export class FWorksheetConditionalFormattingMixin extends FWorksheet implements 
     }
 
     override addConditionalFormattingRule(rule: IConditionFormattingRule): FWorksheet {
-        const params: IAddConditionalRuleMutationParams = {
-            rule, unitId: this._workbook.getUnitId(), subUnitId: this._worksheet.getSheetId(),
+        const params: IAddCfCommandParams = {
+            unitId: this._workbook.getUnitId(),
+            subUnitId: this._worksheet.getSheetId(),
+            rule,
         };
-        this._commandService.syncExecuteCommand(AddConditionalRuleMutation.id, params);
+        this._commandService.syncExecuteCommand(AddCfCommand.id, params);
         return this;
     }
 
     override deleteConditionalFormattingRule(cfId: string): FWorksheet {
-        const params: IDeleteConditionalRuleMutationParams = {
-            unitId: this._workbook.getUnitId(), subUnitId: this._worksheet.getSheetId(),
+        const params: IDeleteCfCommandParams = {
+            unitId: this._workbook.getUnitId(),
+            subUnitId: this._worksheet.getSheetId(),
             cfId,
         };
-        this._commandService.syncExecuteCommand(DeleteConditionalRuleMutation.id, params);
+        this._commandService.syncExecuteCommand(DeleteCfCommand.id, params);
         return this;
     }
 
     override moveConditionalFormattingRule(cfId: string, toCfId: string, type: IAnchor['type'] = 'after'): FWorksheet {
-        const params: IMoveConditionalRuleMutationParams = {
-            unitId: this._workbook.getUnitId(), subUnitId: this._worksheet.getSheetId(),
-            start: { id: cfId, type: 'self' }, end: { id: toCfId, type },
+        const params: IMoveCfCommandParams = {
+            unitId: this._workbook.getUnitId(),
+            subUnitId: this._worksheet.getSheetId(),
+            start: { id: cfId, type: 'self' },
+            end: { id: toCfId, type },
         };
-        this._commandService.syncExecuteCommand(MoveConditionalRuleMutation.id, params);
+        this._commandService.syncExecuteCommand(MoveCfCommand.id, params);
         return this;
     }
 
     override setConditionalFormattingRule(cfId: string, rule: IConditionFormattingRule): FWorksheet {
-        const params: ISetConditionalRuleMutationParams = {
-            unitId: this._workbook.getUnitId(), subUnitId: this._worksheet.getSheetId(),
-            rule,
+        const params: ISetCfCommandParams = {
+            unitId: this._workbook.getUnitId(),
+            subUnitId: this._worksheet.getSheetId(),
             cfId,
+            rule,
         };
-        this._commandService.syncExecuteCommand(SetConditionalRuleMutation.id, params);
+        this._commandService.syncExecuteCommand(SetCfCommand.id, params);
+        return this;
+    }
+
+    override clearConditionalFormatRules(): FWorksheet {
+        const params: IClearWorksheetCfParams = {
+            unitId: this._workbook.getUnitId(),
+            subUnitId: this._worksheet.getSheetId(),
+        };
+        this._commandService.syncExecuteCommand(ClearWorksheetCfCommand.id, params);
         return this;
     }
 }

@@ -25,9 +25,8 @@ import {
     Plugin,
     UniverInstanceType,
 } from '@univerjs/core';
-import { SHEET_CONDITIONAL_FORMATTING_PLUGIN, UniverSheetsConditionalFormattingPlugin } from '@univerjs/sheets-conditional-formatting';
+import { AddCfCommand, ClearRangeCfCommand, ClearWorksheetCfCommand, DeleteCfCommand, MoveCfCommand, SetCfCommand, SHEET_CONDITIONAL_FORMATTING_PLUGIN, UniverSheetsConditionalFormattingPlugin } from '@univerjs/sheets-conditional-formatting';
 import { AddAverageCfCommand } from './commands/commands/add-average-cf.command';
-import { AddCfCommand } from './commands/commands/add-cf.command';
 import { AddColorScaleConditionalRuleCommand } from './commands/commands/add-color-scale-cf.command';
 import { AddDataBarConditionalRuleCommand } from './commands/commands/add-data-bar-cf.command';
 import { AddDuplicateValuesCfCommand } from './commands/commands/add-duplicate-values-cf.command';
@@ -36,11 +35,6 @@ import { AddRankCfCommand } from './commands/commands/add-rank-cf.command';
 import { AddTextCfCommand } from './commands/commands/add-text-cf.command';
 import { AddTimePeriodCfCommand } from './commands/commands/add-time-period-cf.command';
 import { AddUniqueValuesCfCommand } from './commands/commands/add-unique-values-cf.command';
-import { ClearRangeCfCommand } from './commands/commands/clear-range-cf.command';
-import { ClearWorksheetCfCommand } from './commands/commands/clear-worksheet-cf.command';
-import { DeleteCfCommand } from './commands/commands/delete-cf.command';
-import { MoveCfCommand } from './commands/commands/move-cf.command';
-import { SetCfCommand } from './commands/commands/set-cf.command';
 
 import { OpenConditionalFormattingOperator } from './commands/operations/open-conditional-formatting-panel';
 import { ConditionalFormattingCopyPasteController } from './controllers/cf.copy-paste.controller';

@@ -18,9 +18,9 @@ import type { IDisposable, IRange, Nullable } from '@univerjs/core';
 import type { IColumnsHeaderCfgParam, IRowsHeaderCfgParam, RenderComponentType, RenderManagerService, SpreadsheetColumnHeader, SpreadsheetRowHeader, SpreadsheetSkeleton } from '@univerjs/engine-render';
 
 import type { IScrollState, IViewportScrollState } from '@univerjs/sheets-ui';
-import { BooleanNumber, ICommandService, toDisposable } from '@univerjs/core';
+import { ICommandService, toDisposable } from '@univerjs/core';
 import { IRenderManagerService, SHEET_VIEWPORT_KEY, sheetContentViewportKeys } from '@univerjs/engine-render';
-import { SetWorksheetRowIsAutoHeightMutation } from '@univerjs/sheets';
+import { SetWorksheetRowIsAutoHeightCommand } from '@univerjs/sheets';
 import { SetColumnHeaderHeightCommand, SetRowHeaderWidthCommand, SetWorksheetColAutoWidthCommand, SetZoomRatioCommand, SHEET_VIEW_KEY, SheetScrollManagerService, SheetSkeletonManagerService, SheetsScrollRenderController } from '@univerjs/sheets-ui';
 import { FWorksheet } from '@univerjs/sheets/facade';
 
@@ -437,11 +437,10 @@ export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSk
             },
         ];
 
-        this._commandService.syncExecuteCommand(SetWorksheetRowIsAutoHeightMutation.id, {
+        this._commandService.syncExecuteCommand(SetWorksheetRowIsAutoHeightCommand.id, {
             unitId,
             subUnitId,
             ranges,
-            autoHeightInfo: BooleanNumber.TRUE,
         });
 
         return this;

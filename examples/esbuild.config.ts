@@ -307,6 +307,7 @@ async function main() {
 
         console.log(`Local server: ${url}`);
     } else {
+        await monacoBuildTask();
         await esbuild.build(config);
     }
 }

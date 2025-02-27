@@ -146,7 +146,6 @@ export const EditorDeleteLeftShortcutInActive: IShortcutItem = {
     group: '4_sheet-edit',
     preconditions: (contextService) => whenSheetEditorFocused(contextService) && !whenFormulaEditorFocused(contextService),
     binding: KeyCode.BACKSPACE,
-    mac: KeyCode.DELETE,
     staticParameters: {
         visible: true,
         eventType: DeviceInputEventType.Keyboard,

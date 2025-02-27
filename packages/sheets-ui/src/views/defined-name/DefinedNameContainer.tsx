@@ -18,13 +18,12 @@ import type { Nullable, Workbook } from '@univerjs/core';
 
 import type { IDefinedNamesServiceParam, ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
 import { ICommandService, IUniverInstanceService, LocaleService, Tools, UniverInstanceType } from '@univerjs/core';
-import { Confirm, Tooltip } from '@univerjs/design';
+import { clsx, Confirm, Tooltip } from '@univerjs/design';
 import { IDefinedNamesService, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { CheckMarkSingle, DeleteSingle, IncreaseSingle } from '@univerjs/icons';
 import { InsertDefinedNameCommand, RemoveDefinedNameCommand, SCOPE_WORKBOOK_VALUE_DEFINED_NAME, SetDefinedNameCommand, SetWorksheetShowCommand, SheetsSelectionsService } from '@univerjs/sheets';
 import { useDependency } from '@univerjs/ui';
-import clsx from 'clsx';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { DefinedNameInput } from './DefinedNameInput';
 import styles from './index.module.less';
 

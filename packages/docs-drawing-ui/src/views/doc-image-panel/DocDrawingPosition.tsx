@@ -18,14 +18,13 @@ import type { ICommandInfo, IDrawingParam, IObjectPositionH, IObjectPositionV, N
 import type { IDocDrawing } from '@univerjs/docs-drawing';
 import type { IDocumentSkeletonDrawing } from '@univerjs/engine-render';
 import { DocumentFlavor, ICommandService, IUniverInstanceService, LocaleService, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType } from '@univerjs/core';
-import { Checkbox, InputNumber, Select } from '@univerjs/design';
+import { Checkbox, clsx, InputNumber, Select } from '@univerjs/design';
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { useDependency } from '@univerjs/ui';
-import clsx from 'clsx';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { UpdateDrawingDocTransformCommand } from '../../commands/commands/update-doc-drawing.command';
 import styles from './index.module.less';
 
@@ -358,7 +357,6 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
             subscription.unsubscribe();
             mutationListener.dispose();
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (

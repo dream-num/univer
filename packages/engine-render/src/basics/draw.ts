@@ -93,8 +93,8 @@ export function drawLineByBorderType(ctx: UniverRenderingContext, type: BORDER_L
     ctx.beginPath();
     ctx.moveToByPrecision(drawStartX, drawStartY);
     ctx.lineToByPrecision(drawEndX, drawEndY);
-    ctx.closePathByEnv();
     ctx.stroke();
+    ctx.closePathByEnv();
 }
 
 export function drawDiagonalLineByBorderType(ctx: UniverRenderingContext, type: BORDER_LTRB, position: IPosition) {
@@ -196,7 +196,7 @@ export function clearLineByBorderType(ctx: UniverRenderingContext, type: BORDER_
 
 export function setLineType(ctx: UniverRenderingContext, style: BorderStyleTypes) {
     if (style === BorderStyleTypes.HAIR) {
-        ctx.setLineDash([1, 2]);
+        ctx.setLineDash([1, 1]);
     } else if (style === BorderStyleTypes.DASH_DOT_DOT || style === BorderStyleTypes.MEDIUM_DASH_DOT_DOT) {
         ctx.setLineDash([2, 2, 5, 2, 2]);
     } else if (

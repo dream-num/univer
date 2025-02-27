@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-import { Dropdown } from '@univerjs/design';
+import { clsx, Dropdown } from '@univerjs/design';
 import { IDefinedNamesService } from '@univerjs/engine-formula';
 import { MoreDownSingle } from '@univerjs/icons';
 import { useDependency } from '@univerjs/ui';
-import clsx from 'clsx';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { DefinedNameOverlay } from './DefinedNameOverlay';
 import styles from './index.module.less';
 
@@ -35,7 +34,6 @@ export function DefinedName({ disable }: { disable: boolean }) {
         return () => {
             subscription.unsubscribe();
         };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []); // Empty dependency array means this effect runs once on mount and clean up on unmount
 
     // TODO: @DR-Univer: Should be implemented

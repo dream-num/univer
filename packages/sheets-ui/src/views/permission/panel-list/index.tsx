@@ -19,16 +19,13 @@ import type { IPermissionPoint } from '@univerjs/protocol';
 import type { IRangeProtectionRule, IWorksheetProtectionRule } from '@univerjs/sheets';
 import type { IPermissionPanelRule } from '../../../services/permission/sheet-permission-panel.model';
 import { IAuthzIoService, ICommandService, IPermissionService, IUniverInstanceService, LocaleService, Tools, UniverInstanceType, UserManagerService } from '@univerjs/core';
-import { Avatar, Button, Tooltip } from '@univerjs/design';
+import { Avatar, Button, clsx, Tooltip } from '@univerjs/design';
 import { serializeRange } from '@univerjs/engine-formula';
 import { DeleteSingle, WriteSingle } from '@univerjs/icons';
 import { UnitAction, UnitObject } from '@univerjs/protocol';
 import { baseProtectionActions, DeleteRangeProtectionCommand, DeleteWorksheetProtectionCommand, RangeProtectionRuleModel, SetWorksheetActiveOperation, WorkbookCreateProtectPermission, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import { ISidebarService, useDependency, useObservable } from '@univerjs/ui';
-import clsx from 'clsx';
-
-import React, { useCallback, useEffect, useState } from 'react';
-
+import { useCallback, useEffect, useState } from 'react';
 import { distinctUntilChanged, merge } from 'rxjs';
 import { UNIVER_SHEET_PERMISSION_PANEL } from '../../../consts/permission';
 import { useHighlightRange } from '../../../hooks/use-highlight-range';

@@ -209,11 +209,13 @@ export class EditingRenderController extends Disposable implements IRenderModule
 
     private _initialCursorSync(d: DisposableCollection) {
         d.add(this._cellEditorManagerService.focus$.pipe(filter((f) => !!f)).subscribe(() => {
-            const docSelectionRenderManager = this._renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_DOC)?.with(DocSelectionRenderService);
+            const currentDoc = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC);
+            if (!currentDoc) return;
 
-            if (docSelectionRenderManager) {
-                docSelectionRenderManager.sync();
-            }
+            const docSelectionRenderManager = this._renderManagerService.getRenderById(currentDoc?.getUnitId())?.with(DocSelectionRenderService);
+            if (!docSelectionRenderManager) return;
+
+            docSelectionRenderManager.sync();
         }));
     }
 

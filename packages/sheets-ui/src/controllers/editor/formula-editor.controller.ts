@@ -16,7 +16,8 @@
 
 import type { Nullable } from '@univerjs/core';
 import type {
-    IRichTextEditingMutationParams } from '@univerjs/docs';
+    IRichTextEditingMutationParams,
+} from '@univerjs/docs';
 import type { RenderComponentType } from '@univerjs/engine-render';
 import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 import {
@@ -69,7 +70,7 @@ export class FormulaEditorController extends RxDisposable {
         this._listenFxBtnClick();
         this._handleContentChange();
 
-        this._renderManagerService.currentRender$.pipe(takeUntil(this.dispose$)).subscribe((unitId) => {
+        this._univerInstanceService.focused$.pipe(takeUntil(this.dispose$)).subscribe((unitId) => {
             this._create(unitId);
         });
 

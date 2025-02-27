@@ -125,7 +125,7 @@ function DropdownMenuSubContent({
             data-slot="dropdown-menu-sub-content"
             className={clsx(
                 `
-                  univer-z-50 univer-box-border univer-max-h-[var(--radix-popper-available-height)]
+                  univer-z-[1080] univer-box-border univer-max-h-[var(--radix-popper-available-height)]
                   univer-overflow-y-auto univer-rounded-md univer-border univer-border-solid univer-border-gray-200
                   univer-bg-white univer-p-1.5 univer-text-gray-900 univer-shadow-md univer-scrollbar-thin
                   univer-scrollbar-track-gray-50 univer-scrollbar-thumb-gray-300
@@ -158,7 +158,7 @@ function DropdownMenuContent({
                 sideOffset={sideOffset}
                 className={clsx(
                     `
-                      univer-z-50 univer-box-border univer-max-h-[var(--radix-popper-available-height)]
+                      univer-z-[1080] univer-box-border univer-max-h-[var(--radix-popper-available-height)]
                       univer-overflow-y-auto univer-rounded-md univer-border univer-border-solid univer-border-gray-200
                       univer-bg-white univer-p-1.5 univer-text-gray-900 univer-shadow-md univer-scrollbar-thin
                       univer-scrollbar-track-gray-50 univer-scrollbar-thumb-gray-300

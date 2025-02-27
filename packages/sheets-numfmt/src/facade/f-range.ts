@@ -34,10 +34,57 @@ export interface IFRangeSheetsNumfmtMixin {
      * const fWorksheet = fWorkbook.getActiveSheet();
      * const fRange = fWorksheet.getRange('A1');
      * fRange.setValue(1234.567).setNumberFormat('#,##0.00');
-     * console.log(fRange.getValue()); // 1,234.57
+     * console.log(fRange.getDisplayValue()); // 1,234.57
      * ```
      */
     setNumberFormat(pattern: string): FRange;
+
+    /**
+     * Sets a rectangular grid of number formats (must match dimensions of this range).
+     * @param {string[][]} patterns - A two-dimensional array of number formats.
+     * @returns {FRange} The FRange instance for chaining.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:B2');
+     * fRange.setValues([
+     *   [1234.567, 0.1234],
+     *   [45658, 0.9876]
+     * ]).setNumberFormats([
+     *   ['#,##0.00', '0.00%'],
+     *   ['yyyy-MM-DD', '']
+     * ]);
+     * console.log(fRange.getDisplayValues()); // [['1,234.57', '12.34%'], ['2025-01-01', 0.9876]]
+     * ```
+     */
+    setNumberFormats(patterns: string[][]): FRange;
+
+    /**
+     * Get the number formatting of the top-left cell of the given range. Empty cells return an empty string.
+     * @returns {string} The number format of the top-left cell of the range.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:B2');
+     * console.log(fRange.getNumberFormat());
+     * ```
+     */
+    getNumberFormat(): string;
+
+    /**
+     * Returns the number formats for the cells in the range.
+     * @returns {string[][]} A two-dimensional array of number formats.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:B2');
+     * console.log(fRange.getNumberFormats());
+     * ```
+     */
+    getNumberFormats(): string[][];
 }
 
 export class FRangeLegacy extends FRange implements IFRangeSheetsNumfmtMixin {
@@ -54,6 +101,33 @@ export class FRangeLegacy extends FRange implements IFRangeSheetsNumfmtMixin {
         } as ISetNumfmtCommandParams);
 
         return this;
+    }
+
+    override setNumberFormats(patterns: string[][]): FRange {
+        const values: ISetNumfmtCommandParams['values'] = [];
+
+        // Add number format info to the `values` array.
+        this.forEach((row, col) => {
+            const pattern = patterns[row]?.[col];
+            values.push({ row, col, pattern });
+        });
+        this._commandService.syncExecuteCommand(SetNumfmtCommand.id, {
+            unitId: this._workbook.getUnitId(),
+            subUnitId: this._worksheet.getSheetId(),
+            values,
+        } as ISetNumfmtCommandParams);
+
+        return this;
+    }
+
+    override getNumberFormat(): string {
+        const style = this.getCellStyle();
+        return style?.numberFormat?.pattern ?? '';
+    }
+
+    override getNumberFormats(): string[][] {
+        const styles = this.getCellStyles();
+        return styles.map((row) => row.map((cellStyle) => cellStyle?.numberFormat?.pattern ?? ''));
     }
 }
 

@@ -16,7 +16,8 @@
 
 import type { DocumentDataModel, IAccessor, PresetListType } from '@univerjs/core';
 import type {
-    IRichTextEditingMutationParams } from '@univerjs/docs';
+    IRichTextEditingMutationParams,
+} from '@univerjs/docs';
 import type { IMenuButtonItem, IMenuItem, IMenuSelectorItem } from '@univerjs/ui';
 import type { Subscription } from 'rxjs';
 import {
@@ -70,8 +71,8 @@ function getInsertTableHiddenObservable(
             if (unitId == null) {
                 return subscriber.next(true);
             }
-            const univerType = univerInstanceService.getUnitType(unitId);
 
+            const univerType = univerInstanceService.getUnitType(unitId);
             if (univerType !== UniverInstanceType.UNIVER_DOC) {
                 return subscriber.next(true);
             }
@@ -87,15 +88,6 @@ function getInsertTableHiddenObservable(
                 subscriber.next(editArea === DocumentEditArea.HEADER || editArea === DocumentEditArea.FOOTER);
             });
         });
-
-        const currentRender = renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_DOC);
-        if (currentRender == null) {
-            return subscriber.next(true);
-        }
-
-        const viewModel = currentRender.with(DocSkeletonManagerService).getViewModel();
-
-        subscriber.next(viewModel.getEditArea() !== DocumentEditArea.BODY);
 
         return () => subscription.unsubscribe();
     });
@@ -464,7 +456,6 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
         selections: FONT_FAMILY_LIST.map((item) => ({
             label: {
                 name: FONT_FAMILY_ITEM_COMPONENT,
-                hoverable: true,
             },
             value: item.value,
         })),
@@ -555,6 +546,7 @@ export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSele
                 label: {
                     name: COLOR_PICKER_COMPONENT,
                     hoverable: false,
+                    selectable: false,
                 },
             },
         ],
@@ -800,11 +792,13 @@ export function OrderListMenuItemFactory(accessor: IAccessor): IMenuSelectorItem
     return {
         id: OrderListCommand.id,
         type: MenuItemType.BUTTON_SELECTOR,
+        slot: true,
         selections: [
             {
                 label: {
                     name: ORDER_LIST_TYPE_COMPONENT,
                     hoverable: false,
+                    selectable: false,
                 },
                 value$: listValueFactory$(accessor),
             },
@@ -821,11 +815,13 @@ export function BulletListMenuItemFactory(accessor: IAccessor): IMenuSelectorIte
     return {
         id: BulletListCommand.id,
         type: MenuItemType.BUTTON_SELECTOR,
+        slot: true,
         selections: [
             {
                 label: {
                     name: BULLET_LIST_TYPE_COMPONENT,
                     hoverable: false,
+                    selectable: false,
                 },
                 value$: listValueFactory$(accessor),
             },
@@ -901,6 +897,7 @@ export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMe
                 label: {
                     name: COLOR_PICKER_COMPONENT,
                     hoverable: false,
+                    selectable: false,
                 },
             },
         ],

@@ -14,15 +14,4 @@
  * limitations under the License.
  */
 
-// import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, IUniverInstanceService, useDependency } from '@univerjs/core';
-import { useEffect } from 'react';
-
-export const useRefocus = () => {
-    // const univerInstanceService = useDependency(IUniverInstanceService);
-
-    useEffect(() => {
-        return () => {
-            // univerInstanceService.focusUnit(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
-        };
-    }, []);
-};
+export { Separator } from './Separator';

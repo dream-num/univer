@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import type {
-    MenuRef } from '@univerjs/design';
+import type { MenuRef } from '@univerjs/design';
 import type {
     IDisplayMenuItem,
     IMenuButtonItem,
@@ -26,15 +25,13 @@ import type {
 } from '../../../services/menu/menu';
 import { isRealNum } from '@univerjs/core';
 import {
+    clsx,
     Menu as DesignMenu,
     MenuItem as DesignMenuItem,
-    MenuItemGroup as DesignMenuItemGroup,
-    SubMenu as DesignSubMenu,
+    MenuItemGroup as DesignMenuItemGroup, SubMenu as DesignSubMenu,
 } from '@univerjs/design';
 import { CheckMarkSingle, MoreSingle } from '@univerjs/icons';
-import clsx from 'clsx';
-
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { combineLatest, isObservable, of } from 'rxjs';
 import { ILayoutService } from '../../../services/layout/layout.service';
 import { MenuItemType } from '../../../services/menu/menu';
@@ -46,6 +43,7 @@ import styles from './index.module.less';
 
 // TODO: @jikkai disabled and hidden are not working
 
+/** @deprecated */
 export interface IBaseMenuProps {
     parentKey?: string | number;
     menuType?: string;
@@ -60,6 +58,7 @@ export interface IBaseMenuProps {
     onOptionSelect?: (option: IValueOption) => void;
 }
 
+/** @deprecated */
 function MenuWrapper(props: IBaseMenuProps) {
     const { menuType, onOptionSelect } = props;
 
@@ -132,6 +131,7 @@ function MenuWrapper(props: IBaseMenuProps) {
             : null);
 }
 
+/** @deprecated */
 function MenuOptionsWrapper(props: IBaseMenuProps) {
     const { options, value, onOptionSelect, parentKey } = props;
 
@@ -181,6 +181,7 @@ function MenuOptionsWrapper(props: IBaseMenuProps) {
     }) ?? null;
 }
 
+/** @deprecated */
 export const Menu = (props: IBaseMenuProps) => {
     const { overViewport, ...restProps } = props;
     const [menuEl, setMenuEl] = useState<HTMLDListElement>();
@@ -205,11 +206,13 @@ export const Menu = (props: IBaseMenuProps) => {
     );
 };
 
+/** @deprecated */
 interface IMenuItemProps {
     menuItem: IDisplayMenuItem<IMenuItem>;
     onClick: (object: Partial<IValueOption>) => void;
 }
 
+/** @deprecated */
 function MenuItem({ menuItem, onClick }: IMenuItemProps) {
     const menuManagerService = useDependency(IMenuManagerService);
 

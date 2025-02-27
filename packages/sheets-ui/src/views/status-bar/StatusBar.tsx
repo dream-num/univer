@@ -18,9 +18,8 @@ import type { Nullable } from '@univerjs/core';
 import type { IStatusBarServiceStatus, StatusBarService } from '../../services/status-bar.service';
 import type { IStatisticItem } from './CopyableStatisticItem';
 import { debounce, IConfigService } from '@univerjs/core';
+import { clsx } from '@univerjs/design';
 import { useDependency } from '@univerjs/ui';
-
-import clsx from 'clsx';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { HIDE_STATUS_BAR_STATISTIC } from '../../controllers/config.schema';
 import { IStatusBarService } from '../../services/status-bar.service';

@@ -18,6 +18,7 @@ import type { ICommandInfo, Workbook } from '@univerjs/core';
 import type { ISetWorksheetActiveOperationParams } from '@univerjs/sheets';
 import type { IBaseSheetBarProps } from '../../sheet-bar/sheet-bar-tabs/SheetBarItem';
 import { ICommandService } from '@univerjs/core';
+import { clsx } from '@univerjs/design';
 import {
     InsertSheetMutation,
     RemoveSheetMutation,
@@ -27,9 +28,7 @@ import {
     SetWorksheetOrderMutation,
 } from '@univerjs/sheets';
 import { useDependency } from '@univerjs/ui';
-import clsx from 'clsx';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useActiveWorkbook } from '../../../components/hook';
 import styles from './index.module.less';
 

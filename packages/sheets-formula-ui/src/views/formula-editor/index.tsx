@@ -17,28 +17,28 @@
 import type { DocumentDataModel, IDisposable, ITextRange } from '@univerjs/core';
 import type { Editor, IKeyboardEventConfig } from '@univerjs/docs-ui';
 import type { KeyCode, MetaKeys } from '@univerjs/ui';
-import type { ReactNode } from 'react';
-import type { IRefSelection } from '../range-selector/hooks/use-highlight';
+import type { CSSProperties, ReactNode } from 'react';
 import type { FormulaSelectingType } from './hooks/use-formula-selection';
+import type { IRefSelection } from './hooks/use-highlight';
 import { BuildTextUtils, createInternalEditorID, generateRandomId, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { clsx } from '@univerjs/design';
 import { DocBackScrollRenderController, DocSelectionRenderService, IEditorService, useKeyboardEvent, useResize } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { EMBEDDING_FORMULA_EDITOR } from '@univerjs/sheets-ui';
 import { useDependency, useEvent, useObservable, useUpdateEffect } from '@univerjs/ui';
-import clsx from 'clsx';
-import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { useFocus } from '../range-selector/hooks/use-focus';
-import { useFormulaToken } from '../range-selector/hooks/use-formula-token';
-import { useDocHight, useSheetHighlight } from '../range-selector/hooks/use-highlight';
-import { useLeftAndRightArrow } from '../range-selector/hooks/use-left-and-right-arrow';
-import { useRefactorEffect } from '../range-selector/hooks/use-refactor-effect';
-import { useResetSelection } from '../range-selector/hooks/use-reset-selection';
-import { useSwitchSheet } from '../range-selector/hooks/use-switch-sheet';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { findIndexFromSequenceNodes, findRefSequenceIndex } from '../range-selector/utils/find-index-from-sequence-nodes';
 import { HelpFunction } from './help-function/HelpFunction';
+import { useFocus } from './hooks/use-focus';
 import { useFormulaSelecting } from './hooks/use-formula-selection';
+import { useFormulaToken } from './hooks/use-formula-token';
+import { useDocHight, useSheetHighlight } from './hooks/use-highlight';
+import { useLeftAndRightArrow } from './hooks/use-left-and-right-arrow';
+import { useRefactorEffect } from './hooks/use-refactor-effect';
+import { useResetSelection } from './hooks/use-reset-selection';
 import { useSheetSelectionChange } from './hooks/use-sheet-selection-change';
 import { useStateRef } from './hooks/use-state-ref';
+import { useSwitchSheet } from './hooks/use-switch-sheet';
 import { useVerify } from './hooks/use-verify';
 import styles from './index.module.less';
 import { SearchFunction } from './search-function/SearchFunction';
@@ -72,7 +72,7 @@ export interface IFormulaEditorProps {
      */
     disableSelectionOnClick?: boolean;
     disableContextMenu?: boolean;
-    style?: React.CSSProperties;
+    style?: CSSProperties;
 }
 
 const noop = () => { };

@@ -20,7 +20,8 @@
     "keywords": [],
     "exports": {
         ".": "./src/index.ts",
-        "./*": "./src/*"
+        "./*": "./src/*",
+        "./locale/*": "./src/locale/*.ts"
     },
     "main": "./src/index.ts",
     "types": "./lib/types/index.d.ts",
@@ -38,6 +39,11 @@
                 "import": "./lib/es/*",
                 "require": "./lib/cjs/*",
                 "types": "./lib/types/index.d.ts"
+            },
+            "./locale/*": {
+                "import": "./lib/es/locale/*.js",
+                "require": "./lib/cjs/locale/*.js",
+                "types": "./lib/types/locale/*.d.ts"
             },
             "./lib/*": "./lib/*"
         }
@@ -78,8 +84,8 @@
         "rxjs": "^7.8.1",
         "tailwindcss": "^3.4.17",
         "typescript": "^5.7.3",
-        "vite": "^6.1.1",
-        "vitest": "^3.0.6",
+        "vite": "^6.2.0",
+        "vitest": "^3.0.7",
         "vue": "^3.5.13"
     }
 }

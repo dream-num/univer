@@ -18,8 +18,8 @@ import type { IRange, Workbook } from '@univerjs/core';
 import type { IPermissionPanelRule } from '../../../services/permission/sheet-permission-panel.model';
 import { Injector, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { EditStateEnum, ViewStateEnum } from '@univerjs/sheets';
-import { ComponentContainer, ISidebarService, useComponentsOfPart, useDependency, useSidebarClick } from '@univerjs/ui';
-import React, { useEffect, useRef, useState } from 'react';
+import { ComponentContainer, ISidebarService, useComponentsOfPart, useDependency } from '@univerjs/ui';
+import React, { useEffect, useState } from 'react';
 import { UNIVER_SHEET_PERMISSION_USER_PART } from '../../../consts/permission';
 import { checkRangeValid, generateDefaultRule, generateRuleByUnitType } from '../util';
 import styles from './index.module.less';
@@ -44,14 +44,6 @@ export const SheetPermissionPanelDetail = (props: ISheetPermissionPanelDetailPro
     const [desc, setDesc] = useState<string | undefined>(activeRule.description);
     const [editState, setEditState] = useState<EditStateEnum>(activeRule.editState ?? EditStateEnum.OnlyMe);
     const [viewState, setViewState] = useState<ViewStateEnum>(activeRule.viewState ?? ViewStateEnum.OthersCanView);
-    const rangeSelectorActionsRef = useRef<any>({});
-    const [isFocusRangeSelector, isFocusRangeSelectorSet] = useState(false);
-
-    useSidebarClick((e: MouseEvent) => {
-        const handleOutClick = rangeSelectorActionsRef.current?.handleOutClick;
-        handleOutClick && handleOutClick(e, () => isFocusRangeSelectorSet(false));
-    });
-
     const PermissionDetailUserPart = useComponentsOfPart(UNIVER_SHEET_PERMISSION_USER_PART);
 
     useEffect(() => {
@@ -73,18 +65,15 @@ export const SheetPermissionPanelDetail = (props: ISheetPermissionPanelDetailPro
     return (
         <div className={styles.permissionPanelDetailWrapper}>
             <PermissionDetailMainPart
-                onFocus={() => isFocusRangeSelectorSet(true)}
                 permissionId={activeRule.permissionId}
                 ranges={ranges}
                 onRangesChange={(v: IRange[], err?: string) => {
                     setRanges(v);
                     setRangesErrMsg(err);
                 }}
-                isFocusRangeSelector={isFocusRangeSelector}
                 rangesErrMsg={rangesErrMsg}
                 desc={desc}
                 onDescChange={(v) => setDesc(v)}
-                rangeSelectorRef={rangeSelectorActionsRef}
             />
             <ComponentContainer
                 key="user-part"

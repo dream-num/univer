@@ -15,12 +15,10 @@
  */
 
 import { HorizontalAlign, LocaleService, SpacingRule } from '@univerjs/core';
-import { InputNumber, Select, Tooltip } from '@univerjs/design';
+import { clsx, InputNumber, Select, Tooltip } from '@univerjs/design';
 import { AlignTextBothSingle, HorizontallySingle, LeftJustifyingSingle, RightJustifyingSingle } from '@univerjs/icons';
 import { useDependency } from '@univerjs/ui';
-import clsx from 'clsx';
-import * as React from 'react';
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 import {
     useCurrentParagraph,
     useFirstParagraphHorizontalAlign,
@@ -38,7 +36,7 @@ const AutoFocusInputNumber = (props: {
     value: number; onChange: (v: number) => Promise<unknown>; className?: string; min?: number; max?: number; step?: number;
 }) => {
     const { value, onChange, className = '', min = 0, max = 100, step = 1 } = props;
-    const ref = React.useRef<HTMLInputElement>(null);
+    const ref = useRef<HTMLInputElement>(null);
     return (
         <InputNumber
             step={step}

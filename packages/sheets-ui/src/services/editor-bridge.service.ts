@@ -188,7 +188,10 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
             return;
         }
 
-        const ru = this._renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET);
+        const currentSheet = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SHEET);
+        if (!currentSheet) return;
+
+        const ru = this._renderManagerService.getRenderUnitById(currentSheet.getUnitId());
         if (!ru) return;
 
         const skeleton = ru.with(SheetSkeletonManagerService).getSkeletonParam(currentEditCell.sheetId)?.skeleton;
@@ -304,11 +307,12 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
     // eslint-disable-next-line max-lines-per-function
     getLatestEditCellState() {
         const currentEditCell = this._currentEditCell;
-        if (currentEditCell == null) {
-            return;
-        }
+        if (currentEditCell == null) return;
 
-        const ru = this._renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET);
+        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        if (!workbook) return;
+
+        const ru = this._renderManagerService.getRenderUnitById(workbook.getUnitId());
         if (!ru) return;
 
         const skeleton = ru.with(SheetSkeletonManagerService).getCurrentSkeleton();
@@ -318,9 +322,7 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
         const { primary, unitId, sheetId, scene, engine } = currentEditCell;
         const { startRow, startColumn } = primary;
         const primaryWithCoord = attachPrimaryWithCoord(skeleton, primary);
-        if (primaryWithCoord == null) {
-            return;
-        }
+        if (primaryWithCoord == null) return;
 
         const actualRangeWithCoord = convertCellToRange(primaryWithCoord);
         const canvasOffset = getCanvasOffsetByEngine(engine);
@@ -335,7 +337,6 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
         endX = convertTransformToOffsetX(endX, scaleX, scrollXY);
         endY = convertTransformToOffsetY(endY, scaleY, scrollXY);
 
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet();
         if (!worksheet) return;
 
@@ -357,7 +358,7 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
 
         documentLayoutObject = cell && skeleton.getCellDocumentModelWithFormula(cell);
 
-            // Rewrite the cellValueType to STRING to avoid render the value on the right side when number type.
+        // Rewrite the cellValueType to STRING to avoid render the value on the right side when number type.
         const renderConfig = documentLayoutObject?.documentModel?.documentStyle.renderConfig;
         if (renderConfig != null) {
             renderConfig.cellValueType = CellValueType.STRING;
@@ -376,7 +377,7 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
             }
             documentLayoutObject = blankModel;
         }
-            // background of canvas is set to transparent, so if no bgcolor sepcified in curr cell, set it to white.
+        // background of canvas is set to transparent, so if no bgcolor sepcified in curr cell, set it to white.
         documentLayoutObject.fill = documentLayoutObject.fill || '#fff';
         documentLayoutObject.documentModel?.setZoomRatio(Math.max(scaleX, scaleY));
 

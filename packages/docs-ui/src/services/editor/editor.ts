@@ -17,12 +17,14 @@
 import type { DocumentDataModel, ICommandService, IDocumentData, IDocumentStyle, IPosition, IUndoRedoService, IUniverInstanceService, Nullable } from '@univerjs/core';
 import type { DocSelectionManagerService } from '@univerjs/docs';
 import type { IDocSelectionInnerParam, IRender, ISuccinctDocRangeParam, ITextRangeWithStyle } from '@univerjs/engine-render';
+import type { Observable } from 'rxjs';
+import type { IEditorInputConfig } from '../selection/doc-selection-render.service';
 import { Disposable, isInternalEditorID, UniverInstanceType } from '@univerjs/core';
 import { KeyCode } from '@univerjs/ui';
-import { merge, type Observable, Subject } from 'rxjs';
+import { merge, Subject } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { ReplaceSnapshotCommand } from '../../commands/commands/replace-content.command';
-import { DocSelectionRenderService, type IEditorInputConfig } from '../selection/doc-selection-render.service';
+import { DocSelectionRenderService } from '../selection/doc-selection-render.service';
 
 interface IEditorEvent {
     target: IEditor;
@@ -261,7 +263,6 @@ export class Editor extends Disposable implements IEditor {
      */
     blur(): void {
         const docSelectionRenderService = this._param.render.with(DocSelectionRenderService);
-
         docSelectionRenderService.blur();
     }
 
@@ -277,14 +278,14 @@ export class Editor extends Disposable implements IEditor {
     }
 
     // Selects the specified range of characters within editor.
-    setSelectionRanges(ranges: ISuccinctDocRangeParam[]): void {
+    setSelectionRanges(ranges: ISuccinctDocRangeParam[], shouldFocus = true): void {
         const editorUnitId = this.getEditorId();
         const params = {
             unitId: editorUnitId,
             subUnitId: editorUnitId,
         };
 
-        return this._docSelectionManagerService.replaceDocRanges(ranges, params, false);
+        return this._docSelectionManagerService.replaceDocRanges(ranges, params, false, { shouldFocus });
     }
 
     // Get current doc ranges. include text range and rect range.
@@ -331,7 +332,7 @@ export class Editor extends Disposable implements IEditor {
         });
     }
 
-    replaceText(text: string, resetCursor = true) {
+    replaceText(text: string, resetCursor: boolean | ITextRangeWithStyle[] = true) {
         const data = this.getDocumentData();
 
         this.setDocumentData(
@@ -348,13 +349,15 @@ export class Editor extends Disposable implements IEditor {
                     textRuns: [],
                 },
             },
-            resetCursor
-                ? [{
-                    startOffset: text.length,
-                    endOffset: text.length,
-                    collapsed: true,
-                }]
-                : null
+            typeof resetCursor === 'object'
+                ? resetCursor
+                : resetCursor
+                    ? [{
+                        startOffset: text.length,
+                        endOffset: text.length,
+                        collapsed: true,
+                    }]
+                    : null
         );
     }
 

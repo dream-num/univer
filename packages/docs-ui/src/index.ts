@@ -25,7 +25,7 @@ export * from './basics/docs-view-key';
 export { hasParagraphInTable } from './basics/paragraph';
 export { docDrawingPositionToTransform, transformToDocDrawingPosition } from './basics/transform-position';
 export { type IKeyboardEventConfig, useKeyboardEvent, useResize } from './views/rich-text-editor/hooks';
-export { RichTextEditor } from './views/rich-text-editor';
+export { type IRichTextEditorProps, RichTextEditor } from './views/rich-text-editor';
 export { getCommandSkeleton, getRichTextEditPath } from './commands/util';
 // export { TextEditor } from './components/editor/TextEditor';
 // export { RangeSelector as DocRangeSelector } from './components/range-selector/RangeSelector';

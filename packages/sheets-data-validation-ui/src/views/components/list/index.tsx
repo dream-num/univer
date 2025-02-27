@@ -26,20 +26,7 @@ import { DataValidationPanelService } from '../../../services/data-validation-pa
 import { DataValidationItem } from '../item';
 import styles from './index.module.less';
 
-export function DataValidationList() {
-    const univerInstanceService = useDependency(IUniverInstanceService);
-    const workbook = useObservable(
-        () => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET),
-        undefined,
-        undefined,
-        []
-    );
-
-    if (!workbook) return null;
-    return <DataValidationListWithWorkbook workbook={workbook} />;
-}
-
-function DataValidationListWithWorkbook(props: { workbook: Workbook }) {
+export function DataValidationList(props: { workbook: Workbook }) {
     const sheetDataValidationModel = useDependency(SheetDataValidationModel);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const commandService = useDependency(ICommandService);

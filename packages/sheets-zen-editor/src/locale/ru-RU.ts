@@ -17,6 +17,9 @@
 import type zhCN from './zh-CN';
 
 const locale: typeof zhCN = {
+    rightClick: {
+        zenEditor: 'Редактор на весь экран',
+    },
     shortcut: {
         sheet: {
             'zen-edit-cancel': 'Отменить Zen редактирование',

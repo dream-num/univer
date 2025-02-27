@@ -15,9 +15,9 @@
  */
 
 import type { IUniverSheetsUIConfig } from './config.schema';
-import { Disposable, ICommandService, IConfigService, Inject, Injector, UniverInstanceType } from '@univerjs/core';
+import { Disposable, ICommandService, IConfigService, Inject, Injector, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { getCurrentTypeOfRenderer, IRenderManagerService } from '@univerjs/engine-render';
 
 import { HideGridlines } from '@univerjs/icons';
 import {
@@ -363,8 +363,8 @@ export class SheetUIController extends Disposable {
             this._layoutService.registerFocusHandler(UniverInstanceType.UNIVER_SHEET, (_unitId: string) => {
                 // DEBT: `_unitId` is not used hence we cannot support Univer mode now
                 const renderManagerService = this._injector.get(IRenderManagerService);
-
-                const currentEditorRender = renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_DOC);
+                const instanceService = this._injector.get(IUniverInstanceService);
+                const currentEditorRender = getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_DOC, instanceService, renderManagerService);
                 const docSelectionRenderService = currentEditorRender?.with(DocSelectionRenderService);
 
                 docSelectionRenderService?.focus();

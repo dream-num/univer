@@ -15,8 +15,8 @@
  */
 
 import type { ICommand, Nullable } from '@univerjs/core';
-import { CommandType, UniverInstanceType } from '@univerjs/core';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { CommandType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { getCurrentTypeOfRenderer, IRenderManagerService } from '@univerjs/engine-render';
 import { SheetDrawingUpdateController } from '../../controllers/sheet-drawing-update.controller';
 
 export interface IInsertImageCommandParams {
@@ -27,8 +27,13 @@ export const InsertFloatImageCommand: ICommand<IInsertImageCommandParams> = {
     id: 'sheet.command.insert-float-image',
     type: CommandType.COMMAND,
     handler: async (accessor, params) => {
+        const univerInstanceService = accessor.get(IUniverInstanceService);
         const renderManagerService = accessor.get(IRenderManagerService);
-        const sheetDrawingUpdateController = renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET)
+        const sheetDrawingUpdateController = getCurrentTypeOfRenderer(
+            UniverInstanceType.UNIVER_SHEET,
+            univerInstanceService,
+            renderManagerService
+        )
             ?.with(SheetDrawingUpdateController);
 
         if (!sheetDrawingUpdateController) {
@@ -50,8 +55,14 @@ export const InsertCellImageCommand: ICommand = {
     id: 'sheet.command.insert-cell-image',
     type: CommandType.COMMAND,
     handler: (accessor) => {
+        const univerInstanceService = accessor.get(IUniverInstanceService);
         const renderManagerService = accessor.get(IRenderManagerService);
-        return renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET)
+
+        return getCurrentTypeOfRenderer(
+            UniverInstanceType.UNIVER_SHEET,
+            univerInstanceService,
+            renderManagerService
+        )
             ?.with(SheetDrawingUpdateController)
             .insertCellImage() ?? false;
     },

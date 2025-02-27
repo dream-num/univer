@@ -15,8 +15,8 @@
  */
 
 import type { IMention, ITypeMentionList } from '@univerjs/core';
-import cs from 'clsx';
-import React, { useRef, useState } from 'react';
+import { clsx } from '@univerjs/design';
+import { useRef, useState } from 'react';
 import styles from './index.module.less';
 
 export interface IMentionListProps {
@@ -44,7 +44,7 @@ export const MentionList = (props: IMentionListProps) => {
                         <div
                             data-editorid={editorId}
                             key={mention.objectId}
-                            className={cs(styles.docMention, { [styles.docMentionActive]: activeId === mention.objectId })}
+                            className={clsx(styles.docMention, { [styles.docMentionActive]: activeId === mention.objectId })}
                             onClick={() => handleSelect(mention)}
                             onMouseEnter={() => setActiveId(mention.objectId)}
                         >

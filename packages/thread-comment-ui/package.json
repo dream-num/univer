@@ -71,8 +71,7 @@
         "@univerjs/docs-ui": "workspace:*",
         "@univerjs/icons": "^0.2.20",
         "@univerjs/thread-comment": "workspace:*",
-        "@univerjs/ui": "workspace:*",
-        "clsx": "^2.1.1"
+        "@univerjs/ui": "workspace:*"
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",

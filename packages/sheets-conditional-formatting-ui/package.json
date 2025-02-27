@@ -79,7 +79,6 @@
         "@univerjs/sheets-formula-ui": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "clsx": "^2.1.1",
         "react-grid-layout": "^1.4.4",
         "react-resizable": "^3.0.5"
     },

@@ -919,6 +919,21 @@ export class FWorksheet extends FBaseInitialable {
     }
 
     /**
+     * Sets the height of the given ranges to auto.
+     * @param {IRange[]} ranges - The ranges to change
+     * @returns {FWorksheet} This worksheet instance for chaining
+     * @example
+     * ```typescript
+     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * const ranges = [
+     * { startRow: 1, endRow: 10, startColumn: 0, endColumn: 10 },
+     * { startRow: 11, endRow: 20, startColumn: 0, endColumn: 10 },
+     * ]
+     * fWorksheet.setRowAutoHeight(ranges);
+     * ```
+     */
+    setRowAutoHeight(ranges: IRange[]): FWorksheet;
+    /**
      * Sets the height of the given rows to auto.
      * @param {number} startRow - The starting row position to change
      * @param {number} numRows - The number of rows to change
@@ -929,17 +944,25 @@ export class FWorksheet extends FBaseInitialable {
      * fWorksheet.setRowAutoHeight(1, 10);
      * ```
      */
-    setRowAutoHeight(startRow: number, numRows: number): FWorksheet {
+    setRowAutoHeight(startRow: number, numRows: number): FWorksheet;
+    setRowAutoHeight(startRow: number | IRange[], numRows?: number): FWorksheet {
+        let ranges: IRange[] = [];
+
+        if (Array.isArray(startRow)) {
+            ranges = startRow;
+        } else if (numRows !== undefined) {
+            ranges = [
+                {
+                    startRow,
+                    endRow: startRow + numRows - 1,
+                    startColumn: 0,
+                    endColumn: this._worksheet.getColumnCount() - 1,
+                },
+            ];
+        }
+
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
-        const ranges = [
-            {
-                startRow,
-                endRow: startRow + numRows - 1,
-                startColumn: 0,
-                endColumn: this._worksheet.getColumnCount() - 1,
-            },
-        ];
 
         this._commandService.syncExecuteCommand(SetWorksheetRowIsAutoHeightCommand.id, {
             unitId,

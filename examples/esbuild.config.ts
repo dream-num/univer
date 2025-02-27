@@ -290,24 +290,22 @@ const config: SameShape<BuildOptions, BuildOptions> = {
  * Build the project
  */
 async function main() {
+    await monacoBuildTask();
+
     if (args.watch) {
         const ctx = await esbuild.context(config);
-        await monacoBuildTask();
         await nodeBuildTask();
         await ctx.watch();
 
         const port = isE2E ? 3000 : await detect(3002);
-
         await ctx.serve({
             servedir: './local',
             port,
         });
 
         const url = `http://localhost:${port}`;
-
         console.log(`Local server: ${url}`);
     } else {
-        await monacoBuildTask();
         await esbuild.build(config);
     }
 }

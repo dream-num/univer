@@ -74,11 +74,62 @@ export interface IFUniverUIMixin {
 
     /**
      * Copy the current selected content of the currently focused unit into your system clipboard.
+     * @returns {Promise<boolean>} whether the copy operation is successful
+     * @example
+     * ```ts
+     * // Prevent failure due to loss of focus when executing copy and paste code in the console,
+     * // this example listens for the cell click event and executes the copy and paste code.
+     * univerAPI.addEvent(univerAPI.Event.CellClicked, async (params) => {
+     *   const fWorkbook = univerAPI.getActiveWorkbook();
+     *   const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     *   // Copy the range A1:B2 to the clipboard
+     *   const fRange = fWorksheet.getRange('A1:B2');
+     *   fRange.activate().setValues([
+     *     [1, 2],
+     *     [3, 4]
+     *   ]);
+     *   await univerAPI.copy();
+     *
+     *   // Paste the copied content to the range C1:D2
+     *   const fRange2 = fWorksheet.getRange('C1');
+     *   fRange2.activate();
+     *   await univerAPI.paste();
+     *
+     *   // Check the pasted content
+     *   console.log(fWorksheet.getRange('C1:D2').getValues()); // [[1, 2], [3, 4]]
+     * });
+     * ```
      */
     copy(): Promise<boolean>;
 
     /**
      * Paste into the current selected position of the currently focused unit from your system clipboard.
+     * @returns {Promise<boolean>} whether the paste operation is successful
+     * @example
+     * ```ts
+     * // Prevent failure due to loss of focus when executing copy and paste code in the console,
+     * // this example listens for the cell click event and executes the copy and paste code.
+     * univerAPI.addEvent(univerAPI.Event.CellClicked, async (params) => {
+     *   const fWorkbook = univerAPI.getActiveWorkbook();
+     *   const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     *   // Copy the range A1:B2 to the clipboard
+     *   const fRange = fWorksheet.getRange('A1:B2');
+     *   fRange.activate().setValues([
+     *     [1, 2],
+     *     [3, 4]
+     *   ]);
+     *   await univerAPI.copy();
+     *
+     *   // Paste the copied content to the range C1:D2
+     *   const fRange2 = fWorksheet.getRange('C1');
+     *   fRange2.activate();
+     *   await univerAPI.paste();
+     *
+     *   // Check the pasted content
+     *   console.log(fWorksheet.getRange('C1:D2').getValues()); // [[1, 2], [3, 4]]
+     * });
      * ```
      */
     paste(): Promise<boolean>;
@@ -382,11 +433,11 @@ export class FUniverUIMixin extends FUniver implements IFUniverUIMixin {
     }
 
     override copy(): Promise<boolean> {
-        return this._commandService.syncExecuteCommand(CopyCommand.id);
+        return this._commandService.executeCommand(CopyCommand.id);
     }
 
     override paste(): Promise<boolean> {
-        return this._commandService.syncExecuteCommand(PasteCommand.id);
+        return this._commandService.executeCommand(PasteCommand.id);
     }
 
     override createMenu(menuItem: IFacadeMenuItem): FMenu {

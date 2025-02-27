@@ -16,10 +16,10 @@
 
 import type { IHighlightCell } from '@univerjs/sheets-conditional-formatting';
 import { BooleanNumber } from '@univerjs/core';
+import { clsx } from '@univerjs/design';
 import { removeUndefinedAttr } from '@univerjs/sheets-conditional-formatting';
 import { ComponentManager, useDependency } from '@univerjs/ui';
-import cl from 'clsx';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ColorPicker } from '../color-picker';
 import styles from './index.module.less';
 
@@ -100,31 +100,40 @@ export const ConditionalStyleEditor = (props: IConditionalStyleEditorProps) => {
             resultStyle.ul = { s: isUnderline };
         }
         onChange(removeUndefinedAttr(resultStyle));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isBold, isItalic, isUnderline, isStrikethrough, fontColor, bgColor]);
     return (
-        <div className={`
-          ${styles.cfStyleEdit}
-          ${className}
-        `}
+        <div
+            className={clsx(styles.cfStyleEdit, className)}
         >
-            { BoldSingleIcon && (
-                <div className={cl({ [styles.isActive]: getBooleanFromNumber(isBold || BooleanNumber.FALSE) }, styles.buttonItem)} onClick={() => isBoldSet(getAnotherBooleanNumber(isBold))}>
+            {BoldSingleIcon && (
+                <div
+                    className={clsx({ [styles.isActive]: getBooleanFromNumber(isBold || BooleanNumber.FALSE) }, styles.buttonItem)}
+                    onClick={() => isBoldSet(getAnotherBooleanNumber(isBold))}
+                >
                     <BoldSingleIcon />
                 </div>
             )}
-            { ItalicSingleIcon && (
-                <div className={cl({ [styles.isActive]: getBooleanFromNumber(isItalic || BooleanNumber.FALSE) }, styles.buttonItem)} onClick={() => isItalicSet(getAnotherBooleanNumber(isItalic))}>
+            {ItalicSingleIcon && (
+                <div
+                    className={clsx({ [styles.isActive]: getBooleanFromNumber(isItalic || BooleanNumber.FALSE) }, styles.buttonItem)}
+                    onClick={() => isItalicSet(getAnotherBooleanNumber(isItalic))}
+                >
                     <ItalicSingleIcon />
                 </div>
             )}
-            { UnderlineSingleIcon && (
-                <div className={cl({ [styles.isActive]: getBooleanFromNumber(isUnderline || BooleanNumber.FALSE) }, styles.buttonItem)} onClick={() => isUnderlineSet(getAnotherBooleanNumber(isUnderline))}>
+            {UnderlineSingleIcon && (
+                <div
+                    className={clsx({ [styles.isActive]: getBooleanFromNumber(isUnderline || BooleanNumber.FALSE) }, styles.buttonItem)}
+                    onClick={() => isUnderlineSet(getAnotherBooleanNumber(isUnderline))}
+                >
                     <UnderlineSingleIcon />
                 </div>
             )}
-            { StrikethroughSingle && (
-                <div className={cl({ [styles.isActive]: getBooleanFromNumber(isStrikethrough || BooleanNumber.FALSE) }, styles.buttonItem)} onClick={() => isStrikethroughSet(getAnotherBooleanNumber(isStrikethrough))}>
+            {StrikethroughSingle && (
+                <div
+                    className={clsx({ [styles.isActive]: getBooleanFromNumber(isStrikethrough || BooleanNumber.FALSE) }, styles.buttonItem)}
+                    onClick={() => isStrikethroughSet(getAnotherBooleanNumber(isStrikethrough))}
+                >
                     <StrikethroughSingle />
                 </div>
             )}

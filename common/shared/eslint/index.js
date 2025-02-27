@@ -80,7 +80,7 @@ exports.baseRules = {
     'import/consistent-type-specifier-style': 'warn',
 
     'no-restricted-imports': [
-        'warn',
+        'error',
         {
             paths: [
                 {

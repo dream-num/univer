@@ -16,11 +16,9 @@
 
 import type { DocumentDataModel } from '@univerjs/core';
 import { CustomRangeType, ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
-import { MessageType, Tooltip } from '@univerjs/design';
+import { clsx, MessageType, Tooltip } from '@univerjs/design';
 import { CopySingle, LinkSingle, UnlinkSingle, WriteSingle } from '@univerjs/icons';
 import { IMessageService, useDependency, useObservable } from '@univerjs/ui';
-import cs from 'clsx';
-import React from 'react';
 import { DeleteDocHyperLinkCommand } from '../../commands/commands/delete-link.command';
 import { ShowDocHyperLinkEditPopupOperation } from '../../commands/operations/popup.operation';
 import { DocHyperLinkPopupService } from '../../services/hyper-link-popup.service';
@@ -55,7 +53,7 @@ export const DocLinkPopup = () => {
                 hyperLinkService.hideInfoPopup();
             }}
         >
-            <div className={cs(styles.docLinkContent)} onClick={() => window.open(url)}>
+            <div className={clsx(styles.docLinkContent)} onClick={() => window.open(url)}>
                 <div className={styles.docLinkType}>
                     <LinkSingle />
                 </div>
@@ -65,7 +63,7 @@ export const DocLinkPopup = () => {
             </div>
             <div className={styles.docLinkOperations}>
                 <div
-                    className={cs(styles.docLinkOperation)}
+                    className={clsx(styles.docLinkOperation)}
                     onClick={() => {
                         navigator.clipboard.writeText(url);
                         messageService.show({

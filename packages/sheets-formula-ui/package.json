@@ -83,8 +83,7 @@
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-formula": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
-        "@univerjs/ui": "workspace:*",
-        "clsx": "^2.1.1"
+        "@univerjs/ui": "workspace:*"
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",

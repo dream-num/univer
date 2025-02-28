@@ -17,7 +17,7 @@
 import { CountBar } from '../count-bar';
 import styles from './index.module.less';
 import { useDependency, useObservable } from '@univerjs/ui';
-import { IUniverInstanceService, UniverInstanceType, Workbook } from '@univerjs/core';
+import { IUniverInstanceService, UniverInstanceType, type Workbook } from '@univerjs/core';
 
 export const DocFooter = () => {
     const univerInstanceService = useDependency(IUniverInstanceService);

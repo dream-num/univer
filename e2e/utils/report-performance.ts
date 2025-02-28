@@ -19,6 +19,7 @@
 import { PostHog } from 'posthog-node';
 
 const SHOULD_REPORT_TO_POSTHOG = process.env.SHOULD_REPORT_TO_POSTHOG === 'true';
+const GIT_HASH = process.env.GITHUB_SHA;
 
 let client: PostHog | null = null;
 
@@ -36,7 +37,10 @@ export function reportToPosthog(event: string, properties: Record<string | numbe
         timestamp: new Date(),
         event,
         distinctId: 'CI',
-        properties,
+        properties: {
+            ...properties,
+            git_hash: GIT_HASH,
+        },
     });
 }
 

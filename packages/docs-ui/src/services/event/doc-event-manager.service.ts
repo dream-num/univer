@@ -139,6 +139,7 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
         this.disposeWithMe(this._skeleton.dirty$.subscribe(() => {
             this._customRangeDirty = true;
             this._bulletDirty = true;
+            this._tableDirty = true;
         }));
 
         this.disposeWithMe(
@@ -147,6 +148,7 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
             ).subscribe(() => {
                 this._customRangeDirty = true;
                 this._bulletDirty = true;
+                this._tableDirty = true;
             })
         );
     }

@@ -82,6 +82,7 @@ import {
     DocTableInsertRowBellowCommand,
     DocTableInsertRowCommand,
 } from './commands/commands/table/doc-table-insert.command';
+import { DocTableResizeColumnCommand, DocTableResizeRowCommand } from './commands/commands/table/doc-table-resize.command';
 import { DocTableTabCommand } from './commands/commands/table/doc-table-tab.command';
 import { MoveCursorOperation, MoveSelectionOperation } from './commands/operations/doc-cursor.operation';
 import { DocParagraphSettingPanelOperation } from './commands/operations/doc-paragraph-setting-panel.operation';
@@ -254,6 +255,8 @@ export class UniverDocsUIPlugin extends Plugin {
             MoveCursorOperation,
             MoveSelectionOperation,
             ReplaceTextRunsCommand,
+            DocTableResizeRowCommand,
+            DocTableResizeColumnCommand,
         ].forEach((e) => {
             this._commandService.registerCommand(e);
         });

@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IDisposable, Nullable } from '@univerjs/core';
+import type { DocumentDataModel, IDisposable, INumberUnit, Nullable } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import { Disposable, DisposableCollection, ILogService, Inject } from '@univerjs/core';
+import type { IDocTableResizeColumnCommandParams } from '../commands/commands/table/doc-table-resize.command';
+import { Disposable, DisposableCollection, ICommandService, ILogService, Inject } from '@univerjs/core';
 import { CURSOR_TYPE, Rect } from '@univerjs/engine-render';
+import { DocTableResizeColumnCommand } from '../commands/commands/table/doc-table-resize.command';
 import { DocEventManagerService } from '../services/event/doc-event-manager.service';
 import { DocSelectionRenderController } from './render-controllers/doc-selection-render.controller';
 
@@ -36,7 +38,8 @@ export class DocTableWidgetController extends Disposable implements IRenderModul
         private readonly _context: IRenderContext<DocumentDataModel>,
         @Inject(DocEventManagerService) private readonly _docEventManagerService: DocEventManagerService,
         @Inject(ILogService) private readonly _logService: ILogService,
-        @Inject(DocSelectionRenderController) private readonly _docSelectionRenderController: DocSelectionRenderController
+        @Inject(DocSelectionRenderController) private readonly _docSelectionRenderController: DocSelectionRenderController,
+        @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
 
@@ -92,14 +95,6 @@ export class DocTableWidgetController extends Disposable implements IRenderModul
                     this._context.scene.addObject(this._columnRect, 100);
                 }));
 
-                disposable.add(this._context.scene!.onPointerUp$.subscribeEvent(() => {
-                    this._onPointerDown = false;
-                    this._context.scene.removeObject(this._columnRect!);
-                    this._columnRect = null;
-                    disposable.dispose();
-                    this._docSelectionRenderController.disableSelection(false);
-                }));
-
                 disposable.add(this._context.scene.onPointerMove$.subscribeEvent((evt) => {
                     if (!this._onPointerDown) {
                         return;
@@ -109,6 +104,33 @@ export class DocTableWidgetController extends Disposable implements IRenderModul
                     this._columnRect?.makeDirty();
                     this._context.scene.makeDirty();
                 }));
+
+                disposable.add(this._context.scene!.onPointerUp$.subscribeEvent(() => {
+                    this._onPointerDown = false;
+                    const targetX = this._columnRect!.left;
+                    const originX = active.left + active.colAccumulateWidth[grid.columnIndex - 1];
+                    const movedX = Math.floor(targetX - originX);
+                    if (movedX !== 0) {
+                        const resizeInfo: { columnIndex: number; width: INumberUnit }[] = [];
+                        const tableId = grid.tableId.split('#')[0];
+                        const getColumnWidth = (index: number) => active.colAccumulateWidth[index] - (active.colAccumulateWidth[index - 1] ?? 0);
+                        resizeInfo.push({ columnIndex: grid.columnIndex - 1, width: { v: getColumnWidth(grid.columnIndex - 1) + movedX } });
+                        if (grid.columnIndex !== active.colAccumulateWidth.length) {
+                            resizeInfo.push({ columnIndex: grid.columnIndex, width: { v: getColumnWidth(grid.columnIndex) - movedX } });
+                        }
+                        const params: IDocTableResizeColumnCommandParams = {
+                            tableId,
+                            resizeInfo,
+                        };
+                        this._commandService.syncExecuteCommand(DocTableResizeColumnCommand.id, params);
+                    }
+
+                    this._context.scene.removeObject(this._columnRect!);
+                    this._columnRect = null;
+                    disposable.dispose();
+                    this._docSelectionRenderController.disableSelection(false);
+                }));
+
                 this._hoverDisposable = disposable;
             })
         );

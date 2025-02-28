@@ -23,6 +23,7 @@ const locale = {
             'close-dialog': '关闭查找替换对话框',
             'go-to-next-match': '下一个匹配项',
             'go-to-previous-match': '下一个匹配项',
+            'focus-selection': '聚焦选区',
         },
         dialog: {
             title: '查找',

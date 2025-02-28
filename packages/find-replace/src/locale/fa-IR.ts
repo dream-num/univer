@@ -25,6 +25,7 @@ const locale: typeof zhCN = {
             'close-dialog': 'بستن پنجره گفتگوی یافتن و جایگزینی',
             'go-to-next-match': 'رفتن به تطابق بعدی',
             'go-to-previous-match': 'رفتن به تطابق قبلی',
+            'focus-selection': 'تمرکز بر روی انتخاب',
         },
         dialog: {
             title: 'یافتن',

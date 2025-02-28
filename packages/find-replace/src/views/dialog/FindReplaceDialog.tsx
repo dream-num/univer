@@ -305,7 +305,6 @@ function useFindScopeOptions(localeService: LocaleService): Array<{ label: strin
             { label: localeService.t('find-replace.dialog.find-scope.current-sheet'), value: FindScope.SUBUNIT },
             { label: localeService.t('find-replace.dialog.find-scope.workbook'), value: FindScope.UNIT },
         ];
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [locale]);
 
     return options;
@@ -318,7 +317,6 @@ function useFindDirectionOptions(localeService: LocaleService): Array<{ label: s
             { label: localeService.t('find-replace.dialog.find-direction.row'), value: FindDirection.ROW },
             { label: localeService.t('find-replace.dialog.find-direction.column'), value: FindDirection.COLUMN },
         ];
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [locale]);
 
     return options;
@@ -331,7 +329,6 @@ function useFindByOptions(localeService: LocaleService): Array<{ label: string; 
             { label: localeService.t('find-replace.dialog.find-by.value'), value: FindBy.VALUE },
             { label: localeService.t('find-replace.dialog.find-by.formula'), value: FindBy.FORMULA },
         ];
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [locale]);
 
     return options;

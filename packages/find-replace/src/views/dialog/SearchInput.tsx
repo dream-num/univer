@@ -16,9 +16,8 @@
 
 import type { LocaleService } from '@univerjs/core';
 import type { IInputWithSlotProps } from '@univerjs/design';
-import { InputWithSlot, Pager } from '@univerjs/design';
-import React from 'react';
 import type { IFindReplaceService } from '../../services/find-replace.service';
+import { InputWithSlot, Pager } from '@univerjs/design';
 
 export interface ISearchInputProps extends Pick<IInputWithSlotProps, 'onFocus' | 'onBlur' | 'className' | 'onChange'> {
     findCompleted: boolean;
@@ -40,11 +39,11 @@ export function SearchInput(props: ISearchInputProps) {
 
     return (
         <InputWithSlot
-            autoFocus={true}
+            autoFocus
             placeholder={localeService.t('find-replace.dialog.find-placeholder')}
             slot={(
                 <Pager
-                    loop={true}
+                    loop
                     text={text}
                     value={matchesPosition}
                     total={matchesCount}

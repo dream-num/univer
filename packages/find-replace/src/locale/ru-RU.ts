@@ -25,6 +25,7 @@ const locale: typeof zhCN = {
             'close-dialog': 'Закрыть диалог поиска и замены',
             'go-to-next-match': 'Перейти к следующему совпадению',
             'go-to-previous-match': 'Перейти к предыдущему совпадению',
+            'focus-selection': 'Фокус на выделении',
         },
         dialog: {
             title: 'Найти',

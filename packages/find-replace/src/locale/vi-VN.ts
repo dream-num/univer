@@ -25,6 +25,7 @@ const locale: typeof zhCN = {
             'close-dialog': 'Đóng hộp thoại tìm kiếm và thay thế',
             'go-to-next-match': 'Đến mục khớp tiếp theo',
             'go-to-previous-match': 'Đến mục khớp trước đó',
+            'focus-selection': 'Tập trung vào lựa chọn',
         },
         dialog: {
             title: 'Tìm kiếm',

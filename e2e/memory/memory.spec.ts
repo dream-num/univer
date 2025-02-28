@@ -17,6 +17,7 @@
 import type { CDPSession } from '@playwright/test';
 import { createWriteStream } from 'node:fs';
 import { expect, test } from '@playwright/test';
+import { flushPosthog, reportToPosthog } from '../utils/report-performance';
 import { getMetrics } from './util';
 
 const MAX_UNIT_MEMORY_OVERFLOW = 1_000_000; // 1MB
@@ -134,6 +135,8 @@ test('memory', async ({ page }) => {
     await page.evaluate(() => window.E2EControllerAPI.loadAndRelease(2));
     await page.waitForTimeout(2000);
     const memoryAfterSecondLoad = (await getMetrics(page)).JSHeapUsedSize;
+
+    reportToPosthog('unit_memory_workflow', { value: memoryAfterSecondLoad - memoryAfterFirstLoad });
     expect(memoryAfterSecondLoad - memoryAfterFirstLoad)
         .toBeLessThanOrEqual(MAX_UNIT_MEMORY_OVERFLOW);
 
@@ -143,7 +146,6 @@ test('memory', async ({ page }) => {
     await takeHeapSnapshot(client, 'memory-first.heapsnapshot');
 
     const memoryAfterDisposingFirstInstance = (await getMetrics(page)).JSHeapUsedSize;
-
     await page.evaluate(() => window.createNewInstance());
     await page.waitForTimeout(2000);
     await page.evaluate(() => window.univer.dispose());
@@ -152,11 +154,15 @@ test('memory', async ({ page }) => {
     await takeHeapSnapshot(client, 'memory-second.heapsnapshot');
 
     const memoryAfterDisposingSecondUniver = (await getMetrics(page)).JSHeapUsedSize;
+    reportToPosthog('instance_memory_workflow', { value: memoryAfterDisposingSecondUniver - memoryAfterDisposingFirstInstance });
     expect(memoryAfterDisposingSecondUniver - memoryAfterDisposingFirstInstance)
         .toBeLessThanOrEqual(MAX_SECOND_INSTANCE_OVERFLOW);
 
+    reportToPosthog('univer_memory_workflow', { value: memoryAfterDisposingSecondUniver - memoryAfterFirstInstance });
     expect(memoryAfterDisposingSecondUniver - memoryAfterFirstInstance)
         .toBeLessThanOrEqual(MAX_UNIVER_MEMORY_OVERFLOW);
+
+    flushPosthog();
 });
 
 declare global {

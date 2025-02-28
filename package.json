@@ -43,6 +43,9 @@
         "storybook:build": "pnpm --filter @univerjs/storybook build:storybook",
         "release": "release-it"
     },
+    "dependencies": {
+        "posthog-node": "^4.8.1"
+    },
     "devDependencies": {
         "@antfu/eslint-config": "4.3.0",
         "@commitlint/cli": "^19.7.1",

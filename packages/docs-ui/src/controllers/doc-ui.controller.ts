@@ -88,11 +88,9 @@ export class DocUIController extends Disposable {
         this.disposeWithMe(componentManager.register('TodoList', TodoList));
     }
 
-    // TODO: @zhangwei, why add workbook to docs-ui?
     private _initUiParts() {
-        const workbook = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SHEET);
         const config = this._configService.getConfig<IUniverDocsUIConfig>(DOCS_UI_PLUGIN_CONFIG_KEY);
-        if (config?.layout?.docContainerConfig?.footer && !workbook) {
+        if (config?.layout?.docContainerConfig?.footer) {
             this.disposeWithMe(this._uiPartsService.registerComponent(BuiltInUIPart.FOOTER, () => connectInjector(DocFooter, this._injector)));
         }
     }

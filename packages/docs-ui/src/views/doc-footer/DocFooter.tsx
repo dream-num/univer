@@ -17,9 +17,14 @@
 import React from 'react';
 import { CountBar } from '../count-bar';
 import styles from './index.module.less';
+import { useDependency, useObservable } from '@univerjs/ui';
+import { IUniverInstanceService, UniverInstanceType, Workbook } from '@univerjs/core';
 
 export const DocFooter = () => {
-    return (
+    const univerInstanceService = useDependency(IUniverInstanceService);
+    const workbook = useObservable(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET), undefined, undefined, []);
+
+    return workbook? null :(
         <div className={styles.docFooterContainer}>
             <div />
             <CountBar />

@@ -94,7 +94,7 @@ class ConditionalFormatRuleBaseBuilder {
         return obj;
     }
 
-    build() {
+    build(): IConditionFormattingRule {
         if (!this._rule.cfId) {
             this._rule.cfId = createCfId();
         }
@@ -654,7 +654,18 @@ export class FConditionalFormattingBuilder {
 
     }
 
-    build() {
+    /**
+     * Constructs a conditional format rule from the settings applied to the builder.
+     * @returns {IConditionFormattingRule} The conditional format rule.
+     * @example
+     * ```typescript
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const rule = fWorksheet.newConditionalFormattingRule().build();
+     * fWorksheet.setConditionalFormattingRules([rule]);
+     * ```
+     */
+    build(): IConditionFormattingRule {
         return new ConditionalFormatRuleBaseBuilder(this._initConfig).build();
     }
 

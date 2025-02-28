@@ -25,6 +25,7 @@ const locale: typeof zhCN = {
             'close-dialog': 'Close Find & Replace Dialog',
             'go-to-next-match': 'Go to Next Match',
             'go-to-previous-match': 'Go to Previous Match',
+            'focus-selection': 'Focus Selection',
         },
         dialog: {
             title: 'Find',

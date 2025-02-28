@@ -70,3 +70,13 @@ export const GoToPreviousMatchOperation: IOperation = {
         return true;
     },
 };
+
+export const FocusSelectionOperation: IOperation = {
+    type: CommandType.OPERATION,
+    id: 'ui.operation.focus-selection',
+    handler: (accessor) => {
+        const findReplaceService = accessor.get(IFindReplaceService);
+        findReplaceService.focusSelection();
+        return true;
+    },
+};

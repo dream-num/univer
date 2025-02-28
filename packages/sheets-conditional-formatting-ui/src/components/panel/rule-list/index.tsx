@@ -15,24 +15,19 @@
  */
 
 import type { IRange, Workbook } from '@univerjs/core';
-import type { IConditionFormattingRule } from '@univerjs/sheets-conditional-formatting';
-import type { IDeleteCfCommandParams } from '../../../commands/commands/delete-cf.command';
-import type { IMoveCfCommand } from '../../../commands/commands/move-cf.command';
+import type { IConditionFormattingRule, IDeleteCfCommandParams, IMoveCfCommandParams } from '@univerjs/sheets-conditional-formatting';
 
 import { ICommandService, Injector, IUniverInstanceService, LocaleService, Rectangle, UniverInstanceType } from '@univerjs/core';
 import { Select, Tooltip } from '@univerjs/design';
 import { serializeRange } from '@univerjs/engine-formula';
 import { DeleteSingle, IncreaseSingle, SequenceSingle } from '@univerjs/icons';
 import { checkRangesEditablePermission, SetSelectionsOperation, SetWorksheetActiveOperation, SheetsSelectionsService } from '@univerjs/sheets';
-import { AddConditionalRuleMutation, CFRuleType, CFSubRuleType, ConditionalFormattingRuleModel, DeleteConditionalRuleMutation, MoveConditionalRuleMutation, SetConditionalRuleMutation } from '@univerjs/sheets-conditional-formatting';
+import { AddConditionalRuleMutation, CFRuleType, CFSubRuleType, ClearWorksheetCfCommand, ConditionalFormattingRuleModel, DeleteCfCommand, DeleteConditionalRuleMutation, MoveCfCommand, MoveConditionalRuleMutation, SetConditionalRuleMutation } from '@univerjs/sheets-conditional-formatting';
 import { useHighlightRange } from '@univerjs/sheets-ui';
 import { useDependency, useObservable } from '@univerjs/ui';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import GridLayout from 'react-grid-layout';
 import { debounceTime, Observable } from 'rxjs';
-import { ClearWorksheetCfCommand } from '../../../commands/commands/clear-worksheet-cf.command';
-import { DeleteCfCommand } from '../../../commands/commands/delete-cf.command';
-import { MoveCfCommand } from '../../../commands/commands/move-cf.command';
 import { ConditionalFormattingI18nController } from '../../../controllers/cf.i18n.controller';
 import { Preview } from '../../preview';
 import styles from './index.module.less';
@@ -272,7 +267,7 @@ export const RuleList = (props: IRuleListProps) => {
         const cfId = ruleList[getSaveIndex(from.y)].cfId;
         const targetCfId = ruleList[getSaveIndex(to.y)].cfId;
         if (cfId !== targetCfId) {
-            commandService.executeCommand(MoveCfCommand.id, { unitId, subUnitId, start: { id: cfId, type: 'self' }, end: { id: targetCfId, type: to.y > from.y ? 'after' : 'before' } } as IMoveCfCommand);
+            commandService.executeCommand(MoveCfCommand.id, { unitId, subUnitId, start: { id: cfId, type: 'self' }, end: { id: targetCfId, type: to.y > from.y ? 'after' : 'before' } } as IMoveCfCommandParams);
         }
     };
 
@@ -347,10 +342,11 @@ export const RuleList = (props: IRuleListProps) => {
                             </Tooltip>
                         )
                         : (
-                            <div className={`
-                              ${styles.gap}
-                              ${styles.disabled}
-                            `}
+                            <div
+                                className={`
+                                  ${styles.gap}
+                                  ${styles.disabled}
+                                `}
                             >
                                 <DeleteSingle />
                             </div>

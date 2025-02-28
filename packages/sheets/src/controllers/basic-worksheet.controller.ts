@@ -153,7 +153,7 @@ import {
 import { ToggleGridlinesMutation } from '../commands/mutations/toggle-gridlines.mutation';
 import { UnregisterWorksheetRangeThemeStyleMutation } from '../commands/mutations/unregister-range-theme-style.mutation';
 import { ScrollToCellOperation } from '../commands/operations/scroll-to-cell.operation';
-import { SetSelectionsOperation } from '../commands/operations/selection.operation';
+import { SelectRangeCommand, SetSelectionsOperation } from '../commands/operations/selection.operation';
 import { SetWorksheetActiveOperation } from '../commands/operations/set-worksheet-active.operation';
 import { ONLY_REGISTER_FORMULA_RELATED_MUTATIONS_KEY } from './config';
 import { MAX_CELL_PER_SHEET_DEFAULT, MAX_CELL_PER_SHEET_KEY } from './config/config';
@@ -286,6 +286,7 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
                 SetWorksheetColWidthMutation,
                 // SetWorksheetColIsAutoWidthCommand,
 
+                SelectRangeCommand,
                 SetSelectionsOperation,
                 ScrollToCellOperation,
                 InsertDefinedNameCommand,

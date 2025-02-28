@@ -25,6 +25,7 @@ const locale: typeof zhCN = {
             'close-dialog': '關閉查找替換對話框',
             'go-to-next-match': '下一個匹配項',
             'go-to-previous-match': '下一個匹配項',
+            'focus-selection': '聚焦選區',
         },
         dialog: {
             title: '找',

@@ -16,23 +16,16 @@
 
 import type { IRange, Workbook } from '@univerjs/core';
 import type { IRemoveSheetMutationParams } from '@univerjs/sheets';
-import type { IConditionFormattingRule } from '@univerjs/sheets-conditional-formatting';
-import type { IAddCfCommandParams } from '../../../commands/commands/add-cf.command';
-import type { ISetCfCommandParams } from '../../../commands/commands/set-cf.command';
-
+import type { IAddCfCommandParams, IConditionFormattingRule, ISetCfCommandParams } from '@univerjs/sheets-conditional-formatting';
 import type { IStyleEditorProps } from './type';
 import { ICommandService, InterceptorManager, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { Button, Select } from '@univerjs/design';
 import { deserializeRangeWithSheet, serializeRange } from '@univerjs/engine-formula';
 import { RemoveSheetMutation, setEndForRange, SetWorksheetActiveOperation, SheetsSelectionsService } from '@univerjs/sheets';
-import { CFRuleType, CFSubRuleType, ConditionalFormattingRuleModel } from '@univerjs/sheets-conditional-formatting';
+import { AddCfCommand, CFRuleType, CFSubRuleType, ConditionalFormattingRuleModel, SetCfCommand } from '@univerjs/sheets-conditional-formatting';
 import { RangeSelector } from '@univerjs/sheets-formula-ui';
 import { useDependency } from '@univerjs/ui';
-
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { AddCfCommand } from '../../../commands/commands/add-cf.command';
-
-import { SetCfCommand } from '../../../commands/commands/set-cf.command';
 import styleBase from '../index.module.less';
 import { ColorScaleStyleEditor } from './ColorScale';
 import { DataBarStyleEditor } from './DataBar';

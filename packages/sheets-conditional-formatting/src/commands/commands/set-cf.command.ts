@@ -15,6 +15,8 @@
  */
 
 import type { ICommand } from '@univerjs/core';
+import type { IConditionFormattingRule } from '../../models/type';
+import type { ISetConditionalRuleMutationParams } from '../mutations/set-conditional-rule.mutation';
 import {
     CommandType,
     ICommandService,
@@ -22,18 +24,17 @@ import {
     IUniverInstanceService,
 } from '@univerjs/core';
 import { getSheetCommandTarget } from '@univerjs/sheets';
-import type { IAnchor, IMoveConditionalRuleMutationParams } from '@univerjs/sheets-conditional-formatting';
-import { ConditionalFormattingRuleModel, MoveConditionalRuleMutation, MoveConditionalRuleMutationUndoFactory, transformSupportSymmetryAnchor } from '@univerjs/sheets-conditional-formatting';
+import { SetConditionalRuleMutation, setConditionalRuleMutationUndoFactory } from '../mutations/set-conditional-rule.mutation';
 
-export interface IMoveCfCommand {
+export interface ISetCfCommandParams {
     unitId?: string;
     subUnitId?: string;
-    start: IAnchor;
-    end: IAnchor;
+    cfId?: string;
+    rule: IConditionFormattingRule;
 };
-export const MoveCfCommand: ICommand<IMoveCfCommand> = {
+export const SetCfCommand: ICommand<ISetCfCommandParams> = {
     type: CommandType.COMMAND,
-    id: 'sheet.command.move-conditional-rule',
+    id: 'sheet.command.set-conditional-rule',
     handler(accessor, params) {
         if (!params) {
             return false;
@@ -42,28 +43,17 @@ export const MoveCfCommand: ICommand<IMoveCfCommand> = {
         const undoRedoService = accessor.get(IUndoRedoService);
         const commandService = accessor.get(ICommandService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const conditionalFormattingRuleModel = accessor.get(ConditionalFormattingRuleModel);
 
         const target = getSheetCommandTarget(univerInstanceService, params);
         if (!target) return false;
 
         const { unitId, subUnitId } = target;
-        const anchorList = transformSupportSymmetryAnchor(params.start, params.end, conditionalFormattingRuleModel.getSubunitRules(unitId, subUnitId) || [], (rule) => rule.cfId);
-        if (!anchorList) {
-            return false;
-        }
-        const [start, end] = anchorList;
-        const config: IMoveConditionalRuleMutationParams = { unitId, subUnitId, start, end };
-        const undos = MoveConditionalRuleMutationUndoFactory(config);
-        const result = commandService.syncExecuteCommand(MoveConditionalRuleMutation.id, config);
+        const config: ISetConditionalRuleMutationParams = { unitId, subUnitId, rule: params.rule, cfId: params.cfId };
+        const undos = setConditionalRuleMutationUndoFactory(accessor, config);
+        const result = commandService.syncExecuteCommand(SetConditionalRuleMutation.id, config);
         if (result) {
-            undoRedoService.pushUndoRedo({
-                unitID: unitId,
-                redoMutations: [{ id: MoveConditionalRuleMutation.id, params: config }],
-                undoMutations: undos,
-            });
+            undoRedoService.pushUndoRedo({ unitID: unitId, undoMutations: undos, redoMutations: [{ id: SetConditionalRuleMutation.id, params: config }] });
         }
-
         return result;
     },
 };

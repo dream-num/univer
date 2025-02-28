@@ -37,6 +37,7 @@ import { takeUntil } from 'rxjs';
 
 import { ReplaceAllMatchesCommand, ReplaceCurrentMatchCommand } from '../commands/commands/replace.command';
 import {
+    FocusSelectionOperation,
     GoToNextMatchOperation,
     GoToPreviousMatchOperation,
     OpenFindDialogOperation,
@@ -45,6 +46,7 @@ import {
 import { IFindReplaceService } from '../services/find-replace.service';
 import { FindReplaceDialog } from '../views/dialog/FindReplaceDialog';
 import {
+    FocusSelectionShortcutItem,
     GoToNextFindMatchShortcutItem,
     GoToPreviousFindMatchShortcutItem,
     MacOpenFindDialogShortcutItem,
@@ -94,6 +96,7 @@ export class FindReplaceController extends RxDisposable {
             GoToPreviousMatchOperation,
             ReplaceAllMatchesCommand,
             ReplaceCurrentMatchCommand,
+            FocusSelectionOperation,
         ].forEach((c) => {
             this.disposeWithMe(this._commandService.registerCommand(c));
         });
@@ -106,6 +109,7 @@ export class FindReplaceController extends RxDisposable {
             MacOpenFindDialogShortcutItem,
             GoToPreviousFindMatchShortcutItem,
             GoToNextFindMatchShortcutItem,
+            FocusSelectionShortcutItem,
         ].forEach((s) => this.disposeWithMe(this._shortcutService.registerShortcut(s)));
     }
 

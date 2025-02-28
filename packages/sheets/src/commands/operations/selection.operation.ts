@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import type { IOperation } from '@univerjs/core';
+import type { IAccessor, ICommand, IOperation, IRange } from '@univerjs/core';
 import type { ISelectionWithStyle } from '../../basics/selection';
 import type { SelectionMoveType } from '../../services/selections/type';
-import { CommandType } from '@univerjs/core';
+import { CommandType, ICommandService, IUniverInstanceService } from '@univerjs/core';
+import { getPrimaryForRange } from '../commands/utils/selection-utils';
+import { getSheetCommandTarget } from '../commands/utils/target-util';
 import { getSelectionsService } from '../utils/selection-command-util';
 
 export interface ISetSelectionsOperationParams {
@@ -39,6 +41,7 @@ export const SetSelectionsOperation: IOperation<ISetSelectionsOperationParams> =
     type: CommandType.OPERATION,
     handler: (accessor, params) => {
         if (!params) return false;
+
         const { selections, type, unitId, subUnitId } = params;
         const selectionManagerService = getSelectionsService(accessor);
 
@@ -46,5 +49,40 @@ export const SetSelectionsOperation: IOperation<ISetSelectionsOperationParams> =
         // See https://github.com/dream-num/univer/issues/2199
         selectionManagerService.setSelections(unitId, subUnitId, [...selections], type);
         return true;
+    },
+};
+
+export interface ISelectRangeCommandParams {
+    unitId: string;
+    subUnit: string;
+    range: IRange;
+
+    /** If should scroll to the selected range. */
+    reveal?: boolean;
+    extra?: string;
+}
+
+export const SelectRangeCommand: ICommand<ISelectRangeCommandParams> = {
+    id: 'sheet.command.select-range',
+    type: CommandType.COMMAND,
+    handler: (accessor: IAccessor, params: ISelectRangeCommandParams) => {
+        if (!params) return false;
+
+        const { unitId, subUnit, range } = params;
+        const commandService = accessor.get(ICommandService);
+        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), params);
+        if (!target) return false;
+
+        const selections: ISelectionWithStyle[] = [{
+            range,
+            primary: getPrimaryForRange(range, target.worksheet),
+            style: null,
+        }];
+
+        return commandService.syncExecuteCommand(SetSelectionsOperation.id, {
+            unitId,
+            subUnitId: subUnit,
+            selections,
+        } as ISetSelectionsOperationParams);
     },
 };

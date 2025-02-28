@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommandInfo, Nullable, Workbook } from '@univerjs/core';
+import type { DocumentDataModel, ICommandInfo, Nullable } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import { checkForSubstrings, Disposable, ICommandService, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { checkForSubstrings, Disposable, DisposableCollection, ICommandService, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { fromEvent } from 'rxjs';
@@ -157,18 +157,30 @@ export class DocEditorBridgeController extends Disposable implements IRenderModu
             })
         );
 
-        const currentUniverSheet = this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
-        currentUniverSheet.forEach((unit) => {
-            const unitId = unit.getUnitId();
-            const render = this._renderManagerService.getRenderById(unitId);
-            const canvasEle = render?.engine.getCanvas().getCanvasEle();
-            if (canvasEle == null) {
-                return;
-            }
-            fromEvent(canvasEle, 'mousedown').subscribe((evt) => {
-                evt.stopPropagation();
-            });
-        });
+        //TODO:@weird94 I don't know why, but keep this first, and should be removed if it was checked unneccesary.
+        const disposableCollection = new DisposableCollection();
+        this.disposeWithMe(
+            this._univerInstanceService.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_SHEET).subscribe((unit) => {
+                disposableCollection.dispose();
+                if (!unit) {
+                    return;
+                }
+                const unitId = unit.getUnitId();
+                const render = this._renderManagerService.getRenderById(unitId);
+                const canvasEle = render?.engine.getCanvas().getCanvasEle();
+                if (canvasEle == null) {
+                    return;
+                }
+
+                const disposable = fromEvent(canvasEle, 'mousedown').subscribe((evt) => {
+                    evt.stopPropagation();
+                });
+
+                disposableCollection.add(disposable);
+            })
+        );
+
+        this.disposeWithMe(() => disposableCollection.dispose());
     }
 
     /**

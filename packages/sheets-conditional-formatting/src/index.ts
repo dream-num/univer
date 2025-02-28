@@ -35,6 +35,31 @@ export * from './utils/type';
 // #region - all commands
 
 export {
+    AddCfCommand,
+    type IAddCfCommandParams,
+} from './commands/commands/add-cf.command';
+export {
+    ClearRangeCfCommand,
+    type IClearRangeCfParams,
+} from './commands/commands/clear-range-cf.command';
+export {
+    ClearWorksheetCfCommand,
+    type IClearWorksheetCfParams,
+} from './commands/commands/clear-worksheet-cf.command';
+export {
+    DeleteCfCommand,
+    type IDeleteCfCommandParams,
+} from './commands/commands/delete-cf.command';
+export {
+    type IMoveCfCommandParams,
+    MoveCfCommand,
+} from './commands/commands/move-cf.command';
+export {
+    type ISetCfCommandParams,
+    SetCfCommand,
+} from './commands/commands/set-cf.command';
+
+export {
     AddConditionalRuleMutation,
     AddConditionalRuleMutationUndoFactory,
     type IAddConditionalRuleMutationParams,

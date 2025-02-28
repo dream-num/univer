@@ -23,7 +23,7 @@ export const DocFooter = () => {
     const univerInstanceService = useDependency(IUniverInstanceService);
     const workbook = useObservable(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET), undefined, undefined, []);
 
-    return workbook? null :(
+    return workbook ? null : (
         <div className={styles.docFooterContainer}>
             <div />
             <CountBar />

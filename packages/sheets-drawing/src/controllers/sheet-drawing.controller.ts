@@ -33,13 +33,8 @@ export class SheetsDrawingLoadController extends Disposable {
         super();
 
         this._initSnapshot();
-        this._initInterceptors();
 
         this.disposeWithMe(this._commandService.registerCommand(SetDrawingApplyMutation));
-    }
-
-    private _initInterceptors(): void {
-
     }
 
     private _initSnapshot() {

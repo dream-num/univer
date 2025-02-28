@@ -29,6 +29,7 @@ import { DocSelectionRenderService } from '../../services/selection/doc-selectio
 
 export class DocSelectionRenderController extends Disposable implements IRenderModule {
     private _loadedMap = new WeakSet<RenderComponentType>();
+    private _disableSelection = false;
 
     constructor(
         private readonly _context: IRenderContext<DocumentDataModel>,
@@ -50,6 +51,10 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
         this._commandExecutedListener();
         this._refreshListener();
         this._syncSelection();
+    }
+
+    disableSelection(disable: boolean) {
+        this._disableSelection = disable;
     }
 
     private _init() {
@@ -104,6 +109,7 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
         const docObject = neoGetDocObject(this._context);
         const { document, scene } = docObject;
         this.disposeWithMe(document.onPointerEnter$.subscribeEvent(() => {
+            if (this._disableSelection) return;
             if (this._isEditorReadOnly(unitId)) {
                 return;
             }
@@ -111,11 +117,13 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
         }));
 
         this.disposeWithMe(document.onPointerLeave$.subscribeEvent(() => {
+            if (this._disableSelection) return;
             document.cursor = CURSOR_TYPE.DEFAULT;
             scene.resetCursor();
         }));
 
         this.disposeWithMe(document.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
+            if (this._disableSelection) return;
             if (this._isEditorReadOnly(unitId)) {
                 return;
             }

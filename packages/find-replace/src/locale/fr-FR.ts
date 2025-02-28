@@ -25,6 +25,7 @@ const locale: typeof enUS = {
             'close-dialog': 'Fermer la boîte de dialogue Rechercher & Remplacer',
             'go-to-next-match': 'Aller à la correspondance suivante',
             'go-to-previous-match': 'Aller à la correspondance précédente',
+            'focus-selection': 'Focus sur la sélection',
         },
         dialog: {
             title: 'Rechercher',

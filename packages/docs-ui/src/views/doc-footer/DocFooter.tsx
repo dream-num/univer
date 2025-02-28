@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import React from 'react';
 import { CountBar } from '../count-bar';
 import styles from './index.module.less';
 import { useDependency, useObservable } from '@univerjs/ui';

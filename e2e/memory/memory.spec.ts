@@ -136,7 +136,7 @@ test('memory', async ({ page }) => {
     await page.waitForTimeout(2000);
     const memoryAfterSecondLoad = (await getMetrics(page)).JSHeapUsedSize;
 
-    reportToPosthog('unit_memory_workflow', { value: memoryAfterSecondLoad - memoryAfterFirstLoad });
+    reportToPosthog('unit_memory_overflow', { value: memoryAfterSecondLoad - memoryAfterFirstLoad });
     expect(memoryAfterSecondLoad - memoryAfterFirstLoad)
         .toBeLessThanOrEqual(MAX_UNIT_MEMORY_OVERFLOW);
 
@@ -154,11 +154,11 @@ test('memory', async ({ page }) => {
     await takeHeapSnapshot(client, 'memory-second.heapsnapshot');
 
     const memoryAfterDisposingSecondUniver = (await getMetrics(page)).JSHeapUsedSize;
-    reportToPosthog('instance_memory_workflow', { value: memoryAfterDisposingSecondUniver - memoryAfterDisposingFirstInstance });
+    reportToPosthog('instance_memory_overflow', { value: memoryAfterDisposingSecondUniver - memoryAfterDisposingFirstInstance });
     expect(memoryAfterDisposingSecondUniver - memoryAfterDisposingFirstInstance)
         .toBeLessThanOrEqual(MAX_SECOND_INSTANCE_OVERFLOW);
 
-    reportToPosthog('univer_memory_workflow', { value: memoryAfterDisposingSecondUniver - memoryAfterFirstInstance });
+    reportToPosthog('univer_memory_overflow', { value: memoryAfterDisposingSecondUniver - memoryAfterFirstInstance });
     expect(memoryAfterDisposingSecondUniver - memoryAfterFirstInstance)
         .toBeLessThanOrEqual(MAX_UNIVER_MEMORY_OVERFLOW);
 

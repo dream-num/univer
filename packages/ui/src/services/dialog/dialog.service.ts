@@ -15,10 +15,10 @@
  */
 
 import type { IDisposable } from '@univerjs/core';
-import { createIdentifier } from '@univerjs/core';
 import type { Observable } from 'rxjs';
-
 import type { IDialogPartMethodOptions } from '../../views/components/dialog-part/interface';
+
+import { createIdentifier } from '@univerjs/core';
 
 export const IDialogService = createIdentifier<IDialogService>('univer.ui.dialog-service');
 export interface IDialogService {

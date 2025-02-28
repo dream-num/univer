@@ -16,7 +16,7 @@
 
 import type { IDisposable, Nullable } from '@univerjs/core';
 import type { Observable } from 'rxjs';
-import { createIdentifier, Disposable, DisposableCollection, IContextService, Inject, Injector, IUniverInstanceService, toDisposable } from '@univerjs/core';
+import { createIdentifier, Disposable, DisposableCollection, ICommandService, IContextService, Inject, Injector, IUniverInstanceService, toDisposable } from '@univerjs/core';
 import { RENDER_RAW_FORMULA_KEY } from '@univerjs/engine-render';
 import { BehaviorSubject, combineLatest, debounceTime, Subject, throttleTime } from 'rxjs';
 import { FIND_REPLACE_REPLACE_REVEALED } from './context-keys';
@@ -80,6 +80,8 @@ export abstract class FindModel extends Disposable {
      * Replace all matches. This method would return how many
      */
     abstract replaceAll(replaceString: string): Promise<IReplaceAllResult>;
+
+    abstract focusSelection(): void;
 }
 
 /**
@@ -154,6 +156,11 @@ export interface IFindReplaceService {
     replace(): Promise<boolean>;
     replaceAll(): Promise<IReplaceAllResult>;
 
+    /**
+     * Focus the selection of the current match.
+     */
+    focusSelection(): void;
+
     getProviders(): Set<IFindReplaceProvider>;
 }
 export const IFindReplaceService = createIdentifier<IFindReplaceService>('find-replace.service');
@@ -212,7 +219,8 @@ export class FindReplaceModel extends Disposable {
     constructor(
         private readonly _state: FindReplaceState,
         private readonly _providers: Set<IFindReplaceProvider>,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
 
@@ -252,6 +260,10 @@ export class FindReplaceModel extends Disposable {
         const complete = await this._startSearching();
         this._state.changeState({ findCompleted: true });
         return complete;
+    }
+
+    focusSelection(): void {
+        this._matchingModel?.focusSelection();
     }
 
     /** Call this method to start a `searching`. */
@@ -502,9 +514,6 @@ export interface IFindReplaceState {
     findBy: FindBy;
 }
 
-/**
- *
- */
 export function createInitFindReplaceState(): IFindReplaceState {
     return {
         caseSensitive: false,
@@ -811,6 +820,10 @@ export class FindReplaceService extends Disposable implements IFindReplaceServic
     revealReplace(): void {
         this._state.changeState({ replaceRevealed: true, inputtingFindString: this._state.findString });
         this._toggleRevealReplace(true);
+    }
+
+    focusSelection(): void {
+        this._model?.focusSelection();
     }
 
     start(revealReplace = false): boolean {

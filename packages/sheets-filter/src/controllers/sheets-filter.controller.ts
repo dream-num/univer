@@ -56,6 +56,7 @@ export class SheetsFilterController extends Disposable {
         this.disposeWithMe(this._sheetInterceptorService.interceptCommand({
             getMutations: (command) => this._getUpdateFilter(command),
         }));
+
         this.disposeWithMe(this._commandService.onCommandExecuted((commandInfo) => {
             if (commandInfo.id === SetWorksheetActiveOperation.id) {
                 const params = commandInfo.params as ISetWorksheetActiveOperationParams;
@@ -150,9 +151,11 @@ export class SheetsFilterController extends Disposable {
                 if (!unitId || !subUnitId || !targetSubUnitId) {
                     return this._handleNull();
                 }
+
                 return this._handleCopySheetCommand(unitId, subUnitId, targetSubUnitId);
             }
         }
+
         return {
             redos: [],
             undos: [],

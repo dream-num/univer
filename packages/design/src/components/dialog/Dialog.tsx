@@ -112,6 +112,12 @@ export interface IDialogProps {
      * whether click mask to close, default is true
      */
     maskClosable?: boolean;
+
+    /**
+     * whether support press esc to close
+     * @default true
+     */
+    keyboard?: boolean;
 }
 
 export function Dialog(props: IDialogProps) {
@@ -130,6 +136,7 @@ export function Dialog(props: IDialogProps) {
         footer,
         onClose,
         mask,
+        keyboard = true,
         dialogStyles,
         closable,
         maskClosable,
@@ -234,6 +241,7 @@ export function Dialog(props: IDialogProps) {
             styles={dialogStyles}
             closable={closable}
             maskClosable={maskClosable}
+            keyboard={keyboard}
         >
             {children}
         </RcDialog>

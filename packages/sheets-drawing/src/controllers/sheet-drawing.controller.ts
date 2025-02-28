@@ -31,8 +31,15 @@ export class SheetsDrawingLoadController extends Disposable {
         @IResourceManagerService private _resourceManagerService: IResourceManagerService
     ) {
         super();
+
         this._initSnapshot();
+        this._initInterceptors();
+
         this.disposeWithMe(this._commandService.registerCommand(SetDrawingApplyMutation));
+    }
+
+    private _initInterceptors(): void {
+
     }
 
     private _initSnapshot() {
@@ -41,18 +48,22 @@ export class SheetsDrawingLoadController extends Disposable {
             if (map) {
                 return JSON.stringify(map);
             }
+
             return '';
         };
+
         const parseJson = (json: string): IDrawingSubunitMap<ISheetDrawing> => {
             if (!json) {
                 return {};
             }
+
             try {
                 return JSON.parse(json);
-            } catch (err) {
+            } catch {
                 return {};
             }
         };
+
         this.disposeWithMe(
             this._resourceManagerService.registerPluginResource<IDrawingSubunitMap<ISheetDrawing>>({
                 pluginName: SHEET_DRAWING_PLUGIN,

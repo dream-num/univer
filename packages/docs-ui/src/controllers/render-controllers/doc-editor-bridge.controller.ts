@@ -157,7 +157,7 @@ export class DocEditorBridgeController extends Disposable implements IRenderModu
             })
         );
 
-        // I don't know why, but keep this first, and should be removed if it was checked unneccesary.
+        //TODO:@weird94 I don't know why, but keep this first, and should be removed if it was checked unneccesary.
         const disposableCollection = new DisposableCollection();
         this.disposeWithMe(
             this._univerInstanceService.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_SHEET).subscribe((unit) => {

@@ -305,6 +305,9 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
 
         // eslint-disable-next-line max-lines-per-function
         this.disposeWithMe(lifeCycleService.lifecycle$.subscribe((lifecycle) => {
+            // hoverManagerSrv & dragManagerService is not hold by renderUnit
+            // so even render unit changed, they are still the same.
+            // no need to <= renderUnit like the selectionService from renderUnit like below.
             if (lifecycle !== LifecycleStages.Rendered) return;
             disposable.dispose();
             const hoverManagerService = injector.get(HoverManagerService);

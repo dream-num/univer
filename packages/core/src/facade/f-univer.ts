@@ -97,7 +97,7 @@ export class FUniver extends Disposable {
     protected _eventRegistry = new FEventRegistry();
 
     protected registerEventHandler = (event: string, handler: () => IDisposable | Subscription): IDisposable => {
-        return this._eventRegistry.registerEventHandler(event, handler);
+        return this.disposeWithMe(this._eventRegistry.registerEventHandler(event, handler));
     };
 
     constructor(

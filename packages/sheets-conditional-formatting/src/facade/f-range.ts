@@ -17,6 +17,7 @@
 import type {
     IAddConditionalRuleMutationParams,
     IAnchor,
+    IClearRangeCfParams,
     IConditionFormattingRule,
     IDeleteConditionalRuleMutationParams,
     IMoveConditionalRuleMutationParams,
@@ -25,6 +26,7 @@ import type {
 import { Rectangle } from '@univerjs/core';
 import {
     AddConditionalRuleMutation,
+    ClearRangeCfCommand,
     ConditionalFormattingRuleModel,
     DeleteConditionalRuleMutation,
     MoveConditionalRuleMutation,
@@ -140,6 +142,13 @@ export interface IFRangeConditionalFormattingMixin {
      * ```
      */
     setConditionalFormattingRule(cfId: string, rule: IConditionFormattingRule): FRange;
+
+    /**
+     * Clear the conditional rules for the range.
+     * @returns {FRange} Returns the current range instance for method chaining
+     * @memberof IFRangeConditionalFormattingMixin
+     */
+    clearConditionalFormatRules(): FRange;
 }
 
 export class FRangeConditionalFormattingMixin extends FRange implements IFRangeConditionalFormattingMixin {
@@ -189,6 +198,16 @@ export class FRangeConditionalFormattingMixin extends FRange implements IFRangeC
             cfId,
         };
         this._commandService.syncExecuteCommand(SetConditionalRuleMutation.id, params);
+        return this;
+    }
+
+    override clearConditionalFormatRules(): FRange {
+        const params: IClearRangeCfParams = {
+            unitId: this._workbook.getUnitId(),
+            subUnitId: this._worksheet.getSheetId(),
+            ranges: [this._range],
+        };
+        this._commandService.syncExecuteCommand(ClearRangeCfCommand.id, params);
         return this;
     }
 }

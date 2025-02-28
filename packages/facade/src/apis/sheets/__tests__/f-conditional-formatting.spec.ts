@@ -19,7 +19,17 @@ import type { FUniver } from '@univerjs/core/facade';
 import { ICommandService } from '@univerjs/core/services/command/command.service.js';
 import { RemoveOtherFormulaMutation } from '@univerjs/engine-formula';
 import { SetSelectionsOperation } from '@univerjs/sheets';
-import { AddConditionalRuleMutation, ConditionalFormattingViewModel, DeleteConditionalRuleMutation, MoveConditionalRuleMutation, SetConditionalRuleMutation } from '@univerjs/sheets-conditional-formatting';
+import {
+    AddCfCommand,
+    AddConditionalRuleMutation,
+    ConditionalFormattingViewModel,
+    DeleteCfCommand,
+    DeleteConditionalRuleMutation,
+    MoveCfCommand,
+    MoveConditionalRuleMutation,
+    SetCfCommand,
+    SetConditionalRuleMutation,
+} from '@univerjs/sheets-conditional-formatting';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { createFacadeTestBed } from '../../__tests__/create-test-bed';
 
@@ -39,7 +49,18 @@ describe('Test conditional formatting facade', () => {
         univer = testBed.univer;
 
         commandService = get(ICommandService);
-        [AddConditionalRuleMutation, DeleteConditionalRuleMutation, MoveConditionalRuleMutation, SetConditionalRuleMutation, SetSelectionsOperation, RemoveOtherFormulaMutation].forEach((m) => {
+        [
+            AddCfCommand,
+            AddConditionalRuleMutation,
+            DeleteCfCommand,
+            DeleteConditionalRuleMutation,
+            MoveCfCommand,
+            MoveConditionalRuleMutation,
+            SetConditionalRuleMutation,
+            SetCfCommand,
+            SetSelectionsOperation,
+            RemoveOtherFormulaMutation,
+        ].forEach((m) => {
             commandService.registerCommand(m);
         });
     });

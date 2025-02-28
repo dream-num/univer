@@ -15,6 +15,7 @@
  */
 
 import type { ICommand } from '@univerjs/core';
+import type { IDeleteConditionalRuleMutationParams } from '../mutations/delete-conditional-rule.mutation';
 import {
     CommandType,
     ICommandService,
@@ -22,35 +23,32 @@ import {
     IUniverInstanceService,
 } from '@univerjs/core';
 import { getSheetCommandTarget } from '@univerjs/sheets';
-import type { IConditionFormattingRule, ISetConditionalRuleMutationParams } from '@univerjs/sheets-conditional-formatting';
-import { SetConditionalRuleMutation, setConditionalRuleMutationUndoFactory } from '@univerjs/sheets-conditional-formatting';
+import { DeleteConditionalRuleMutation, DeleteConditionalRuleMutationUndoFactory } from '../mutations/delete-conditional-rule.mutation';
 
-export interface ISetCfCommandParams {
+export interface IDeleteCfCommandParams {
     unitId?: string;
     subUnitId?: string;
-    rule: IConditionFormattingRule;
-};
-export const SetCfCommand: ICommand<ISetCfCommandParams> = {
+    cfId: string;
+}
+export const DeleteCfCommand: ICommand<IDeleteCfCommandParams> = {
     type: CommandType.COMMAND,
-    id: 'sheet.command.set-conditional-rule',
+    id: 'sheet.command.delete-conditional-rule',
     handler(accessor, params) {
         if (!params) {
             return false;
         }
-
         const undoRedoService = accessor.get(IUndoRedoService);
         const commandService = accessor.get(ICommandService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
-
         const target = getSheetCommandTarget(univerInstanceService, params);
         if (!target) return false;
 
         const { unitId, subUnitId } = target;
-        const config: ISetConditionalRuleMutationParams = { unitId, subUnitId, rule: params.rule };
-        const undos = setConditionalRuleMutationUndoFactory(accessor, config);
-        const result = commandService.syncExecuteCommand(SetConditionalRuleMutation.id, config);
+        const config: IDeleteConditionalRuleMutationParams = { unitId, subUnitId, cfId: params.cfId };
+        const undos = DeleteConditionalRuleMutationUndoFactory(accessor, config);
+        const result = commandService.syncExecuteCommand(DeleteConditionalRuleMutation.id, config);
         if (result) {
-            undoRedoService.pushUndoRedo({ unitID: unitId, undoMutations: undos, redoMutations: [{ id: SetConditionalRuleMutation.id, params: config }] });
+            undoRedoService.pushUndoRedo({ unitID: unitId, undoMutations: undos, redoMutations: [{ id: DeleteConditionalRuleMutation.id, params: config }] });
         }
         return result;
     },

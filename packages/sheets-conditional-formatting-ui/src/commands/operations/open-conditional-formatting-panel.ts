@@ -15,14 +15,11 @@
  */
 
 import type { IAccessor, ICommand } from '@univerjs/core';
+import type { IClearRangeCfParams, IColorScale, IConditionFormattingRule, IDataBar, IFormulaHighlightCell, IIconSet, IRankHighlightCell } from '@univerjs/sheets-conditional-formatting';
 import { CommandType, ICommandService } from '@univerjs/core';
 import { SheetsSelectionsService } from '@univerjs/sheets';
-import { CFRuleType, CFSubRuleType, createDefaultRule } from '@univerjs/sheets-conditional-formatting';
-import type { IColorScale, IConditionFormattingRule, IDataBar, IFormulaHighlightCell, IIconSet, IRankHighlightCell } from '@univerjs/sheets-conditional-formatting';
+import { CFRuleType, CFSubRuleType, ClearRangeCfCommand, ClearWorksheetCfCommand, createDefaultRule } from '@univerjs/sheets-conditional-formatting';
 import { ConditionalFormattingPanelController } from '../../controllers/cf.panel.controller';
-import type { IClearRangeCfParams } from '../commands/clear-range-cf.command';
-import { ClearRangeCfCommand } from '../commands/clear-range-cf.command';
-import { ClearWorksheetCfCommand } from '../commands/clear-worksheet-cf.command';
 
 interface IOpenConditionalFormattingOperatorParams {
     value: number;

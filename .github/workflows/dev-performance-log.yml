@@ -34,4 +34,6 @@ jobs:
               run: pnpm build:e2e
 
             - name: Run Playwright Tests
+              env:
+                  POSTHOG_API_KEY: ${{ secrets.POSTHOG_API_KEY }}
               run: pnpm exec playwright test

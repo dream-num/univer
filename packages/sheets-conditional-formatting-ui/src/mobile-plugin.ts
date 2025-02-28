@@ -25,7 +25,7 @@ import {
     Plugin,
     UniverInstanceType,
 } from '@univerjs/core';
-import { AddCfCommand, ClearRangeCfCommand, ClearWorksheetCfCommand, DeleteCfCommand, MoveCfCommand, SetCfCommand, SHEET_CONDITIONAL_FORMATTING_PLUGIN, UniverSheetsConditionalFormattingPlugin } from '@univerjs/sheets-conditional-formatting';
+import { SHEET_CONDITIONAL_FORMATTING_PLUGIN, UniverSheetsConditionalFormattingPlugin } from '@univerjs/sheets-conditional-formatting';
 import { AddAverageCfCommand } from './commands/commands/add-average-cf.command';
 import { AddColorScaleConditionalRuleCommand } from './commands/commands/add-color-scale-cf.command';
 import { AddDataBarConditionalRuleCommand } from './commands/commands/add-data-bar-cf.command';
@@ -89,12 +89,6 @@ export class UniverSheetsConditionalFormattingMobileUIPlugin extends Plugin {
             AddTimePeriodCfCommand,
             AddUniqueValuesCfCommand,
             OpenConditionalFormattingOperator,
-            DeleteCfCommand,
-            SetCfCommand,
-            MoveCfCommand,
-            AddCfCommand,
-            ClearRangeCfCommand,
-            ClearWorksheetCfCommand,
         ].forEach((m) => {
             this._commandService.registerCommand(m);
         });

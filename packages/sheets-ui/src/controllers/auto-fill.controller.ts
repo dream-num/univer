@@ -184,7 +184,7 @@ export class AutoFillController extends Disposable {
             // Each range change requires re-listening.
             disposableCollection.dispose();
 
-            const currentRenderer = getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SLIDE, this._univerInstanceService, this._renderManagerService);
+            const currentRenderer = getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET, this._univerInstanceService, this._renderManagerService);
             if (!currentRenderer) return;
 
             const selectionRenderService = currentRenderer.with(ISheetSelectionRenderService);

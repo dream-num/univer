@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/engine-numfmt",
-    "version": "0.6.1",
+    "version": "0.6.2",
     "private": false,
     "description": "UniverSheet normal plugin UI manager",
     "author": "DreamNum <developer@univer.ai>",

@@ -60,6 +60,7 @@
     },
     "dependencies": {
         "@univerjs/core": "workspace:*",
+        "@univerjs/design": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/icons": "^0.2.20",
         "@univerjs/slides-ui": "workspace:*",

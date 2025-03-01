@@ -32,7 +32,7 @@ import {
     SetCfCommand,
 } from '@univerjs/sheets-conditional-formatting';
 import { FWorksheet } from '@univerjs/sheets/facade';
-import { FConditionalFormattingBuilder } from './conditional-formatting-builder';
+import { FConditionalFormattingBuilder } from './f-conditional-formatting-builder';
 
 /**
  * @ignore
@@ -127,6 +127,8 @@ export interface IFWorksheetConditionalFormattingMixin {
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getActiveSheet();
      * const rules = fWorksheet.getConditionalFormattingRules();
+     *
+     * // Delete the first rule
      * fWorksheet.deleteConditionalFormattingRule(rules[0]?.cfId);
      * ```
      */
@@ -144,6 +146,8 @@ export interface IFWorksheetConditionalFormattingMixin {
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getActiveSheet();
      * const rules = fWorksheet.getConditionalFormattingRules();
+     *
+     * // Move the third rule before the first rule
      * const rule = rules[2];
      * const targetRule = rules[0];
      * fWorksheet.moveConditionalFormattingRule(rule?.cfId, targetRule?.cfId, 'before');
@@ -171,6 +175,7 @@ export interface IFWorksheetConditionalFormattingMixin {
      *   .build();
      * fWorksheet.addConditionalFormattingRule(rule);
      *
+     * // Modify the first rule to apply to a new range
      * const rules = fWorksheet.getConditionalFormattingRules();
      * const newRuleRange = fWorksheet.getRange('A1:D10');
      * fWorksheet.setConditionalFormattingRule(rules[0]?.cfId, { ...rules[0], ranges: [newRuleRange.getRange()] });
@@ -187,7 +192,7 @@ export interface IFWorksheetConditionalFormattingMixin {
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getActiveSheet();
      * fWorksheet.clearConditionalFormatRules();
-     * console.log(fWorksheet.getConditionalFormattingRules());
+     * console.log(fWorksheet.getConditionalFormattingRules()); // []
      * ```
      */
     clearConditionalFormatRules(): FWorksheet;

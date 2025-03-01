@@ -17,7 +17,6 @@
 import type { IDisposable } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent } from '@univerjs/engine-render';
 import { createIdentifier, Disposable, toDisposable } from '@univerjs/core';
-import { BehaviorSubject } from 'rxjs';
 
 export interface IContextMenuHandler {
     /** A callback to open context menu with given position and menu type. */
@@ -42,7 +41,6 @@ export const IContextMenuService = createIdentifier<IContextMenuService>('ui.con
 
 export class ContextMenuService extends Disposable implements IContextMenuService {
     private _currentHandler: IContextMenuHandler | null = null;
-    trigger$: BehaviorSubject<number> = new BehaviorSubject<number>(0);
     disabled: boolean = false;
 
     get visible(): boolean {

@@ -47,12 +47,12 @@
                 "require": "./lib/cjs/locale/*.js",
                 "types": "./lib/types/locale/*.d.ts"
             },
-            "./lib/*": "./lib/*",
             "./facade": {
                 "import": "./lib/es/facade.js",
                 "require": "./lib/cjs/facade.js",
                 "types": "./lib/types/facade/index.d.ts"
-            }
+            },
+            "./lib/*": "./lib/*"
         }
     },
     "directories": {

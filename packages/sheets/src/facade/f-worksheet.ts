@@ -2390,6 +2390,21 @@ export class FWorksheet extends FBaseInitialable {
     }
 
     /**
+     * Get custom metadata of worksheet
+     * @returns {CustomData | undefined} custom metadata
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorkSheet = fWorkbook.getActiveSheet();
+     * const custom = fWorkSheet.getCustomMetadata();
+     * console.log(custom);
+     * ```
+     */
+    getCustomMetadata(): CustomData | undefined {
+        return this._worksheet.getCustomMetadata();
+    }
+
+    /**
      * Set custom metadata of row
      * @param {number} index - row index
      * @param {CustomData | undefined} custom - custom metadata

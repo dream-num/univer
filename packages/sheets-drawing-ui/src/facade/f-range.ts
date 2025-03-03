@@ -30,8 +30,10 @@ export interface IFRangeSheetDrawingMixin {
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // Insert an image into the cell A10
      * const fRange = fWorksheet.getRange('A10');
-     * const result = fRange.insertCellImageAsync('https://avatars.githubusercontent.com/u/61444807?s=48&v=4');
+     * const result = await fRange.insertCellImageAsync('https://avatars.githubusercontent.com/u/61444807?s=48&v=4');
      * console.log(result);
      * ```
      */

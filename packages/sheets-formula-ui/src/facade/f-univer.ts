@@ -27,16 +27,25 @@ export interface ISheetsFormulaUIMixin {
      * @returns {Promise<IUnitRangeName[]>} The selected ranges.
      * @example
      * ```typescript
-     * this.univer.showRangeSelectorDialog({
-     *     unitId: 'unit1',
-     *     subUnitId: 'subUnit1',
-     *     initialValue: [{ sheetName: 'Sheet1', range: 'A1:B2' }],
-     *     maxRangeCount: 2,
-     *     supportAcrossSheet: true,
-     *     callback: (ranges, isCancel) => {
-     *         // Handle the selected ranges
-     *     }
-     * })
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const unitId = fWorkbook.getId();
+     *
+     * univerAPI.showRangeSelectorDialog({
+     *   unitId,
+     *   subUnitId: fWorksheet.getSheetId(),
+     *   initialValue: [{
+     *     unitId,
+     *     sheetName: fWorksheet.getSheetName(),
+     *     range: 'A1:B2'
+     *   }],
+     *   maxRangeCount: 2,
+     *   supportAcrossSheet: true,
+     *   callback: (ranges, isCancel) => {
+     *     // Handle the selected ranges
+     *     console.log(ranges, isCancel);
+     *   }
+     * });
      * ```
      */
     showRangeSelectorDialog(opts: IShowRangeSelectorDialogOptions): Promise<IUnitRangeName[]>;

@@ -243,7 +243,7 @@ export class FOverGridImageBuilder {
 
     /**
      * Set the horizontal position of the image
-     * @param {number} column - The column index of the image start position
+     * @param {number} column - The column index of the image start position, start at 0
      * @returns {FOverGridImageBuilder} The `FOverGridImageBuilder` for chaining
      * @example
      * ```ts
@@ -266,7 +266,7 @@ export class FOverGridImageBuilder {
 
     /**
      * Set the vertical position of the image
-     * @param {number} row - The row index of the image start position
+     * @param {number} row - The row index of the image start position, start at 0
      * @returns {FOverGridImageBuilder} The `FOverGridImageBuilder` for chaining
      * @example
      * ```ts
@@ -884,7 +884,7 @@ export class FOverGridImage extends FBase {
 
     /**
      * Move the image layer backward by one level
-     * @returns success or not
+     * @returns {boolean} true if the image is moved backward successfully, otherwise false
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
@@ -905,7 +905,7 @@ export class FOverGridImage extends FBase {
 
     /**
      * Move the image layer to the bottom layer
-     * @returns success or not
+     * @returns {boolean} true if the image is moved to the bottom layer successfully, otherwise false
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
@@ -926,7 +926,7 @@ export class FOverGridImage extends FBase {
 
     /**
      * Move the image layer to the top layer
-     * @returns success or not
+     * @returns {boolean} true if the image is moved to the top layer successfully, otherwise false
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();

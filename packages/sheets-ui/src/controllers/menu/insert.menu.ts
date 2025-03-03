@@ -29,7 +29,9 @@ import {
     SetSelectionsOperation,
     SheetsSelectionsService,
     WorkbookEditablePermission,
-    WorksheetEditPermission, WorksheetInsertColumnPermission, WorksheetInsertRowPermission,
+    WorksheetEditPermission,
+    WorksheetInsertColumnPermission,
+    WorksheetInsertRowPermission,
 } from '@univerjs/sheets';
 
 import { MenuItemType } from '@univerjs/ui';

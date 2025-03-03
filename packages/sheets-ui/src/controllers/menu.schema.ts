@@ -25,7 +25,6 @@ import {
     ClearSelectionContentCommand,
     ClearSelectionFormatCommand,
     CopySheetCommand,
-    InsertColAfterCommand,
     InsertColBeforeCommand,
     InsertMultiColsLeftCommand,
     InsertMultiColsRightCommand,
@@ -109,8 +108,6 @@ import {
     InsertRangeMoveDownMenuItemFactory,
     InsertRangeMoveRightMenuItemFactory,
     InsertRowBeforeCellMenuItemFactory,
-    ROW_INSERT_MENU_ID,
-    RowInsertMenuItemFactory,
 } from './menu/insert.menu';
 import {
     BackgroundColorSelectorMenuItemFactory,

@@ -23,6 +23,8 @@ import { DataValidationFormulaService } from '../services/dv-formula.service';
 import { getFormulaResult, isLegalFormulaResult } from '../utils/formula';
 import { getCellValueOrigin } from '../utils/get-cell-data-origin';
 import { deserializeListOptions } from './util';
+import { SheetSkeletonService } from '@univerjs/sheets';
+import { SpreadsheetSkeleton } from '../../../engine-render/src';
 
 export function getRuleFormulaResultSet(result: Nullable<Nullable<ICellData>[][]>) {
     if (!result) {
@@ -92,6 +94,7 @@ export class ListValidator extends BaseDataValidator {
     protected formulaService = this.injector.get(DataValidationFormulaService);
     private _lexer = this.injector.get(LexerTreeBuilder);
     private _univerInstanceService = this.injector.get(IUniverInstanceService);
+    private _skService = this.injector.get(SheetSkeletonService);
 
     override readonly offsetFormulaByRange = false;
 
@@ -100,7 +103,14 @@ export class ListValidator extends BaseDataValidator {
     operators: DataValidationOperator[] = [];
     scopes: string | string[] = ['sheet'];
 
-    override skipDefaultFontRender = (rule: ISheetDataValidationRule) => {
+    override skipDefaultFontRender = (rule: ISheetDataValidationRule, cellValue: Nullable<CellValue>, pos: { unitId: string; subUnitId: string; row: number; column: number }) => {
+        if(pos) {
+            console.log('list vali skipDefaultFontRender', rule.renderMode !== DataValidationRenderMode.TEXT);
+            const { unitId, subUnitId } = pos;
+            (this._skService.getSkeleton(unitId, subUnitId) as SpreadsheetSkeleton)?.resetRangeCache(rule.ranges)
+
+        }
+
         return rule.renderMode !== DataValidationRenderMode.TEXT;
     };
 

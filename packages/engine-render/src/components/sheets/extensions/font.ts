@@ -17,7 +17,7 @@
 /* eslint-disable max-lines-per-function */
 /* eslint-disable complexity */
 
-import type { ICellDataForSheetInterceptor, ICellWithCoord, IDocDrawingBase, ImageSourceType, IRange, IScale, Nullable, ObjectMatrix } from '@univerjs/core';
+import type { ICellWithCoord, IDocDrawingBase, ImageSourceType, IRange, IScale, Nullable, ObjectMatrix } from '@univerjs/core';
 import type { UniverRenderingContext } from '../../../context';
 import type { Documents } from '../../docs/document';
 import type { IDrawInfo } from '../../extension';
@@ -190,9 +190,14 @@ export class Font extends SheetExtension {
         renderFontCtx.fontCache = fontCache;
 
         //#region overflow
-        // If the cell is overflowing, but the overflowRectangle has not been set,
-        // then overflowRectangle is set to undefined.
+        // e.g. cell(12, 5)'s textwrap value is overflow(which is default), and text ends at column 9,
+        // the overflowRange would be startRow: 12, startColumn: 5, endRow: 12, endColumn: 9
+        // and if column 9 is not empty, then the overflowRang e endColumn would be 8
+        // and if column 7 is not empty, the endColumn would be 6
         const overflowRange = spreadsheetSkeleton.overflowCache.getValue(row, col);
+        if (row === 12 && col === 5) {
+            console.log('12, 5 overflow', JSON.stringify(overflowRange));
+        }
 
         // If it's neither an overflow nor within the current range,
         // then we can exit early
@@ -212,20 +217,24 @@ export class Font extends SheetExtension {
         // Since we cannot predict when fontRenderExtension?.isSkip might change,
         // we must check it every time and retrieve cell data directly from the worksheet,
         // not from the cache to ensure accuracy.
-        // if (renderFontCtx.fontCache?.cellData?.fontRenderExtension?.isSkip) {
-        //     return true;
-        // }
-        const cellData = spreadsheetSkeleton.worksheet.getCell(row, col) as ICellDataForSheetInterceptor || {};
-        if (cellData?.fontRenderExtension?.isSkip) {
+        if (row == 12 && col == 5) {
+            if (window.resetC125) debugger;
+            console.log('12, 5 from cache', renderFontCtx.fontCache, JSON.stringify(renderFontCtx.fontCache?.cellData?.fontRenderExtension?.isSkip));
+        }
+        if (renderFontCtx.fontCache?.cellData?.fontRenderExtension?.isSkip) {
             return true;
         }
+        // const cellData = spreadsheetSkeleton.worksheet.getCell(row, col) as ICellDataForSheetInterceptor || {};
+        // if (cellData?.fontRenderExtension?.isSkip) {
+        //     return true;
+        // }
 
         ctx.save();
         ctx.beginPath();
 
         //#region text overflow
         renderFontCtx.overflowRectangle = overflowRange;
-        this._setFontRenderBounds(renderFontCtx, row, col);
+        this._clipByRenderBounds(renderFontCtx, row, col);
         //#endregion
 
         ctx.translate(renderFontCtx.startX + FIX_ONE_PIXEL_BLUR_OFFSET, renderFontCtx.startY + FIX_ONE_PIXEL_BLUR_OFFSET);
@@ -238,7 +247,7 @@ export class Font extends SheetExtension {
         if (documentDataModel.getDrawingsOrder()?.length) {
             ctx.save();
             ctx.beginPath();
-            this._setFontRenderBounds(renderFontCtx, row, col, 1);
+            this._clipByRenderBounds(renderFontCtx, row, col, 1);
             this._renderImages(ctx, fontCache, renderFontCtx.startX, renderFontCtx.startY, renderFontCtx.endX, renderFontCtx.endY);
             ctx.closePath();
             ctx.restore();
@@ -324,13 +333,13 @@ export class Font extends SheetExtension {
     }
 
     /**
-     * Change font render bounds, for overflow and filter icon & custom render.
+     * Set font render bounds, for overflow and filter icon & custom render, then ctx.clip.
      * @param renderFontContext
      * @param row
      * @param col
      * @param fontCache
      */
-    private _setFontRenderBounds(renderFontContext: IRenderFontContext, row: number, col: number, padding = 0) {
+    private _clipByRenderBounds(renderFontContext: IRenderFontContext, row: number, col: number, padding = 0) {
         const { ctx, scale, overflowRectangle, rowHeightAccumulation, columnWidthAccumulation, fontCache } = renderFontContext;
         let { startX, endX, startY, endY } = renderFontContext;
 

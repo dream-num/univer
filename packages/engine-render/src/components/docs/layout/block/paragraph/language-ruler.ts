@@ -36,8 +36,9 @@ export function otherHandler(
     const glyphGroup = [];
     let step = 0;
     let src = charArray;
-
-    while (src.length) {
+    let count = 0;
+    while (src.length && count < 10) {
+        count++;
         const char = src.match(/^[\s\S]/gu)?.[0];
 
         if (char == null) {

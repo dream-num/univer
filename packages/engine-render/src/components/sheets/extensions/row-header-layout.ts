@@ -79,7 +79,7 @@ export class RowHeaderLayout extends SheetExtension {
             curRowSpecCfg = rowsCfg[rowIndex] as IRowStyleCfg & { text: string };
             mergeWithSpecCfg = { ...this.headerStyle, ...curRowSpecCfg };
         } else {
-            mergeWithSpecCfg = { ...this.headerStyle, text: `${rowIndex + 1}` };
+            mergeWithSpecCfg = { ...this.headerStyle, text: `${rowIndex}` };
         }
         const specStyle = Object.keys(curRowSpecCfg || {}).length > 1; // if cfg have more keys than 'text', means there would be special style config for this row.
         return [mergeWithSpecCfg, specStyle] as [IARowCfgObj, boolean];
@@ -115,7 +115,7 @@ export class RowHeaderLayout extends SheetExtension {
         }
 
         const scale = this._getScale(parentScale);
-        this.setStyleToCtx(ctx, this.headerStyle);
+        // this.setStyleToCtx(ctx, this.headerStyle);
 
         // background
         ctx.save();

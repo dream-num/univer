@@ -134,7 +134,7 @@ export class SheetsDataValidationRenderController extends RxDisposable {
                     effect: InterceptorEffectEnum.Style,
                     // must be after numfmt
                     priority: InterceptCellContentPriority.DATA_VALIDATION,
-                    // eslint-disable-next-line max-lines-per-function, complexity
+                    // eslint-disable-next-line max-lines-per-function
                     handler: (cell, pos, next) => {
                         const { row, col, unitId, subUnitId, workbook, worksheet } = pos;
 
@@ -177,7 +177,11 @@ export class SheetsDataValidationRenderController extends RxDisposable {
                             ],
                             fontRenderExtension: {
                                 ...cell?.fontRenderExtension,
-                                isSkip: cell?.fontRenderExtension?.isSkip || validator?.skipDefaultFontRender?.(rule, cellValue.value, pos),
+                                isSkip: (() => {
+                                    const isSkip = cell?.fontRenderExtension?.isSkip || validator?.skipDefaultFontRender?.(rule, cellValue.value, pos);
+
+                                    return isSkip;
+                                })(),
                             },
                             interceptorStyle: {
                                 ...cell?.interceptorStyle,

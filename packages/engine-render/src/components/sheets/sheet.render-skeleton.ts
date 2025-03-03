@@ -60,10 +60,10 @@ import {
     isWhiteColor,
     LocaleService,
     ObjectMatrix,
+    Range,
     searchArray,
     SheetSkeleton,
-    Tools,
-    WrapStrategy,
+    Tools, WrapStrategy,
 } from '@univerjs/core';
 import { distinctUntilChanged, startWith } from 'rxjs';
 import { BORDER_TYPE as BORDER_LTRB, COLOR_BLACK_RGB, MAXIMUM_COL_WIDTH, MAXIMUM_ROW_HEIGHT, MIN_COL_WIDTH } from '../../basics/const';
@@ -1155,6 +1155,21 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         this._overflowCache?.reset();
     }
 
+    override resetRangeCache(ranges: IRange[]): void {
+        for (let i = 0; i < ranges.length; i++) {
+            const range = ranges[i];
+            Range.foreach(range, (row, col) => {
+                if (row == 12 && col == 5) {
+                    window.resetC125 = true;
+                    console.log('resetRangeCache 12, 5');
+                }
+                this._cachedCellMatrix.setValue(row, col, undefined);
+                this._stylesCache.fontMatrix.realDeleteValue(row, col);
+            });
+        }
+        this.makeDirty(true);
+    }
+
     _setBorderStylesCache(row: number, col: number, style: Nullable<IStyleData>, options: {
         mergeRange?: IRange;
         cacheItem?: ICacheItem;
@@ -1254,7 +1269,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
                         imageCacheMap: this._imageCacheMap,
                         cellData,
                     };
-                    this._calculateOverflowCell(row, col, config as IFontCacheItem);
+                    // this._calculateOverflowCell(row, col, config as IFontCacheItem);
                     this._handleFontMatrix.setValue(row, col, true);
                 }
             }
@@ -1299,6 +1314,9 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         const cell = (() => {
             const cacheCell = this._cachedCellMatrix.getValue(row, col);
             if (cacheCell) {
+                if (row == 12 && col == 5) {
+                    console.log('cache cell', row, col);
+                }
                 return cacheCell;
             }
 
@@ -1311,6 +1329,9 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             // } else {
             //     window.skCellCount.set(k, 1);
             // }
+            if (row == 12 && col == 5) {
+                console.log('get cell', row, col);
+            }
             return this.worksheet.getCell(row, col) || this.worksheet.getCellRaw(row, col);
         })();
         this._cachedCellMatrix.setValue(row, col, cell);

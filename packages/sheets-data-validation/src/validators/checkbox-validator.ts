@@ -16,10 +16,12 @@
 
 import type { CellValue, DataValidationOperator, IDataValidationRule, IDataValidationRuleBase, ISheetDataValidationRule, LocaleService, Nullable } from '@univerjs/core';
 import type { IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation';
-import { DataValidationType, isFormulaString, Tools, WrapStrategy } from '@univerjs/core';
+import { DataValidationType, isFormulaString, Skeleton, Tools, WrapStrategy } from '@univerjs/core';
 import { BaseDataValidator } from '@univerjs/data-validation';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
 import { getFormulaResult, isLegalFormulaResult } from '../utils/formula';
+import { SheetSkeletonService } from '@univerjs/sheets';
+import { SpreadsheetSkeleton } from '../../../engine-render/src';
 
 export const CHECKBOX_FORMULA_1 = 1;
 export const CHECKBOX_FORMULA_2 = 0;
@@ -57,14 +59,16 @@ export class CheckboxValidator extends BaseDataValidator {
     override readonly offsetFormulaByRange = false;
 
     private _formulaService = this.injector.get(DataValidationFormulaService);
+    private _skService = this.injector.get(SheetSkeletonService);
 
     override skipDefaultFontRender = (rule: ISheetDataValidationRule, cellValue: Nullable<CellValue>, pos: { unitId: string; subUnitId: string; row: number; column: number }) => {
         const { unitId, subUnitId } = pos;
         const { formula1, formula2 } = this.parseFormulaSync(rule, unitId, subUnitId);
 
         const valueStr = `${cellValue ?? ''}`;
-
         const res = !valueStr || (valueStr === (`${formula1}`) || valueStr === `${formula2}`);
+
+        (this._skService.getSkeleton(unitId, subUnitId) as SpreadsheetSkeleton)?.resetRangeCache(rule.ranges)
         return res;
     };
 

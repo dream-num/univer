@@ -42,11 +42,8 @@ export const GlobalRangeSelector = () => {
             subUnitId={current?.subUnitId ?? ''}
             hideEditor
             selectorRef={instance}
-            onRangeSelectorDialogVisibleChange={(visible) => {
-                if (!visible) {
-                    const value = instance.current?.getValue();
-                    current?.callback(value?.split(',').map((i) => deserializeRangeWithSheet(i)) ?? []);
-                }
+            onChange={(_, value) => {
+                current?.callback(value?.split(',').map((i) => deserializeRangeWithSheet(i)) ?? []);
             }}
         />
     );

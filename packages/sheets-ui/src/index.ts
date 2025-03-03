@@ -109,7 +109,8 @@ export {
     SheetPasteColWidthCommand,
     SheetPasteCommand,
     SheetPasteFormatCommand,
-    SheetPasteShortKeyCommand, SheetPasteValueCommand,
+    SheetPasteShortKeyCommand,
+    SheetPasteValueCommand,
 } from './commands/commands/clipboard.command';
 export { DeleteRangeMoveLeftConfirmCommand } from './commands/commands/delete-range-move-left-confirm.command';
 export { DeleteRangeMoveUpConfirmCommand } from './commands/commands/delete-range-move-up-confirm.command';
@@ -146,7 +147,8 @@ export {
     type IScrollCommandParams,
     type IScrollToCellCommandParams,
     type ISetScrollRelativeCommandParams,
-    ResetScrollCommand, ScrollCommand,
+    ResetScrollCommand,
+    ScrollCommand,
     ScrollToCellCommand,
     SetScrollRelativeCommand,
 } from './commands/commands/set-scroll.command';

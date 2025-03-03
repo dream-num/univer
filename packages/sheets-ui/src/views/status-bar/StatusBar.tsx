@@ -56,19 +56,13 @@ export const StatusBar = () => {
         const [show, setShow] = useState(true);
 
         const filteredStatistics = useMemo(() =>
-            statistics.filter((item) => item.show && !item.disable),
-        [statistics]
-        );
+            statistics.filter((item) => item.show && !item.disable), [statistics]);
 
         const firstItem = useMemo(() =>
-            filteredStatistics.find((item) => item.show && !item.disable),
-        [filteredStatistics]
-        );
+            filteredStatistics.find((item) => item.show && !item.disable), [filteredStatistics]);
 
         const showList = useMemo(() =>
-            isSingle && firstItem ? [firstItem] : filteredStatistics,
-        [isSingle, firstItem, filteredStatistics]
-        );
+            isSingle && firstItem ? [firstItem] : filteredStatistics, [isSingle, firstItem, filteredStatistics]);
 
         const updateStatistics = useCallback((state: Nullable<IStatusBarServiceStatus>) => {
             const items = state?.values;
@@ -179,9 +173,7 @@ export const StatusBar = () => {
         return renderContent;
     };
 
-    const renderContent = useStatisticLayout(showList,
-        ROW_COUNT_THRESHOLD,
-        CopyableStatisticItem);
+    const renderContent = useStatisticLayout(showList, ROW_COUNT_THRESHOLD, CopyableStatisticItem);
 
     return (
         show && (

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+/* eslint-disable antfu/consistent-list-newline */
 import type { IFunctionService, ISequenceNode, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { LocaleType, numfmt } from '@univerjs/core';
 import { matchToken, sequenceNodeType } from '@univerjs/engine-formula';

@@ -230,9 +230,14 @@ export class SelectionControl extends Disposable {
 
         const shapes = [
             this._autoFillControl,
-            this._leftBorder, this._rightBorder, this._topBorder, this._bottomBorder,
-            this._backgroundControlTop, this._backgroundControlMiddleLeft,
-            this._backgroundControlMiddleRight, this._backgroundControlBottom,
+            this._leftBorder,
+            this._rightBorder,
+            this._topBorder,
+            this._bottomBorder,
+            this._backgroundControlTop,
+            this._backgroundControlMiddleLeft,
+            this._backgroundControlMiddleRight,
+            this._backgroundControlBottom,
             this._dashedRect,
         ];
 
@@ -852,8 +857,11 @@ export class SelectionControl extends Disposable {
         const scale = this._getScale();
 
         const {
-            stroke, rowHeaderFill = defaultStyle.rowHeaderFill!, rowHeaderStroke = defaultStyle.rowHeaderStroke!,
-            columnHeaderFill = defaultStyle.columnHeaderFill!, columnHeaderStroke = defaultStyle.columnHeaderStroke!,
+            stroke,
+            rowHeaderFill = defaultStyle.rowHeaderFill!,
+            rowHeaderStroke = defaultStyle.rowHeaderStroke!,
+            columnHeaderFill = defaultStyle.columnHeaderFill!,
+            columnHeaderStroke = defaultStyle.columnHeaderStroke!,
         } = style;
 
         let {

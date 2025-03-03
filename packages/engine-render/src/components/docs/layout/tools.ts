@@ -525,7 +525,8 @@ export function lineIterator(
         column: IDocumentSkeletonColumn,
         section: IDocumentSkeletonSection,
         page: IDocumentSkeletonPage
-    ) => void) {
+    ) => void
+) {
     for (const pageOrCell of pagesOrCells) {
         const { sections } = pageOrCell;
 

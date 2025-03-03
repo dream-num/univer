@@ -63,7 +63,8 @@ export class DataValidationRejectInputController extends Disposable {
                             worksheet,
                             workbook,
                             t: cell?.t,
-                        }, rule
+                        },
+                        rule
                     );
 
                     if (success) {

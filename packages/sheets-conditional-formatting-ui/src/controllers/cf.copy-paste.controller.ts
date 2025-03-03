@@ -29,7 +29,8 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import {
-    createTopMatrixFromMatrix, findAllRectangle,
+    createTopMatrixFromMatrix,
+    findAllRectangle,
     rangeToDiscreteRange,
 } from '@univerjs/sheets';
 import { AddConditionalRuleMutation, AddConditionalRuleMutationUndoFactory, ConditionalFormattingRuleModel, ConditionalFormattingViewModel, DeleteConditionalRuleMutation, DeleteConditionalRuleMutationUndoFactory, SetConditionalRuleMutation, setConditionalRuleMutationUndoFactory, SHEET_CONDITIONAL_FORMATTING_PLUGIN } from '@univerjs/sheets-conditional-formatting';
@@ -137,7 +138,9 @@ export class ConditionalFormattingCopyPasteController extends Disposable {
         }
 
         const specialPastes: IPasteHookValueType[] = [
-            PREDEFINED_HOOK_NAME.SPECIAL_PASTE_FORMAT, PREDEFINED_HOOK_NAME.DEFAULT_PASTE, PREDEFINED_HOOK_NAME.SPECIAL_PASTE_BESIDES_BORDER,
+            PREDEFINED_HOOK_NAME.SPECIAL_PASTE_FORMAT,
+            PREDEFINED_HOOK_NAME.DEFAULT_PASTE,
+            PREDEFINED_HOOK_NAME.SPECIAL_PASTE_BESIDES_BORDER,
         ];
 
         if (
@@ -242,7 +245,9 @@ export class ConditionalFormattingCopyPasteController extends Disposable {
             const ranges = findAllRectangle(createTopMatrixFromMatrix(matrix));
             if (!ranges.length) {
                 const deleteParams: IDeleteConditionalRuleMutationParams = {
-                    unitId, subUnitId, cfId,
+                    unitId,
+                    subUnitId,
+                    cfId,
                 };
                 redos.push({ id: DeleteConditionalRuleMutation.id, params: deleteParams });
                 undos.push(...DeleteConditionalRuleMutationUndoFactory(this._injector, deleteParams));
@@ -250,7 +255,9 @@ export class ConditionalFormattingCopyPasteController extends Disposable {
             if (waitAddRule.some((rule) => rule.cfId === cfId)) {
                 const rule = getCurrentSheetCfRule(cfId);
                 const addParams: IAddConditionalRuleMutationParams = {
-                    unitId, subUnitId, rule: { ...rule, ranges },
+                    unitId,
+                    subUnitId,
+                    rule: { ...rule, ranges },
                 };
                 redos.push({ id: AddConditionalRuleMutation.id, params: addParams });
                 undos.push(AddConditionalRuleMutationUndoFactory(this._injector, addParams));
@@ -260,7 +267,9 @@ export class ConditionalFormattingCopyPasteController extends Disposable {
                     continue;
                 }
                 const setParams: ISetConditionalRuleMutationParams = {
-                    unitId, subUnitId, rule: { ...rule, ranges },
+                    unitId,
+                    subUnitId,
+                    rule: { ...rule, ranges },
                 };
                 redos.push({ id: SetConditionalRuleMutation.id, params: setParams });
                 undos.push(...setConditionalRuleMutationUndoFactory(this._injector, setParams));

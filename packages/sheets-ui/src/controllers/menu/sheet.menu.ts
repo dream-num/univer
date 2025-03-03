@@ -225,7 +225,8 @@ export function ShowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
             return disposable.dispose;
         }).pipe(
             combineLatestWith(getWorkbookPermissionDisable$(accessor, [WorkbookEditablePermission, WorkbookHideSheetPermission])),
-            map(([defaultDisabled, permissionDisabled]) => defaultDisabled || permissionDisabled)),
+            map(([defaultDisabled, permissionDisabled]) => defaultDisabled || permissionDisabled)
+        ),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }

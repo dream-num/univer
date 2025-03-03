@@ -48,7 +48,14 @@ export function cursorConvertToTextRange(
         ? docSkeleton.findNodePositionByCharIndex(endOffset, true, segmentId, segmentPage)
         : null;
     const textRange = new TextRange(
-        scene, document, docSkeleton, anchorNodePosition, focusNodePosition, style, segmentId, segmentPage
+        scene,
+        document,
+        docSkeleton,
+        anchorNodePosition,
+        focusNodePosition,
+        style,
+        segmentId,
+        segmentPage
     );
 
     return textRange;

@@ -147,10 +147,7 @@ function RectPopup(props: IRectPopupProps) {
         });
 
         return () => anchorRectSub.unsubscribe();
-    },
-
-    [anchorRect$, direction]
-    );
+    }, [anchorRect$, direction]);
 
     useEffect(() => {
         const handleClickOther = (e: MouseEvent) => {

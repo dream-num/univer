@@ -77,7 +77,8 @@ export const RuleEdit = (props: IRuleEditProps) => {
         { label: localeService.t('sheet.cf.ruleType.dataBar'), value: '3' },
         { label: localeService.t('sheet.cf.ruleType.colorScale'), value: '4' },
         { label: localeService.t('sheet.cf.ruleType.formula'), value: '5' },
-        { label: localeService.t('sheet.cf.ruleType.iconSet'), value: '6' }];
+        { label: localeService.t('sheet.cf.ruleType.iconSet'), value: '6' },
+    ];
 
     const [ruleType, ruleTypeSet] = useState(() => {
         const type = props.rule?.rule.type;

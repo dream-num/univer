@@ -242,7 +242,8 @@ export class SheetsFilterController extends Disposable {
         redos.push({ id: SetSheetsFilterRangeMutation.id, params: setFilterRangeParams });
         undos.push({ id: SetSheetsFilterRangeMutation.id, params: undoSetFilterRangeMutationParams });
         return {
-            redos: mergeSetFilterCriteria(redos), undos: mergeSetFilterCriteria(undos),
+            redos: mergeSetFilterCriteria(redos),
+            undos: mergeSetFilterCriteria(undos),
         };
     }
 
@@ -336,13 +337,15 @@ export class SheetsFilterController extends Disposable {
             return {
                 undos: [{ id: SetSheetsFilterRangeMutation.id, params: { range: filterRange, unitId, subUnitId } }],
                 redos: [{
-                    id: SetSheetsFilterRangeMutation.id, params: {
+                    id: SetSheetsFilterRangeMutation.id,
+                    params: {
                         range: {
                             ...filterRange,
                             startRow: startRow - (removeEndRow - removeStartRow + 1),
                             endRow: endRow - (removeEndRow - removeStartRow + 1),
                         },
-                        unitId, subUnitId,
+                        unitId,
+                        subUnitId,
                     },
                 }],
             };
@@ -691,7 +694,9 @@ export class SheetsFilterController extends Disposable {
             handler: (filtered, rowLocation) => {
                 if (filtered) return true;
                 return this._sheetsFilterService.getFilterModel(
-                    rowLocation.unitId, rowLocation.subUnitId)?.isRowFiltered(rowLocation.row) ?? false;
+                    rowLocation.unitId,
+                    rowLocation.subUnitId
+                )?.isRowFiltered(rowLocation.row) ?? false;
             },
         }));
     }

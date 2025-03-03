@@ -111,7 +111,8 @@ function registerBasicPlugins(univer: Univer) {
             [DocUIController, {
                 useFactory: (injector) => {
                     injector.createInstance(UniDocsUIController, {});
-                }, deps: [Injector],
+                },
+                deps: [Injector],
             }],
         ],
     });
@@ -132,7 +133,8 @@ function registerSheetPlugins(univer: Univer) {
             [SheetUIController, {
                 useFactory: (injector) => {
                     injector.createInstance(UniSheetsUIController, {});
-                }, deps: [Injector],
+                },
+                deps: [Injector],
             }],
         ],
     });

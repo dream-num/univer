@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
+import type { IDrawingSearch } from '@univerjs/core';
 import type { IImageData } from '@univerjs/drawing';
 import type { IImageProps, Scene } from '@univerjs/engine-render';
-import { DrawingTypeEnum, type IDrawingSearch } from '@univerjs/core';
+import { DrawingTypeEnum } from '@univerjs/core';
 import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService, IImageIoService, ImageSourceType } from '@univerjs/drawing';
 import { DRAWING_OBJECT_LAYER_INDEX, Image } from '@univerjs/engine-render';
 import { IDialogService } from '@univerjs/ui';
@@ -35,8 +36,18 @@ export class DrawingRenderService {
     // eslint-disable-next-line max-lines-per-function
     async renderImages(imageParam: IImageData, scene: Scene) {
         const {
-            transform: singleTransform, drawingType, source, imageSourceType, srcRect,
-            prstGeom, groupId, unitId, subUnitId, drawingId, isMultiTransform, transforms: multiTransforms,
+            transform: singleTransform,
+            drawingType,
+            source,
+            imageSourceType,
+            srcRect,
+            prstGeom,
+            groupId,
+            unitId,
+            subUnitId,
+            drawingId,
+            isMultiTransform,
+            transforms: multiTransforms,
         } = imageParam;
         if (drawingType !== DrawingTypeEnum.DRAWING_IMAGE) {
             return;

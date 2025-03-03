@@ -70,7 +70,8 @@ const commonSelections = [
             selectable: false,
         },
         value: CF_MENU_OPERATION.dataBar,
-    }, {
+    },
+    {
         label: {
             name: 'sheet.cf.ruleType.iconSet',
             selectable: false,
@@ -83,7 +84,8 @@ const commonSelections = [
             selectable: false,
         },
         value: CF_MENU_OPERATION.viewRule,
-    }, {
+    },
+    {
         label: {
             name: 'sheet.cf.menu.createConditionalFormatting',
             selectable: false,

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import type { Dependency } from '@univerjs/core';
 import { Inject, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import type { Dependency } from '@univerjs/core';
 import { ReCalcSheetsFilterMutation, RemoveSheetsFilterMutation, SetSheetsFilterCriteriaMutation, SetSheetsFilterRangeMutation } from '@univerjs/sheets-filter';
 import { SheetsRenderService } from '@univerjs/sheets-ui';
 import { SheetsFilterRenderController } from '../views/render-modules/sheets-filter.render-controller';
@@ -36,7 +36,8 @@ export class SheetsFilterUIMobileController extends RxDisposable {
         ].forEach((m) => this.disposeWithMe(this._sheetsRenderService.registerSkeletonChangingMutations(m.id)));
 
         this.disposeWithMe(this._renderManagerService.registerRenderModule(
-            UniverInstanceType.UNIVER_SHEET, [SheetsFilterRenderController] as Dependency
+            UniverInstanceType.UNIVER_SHEET,
+            [SheetsFilterRenderController] as Dependency
         ));
     }
 }

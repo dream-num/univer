@@ -15,14 +15,14 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { COLORS, EventSubject } from '@univerjs/core';
-
-import { CURSOR_TYPE } from '../../basics/const';
 import type { IMouseEvent, IPointerEvent } from '../../basics/i-events';
-import { attachObjectHover } from '../../basics/quick-event';
-import { getColor } from '../../basics/tools';
+
 import type { UniverRenderingContext } from '../../context';
 import type { Scene } from '../../scene';
+import { COLORS, EventSubject } from '@univerjs/core';
+import { CURSOR_TYPE } from '../../basics/const';
+import { attachObjectHover } from '../../basics/quick-event';
+import { getColor } from '../../basics/tools';
 import { SceneViewer } from '../../scene-viewer';
 import { Path } from '../../shape/path';
 

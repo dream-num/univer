@@ -17,10 +17,10 @@
 import type { IKeyValue } from '@univerjs/core';
 
 import type { IObjectFullState } from '../basics/interfaces';
-import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '../basics/interfaces';
 import type { IPoint, Vector2 } from '../basics/vector2';
 import type { UniverRenderingContext } from '../context';
 import type { IShapeProps } from './shape';
+import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '../basics/interfaces';
 import { Shape } from './shape';
 
 export interface IRegularPolygonProps extends IShapeProps {

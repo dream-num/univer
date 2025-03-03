@@ -89,7 +89,7 @@ export function ToolbarButton(props: IBaseToolbarButtonProps) {
             className={clsx(`
               univer-flex univer-h-6 univer-min-w-6 univer-cursor-pointer univer-items-center univer-justify-center
               univer-rounded univer-border-none univer-bg-transparent univer-p-0 univer-text-base univer-text-gray-900
-              univer-outline-none
+              univer-outline-none univer-transition-colors
               [&:disabled]:univer-cursor-not-allowed [&:disabled]:univer-text-gray-200
               [&:disabled]:hover:univer-bg-transparent
               hover:univer-bg-gray-100

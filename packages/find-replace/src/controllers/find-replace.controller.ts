@@ -16,7 +16,8 @@
 
 import type {
     IDisposable,
-    Nullable } from '@univerjs/core';
+    Nullable,
+} from '@univerjs/core';
 import {
     ICommandService,
     Inject,
@@ -27,12 +28,7 @@ import {
     toDisposable,
 } from '@univerjs/core';
 import { SearchSingle } from '@univerjs/icons';
-import { ComponentManager,
-    IDialogService,
-    ILayoutService,
-    IMenuManagerService,
-    IShortcutService,
-} from '@univerjs/ui';
+import { ComponentManager, IDialogService, ILayoutService, IMenuManagerService, IShortcutService } from '@univerjs/ui';
 import { takeUntil } from 'rxjs';
 
 import { ReplaceAllMatchesCommand, ReplaceCurrentMatchCommand } from '../commands/commands/replace.command';

@@ -68,7 +68,8 @@ export class SheetsSortUIService extends Disposable {
         @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
         @Inject(SheetsSortService) private readonly _sheetsSortService: SheetsSortService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
-        @ICommandService private readonly _commandService: ICommandService) {
+        @ICommandService private readonly _commandService: ICommandService
+    ) {
         super();
     }
 
@@ -128,16 +129,15 @@ export class SheetsSortUIService extends Disposable {
 
         const colTranslator = colIndexTranslator(this._localeService);
 
-        return Array.from({ length: range.endColumn - range.startColumn + 1 },
-            (_, i) => {
-                const cellValue = worksheet.getCell(range.startRow, i + range.startColumn)?.v;
-                return {
-                    index: i + range.startColumn,
-                    label: hasTitle ?
-                        `${cellValue ?? colTranslator(i + range.startColumn)}` :
-                        colTranslator(i + range.startColumn),
-                };
-            });
+        return Array.from({ length: range.endColumn - range.startColumn + 1 }, (_, i) => {
+            const cellValue = worksheet.getCell(range.startRow, i + range.startColumn)?.v;
+            return {
+                index: i + range.startColumn,
+                label: hasTitle ?
+                    `${cellValue ?? colTranslator(i + range.startColumn)}` :
+                    colTranslator(i + range.startColumn),
+            };
+        });
     }
 
     setSelection(unitId: string, subUnitId: string, range: IRange) {

@@ -387,7 +387,8 @@ export class SheetInterceptorService extends Disposable {
                                 worksheet,
                                 workbook,
                                 rawData,
-                            });
+                            }
+                        );
                     },
                 }));
 

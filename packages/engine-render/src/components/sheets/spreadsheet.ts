@@ -278,7 +278,17 @@ export class Spreadsheet extends SheetComponent {
             // scrolling && no dirty
             this.addRenderTagToScene('scrolling', true);
             this.paintNewAreaForScrolling(viewportInfo, {
-                cacheCanvas, cacheCtx, mainCtx, topOrigin, leftOrigin, bufferEdgeX, bufferEdgeY, scaleX, scaleY, columnHeaderHeight, rowHeaderWidth,
+                cacheCanvas,
+                cacheCtx,
+                mainCtx,
+                topOrigin,
+                leftOrigin,
+                bufferEdgeX,
+                bufferEdgeY,
+                scaleX,
+                scaleY,
+                columnHeaderHeight,
+                rowHeaderWidth,
             });
         }
         // support for browser native zoom (only windows has this problem)

@@ -59,8 +59,7 @@ export class SheetPermissionViewModelController extends Disposable {
                 return next(cell);
             },
 
-        }
-        ));
+        }));
     }
 
     private _initViewModelBySheetInterceptor() {
@@ -88,7 +87,6 @@ export class SheetPermissionViewModelController extends Disposable {
                 }
                 return next(cell);
             },
-        }
-        ));
+        }));
     }
 }

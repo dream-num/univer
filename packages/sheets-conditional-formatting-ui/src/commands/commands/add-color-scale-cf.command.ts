@@ -15,6 +15,7 @@
  */
 
 import type { ICommand, IRange } from '@univerjs/core';
+import type { IAddConditionalRuleMutationParams, IColorScale, IConditionFormattingRule } from '@univerjs/sheets-conditional-formatting';
 import {
     CommandType,
     ICommandService,
@@ -22,7 +23,6 @@ import {
 } from '@univerjs/core';
 import { getSheetCommandTarget } from '@univerjs/sheets';
 import { AddConditionalRuleMutation, CFRuleType, ConditionalFormattingRuleModel } from '@univerjs/sheets-conditional-formatting';
-import type { IAddConditionalRuleMutationParams, IColorScale, IConditionFormattingRule } from '@univerjs/sheets-conditional-formatting';
 
 interface IAddColorScaleConditionalRuleParams {
     ranges: IRange[];
@@ -49,7 +49,8 @@ export const AddColorScaleConditionalRuleCommand: ICommand<IAddColorScaleConditi
         const { unitId, subUnitId } = target;
         const cfId = conditionalFormattingRuleModel.createCfId(unitId, subUnitId);
         const rule: IConditionFormattingRule = {
-            ranges, cfId,
+            ranges,
+            cfId,
             stopIfTrue: !!stopIfTrue,
             rule: {
                 type: CFRuleType.colorScale,

@@ -17,7 +17,23 @@
 /* eslint-disable ts/explicit-function-return-type */
 
 import type { IRange } from '@univerjs/core';
-import type { CFTimePeriodOperator, IAverageHighlightCell, IColorScale, IConditionalFormattingRuleConfig, IConditionFormattingRule, IDataBar, IDuplicateValuesHighlightCell, IFormulaHighlightCell, IIconSet, INumberHighlightCell, IRankHighlightCell, ITextHighlightCell, ITimePeriodHighlightCell, IUniqueValuesHighlightCell, IValueConfig } from '@univerjs/sheets-conditional-formatting';
+import type {
+    CFTimePeriodOperator,
+    IAverageHighlightCell,
+    IColorScale,
+    IConditionalFormattingRuleConfig,
+    IConditionFormattingRule,
+    IDataBar,
+    IDuplicateValuesHighlightCell,
+    IFormulaHighlightCell,
+    IIconSet,
+    INumberHighlightCell,
+    IRankHighlightCell,
+    ITextHighlightCell,
+    ITimePeriodHighlightCell,
+    IUniqueValuesHighlightCell,
+    IValueConfig,
+} from '@univerjs/sheets-conditional-formatting';
 import { BooleanNumber, ColorKit, Tools } from '@univerjs/core';
 import { CFNumberOperator, CFRuleType, CFSubRuleType, CFTextOperator, CFValueType, createCfId, EMPTY_ICON_TYPE, iconMap } from '@univerjs/sheets-conditional-formatting';
 
@@ -39,12 +55,14 @@ class ConditionalFormatRuleBaseBuilder {
                     type,
                     config: [
                         { index: 0, color: new ColorKit('').toRgbString(), value: { type: CFValueType.min } },
-                        { index: 0, color: new ColorKit('green').toRgbString(), value: { type: CFValueType.max } }],
+                        { index: 0, color: new ColorKit('green').toRgbString(), value: { type: CFValueType.max } },
+                    ],
                 } as IColorScale;
             }
             case CFRuleType.dataBar: {
                 return {
-                    type, isShowValue: true,
+                    type,
+                    isShowValue: true,
                     config: { min: { type: CFValueType.min }, max: { type: CFValueType.max }, positiveColor: new ColorKit('green').toRgbString(), nativeColor: new ColorKit('').toRgbString(), isGradient: false },
                 } as IDataBar;
             }
@@ -62,16 +80,20 @@ class ConditionalFormatRuleBaseBuilder {
                     type,
                     isShowValue: true,
                     config: [{
-                        operator: CFNumberOperator.greaterThanOrEqual, value: { type: CFValueType.min },
-                        iconType: EMPTY_ICON_TYPE, iconId: '',
-                    },
-                    {
-                        operator: CFNumberOperator.greaterThanOrEqual, value: { type: CFValueType.percentile, value: 0.5 },
-                        iconType: EMPTY_ICON_TYPE, iconId: '',
-                    },
-                    {
-                        operator: CFNumberOperator.lessThanOrEqual, value: { type: CFValueType.max },
-                        iconType: EMPTY_ICON_TYPE, iconId: '',
+                        operator: CFNumberOperator.greaterThanOrEqual,
+                        value: { type: CFValueType.min },
+                        iconType: EMPTY_ICON_TYPE,
+                        iconId: '',
+                    }, {
+                        operator: CFNumberOperator.greaterThanOrEqual,
+                        value: { type: CFValueType.percentile, value: 0.5 },
+                        iconType: EMPTY_ICON_TYPE,
+                        iconId: '',
+                    }, {
+                        operator: CFNumberOperator.lessThanOrEqual,
+                        value: { type: CFValueType.max },
+                        iconType: EMPTY_ICON_TYPE,
+                        iconId: '',
                     }],
                 } as IIconSet;
             }

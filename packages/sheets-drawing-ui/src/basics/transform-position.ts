@@ -16,13 +16,15 @@
 
 import type { ITransformState, Nullable } from '@univerjs/core';
 import type { ISheetDrawingPosition } from '@univerjs/sheets-drawing';
+import type { ISheetSelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { precisionTo } from '@univerjs/engine-render';
-import { convertPositionSheetOverGridToAbsolute, type ISheetSelectionRenderService, type SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { convertPositionSheetOverGridToAbsolute } from '@univerjs/sheets-ui';
 
 export function drawingPositionToTransform(
     position: ISheetDrawingPosition,
     selectionRenderService: ISheetSelectionRenderService,
-    sheetSkeletonManagerService: SheetSkeletonManagerService): Nullable<ITransformState> {
+    sheetSkeletonManagerService: SheetSkeletonManagerService
+): Nullable<ITransformState> {
     const { from, to, flipY = false, flipX = false, angle = 0, skewX = 0, skewY = 0 } = position;
     const skeletonParam = sheetSkeletonManagerService.getCurrent();
     if (skeletonParam == null) {
@@ -30,7 +32,10 @@ export function drawingPositionToTransform(
     }
 
     const absolutePosition = convertPositionSheetOverGridToAbsolute(
-        skeletonParam.unitId, skeletonParam.sheetId, { from, to }, sheetSkeletonManagerService
+        skeletonParam.unitId,
+        skeletonParam.sheetId,
+        { from, to },
+        sheetSkeletonManagerService
     );
 
     let { left, top, width, height } = absolutePosition;
@@ -88,7 +93,11 @@ export function drawingPositionToTransform(
     }
 
     return {
-        flipY, flipX, angle, skewX, skewY,
+        flipY,
+        flipX,
+        angle,
+        skewX,
+        skewY,
         left,
         top,
         width,
@@ -127,7 +136,11 @@ export function transformToDrawingPosition(transform: ITransformState, selection
     };
 
     return {
-        flipY, flipX, angle, skewX, skewY,
+        flipY,
+        flipX,
+        angle,
+        skewX,
+        skewY,
         from,
         to,
     };

@@ -95,7 +95,8 @@ export class UniverMobileUIPlugin extends Plugin {
 
             // controllers
             [
-                IUIController, {
+                IUIController,
+                {
                     useFactory: (injector: Injector) => injector.createInstance(MobileUIController, this._config),
                     deps: [Injector],
                 },

@@ -254,7 +254,10 @@ export const getOppositeOperator = (operator: CFNumberOperator) => {
 
 export const getColorScaleFromValue = (colorList: { color: ColorKit; value: number }[], value: number) => {
     interface IRgbColor {
-        b: number; g: number; r: number; a?: number;
+        b: number;
+        g: number;
+        r: number;
+        a?: number;
     }
     const prefixRgba = (rgb: IRgbColor): Required<IRgbColor> => {
         if (rgb.a !== undefined) {

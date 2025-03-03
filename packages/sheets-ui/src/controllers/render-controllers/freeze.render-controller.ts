@@ -237,8 +237,10 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
             const FREEZE_OFFSET = FREEZE_SIZE;
 
             this._rowFreezeHeaderRect = new Rect(FREEZE_ROW_HEADER_NAME, {
-                fill: this._freezeNormalHeaderColor, width: rowHeaderWidthAndMarginLeft,
-                height: FREEZE_SIZE, left: 0,
+                fill: this._freezeNormalHeaderColor,
+                width: rowHeaderWidthAndMarginLeft,
+                height: FREEZE_SIZE,
+                left: 0,
                 top: startY - FREEZE_OFFSET,
                 zIndex: 3,
             });
@@ -266,8 +268,12 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
             const FREEZE_OFFSET = FREEZE_SIZE;
 
             this._columnFreezeHeaderRect = new Rect(FREEZE_COLUMN_HEADER_NAME, {
-                fill: this._freezeNormalHeaderColor, width: FREEZE_SIZE, height: columnHeaderHeightAndMarginTop,
-                left: startX - FREEZE_OFFSET, top: 0, zIndex: 3,
+                fill: this._freezeNormalHeaderColor,
+                width: FREEZE_SIZE,
+                height: columnHeaderHeightAndMarginTop,
+                left: startX - FREEZE_OFFSET,
+                top: 0,
+                zIndex: 3,
             });
 
             let fill = this._freezeNormalHeaderColor;

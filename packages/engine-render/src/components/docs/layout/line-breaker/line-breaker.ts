@@ -18,10 +18,10 @@
 
 import type { Nullable } from '@univerjs/core';
 
+import type { ILineBreakRule } from './rule';
 import { Break, BreakPointType } from './break';
 import { AI, AL, BA, BK, CJ, CR, HL, HY, LF, NL, NS, RI, SA, SG, SP, WJ, XX, ZWJ } from './classes';
 import { CI_BRK, CP_BRK, DI_BRK, IN_BRK, pairTable, PR_BRK } from './pairs';
-import type { ILineBreakRule } from './rule';
 import { Rule } from './rule';
 import data from './trie-data';
 import UnicodeTrie from './unicode-trie';

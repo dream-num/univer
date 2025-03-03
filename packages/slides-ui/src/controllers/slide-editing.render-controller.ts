@@ -21,7 +21,8 @@ import type {
     IPosition,
     Nullable,
     SlideDataModel,
-    UnitModel } from '@univerjs/core';
+    UnitModel,
+} from '@univerjs/core';
 import type { IDocObjectParam, IEditorInputConfig } from '@univerjs/docs-ui';
 import type {
     DocBackground,

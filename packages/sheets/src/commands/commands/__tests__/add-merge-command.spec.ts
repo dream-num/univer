@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import type { Injector, IWorkbookData } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, LocaleService, LocaleType } from '@univerjs/core';
 import { beforeEach, describe, expect, it } from 'vitest';
-import type { Injector, IWorkbookData } from '@univerjs/core';
 import enUS from '../../../locale/en-US';
 import zhCN from '../../../locale/zh-CN';
 import { AddWorksheetMergeMutation } from '../../mutations/add-worksheet-merge.mutation';
@@ -152,7 +152,10 @@ describe('add-merge-command', () => {
         const mergeData = worksheet?.getConfig().mergeData;
         const { startRow, startColumn, endColumn, endRow } = mergeData![0];
         expect({
-            startRow, startColumn, endColumn, endRow,
+            startRow,
+            startColumn,
+            endColumn,
+            endRow,
         }).toEqual({
             startRow: 0,
             startColumn: 0,

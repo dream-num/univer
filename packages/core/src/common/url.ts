@@ -320,7 +320,8 @@ const re_weburl = new RegExp(
       '(?::\\d{2,5})?' +
       // resource path (optional)
       '(?:[/?#]\\S*)?' +
-    '$', 'i'
+    '$',
+    'i'
 );
 export function isLegalUrl(url: string) {
     // skip number 0.1

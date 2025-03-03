@@ -829,13 +829,12 @@ export class FWorksheet extends FBaseInitialable {
             range: ranges[0],
             value: WrapStrategy.WRAP,
         } as ISetTextWrapCommandParams);
-        this._commandService.syncExecuteCommand(SetWorksheetRowIsAutoHeightMutation.id,
-            {
-                unitId,
-                subUnitId,
-                ranges,
-                autoHeightInfo: auto,
-            });
+        this._commandService.syncExecuteCommand(SetWorksheetRowIsAutoHeightMutation.id, {
+            unitId,
+            subUnitId,
+            ranges,
+            autoHeightInfo: auto,
+        });
         return this;
     }
 

@@ -141,7 +141,9 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
     }
 
     async legacyPaste(options: {
-        html?: string; text?: string; files: File[];
+        html?: string;
+        text?: string;
+        files: File[];
     }): Promise<boolean> {
         let { html, text, files } = options;
         const currentDocInstance = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC);

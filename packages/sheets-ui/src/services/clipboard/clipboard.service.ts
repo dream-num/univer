@@ -16,10 +16,13 @@
 
 import type {
     ICellData,
-    ICellDataWithSpanAndDisplay, IDisposable,
+    ICellDataWithSpanAndDisplay,
+    IDisposable,
     IMutationInfo,
     IRange,
-    Nullable, Workbook, Worksheet,
+    Nullable,
+    Workbook,
+    Worksheet,
 } from '@univerjs/core';
 import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
 import type { Observable } from 'rxjs';
@@ -37,7 +40,11 @@ import type {
 } from './type';
 import {
     CellModeEnum,
-    createIdentifier, Disposable, ErrorService, extractPureTextFromCell, ICommandService,
+    createIdentifier,
+    Disposable,
+    ErrorService,
+    extractPureTextFromCell,
+    ICommandService,
     ILogService,
     Inject,
     Injector,
@@ -182,7 +189,8 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
                 UniverInstanceType.UNIVER_SHEET,
                 SheetSkeletonManagerService,
                 this._univerInstanceService,
-                this._renderManagerService)?.getCurrentParam(),
+                this._renderManagerService
+            )?.getCurrentParam(),
         });
 
         this._usmToHtml = new USMToHtmlService();
@@ -304,7 +312,8 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
                 const file = new File(
                     [imageBlob],
                     `clipboard-image.${imageExtension}`,
-                    { type: imageMimeType });
+                    { type: imageMimeType }
+                );
 
                 return this._pasteFiles([file], pasteType);
             }
@@ -477,10 +486,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         unitId: string;
         subUnitId: string;
         range: IDiscreteRange;
-    }) => undefined | ({
-        undos: IMutationInfo[];
-        redos: IMutationInfo[];
-    })): Promise<boolean> {
+    }) => undefined | ({ undos: IMutationInfo[]; redos: IMutationInfo[] })): Promise<boolean> {
         const target = this._getPastingTarget();
         if (!target.subUnitId || !target.selection) {
             return false;
@@ -913,7 +919,9 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
                     endRow,
                     startColumn,
                     endColumn,
-                }, primary, style: null,
+                },
+                primary,
+                style: null,
             }],
         };
         return {

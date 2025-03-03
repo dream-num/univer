@@ -311,9 +311,7 @@ export const RuleList = (props: IRuleListProps) => {
         <div className={styles.cfRuleList}>
             <div className={styles.ruleSelector}>
                 <div>
-                    {conditionalFormattingI18nController.tWithReactNode('sheet.cf.panel.managerRuleSelect',
-                        <Select className={styles.select} options={selectOption} value={selectValue} onChange={(v) => { selectValueSet(v); }} />
-                    )
+                    {conditionalFormattingI18nController.tWithReactNode('sheet.cf.panel.managerRuleSelect', <Select className={styles.select} options={selectOption} value={selectValue} onChange={(v) => { selectValueSet(v); }} />)
                         .map((ele, index) => <span key={index}>{ele}</span>)}
                 </div>
                 <div className={styles.btnList}>

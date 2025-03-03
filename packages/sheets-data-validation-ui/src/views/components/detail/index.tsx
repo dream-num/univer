@@ -33,9 +33,7 @@ import styles from './index.module.less';
 
 // debounce execute commands, for better redo-undo experience
 const debounceExecuteFactory = (commandService: ICommandService) => debounce(
-    async (id: string, params?: any, options?: IExecutionOptions | undefined,
-        callback?: (success: boolean) => void
-    ) => {
+    async (id: string, params?: any, options?: IExecutionOptions | undefined, callback?: (success: boolean) => void) => {
         const res = await commandService.executeCommand(id, params, options);
         callback?.(res);
     },
@@ -124,7 +122,8 @@ export function DataValidationDetail() {
                 return { ...unitRange, sheetId };
             }
             return {
-                ...unitRange, sheetId: '',
+                ...unitRange,
+                sheetId: '',
             };
         });
         if (isUnitRangesEqual(unitRanges, localRanges)) {

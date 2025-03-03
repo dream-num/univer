@@ -430,13 +430,12 @@ export class SheetFindModel extends FindModel {
         const sortFn = findDirection === FindDirection.ROW ? isBehindPositionWithRowPriority : isBehindPositionWithColumnPriority;
         const dedupeSet = new Set<string>();
         const finds = selections
-            .map((selection) => this._findInRange(worksheet, query, selection.range, unitId,
-                (row, col) => {
-                    const key = `${row}-${col}`;
-                    if (dedupeSet.has(key)) return true;
-                    dedupeSet.add(key);
-                    return false;
-                }).results)
+            .map((selection) => this._findInRange(worksheet, query, selection.range, unitId, (row, col) => {
+                const key = `${row}-${col}`;
+                if (dedupeSet.has(key)) return true;
+                dedupeSet.add(key);
+                return false;
+            }).results)
             .flat()
             .sort((a, b) => sortFn(a.range.range, b.range.range) ? -1 : 1);
 
@@ -547,10 +546,7 @@ export class SheetFindModel extends FindModel {
     private _focusMatch(match: ISheetCellMatch): void {
         const subUnitId = match.range.subUnitId;
         if (subUnitId !== this._workbook.getActiveSheet()?.getSheetId()) {
-            this._commandService.executeCommand(SetWorksheetActivateCommand.id,
-                { unitId: this._workbook.getUnitId(), subUnitId } as ISetWorksheetActivateCommandParams,
-                { fromFindReplace: true }
-            );
+            this._commandService.executeCommand(SetWorksheetActivateCommand.id, { unitId: this._workbook.getUnitId(), subUnitId } as ISetWorksheetActivateCommandParams, { fromFindReplace: true });
         }
 
         this._commandService.executeCommand(

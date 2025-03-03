@@ -16,10 +16,10 @@
 
 import { describe, expect, it } from 'vitest';
 
+import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
+import { NumberValueObject } from '../../../../engine/value-object/primitive-object';
 import { FUNCTION_NAMES_DATE } from '../../function-names';
 import { Edate } from '../index';
-import { NumberValueObject } from '../../../../engine/value-object/primitive-object';
-import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 
 describe('Test edate function', () => {
     const testFunction = new Edate(FUNCTION_NAMES_DATE.EDATE);
@@ -83,8 +83,7 @@ describe('Test edate function', () => {
         it('Months is array with multiple format values', () => {
             const startDate = NumberValueObject.create(43831);
             const months = ArrayValueObject.create({
-                calculateValueList: transformToValueObject([[1, ' ', 1.23, true, false, null],
-                    [0, '100', '2.34', 'test', -3, 1900]]),
+                calculateValueList: transformToValueObject([[1, ' ', 1.23, true, false, null], [0, '100', '2.34', 'test', -3, 1900]]),
                 rowCount: 2,
                 columnCount: 6,
                 unitId: '',

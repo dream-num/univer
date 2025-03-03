@@ -190,8 +190,7 @@ const IconSetRuleEdit = (props: {
     const { onChange, configList, errorMap = {} } = props;
     const localeService = useDependency(LocaleService);
 
-    const options = [{ label: localeService.t(`sheet.cf.symbol.${CFNumberOperator.greaterThan}`), value: CFNumberOperator.greaterThan },
-        { label: localeService.t(`sheet.cf.symbol.${CFNumberOperator.greaterThanOrEqual}`), value: CFNumberOperator.greaterThanOrEqual }];
+    const options = [{ label: localeService.t(`sheet.cf.symbol.${CFNumberOperator.greaterThan}`), value: CFNumberOperator.greaterThan }, { label: localeService.t(`sheet.cf.symbol.${CFNumberOperator.greaterThanOrEqual}`), value: CFNumberOperator.greaterThanOrEqual }];
     const valueTypeOptions = [
         { label: localeService.t(`sheet.cf.valueType.${CFValueType.num}`), value: CFValueType.num },
         { label: localeService.t(`sheet.cf.valueType.${CFValueType.percent}`), value: CFValueType.percent },

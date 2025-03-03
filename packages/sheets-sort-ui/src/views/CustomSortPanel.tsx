@@ -71,7 +71,9 @@ export function CustomSortPanel() {
                 newList.push({ type: SortType.ASC, colIndex: nextColIndex });
                 setList(newList);
             }
-        }, 200), [list, range]);
+        }, 200),
+        [list, range]
+    );
 
     const apply = useCallback((orderRules: IOrderRule[], hasTitle: boolean) => {
         sheetsSortService.applySort({ range, orderRules, hasTitle });

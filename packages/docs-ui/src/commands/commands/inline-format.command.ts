@@ -16,19 +16,29 @@
 
 import type {
     DocumentDataModel,
-    ICommand, IDocumentBody, IMutationInfo, IStyleBase, ITextDecoration, ITextRun,
+    ICommand,
+    IDocumentBody,
+    IMutationInfo,
+    IStyleBase,
+    ITextDecoration,
+    ITextRun,
     ITextStyle,
     Nullable,
 } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import {
-    BaselineOffset, BooleanNumber, CommandType,
+    BaselineOffset,
+    BooleanNumber,
+    CommandType,
     DOC_RANGE_TYPE,
     getBodySlice,
-    ICommandService, IUniverInstanceService,
-    JSONX, MemoryCursor,
-    TextX, TextXActionType,
+    ICommandService,
+    IUniverInstanceService,
+    JSONX,
+    MemoryCursor,
+    TextX,
+    TextXActionType,
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';

@@ -95,7 +95,8 @@ export const AutoFillPopupMenu: React.FC<{}> = () => {
                 if (skeleton) {
                     forceUpdate();
                 }
-            }));
+            })
+        );
         return disposable?.dispose;
     }, [sheetSkeletonManagerService, forceUpdate]);
 

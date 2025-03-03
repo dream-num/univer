@@ -192,7 +192,14 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
 
         const generalAddRange = (startOffset: number, endOffset: number) => {
             const rangeList = getRangeListFromCharIndex(
-                startOffset, endOffset, scene, document, docSkeleton, style, segmentId, segmentPage
+                startOffset,
+                endOffset,
+                scene,
+                document,
+                docSkeleton,
+                style,
+                segmentId,
+                segmentPage
             );
 
             if (rangeList == null) {
@@ -1233,7 +1240,11 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         } = document.getOffsetConfig();
 
         const nodeInfo = skeleton.findNodeByCoord(
-            coord, pageLayoutType, pageMarginLeft, pageMarginTop, restrictions
+            coord,
+            pageLayoutType,
+            pageMarginLeft,
+            pageMarginTop,
+            restrictions
         );
 
         return nodeInfo;

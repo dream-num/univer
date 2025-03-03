@@ -29,7 +29,8 @@ export default antfu(
         ignores: [
             'mockdata/**/*.json',
         ],
-    }, {
+    },
+    {
         files: ['**/*.ts', '**/*.tsx'],
         ignores: [
             'packages/engine-render/src/components/docs/**/*.ts',
@@ -46,7 +47,8 @@ export default antfu(
             complexity: ['warn', { max: 20 }],
             'max-lines-per-function': ['warn', 80],
         },
-    }, {
+    },
+    {
         files: ['**/*.ts', '**/*.tsx'],
         ignores: ['**/*.d.ts', '**/vite.config.ts', '**/vitest.config.ts', 'playwright.config.ts'],
         plugins: {
@@ -78,7 +80,8 @@ export default antfu(
                 2,
             ],
         },
-    }, {
+    },
+    {
         // Not penetrating for source files
         files: ['**/*.ts', '**/*.tsx'],
         plugins: {
@@ -92,7 +95,8 @@ export default antfu(
         rules: {
             'penetrating/no-penetrating-import': 2,
         },
-    }, {
+    },
+    {
         files: ['**/*/src/index.ts'],
         rules: {
             'perfectionist/sort-exports': 'off',

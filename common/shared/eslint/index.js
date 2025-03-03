@@ -126,7 +126,6 @@ exports.baseRules = {
     'ts/ban-ts-comment': 'off',
     'ts/no-duplicate-enum-values': 'off',
     'no-cond-assign': 'warn',
-    'antfu/consistent-list-newline': 'off',
     'ts/no-use-before-define': 'warn',
     'intunicorn/number-literal-case': 'off',
     'test/no-identical-title': 'warn',

@@ -16,12 +16,12 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { FUNCTION_NAMES_DATE } from '../../function-names';
-import { Timevalue } from '../index';
-import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
-import { ErrorType } from '../../../../basics/error-type';
+import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { FUNCTION_NAMES_DATE } from '../../function-names';
+import { Timevalue } from '../index';
 
 describe('Test timevalue function', () => {
     const testFunction = new Timevalue(FUNCTION_NAMES_DATE.TIMEVALUE);
@@ -65,8 +65,7 @@ describe('Test timevalue function', () => {
 
         it('Serial number is array', () => {
             const serialNumber = ArrayValueObject.create({
-                calculateValueList: transformToValueObject([[1, ' ', 1.23, true, false, null],
-                    [0, '100', '2.34', 'test', -3, ErrorType.NAME]]),
+                calculateValueList: transformToValueObject([[1, ' ', 1.23, true, false, null], [0, '100', '2.34', 'test', -3, ErrorType.NAME]]),
                 rowCount: 2,
                 columnCount: 6,
                 unitId: '',

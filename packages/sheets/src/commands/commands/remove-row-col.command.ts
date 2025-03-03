@@ -239,11 +239,13 @@ export const RemoveColByRangeCommand: ICommand<IRemoveColByRangeCommandParams> =
                     ...(intercepted.preUndos ?? []),
                     { id: InsertColMutation.id, params: undoRemoveColParams },
                     { id: SetRangeValuesMutation.id, params: undoSetRangeValuesParams },
-                    ...intercepted.undos],
+                    ...intercepted.undos,
+                ],
                 redoMutations: [
                     ...(intercepted.preRedos ?? []),
                     { id: RemoveColMutation.id, params: removeColParams },
-                    ...intercepted.redos],
+                    ...intercepted.redos,
+                ],
             });
 
             return true;

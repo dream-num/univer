@@ -16,10 +16,10 @@
 
 import type { IKeyValue } from '@univerjs/core';
 
-import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '../basics/interfaces';
 import type { UniverRenderingContext } from '../context';
-import { ObjectType } from '../base-object';
 import type { IShapeProps } from './shape';
+import { ObjectType } from '../base-object';
+import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '../basics/interfaces';
 import { Shape } from './shape';
 
 export interface ICircleProps extends IShapeProps {

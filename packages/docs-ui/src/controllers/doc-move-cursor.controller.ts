@@ -112,8 +112,15 @@ export class DocMoveCursorController extends Disposable {
         }
 
         const {
-            startOffset, endOffset, style, collapsed, direction: rangeDirection,
-            segmentId, startNodePosition, endNodePosition, segmentPage,
+            startOffset,
+            endOffset,
+            style,
+            collapsed,
+            direction: rangeDirection,
+            segmentId,
+            startNodePosition,
+            endNodePosition,
+            segmentPage,
         } = activeRange;
 
         if (allRanges.length > 1) {

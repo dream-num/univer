@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { Rectangle } from '@univerjs/core';
 import type { IViewportInfo } from '../basics/vector2';
 import type { UniverRenderingContext } from '../context';
 import type { IRectProps } from './rect';
+import { Rectangle } from '@univerjs/core';
 import { Rect } from './rect';
 
 export class DashedRect extends Rect {

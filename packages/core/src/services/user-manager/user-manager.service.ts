@@ -18,7 +18,9 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { createDefaultUser } from './const';
 
 export interface IUser {
-    userID: string; name: string; avatar?: string;
+    userID: string;
+    name: string;
+    avatar?: string;
 };
 
 export class UserManagerService {

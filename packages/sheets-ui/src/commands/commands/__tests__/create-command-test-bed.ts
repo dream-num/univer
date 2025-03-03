@@ -39,7 +39,11 @@ import {
     RangeProtectionRuleModel,
     SheetInterceptorService,
 
-    SheetsSelectionsService, WorkbookPermissionService, WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel,
+    SheetsSelectionsService,
+    WorkbookPermissionService,
+    WorksheetPermissionService,
+    WorksheetProtectionPointModel,
+    WorksheetProtectionRuleModel,
 } from '@univerjs/sheets';
 import { BehaviorSubject } from 'rxjs';
 import enUS from '../../../locale/en-US';

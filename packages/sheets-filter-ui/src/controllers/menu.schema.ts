@@ -16,7 +16,8 @@
 
 import type { MenuSchemaType } from '@univerjs/ui';
 import {
-    ClearSheetsFilterCriteriaCommand, ReCalcSheetsFilterCommand,
+    ClearSheetsFilterCriteriaCommand,
+    ReCalcSheetsFilterCommand,
     SmartToggleSheetsFilterCommand,
 } from '@univerjs/sheets-filter';
 import { RibbonStartGroup } from '@univerjs/ui';

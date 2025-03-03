@@ -297,7 +297,8 @@ export default {
             {
                 title: '教導',
                 url: 'https://support.microsoft.com/zh-tw/office/mid-midb-%E5%87%BD%E6%95%B0-d5f9e25c-d7d6-472e-b568-4ecb12433028',
-            }],
+            },
+        ],
         functionParameter: {
             text: { name: '文字', detail: '包含想擷取之字元的文字字串。' },
             startNum: { name: '開始位置', detail: '要在文字中擷取之第一個字元的位置。' },

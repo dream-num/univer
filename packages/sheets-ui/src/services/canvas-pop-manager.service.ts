@@ -527,10 +527,7 @@ export class SheetCanvasPopManagerService extends Disposable {
             return null;
         }
 
-        const { position, position$, disposable: positionObserverDisposable, updateRowCol,
-                topLeftPos$,
-                rightBottomPos$,
-        } = this._createRangePositionObserver(range, currentRender, skeleton, activeViewport);
+        const { position, position$, disposable: positionObserverDisposable, updateRowCol, topLeftPos$, rightBottomPos$ } = this._createRangePositionObserver(range, currentRender, skeleton, activeViewport);
 
         const { rects$, disposable: rectsObserverDisposable } = this._createHiddenRectObserver({
             row: range.startRow,

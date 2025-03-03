@@ -31,8 +31,7 @@ export const RankStyleEditor = (props: IStyleEditorProps) => {
     const localeService = useDependency(LocaleService);
 
     const rule = props.rule?.type === CFRuleType.highlightCell ? props.rule : undefined as IRankHighlightCell | IAverageHighlightCell | undefined;
-    const options = [{ label: localeService.t('sheet.cf.panel.isNotBottom'), value: 'isNotBottom' }, { label: localeService.t('sheet.cf.panel.isBottom'), value: 'isBottom' },
-        { label: localeService.t('sheet.cf.panel.greaterThanAverage'), value: 'greaterThanAverage' }, { label: localeService.t('sheet.cf.panel.lessThanAverage'), value: 'lessThanAverage' }];
+    const options = [{ label: localeService.t('sheet.cf.panel.isNotBottom'), value: 'isNotBottom' }, { label: localeService.t('sheet.cf.panel.isBottom'), value: 'isBottom' }, { label: localeService.t('sheet.cf.panel.greaterThanAverage'), value: 'greaterThanAverage' }, { label: localeService.t('sheet.cf.panel.lessThanAverage'), value: 'lessThanAverage' }];
 
     const [type, typeSet] = useState(() => {
         const defaultV = options[0].value;
@@ -143,10 +142,11 @@ export const RankStyleEditor = (props: IStyleEditorProps) => {
     };
     return (
         <div>
-            <div className={`
-              ${stylesBase.title}
-              ${stylesBase.mTBase}
-            `}
+            <div
+                className={`
+                  ${stylesBase.title}
+                  ${stylesBase.mTBase}
+                `}
             >
                 {localeService.t('sheet.cf.panel.styleRule')}
             </div>
@@ -163,10 +163,11 @@ export const RankStyleEditor = (props: IStyleEditorProps) => {
                 }}
             />
             {['isNotBottom', 'isBottom'].includes(type) && (
-                <div className={`
-                  ${stylesBase.labelContainer}
-                  ${stylesBase.mTSm}
-                `}
+                <div
+                    className={`
+                      ${stylesBase.labelContainer}
+                      ${stylesBase.mTSm}
+                    `}
                 >
                     <InputNumber
                         min={1}
@@ -178,11 +179,12 @@ export const RankStyleEditor = (props: IStyleEditorProps) => {
                             _onChange({ type, isPercent, value, style });
                         }}
                     />
-                    <div className={`
-                      ${stylesBase.mLSm}
-                      ${stylesBase.labelContainer}
-                      ${styles.text}
-                    `}
+                    <div
+                        className={`
+                          ${stylesBase.mLSm}
+                          ${stylesBase.labelContainer}
+                          ${styles.text}
+                        `}
                     >
                         <Checkbox
                             checked={isPercent}
@@ -196,9 +198,10 @@ export const RankStyleEditor = (props: IStyleEditorProps) => {
 
                 </div>
             )}
-            <div className={`
-              ${styles.cfPreviewWrap}
-            `}
+            <div
+                className={`
+                  ${styles.cfPreviewWrap}
+                `}
             >
                 <Preview rule={getResult({ type, isPercent, value, style }) as IConditionalFormattingRuleConfig} />
             </div>

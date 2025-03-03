@@ -19,7 +19,8 @@ import type { ISetDefinedNameMutationParam } from '../commands/mutations/set-def
 
 import type {
     IRemoveFeatureCalculationMutationParam,
-    ISetFeatureCalculationMutation } from '../commands/mutations/set-feature-calculation.mutation';
+    ISetFeatureCalculationMutation,
+} from '../commands/mutations/set-feature-calculation.mutation';
 import type { ISetFormulaDataMutationParams } from '../commands/mutations/set-formula-data.mutation';
 import type { IRemoveOtherFormulaMutationParams, ISetOtherFormulaMutationParams } from '../commands/mutations/set-other-formula.mutation';
 import { Disposable, ICommandService, ObjectMatrix } from '@univerjs/core';
@@ -38,7 +39,8 @@ export class SetDependencyController extends Disposable {
         @ICommandService private readonly _commandService: ICommandService,
         @IFeatureCalculationManagerService
         @IDependencyManagerService private readonly _dependencyManagerService: IDependencyManagerService,
-        @IFeatureCalculationManagerService private readonly _featureCalculationManagerService: IFeatureCalculationManagerService) {
+        @IFeatureCalculationManagerService private readonly _featureCalculationManagerService: IFeatureCalculationManagerService
+    ) {
         super();
 
         this._initialize();

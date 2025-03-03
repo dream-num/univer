@@ -22,7 +22,8 @@ import type {
     AsyncObject,
     BaseReferenceObject,
     FunctionVariantType,
-    NodeValueType } from '../reference-object/base-reference-object';
+    NodeValueType,
+} from '../reference-object/base-reference-object';
 import type { BaseValueObject } from '../value-object/base-value-object';
 import type { FormulaFunctionResultValueType } from '../value-object/primitive-object';
 import { Inject, Injector } from '@univerjs/core';

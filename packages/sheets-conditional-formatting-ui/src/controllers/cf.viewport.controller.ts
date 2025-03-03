@@ -24,7 +24,8 @@ export class ConditionalFormattingViewportController extends Disposable {
     constructor(
         @Inject(ConditionalFormattingViewModel) private _conditionalFormattingViewModel: ConditionalFormattingViewModel,
         @IUniverInstanceService private _univerInstanceService: IUniverInstanceService,
-        @IRenderManagerService private _renderManagerService: IRenderManagerService) {
+        @IRenderManagerService private _renderManagerService: IRenderManagerService
+    ) {
         super();
         this._init();
     }

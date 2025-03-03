@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { BooleanNumber, type IStyleBase, type Nullable } from '@univerjs/core';
+import type { IStyleBase, Nullable } from '@univerjs/core';
+import { BooleanNumber } from '@univerjs/core';
 
 interface IFontData {
     readonly family: string;

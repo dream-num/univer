@@ -91,7 +91,8 @@ export class MobileSelectionControl extends SelectionControl {
 
         // put into scene
         const objs = [
-            this._fillControlTopLeft, this._fillControlBottomRight,
+            this._fillControlTopLeft,
+            this._fillControlBottomRight,
         ] as BaseObject[];
 
         // do not use this.model.rangeType, model has not been initialized yet

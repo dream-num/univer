@@ -153,11 +153,13 @@ export class ConditionalFormattingService extends Disposable {
 
                         ruleList.forEach((item) => {
                             const params: IDeleteConditionalRuleMutationParams = {
-                                unitId, subUnitId,
+                                unitId,
+                                subUnitId,
                                 cfId: item.cfId,
                             };
                             redos.push({
-                                id: DeleteConditionalRuleMutation.id, params,
+                                id: DeleteConditionalRuleMutation.id,
+                                params,
                             });
                             undos.push(...DeleteConditionalRuleMutationUndoFactory(this._injector, params));
                         });
@@ -293,7 +295,8 @@ export class ConditionalFormattingService extends Disposable {
                         break;
                     }
                 }
-            }));
+            })
+        );
     }
 }
 

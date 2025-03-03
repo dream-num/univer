@@ -35,17 +35,21 @@ export const iconGroup: { title: string; group: { name: string; list: string[] }
         title: 'sheet.cf.iconSet.shape',
         group: [
             {
-                name: '3TrafficLights1', list: [ICON_MAP.shape['roundness-greed'], ICON_MAP.shape['roundness-gold'], ICON_MAP.shape['roundness-red']],
+                name: '3TrafficLights1',
+                list: [ICON_MAP.shape['roundness-greed'], ICON_MAP.shape['roundness-gold'], ICON_MAP.shape['roundness-red']],
             },
             {
-                name: '3Signs', list: [ICON_MAP.shape['roundness-greed'], ICON_MAP.shape['triangle-gold'], ICON_MAP.shape['rhomboid-red']],
+                name: '3Signs',
+                list: [ICON_MAP.shape['roundness-greed'], ICON_MAP.shape['triangle-gold'], ICON_MAP.shape['rhomboid-red']],
             },
             { name: '3TrafficLights2', list: [ICON_MAP.shape['indicate-greed'], ICON_MAP.shape['indicate-gold'], ICON_MAP.shape['indicate-red']] },
             {
-                name: '4RedToBlack', list: [ICON_MAP.shape['roundness-red'], ICON_MAP.shape['roundness-pink'], ICON_MAP.shape['roundness-gray'], ICON_MAP.shape['roundness-black']],
+                name: '4RedToBlack',
+                list: [ICON_MAP.shape['roundness-red'], ICON_MAP.shape['roundness-pink'], ICON_MAP.shape['roundness-gray'], ICON_MAP.shape['roundness-black']],
             },
             {
-                name: '4TrafficLights', list: [ICON_MAP.shape['roundness-greed'], ICON_MAP.shape['roundness-gold'], ICON_MAP.shape['roundness-red'], ICON_MAP.shape['roundness-black']],
+                name: '4TrafficLights',
+                list: [ICON_MAP.shape['roundness-greed'], ICON_MAP.shape['roundness-gold'], ICON_MAP.shape['roundness-red'], ICON_MAP.shape['roundness-black']],
             },
         ],
     },
@@ -53,13 +57,16 @@ export const iconGroup: { title: string; group: { name: string; list: string[] }
         title: 'sheet.cf.iconSet.mark',
         group: [
             {
-                name: '3Symbols', list: [ICON_MAP.feedback.correct, ICON_MAP.feedback.warn, ICON_MAP.feedback.mistake],
+                name: '3Symbols',
+                list: [ICON_MAP.feedback.correct, ICON_MAP.feedback.warn, ICON_MAP.feedback.mistake],
             },
             {
-                name: '3Symbols2', list: [ICON_MAP.feedback2.correct2, ICON_MAP.feedback2.warn2, ICON_MAP.feedback2.mistake2],
+                name: '3Symbols2',
+                list: [ICON_MAP.feedback2.correct2, ICON_MAP.feedback2.warn2, ICON_MAP.feedback2.mistake2],
             },
             {
-                name: '3Flags', list: [ICON_MAP.flag['flag-green'], ICON_MAP.flag['flag-gold'], ICON_MAP.flag['flag-red']],
+                name: '3Flags',
+                list: [ICON_MAP.flag['flag-green'], ICON_MAP.flag['flag-gold'], ICON_MAP.flag['flag-red']],
             },
 
         ],
@@ -68,22 +75,28 @@ export const iconGroup: { title: string; group: { name: string; list: string[] }
         title: 'sheet.cf.iconSet.rank',
         group: [
             {
-                name: '4Rating', list: [ICON_MAP.signal.signal25, ICON_MAP.signal.signal50, ICON_MAP.signal.signal75, ICON_MAP.signal.signal100],
+                name: '4Rating',
+                list: [ICON_MAP.signal.signal25, ICON_MAP.signal.signal50, ICON_MAP.signal.signal75, ICON_MAP.signal.signal100],
             },
             {
-                name: '5Rating', list: [ICON_MAP.signal.signal0, ICON_MAP.signal.signal25, ICON_MAP.signal.signal50, ICON_MAP.signal.signal75, ICON_MAP.signal.signal100],
+                name: '5Rating',
+                list: [ICON_MAP.signal.signal0, ICON_MAP.signal.signal25, ICON_MAP.signal.signal50, ICON_MAP.signal.signal75, ICON_MAP.signal.signal100],
             },
             {
-                name: '5Quarters', list: [ICON_MAP.progress.progress100, ICON_MAP.progress.progress75, ICON_MAP.progress.progress50, ICON_MAP.progress.progress25, ICON_MAP.progress.progress0],
+                name: '5Quarters',
+                list: [ICON_MAP.progress.progress100, ICON_MAP.progress.progress75, ICON_MAP.progress.progress50, ICON_MAP.progress.progress25, ICON_MAP.progress.progress0],
             },
             {
-                name: '_5Felling', list: [ICON_MAP.feeling.guffaw, ICON_MAP.feeling.smile, ICON_MAP.feeling.noninductive, ICON_MAP.feeling.dissatisfied, ICON_MAP.feeling.impatient],
+                name: '_5Felling',
+                list: [ICON_MAP.feeling.guffaw, ICON_MAP.feeling.smile, ICON_MAP.feeling.noninductive, ICON_MAP.feeling.dissatisfied, ICON_MAP.feeling.impatient],
             },
             {
-                name: '5Boxes', list: [ICON_MAP.cell['cell-100'], ICON_MAP.cell['cell-75'], ICON_MAP.cell['cell-50'], ICON_MAP.cell['cell-25'], ICON_MAP.cell['cell-0']],
+                name: '5Boxes',
+                list: [ICON_MAP.cell['cell-100'], ICON_MAP.cell['cell-75'], ICON_MAP.cell['cell-50'], ICON_MAP.cell['cell-25'], ICON_MAP.cell['cell-0']],
             },
             {
-                name: '3Stars', list: [ICON_MAP.star.starFull, ICON_MAP.star.starIncomplete, ICON_MAP.star.starEmpty],
+                name: '3Stars',
+                list: [ICON_MAP.star.starFull, ICON_MAP.star.starIncomplete, ICON_MAP.star.starEmpty],
             },
         ],
     },

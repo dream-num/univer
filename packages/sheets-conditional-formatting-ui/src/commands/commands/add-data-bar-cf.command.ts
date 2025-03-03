@@ -15,6 +15,7 @@
  */
 
 import type { ICommand, IRange } from '@univerjs/core';
+import type { IAddConditionalRuleMutationParams, IConditionFormattingRule, IDataBar } from '@univerjs/sheets-conditional-formatting';
 import {
     CommandType,
     ICommandService,
@@ -22,7 +23,6 @@ import {
 } from '@univerjs/core';
 import { getSheetCommandTarget } from '@univerjs/sheets';
 import { AddConditionalRuleMutation, CFRuleType, ConditionalFormattingRuleModel } from '@univerjs/sheets-conditional-formatting';
-import type { IAddConditionalRuleMutationParams, IConditionFormattingRule, IDataBar } from '@univerjs/sheets-conditional-formatting';
 
 interface IAddUniqueValuesConditionalRuleParams {
     ranges: IRange[];
@@ -54,13 +54,18 @@ export const AddDataBarConditionalRuleCommand: ICommand<IAddUniqueValuesConditio
 
         const cfId = conditionalFormattingRuleModel.createCfId(unitId, subUnitId);
         const rule: IConditionFormattingRule = {
-            ranges, cfId,
+            ranges,
+            cfId,
             stopIfTrue: !!stopIfTrue,
             rule: {
                 type: CFRuleType.dataBar,
                 isShowValue,
                 config: {
-                    min, max, nativeColor, positiveColor, isGradient,
+                    min,
+                    max,
+                    nativeColor,
+                    positiveColor,
+                    isGradient,
                 },
             },
         };

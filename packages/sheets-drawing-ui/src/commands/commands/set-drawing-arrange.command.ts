@@ -20,7 +20,8 @@ import {
     ArrangeTypeEnum,
     CommandType,
     ICommandService,
-    IUndoRedoService } from '@univerjs/core';
+    IUndoRedoService,
+} from '@univerjs/core';
 import { DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation } from '@univerjs/sheets-drawing';
 
 export interface ISetDrawingArrangeCommandParams extends IDrawingOrderMapParam {

@@ -176,22 +176,20 @@ describe('Test auto fill with formula', () => {
             expect(B2?.f).toStrictEqual('=SUM(A2)');
             expect(B2?.si).toEqual(B3?.si);
 
-            commandService.executeCommand(AutoFillCommand.id,
-                {
-                    sourceRange: {
-                        startColumn: 1,
-                        endColumn: 1,
-                        startRow: 0,
-                        endRow: 2,
-                    },
-                    targetRange: {
-                        startColumn: 1,
-                        endColumn: 3,
-                        startRow: 0,
-                        endRow: 2,
-                    },
-                }
-            );
+            commandService.executeCommand(AutoFillCommand.id, {
+                sourceRange: {
+                    startColumn: 1,
+                    endColumn: 1,
+                    startRow: 0,
+                    endRow: 2,
+                },
+                targetRange: {
+                    startColumn: 1,
+                    endColumn: 3,
+                    startRow: 0,
+                    endRow: 2,
+                },
+            });
 
             // B1:D3 values will be in the following format
             // [
@@ -302,22 +300,20 @@ describe('Test auto fill with formula', () => {
                 },
             ]);
 
-            commandService.executeCommand(AutoFillCommand.id,
-                {
-                    sourceRange: {
-                        startColumn: 0,
-                        endColumn: 0,
-                        startRow: 9,
-                        endRow: 9,
-                    },
-                    targetRange: {
-                        startColumn: 0,
-                        endColumn: 0,
-                        startRow: 6,
-                        endRow: 9,
-                    },
-                }
-            );
+            commandService.executeCommand(AutoFillCommand.id, {
+                sourceRange: {
+                    startColumn: 0,
+                    endColumn: 0,
+                    startRow: 9,
+                    endRow: 9,
+                },
+                targetRange: {
+                    startColumn: 0,
+                    endColumn: 0,
+                    startRow: 6,
+                    endRow: 9,
+                },
+            });
 
             // B1:B3 values will be in the following format
             // [
@@ -370,22 +366,20 @@ describe('Test auto fill with formula', () => {
                 },
             ]);
 
-            commandService.executeCommand(AutoFillCommand.id,
-                {
-                    sourceRange: {
-                        startColumn: 0,
-                        endColumn: 0,
-                        startRow: 19,
-                        endRow: 20,
-                    },
-                    targetRange: {
-                        startColumn: 0,
-                        endColumn: 0,
-                        startRow: 15,
-                        endRow: 20,
-                    },
-                }
-            );
+            commandService.executeCommand(AutoFillCommand.id, {
+                sourceRange: {
+                    startColumn: 0,
+                    endColumn: 0,
+                    startRow: 19,
+                    endRow: 20,
+                },
+                targetRange: {
+                    startColumn: 0,
+                    endColumn: 0,
+                    startRow: 15,
+                    endRow: 20,
+                },
+            });
 
             // B1:B3 values will be in the following format
             // [

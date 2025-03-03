@@ -84,7 +84,9 @@ export const SetSpecificRowsVisibleCommand: ICommand<ISetSpecificRowsVisibleComm
             [
                 { id: SetRowVisibleMutation.id, params: redoMutationParams },
                 { id: SetSelectionsOperation.id, params: setSelectionOperationParams },
-            ], commandService);
+            ],
+            commandService
+        );
 
         const intercepted = sheetInterceptorService.onCommandExecute({
             id: SetSpecificRowsVisibleCommand.id,

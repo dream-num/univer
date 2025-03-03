@@ -212,11 +212,17 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
 
     // font: string;
     get font() {
-        return this._context.font;
+        if (this.fontStyleStr) {
+            return this.fontStyleStr;
+        }
+        this.fontStyleStr = this._context.font;
+        return this.fontStyleStr;
     }
 
+    fontStyleStr: string;
     set font(val: string) {
         this._context.font = val;
+        this.fontStyleStr = this._context.font;
     }
 
     // fontKerning: CanvasFontKerning;

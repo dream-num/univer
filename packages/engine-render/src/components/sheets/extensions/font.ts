@@ -209,13 +209,16 @@ export class Font extends SheetExtension {
         const visibleCol = spreadsheetSkeleton.worksheet.getColVisible(col);
         if (!visibleRow || !visibleCol) return true;
 
+        // Since we cannot predict when fontRenderExtension?.isSkip might change,
+        // we must check it every time and retrieve cell data directly from the worksheet,
+        // not from the cache to ensure accuracy.
+        // if (renderFontCtx.fontCache?.cellData?.fontRenderExtension?.isSkip) {
+        //     return true;
+        // }
         const cellData = spreadsheetSkeleton.worksheet.getCell(row, col) as ICellDataForSheetInterceptor || {};
         if (cellData?.fontRenderExtension?.isSkip) {
             return true;
         }
-        // if (renderFontCtx.fontCache?.cellData?.fontRenderExtension?.isSkip) {
-        //     return true;
-        // }
 
         ctx.save();
         ctx.beginPath();

@@ -183,6 +183,8 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
                 this.makeDirty(true);
             })
         );
+
+        window.sk = this;
     }
 
     setScene(scene: Scene) {
@@ -318,6 +320,8 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
     setStylesCache(vpInfo?: IViewportInfo): Nullable<SpreadsheetSkeleton> {
         if (!this._worksheetData) return;
         if (!this.rowHeightAccumulation || !this.columnWidthAccumulation) return;
+
+        // this._cachedCellMatrix.reset();
 
         this.updateVisibleRange(vpInfo);
 
@@ -1129,15 +1133,14 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         return this.worksheet.getSpanModel().getMergedCellRangeForSkeleton(range.startRow, range.startColumn, range.endRow, range.endColumn);
     }
 
-    resetCache(): void {
+    override resetCache(): void {
         this._resetCache();
     }
 
     /**
      * Any changes to sheet model would reset cache.
      */
-    override _resetCache(): void {
-        super._resetCache();
+    _resetCache(): void {
         this._stylesCache = {
             background: {},
             backgroundPositions: new ObjectMatrix<ICellWithCoord>(),
@@ -1298,6 +1301,16 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             if (cacheCell) {
                 return cacheCell;
             }
+
+            // if (!window.skCellCount) {
+            //     window.skCellCount = new Map();
+            // }
+            // const k = `${row}, ${col}`;
+            // if (window.skCellCount.has(k)) {
+            //     window.skCellCount.set(k, window.skCellCount.get(k) + 1);
+            // } else {
+            //     window.skCellCount.set(k, 1);
+            // }
             return this.worksheet.getCell(row, col) || this.worksheet.getCellRaw(row, col);
         })();
         this._cachedCellMatrix.setValue(row, col, cell);

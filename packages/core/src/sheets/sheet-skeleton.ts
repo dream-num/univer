@@ -97,8 +97,20 @@ export class SheetSkeleton extends Skeleton {
         this._isRowStylePrecedeColumnStyle = this._configService.getConfig(IS_ROW_STYLE_PRECEDE_COLUMN_STYLE) ?? false;
     }
 
-    _resetCache() {
+    resetCache() {
         //
+    }
+
+    resetRangeCache(_range: IRange[]) {
+        //
+    }
+
+    getRowTotalHeight(): number {
+        return this._rowTotalHeight;
+    }
+
+    getColumnTotalWidth(): number {
+        return this._columnTotalWidth;
     }
 
     /**

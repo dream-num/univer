@@ -69,18 +69,13 @@ const HighlightCellInput = (props: {
     useEffect(() => {
         switch (type) {
             case CFSubRuleType.text: {
-                if ([CFTextOperator.beginsWith, CFTextOperator.endsWith,
-                    CFTextOperator.containsText, CFTextOperator.notContainsText,
-                    CFTextOperator.equal, CFTextOperator.notEqual].includes(operator as CFTextOperator)) {
+                if ([CFTextOperator.beginsWith, CFTextOperator.endsWith, CFTextOperator.containsText, CFTextOperator.notContainsText, CFTextOperator.equal, CFTextOperator.notEqual].includes(operator as CFTextOperator)) {
                     onChange(inputTextValue);
                 }
                 break;
             }
             case CFSubRuleType.number: {
-                if ([CFNumberOperator.equal, CFNumberOperator.notEqual,
-                    CFNumberOperator.greaterThan, CFNumberOperator.greaterThanOrEqual,
-                    CFNumberOperator.lessThan, CFNumberOperator.lessThanOrEqual,
-                ].includes(operator as CFNumberOperator)) {
+                if ([CFNumberOperator.equal, CFNumberOperator.notEqual, CFNumberOperator.greaterThan, CFNumberOperator.greaterThanOrEqual, CFNumberOperator.lessThan, CFNumberOperator.lessThanOrEqual].includes(operator as CFNumberOperator)) {
                     onChange(inputNumberValue);
                 }
                 if ([CFNumberOperator.between, CFNumberOperator.notBetween].includes(operator as CFNumberOperator)) {
@@ -96,12 +91,7 @@ const HighlightCellInput = (props: {
             handler: (v, _c, next) => {
                 switch (type) {
                     case CFSubRuleType.text: {
-                        if ([CFTextOperator.beginsWith,
-                            CFTextOperator.containsText,
-                            CFTextOperator.endsWith,
-                            CFTextOperator.notEqual,
-                            CFTextOperator.notContainsText,
-                            CFTextOperator.equal].includes(operator as any)) {
+                        if ([CFTextOperator.beginsWith, CFTextOperator.containsText, CFTextOperator.endsWith, CFTextOperator.notEqual, CFTextOperator.notContainsText, CFTextOperator.equal].includes(operator as any)) {
                             if (!inputTextValue) {
                                 textErrorSet(localeService.t('sheet.cf.errorMessage.notBlank'));
                                 return false;
@@ -120,17 +110,16 @@ const HighlightCellInput = (props: {
 
     switch (type) {
         case CFSubRuleType.text: {
-            if ([CFTextOperator.beginsWith, CFTextOperator.endsWith,
-                CFTextOperator.containsText, CFTextOperator.notContainsText,
-                CFTextOperator.equal, CFTextOperator.notEqual].includes(operator as CFTextOperator)) {
+            if ([CFTextOperator.beginsWith, CFTextOperator.endsWith, CFTextOperator.containsText, CFTextOperator.notContainsText, CFTextOperator.equal, CFTextOperator.notEqual].includes(operator as CFTextOperator)) {
                 const _onChange = (value: string) => {
                     inputTextValueSet(value);
                     onChange(value);
                 };
                 return (
-                    <div className={`
-                      ${stylesBase.mTSm}
-                    `}
+                    <div
+                        className={`
+                          ${stylesBase.mTSm}
+                        `}
                     >
                         <WrapperError errorText={textError}>
                             <Input
@@ -148,19 +137,17 @@ const HighlightCellInput = (props: {
             break;
         }
         case CFSubRuleType.number: {
-            if ([CFNumberOperator.equal, CFNumberOperator.notEqual,
-                CFNumberOperator.greaterThan, CFNumberOperator.greaterThanOrEqual,
-                CFNumberOperator.lessThan, CFNumberOperator.lessThanOrEqual,
-            ].includes(operator as CFNumberOperator)) {
+            if ([CFNumberOperator.equal, CFNumberOperator.notEqual, CFNumberOperator.greaterThan, CFNumberOperator.greaterThanOrEqual, CFNumberOperator.lessThan, CFNumberOperator.lessThanOrEqual].includes(operator as CFNumberOperator)) {
                 const _onChange = (value: number | null) => {
                     inputNumberValueSet(value || 0);
                     onChange(value || 0);
                     numberErrorSet('');
                 };
                 return (
-                    <div className={`
-                      ${stylesBase.mTSm}
-                    `}
+                    <div
+                        className={`
+                          ${stylesBase.mTSm}
+                        `}
                     >
                         <WrapperError errorText={numberError}>
                             <InputNumber min={Number.MIN_SAFE_INTEGER} max={Number.MAX_SAFE_INTEGER} className={styles.width100} value={inputNumberValue} onChange={_onChange} />
@@ -182,10 +169,11 @@ const HighlightCellInput = (props: {
                     numberMaxErrorSet('');
                 };
                 return (
-                    <div className={`
-                      ${stylesBase.mTSm}
-                      ${stylesBase.labelContainer}
-                    `}
+                    <div
+                        className={`
+                          ${stylesBase.mTSm}
+                          ${stylesBase.labelContainer}
+                        `}
                     >
                         <WrapperError errorText={numberMinError}>
                             <InputNumber min={Number.MIN_SAFE_INTEGER} max={Number.MAX_SAFE_INTEGER} value={inputNumberMin} onChange={onChangeMin} />
@@ -281,8 +269,7 @@ export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, ITextHigh
     }, {
         value: CFSubRuleType.uniqueValues,
         label: localeService.t('sheet.cf.subRuleType.uniqueValues'),
-    },
-    ];
+    }];
 
     const operatorOptions = useMemo(() => getOperatorOptions(subType, localeService), [subType]);
 
@@ -308,9 +295,7 @@ export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, ITextHigh
     const getResult = useMemo(() => (option: { subType?: string; operator?: string; value?: IValue; style?: IHighlightCell['style'] }) => {
         switch (option.subType || subType) {
             case CFSubRuleType.text: {
-                if ([CFTextOperator.beginsWith, CFTextOperator.endsWith,
-                    CFTextOperator.containsText, CFTextOperator.notContainsText,
-                    CFTextOperator.equal, CFTextOperator.notEqual].includes(operator as CFTextOperator)) {
+                if ([CFTextOperator.beginsWith, CFTextOperator.endsWith, CFTextOperator.containsText, CFTextOperator.notContainsText, CFTextOperator.equal, CFTextOperator.notEqual].includes(operator as CFTextOperator)) {
                     return {
                         type: CFRuleType.highlightCell,
                         subType: option.subType ?? subType,
@@ -322,10 +307,7 @@ export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, ITextHigh
                 break;
             }
             case CFSubRuleType.number: {
-                if ([CFNumberOperator.equal, CFNumberOperator.notEqual,
-                    CFNumberOperator.greaterThan, CFNumberOperator.greaterThanOrEqual,
-                    CFNumberOperator.lessThan, CFNumberOperator.lessThanOrEqual,
-                ].includes(operator as CFNumberOperator)) {
+                if ([CFNumberOperator.equal, CFNumberOperator.notEqual, CFNumberOperator.greaterThan, CFNumberOperator.greaterThanOrEqual, CFNumberOperator.lessThan, CFNumberOperator.lessThanOrEqual].includes(operator as CFNumberOperator)) {
                     return {
                         type: CFRuleType.highlightCell,
                         subType: option.subType ?? subType,
@@ -396,10 +378,11 @@ export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, ITextHigh
 
     return (
         <div>
-            <div className={`
-              ${stylesBase.title}
-              ${stylesBase.mTBase}
-            `}
+            <div
+                className={`
+                  ${stylesBase.title}
+                  ${stylesBase.mTBase}
+                `}
             >
                 {localeService.t('sheet.cf.panel.styleRule')}
             </div>
@@ -424,9 +407,10 @@ export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, ITextHigh
                 />
             )}
             <HighlightCellInput key={inputRenderKey} value={value} interceptorManager={interceptorManager} type={subType} operator={operator} rule={rule} onChange={onInputChange} />
-            <div className={`
-              ${styles.cfPreviewWrap}
-            `}
+            <div
+                className={`
+                  ${styles.cfPreviewWrap}
+                `}
             >
                 <Preview rule={getResult({}) as IConditionalFormattingRuleConfig} />
             </div>

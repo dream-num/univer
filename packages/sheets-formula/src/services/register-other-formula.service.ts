@@ -113,7 +113,8 @@ export class RegisterOtherFormulaService extends Disposable {
             this._commandService.executeCommand(SetOtherFormulaMutation.id, params).then(() => {
                 this._commandService.executeCommand(
                     OtherFormulaMarkDirty.id,
-                    { [unitId]: { [subUnitId]: { [formulaId]: true } } });
+                    { [unitId]: { [subUnitId]: { [formulaId]: true } } }
+                );
             });
         };
 

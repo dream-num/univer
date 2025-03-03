@@ -15,12 +15,12 @@
  */
 
 import type { IAccessor, IMutation, IMutationInfo } from '@univerjs/core';
+import type { IAddConditionalRuleMutationParams } from './add-conditional-rule.mutation';
+import type { IMoveConditionalRuleMutationParams } from './move-conditional-rule.mutation';
 import { CommandType, Tools } from '@univerjs/core';
 import { ConditionalFormattingRuleModel } from '../../models/conditional-formatting-rule-model';
 import { transformSupportSymmetryAnchor } from '../../utils/anchor';
-import type { IAddConditionalRuleMutationParams } from './add-conditional-rule.mutation';
 import { AddConditionalRuleMutation } from './add-conditional-rule.mutation';
-import type { IMoveConditionalRuleMutationParams } from './move-conditional-rule.mutation';
 import { MoveConditionalRuleMutation } from './move-conditional-rule.mutation';
 
 export interface IDeleteConditionalRuleMutationParams {
@@ -50,7 +50,9 @@ export const DeleteConditionalRuleMutationUndoFactory = (accessor: IAccessor, pa
                 }
                 const [start, end] = transformResult;
                 const params: IMoveConditionalRuleMutationParams = {
-                    unitId, subUnitId, start,
+                    unitId,
+                    subUnitId,
+                    start,
                     end,
                 };
                 result.push({ id: MoveConditionalRuleMutation.id, params });

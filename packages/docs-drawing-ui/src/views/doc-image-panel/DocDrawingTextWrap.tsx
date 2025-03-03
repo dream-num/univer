@@ -173,7 +173,10 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
         }
 
         const {
-            distT = 0, distL = 0, distB = 0, distR = 0,
+            distT = 0,
+            distL = 0,
+            distB = 0,
+            distR = 0,
             layoutType = PositionedObjectLayoutType.INLINE,
             behindDoc = BooleanNumber.FALSE,
             wrapText = WrapTextType.BOTH_SIDES,

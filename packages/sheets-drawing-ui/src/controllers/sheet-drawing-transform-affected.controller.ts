@@ -36,7 +36,10 @@ enum RangeMoveUndoType {
 }
 
 const UPDATE_COMMANDS = [
-    InsertRowCommand.id, InsertColCommand.id, RemoveRowCommand.id, RemoveColCommand.id,
+    InsertRowCommand.id,
+    InsertColCommand.id,
+    RemoveRowCommand.id,
+    RemoveColCommand.id,
 
     DeleteRangeMoveLeftCommand.id,
     DeleteRangeMoveUpCommand.id,
@@ -551,8 +554,7 @@ export class SheetDrawingTransformAffectedController extends Disposable implemen
                         }
                     }
 
-                    const newTransform = drawingPositionToTransform({ ...sheetTransform },
-                        this._selectionRenderService, this._skeletonManagerService);
+                    const newTransform = drawingPositionToTransform({ ...sheetTransform }, this._selectionRenderService, this._skeletonManagerService);
                     if (newTransform != null) {
                         updateDrawings.push({
                             ...drawing,
@@ -1234,10 +1236,16 @@ export class SheetDrawingTransformAffectedController extends Disposable implemen
                 const { startRow, endRow, startColumn, endColumn } = range;
                 if (Rectangle.intersects(
                     {
-                        startRow, endRow, startColumn, endColumn,
+                        startRow,
+                        endRow,
+                        startColumn,
+                        endColumn,
                     },
                     {
-                        startRow: fromRow, endRow: toRow, startColumn: fromColumn, endColumn: toColumn,
+                        startRow: fromRow,
+                        endRow: toRow,
+                        startColumn: fromColumn,
+                        endColumn: toColumn,
                     }
                 ) || fromRow > endRow || fromColumn > endColumn) {
                     const isPositionAnchor = anchorType === SheetDrawingAnchorType.Position;

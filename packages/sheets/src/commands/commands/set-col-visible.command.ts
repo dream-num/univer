@@ -169,7 +169,8 @@ export const SetColHiddenCommand: ICommand = {
 
         const redoMutationParams: ISetColHiddenMutationParams = { unitId, subUnitId, ranges };
         const setSelectionOperationParams: ISetSelectionsOperationParams = {
-            unitId, subUnitId,
+            unitId,
+            subUnitId,
             selections: getSelectionsAfterHiding(ranges).map((range) => ({
                 range,
                 primary: getPrimaryForRange(range, worksheet),
@@ -179,7 +180,8 @@ export const SetColHiddenCommand: ICommand = {
 
         const undoMutationParams = SetColHiddenUndoMutationFactory(accessor, redoMutationParams);
         const undoSetSelectionsOperationParams: ISetSelectionsOperationParams = {
-            unitId, subUnitId,
+            unitId,
+            subUnitId,
             reveal: true,
             selections: ranges.map((range) => ({
                 range,

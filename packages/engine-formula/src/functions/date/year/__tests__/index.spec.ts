@@ -16,10 +16,10 @@
 
 import { describe, expect, it } from 'vitest';
 
+import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
+import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { FUNCTION_NAMES_DATE } from '../../function-names';
 import { Year } from '../index';
-import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
-import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 
 describe('Test year function', () => {
     const testFunction = new Year(FUNCTION_NAMES_DATE.YEAR);
@@ -38,8 +38,7 @@ describe('Test year function', () => {
 
         it('Serial number is array', () => {
             const serialNumber = ArrayValueObject.create({
-                calculateValueList: transformToValueObject([[1, ' ', 1.23, true, false, null],
-                    [0, '100', '2.34', 'test', -3, 1900]]),
+                calculateValueList: transformToValueObject([[1, ' ', 1.23, true, false, null], [0, '100', '2.34', 'test', -3, 1900]]),
                 rowCount: 2,
                 columnCount: 6,
                 unitId: '',

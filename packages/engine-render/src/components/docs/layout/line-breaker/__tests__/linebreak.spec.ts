@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+/* eslint-disable antfu/consistent-list-newline */
 import fs from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';

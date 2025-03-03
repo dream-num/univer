@@ -28,7 +28,8 @@ import {
     clsx,
     Menu as DesignMenu,
     MenuItem as DesignMenuItem,
-    MenuItemGroup as DesignMenuItemGroup, SubMenu as DesignSubMenu,
+    MenuItemGroup as DesignMenuItemGroup,
+    SubMenu as DesignSubMenu,
 } from '@univerjs/design';
 import { CheckMarkSingle, MoreSingle } from '@univerjs/icons';
 import { useEffect, useMemo, useState } from 'react';

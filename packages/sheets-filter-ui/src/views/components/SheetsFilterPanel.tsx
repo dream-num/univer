@@ -110,6 +110,5 @@ function useFilterByOptions(localeService: LocaleService) {
     return useMemo(() => [
         { label: localeService.t('sheets-filter.panel.by-values'), value: FilterBy.VALUES },
         { label: localeService.t('sheets-filter.panel.by-conditions'), value: FilterBy.CONDITIONS },
-    ],
-    [locale, localeService]);
+    ], [locale, localeService]);
 }

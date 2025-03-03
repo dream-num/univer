@@ -33,7 +33,12 @@ import type { IShortcutService } from '@univerjs/ui';
 import type { Observable, Subscription } from 'rxjs';
 import type { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import {
-    convertCellToRange, createIdentifier, Disposable, InterceptorManager, RANGE_TYPE, ThemeService,
+    convertCellToRange,
+    createIdentifier,
+    Disposable,
+    InterceptorManager,
+    RANGE_TYPE,
+    ThemeService,
 } from '@univerjs/core';
 
 import { ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
@@ -520,10 +525,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
                 if (!startViewport || !endViewport || !viewportMain) {
                     return false;
                 }
-                const crossableViewports = [SHEET_VIEWPORT_KEY.VIEW_MAIN,
-                    SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT_TOP,
-                    SHEET_VIEWPORT_KEY.VIEW_MAIN_TOP,
-                    SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT] as string[];
+                const crossableViewports = [SHEET_VIEWPORT_KEY.VIEW_MAIN, SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT_TOP, SHEET_VIEWPORT_KEY.VIEW_MAIN_TOP, SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT] as string[];
                 return crossableViewports.includes(startViewport.viewportKey) && crossableViewports.includes(endViewport.viewportKey);
             };
             if (isCrossableViewports()) {

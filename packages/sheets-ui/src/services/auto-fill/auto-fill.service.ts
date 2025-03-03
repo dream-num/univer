@@ -19,19 +19,7 @@ import type { RenderManagerService } from '@univerjs/engine-render';
 import type { ISetRangeValuesMutationParams, ISetWorksheetRowAutoHeightMutationParams } from '@univerjs/sheets';
 import type { Observable } from 'rxjs';
 import type { IAutoFillLocation, IAutoFillRule, ISheetAutoFillHook } from './type';
-import { createIdentifier, Direction,
-    Disposable,
-    ICommandService,
-    Inject,
-    Injector,
-    IUndoRedoService,
-    IUniverInstanceService,
-    ObjectMatrix,
-    RANGE_TYPE,
-    Rectangle,
-    toDisposable,
-    UniverInstanceType,
-} from '@univerjs/core';
+import { createIdentifier, Direction, Disposable, ICommandService, Inject, Injector, IUndoRedoService, IUniverInstanceService, ObjectMatrix, RANGE_TYPE, Rectangle, toDisposable, UniverInstanceType } from '@univerjs/core';
 
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { rangeToDiscreteRange, SetRangeValuesMutation, SetSelectionsOperation, SetWorksheetRowAutoHeightMutation, SetWorksheetRowAutoHeightMutationFactory, SheetsSelectionsService } from '@univerjs/sheets';
@@ -391,10 +379,7 @@ export class AutoFillService extends Disposable implements IAutoFillService {
     // eslint-disable-next-line max-lines-per-function
     fillData(applyType: APPLY_TYPE) {
         this.applyType = applyType;
-        const { source, target,
-                unitId = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId(),
-                subUnitId = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()?.getSheetId(),
-        } = this.autoFillLocation || {};
+        const { source, target, unitId = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId(), subUnitId = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()?.getSheetId() } = this.autoFillLocation || {};
 
         if (!source || !target || !unitId || !subUnitId) {
             return false;

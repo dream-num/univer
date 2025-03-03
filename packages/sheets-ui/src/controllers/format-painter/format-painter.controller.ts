@@ -16,7 +16,6 @@
 
 import type { ICellData, IMutationInfo, IRange, IStyleData, Workbook } from '@univerjs/core';
 import type { IAddWorksheetMergeMutationParams, IRemoveWorksheetMergeMutationParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
-
 import type { IFormatPainterHook, ISelectionFormatInfo } from '../../services/format-painter/format-painter.service';
 import {
     Disposable,
@@ -29,8 +28,18 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { AddMergeUndoMutationFactory, AddWorksheetMergeMutation, getAddMergeMutationRangeByType, RemoveMergeUndoMutationFactory, RemoveWorksheetMergeMutation, SetRangeValuesCommand, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
-
+import {
+    AddMergeUndoMutationFactory,
+    AddWorksheetMergeMutation,
+    getAddMergeMutationRangeByType,
+    RemoveMergeUndoMutationFactory,
+    RemoveWorksheetMergeMutation,
+    SetRangeValuesCommand,
+    SetRangeValuesMutation,
+    SetRangeValuesUndoMutationFactory,
+    SheetInterceptorService,
+    SheetsSelectionsService,
+} from '@univerjs/sheets';
 import { checkCellContentInRanges, getClearContentMutationParamsForRanges } from '../../common/utils';
 import { FormatPainterStatus, IFormatPainterService } from '../../services/format-painter/format-painter.service';
 
@@ -126,8 +135,7 @@ export class FormatPainterController extends Disposable {
             }
             : originRange;
         const styleValues: ICellData[][] = Array.from({ length: range.endRow - range.startRow + 1 }, () =>
-            Array.from({ length: range.endColumn - range.startColumn + 1 }, () => ({}))
-        );
+            Array.from({ length: range.endColumn - range.startColumn + 1 }, () => ({})));
         const mergeRanges: IRange[] = [];
 
         styleValues.forEach((row, rowIndex) => {

@@ -23,7 +23,8 @@ import { IConfigService, Inject, Injector, merge, Plugin } from '@univerjs/core'
 import {
     defaultPluginMainThreadConfig,
     defaultPluginWorkerThreadConfig,
-    PLUGIN_CONFIG_KEY_MAIN_THREAD, PLUGIN_CONFIG_KEY_WORKER_THREAD,
+    PLUGIN_CONFIG_KEY_MAIN_THREAD,
+    PLUGIN_CONFIG_KEY_WORKER_THREAD,
 } from './controllers/config.schema';
 import { DataSyncPrimaryController } from './controllers/data-sync/data-sync-primary.controller';
 import { DataSyncReplicaController } from './controllers/data-sync/data-sync-replica.controller';

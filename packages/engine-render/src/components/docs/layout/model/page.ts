@@ -209,9 +209,16 @@ function _createSkeletonHeaderFooter(
     count = 0
 ): IDocumentSkeletonHeaderFooter {
     const {
-        lists, footerTreeMap, headerTreeMap, localeService, pageSize, drawings,
-        marginLeft = 0, marginRight = 0,
-        marginHeader = 0, marginFooter = 0,
+        lists,
+        footerTreeMap,
+        headerTreeMap,
+        localeService,
+        pageSize,
+        drawings,
+        marginLeft = 0,
+        marginRight = 0,
+        marginHeader = 0,
+        marginFooter = 0,
     } = sectionBreakConfig;
     const pageWidth = pageSize?.width || Number.POSITIVE_INFINITY;
     const pageHeight = pageSize?.height || Number.POSITIVE_INFINITY;

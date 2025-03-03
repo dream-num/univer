@@ -15,8 +15,12 @@
  */
 
 import type { IMutationInfo, IRange } from '@univerjs/core';
-import { beforeEach, describe, expect, it } from 'vitest';
+import type { IRemoveSheetMutationParams } from '../../../basics';
 
+import type { IMoveRowsMutationParams } from '../../../commands/mutations/move-rows-cols.mutation';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { MoveRowsMutation } from '../../../commands/mutations/move-rows-cols.mutation';
+import { RemoveSheetMutation } from '../../../commands/mutations/remove-sheet.mutation';
 import { EffectRefRangId } from '../type';
 import {
     adjustRangeOnMutation,
@@ -39,10 +43,6 @@ import {
     handleRemoveRowCommon,
     runRefRangeMutations,
 } from '../util';
-import { RemoveSheetMutation } from '../../../commands/mutations/remove-sheet.mutation';
-import type { IRemoveSheetMutationParams } from '../../../basics';
-import type { IMoveRowsMutationParams } from '../../../commands/mutations/move-rows-cols.mutation';
-import { MoveRowsMutation } from '../../../commands/mutations/move-rows-cols.mutation';
 
 const countRange = ([a, b, c, d]: readonly [number, number, number, number]) => (a * 1000 + b * 100 + c * 10 + d);
 
@@ -1228,8 +1228,7 @@ describe('test ref-range move', () => {
                             endRow: 10,
                             startColumn: 8,
                             startRow: 6,
-                        },
-                        {
+                        }, {
                             endColumn: 7,
                             endRow: 10,
                             startColumn: 6,

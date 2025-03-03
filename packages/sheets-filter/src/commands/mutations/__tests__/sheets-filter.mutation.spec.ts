@@ -15,10 +15,10 @@
  */
 
 import type { IWorkbookData } from '@univerjs/core';
+import type { ISetSheetsFilterCriteriaMutationParams, ISetSheetsFilterRangeMutationParams } from '../sheets-filter.mutation';
 import { ICommandService, Inject, Injector, LocaleType, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
 import { afterEach, describe, expect, it } from 'vitest';
 import { SHEET_FILTER_SNAPSHOT_ID, SheetsFilterService } from '../../../services/sheet-filter.service';
-import type { ISetSheetsFilterCriteriaMutationParams, ISetSheetsFilterRangeMutationParams } from '../sheets-filter.mutation';
 import { ReCalcSheetsFilterMutation, RemoveSheetsFilterMutation, SetSheetsFilterCriteriaMutation, SetSheetsFilterRangeMutation } from '../sheets-filter.mutation';
 
 function testWorkbookDataFactory(): IWorkbookData {
@@ -124,7 +124,8 @@ function createFilterMutationTestBed(workbookData?: IWorkbookData) {
         SetSheetsFilterRangeMutation,
         SetSheetsFilterCriteriaMutation,
         RemoveSheetsFilterMutation,
-        ReCalcSheetsFilterMutation]
+        ReCalcSheetsFilterMutation,
+    ]
     ).forEach((command) => commandService.registerCommand(command));
 
     return {

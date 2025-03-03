@@ -208,7 +208,8 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
                                 {
                                     value: 'current',
                                     label: localeService.t('threadCommentUI.filter.sheet.current'),
-                                }, {
+                                },
+                                {
                                     value: 'all',
                                     label: localeService.t('threadCommentUI.filter.sheet.all'),
                                 },
@@ -224,7 +225,8 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
                         {
                             value: 'all',
                             label: localeService.t('threadCommentUI.filter.status.all'),
-                        }, {
+                        },
+                        {
                             value: 'resolved',
                             label: localeService.t('threadCommentUI.filter.status.resolved'),
                         },

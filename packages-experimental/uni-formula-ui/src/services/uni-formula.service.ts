@@ -21,8 +21,10 @@ import type {
     IDisposable,
     IDocumentBody,
     Nullable,
-    SlideDataModel } from '@univerjs/core';
+    SlideDataModel,
+} from '@univerjs/core';
 import type { IDocFormulaCache, ISlideFormulaCache } from '@univerjs/uni-formula';
+import type { IDocPopupPosition, ISlidePopupPosition } from '../commands/operations/operation';
 import {
     BuildTextUtils,
     CommandType,
@@ -45,7 +47,7 @@ import { RegisterOtherFormulaService } from '@univerjs/sheets-formula';
 import { CanvasView } from '@univerjs/slides-ui';
 import { DumbUniFormulaService, IUniFormulaService } from '@univerjs/uni-formula';
 import { take } from 'rxjs';
-import { type IDocPopupPosition, type ISlidePopupPosition, isSlidePosition } from '../commands/operations/operation';
+import { isSlidePosition } from '../commands/operations/operation';
 
 const PSEUDO_SUBUNIT = 'PSEUDO_SUBUNIT';
 

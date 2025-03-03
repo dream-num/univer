@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommand, IMutationInfo,
-    IRange,
-} from '@univerjs/core';
+import type { ICommand, IMutationInfo, IRange } from '@univerjs/core';
 import type { IConditionFormattingRule } from '../../models/type';
 import type { IDeleteConditionalRuleMutationParams } from '../mutations/delete-conditional-rule.mutation';
 import type { ISetConditionalRuleMutationParams } from '../mutations/set-conditional-rule.mutation';

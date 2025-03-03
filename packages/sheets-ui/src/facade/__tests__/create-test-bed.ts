@@ -26,7 +26,8 @@ import {
     Plugin,
     ThemeService,
     Univer,
-    UniverInstanceType } from '@univerjs/core';
+    UniverInstanceType,
+} from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { Engine, IRenderingEngine, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';

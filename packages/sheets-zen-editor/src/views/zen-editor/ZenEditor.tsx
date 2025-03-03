@@ -84,8 +84,7 @@ export function ZenEditor() {
             initialSnapshot: INITIAL_SNAPSHOT,
             scrollBar: true,
             backScrollOffset: 100,
-        },
-        editorDom);
+        }, editorDom);
 
         const resizeObserver = new ResizeObserver(() => {
             zenEditorService.setPosition(editorDom.getBoundingClientRect());

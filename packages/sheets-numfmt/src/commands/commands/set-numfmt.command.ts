@@ -22,13 +22,7 @@ import type {
     ISetNumfmtMutationParams,
     ISetRangeValuesMutationParams,
 } from '@univerjs/sheets';
-import { CellValueType,
-    CommandType,
-    ICommandService,
-    IUndoRedoService,
-    IUniverInstanceService,
-    ObjectMatrix,
-    sequenceExecute } from '@univerjs/core';
+import { CellValueType, CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, ObjectMatrix, sequenceExecute } from '@univerjs/core';
 import { isTextFormat } from '@univerjs/engine-numfmt';
 import {
     checkCellValueType,

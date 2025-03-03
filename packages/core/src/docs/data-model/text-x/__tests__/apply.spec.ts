@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
+import type { IDocumentBody } from '../../../../types/interfaces';
 import type { TextXAction } from '../action-types';
 import { describe, expect, it } from 'vitest';
 import { UpdateDocsAttributeType } from '../../../../shared';
 import { BooleanNumber, HorizontalAlign } from '../../../../types/enum';
-import { CustomRangeType, type IDocumentBody } from '../../../../types/interfaces';
+import { CustomRangeType } from '../../../../types/interfaces';
 import { PresetListType } from '../../preset-list-type';
 import { TextXActionType } from '../action-types';
 import { TextX } from '../text-x';
@@ -290,7 +291,8 @@ describe('apply method', () => {
             {
                 t: TextXActionType.RETAIN,
                 len: 1,
-            }, {
+            },
+            {
                 t: TextXActionType.RETAIN,
                 len: 1,
                 body: {
@@ -309,7 +311,8 @@ describe('apply method', () => {
             {
                 t: TextXActionType.RETAIN,
                 len: 1,
-            }, {
+            },
+            {
                 t: TextXActionType.RETAIN,
                 len: 1,
                 body: {
@@ -349,7 +352,8 @@ describe('apply method', () => {
             {
                 t: TextXActionType.RETAIN,
                 len: 1,
-            }, {
+            },
+            {
                 t: TextXActionType.RETAIN,
                 len: 1,
                 coverType: UpdateDocsAttributeType.REPLACE,
@@ -369,7 +373,8 @@ describe('apply method', () => {
             {
                 t: TextXActionType.RETAIN,
                 len: 1,
-            }, {
+            },
+            {
                 t: TextXActionType.RETAIN,
                 len: 1,
                 coverType: UpdateDocsAttributeType.REPLACE,
@@ -410,7 +415,8 @@ describe('apply method', () => {
             {
                 t: TextXActionType.RETAIN,
                 len: 1,
-            }, {
+            },
+            {
                 t: TextXActionType.RETAIN,
                 len: 1,
                 coverType: UpdateDocsAttributeType.REPLACE,
@@ -435,7 +441,8 @@ describe('apply method', () => {
             {
                 t: TextXActionType.RETAIN,
                 len: 1,
-            }, {
+            },
+            {
                 t: TextXActionType.RETAIN,
                 len: 1,
                 coverType: UpdateDocsAttributeType.REPLACE,
@@ -481,7 +488,8 @@ describe('apply method', () => {
             {
                 t: TextXActionType.RETAIN,
                 len: 1,
-            }, {
+            },
+            {
                 t: TextXActionType.RETAIN,
                 len: 1,
                 body: {
@@ -539,7 +547,8 @@ describe('apply method', () => {
             {
                 t: TextXActionType.RETAIN,
                 len: 1,
-            }, {
+            },
+            {
                 t: TextXActionType.INSERT,
                 len: 1,
                 body: {
@@ -558,7 +567,8 @@ describe('apply method', () => {
             {
                 t: TextXActionType.RETAIN,
                 len: 2,
-            }, {
+            },
+            {
                 t: TextXActionType.INSERT,
                 len: 1,
                 body: {
@@ -614,7 +624,8 @@ describe('apply method', () => {
             {
                 t: TextXActionType.RETAIN,
                 len: 2,
-            }, {
+            },
+            {
                 t: TextXActionType.INSERT,
                 len: 1,
                 body: {

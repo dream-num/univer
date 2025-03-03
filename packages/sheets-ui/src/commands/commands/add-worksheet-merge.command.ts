@@ -36,7 +36,9 @@ import {
     AddWorksheetMergeMutation,
     getAddMergeMutationRangeByType,
     RemoveMergeUndoMutationFactory,
-    RemoveWorksheetMergeMutation, SheetInterceptorService, SheetsSelectionsService,
+    RemoveWorksheetMergeMutation,
+    SheetInterceptorService,
+    SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { IConfirmService } from '@univerjs/ui';
 

@@ -37,7 +37,9 @@ import { CURSOR_TYPE, Rect, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine
 
 import {
     DeltaColumnWidthCommand,
-    DeltaRowHeightCommand, SetWorksheetRowIsAutoHeightCommand, SheetsSelectionsService,
+    DeltaRowHeightCommand,
+    SetWorksheetRowIsAutoHeightCommand,
+    SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { Subscription } from 'rxjs';
 import { SetWorksheetColAutoWidthCommand } from '../../commands/commands/set-worksheet-auto-col-width.command';
@@ -517,7 +519,8 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
                         }
 
                         this._commandService.executeCommand<ISetWorksheetColIsAutoWidthCommandParams>(
-                            SetWorksheetColAutoWidthCommand.id, { ranges }
+                            SetWorksheetColAutoWidthCommand.id,
+                            { ranges }
                         );
                         this._columnResizeRect?.hide();
                         break;

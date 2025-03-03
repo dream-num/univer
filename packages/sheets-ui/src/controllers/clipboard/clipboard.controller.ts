@@ -443,8 +443,10 @@ export class SheetClipboardController extends RxDisposable {
                         unitId: unitId!,
                         subUnitId: subUnitId!,
                         ranges: [{
-                            startRow: range.rows[0], endRow: Math.min(range.rows[range.rows.length - 1], maxRow),
-                            startColumn: range.cols[0], endColumn: range.cols[range.cols.length - 1],
+                            startRow: range.rows[0],
+                            endRow: Math.min(range.rows[range.rows.length - 1], maxRow),
+                            startColumn: range.cols[0],
+                            endColumn: range.cols[range.cols.length - 1],
                         }],
                         rowHeight,
                     };

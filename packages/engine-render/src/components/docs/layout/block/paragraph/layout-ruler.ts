@@ -398,14 +398,7 @@ function _divideOperator(
                         );
                     }
 
-                    _divideOperator(ctx,
-                        glyphGroup,
-                        pages,
-                        sectionBreakConfig,
-                        paragraphConfig,
-                        isParagraphFirstShapedText,
-
-                        breakPointType);
+                    _divideOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, isParagraphFirstShapedText, breakPointType);
 
                     return;
                 }
@@ -414,15 +407,7 @@ function _divideOperator(
             updateDivideInfo(divide, { breakType: breakPointType });
         }
     } else {
-        _lineOperator(ctx,
-            glyphGroup,
-            pages,
-            sectionBreakConfig,
-            paragraphConfig,
-            isParagraphFirstShapedText,
-
-            breakPointType,
-            defaultSpanLineHeight);
+        _lineOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, isParagraphFirstShapedText, breakPointType, defaultSpanLineHeight);
     }
 }
 
@@ -483,7 +468,12 @@ function _lineOperator(
     } = paragraphStyle;
 
     const {
-        paragraphLineGapDefault, linePitch, lineSpacing, spacingRule, snapToGrid, gridType,
+        paragraphLineGapDefault,
+        linePitch,
+        lineSpacing,
+        spacingRule,
+        snapToGrid,
+        gridType,
     } = getLineHeightConfig(
         sectionBreakConfig,
         paragraphConfig
@@ -761,7 +751,13 @@ function __getWrapTablePosition(
 
     const left = getPositionHorizon(positionH, column, page, width, isPageBreak) ?? 0;
     const top = getPositionVertical(
-        positionV, page, lineTop, lineHeight, height, drawingAnchorTop, isPageBreak
+        positionV,
+        page,
+        lineTop,
+        lineHeight,
+        height,
+        drawingAnchorTop,
+        isPageBreak
     ) ?? 0;
 
     return { left, top };
@@ -1038,18 +1034,9 @@ function _columnOperator(
     const columnIsFull = isColumnFull(lastPage);
 
     if (columnIsFull === true) {
-        _pageOperator(ctx,
-            glyphGroup,
-            pages,
-            sectionBreakConfig,
-            paragraphConfig,
-            isParagraphFirstShapedText,
-
-            breakPointType, defaultSpanLineHeight);
+        _pageOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, isParagraphFirstShapedText, breakPointType, defaultSpanLineHeight);
     } else {
-        _lineOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig,
-            isParagraphFirstShapedText,
-            breakPointType, defaultSpanLineHeight);
+        _lineOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, isParagraphFirstShapedText, breakPointType, defaultSpanLineHeight);
     }
 }
 
@@ -1067,14 +1054,7 @@ function _pageOperator(
     const { skeHeaders, skeFooters } = paragraphConfig;
 
     pages.push(createSkeletonPage(ctx, sectionBreakConfig, { skeHeaders, skeFooters }, curSkeletonPage?.pageNumber + 1));
-    _columnOperator(ctx, glyphGroup,
-        pages,
-        sectionBreakConfig,
-        paragraphConfig,
-        isParagraphFirstShapedText,
-
-        breakPointType,
-        defaultSpanLineHeight);
+    _columnOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, isParagraphFirstShapedText, breakPointType, defaultSpanLineHeight);
 }
 
 /**
@@ -1301,7 +1281,13 @@ function __getDrawingPosition(
 
         drawing.aLeft = getPositionHorizon(positionH, column, page, width, isPageBreak) ?? 0;
         drawing.aTop = getPositionVertical(
-            positionV, page, lineTop, lineHeight, height, blockAnchorTop, isPageBreak
+            positionV,
+            page,
+            lineTop,
+            lineHeight,
+            height,
+            blockAnchorTop,
+            isPageBreak
         ) ?? 0;
         drawing.width = width;
         drawing.height = height;

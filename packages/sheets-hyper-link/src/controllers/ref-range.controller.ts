@@ -133,12 +133,10 @@ export class SheetsHyperLinkRefRangeController extends Disposable {
             startRow: link.row,
             endRow: link.row,
         };
-        this._watchDisposableMap.set(id,
-            this._refRangeService.watchRange(unitId, subUnitId, oldRange, (before, after) => {
-                const { redos } = this._handlePositionChange(unitId, subUnitId, link, after, true);
-                sequenceExecuteAsync(redos, this._commandService, { onlyLocal: true });
-            }, true)
-        );
+        this._watchDisposableMap.set(id, this._refRangeService.watchRange(unitId, subUnitId, oldRange, (before, after) => {
+            const { redos } = this._handlePositionChange(unitId, subUnitId, link, after, true);
+            sequenceExecuteAsync(redos, this._commandService, { onlyLocal: true });
+        }, true));
     }
 
     private _unregisterPosition(id: string) {

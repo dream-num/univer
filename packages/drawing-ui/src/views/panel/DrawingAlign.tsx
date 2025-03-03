@@ -45,10 +45,12 @@ export const DrawingAlign = (props: IDrawingAlignProps) => {
                 {
                     label: localeService.t('image-panel.align.left'),
                     value: AlignType.left,
-                }, {
+                },
+                {
                     label: localeService.t('image-panel.align.center'),
                     value: AlignType.center,
-                }, {
+                },
+                {
                     label: localeService.t('image-panel.align.right'),
                     value: AlignType.right,
                 },
@@ -59,20 +61,24 @@ export const DrawingAlign = (props: IDrawingAlignProps) => {
                 {
                     label: localeService.t('image-panel.align.top'),
                     value: AlignType.top,
-                }, {
+                },
+                {
                     label: localeService.t('image-panel.align.middle'),
                     value: AlignType.middle,
-                }, {
+                },
+                {
                     label: localeService.t('image-panel.align.bottom'),
                     value: AlignType.bottom,
                 },
             ],
-        }, {
+        },
+        {
             options: [
                 {
                     label: localeService.t('image-panel.align.horizon'),
                     value: AlignType.horizon,
-                }, {
+                },
+                {
                     label: localeService.t('image-panel.align.vertical'),
                     value: AlignType.vertical,
                 },

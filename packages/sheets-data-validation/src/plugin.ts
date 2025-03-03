@@ -22,7 +22,9 @@ import {
     IConfigService,
     Inject,
     Injector,
-    merge, Plugin, UniverInstanceType,
+    merge,
+    Plugin,
+    UniverInstanceType,
 } from '@univerjs/core';
 import { UniverDataValidationPlugin } from '@univerjs/data-validation';
 import {

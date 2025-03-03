@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { ICellData, Injector, IStyleData, Nullable, Univer } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, LocaleType, RANGE_TYPE } from '@univerjs/core';
 import {
     AddWorksheetMergeMutation,
@@ -26,7 +27,6 @@ import {
     SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import type { ICellData, Injector, IStyleData, Nullable, Univer } from '@univerjs/core';
 
 import { SheetSkeletonManagerService } from '../../sheet-skeleton-manager.service';
 import { ISheetClipboardService } from '../clipboard.service';
@@ -205,14 +205,21 @@ describe('Test clipboard', () => {
             expect(richTextStyle?.body?.paragraphs).toStrictEqual([{ startIndex: 6 }]);
             expect(richTextStyle?.body?.textRuns).toStrictEqual([
                 {
-                    st: 1, ed: 4, ts: {
+                    st: 1,
+                    ed: 4,
+                    ts: {
                         cl:
                             { rgb: 'rgb(218,233,248)' },
-                        ff: '等线', fs: 28, it: 1, bl: 1,
+                        ff: '等线',
+                        fs: 28,
+                        it: 1,
+                        bl: 1,
                     },
                 },
                 {
-                    ed: 6, st: 4, ts: { fs: 12, ff: '等线', cl: { rgb: 'rgb(0,0,0)' } },
+                    ed: 6,
+                    st: 4,
+                    ts: { fs: 12, ff: '等线', cl: { rgb: 'rgb(0,0,0)' } },
                 },
             ]);
         });

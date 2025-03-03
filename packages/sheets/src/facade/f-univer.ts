@@ -201,13 +201,11 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
             this.Event.WorkbookDisposed,
             () => univerInstanceService.unitDisposed$.subscribe((unit) => {
                 if (unit.type === UniverInstanceType.UNIVER_SHEET) {
-                    this.fireEvent(this.Event.WorkbookDisposed,
-                        {
-                            unitId: unit.getUnitId(),
-                            unitType: unit.type,
-                            snapshot: unit.getSnapshot() as IWorkbookData,
-                        }
-                    );
+                    this.fireEvent(this.Event.WorkbookDisposed, {
+                        unitId: unit.getUnitId(),
+                        unitType: unit.type,
+                        snapshot: unit.getSnapshot() as IWorkbookData,
+                    });
                 }
             })
         );
@@ -219,14 +217,12 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
                 if (unit.type === UniverInstanceType.UNIVER_SHEET) {
                     const workbook = unit as Workbook;
                     const workbookUnit = injector.createInstance(FWorkbook, workbook);
-                    this.fireEvent(this.Event.WorkbookCreated,
-                        {
-                            unitId: unit.getUnitId(),
-                            type: unit.type,
-                            workbook: workbookUnit,
-                            unit: workbookUnit,
-                        }
-                    );
+                    this.fireEvent(this.Event.WorkbookCreated, {
+                        unitId: unit.getUnitId(),
+                        type: unit.type,
+                        workbook: workbookUnit,
+                        unit: workbookUnit,
+                    });
                 }
             })
         );

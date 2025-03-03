@@ -142,10 +142,7 @@ describe('Test set range values commands', () => {
         endColumn: number
     ) => Nullable<Array<Array<Nullable<ICellData>>>>;
     let getStyle: () => any;
-    let getStyles: (startRow: number,
-        startColumn: number,
-        endRow: number,
-        endColumn: number) => Nullable<Nullable<IStyleData>[][]>;
+    let getStyles: (startRow: number, startColumn: number, endRow: number, endColumn: number) => Nullable<Nullable<IStyleData>[][]>;
 
     beforeEach(() => {
         const testBed = createCommandTestBed(getTestWorkbookDataDemo());
@@ -192,10 +189,7 @@ describe('Test set range values commands', () => {
             }
         };
 
-        getStyles = (startRow: number,
-            startColumn: number,
-            endRow: number,
-            endColumn: number): Nullable<Nullable<IStyleData>[][]> => {
+        getStyles = (startRow: number, startColumn: number, endRow: number, endColumn: number): Nullable<Nullable<IStyleData>[][]> => {
             const values = getValues(startRow, startColumn, endRow, endColumn);
             const styles = get(IUniverInstanceService).getUniverSheetInstance('test')?.getStyles();
 

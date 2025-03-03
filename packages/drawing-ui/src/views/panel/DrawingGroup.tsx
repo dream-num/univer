@@ -65,7 +65,9 @@ export const DrawingGroup = (props: IDrawingGroupProps) => {
             const transform = drawing.transform || { left: 0, top: 0 };
             const { unitId, subUnitId, drawingId } = drawing;
             return {
-                unitId, subUnitId, drawingId,
+                unitId,
+                subUnitId,
+                drawingId,
                 transform: {
                     ...transform,
                     left: transform.left! - groupTransform.left,
@@ -103,7 +105,9 @@ export const DrawingGroup = (props: IDrawingGroupProps) => {
             const { unitId, subUnitId, drawingId } = object;
             const newTransform = transformObjectOutOfGroup(transform || {}, groupTransform, groupTransform.width || 0, groupTransform.height || 0);
             return {
-                unitId, subUnitId, drawingId,
+                unitId,
+                subUnitId,
+                drawingId,
                 transform: {
                     ...transform,
                     ...newTransform,

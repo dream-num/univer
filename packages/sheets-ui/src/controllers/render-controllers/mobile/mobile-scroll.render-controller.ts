@@ -229,7 +229,8 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
                     offsetY: rowOffset,
                     viewportScrollX,
                     viewportScrollY,
-                    scrollX, scrollY,
+                    scrollX,
+                    scrollY,
                 };
                 // lastestScrollInfo derived from viewportScrollX, viewportScrollY from onScrollAfter$
                 this._scrollManagerService.setValidScrollStateToCurrSheet(scrollInfo);
@@ -302,7 +303,8 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
                     }
                     this._updateSceneSize(param as unknown as ISheetSkeletonManagerParam);
                 }
-            })));
+            })
+        ));
     }
 
     /**

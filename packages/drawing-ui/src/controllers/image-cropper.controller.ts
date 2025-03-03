@@ -321,7 +321,10 @@ export class ImageCropperController extends Disposable {
                         ...drawingParam,
                         transform: {
                             ...drawingParam.transform,
-                            left, top, height, width,
+                            left,
+                            top,
+                            height,
+                            width,
                         },
                         srcRect: srcRect.srcRectAngle,
                     }] as IImageData[]);

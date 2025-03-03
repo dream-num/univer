@@ -145,16 +145,15 @@ export class ConditionalFormattingFormulaService extends Disposable {
         }));
 
         // Register formula with Dirty Logic
-        this._activeDirtyManagerService.register(ConditionalFormattingFormulaMarkDirty.id,
-            {
-                commandId: ConditionalFormattingFormulaMarkDirty.id,
-                getDirtyData(commandInfo) {
-                    const params = commandInfo.params as IConditionalFormattingFormulaMarkDirtyParams;
-                    return {
-                        dirtyUnitOtherFormulaMap: params,
-                    };
-                },
-            });
+        this._activeDirtyManagerService.register(ConditionalFormattingFormulaMarkDirty.id, {
+            commandId: ConditionalFormattingFormulaMarkDirty.id,
+            getDirtyData(commandInfo) {
+                const params = commandInfo.params as IConditionalFormattingFormulaMarkDirtyParams;
+                return {
+                    dirtyUnitOtherFormulaMap: params,
+                };
+            },
+        });
     }
 
     private _ensureSubunitFormulaMap(unitId: string, subUnitId: string) {
@@ -205,8 +204,7 @@ export class ConditionalFormattingFormulaService extends Disposable {
         };
 
         this._commandService.executeCommand(SetOtherFormulaMutation.id, params, { onlyLocal: true }).then(() => {
-            this._commandService.executeCommand(ConditionalFormattingFormulaMarkDirty.id,
-                { [unitId]: { [subUnitId]: { [formulaId]: true } } }, { onlyLocal: true });
+            this._commandService.executeCommand(ConditionalFormattingFormulaMarkDirty.id, { [unitId]: { [subUnitId]: { [formulaId]: true } } }, { onlyLocal: true });
         });
     }
 

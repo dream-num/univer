@@ -55,8 +55,24 @@ export const countryCurrencyMap = {
     KR: '₩', // South Korean Won
     RU: '₽', // Russian Ruble
     // Euro countries
-    AT: '€', BE: '€', CY: '€', EE: '€', FI: '€', FR: '€',
-    DE: '€', GR: '€', IE: '€', IT: '€', LV: '€', LT: '€',
-    LU: '€', MT: '€', NL: '€', PT: '€', SK: '€', SI: '€', ES: '€',
+    AT: '€',
+    BE: '€',
+    CY: '€',
+    EE: '€',
+    FI: '€',
+    FR: '€',
+    DE: '€',
+    GR: '€',
+    IE: '€',
+    IT: '€',
+    LV: '€',
+    LT: '€',
+    LU: '€',
+    MT: '€',
+    NL: '€',
+    PT: '€',
+    SK: '€',
+    SI: '€',
+    ES: '€',
     // Add more mappings as needed
 };

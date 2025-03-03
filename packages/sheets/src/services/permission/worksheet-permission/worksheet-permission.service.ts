@@ -123,7 +123,8 @@ export class WorksheetPermissionService extends RxDisposable {
                         break;
                     }
                 }
-            }));
+            })
+        );
     }
 
     private _initRuleSnapshot() {
@@ -143,7 +144,8 @@ export class WorksheetPermissionService extends RxDisposable {
         };
         this.disposeWithMe(
             this._resourceManagerService.registerPluginResource({
-                toJson, parseJson,
+                toJson,
+                parseJson,
                 pluginName: RULE_MODEL_PLUGIN_NAME,
                 businesses: [UniverType.UNIVER_SHEET],
                 onLoad: (unitId, resources) => {
@@ -197,7 +199,8 @@ export class WorksheetPermissionService extends RxDisposable {
         };
         this.disposeWithMe(
             this._resourceManagerService.registerPluginResource({
-                toJson, parseJson,
+                toJson,
+                parseJson,
                 pluginName: POINT_MODEL_PLUGIN_NAME,
                 businesses: [UniverType.UNIVER_SHEET],
                 onLoad: (unitId, resources) => {

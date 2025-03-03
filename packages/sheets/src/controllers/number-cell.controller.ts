@@ -21,7 +21,8 @@ import { SheetInterceptorService } from '../services/sheet-interceptor/sheet-int
 
 export class NumberCellDisplayController extends Disposable {
     constructor(
-        @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService) {
+        @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService
+    ) {
         super();
 
         this._initialize();

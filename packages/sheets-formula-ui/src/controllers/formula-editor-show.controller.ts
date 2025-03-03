@@ -18,7 +18,8 @@ import type { ICellDataForSheetInterceptor, ICommandInfo, IObjectMatrixPrimitive
 import type { IRenderContext, IRenderModule, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { ISelectionWithStyle, ISetWorksheetRowAutoHeightMutationParams } from '@univerjs/sheets';
 import {
-    ColorKit, Disposable,
+    ColorKit,
+    Disposable,
     ICommandService,
     ILogService,
     Inject,
@@ -95,60 +96,58 @@ export class FormulaEditorShowController extends Disposable implements IRenderMo
     private _initInterceptorEditorStart(): void {
         this.disposeWithMe(
             toDisposable(
-                this._sheetInterceptorService.writeCellInterceptor.intercept(BEFORE_CELL_EDIT,
-                    {
-                        handler: (value, context, next) => {
-                            const { row, col, unitId, subUnitId, worksheet } = context;
-                            const arrayFormulaMatrixRange = this._formulaDataModel.getArrayFormulaRange();
+                this._sheetInterceptorService.writeCellInterceptor.intercept(BEFORE_CELL_EDIT, {
+                    handler: (value, context, next) => {
+                        const { row, col, unitId, subUnitId, worksheet } = context;
+                        const arrayFormulaMatrixRange = this._formulaDataModel.getArrayFormulaRange();
 
-                            const arrayFormulaMatrixCell = this._formulaDataModel.getArrayFormulaCellData();
+                        const arrayFormulaMatrixCell = this._formulaDataModel.getArrayFormulaCellData();
 
-                            this._removeArrayFormulaRangeShape();
+                        this._removeArrayFormulaRangeShape();
 
-                            if (value == null) {
-                                return next(value);
-                            }
+                        if (value == null) {
+                            return next(value);
+                        }
 
-                            let cellInfo: Nullable<ICellDataForSheetInterceptor> = null;
+                        let cellInfo: Nullable<ICellDataForSheetInterceptor> = null;
 
-                            const formulaString = this._formulaDataModel.getFormulaStringByCell(row, col, subUnitId, unitId);
+                        const formulaString = this._formulaDataModel.getFormulaStringByCell(row, col, subUnitId, unitId);
 
-                            if (formulaString !== null) {
-                                cellInfo = { f: formulaString };
-                            }
+                        if (formulaString !== null) {
+                            cellInfo = { f: formulaString };
+                        }
 
                             /**
                              * If the display conditions for the array formula are not met, return the range directly.
                              */
-                            if (
-                                value.v != null &&
+                        if (
+                            value.v != null &&
                                 value.v !== '' &&
                                 arrayFormulaMatrixCell[unitId]?.[subUnitId]?.[row]?.[col] == null
-                            ) {
-                                if (cellInfo) {
-                                    return { ...value, ...cellInfo };
-                                }
-
-                                return next(value);
-                            }
-
-                            /**
-                             * Mark the array formula for special display in subsequent processing
-                             */
-                            const matrixRange = arrayFormulaMatrixRange?.[unitId]?.[subUnitId];
-                            if (matrixRange != null) {
-                                // For cells other than the upper left corner, the cellInfo information will be updated
-                                cellInfo = this._displayArrayFormulaRangeShape(matrixRange, row, col, unitId, subUnitId, worksheet, cellInfo);
-                            }
-
+                        ) {
                             if (cellInfo) {
                                 return { ...value, ...cellInfo };
                             }
 
                             return next(value);
-                        },
-                    }
-                )
+                        }
+
+                            /**
+                             * Mark the array formula for special display in subsequent processing
+                             */
+                        const matrixRange = arrayFormulaMatrixRange?.[unitId]?.[subUnitId];
+                        if (matrixRange != null) {
+                                // For cells other than the upper left corner, the cellInfo information will be updated
+                            cellInfo = this._displayArrayFormulaRangeShape(matrixRange, row, col, unitId, subUnitId, worksheet, cellInfo);
+                        }
+
+                        if (cellInfo) {
+                            return { ...value, ...cellInfo };
+                        }
+
+                        return next(value);
+                    },
+                })
             )
         );
     }

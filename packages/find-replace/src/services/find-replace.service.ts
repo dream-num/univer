@@ -237,7 +237,8 @@ export class FindReplaceModel extends Disposable {
                             this._stopSearching();
                         }
                     }
-                }));
+                })
+        );
     }
 
     override dispose(): void {

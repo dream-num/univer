@@ -17,9 +17,9 @@
 import type { IKeyValue, Nullable } from '@univerjs/core';
 
 import type { IObjectFullState } from '../basics/interfaces';
-import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '../basics/interfaces';
 import type { UniverRenderingContext } from '../context';
 import type { IShapeProps } from './shape';
+import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '../basics/interfaces';
 import { Shape } from './shape';
 
 interface IPathDataArray {

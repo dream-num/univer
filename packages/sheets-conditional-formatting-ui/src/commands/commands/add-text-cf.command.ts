@@ -15,6 +15,7 @@
  */
 
 import type { ICommand, IRange } from '@univerjs/core';
+import type { IAddConditionalRuleMutationParams, IConditionFormattingRule, ITextHighlightCell } from '@univerjs/sheets-conditional-formatting';
 import {
     CommandType,
     ICommandService,
@@ -23,7 +24,6 @@ import {
 } from '@univerjs/core';
 import { getSheetCommandTarget } from '@univerjs/sheets';
 import { AddConditionalRuleMutation, CFRuleType, CFSubRuleType, ConditionalFormattingRuleModel } from '@univerjs/sheets-conditional-formatting';
-import type { IAddConditionalRuleMutationParams, IConditionFormattingRule, ITextHighlightCell } from '@univerjs/sheets-conditional-formatting';
 
 interface IAddAverageCfParams {
     ranges: IRange[];
@@ -51,7 +51,8 @@ export const AddTextCfCommand: ICommand<IAddAverageCfParams> = {
 
         const cfId = conditionalFormattingRuleModel.createCfId(unitId, subUnitId);
         const rule: IConditionFormattingRule = {
-            ranges, cfId,
+            ranges,
+            cfId,
             stopIfTrue: !!stopIfTrue,
             rule: {
                 type: CFRuleType.highlightCell,

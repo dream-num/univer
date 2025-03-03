@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from 'vitest';
 import { BooleanNumber } from '@univerjs/core';
 import { CustomFilterOperator } from '@univerjs/sheets-filter';
+import { describe, expect, it } from 'vitest';
 
 import { FilterConditionItems } from '../conditions';
 import { ExtendCustomFilterOperator } from '../extended-operators';
@@ -97,7 +97,8 @@ describe('test "FilterConditionItems"', () => {
                     .toEqual([FilterConditionItems.TEXT_CONTAINS, { operator1: ExtendCustomFilterOperator.CONTAINS, val1: 'xxx' }]);
 
                 expect(FilterConditionItems.testMappingFilterColumn({ customFilters: { customFilters: [{ val: '*xxx' }] } }))
-                    .not.toEqual([FilterConditionItems.TEXT_CONTAINS, { operator1: ExtendCustomFilterOperator.CONTAINS, val1: 'xxx' }]);
+                    .not
+                    .toEqual([FilterConditionItems.TEXT_CONTAINS, { operator1: ExtendCustomFilterOperator.CONTAINS, val1: 'xxx' }]);
             });
 
             it('should support default params with empty string', () => {
@@ -399,8 +400,10 @@ describe('test "FilterConditionItems"', () => {
                     },
                 })).toEqual([FilterConditionItems.BETWEEN, {
                     and: true,
-                    operator1: CustomFilterOperator.GREATER_THAN_OR_EQUAL, val1: '123',
-                    operator2: CustomFilterOperator.LESS_THAN_OR_EQUAL, val2: '456',
+                    operator1: CustomFilterOperator.GREATER_THAN_OR_EQUAL,
+                    val1: '123',
+                    operator2: CustomFilterOperator.LESS_THAN_OR_EQUAL,
+                    val2: '456',
                 }]);
 
                 expect(FilterConditionItems.testMappingFilterColumn({
@@ -413,8 +416,10 @@ describe('test "FilterConditionItems"', () => {
                     },
                 })).toEqual([FilterConditionItems.BETWEEN, {
                     and: true,
-                    operator1: CustomFilterOperator.GREATER_THAN_OR_EQUAL, val1: '123',
-                    operator2: CustomFilterOperator.LESS_THAN_OR_EQUAL, val2: '456',
+                    operator1: CustomFilterOperator.GREATER_THAN_OR_EQUAL,
+                    val1: '123',
+                    operator2: CustomFilterOperator.LESS_THAN_OR_EQUAL,
+                    val2: '456',
                 }]);
 
                 expect(FilterConditionItems.testMappingFilterColumn({
@@ -426,16 +431,20 @@ describe('test "FilterConditionItems"', () => {
                     },
                 })).not.toEqual([FilterConditionItems.BETWEEN, {
                     and: true,
-                    operator1: CustomFilterOperator.GREATER_THAN_OR_EQUAL, val1: '123',
-                    operator2: CustomFilterOperator.LESS_THAN_OR_EQUAL, val2: '456',
+                    operator1: CustomFilterOperator.GREATER_THAN_OR_EQUAL,
+                    val1: '123',
+                    operator2: CustomFilterOperator.LESS_THAN_OR_EQUAL,
+                    val2: '456',
                 }]);
             });
 
             it('should support default params with empty string', () => {
                 expect(FilterConditionItems.BETWEEN.getDefaultFormParams()).toEqual({
                     and: true,
-                    operator1: CustomFilterOperator.GREATER_THAN_OR_EQUAL, val1: '',
-                    operator2: CustomFilterOperator.LESS_THAN_OR_EQUAL, val2: '',
+                    operator1: CustomFilterOperator.GREATER_THAN_OR_EQUAL,
+                    val1: '',
+                    operator2: CustomFilterOperator.LESS_THAN_OR_EQUAL,
+                    val2: '',
                 });
             });
 
@@ -472,8 +481,10 @@ describe('test "FilterConditionItems"', () => {
             it('should map to filter column with correct combination of two operators', () => {
                 expect(FilterConditionItems.BETWEEN.mapToFilterColumn({
                     and: true,
-                    operator1: CustomFilterOperator.GREATER_THAN_OR_EQUAL, val1: '123',
-                    operator2: CustomFilterOperator.LESS_THAN_OR_EQUAL, val2: '456',
+                    operator1: CustomFilterOperator.GREATER_THAN_OR_EQUAL,
+                    val1: '123',
+                    operator2: CustomFilterOperator.LESS_THAN_OR_EQUAL,
+                    val2: '456',
                 })).toEqual({
                     customFilters: {
                         and: BooleanNumber.TRUE,
@@ -496,15 +507,19 @@ describe('test "FilterConditionItems"', () => {
                         ],
                     },
                 })).toEqual([FilterConditionItems.NOT_BETWEEN, {
-                    operator1: CustomFilterOperator.LESS_THAN, val1: '123',
-                    operator2: CustomFilterOperator.GREATER_THAN, val2: '456',
+                    operator1: CustomFilterOperator.LESS_THAN,
+                    val1: '123',
+                    operator2: CustomFilterOperator.GREATER_THAN,
+                    val2: '456',
                 }]);
             });
 
             it('should support default params with empty string', () => {
                 expect(FilterConditionItems.NOT_BETWEEN.getDefaultFormParams()).toEqual({
-                    operator1: CustomFilterOperator.LESS_THAN, val1: '',
-                    operator2: CustomFilterOperator.GREATER_THAN, val2: '',
+                    operator1: CustomFilterOperator.LESS_THAN,
+                    val1: '',
+                    operator2: CustomFilterOperator.GREATER_THAN,
+                    val2: '',
                 });
             });
 
@@ -535,8 +550,10 @@ describe('test "FilterConditionItems"', () => {
 
             it('should map to filter column with correct combination of two operators', () => {
                 expect(FilterConditionItems.NOT_BETWEEN.mapToFilterColumn({
-                    operator1: CustomFilterOperator.GREATER_THAN, val1: '123',
-                    operator2: CustomFilterOperator.LESS_THAN, val2: '456',
+                    operator1: CustomFilterOperator.GREATER_THAN,
+                    val1: '123',
+                    operator2: CustomFilterOperator.LESS_THAN,
+                    val2: '456',
                 })).toEqual({
                     customFilters: {
                         customFilters: [
@@ -555,15 +572,19 @@ describe('test "FilterConditionItems"', () => {
                     { val: '123*' },
                 ] } })).toEqual([FilterConditionItems.CUSTOM, {
                     and: true,
-                    operator1: ExtendCustomFilterOperator.ENDS_WITH, val1: '123',
-                    operator2: ExtendCustomFilterOperator.STARTS_WITH, val2: '123',
+                    operator1: ExtendCustomFilterOperator.ENDS_WITH,
+                    val1: '123',
+                    operator2: ExtendCustomFilterOperator.STARTS_WITH,
+                    val2: '123',
                 }]);
             });
 
             it('should support default params with empty string', () => {
                 expect(FilterConditionItems.CUSTOM.getDefaultFormParams()).toEqual({
-                    operator1: ExtendCustomFilterOperator.NONE, val1: '',
-                    operator2: ExtendCustomFilterOperator.NONE, val2: '',
+                    operator1: ExtendCustomFilterOperator.NONE,
+                    val1: '',
+                    operator2: ExtendCustomFilterOperator.NONE,
+                    val2: '',
                 });
             });
 
@@ -574,8 +595,10 @@ describe('test "FilterConditionItems"', () => {
             it('should map to filter column with empty string', () => {
                 expect(FilterConditionItems.CUSTOM.mapToFilterColumn({
                     and: true,
-                    operator1: ExtendCustomFilterOperator.ENDS_WITH, val1: '123',
-                    operator2: CustomFilterOperator.GREATER_THAN, val2: '456',
+                    operator1: ExtendCustomFilterOperator.ENDS_WITH,
+                    val1: '123',
+                    operator2: CustomFilterOperator.GREATER_THAN,
+                    val2: '456',
                 }))
                     .toEqual({ customFilters: {
                         and: BooleanNumber.TRUE,

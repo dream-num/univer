@@ -352,7 +352,10 @@ export class HoverManagerService extends Disposable {
         if (activeCell && activeCell.location) {
             const { unitId, subUnitId, row, col } = getLocationBase(activeCell.location);
             this._currentPointerDownCell$.next({
-                unitId, subUnitId, row, col,
+                unitId,
+                subUnitId,
+                row,
+                col,
                 event,
             });
         }

@@ -30,7 +30,8 @@ import {
     IContextService,
     Inject,
     Injector,
-    RANGE_TYPE, toDisposable,
+    RANGE_TYPE,
+    toDisposable,
     Tools,
 } from '@univerjs/core';
 import { IRenderManagerService, RENDER_CLASS_TYPE, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
@@ -257,7 +258,8 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
                 if (currScrollInfo) {
                     this._updateViewportScroll(viewportScrollX, viewportScrollY);
                 }
-            })));
+            })
+        ));
     }
 
     _updateViewportScroll(viewportScrollX: number = 0, viewportScrollY: number = 0) {

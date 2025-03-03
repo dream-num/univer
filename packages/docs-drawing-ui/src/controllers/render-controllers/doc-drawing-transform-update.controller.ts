@@ -166,7 +166,11 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
 
                 if (headerPage) {
                     this._calculateDrawingPosition(
-                        unitId, headerPage, docsLeft, docsTop, updateDrawingMap,
+                        unitId,
+                        headerPage,
+                        docsLeft,
+                        docsTop,
+                        updateDrawingMap,
                         headerPage.marginTop,
                         page.marginLeft
                     );
@@ -178,7 +182,11 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
 
                 if (footerPage) {
                     this._calculateDrawingPosition(
-                        unitId, footerPage, docsLeft, docsTop, updateDrawingMap,
+                        unitId,
+                        footerPage,
+                        docsLeft,
+                        docsTop,
+                        updateDrawingMap,
                         page.pageHeight - page.marginBottom + footerPage.marginTop,
                         page.marginLeft
                     );

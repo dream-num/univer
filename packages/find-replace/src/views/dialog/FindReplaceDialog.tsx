@@ -259,10 +259,12 @@ export function FindReplaceDialog() {
     const focusRef = useRef<ISubFormRef>(null);
     const setDialogContainerFocus = useCallback(
         (focused: boolean) => contextService.setContextValue(FIND_REPLACE_DIALOG_FOCUS, focused),
-        [contextService]);
+        [contextService]
+    );
     const setDialogInputFocus = useCallback(
         (focused: boolean) => contextService.setContextValue(FIND_REPLACE_INPUT_FOCUS, focused),
-        [contextService]);
+        [contextService]
+    );
 
     useEffect(() => {
         const focusSubscription = fromEvent(document, 'focusin').subscribe((event) => {

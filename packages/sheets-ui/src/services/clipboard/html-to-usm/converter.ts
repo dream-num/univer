@@ -481,7 +481,8 @@ export class HtmlToUSMService {
             const p = documentModel?.getSnapshot();
             const singleDataStream = `${newDocBody.dataStream}\r\n`;
             const documentData = {
-                ...p, ...{
+                ...p,
+                ...{
                     body: {
                         dataStream: singleDataStream,
                         textRuns: newDocBody.textRuns,
@@ -774,7 +775,8 @@ function setMergedCellStyle(
         rowIndex: number;
         colIndex: number;
         colSetValueIndex: number;
-    }) {
+    }
+) {
     const { rowSpan, colSpan, rowIndex, colSetValueIndex } = indexParams;
 
     for (let i = rowIndex; i < rowIndex + rowSpan; i++) {

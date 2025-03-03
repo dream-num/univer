@@ -70,7 +70,8 @@ export class RangeProtectionService extends Disposable {
                         break;
                     }
                 }
-            }));
+            })
+        );
     }
 
     private _initSnapshot() {
@@ -91,7 +92,8 @@ export class RangeProtectionService extends Disposable {
         };
         this.disposeWithMe(
             this._resourceManagerService.registerPluginResource({
-                toJson, parseJson,
+                toJson,
+                parseJson,
                 pluginName: PLUGIN_NAME,
                 businesses: [UniverType.UNIVER_SHEET],
                 onLoad: (unitId, resources) => {

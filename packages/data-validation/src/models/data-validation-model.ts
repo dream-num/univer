@@ -35,7 +35,8 @@ export interface IRuleChange {
 }
 
 interface ISubUnitDataValidation {
-    map: Map<string, IDataValidationRule>; list: IDataValidationRule[];
+    map: Map<string, IDataValidationRule>;
+    list: IDataValidationRule[];
 }
 
 export class DataValidationModel extends Disposable {

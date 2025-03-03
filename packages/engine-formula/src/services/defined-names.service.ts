@@ -85,7 +85,9 @@ export class DefinedNamesService extends Disposable implements IDefinedNamesServ
     readonly update$ = this._update$.asObservable();
 
     private _currentRange: IUnitRange = {
-        unitId: '', sheetId: '', range: {
+        unitId: '',
+        sheetId: '',
+        range: {
             startRow: 0,
             endRow: 0,
             startColumn: 0,

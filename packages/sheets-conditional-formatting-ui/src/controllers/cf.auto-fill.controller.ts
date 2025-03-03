@@ -172,13 +172,17 @@ export class ConditionalFormattingAutoFillController extends Disposable {
                 const ranges = findAllRectangle(createTopMatrixFromMatrix(item));
                 if (ranges.length) {
                     const params: ISetConditionalRuleMutationParams = {
-                        unitId, subUnitId, rule: { ...rule, ranges },
+                        unitId,
+                        subUnitId,
+                        rule: { ...rule, ranges },
                     };
                     redos.push({ id: SetConditionalRuleMutation.id, params });
                     undos.push(...setConditionalRuleMutationUndoFactory(this._injector, params));
                 } else {
                     const params: IDeleteConditionalRuleMutationParams = {
-                        unitId, subUnitId, cfId: rule.cfId,
+                        unitId,
+                        subUnitId,
+                        cfId: rule.cfId,
                     };
                     redos.push({ id: DeleteConditionalRuleMutation.id, params });
                     undos.push(...DeleteConditionalRuleMutationUndoFactory(this._injector, params));

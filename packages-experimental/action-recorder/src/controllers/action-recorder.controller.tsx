@@ -16,7 +16,8 @@
 
 import { Disposable, ICommandService, Inject, Injector } from '@univerjs/core';
 import { RecordSingle } from '@univerjs/icons';
-import { AddWorksheetMergeAllCommand,
+import {
+    AddWorksheetMergeAllCommand,
     AddWorksheetMergeCommand,
     AddWorksheetMergeHorizontalCommand,
     AddWorksheetMergeVerticalCommand,
@@ -47,7 +48,10 @@ import { AddWorksheetMergeAllCommand,
     SetWorksheetActiveOperation,
 } from '@univerjs/sheets';
 import { RemoveSheetFilterCommand, SetSheetFilterRangeCommand, SetSheetsFilterCriteriaCommand } from '@univerjs/sheets-filter';
-import { AutoFillCommand, RefillCommand, SetRangeBoldCommand,
+import {
+    AutoFillCommand,
+    RefillCommand,
+    SetRangeBoldCommand,
     SetRangeFontFamilyCommand,
     SetRangeFontSizeCommand,
     SetRangeItalicCommand,

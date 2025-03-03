@@ -232,13 +232,11 @@ export class FUniver extends Disposable {
             this.Event.DocDisposed,
             () => univerInstanceService.unitDisposed$.subscribe((unit) => {
                 if (unit.type === UniverInstanceType.UNIVER_DOC) {
-                    this.fireEvent(this.Event.DocDisposed,
-                        {
-                            unitId: unit.getUnitId(),
-                            unitType: unit.type,
-                            snapshot: unit.getSnapshot() as IDocumentData,
-                        }
-                    );
+                    this.fireEvent(this.Event.DocDisposed, {
+                        unitId: unit.getUnitId(),
+                        unitType: unit.type,
+                        snapshot: unit.getSnapshot() as IDocumentData,
+                    });
                 }
             })
         );
@@ -249,14 +247,12 @@ export class FUniver extends Disposable {
                 if (unit.type === UniverInstanceType.UNIVER_DOC) {
                     const doc = unit as DocumentDataModel;
                     const docUnit = injector.createInstance(FDoc, doc);
-                    this.fireEvent(this.Event.DocCreated,
-                        {
-                            unitId: unit.getUnitId(),
-                            type: unit.type,
-                            doc: docUnit,
-                            unit: docUnit,
-                        }
-                    );
+                    this.fireEvent(this.Event.DocCreated, {
+                        unitId: unit.getUnitId(),
+                        type: unit.type,
+                        doc: docUnit,
+                        unit: docUnit,
+                    });
                 }
             })
         );

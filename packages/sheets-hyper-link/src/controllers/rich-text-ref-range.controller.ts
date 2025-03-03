@@ -139,7 +139,8 @@ export class SheetsHyperLinkRichTextRefRangeController extends Disposable {
                                 },
                                 worksheet.getUnitId(),
                                 worksheet.getSheetId()
-                            ));
+                            )
+                        );
                     }
                 }
             });

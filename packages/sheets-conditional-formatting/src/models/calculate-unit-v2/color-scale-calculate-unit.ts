@@ -52,7 +52,8 @@ export class ColorScaleCalculateUnit extends BaseCalculateUnit<IConfigItem[], st
                 value: getValueByType(config.value, matrix, {
                     ...context,
                     cfId: rule.cfId,
-                }), color: new ColorKit(config.color),
+                }),
+                color: new ColorKit(config.color),
             };
         });
         const isAllFinished = !_configList.some((item) => isObject(item.value) ? item.value.status !== FormulaResultStatus.SUCCESS : false);

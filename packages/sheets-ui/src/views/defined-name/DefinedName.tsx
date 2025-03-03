@@ -73,8 +73,7 @@ export function DefinedName({ disable }: { disable: boolean }) {
                       univer-absolute univer-right-0 univer-top-0 univer-flex univer-h-full univer-cursor-pointer
                       univer-items-center univer-justify-center univer-px-1 univer-transition-colors univer-duration-200
                       hover:univer-bg-gray-100
-                    `,
-                    {
+                    `, {
                         'univer-cursor-not-allowed univer-text-gray-300 hover:univer-bg-transparent': disable,
                     })}
                 >

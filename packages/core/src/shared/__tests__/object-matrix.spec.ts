@@ -25,7 +25,9 @@ describe('test ObjectMatrix', () => {
     });
 
     const getHasNullPrimitiveObj = () => ({
-        1: '111', 2: null, 3: '333',
+        1: '111',
+        2: null,
+        3: '333',
     });
 
     it('test deleteValue', () => {
@@ -79,7 +81,9 @@ describe('test ObjectMatrix', () => {
         const primitiveObject = getHasNullPrimitiveObj();
         moveMatrixArray(2, 1, 0, primitiveObject);
         expect(primitiveObject).toStrictEqual({
-            0: null, 2: '111', 3: '333',
+            0: null,
+            2: '111',
+            3: '333',
         });
     });
 
@@ -87,7 +91,9 @@ describe('test ObjectMatrix', () => {
         const primitiveObject = getHasNullPrimitiveObj();
         moveMatrixArray(2, 1, 4, primitiveObject);
         expect(primitiveObject).toStrictEqual({
-            1: '111', 2: '333', 3: null,
+            1: '111',
+            2: '333',
+            3: null,
         });
     });
     it('test spliceMatrix row', () => {

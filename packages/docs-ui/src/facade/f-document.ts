@@ -15,7 +15,9 @@
  */
 
 import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
-import { DOC_RANGE_TYPE, ICommandService,
+import {
+    DOC_RANGE_TYPE,
+    ICommandService,
     Inject,
     Injector,
     IResourceManagerService,

@@ -174,8 +174,10 @@ describe('test "SheetsFilterPanelService"', () => {
                 expect(filterByModel.conditionItem.operator).toBe(FilterConditionItems.BETWEEN.operator);
                 expect(filterByModel.filterConditionFormParams).toEqual({
                     and: true,
-                    operator1: CustomFilterOperator.GREATER_THAN_OR_EQUAL, val1: '',
-                    operator2: CustomFilterOperator.LESS_THAN_OR_EQUAL, val2: '',
+                    operator1: CustomFilterOperator.GREATER_THAN_OR_EQUAL,
+                    val1: '',
+                    operator2: CustomFilterOperator.LESS_THAN_OR_EQUAL,
+                    val2: '',
                 } as IFilterConditionFormParams);
 
                 filterByModel.onPrimaryConditionChange(ExtendCustomFilterOperator.ENDS_WITH);
@@ -211,8 +213,10 @@ describe('test "SheetsFilterPanelService"', () => {
                 expect(filterByModel.conditionItem.operator).toBe(FilterConditionItems.CUSTOM.operator);
                 expect(filterByModel.filterConditionFormParams).toEqual({
                     and: true,
-                    operator1: ExtendCustomFilterOperator.ENDS_WITH, val1: '',
-                    operator2: CustomFilterOperator.LESS_THAN_OR_EQUAL, val2: '',
+                    operator1: ExtendCustomFilterOperator.ENDS_WITH,
+                    val1: '',
+                    operator2: CustomFilterOperator.LESS_THAN_OR_EQUAL,
+                    val2: '',
                 } as IFilterConditionFormParams);
             });
         });

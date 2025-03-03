@@ -44,11 +44,13 @@ const TextInput = (props: { id: string; type: CFValueType | 'none'; value: numbe
         }
         if ([CFValueType.percent, CFValueType.percentile].includes(type as CFValueType)) {
             return {
-                min: 0, max: 100,
+                min: 0,
+                max: 100,
             };
         }
         return {
-            min: Number.MIN_SAFE_INTEGER, max: Number.MAX_SAFE_INTEGER,
+            min: Number.MIN_SAFE_INTEGER,
+            max: Number.MAX_SAFE_INTEGER,
         };
     }, [type]);
 
@@ -180,15 +182,7 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
         medianColor: string;
         maxColor: string;
     }) => {
-        const { minType,
-                medianType,
-                maxType,
-                minValue,
-                medianValue,
-                maxValue,
-                minColor,
-                medianColor,
-                maxColor } = option;
+        const { minType, medianType, maxType, minValue, medianValue, maxValue, minColor, medianColor, maxColor } = option;
         const list = [];
         list.push({ color: minColor, value: { type: minType, value: minValue } });
         medianType !== 'none' && list.push({ color: medianColor, value: { type: medianType, value: medianValue } });

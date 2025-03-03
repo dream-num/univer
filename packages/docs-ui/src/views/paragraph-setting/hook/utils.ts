@@ -304,7 +304,8 @@ export const useFirstParagraphLineSpacing = (paragraph: IParagraph[]) => {
                     });
                     return a;
                 }, {} as { spacingRule?: SpacingRule; lineSpacing?: number });
-            })).subscribe((v) => {
+            })
+        ).subscribe((v) => {
             return commandService.executeCommand(DocParagraphSettingCommand.id, {
                 paragraph: { ...v },
             } as IDocParagraphSettingCommandParams);

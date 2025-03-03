@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
+import type { IRange } from '@univerjs/core';
 
-import { AbsoluteRefType, type IRange } from '@univerjs/core';
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import { AbsoluteRefType } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import { serializeRangeToR1C1 } from '../../../engine/utils/r1c1-reference';
 import { addQuotesBothSides, serializeRange } from '../../../engine/utils/reference';
-import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
+import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BooleanValueObject, NumberValueObject, StringValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
@@ -116,11 +118,7 @@ export class Address extends BaseFunction {
         });
     }
 
-    private _calculateSingleCell(rowNumber: BaseValueObject,
-        columnNumber: BaseValueObject,
-        absNumber: BaseValueObject,
-        a1: BaseValueObject,
-        sheetText: BaseValueObject) {
+    private _calculateSingleCell(rowNumber: BaseValueObject, columnNumber: BaseValueObject, absNumber: BaseValueObject, a1: BaseValueObject, sheetText: BaseValueObject) {
         const row = Number.parseInt(`${Number(rowNumber.getValue()) - 1}`);
         const column = Number.parseInt(`${Number(columnNumber.getValue()) - 1}`);
         const absNumberValue = Number.parseInt(`${Number(absNumber.getValue())}`);

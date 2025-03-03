@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { cellToRange, type IRange } from '@univerjs/core';
+import type { IRange } from '@univerjs/core';
+import { cellToRange } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 
 import { generateNullCell, generateNullCellStyle, generateNullCellValue } from '../utils';
@@ -47,12 +48,7 @@ describe('Test utils', () => {
                 },
             },
             1: {
-                1: { v: null,
-                     p: null,
-                     f: null,
-                     si: null,
-                     custom: null,
-                },
+                1: { v: null, p: null, f: null, si: null, custom: null },
             },
         });
     });

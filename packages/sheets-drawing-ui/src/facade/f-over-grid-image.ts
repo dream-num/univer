@@ -40,7 +40,10 @@ function convertSheetImageToFOverGridImage(sheetImage: ISheetImage, sheetSkeleto
     const { column: fromColumn, columnOffset: fromColumnOffset, row: fromRow, rowOffset: fromRowOffset } = from;
 
     const absolutePosition = convertPositionSheetOverGridToAbsolute(
-        sheetImage.unitId, sheetImage.subUnitId, { from, to }, sheetSkeletonManagerService
+        sheetImage.unitId,
+        sheetImage.subUnitId,
+        { from, to },
+        sheetSkeletonManagerService
     );
 
     const { width, height } = absolutePosition;
@@ -72,7 +75,13 @@ function convertFOverGridImageToSheetImage(fOverGridImage: IFOverGridImage, sele
     const { column: fromColumn, columnOffset: fromColumnOffset, row: fromRow, rowOffset: fromRowOffset, flipY = false, flipX = false, angle = 0, skewX = 0, skewY = 0, width, height } = fOverGridImage;
 
     const absolutePosition = convertPositionCellToSheetOverGrid(
-        fOverGridImage.unitId, fOverGridImage.subUnitId, { column: fromColumn, columnOffset: fromColumnOffset, row: fromRow, rowOffset: fromRowOffset }, width, height, selectionRenderService, sheetSkeletonManagerService
+        fOverGridImage.unitId,
+        fOverGridImage.subUnitId,
+        { column: fromColumn, columnOffset: fromColumnOffset, row: fromRow, rowOffset: fromRowOffset },
+        width,
+        height,
+        selectionRenderService,
+        sheetSkeletonManagerService
     );
 
     const { sheetTransform, transform } = absolutePosition;

@@ -17,7 +17,10 @@
 /* eslint-disable max-lines-per-function */
 
 import type {
-    ICommandInfo, IMutationInfo, IRange, Workbook,
+    ICommandInfo,
+    IMutationInfo,
+    IRange,
+    Workbook,
 } from '@univerjs/core';
 import type {
     IAddWorksheetMergeMutationParams,

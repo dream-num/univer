@@ -197,7 +197,8 @@ export default {
             {
                 title: '教導',
                 url: 'https://support.microsoft.com/zh-tw/office/is-%E5%87%BD%E6%95%B0-0f2d7971-6019-40a0-a171-f2d869135665',
-            }],
+            },
+        ],
         functionParameter: {
             value: { name: '值', detail: '指的是要測試的值。參數值可以是空白（空白儲存格）、錯誤值、邏輯值、文字、數字、參考值，或引用要測試的以上任意值的名稱。' },
         },

@@ -17,7 +17,8 @@
 import type { Nullable, Workbook } from '@univerjs/core';
 import type { IAutoFilter } from '../models/types';
 import {
-    CommandType, Disposable,
+    CommandType,
+    Disposable,
     fromCallback,
     ICommandService,
     IResourceManagerService,
@@ -145,7 +146,8 @@ export class SheetsFilterService extends Disposable {
                 // source2: activate sheet changes
                 this._univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET)
                     .pipe(switchMap((workbook) => workbook?.activeSheet$ ?? of(null)))
-            ).subscribe(() => this._updateActiveFilterModel()));
+            ).subscribe(() => this._updateActiveFilterModel())
+        );
     }
 
     private _serializeAutoFiltersForUnit(unitId: string): string {

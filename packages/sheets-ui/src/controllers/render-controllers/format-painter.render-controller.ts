@@ -78,6 +78,7 @@ export class FormatPainterRenderController extends Disposable implements IRender
                 } else {
                     scene.setDefaultCursor(CURSOR_TYPE.DEFAULT);
                 }
-            })));
+            }))
+        );
     }
 }

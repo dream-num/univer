@@ -90,6 +90,7 @@ exports.baseRules = {
             ],
         },
     ],
+    'antfu/consistent-list-newline': 'error',
 
     // IMPORTANT: To ensure compatibility, some features of React 19 will be disabled.
     'react/no-forward-ref': 'off',
@@ -126,7 +127,6 @@ exports.baseRules = {
     'ts/ban-ts-comment': 'off',
     'ts/no-duplicate-enum-values': 'off',
     'no-cond-assign': 'warn',
-    'antfu/consistent-list-newline': 'off',
     'ts/no-use-before-define': 'warn',
     'intunicorn/number-literal-case': 'off',
     'test/no-identical-title': 'warn',

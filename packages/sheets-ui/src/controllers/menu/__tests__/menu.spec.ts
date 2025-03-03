@@ -19,7 +19,8 @@ import {
     DisposableCollection,
     ICommandService,
     Injector,
-    RANGE_TYPE } from '@univerjs/core';
+    RANGE_TYPE,
+} from '@univerjs/core';
 import {
     SetBoldCommand,
     SetRangeValuesMutation,

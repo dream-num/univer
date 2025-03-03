@@ -15,14 +15,15 @@
  */
 
 import type { IObjectArrayPrimitiveType, IRowData, Nullable } from '@univerjs/core';
+import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { BooleanNumber } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
-import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
-import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
-import { BaseFunction } from '../../base-function';
 import { createNewArray } from '../../../engine/utils/array-object';
+import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
-import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
+import { BaseFunction } from '../../base-function';
 
 enum FunctionNum {
     AVERAGE = 1,
@@ -407,8 +408,7 @@ export class Subtotal extends BaseFunction {
         return createNewArray(flattenValues, 1, flattenValues[0].length);
     }
 
-    private _isRowHidden(rowData: IObjectArrayPrimitiveType<Partial<IRowData>>, rowIndex: number
-    ) {
+    private _isRowHidden(rowData: IObjectArrayPrimitiveType<Partial<IRowData>>, rowIndex: number) {
         const row = rowData[rowIndex];
         if (!row) {
             return false;

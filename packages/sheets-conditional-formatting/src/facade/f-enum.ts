@@ -24,20 +24,20 @@ export interface IFSheetsConditionalFormattingEnum {
     /**
      * Conditional formatting number operator
      */
-    CFNumberOperator: typeof CFNumberOperator;
+    ConditionFormatNumberOperatorEnum: typeof CFNumberOperator;
 
     /**
      * Conditional formatting time period operator
      */
-    CFTimePeriodOperator: typeof CFTimePeriodOperator;
+    ConditionFormatTimePeriodOperatorEnum: typeof CFTimePeriodOperator;
 }
 
 export class FSheetsConditionalFormattingEnum implements IFSheetsConditionalFormattingEnum {
-    get CFNumberOperator(): typeof CFNumberOperator {
+    get ConditionFormatNumberOperatorEnum(): typeof CFNumberOperator {
         return CFNumberOperator;
     }
 
-    get CFTimePeriodOperator(): typeof CFTimePeriodOperator {
+    get ConditionFormatTimePeriodOperatorEnum(): typeof CFTimePeriodOperator {
         return CFTimePeriodOperator;
     }
 }

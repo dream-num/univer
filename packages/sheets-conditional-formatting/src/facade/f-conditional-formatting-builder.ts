@@ -206,7 +206,7 @@ class ConditionalFormatRuleBaseBuilder {
      * fWorksheet.addConditionalFormattingRule(rule);
      * ```
      */
-    setRanges(ranges: IRange[]): ConditionalFormatRuleBaseBuilder {
+    setRanges(ranges: IRange[]) {
         this._rule.ranges = ranges;
         return this;
     }
@@ -265,7 +265,7 @@ class ConditionalFormatHighlightRuleBuilder extends ConditionalFormatRuleBaseBui
      * // Create a conditional formatting rule that highlights cells with greater than average values in red for the range A1:D10.
      * const fRange = fWorksheet.getRange('A1:D10');
      * const rule = fWorksheet.newConditionalFormattingRule()
-     *   .setAverage(univerAPI.Enum.CFNumberOperator.greaterThan)
+     *   .setAverage(univerAPI.Enum.ConditionFormatNumberOperatorEnum.greaterThan)
      *   .setBackground('#FF0000')
      *   .setRanges([fRange.getRange()])
      *   .build();
@@ -601,7 +601,7 @@ class ConditionalFormatHighlightRuleBuilder extends ConditionalFormatRuleBaseBui
      * // Create a conditional formatting rule that highlights cells with dates in the last 7 days in red for the range A1:D10.
      * const fRange = fWorksheet.getRange('A1:D10');
      * const rule = fWorksheet.newConditionalFormattingRule()
-     *   .whenDate(univerAPI.Enum.CFTimePeriodOperator.last7Days)
+     *   .whenDate(univerAPI.Enum.ConditionFormatTimePeriodOperatorEnum.last7Days)
      *   .setBackground('#FF0000')
      *   .setRanges([fRange.getRange()])
      *   .build();
@@ -1199,9 +1199,9 @@ class ConditionalFormatIconSetRuleBuilder extends ConditionalFormatRuleBaseBuild
      * const builder = fWorksheet.newConditionalFormattingRule()
      *   .setIconSet({
      *     iconConfigs: [
-     *       { iconType: '3Arrows', iconId: '0', operator: univerAPI.Enum.CFNumberOperator.greaterThan, value: { type: 'num', value: 20 } },
-     *       { iconType: '3Arrows', iconId: '1', operator: univerAPI.Enum.CFNumberOperator.greaterThan, value: { type: 'num', value: 10 } },
-     *       { iconType: '3Arrows', iconId: '2', operator: univerAPI.Enum.CFNumberOperator.lessThanOrEqual, value: { type: 'num', value: 10 } }
+     *       { iconType: '3Arrows', iconId: '0', operator: univerAPI.Enum.ConditionFormatNumberOperatorEnum.greaterThan, value: { type: 'num', value: 20 } },
+     *       { iconType: '3Arrows', iconId: '1', operator: univerAPI.Enum.ConditionFormatNumberOperatorEnum.greaterThan, value: { type: 'num', value: 10 } },
+     *       { iconType: '3Arrows', iconId: '2', operator: univerAPI.Enum.ConditionFormatNumberOperatorEnum.lessThanOrEqual, value: { type: 'num', value: 10 } }
      *     ],
      *     isShowValue: true,
      *   })
@@ -1243,9 +1243,9 @@ class ConditionalFormatIconSetRuleBuilder extends ConditionalFormatRuleBaseBuild
      * console.log(builder.getIconMap()); // icons key-value map
      * const rule = builder.setIconSet({
      *     iconConfigs: [
-     *       { iconType: '3Arrows', iconId: '0', operator: univerAPI.Enum.CFNumberOperator.greaterThan, value: { type: 'num', value: 20 } },
-     *       { iconType: '3Arrows', iconId: '1', operator: univerAPI.Enum.CFNumberOperator.greaterThan, value: { type: 'num', value: 10 } },
-     *       { iconType: '3Arrows', iconId: '2', operator: univerAPI.Enum.CFNumberOperator.lessThanOrEqual, value: { type: 'num', value: 10 } }
+     *       { iconType: '3Arrows', iconId: '0', operator: univerAPI.Enum.ConditionFormatNumberOperatorEnum.greaterThan, value: { type: 'num', value: 20 } },
+     *       { iconType: '3Arrows', iconId: '1', operator: univerAPI.Enum.ConditionFormatNumberOperatorEnum.greaterThan, value: { type: 'num', value: 10 } },
+     *       { iconType: '3Arrows', iconId: '2', operator: univerAPI.Enum.ConditionFormatNumberOperatorEnum.lessThanOrEqual, value: { type: 'num', value: 10 } }
      *     ],
      *     isShowValue: true,
      *   })
@@ -1305,7 +1305,7 @@ export class FConditionalFormattingBuilder {
      * // Create a conditional formatting rule that highlights cells with greater than average values in red for the range A1:D10.
      * const fRange = fWorksheet.getRange('A1:D10');
      * const rule = fWorksheet.newConditionalFormattingRule()
-     *   .setAverage(univerAPI.Enum.CFNumberOperator.greaterThan)
+     *   .setAverage(univerAPI.Enum.ConditionFormatNumberOperatorEnum.greaterThan)
      *   .setBackground('#FF0000')
      *   .setRanges([fRange.getRange()])
      *   .build();
@@ -1420,9 +1420,9 @@ export class FConditionalFormattingBuilder {
      * console.log(builder.getIconMap()); // icons key-value map
      * const rule = builder.setIconSet({
      *     iconConfigs: [
-     *       { iconType: '3Arrows', iconId: '0', operator: univerAPI.Enum.CFNumberOperator.greaterThan, value: { type: 'num', value: 20 } },
-     *       { iconType: '3Arrows', iconId: '1', operator: univerAPI.Enum.CFNumberOperator.greaterThan, value: { type: 'num', value: 10 } },
-     *       { iconType: '3Arrows', iconId: '2', operator: univerAPI.Enum.CFNumberOperator.lessThanOrEqual, value: { type: 'num', value: 10 } }
+     *       { iconType: '3Arrows', iconId: '0', operator: univerAPI.Enum.ConditionFormatNumberOperatorEnum.greaterThan, value: { type: 'num', value: 20 } },
+     *       { iconType: '3Arrows', iconId: '1', operator: univerAPI.Enum.ConditionFormatNumberOperatorEnum.greaterThan, value: { type: 'num', value: 10 } },
+     *       { iconType: '3Arrows', iconId: '2', operator: univerAPI.Enum.ConditionFormatNumberOperatorEnum.lessThanOrEqual, value: { type: 'num', value: 10 } }
      *     ],
      *     isShowValue: true,
      *   })
@@ -1708,7 +1708,7 @@ export class FConditionalFormattingBuilder {
      * // Create a conditional formatting rule that highlights cells with dates in the last 7 days in red for the range A1:D10.
      * const fRange = fWorksheet.getRange('A1:D10');
      * const rule = fWorksheet.newConditionalFormattingRule()
-     *   .whenDate(univerAPI.Enum.CFTimePeriodOperator.last7Days)
+     *   .whenDate(univerAPI.Enum.ConditionFormatTimePeriodOperatorEnum.last7Days)
      *   .setBackground('#FF0000')
      *   .setRanges([fRange.getRange()])
      *   .build();

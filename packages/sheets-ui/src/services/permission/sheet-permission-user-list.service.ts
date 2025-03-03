@@ -19,6 +19,9 @@ import { BehaviorSubject } from 'rxjs';
 
 export class SheetPermissionUserManagerService {
     private _userList: ICollaborator[] = [];
+    private _userList$ = new BehaviorSubject<ICollaborator[]>(this._userList);
+    userList$ = this._userList$.asObservable();
+
     private _oldCollaboratorList: ICollaborator[] = [];
 
     private _selectUserList: ICollaborator[] = [];
@@ -32,6 +35,7 @@ export class SheetPermissionUserManagerService {
     // Set all editable users of this unit
     setCanEditUserList(userList: ICollaborator[]) {
         this._userList = userList;
+        this._userList$.next(userList);
     }
 
     reset() {

@@ -23,7 +23,7 @@ export interface IShowRangeSelectorDialogOptions {
     initialValue?: IUnitRangeName[];
     maxRangeCount?: number;
     supportAcrossSheet?: boolean;
-    callback: (ranges: IUnitRangeName[], isCancel: boolean) => void;
+    callback: (ranges: IUnitRangeName[]) => void;
 }
 
 export class GlobalRangeSelectorService {
@@ -34,9 +34,9 @@ export class GlobalRangeSelectorService {
     showRangeSelectorDialog(opts: IShowRangeSelectorDialogOptions) {
         const callback = opts.callback;
         const promise = new Promise<IUnitRangeName[]>((resolve) => {
-            opts.callback = (ranges, isCancel) => {
+            opts.callback = (ranges) => {
                 resolve(ranges);
-                callback(ranges, isCancel);
+                callback(ranges);
             };
         });
 

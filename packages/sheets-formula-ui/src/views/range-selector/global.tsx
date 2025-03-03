@@ -15,6 +15,7 @@
  */
 
 import type { IRangeSelectorInstance } from './index';
+import { deserializeRangeWithSheet } from '@univerjs/engine-formula';
 import { useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useRef } from 'react';
 import { GlobalRangeSelectorService } from '../../services/range-selector.service';
@@ -34,12 +35,19 @@ export const GlobalRangeSelector = () => {
             };
         }
     }, [current]);
+
     return (
         <RangeSelector
             unitId={current?.unitId ?? ''}
             subUnitId={current?.subUnitId ?? ''}
             hideEditor
             selectorRef={instance}
+            onRangeSelectorDialogVisibleChange={(visible) => {
+                if (!visible) {
+                    const value = instance.current?.getValue();
+                    current?.callback(value?.split(',').map((i) => deserializeRangeWithSheet(i)) ?? []);
+                }
+            }}
         />
     );
 };

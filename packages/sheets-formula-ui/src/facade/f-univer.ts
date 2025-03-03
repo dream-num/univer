@@ -31,7 +31,7 @@ export interface ISheetsFormulaUIMixin {
      * const fWorksheet = fWorkbook.getActiveSheet();
      * const unitId = fWorkbook.getId();
      *
-     * univerAPI.showRangeSelectorDialog({
+     * await univerAPI.showRangeSelectorDialog({
      *   unitId,
      *   subUnitId: fWorksheet.getSheetId(),
      *   initialValue: [{

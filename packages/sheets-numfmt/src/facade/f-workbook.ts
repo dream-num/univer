@@ -33,11 +33,11 @@ export interface IFWorkbookNumfmtMixin {
      *
      * // Set the locale en_US for number formatting.
      * fWorkbook.setNumfmtLocal('en_US');
-     * console.log(fRange.getValue()); // 1,234.57
+     * console.log(fRange.getDisplayValue()); // 1,234.57
      *
      * // Set the locale de_DE for number formatting.
      * fWorkbook.setNumfmtLocal('de_DE');
-     * console.log(fRange.getValue()); // 1.234,57
+     * console.log(fRange.getDisplayValue()); // 1.234,57
      * ```
      */
     setNumfmtLocal(local: INumfmtLocalTag): FWorkbook;

@@ -57,20 +57,6 @@ export interface IFWorksheetConditionalFormattingMixin {
      * Creates a constructor for conditional formatting
      * @returns {FConditionalFormattingBuilder} The conditional formatting builder
      * @memberof IFWorksheetConditionalFormattingMixin
-     * @example
-     * ```ts
-     * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
-     * const fRange = fWorksheet.getRange('A1:T100');
-     * const rule = fWorksheet.createConditionalFormattingRule()
-     *   .whenCellNotEmpty()
-     *   .setRanges([fRange.getRange()])
-     *   .setItalic(true)
-     *   .setBackground('red')
-     *   .setFontColor('green')
-     *   .build();
-     * fWorksheet.addConditionalFormattingRule(rule);
-     * ```
      */
     createConditionalFormattingRule(): FConditionalFormattingBuilder;
 
@@ -82,6 +68,8 @@ export interface IFWorksheetConditionalFormattingMixin {
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // Create a conditional formatting rule that bolds the text for cells with not empty content in the range A1:T100.
      * const fRange = fWorksheet.getRange('A1:T100');
      * const rule = fWorksheet.newConditionalFormattingRule()
      *   .whenCellNotEmpty()
@@ -104,6 +92,8 @@ export interface IFWorksheetConditionalFormattingMixin {
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // Create a conditional formatting rule that bolds the text for cells with not empty content in the range A1:T100.
      * const fRange = fWorksheet.getRange('A1:T100');
      * const rule = fWorksheet.newConditionalFormattingRule()
      *   .whenCellNotEmpty()

@@ -41,12 +41,14 @@ import { FConditionalFormattingBuilder } from './f-conditional-formatting-builde
  */
 export interface IFRangeConditionalFormattingMixin {
     /**
-     * Gets all the conditional formatting for the current range
-     * @returns {IConditionFormattingRule[]} conditional formatting rules for the current range
+     * Gets all the conditional formatting for the current range.
+     * @returns {IConditionFormattingRule[]} conditional formatting rules for the current range.
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // Create a conditional formatting rule that bolds the text for cells with not empty content in the range A1:T100.
      * const fRange = fWorksheet.getRange('A1:T100');
      * const rule = fWorksheet.newConditionalFormattingRule()
      *   .whenCellNotEmpty()
@@ -57,6 +59,7 @@ export interface IFRangeConditionalFormattingMixin {
      *   .build();
      * fWorksheet.addConditionalFormattingRule(rule);
      *
+     * // Get all the conditional formatting rules for the range F6:H8.
      * const targetRange = fWorksheet.getRange('F6:H8');
      * const rules = targetRange.getConditionalFormattingRules();
      * console.log(rules);
@@ -71,6 +74,8 @@ export interface IFRangeConditionalFormattingMixin {
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // Create a conditional formatting rule that bolds the text for cells with not empty content in the range A1:T100.
      * const fRange = fWorksheet.getRange('A1:T100');
      * const rule = fRange.createConditionalFormattingRule()
      *   .whenCellNotEmpty()

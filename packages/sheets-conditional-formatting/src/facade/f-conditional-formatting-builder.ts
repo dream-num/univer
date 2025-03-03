@@ -173,9 +173,9 @@ class ConditionalFormatRuleBaseBuilder {
 
     /**
      * Get the icon set mapping dictionary.
-     * @returns {Record<string, string>} The icon set mapping dictionary.
+     * @returns {Record<string, string[]>} The icon set mapping dictionary.
      */
-    getIconMap() {
+    getIconMap(): Record<string, string[]> {
         return iconMap;
     }
 
@@ -1097,7 +1097,7 @@ class ConditionalFormatDataBarRuleBuilder extends ConditionalFormatRuleBaseBuild
         positiveColor: string;
         nativeColor: string;
         isShowValue?: boolean;
-    }) {
+    }): ConditionalFormatDataBarRuleBuilder {
         const ruleConfig = this._ruleConfig as IDataBar;
         ruleConfig.type = CFRuleType.dataBar;
         ruleConfig.isShowValue = !!config.isShowValue;
@@ -1113,6 +1113,33 @@ class ConditionalFormatDataBarRuleBuilder extends ConditionalFormatRuleBaseBuild
 }
 
 class ConditionalFormatColorScaleRuleBuilder extends ConditionalFormatRuleBaseBuilder {
+    /**
+     * Deep clone a current builder.
+     * @returns {ConditionalFormatColorScaleRuleBuilder} A new instance of the builder with the same settings as the original.
+     * @example
+     * ```typescript
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // Create a conditional formatting rule that adds a color scale to cells with values between 0 and 100 in the range A1:D10.
+     * // The color scale is green for 0, yellow for 50, and red for 100.
+     * const fRange = fWorksheet.getRange('A1:D10');
+     * const builder = fWorksheet.newConditionalFormattingRule()
+     *   .setColorScale([
+     *     { index: 0, color: '#00FF00', value: { type: 'num', value: 0 } },
+     *     { index: 1, color: '#FFFF00', value: { type: 'num', value: 50 } },
+     *     { index: 2, color: '#FF0000', value: { type: 'num', value: 100 } }
+     *   ])
+     *   .setRanges([fRange.getRange()]);
+     * fWorksheet.addConditionalFormattingRule(builder.build());
+     *
+     * // Copy the rule and apply it to a new range.
+     * const newRange = fWorksheet.getRange('F1:F10');
+     * const newBuilder = builder.copy()
+     *   .setRanges([newRange.getRange()]);
+     * fWorksheet.addConditionalFormattingRule(newBuilder.build());
+     * ```
+     */
     override copy(): ConditionalFormatColorScaleRuleBuilder {
         const newRule = Tools.deepClone(this._rule);
         if (newRule.cfId) {
@@ -1122,11 +1149,32 @@ class ConditionalFormatColorScaleRuleBuilder extends ConditionalFormatRuleBaseBu
     }
 
     /**
-     * Color scale set
-     * @param {{ index: number; color: string; value: IValueConfig }[]} config
-     * @memberof ConditionalFormatRuleBuilder
+     * Set color scale rule.
+     * @param {{ index: number; color: string; value: IValueConfig }[]} config - The color scale rule settings.
+     * @param {number} config.index - The index of the color scale configuration.
+     * @param {string} config.color - The color corresponding to the index of the color scale configuration.
+     * @param {IValueConfig} config.value - The condition value corresponding to the index of the color scale configuration.
+     * @returns {ConditionalFormatColorScaleRuleBuilder} This builder for chaining.
+     * @example
+     * ```typescript
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // Create a conditional formatting rule that adds a color scale to cells with values between 0 and 100 in the range A1:D10.
+     * // The color scale is green for 0, yellow for 50, and red for 100.
+     * const fRange = fWorksheet.getRange('A1:D10');
+     * const rule = fWorksheet.newConditionalFormattingRule()
+     *   .setColorScale([
+     *     { index: 0, color: '#00FF00', value: { type: 'num', value: 0 } },
+     *     { index: 1, color: '#FFFF00', value: { type: 'num', value: 50 } },
+     *     { index: 2, color: '#FF0000', value: { type: 'num', value: 100 } }
+     *   ])
+     *   .setRanges([fRange.getRange()])
+     *   .build();
+     * fWorksheet.addConditionalFormattingRule(rule);
+     * ```
      */
-    setColorScale(config: IColorScale['config']) {
+    setColorScale(config: IColorScale['config']): ConditionalFormatColorScaleRuleBuilder {
         const ruleConfig = this._ruleConfig as IColorScale;
         ruleConfig.type = CFRuleType.colorScale;
         ruleConfig.config = config;
@@ -1135,6 +1183,38 @@ class ConditionalFormatColorScaleRuleBuilder extends ConditionalFormatRuleBaseBu
 }
 
 class ConditionalFormatIconSetRuleBuilder extends ConditionalFormatRuleBaseBuilder {
+    /**
+     * Deep clone a current builder.
+     * @returns {ConditionalFormatIconSetRuleBuilder} A new instance of the builder with the same settings as the original.
+     * @example
+     * ```typescript
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // Create a 3-arrow icon set conditional formatting rule in the range A1:D10.
+     * // The first arrow is green for values greater than 20.
+     * // The second arrow is yellow for values greater than 10.
+     * // The third arrow is red for values less than or equal to 10.
+     * const fRange = fWorksheet.getRange('A1:D10');
+     * const builder = fWorksheet.newConditionalFormattingRule()
+     *   .setIconSet({
+     *     iconConfigs: [
+     *       { iconType: '3Arrows', iconId: '0', operator: univerAPI.Enum.CFNumberOperator.greaterThan, value: { type: 'num', value: 20 } },
+     *       { iconType: '3Arrows', iconId: '1', operator: univerAPI.Enum.CFNumberOperator.greaterThan, value: { type: 'num', value: 10 } },
+     *       { iconType: '3Arrows', iconId: '2', operator: univerAPI.Enum.CFNumberOperator.lessThanOrEqual, value: { type: 'num', value: 10 } }
+     *     ],
+     *     isShowValue: true,
+     *   })
+     *   .setRanges([fRange.getRange()]);
+     * fWorksheet.addConditionalFormattingRule(builder.build());
+     *
+     * // Copy the rule and apply it to a new range.
+     * const newRange = fWorksheet.getRange('F1:F10');
+     * const newBuilder = builder.copy()
+     *   .setRanges([newRange.getRange()]);
+     * fWorksheet.addConditionalFormattingRule(newBuilder.build());
+     * ```
+     */
     override copy(): ConditionalFormatIconSetRuleBuilder {
         const newRule = Tools.deepClone(this._rule);
         if (newRule.cfId) {
@@ -1144,14 +1224,37 @@ class ConditionalFormatIconSetRuleBuilder extends ConditionalFormatRuleBaseBuild
     }
 
     /**
+     * Set up icon set conditional formatting rule.
+     * @param {{ iconConfigs: IIconSet['config'], isShowValue: boolean }} config - The icon set conditional formatting rule settings.
+     * @param {IIconSet['config']} config.iconConfigs - The icon configurations. iconId property is a string indexing of a group icons.
+     * @param {boolean} config.isShowValue - Whether to show the value in the cell.
+     * @returns {ConditionalFormatIconSetRuleBuilder} This builder for chaining.
+     * @example
+     * ```typescript
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
      *
-     * Icon Set
-     * @param {{ iconConfigs: IIconSet['config'], isShowValue: boolean }} config
-     * @param config.iconConfigs
-     * @param config.isShowValue
-     * @memberof ConditionalFormatRuleBuilder
+     * // Create a 3-arrow icon set conditional formatting rule in the range A1:D10.
+     * // The first arrow is green for values greater than 20.
+     * // The second arrow is yellow for values greater than 10.
+     * // The third arrow is red for values less than or equal to 10.
+     * const fRange = fWorksheet.getRange('A1:D10');
+     * const builder = fWorksheet.newConditionalFormattingRule();
+     * console.log(builder.getIconMap()); // icons key-value map
+     * const rule = builder.setIconSet({
+     *     iconConfigs: [
+     *       { iconType: '3Arrows', iconId: '0', operator: univerAPI.Enum.CFNumberOperator.greaterThan, value: { type: 'num', value: 20 } },
+     *       { iconType: '3Arrows', iconId: '1', operator: univerAPI.Enum.CFNumberOperator.greaterThan, value: { type: 'num', value: 10 } },
+     *       { iconType: '3Arrows', iconId: '2', operator: univerAPI.Enum.CFNumberOperator.lessThanOrEqual, value: { type: 'num', value: 10 } }
+     *     ],
+     *     isShowValue: true,
+     *   })
+     *   .setRanges([fRange.getRange()])
+     *   .build();
+     * fWorksheet.addConditionalFormattingRule(rule);
+     * ```
      */
-    setIconSet(config: { iconConfigs: IIconSet['config']; isShowValue: boolean }) {
+    setIconSet(config: { iconConfigs: IIconSet['config']; isShowValue: boolean }): ConditionalFormatIconSetRuleBuilder {
         const ruleConfig = this._ruleConfig as IIconSet;
         ruleConfig.type = CFRuleType.iconSet;
         ruleConfig.config = config.iconConfigs;
@@ -1175,8 +1278,15 @@ export class FConditionalFormattingBuilder {
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getActiveSheet();
-     * const rule = fWorksheet.newConditionalFormattingRule().build();
-     * fWorksheet.setConditionalFormattingRules([rule]);
+     *
+     * // Create a conditional formatting rule that highlights cells with values greater than 10 in red for the range A1:D10.
+     * const fRange = fWorksheet.getRange('A1:D10');
+     * const rule = fWorksheet.newConditionalFormattingRule()
+     *   .whenNumberGreaterThan(10)
+     *   .setBackground('#FF0000')
+     *   .setRanges([fRange.getRange()])
+     *   .build();
+     * fWorksheet.addConditionalFormattingRule(rule);
      * ```
      */
     build(): IConditionFormattingRule {
@@ -1277,23 +1387,81 @@ export class FConditionalFormattingBuilder {
     }
 
     /**
-     *
-     * Set iconSet rule
-     * @param {{ iconConfigs: IIconSet['config'], isShowValue: boolean }} config
-     * @param config.iconConfigs
-     * @param config.isShowValue
-     * @memberof ConditionalFormatRuleBuilder
+     * Get the icon set mapping dictionary.
+     * @returns {Record<string, string[]>} The icon set mapping dictionary.
+     * @example
+     * ```typescript
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * console.log(fWorksheet.newConditionalFormattingRule().getIconMap()); // icons key-value map
+     * ```
      */
-    setIconSet(config: { iconConfigs: IIconSet['config']; isShowValue: boolean }) {
+    getIconMap(): Record<string, string[]> {
+        return iconMap;
+    }
+
+    /**
+     * Set up icon set conditional formatting rule.
+     * @param {{ iconConfigs: IIconSet['config'], isShowValue: boolean }} config - The icon set conditional formatting rule settings.
+     * @param {IIconSet['config']} config.iconConfigs - The icon configurations. iconId property is a string indexing of a group icons.
+     * @param {boolean} config.isShowValue - Whether to show the value in the cell.
+     * @returns {ConditionalFormatIconSetRuleBuilder} The conditional format icon set rule builder.
+     * @example
+     * ```typescript
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // Create a 3-arrow icon set conditional formatting rule in the range A1:D10.
+     * // The first arrow is green for values greater than 20.
+     * // The second arrow is yellow for values greater than 10.
+     * // The third arrow is red for values less than or equal to 10.
+     * const fRange = fWorksheet.getRange('A1:D10');
+     * const builder = fWorksheet.newConditionalFormattingRule();
+     * console.log(builder.getIconMap()); // icons key-value map
+     * const rule = builder.setIconSet({
+     *     iconConfigs: [
+     *       { iconType: '3Arrows', iconId: '0', operator: univerAPI.Enum.CFNumberOperator.greaterThan, value: { type: 'num', value: 20 } },
+     *       { iconType: '3Arrows', iconId: '1', operator: univerAPI.Enum.CFNumberOperator.greaterThan, value: { type: 'num', value: 10 } },
+     *       { iconType: '3Arrows', iconId: '2', operator: univerAPI.Enum.CFNumberOperator.lessThanOrEqual, value: { type: 'num', value: 10 } }
+     *     ],
+     *     isShowValue: true,
+     *   })
+     *   .setRanges([fRange.getRange()])
+     *   .build();
+     * fWorksheet.addConditionalFormattingRule(rule);
+     * ```
+     */
+    setIconSet(config: { iconConfigs: IIconSet['config']; isShowValue: boolean }): ConditionalFormatIconSetRuleBuilder {
         return new ConditionalFormatIconSetRuleBuilder(this._initConfig).setIconSet(config);
     }
 
     /**
-     * Set colorScale rule
-     * @param {{ index: number; color: string; value: IValueConfig }[]} config
-     * @memberof ConditionalFormatRuleBuilder
+     * Set color scale rule.
+     * @param {{ index: number; color: string; value: IValueConfig }[]} config - The color scale rule settings.
+     * @param {number} config.index - The index of the color scale.
+     * @param {string} config.color - The color for the color scale.
+     * @param {IValueConfig} config.value - The value for the color scale.
+     * @returns {ConditionalFormatColorScaleRuleBuilder} The conditional format color scale rule builder.
+     * @example
+     * ```typescript
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // Create a conditional formatting rule that adds a color scale to cells with values between 0 and 100 in the range A1:D10.
+     * // The color scale is green for 0, yellow for 50, and red for 100.
+     * const fRange = fWorksheet.getRange('A1:D10');
+     * const rule = fWorksheet.newConditionalFormattingRule()
+     *   .setColorScale([
+     *     { index: 0, color: '#00FF00', value: { type: 'num', value: 0 } },
+     *     { index: 1, color: '#FFFF00', value: { type: 'num', value: 50 } },
+     *     { index: 2, color: '#FF0000', value: { type: 'num', value: 100 } }
+     *   ])
+     *   .setRanges([fRange.getRange()])
+     *   .build();
+     * fWorksheet.addConditionalFormattingRule(rule);
+     * ```
      */
-    setColorScale(config: IColorScale['config']) {
+    setColorScale(config: IColorScale['config']): ConditionalFormatColorScaleRuleBuilder {
         return new ConditionalFormatColorScaleRuleBuilder(this._initConfig).setColorScale(config);
     }
 

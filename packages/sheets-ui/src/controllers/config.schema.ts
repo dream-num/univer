@@ -21,7 +21,6 @@ export const SHEETS_UI_PLUGIN_CONFIG_KEY = 'sheets-ui.config';
 
 export const configSymbol = Symbol(SHEETS_UI_PLUGIN_CONFIG_KEY);
 
-export const HIDE_STATUS_BAR_STATISTIC = Symbol('HIDE_STATUS_BAR_STATISTIC');
 export interface IUniverSheetsUIConfig {
     menu?: MenuConfig;
     disableAutoFocus?: true;
@@ -38,14 +37,16 @@ export interface IUniverSheetsUIConfig {
      */
     formulaBar?: boolean;
 
+    statusBarStatistic?: boolean;
+
     clipboardConfig?: {
         hidePasteOptions?: boolean;
     };
 
-    hideStatusBarStatistic?: boolean;
 }
 
 export const defaultPluginConfig: IUniverSheetsUIConfig = {
     formulaBar: true,
+    statusBarStatistic: true,
     maxAutoHeightCount: 1000,
 };

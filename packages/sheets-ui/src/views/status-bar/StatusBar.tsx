@@ -15,13 +15,14 @@
  */
 
 import type { Nullable } from '@univerjs/core';
+import type { IUniverSheetsUIConfig } from '../../controllers/config.schema';
 import type { IStatusBarServiceStatus, StatusBarService } from '../../services/status-bar.service';
 import type { IStatisticItem } from './CopyableStatisticItem';
 import { debounce, IConfigService } from '@univerjs/core';
 import { clsx } from '@univerjs/design';
 import { useDependency } from '@univerjs/ui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { HIDE_STATUS_BAR_STATISTIC } from '../../controllers/config.schema';
+import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../controllers/config.schema';
 import { IStatusBarService } from '../../services/status-bar.service';
 import { CopyableStatisticItem } from './CopyableStatisticItem';
 import styles from './index.module.less';
@@ -31,7 +32,7 @@ const ROW_COUNT_THRESHOLD = 3;
 
 export const StatusBar = () => {
     const configService = useDependency(IConfigService);
-    const hideStatistic = configService.getConfig<boolean>(HIDE_STATUS_BAR_STATISTIC) || false;
+    const showStatistic = configService.getConfig<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY)?.statusBarStatistic ?? true;
 
     const [isSingle, setIsSingle] = useState(window.innerWidth < SINGLE_MODE_WIDTH);
 
@@ -49,7 +50,7 @@ export const StatusBar = () => {
         initialItems: IStatisticItem[],
         statusBarService: StatusBarService,
         isSingle: boolean,
-        hideStatistic: boolean
+        showStatistic: boolean
     ) => {
         const [statistics, setStatistics] = useState<IStatisticItem[]>(initialItems);
         const [show, setShow] = useState(true);
@@ -88,12 +89,12 @@ export const StatusBar = () => {
         }, []);
 
         useEffect(() => {
-            if (hideStatistic) return;
+            if (!showStatistic) return;
 
             const subscription = statusBarService.state$.subscribe(updateStatistics);
 
             return () => subscription.unsubscribe();
-        }, [hideStatistic, statusBarService, updateStatistics]);
+        }, [showStatistic, statusBarService, updateStatistics]);
 
         return {
             statistics,
@@ -106,7 +107,7 @@ export const StatusBar = () => {
         items,
         statusBarService,
         isSingle,
-        hideStatistic
+        showStatistic
     );
     const handleResize = debounce(() => {
         const newSingleState = window.innerWidth < SINGLE_MODE_WIDTH;
@@ -128,7 +129,7 @@ export const StatusBar = () => {
         rowCountThreshold: number,
         CopyableStatisticItem: React.ComponentType<IStatisticItem>
     ) => {
-        if (hideStatistic) return null;
+        if (!showStatistic) return null;
         const renderContent = React.useMemo(() => {
             if (showList.length > rowCountThreshold) {
                 const doubleLineList = showList.reduce<IStatisticItem[][]>((acc, _, index) => {

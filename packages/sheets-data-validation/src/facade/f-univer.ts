@@ -54,8 +54,20 @@ export interface IFUnvierDataValidationMixin {
      * @returns {FDataValidationBuilder} A new instance of the FDataValidationBuilder class
      * @example
      * ```ts
-     * const rule = FUnvier.newDataValidation();
-     * cell.setDataValidation(rule.requireValueInRange(range));
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // Create a new data validation rule that requires a number between 1 and 10 fot the range A1:B10
+     * const fRange = fWorksheet.getRange('A1:B10');
+     * const rule = univerAPI.newDataValidation()
+     *   .requireNumberBetween(1, 10)
+     *   .setOptions({
+     *     allowBlank: true,
+     *     showErrorMessage: true,
+     *     error: 'Please enter a number between 1 and 10'
+     *   })
+     *   .build();
+     * fRange.setDataValidation(rule);
      * ```
      */
     newDataValidation(): FDataValidationBuilder;

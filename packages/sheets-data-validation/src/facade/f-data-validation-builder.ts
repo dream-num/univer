@@ -64,6 +64,8 @@ export class FDataValidationBuilder {
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // Create a new data validation rule that requires a number between 1 and 10 for the range A1:B10
      * const fRange = fWorksheet.getRange('A1:B10');
      * const rule = univerAPI.newDataValidation()
      *   .requireNumberBetween(1, 10)
@@ -85,9 +87,24 @@ export class FDataValidationBuilder {
      * @returns {FDataValidationBuilder} A new instance of the DataValidationBuilder class
      * @example
      * ```typescript
-     * const builder = univerAPI.newDataValidation().requireNumberBetween(1, 10);
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // Create a new data validation rule that requires a number between 1 and 10 for the range A1:B10
+     * const fRange = fWorksheet.getRange('A1:B10');
+     * const builder = univerAPI.newDataValidation()
+     *   .requireNumberBetween(1, 10)
+     *   .setOptions({
+     *     allowBlank: true,
+     *     showErrorMessage: true,
+     *     error: 'Please enter a number between 1 and 10'
+     *   });
+     * fRange.setDataValidation(builder.build());
+     *
+     * // Copy the builder applied to the new range F1:G10
+     * const newRange = fWorksheet.getRange('F1:G10');
      * const copyBuilder = builder.copy();
-     * console.log(copyBuilder);
+     * newRange.setDataValidation(copyBuilder.build());
      * ```
      */
     copy(): FDataValidationBuilder {
@@ -116,13 +133,13 @@ export class FDataValidationBuilder {
      * @example
      * ```typescript
      * const builder = univerAPI.newDataValidation();
-     * console.log(builder.getCriteriaType());
+     * console.log(builder.getCriteriaType()); // custom
      *
      * builder.requireNumberBetween(1, 10);
-     * console.log(builder.getCriteriaType());
+     * console.log(builder.getCriteriaType()); // decimal
      *
      * builder.requireValueInList(['Yes', 'No']);
-     * console.log(builder.getCriteriaType());
+     * console.log(builder.getCriteriaType()); // list
      * ```
      */
     getCriteriaType(): DataValidationType | string {
@@ -136,10 +153,10 @@ export class FDataValidationBuilder {
      * ```typescript
      * const builder = univerAPI.newDataValidation().requireNumberBetween(1, 10);
      * const [operator, formula1, formula2] = builder.getCriteriaValues();
-     * console.log(operator, formula1, formula2);
+     * console.log(operator, formula1, formula2); // between 1 10
      *
      * builder.requireValueInList(['Yes', 'No']);
-     * console.log(builder.getCriteriaValues());
+     * console.log(builder.getCriteriaValues()); // undefined Yes,No undefined
      * ```
      */
     getCriteriaValues(): [string | undefined, string | undefined, string | undefined] {
@@ -163,10 +180,10 @@ export class FDataValidationBuilder {
     }
 
     /**
-     * Sets the data validation type to CHECKBOX and sets the checked and unchecked values
-     * @param {string} [checkedValue] - The value when the checkbox is checked
-     * @param {string} [uncheckedValue] - The value when the checkbox is unchecked
-     * @returns {FDataValidationBuilder} The current instance for method chaining
+     * Sets the data validation rule to require that the input is a boolean value; this value is rendered as a checkbox.
+     * @param {string} [checkedValue] - The value assigned to a checked box.
+     * @param {string} [uncheckedValue] - The value assigned to an unchecked box.
+     * @returns {FDataValidationBuilder} The current instance for method chaining.
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
@@ -196,23 +213,28 @@ export class FDataValidationBuilder {
     }
 
     /**
-     * Set the data validation type to DATE and configure the validation rules to be after a specific date
-     * @param {Date} date - The date to compare against
-     * @returns {FDataValidationBuilder} The current instance for method chaining
+     * Set the data validation type to DATE and configure the validation rules to be after a specific date.
+     * @param {Date} date - The latest unacceptable date.
+     * @returns {FDataValidationBuilder} The current instance for method chaining.
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // Set some date values in the range A1:B2
      * const fRange = fWorksheet.getRange('A1:B2');
      * fRange.setValues([
      *   ['2024-01-01', '2024-12-31'],
      *   ['2025-01-01', '2025-12-31']
      * ]);
+     *
+     * // Create a data validation rule that requires a date after 2025-01-01
      * const rule = univerAPI.newDataValidation()
      *   .requireDateAfter(new Date('2025-01-01'))
      *   .build();
      * fRange.setDataValidation(rule);
      *
+     * // Get the validation status of the range
      * const status = await fRange.getValidatorStatus();
      * console.log(status); // [['invalid', 'invalid', 'invalid', 'valid']]
      * ```
@@ -226,23 +248,28 @@ export class FDataValidationBuilder {
     }
 
     /**
-     * Set the data validation type to DATE and configure the validation rules to be before a specific date
-     * @param {Date} date - The date to compare against
-     * @returns {FDataValidationBuilder} The current instance for method chaining
+     * Set the data validation type to DATE and configure the validation rules to be before a specific date.
+     * @param {Date} date - The earliest unacceptable date.
+     * @returns {FDataValidationBuilder} The current instance for method chaining.
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // Set some date values in the range A1:B2
      * const fRange = fWorksheet.getRange('A1:B2');
      * fRange.setValues([
      *   ['2024-01-01', '2024-12-31'],
      *   ['2025-01-01', '2025-12-31']
      * ]);
+     *
+     * // Create a data validation rule that requires a date before 2025-01-01
      * const rule = univerAPI.newDataValidation()
      *   .requireDateBefore(new Date('2025-01-01'))
      *   .build();
      * fRange.setDataValidation(rule);
      *
+     * // Get the validation status of the range
      * const status = await fRange.getValidatorStatus();
      * console.log(status); // [['valid', 'valid', 'invalid', 'invalid']]
      * ```
@@ -257,24 +284,29 @@ export class FDataValidationBuilder {
     }
 
     /**
-     * Set the data validation type to DATE and configure the validation rules to be within a specific date range
-     * @param {Date} start - The starting date of the range
-     * @param {Date} end - The ending date of the range
-     * @returns {FDataValidationBuilder} The current instance for method chaining
+     * Set the data validation type to DATE and configure the validation rules to be within a specific date range.
+     * @param {Date} start - The earliest acceptable date.
+     * @param {Date} end - The latest acceptable date.
+     * @returns {FDataValidationBuilder} The current instance for method chaining.
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // Set some date values in the range A1:B2
      * const fRange = fWorksheet.getRange('A1:B2');
      * fRange.setValues([
      *   ['2024-01-01', '2024-12-31'],
      *   ['2025-01-01', '2025-12-31']
      * ]);
+     *
+     * // Create a data validation rule that requires a date between 2024-06-01 and 2025-06-01
      * const rule = univerAPI.newDataValidation()
      *   .requireDateBetween(new Date('2024-06-01'), new Date('2025-06-01'))
      *   .build();
      * fRange.setDataValidation(rule);
      *
+     * // Get the validation status of the range
      * const status = await fRange.getValidatorStatus();
      * console.log(status); // [['invalid', 'valid', 'valid', 'invalid']]
      * ```
@@ -289,26 +321,32 @@ export class FDataValidationBuilder {
     }
 
     /**
-     * Set the data validation type to DATE and configure the validation rules to be equal to a specific date
-     * @param {Date} date - The date to compare against
-     * @returns {FDataValidationBuilder} The current instance for method chaining
+     * Set the data validation type to DATE and configure the validation rules to be equal to a specific date.
+     * @param {Date} date - The sole acceptable date.
+     * @returns {FDataValidationBuilder} The current instance for method chaining.
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // Set some date values in the range A1:B2
      * const fRange = fWorksheet.getRange('A1:B2');
      * fRange.setValues([
      *   ['2024-01-01', '2024-12-31'],
      *   ['2025-01-01', '2025-12-31']
      * ]);
+     *
+     * // Create a data validation rule that requires a date equal to 2025-01-01
      * const rule = univerAPI.newDataValidation()
      *   .requireDateEqualTo(new Date('2025-01-01'))
      *   .build();
      * fRange.setDataValidation(rule);
      *
+     * // Get the validation status of the cell A2
      * const status = await fWorksheet.getRange('A2').getValidatorStatus();
      * console.log(status?.[0]?.[0]); // 'valid'
      *
+     * // Get the validation status of the cell B2
      * const status2 = await fWorksheet.getRange('B2').getValidatorStatus();
      * console.log(status2?.[0]?.[0]); // 'invalid'
      * ```
@@ -323,24 +361,29 @@ export class FDataValidationBuilder {
     }
 
     /**
-     * Set the data validation type to DATE and configure the validation rules to be not within a specific date range
-     * @param {Date} start - The starting date of the date range
-     * @param {Date} end - The ending date of the date range
-     * @returns {FDataValidationBuilder} The current instance for method chaining
+     * Set the data validation type to DATE and configure the validation rules to be not within a specific date range.
+     * @param {Date} start - The earliest unacceptable date.
+     * @param {Date} end - The latest unacceptable date.
+     * @returns {FDataValidationBuilder} The current instance for method chaining.
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // Set some date values in the range A1:B2
      * const fRange = fWorksheet.getRange('A1:B2');
      * fRange.setValues([
      *   ['2024-01-01', '2024-12-31'],
      *   ['2025-01-01', '2025-12-31']
      * ]);
+     *
+     * // Create a data validation rule that requires a date not between 2024-06-01 and 2025-06-01
      * const rule = univerAPI.newDataValidation()
      *   .requireDateNotBetween(new Date('2024-06-01'), new Date('2025-06-01'))
      *   .build();
      * fRange.setDataValidation(rule);
      *
+     * // Get the validation status of the range
      * const status = await fRange.getValidatorStatus();
      * console.log(status); // [['valid', 'invalid', 'invalid', 'valid']]
      * ```
@@ -355,23 +398,28 @@ export class FDataValidationBuilder {
     }
 
     /**
-     * Set the data validation type to DATE and configure the validation rules to be on or after a specific date
-     * @param {Date} date - The date to compare against
-     * @returns {FDataValidationBuilder} The current instance for method chaining
+     * Set the data validation type to DATE and configure the validation rules to be on or after a specific date.
+     * @param {Date} date - The earliest acceptable date.
+     * @returns {FDataValidationBuilder} The current instance for method chaining.
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // Set some date values in the range A1:B2
      * const fRange = fWorksheet.getRange('A1:B2');
      * fRange.setValues([
      *   ['2024-01-01', '2024-12-31'],
      *   ['2025-01-01', '2025-12-31']
      * ]);
+     *
+     * // Create a data validation rule that requires a date on or after 2025-01-01
      * const rule = univerAPI.newDataValidation()
      *   .requireDateOnOrAfter(new Date('2025-01-01'))
      *   .build();
      * fRange.setDataValidation(rule);
      *
+     * // Get the validation status of the range
      * const status = await fRange.getValidatorStatus();
      * console.log(status); // [['invalid', 'invalid', 'valid', 'valid']]
      * ```
@@ -386,23 +434,28 @@ export class FDataValidationBuilder {
     }
 
     /**
-     * Set the data validation type to DATE and configure the validation rules to be on or before a specific date
-     * @param {Date} date - The date to compare against
-     * @returns {FDataValidationBuilder} The current instance for method chaining
+     * Set the data validation type to DATE and configure the validation rules to be on or before a specific date.
+     * @param {Date} date - The latest acceptable date.
+     * @returns {FDataValidationBuilder} The current instance for method chaining.
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // Set some date values in the range A1:B2
      * const fRange = fWorksheet.getRange('A1:B2');
      * fRange.setValues([
      *   ['2024-01-01', '2024-12-31'],
      *   ['2025-01-01', '2025-12-31']
      * ]);
+     *
+     * // Create a data validation rule that requires a date on or before 2025-01-01
      * const rule = univerAPI.newDataValidation()
      *   .requireDateOnOrBefore(new Date('2025-01-01'))
      *   .build();
      * fRange.setDataValidation(rule);
      *
+     * // Get the validation status of the range
      * const status = await fRange.getValidatorStatus();
      * console.log(status); // [['valid', 'valid', 'valid', 'invalid']]
      * ```
@@ -417,13 +470,15 @@ export class FDataValidationBuilder {
     }
 
     /**
-     * Requires that a custom formula be satisfied
-     * @param {string} formula - The formula string that needs to be satisfied, formula result should be TRUE or FALSE, and references range will relative offset
-     * @returns {FDataValidationBuilder} The current instance for method chaining
+     * Sets the data validation rule to require that the given formula evaluates to `true`.
+     * @param {string} formula - The formula string that needs to be satisfied, formula result should be TRUE or FALSE, and references range will relative offset.
+     * @returns {FDataValidationBuilder} The current instance for method chaining.
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // Set some values in the range A1:B2 and C1:D2
      * const cell = fWorksheet.getRange('A1:B2');
      * cell.setValues([
      *   [4, 3],
@@ -434,6 +489,8 @@ export class FDataValidationBuilder {
      *   [1, 2],
      *   [3, 4]
      * ]);
+     *
+     * // Create a data validation rule that requires the formula '=A1>2' to be satisfied
      * const rule = univerAPI.newDataValidation()
      *   .requireFormulaSatisfied('=A1>2')
      *   .setOptions({
@@ -443,6 +500,7 @@ export class FDataValidationBuilder {
      *   .build();
      * fRange.setDataValidation(rule);
      *
+     * // Get the validation status of the range
      * const status = await fRange.getValidatorStatus();
      * console.log(status); // [['valid', 'valid', 'invalid', 'invalid']]
      * ```
@@ -455,15 +513,17 @@ export class FDataValidationBuilder {
     }
 
     /**
-     * Requires the user to enter a number within a specific range, which can be integer or decimal
-     * @param {number} start - The starting value of the number range
-     * @param {number} end - The ending value of the number range
-     * @param {boolean} [isInteger] - Indicates whether the required number is an integer
-     * @returns {FDataValidationBuilder} The current instance for method chaining
+     * Sets the data validation rule to require a number that falls between, or is either of, two specified numbers.
+     * @param {number} start - The lowest acceptable value.
+     * @param {number} end - The highest acceptable value.
+     * @param {boolean} [isInteger] - Indicates whether the required number is an integer.
+     * @returns {FDataValidationBuilder} The current instance for method chaining.
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // Create a new data validation rule that requires a number between 1 and 10 for the range A1:B10
      * const fRange = fWorksheet.getRange('A1:B10');
      * const rule = univerAPI.newDataValidation()
      *   .requireNumberBetween(1, 10)
@@ -486,14 +546,16 @@ export class FDataValidationBuilder {
     }
 
     /**
-     * Requires the user to enter a number that is equal to a specific value, which can be an integer or a decimal
-     * @param {number} num - The number to which the entered number should be equal
-     * @param {boolean} [isInteger] - Indicates whether the required number is an integer
-     * @returns {FDataValidationBuilder} The current instance for method chaining
+     * Sets the data validation rule to require a number equal to the given value.
+     * @param {number} num - The sole acceptable value.
+     * @param {boolean} [isInteger] - Indicates whether the required number is an integer.
+     * @returns {FDataValidationBuilder} The current instance for method chaining.
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // Create a new data validation rule that requires a number equal to 10 for the range A1:B10
      * const fRange = fWorksheet.getRange('A1:B10');
      * const rule = univerAPI.newDataValidation()
      *   .requireNumberEqualTo(10)
@@ -515,14 +577,16 @@ export class FDataValidationBuilder {
     }
 
     /**
-     * Requires the user to enter a number that is greater than a specific value, which can be an integer or a decimal
-     * @param {number} num - The number to which the entered number should be greater
-     * @param {boolean} [isInteger] - Indicates whether the required number is an integer
-     * @returns {FDataValidationBuilder} The current instance for method chaining
+     * Sets the data validation rule to require a number greater than the given value.
+     * @param {number} num - The highest unacceptable value.
+     * @param {boolean} [isInteger] - Indicates whether the required number is an integer.
+     * @returns {FDataValidationBuilder} The current instance for method chaining.
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // Create a new data validation rule that requires a number greater than 10 for the range A1:B10
      * const fRange = fWorksheet.getRange('A1:B10');
      * const rule = univerAPI.newDataValidation()
      *   .requireNumberGreaterThan(10)
@@ -544,14 +608,16 @@ export class FDataValidationBuilder {
     }
 
     /**
-     * Requires the user to enter a number that is greater than or equal to a specific value, which can be an integer or a decimal
-     * @param {number} num - The number to which the entered number should be greater than or equal
-     * @param {boolean} [isInteger] - Indicates whether the required number is an integer
-     * @returns {FDataValidationBuilder} The current instance for method chaining
+     * Sets the data validation rule to require a number greater than or equal to the given value.
+     * @param {number} num - The lowest acceptable value.
+     * @param {boolean} [isInteger] - Indicates whether the required number is an integer.
+     * @returns {FDataValidationBuilder} The current instance for method chaining.
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // Create a new data validation rule that requires a number greater than 10 or equal to 10 for the range A1:B10
      * const fRange = fWorksheet.getRange('A1:B10');
      * const rule = univerAPI.newDataValidation()
      *   .requireNumberGreaterThanOrEqualTo(10)
@@ -573,14 +639,16 @@ export class FDataValidationBuilder {
     }
 
     /**
-     * Requires the user to enter a number that is less than a specific value, which can be an integer or a decimal
-     * @param {number} num - The number to which the entered number should be less
-     * @param {boolean} [isInteger] - Indicates whether the required number is an integer
-     * @returns {FDataValidationBuilder} The current instance for method chaining
+     * Sets the data validation rule to require a number less than the given value.
+     * @param {number} num - The lowest unacceptable value.
+     * @param {boolean} [isInteger] - Indicates whether the required number is an integer.
+     * @returns {FDataValidationBuilder} The current instance for method chaining.
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // Create a new data validation rule that requires a number less than 10 for the range A1:B10
      * const fRange = fWorksheet.getRange('A1:B10');
      * const rule = univerAPI.newDataValidation()
      *   .requireNumberLessThan(10)
@@ -602,15 +670,16 @@ export class FDataValidationBuilder {
     }
 
     /**
-     * Sets the data validation rule to require a number less than or equal to a specified value
-     * The specified value can be an integer or a decimal
-     * @param {number} num - The number to which the entered number should be less than or equal
-     * @param {boolean} [isInteger] - Indicates whether the required number is an integer
-     * @returns {FDataValidationBuilder} The current instance for method chaining
+     * Sets the data validation rule to require a number less than or equal to the given value.
+     * @param {number} num - The highest acceptable value.
+     * @param {boolean} [isInteger] - Indicates whether the required number is an integer.
+     * @returns {FDataValidationBuilder} The current instance for method chaining.
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // Create a new data validation rule that requires a number less than 10 or equal to 10 for the range A1:B10
      * const fRange = fWorksheet.getRange('A1:B10');
      * const rule = univerAPI.newDataValidation()
      *   .requireNumberLessThanOrEqualTo(10)
@@ -632,16 +701,17 @@ export class FDataValidationBuilder {
     }
 
     /**
-     * Sets a data validation rule that requires the user to enter a number outside a specified range
-     * The specified range includes all integers and decimals
-     * @param {number} start - The starting point of the specified range
-     * @param {number} end - The end point of the specified range
-     * @param {boolean} [isInteger] - Optional parameter, indicating whether the number to be verified is an integer
-     * @returns {FDataValidationBuilder} The current instance for method chaining
+     * Sets the data validation rule to require a number that does not fall between, and is neither of, two specified numbers.
+     * @param {number} start - The lowest unacceptable value.
+     * @param {number} end - The highest unacceptable value.
+     * @param {boolean} [isInteger] - Optional parameter, indicating whether the number to be verified is an integer.
+     * @returns {FDataValidationBuilder} The current instance for method chaining.
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // Create a new data validation rule that requires a number not between 1 and 10 for the range A1:B10
      * const fRange = fWorksheet.getRange('A1:B10');
      * const rule = univerAPI.newDataValidation()
      *   .requireNumberNotBetween(1, 10)
@@ -664,15 +734,16 @@ export class FDataValidationBuilder {
     }
 
     /**
-     * Creates a data validation rule that requires the user to enter a number that is not equal to a specific value
-     * The specific value can be an integer or a decimal
-     * @param {number} num - The number to which the entered number should not be equal
-     * @param {boolean} [isInteger] - Indicates whether the required number is an integer
-     * @returns {FDataValidationBuilder} The current instance for method chaining
+     * Sets the data validation rule to require a number not equal to the given value.
+     * @param {number} num - The sole unacceptable value.
+     * @param {boolean} [isInteger] - Indicates whether the required number is an integer.
+     * @returns {FDataValidationBuilder} The current instance for method chaining.
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // Create a new data validation rule that requires a number not equal to 10 for the range A1:B10
      * const fRange = fWorksheet.getRange('A1:B10');
      * const rule = univerAPI.newDataValidation()
      *   .requireNumberNotEqualTo(10)
@@ -694,16 +765,18 @@ export class FDataValidationBuilder {
     }
 
     /**
-     * Sets a data validation rule that requires the user to enter a value from a list of specific values
-     * The list can be displayed in a dropdown, and the user can choose multiple values according to the settings
-     * @param {string[]} values - An array containing the specific values that the user can enter
-     * @param {boolean} [multiple] - Optional parameter indicating whether the user can select multiple values
-     * @param {boolean} [showDropdown] - Optional parameter indicating whether to display the list in a dropdown
-     * @returns {FDataValidationBuilder} The current instance for method chaining
+     * Sets a data validation rule that requires the user to enter a value from a list of specific values.
+     * The list can be displayed in a dropdown, and the user can choose multiple values according to the settings.
+     * @param {string[]} values - An array of acceptable values.
+     * @param {boolean} [multiple] - Optional parameter indicating whether the user can select multiple values.
+     * @param {boolean} [showDropdown] - Optional parameter indicating whether to display the list in a dropdown.
+     * @returns {FDataValidationBuilder} The current instance for method chaining.
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // Create a new data validation rule that requires the user to enter a value from the list ['Yes', 'No'] for the range A1:B10
      * const fRange = fWorksheet.getRange('A1:B10');
      * const rule = univerAPI.newDataValidation()
      *   .requireValueInList(['Yes', 'No'])
@@ -726,22 +799,25 @@ export class FDataValidationBuilder {
     }
 
     /**
-     * Sets a data validation rule that requires the user to enter a value within a specific range
-     * The range is defined by an FRange object, which contains the unit ID, sheet name, and cell range
-     * @param {FRange} range - An FRange object representing the range of values that the user can enter
-     * @param {boolean} [multiple] - Optional parameter indicating whether the user can select multiple values
-     * @param {boolean} [showDropdown] - Optional parameter indicating whether to display the list in a dropdown
-     * @returns {FDataValidationBuilder} The current instance for method chaining
+     * Sets a data validation rule that requires the user to enter a value within a specific range.
+     * The range is defined by an FRange object, which contains the unit ID, sheet name, and cell range.
+     * @param {FRange} range - An FRange object representing the range of values that the user can enter.
+     * @param {boolean} [multiple] - Optional parameter indicating whether the user can select multiple values.
+     * @param {boolean} [showDropdown] - Optional parameter indicating whether to display the list in a dropdown.
+     * @returns {FDataValidationBuilder} The current instance for method chaining.
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // Set the values in the range B1:B2
      * const fRange = fWorksheet.getRange('B1:B2');
      * fRange.setValues([
      *   ['Yes'],
      *   ['No']
      * ]);
      *
+     * // Create a new data validation rule that requires the user to enter a value from the range B1:B2 for the range A1:A10
      * const rule = univerAPI.newDataValidation()
      *   .requireValueInRange(fRange)
      *   .setOptions({
@@ -768,11 +844,11 @@ export class FDataValidationBuilder {
     }
 
     /**
-     * Sets whether to allow invalid data and configures the error style
-     * If invalid data is not allowed, the error style will be set to STOP, indicating that data entry must stop upon encountering an error
-     * If invalid data is allowed, the error style will be set to WARNING, indicating that a warning will be displayed when invalid data is entered, but data entry can continue
-     * @param {boolean} allowInvalidData - Whether to allow invalid data
-     * @returns {FDataValidationBuilder} The current instance for method chaining
+     * Sets whether to allow invalid data and configures the error style.
+     * If invalid data is not allowed, the error style will be set to STOP, indicating that data entry must stop upon encountering an error.
+     * If invalid data is allowed, the error style will be set to WARNING, indicating that a warning will be displayed when invalid data is entered, but data entry can continue.
+     * @param {boolean} allowInvalidData - Whether to allow invalid data.
+     * @returns {FDataValidationBuilder} The current instance for method chaining.
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
@@ -801,9 +877,9 @@ export class FDataValidationBuilder {
     }
 
     /**
-     * Sets whether to allow blank values
-     * @param {boolean} allowBlank - Whether to allow blank values
-     * @returns {FDataValidationBuilder} The current instance for method chaining
+     * Sets whether to allow blank values.
+     * @param {boolean} allowBlank - Whether to allow blank values.
+     * @returns {FDataValidationBuilder} The current instance for method chaining.
      * @example
      * ```typescript
      * // Assume current sheet is empty data
@@ -833,13 +909,15 @@ export class FDataValidationBuilder {
     }
 
     /**
-     * Sets the options for the data validation rule
-     * @param {Partial<IDataValidationRuleOptions>} options - The options to set for the data validation rule
-     * @returns {FDataValidationBuilder} The current instance for method chaining
+     * Sets the options for the data validation rule.
+     * @param {Partial<IDataValidationRuleOptions>} options - The options to set for the data validation rule.
+     * @returns {FDataValidationBuilder} The current instance for method chaining.
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // Create a new data validation rule that requires the user to enter a value from the list ['Yes', 'No'] for the range A1:B10
      * const fRange = fWorksheet.getRange('A1:B10');
      * const rule = univerAPI.newDataValidation()
      *   .requireValueInList(['Yes', 'No'])

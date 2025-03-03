@@ -242,12 +242,15 @@ export class FDataValidation {
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // Create a new data validation rule that requires a number equal to 20 for the range A1:B10
      * const fRange = fWorksheet.getRange('A1:B10');
      * const rule = univerAPI.newDataValidation()
      *   .requireNumberEqualTo(20)
      *   .build();
      * fRange.setDataValidation(rule);
      *
+     * // Change the rule criteria to require a number between 1 and 10
      * fRange.getDataValidation().setCriteria(
      *   univerAPI.Enum.DataValidationType.DECIMAL,
      *   [univerAPI.Enum.DataValidationOperator.BETWEEN, '1', '10']
@@ -292,12 +295,15 @@ export class FDataValidation {
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // Create a new data validation rule that requires a number equal to 20 for the range A1:B10
      * const fRange = fWorksheet.getRange('A1:B10');
      * const rule = univerAPI.newDataValidation()
      *   .requireNumberEqualTo(20)
      *   .build();
      * fRange.setDataValidation(rule);
      *
+     * // Supplement the rule with additional options
      * fRange.getDataValidation().setOptions({
      *   allowBlank: true,
      *   showErrorMessage: true,
@@ -335,12 +341,15 @@ export class FDataValidation {
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // Create a new data validation rule that requires a number equal to 20 for the range A1:B10
      * const fRange = fWorksheet.getRange('A1:B10');
      * const rule = univerAPI.newDataValidation()
      *   .requireNumberEqualTo(20)
      *   .build();
      * fRange.setDataValidation(rule);
      *
+     * // Change the range to C1:D10
      * const newRuleRange = fWorksheet.getRange('C1:D10');
      * fRange.getDataValidation().setRanges([newRuleRange]);
      * ```
@@ -371,12 +380,15 @@ export class FDataValidation {
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // Create a new data validation rule that requires a number equal to 20 for the range A1:B10
      * const fRange = fWorksheet.getRange('A1:B10');
      * const rule = univerAPI.newDataValidation()
      *   .requireNumberEqualTo(20)
      *   .build();
      * fRange.setDataValidation(rule);
      *
+     * // Delete the data validation rule
      * fRange.getDataValidation().delete();
      * ```
      */

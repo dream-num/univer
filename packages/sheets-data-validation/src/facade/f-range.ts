@@ -32,6 +32,8 @@ export interface IFRangeDataValidationMixin {
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // Create a data validation rule that requires a number between 1 and 10 for the range A1:B10
      * const fRange = fWorksheet.getRange('A1:B10');
      * const rule = univerAPI.newDataValidation()
      *   .requireNumberBetween(1, 10)
@@ -53,6 +55,8 @@ export interface IFRangeDataValidationMixin {
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // Create a data validation rule that requires a number equal to 20 for the range A1:B10
      * const fRange = fWorksheet.getRange('A1:B10');
      * const rule = univerAPI.newDataValidation()
      *   .requireNumberEqualTo(20)
@@ -60,10 +64,13 @@ export interface IFRangeDataValidationMixin {
      * fRange.setDataValidation(rule);
      * console.log(fRange.getDataValidation().getCriteriaValues());
      *
+     * // Change the rule criteria to require a number between 1 and 10
      * fRange.getDataValidation().setCriteria(
      *   univerAPI.Enum.DataValidationType.DECIMAL,
      *   [univerAPI.Enum.DataValidationOperator.BETWEEN, '1', '10']
      * );
+     *
+     * // Print the new rule criteria values
      * console.log(fRange.getDataValidation().getCriteriaValues());
      * ```
      */
@@ -76,18 +83,22 @@ export interface IFRangeDataValidationMixin {
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // Create a data validation rule that requires a number equal to 20 for the range A1:B10
      * const fRange1 = fWorksheet.getRange('A1:B10');
      * const rule1 = univerAPI.newDataValidation()
      *   .requireNumberEqualTo(20)
      *   .build();
      * fRange1.setDataValidation(rule1);
      *
+     * // Create a data validation rule that requires a number between 1 and 10 for the range C1:D10
      * const fRange2 = fWorksheet.getRange('C1:D10');
      * const rule2 = univerAPI.newDataValidation()
      *   .requireNumberBetween(1, 10)
      *   .build();
      * fRange2.setDataValidation(rule2);
      *
+     * // Get all data validation rules in the range A1:D10
      * const range = fWorksheet.getRange('A1:D10');
      * const rules = range.getDataValidations();
      * console.log(rules.length); // 2
@@ -102,6 +113,8 @@ export interface IFRangeDataValidationMixin {
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // Set some values in the range A1:B10
      * const fRange = fWorksheet.getRange('A1:B10');
      * fRange.setValues([
      *   [1, 2],
@@ -115,14 +128,18 @@ export interface IFRangeDataValidationMixin {
      *   [17, 18],
      *   [19, 20]
      * ]);
+     *
+     * // Create a data validation rule that requires a number between 1 and 10 for the range A1:B10
      * const rule = univerAPI.newDataValidation()
      *   .requireNumberBetween(1, 10)
      *   .build();
      * fRange.setDataValidation(rule);
      *
+     * // Get the validator status for the cell B2
      * const status = await fWorksheet.getRange('B2').getValidatorStatus();
      * console.log(status?.[0]?.[0]); // 'valid'
      *
+     * // Get the validator status for the cell B10
      * const status2 = await fWorksheet.getRange('B10').getValidatorStatus();
      * console.log(status2?.[0]?.[0]); // 'invalid'
      * ```

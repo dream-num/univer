@@ -25,10 +25,9 @@ import { DocSelectionManagerService, DocSkeletonManagerService, RichTextEditingM
 import { IDocDrawingService } from '@univerjs/docs-drawing';
 import { docDrawingPositionToTransform, DocSelectionRenderService } from '@univerjs/docs-ui';
 import { DRAWING_IMAGE_ALLOW_IMAGE_LIST, DRAWING_IMAGE_ALLOW_SIZE, DRAWING_IMAGE_COUNT_LIMIT, DRAWING_IMAGE_HEIGHT_LIMIT, DRAWING_IMAGE_WIDTH_LIMIT, getDrawingShapeKeyByDrawingSearch, getImageSize, IDrawingManagerService, IImageIoService, ImageUploadStatusType } from '@univerjs/drawing';
+import { getUpdateParams } from '@univerjs/drawing-ui';
 import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
-
 import { ILocalFileService, IMessageService } from '@univerjs/ui';
-import { debounceTime } from 'rxjs';
 import { GroupDocDrawingCommand } from '../../commands/commands/group-doc-drawing.command';
 import { InsertDocDrawingCommand } from '../../commands/commands/insert-doc-drawing.command';
 import { type ISetDrawingArrangeCommandParams, SetDocDrawingArrangeCommand } from '../../commands/commands/set-drawing-arrange.command';
@@ -254,8 +253,11 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
     private _transformDrawingListener() {
         const res = this._getCurrentSceneAndTransformer();
         if (res && res.transformer) {
-            this.disposeWithMe(res.transformer.changeEnd$.pipe(debounceTime(30)).subscribe((params) => {
-                this._docSelectionManagerService.refreshSelection();
+            this.disposeWithMe(res.transformer.changeEnd$.subscribe((params) => {
+                const drawingParams = getUpdateParams(params.objects, this._drawingManagerService).filter((e) => !!e);
+                if (drawingParams && drawingParams.length) {
+                    this._setDrawingSelections(drawingParams);
+                }
             }));
         } else {
             throw new Error('transformer is not init');

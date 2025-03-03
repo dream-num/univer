@@ -79,7 +79,8 @@ export const TooltipWrapper = forwardRef<ITooltipWrapperRef, ITooltipProps>((pro
     );
 });
 
-export function DropdownWrapper({ children, overlay, disabled }: { children: ReactNode; overlay: ReactNode; disabled?: boolean }) {
+export function DropdownWrapper(props: Omit<Partial<IDropdownProps>, 'overlay'> & { overlay: ReactNode; align?: 'start' | 'end' | 'center' }) {
+    const { children, overlay, disabled, align = 'start' } = props;
     const { setDropdownVisible } = useContext(TooltipWrapperContext);
 
     function handleVisibleChange(visible: boolean) {
@@ -88,7 +89,7 @@ export function DropdownWrapper({ children, overlay, disabled }: { children: Rea
 
     return (
         <Dropdown
-            align="start"
+            align={align}
             overlay={(
                 <div className="univer-grid univer-gap-2 univer-theme">
                     {overlay}

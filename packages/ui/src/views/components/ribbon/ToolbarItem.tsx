@@ -28,7 +28,6 @@ import { MenuItemType } from '../../../services/menu/menu';
 import { useDependency, useObservable } from '../../../utils/di';
 import { ToolbarButton } from './Button/ToolbarButton';
 import { useToolbarItemStatus } from './hook';
-import styles from './index.module.less';
 import { DropdownMenuWrapper, TooltipWrapper } from './TooltipButtonWrapper';
 
 export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenuItem>>((props, ref) => {
@@ -105,17 +104,21 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
         if (menuType === MenuItemType.BUTTON_SELECTOR) {
             return (
                 <div
-                    className={clsx(styles.toolbarItemSelectButton, `
+                    className={clsx(`
+                      univer-relative univer-flex univer-cursor-pointer univer-items-center univer-rounded
+                    `, `
                       univer-group univer-h-6 univer-pr-5 univer-transition-colors
                       hover:univer-bg-gray-100
                     `, {
+                        'univer-text-gray-900': !disabled,
                         'univer-pointer-events-none univer-cursor-not-allowed univer-text-gray-200': disabled,
                     })}
                     data-disabled={disabled}
                 >
                     <div
-                        className={clsx(styles.toolbarItemSelectButtonLabel, `
-                          univer-transition-colors
+                        className={clsx(`
+                          univer-relative univer-z-[1] univer-flex univer-h-full univer-items-center univer-rounded-l
+                          univer-px-1 univer-transition-colors
                           hover:univer-bg-gray-200
                         `, {
                             'univer-bg-gray-200': activated,
@@ -142,17 +145,18 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
                     >
                         <div
                             className={clsx(`
-                              univer-absolute univer-right-0 univer-top-0 univer-box-border text-gray-400 univer-flex
-                              univer-h-6 univer-w-5 univer-items-center univer-justify-center univer-transition-colors
+                              univer-absolute univer-right-0 univer-top-0 univer-box-border univer-flex univer-h-6
+                              univer-w-5 univer-items-center univer-justify-center univer-rounded-r
+                              univer-transition-colors
                               hover:univer-bg-gray-200
                             `, {
-                                'univer-pointer-events-none univer-cursor-not-allowed univer-text-gray-400': disabled,
+                                'univer-pointer-events-none univer-cursor-not-allowed univer-text-gray-200': disabled,
                                 'univer-bg-gray-200': activated,
                                 'univer-bg-gray-50': activated && disabled,
                             })}
                             data-disabled={disabled}
                         >
-                            <MoreDownSingle className="univer-text-gray-400" />
+                            <MoreDownSingle />
                         </div>
                     </DropdownMenuWrapper>
                 </div>
@@ -168,9 +172,15 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
                     onOptionSelect={handleSelect}
                 >
                     <div
-                        className={clsx(styles.toolbarItemSelect, {
+                        className={clsx(`
+                          univer-relative univer-flex univer-h-6 univer-cursor-pointer univer-items-center univer-gap-2
+                          univer-rounded univer-px-1 univer-transition-colors
+                          hover:univer-bg-gray-100
+                        `, {
+                            'univer-text-gray-900': !disabled,
                             'univer-pointer-events-none univer-cursor-not-allowed univer-text-gray-200': disabled,
-                            [styles.toolbarItemSelectActivated]: activated,
+                            'univer-bg-gray-200': activated,
+                            'univer-bg-gray-50': activated && disabled,
                         })}
                     >
                         <CustomLabel
@@ -181,11 +191,11 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
                             onChange={handleSelectionsValueChange}
                         />
                         <div
-                            className={clsx(styles.toolbarItemSelectArrow, {
+                            className={clsx('univer-flex univer-h-full univer-items-center', {
                                 'univer-pointer-events-none univer-cursor-not-allowed univer-text-gray-200': disabled,
                             })}
                         >
-                            <MoreDownSingle className="univer-text-gray-400" />
+                            <MoreDownSingle />
                         </div>
                     </div>
                 </DropdownMenuWrapper>

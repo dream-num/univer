@@ -285,10 +285,10 @@ export function Tooltip(props: ITooltipProps) {
                 : (
                     <div
                         ref={triggerRef}
-                        className={`
-                          ${className}
-                          univer-inline-block
-                        `}
+                        className={clsx(
+                            className,
+                            'univer-inline-block'
+                        )}
                     >
                         {children}
                     </div>

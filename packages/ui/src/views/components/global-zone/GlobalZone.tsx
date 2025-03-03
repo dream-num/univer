@@ -19,15 +19,12 @@ import { useEffect, useMemo, useState } from 'react';
 import { ComponentManager } from '../../../common/component-manager';
 import { IGlobalZoneService } from '../../../services/global-zone/global-zone.service';
 import { useDependency, useObservable } from '../../../utils/di';
-import styles from './index.module.less';
 
 export function GlobalZone() {
     const globalZoneService = useDependency(IGlobalZoneService);
     const [visible, setVisible] = useState(false);
     const componentKey = useObservable(globalZoneService.componentKey$, globalZoneService.componentKey);
     const componentManager = useDependency(ComponentManager);
-
-    const _className = clsx(styles.globalZone, styles.globalZoneOpen);
 
     const Component = useMemo(() => {
         const Component = componentManager.get(componentKey ?? '');
@@ -50,5 +47,17 @@ export function GlobalZone() {
         return null;
     }
 
-    return <section className={_className}>{Component && <Component />}</section>;
+    return (
+        <section
+            className={clsx(
+                'univer-absolute univer-bg-gray-100',
+                {
+                    'univer-hidden': !visible,
+                    'univer-inset-0 univer-z-[100] univer-block univer-size-full': visible,
+                }
+            )}
+        >
+            {Component && <Component />}
+        </section>
+    );
 }

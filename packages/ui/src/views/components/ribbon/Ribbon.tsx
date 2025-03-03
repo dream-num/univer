@@ -17,20 +17,23 @@
 import type { ComponentType } from 'react';
 import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
 import { LocaleService } from '@univerjs/core';
-import { clsx } from '@univerjs/design';
+import { clsx, Separator } from '@univerjs/design';
 import { MoreFunctionSingle } from '@univerjs/icons';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
 import { MenuManagerPosition, RibbonPosition } from '../../../services/menu/types';
 import { useDependency } from '../../../utils/di';
 import { ComponentContainer } from '../ComponentContainer';
 import { ToolbarButton } from '../ribbon/Button/ToolbarButton';
-import styles from './index.module.less';
 import { ToolbarItem } from './ToolbarItem';
 import { DropdownWrapper, TooltipWrapper } from './TooltipButtonWrapper';
 
 interface IRibbonProps {
     headerMenuComponents?: Set<ComponentType>;
+}
+
+function Divider() {
+    return <Separator className="!univer-h-5" orientation="vertical" />;
 }
 
 export function Ribbon(props: IRibbonProps) {
@@ -108,7 +111,9 @@ export function Ribbon(props: IRibbonProps) {
         for (const item of allGroups) {
             if (item.children) {
                 const visibleChildren = item.children.filter((child) => !collapsedIds.includes(child.key));
-                visibleGroups.push({ ...item, children: visibleChildren });
+                if (visibleChildren.length > 0) {
+                    visibleGroups.push({ ...item, children: visibleChildren });
+                }
 
                 if (visibleChildren.length < item.children.length) {
                     hiddenGroups.push({ ...item, children: item.children.filter((child) => collapsedIds.includes(child.key)) });
@@ -125,24 +130,27 @@ export function Ribbon(props: IRibbonProps) {
 
     const fakeToolbarContent = useMemo(() => (
         activeGroup.allGroups.map((groupItem) => (
-            <div key={groupItem.key} className={styles.toolbarGroup}>
-                {groupItem.children?.map((child) => (
-                    child.item && (
-                        <ToolbarItem
-                            key={child.key}
-                            {...child.item}
-                            ref={(ref) => {
-                                if (ref?.el) {
-                                    toolbarItemRefs.current[child.key] = {
-                                        el: ref.el,
-                                        key: child.key,
-                                    };
-                                }
-                            }}
-                        />
-                    )
-                ))}
-            </div>
+            <Fragment key={groupItem.key}>
+                <div className="univer-flex univer-flex-nowrap univer-gap-2 univer-px-2">
+                    {groupItem.children?.map((child) => (
+                        child.item && (
+                            <ToolbarItem
+                                key={child.key}
+                                {...child.item}
+                                ref={(ref) => {
+                                    if (ref?.el) {
+                                        toolbarItemRefs.current[child.key] = {
+                                            el: ref.el,
+                                            key: child.key,
+                                        };
+                                    }
+                                }}
+                            />
+                        )
+                    ))}
+                </div>
+                <Divider />
+            </Fragment>
         ))
     ), [activeGroup.allGroups]);
 
@@ -190,50 +198,75 @@ export function Ribbon(props: IRibbonProps) {
                 )}
             </header>
 
-            <section role="toolbar" className={styles.toolbar}>
+            <section
+                role="toolbar"
+                className={`
+                  univer-relative univer-box-border univer-flex univer-h-8 univer-select-none univer-items-center
+                  univer-border-0 univer-border-b univer-border-solid univer-border-b-gray-200 univer-bg-white
+                  univer-text-base univer-text-gray-800
+                  dark:univer-bg-gray-900
+                `}
+            >
                 <div
                     className={`
                       univer-mx-auto univer-box-border univer-flex univer-h-full univer-flex-1 univer-items-center
                       univer-justify-center univer-gap-1 univer-overflow-hidden univer-px-4
                     `}
                 >
-                    {activeGroup.visibleGroups.map((groupItem) => (groupItem.children?.length || groupItem.item) && (
-                        <div key={groupItem.key} className={styles.toolbarGroup}>
-                            {groupItem.children
-                                ? groupItem.children?.map((child) => (
-                                    child.item && <ToolbarItem key={child.key} {...child.item} />
-                                ))
-                                : (
-                                    groupItem.item && <ToolbarItem key={groupItem.key} {...groupItem.item} />
-                                )}
-                        </div>
+                    {activeGroup.visibleGroups.map((groupItem, index) => (groupItem.children?.length || groupItem.item) && (
+                        <Fragment key={groupItem.key}>
+                            <div className="univer-flex univer-flex-nowrap univer-gap-2 univer-px-2">
+                                {groupItem.children
+                                    ? groupItem.children?.map((child) => (
+                                        child.item && <ToolbarItem key={child.key} {...child.item} />
+                                    ))
+                                    : (
+                                        groupItem.item && <ToolbarItem key={groupItem.key} {...groupItem.item} />
+                                    )}
+                            </div>
+                            {index < activeGroup.visibleGroups.length - 1 && activeGroup.visibleGroups.some((groupItem) => groupItem.children?.length || !!groupItem.item) && <Divider />}
+                        </Fragment>
                     ))}
 
                     {/* overflow menu items */}
                     {collapsedIds.length > 0 && (
-                        <TooltipWrapper title={localeService.t('ribbon.more')} placement="bottom">
-                            <DropdownWrapper
-                                overlay={(
-                                    <div className={styles.toolbarMoreContainer}>
-                                        {activeGroup.hiddenGroups.map((groupItem) => (
-                                            <div key={groupItem.key} className={styles.toolbarGroup}>
-                                                {groupItem.children
-                                                    ? groupItem.children?.map((child) => (
-                                                        child.item && <ToolbarItem key={child.key} {...child.item} />
-                                                    ))
-                                                    : (
-                                                        groupItem.item && <ToolbarItem key={groupItem.key} {...groupItem.item} />
-                                                    )}
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                            >
-                                <ToolbarButton className={styles.toolbarItemTextButton}>
-                                    <MoreFunctionSingle />
-                                </ToolbarButton>
-                            </DropdownWrapper>
-                        </TooltipWrapper>
+                        <>
+                            <Divider />
+                            <TooltipWrapper title={localeService.t('ribbon.more')} placement="bottom">
+                                <DropdownWrapper
+                                    align="end"
+                                    overlay={(
+                                        <div
+                                            className={`
+                                              univer-box-border univer-grid
+                                              univer-max-w-[var(--radix-popper-available-width)] univer-gap-2 univer-p-2
+                                            `}
+                                        >
+                                            {activeGroup.hiddenGroups.map((groupItem) => (
+                                                <div
+                                                    key={groupItem.key}
+                                                    className="univer-flex univer-items-center univer-gap-2"
+                                                >
+                                                    <div className="univer-flex univer-flex-wrap univer-gap-2">
+                                                        {groupItem.children
+                                                            ? groupItem.children?.map((child) => (
+                                                                child.item && <ToolbarItem key={child.key} {...child.item} />
+                                                            ))
+                                                            : (
+                                                                groupItem.item && <ToolbarItem key={groupItem.key} {...groupItem.item} />
+                                                            )}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                >
+                                    <ToolbarButton>
+                                        <MoreFunctionSingle />
+                                    </ToolbarButton>
+                                </DropdownWrapper>
+                            </TooltipWrapper>
+                        </>
                     )}
                 </div>
             </section>

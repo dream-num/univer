@@ -90,7 +90,6 @@ exports.baseRules = {
             ],
         },
     ],
-    'antfu/consistent-list-newline': 'error',
 
     // IMPORTANT: To ensure compatibility, some features of React 19 will be disabled.
     'react/no-forward-ref': 'off',

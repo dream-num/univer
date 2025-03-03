@@ -62,6 +62,7 @@ export function DesktopContextMenu() {
         };
     }, [contextMenuService]);
 
+    /** A function to open context menu with given position and menu type. */
     function handleContextMenu(event: IMouseEvent, menuType: string) {
         setVisible(false);
         requestAnimationFrame(() => {

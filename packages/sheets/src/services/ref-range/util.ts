@@ -18,6 +18,8 @@ import type { IAccessor, ICommandInfo, IMutationInfo, IRange, Nullable } from '@
 import type { IInsertColMutationParams, IInsertRowMutationParams, IRemoveColMutationParams, IRemoveRowsMutationParams, IRemoveSheetMutationParams } from '../../basics';
 import type { IInsertColCommandParams, IInsertRowCommandParams } from '../../commands/commands/insert-row-col.command';
 import type { IRemoveRowColCommandInterceptParams } from '../../commands/commands/remove-row-col.command';
+import type { IMoveRangeMutationParams } from '../../commands/mutations/move-range.mutation';
+import type { IMoveColumnsMutationParams, IMoveRowsMutationParams } from '../../commands/mutations/move-rows-cols.mutation';
 import type { ISheetCommandSharedParams } from '../../commands/utils/interface';
 import type {
     EffectRefRangeParams,
@@ -41,8 +43,8 @@ import { InsertRangeMoveDownCommand } from '../../commands/commands/insert-range
 import { InsertRangeMoveRightCommandId } from '../../commands/commands/insert-range-move-right.command';
 import { getSheetCommandTarget } from '../../commands/commands/utils/target-util';
 import { InsertColMutation, InsertRowMutation } from '../../commands/mutations/insert-row-col.mutation';
-import { type IMoveRangeMutationParams, MoveRangeMutation } from '../../commands/mutations/move-range.mutation';
-import { type IMoveColumnsMutationParams, type IMoveRowsMutationParams, MoveColsMutation, MoveRowsMutation } from '../../commands/mutations/move-rows-cols.mutation';
+import { MoveRangeMutation } from '../../commands/mutations/move-range.mutation';
+import { MoveColsMutation, MoveRowsMutation } from '../../commands/mutations/move-rows-cols.mutation';
 import { RemoveColMutation, RemoveRowMutation } from '../../commands/mutations/remove-row-col.mutation';
 import { RemoveSheetMutation } from '../../commands/mutations/remove-sheet.mutation';
 import { SheetsSelectionsService } from '../selections/selection.service';
@@ -559,38 +561,75 @@ export const handleReorderRange = (param: IReorderRangeCommand, targetRange: IRa
     return [];
 };
 
-// see docs/tldr/ref-range/insert-rows-cols.tldr
+/**
+ * see docs/tldr/ref-range/insert-rows-cols.tldr
+ * calculate insert steps(move step) or expand size(length) to ref range.
+ *
+ * @param _insertRange inserted range
+ * @param _targetRange ref range
+ * @returns {step: number, length: number} step means inserted count of row/col before ref range, that would cause range move few cells(steps) afterward.
+ * length means expand size of row/col in ref range, that would make ref range larger than before.
+ */
 export const handleBaseInsertRange = (_insertRange: IRange, _targetRange: IRange) => {
     const insertRange = handleRangeTypeInput(_insertRange);
     const targetRange = handleRangeTypeInput(_targetRange);
     const getLength = (range: IRange): number => range.endColumn - range.startColumn + 1;
-    if (insertRange.startRow <= targetRange.startRow && insertRange.endRow >= targetRange.endRow) {
-        if (
-            // 2
-            (targetRange.startColumn < insertRange.startColumn &&
-                targetRange.endColumn >= insertRange.startColumn &&
-                targetRange.endColumn <= insertRange.endColumn) ||
-            // 6
-            (targetRange.startColumn < insertRange.startColumn && targetRange.endColumn >= insertRange.endColumn)
-        ) {
-            const length = getLength(insertRange);
-            return { step: 0, length };
-        }
-
-        if (
-            // 3
-            (targetRange.startColumn >= insertRange.startColumn && targetRange.endColumn <= insertRange.endColumn) ||
-            // 4
-            (targetRange.startColumn > insertRange.startColumn &&
-                targetRange.startColumn <= insertRange.endColumn &&
-                targetRange.endColumn > insertRange.endColumn) ||
-            //5
-            targetRange.startColumn >= insertRange.endColumn
-        ) {
-            const step = getLength(insertRange);
-            return { step, length: 0 };
-        }
+    if (!(insertRange.startRow <= targetRange.startRow && insertRange.endRow >= targetRange.endRow)) {
+        return { step: 0, length: 0 };
     }
+
+    // expand range, that means insert new rows/cols in target range
+    if (
+        // 2
+        // Case 2: Overlap on the left side
+        // Target range starts before the insert range and ends within the insert range boundaries
+        // targetRange:  |----------|
+        // insertRange:         |-------|
+        // insertRange:
+        (targetRange.startColumn < insertRange.startColumn &&
+            targetRange.endColumn >= insertRange.startColumn &&
+            targetRange.endColumn <= insertRange.endColumn)
+        ||
+        // 6
+        // Case 6: Fully overlapping on both sides
+        // Target range starts before the insert range and ends after the insert range
+        // targetRange:  |----------------|
+        // insertRange:         |-------|
+        (targetRange.startColumn < insertRange.startColumn && targetRange.endColumn >= insertRange.endColumn)
+
+        // (targetRange.startColumn === insertRange.startColumn && targetRange.endColumn > insertRange.endColumn)
+    ) {
+        const length = getLength(insertRange);
+        return { step: 0, length };
+    }
+
+    // make range shifted backward, that means insert new rows/cols before target range
+    if (
+        // 3
+        // Case 3: Fully contained
+        // Target range is completely within the insert range
+        // targetRange:      |---|
+        // insertRange:    |-------|
+        (targetRange.startColumn >= insertRange.startColumn && targetRange.endColumn <= insertRange.endColumn) ||
+        // 4
+        // Case 4: Overlap on the right side
+        // Target range starts within the insert range and ends after the insert range
+        // targetRange:         |---------|
+        // insertRange:    |-------|
+        (targetRange.startColumn >= insertRange.startColumn &&
+            targetRange.startColumn <= insertRange.endColumn &&
+            targetRange.endColumn > insertRange.endColumn) ||
+        //5
+        // Case 5: No overlap (target range starts after the insert range ends)
+        // targetRange:                |-------|
+        // insertRange:    |-------|
+        targetRange.startColumn >= insertRange.endColumn
+
+    ) {
+        const step = getLength(insertRange);
+        return { step, length: 0 };
+    }
+
     return { step: 0, length: 0 };
 };
 

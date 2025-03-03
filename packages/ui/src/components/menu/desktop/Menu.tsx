@@ -216,20 +216,21 @@ interface IMenuItemProps {
 /** @deprecated */
 function MenuItem({ menuItem, onClick }: IMenuItemProps) {
     const menuManagerService = useDependency(IMenuManagerService);
-
     const disabled = useObservable<boolean>(menuItem.disabled$, false);
     const activated = useObservable<boolean>(menuItem.activated$, false);
     const hidden = useObservable(menuItem.hidden$, false);
     const value = useObservable<MenuItemDefaultValueType>(menuItem.value$);
-
     const item = menuItem as IDisplayMenuItem<IMenuSelectorItem>;
     const selectionsFromObservable = useObservable(isObservable(item.selections) ? item.selections : undefined);
     const [inputValue, setInputValue] = useState(value);
 
+    useEffect(() => {
+        setInputValue(value);
+    }, [value]);
+
     if (hidden) {
         return null;
     }
-
     /**
      * user input change value from CustomLabel
      * @param v

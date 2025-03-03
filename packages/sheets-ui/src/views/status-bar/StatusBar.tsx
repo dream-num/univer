@@ -15,13 +15,14 @@
  */
 
 import type { Nullable } from '@univerjs/core';
+import type { IUniverSheetsUIConfig } from '../../controllers/config.schema';
 import type { IStatusBarServiceStatus, StatusBarService } from '../../services/status-bar.service';
 import type { IStatisticItem } from './CopyableStatisticItem';
 import { debounce, IConfigService } from '@univerjs/core';
 import { clsx } from '@univerjs/design';
 import { useDependency } from '@univerjs/ui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { SHOW_STATUS_BAR_STATISTIC } from '../../controllers/config.schema';
+import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../controllers/config.schema';
 import { IStatusBarService } from '../../services/status-bar.service';
 import { CopyableStatisticItem } from './CopyableStatisticItem';
 import styles from './index.module.less';
@@ -31,7 +32,7 @@ const ROW_COUNT_THRESHOLD = 3;
 
 export const StatusBar = () => {
     const configService = useDependency(IConfigService);
-    const showStatistic = configService.getConfig<boolean>(SHOW_STATUS_BAR_STATISTIC) ?? true;
+    const showStatistic = configService.getConfig<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY)?.statusBarStatistic ?? true;
 
     const [isSingle, setIsSingle] = useState(window.innerWidth < SINGLE_MODE_WIDTH);
 

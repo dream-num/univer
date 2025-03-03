@@ -21,7 +21,6 @@ export const SHEETS_UI_PLUGIN_CONFIG_KEY = 'sheets-ui.config';
 
 export const configSymbol = Symbol(SHEETS_UI_PLUGIN_CONFIG_KEY);
 
-export const SHOW_STATUS_BAR_STATISTIC = Symbol('SHOW_STATUS_BAR_STATISTIC');
 export interface IUniverSheetsUIConfig {
     menu?: MenuConfig;
     disableAutoFocus?: true;

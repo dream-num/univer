@@ -16,7 +16,7 @@
 
 import type { DocumentDataModel, ICommand, INumberUnit, JSONXActions } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import { CommandType, ICommandService, IUniverInstanceService, JSONX, UniverInstanceType } from '@univerjs/core';
+import { CommandType, ICommandService, IUniverInstanceService, JSONX, TableRowHeightRule, UniverInstanceType } from '@univerjs/core';
 import { RichTextEditingMutation } from '@univerjs/docs';
 
 export interface IDocTableResizeColumnCommandParams {
@@ -76,7 +76,9 @@ export const DocTableResizeRowCommand: ICommand<IDocTableResizeRowCommandParams>
 
         resizeInfo.forEach((info) => {
             const actions = jsonX.replaceOp(['tableSource', tableId, 'tableRows', info.rowIndex, 'trHeight', 'val'], documentDataModel.getSnapshot().tableSource?.[tableId]?.tableRows?.[info.rowIndex]?.trHeight?.val, info.height);
-            actions && rawActions.push(...actions);
+            actions && rawActions.push(actions);
+            const actions2 = jsonX.replaceOp(['tableSource', tableId, 'tableRows', info.rowIndex, 'trHeight', 'hRule'], documentDataModel.getSnapshot().tableSource?.[tableId]?.tableRows?.[info.rowIndex]?.trHeight?.hRule, TableRowHeightRule.EXACT);
+            actions2 && rawActions.push(actions2);
         });
 
         return commandService.syncExecuteCommand(

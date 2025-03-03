@@ -15,9 +15,10 @@
  */
 
 import type { IMutation, IMutationCommonParams, JSONXActions, Nullable } from '@univerjs/core';
+import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import type { IDocStateChangeInfo } from '../../services/doc-state-emit.service';
 import { CommandType, IUniverInstanceService, JSONX } from '@univerjs/core';
-import { IRenderManagerService, type ITextRangeWithStyle } from '@univerjs/engine-render';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { DocSelectionManagerService } from '../../services/doc-selection-manager.service';
 import { DocSkeletonManagerService } from '../../services/doc-skeleton-manager.service';
 import { DocStateEmitService } from '../../services/doc-state-emit.service';
@@ -106,7 +107,6 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
                 docSelectionManagerService.replaceDocRanges(textRanges, { unitId, subUnitId: unitId }, isEditing, params.options);
             });
         }
-
         // Step 4: Emit state change event.
         const changeState: IDocStateChangeInfo = {
             commandId: RichTextEditingMutationId,

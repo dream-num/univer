@@ -78,6 +78,8 @@ export interface ITablePositionInfo {
     left: number;
     height: number;
     width: number;
+    minX: number;
+    maxX: number;
 }
 
 export const calcTablePositions = (documents: Documents, skeleton: DocumentSkeleton) => {
@@ -99,8 +101,9 @@ export const calcTablePositions = (documents: Documents, skeleton: DocumentSkele
             left: pageLeft,
             height,
             width,
+            minX: docsLeft + page.marginLeft,
+            maxX: docsLeft + page.pageWidth - page.marginRight,
         };
-
         tableData.rows.forEach((rowData) => {
             height += rowData.height;
             data.rowAccumulateHeight.push(height);

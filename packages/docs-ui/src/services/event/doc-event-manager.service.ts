@@ -336,7 +336,6 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
 
         this._bulletBounds = [];
         this._bulletBounds.push(...this._buildBulletBoundsBySegment());
-
         this._skeleton.getSkeletonData()?.pages.forEach((page, pageIndex) => {
             if (page.headerId) {
                 this._bulletBounds.push(...this._buildBulletBoundsBySegment(page.headerId, pageIndex));

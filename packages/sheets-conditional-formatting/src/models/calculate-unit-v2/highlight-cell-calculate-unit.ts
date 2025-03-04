@@ -84,7 +84,7 @@ export class HighlightCellCalculateUnit extends BaseCalculateUnit<Nullable<IConf
                     allValue.sort((a, b) => b - a);
                     const configRule = context.rule.rule as IRankHighlightCell;
                     const targetIndex = configRule.isPercent
-                        ? Math.floor(Math.max(Math.min(configRule.value, 100), 0) / 100 * allValue.length)
+                        ? Math.floor(Math.max(Math.min(configRule.value, 100), 0) / 100 * allValue.length) - (configRule.isBottom ? 1 : 0)
                         : Math.floor(Math.max(Math.min(configRule.isBottom ? (configRule.value - 1) : configRule.value, allValue.length), 0));
                     if (configRule.isBottom) {
                         return { value: allValue[allValue.length - targetIndex - 1], type: ruleConfig.subType };

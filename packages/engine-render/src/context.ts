@@ -34,6 +34,39 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
     constructor(context: CanvasRenderingContext2D) {
         this.canvas = context.canvas;
         this._context = context;
+
+        function debugCanvasFontChanges(ctx: CanvasRenderingContext2D): void {
+            // 保存原始的font属性描述符
+            const originalDescriptor = Object.getOwnPropertyDescriptor(
+                CanvasRenderingContext2D.prototype, 'font'
+            );
+
+            if (!originalDescriptor) return;
+
+            // 覆盖font属性
+            Object.defineProperty(CanvasRenderingContext2D.prototype, 'font', {
+                get() {
+                    return originalDescriptor.get?.call(this);
+                },
+                set(value) {
+                    console.error(`Canvas font changed to: ${value}`); // 打印堆栈跟踪
+                    return originalDescriptor.set?.call(this, value);
+                },
+                configurable: true,
+            });
+
+            // 可选：提供恢复原始行为的方法
+            (window as any).restoreCanvasFontBehavior = function () {
+                Object.defineProperty(
+                    CanvasRenderingContext2D.prototype,
+                    'font',
+                    originalDescriptor
+                );
+                console.log('Restored original canvas font behavior');
+            };
+        }
+
+        // debugCanvasFontChanges(context);
     }
 
     private _id: string;
@@ -216,6 +249,9 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
     }
 
     set font(val: string) {
+        if (this.canvas.height > 200) {
+            console.log('set font', val);
+        }
         this._context.font = val;
     }
 

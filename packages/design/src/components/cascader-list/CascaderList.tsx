@@ -44,10 +44,20 @@ export interface ICascaderListProps {
      * The callback function that is triggered when the value is changed
      */
     onChange: (value: string[]) => void;
+
+    /**
+     * The class name of the content
+     */
+    contentClassName?: string;
+
+    /**
+     * The class name of the wrapper
+     */
+    wrapperClassName?: string;
 }
 
 export function CascaderList(props: ICascaderListProps) {
-    const { value, options = [], onChange } = props;
+    const { value, options = [], onChange, contentClassName, wrapperClassName } = props;
 
     const { locale } = useContext(ConfigContext);
 
@@ -84,11 +94,11 @@ export function CascaderList(props: ICascaderListProps) {
     }
 
     return (
-        <section className={styles.cascaderList}>
+        <section className={clsx(styles.cascaderList, wrapperClassName)}>
             {activeOptions.map((options, index) =>
                 options.length
                     ? (
-                        <ul key={index} className={styles.cascaderListBoard}>
+                        <ul key={index} className={clsx(styles.cascaderListBoard, contentClassName)}>
                             {options.map((option) => (
                                 <li
                                     key={option.value}

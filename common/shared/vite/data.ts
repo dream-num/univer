@@ -55,6 +55,11 @@ export const peerDepsMap = {
         name: '@wendellhu/redi',
         version: '@wendellhu/redi',
     },
+    'monaco-editor': {
+        global: 'monaco',
+        name: 'monaco-editor',
+        version: '>=0.50.0',
+    },
     vue: {
         global: 'Vue',
         name: 'vue',

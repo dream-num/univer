@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.6.3](https://github.com/dream-num/univer/compare/v0.6.2...v0.6.3) (2025-03-04)
+
+
+### Bug Fixes
+
+* await posthog ([#4763](https://github.com/dream-num/univer/issues/4763)) ([d856140](https://github.com/dream-num/univer/commit/d8561401b8dd98c8af2ae5efc956d91abfeb04c7))
+* change config hide statistic to show statistic ([#4755](https://github.com/dream-num/univer/issues/4755)) ([d2fc935](https://github.com/dream-num/univer/commit/d2fc935bdd2eeff13584729617a8304f84e7adf0))
+* **sheets-formula-ui:** range selector callback not triggered ([#4758](https://github.com/dream-num/univer/issues/4758)) ([1dfb034](https://github.com/dream-num/univer/commit/1dfb03439afba43675d6e3daaac4909c47ccebaf))
+* **sheets-ui:** mac delete shortcut work error ([#4765](https://github.com/dream-num/univer/issues/4765)) ([aef6b87](https://github.com/dream-num/univer/commit/aef6b87219ccdd792c170560c92dc4252aacf57a))
+
+
+### Features
+
+* add multi rows& cols menu ([#4579](https://github.com/dream-num/univer/issues/4579)) ([4eed277](https://github.com/dream-num/univer/commit/4eed277c4a9996e1c81f5c92fb9b58bbea6c0290))
+* **facade:** get custom meta data ([#4759](https://github.com/dream-num/univer/issues/4759)) ([14543cc](https://github.com/dream-num/univer/commit/14543ccccdc5b847459146918b6ca3962b08a99b))
+* **sheets-ui:** add reactive user list for permission management ([#4760](https://github.com/dream-num/univer/issues/4760)) ([1bd2cca](https://github.com/dream-num/univer/commit/1bd2ccaa9fc6bcdccf4b38f14fa176b95dd66bbd))
+* supplement facade notes and example ([#4756](https://github.com/dream-num/univer/issues/4756)) ([2699cb9](https://github.com/dream-num/univer/commit/2699cb9b6aaedcc009e48ac1918271a35ca2242a))
+
 ## [0.6.2](https://github.com/dream-num/univer/compare/v0.6.1...v0.6.2) (2025-03-01)
 
 

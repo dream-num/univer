@@ -162,10 +162,6 @@ export class UniverSheetsUIPlugin extends Plugin {
             [SheetPermissionCheckUIController],
             [SheetPermissionRenderManagerController],
         ] as Dependency[], this._config.override));
-
-        touchDependencies(this._injector, [
-            [SheetPermissionInitUIController],
-        ]);
     }
 
     override onReady(): void {
@@ -184,6 +180,7 @@ export class UniverSheetsUIPlugin extends Plugin {
             [SheetsRenderService],
             [ActiveWorksheetController],
             [SheetPermissionCheckUIController],
+            [SheetPermissionInitUIController],
         ]);
     }
 

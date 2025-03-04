@@ -175,6 +175,10 @@ export interface IUnitExcludedCell {
     [unitId: string]: Nullable<{ [sheetId: string]: ObjectMatrix<boolean> }>;
 }
 
+export interface IUnitRowData {
+    [unitId: string]: Nullable<{ [sheetId: string]: IObjectArrayPrimitiveType<Partial<IRowData>> }>;
+}
+
 export interface IFormulaDatasetConfig {
     formulaData: IFormulaData;
     arrayFormulaCellData: IArrayFormulaUnitCellType;
@@ -191,6 +195,7 @@ export interface IFormulaDatasetConfig {
     unitStylesData?: IUnitStylesData;
     unitSheetNameMap?: IUnitSheetNameMap;
     maxIteration?: number;
+    rowData?: IUnitRowData; // Include rows hidden by filters
 }
 
 export enum ConcatenateType {

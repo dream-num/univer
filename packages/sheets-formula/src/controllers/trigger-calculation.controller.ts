@@ -22,8 +22,7 @@ import type {
     IExecutionInProgressParams,
     IFormulaDirtyData,
     ISetFormulaCalculationNotificationMutation,
-    ISetFormulaCalculationStartMutation,
-} from '@univerjs/engine-formula';
+    ISetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import type { IUniverSheetsFormulaBaseConfig } from './config.schema';
 import { Disposable, ICommandService, IConfigService, ILogService, Inject, LocaleService } from '@univerjs/core';
@@ -167,6 +166,17 @@ export class TriggerCalculationController extends Disposable {
     }
 
     private _commandExecutedListener() {
+        // The filtering information is not synchronized to the worker and must be passed in from the main thread each time
+        this.disposeWithMe(
+            this._commandService.beforeCommandExecuted((command: ICommandInfo) => {
+                if (command.id === SetFormulaCalculationStartMutation.id) {
+                    const params = command.params as ISetFormulaCalculationStartMutation;
+
+                    params.rowData = this._formulaDataModel.getHiddenRowsFiltered();
+                }
+            })
+        );
+
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo, options) => {
                 if (!this._activeDirtyManagerService.get(command.id)) {

@@ -27,9 +27,17 @@ export const SetCellEditVisibleOperation: IOperation<IEditorBridgeServiceVisible
         if (!params) {
             return false;
         }
-
+        const { unitId } = params;
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        if (!workbook) {
+            return false;
+        }
         const editorBridgeService = accessor.get(IEditorBridgeService);
-        editorBridgeService.changeVisible(params);
+        editorBridgeService.changeVisible({
+            ...params,
+            unitId: unitId ?? workbook.getUnitId(),
+        });
 
         return true;
     },

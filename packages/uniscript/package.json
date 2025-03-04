@@ -64,6 +64,7 @@
         "build": "univer-cli build"
     },
     "peerDependencies": {
+        "monaco-editor": ">=0.50.0",
         "react": ">=16.9.0 || >=17 || >=18 || >=19",
         "rxjs": ">=7.0.0"
     },

@@ -17,7 +17,7 @@
 import type { CDPSession } from '@playwright/test';
 import { createWriteStream } from 'node:fs';
 import { expect, test } from '@playwright/test';
-import { flushPosthog, reportToPosthog } from '../utils/report-performance';
+import { reportToPosthog, shutdownPosthog } from '../utils/report-performance';
 import { getMetrics } from './util';
 
 const MAX_UNIT_MEMORY_OVERFLOW = 1_000_000; // 1MB
@@ -30,11 +30,11 @@ const MAX_UNIVER_MEMORY_OVERFLOW = 6_000_000; // TODO@wzhudev: temporarily added
 
 const MAX_SECOND_INSTANCE_OVERFLOW = 110_000; // Only 100 KB
 
-interface HeapSnapshotChunk {
+interface IHeapSnapshotChunk {
     chunk: string;
 }
 
-interface HeapSnapshotProgress {
+interface IHeapSnapshotProgress {
     done: number;
     total: number;
     finished?: boolean;
@@ -45,8 +45,8 @@ async function takeHeapSnapshot(client: CDPSession, filename: string) {
         let isFinished = false;
         let error = null;
         let noChunkTimeout = null;
-        let chunkHandler = (_: HeapSnapshotChunk) => {};
-        let progressHandler = (_: HeapSnapshotProgress) => {};
+        let chunkHandler = (_: IHeapSnapshotChunk) => {};
+        let progressHandler = (_: IHeapSnapshotProgress) => {};
 
         // Cleanup function to remove listeners
         const cleanup = () => {
@@ -80,7 +80,7 @@ async function takeHeapSnapshot(client: CDPSession, filename: string) {
         };
 
         // Set up the chunk handler
-        chunkHandler = (payload: HeapSnapshotChunk) => {
+        chunkHandler = (payload: IHeapSnapshotChunk) => {
             try {
                 if (payload.chunk) {
                     file.write(payload.chunk);
@@ -95,7 +95,7 @@ async function takeHeapSnapshot(client: CDPSession, filename: string) {
         };
 
         // Set up the progress handler
-        progressHandler = (params: HeapSnapshotProgress) => {
+        progressHandler = (params: IHeapSnapshotProgress) => {
             if (params.finished) {
                 isFinished = true;
             }
@@ -136,7 +136,7 @@ test('memory', async ({ page }) => {
     await page.waitForTimeout(2000);
     const memoryAfterSecondLoad = (await getMetrics(page)).JSHeapUsedSize;
 
-    reportToPosthog('unit_memory_overflow', { value: memoryAfterSecondLoad - memoryAfterFirstLoad });
+    await reportToPosthog('unit_memory_overflow', { value: memoryAfterSecondLoad - memoryAfterFirstLoad });
     expect(memoryAfterSecondLoad - memoryAfterFirstLoad)
         .toBeLessThanOrEqual(MAX_UNIT_MEMORY_OVERFLOW);
 
@@ -154,15 +154,15 @@ test('memory', async ({ page }) => {
     await takeHeapSnapshot(client, 'memory-second.heapsnapshot');
 
     const memoryAfterDisposingSecondUniver = (await getMetrics(page)).JSHeapUsedSize;
-    reportToPosthog('instance_memory_overflow', { value: memoryAfterDisposingSecondUniver - memoryAfterDisposingFirstInstance });
+    await reportToPosthog('instance_memory_overflow', { value: memoryAfterDisposingSecondUniver - memoryAfterDisposingFirstInstance });
     expect(memoryAfterDisposingSecondUniver - memoryAfterDisposingFirstInstance)
         .toBeLessThanOrEqual(MAX_SECOND_INSTANCE_OVERFLOW);
 
-    reportToPosthog('univer_memory_overflow', { value: memoryAfterDisposingSecondUniver - memoryAfterFirstInstance });
+    await reportToPosthog('univer_memory_overflow', { value: memoryAfterDisposingSecondUniver - memoryAfterFirstInstance });
     expect(memoryAfterDisposingSecondUniver - memoryAfterFirstInstance)
         .toBeLessThanOrEqual(MAX_UNIVER_MEMORY_OVERFLOW);
 
-    flushPosthog();
+    await shutdownPosthog();
 });
 
 declare global {

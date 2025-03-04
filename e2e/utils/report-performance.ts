@@ -23,7 +23,8 @@ const GIT_HASH = process.env.GITHUB_SHA;
 
 let client: PostHog | null = null;
 
-export function reportToPosthog(event: string, properties: Record<string | number, any>) {
+// eslint-disable-next-line ts/no-explicit-any
+export async function reportToPosthog(event: string, properties: Record<string | number, any>) {
     if (!SHOULD_REPORT_TO_POSTHOG) {
         return;
     }
@@ -42,13 +43,13 @@ export function reportToPosthog(event: string, properties: Record<string | numbe
             git_hash: GIT_HASH,
         },
     });
+
+    await client.flush();
 }
 
-export function flushPosthog() {
+export async function shutdownPosthog() {
     if (client) {
-        client.flush();
-        client.shutdown();
-
+        await client.shutdown();
         client = null;
     }
 }

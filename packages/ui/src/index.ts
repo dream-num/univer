@@ -40,6 +40,7 @@ export {
 export { ShortcutPanelController } from './controllers/shortcut-display/shortcut-panel.controller';
 export { IUIController, type IWorkbenchOptions } from './controllers/ui/ui.controller';
 export { DesktopUIController } from './controllers/ui/ui-desktop.controller';
+export { SingleUnitUIController } from './controllers/ui/ui-shared.controller';
 export { UniverMobileUIPlugin } from './mobile-ui-plugin';
 export { DesktopBeforeCloseService, IBeforeCloseService } from './services/before-close/before-close.service';
 export { CopyCommand, CutCommand, PasteCommand, SheetPasteShortKeyCommandName } from './services/clipboard/clipboard.command';

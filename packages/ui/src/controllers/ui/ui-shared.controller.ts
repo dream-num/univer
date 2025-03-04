@@ -21,6 +21,9 @@ import { Disposable, isInternalEditorID, LifecycleStages } from '@univerjs/core'
 
 const STEADY_TIMEOUT = 3000;
 
+/**
+ * @ignore
+ */
 export abstract class SingleUnitUIController extends Disposable {
     protected _steadyTimeout: number;
     protected _renderTimeout: number;

@@ -37,7 +37,7 @@ export interface ISheetsFormulaUIMixin {
      *   initialValue: [{
      *     unitId,
      *     sheetName: fWorksheet.getSheetName(),
-     *     range: 'A1:B2'
+     *     range: { startColumn: 1, endColumn: 2, startRow: 1, endRow: 2 }
      *   }],
      *   maxRangeCount: 2,
      *   supportAcrossSheet: true,

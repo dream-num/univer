@@ -68,6 +68,11 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
+        "@univerjs/core": "workspace:*",
+        "@univerjs/design": "workspace:*",
+        "@univerjs/sheets": "workspace:*",
+        "@univerjs/sheets-ui": "workspace:*",
+        "@univerjs/ui": "workspace:*",
         "monaco-editor": "0.52.2"
     },
     "devDependencies": {

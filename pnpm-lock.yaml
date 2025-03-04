@@ -3259,6 +3259,21 @@ importers:
 
   packages/uniscript:
     dependencies:
+      '@univerjs/core':
+        specifier: workspace:*
+        version: link:../core
+      '@univerjs/design':
+        specifier: workspace:*
+        version: link:../design
+      '@univerjs/sheets':
+        specifier: workspace:*
+        version: link:../sheets
+      '@univerjs/sheets-ui':
+        specifier: workspace:*
+        version: link:../sheets-ui
+      '@univerjs/ui':
+        specifier: workspace:*
+        version: link:../ui
       monaco-editor:
         specifier: 0.52.2
         version: 0.52.2

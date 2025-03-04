@@ -15,7 +15,6 @@
  */
 
 import type { IShortcutItem } from '@univerjs/ui';
-import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY } from '@univerjs/core';
 import { BreakLineCommand, DeleteLeftCommand } from '@univerjs/docs-ui';
 
 import { DeviceInputEventType } from '@univerjs/engine-render';
@@ -137,7 +136,6 @@ export const EditorDeleteLeftShortcut: IShortcutItem = {
     preconditions: (contextService) =>
         whenEditorActivated(contextService) || whenFormulaEditorFocused(contextService),
     binding: KeyCode.BACKSPACE,
-    mac: KeyCode.DELETE,
 };
 
 export const EditorDeleteLeftShortcutInActive: IShortcutItem = {
@@ -150,6 +148,5 @@ export const EditorDeleteLeftShortcutInActive: IShortcutItem = {
         visible: true,
         eventType: DeviceInputEventType.Keyboard,
         keycode: KeyCode.BACKSPACE,
-        unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     },
 };

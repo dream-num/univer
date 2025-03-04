@@ -90,7 +90,7 @@ export class RowHeaderLayout extends SheetExtension {
         if (rowStyle.textBaseline) ctx.textBaseline = rowStyle.textBaseline;
         if (rowStyle.fontColor) ctx.fillStyle = rowStyle.fontColor;
         if (rowStyle.borderColor) ctx.strokeStyle = rowStyle.borderColor;
-        if (rowStyle.fontSize) ctx.font = `${rowStyle.fontSize}px ${DEFAULT_FONTFACE_PLANE}`;
+        // if (rowStyle.fontSize) ctx.font = `${rowStyle.fontSize}px ${DEFAULT_FONTFACE_PLANE}`;
     }
 
     // eslint-disable-next-line max-lines-per-function

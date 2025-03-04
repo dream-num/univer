@@ -18,7 +18,7 @@ import type { IScale } from '@univerjs/core';
 import type { IDocumentSkeletonGlyph } from '../../../basics/i-document-skeleton-cached';
 import type { UniverRenderingContext } from '../../../context';
 import { BaselineOffset, getColorStyle } from '@univerjs/core';
-import { GlyphType, hasCJK } from '../../../basics';
+import { fontStringPtToPx, GlyphType, hasCJK } from '../../../basics';
 import { COLOR_BLACK_RGB } from '../../../basics/const';
 import { Vector2 } from '../../../basics/vector2';
 import { CheckboxShape } from '../../../shape';
@@ -29,12 +29,79 @@ const UNIQUE_KEY = 'DefaultDocsFontAndBaseLineExtension';
 
 const DOC_EXTENSION_Z_INDEX = 20;
 
+export function fontStringPtToPx(fontString: string): string {
+    const ptRegex = /(\d+)pt/;
+    const match = fontString.match(ptRegex);
+
+    if (match) {
+        const ptValue = Number.parseInt(match[1], 10);
+
+        const pxValue = Number.parseFloat((ptValue * (4 / 3)).toFixed(4)); ;
+
+        const newFontString = fontString.replace(ptRegex, `${pxValue}px`);
+        return newFontString;
+    } else {
+        return fontString;
+    }
+}
+
+/**
+ * 规范化字体字符串，移除默认的'normal'值
+ * @param fontString 原始字体字符串
+ * @returns 规范化后的字体字符串
+ */
+export function normalizeFontString(fontString: string): string {
+  // 分割字体字符串为组件
+    const parts = fontString.trim().split(/\s+/);
+    const normalizedParts: string[] = [];
+
+    let fontSizeFound = false;
+
+  // 遍历并处理每个部分
+    for (let i = 0; i < parts.length; i++) {
+        const part = parts[i];
+
+    // 检查是否已找到字体大小（包含px, pt, em等）
+        if (/^(\d+(\.\d+)?(px|pt|em|rem|%|vh|vw|vmin|vmax))$/i.test(part)) {
+            fontSizeFound = true;
+            normalizedParts.push(part);
+            continue;
+        }
+
+    // 如果已找到字体大小，后面的都是字体族名称
+        if (fontSizeFound) {
+            normalizedParts.push(part);
+            continue;
+        }
+
+    // 跳过'normal'值
+        if (part.toLowerCase() === 'normal') {
+            continue;
+        }
+
+    // 保留其他值（如'italic', 'bold', 'small-caps'等）
+        normalizedParts.push(part);
+    }
+
+    return normalizedParts.join(' ');
+}
+
+/**
+ * Singleton
+ */
 export class FontAndBaseLine extends docExtension {
     override uKey = UNIQUE_KEY;
 
     override Z_INDEX = DOC_EXTENSION_Z_INDEX;
 
     private _preFontColor = '';
+
+    actualFontMap: Record<string, string> = {}; // 字体映射
+
+    constructor() {
+        super();
+        console.log('FontAndBaseLine');
+    }
 
     override draw(ctx: UniverRenderingContext, parentScale: IScale, glyph: IDocumentSkeletonGlyph) {
         const line = glyph.parent?.parent;
@@ -55,8 +122,20 @@ export class FontAndBaseLine extends docExtension {
             return;
         }
 
-        if (ctx.font !== fontStyle?.fontString) {
-            ctx.font = fontStyle?.fontString || '';
+        // const fontStringPxStr = normalizeFontString(fontStringPtToPx(fontStyle?.fontString || ''));
+        // if (!(glyph.raw === '\r' || glyph.raw === '\n' || glyph.raw === ' ')) {
+        //     // if (ctx.font !== fontStringPxStr) {
+        //     ctx.font = fontStringPxStr;
+        //     console.log('fontStringPxStr', fontStringPxStr, glyph.raw, 'height::', ctx.canvas.height);
+        //     // }
+        // }
+        if (fontStyle && fontStyle.fontString) {
+            if (!(glyph.raw === '\r' || glyph.raw === '\n' || glyph.raw === ' ')) {
+                if (this.actualFontMap[fontStyle.fontString] !== ctx.font || true) {
+                    ctx.font = fontStyle.fontString;
+                    this.actualFontMap[fontStyle.fontString] = ctx.font;
+                }
+            }
         }
 
         const { cl: colorStyle, va: baselineOffset } = textStyle;

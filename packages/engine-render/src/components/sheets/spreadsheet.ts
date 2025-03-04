@@ -474,6 +474,7 @@ export class Spreadsheet extends SheetComponent {
 
         const pixelRatio = cacheCanvas.getPixelRatio();
         const cacheCtx = cacheCanvas.getContext();
+        console.log('spreadsheet, font', cacheCanvas.getContext().font);
         cacheCtx.save();
         ctx.save();
         ctx.setTransform(1, 0, 0, 1, 0, 0);

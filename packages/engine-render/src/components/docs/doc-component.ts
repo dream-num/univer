@@ -82,7 +82,7 @@ export abstract class DocComponent extends RenderComponent<
         }
     }
 
-    override render(mainCtx: UniverRenderingContext, bounds?: IViewportInfo) {
+    override render(mainCtx: UniverRenderingContext, bounds?: Partial<IViewportInfo>) {
         if (!this.visible) {
             this.makeDirty(false);
             return this;
@@ -146,5 +146,5 @@ export abstract class DocComponent extends RenderComponent<
         return false;
     }
 
-    protected abstract _draw(ctx: UniverRenderingContext, bounds?: IViewportInfo): void;
+    protected abstract _draw(ctx: UniverRenderingContext, bounds?: Partial<IViewportInfo>): void;
 }

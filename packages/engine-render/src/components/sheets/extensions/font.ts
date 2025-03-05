@@ -18,6 +18,7 @@
 /* eslint-disable complexity */
 
 import type { ICellDataForSheetInterceptor, ICellWithCoord, IDocDrawingBase, ImageSourceType, IRange, IScale, Nullable, ObjectMatrix } from '@univerjs/core';
+import type { IBoundRectNoAngle, IViewportInfo } from '../../../basics';
 import type { UniverRenderingContext } from '../../../context';
 import type { Documents } from '../../docs/document';
 import type { IDrawInfo } from '../../extension';
@@ -475,7 +476,14 @@ export class Font extends SheetExtension {
 
         documentSkeleton.makeDirty(false);
         documents.resize(cellWidth, cellHeight);
-        documents.changeSkeleton(documentSkeleton).render(ctx);
+        documents.changeSkeleton(documentSkeleton).render(ctx, {
+            viewBound: {
+                left: 0,
+                top: 0,
+                right: cellWidth,
+                bottom: cellHeight,
+            } as IBoundRectNoAngle,
+        } as Partial<IViewportInfo>);
     }
 
     private _clipRectangleForOverflow(

@@ -20,6 +20,6 @@ export function isTextFormat(pattern: string | undefined) {
     return pattern === DEFAULT_TEXT_FORMAT || pattern === DEFAULT_TEXT_FORMAT_EXCEL;
 }
 
-export function isDefaultFormat(pattern: string | undefined | null) {
+export function isDefaultFormat(pattern?: string | null) {
     return pattern === null || pattern === undefined || pattern === DEFAULT_NUMBER_FORMAT;
 }

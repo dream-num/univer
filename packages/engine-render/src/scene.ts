@@ -175,6 +175,21 @@ export class Scene extends Disposable {
         return this._evented;
     }
 
+    /**
+     * If scene.event is disabled, scene.pick(cursor Pos) return null.
+     * Then only scene itself can response to pointer event, all objects under the scene would not.
+     * see sceneInputManager@_onPointerMove
+     */
+    // 禁用对象事件
+    disableObjectsEvent() {
+        // 将_evented属性设置为false
+        this._evented = false;
+    }
+
+    enableObjectsEvent() {
+        this._evented = true;
+    }
+
     set transform(trans: Transform) {
         this._transform = trans;
     }
@@ -1232,21 +1247,6 @@ export class Scene extends Disposable {
             vp.resetCanvasSizeAndUpdateScroll();
         });
         this.makeDirty(true);
-    }
-
-    /**
-     * If scene.event is disabled, scene.pick(cursor Pos) return null.
-     * Then only scene itself can response to pointer event, all objects under the scene would not.
-     * see sceneInputManager@_onPointerMove
-     */
-    // 禁用对象事件
-    disableObjectsEvent() {
-        // 将_evented属性设置为false
-        this._evented = false;
-    }
-
-    enableObjectsEvent() {
-        this._evented = true;
     }
 
     _capturedObject: BaseObject | null = null;

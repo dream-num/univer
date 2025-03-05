@@ -53,3 +53,4 @@ export { render, unmount } from './helper/react-dom';
 export { isBrowser } from './helper/is-browser';
 export { DropdownMenu, type IDropdownProps } from './components/dropdown-menu';
 export { Separator } from './components/separator';
+export { DateRangePicker } from './components/date-range-picker';

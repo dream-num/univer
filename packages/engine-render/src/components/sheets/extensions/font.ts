@@ -17,7 +17,7 @@
 /* eslint-disable max-lines-per-function */
 /* eslint-disable complexity */
 
-import type { ICellWithCoord, IDocDrawingBase, ImageSourceType, IRange, IScale, Nullable, ObjectMatrix } from '@univerjs/core';
+import type { ICellDataForSheetInterceptor, ICellWithCoord, IDocDrawingBase, ImageSourceType, IRange, IScale, Nullable, ObjectMatrix } from '@univerjs/core';
 import type { UniverRenderingContext } from '../../../context';
 import type { Documents } from '../../docs/document';
 import type { IDrawInfo } from '../../extension';
@@ -214,7 +214,7 @@ export class Font extends SheetExtension {
         // Since we cannot predict when fontRenderExtension?.isSkip might change,
         // we must check it every time and retrieve cell data directly from the worksheet,
         // not from the cache to ensure accuracy.
-        const cellData = spreadsheetSkeleton.worksheet.getCell(row, col) as ICellDataForSheetInterceptor || {};        
+        const cellData = spreadsheetSkeleton.worksheet.getCell(row, col) as ICellDataForSheetInterceptor || {};
         if (cellData?.fontRenderExtension?.isSkip) {
             return true;
         }
@@ -329,7 +329,7 @@ export class Font extends SheetExtension {
      * @param col
      * @param fontCache
      */
-    private _setFontRenderBounds(renderFontContext: IRenderFontContext, row: number, col: number, padding = 0) {
+    private _clipByRenderBounds(renderFontContext: IRenderFontContext, row: number, col: number, padding = 0) {
         const { ctx, scale, overflowRectangle, rowHeightAccumulation, columnWidthAccumulation, fontCache } = renderFontContext;
         let { startX, endX, startY, endY } = renderFontContext;
 

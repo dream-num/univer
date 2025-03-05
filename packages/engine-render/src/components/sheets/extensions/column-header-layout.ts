@@ -92,7 +92,7 @@ export class ColumnHeaderLayout extends SheetExtension {
         if (columnStyle.textBaseline) ctx.textBaseline = columnStyle.textBaseline;
         if (columnStyle.fontColor) ctx.fillStyle = columnStyle.fontColor;
         if (columnStyle.borderColor) ctx.strokeStyle = columnStyle.borderColor;
-        // if (columnStyle.fontSize) ctx.font = `${columnStyle.fontSize}px ${DEFAULT_FONTFACE_PLANE}`;
+        if (columnStyle.fontSize) ctx.font = `${columnStyle.fontSize}px ${DEFAULT_FONTFACE_PLANE}`;
     }
 
     // eslint-disable-next-line max-lines-per-function

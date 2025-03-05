@@ -111,7 +111,6 @@ export const SetRangeValuesCommand: ICommand = {
         const result = sequenceExecute([...redos], commandService);
         if (result.result) {
             const selectionOperation = followSelectionOperation(range ?? cellValue.getRange(), workbook, worksheet);
-
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
                 undoMutations: [

@@ -621,7 +621,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
         if (res) {
             const isValid = await this._sheetInterceptorService.onValidateCell(workbook, worksheet, row, column);
             if (isValid === false) {
-                this._undoRedoService.popRedo();
+                this._undoRedoService.cancelLastRedo(unitId);
             }
         }
     }

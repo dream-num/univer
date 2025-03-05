@@ -49,7 +49,7 @@ export interface IUndoRedoService {
     popUndoToRedo(): void;
     popRedoToUndo(): void;
 
-    popRedo(): Nullable<IUndoRedoItem>;
+    cancelLastRedo(unitId?: string): Nullable<IUndoRedoItem>;
 
     clearUndoRedo(unitId: string): void;
 
@@ -273,9 +273,9 @@ export class LocalUndoRedoService extends Disposable implements IUndoRedoService
         }
     }
 
-    popRedo(): void {
-        const unitId = this._getFocusedUnitId();
-        const stack = this._getRedoStack(unitId);
+    cancelLastRedo(unitID?: string): void {
+        const unitId = unitID || this._getFocusedUnitId();
+        const stack = this._getUndoStack(unitId);
         const item = stack?.pop();
         if (item) {
             sequenceExecute(item.undoMutations, this._commandService);

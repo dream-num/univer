@@ -65,7 +65,7 @@ export class FontAndBaseLine extends docExtension {
     }
 
     // invoked by document.ts
-    override draw(ctx: UniverRenderingContext, _parentScale: IScale, glyph: IDocumentSkeletonGlyph, _diffBounds?: IBoundRectNoAngle, more?: IDrawInfo) {
+    override draw(ctx: UniverRenderingContext, _parentScale: IScale, glyph: IDocumentSkeletonGlyph, _?: IBoundRectNoAngle, more?: IDrawInfo) {
         // _parentScale: IScale, _skeleton: T, _diffBounds?: V, _more?: IDrawInfo
 
         const line = glyph.parent?.parent;

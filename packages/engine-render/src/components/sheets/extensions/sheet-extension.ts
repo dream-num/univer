@@ -54,21 +54,6 @@ export class SheetExtension extends ComponentExtension<SpreadsheetSkeleton, SHEE
         return false;
     }
 
-    // isRenderDiffRangesByColumn(column: number, diffRanges?: IRange[]) {
-    //     if (diffRanges == null || diffRanges.length === 0) {
-    //         return true;
-    //     }
-
-    //     for (const range of diffRanges) {
-    //         const { startColumn, endColumn } = range;
-    //         if (column >= startColumn && column <= endColumn) {
-    //             return true;
-    //         }
-    //     }
-
-    //     return false;
-    // }
-
     isRenderDiffRangesByColumn(curStartColumn: number, curEndColumn: number, diffRanges?: IRange[]) {
         if (diffRanges == null || diffRanges.length === 0) {
             return true;

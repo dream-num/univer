@@ -60,6 +60,7 @@ import {
     isWhiteColor,
     LocaleService,
     ObjectMatrix,
+    Range,
     searchArray,
     SheetSkeleton,
     Tools,
@@ -1152,11 +1153,6 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         for (let i = 0; i < ranges.length; i++) {
             const range = ranges[i];
             Range.foreach(range, (row, col) => {
-                if (row == 12 && col == 5) {
-                    window.resetC125 = true;
-                    // console.log('resetRangeCache 12, 5');
-                }
-                this._cachedCellMatrix.setValue(row, col, undefined);
                 this._stylesCache.fontMatrix.realDeleteValue(row, col);
             });
         }

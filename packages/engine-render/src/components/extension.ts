@@ -56,7 +56,7 @@ export class ComponentExtension<T, U, V> {
         return this.Z_INDEX;
     }
 
-    draw(_ctx: UniverRenderingContext, _parentScale: IScale, _skeleton: T, _diffBounds?: V, _more?: IDrawInfo) {
+    draw(_ctx: UniverRenderingContext, _parentScale: IScale, _skeleton: T, _diff?: V, _more?: IDrawInfo) {
         /* abstract */
     }
 

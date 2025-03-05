@@ -1258,8 +1258,9 @@ export class Scene extends Disposable {
     }
 
     /**
+     * Disable scene.event
      * If scene.event is disabled, scene.pick(cursor Pos) return null.
-     * Then only scene itself can response to pointer event, all objects under the scene would not.
+     * After disableObjectsEvent, only the scene itself can respond to pointer events; objects beneath the scene will not.
      * see sceneInputManager@_onPointerMove
      */
     // 禁用对象事件

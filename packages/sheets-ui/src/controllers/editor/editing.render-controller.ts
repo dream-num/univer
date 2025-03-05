@@ -601,11 +601,12 @@ export class EditingRenderController extends Disposable implements IRenderModule
             return;
         }
 
-        const finalCell = await this._sheetInterceptorService.onWriteCell(workbook, worksheet, row, column, cellData);
+        const finalCell = this._sheetInterceptorService.onWriteCell(workbook, worksheet, row, column, cellData);
         if (finalCell === worksheet.getCellRaw(row, column)) {
             return;
         }
-        this._commandService.executeCommand(SetRangeValuesCommand.id, {
+
+        const res = this._commandService.syncExecuteCommand(SetRangeValuesCommand.id, {
             subUnitId: sheetId,
             unitId,
             range: {
@@ -614,8 +615,15 @@ export class EditingRenderController extends Disposable implements IRenderModule
                 endRow: row,
                 endColumn: column,
             },
-            value: finalCell,
+            value: cellData,
         });
+
+        if (res) {
+            const isValid = await this._sheetInterceptorService.onValidateCell(workbook, worksheet, row, column);
+            if (isValid === false) {
+                this._undoRedoService.popRedo();
+            }
+        }
     }
 
     private _exitInput(param: IEditorBridgeServiceVisibleParam) {

@@ -16,7 +16,7 @@
 
 import type { DocumentDataModel, ICellData, ICommand, IMutationInfo } from '@univerjs/core';
 import type { ICellLinkContent } from '../../types/interfaces/i-hyper-link';
-import { CellValueType, CommandType, CustomRangeType, generateRandomId, getBodySlice, ICommandService, IUndoRedoService, IUniverInstanceService, sequenceExecuteAsync, TextX, Tools, UniverInstanceType } from '@univerjs/core';
+import { CellValueType, CommandType, CustomRangeType, generateRandomId, getBodySlice, ICommandService, IUndoRedoService, IUniverInstanceService, sequenceExecute, TextX, Tools, UniverInstanceType } from '@univerjs/core';
 import { replaceSelectionFactory } from '@univerjs/docs';
 import { getSheetCommandTarget, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory, SheetInterceptorService } from '@univerjs/sheets';
 import { HyperLinkModel } from '../../models/hyper-link.model';
@@ -107,7 +107,7 @@ export const UpdateHyperLinkCommand: ICommand<IUpdateHyperLinkCommandParams> = {
             t: CellValueType.STRING,
         };
 
-        const finalCellData = await interceptorService.onWriteCell(workbook, worksheet, row, column, newCellData);
+        const finalCellData = interceptorService.onWriteCell(workbook, worksheet, row, column, newCellData);
 
         const redo = {
             id: SetRangeValuesMutation.id,
@@ -149,8 +149,13 @@ export const UpdateHyperLinkCommand: ICommand<IUpdateHyperLinkCommandParams> = {
             });
         }
 
-        const res = await sequenceExecuteAsync(redos, commandService);
+        const res = sequenceExecute(redos, commandService);
         if (res) {
+            const isValid = await interceptorService.onValidateCell(workbook, worksheet, row, column);
+            if (isValid === false) {
+                sequenceExecute(undos, commandService);
+                return false;
+            }
             undoRedoService.pushUndoRedo({
                 redoMutations: redos,
                 undoMutations: undos,

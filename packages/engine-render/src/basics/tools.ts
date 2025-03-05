@@ -475,7 +475,6 @@ export function pxToPt(px: number) {
     return px * (BENCHMARK_DPI / getDPI());
 }
 
-
 // pxToMM
 export function ptToMM(px: number) {
     return px * (getDPI() / BENCHMARK_CONVERT_MM);

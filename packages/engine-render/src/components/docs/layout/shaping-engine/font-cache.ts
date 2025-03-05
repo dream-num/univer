@@ -246,7 +246,6 @@ export class FontCache {
         if (mtc != null) {
             return mtc;
         }
-        console.log('measure ctx.font = ', fontString, ctx.canvas.height);
         ctx.font = fontString;
 
         const textMetrics = ctx.measureText(content);

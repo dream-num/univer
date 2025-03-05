@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import type { ICommandService } from '../services/command/command.service';
 import { merge, timer } from 'rxjs';
 import { debounceTime, filter, first } from 'rxjs/operators';
-import type { ICommandService } from '../services/command/command.service';
 import { CommandType } from '../services/command/command.service';
 import { fromCallback } from './rxjs';
 

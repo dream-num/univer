@@ -553,13 +553,13 @@ export class EditingRenderController extends Disposable implements IRenderModule
 
         if (snapshot) {
             const res = await this._submitCellData(snapshot);
-            // if the submit was rejected, don't move cursor
+            // if the submit was rejected, don't move selection
             if (res === false) {
                 return;
             }
         }
 
-        // moveCursor need to put behind of SetRangeValuesCommand, fix https://github.com/dream-num/univer/issues/1155
+        // moveSelection need to put behind of SetRangeValuesCommand, fix https://github.com/dream-num/univer/issues/1155
         this._moveSelection(keycode);
     }
 

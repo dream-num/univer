@@ -15,8 +15,10 @@
  */
 
 import type { IScale } from '@univerjs/core';
+import type { IBoundRectNoAngle } from '../../../basics';
 import type { IDocumentSkeletonGlyph } from '../../../basics/i-document-skeleton-cached';
 import type { UniverRenderingContext } from '../../../context';
+import type { IDrawInfo } from '../../extension';
 import { BaselineOffset, getColorStyle } from '@univerjs/core';
 import { GlyphType, hasCJK } from '../../../basics';
 import { COLOR_BLACK_RGB } from '../../../basics/const';
@@ -62,7 +64,10 @@ export class FontAndBaseLine extends docExtension {
         super();
     }
 
-    override draw(ctx: UniverRenderingContext, parentScale: IScale, glyph: IDocumentSkeletonGlyph) {
+    // invoked by document.ts
+    override draw(ctx: UniverRenderingContext, _parentScale: IScale, glyph: IDocumentSkeletonGlyph, _diffBounds?: IBoundRectNoAngle, more?: IDrawInfo) {
+        // _parentScale: IScale, _skeleton: T, _diffBounds?: V, _more?: IDrawInfo
+
         const line = glyph.parent?.parent;
         if (!line) {
             return;
@@ -71,6 +76,14 @@ export class FontAndBaseLine extends docExtension {
         const { ts: textStyle, content, fontStyle, bBox } = glyph;
 
         const { spanPointWithFont = Vector2.create(0, 0) } = this.extensionOffset;
+
+        if (more) {
+            if (more.viewBound) {
+                if (spanPointWithFont.x > more.viewBound.right || spanPointWithFont.y > more.viewBound.bottom) {
+                    return;
+                }
+            }
+        }
 
         if (content == null) {
             return;

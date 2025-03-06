@@ -17,7 +17,7 @@
 import type { ICommandInfo, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import type { ISetFormulaCalculationNotificationMutation } from '@univerjs/engine-formula';
 import type { IAfterRender$Info, IBasicFrameInfo, IExtendFrameInfo, IRenderContext, IRenderModule, ISummaryFrameInfo, ISummaryMetric, ITimeMetric, IViewportInfos, Scene } from '@univerjs/engine-render';
-import { CommandType, ICommandService, Inject, Injector, Optional, Rectangle, RxDisposable } from '@univerjs/core';
+import { CommandType, ICommandService, Inject, Optional, Rectangle, RxDisposable } from '@univerjs/core';
 import { SetFormulaCalculationNotificationMutation } from '@univerjs/engine-formula';
 import {
     Rect,
@@ -61,14 +61,12 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
     renderMetric$ = this._renderMetric$.asObservable();
     constructor(
         private readonly _context: IRenderContext<Workbook>,
-        @Inject(Injector) private readonly _injector: Injector,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @Inject(SheetsRenderService) private readonly _sheetRenderService: SheetsRenderService,
         @ICommandService private readonly _commandService: ICommandService,
         @Optional(ITelemetryService) private readonly _telemetryService?: ITelemetryService
     ) {
         super();
-        window._injector = this._injector;
         this._addNewRender();
         this._initRenderMetricSubscriber();
     }

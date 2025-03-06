@@ -92,7 +92,7 @@ export class HighlightCellCalculateUnit extends BaseCalculateUnit<Nullable<IConf
                         const threshold = Tools.clamp(configRule.value, 0, 100) / 100;
                         const targetIndex = Math.floor(threshold * allValue.length);
                         // Ensure the index is within bounds
-                        const safeIndex = Math.min(Math.max(targetIndex - 1, 0), allValue.length - 1);
+                        const safeIndex = Tools.clamp(targetIndex - 1, 0, allValue.length - 1);
                         return { value: allValue[safeIndex], type: ruleConfig.subType };
                     }
 

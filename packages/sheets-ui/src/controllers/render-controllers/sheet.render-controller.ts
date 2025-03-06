@@ -146,6 +146,7 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
     }
 
     private _renderMetricCapture(frameInfoList: IExtendFrameInfo[]) {
+        if (!this._telemetryService) return;
         const filteredFrameInfo = frameInfoList;//.filter((info) => info.scrolling);
         if (filteredFrameInfo.length === 0) return;
 
@@ -207,7 +208,7 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
         const sheetId = this._context.unit.getActiveSheet().getSheetId();
         const unitId = this._context.unit.getUnitId();
         const telemetryData = { sheetId, unitId, elapsedTimeToStart, ...summaryFrameStats };
-        this._telemetryService!.capture('sheet_render_cost', telemetryData);
+        this._telemetryService.capture('sheet_render_cost', telemetryData);
     }
 
     private _addComponent(workbook: Workbook) {

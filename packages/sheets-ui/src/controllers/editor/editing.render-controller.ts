@@ -35,6 +35,7 @@ import {
     FOCUSING_EDITOR_INPUT_FORMULA,
     FOCUSING_EDITOR_STANDALONE,
     FOCUSING_FX_BAR_EDITOR,
+    generateRandomId,
     ICommandService,
     IContextService,
     Inject,
@@ -610,6 +611,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
             return true;
         }
 
+        const redoUndoId = generateRandomId(6);
         const res = this._commandService.syncExecuteCommand(SetRangeValuesCommand.id, {
             subUnitId: sheetId,
             unitId,
@@ -620,12 +622,13 @@ export class EditingRenderController extends Disposable implements IRenderModule
                 endColumn: column,
             },
             value: cellData,
+            redoUndoId,
         });
 
         if (res) {
             const isValid = await this._sheetInterceptorService.onValidateCell(workbook, worksheet, row, column);
             if (isValid === false) {
-                this._undoRedoService.cancelLastRedo(unitId);
+                this._undoRedoService.rollback(redoUndoId, unitId);
                 return false;
             }
         }

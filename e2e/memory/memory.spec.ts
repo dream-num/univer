@@ -21,14 +21,12 @@ import { reportToPosthog, shutdownPosthog } from '../utils/report-performance';
 import { getMetrics } from './util';
 
 const MAX_UNIT_MEMORY_OVERFLOW = 1_000_000; // 1MB
+const MAX_SECOND_INSTANCE_OVERFLOW = 20_000; // 200 KB
 
 // There are some compiled code and global cache, so we make some room
 // for this. But we need to make sure that a Univer object cannot fit
 // in this size.
-const MAX_UNIVER_MEMORY_OVERFLOW = 6_000_000; // TODO@wzhudev: temporarily added 300KB
-// there is a memory leak in the univer object, so we need to make sure that
-
-const MAX_SECOND_INSTANCE_OVERFLOW = 110_000; // Only 100 KB
+const MAX_UNIVER_MEMORY_OVERFLOW = 6_000_000;
 
 interface IHeapSnapshotChunk {
     chunk: string;

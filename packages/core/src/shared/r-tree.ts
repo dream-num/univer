@@ -243,7 +243,7 @@ export class RTree {
         }
     }
 
-    *searchGenerator(search: IUnitRange): IterableIterator<StringOrNumber> {
+    * searchGenerator(search: IUnitRange): IterableIterator<StringOrNumber> {
         const { unitId, sheetId: subUnitId, range } = search;
 
         if (this._enableOneCellCache) {

@@ -23,6 +23,13 @@ const GIT_HASH = process.env.GITHUB_SHA;
 
 let client: PostHog | null = null;
 
+/**
+ * Report an event to PostHog. For Univer members, you can visit https://us.posthog.com/project/133116/dashboard/332238
+ * for the dashboard.
+ * @param event
+ * @param properties
+ * @returns {Promise<void>} A promise that resolves when the event is reported.
+ */
 // eslint-disable-next-line ts/no-explicit-any
 export async function reportToPosthog(event: string, properties: Record<string | number, any>) {
     if (!SHOULD_REPORT_TO_POSTHOG) {

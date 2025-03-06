@@ -21,14 +21,12 @@ import { reportToPosthog, shutdownPosthog } from '../utils/report-performance';
 import { getMetrics } from './util';
 
 const MAX_UNIT_MEMORY_OVERFLOW = 1_000_000; // 1MB
+const MAX_SECOND_INSTANCE_OVERFLOW = 200_000; // 200 KB
 
 // There are some compiled code and global cache, so we make some room
 // for this. But we need to make sure that a Univer object cannot fit
 // in this size.
-const MAX_UNIVER_MEMORY_OVERFLOW = 6_000_000; // TODO@wzhudev: temporarily added 300KB
-// there is a memory leak in the univer object, so we need to make sure that
-
-const MAX_SECOND_INSTANCE_OVERFLOW = 110_000; // Only 100 KB
+const MAX_UNIVER_MEMORY_OVERFLOW = 6_000_000;
 
 interface IHeapSnapshotChunk {
     chunk: string;
@@ -124,45 +122,37 @@ test('memory', async ({ page }) => {
     const client = await page.context().newCDPSession(page);
 
     await page.goto('http://localhost:3000/sheets/');
-    await page.waitForTimeout(2000);
-
+    await page.waitForTimeout(5000);
     const memoryAfterFirstInstance = (await getMetrics(page)).JSHeapUsedSize;
 
     await page.evaluate(() => window.E2EControllerAPI.loadAndRelease(1));
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(5000);
     const memoryAfterFirstLoad = (await getMetrics(page)).JSHeapUsedSize;
-
     await page.evaluate(() => window.E2EControllerAPI.loadAndRelease(2));
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(5000);
     const memoryAfterSecondLoad = (await getMetrics(page)).JSHeapUsedSize;
-
-    await reportToPosthog('unit_memory_overflow', { value: memoryAfterSecondLoad - memoryAfterFirstLoad });
-    expect(memoryAfterSecondLoad - memoryAfterFirstLoad)
-        .toBeLessThanOrEqual(MAX_UNIT_MEMORY_OVERFLOW);
+    const unitMemoryOverflow = memoryAfterSecondLoad - memoryAfterFirstLoad;
+    await reportToPosthog('unit_memory_overflow', { value: unitMemoryOverflow });
 
     await page.evaluate(() => window.univer.dispose());
-    await page.waitForTimeout(2000);
-
+    await page.waitForTimeout(5000);
     await takeHeapSnapshot(client, 'memory-first.heapsnapshot');
-
     const memoryAfterDisposingFirstInstance = (await getMetrics(page)).JSHeapUsedSize;
     await page.evaluate(() => window.createNewInstance());
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(5000);
     await page.evaluate(() => window.univer.dispose());
-    await page.waitForTimeout(2000);
-
+    await page.waitForTimeout(5000);
     await takeHeapSnapshot(client, 'memory-second.heapsnapshot');
-
     const memoryAfterDisposingSecondUniver = (await getMetrics(page)).JSHeapUsedSize;
-    await reportToPosthog('instance_memory_overflow', { value: memoryAfterDisposingSecondUniver - memoryAfterDisposingFirstInstance });
-    expect(memoryAfterDisposingSecondUniver - memoryAfterDisposingFirstInstance)
-        .toBeLessThanOrEqual(MAX_SECOND_INSTANCE_OVERFLOW);
-
-    await reportToPosthog('univer_memory_overflow', { value: memoryAfterDisposingSecondUniver - memoryAfterFirstInstance });
-    expect(memoryAfterDisposingSecondUniver - memoryAfterFirstInstance)
-        .toBeLessThanOrEqual(MAX_UNIVER_MEMORY_OVERFLOW);
-
+    const instanceMemoryOverflow = memoryAfterDisposingSecondUniver - memoryAfterDisposingFirstInstance;
+    const univerMemoryOverflow = memoryAfterDisposingSecondUniver - memoryAfterFirstInstance;
+    await reportToPosthog('instance_memory_overflow', { value: instanceMemoryOverflow });
+    await reportToPosthog('univer_memory_overflow', { value: univerMemoryOverflow });
     await shutdownPosthog();
+
+    expect(unitMemoryOverflow).toBeLessThanOrEqual(MAX_UNIT_MEMORY_OVERFLOW);
+    expect(instanceMemoryOverflow).toBeLessThanOrEqual(MAX_SECOND_INSTANCE_OVERFLOW);
+    expect(univerMemoryOverflow).toBeLessThanOrEqual(MAX_UNIVER_MEMORY_OVERFLOW);
 });
 
 declare global {

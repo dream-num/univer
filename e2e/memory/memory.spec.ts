@@ -124,43 +124,37 @@ test('memory', async ({ page }) => {
     const client = await page.context().newCDPSession(page);
 
     await page.goto('http://localhost:3000/sheets/');
-    await page.waitForTimeout(2000);
-
+    await page.waitForTimeout(5000);
     const memoryAfterFirstInstance = (await getMetrics(page)).JSHeapUsedSize;
 
     await page.evaluate(() => window.E2EControllerAPI.loadAndRelease(1));
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(5000);
     const memoryAfterFirstLoad = (await getMetrics(page)).JSHeapUsedSize;
-
     await page.evaluate(() => window.E2EControllerAPI.loadAndRelease(2));
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(5000);
     const memoryAfterSecondLoad = (await getMetrics(page)).JSHeapUsedSize;
+    const unitMemoryOverflow = memoryAfterSecondLoad - memoryAfterFirstLoad;
+    await reportToPosthog('unit_memory_overflow', { value: unitMemoryOverflow });
 
-    await reportToPosthog('unit_memory_overflow', { value: memoryAfterSecondLoad - memoryAfterFirstLoad });
     await page.evaluate(() => window.univer.dispose());
-    await page.waitForTimeout(2000);
-
+    await page.waitForTimeout(5000);
     await takeHeapSnapshot(client, 'memory-first.heapsnapshot');
-
     const memoryAfterDisposingFirstInstance = (await getMetrics(page)).JSHeapUsedSize;
     await page.evaluate(() => window.createNewInstance());
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(5000);
     await page.evaluate(() => window.univer.dispose());
-    await page.waitForTimeout(2000);
-
+    await page.waitForTimeout(5000);
     await takeHeapSnapshot(client, 'memory-second.heapsnapshot');
-
     const memoryAfterDisposingSecondUniver = (await getMetrics(page)).JSHeapUsedSize;
-    await reportToPosthog('instance_memory_overflow', { value: memoryAfterDisposingSecondUniver - memoryAfterDisposingFirstInstance });
-    await reportToPosthog('univer_memory_overflow', { value: memoryAfterDisposingSecondUniver - memoryAfterFirstInstance });
+    const instanceMemoryOverflow = memoryAfterDisposingSecondUniver - memoryAfterDisposingFirstInstance;
+    const univerMemoryOverflow = memoryAfterDisposingSecondUniver - memoryAfterFirstInstance;
+    await reportToPosthog('instance_memory_overflow', { value: instanceMemoryOverflow });
+    await reportToPosthog('univer_memory_overflow', { value: univerMemoryOverflow });
     await shutdownPosthog();
 
-    expect(memoryAfterSecondLoad - memoryAfterFirstLoad)
-        .toBeLessThanOrEqual(MAX_UNIT_MEMORY_OVERFLOW);
-    expect(memoryAfterDisposingSecondUniver - memoryAfterDisposingFirstInstance)
-        .toBeLessThanOrEqual(MAX_SECOND_INSTANCE_OVERFLOW);
-    expect(memoryAfterDisposingSecondUniver - memoryAfterFirstInstance)
-        .toBeLessThanOrEqual(MAX_UNIVER_MEMORY_OVERFLOW);
+    expect(unitMemoryOverflow).toBeLessThanOrEqual(MAX_UNIT_MEMORY_OVERFLOW);
+    expect(instanceMemoryOverflow).toBeLessThanOrEqual(MAX_SECOND_INSTANCE_OVERFLOW);
+    expect(univerMemoryOverflow).toBeLessThanOrEqual(MAX_UNIVER_MEMORY_OVERFLOW);
 });
 
 declare global {

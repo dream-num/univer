@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Injector } from '@univerjs/core';
+import type { IDisposable, Injector } from '@univerjs/core';
 import type {
     IAddSheetDataValidationCommandParams,
     IRemoveSheetAllDataValidationCommandParams,
@@ -84,60 +84,68 @@ export class FUnvierDataValidationMixin extends FUniver implements IFUnvierDataV
      */
     // eslint-disable-next-line max-lines-per-function
     override _initialize(injector: Injector): void {
-        if (!injector.has(SheetDataValidationModel)) return;
-        const sheetDataValidationModel = injector.get(SheetDataValidationModel);
-        const commadnService = injector.get(ICommandService);
+        const commandService = injector.get(ICommandService);
 
         this.registerEventHandler(
             this.Event.SheetDataValidationChanged,
-            () => sheetDataValidationModel.ruleChange$.subscribe((ruleChange) => {
-                const { unitId, subUnitId, rule, oldRule, type } = ruleChange;
-                const target = this.getSheetTarget(unitId, subUnitId);
-                if (!target) {
-                    return;
-                }
-                const { workbook, worksheet } = target;
+            () => {
+                if (!injector.has(SheetDataValidationModel)) return { dispose: () => {} } as IDisposable;
+                const sheetDataValidationModel = injector.get(SheetDataValidationModel);
 
-                const fRule = new FDataValidation(rule, worksheet.getSheet(), this._injector);
-                this.fireEvent(this.Event.SheetDataValidationChanged, {
-                    origin: ruleChange,
-                    worksheet,
-                    workbook,
-                    changeType: type,
-                    oldRule,
-                    rule: fRule,
+                return sheetDataValidationModel.ruleChange$.subscribe((ruleChange) => {
+                    const { unitId, subUnitId, rule, oldRule, type } = ruleChange;
+                    const target = this.getSheetTarget(unitId, subUnitId);
+                    if (!target) {
+                        return;
+                    }
+                    const { workbook, worksheet } = target;
+
+                    const fRule = new FDataValidation(rule, worksheet.getSheet(), this._injector);
+                    this.fireEvent(this.Event.SheetDataValidationChanged, {
+                        origin: ruleChange,
+                        worksheet,
+                        workbook,
+                        changeType: type,
+                        oldRule,
+                        rule: fRule,
+                    });
                 });
-            })
+            }
         );
 
         this.registerEventHandler(
             this.Event.SheetDataValidatorStatusChanged,
-            () => sheetDataValidationModel.validStatusChange$.subscribe((statusChange) => {
-                const { unitId, subUnitId, ruleId, status, row, col } = statusChange;
-                const target = this.getSheetTarget(unitId, subUnitId);
-                if (!target) {
-                    return;
-                }
-                const { workbook, worksheet } = target;
-                const rule = worksheet.getDataValidation(ruleId);
-                if (!rule) {
-                    return;
-                }
-                this.fireEvent(this.Event.SheetDataValidatorStatusChanged, {
-                    workbook,
-                    worksheet,
-                    row,
-                    column: col,
-                    rule,
-                    status,
+            () => {
+                if (!injector.has(SheetDataValidationModel)) return { dispose: () => {} } as IDisposable;
+                const sheetDataValidationModel = injector.get(SheetDataValidationModel);
+
+                return sheetDataValidationModel.validStatusChange$.subscribe((statusChange) => {
+                    const { unitId, subUnitId, ruleId, status, row, col } = statusChange;
+                    const target = this.getSheetTarget(unitId, subUnitId);
+                    if (!target) {
+                        return;
+                    }
+                    const { workbook, worksheet } = target;
+                    const rule = worksheet.getDataValidation(ruleId);
+                    if (!rule) {
+                        return;
+                    }
+                    this.fireEvent(this.Event.SheetDataValidatorStatusChanged, {
+                        workbook,
+                        worksheet,
+                        row,
+                        column: col,
+                        rule,
+                        status,
+                    });
                 });
-            })
+            }
         );
 
         // Register handlers for before command events
         this.registerEventHandler(
             this.Event.BeforeSheetDataValidationAdd,
-            () => commadnService.beforeCommandExecuted((commandInfo) => {
+            () => commandService.beforeCommandExecuted((commandInfo) => {
                 if (commandInfo.id === AddSheetDataValidationCommand.id) {
                     const params = commandInfo.params as IAddSheetDataValidationCommandParams;
                     const target = this.getSheetTarget(params.unitId, params.subUnitId);
@@ -160,7 +168,7 @@ export class FUnvierDataValidationMixin extends FUniver implements IFUnvierDataV
 
         this.registerEventHandler(
             this.Event.BeforeSheetDataValidationCriteriaUpdate,
-            () => commadnService.beforeCommandExecuted((commandInfo) => {
+            () => commandService.beforeCommandExecuted((commandInfo) => {
                 if (commandInfo.id === UpdateSheetDataValidationSettingCommand.id) {
                     const params = commandInfo.params as IUpdateSheetDataValidationSettingCommandParams;
                     const target = this.getSheetTarget(params.unitId, params.subUnitId);
@@ -190,7 +198,7 @@ export class FUnvierDataValidationMixin extends FUniver implements IFUnvierDataV
 
         this.registerEventHandler(
             this.Event.BeforeSheetDataValidationRangeUpdate,
-            () => commadnService.beforeCommandExecuted((commandInfo) => {
+            () => commandService.beforeCommandExecuted((commandInfo) => {
                 if (commandInfo.id === UpdateSheetDataValidationRangeCommand.id) {
                     const params = commandInfo.params as IUpdateSheetDataValidationRangeCommandParams;
                     const target = this.getSheetTarget(params.unitId, params.subUnitId);
@@ -219,7 +227,7 @@ export class FUnvierDataValidationMixin extends FUniver implements IFUnvierDataV
 
         this.registerEventHandler(
             this.Event.BeforeSheetDataValidationOptionsUpdate,
-            () => commadnService.beforeCommandExecuted((commandInfo) => {
+            () => commandService.beforeCommandExecuted((commandInfo) => {
                 if (commandInfo.id === UpdateSheetDataValidationOptionsCommand.id) {
                     const params = commandInfo.params as IUpdateSheetDataValidationOptionsCommandParams;
                     const target = this.getSheetTarget(params.unitId, params.subUnitId);
@@ -248,7 +256,7 @@ export class FUnvierDataValidationMixin extends FUniver implements IFUnvierDataV
 
         this.registerEventHandler(
             this.Event.BeforeSheetDataValidationDelete,
-            () => commadnService.beforeCommandExecuted((commandInfo) => {
+            () => commandService.beforeCommandExecuted((commandInfo) => {
                 if (commandInfo.id === RemoveSheetDataValidationCommand.id) {
                     const params = commandInfo.params as IRemoveSheetDataValidationCommandParams;
                     const target = this.getSheetTarget(params.unitId, params.subUnitId);
@@ -276,7 +284,7 @@ export class FUnvierDataValidationMixin extends FUniver implements IFUnvierDataV
 
         this.registerEventHandler(
             this.Event.BeforeSheetDataValidationDeleteAll,
-            () => commadnService.beforeCommandExecuted((commandInfo) => {
+            () => commandService.beforeCommandExecuted((commandInfo) => {
                 if (commandInfo.id === RemoveSheetAllDataValidationCommand.id) {
                     const params = commandInfo.params as IRemoveSheetAllDataValidationCommandParams;
                     const target = this.getSheetTarget(params.unitId, params.subUnitId);

@@ -16,8 +16,7 @@
 
 import type { IDisposable } from '@univerjs/core';
 import type { Subject } from 'rxjs';
-import type { ISidebarMethodOptions } from '../../views/components/sidebar/interface';
-
+import type { ISidebarMethodOptions } from '../../views/components/sidebar/Sidebar';
 import { createIdentifier } from '@univerjs/core';
 
 export interface ISidebarService {

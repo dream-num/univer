@@ -16,8 +16,8 @@
 
 import type { ICommandInfo, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import type { ISetFormulaCalculationNotificationMutation } from '@univerjs/engine-formula';
-import type { IAfterRender$Info, IBasicFrameInfo, IExtendFrameInfo, IRenderContext, IRenderModule, ISummaryFrameInfo, ITimeMetric, IViewportInfos, Scene } from '@univerjs/engine-render';
-import { CommandType, ICommandService, Inject, Optional, Rectangle, RxDisposable } from '@univerjs/core';
+import type { IAfterRender$Info, IBasicFrameInfo, IExtendFrameInfo, IRenderContext, IRenderModule, ISummaryFrameInfo, ISummaryMetric, ITimeMetric, IViewportInfos, Scene } from '@univerjs/engine-render';
+import { CommandType, ICommandService, Inject, Injector, Optional, Rectangle, RxDisposable } from '@univerjs/core';
 import { SetFormulaCalculationNotificationMutation } from '@univerjs/engine-formula';
 import {
     Rect,
@@ -46,18 +46,29 @@ interface ISetWorksheetMutationParams {
     subUnitId: string;
 }
 
+export interface ITelemetryData {
+    unitId: string;
+    sheetId: string;
+    FPS: ISummaryMetric;
+    frameTime: ISummaryMetric;
+    elapsedTimeToStart: number;
+}
+
 const FRAME_STACK_THRESHOLD = 60;
 
 export class SheetRenderController extends RxDisposable implements IRenderModule {
+    private _renderMetric$: Subject<ITelemetryData> = new Subject();
+    renderMetric$ = this._renderMetric$.asObservable();
     constructor(
         private readonly _context: IRenderContext<Workbook>,
+        @Inject(Injector) private readonly _injector: Injector,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @Inject(SheetsRenderService) private readonly _sheetRenderService: SheetsRenderService,
         @ICommandService private readonly _commandService: ICommandService,
         @Optional(ITelemetryService) private readonly _telemetryService?: ITelemetryService
     ) {
         super();
-
+        window._injector = this._injector;
         this._addNewRender();
         this._initRenderMetricSubscriber();
     }
@@ -94,8 +105,6 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
 
     private _afterRenderMetric$: Subject<IAfterRender$Info> = new Subject<IAfterRender$Info>();
     private _initRenderMetricSubscriber() {
-        if (!this._telemetryService) return;
-
         const { engine } = this._context;
 
         engine.beginFrame$.subscribe(() => {
@@ -139,14 +148,17 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
                 ...sceneRenderDetail.tags,
             });
             if (frameInfoList.length > FRAME_STACK_THRESHOLD) {
-                this._renderMetricCapture(frameInfoList);
+                this._captureRenderMetric(frameInfoList);
                 frameInfoList.length = 0;
             }
         });
     }
 
-    private _renderMetricCapture(frameInfoList: IExtendFrameInfo[]) {
-        if (!this._telemetryService) return;
+    /**
+     * Send render metric to telemetry service
+     * @param frameInfoList
+     */
+    private _captureRenderMetric(frameInfoList: IExtendFrameInfo[]) {
         const filteredFrameInfo = frameInfoList;//.filter((info) => info.scrolling);
         if (filteredFrameInfo.length === 0) return;
 
@@ -207,8 +219,10 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
         const elapsedTimeToStart = filteredFrameInfo[filteredFrameInfo.length - 1].elapsedTime;
         const sheetId = this._context.unit.getActiveSheet().getSheetId();
         const unitId = this._context.unit.getUnitId();
-        const telemetryData = { sheetId, unitId, elapsedTimeToStart, ...summaryFrameStats };
-        this._telemetryService.capture('sheet_render_cost', telemetryData);
+        const telemetryData: ITelemetryData = { sheetId, unitId, elapsedTimeToStart, ...summaryFrameStats };
+        this._renderMetric$.next(telemetryData);
+
+        this._telemetryService?.capture('sheet_render_cost', telemetryData);
     }
 
     private _addComponent(workbook: Workbook) {

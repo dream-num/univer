@@ -21,6 +21,7 @@ import { sheetData as emptySheetData } from '../__testing__/emptysheet';
 import { sheetData as freezeData } from '../__testing__/freezesheet';
 import { sheetData as mergeCellData } from '../__testing__/mergecell';
 import { sheetData as overflowData } from '../__testing__/overflow';
+import { reportToPosthog } from '../utils/report-performance';
 
 export interface IFPSData {
     fpsData: number[];
@@ -39,7 +40,7 @@ interface IFPSResult {
     maxFrameTimes: number[];
 }
 
-const isCI = !!process.env.CI;
+// const isCI = !!process.env.CI;
 /**
  * measure FPS of scrolling time.
  * @param page Page from playwright
@@ -143,6 +144,8 @@ const createTest = (title: string, sheetData: IJsonObject, minFpsValue: number, 
             await page.evaluate(({ sheetData, window }: any) => {
                 window.E2EControllerAPI.disposeCurrSheetUnit();
                 window.univer.createUniverSheet(sheetData);
+
+                window.E2EControllerAPI.sheetRenderMetric(window.univerAPI.getActiveUniverSheet().id, (data) => console.log(data));
             }, { sheetData, window: windowOfPage });
             // wait for canvas has data
             await page.waitForTimeout(2000);
@@ -154,6 +157,8 @@ const createTest = (title: string, sheetData: IJsonObject, minFpsValue: number, 
                 console.log('FPS', resultOfFPS.fps);
                 console.log('medianFrameTime', resultOfFPS.medianFrameTime);
                 console.log('max10FrameTimes', resultOfFPS.maxFrameTimes);
+
+                await reportToPosthog(title, resultOfFPS);
                 expect(resultOfFPS.fps).toBeGreaterThan(minFpsValue);
             });
         } catch (error) {

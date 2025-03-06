@@ -203,9 +203,15 @@ export const DefinedNameContainer = () => {
                                     </div>
                                 </Tooltip>
                             </div>
-                            <Confirm visible={deleteConformKey === definedName.id} onClose={handleDeleteClose} onConfirm={() => { handleDeleteConfirm(definedName.id); }}>
+
+                            <Confirm
+                                visible={deleteConformKey === definedName.id}
+                                onClose={handleDeleteClose}
+                                onConfirm={() => { handleDeleteConfirm(definedName.id); }}
+                            >
                                 {localeService.t('definedName.deleteConfirmText')}
                             </Confirm>
+
                             {definedName.id === editorKey && (
                                 <DefinedNameInput
                                     confirm={insertConfirm}

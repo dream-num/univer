@@ -57,10 +57,10 @@ export interface IFFormulaSheetsMixin {
      *
      * // Use the function in a cell
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fSheet = fWorkbook.getActiveSheet();
-     * const cellA1 = fSheet.getRange('A1');
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const cellA1 = fWorksheet.getRange('A1');
      * cellA1.setValue('World');
-     * const cellA2 = fSheet.getRange('A2');
+     * const cellA2 = fWorksheet.getRange('A2');
      * cellA2.setValue({ f: '=HELLO(A1)' });
      *
      * // A2 will display: "Hello, World!"
@@ -82,10 +82,10 @@ export interface IFFormulaSheetsMixin {
      *
      * // Use the function in a cell
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fSheet = fWorkbook.getActiveSheet();
-     * const cellA1 = fSheet.getRange('A1');
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const cellA1 = fWorksheet.getRange('A1');
      * cellA1.setValue(100);
-     * const cellA2 = fSheet.getRange('A2');
+     * const cellA2 = fWorksheet.getRange('A2');
      * cellA2.setValue({ f: '=DISCOUNT(A1, 20)' });
      *
      * // A2 will display: 80
@@ -122,12 +122,12 @@ export interface IFFormulaSheetsMixin {
      *
      * // Use the function in a cell
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fSheet = fWorkbook.getActiveSheet();
-     * const cellA1 = fSheet.getRange('A1');
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const cellA1 = fWorksheet.getRange('A1');
      * cellA1.setValue(1);
-     * const cellA2 = fSheet.getRange('A2');
+     * const cellA2 = fWorksheet.getRange('A2');
      * cellA2.setValue(2);
-     * const cellA3 = fSheet.getRange('A3');
+     * const cellA3 = fWorksheet.getRange('A3');
      * cellA3.setValue({ f: '=CUSTOMSUM(A1,A2,LAMBDA(x,y,x*y))' });
      *
      * // A3 will display: 5
@@ -177,10 +177,10 @@ export interface IFFormulaSheetsMixin {
      *
      * // Use the function in a cell
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fSheet = fWorkbook.getActiveSheet();
-     * const cellA1 = fSheet.getRange('A1');
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const cellA1 = fWorksheet.getRange('A1');
      * cellA1.setValue('World');
-     * const cellA2 = fSheet.getRange('A2');
+     * const cellA2 = fWorksheet.getRange('A2');
      * cellA2.setValue({ f: '=HELLO(A1)' });
      *
      * // A2 will display: "Hello, World!"
@@ -213,8 +213,8 @@ export interface IFFormulaSheetsMixin {
      *
      * // Use the function in a cell
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fSheet = fWorkbook.getActiveSheet();
-     * const cellA1 = fSheet.getRange('A1');
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const cellA1 = fWorksheet.getRange('A1');
      * cellA1.setValue({ f: '=RANDOM_DELAYED()' });
      *
      * // After 0.5 second, A1 will display a random number
@@ -263,8 +263,8 @@ export interface IFFormulaSheetsMixin {
      *
      * // Use the function in a cell
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fSheet = fWorkbook.getActiveSheet();
-     * const cellA1 = fSheet.getRange('A1');
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const cellA1 = fWorksheet.getRange('A1');
      * cellA1.setValue({ f: '=FETCH_USER_SCORE(42)' });
      *
      * // After 1 second, A1 will display a score

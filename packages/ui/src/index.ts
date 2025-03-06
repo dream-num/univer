@@ -135,8 +135,7 @@ export { ToolbarButton } from './views/components/ribbon/Button/ToolbarButton';
 export { useToolbarItemStatus } from './views/components/ribbon/hook';
 export { Ribbon } from './views/components/ribbon/Ribbon';
 export { ToolbarItem } from './views/components/ribbon/ToolbarItem';
-export { type ISidebarMethodOptions } from './views/components/sidebar/interface';
-export { Sidebar } from './views/components/sidebar/Sidebar';
+export { type ISidebarMethodOptions, Sidebar } from './views/components/sidebar/Sidebar';
 // #endregion
 
 // #region - all commands

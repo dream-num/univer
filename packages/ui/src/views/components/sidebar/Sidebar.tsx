@@ -14,14 +14,29 @@
  * limitations under the License.
  */
 
-import type { ISidebarMethodOptions } from './interface';
+import type { CSSProperties } from 'react';
+import type { ICustomLabelProps } from '../../../components/custom-label/CustomLabel';
 import { clsx } from '@univerjs/design';
 import { CloseSingle } from '@univerjs/icons';
 import React, { useEffect, useMemo, useRef } from 'react';
 import { CustomLabel } from '../../../components/custom-label/CustomLabel';
 import { ISidebarService } from '../../../services/sidebar/sidebar.service';
 import { useDependency, useObservable } from '../../../utils/di';
-import styles from './index.module.less';
+
+export interface ISidebarMethodOptions {
+    id?: string;
+    header?: ICustomLabelProps;
+    children?: ICustomLabelProps;
+    bodyStyle?: CSSProperties;
+    footer?: ICustomLabelProps;
+
+    visible?: boolean;
+
+    width?: number | string;
+
+    onClose?: () => void;
+    onOpen?: () => void;
+}
 
 export function Sidebar() {
     const sidebarService = useDependency(ISidebarService);
@@ -76,10 +91,6 @@ export function Sidebar() {
         };
     }, [sidebarService]);
 
-    const _className = clsx(styles.sidebar, {
-        [styles.sidebarOpen]: options?.visible,
-    });
-
     const width = useMemo(() => {
         if (!options?.visible) return 0;
 
@@ -101,19 +112,46 @@ export function Sidebar() {
         options?.onClose?.();
     }
     return (
-        <section className={_className} style={{ width }}>
-            <section className={styles.sidebarContainer} ref={scrollRef}>
-                <header className={styles.sidebarHeader}>
+        <section
+            className={clsx('univer-relative univer-h-full univer-text-gray-800', {
+                'univer-w-96 univer-translate-x-0': options?.visible,
+                'univer-w-0 univer-translate-x-full': !options?.visible,
+            })}
+            style={{ width }}
+        >
+            <section
+                className={`
+                  univer-box-border univer-grid univer-h-0 univer-min-h-full univer-grid-rows-[auto_1fr_auto]
+                  univer-overflow-y-auto univer-border-0 univer-border-b univer-border-l univer-border-solid
+                  univer-border-gray-200 univer-bg-white univer-scrollbar-thin univer-scrollbar-track-gray-50
+                  univer-scrollbar-thumb-gray-300
+                `}
+                ref={scrollRef}
+            >
+                <header
+                    className={`
+                      univer-sticky univer-top-0 univer-z-10 univer-box-border univer-flex univer-items-center
+                      univer-justify-between univer-bg-white univer-p-4 univer-pb-2 univer-text-base univer-font-medium
+                    `}
+                >
                     {options?.header}
 
-                    <a className={styles.sidebarHeaderClose} onClick={handleClose}>
+                    <a className="univer-cursor-pointer univer-text-gray-500" onClick={handleClose}>
                         <CloseSingle />
                     </a>
                 </header>
 
-                <section className={clsx(styles.sidebarBody, 'univer-py-1')} style={options?.bodyStyle}>{options?.children}</section>
+                <section className="univer-box-border univer-px-4" style={options?.bodyStyle}>
+                    {options?.children}
+                </section>
 
-                {options?.footer && <footer className={styles.sidebarFooter}>{options.footer}</footer>}
+                {options?.footer && (
+                    <footer
+                        className="univer-sticky univer-bottom-0 univer-box-border univer-bg-white univer-p-4"
+                    >
+                        {options.footer}
+                    </footer>
+                )}
             </section>
         </section>
     );

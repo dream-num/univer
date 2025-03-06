@@ -87,17 +87,15 @@ export class HighlightCellCalculateUnit extends BaseCalculateUnit<Nullable<IConf
                         if (configRule.isBottom) {
                             allValue = allValue.toReversed();
                         }
-                        const step = 1 / allValue.length;
+
+                        // Calculate the index directly based on the threshold percentage.
                         const threshold = Tools.clamp(configRule.value, 0, 100) / 100;
-                        let currentValue;
-                        let currentStep = step;
-                        allValue.find((value) => {
-                            currentValue = value;
-                            currentStep = Math.round((currentStep + step) * 10000) / 10000;
-                            return currentStep > threshold;
-                        });
-                        return { value: currentValue, type: ruleConfig.subType };
+                        const targetIndex = Math.floor(threshold * allValue.length);
+                        // Ensure the index is within bounds
+                        const safeIndex = Math.min(Math.max(targetIndex - 1, 0), allValue.length - 1);
+                        return { value: allValue[safeIndex], type: ruleConfig.subType };
                     }
+
                     const targetIndex = Math.floor(Tools.clamp(configRule.isBottom ? (configRule.value - 1) : configRule.value, 0, allValue.length));
                     if (configRule.isBottom) {
                         return { value: allValue[allValue.length - targetIndex - 1], type: ruleConfig.subType };

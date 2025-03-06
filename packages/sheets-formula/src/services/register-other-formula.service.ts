@@ -31,7 +31,6 @@ export class RegisterOtherFormulaService extends Disposable {
     public formulaChangeWithRange$ = this._formulaChangeWithRange$.asObservable();
 
     // FIXME: this design could be improved.
-
     private _formulaResult$ = new Subject<Record<string, Record<string, IOtherFormulaResult[]>>>();
     public formulaResult$ = this._formulaResult$.asObservable();
 
@@ -237,5 +236,15 @@ export class RegisterOtherFormulaService extends Disposable {
     getFormulaValueSync(unitId: string, subUnitId: string, formulaId: string): Nullable<IOtherFormulaResult> {
         const cacheMap = this._ensureCacheMap(unitId, subUnitId);
         return cacheMap.get(formulaId);
+    }
+
+    markFormulaDirty(unitId: string, subUnitId: string, formulaId: string) {
+        const cache = this.getFormulaValueSync(unitId, subUnitId, formulaId);
+        if (!cache) return;
+        cache.status = FormulaResultStatus.WAIT;
+        this._commandService.executeCommand(
+            OtherFormulaMarkDirty.id,
+            { [unitId]: { [subUnitId]: { [formulaId]: true } } }
+        );
     }
 }

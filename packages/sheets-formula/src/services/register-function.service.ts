@@ -207,6 +207,8 @@ export class RegisterFunctionService extends Disposable implements IRegisterFunc
         instance.calculateCustom = func;
         this._functionService.registerExecutors(instance);
         disposables.add(toDisposable(() => this._functionService.unregisterExecutors(name)));
+        disposables.add(toDisposable(() => this._functionService.unregisterDescriptions(name)));
+        disposables.add(toDisposable(() => this._functionService.deleteFormulaAstCacheKey(name)));
 
         // Handle remote registration if available
         if (this._remoteRegisterFunctionService) {

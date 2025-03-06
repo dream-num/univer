@@ -37,6 +37,14 @@ export class FormulaAstLRU<T> {
         this._cache.clear();
     }
 
+    delete(formulaString: string) {
+        this._cache.delete(this._hash(formulaString));
+    }
+
+    forEach(callbackfn: (value: T, key: string, map: LRUMap<string, T>) => void, thisArg?: any) {
+        this._cache.forEach(callbackfn, thisArg);
+    }
+
     private _hash(formulaString: string) {
         if (formulaString.length <= 64) {
             return formulaString;

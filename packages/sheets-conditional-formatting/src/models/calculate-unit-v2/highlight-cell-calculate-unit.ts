@@ -17,7 +17,7 @@
 import type { IStyleData, Nullable } from '@univerjs/core';
 import type { IAverageHighlightCell, IFormulaHighlightCell, IHighlightCell, INumberHighlightCell, IRankHighlightCell, ITextHighlightCell, ITimePeriodHighlightCell } from '../type';
 import type { IContext } from './base-calculate-unit';
-import { CellValueType, dayjs, Range } from '@univerjs/core';
+import { CellValueType, dayjs, Range, Tools } from '@univerjs/core';
 import { ERROR_TYPE_SET } from '@univerjs/engine-formula';
 import { CFNumberOperator, CFSubRuleType, CFTextOperator, CFTimePeriodOperator } from '../../base/const';
 import { ConditionalFormattingFormulaService, FormulaResultStatus } from '../../services/conditional-formatting-formula.service';
@@ -71,7 +71,7 @@ export class HighlightCellCalculateUnit extends BaseCalculateUnit<Nullable<IConf
                     return { value: cacheMap, type: ruleConfig.subType };
                 }
                 case CFSubRuleType.rank: {
-                    const allValue: number[] = [];
+                    let allValue: number[] = [];
                     ranges.forEach((range) => {
                         Range.foreach(range, (row, col) => {
                             const cell = context.getCellValue(row, col);
@@ -83,9 +83,20 @@ export class HighlightCellCalculateUnit extends BaseCalculateUnit<Nullable<IConf
                     });
                     allValue.sort((a, b) => b - a);
                     const configRule = context.rule.rule as IRankHighlightCell;
-                    const targetIndex = configRule.isPercent
-                        ? Math.floor(Math.max(Math.min(configRule.value, 100), 0) / 100 * allValue.length)
-                        : Math.floor(Math.max(Math.min(configRule.isBottom ? (configRule.value - 1) : configRule.value, allValue.length), 0));
+                    if (configRule.isPercent) {
+                        if (configRule.isBottom) {
+                            allValue = allValue.toReversed();
+                        }
+
+                        // Calculate the index directly based on the threshold percentage.
+                        const threshold = Tools.clamp(configRule.value, 0, 100) / 100;
+                        const targetIndex = Math.floor(threshold * allValue.length);
+                        // Ensure the index is within bounds
+                        const safeIndex = Tools.clamp(targetIndex - 1, 0, allValue.length - 1);
+                        return { value: allValue[safeIndex], type: ruleConfig.subType };
+                    }
+
+                    const targetIndex = Math.floor(Tools.clamp(configRule.isBottom ? (configRule.value - 1) : configRule.value, 0, allValue.length));
                     if (configRule.isBottom) {
                         return { value: allValue[allValue.length - targetIndex - 1], type: ruleConfig.subType };
                     } else {

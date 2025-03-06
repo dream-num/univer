@@ -583,6 +583,7 @@ describe('Test conditional formatting highlight', () => {
             const result = testBed.getConditionalFormattingService().composeStyle(testBed.unitId, testBed.subUnitId, 1, 0);
             expect(result).toEqual({ style: { bg: { rgb: '#2AEAEA' } } });
         });
+
         it('is bottom 6', () => {
             const params: IConditionFormattingRule<IRankHighlightCell> = {
                 ranges: [{ startRow: 0, startColumn: 0, endRow: 4, endColumn: 4 }],
@@ -601,6 +602,80 @@ describe('Test conditional formatting highlight', () => {
             testBed.getConditionalFormattingService().composeStyle(testBed.unitId, testBed.subUnitId, 1, 1);
             const result = testBed.getConditionalFormattingService().composeStyle(testBed.unitId, testBed.subUnitId, 1, 1);
             expect(result).toEqual({ style: { bg: { rgb: '#2AEAEA' } } });
+        });
+
+        it('is bottom 22%', () => {
+            const params: IConditionFormattingRule<IRankHighlightCell> = {
+                ranges: [{ startRow: 0, startColumn: 0, endRow: 0, endColumn: 8 }],
+                cfId: testBed.getConditionalFormattingRuleModel().createCfId(testBed.unitId, testBed.subUnitId),
+                stopIfTrue: false,
+                rule: {
+                    style: { bg: { rgb: '#2AEAEA' } },
+                    type: CFRuleType.highlightCell,
+                    subType: CFSubRuleType.rank,
+                    isBottom: true,
+                    isPercent: true,
+                    value: 22,
+                },
+            };
+            testBed.getConditionalFormattingRuleModel().addRule(testBed.unitId, testBed.subUnitId, params);
+            const results = [
+                testBed.getConditionalFormattingService().composeStyle(testBed.unitId, testBed.subUnitId, 0, 0),
+                testBed.getConditionalFormattingService().composeStyle(testBed.unitId, testBed.subUnitId, 0, 1),
+            ];
+            expect(results[0]).toEqual({ style: { bg: { rgb: '#2AEAEA' } } });
+            expect(results[1]).toEqual({ style: {} });
+        });
+
+        it('is bottom 23%', () => {
+            const params: IConditionFormattingRule<IRankHighlightCell> = {
+                ranges: [{ startRow: 0, startColumn: 0, endRow: 0, endColumn: 8 }],
+                cfId: testBed.getConditionalFormattingRuleModel().createCfId(testBed.unitId, testBed.subUnitId),
+                stopIfTrue: false,
+                rule: {
+                    style: { bg: { rgb: '#2AEAEA' } },
+                    type: CFRuleType.highlightCell,
+                    subType: CFSubRuleType.rank,
+                    isBottom: true,
+                    isPercent: true,
+                    value: 23,
+                },
+            };
+            testBed.getConditionalFormattingRuleModel().addRule(testBed.unitId, testBed.subUnitId, params);
+            const results = [
+                testBed.getConditionalFormattingService().composeStyle(testBed.unitId, testBed.subUnitId, 0, 0),
+                testBed.getConditionalFormattingService().composeStyle(testBed.unitId, testBed.subUnitId, 0, 1),
+                testBed.getConditionalFormattingService().composeStyle(testBed.unitId, testBed.subUnitId, 0, 2),
+            ];
+            expect(results[0]).toEqual({ style: { bg: { rgb: '#2AEAEA' } } });
+            expect(results[1]).toEqual({ style: { bg: { rgb: '#2AEAEA' } } });
+            expect(results[2]).toEqual({ style: {} });
+        });
+
+        // In this case, 2 items should be highlighted. Where the second item is exactly 20%.
+        it('is bottom 20%', () => {
+            const params: IConditionFormattingRule<IRankHighlightCell> = {
+                ranges: [{ startRow: 7, startColumn: 0, endRow: 7, endColumn: 9 }],
+                cfId: testBed.getConditionalFormattingRuleModel().createCfId(testBed.unitId, testBed.subUnitId),
+                stopIfTrue: false,
+                rule: {
+                    style: { bg: { rgb: '#2AEAEA' } },
+                    type: CFRuleType.highlightCell,
+                    subType: CFSubRuleType.rank,
+                    isBottom: true,
+                    isPercent: true,
+                    value: 20,
+                },
+            };
+            testBed.getConditionalFormattingRuleModel().addRule(testBed.unitId, testBed.subUnitId, params);
+            const results = [
+                testBed.getConditionalFormattingService().composeStyle(testBed.unitId, testBed.subUnitId, 7, 0),
+                testBed.getConditionalFormattingService().composeStyle(testBed.unitId, testBed.subUnitId, 7, 1),
+                testBed.getConditionalFormattingService().composeStyle(testBed.unitId, testBed.subUnitId, 7, 2),
+            ];
+            expect(results[0]).toEqual({ style: { bg: { rgb: '#2AEAEA' } } });
+            expect(results[1]).toEqual({ style: { bg: { rgb: '#2AEAEA' } } });
+            expect(results[2]).toEqual({ style: {} });
         });
     });
 });

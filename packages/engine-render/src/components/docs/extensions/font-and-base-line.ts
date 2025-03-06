@@ -31,22 +31,6 @@ const UNIQUE_KEY = 'DefaultDocsFontAndBaseLineExtension';
 
 const DOC_EXTENSION_Z_INDEX = 20;
 
-export function fontStringPtToPx(fontString: string): string {
-    const ptRegex = /(\d+)pt/;
-    const match = fontString.match(ptRegex);
-
-    if (match) {
-        const ptValue = Number.parseInt(match[1], 10);
-
-        const pxValue = Number.parseFloat((ptValue * (4 / 3)).toFixed(4)); ;
-
-        const newFontString = fontString.replace(ptRegex, `${pxValue}px`);
-        return newFontString;
-    } else {
-        return fontString;
-    }
-}
-
 /**
  * Singleton
  */
@@ -57,8 +41,12 @@ export class FontAndBaseLine extends docExtension {
 
     private _preFontColor = '';
 
-    actualFontMap: Record<string, string> = {}; // 字体映射
-    rawCtxFont = '';
+    /**
+     * ctx.font = val;  then ctx.font is not exactly the same as val
+     * that is because canvas would normalize the font string, remove default value and convert pt to px.
+     * so we need a map to store actual value and set value
+     */
+    actualFontMap: Record<string, string> = {};
 
     constructor() {
         super();

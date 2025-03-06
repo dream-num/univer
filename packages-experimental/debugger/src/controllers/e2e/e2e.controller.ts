@@ -14,12 +14,9 @@
  * limitations under the License.
  */
 
-import type { ITelemetryData } from '@univerjs/sheets-ui';
-import { awaitTime, Disposable, ICommandService, Inject, Injector, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { awaitTime, Disposable, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 
 import { DEFAULT_WORKBOOK_DATA_DEMO, DEFAULT_WORKBOOK_DATA_DEMO_DEFAULT_STYLE } from '@univerjs/mockdata';
-import { SheetRenderController } from '@univerjs/sheets-ui';
 import { DisposeUniverCommand } from '../../commands/commands/unit.command';
 import { getDefaultDocData } from './data/default-doc';
 import { getDefaultWorkbookData } from './data/default-sheet';
@@ -38,7 +35,6 @@ export interface IE2EControllerAPI {
     loadDefaultDoc(loadTimeout?: number,): Promise<void>;
     disposeUniver(): Promise<void>;
     disposeCurrSheetUnit(disposeTimeout?: number): Promise<void>;
-    sheetRenderMetric: (unitId: string, callback: (data: ITelemetryData) => void) => void;
 }
 
 declare global {
@@ -53,7 +49,6 @@ declare global {
  */
 export class E2EController extends Disposable {
     constructor(
-        @Inject(Injector) private readonly _injector: Injector,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService
     ) {
@@ -77,19 +72,7 @@ export class E2EController extends Disposable {
             disposeCurrSheetUnit: (disposeTimeout?: number) => this._diposeDefaultSheetUnit(disposeTimeout),
             loadDefaultDoc: (loadTimeout) => this._loadDefaultDoc(loadTimeout),
             disposeUniver: () => this._disposeUniver(),
-            sheetRenderMetric: (unitId: string, callback: (data: ITelemetryData) => void) => this._sheetRenderMetric(unitId, callback),
         };
-    }
-
-    private _sheetRenderMetric(unitId: string, callback: (data: ITelemetryData) => void): void {
-        //window.E2EControllerAPI.sheetRenderMetric(window.univerAPI.getActiveUniverSheet().id, (data) => console.log(data))
-        const rms = this._injector.get(IRenderManagerService);
-        if (rms) {
-            const src = rms.getRenderUnitById(unitId)?.with(SheetRenderController);
-            src?.renderMetric$.subscribe((data) => {
-                callback(data);
-            });
-        }
     }
 
     private async _loadAndRelease(releaseId: number, loadingTimeout: number = AWAIT_LOADING_TIMEOUT, disposingTimeout: number = AWAIT_DISPOSING_TIMEOUT): Promise<void> {

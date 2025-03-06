@@ -210,24 +210,22 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
         this._context.direction = val;
     }
 
-    // font: string;
     get font() {
-        // return this._context.font;
-        if (this.normalizedCachedFont) {
-            return this.normalizedCachedFont;
+        if (this._normalizedCachedFont) {
+            return this._normalizedCachedFont;
         }
         const fontStr = this._context.font;
-        this.normalizedCachedFont = fontStr;
+        this._normalizedCachedFont = fontStr;
         return fontStr;
     }
 
-    normalizedCachedFont: string;
+    _normalizedCachedFont: string;
     set font(val: string) {
         this._context.font = val;
         // set font called too many times, even get font from context is time consuming.
         // this.fontStyleStr = this._context.font;
         // DO NOT use val to cachedStyleStr,  Actual font string may change after set to context.
-        this.normalizedCachedFont = '';
+        this._normalizedCachedFont = '';
     }
 
     // fontKerning: CanvasFontKerning;
@@ -873,7 +871,8 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
      * @method
      */
     restore() {
-        this.normalizedCachedFont = '';
+        this._transformCache = null;
+        this._normalizedCachedFont = '';
         this._context.restore();
     }
 
@@ -942,6 +941,7 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
 
     setTransform(...args: [any]) {
         this._transformCache = null;
+        this._normalizedCachedFont = '';
         this._context.setTransform(...args);
     }
 

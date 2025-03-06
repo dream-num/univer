@@ -36,8 +36,6 @@ export class UniverDebuggerPlugin extends Plugin {
     ) {
         super();
 
-        window.dbgInj = this._injector;
-
         // Manage the plugin configuration.
         const { menu, ...rest } = merge(
             {},

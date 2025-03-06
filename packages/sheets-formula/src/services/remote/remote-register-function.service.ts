@@ -52,7 +52,9 @@ export class RemoteRegisterFunctionService implements IRemoteRegisterFunctionSer
     }
 
     async unregisterFunctions(names: string[]): Promise<void> {
+        this._functionService.unregisterExecutors(...names);
         this._functionService.unregisterDescriptions(...names);
+        this._functionService.deleteFormulaAstCacheKey(...names);
     }
 }
 

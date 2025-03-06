@@ -22,7 +22,8 @@ import type {
     IExecutionInProgressParams,
     IFormulaDirtyData,
     ISetFormulaCalculationNotificationMutation,
-    ISetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
+    ISetFormulaCalculationStartMutation,
+} from '@univerjs/engine-formula';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import type { IUniverSheetsFormulaBaseConfig } from './config.schema';
 import { Disposable, ICommandService, IConfigService, ILogService, Inject, LocaleService } from '@univerjs/core';

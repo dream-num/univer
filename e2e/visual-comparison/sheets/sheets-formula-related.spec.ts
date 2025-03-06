@@ -17,7 +17,7 @@
 import { chromium, expect, test } from '@playwright/test';
 import { generateSnapshotName } from '../const';
 
-const SHEET_MAIN_CANVAS_ID = '#univer-sheet-main-canvas_workbook-01';
+const SHEET_MAIN_CANVAS_ID = '[id^="univer-sheet-main-canvas_"]';
 const isCI = !!process.env.CI;
 
 test('diff formula related', async () => {

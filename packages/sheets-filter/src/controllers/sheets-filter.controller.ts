@@ -32,7 +32,8 @@ export class SheetsFilterController extends Disposable {
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
         @Inject(SheetsFilterService) private readonly _sheetsFilterService: SheetsFilterService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @Inject(RefRangeService) private readonly _refRangeService: RefRangeService) {
+        @Inject(RefRangeService) private readonly _refRangeService: RefRangeService
+    ) {
         super();
 
         this._initCommands();

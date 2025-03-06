@@ -16,10 +16,7 @@
 
 import type { Workbook } from '@univerjs/core';
 import type { ISheetCommandSharedParams } from '@univerjs/sheets';
-import { Disposable,
-    Inject,
-    IUniverInstanceService,
-} from '@univerjs/core';
+import { Disposable, Inject, IUniverInstanceService } from '@univerjs/core';
 import { IActiveDirtyManagerService } from '@univerjs/engine-formula';
 import { FILTER_MUTATIONS } from '../common/const';
 import { SheetsFilterService } from './sheet-filter.service';

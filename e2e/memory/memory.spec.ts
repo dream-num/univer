@@ -21,7 +21,7 @@ import { reportToPosthog, shutdownPosthog } from '../utils/report-performance';
 import { getMetrics } from './util';
 
 const MAX_UNIT_MEMORY_OVERFLOW = 1_000_000; // 1MB
-const MAX_SECOND_INSTANCE_OVERFLOW = 20_000; // 200 KB
+const MAX_SECOND_INSTANCE_OVERFLOW = 200_000; // 200 KB
 
 // There are some compiled code and global cache, so we make some room
 // for this. But we need to make sure that a Univer object cannot fit

@@ -15,7 +15,7 @@
  */
 
 import type { IRange, ISheetDataValidationRule } from '@univerjs/core';
-import { Disposable, Inject, isFormulaString, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { Disposable, Inject, isFormulaString, IUniverInstanceService, Rectangle, UniverInstanceType } from '@univerjs/core';
 import { DataValidationModel, DataValidatorRegistryService } from '@univerjs/data-validation';
 import { RegisterOtherFormulaService } from '@univerjs/sheets-formula';
 import { getFormulaCellData, shouldOffsetFormulaByRange } from '../utils/formula';
@@ -49,6 +49,7 @@ export class DataValidationCustomFormulaService extends Disposable {
         super();
 
         this._initFormulaResultHandler();
+        this._initDirtyRanges();
     }
 
     private _initFormulaResultHandler() {
@@ -106,6 +107,25 @@ export class DataValidationCustomFormulaService extends Disposable {
     private _registerFormula(unitId: string, subUnitId: string, ruleId: string, formulaString: string, ranges: IRange[]) {
         return this._registerOtherFormulaService.registerFormulaWithRange(unitId, subUnitId, formulaString, ranges, { ruleId });
     };
+
+    private _handleDirtyRanges(unitId: string, subUnitId: string, ranges: IRange[]) {
+        const rules = this._dataValidationModel.getRules(unitId, subUnitId);
+        rules.forEach((rule) => {
+            const ruleRanges = rule.ranges as IRange[];
+            const hasOverLap = Rectangle.doAnyRangesIntersect(ruleRanges, ranges);
+            if (hasOverLap) {
+                this.makeRuleDirty(unitId, subUnitId, rule.uid);
+            }
+        });
+    }
+
+    private _initDirtyRanges() {
+        this._dataValidationCacheService.dirtyRanges$.subscribe((data) => {
+            if (data.isSetRange) {
+                this._handleDirtyRanges(data.unitId, data.subUnitId, data.ranges);
+            }
+        });
+    }
 
     deleteByRuleId(unitId: string, subUnitId: string, ruleId: string) {
         const { ruleFormulaMap, ruleFormulaMap2 } = this._ensureMaps(unitId, subUnitId);
@@ -223,5 +243,16 @@ export class DataValidationCustomFormulaService extends Disposable {
         const { ruleFormulaMap } = this._ensureMaps(unitId, subUnitId);
 
         return ruleFormulaMap.get(ruleId);
+    }
+
+    makeRuleDirty(unitId: string, subUnitId: string, ruleId: string) {
+        const formula1 = this._ruleFormulaMap.get(unitId)?.get(subUnitId)?.get(ruleId);
+        const formula2 = this._ruleFormulaMap2.get(unitId)?.get(subUnitId)?.get(ruleId);
+        if (formula1) {
+            this._registerOtherFormulaService.markFormulaDirty(unitId, subUnitId, formula1.formulaId);
+        }
+        if (formula2) {
+            this._registerOtherFormulaService.markFormulaDirty(unitId, subUnitId, formula2.formulaId);
+        }
     }
 }

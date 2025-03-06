@@ -74,7 +74,7 @@ interface ISheetLocationForEditor extends ISheetLocation {
 
 export const BEFORE_CELL_EDIT = createInterceptorKey<ICellDataForSheetInterceptor, ISheetLocationForEditor>('BEFORE_CELL_EDIT');
 export const AFTER_CELL_EDIT = createInterceptorKey<ICellDataForSheetInterceptor, ISheetLocationForEditor>('AFTER_CELL_EDIT');
-export const AFTER_CELL_EDIT_ASYNC = createInterceptorKey<Promise<Nullable<ICellDataForSheetInterceptor>>, ISheetLocationForEditor>('AFTER_CELL_EDIT_ASYNC');
+export const VALIDATE_CELL = createInterceptorKey<Promise<boolean>, ISheetLocation>('VALIDATE_CELL');
 
 /**
  * This class expose methods for sheet features to inject code to sheet underlying logic.
@@ -96,7 +96,7 @@ export class SheetInterceptorService extends Disposable {
     readonly writeCellInterceptor = new InterceptorManager({
         BEFORE_CELL_EDIT,
         AFTER_CELL_EDIT,
-        AFTER_CELL_EDIT_ASYNC,
+        VALIDATE_CELL,
     });
 
     /** @ignore */
@@ -139,7 +139,7 @@ export class SheetInterceptorService extends Disposable {
             handler: (_value) => _value,
         }));
 
-        this.disposeWithMe(this.writeCellInterceptor.intercept(AFTER_CELL_EDIT_ASYNC, {
+        this.disposeWithMe(this.writeCellInterceptor.intercept(VALIDATE_CELL, {
             priority: -1,
             handler: (_value) => _value,
         }));
@@ -277,7 +277,7 @@ export class SheetInterceptorService extends Disposable {
 
     // #region intercept on writing cell
 
-    async onWriteCell(workbook: Workbook, worksheet: Worksheet, row: number, col: number, cellData: ICellData) {
+    onWriteCell(workbook: Workbook, worksheet: Worksheet, row: number, col: number, cellData: ICellData) {
         const context = {
             subUnitId: worksheet.getSheetId(),
             unitId: workbook.getUnitId(),
@@ -288,12 +288,23 @@ export class SheetInterceptorService extends Disposable {
             origin: Tools.deepClone(cellData),
         };
 
-        const cell = this.writeCellInterceptor.fetchThroughInterceptors(AFTER_CELL_EDIT)(cellData, context);
-        const finalCell = await this.writeCellInterceptor.fetchThroughInterceptors(AFTER_CELL_EDIT_ASYNC)(Promise.resolve(cell), context);
-        return finalCell;
+        return this.writeCellInterceptor.fetchThroughInterceptors(AFTER_CELL_EDIT)(cellData, context);
     }
 
     // #endregion
+
+    onValidateCell(workbook: Workbook, worksheet: Worksheet, row: number, col: number) {
+        const context: ISheetLocation = {
+            subUnitId: worksheet.getSheetId(),
+            unitId: workbook.getUnitId(),
+            workbook: workbook!,
+            worksheet,
+            row,
+            col,
+        };
+
+        return this.writeCellInterceptor.fetchThroughInterceptors(VALIDATE_CELL)(Promise.resolve(true), context);
+    }
 
     intercept<T extends IInterceptor<any, any>>(name: T, interceptor: T): IDisposable {
         const key = name as unknown as string;

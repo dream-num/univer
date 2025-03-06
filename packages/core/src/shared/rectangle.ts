@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
+import type { BBox } from 'rbush';
 import type { IRange, IRectLTRB } from '../sheets/typedef';
 import type { Nullable } from './types';
+import RBush from 'rbush';
 import { AbsoluteRefType, RANGE_TYPE } from '../sheets/typedef';
 import { mergeRanges, multiSubtractSingleRange, splitIntoGrid } from './range';
 
@@ -165,6 +167,30 @@ export class Rectangle {
         const y = Math.abs(currentStartRow - currentEndRow) + Math.abs(incomingStartRow - incomingEndRow);
 
         return zx <= x && zy <= y;
+    }
+
+    /**
+     * Checks if any of the ranges in the target array intersect with any of the ranges in the source array.
+     * Attention! Please make sure there is no NaN in the ranges.
+     * @param src
+     * @param target
+     * @example
+     * ```typescript
+     * const ranges1 = [
+     *   { startRow: 0, startColumn: 0, endRow: 2, endColumn: 2 },
+     *   { startRow: 3, startColumn: 3, endRow: 5, endColumn: 5 }
+     * ];
+     * const ranges2 = [
+     *   { startRow: 1, startColumn: 1, endRow: 4, endColumn: 4 },
+     *   { startRow: 6, startColumn: 6, endRow: 8, endColumn: 8 }
+     * ];
+     * const doIntersect = Rectangle.doAnyRangesIntersect(ranges1, ranges2); // true
+     * ```
+     */
+    static doAnyRangesIntersect(src: IRange[], target: IRange[]): boolean {
+        const rbush = new RBush<BBox>();
+        rbush.load(src.map((r) => ({ minX: r.startColumn, minY: r.startRow, maxX: r.endColumn, maxY: r.endRow })));
+        return target.some((r) => rbush.search({ minX: r.startColumn, minY: r.startRow, maxX: r.endColumn, maxY: r.endRow }).length > 0);
     }
 
     /**

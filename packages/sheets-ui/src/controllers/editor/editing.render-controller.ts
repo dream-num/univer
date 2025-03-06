@@ -552,11 +552,15 @@ export class EditingRenderController extends Disposable implements IRenderModule
         }
 
         if (snapshot) {
-            await this._submitCellData(snapshot);
+            const res = await this._submitCellData(snapshot);
+            // if the submit was rejected, don't move selection
+            if (res === false) {
+                return;
+            }
         }
 
-        // moveCursor need to put behind of SetRangeValuesCommand, fix https://github.com/dream-num/univer/issues/1155
-        this._moveCursor(keycode);
+        // moveSelection need to put behind of SetRangeValuesCommand, fix https://github.com/dream-num/univer/issues/1155
+        this._moveSelection(keycode);
     }
 
     private _getEditorObject() {
@@ -570,7 +574,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
     private async _submitCellData(snapshot: IDocumentData) {
         const editCellState = this._editorBridgeService.getEditCellState();
         if (editCellState == null) {
-            return;
+            return true;
         }
 
         const { unitId, sheetId, row, column } = editCellState;
@@ -581,7 +585,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
         // If the target cell does not exist, there is no need to execute setRangeValue
         const setRangeValueTargetSheet = workbook.getSheetBySheetId(sheetId);
         if (!setRangeValueTargetSheet) {
-            return;
+            return true;
         }
 
         worksheet = workbook.getActiveSheet();
@@ -598,14 +602,15 @@ export class EditingRenderController extends Disposable implements IRenderModule
         );
 
         if (!cellData) {
-            return;
+            return true;
         }
 
-        const finalCell = await this._sheetInterceptorService.onWriteCell(workbook, worksheet, row, column, cellData);
+        const finalCell = this._sheetInterceptorService.onWriteCell(workbook, worksheet, row, column, cellData);
         if (finalCell === worksheet.getCellRaw(row, column)) {
-            return;
+            return true;
         }
-        this._commandService.executeCommand(SetRangeValuesCommand.id, {
+
+        const res = this._commandService.syncExecuteCommand(SetRangeValuesCommand.id, {
             subUnitId: sheetId,
             unitId,
             range: {
@@ -614,8 +619,18 @@ export class EditingRenderController extends Disposable implements IRenderModule
                 endRow: row,
                 endColumn: column,
             },
-            value: finalCell,
+            value: cellData,
         });
+
+        if (res) {
+            const isValid = await this._sheetInterceptorService.onValidateCell(workbook, worksheet, row, column);
+            if (isValid === false) {
+                this._undoRedoService.cancelLastRedo(unitId);
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private _exitInput(param: IEditorBridgeServiceVisibleParam) {
@@ -639,7 +654,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
         this._undoRedoService.clearUndoRedo(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
     }
 
-    private _moveCursor(keycode?: KeyCode) {
+    private _moveSelection(keycode?: KeyCode) {
         if (keycode == null || !MOVE_SELECTION_KEYCODE_LIST.includes(keycode)) {
             return;
         }

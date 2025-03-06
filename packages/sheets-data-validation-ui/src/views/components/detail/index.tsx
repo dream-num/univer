@@ -303,25 +303,27 @@ export function DataValidationDetail() {
                 : null}
             {FormulaInput
                 ? (
-                    <FormulaInput
-                        key={key + localRule.type}
-                        isTwoFormula={isTwoFormula}
-                        value={{
-                            formula1: localRule.formula1,
-                            formula2: localRule.formula2,
-                        }}
-                        onChange={(value: any) => {
-                            handleUpdateRuleSetting({
-                                ...baseRule,
-                                ...value,
-                            });
-                        }}
-                        showError={showError}
-                        validResult={validator.validatorFormula(localRule, unitId, subUnitId)}
-                        unitId={unitId}
-                        subUnitId={subUnitId}
-                        ruleId={ruleId}
-                    />
+                    <FormLayout>
+                        <FormulaInput
+                            key={key + localRule.type}
+                            isTwoFormula={isTwoFormula}
+                            value={{
+                                formula1: localRule.formula1,
+                                formula2: localRule.formula2,
+                            }}
+                            onChange={(value: any) => {
+                                handleUpdateRuleSetting({
+                                    ...baseRule,
+                                    ...value,
+                                });
+                            }}
+                            showError={showError}
+                            validResult={validator.validatorFormula(localRule, unitId, subUnitId)}
+                            unitId={unitId}
+                            subUnitId={subUnitId}
+                            ruleId={ruleId}
+                        />
+                    </FormLayout>
                 )
                 : null}
             <FormLayout>

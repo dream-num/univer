@@ -87,7 +87,7 @@ export interface ISlideEditorBridgeService {
     // interceptor: InterceptorManager<{
     //     BEFORE_CELL_EDIT: typeof BEFORE_CELL_EDIT;
     //     AFTER_CELL_EDIT: typeof AFTER_CELL_EDIT;
-    //     AFTER_CELL_EDIT_ASYNC: typeof AFTER_CELL_EDIT_ASYNC;
+    //     VALIDATE_CELL: typeof VALIDATE_CELL;
     // }>;
     dispose(): void;
     // refreshEditCellState(): void;

@@ -41,7 +41,10 @@ export const DocSelectAllCommand: ICommand<ISelectAllCommandParams> = {
             return false;
         }
 
-        const { tables = [] } = body;
+        const { tables = [], dataStream } = body;
+        if (dataStream === '\r\n') {
+            return true;
+        }
         const textRanges: ISuccinctDocRangeParam[] = [];
         let offset = 0;
 

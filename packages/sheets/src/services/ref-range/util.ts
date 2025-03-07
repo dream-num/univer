@@ -295,7 +295,7 @@ export const handleReorderRangeCommon = (param: IReorderRangeCommand, targetRang
 
     const cacheMatrix = new ObjectMatrix();
     Range.foreach(range, (row, col) => {
-        if (order.hasOwnProperty(row)) {
+        if (Object.prototype.hasOwnProperty.call(order, row)) {
             const targetRow = order[row];
             const cloneCell = matrix.getValue(targetRow, col) ?? 0;
             cacheMatrix.setValue(row, col, cloneCell);

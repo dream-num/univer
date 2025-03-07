@@ -16,6 +16,7 @@
 
 import type { IInterceptor } from '../common/interceptor';
 import type { IObjectMatrixPrimitiveType, Nullable } from '../shared';
+import type { BooleanNumber, HorizontalAlign, TextDirection, VerticalAlign, WrapStrategy } from '../types/enum';
 import type { IDocumentData, IDocumentRenderConfig, IPaddingData, IStyleData, ITextRotation } from '../types/interfaces';
 import type { Styles } from './styles';
 import type { CustomData, ICellData, ICellDataForSheetInterceptor, ICellDataWithSpanAndDisplay, IFreeze, IRange, ISelectionCell, IWorksheetData } from './typedef';
@@ -24,7 +25,7 @@ import { convertTextRotation, getFontStyleString } from '../docs/data-model/util
 import { composeStyles, ObjectMatrix, Tools } from '../shared';
 import { createRowColIter } from '../shared/row-col-iter';
 import { DEFAULT_STYLES } from '../types/const';
-import { type BooleanNumber, CellValueType, type HorizontalAlign, type TextDirection, type VerticalAlign, type WrapStrategy } from '../types/enum';
+import { CellValueType } from '../types/enum';
 import { ColumnManager } from './column-manager';
 import { Range } from './range';
 import { RowManager } from './row-manager';

@@ -36,7 +36,7 @@ import type {
     IRemoveRowColCommand,
     IReorderRangeCommand,
 } from './type';
-import { Direction, IUniverInstanceService, ObjectMatrix, queryObjectMatrix, Range, RANGE_TYPE, Rectangle } from '@univerjs/core';
+import { IUniverInstanceService, ObjectMatrix, queryObjectMatrix, Range, RANGE_TYPE, Rectangle } from '@univerjs/core';
 import { DeleteRangeMoveLeftCommand } from '../../commands/commands/delete-range-move-left.command';
 import { DeleteRangeMoveUpCommand } from '../../commands/commands/delete-range-move-up.command';
 import { InsertRangeMoveDownCommand } from '../../commands/commands/insert-range-move-down.command';
@@ -295,7 +295,7 @@ export const handleReorderRangeCommon = (param: IReorderRangeCommand, targetRang
 
     const cacheMatrix = new ObjectMatrix();
     Range.foreach(range, (row, col) => {
-        if (order.hasOwnProperty(row)) {
+        if (Object.prototype.hasOwnProperty.call(order, row)) {
             const targetRow = order[row];
             const cloneCell = matrix.getValue(targetRow, col) ?? 0;
             cacheMatrix.setValue(row, col, cloneCell);
@@ -945,21 +945,7 @@ export const handleInsertRowCommon = (info: ICommandInfo<IInsertRowCommandParams
     const param = info.params!;
     const insertRow = param.range.startRow;
     const insertCount = param.range.endRow - param.range.startRow + 1;
-    const direction = param.direction;
-    // expand
-    if (
-        (direction === Direction.UP && insertRow === targetRange.startRow) ||
-        (direction === Direction.DOWN && insertRow - 1 === targetRange.endRow)
-    ) {
-        return [
-            {
-                startRow: targetRange.startRow,
-                endRow: targetRange.endRow + insertCount,
-                startColumn: targetRange.startColumn,
-                endColumn: targetRange.endColumn,
-            },
-        ];
-    }
+
     if (targetRange.startRow >= insertRow) {
         return [{
             startRow: targetRange.startRow + insertCount,
@@ -967,7 +953,7 @@ export const handleInsertRowCommon = (info: ICommandInfo<IInsertRowCommandParams
             startColumn: targetRange.startColumn,
             endColumn: targetRange.endColumn,
         }];
-    } else if (targetRange.endRow <= insertRow) {
+    } else if (targetRange.endRow < insertRow) {
         return [targetRange];
     } else {
         return [{
@@ -983,22 +969,6 @@ export const handleInsertColCommon = (info: ICommandInfo<IInsertColCommandParams
     const param = info.params!;
     const insertColumn = param.range.startColumn;
     const insertCount = param.range.endColumn - param.range.startColumn + 1;
-    const direction = param.direction;
-
-    // expand
-    if (
-        (direction === Direction.LEFT && insertColumn === targetRange.startColumn) ||
-        (direction === Direction.RIGHT && insertColumn - 1 === targetRange.endColumn)
-    ) {
-        return [
-            {
-                startRow: targetRange.startRow,
-                endRow: targetRange.endRow,
-                startColumn: targetRange.startColumn,
-                endColumn: targetRange.endColumn + insertCount,
-            },
-        ];
-    }
 
     if (targetRange.startColumn >= insertColumn) {
         return [{
@@ -1007,7 +977,7 @@ export const handleInsertColCommon = (info: ICommandInfo<IInsertColCommandParams
             startColumn: targetRange.startColumn + insertCount,
             endColumn: targetRange.endColumn + insertCount,
         }];
-    } else if (targetRange.endColumn <= insertColumn) {
+    } else if (targetRange.endColumn < insertColumn) {
         return [targetRange];
     } else {
         return [{

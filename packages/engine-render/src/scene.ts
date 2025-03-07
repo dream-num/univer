@@ -480,6 +480,11 @@ export class Scene extends Disposable {
         return this._layers;
     }
 
+    /**
+     * Get layer by zIndex.
+     * This method would create a new Layer if Layer is not exist.
+     * @param zIndex
+     */
     getLayer(zIndex: number = 1): Layer {
         for (const layer of this._layers) {
             if (layer.zIndex === zIndex) {
@@ -516,7 +521,8 @@ export class Scene extends Disposable {
     }
 
     /**
-     * Add objects to Layer( Layer is specfied by zIndex)
+     * Add objects to Layer( Layer is specified by zIndex)
+     * This method would create a new Layer if Layer is not exist.
      * If object is a group, insert all its children and group itself to _objects[].
      * @param objects
      * @param zIndex
@@ -530,7 +536,8 @@ export class Scene extends Disposable {
 
     /**
      * Add object to Layer (Layer is specified by zIndex).
-     * If object is a group, insert all its children and group itself to _objects[].
+     * This method would create a new Layer if Layer is not exist.
+     * And if object is a group, insert all its children and group itself to _objects[].
      * @param o
      * @param zIndex layer index
      * @returns {Scene} scene

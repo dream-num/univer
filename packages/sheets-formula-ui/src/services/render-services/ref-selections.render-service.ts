@@ -386,7 +386,7 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
 
         this._selectionMoveStart$.next(this.getSelectionDataWithStyle());
 
-        scene.disableObjectsEvent();
+        // scene.disableObjectsEvent();
         this._clearUpdatingListeners();
         this._addEndingListeners();
 

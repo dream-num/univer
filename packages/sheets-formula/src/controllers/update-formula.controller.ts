@@ -262,12 +262,12 @@ export class UpdateFormulaController extends Disposable {
 
         const config = this._configService.getConfig<IUniverSheetsFormulaBaseConfig>(PLUGIN_CONFIG_KEY_BASE);
         const calculationMode = config?.initialFormulaComputing ?? CalculationMode.WHEN_EMPTY;
-        const params = this._getDiryDataByCalculationMode(calculationMode);
+        const params = this._getDirtyDataByCalculationMode(calculationMode);
 
         this._commandService.executeCommand(SetFormulaCalculationStartMutation.id, params, { onlyLocal: true });
     }
 
-    private _getDiryDataByCalculationMode(calculationMode: CalculationMode): IFormulaDirtyData {
+    private _getDirtyDataByCalculationMode(calculationMode: CalculationMode): IFormulaDirtyData {
         const forceCalculation = calculationMode === CalculationMode.FORCED;
 
         // loop all sheets cell data, and get the dirty data

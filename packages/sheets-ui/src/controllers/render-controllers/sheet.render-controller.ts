@@ -34,9 +34,8 @@ import { COMMAND_LISTENER_SKELETON_CHANGE, COMMAND_LISTENER_VALUE_CHANGE, MoveRa
 import { ITelemetryService } from '@univerjs/telemetry';
 import { Subject, withLatestFrom } from 'rxjs';
 import {
-    SHEET_COMPONENT_HEADER_LAYER_INDEX,
-    SHEET_COMPONENT_MAIN_LAYER_INDEX,
     SHEET_VIEW_KEY,
+    SheetComponentLayerIndex,
 } from '../../common/keys';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import { SheetsRenderService } from '../../services/sheets-render.service';
@@ -234,13 +233,13 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
         components.set(SHEET_VIEW_KEY.COLUMN, spreadsheetColumnHeader);
         components.set(SHEET_VIEW_KEY.LEFT_TOP, SpreadsheetLeftTopPlaceholder);
 
-        scene.addObjects([spreadsheet], SHEET_COMPONENT_MAIN_LAYER_INDEX);
+        scene.addObjects([spreadsheet], SheetComponentLayerIndex.MainLayer);
         scene.addObjects(
             [spreadsheetRowHeader, spreadsheetColumnHeader, SpreadsheetLeftTopPlaceholder],
-            SHEET_COMPONENT_HEADER_LAYER_INDEX
+            SheetComponentLayerIndex.HeaderLayer
         );
 
-        scene.enableLayerCache(SHEET_COMPONENT_MAIN_LAYER_INDEX, SHEET_COMPONENT_HEADER_LAYER_INDEX);
+        scene.enableLayerCache(SheetComponentLayerIndex.MainLayer, SheetComponentLayerIndex.HeaderLayer);
     }
 
     private _initViewports(scene: Scene, rowHeader: { width: number }, columnHeader: { height: number }) {

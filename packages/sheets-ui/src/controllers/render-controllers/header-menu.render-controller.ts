@@ -28,7 +28,7 @@ import { SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheet
 import { ContextMenuPosition, IContextMenuService } from '@univerjs/ui';
 import { Subscription } from 'rxjs';
 
-import { SHEET_COMPONENT_HEADER_LAYER_INDEX, SHEET_VIEW_KEY } from '../../common/keys';
+import { SHEET_VIEW_KEY, SheetComponentLayerIndex } from '../../common/keys';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import { HEADER_MENU_SHAPE_TYPE, HeaderMenuShape } from '../../views/header-menu-shape';
 import { getCoordByOffset } from '../utils/component-tools';
@@ -106,7 +106,7 @@ export class HeaderMenuRenderController extends Disposable implements IRenderMod
 
         this._hoverMenu = new HeaderMenuShape(HEADER_MENU_CONTROLLER_MENU, { zIndex: 100, visible: false });
 
-        scene.addObjects([this._hoverRect, this._hoverMenu], SHEET_COMPONENT_HEADER_LAYER_INDEX);
+        scene.addObjects([this._hoverRect, this._hoverMenu], SheetComponentLayerIndex.HeaderLayer);
 
         this._initialHover(HEADER_HOVER_TYPE.ROW);
 

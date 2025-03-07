@@ -26,7 +26,7 @@ import {
 } from '@univerjs/sheets';
 
 import { BehaviorSubject, Subject } from 'rxjs';
-import { SHEET_COMPONENT_HEADER_SELECTION_LAYER_INDEX, SHEET_COMPONENT_SELECTION_LAYER_INDEX } from '../../common/keys';
+import { SheetComponentLayerIndex } from '../../common/keys';
 import { genNormalSelectionStyle } from './const';
 import { SelectionRenderModel } from './selection-render-model';
 import { SelectionShapeExtension } from './selection-shape-extension';
@@ -248,7 +248,7 @@ export class SelectionControl extends Disposable {
         this._selectionShapeGroup.zIndex = zIndex;
 
         const scene = this.getScene();
-        scene.addObject(this._selectionShapeGroup, SHEET_COMPONENT_SELECTION_LAYER_INDEX);
+        scene.addObject(this._selectionShapeGroup, SheetComponentLayerIndex.SelectionLayer);
 
         this.disposeWithMe(
             toDisposable(
@@ -307,7 +307,7 @@ export class SelectionControl extends Disposable {
         this._columnHeaderGroup.zIndex = zIndex;
 
         const scene = this.getScene();
-        scene.addObjects([this._rowHeaderGroup, this._columnHeaderGroup], SHEET_COMPONENT_HEADER_SELECTION_LAYER_INDEX);
+        scene.addObjects([this._rowHeaderGroup, this._columnHeaderGroup], SheetComponentLayerIndex.HeaderSelectionLayer);
     }
 
     private _initialWidget(): Rect[] {

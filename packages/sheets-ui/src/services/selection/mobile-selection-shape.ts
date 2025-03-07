@@ -20,7 +20,7 @@ import type { ISelectionStyle } from '@univerjs/sheets';
 import { RANGE_TYPE } from '@univerjs/core';
 import { Rect, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 
-import { SHEET_COMPONENT_SELECTION_LAYER_INDEX } from '../../common/keys';
+import { SheetComponentLayerIndex } from '../../common/keys';
 import { SELECTION_MANAGER_KEY, SelectionControl } from './selection-control';
 
 export class MobileSelectionControl extends SelectionControl {
@@ -108,7 +108,7 @@ export class MobileSelectionControl extends SelectionControl {
         }
 
         const scene = this.getScene();
-        scene.addObjects(objs, SHEET_COMPONENT_SELECTION_LAYER_INDEX);
+        scene.addObjects(objs, SheetComponentLayerIndex.SelectionLayer);
     }
 
     get fillControlTopLeft(): Rect<IRectProps> | null {

@@ -45,7 +45,7 @@ import {
 } from '@univerjs/sheets';
 
 import { Subscription } from 'rxjs';
-import { SHEET_COMPONENT_HEADER_LAYER_INDEX, SHEET_VIEW_KEY } from '../../common/keys';
+import { SHEET_VIEW_KEY, SheetComponentLayerIndex } from '../../common/keys';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import { getCoordByOffset } from '../utils/component-tools';
 import { matchedSelectionByRowColIndex } from '../utils/selections-tools';
@@ -490,7 +490,7 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
         });
         scene.addObjects(
             [this._moveHelperBackgroundShape, this._moveHelperLineShape],
-            SHEET_COMPONENT_HEADER_LAYER_INDEX
+            SheetComponentLayerIndex.HeaderLayer
         );
     }
 

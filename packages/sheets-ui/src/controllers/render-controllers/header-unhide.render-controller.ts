@@ -28,7 +28,7 @@ import {
 } from '@univerjs/sheets';
 import { takeUntil } from 'rxjs';
 
-import { SHEET_COMPONENT_UNHIDE_LAYER_INDEX } from '../../common/keys';
+import { SheetComponentLayerIndex } from '../../common/keys';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import { HeaderUnhideShape, HeaderUnhideShapeType, UNHIDE_ICON_SIZE } from '../../views/header-unhide-shape';
 import { getCoordByCell, getSheetObject } from '../utils/component-tools';
@@ -156,8 +156,8 @@ export class HeaderUnhideRenderController extends RxDisposable {
             );
         });
 
-        scene.addObjects(colShapes, SHEET_COMPONENT_UNHIDE_LAYER_INDEX);
-        scene.addObjects(rowShapes, SHEET_COMPONENT_UNHIDE_LAYER_INDEX);
+        scene.addObjects(colShapes, SheetComponentLayerIndex.UnhideLayer);
+        scene.addObjects(rowShapes, SheetComponentLayerIndex.UnhideLayer);
 
         // 3. clear the previous shapes and update the shapes
         this._clearShapes();

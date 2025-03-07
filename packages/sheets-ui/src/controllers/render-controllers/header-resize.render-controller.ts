@@ -43,7 +43,7 @@ import {
 } from '@univerjs/sheets';
 import { Subscription } from 'rxjs';
 import { SetWorksheetColAutoWidthCommand } from '../../commands/commands/set-worksheet-auto-col-width.command';
-import { SHEET_COMPONENT_HEADER_LAYER_INDEX, SHEET_VIEW_KEY } from '../../common/keys';
+import { SHEET_VIEW_KEY, SheetComponentLayerIndex } from '../../common/keys';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import {
     HEADER_MENU_SHAPE_SIZE,
@@ -133,7 +133,7 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
             zIndex: 100,
         });
 
-        scene.addObjects([this._rowResizeRect, this._columnResizeRect], SHEET_COMPONENT_HEADER_LAYER_INDEX);
+        scene.addObjects([this._rowResizeRect, this._columnResizeRect], SheetComponentLayerIndex.HeaderLayer);
 
         this._initialHover(HEADER_RESIZE_TYPE.ROW);
 
@@ -370,7 +370,7 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
 
                 const rowResizeRectX = this._columnResizeRect?.left || 0;
                 const rowResizeRectY = this._rowResizeRect?.top || 0;
-                scene.addObject(this._resizeHelperShape, SHEET_COMPONENT_HEADER_LAYER_INDEX);
+                scene.addObject(this._resizeHelperShape, SheetComponentLayerIndex.HeaderLayer);
                 scene.disableObjectsEvent();
 
                 this._scenePointerMoveSub = scene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {

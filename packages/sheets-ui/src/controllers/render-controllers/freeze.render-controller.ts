@@ -73,7 +73,7 @@ import { SetColumnHeaderHeightCommand, SetRowHeaderWidthCommand } from '../../co
 import { ScrollCommand } from '../../commands/commands/set-scroll.command';
 
 import { SetZoomRatioOperation } from '../../commands/operations/set-zoom-ratio.operation';
-import { SHEET_COMPONENT_HEADER_LAYER_INDEX } from '../../common/keys';
+import { SheetComponentLayerIndex } from '../../common/keys';
 import { SheetScrollManagerService } from '../../services/scroll-manager.service';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import { getCoordByOffset, getSheetObject } from '../utils/component-tools';
@@ -259,7 +259,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
                 zIndex: 3,
             });
 
-            scene.addObjects([this._rowFreezeHeaderRect, this._rowFreezeMainRect], SHEET_COMPONENT_HEADER_LAYER_INDEX);
+            scene.addObjects([this._rowFreezeHeaderRect, this._rowFreezeMainRect], SheetComponentLayerIndex.HeaderLayer);
         } else {
             if (freezeColumn === -1 || freezeColumn === 0) {
                 FREEZE_SIZE = FREEZE_SIZE * 2;
@@ -290,7 +290,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
                 zIndex: 3,
             });
 
-            scene.addObjects([this._columnFreezeHeaderRect, this._columnFreezeMainRect], SHEET_COMPONENT_HEADER_LAYER_INDEX);
+            scene.addObjects([this._columnFreezeHeaderRect, this._columnFreezeMainRect], SheetComponentLayerIndex.HeaderLayer);
         }
 
         this._eventBinding(freezeDirectionType);

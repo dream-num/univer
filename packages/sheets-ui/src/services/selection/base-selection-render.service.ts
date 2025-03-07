@@ -44,7 +44,7 @@ import {
 import { ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 import { REF_SELECTIONS_ENABLED, SELECTIONS_ENABLED } from '@univerjs/sheets';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { SHEET_COMPONENT_SELECTION_LAYER_INDEX } from '../../common/keys';
+import { SheetComponentLayerIndex } from '../../common/keys';
 import { genNormalSelectionStyle, RANGE_FILL_PERMISSION_CHECK, RANGE_MOVE_PERMISSION_CHECK } from './const';
 import { SelectionControl } from './selection-control';
 import { SelectionLayer } from './selection-layer';
@@ -329,8 +329,8 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         this._scene = scene;
         this._activeViewport = viewport || scene?.getViewports()[0];
 
-        if (!scene.findLayerByZIndex(SHEET_COMPONENT_SELECTION_LAYER_INDEX)) {
-            scene.addLayer(new SelectionLayer(scene, [], SHEET_COMPONENT_SELECTION_LAYER_INDEX));
+        if (!scene.findLayerByZIndex(SheetComponentLayerIndex.SelectionLayer)) {
+            scene.addLayer(new SelectionLayer(scene, [], SheetComponentLayerIndex.SelectionLayer));
         }
     }
 

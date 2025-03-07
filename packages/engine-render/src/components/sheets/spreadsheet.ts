@@ -412,14 +412,14 @@ export class Spreadsheet extends SheetComponent {
 
         const { viewportKey } = viewportInfo;
         // scene --> layer, getObjects --> viewport.render(object) --> spreadsheet
-        // SHEET_COMPONENT_MAIN_LAYER_INDEX = 0;
-        // SHEET_COMPONENT_SELECTION_LAYER_INDEX = 1;
-        // SHEET_COMPONENT_HEADER_LAYER_INDEX = 10;
-        // SHEET_COMPONENT_HEADER_SELECTION_LAYER_INDEX = 11;
+        // SheetComponentLayerIndex.MainLayer = 0;
+        // SheetComponentLayerIndex.SelectionLayer = 1;
+        // SheetComponentLayerIndex.HeaderLayer = 10;
+        // SheetComponentLayerIndex.HeaderSelectionLayer = 11;
         // ......
-        // SHEET_COMPONENT_MAIN_LAYER_INDEX spreadsheet  this.getObjectsByOrder() ---> [spreadsheet]
-        // SHEET_COMPONENT_HEADER_LAYER_INDEX rowHeader & colHeader & freezeBorder this.getObjectsByOrder() ---> [SpreadsheetRowHeader, SpreadsheetColumnHeader, _Rect..., HeaderMenuResizeShape]
-        // SHEET_COMPONENT_HEADER_SELECTION_LAYER_INDEX selection  this.getObjectsByOrder() ---> [_Rect, Group]
+        // SheetComponentLayerIndex.MainLayer spreadsheet  this.getObjectsByOrder() ---> [spreadsheet]
+        // SheetComponentLayerIndex.HeaderLayer rowHeader & colHeader & freezeBorder this.getObjectsByOrder() ---> [SpreadsheetRowHeader, SpreadsheetColumnHeader, _Rect..., HeaderMenuResizeShape]
+        // SheetComponentLayerIndex.HeaderSelectionLayer selection  this.getObjectsByOrder() ---> [_Rect, Group]
 
         // SpreadsheetRowHeader SpreadsheetColumnHeader is not render by spreadsheet
         if (sheetContentViewportKeys.includes(viewportKey as SHEET_VIEWPORT_KEY)) {

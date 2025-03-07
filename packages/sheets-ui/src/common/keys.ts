@@ -31,11 +31,21 @@ export enum SHEET_VIEW_KEY {
     LEFT_TOP = '__SpreadsheetLeftTopPlaceholder__',
 }
 
+export enum SheetComponentLayerIndex {
+    MainLayer = 0,
+    SelectionLayer = 1,
+    HeaderLayer = 10,
+    HeaderSelectionLayer = 11,
+    UnhideLayer = 12,
+}
+
+// but in packages/engine-render/src/scene.ts,  default layer index = 1??
+// packages/engine-render/src/layer.ts shows default layer index = 1
 export const SHEET_COMPONENT_MAIN_LAYER_INDEX = 0;
 
 export const SHEET_COMPONENT_SELECTION_LAYER_INDEX = 1;
 
-export const SHEET_COMPONENT_HEADER_LAYER_INDEX = 10;
+export const SHEET_COMPONENT_HEADER_LAYER_INDEX = 10;// But watermark is also 10.
 
 export const SHEET_COMPONENT_HEADER_SELECTION_LAYER_INDEX = 11;
 

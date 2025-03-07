@@ -345,7 +345,7 @@ export class SelectionShapeExtension {
         this._scrollTimer = scrollTimer;
         scrollTimer.startScroll(newEvtOffsetX, newEvtOffsetY, viewMain);
 
-        scene.disableObjectsEvent();
+        // scene.disableObjectsEvent();
 
         this._scenePointerMoveSub = scene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
             const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
@@ -484,7 +484,7 @@ export class SelectionShapeExtension {
         scrollTimer.startScroll(newEvtOffsetX, newEvtOffsetY, viewMain);
         this._scrollTimer = scrollTimer;
 
-        scene.disableObjectsEvent();
+        // scene.disableObjectsEvent();
 
         this._scenePointerMoveSub = scene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
             const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
@@ -841,7 +841,7 @@ export class SelectionShapeExtension {
 
         this._scrollTimer = scrollTimer;
 
-        scene.disableObjectsEvent();
+        // scene.disableObjectsEvent();
 
         this._controlHandler((o) => {
             this._fillControlColors.push(o.fill as string);

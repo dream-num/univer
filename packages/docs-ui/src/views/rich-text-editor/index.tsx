@@ -50,6 +50,7 @@ export interface IRichTextEditorProps {
     defaultHeight?: number;
     icon?: ReactNode;
     editorRef?: React.RefObject<Editor | null> | ((editor: Editor | null) => void);
+    autoBlur?: boolean;
 }
 
 export const RichTextEditor = (props: IRichTextEditorProps) => {
@@ -70,6 +71,7 @@ export const RichTextEditor = (props: IRichTextEditorProps) => {
         maxHeight = 32,
         icon,
         editorRef,
+        autoBlur,
     } = props;
     const editorService = useDependency(IEditorService);
     const onFocusChange = useEvent(_onFocusChange);
@@ -131,17 +133,20 @@ export const RichTextEditor = (props: IRichTextEditorProps) => {
         onFocusChange?.(isFocusing, getPlainText(data?.body?.dataStream ?? ''));
     }, [isFocusing, onFocusChange]);
 
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (editorService.getFocusId() !== editorId) return;
+    const handleClickOutside = useEvent((event: MouseEvent) => {
+        if (editorService.getFocusId() !== editorId) return;
 
-            const id = (event.target as HTMLDivElement)?.dataset?.editorid;
-            if (id === editorId) return;
-            if (sheetEmbeddingRef.current && !sheetEmbeddingRef.current.contains(event.target as any)) {
-                onClickOutside?.();
+        const id = (event.target as HTMLDivElement)?.dataset?.editorid;
+        if (id === editorId) return;
+        if (sheetEmbeddingRef.current && !sheetEmbeddingRef.current.contains(event.target as any)) {
+            if (autoBlur) {
+                editorService.blur(true);
             }
-        };
+            onClickOutside?.();
+        }
+    });
 
+    useEffect(() => {
         const timer = setTimeout(() => {
             document.addEventListener('click', handleClickOutside);
         }, 100);
@@ -150,7 +155,7 @@ export const RichTextEditor = (props: IRichTextEditorProps) => {
             document.removeEventListener('click', handleClickOutside);
             clearTimeout(timer);
         };
-    }, [editor, editorId, editorService, onClickOutside]);
+    }, []);
 
     useLeftAndRightArrow(isFocusing && moveCursor, false, editor);
     useKeyboardEvent(isFocusing, keyboardEventConfig, editor);

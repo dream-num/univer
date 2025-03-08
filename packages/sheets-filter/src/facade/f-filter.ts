@@ -44,7 +44,9 @@ export class FFilter {
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getActiveSheet();
-     * const fRange = fWorksheet.getRange('A1:D10');
+     *
+     * // Set some values of the range C1:F10
+     * const fRange = fWorksheet.getRange('C1:F10');
      * fRange.setValues([
      *   [1, 2, 3, 4],
      *   [2, 3, 4, 5],
@@ -58,7 +60,7 @@ export class FFilter {
      *   [10, 11, 12, 13],
      * ]);
      *
-     * // Create a filter on the range
+     * // Create a filter on the range C1:F10
      * let fFilter = fRange.createFilter();
      *
      * // If the filter already exists, remove it and create a new one
@@ -67,15 +69,17 @@ export class FFilter {
      *   fFilter = fRange.createFilter();
      * }
      *
-     * // Set the filter criteria of the column A
-     * fFilter?.setColumnFilterCriteria(0, {
+     * // Set the filter criteria of the column C, filter out the rows that are not 1, 5, 9
+     * const column = fWorksheet.getRange('C:C').getColumn();
+     * fFilter.setColumnFilterCriteria(column, {
      *   colId: 0,
      *   filters: {
      *     filters: ['1', '5', '9'],
      *   },
      * });
      *
-     * console.log(fFilter?.getFilteredOutRows()); // [1, 2, 3, 5, 6, 7, 9]
+     * // Get the filtered out rows
+     * console.log(fFilter.getFilteredOutRows()); // [1, 2, 3, 5, 6, 7, 9]
      * ```
      */
     getFilteredOutRows(): number[] {
@@ -90,7 +94,9 @@ export class FFilter {
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getActiveSheet();
-     * const fRange = fWorksheet.getRange('A1:D10');
+     *
+     * // Set some values of the range C1:F10
+     * const fRange = fWorksheet.getRange('C1:F10');
      * fRange.setValues([
      *   [1, 2, 3, 4],
      *   [2, 3, 4, 5],
@@ -104,7 +110,7 @@ export class FFilter {
      *   [10, 11, 12, 13],
      * ]);
      *
-     * // Create a filter on the range
+     * // Create a filter on the range C1:F10
      * let fFilter = fRange.createFilter();
      *
      * // If the filter already exists, remove it and create a new one
@@ -113,16 +119,18 @@ export class FFilter {
      *   fFilter = fRange.createFilter();
      * }
      *
-     * // Set the filter criteria of the column A
-     * fFilter?.setColumnFilterCriteria(0, {
+     * // Set the filter criteria of the column C, filter out the rows that are not 1, 5, 9
+     * const column = fWorksheet.getRange('C:C').getColumn();
+     * fFilter.setColumnFilterCriteria(column, {
      *   colId: 0,
      *   filters: {
      *     filters: ['1', '5', '9'],
      *   },
      * });
      *
-     * console.log(fFilter?.getColumnFilterCriteria(0)); // { colId: 0, filters: { filters: ['1', '5', '9'] } }
-     * console.log(fFilter?.getColumnFilterCriteria(1)); // undefined
+     * // Print the filter criteria of the column C and D
+     * console.log(fFilter.getColumnFilterCriteria(column)); // { colId: 0, filters: { filters: ['1', '5', '9'] } }
+     * console.log(fFilter.getColumnFilterCriteria(column + 1)); // undefined
      * ```
      */
     getColumnFilterCriteria(column: number): Nullable<IFilterColumn> {
@@ -137,7 +145,9 @@ export class FFilter {
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getActiveSheet();
-     * const fRange = fWorksheet.getRange('A1:D10');
+     *
+     * // Set some values of the range C1:F10
+     * const fRange = fWorksheet.getRange('C1:F10');
      * fRange.setValues([
      *   [1, 2, 3, 4],
      *   [2, 3, 4, 5],
@@ -151,7 +161,7 @@ export class FFilter {
      *   [10, 11, 12, 13],
      * ]);
      *
-     * // Create a filter on the range
+     * // Create a filter on the range C1:F10
      * let fFilter = fRange.createFilter();
      *
      * // If the filter already exists, remove it and create a new one
@@ -160,17 +170,18 @@ export class FFilter {
      *   fFilter = fRange.createFilter();
      * }
      *
-     * // Set the filter criteria of the column A
-     * fFilter?.setColumnFilterCriteria(0, {
+     * // Set the filter criteria of the column C, filter out the rows that are not 1, 5, 9
+     * const column = fWorksheet.getRange('C:C').getColumn();
+     * fFilter.setColumnFilterCriteria(column, {
      *   colId: 0,
      *   filters: {
      *     filters: ['1', '5', '9'],
      *   },
      * });
      *
-     * // Clear the filter criteria of the column A after 3 seconds
+     * // Clear the filter criteria of the column C after 3 seconds
      * setTimeout(() => {
-     *   fFilter?.removeColumnFilterCriteria(0);
+     *   fFilter.removeColumnFilterCriteria(column);
      * }, 3000);
      * ```
      */
@@ -193,7 +204,9 @@ export class FFilter {
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getActiveSheet();
-     * const fRange = fWorksheet.getRange('A1:D10');
+     *
+     * // Set some values of the range C1:F10
+     * const fRange = fWorksheet.getRange('C1:F10');
      * fRange.setValues([
      *   [1, 2, 3, 4],
      *   [2, 3, 4, 5],
@@ -207,7 +220,7 @@ export class FFilter {
      *   [10, 11, 12, 13],
      * ]);
      *
-     * // Create a filter on the range
+     * // Create a filter on the range C1:F10
      * let fFilter = fRange.createFilter();
      *
      * // If the filter already exists, remove it and create a new one
@@ -216,8 +229,9 @@ export class FFilter {
      *   fFilter = fRange.createFilter();
      * }
      *
-     * // Set the filter criteria of the column A
-     * fFilter?.setColumnFilterCriteria(0, {
+     * // Set the filter criteria of the column C, filter out the rows that are not 1, 5, 9
+     * const column = fWorksheet.getRange('C:C').getColumn();
+     * fFilter.setColumnFilterCriteria(column, {
      *   colId: 0,
      *   filters: {
      *     filters: ['1', '5', '9'],
@@ -258,7 +272,9 @@ export class FFilter {
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getActiveSheet();
-     * const fRange = fWorksheet.getRange('A1:D10');
+     *
+     * // Set some values of the range C1:F10
+     * const fRange = fWorksheet.getRange('C1:F10');
      * fRange.setValues([
      *   [1, 2, 3, 4],
      *   [2, 3, 4, 5],
@@ -272,7 +288,7 @@ export class FFilter {
      *   [10, 11, 12, 13],
      * ]);
      *
-     * // Create a filter on the range
+     * // Create a filter on the range C1:F10
      * let fFilter = fRange.createFilter();
      *
      * // If the filter already exists, remove it and create a new one
@@ -281,8 +297,9 @@ export class FFilter {
      *   fFilter = fRange.createFilter();
      * }
      *
-     * // Set the filter criteria of the column A
-     * fFilter?.setColumnFilterCriteria(0, {
+     * // Set the filter criteria of the column C, filter out the rows that are not 1, 5, 9
+     * const column = fWorksheet.getRange('C:C').getColumn();
+     * fFilter.setColumnFilterCriteria(column, {
      *   colId: 0,
      *   filters: {
      *     filters: ['1', '5', '9'],
@@ -291,7 +308,7 @@ export class FFilter {
      *
      * // Clear the filter criteria of all columns after 3 seconds
      * setTimeout(() => {
-     *   fFilter?.removeFilterCriteria();
+     *   fFilter.removeFilterCriteria();
      * }, 3000);
      * ```
      */

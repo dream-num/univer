@@ -143,8 +143,7 @@ export class FSelection {
      * const cell = fWorksheet.getRange('B11');
      *
      * let fSelection = fWorksheet.getSelection();
-     * fSelection.updatePrimaryCell(cell);
-     * fSelection = fWorksheet.getSelection();
+     * fSelection = fSelection.updatePrimaryCell(cell);
      *
      * const currentCell = fSelection.getCurrentCell();
      * const { actualRow, actualColumn } = currentCell;

@@ -1119,8 +1119,9 @@ export class FRange extends FBaseInitialable {
      * const fRange = fWorksheet.getRange('A1:B2');
      * console.log(fRange.getValue(true));
      *
-     * // set the first cell value to 123
-     * const richText = univerAPI.newRichText({ body: { dataStream: 'Hello World\r\n' } })
+     * // Set A1 cell value to rich text
+     * const richText = univerAPI.newRichText()
+     *   .insertText('Hello World')
      *   .setStyle(0, 1, { bl: 1, cl: { rgb: '#c81e1e' } })
      *   .setStyle(6, 7, { bl: 1, cl: { rgb: '#c81e1e' } });
      * fRange.setRichTextValueForCell(richText);
@@ -1155,8 +1156,9 @@ export class FRange extends FBaseInitialable {
      * const fRange = fWorksheet.getRange('A1:B2');
      * console.log(fRange.getValue(true));
      *
-     * // set the first cell value to 123
-     * const richText = univerAPI.newRichText({ body: { dataStream: 'Hello World\r\n' } })
+     * // Set A1:B2 cell value to rich text
+     * const richText = univerAPI.newRichText()
+     *   .insertText('Hello World')
      *   .setStyle(0, 1, { bl: 1, cl: { rgb: '#c81e1e' } })
      *   .setStyle(6, 7, { bl: 1, cl: { rgb: '#c81e1e' } });
      * fRange.setRichTextValues([
@@ -1815,14 +1817,14 @@ export class FRange extends FBaseInitialable {
      * const fWorksheet = fWorkbook.getActiveSheet();
      *
      * // A1:A3 has following values:
-     * //  A      | B | C
-     * //  1,2,3  |   |
-     * //  4,,5,6 |   |
+     * //    A    |
+     * //  1,2,3  |
+     * //  4,,5,6 |
      * const fRange = fWorksheet.getRange('A1:A3');
      * fRange.setValues([
-     *   ['A', 'B', 'C'],
-     *   ['1,2,3', null, null],
-     *   ['4,,5,6', null, null]
+     *   ['A'],
+     *   ['1,2,3'],
+     *   ['4,,5,6']
      * ]);
      *
      * // After calling splitTextToColumns(true), the range will be:
@@ -1849,14 +1851,14 @@ export class FRange extends FBaseInitialable {
      * const fWorksheet = fWorkbook.getActiveSheet();
      *
      * // A1:A3 has following values:
-     * //     A   | B | C
-     * //  1;;2;3 |   |
-     * //  1;,2;3 |   |
+     * //     A   |
+     * //  1;;2;3 |
+     * //  1;,2;3 |
      * const fRange = fWorksheet.getRange('A1:A3');
      * fRange.setValues([
-     *   ['A', 'B', 'C'],
-     *   ['1;;2;3', null, null],
-     *   ['1;,2;3', null, null]
+     *   ['A'],
+     *   ['1;;2;3'],
+     *   ['1;,2;3']
      * ]);
      *
      * // After calling splitTextToColumns(false, univerAPI.Enum.SplitDelimiterType.Semicolon|univerAPI.Enum.SplitDelimiterType.Comma), the range will be:
@@ -1884,14 +1886,14 @@ export class FRange extends FBaseInitialable {
      * const fWorksheet = fWorkbook.getActiveSheet();
      *
      * // A1:A3 has following values:
-     * //     A   | B | C
-     * //  1#2#3  |   |
-     * //  4##5#6 |   |
+     * //     A   |
+     * //  1#2#3  |
+     * //  4##5#6 |
      * const fRange = fWorksheet.getRange('A1:A3');
      * fRange.setValues([
-     *   ['A', 'B', 'C'],
-     *   ['1#2#3', null, null],
-     *   ['4##5#6', null, null]
+     *   ['A'],
+     *   ['1#2#3'],
+     *   ['4##5#6']
      * ]);
      *
      * // After calling splitTextToColumns(false, univerAPI.Enum.SplitDelimiterType.Custom, '#'), the range will be:

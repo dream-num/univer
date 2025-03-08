@@ -67,7 +67,8 @@ export class FontAndBaseLine extends docExtension {
 
         if (more) {
             if (more.viewBound) {
-                if (spanPointWithFont.x > more.viewBound.right || spanPointWithFont.y > more.viewBound.bottom) {
+                // ctx.fillText('', x, y), the 'y' is the baseline of a character, not the left top of the character
+                if (spanPointWithFont.x > more.viewBound.right || spanPointWithFont.y - glyph.bBox.aba > more.viewBound.bottom) {
                     return;
                 }
             }

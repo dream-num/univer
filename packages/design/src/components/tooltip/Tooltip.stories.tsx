@@ -35,9 +35,11 @@ export const Playground = {
         return (
             <>
                 <div
-                    className="univer-box-border univer-relative univer-w-96 univer-p-4 univer-bg-gray-50 univer-h-48 univer-flex univer-justify-center univer-items-center"
+                    className={`
+                      univer-relative univer-box-border univer-flex univer-h-48 univer-w-96 univer-items-center
+                      univer-justify-center univer-bg-gray-50 univer-p-4
+                    `}
                 >
-
                     <div className="univer-absolute univer-top-0">
                         <Tooltip title="hello world" placement="top">
                             <Button>top</Button>
@@ -62,7 +64,7 @@ export const Playground = {
 
                 <div>
                     <Tooltip title="Just a tooltip">
-                        <a className="px-4 py-2 bg-blue-500 text-white rounded">
+                        <a className="rounded bg-blue-500 px-4 py-2 text-white">
                             Hover me
                         </a>
                     </Tooltip>

@@ -129,11 +129,11 @@ export function SheetBarMenu() {
     const items: IDropdownProps['items'] = useMemo(() => menu.map((item) => ({
         type: 'item',
         children: (
-            <div className="univer-pl-6 univer-box-border univer-relative">
+            <div className="univer-relative univer-box-border univer-pl-6">
                 {(item.selected || item.hidden) && (
                     <span className="univer-absolute univer-left-1 univer-top-0.5">
-                        {item.selected && <CheckMarkSingle className="univer-text-primary-600  univer-size-4" />}
-                        {item.hidden && <EyelashSingle className="univer-text-gray-400 univer-size-4" />}
+                        {item.selected && <CheckMarkSingle className="univer-size-4 univer-text-primary-600" />}
+                        {item.hidden && <EyelashSingle className="univer-size-4 univer-text-gray-400" />}
                     </span>
                 )}
 

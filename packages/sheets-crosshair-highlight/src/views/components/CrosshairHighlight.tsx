@@ -19,8 +19,6 @@ import { useDependency, useObservable } from '@univerjs/ui';
 import { useCallback } from 'react';
 import { CROSSHAIR_HIGHLIGHT_COLORS, SheetsCrosshairHighlightService } from '../../services/crosshair.service';
 
-import styles from './index.module.less';
-
 export interface ICrosshairOverlayProps {
     onChange?: (value: string) => void;
 }
@@ -37,13 +35,17 @@ export function CrosshairOverlay(props: ICrosshairOverlayProps) {
     }, [onChange]);
 
     return (
-        <div className={styles.crosshairHighlightOverlay}>
+        <div className="univer-grid univer-grid-cols-8 univer-gap-x-2 univer-gap-y-3">
             {CROSSHAIR_HIGHLIGHT_COLORS.map((color: string) => {
                 return (
                     <div
                         key={color}
-                        className={clsx(styles.crosshairHighlightItem, {
-                            [styles.crosshairHighlightItemSelected]: color === currentColor,
+                        className={clsx(`
+                          univer-box-border univer-size-5 univer-cursor-pointer univer-rounded univer-border
+                          univer-border-solid univer-border-gray-200 univer-ring-offset-1 univer-transition-shadow
+                          hover:univer-ring-[1.5px] hover:univer-ring-primary-600/40
+                        `, {
+                            'univer-ring-[1.5px] univer-ring-primary-600 hover:univer-ring-primary-600': color === currentColor,
                         })}
                         style={{ backgroundColor: color }}
                         onClick={() => handleColorPicked(color)}

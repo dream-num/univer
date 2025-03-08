@@ -3,7 +3,7 @@
     "type": "module",
     "version": "0.6.4",
     "private": true,
-    "packageManager": "pnpm@10.5.2",
+    "packageManager": "pnpm@10.6.1",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",
     "license": "Apache-2.0",
     "funding": {
@@ -44,21 +44,21 @@
         "release": "release-it"
     },
     "devDependencies": {
-        "@antfu/eslint-config": "4.5.1",
-        "@commitlint/cli": "^19.7.1",
-        "@commitlint/config-conventional": "^19.7.1",
-        "@eslint-react/eslint-plugin": "^1.30.2",
-        "@playwright/test": "^1.50.1",
+        "@antfu/eslint-config": "4.8.1",
+        "@commitlint/cli": "^19.8.0",
+        "@commitlint/config-conventional": "^19.8.0",
+        "@eslint-react/eslint-plugin": "^1.31.0",
+        "@playwright/test": "^1.51.0",
         "@release-it-plugins/workspaces": "^4.2.0",
         "@release-it/conventional-changelog": "^9.0.4",
         "@storybook/react": "8.6.4",
-        "@types/node": "^22.13.9",
+        "@types/node": "^22.13.10",
         "@types/react": "^19.0.10",
         "@types/react-dom": "^19.0.4",
         "@univerjs-infra/shared": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@vitejs/plugin-react": "^4.3.4",
-        "eslint": "9.21.0",
+        "eslint": "9.22.0",
         "eslint-plugin-format": "^1.0.1",
         "eslint-plugin-header": "^3.1.1",
         "eslint-plugin-jsdoc": "^50.6.3",
@@ -69,7 +69,7 @@
         "eslint-plugin-react-refresh": "^0.4.19",
         "husky": "^9.1.7",
         "lint-staged": "^15.4.3",
-        "posthog-node": "^4.10.0",
+        "posthog-node": "^4.10.1",
         "react": "19.0.0",
         "react-dom": "19.0.0",
         "release-it": "^17.11.0",
@@ -77,7 +77,7 @@
         "tsx": "^4.19.3",
         "turbo": "^2.4.4",
         "typescript": "^5.8.2",
-        "vitest": "^3.0.7"
+        "vitest": "^3.0.8"
     },
     "pnpm": {
         "onlyBuiltDependencies": [

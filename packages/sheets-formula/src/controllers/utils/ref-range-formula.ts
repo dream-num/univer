@@ -617,8 +617,7 @@ export function formulaDataItemToCellData(formulaDataItem: Nullable<IFormulaData
  * @param formulaData
  * @returns
  */
-export function formulaDataToCellData(formulaData: IObjectMatrixPrimitiveType<IFormulaDataItem | null>
-): IObjectMatrixPrimitiveType<Nullable<ICellData>> {
+export function formulaDataToCellData(formulaData: IObjectMatrixPrimitiveType<IFormulaDataItem | null>): IObjectMatrixPrimitiveType<Nullable<ICellData>> {
     const cellData = new ObjectMatrix<Nullable<ICellData>>({});
     const formulaDataMatrix = new ObjectMatrix(formulaData);
 

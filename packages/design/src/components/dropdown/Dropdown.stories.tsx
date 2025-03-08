@@ -52,7 +52,13 @@ export const Playground = {
                         </div>
                     )}
                 >
-                    <a className="univer-cursor-pointer univer-border univer-rounded-lg univer-border-gray-200 univer-px-4 univer-py-2 univer-border-solid hover:univer-bg-gray-100 univer-transition-all">
+                    <a
+                        className={`
+                          univer-cursor-pointer univer-rounded-lg univer-border univer-border-solid
+                          univer-border-gray-200 univer-px-4 univer-py-2 univer-transition-all
+                          hover:univer-bg-gray-100
+                        `}
+                    >
                         Click me
                     </a>
                 </Dropdown>

@@ -887,8 +887,7 @@ export default {
         links: [{
             title: '教導',
             url: 'https://support.microsoft.com/zh-tw/office/yield-%E5%87%BD%E6%95%B0-f5f5ca43-c4bd-434f-8bd2-ed3c9727a4fe',
-        },
-        ],
+        }],
         functionParameter: {
             settlement: { name: '結算日期', detail: '證券的結算日期。' },
             maturity: { name: '到期日期', detail: '證券的到期日期。' },

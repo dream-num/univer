@@ -15,9 +15,9 @@
  */
 
 import type { IAccessor, IMutation } from '@univerjs/core';
+import type { IConditionFormattingRule } from '../../models/type';
 import { CommandType, Tools } from '@univerjs/core';
 import { ConditionalFormattingRuleModel } from '../../models/conditional-formatting-rule-model';
-import type { IConditionFormattingRule } from '../../models/type';
 
 export interface ISetConditionalRuleMutationParams {
     unitId: string;
@@ -56,8 +56,7 @@ export const setConditionalRuleMutationUndoFactory = (accessor: IAccessor, param
                 cfId,
                 rule: Tools.deepClone(rule),
             } as ISetConditionalRuleMutationParams,
-        },
-        ];
+        }];
     }
     return [];
 };

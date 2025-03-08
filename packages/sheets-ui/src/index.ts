@@ -29,7 +29,7 @@ export { HeaderFreezeRenderController } from './controllers/render-controllers/f
 export { HeaderMoveRenderController } from './controllers/render-controllers/header-move.render-controller';
 export { HeaderResizeRenderController } from './controllers/render-controllers/header-resize.render-controller';
 export { SheetsScrollRenderController } from './controllers/render-controllers/scroll.render-controller';
-export { type ITelemetryData, SheetRenderController } from './controllers/render-controllers/sheet.render-controller';
+export { SheetRenderController } from './controllers/render-controllers/sheet.render-controller';
 export { SheetUIController } from './controllers/sheet-ui.controller';
 export { whenFormulaEditorActivated, whenSheetEditorFocused } from './controllers/shortcuts/utils';
 export { getCoordByCell, getCoordByOffset, getSheetObject, getTransformCoord } from './controllers/utils/component-tools';

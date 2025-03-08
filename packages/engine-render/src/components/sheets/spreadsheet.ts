@@ -133,7 +133,6 @@ export class Spreadsheet extends SheetComponent {
                 checkOutOfViewBound: true,
                 viewportKey: viewportInfo.viewportKey,
                 viewBound: viewportInfo.cacheBound,
-                diffBounds: viewportInfo.diffBounds,
             } as IDrawInfo);
             this.addRenderFrameTimeMetricToScene(timeKey, Tools.now() - st, scene);
         }

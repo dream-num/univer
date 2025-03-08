@@ -15,7 +15,6 @@
  */
 
 import { awaitTime, Disposable, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-
 import { DEFAULT_WORKBOOK_DATA_DEMO, DEFAULT_WORKBOOK_DATA_DEMO_DEFAULT_STYLE } from '@univerjs/mockdata';
 import { DisposeUniverCommand } from '../../commands/commands/unit.command';
 import { getDefaultDocData } from './data/default-doc';

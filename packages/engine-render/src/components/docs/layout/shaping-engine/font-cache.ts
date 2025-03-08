@@ -218,12 +218,8 @@ export class FontCache {
         }, fontStyle);
     }
 
-    /**
-     * Measure text on another canvas.
-     * @param content
-     * @param fontString
-     * @returns IMeasureTextCache
-     */
+    // 获取有值单元格文本大小
+    // let measureTextCache = {}, measureTextCacheTimeOut = null;
     static getMeasureText(content: string, fontString: string): IMeasureTextCache {
         if (!this._context) {
             const canvas = document.createElement('canvas');
@@ -246,6 +242,7 @@ export class FontCache {
         if (mtc != null) {
             return mtc;
         }
+
         ctx.font = fontString;
 
         const textMetrics = ctx.measureText(content);

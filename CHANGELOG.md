@@ -1,5 +1,39 @@
 # Changelog
 
+## [0.6.4](https://github.com/dream-num/univer/compare/v0.6.3...v0.6.4) (2025-03-08)
+
+
+### Bug Fixes
+
+* dep detect only in event handler not before register event ([#4781](https://github.com/dream-num/univer/issues/4781)) ([58a24b5](https://github.com/dream-num/univer/commit/58a24b5c3b4cef4169ff865035e0f74a120df275))
+* **design:** resolve the issue of tooltip jitter during initialization ([#4779](https://github.com/dream-num/univer/issues/4779)) ([3643ffe](https://github.com/dream-num/univer/commit/3643ffeb0f777754d01cd3d647893e832e3d6beb))
+* **docs-ui:** select all on empty doc ([#4787](https://github.com/dream-num/univer/issues/4787)) ([d85a0db](https://github.com/dream-num/univer/commit/d85a0db73fda9fbb7c0668d9d18b6ce233068eab))
+* **facade:** showRangeSelectorDialog document ([#4767](https://github.com/dream-num/univer/issues/4767)) ([323fe3f](https://github.com/dream-num/univer/commit/323fe3fa3595ec0b4f0dce386c9fbb74abf39708))
+* fix facade example ([#4780](https://github.com/dream-num/univer/issues/4780)) ([ca2329e](https://github.com/dream-num/univer/commit/ca2329e4af7aa8f0d299bab2cd95eca49f769fb7))
+* formula e2e ([#4788](https://github.com/dream-num/univer/issues/4788)) ([f0df9ef](https://github.com/dream-num/univer/commit/f0df9ef2cb0a5ddd0ee32913021df3bb621d3e90))
+* **formula:** fix dispose register function bug ([#4783](https://github.com/dream-num/univer/issues/4783)) ([be00bdd](https://github.com/dream-num/univer/commit/be00bdd403b267b613f01df7714eb5dc420c9083))
+* **formula:** formula update after hide row column ([#4238](https://github.com/dream-num/univer/issues/4238)) ([4113714](https://github.com/dream-num/univer/commit/4113714af7ef47b7821bbed0117006b753b87812))
+* **sheets-conditional-formatting:** correct bottom percent rank calculation ([#4771](https://github.com/dream-num/univer/issues/4771)) ([e5cff35](https://github.com/dream-num/univer/commit/e5cff3510715e98a741101e9faba470237c3756e))
+* **sheets-data-validation:** data validation ref-range error on insert row & column ([#4785](https://github.com/dream-num/univer/issues/4785)) ([82545bf](https://github.com/dream-num/univer/commit/82545bf9d808af3748eff711e1be957e0e272aab))
+* **sheets-data-validation:** data validation valid error on custom formula ([#4776](https://github.com/dream-num/univer/issues/4776)) ([2f3c477](https://github.com/dream-num/univer/commit/2f3c47710c7f6f236292323836d069e4232ecba8))
+* update permission init timing ([#4770](https://github.com/dream-num/univer/issues/4770)) ([5099acf](https://github.com/dream-num/univer/commit/5099acfd3126aca2ca3c77476d518f615650adf9))
+
+
+### Features
+
+* **sheets-numfmt:** add percentage as default option ([#4772](https://github.com/dream-num/univer/issues/4772)) ([e3a9b59](https://github.com/dream-num/univer/commit/e3a9b598b8706d335fe842b5f10adf2d3b417755))
+* **sheets-ui:** check before undo-redo rollback ([#4784](https://github.com/dream-num/univer/issues/4784)) ([f66f931](https://github.com/dream-num/univer/commit/f66f9314c678a6a18145fa37edd2440f84ce4108))
+
+
+### Performance Improvements
+
+* remove unnecessary `ctx.font =` calls, and avoid drawing glyphs outside the viewBounds ([#4775](https://github.com/dream-num/univer/issues/4775)) ([cd3decd](https://github.com/dream-num/univer/commit/cd3decd487d641738229a8c5a4213d60ff191d57))
+
+
+### Reverts
+
+* remove unnecessary `ctx.font =` calls, and avoid drawing out of bounds ([#4793](https://github.com/dream-num/univer/issues/4793)) ([1aaad2a](https://github.com/dream-num/univer/commit/1aaad2a58d3ceb57a47d13d80138392a2d6a609e))
+
 ## [0.6.3](https://github.com/dream-num/univer/compare/v0.6.2...v0.6.3) (2025-03-04)
 
 

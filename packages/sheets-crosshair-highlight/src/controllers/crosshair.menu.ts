@@ -36,6 +36,7 @@ export function CrosshairHighlightMenuItemFactory(accessor: IAccessor): IMenuSel
                 label: {
                     name: CROSSHAIR_HIGHLIGHT_OVERLAY_COMPONENT,
                     hoverable: false,
+                    selectable: false,
                 },
             },
         ],

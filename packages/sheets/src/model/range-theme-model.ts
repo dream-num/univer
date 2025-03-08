@@ -214,7 +214,7 @@ export class SheetRangeThemeModel extends Disposable {
     toJson(unitId: string) {
         // deserialize registered range theme style rule
         const ruleMap = this._ensureRangeThemeStyleRuleMap(unitId);
-          // deserialize custom range theme style
+        // deserialize custom range theme style
         const rangeThemeStyleMap = this._ensureRangeThemeStyleMap(unitId);
 
         if (rangeThemeStyleMap.size === 0 && ruleMap.size === 0) {
@@ -237,17 +237,11 @@ export class SheetRangeThemeModel extends Disposable {
         });
     }
 
-    fromJSON(json: ISheetRangeThemeModelJSON) {
-        const { rangeThemeStyleRuleMap, rangeThemeStyleMapJson } = json;
+    fromJSON(unitId: string, json: ISheetRangeThemeModelJSON) {
+        const { rangeThemeStyleRuleMap: rangeThemeStyleRuleMapJSON, rangeThemeStyleMapJson } = json;
 
-        this._rangeThemeStyleMap.clear();
-        this._rangeThemeStyleRuleMap.clear();
-        this._rTreeCollection.clear();
-        if (!rangeThemeStyleRuleMap || !rangeThemeStyleMapJson) {
-            return;
-        }
-        Object.keys(rangeThemeStyleRuleMap).forEach((key) => {
-            const ruleMap = rangeThemeStyleRuleMap[key];
+        Object.keys(rangeThemeStyleRuleMapJSON).forEach((key) => {
+            const ruleMap = rangeThemeStyleRuleMapJSON[key];
             const { themeName, rangeInfo } = ruleMap;
             this.registerRangeThemeRule(themeName, rangeInfo);
             const rTreeCollection = this._ensureRTreeCollection(rangeInfo.unitId);
@@ -258,7 +252,7 @@ export class SheetRangeThemeModel extends Disposable {
             const styleMap = rangeThemeStyleMapJson[key];
             const style = new RangeThemeStyle(styleMap.name);
             style.fromJson(styleMap);
-            this._ensureRangeThemeStyleMap(key).set(style.getName(), style);
+            this._ensureRangeThemeStyleMap(unitId).set(style.getName(), style);
         });
     }
 
@@ -286,8 +280,8 @@ export class SheetRangeThemeModel extends Disposable {
             },
             businesses: [UniverInstanceType.UNIVER_SHEET],
             pluginName: SHEET_RANGE_THEME_MODEL_PLUGIN,
-            onLoad: (_unitId, resources) => {
-                this.fromJSON(resources);
+            onLoad: (unitId, resources) => {
+                this.fromJSON(unitId, resources);
             },
             onUnLoad: (unitId) => {
                 this.deleteUnitId(unitId);

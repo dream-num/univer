@@ -21,6 +21,7 @@ import { sheetData as emptySheetData } from '../__testing__/emptysheet';
 import { sheetData as freezeData } from '../__testing__/freezesheet';
 import { sheetData as mergeCellData } from '../__testing__/mergecell';
 import { sheetData as overflowData } from '../__testing__/overflow';
+import { reportToPosthog } from '../utils/report-performance';
 
 export interface IFPSData {
     fpsData: number[];
@@ -39,7 +40,7 @@ interface IFPSResult {
     maxFrameTimes: number[];
 }
 
-const isCI = !!process.env.CI;
+// const isCI = !!process.env.CI;
 /**
  * measure FPS of scrolling time.
  * @param page Page from playwright
@@ -132,7 +133,7 @@ async function measureFPS(page: Page, testDuration = 5, deltaX: number, deltaY: 
     return fpsCounterPromise as Promise<IFPSResult>;
 }
 
-const createTest = (title: string, sheetData: IJsonObject, minFpsValue: number, deltaX = 0, deltaY = 0) => {
+const createTest = (title: string, telemetryName: string, sheetData: IJsonObject, minFpsValue: number, deltaX = 0, deltaY = 0) => {
     // Default Size Of browser: 1280x720 pixels. And default DPR is 1.
     test(title, async ({ page }) => {
         await page.goto('http://localhost:3000/sheets/');
@@ -154,6 +155,8 @@ const createTest = (title: string, sheetData: IJsonObject, minFpsValue: number, 
                 console.log('FPS', resultOfFPS.fps);
                 console.log('medianFrameTime', resultOfFPS.medianFrameTime);
                 console.log('max10FrameTimes', resultOfFPS.maxFrameTimes);
+
+                await reportToPosthog(telemetryName, resultOfFPS);
                 expect(resultOfFPS.fps).toBeGreaterThan(minFpsValue);
             });
         } catch (error) {
@@ -165,7 +168,7 @@ const createTest = (title: string, sheetData: IJsonObject, minFpsValue: number, 
     });
 };
 
-createTest('sheet scroll empty', emptySheetData, 50, 10, 100);
-createTest('sheet scroll after freeze', freezeData, 10, 10, 100);
-createTest('sheet scroll in a lots of merge cell', mergeCellData, 10, 10, 50);
-createTest('sheet X scroll in a lots of overflow', overflowData, 10, 50, 5);
+createTest('sheet scroll empty', 'perf.sheet.scroll.empty', emptySheetData, 50, 10, 100);
+createTest('sheet scroll after freeze', 'perf.sheet.scroll.freeze', freezeData, 10, 10, 100);
+createTest('sheet scroll in a lots of merge cell', 'perf.sheet.scroll.mergeCell', mergeCellData, 10, 10, 50);
+createTest('sheet X scroll in a lots of overflow', 'perf.sheet.scroll.overflow', overflowData, 10, 50, 5);

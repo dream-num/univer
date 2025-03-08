@@ -15,8 +15,10 @@
  */
 
 import type { IScale } from '@univerjs/core';
+import type { IBoundRectNoAngle } from '../../../basics';
 import type { IDocumentSkeletonGlyph } from '../../../basics/i-document-skeleton-cached';
 import type { UniverRenderingContext } from '../../../context';
+import type { IDrawInfo } from '../../extension';
 import { BaselineOffset, getColorStyle } from '@univerjs/core';
 import { GlyphType, hasCJK } from '../../../basics';
 import { COLOR_BLACK_RGB } from '../../../basics/const';
@@ -29,6 +31,9 @@ const UNIQUE_KEY = 'DefaultDocsFontAndBaseLineExtension';
 
 const DOC_EXTENSION_Z_INDEX = 20;
 
+/**
+ * Singleton
+ */
 export class FontAndBaseLine extends docExtension {
     override uKey = UNIQUE_KEY;
 
@@ -36,7 +41,21 @@ export class FontAndBaseLine extends docExtension {
 
     private _preFontColor = '';
 
-    override draw(ctx: UniverRenderingContext, parentScale: IScale, glyph: IDocumentSkeletonGlyph) {
+    /**
+     * ctx.font = val;  then ctx.font is not exactly the same as val
+     * that is because canvas would normalize the font string, remove default value and convert pt to px.
+     * so we need a map to store actual value and set value
+     */
+    actualFontMap: Record<string, string> = {};
+
+    constructor() {
+        super();
+    }
+
+    // invoked by document.ts
+    override draw(ctx: UniverRenderingContext, _parentScale: IScale, glyph: IDocumentSkeletonGlyph, _?: IBoundRectNoAngle, more?: IDrawInfo) {
+        // _parentScale: IScale, _skeleton: T, _diffBounds?: V, _more?: IDrawInfo
+
         const line = glyph.parent?.parent;
         if (!line) {
             return;
@@ -45,6 +64,14 @@ export class FontAndBaseLine extends docExtension {
         const { ts: textStyle, content, fontStyle, bBox } = glyph;
 
         const { spanPointWithFont = Vector2.create(0, 0) } = this.extensionOffset;
+
+        if (more) {
+            if (more.viewBound) {
+                if (spanPointWithFont.x > more.viewBound.right || spanPointWithFont.y > more.viewBound.bottom) {
+                    return;
+                }
+            }
+        }
 
         if (content == null) {
             return;
@@ -55,8 +82,12 @@ export class FontAndBaseLine extends docExtension {
             return;
         }
 
-        if (ctx.font !== fontStyle?.fontString) {
-            ctx.font = fontStyle?.fontString || '';
+        const fontStringPxStr = fontStyle?.fontString || '';
+        if (fontStringPxStr) {
+            if (ctx.font !== this.actualFontMap[fontStringPxStr]) {
+                ctx.font = fontStringPxStr;
+                this.actualFontMap[fontStringPxStr] = ctx.font;
+            }
         }
 
         const { cl: colorStyle, va: baselineOffset } = textStyle;
@@ -71,7 +102,6 @@ export class FontAndBaseLine extends docExtension {
         } else if (baselineOffset === BaselineOffset.SUBSCRIPT) {
             spanPointWithFont.y += bBox.sbo;
         }
-
         this._fillText(ctx, glyph, spanPointWithFont);
     }
 

@@ -17,8 +17,7 @@
 /* eslint-disable max-lines-per-function */
 /* eslint-disable complexity */
 
-import type { ICellDataForSheetInterceptor, ICellWithCoord, IDocDrawingBase, ImageSourceType, IRange, IScale, Nullable, ObjectMatrix } from '@univerjs/core';
-import type { IBoundRectNoAngle, IViewportInfo } from '../../../basics';
+import type { ICellWithCoord, IDocDrawingBase, ImageSourceType, IRange, IScale, Nullable, ObjectMatrix } from '@univerjs/core';
 import type { UniverRenderingContext } from '../../../context';
 import type { Documents } from '../../docs/document';
 import type { IDrawInfo } from '../../extension';
@@ -191,10 +190,8 @@ export class Font extends SheetExtension {
         renderFontCtx.fontCache = fontCache;
 
         //#region overflow
-        // e.g. cell(12, 5)'s textwrap value is overflow(which is default), and text ends at column 9,
-        // the overflowRange would be startRow: 12, startColumn: 5, endRow: 12, endColumn: 9
-        // and if column 9 is not empty, then the overflowRang e endColumn would be 8
-        // and if column 7 is not empty, the endColumn would be 6
+        // If the cell is overflowing, but the overflowRectangle has not been set,
+        // then overflowRectangle is set to undefined.
         const overflowRange = spreadsheetSkeleton.overflowCache.getValue(row, col);
 
         // If it's neither an overflow nor within the current range,
@@ -212,11 +209,8 @@ export class Font extends SheetExtension {
         const visibleCol = spreadsheetSkeleton.worksheet.getColVisible(col);
         if (!visibleRow || !visibleCol) return true;
 
-        // Since we cannot predict when fontRenderExtension?.isSkip might change,
-        // we must check it every time and retrieve cell data directly from the worksheet,
-        // not from the cache to ensure accuracy.
-        const cellData = spreadsheetSkeleton.worksheet.getCell(row, col) as ICellDataForSheetInterceptor || {};
-        if (cellData?.fontRenderExtension?.isSkip) {
+        // const cellData = spreadsheetSkeleton.worksheet.getCell(row, col) as ICellDataForSheetInterceptor || {};
+        if (renderFontCtx.fontCache?.cellData?.fontRenderExtension?.isSkip) {
             return true;
         }
 
@@ -225,7 +219,7 @@ export class Font extends SheetExtension {
 
         //#region text overflow
         renderFontCtx.overflowRectangle = overflowRange;
-        this._clipByRenderBounds(renderFontCtx, row, col);
+        this._setFontRenderBounds(renderFontCtx, row, col);
         //#endregion
 
         ctx.translate(renderFontCtx.startX + FIX_ONE_PIXEL_BLUR_OFFSET, renderFontCtx.startY + FIX_ONE_PIXEL_BLUR_OFFSET);
@@ -238,7 +232,7 @@ export class Font extends SheetExtension {
         if (documentDataModel.getDrawingsOrder()?.length) {
             ctx.save();
             ctx.beginPath();
-            this._clipByRenderBounds(renderFontCtx, row, col, 1);
+            this._setFontRenderBounds(renderFontCtx, row, col, 1);
             this._renderImages(ctx, fontCache, renderFontCtx.startX, renderFontCtx.startY, renderFontCtx.endX, renderFontCtx.endY);
             ctx.closePath();
             ctx.restore();
@@ -330,7 +324,7 @@ export class Font extends SheetExtension {
      * @param col
      * @param fontCache
      */
-    private _clipByRenderBounds(renderFontContext: IRenderFontContext, row: number, col: number, padding = 0) {
+    private _setFontRenderBounds(renderFontContext: IRenderFontContext, row: number, col: number, padding = 0) {
         const { ctx, scale, overflowRectangle, rowHeightAccumulation, columnWidthAccumulation, fontCache } = renderFontContext;
         let { startX, endX, startY, endY } = renderFontContext;
 
@@ -476,14 +470,7 @@ export class Font extends SheetExtension {
 
         documentSkeleton.makeDirty(false);
         documents.resize(cellWidth, cellHeight);
-        documents.changeSkeleton(documentSkeleton).render(ctx, {
-            viewBound: {
-                left: 0,
-                top: 0,
-                right: cellWidth,
-                bottom: cellHeight,
-            } as IBoundRectNoAngle,
-        } as Partial<IViewportInfo>);
+        documents.changeSkeleton(documentSkeleton).render(ctx);
     }
 
     private _clipRectangleForOverflow(

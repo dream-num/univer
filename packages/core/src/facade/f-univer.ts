@@ -298,7 +298,7 @@ export class FUniver extends Disposable {
      *
      * @example
      * ```ts
-     * univerAPI.undo();
+     * await univerAPI.undo();
      * ```
      */
     undo(): Promise<boolean> {
@@ -311,7 +311,7 @@ export class FUniver extends Disposable {
      *
      * @example
      * ```ts
-     * univerAPI.redo();
+     * await univerAPI.redo();
      * ```
      */
     redo(): Promise<boolean> {

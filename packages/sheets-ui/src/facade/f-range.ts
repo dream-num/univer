@@ -189,9 +189,20 @@ interface IFRangeSheetsUIMixin {
      * const fRange = fWorksheet.getRange('C3:E5');
      * fRange.highlight();
      *
-     * // Highlight the range C7:E9 with custom style
+     * // Highlight the range C7:E9 with custom style and primary cell D8
      * const fRange2 = fWorksheet.getRange('C7:E9');
-     * const disposable = fRange2.highlight({ stroke: 'red', fill: 'yellow' });
+     * const primaryCell = fWorksheet.getRange('D8').getRange();
+     * const disposable = fRange2.highlight(
+     *   {
+     *     stroke: 'red',
+     *     fill: 'yellow'
+     *   },
+     *   {
+     *     ...primaryCell,
+     *     actualRow: primaryCell.startRow,
+     *     actualColumn: primaryCell.startColumn
+     *   }
+     * );
      *
      * // Remove the range C7:E9 highlight after 5 seconds
      * setTimeout(() => {

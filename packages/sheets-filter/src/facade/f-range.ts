@@ -41,7 +41,7 @@ export interface IFRangeFilter {
      *   fWorksheet.getFilter().remove();
      *   fFilter = fRange.createFilter();
      * }
-     * console.log(fFilter);
+     * console.log(fFilter, fFilter.getRange().getA1Notation());
      * ```
      */
     createFilter(this: FRange): FFilter | null;
@@ -61,7 +61,7 @@ export interface IFRangeFilter {
      * if (!fFilter) {
      *    fFilter = fRange.createFilter();
      * }
-     * console.log(fFilter);
+     * console.log(fFilter, fFilter.getRange().getA1Notation());
      * ```
      */
     getFilter(): FFilter | null;

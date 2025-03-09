@@ -46,7 +46,7 @@ export const AddCfCommand: ICommand<IAddCfCommandParams> = {
         const commandService = accessor.get(ICommandService);
         const conditionalFormattingRuleModel = accessor.get(ConditionalFormattingRuleModel);
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const target = getSheetCommandTarget(univerInstanceService);
+        const target = getSheetCommandTarget(univerInstanceService, params);
         if (!target) return false;
 
         const { unitId, subUnitId } = target;

@@ -156,8 +156,8 @@ export const calculateDocSkeletonRects = (docSkeleton: DocumentSkeleton, padding
 };
 
 export function calcPadding(cell: ICellWithCoord, font: IFontCacheItem, isNum: boolean) {
-    const height = font.documentSkeleton.getSkeletonData()?.pages[0].height ?? 0;
-    const width = font.documentSkeleton.getSkeletonData()?.pages[0].width ?? 0;
+    const height = font.documentSkeleton?.getSkeletonData()?.pages[0].height ?? 0;
+    const width = font.documentSkeleton?.getSkeletonData()?.pages[0].width ?? 0;
     const vt = font.verticalAlign;
     const ht = font.horizontalAlign;
 

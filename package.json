@@ -25,7 +25,7 @@
     "scripts": {
         "prepare": "husky",
         "pre-commit": "lint-staged",
-        "dev": "turbo dev:demo",
+        "dev": "turbo dev:demo  -- --host 0.0.0.0",
         "dev:libs": "pnpm --filter univer-examples dev:demo-libs",
         "dev:e2e": "pnpm --filter univer-examples dev:e2e",
         "lint:types": "turbo lint:types",

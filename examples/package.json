@@ -36,6 +36,7 @@
         "@univerjs/find-replace": "workspace:*",
         "@univerjs/icons": "0.2.20",
         "@univerjs/mockdata": "workspace:*",
+        "@univerjs/network": "workspace:*",
         "@univerjs/rpc": "workspace:*",
         "@univerjs/rpc-node": "workspace:*",
         "@univerjs/sheets": "workspace:*",

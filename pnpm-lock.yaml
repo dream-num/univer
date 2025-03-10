@@ -331,6 +331,9 @@ importers:
       '@univerjs/mockdata':
         specifier: workspace:*
         version: link:../mockdata
+      '@univerjs/network':
+        specifier: workspace:*
+        version: link:../packages/network
       '@univerjs/rpc':
         specifier: workspace:*
         version: link:../packages/rpc
@@ -1911,6 +1914,12 @@ importers:
       '@univerjs/engine-numfmt':
         specifier: workspace:*
         version: link:../engine-numfmt
+      '@univerjs/engine-render':
+        specifier: workspace:*
+        version: link:../engine-render
+      '@univerjs/network':
+        specifier: workspace:*
+        version: link:../network
       '@univerjs/protocol':
         specifier: 0.1.43
         version: 0.1.43(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)

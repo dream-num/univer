@@ -25,6 +25,7 @@ import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '@univerjs/mockdata';
+import { UniverNetworkPlugin } from '@univerjs/network';
 import { UniverRPCMainThreadPlugin } from '@univerjs/rpc';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverSheetsConditionalFormattingPlugin } from '@univerjs/sheets-conditional-formatting';
@@ -67,6 +68,7 @@ import '@univerjs/sheets-source-binding/facade';
 import '@univerjs/sheets-crosshair-highlight/facade';
 import '@univerjs/sheets-formula-ui/facade';
 import '@univerjs/sheets-sort/facade';
+import '@univerjs/network/facade';
 import '../global.css';
 import './styles';
 
@@ -130,6 +132,7 @@ function createNewInstance() {
     univer.registerPlugin(UniverSheetsThreadCommentUIPlugin);
     univer.registerPlugin(UniverSheetsBindingSourcePlugin);
     univer.registerPlugin(UniverSheetsCustomMenuPlugin);
+    univer.registerPlugin(UniverNetworkPlugin);
 
     // If we are running in e2e platform, we should immediately register the debugger plugin.
     if (IS_E2E) {

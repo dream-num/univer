@@ -1029,7 +1029,7 @@ export enum ObjectRelativeFromH {
     RIGHT_MARGIN,
 }
 
-// 20.4.3.4 ST_RelFromH (Horizontal Relative Positioning)
+// 20.4.3.4 ST_RelFromH (Vertical Relative Positioning)
 export enum ObjectRelativeFromV {
     PAGE,
     PARAGRAPH,

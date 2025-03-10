@@ -15,8 +15,9 @@
  */
 
 import type { IDocDrawingBase } from '@univerjs/core';
+import type { IImageData, IUnitDrawingService } from '@univerjs/drawing';
 import { createIdentifier } from '@univerjs/core';
-import { type IImageData, type IUnitDrawingService, UnitDrawingService } from '@univerjs/drawing';
+import { UnitDrawingService } from '@univerjs/drawing';
 
 export interface IDocImage extends IImageData, IDocDrawingBase {}
 

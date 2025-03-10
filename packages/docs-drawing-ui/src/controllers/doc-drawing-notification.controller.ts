@@ -21,6 +21,7 @@ import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IDocDrawing } from '@univerjs/docs-drawing';
 import type { IDrawingJsonUndo1, IDrawingOrderMapParam } from '@univerjs/drawing';
 import {
+    BlockType,
     Disposable,
     ICommandService,
     IUniverInstanceService,
@@ -142,10 +143,19 @@ export class DocDrawingAddRemoveController extends Disposable {
 
                 const params = command.params as IRichTextEditingMutationParams;
                 const { unitId, actions } = params;
+                const documentDataModel = this._univerInstanceService.getUniverDocInstance(unitId);
+                const customBlocks = documentDataModel?.getBody()?.customBlocks ?? [];
 
                 const addOrRemoveDrawings = getAddOrRemoveDrawings(actions);
                 if (addOrRemoveDrawings != null) {
                     for (const { type, drawingId, drawing } of addOrRemoveDrawings) {
+                        const customBlock = customBlocks.find((customBlock) => customBlock.blockId === drawingId);
+
+                        // @yuhong, Only handle the custom block drawings. YOU need handle custom chart in your plugin.
+                        if (customBlock?.blockType === BlockType.CUSTOM) {
+                            continue;
+                        }
+
                         if (type === 'add') {
                             this._addDrawings(unitId, [drawing!]);
                         } else {
@@ -198,7 +208,6 @@ export class DocDrawingAddRemoveController extends Disposable {
     }
 
     private _addDrawings(unitId: string, drawings: IDocDrawing[]) {
-        // console.log('=addDrawings', drawings);
         const drawingManagerService = this._drawingManagerService;
         const docDrawingService = this._docDrawingService;
 

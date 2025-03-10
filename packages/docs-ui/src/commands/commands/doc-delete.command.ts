@@ -18,6 +18,7 @@ import type { DocumentDataModel, ICommand, IMutationInfo, IParagraph, ITextRange
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IRectRangeWithStyle, ITextRangeWithStyle } from '@univerjs/engine-render';
 import {
+    BlockType,
     CommandType,
     DataStreamTreeTokenType,
     ICommandService,
@@ -452,9 +453,11 @@ export const DeleteLeftCommand: ICommand = {
                         return true;
                     }
 
-                    const isInlineDrawing = drawing.layoutType === PositionedObjectLayoutType.INLINE;
+                    const customBlock = docDataModel.getBody()?.customBlocks?.find((block) => block.blockId === preGlyph.drawingId);
 
-                    if (isInlineDrawing) {
+                    const isInlineDrawingOrCustom = drawing.layoutType === PositionedObjectLayoutType.INLINE || customBlock?.blockType === BlockType.CUSTOM;
+
+                    if (isInlineDrawingOrCustom) {
                         const unitId = docDataModel.getUnitId();
                         result = await commandService.executeCommand(DeleteCustomBlockCommand.id, {
                             direction: DeleteDirection.LEFT,
@@ -464,6 +467,7 @@ export const DeleteLeftCommand: ICommand = {
                         });
                     } else {
                         const prePreGlyph = skeleton.findNodeByCharIndex(startOffset - 2);
+
                         if (prePreGlyph == null) {
                             return true;
                         }

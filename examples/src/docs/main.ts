@@ -26,7 +26,7 @@ import { UniverDocsThreadCommentUIPlugin } from '@univerjs/docs-thread-comment-u
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
-import { DEFAULT_DOCUMENT_DATA_SIMPLE } from '@univerjs/mockdata';
+import { DEFAULT_DOCUMENT_DATA_CN } from '@univerjs/mockdata';
 import { UniverUIPlugin } from '@univerjs/ui';
 import { enUS, faIR, ruRU, zhCN } from '../locales';
 
@@ -72,7 +72,7 @@ univer.registerPlugin(UniverDocsHyperLinkUIPlugin);
 univer.registerPlugin(UniverDocsMentionUIPlugin);
 
 if (!IS_E2E) {
-    univer.createUnit(UniverInstanceType.UNIVER_DOC, DEFAULT_DOCUMENT_DATA_SIMPLE);
+    univer.createUnit(UniverInstanceType.UNIVER_DOC, DEFAULT_DOCUMENT_DATA_CN);
 }
 
 // use for console test

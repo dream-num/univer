@@ -60,6 +60,7 @@ import {
     isWhiteColor,
     LocaleService,
     ObjectMatrix,
+    Range,
     searchArray,
     SheetSkeleton,
     Tools,
@@ -1127,15 +1128,14 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         return this.worksheet.getSpanModel().getMergedCellRangeForSkeleton(range.startRow, range.startColumn, range.endRow, range.endColumn);
     }
 
-    resetCache(): void {
+    override resetCache(): void {
         this._resetCache();
     }
 
     /**
      * Any changes to sheet model would reset cache.
      */
-    override _resetCache(): void {
-        super._resetCache();
+    _resetCache(): void {
         this._stylesCache = {
             background: {},
             backgroundPositions: new ObjectMatrix<ICellWithCoord>(),
@@ -1147,6 +1147,16 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         this._handleBgMatrix?.reset();
         this._handleBorderMatrix?.reset();
         this._overflowCache?.reset();
+    }
+
+    override resetRangeCache(ranges: IRange[]): void {
+        for (let i = 0; i < ranges.length; i++) {
+            const range = ranges[i];
+            Range.foreach(range, (row, col) => {
+                this._stylesCache.fontMatrix.realDeleteValue(row, col);
+            });
+        }
+        this.makeDirty(true);
     }
 
     _setBorderStylesCache(row: number, col: number, style: Nullable<IStyleData>, options: {

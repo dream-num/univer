@@ -21,7 +21,7 @@ import type { Transform } from '../../basics/transform';
 import type { IBoundRectNoAngle, IViewportInfo } from '../../basics/vector2';
 import type { UniverRenderingContext } from '../../context';
 import type { Scene } from '../../scene';
-import type { ComponentExtension, IExtensionConfig } from '../extension';
+import type { ComponentExtension, IDrawInfo, IExtensionConfig } from '../extension';
 import type { IDocumentsConfig, IPageMarginLayout } from './doc-component';
 import type { DocumentSkeleton } from './layout/doc-skeleton';
 import { CellValueType, HorizontalAlign, VerticalAlign, WrapStrategy } from '@univerjs/core';
@@ -432,7 +432,9 @@ export class Documents extends DocComponent {
 
                                     for (const extension of glyphExtensionsExcludeBackground) {
                                         extension.extensionOffset = extensionOffset;
-                                        extension.draw(ctx, parentScale, glyph);
+                                        extension.draw(ctx, parentScale, glyph, [], {
+                                            viewBound: bounds?.viewBound,
+                                        } as IDrawInfo);
                                     }
                                 }
 

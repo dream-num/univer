@@ -85,6 +85,8 @@
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
         "@univerjs/docs-drawing": "workspace:*",
+        "jest-canvas-mock": "^2.5.2",
+        "jsdom": "^24.1.1",
         "less": "^4.2.2",
         "postcss": "^8.5.3",
         "react": "18.3.1",

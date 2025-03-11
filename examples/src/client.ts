@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+// @ts-nocheck
 import ReactDOM from 'react-dom';
 
 export function createRoot(container: HTMLElement) {

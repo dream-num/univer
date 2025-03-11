@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { CommandType, type ICommand, ICommandService, sequenceExecuteAsync } from '@univerjs/core';
+import type { ICommand } from '@univerjs/core';
+import { CommandType, ICommandService, sequenceExecuteAsync } from '@univerjs/core';
 import { DocAutoFormatService } from '../../services/doc-auto-format.service';
 
 const TabCommandId = 'doc.command.tab';

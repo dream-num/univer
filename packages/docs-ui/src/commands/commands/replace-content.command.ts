@@ -307,7 +307,6 @@ export interface IReplaceSelectionCommandParams {
     textRanges?: ITextRangeWithStyle[];
 }
 
-// TODO: implement
 export const ReplaceSelectionCommand: ICommand<IReplaceSelectionCommandParams> = {
     id: 'doc.command.replace-selection',
     type: CommandType.COMMAND,

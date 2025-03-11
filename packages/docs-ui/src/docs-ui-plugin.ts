@@ -58,6 +58,7 @@ import {
     SetInlineFormatTextColorCommand,
     SetInlineFormatUnderlineCommand,
 } from './commands/commands/inline-format.command';
+import { InsertCustomRangeCommand } from './commands/commands/insert-custom-range.command';
 import {
     BulletListCommand,
     ChangeListNestingLevelCommand,
@@ -69,7 +70,7 @@ import {
     ToggleCheckListCommand,
 } from './commands/commands/list.command';
 import { AlignCenterCommand, AlignJustifyCommand, AlignLeftCommand, AlignOperationCommand, AlignRightCommand } from './commands/commands/paragraph-align.command';
-import { CoverContentCommand, ReplaceContentCommand, ReplaceSnapshotCommand, ReplaceTextRunsCommand } from './commands/commands/replace-content.command';
+import { CoverContentCommand, ReplaceContentCommand, ReplaceSelectionCommand, ReplaceSnapshotCommand, ReplaceTextRunsCommand } from './commands/commands/replace-content.command';
 import { SetDocZoomRatioCommand } from './commands/commands/set-doc-zoom-ratio.command';
 import { SwitchDocModeCommand } from './commands/commands/switch-doc-mode.command';
 import { CreateDocTableCommand } from './commands/commands/table/doc-table-create.command';
@@ -253,6 +254,8 @@ export class UniverDocsUIPlugin extends Plugin {
             MoveCursorOperation,
             MoveSelectionOperation,
             ReplaceTextRunsCommand,
+            ReplaceSelectionCommand,
+            InsertCustomRangeCommand,
         ].forEach((e) => {
             this._commandService.registerCommand(e);
         });

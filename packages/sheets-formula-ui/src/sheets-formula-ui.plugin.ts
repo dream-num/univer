@@ -88,7 +88,7 @@ export class UniverSheetsFormulaUIPlugin extends Plugin {
         this._initUIPart();
     }
 
-    override onRendered(): void {
+    override onReady(): void {
         ([
             [RefSelectionsRenderService],
             [FormulaAlertRenderController],

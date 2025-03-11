@@ -133,6 +133,15 @@ jobs:
                   mkdir .workspace
                   cp -r ./examples/local/* .workspace
 
+            - name: 📦 Build react16 demo
+              run: |
+                  pnpm use:react16
+                  pnpm build:demo
+
+            - name: Copy demo to workspace
+              run: |
+                  cp -r ./examples/local/* .workspace/react16
+
             - name: 🚀 Deploy to Vercel (demo)
               uses: amondnet/vercel-action@v25
               if: ${{ needs.setup.outputs.ref == '' }}
@@ -208,28 +217,6 @@ jobs:
         needs: [setup, build-demo, build-storybook]
 
         steps:
-            - name: Invoke deployment hook
-              uses: distributhor/workflow-webhook@v3
-              with:
-                  webhook_url: ${{ secrets.WEBHOOK_URL }}
-                  data: >
-                      {
-                          "type": "build",
-                          "workflow": {
-                              "id": "${{ github.run_id }}"
-                          },
-                          "commit": {
-                              "ref": "${{ needs.setup.outputs.ref }}",
-                              "message": "${{ needs.build-demo.outputs.commit-message }}",
-                              "id": "${{ github.event.workflow_run.head_commit.id }}",
-                              "author": "${{ github.event.workflow_run.head_commit.author.name }}"
-                          },
-                          "preview": {
-                              "📑 Examples": "${{ needs.build-demo.outputs.preview-url }}/",
-                              "📚 Storybook": "${{ needs.build-storybook.outputs.preview-url }}/"
-                          }
-                      }
-
             # ================= Create Comment =================
             - name: 🧽 Find And Delete Comment
               uses: peter-evans/find-comment@v2
@@ -248,7 +235,7 @@ jobs:
                   issue-number: ${{ needs.setup.outputs.id }}
                   body: |
                       ## View Deployment
-                      | 📑 Examples | 📚 Storybook |
+                      | 📑 Demo (React@19) | Demo (React@16) | 📚 Storybook |
                       | --- | --- |
-                      | [🔗 Preview link](${{ needs.build-demo.outputs.preview-url }}/) | [🔗 Preview link](${{ needs.build-storybook.outputs.preview-url }}/) |
+                      | [🔗 Preview link](${{ needs.build-demo.outputs.preview-url }}/) | [🔗 Preview link](${{ needs.build-demo.outputs.preview-url }}/react16/) | [🔗 Preview link](${{ needs.build-storybook.outputs.preview-url }}/) |
                   edit-mode: replace

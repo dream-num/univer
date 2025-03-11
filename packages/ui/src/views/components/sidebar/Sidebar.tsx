@@ -58,10 +58,10 @@ export function Sidebar() {
             const k = key as keyof ISidebarMethodOptions;
 
             if (sidebarOptions[k]) {
-                const props = sidebarOptions[k] as any;
+                const { key, ...props } = sidebarOptions[k] as any;
 
                 if (props) {
-                    (copy as any)[k] = <CustomLabel {...props} />;
+                    (copy as any)[k] = <CustomLabel key={key} {...props} />;
                 }
             }
         }

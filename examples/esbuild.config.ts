@@ -18,8 +18,10 @@ import type { BuildOptions, Plugin, SameShape } from 'esbuild';
 import { execSync } from 'node:child_process';
 import path from 'node:path';
 import process from 'node:process';
+import { fileURLToPath } from 'node:url';
 import detect from 'detect-port';
 import esbuild from 'esbuild';
+import aliasPlugin from 'esbuild-plugin-alias';
 import cleanPlugin from 'esbuild-plugin-clean';
 import copyPlugin from 'esbuild-plugin-copy';
 import vue from 'esbuild-plugin-vue3';
@@ -27,13 +29,17 @@ import stylePlugin from 'esbuild-style-plugin';
 import glob from 'fast-glob';
 import fs from 'fs-extra';
 import minimist from 'minimist';
+import React from 'react';
 import tailwindcss from 'tailwindcss';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const LINK_TO_LIB = process.env.LINK_TO_LIB === 'true';
 const nodeModules = path.resolve(process.cwd(), './node_modules');
 
 const args = minimist(process.argv.slice(2));
 const isE2E = !!args.e2e;
+const isReact16 = React.version.startsWith('16');
 
 // User should also config their bundler to build monaco editor's resources for web worker.
 const monacoEditorEntryPoints = [
@@ -285,6 +291,14 @@ const config: SameShape<BuildOptions, BuildOptions> = {
     define,
     alias: LINK_TO_LIB ? generateAliases() : {},
 };
+
+if (isReact16) {
+    config.plugins?.push(
+        aliasPlugin({
+            'react-dom/client': path.resolve(__dirname, './src/client.ts'),
+        })
+    );
+}
 
 /**
  * Build the project

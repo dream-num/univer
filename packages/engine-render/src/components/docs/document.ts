@@ -440,6 +440,10 @@ export class Documents extends DocComponent {
 
                                 this._drawLiquid.translateRestore();
                             }
+
+                            if (line.borderBottom) {
+                                this._drawBorderBottom(ctx, page, line);
+                            }
                             this._drawLiquid.translateRestore();
                         }
                     }
@@ -542,6 +546,35 @@ export class Documents extends DocComponent {
 
             this._drawLiquid?.translateRestore();
         }
+    }
+
+    private _drawBorderBottom(
+        ctx: UniverRenderingContext,
+        page: IDocumentSkeletonPage,
+        line: IDocumentSkeletonLine,
+        left = 0,
+        top = 0
+    ) {
+        if (this._drawLiquid == null) {
+            return;
+        }
+        let { x, y } = this._drawLiquid;
+        const { pageWidth, marginLeft, marginRight, marginTop } = page;
+
+        x += marginLeft + (left ?? 0);
+        y -= line.marginTop;
+        y -= line.paddingTop;
+        y += marginTop + top + line.lineHeight + (line.borderBottom?.padding ?? 0);
+
+        ctx.save();
+        ctx.strokeStyle = line.borderBottom?.color.rgb ?? '#CDD0D8';
+        drawLineByBorderType(ctx, BORDER_LTRB.BOTTOM, 0, {
+            startX: x,
+            startY: y,
+            endX: x + pageWidth - marginLeft - marginRight,
+            endY: y,
+        });
+        ctx.restore();
     }
 
     // TODO: @JOCS, DRY!!!
@@ -704,6 +737,10 @@ export class Documents extends DocComponent {
                             }
 
                             this._drawLiquid.translateRestore();
+                        }
+
+                        if (line.borderBottom) {
+                            this._drawBorderBottom(ctx, cell, line, page.marginLeft, page.marginTop);
                         }
 
                         this._drawLiquid.translateRestore();
@@ -925,6 +962,10 @@ export class Documents extends DocComponent {
                             }
 
                             this._drawLiquid.translateRestore();
+                        }
+
+                        if (line.borderBottom) {
+                            this._drawBorderBottom(ctx, page, line, parentPage.marginLeft);
                         }
 
                         this._drawLiquid.translateRestore();

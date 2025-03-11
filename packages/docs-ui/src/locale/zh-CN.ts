@@ -49,6 +49,7 @@ const locale = {
         alignCenter: '居中对齐',
         alignRight: '右对齐',
         alignJustify: '两端对齐',
+        horizontalLine: '水平分割线',
         headerFooter: '页眉页脚',
     },
     table: {

@@ -140,6 +140,7 @@ jobs:
 
             - name: Copy demo to workspace
               run: |
+                  mkdir .workspace/react16
                   cp -r ./examples/local/* .workspace/react16
 
             - name: 🚀 Deploy to Vercel (demo)

@@ -28,6 +28,8 @@
         "dev": "turbo dev:demo  -- --host 0.0.0.0",
         "dev:libs": "pnpm --filter univer-examples dev:demo-libs",
         "dev:e2e": "pnpm --filter univer-examples dev:e2e",
+        "use:react16": "tsx ./scripts/react-version-manager.ts --react=16",
+        "use:react19": "tsx ./scripts/react-version-manager.ts --react=19",
         "lint:types": "turbo lint:types",
         "test": "turbo test -- --passWithNoTests",
         "coverage": "turbo coverage -- --passWithNoTests",
@@ -52,6 +54,7 @@
         "@release-it-plugins/workspaces": "^4.2.0",
         "@release-it/conventional-changelog": "^9.0.4",
         "@storybook/react": "8.6.4",
+        "@types/fs-extra": "^11.0.4",
         "@types/node": "^22.13.10",
         "@types/react": "^19.0.10",
         "@types/react-dom": "^19.0.4",
@@ -67,6 +70,7 @@
         "eslint-plugin-react": "^7.37.4",
         "eslint-plugin-react-hooks": "5.2.0",
         "eslint-plugin-react-refresh": "^0.4.19",
+        "fs-extra": "^11.3.0",
         "husky": "^9.1.7",
         "lint-staged": "^15.4.3",
         "posthog-node": "^4.10.1",
@@ -85,10 +89,10 @@
         ]
     },
     "resolutions": {
-        "@types/react": "^19.0.8",
-        "@types/react-dom": "^19.0.3",
-        "react": "19.0.0",
-        "react-dom": "19.0.0"
+        "@types/react": "19",
+        "@types/react-dom": "19",
+        "react": "19",
+        "react-dom": "19"
     },
     "lint-staged": {
         "*": "eslint --fix"

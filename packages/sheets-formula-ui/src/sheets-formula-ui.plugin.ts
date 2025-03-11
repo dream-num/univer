@@ -16,7 +16,7 @@
 
 import type { Dependency } from '@univerjs/core';
 import type { IUniverSheetsFormulaBaseConfig } from './controllers/config.schema';
-import { DependentOn, IConfigService, Inject, Injector, merge, Plugin, touchDependencies, UniverInstanceType } from '@univerjs/core';
+import { DependentOn, IConfigService, Inject, Injector, merge, Plugin, registerDependencies, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
@@ -69,8 +69,7 @@ export class UniverSheetsFormulaUIPlugin extends Plugin {
     }
 
     override onStarting(): void {
-        const j = this._injector;
-        const dependencies: Dependency[] = [
+        registerDependencies(this._injector, [
             [IFormulaPromptService, { useClass: FormulaPromptService }],
             [GlobalRangeSelectorService],
             [FormulaUIController],
@@ -78,14 +77,7 @@ export class UniverSheetsFormulaUIPlugin extends Plugin {
             [FormulaClipboardController],
             [FormulaEditorShowController],
             [FormulaRenderManagerController],
-        ];
-
-        dependencies.forEach((dependency) => j.add(dependency));
-
-        const componentManager = this._injector.get(ComponentManager);
-        componentManager.register(RANGE_SELECTOR_COMPONENT_KEY, RangeSelector);
-        componentManager.register(EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY, FormulaEditor);
-        this._initUIPart();
+        ]);
     }
 
     override onRendered(): void {
@@ -101,6 +93,10 @@ export class UniverSheetsFormulaUIPlugin extends Plugin {
             [FormulaClipboardController],
             [FormulaRenderManagerController],
         ]);
+
+        // Since component FormulaEditor relies on RefSelectionsRenderService, it should be
+        // registered after RefSelectionsRenderService is registered.
+        this._initUIPart();
     }
 
     override onSteady(): void {
@@ -108,6 +104,9 @@ export class UniverSheetsFormulaUIPlugin extends Plugin {
     }
 
     private _initUIPart(): void {
+        const componentManager = this._injector.get(ComponentManager);
+        this.disposeWithMe(componentManager.register(RANGE_SELECTOR_COMPONENT_KEY, RangeSelector));
+        this.disposeWithMe(componentManager.register(EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY, FormulaEditor));
         this.disposeWithMe(this._uiPartsService.registerComponent(BuiltInUIPart.GLOBAL, () => connectInjector(GlobalRangeSelector, this._injector)));
     }
 }

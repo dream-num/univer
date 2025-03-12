@@ -14,14 +14,19 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICustomDecorationForInterceptor, ICustomRangeForInterceptor, IInterceptor, Nullable } from '@univerjs/core';
+import type { DocumentDataModel, ICommandInfo, ICustomDecorationForInterceptor, ICustomRangeForInterceptor, IInterceptor, Nullable } from '@univerjs/core';
 import type { DocumentViewModel, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { composeInterceptors, Disposable, DisposableCollection, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, Inject, remove, toDisposable } from '@univerjs/core';
 import { DocSkeletonManagerService } from '../doc-skeleton-manager.service';
 import { DOC_INTERCEPTOR_POINT } from './interceptor-const';
 
+export interface IBeforeOperationInterceptor {
+    priority?: number;
+    performCheck(info: ICommandInfo): boolean;
+}
 export class DocInterceptorService extends Disposable implements IRenderModule {
     private _interceptorsByName: Map<string, Array<IInterceptor<unknown, unknown>>> = new Map();
+    private _beforeOperationInterceptor: IBeforeOperationInterceptor[] = [];
 
     constructor(
         private readonly _context: IRenderContext<DocumentDataModel>,
@@ -55,6 +60,23 @@ export class DocInterceptorService extends Disposable implements IRenderModule {
         });
 
         this.disposeWithMe(disposableCollection);
+    }
+
+    interceptBeforeOperation(interceptor: IBeforeOperationInterceptor) {
+        const { _beforeOperationInterceptor } = this;
+        if (_beforeOperationInterceptor.includes(interceptor)) {
+            throw new Error('[DocInterceptorService]: Interceptor already exists!');
+        }
+
+        _beforeOperationInterceptor.push(interceptor);
+        _beforeOperationInterceptor.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
+
+        return this.disposeWithMe(toDisposable(() => remove(this._beforeOperationInterceptor, interceptor)));
+    }
+
+    beforeOperationExecute(info: ICommandInfo): boolean {
+        const allPerformCheckRes = this._beforeOperationInterceptor.map((i) => i.performCheck(info));
+        return allPerformCheckRes.every((perform) => perform);
     }
 
     intercept<T extends IInterceptor<any, any>>(name: T, interceptor: T) {

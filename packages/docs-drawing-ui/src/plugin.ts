@@ -26,6 +26,7 @@ import { defaultPluginConfig, DOCS_DRAWING_UI_PLUGIN_CONFIG_KEY } from './contro
 import { DocDrawingAddRemoveController } from './controllers/doc-drawing-notification.controller';
 import { DocDrawingTransformerController } from './controllers/doc-drawing-transformer-update.controller';
 import { DocDrawingUIController } from './controllers/doc-drawing.controller';
+import { DocFloatDomController } from './controllers/doc-float-dom.controller';
 import { DocDrawingPopupMenuController } from './controllers/drawing-popup-menu.controller';
 import { DocDrawingTransformUpdateController } from './controllers/render-controllers/doc-drawing-transform-update.controller';
 import { DocDrawingUpdateRenderController } from './controllers/render-controllers/doc-drawing-update.render-controller';
@@ -62,6 +63,7 @@ export class UniverDocsDrawingUIPlugin extends Plugin {
             [DocDrawingTransformerController],
             [DocDrawingAddRemoveController],
             [DocRefreshDrawingsService],
+            [DocFloatDomController],
         ];
 
         dependencies.forEach((dependency) => this._injector.add(dependency));
@@ -80,5 +82,6 @@ export class UniverDocsDrawingUIPlugin extends Plugin {
 
     override onRendered(): void {
         this._injector.get(DocDrawingPopupMenuController);
+        this._injector.get(DocFloatDomController);
     }
 }

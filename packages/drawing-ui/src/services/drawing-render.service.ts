@@ -15,11 +15,11 @@
  */
 
 import type { IDrawingSearch } from '@univerjs/core';
-import type { IImageData } from '@univerjs/drawing';
-import type { IImageProps, Scene } from '@univerjs/engine-render';
+import type { IDocFloatDomData, IImageData } from '@univerjs/drawing';
+import type { IImageProps, IRectProps, Scene } from '@univerjs/engine-render';
 import { DrawingTypeEnum } from '@univerjs/core';
 import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService, IImageIoService, ImageSourceType } from '@univerjs/drawing';
-import { DRAWING_OBJECT_LAYER_INDEX, Image } from '@univerjs/engine-render';
+import { DRAWING_OBJECT_LAYER_INDEX, Image, Rect } from '@univerjs/engine-render';
 import { IDialogService } from '@univerjs/ui';
 import { insertGroupObject } from '../controllers/utils';
 import { COMPONENT_IMAGE_VIEWER } from '../views/image-viewer/component-name';
@@ -130,6 +130,71 @@ export class DrawingRenderService {
         }
 
         return images;
+    }
+
+    renderFloatDom(param: IDocFloatDomData, scene: Scene) {
+        const {
+            transform: singleTransform,
+            drawingType,
+            groupId,
+            unitId,
+            subUnitId,
+            drawingId,
+            isMultiTransform,
+            transforms: multiTransforms,
+        } = param;
+        if (drawingType !== DrawingTypeEnum.DRAWING_IMAGE) {
+            return;
+        }
+
+        if (!this._drawingManagerService.getDrawingVisible()) {
+            return;
+        }
+
+        if (singleTransform == null) {
+            return;
+        }
+
+        const transforms = isMultiTransform && multiTransforms ? multiTransforms : [singleTransform];
+
+        const rects = [];
+        for (const transform of transforms) {
+            const { left, top, width, height, angle, flipX, flipY, skewX, skewY } = transform;
+            const index = transforms.indexOf(transform);
+            const imageShapeKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId }, isMultiTransform ? index : undefined);
+            const imageShape = scene.getObject(imageShapeKey);
+
+            if (imageShape != null) {
+                imageShape.transformByState({ left, top, width, height, angle, flipX, flipY, skewX, skewY });
+                continue;
+            }
+
+            const orders = this._drawingManagerService.getDrawingOrder(unitId, subUnitId);
+            const zIndex = orders.indexOf(drawingId);
+            const rectConfig: IRectProps = { ...transform, zIndex: zIndex === -1 ? (orders.length - 1) : zIndex };
+
+            if (scene.getObject(imageShapeKey)) {
+                // The image maybe already added  in the time we are getting  the source of the image
+                continue;
+            }
+
+            rectConfig.printable = false;
+            const rect = new Rect(imageShapeKey, rectConfig);
+
+            if (!this._drawingManagerService.getDrawingVisible()) {
+                continue;
+            }
+
+            scene.addObject(rect, DRAWING_OBJECT_LAYER_INDEX);
+            if (this._drawingManagerService.getDrawingEditable()) {
+                scene.attachTransformerTo(rect);
+            }
+
+            groupId && insertGroupObject({ drawingId: groupId, unitId, subUnitId }, rect, scene, this._drawingManagerService);
+            rects.push(rect);
+        }
+
+        return rects;
     }
 
     renderDrawing(param: IDrawingSearch, scene: Scene) {

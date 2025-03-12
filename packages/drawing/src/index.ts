@@ -19,7 +19,7 @@ export { DrawingManagerService, type IDrawingJson1Type, type IDrawingJsonUndo1, 
 export { getDrawingShapeKeyByDrawingSearch } from './utils/get-image-shape-key';
 export { getImageSize } from './utils/get-image-size';
 export { UniverDrawingPlugin } from './plugin';
-export { type IImageData } from './models/image-model-interface';
+export { type IDocFloatDomData, type IImageData } from './models/image-model-interface';
 export { IImageIoService, type IImageIoServiceParam, ImageSourceType, ImageUploadStatusType } from './services/image-io.service';
 export { ImageIoService } from './services/image-io-impl.service';
 export {

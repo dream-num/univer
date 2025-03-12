@@ -81,6 +81,8 @@
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
+        "@univerjs/engine-render": "workspace:*",
+        "@univerjs/network": "workspace:*",
         "rxjs": "^7.8.1",
         "typescript": "^5.8.2",
         "vite": "^6.2.1",

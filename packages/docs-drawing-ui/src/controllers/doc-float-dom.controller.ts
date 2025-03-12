@@ -14,24 +14,65 @@
  * limitations under the License.
  */
 
-import type { IDrawingSearch, Nullable } from '@univerjs/core';
+import type { DocumentDataModel, IDisposable, IDrawingSearch, Nullable } from '@univerjs/core';
 import type { IDocFloatDom } from '@univerjs/docs-drawing';
+import type { ISetDocZoomRatioOperationParams } from '@univerjs/docs-ui';
+import type { IDocFloatDomDataBase } from '@univerjs/drawing';
 import type { BaseObject, IRender, Rect } from '@univerjs/engine-render';
-import { Disposable, DrawingTypeEnum, Inject, toDisposable } from '@univerjs/core';
+import type { IFloatDomLayout } from '@univerjs/ui';
+import type { IInsertDrawingCommandParams } from '../commands/commands/interfaces';
+import { Disposable, DisposableCollection, DrawingTypeEnum, fromEventSubject, generateRandomId, ICommandService, Inject, IUniverInstanceService, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, toDisposable, UniverInstanceType } from '@univerjs/core';
+import { docDrawingPositionToTransform, SetDocZoomRatioOperation, VIEWPORT_KEY } from '@univerjs/docs-ui';
 import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
 import { DrawingRenderService } from '@univerjs/drawing-ui';
 import { CURSOR_TYPE, IRenderManagerService } from '@univerjs/engine-render';
+import { CanvasFloatDomService } from '@univerjs/ui';
+import { BehaviorSubject, map, of, switchMap } from 'rxjs';
+import { InsertDocDrawingCommand } from '../commands/commands/insert-doc-drawing.command';
 
 function calcDocFloatDomPosition(
     object: BaseObject,
     renderUnit: IRender
-) {}
+): IFloatDomLayout {
+    const { top, left, width, height, angle } = object;
+    // const
+    const scene = renderUnit.scene;
+    const viewMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN)!;
+    const { viewportScrollX, viewportScrollY } = viewMain;
+    const { scaleX, scaleY } = scene.getAncestorScale();
+
+    return {
+        startX: (left - viewportScrollX) * scaleX,
+        startY: (top - viewportScrollY) * scaleY,
+        endX: (left + width - viewportScrollX) * scaleX,
+        endY: (top + height - viewportScrollY) * scaleY,
+        width,
+        height,
+        rotate: 0,
+        absolute: {
+            left: false,
+            top: false,
+        },
+    };
+}
+
+interface ICanvasFloatDomInfo {
+    position$: BehaviorSubject<IFloatDomLayout>;
+    dispose: IDisposable;
+    rect: Rect;
+    unitId: string;
+}
 
 export class DocFloatDomController extends Disposable {
+    private _domLayerInfoMap = new Map<string, ICanvasFloatDomInfo>();
+
     constructor(
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
-        @Inject(DrawingRenderService) private readonly _drawingRenderService: DrawingRenderService
+        @Inject(DrawingRenderService) private readonly _drawingRenderService: DrawingRenderService,
+        @Inject(CanvasFloatDomService) private readonly _canvasFloatDomService: CanvasFloatDomService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
 
@@ -43,8 +84,9 @@ export class DocFloatDomController extends Disposable {
     }
 
     private _initialize() {
-        this._drawingAddListener();
+        this._drawingAddRemoveListener();
         this._imageUpdateListener();
+        this._initScrollAndZoomEvent();
     }
 
     private _getSceneAndTransformerByDrawingSearch(unitId: Nullable<string>) {
@@ -54,21 +96,33 @@ export class DocFloatDomController extends Disposable {
 
         const renderObject = this._renderManagerService.getRenderById(unitId);
 
-        const scene = renderObject?.scene;
-
-        if (scene == null) {
+        if (renderObject == null) {
             return null;
         }
 
+        const scene = renderObject.scene;
+
         const transformer = scene.getTransformerByCreate();
 
-        return { scene, transformer };
+        return { scene, transformer, renderUnit: renderObject, canvas: renderObject.engine.getCanvasElement() };
     }
 
-    private _drawingAddListener() {
+    private _drawingAddRemoveListener() {
         this.disposeWithMe(
             this._drawingManagerService.add$.subscribe((params) => {
                 this._insertRects(params);
+            })
+        );
+
+        this.disposeWithMe(
+            this._drawingManagerService.remove$.subscribe((params) => {
+                params.forEach((param) => {
+                    const rectParam = this._drawingManagerService.getDrawingByParam(param) as IDocFloatDom;
+                    if (rectParam.drawingType !== DrawingTypeEnum.DRAWING_DOM) return;
+                    const documentDataModel = this._univerInstanceService.getUnit(rectParam.unitId, UniverInstanceType.UNIVER_DOC);
+                    if (!documentDataModel) return;
+                    this._removeDom(param.drawingId);
+                });
             })
         );
     }
@@ -82,19 +136,63 @@ export class DocFloatDomController extends Disposable {
                 return;
             }
 
-            const imageParam = this._drawingManagerService.getDrawingByParam(param) as IDocFloatDom;
-            if (imageParam == null) {
+            const rectParam = this._drawingManagerService.getDrawingByParam(param) as IDocFloatDom;
+            if (rectParam == null) {
                 return;
             }
 
-            const images = await this._drawingRenderService.renderFloatDom(imageParam, renderObject.scene);
-
-            if (images == null || images.length === 0) {
+            const rects = await this._drawingRenderService.renderFloatDom(rectParam, renderObject.scene);
+            if (rects == null || rects.length === 0) {
                 return;
             }
 
-            for (const image of images) {
-                this._addHoverForRect(image);
+            for (const rect of rects) {
+                this._addHoverForRect(rect);
+                const disposableCollection = new DisposableCollection();
+                const initPosition = calcDocFloatDomPosition(rect, renderObject.renderUnit);
+                const position$ = new BehaviorSubject<IFloatDomLayout>(initPosition);
+                const canvas = renderObject.canvas;
+                const data = rectParam.data;
+
+                const info: ICanvasFloatDomInfo = {
+                    dispose: disposableCollection,
+                    rect,
+                    position$,
+                    unitId,
+                };
+
+                this._canvasFloatDomService.addFloatDom({
+                    position$,
+                    id: rectParam.drawingId,
+                    componentKey: rectParam.componentKey,
+                    onPointerDown: (evt) => {
+                        canvas.dispatchEvent(new PointerEvent(evt.type, evt));
+                    },
+                    onPointerMove: (evt: PointerEvent | MouseEvent) => {
+                        canvas.dispatchEvent(new PointerEvent(evt.type, evt));
+                    },
+                    onPointerUp: (evt: PointerEvent | MouseEvent) => {
+                        canvas.dispatchEvent(new PointerEvent(evt.type, evt));
+                    },
+                    onWheel: (evt: WheelEvent) => {
+                        canvas.dispatchEvent(new WheelEvent(evt.type, evt));
+                    },
+                    data,
+                    unitId,
+                });
+
+                const listener = rect.onTransformChange$.subscribeEvent(() => {
+                    const newPosition = calcDocFloatDomPosition(rect, renderObject.renderUnit);
+                    position$.next(
+                        newPosition
+                    );
+                });
+
+                disposableCollection.add(() => {
+                    this._canvasFloatDomService.removeFloatDom(rectParam.drawingId);
+                });
+                listener && disposableCollection.add(listener);
+                this._domLayerInfoMap.set(rectParam.drawingId, info);
             }
         });
     }
@@ -156,5 +254,101 @@ export class DocFloatDomController extends Disposable {
                 })
             )
         );
+    }
+
+    private _removeDom(id: string) {
+        const info = this._domLayerInfoMap.get(id);
+        if (!info) {
+            return;
+        }
+        const { unitId } = info;
+        this._domLayerInfoMap.delete(id);
+
+        info.dispose.dispose();
+        const renderObject = this._getSceneAndTransformerByDrawingSearch(unitId);
+        if (renderObject) {
+            renderObject.scene.removeObject(info.rect);
+        }
+    }
+
+    private _initScrollAndZoomEvent() {
+        const updateDoc = (unitId: string) => {
+            const renderObject = this._getSceneAndTransformerByDrawingSearch(unitId);
+            if (!renderObject) {
+                return;
+            }
+            this._domLayerInfoMap.forEach((floatDomInfo) => {
+                if (floatDomInfo.unitId !== unitId) return;
+                const position = calcDocFloatDomPosition(floatDomInfo.rect, renderObject.renderUnit);
+                floatDomInfo.position$.next(position);
+            });
+        };
+
+        this.disposeWithMe(
+            this._univerInstanceService.getCurrentTypeOfUnit$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC).pipe(
+                map((documentDataModel) => {
+                    if (!documentDataModel) return null;
+                    const unitId = documentDataModel.getUnitId();
+                    const render = this._renderManagerService.getRenderById(unitId);
+                    return render ? { render, unitId } : null;
+                }),
+                switchMap((render) =>
+                    render
+                        ? fromEventSubject(render.render.scene.getViewport(VIEWPORT_KEY.VIEW_MAIN)!.onScrollAfter$)
+                            .pipe(map(() => ({ unitId: render.unitId })))
+                        : of(null)
+                )
+            ).subscribe((value) => {
+                if (!value) return;
+                const { unitId } = value;
+                updateDoc(unitId);
+            })
+        );
+
+        this.disposeWithMe(this._commandService.onCommandExecuted((commandInfo) => {
+            if (commandInfo.id === SetDocZoomRatioOperation.id) {
+                const params = (commandInfo.params) as ISetDocZoomRatioOperationParams;
+                const { unitId } = params;
+                updateDoc(unitId);
+            }
+        }));
+    }
+
+    insertFloatDom(floatDom: IDocFloatDomDataBase) {
+        const currentDoc = this._univerInstanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_DOC);
+        if (!currentDoc) return false;
+        const docTransform = {
+            size: {
+                width: 100,
+                height: 100,
+            },
+            positionH: {
+                relativeFrom: ObjectRelativeFromH.PAGE,
+                posOffset: 0,
+            },
+            positionV: {
+                relativeFrom: ObjectRelativeFromV.PAGE,
+                posOffset: 0,
+            },
+            angle: 0,
+        };
+        const params: IInsertDrawingCommandParams = {
+            unitId: currentDoc.getUnitId(),
+            drawings: [
+                {
+                    drawingId: generateRandomId(),
+                    drawingType: DrawingTypeEnum.DRAWING_DOM,
+                    subUnitId: currentDoc.getUnitId(),
+                    unitId: currentDoc.getUnitId(),
+                    ...floatDom,
+                    title: '123',
+                    description: '123',
+                    docTransform,
+                    layoutType: PositionedObjectLayoutType.INLINE,
+                    transform: docDrawingPositionToTransform(docTransform),
+                },
+            ],
+        };
+        this._commandService.executeCommand(InsertDocDrawingCommand.id, params);
     }
 }

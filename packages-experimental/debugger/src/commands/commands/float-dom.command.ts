@@ -15,30 +15,42 @@
  */
 
 import type { ICommand } from '@univerjs/core';
-import { CommandType } from '@univerjs/core';
+import { CommandType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { DocFloatDomController } from '@univerjs/docs-drawing-ui';
 import { SheetCanvasFloatDomManagerService } from '@univerjs/sheets-drawing-ui';
 
 export const CreateFloatDomCommand: ICommand = {
     id: 'debugger.command.create-float-dom',
     type: CommandType.COMMAND,
     handler: (accessor) => {
-        const floatDomService = accessor.get(SheetCanvasFloatDomManagerService);
-        floatDomService.addFloatDomToPosition({
-            allowTransform: true,
-            initPosition: {
-                startX: 200,
-                endX: 400,
-                startY: 200,
-                endY: 400,
-            },
-            componentKey: 'ImageDemo',
-            props: {
-                a: 1,
-            },
-            data: {
-                aa: '128',
-            },
-        });
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const currentSheet = univerInstanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_SHEET);
+        if (currentSheet) {
+            const floatDomService = accessor.get(SheetCanvasFloatDomManagerService);
+            floatDomService.addFloatDomToPosition({
+                allowTransform: true,
+                initPosition: {
+                    startX: 200,
+                    endX: 400,
+                    startY: 200,
+                    endY: 400,
+                },
+                componentKey: 'ImageDemo',
+                data: {
+                    aa: '128',
+                },
+            });
+        } else {
+            const floatDomController = accessor.get(DocFloatDomController);
+            floatDomController.insertFloatDom({
+                allowTransform: true,
+                componentKey: 'ImageDemo',
+                data: {
+                    aa: '128',
+                },
+            });
+        }
+
         return true;
     },
 };

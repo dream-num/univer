@@ -143,7 +143,7 @@ export class DrawingRenderService {
             isMultiTransform,
             transforms: multiTransforms,
         } = param;
-        if (drawingType !== DrawingTypeEnum.DRAWING_IMAGE) {
+        if (drawingType !== DrawingTypeEnum.DRAWING_DOM) {
             return;
         }
 

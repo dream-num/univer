@@ -165,7 +165,7 @@ export class ImageUpdateController extends Disposable {
 
     private _insertImages(params: IDrawingSearch[]) {
         (params).forEach(async (param) => {
-            const { unitId, subUnitId, drawingId } = param;
+            const { unitId, subUnitId } = param;
             const renderObject = this._getSceneAndTransformerByDrawingSearch(unitId);
             const currentSubUnitId = getCurrentUnitInfo(this._currentUniverService, unitId)?.subUnitId;
 

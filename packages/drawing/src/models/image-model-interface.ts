@@ -30,8 +30,12 @@ export interface IImageData extends IDrawingParam {
     prstGeom?: Nullable<PresetGeometryType>;
 }
 
-export interface IDocFloatDomData extends IDrawingParam {
+export interface IDocFloatDomDataBase {
     componentKey: string;
     data?: Serializable;
     allowTransform?: boolean;
+}
+
+export interface IDocFloatDomData extends IDrawingParam, IDocFloatDomDataBase {
+
 }

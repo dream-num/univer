@@ -48,6 +48,8 @@ export const CreateFloatDomCommand: ICommand = {
                 data: {
                     aa: '128',
                 },
+            }, {
+                height: 300,
             });
         }
 

@@ -22,6 +22,7 @@ import type { BaseObject, IRender, Rect } from '@univerjs/engine-render';
 import type { IFloatDomLayout } from '@univerjs/ui';
 import type { IInsertDrawingCommandParams } from '../commands/commands/interfaces';
 import { Disposable, DisposableCollection, DrawingTypeEnum, fromEventSubject, generateRandomId, ICommandService, Inject, IUniverInstanceService, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, toDisposable, UniverInstanceType } from '@univerjs/core';
+import { DocSkeletonManagerService } from '@univerjs/docs';
 import { docDrawingPositionToTransform, SetDocZoomRatioOperation, VIEWPORT_KEY } from '@univerjs/docs-ui';
 import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
 import { DrawingRenderService } from '@univerjs/drawing-ui';
@@ -117,10 +118,6 @@ export class DocFloatDomController extends Disposable {
         this.disposeWithMe(
             this._drawingManagerService.remove$.subscribe((params) => {
                 params.forEach((param) => {
-                    const rectParam = this._drawingManagerService.getDrawingByParam(param) as IDocFloatDom;
-                    if (rectParam.drawingType !== DrawingTypeEnum.DRAWING_DOM) return;
-                    const documentDataModel = this._univerInstanceService.getUnit(rectParam.unitId, UniverInstanceType.UNIVER_DOC);
-                    if (!documentDataModel) return;
                     this._removeDom(param.drawingId);
                 });
             })
@@ -314,13 +311,21 @@ export class DocFloatDomController extends Disposable {
         }));
     }
 
-    insertFloatDom(floatDom: IDocFloatDomDataBase) {
+    insertFloatDom(floatDom: IDocFloatDomDataBase, size: { width?: number; height: number }) {
         const currentDoc = this._univerInstanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_DOC);
         if (!currentDoc) return false;
+        const render = this._getSceneAndTransformerByDrawingSearch(currentDoc.getUnitId());
+        if (!render) return false;
+        const docSkeletonManagerService = render.renderUnit.with(DocSkeletonManagerService);
+        const skeleton = docSkeletonManagerService.getSkeleton();
+        const page = skeleton.getSkeletonData()?.pages[0];
+        if (!page) return false;
+        const { pageWidth, marginLeft, marginRight } = page;
+        const width = pageWidth - marginLeft - marginRight;
         const docTransform = {
             size: {
-                width: 100,
-                height: 100,
+                width: size.width ?? width,
+                height: size.height,
             },
             positionH: {
                 relativeFrom: ObjectRelativeFromH.PAGE,
@@ -332,6 +337,7 @@ export class DocFloatDomController extends Disposable {
             },
             angle: 0,
         };
+
         const params: IInsertDrawingCommandParams = {
             unitId: currentDoc.getUnitId(),
             drawings: [

@@ -311,7 +311,7 @@ export class DocFloatDomController extends Disposable {
         }));
     }
 
-    insertFloatDom(floatDom: IDocFloatDomDataBase, size: { width?: number; height: number }) {
+    insertFloatDom(floatDom: IDocFloatDomDataBase, opts: { width?: number; height: number; drawingId?: string }) {
         const currentDoc = this._univerInstanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_DOC);
         if (!currentDoc) return false;
         const render = this._getSceneAndTransformerByDrawingSearch(currentDoc.getUnitId());
@@ -324,8 +324,8 @@ export class DocFloatDomController extends Disposable {
         const width = pageWidth - marginLeft - marginRight;
         const docTransform = {
             size: {
-                width: size.width ?? width,
-                height: size.height,
+                width: opts.width ?? width,
+                height: opts.height,
             },
             positionH: {
                 relativeFrom: ObjectRelativeFromH.PAGE,
@@ -342,13 +342,13 @@ export class DocFloatDomController extends Disposable {
             unitId: currentDoc.getUnitId(),
             drawings: [
                 {
-                    drawingId: generateRandomId(),
+                    drawingId: opts.drawingId ?? generateRandomId(),
                     drawingType: DrawingTypeEnum.DRAWING_DOM,
                     subUnitId: currentDoc.getUnitId(),
                     unitId: currentDoc.getUnitId(),
                     ...floatDom,
-                    title: '123',
-                    description: '123',
+                    title: '',
+                    description: '',
                     docTransform,
                     layoutType: PositionedObjectLayoutType.INLINE,
                     transform: docDrawingPositionToTransform(docTransform),

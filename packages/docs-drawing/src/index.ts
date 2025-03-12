@@ -19,3 +19,4 @@ export { DocDrawingService, type IDocDrawing, IDocDrawingService, type IDocImage
 
 export { DOCS_DRAWING_PLUGIN, type IDocDrawingModel } from './controllers/doc-drawing.controller';
 export { DocDrawingController } from './controllers/doc-drawing.controller';
+export { type IDocFloatDom } from './services/doc-drawing.service';

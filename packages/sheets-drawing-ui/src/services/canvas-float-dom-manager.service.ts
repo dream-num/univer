@@ -370,10 +370,13 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         return props;
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _drawingAddListener() {
         this.disposeWithMe(
 
+            // eslint-disable-next-line max-lines-per-function
             this._drawingManagerService.add$.subscribe((params: IDrawingSearch[]) => {
+                // eslint-disable-next-line max-lines-per-function, complexity
                 (params).forEach((param) => {
                     const { unitId, subUnitId, drawingId } = param;
                     const target = getSheetCommandTarget(this._univerInstanceService, { unitId, subUnitId });

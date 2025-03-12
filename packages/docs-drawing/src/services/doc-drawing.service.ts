@@ -15,24 +15,26 @@
  */
 
 import type { IDocDrawingBase } from '@univerjs/core';
-import type { IImageData, IUnitDrawingService } from '@univerjs/drawing';
+import type { IDocFloatDomData, IImageData, IUnitDrawingService } from '@univerjs/drawing';
 import { createIdentifier } from '@univerjs/core';
 import { UnitDrawingService } from '@univerjs/drawing';
 
-export interface IDocImage extends IImageData, IDocDrawingBase {}
+export interface IDocImage extends IImageData, IDocDrawingBase { }
 
 /**
  * test type
  */
-export interface IDocShape extends IDocDrawingBase {}
+export interface IDocShape extends IDocDrawingBase { }
 
-export type IDocDrawing = IDocImage | IDocShape;
+export interface IDocFloatDom extends IDocFloatDomData, IDocDrawingBase {}
+
+export type IDocDrawing = IDocImage | IDocFloatDom | IDocShape;
 
 type OptionalField<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 export type IDocUpdateDrawing = OptionalField<IDocDrawing, 'drawingType' | 'layoutType' | 'docTransform' | 'description' | 'title'>;
 
-export class DocDrawingService extends UnitDrawingService<IDocDrawing> {}
+export class DocDrawingService extends UnitDrawingService<IDocDrawing> { }
 
-export interface IDocDrawingService extends IUnitDrawingService<IDocDrawing> {}
+export interface IDocDrawingService extends IUnitDrawingService<IDocDrawing> { }
 
 export const IDocDrawingService = createIdentifier<IDocDrawingService>('univer.doc.plugin.doc-drawing.service');

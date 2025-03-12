@@ -18,7 +18,7 @@ import './global.css';
 
 export { UniverDocsDrawingUIPlugin } from './plugin';
 export { DOCS_IMAGE_MENU_ID } from './views/menu/image.menu';
-
+export { DocFloatDomController } from './controllers/doc-float-dom.controller';
 // #region - all commands
 
 export { DeleteDocDrawingsCommand } from './commands/commands/delete-doc-drawing.command';

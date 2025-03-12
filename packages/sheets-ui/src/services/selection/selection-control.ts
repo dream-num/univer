@@ -687,8 +687,10 @@ export class SelectionControl extends Disposable {
      */
     updateRangeBySelectionWithCoord(selectionWthCoord: ISelectionWithCoord, sk?: SpreadsheetSkeleton) {
         if (sk) {
-            this._rowHeaderWidth = sk.getWorksheetConfig().rowHeader.width;
-            this._columnHeaderHeight = sk.getWorksheetConfig().columnHeader.height;
+            // do not get header size from workbook, that is default value.
+            // if row is over one million, row header width would be bigger than default value.
+            this._rowHeaderWidth = sk.rowHeaderWidth;
+            this._columnHeaderHeight = sk.columnHeaderHeight;
         }
         this._selectionRenderModel.setValue(selectionWthCoord.rangeWithCoord, selectionWthCoord.primaryWithCoord);
         // if primaryWithCoord is undefined, that means keeps the previous value.

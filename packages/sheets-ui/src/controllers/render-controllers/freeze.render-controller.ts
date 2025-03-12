@@ -832,6 +832,8 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
         viewColumnRight.resizeWhenFreezeChange({
             left: rowHeaderWidthAndMarginLeft,
             top: 0,
+            // ctx.clip by the size of viewport, and selection header border is slightly below column header
+            // I think it's a bad design, Should not clip for selection rendering in viewport,
             height: columnHeaderHeightAndMarginTop + 1,
             right: 0,
         });

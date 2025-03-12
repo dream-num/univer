@@ -17,7 +17,6 @@
 import type { IStyleData, Nullable } from '@univerjs/core';
 
 export type IRangeThemeStyleItem = Pick<IStyleData, 'bg' | 'ol' | 'bd' | 'cl' | 'ht' | 'vt' | 'bl'>;
-
 export interface IRangeThemeStyleJSON {
     name: string;
     wholeStyle?: IRangeThemeStyleItem;
@@ -179,6 +178,7 @@ export class RangeThemeStyle {
 
     setWholeStyle(style: Nullable<IRangeThemeStyleItem>): void {
         this.wholeStyle = style;
+        this._resetStyleCache();
     }
 
     getFirstRowStyle(): Nullable<IRangeThemeStyleItem> {
@@ -187,6 +187,7 @@ export class RangeThemeStyle {
 
     setFirstRowStyle(style: Nullable<IRangeThemeStyleItem>): void {
         this.firstRowStyle = style;
+        this._resetStyleCache();
     }
 
     getSecondRowStyle(): Nullable<IRangeThemeStyleItem> {
@@ -195,6 +196,7 @@ export class RangeThemeStyle {
 
     setSecondRowStyle(style: Nullable<IRangeThemeStyleItem>): void {
         this.secondRowStyle = style;
+        this._resetStyleCache();
     }
 
     getLastRowStyle(): Nullable<IRangeThemeStyleItem> {
@@ -203,6 +205,7 @@ export class RangeThemeStyle {
 
     setLastRowStyle(style: Nullable<IRangeThemeStyleItem>): void {
         this.lastRowStyle = style;
+        this._resetStyleCache();
     }
 
     getFirstColumnStyle(): Nullable<IRangeThemeStyleItem> {
@@ -211,6 +214,7 @@ export class RangeThemeStyle {
 
     setFirstColumnStyle(style: Nullable<IRangeThemeStyleItem>): void {
         this.firstColumnStyle = style;
+        this._resetStyleCache();
     }
 
     getSecondColumnStyle(): Nullable<IRangeThemeStyleItem> {
@@ -219,6 +223,7 @@ export class RangeThemeStyle {
 
     setSecondColumnStyle(style: Nullable<IRangeThemeStyleItem>): void {
         this.secondColumnStyle = style;
+        this._resetStyleCache();
     }
 
     getLastColumnStyle(): Nullable<IRangeThemeStyleItem> {
@@ -227,6 +232,7 @@ export class RangeThemeStyle {
 
     setLastColumnStyle(style: Nullable<IRangeThemeStyleItem>): void {
         this.lastColumnStyle = style;
+        this._resetStyleCache();
     }
 
     getHeaderRowStyle(): Nullable<IRangeThemeStyleItem> {
@@ -235,6 +241,7 @@ export class RangeThemeStyle {
 
     setHeaderRowStyle(style: Nullable<IRangeThemeStyleItem>): void {
         this.headerRowStyle = style;
+        this._resetStyleCache();
     }
 
     getHeaderColumnStyle(): Nullable<IRangeThemeStyleItem> {
@@ -243,6 +250,7 @@ export class RangeThemeStyle {
 
     setHeaderColumnStyle(style: Nullable<IRangeThemeStyleItem>): void {
         this.headerColumnStyle = style;
+        this._resetStyleCache();
     }
 
     public getStyle(offsetRow: number, offsetCol: number, isLastRow: boolean, isLastCol: boolean) {
@@ -341,6 +349,10 @@ export class RangeThemeStyle {
         }
 
         return composeStyles(rs as IStyleData[]);
+    }
+
+    private _resetStyleCache() {
+        this._mergeCacheMap.clear();
     }
 
     toJson(): IRangeThemeStyleJSON {

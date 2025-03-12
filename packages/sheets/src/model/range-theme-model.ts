@@ -23,6 +23,7 @@ import { RangeThemeStyle } from './range-theme-util';
 
 import { buildInThemes } from './range-themes/build-in-theme.factory';
 import { defaultRangeThemeStyle, defaultRangeThemeStyleJSONWithLastRowStyle } from './range-themes/default';
+import { Subject } from 'rxjs';
 
 export interface IRangeThemeRangeInfo {
     range: IRange;
@@ -47,6 +48,10 @@ export class SheetRangeThemeModel extends Disposable {
     private _rangeThemeStyleRuleMap: Map<string, Map<string, IRangeThemeStyleRule>> = new Map();
     private _rTreeCollection: Map<string, RTree> = new Map();
     private _defaultRangeThemeMap: Map<string, RangeThemeStyle> = new Map();
+
+    private _rangeThemeMapChanged$ = new Subject<{ type: 'add' | 'remove', styleName: string }>();
+    public rangeThemeMapChange$ = this._rangeThemeMapChanged$.asObservable();
+
     constructor(
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
         @Inject(IResourceManagerService) private _resourceManagerService: IResourceManagerService
@@ -122,18 +127,25 @@ export class SheetRangeThemeModel extends Disposable {
         const { unitId, subUnitId, range } = rangeInfo;
         const rTreeCollection = this._ensureRTreeCollection(unitId);
         const themes = Array.from(rTreeCollection.bulkSearch([{ unitId, sheetId: subUnitId, range }]));
-        if (themes[0]) {
-            const themeRuleMap = this._ensureRangeThemeStyleRuleMap(unitId);
-            const themeRule = themeRuleMap.get(themes[0] as string);
+        const themeRuleMap = this._ensureRangeThemeStyleRuleMap(unitId);
+        for (let i = 0; i < themes.length; i++) {
+            const themeRule = themeRuleMap.get(themes[i] as string);
             if (themeRule && themeRule.themeName === themeName) {
-                themeRuleMap.delete(themes[0] as string);
-                rTreeCollection.remove({ unitId, sheetId: subUnitId, range, id: themes[0] as string });
+                themeRuleMap.delete(themes[i] as string);
+                rTreeCollection.remove({ unitId, sheetId: subUnitId, range, id: themes[i] as string });
+                break;
             }
         }
     }
 
     registerDefaultRangeTheme(rangeThemeStyle: RangeThemeStyle): void {
         this._defaultRangeThemeMap.set(rangeThemeStyle.getName(), rangeThemeStyle);
+        this._rangeThemeMapChanged$.next({ type: 'add', styleName: rangeThemeStyle.getName() });
+    }
+
+    unRegisterDefaultRangeTheme(themeName: string): void {
+        this._defaultRangeThemeMap.delete(themeName);
+        this._rangeThemeMapChanged$.next({ type: 'remove', styleName: themeName });
     }
 
     getRegisteredRangeThemes(): string[] {
@@ -148,6 +160,8 @@ export class SheetRangeThemeModel extends Disposable {
     registerRangeThemeStyle(unitId: string, rangeThemeStyle: RangeThemeStyle): void {
         this._ensureRangeThemeStyleMap(unitId).set(rangeThemeStyle.getName(), rangeThemeStyle);
     }
+
+
 
     /**
      *  Unregister custom range theme style.
@@ -185,7 +199,9 @@ export class SheetRangeThemeModel extends Disposable {
                 const offsetRow = row - rangeInfo.range.startRow;
                 const offsetCol = col - rangeInfo.range.startColumn;
                 const theme = this.getRangeThemeStyle(unitId, themeName);
-                return theme.getStyle(offsetRow, offsetCol, row === rangeInfo.range.endRow, col === rangeInfo.range.endColumn);
+                if (theme) {
+                    return theme.getStyle(offsetRow, offsetCol, row === rangeInfo.range.endRow, col === rangeInfo.range.endColumn);
+                }
             }
         }
         return undefined;

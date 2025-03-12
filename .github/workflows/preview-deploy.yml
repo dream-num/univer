@@ -237,6 +237,6 @@ jobs:
                   body: |
                       ## View Deployment
                       | 📑 Demo (React@19) | Demo (React@16) | 📚 Storybook |
-                      | --- | --- |
+                      | --- | --- | --- |
                       | [🔗 Preview link](${{ needs.build-demo.outputs.preview-url }}/) | [🔗 Preview link](${{ needs.build-demo.outputs.preview-url }}/react16/) | [🔗 Preview link](${{ needs.build-storybook.outputs.preview-url }}/) |
                   edit-mode: replace

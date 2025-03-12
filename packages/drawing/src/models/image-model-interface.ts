@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDrawingParam, ISrcRect, Nullable, PresetGeometryType } from '@univerjs/core';
+import type { IDrawingParam, ISrcRect, Nullable, PresetGeometryType, Serializable } from '@univerjs/core';
 import type { ImageSourceType } from '../services/image-io.service';
 
 export interface IImageData extends IDrawingParam {
@@ -28,4 +28,14 @@ export interface IImageData extends IDrawingParam {
      * 20.1.9.18 prstGeom (Preset geometry)
      */
     prstGeom?: Nullable<PresetGeometryType>;
+}
+
+export interface IDocFloatDomDataBase {
+    componentKey: string;
+    data?: Serializable;
+    allowTransform?: boolean;
+}
+
+export interface IDocFloatDomData extends IDrawingParam, IDocFloatDomDataBase {
+
 }

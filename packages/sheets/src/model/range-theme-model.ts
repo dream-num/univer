@@ -240,20 +240,24 @@ export class SheetRangeThemeModel extends Disposable {
     fromJSON(unitId: string, json: ISheetRangeThemeModelJSON) {
         const { rangeThemeStyleRuleMap: rangeThemeStyleRuleMapJSON, rangeThemeStyleMapJson } = json;
 
-        Object.keys(rangeThemeStyleRuleMapJSON).forEach((key) => {
-            const ruleMap = rangeThemeStyleRuleMapJSON[key];
-            const { themeName, rangeInfo } = ruleMap;
-            this.registerRangeThemeRule(themeName, rangeInfo);
-            const rTreeCollection = this._ensureRTreeCollection(rangeInfo.unitId);
-            rTreeCollection.insert({ unitId: key, sheetId: rangeInfo.subUnitId, range: rangeInfo.range, id: key });
-        });
+        if (rangeThemeStyleRuleMapJSON) {
+            Object.keys(rangeThemeStyleRuleMapJSON).forEach((key) => {
+                const ruleMap = rangeThemeStyleRuleMapJSON[key];
+                const { themeName, rangeInfo } = ruleMap;
+                this.registerRangeThemeRule(themeName, rangeInfo);
+                const rTreeCollection = this._ensureRTreeCollection(rangeInfo.unitId);
+                rTreeCollection.insert({ unitId: key, sheetId: rangeInfo.subUnitId, range: rangeInfo.range, id: key });
+            });
+        }
 
-        Object.keys(rangeThemeStyleMapJson).forEach((key) => {
-            const styleMap = rangeThemeStyleMapJson[key];
-            const style = new RangeThemeStyle(styleMap.name);
-            style.fromJson(styleMap);
-            this._ensureRangeThemeStyleMap(unitId).set(style.getName(), style);
-        });
+        if (rangeThemeStyleMapJson) {
+            Object.keys(rangeThemeStyleMapJson).forEach((key) => {
+                const styleMap = rangeThemeStyleMapJson[key];
+                const style = new RangeThemeStyle(styleMap.name);
+                style.fromJson(styleMap);
+                this._ensureRangeThemeStyleMap(unitId).set(style.getName(), style);
+            });
+        }
     }
 
     deleteUnitId(unitId: string) {

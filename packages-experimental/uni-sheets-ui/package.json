@@ -56,7 +56,7 @@
         "build": "univer-cli build"
     },
     "peerDependencies": {
-        "react": ">=16.9.0 || >=17 || >=18 || >=19",
+        "react": ">=16.9.0",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
@@ -64,7 +64,7 @@
         "@univerjs/design": "workspace:*",
         "@univerjs/docs": "workspace:*",
         "@univerjs/docs-ui": "workspace:*",
-        "@univerjs/icons": "^0.2.20",
+        "@univerjs/icons": "^0.2.21",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-drawing-ui": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",

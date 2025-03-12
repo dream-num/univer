@@ -42,7 +42,6 @@ export const InsertDocDrawingCommand: ICommand = {
         if (params == null) {
             return false;
         }
-
         const commandService = accessor.get(ICommandService);
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);

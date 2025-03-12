@@ -15,7 +15,7 @@
  */
 
 import type { IFloatDom } from '../../../services/dom/canvas-dom-layer.service';
-import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { IUniverInstanceService } from '@univerjs/core';
 import React, { memo, useEffect, useMemo, useRef } from 'react';
 import { distinctUntilChanged, first } from 'rxjs';
 import { ComponentManager } from '../../../common';
@@ -144,7 +144,7 @@ export const FloatDom = ({ unitId }: { unitId?: string }) => {
     const instanceService = useDependency(IUniverInstanceService);
     const domLayerService = useDependency(CanvasFloatDomService);
     const layers = useObservable(domLayerService.domLayers$);
-    const currentUnitId = unitId || instanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SHEET)?.getUnitId();
+    const currentUnitId = unitId || instanceService.getFocusedUnit()?.getUnitId();
 
     return layers?.filter((layer) => layer[1].unitId === currentUnitId)?.map((layer) => (
         <FloatDomSingle

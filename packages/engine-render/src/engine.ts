@@ -415,7 +415,7 @@ export class Engine extends Disposable {
         const scenes = { ...this.getScenes() };
         const sceneKeys = Object.keys(scenes);
         sceneKeys.forEach((key) => {
-            (scenes[key] as any).dispose();
+            (scenes[key] as IDisposable).dispose();
         });
         this._scenes = {};
 
@@ -438,11 +438,14 @@ export class Engine extends Disposable {
         this._renderFrameTasks = [];
         this._performanceMonitor.dispose();
         this.getCanvas().dispose();
-        this.onTransformChange$.complete();
+
+        this._resizeObserver?.disconnect();
 
         this.onTransformChange$.complete();
         this._beginFrame$.complete();
         this._endFrame$.complete();
+        this.renderFrameTags$.complete();
+        this.renderFrameTimeMetric$.complete();
 
         this._clearResizeListener();
         this._container = null;

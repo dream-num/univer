@@ -891,7 +891,7 @@ export class SelectionControl extends Disposable {
             this._columnHeaderBorder.transformByState({
                 width: endX - startX,
                 height: columnHeaderStrokeWidth,
-                top: columnHeaderHeight - columnHeaderStrokeWidth + 1 / scale,
+                top: columnHeaderHeight - columnHeaderStrokeWidth + 1 / scale, // + 1 / scale: Avoid appearing thicker due to the adjacency of the first row cells.
             });
 
             this._columnHeaderGroup.show();

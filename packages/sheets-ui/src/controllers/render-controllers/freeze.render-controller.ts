@@ -212,11 +212,11 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
         const { startX, startY } = position;
         const { rowTotalHeight, columnTotalWidth, rowHeaderWidthAndMarginLeft, columnHeaderHeightAndMarginTop } = skeleton;
 
-        const shapeWidth = canvasMaxWidth > columnTotalWidth + rowHeaderWidthAndMarginLeft
+        const contentWidth = canvasMaxWidth > columnTotalWidth + rowHeaderWidthAndMarginLeft
             ? canvasMaxWidth
             : columnTotalWidth + columnHeaderHeightAndMarginTop;
 
-        const shapeHeight = canvasMaxHeight > rowTotalHeight + columnHeaderHeightAndMarginTop
+        const contentHeight = canvasMaxHeight > rowTotalHeight + columnHeaderHeightAndMarginTop
             ? canvasMaxHeight
             : rowTotalHeight + columnHeaderHeightAndMarginTop;
 
@@ -227,21 +227,21 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
 
         const scale = Math.max(scene.scaleX, scene.scaleY);
 
-        let FREEZE_SIZE = FREEZE_SIZE_NORMAL / (scale < 1 ? 1 : scale);
+        let freezeSize = FREEZE_SIZE_NORMAL / Math.max(1, scale);
 
         if (freezeDirectionType === FREEZE_DIRECTION_TYPE.ROW) {
             if (freezeRow === -1 || freezeRow === 0) {
-                FREEZE_SIZE = FREEZE_SIZE * 2;
+                freezeSize = freezeSize * 2;
             }
 
-            const FREEZE_OFFSET = FREEZE_SIZE;
+            const freezeOffset = freezeSize;
 
             this._rowFreezeHeaderRect = new Rect(FREEZE_ROW_HEADER_NAME, {
                 fill: this._freezeNormalHeaderColor,
                 width: rowHeaderWidthAndMarginLeft,
-                height: FREEZE_SIZE,
+                height: freezeSize,
                 left: 0,
-                top: startY - FREEZE_OFFSET,
+                top: startY - freezeOffset,
                 zIndex: 3,
             });
 
@@ -252,24 +252,24 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
 
             this._rowFreezeMainRect = new Rect(FREEZE_ROW_MAIN_NAME, {
                 fill,
-                width: shapeWidth * 2 / scale,
-                height: FREEZE_SIZE,
+                width: contentWidth * 2 / scale,
+                height: freezeSize,
                 left: rowHeaderWidthAndMarginLeft,
-                top: startY - FREEZE_OFFSET,
+                top: startY - freezeOffset,
                 zIndex: 3,
             });
 
             scene.addObjects([this._rowFreezeHeaderRect, this._rowFreezeMainRect], SHEET_COMPONENT_HEADER_LAYER_INDEX);
         } else {
             if (freezeColumn === -1 || freezeColumn === 0) {
-                FREEZE_SIZE = FREEZE_SIZE * 2;
+                freezeSize = freezeSize * 2;
             }
 
-            const FREEZE_OFFSET = FREEZE_SIZE;
+            const FREEZE_OFFSET = freezeSize;
 
             this._columnFreezeHeaderRect = new Rect(FREEZE_COLUMN_HEADER_NAME, {
                 fill: this._freezeNormalHeaderColor,
-                width: FREEZE_SIZE,
+                width: freezeSize,
                 height: columnHeaderHeightAndMarginTop,
                 left: startX - FREEZE_OFFSET,
                 top: 0,
@@ -283,8 +283,8 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
 
             this._columnFreezeMainRect = new Rect(FREEZE_COLUMN_MAIN_NAME, {
                 fill,
-                width: FREEZE_SIZE,
-                height: shapeHeight * 2 / scale,
+                width: freezeSize,
+                height: contentHeight * 2 / scale,
                 left: startX - FREEZE_OFFSET,
                 top: columnHeaderHeightAndMarginTop,
                 zIndex: 3,
@@ -832,7 +832,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
         viewColumnRight.resizeWhenFreezeChange({
             left: rowHeaderWidthAndMarginLeft,
             top: 0,
-            height: columnHeaderHeightAndMarginTop,
+            height: columnHeaderHeightAndMarginTop + 1,
             right: 0,
         });
 
@@ -840,13 +840,13 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
             left: 0,
             top: columnHeaderHeightAndMarginTop,
             bottom: 0,
-            width: rowHeaderWidthAndMarginLeft,
+            width: rowHeaderWidthAndMarginLeft + 1,
         });
 
         viewLeftTop.resizeWhenFreezeChange({
             left: 0,
             top: 0,
-            width: rowHeaderWidthAndMarginLeft,
+            width: rowHeaderWidthAndMarginLeft + 1,
             height: columnHeaderHeightAndMarginTop,
         });
 
@@ -911,13 +911,13 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
             viewRowTop.resizeWhenFreezeChange({
                 left: 0,
                 top: columnHeaderHeightAndMarginTop,
-                width: rowHeaderWidthAndMarginLeft,
+                width: rowHeaderWidthAndMarginLeft + 1,
                 height: 0,
             });
             viewColumnLeft.resizeWhenFreezeChange({
                 left: 0,
                 top: 0,
-                height: columnHeaderHeightAndMarginTop,
+                height: columnHeaderHeightAndMarginTop + 1,
                 width: 0,
             });
         } else if (isTopView === true && isLeftView === false) {
@@ -958,7 +958,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
             viewRowTop.resizeWhenFreezeChange({
                 left: 0,
                 top: columnHeaderHeightAndMarginTop,
-                width: rowHeaderWidthAndMarginLeft,
+                width: rowHeaderWidthAndMarginLeft + 1,
                 height: topGap,
             });
             viewRowTop
@@ -969,7 +969,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
                 left: 0,
                 top: columnHeaderHeightAndMarginTop + topGap,
                 bottom: 0,
-                width: rowHeaderWidthAndMarginLeft,
+                width: rowHeaderWidthAndMarginLeft + 1,
             });
 
             viewMainTop.enable();
@@ -1014,7 +1014,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
                 left: rowHeaderWidthAndMarginLeft,
                 top: 0,
                 width: leftGap,
-                height: columnHeaderHeightAndMarginTop,
+                height: columnHeaderHeightAndMarginTop + 1,
             });
             viewColumnLeft
                 .updateScrollVal({
@@ -1023,7 +1023,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
             viewColumnRight.resizeWhenFreezeChange({
                 left: rowHeaderWidthAndMarginLeft + leftGap,
                 top: 0,
-                height: columnHeaderHeightAndMarginTop,
+                height: columnHeaderHeightAndMarginTop + 1,
                 right: 0,
             });
 
@@ -1102,7 +1102,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
             viewRowTop.resizeWhenFreezeChange({
                 left: 0,
                 top: columnHeaderHeightAndMarginTop,
-                width: rowHeaderWidthAndMarginLeft,
+                width: rowHeaderWidthAndMarginLeft + 1,
                 height: topGap,
             });
 
@@ -1115,14 +1115,14 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
                 left: 0,
                 top: columnHeaderHeightAndMarginTop + topGap,
                 bottom: 0,
-                width: rowHeaderWidthAndMarginLeft,
+                width: rowHeaderWidthAndMarginLeft + 1,
             });
 
             viewColumnLeft.resizeWhenFreezeChange({
                 left: rowHeaderWidthAndMarginLeft,
                 top: 0,
                 width: leftGap,
-                height: columnHeaderHeightAndMarginTop,
+                height: columnHeaderHeightAndMarginTop + 1,
             });
 
             viewColumnLeft
@@ -1133,7 +1133,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
             viewColumnRight.resizeWhenFreezeChange({
                 left: rowHeaderWidthAndMarginLeft + leftGap,
                 top: 0,
-                height: columnHeaderHeightAndMarginTop,
+                height: columnHeaderHeightAndMarginTop + 1,
                 right: 0,
             });
 

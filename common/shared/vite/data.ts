@@ -18,7 +18,7 @@ export const peerDepsMap = {
     react: {
         global: 'React',
         name: 'react',
-        version: '>=16.9.0 || >=17 || >=18 || >=19',
+        version: '>=16.9.0',
     },
     'react/jsx-runtime': {
         global: 'React',
@@ -28,7 +28,7 @@ export const peerDepsMap = {
     'react-dom': {
         global: 'ReactDOM',
         name: 'react-dom',
-        version: '>=16.9.0 || >=17 || >=18 || >=19',
+        version: '>=16.9.0',
     },
     'react-dom/client': {
         global: 'ReactDOM',

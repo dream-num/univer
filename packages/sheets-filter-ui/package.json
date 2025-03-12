@@ -62,13 +62,12 @@
         "build": "univer-cli build"
     },
     "peerDependencies": {
-        "react": ">=16.9.0 || >=17 || >=18 || >=19",
+        "react": ">=16.9.0",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
-        "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/icons": "^0.2.21",
         "@univerjs/rpc": "workspace:*",
@@ -79,6 +78,7 @@
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
+        "@univerjs/engine-formula": "workspace:*",
         "less": "^4.2.2",
         "postcss": "^8.5.3",
         "react": "18.3.1",

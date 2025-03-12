@@ -70,7 +70,7 @@
         "build": "univer-cli build"
     },
     "peerDependencies": {
-        "react": ">=16.9.0 || >=17 || >=18 || >=19",
+        "react": ">=16.9.0",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {

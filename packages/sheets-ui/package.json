@@ -70,7 +70,7 @@
         "build": "univer-cli build"
     },
     "peerDependencies": {
-        "react": ">=16.9.0 || >=17 || >=18 || >=19",
+        "react": ">=16.9.0",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
@@ -82,7 +82,7 @@
         "@univerjs/engine-numfmt": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/icons": "^0.2.21",
-        "@univerjs/protocol": "0.1.43",
+        "@univerjs/protocol": "0.1.44",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/telemetry": "workspace:*",
         "@univerjs/ui": "workspace:*"

@@ -60,7 +60,7 @@
     },
     "dependencies": {
         "@univerjs/core": "workspace:*",
-        "@univerjs/protocol": "0.1.43"
+        "@univerjs/protocol": "0.1.44"
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",

@@ -17,7 +17,7 @@
 import type { DocumentDataModel, ICommandInfo, IDocDrawingPosition, IDrawingParam, Nullable } from '@univerjs/core';
 import type { IDocDrawing } from '@univerjs/docs-drawing';
 import type { IImageIoServiceParam } from '@univerjs/drawing';
-import type { Documents, IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import type { Documents, Image, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import type { IInsertDrawingCommandParams } from '../../commands/commands/interfaces';
 import type { ISetDrawingArrangeCommandParams } from '../../commands/commands/set-drawing-arrange.command';
 import { BooleanNumber, Disposable, DrawingTypeEnum, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, Inject, LocaleService, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, WrapTextType } from '@univerjs/core';
@@ -26,7 +26,7 @@ import { DocSelectionManagerService, DocSkeletonManagerService, RichTextEditingM
 import { IDocDrawingService } from '@univerjs/docs-drawing';
 import { docDrawingPositionToTransform, DocSelectionRenderService } from '@univerjs/docs-ui';
 import { DRAWING_IMAGE_ALLOW_IMAGE_LIST, DRAWING_IMAGE_ALLOW_SIZE, DRAWING_IMAGE_COUNT_LIMIT, DRAWING_IMAGE_HEIGHT_LIMIT, DRAWING_IMAGE_WIDTH_LIMIT, getDrawingShapeKeyByDrawingSearch, getImageSize, IDrawingManagerService, IImageIoService, ImageUploadStatusType } from '@univerjs/drawing';
-import { DocumentEditArea, Image, IRenderManagerService } from '@univerjs/engine-render';
+import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
 
 import { ILocalFileService, IMessageService } from '@univerjs/ui';
 import { debounceTime } from 'rxjs';
@@ -351,16 +351,21 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
             if (drawingShapes.length) {
                 for (const shape of drawingShapes) {
                     scene.detachTransformerFrom(shape);
-                    if (shape instanceof Image) {
+                    try {
                         (shape as Image).setOpacity(0.5);
+                    } catch (e) {
                     }
                     if (
                         (isEditBody && drawing.isMultiTransform !== BooleanNumber.TRUE)
                         || (!isEditBody && drawing.isMultiTransform === BooleanNumber.TRUE)
                     ) {
-                        scene.attachTransformerTo(shape);
-                        if (shape instanceof Image) {
+                        if (drawing.allowTransform !== false) {
+                            scene.attachTransformerTo(shape);
+                        }
+
+                        try {
                             (shape as Image).setOpacity(1);
+                        } catch (e) {
                         }
                     }
                 }

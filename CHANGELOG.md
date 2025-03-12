@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.6.5](https://github.com/dream-num/univer/compare/v0.6.4...v0.6.5) (2025-03-12)
+
+
+### Bug Fixes
+
+* fix peerDependencies ([#4820](https://github.com/dream-num/univer/issues/4820)) ([ef19fc7](https://github.com/dream-num/univer/commit/ef19fc7ead2b95bcd956fa89ed5db77a1e4bafe8))
+* fix range theme fromjson ([#4795](https://github.com/dream-num/univer/issues/4795)) ([d2a4e12](https://github.com/dream-num/univer/commit/d2a4e126d7dd466a4dc7d54f6162c86a310b515a))
+* fixed tooltip warnings in React 18 ([#4794](https://github.com/dream-num/univer/issues/4794)) ([55ba301](https://github.com/dream-num/univer/commit/55ba3012b96f1025dcc8aaaa764e6f971ac4653e))
+* header line ([#4818](https://github.com/dream-num/univer/issues/4818)) ([ff3f8ad](https://github.com/dream-num/univer/commit/ff3f8adf2f179508c54bd785e2642065968683a9))
+* reduce `set font` and limit fillText out of viewbounds ([#4800](https://github.com/dream-num/univer/issues/4800)) ([8ec54c5](https://github.com/dream-num/univer/commit/8ec54c5065119d02963c1e6cc6391dd48deeecc5))
+* **sheet:** fix fromjson error ([#4812](https://github.com/dream-num/univer/issues/4812)) ([da002ee](https://github.com/dream-num/univer/commit/da002ee0a1520463a7dabf82a544ca6033a22df8))
+* **sheets-conditional-formatting:** apply conditional formatting for triggered sheet ([#4798](https://github.com/dream-num/univer/issues/4798)) ([c3574ee](https://github.com/dream-num/univer/commit/c3574ee2dc7ed2ea106069b7778a02436d3bb3d5))
+* **sheets-formula-ui:** fix component registration ([#4807](https://github.com/dream-num/univer/issues/4807)) ([8e2be48](https://github.com/dream-num/univer/commit/8e2be48dd160c7e94a636d16085e03e887de3598))
+* **sheets-ui:** fix sheet clipboard col tag not closed ([#4803](https://github.com/dream-num/univer/issues/4803)) ([9e88fac](https://github.com/dream-num/univer/commit/9e88fac2467c99377fc9a846db6a6782c6e861b9))
+* **sheets-ui:** hover service error ([#4804](https://github.com/dream-num/univer/issues/4804)) ([5d82419](https://github.com/dream-num/univer/commit/5d82419fa97bc1110148e70da72328cd8bc156b6))
+
+
+### Features
+
+* **docs-drawing-ui:** support float-dom on doc-canvas ([#4821](https://github.com/dream-num/univer/issues/4821)) ([fdc7f0e](https://github.com/dream-num/univer/commit/fdc7f0e24804f171278831fbf52dbb22228f7e4f))
+* **docs:** custom block support custom type ([#4792](https://github.com/dream-num/univer/issues/4792)) ([4497c4f](https://github.com/dream-num/univer/commit/4497c4f3220119e2cab51da84e0f35e2d520c81d))
+* **sheets-drawing-ui:** change cell-image resize to render phase ([#4809](https://github.com/dream-num/univer/issues/4809)) ([a4aee93](https://github.com/dream-num/univer/commit/a4aee931c0ac436ff212bc5077044e3869825169))
+* supplement facade example ([#4799](https://github.com/dream-num/univer/issues/4799)) ([c43b0c9](https://github.com/dream-num/univer/commit/c43b0c9394b1a07423019a6e5362be1001e56b47))
+
 ## [0.6.4](https://github.com/dream-num/univer/compare/v0.6.3...v0.6.4) (2025-03-08)
 
 

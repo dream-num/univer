@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-graphics",
-    "version": "0.6.4",
+    "version": "0.6.5",
     "private": false,
     "description": "Drawing graphics for Univer Sheets",
     "author": "DreamNum <developer@univer.ai>",

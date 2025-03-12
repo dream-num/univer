@@ -58,6 +58,7 @@ const FloatDomSingle = memo((props: { layer: IFloatDom; id: string }) => {
                 domRef.current.style.transform = transformRef.current;
                 domRef.current.style.top = `${topRef.current}px`;
                 domRef.current.style.left = `${leftRef.current}px`;
+                domRef.current.style.opacity = `${position.opacity ?? 1}`;
             }
         });
 

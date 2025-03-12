@@ -26,6 +26,7 @@ export interface IFloatDomLayout extends IPosition {
         left: boolean;
         top: boolean;
     };
+    opacity?: number;
 }
 
 export interface IFloatDom {

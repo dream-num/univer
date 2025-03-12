@@ -15,7 +15,7 @@
  */
 
 import type { IDocDrawingBase, IDocDrawingPosition, Nullable } from '@univerjs/core';
-import type { BaseObject, Documents, IDocumentSkeletonGlyph, IDocumentSkeletonPage, Image, INodeSearch, IPoint, Viewport } from '@univerjs/engine-render';
+import type { BaseObject, Documents, IDocumentSkeletonGlyph, IDocumentSkeletonPage, INodeSearch, IPoint, Viewport } from '@univerjs/engine-render';
 import type { IDrawingDocTransform } from '../commands/commands/update-doc-drawing.command';
 import {
     BooleanNumber,
@@ -33,7 +33,7 @@ import {
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { DocSelectionRenderService, getAnchorBounding, getDocObject, getOneTextSelectionRange, NodePositionConvertToCursor, TEXT_RANGE_LAYER_INDEX } from '@univerjs/docs-ui';
 import { IDrawingManagerService } from '@univerjs/drawing';
-import { DocumentSkeletonPageType, getColor, IRenderManagerService, Liquid, PageLayoutType, Rect, Vector2 } from '@univerjs/engine-render';
+import { DocumentSkeletonPageType, getColor, Image, IRenderManagerService, Liquid, PageLayoutType, Rect, Vector2 } from '@univerjs/engine-render';
 import { IMoveInlineDrawingCommand, ITransformNonInlineDrawingCommand, UpdateDrawingDocTransformCommand } from '../commands/commands/update-doc-drawing.command';
 
 const INLINE_DRAWING_ANCHOR_KEY_PREFIX = '__InlineDrawingAnchor__';
@@ -130,7 +130,9 @@ export class DocDrawingTransformerController extends Disposable {
                         const drawingData = documentDataModel?.getSnapshot().drawings?.[drawing.drawingId];
 
                         if (drawingData?.layoutType === PositionedObjectLayoutType.INLINE) {
-                            (object as Image).setOpacity(0.2);
+                            if (object instanceof Image) {
+                                (object as Image).setOpacity(0.2);
+                            }
                         }
 
                         if (drawingData != null) {
@@ -202,7 +204,9 @@ export class DocDrawingTransformerController extends Disposable {
                         const drawingCache = this._transformerCache.get(drawing?.drawingId);
 
                         if (drawingCache?.drawing.layoutType === PositionedObjectLayoutType.INLINE) {
-                            (object as Image).setOpacity(1);
+                            if (object instanceof Image) {
+                                (object as Image).setOpacity(1);
+                            }
                         }
                     }
 

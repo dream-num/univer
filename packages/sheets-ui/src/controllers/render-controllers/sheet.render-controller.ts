@@ -298,7 +298,7 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
             left: 0,
             top: columnHeader.height,
             bottom: 0,
-            width: rowHeader.width,
+            width: rowHeader.width + 1,
             isWheelPreventDefaultX: true,
         });
         const viewColumnLeft = new Viewport(SHEET_VIEWPORT_KEY.VIEW_COLUMN_LEFT, scene, {
@@ -308,7 +308,7 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
         const viewColumnRight = new Viewport(SHEET_VIEWPORT_KEY.VIEW_COLUMN_RIGHT, scene, {
             left: rowHeader.width,
             top: 0,
-            height: columnHeader.height,
+            height: columnHeader.height + 1,
             right: 0,
             isWheelPreventDefaultX: true,
         });

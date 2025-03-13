@@ -45,7 +45,7 @@ export function RemoveColMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         type: MenuItemType.BUTTON,
         icon: 'DeleteColumn',
         title: 'rightClick.deleteSelectedColumn',
-        hidden$: getObservableWithExclusiveRange$(accessor, getDeleteMenuHidden$(accessor, 'col')),
+        hidden$: getDeleteMenuHidden$(accessor, 'col'),
         disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetDeleteColumnPermission] }),
     };
 }

@@ -17,9 +17,10 @@
 import type { DocumentDataModel, IDisposable, Nullable } from '@univerjs/core';
 import type { IInsertCommandParams } from '@univerjs/docs-ui';
 import type { Observable } from 'rxjs';
-import { Disposable, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { Disposable, ICommandService, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
 import { BehaviorSubject, distinctUntilChanged, map } from 'rxjs';
+import { DeleteSearchKeyCommand } from '../commands/commands/doc-quick-insert.command';
 import { QuickInsertPopup } from '../views/QuickInsertPopup';
 
 export interface IDocPopupGroupItem {
@@ -74,7 +75,8 @@ export class DocQuickInsertPopupService extends Disposable {
 
     constructor(
         @Inject(DocCanvasPopManagerService) private readonly _docCanvasPopupManagerService: DocCanvasPopManagerService,
-        @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService
+        @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService,
+        @Inject(ICommandService) private readonly _commandService: ICommandService
     ) {
         super();
 
@@ -140,6 +142,12 @@ export class DocQuickInsertPopupService extends Disposable {
     }
 
     emitMenuSelected(menu: IDocPopupMenuItem) {
+        const { start, end } = this.filterKeywordOffset;
+        this._commandService.executeCommand(DeleteSearchKeyCommand.id, {
+            start,
+            end,
+        });
+
         this._menuSelectedCallbacks.forEach((callback) => callback(menu));
     }
 }

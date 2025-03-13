@@ -19,6 +19,7 @@ import type { IDocPopup } from '../services/doc-quick-insert-popup.service';
 import { Disposable, ICommandService, Inject } from '@univerjs/core';
 import { ComponentManager, IMenuManagerService } from '@univerjs/ui';
 import { of } from 'rxjs';
+import { DeleteSearchKeyCommand } from '../commands/commands/doc-quick-insert.command';
 import { CloseQuickInsertPopupOperation, ShowQuickInsertPopupOperation } from '../commands/operations/quick-insert-popup.operation';
 import { DocQuickInsertPopupService } from '../services/doc-quick-insert-popup.service';
 import { QuickInsertPopup } from '../views/QuickInsertPopup';
@@ -40,6 +41,7 @@ export class DocQuickInsertUIController extends Disposable {
 
     private _initCommands() {
         [
+            DeleteSearchKeyCommand,
             ShowQuickInsertPopupOperation,
             CloseQuickInsertPopupOperation,
         ].forEach((operation) => {

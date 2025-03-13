@@ -19,17 +19,13 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     docQuickInsert: {
         menu: {
-            todoList: 'Liste des tâches',
-            code: 'Code',
-            image: 'Image',
-            table: 'Table',
-            formula: 'Formule',
-            hyperlink: 'Hyperlien',
-            comment: 'Commentaire',
+            numberedList: 'Liste numérotée',
+            bulletedList: 'Liste à puces',
+            dividedLine: 'Ligne de séparation',
+            text: 'Texte',
         },
         group: {
-            basics: 'Basics',
-            media: 'Media',
+            basics: 'Basiques',
         },
     },
 };

@@ -19,17 +19,13 @@ import type zhCN from './zh-CN';
 const locale: typeof zhCN = {
     docQuickInsert: {
         menu: {
-            todoList: '待辦事項',
-            code: '程式碼',
-            image: '圖片',
-            table: '表格',
-            formula: '公式',
-            hyperlink: '超連結',
-            comment: '評論',
+            numberedList: '有序列表',
+            bulletedList: '無序列表',
+            dividedLine: '分隔線',
+            text: '文本',
         },
         group: {
             basics: '基礎',
-            media: '媒體',
         },
     },
 };

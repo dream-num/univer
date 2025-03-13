@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { IDisposable, Nullable } from '@univerjs/core';
+import type { DocumentDataModel, IDisposable, Nullable } from '@univerjs/core';
 import type { IInsertCommandParams } from '@univerjs/docs-ui';
 import type { Observable } from 'rxjs';
-import { Disposable, Inject } from '@univerjs/core';
+import { Disposable, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, distinctUntilChanged, map } from 'rxjs';
 import { QuickInsertPopup } from '../views/QuickInsertPopup';
 
 export interface IDocPopupGroupItem {
@@ -54,25 +54,42 @@ export class DocQuickInsertPopupService extends Disposable {
     }>>(undefined);
 
     readonly editPopup$ = this._editPopup$.asObservable();
-
-    private readonly _filterKeyword$ = new BehaviorSubject<string>('');
-    readonly filterKeyword$ = this._filterKeyword$.asObservable();
-
     get editPopup() {
         return this._editPopup$.value;
     }
 
+    private readonly _filterKeywordOffset$ = new BehaviorSubject<{ start: number; end: number }>({ start: 0, end: 0 });
+    readonly filterKeywordOffset$ = this._filterKeywordOffset$.asObservable();
+    get filterKeywordOffset() {
+        return this._filterKeywordOffset$.value;
+    }
+
+    setFilterKeywordOffset(offset: { start: number; end: number }) {
+        this._filterKeywordOffset$.next(offset);
+    }
+
+    readonly filterKeyword$: Observable<string>;
+
+    private _menuSelectedCallbacks: Set<(menu: IDocPopupMenuItem) => void> = new Set();
+
     constructor(
-        @Inject(DocCanvasPopManagerService) private readonly _docCanvasPopupManagerService: DocCanvasPopManagerService
+        @Inject(DocCanvasPopManagerService) private readonly _docCanvasPopupManagerService: DocCanvasPopManagerService,
+        @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();
 
         this.disposeWithMe(this._editPopup$);
-        this.disposeWithMe(this._filterKeyword$);
-    }
 
-    get filterKeyword() {
-        return this._filterKeyword$.value;
+        const getBodySlice = (start: number, end: number) => this._univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC)?.getBody()?.dataStream.slice(start, end);
+
+        this.filterKeyword$ = this._filterKeywordOffset$.pipe(
+            map((offset) => {
+                const slice = getBodySlice(offset.start, offset.end);
+                // console.log('slice', slice, offset);
+                return slice?.slice(1) ?? '';
+            }),
+            distinctUntilChanged()
+        );
     }
 
     resolvePopup(keyword: string) {
@@ -85,10 +102,6 @@ export class DocQuickInsertPopupService extends Disposable {
         return () => {
             this._popups.delete(popup);
         };
-    }
-
-    setFilterKeyword(keyword: string) {
-        this._filterKeyword$.next(keyword);
     }
 
     showPopup(options: { popup: IDocPopup; index: number; unitId: string }) {
@@ -116,5 +129,17 @@ export class DocQuickInsertPopupService extends Disposable {
             this.editPopup.disposable.dispose();
             this._editPopup$.next(null);
         }
+    }
+
+    onMenuSelected(callback: (menu: IDocPopupMenuItem) => void) {
+        this._menuSelectedCallbacks.add(callback);
+
+        return () => {
+            this._menuSelectedCallbacks.delete(callback);
+        };
+    }
+
+    emitMenuSelected(menu: IDocPopupMenuItem) {
+        this._menuSelectedCallbacks.forEach((callback) => callback(menu));
     }
 }

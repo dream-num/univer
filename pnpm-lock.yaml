@@ -188,7 +188,7 @@ importers:
         version: 0.2.21
       '@univerjs/protocol':
         specifier: 0.1.44
-        version: 0.1.44(@grpc/grpc-js@1.10.9)(rxjs@7.8.2)
+        version: 0.1.44(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
 
   common/storybook:
     dependencies:
@@ -1488,11 +1488,11 @@ importers:
         specifier: ^8.5.3
         version: 8.5.3
       react:
-        specifier: 19.0.0
+        specifier: '19'
         version: 19.0.0
       rxjs:
         specifier: ^7.8.1
-        version: 7.8.2
+        version: 7.8.1
       tailwindcss:
         specifier: ^3.4.17
         version: 3.4.17
@@ -9995,9 +9995,6 @@ packages:
   rxjs@7.8.1:
     resolution: {integrity: sha512-AA3TVj+0A2iuIoQkWEK/tqFjBq2j+6PO6Y0zJcvzLAFhEFIO3HL0vls9hWLncZbAAbK0mar7oZ4V079I/qPMxg==}
 
-  rxjs@7.8.2:
-    resolution: {integrity: sha512-dhKf903U/PQZY6boNNtAGdWbG85WAbjT/1xYoZIC7FAY0yWapOBQVsVrDl58W86//e1VpMNBtRV4MaXfdMySFA==}
-
   safe-array-concat@1.1.3:
     resolution: {integrity: sha512-AURm5f0jYEOydBj7VQlVvDrjeFgthDdEF5H1dP+6mNpoXOMo1quQqJ4wvJDyRZ9+pO3kGWoOdmV08cSv2aJV6Q==}
     engines: {node: '>=0.4'}
@@ -13478,11 +13475,6 @@ snapshots:
       '@grpc/grpc-js': 1.10.9
       rxjs: 7.8.1
 
-  '@univerjs/protocol@0.1.44(@grpc/grpc-js@1.10.9)(rxjs@7.8.2)':
-    dependencies:
-      '@grpc/grpc-js': 1.10.9
-      rxjs: 7.8.2
-
   '@vitejs/plugin-react@4.3.4(vite@6.2.1(@types/node@22.13.10)(jiti@2.4.2)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0))':
     dependencies:
       '@babel/core': 7.26.0
@@ -16256,7 +16248,7 @@ snapshots:
       mute-stream: 1.0.0
       ora: 5.4.1
       run-async: 3.0.0
-      rxjs: 7.8.2
+      rxjs: 7.8.1
       string-width: 4.2.3
       strip-ansi: 6.0.1
       wrap-ansi: 6.2.0
@@ -18688,10 +18680,6 @@ snapshots:
       queue-microtask: 1.2.3
 
   rxjs@7.8.1:
-    dependencies:
-      tslib: 2.8.1
-
-  rxjs@7.8.2:
     dependencies:
       tslib: 2.8.1
 

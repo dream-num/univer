@@ -18,36 +18,44 @@ import type { DocPopupMenu, IDocPopupMenuItem } from '../services/doc-quick-inse
 import { CommandType, Direction, DisposableCollection, ICommandService, LocaleService, toDisposable } from '@univerjs/core';
 import { clsx, Menu, MenuItem, MenuItemGroup } from '@univerjs/design';
 import { ComponentManager, IShortcutService, KeyCode, useDependency, useObservable } from '@univerjs/ui';
-import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
+import { startTransition, useEffect, useId, useMemo, useRef, useState } from 'react';
+import { CloseQuickInsertPopupOperation } from '../commands/operations/quick-insert-popup.operation';
 import { DocQuickInsertPopupService } from '../services/doc-quick-insert-popup.service';
 
-function filterMenusByKeyword(menus: DocPopupMenu[], keyword: string, localeService: LocaleService) {
-    return menus.filter((menu) => {
-        if ('children' in menu) {
-            const newChildren = filterMenusByKeyword(menu.children!, keyword, localeService) as IDocPopupMenuItem[];
+function filterMenusByKeyword(menus: DocPopupMenu[], keyword: string) {
+    return menus
+        .map((menu) => ({ ...menu }))
+        .filter((menu) => {
+            if ('children' in menu) {
+                menu.children = filterMenusByKeyword(menu.children!, keyword) as IDocPopupMenuItem[];
 
-            return newChildren.length > 0;
-        }
+                return menu.children.length > 0;
+            }
 
-        const keywords = (menu as IDocPopupMenuItem).keywords;
+            const keywords = (menu as IDocPopupMenuItem).keywords;
 
-        return keywords.some((word) => word.includes(keyword));
-    });
+            return keywords.some((word) => word.includes(keyword));
+        });
 }
 
 function translateMenus(menus: DocPopupMenu[], localeService: LocaleService) {
-    return menus.map((menu) => {
-        const newMenu = { ...menu } as DocPopupMenu;
-        if ('children' in newMenu) {
-            newMenu.children = translateMenus(newMenu.children!, localeService) as IDocPopupMenuItem[];
+    return menus.map((_menu) => {
+        const menu = { ..._menu } as DocPopupMenu;
+        if ('children' in menu) {
+            menu.children = translateMenus(menu.children!, localeService) as IDocPopupMenuItem[];
         }
 
-        newMenu.title = localeService.t(menu.title);
-        (newMenu as IDocPopupMenuItem).keywords = (newMenu as IDocPopupMenuItem).keywords.concat(newMenu.title);
+        menu.title = localeService.t(menu.title);
 
-        return newMenu;
+        if ('keywords' in menu) {
+            menu.keywords = menu.keywords.concat(menu.title);
+        }
+
+        return menu;
     });
 }
+
+const interceptKeys = [KeyCode.ARROW_UP, KeyCode.ARROW_DOWN, KeyCode.ENTER];
 
 const QuickInsertPopup = () => {
     const localeService = useDependency(LocaleService);
@@ -55,27 +63,34 @@ const QuickInsertPopup = () => {
     const componentManager = useDependency(ComponentManager);
     const shortcutService = useDependency(IShortcutService);
     const commandService = useDependency(ICommandService);
-    // const menuManagerService = useDependency(IMenuManagerService);
+
     const id = useId();
 
-    const filterKeyword = useObservable(docQuickInsertPopupService.filterKeyword$);
+    const [focusedMenuIndex, setFocusedMenuIndex] = useState(0);
+    const focusedMenuRef = useRef<IDocPopupMenuItem | null>(null);
+
+    const menuIndexAccumulator = useRef(0);
+    menuIndexAccumulator.current = 0;
+
+    const filterKeyword = useObservable(docQuickInsertPopupService.filterKeyword$, '');
     const currentPopup = useObservable(docQuickInsertPopupService.editPopup$);
     const menus = useObservable<DocPopupMenu[]>(currentPopup?.popup.menus$, []);
+    const [filteredMenus, setFilteredMenus] = useState<DocPopupMenu[]>([]);
+
     const translatedMenus = useMemo(() => {
         return translateMenus(menus, localeService);
     }, [menus]);
 
-    const [focusedMenuIndex, setFocusedMenuIndex] = useState(0);
-    const menuIndexAccumulator = useRef(0);
-    menuIndexAccumulator.current = 0;
-
-    const filteredMenus = useMemo(() => {
-        return filterMenusByKeyword(translatedMenus, filterKeyword, localeService);
+    useEffect(() => {
+        startTransition(() => {
+            setFilteredMenus(filterMenusByKeyword(translatedMenus, filterKeyword));
+        });
     }, [translatedMenus, filterKeyword]);
 
-    const handleMouseEnter = useCallback(() => {
-        setFocusedMenuIndex(Number.NaN);
-    }, []);
+    const handleMenuSelect = (menu: IDocPopupMenuItem) => {
+        docQuickInsertPopupService.emitMenuSelected(menu);
+        commandService.executeCommand(CloseQuickInsertPopupOperation.id);
+    };
 
     useEffect(() => {
         /** Use up or down to navigate the focused menu instead of moving the cursor in documents. */
@@ -83,9 +98,7 @@ const QuickInsertPopup = () => {
 
         const shortcutItems = shortcutService.getAllShortcuts();
 
-        const interceptedShortcutItems = shortcutItems.filter((item) => {
-            return item.binding === KeyCode.ARROW_DOWN || item.binding === KeyCode.ARROW_UP;
-        });
+        const interceptedShortcutItems = shortcutItems.filter((item) => item.binding && interceptKeys.includes(item.binding));
         // disable the shortcut items of moving the cursor in documents
         interceptedShortcutItems.forEach((item) => {
             const rawPreconditions = item.preconditions;
@@ -96,6 +109,17 @@ const QuickInsertPopup = () => {
                 item.preconditions = rawPreconditions;
             }));
         });
+
+        const enterCommand = {
+            id: `quick.insert.popup.enter.${id}`,
+            type: CommandType.OPERATION,
+            handler: () => {
+                const menu = focusedMenuRef.current;
+                if (menu) {
+                    handleMenuSelect(menu);
+                }
+            },
+        };
 
         const moveCursorUpCommand = {
             id: `quick.insert.popup.move.cursor.up.${id}`,
@@ -119,11 +143,13 @@ const QuickInsertPopup = () => {
                 });
             },
         };
+
         // register the commands of moving the focused menu up and down
         disposableCollection.add(commandService.registerCommand(moveCursorUpCommand));
         disposableCollection.add(commandService.registerCommand(moveCursorDownCommand));
-
+        disposableCollection.add(commandService.registerCommand(enterCommand));
         disposableCollection.add(shortcutService.registerShortcut({
+            priority: 1000,
             id: moveCursorUpCommand.id,
             binding: KeyCode.ARROW_UP,
             preconditions: () => true,
@@ -133,12 +159,20 @@ const QuickInsertPopup = () => {
         }));
 
         disposableCollection.add(shortcutService.registerShortcut({
+            priority: 1000,
             id: moveCursorDownCommand.id,
             binding: KeyCode.ARROW_DOWN,
             preconditions: () => true,
             staticParameters: {
                 direction: Direction.DOWN,
             },
+        }));
+
+        disposableCollection.add(shortcutService.registerShortcut({
+            priority: 1000,
+            id: enterCommand.id,
+            binding: KeyCode.ENTER,
+            preconditions: () => true,
         }));
 
         return () => {
@@ -154,30 +188,39 @@ const QuickInsertPopup = () => {
         return menus.map((menu) => {
             if ('children' in menu) {
                 return (
-                    <MenuItemGroup key={menu.id} title={localeService.t(menu.title)}>
+                    <MenuItemGroup key={menu.id} title={<div className="univer-mb-2 univer-text-gray-500">{localeService.t(menu.title)}</div>}>
                         {renderMenus(menu.children!)}
                     </MenuItemGroup>
                 );
             }
 
             const iconKey = (menu as IDocPopupMenuItem).icon;
-            const Icon = typeof iconKey === 'string' ? componentManager.get(iconKey) : null;
+            const Icon = iconKey ? componentManager.get(iconKey) : null;
 
             const title = menu.title;
-            const isFocused = focusedMenuIndex === menuIndexAccumulator.current;
+
+            const currentMenuIndex = menuIndexAccumulator.current;
+            const isFocused = focusedMenuIndex === currentMenuIndex;
+            if (isFocused) {
+                focusedMenuRef.current = menu as IDocPopupMenuItem;
+            }
 
             menuIndexAccumulator.current++;
 
             return (
                 <MenuItem
-                    onMouseEnter={handleMouseEnter}
+                    onMouseEnter={() => setFocusedMenuIndex(currentMenuIndex)}
+                    onMouseLeave={() => setFocusedMenuIndex(Number.NaN)}
                     key={menu.id}
-                    className={clsx({
+                    className={clsx('univer-text-sm', {
+                        'hover:univer-bg-transparent': !isFocused,
                         'univer-bg-[rgb(var(--bg-color-hover))]': isFocused,
                     })}
-                    onClick={() => {}}
+                    onClick={() => {
+                        handleMenuSelect(menu as IDocPopupMenuItem);
+                    }}
                 >
-                    {Icon && <Icon />}
+                    {Icon && <span className="univer-mr-4"><Icon /></span> }
                     <span>{localeService.t(title ?? '')}</span>
                 </MenuItem>
             );
@@ -185,7 +228,12 @@ const QuickInsertPopup = () => {
     }
 
     return (
-        <div className="univer-rounded-lg univer-border univer-border-solid univer-border-gray-100">
+        <div
+            className={`
+              univer-w-[230px] univer-border univer-border-solid univer-border-gray-100
+              marker:univer-rounded-lg
+            `}
+        >
             <Menu>
                 {renderMenus(filteredMenus)}
             </Menu>

@@ -17,17 +17,13 @@
 const locale = {
     docQuickInsert: {
         menu: {
-            todoList: '待办事项',
-            code: '代码',
-            image: '图片',
-            table: '表格',
-            formula: '公式',
-            hyperlink: '超链接',
-            comment: '评论',
+            numberedList: '有序列表',
+            bulletedList: '无序列表',
+            dividedLine: '分隔线',
+            text: '文本',
         },
         group: {
             basics: '基础',
-            media: '媒体',
         },
     },
 };

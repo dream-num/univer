@@ -15,21 +15,29 @@
  */
 
 import type { DocPopupMenu, IDocPopupMenuItem } from '../services/doc-quick-insert-popup.service';
+import { BulletListCommand, OrderListCommand } from '@univerjs/docs-ui';
 
 export enum QuickInsertMenuGroup {
     Basic = 'quick.insert.group.basic',
     Media = 'quick.insert.group.media',
 }
 
+export const textMenu: IDocPopupMenuItem = {
+    id: 'quick-insert.text.menu',
+    title: 'docQuickInsert.menu.text',
+    icon: 'text',
+    keywords: ['text'],
+};
+
 export const numberedListMenu: IDocPopupMenuItem = {
-    id: 'quick-insert.numbered-list.menu',
+    id: OrderListCommand.id,
     title: 'docQuickInsert.menu.numberedList',
     icon: 'numberedList',
     keywords: ['numbered', 'list', 'ordered'],
 };
 
 export const bulletedListMenu: IDocPopupMenuItem = {
-    id: 'quick-insert.bulleted-list.menu',
+    id: BulletListCommand.id,
     title: 'docQuickInsert.menu.bulletedList',
     icon: 'bulletedList',
     keywords: ['bulleted', 'list', 'unordered'],
@@ -37,7 +45,7 @@ export const bulletedListMenu: IDocPopupMenuItem = {
 
 export const dividerMenu: IDocPopupMenuItem = {
     id: 'quick-insert.divider.menu',
-    title: 'docQuickInsert.menu.divider',
+    title: 'docQuickInsert.menu.dividedLine',
     icon: 'divide',
     keywords: ['divider', 'line', 'separate'],
 };
@@ -47,6 +55,7 @@ export const builtInMenus: DocPopupMenu[] = [
         title: 'docQuickInsert.group.basics',
         id: QuickInsertMenuGroup.Basic,
         children: [
+            textMenu,
             numberedListMenu,
             bulletedListMenu,
             dividerMenu,

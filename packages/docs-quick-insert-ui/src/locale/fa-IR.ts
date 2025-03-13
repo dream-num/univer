@@ -19,17 +19,13 @@ import type zhCN from './zh-CN';
 const locale: typeof zhCN = {
     docQuickInsert: {
         menu: {
-            todoList: 'لیست کارها',
-            code: 'کد',
-            image: 'عکس',
-            table: 'جدول',
-            formula: 'فرمول',
-            hyperlink: 'لینک',
-            comment: 'نظر',
+            numberedList: 'لیست شمارهدار',
+            bulletedList: 'لیست نقطهدار',
+            dividedLine: 'خط تقسیم',
+            text: 'متن',
         },
         group: {
             basics: 'بنیادی',
-            media: 'رسانه',
         },
     },
 };

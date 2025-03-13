@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IDeleteCommandParams, IInsertCommandParams, IMoveCursorOperationParams } from '@univerjs/docs-ui';
-import { DeleteDirection, Direction, Disposable, ICommandService, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { DeleteDirection, Direction, Disposable, ICommandService, Inject } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { DeleteCommand, DeleteLeftCommand, InsertCommand, MoveCursorOperation } from '@univerjs/docs-ui';
 import { IShortcutService, KeyCode } from '@univerjs/ui';
-import { BehaviorSubject } from 'rxjs';
 import { CloseQuickInsertPopupOperation, ShowQuickInsertPopupOperation } from '../commands/operations/quick-insert-popup.operation';
 import { DocQuickInsertPopupService } from '../services/doc-quick-insert-popup.service';
 import { DocQuickInsertService } from '../services/doc-quick-insert.service';
@@ -32,8 +30,7 @@ export class DocQuickInsertTriggerController extends Disposable {
         @Inject(DocQuickInsertService) private readonly _docQuickInsertService: DocQuickInsertService,
         @Inject(DocSelectionManagerService) private readonly _textSelectionManagerService: DocSelectionManagerService,
         @Inject(DocQuickInsertPopupService) private readonly _docQuickInsertPopupService: DocQuickInsertPopupService,
-        @Inject(IShortcutService) private readonly _shortcutService: IShortcutService,
-        @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService
+        @Inject(IShortcutService) private readonly _shortcutService: IShortcutService
     ) {
         super();
 
@@ -42,22 +39,11 @@ export class DocQuickInsertTriggerController extends Disposable {
 
     // eslint-disable-next-line max-lines-per-function
     private _initTrigger() {
-        const getDocDataModel = () => this._univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
-        const getBodySlice = (start: number, end: number) => getDocDataModel()?.getBody()?.dataStream.slice(start, end);
-
         this.disposeWithMe(this._shortcutService.registerShortcut({
             id: CloseQuickInsertPopupOperation.id,
             binding: KeyCode.ESC,
             preconditions: () => Boolean(this._docQuickInsertPopupService.editPopup),
-            priority: 900,
-        }));
-
-        const filterKeywordOffset = new BehaviorSubject<{ start: number; end: number }>({ start: 0, end: 0 });
-
-        this.disposeWithMe(filterKeywordOffset);
-
-        this.disposeWithMe(filterKeywordOffset.subscribe((offset) => {
-            this._docQuickInsertPopupService.setFilterKeyword(getBodySlice(offset.start, offset.end) ?? '');
+            priority: 1000,
         }));
 
         this.disposeWithMe(
@@ -67,7 +53,10 @@ export class DocQuickInsertTriggerController extends Disposable {
                 if (commandInfo.id === InsertCommand.id) {
                     const params = commandInfo.params as IInsertCommandParams;
                     if (_docQuickInsertPopupService.editPopup) {
-                        filterKeywordOffset.next({ start: filterKeywordOffset.value.start, end: params.range.endOffset + 1 });
+                        _docQuickInsertPopupService.setFilterKeywordOffset({
+                            start: _docQuickInsertPopupService.filterKeywordOffset.start,
+                            end: params.range.endOffset + 1,
+                        });
                         return;
                     }
 
@@ -86,7 +75,7 @@ export class DocQuickInsertTriggerController extends Disposable {
                         return;
                     }
 
-                    filterKeywordOffset.next({ start: activeRange.startOffset, end: 0 });
+                    _docQuickInsertPopupService.setFilterKeywordOffset({ start: activeRange.startOffset - 1, end: 0 });
 
                     setTimeout(() => {
                         _commandService.executeCommand(ShowQuickInsertPopupOperation.id, {
@@ -102,7 +91,7 @@ export class DocQuickInsertTriggerController extends Disposable {
                     if (params.isCompositionEnd) {
                         const endOffset = params.textRanges?.[0]?.endOffset;
                         if (endOffset) {
-                            filterKeywordOffset.next({ start: filterKeywordOffset.value.start, end: endOffset });
+                            _docQuickInsertPopupService.setFilterKeywordOffset({ start: _docQuickInsertPopupService.filterKeywordOffset.start, end: endOffset });
                         }
                     }
                 }
@@ -111,7 +100,7 @@ export class DocQuickInsertTriggerController extends Disposable {
                     const params = commandInfo.params as IDeleteCommandParams;
                     if (_docQuickInsertPopupService.editPopup && params.direction === DeleteDirection.LEFT) {
                         const len = params.len ?? 0;
-                        filterKeywordOffset.next({ start: filterKeywordOffset.value.start, end: params.range.endOffset - len });
+                        _docQuickInsertPopupService.setFilterKeywordOffset({ start: _docQuickInsertPopupService.filterKeywordOffset.start, end: params.range.endOffset - len });
                     }
                 }
 

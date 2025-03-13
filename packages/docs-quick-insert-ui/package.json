@@ -87,8 +87,5 @@
         "typescript": "^5.8.2",
         "vite": "^6.2.1",
         "vitest": "^3.0.8"
-    },
-    "overrides": {
-        "rxjs": "7.8.1"
     }
 }

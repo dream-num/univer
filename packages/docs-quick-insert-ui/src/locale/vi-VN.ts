@@ -19,17 +19,13 @@ import type zhCN from './zh-CN';
 const locale: typeof zhCN = {
     docQuickInsert: {
         menu: {
-            todoList: 'Danh sách công việc',
-            code: 'Mã',
-            image: 'Hình ảnh',
-            table: 'Bảng',
-            formula: 'Công thức',
-            hyperlink: 'Siêu liên kết',
-            comment: 'Bình luận',
+            numberedList: 'Danh sách được đánh số',
+            bulletedList: 'Danh sách không được đánh số',
+            dividedLine: 'Đường phân cách',
+            text: 'Văn bản',
         },
         group: {
             basics: 'Cơ bản',
-            media: 'Trung tâm',
         },
     },
 };

@@ -54,6 +54,7 @@ export class DocQuickInsertUIController extends Disposable {
             {
                 keyword: '/',
                 menus$: of(builtInMenus),
+                // only show when the cursor is at the beginning of a line
                 preconditions: (params) => (params.range as ITextRangeWithStyle).startNodePosition?.glyph === 0,
             },
         ];

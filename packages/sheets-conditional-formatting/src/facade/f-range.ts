@@ -48,7 +48,7 @@ export interface IFRangeConditionalFormattingMixin {
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getActiveSheet();
      *
-     * // Create a conditional formatting rule that bolds the text for cells with not empty content in the range A1:T100.
+     * // Create a conditional formatting rule that sets the cell format to italic, red background, and green font color when the cell is not empty.
      * const fRange = fWorksheet.getRange('A1:T100');
      * const rule = fWorksheet.newConditionalFormattingRule()
      *   .whenCellNotEmpty()
@@ -75,7 +75,7 @@ export interface IFRangeConditionalFormattingMixin {
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getActiveSheet();
      *
-     * // Create a conditional formatting rule that bolds the text for cells with not empty content in the range A1:T100.
+     * // Create a conditional formatting rule that sets the cell format to italic, red background, and green font color when the cell is not empty.
      * const fRange = fWorksheet.getRange('A1:T100');
      * const rule = fRange.createConditionalFormattingRule()
      *   .whenCellNotEmpty()

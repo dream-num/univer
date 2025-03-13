@@ -41,7 +41,7 @@ export interface IFWorksheetLegacy {
      * @param {string} [id] - The float dom id, if not given will be auto generated.
      * @returns float dom id and dispose function
      * @example
-     * ```ts
+     * ```tsx
      * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
      *
      * // You should register components at an appropriate time (e.g., when Univer is loaded)
@@ -74,7 +74,7 @@ export interface IFWorksheetLegacy {
      *   },
      * });
      *
-     * // Remove the floating DOM
+     * // Remove the floating DOM after 2 seconds
      * setTimeout(() => {
      *   disposeable?.dispose();
      * }, 2000);
@@ -93,7 +93,7 @@ export interface IFWorksheetLegacy {
      * @param {string} [id] - The float dom id, if not given will be auto generated
      * @returns float dom id and dispose function
      * @example
-     * ```ts
+     * ```tsx
      * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
      *
      * // Register a range loading component
@@ -120,9 +120,10 @@ export interface IFWorksheetLegacy {
      * univerAPI.registerComponent('RangeLoading', RangeLoading);
      *
      * // Add the range loading component covering the range A1:C3
-     * const range = fWorksheet.getRange('A1:C3');
-     * const disposeable = fWorksheet.addFloatDomToRange(range, { componentKey: 'RangeLoading' }, {}, 'myRangeLoading');
+     * const fRange = fWorksheet.getRange('A1:C3');
+     * const disposeable = fWorksheet.addFloatDomToRange(fRange, { componentKey: 'RangeLoading' }, {}, 'myRangeLoading');
      *
+     * // Remove the floating DOM after 2 seconds
      * setTimeout(() => {
      *   disposeable?.dispose();
      * }, 2000);
@@ -156,15 +157,20 @@ export interface IFWorksheetLegacy {
      * univerAPI.registerComponent('FloatButton', FloatButton);
      *
      * // Add the float button to the range A5:C7, position is start from A5 cell, and width is 100px, height is 30px, margin is 100% of range width and height
-     * const range2 = fWorksheet.getRange('A5:C7');
-     * const disposeable2 = fWorksheet.addFloatDomToRange(range2, {
-     *   componentKey: 'FloatButton',
-     * }, {
-     *   width: 100,
-     *   height: 30,
-     *   marginX: '100%', // margin percent to range width, or pixel
-     *   marginY: '100%'
-     * }, 'myFloatButton');
+     * const fRange2 = fWorksheet.getRange('A5:C7');
+     * const disposeable2 = fWorksheet.addFloatDomToRange(
+     *   fRange2,
+     *   {
+     *     componentKey: 'FloatButton',
+     *   },
+     *   {
+     *     width: 100,
+     *     height: 30,
+     *     marginX: '100%', // margin percent to range width, or pixel
+     *     marginY: '100%'
+     *   },
+     *   'myFloatButton'
+     * );
      * ```
      */
     addFloatDomToRange(range: FRange, layer: Partial<IFICanvasFloatDom>, domLayout: Partial<IDOMAnchor>, id?: string): Nullable<{
@@ -211,18 +217,23 @@ export interface IFWorksheetLegacy {
      * univerAPI.registerComponent('FloatButton', FloatButton);
      *
      * // Add the float button to the column D header, position is right align, width is 100px, height is 30px, margin is 0
-     * const disposeable = fWorksheet.addFloatDomToColumnHeader(3, {
-     *   componentKey: 'FloatButton',
-     *   allowTransform: false,
-     * }, {
-     *   width: 100,
-     *   height: 30,
-     *   marginX: 0,
-     *   marginY: 0,
-     *   horizonOffsetAlign: 'right',
-     * }, 'myFloatButton');
+     * const disposeable = fWorksheet.addFloatDomToColumnHeader(
+     *   3,
+     *   {
+     *     componentKey: 'FloatButton',
+     *     allowTransform: false,
+     *   },
+     *   {
+     *     width: 100,
+     *     height: 30,
+     *     marginX: 0,
+     *     marginY: 0,
+     *     horizonOffsetAlign: 'right',
+     *   },
+     *   'myFloatButton'
+     * );
      *
-     * // Remove the float button
+     * // Remove the float button after 2 seconds
      * setTimeout(() => {
      *   disposeable?.dispose();
      * }, 2000);
@@ -345,6 +356,8 @@ export interface IFWorksheetLegacy {
      * ```ts
      * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
      * const image = fWorksheet.getImages()[0];
+     *
+     * // Delete the first image of the sheet
      * fWorksheet.deleteImages([image]);
      * ```
      */
@@ -369,7 +382,7 @@ export interface IFWorksheetLegacy {
      *   .buildAsync();
      * fWorksheet.insertImages([image]);
      *
-     * // update the image width to 100px and height to 50px
+     * // update the image width to 100px and height to 50px after 4 seconds
      * setTimeout(async () => {
      *   const imageBuilder = fWorksheet.getImageById(image.drawingId).toBuilder();
      *   const newImage = await imageBuilder.setWidth(100).setHeight(50).buildAsync();

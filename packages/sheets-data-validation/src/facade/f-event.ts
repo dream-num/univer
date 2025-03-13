@@ -182,9 +182,9 @@ interface IDataValidationEvent {
      * @see {@link ISheetDataValidationChangedEvent}
      * @example
      * ```ts
-     * const disposable = univerAPI.addEvent(univerAPI.Event.SheetDataValidationChanged, (event) => {
-     *   const { origin, worksheet, workbook, changeType, oldRule, rule } = event;
-     *   console.log(event);
+     * const disposable = univerAPI.addEvent(univerAPI.Event.SheetDataValidationChanged, (params) => {
+     *   const { origin, worksheet, workbook, changeType, oldRule, rule } = params;
+     *   console.log(params);
      * });
      *
      * // Remove the event listener, use `disposable.dispose()`
@@ -197,9 +197,9 @@ interface IDataValidationEvent {
      * @see {@link ISheetDataValidatorStatusChangedEvent}
      * @example
      * ```ts
-     * const disposable = univerAPI.addEvent(univerAPI.Event.SheetDataValidatorStatusChanged, (event) => {
-     *   const { worksheet, workbook, row, column, status, rule } = event;
-     *   console.log(event);
+     * const disposable = univerAPI.addEvent(univerAPI.Event.SheetDataValidatorStatusChanged, (params) => {
+     *   const { worksheet, workbook, row, column, status, rule } = params;
+     *   console.log(params);
      * });
      *
      * // Remove the event listener, use `disposable.dispose()`
@@ -212,12 +212,12 @@ interface IDataValidationEvent {
      * @see {@link IBeforeSheetDataValidationAddEvent}
      * @example
      * ```ts
-     * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeSheetDataValidationAdd, (event) => {
-     *   const { worksheet, workbook, rule } = event;
-     *   console.log(event);
+     * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeSheetDataValidationAdd, (params) => {
+     *   const { worksheet, workbook, rule } = params;
+     *   console.log(params);
      *
      *   // Cancel the data validation rule addition operation
-     *   event.cancel = true;
+     *   params.cancel = true;
      * });
      *
      * // Remove the event listener, use `disposable.dispose()`
@@ -230,12 +230,12 @@ interface IDataValidationEvent {
      * @see {@link IBeforeSheetDataValidationDeleteEvent}
      * @example
      * ```ts
-     * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeSheetDataValidationDelete, (event) => {
-     *   const { worksheet, workbook, ruleId, rule } = event;
-     *   console.log(event);
+     * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeSheetDataValidationDelete, (params) => {
+     *   const { worksheet, workbook, ruleId, rule } = params;
+     *   console.log(params);
      *
      *   // Cancel the data validation rule deletion operation
-     *   event.cancel = true;
+     *   params.cancel = true;
      * });
      *
      * // Remove the event listener, use `disposable.dispose()`
@@ -248,12 +248,12 @@ interface IDataValidationEvent {
      * @see {@link IBeforeSheetDataValidationDeleteAllEvent}
      * @example
      * ```ts
-     * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeSheetDataValidationDeleteAll, (event) => {
-     *   const { worksheet, workbook, rules } = event;
-     *   console.log(event);
+     * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeSheetDataValidationDeleteAll, (params) => {
+     *   const { worksheet, workbook, rules } = params;
+     *   console.log(params);
      *
      *   // Cancel the data validation rule deletion operation
-     *   event.cancel = true;
+     *   params.cancel = true;
      * });
      *
      * // Remove the event listener, use `disposable.dispose()`
@@ -266,12 +266,12 @@ interface IDataValidationEvent {
      * @see {@link IBeforeSheetDataValidationCriteriaUpdateEvent}
      * @example
      * ```ts
-     * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeSheetDataValidationCriteriaUpdate, (event) => {
-     *   const { worksheet, workbook, ruleId, rule, newCriteria } = event;
-     *   console.log(event);
+     * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeSheetDataValidationCriteriaUpdate, (params) => {
+     *   const { worksheet, workbook, ruleId, rule, newCriteria } = params;
+     *   console.log(params);
      *
      *   // Cancel the data validation rule criteria update operation
-     *   event.cancel = true;
+     *   params.cancel = true;
      * });
      *
      * // Remove the event listener, use `disposable.dispose()`
@@ -284,12 +284,12 @@ interface IDataValidationEvent {
      * @see {@link IBeforeSheetDataValidationRangeUpdateEvent}
      * @example
      * ```ts
-     * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeSheetDataValidationRangeUpdate, (event) => {
-     *   const { worksheet, workbook, ruleId, rule, newRanges } = event;
-     *   console.log(event);
+     * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeSheetDataValidationRangeUpdate, (params) => {
+     *   const { worksheet, workbook, ruleId, rule, newRanges } = params;
+     *   console.log(params);
      *
      *   // Cancel the data validation rule range update operation
-     *   event.cancel = true;
+     *   params.cancel = true;
      * });
      *
      * // Remove the event listener, use `disposable.dispose()`
@@ -302,12 +302,12 @@ interface IDataValidationEvent {
      * @see {@link IBeforeSheetDataValidationOptionsUpdateEvent}
      * @example
      * ```ts
-     * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeSheetDataValidationOptionsUpdate, (event) => {
-     *   const { worksheet, workbook, ruleId, rule, newOptions } = event;
-     *   console.log(event);
+     * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeSheetDataValidationOptionsUpdate, (params) => {
+     *   const { worksheet, workbook, ruleId, rule, newOptions } = params;
+     *   console.log(params);
      *
      *   // Cancel the data validation rule options update operation
-     *   event.cancel = true;
+     *   params.cancel = true;
      * });
      *
      * // Remove the event listener, use `disposable.dispose()`

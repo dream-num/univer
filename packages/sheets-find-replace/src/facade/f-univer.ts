@@ -31,6 +31,8 @@ export interface IFUniverFindReplaceMixin {
      * // Assume the current sheet is empty sheet.
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // Set some values to the range A1:D10.
      * const fRange = fWorksheet.getRange('A1:D10');
      * fRange.setValues([
      *   [1, 2, 3, 4],

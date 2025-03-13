@@ -37,6 +37,8 @@ export interface IFRangeHyperlinkMixin {
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // Create a hyperlink to Univer on cell A1
      * const fRange = fWorksheet.getRange('A1');
      * const richText = univerAPI.newRichText().insertLink('Univer', 'https://univer.ai/');
      * fRange.setRichTextValueForCell(richText);
@@ -50,11 +52,13 @@ export interface IFRangeHyperlinkMixin {
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // Create a hyperlink to Univer on cell A1
      * const fRange = fWorksheet.getRange('A1');
      * const richText = univerAPI.newRichText().insertLink('Univer', 'https://univer.ai/');
      * fRange.setRichTextValueForCell(richText);
      *
-     * // Get hyperlinks
+     * // Get hyperlinks from cell A1
      * console.log(fRange.getValue(true).getLinks());
      * ```
      */
@@ -75,7 +79,7 @@ export interface IFRangeHyperlinkMixin {
      *   const cellValue = fRange.getValue(true);
      *   const hyperlinks = cellValue.getLinks();
      *   const id = hyperlinks[0].rangeId;
-     *   const newUrl = 'https://go.univer.ai/';
+     *   const newUrl = 'https://insight.univer.ai/';
      *   const newRichText = cellValue.copy().updateLink(id, newUrl);
      *   fRange.setRichTextValueForCell(newRichText);
      * }, 3000);

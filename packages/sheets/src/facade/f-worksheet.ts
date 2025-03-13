@@ -2009,7 +2009,7 @@ export class FWorksheet extends FBaseInitialable {
 
     // eslint-disable-next-line
     /**
-     * @deprecated use `univerAPI.addEvent(univerAPI.Event.SheetValueChanged, (params) => {})` instead
+     * @deprecated use `univerAPI.addEvent(univerAPI.Event.BeforeSheetEditEnd, (params) => {})` instead
      */
     onBeforeCellDataChange(callback: (cellValue: ObjectMatrix<Nullable<ICellData>>) => void): IDisposable {
         const commandService = this._injector.get(ICommandService);

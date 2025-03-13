@@ -1372,13 +1372,15 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
                 break;
             }
 
+            const themeStyleBd = cell.themeStyle?.bd;
+
             const style = this._styles.getStyleByCell(cell);
-            if (!style) {
+            if (!style && !themeStyleBd) {
                 isAddBorders = false;
                 break;
             }
 
-            const props: Nullable<IBorderStyleData> = style.bd?.[type];
+            const props: Nullable<IBorderStyleData> = style?.bd?.[type] ?? themeStyleBd?.[type];
             if (props) {
                 const rgb = getColorStyle(props.cl) || COLOR_BLACK_RGB;
                 borders.push({

@@ -139,6 +139,8 @@ export class Worksheet {
      * @param {boolean} [keepRaw] If true, return the raw style data, otherwise return the style data object
      * @returns {Nullable<IStyleData>|string} The style of the column
      */
+    getColumnStyle(column: number, keepRaw: true): string | Nullable<IStyleData>;
+    getColumnStyle(column: number): Nullable<IStyleData>;
     getColumnStyle(column: number, keepRaw = false): string | Nullable<IStyleData> {
         if (keepRaw) {
             return this._columnManager.getColumnStyle(column);
@@ -161,6 +163,8 @@ export class Worksheet {
      * @param {boolean} [keepRaw] If true, return the raw style data, otherwise return the style data object
      * @returns {Nullable<IStyleData>} The style of the row
      */
+    getRowStyle(row: number, keepRaw: true): string | Nullable<IStyleData>;
+    getRowStyle(row: number): Nullable<IStyleData>;
     getRowStyle(row: number, keepRaw = false): string | Nullable<IStyleData> {
         if (keepRaw) {
             return this._rowManager.getRowStyle(row);
@@ -221,6 +225,19 @@ export class Worksheet {
      */
     setDefaultCellStyle(style: Nullable<IStyleData> | string): void {
         this._snapshot.defaultStyle = style;
+    }
+
+    getCellStyle(row: number, col: number): Nullable<IStyleData> {
+        const cell = this.getCell(row, col);
+        if (cell) {
+            const style = cell.s;
+            if (typeof style === 'string') {
+                return this._styles.get(style);
+            }
+            return style;
+        }
+
+        return null;
     }
 
     /**

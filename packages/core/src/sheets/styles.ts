@@ -90,6 +90,7 @@ export class Styles {
         return this._styles;
     }
 
+    // TODO: this should be `deReuseStyle` to be more accurate.
     getStyleByCell(cell: Nullable<ICellDataForSheetInterceptor>): Nullable<IStyleData> {
         let style;
         if (cell && Tools.isObject(cell.s)) {

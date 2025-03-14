@@ -82,9 +82,13 @@ const QuickInsertPopup = () => {
     }, [menus]);
 
     useEffect(() => {
-        requestIdleCallback(() => {
+        const id = requestIdleCallback(() => {
             setFilteredMenus(filterMenusByKeyword(translatedMenus, filterKeyword.toLowerCase()));
         });
+
+        return () => {
+            cancelIdleCallback(id);
+        };
     }, [translatedMenus, filterKeyword]);
 
     const handleMenuSelect = (menu: IDocPopupMenuItem) => {

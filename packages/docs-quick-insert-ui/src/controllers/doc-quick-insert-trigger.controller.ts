@@ -52,8 +52,8 @@ export class DocQuickInsertTriggerController extends Disposable {
                 if (commandInfo.id === InsertCommand.id) {
                     const params = commandInfo.params as IInsertCommandParams;
                     if (_docQuickInsertPopupService.editPopup) {
-                        _docQuickInsertPopupService.setFilterKeywordOffset({
-                            start: _docQuickInsertPopupService.filterKeywordOffset.start,
+                        _docQuickInsertPopupService.setInputOffset({
+                            start: _docQuickInsertPopupService.inputOffset.start,
                             end: params.range.endOffset + 1,
                         });
                         return;
@@ -74,7 +74,7 @@ export class DocQuickInsertTriggerController extends Disposable {
                         return;
                     }
 
-                    _docQuickInsertPopupService.setFilterKeywordOffset({ start: activeRange.startOffset - 1, end: activeRange.startOffset });
+                    _docQuickInsertPopupService.setInputOffset({ start: activeRange.startOffset - 1, end: activeRange.startOffset });
 
                     setTimeout(() => {
                         _commandService.executeCommand(ShowQuickInsertPopupOperation.id, {
@@ -90,7 +90,7 @@ export class DocQuickInsertTriggerController extends Disposable {
                     if (params.isCompositionEnd) {
                         const endOffset = params.textRanges?.[0]?.endOffset;
                         if (endOffset) {
-                            _docQuickInsertPopupService.setFilterKeywordOffset({ start: _docQuickInsertPopupService.filterKeywordOffset.start, end: endOffset });
+                            _docQuickInsertPopupService.setInputOffset({ start: _docQuickInsertPopupService.inputOffset.start, end: endOffset });
                         }
                     }
                 }
@@ -99,7 +99,7 @@ export class DocQuickInsertTriggerController extends Disposable {
                     const params = commandInfo.params as IDeleteCommandParams;
                     if (_docQuickInsertPopupService.editPopup && params.direction === DeleteDirection.LEFT) {
                         const len = params.len ?? 0;
-                        _docQuickInsertPopupService.setFilterKeywordOffset({ start: _docQuickInsertPopupService.filterKeywordOffset.start, end: params.range.endOffset - len });
+                        _docQuickInsertPopupService.setInputOffset({ start: _docQuickInsertPopupService.inputOffset.start, end: params.range.endOffset - len });
                     }
                 }
 

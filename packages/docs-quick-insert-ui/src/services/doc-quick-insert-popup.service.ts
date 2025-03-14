@@ -61,14 +61,14 @@ export class DocQuickInsertPopupService extends Disposable {
         return this._editPopup$.value;
     }
 
-    private readonly _filterKeywordOffset$ = new BehaviorSubject<{ start: number; end: number }>({ start: 0, end: 0 });
-    readonly filterKeywordOffset$ = this._filterKeywordOffset$.asObservable();
-    get filterKeywordOffset() {
-        return this._filterKeywordOffset$.value;
+    private readonly _inputOffset$ = new BehaviorSubject<{ start: number; end: number }>({ start: 0, end: 0 });
+    readonly inputOffset$ = this._inputOffset$.asObservable();
+    get inputOffset() {
+        return this._inputOffset$.value;
     }
 
-    setFilterKeywordOffset(offset: { start: number; end: number }) {
-        this._filterKeywordOffset$.next(offset);
+    setInputOffset(offset: { start: number; end: number }) {
+        this._inputOffset$.next(offset);
     }
 
     readonly filterKeyword$: Observable<string>;
@@ -86,10 +86,10 @@ export class DocQuickInsertPopupService extends Disposable {
 
         const getBodySlice = (start: number, end: number) => this._univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC)?.getBody()?.dataStream.slice(start, end);
 
-        this.filterKeyword$ = this._filterKeywordOffset$.pipe(
+        this.filterKeyword$ = this._inputOffset$.pipe(
             map((offset) => {
                 const slice = getBodySlice(offset.start, offset.end);
-                // console.log('slice', slice, offset);
+
                 return slice?.slice(1) ?? '';
             }),
             distinctUntilChanged()
@@ -144,7 +144,7 @@ export class DocQuickInsertPopupService extends Disposable {
     }
 
     emitMenuSelected(menu: IDocPopupMenuItem) {
-        const { start, end } = this.filterKeywordOffset;
+        const { start, end } = this.inputOffset;
         this._commandService.syncExecuteCommand(DeleteSearchKeyCommand.id, {
             start,
             end,

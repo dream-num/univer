@@ -145,11 +145,12 @@ export class DocQuickInsertPopupService extends Disposable {
 
     emitMenuSelected(menu: IDocPopupMenuItem) {
         const { start, end } = this.filterKeywordOffset;
-        this._commandService.executeCommand(DeleteSearchKeyCommand.id, {
+        this._commandService.syncExecuteCommand(DeleteSearchKeyCommand.id, {
             start,
             end,
         });
-
-        this._menuSelectedCallbacks.forEach((callback) => callback(menu));
+        setTimeout(() => {
+            this._menuSelectedCallbacks.forEach((callback) => callback(menu));
+        }, 0);
     }
 }

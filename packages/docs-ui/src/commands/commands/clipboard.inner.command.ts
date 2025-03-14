@@ -481,7 +481,7 @@ export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
 
     type: CommandType.COMMAND,
 
-    handler: async (accessor, params: IInnerCutCommandParams) => {
+    handler: (accessor, params: IInnerCutCommandParams) => {
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
         const commandService = accessor.get(ICommandService);
         const univerInstanceService = accessor.get(IUniverInstanceService);

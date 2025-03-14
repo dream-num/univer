@@ -29,11 +29,10 @@ export const DeleteSearchKeyCommand: ICommand<IDeleteSearchKeyCommandParams> = {
 
     type: CommandType.COMMAND,
 
-    handler: async (accessor, params: IDeleteSearchKeyCommandParams) => {
+    handler: (accessor, params: IDeleteSearchKeyCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const { start, end } = params;
-
-        return commandService.executeCommand(CutContentCommand.id, {
+        return commandService.syncExecuteCommand(CutContentCommand.id, {
             segmentId: '',
             textRanges: [{
                 startOffset: start,

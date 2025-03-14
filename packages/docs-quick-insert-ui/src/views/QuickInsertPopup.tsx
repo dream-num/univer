@@ -199,7 +199,7 @@ const QuickInsertPopup = () => {
                                   univer-mb-2 univer-flex univer-items-center univer-text-xs univer-text-gray-400
                                 `}
                             >
-                                {Icon && <span className="univer-mr-4 univer-inline-flex univer-text-base"><Icon /></span>}
+                                {Icon && <span className="univer-mr-2 univer-inline-flex univer-text-base"><Icon /></span>}
                                 <span>{menu.title}</span>
                             </div>
                         )}
@@ -230,8 +230,8 @@ const QuickInsertPopup = () => {
                         handleMenuSelect(menu as IDocPopupMenuItem);
                     }}
                 >
-                    <div className="univer-flex univer-items-center">
-                        {Icon && <span className="univer-mr-4 univer-inline-flex univer-text-base"><Icon /></span>}
+                    <div className="univer-flex univer-items-center univer-px-1">
+                        {Icon && <span className="univer-mr-2 univer-inline-flex univer-text-base"><Icon /></span>}
                         <span>{menu.title}</span>
                     </div>
                 </MenuItem>

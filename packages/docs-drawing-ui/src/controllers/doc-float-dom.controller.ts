@@ -130,6 +130,11 @@ export class DocFloatDomController extends Disposable {
     private _insertRects(params: IDrawingSearch[]) {
         (params).forEach(async (param) => {
             const { unitId } = param;
+            const documentDataModel = this._univerInstanceService.getUnit(unitId, UniverInstanceType.UNIVER_DOC);
+            if (!documentDataModel) {
+                return;
+            }
+
             const renderObject = this._getSceneAndTransformerByDrawingSearch(unitId);
 
             if (renderObject == null) {

@@ -29,7 +29,9 @@ interface IFloatToolbarProps {
 }
 
 export function FloatToolbar(props: IFloatToolbarProps) {
-    const { avaliableMenus = [] } = props;
+    const { avaliableMenus = [], position = { top: 0, left: 0 } } = props;
+
+    const { top, right, bottom, left } = position;
 
     const menuManagerService = useDependency(IMenuManagerService);
 
@@ -62,7 +64,19 @@ export function FloatToolbar(props: IFloatToolbarProps) {
     }, [menuManagerService]);
 
     return (
-        <div className="univer-fixed univer-left-0 univer-top-0 univer-flex">
+        <div
+            className={`
+              univer-fixed univer-box-border univer-flex univer-rounded-xl univer-border univer-border-solid
+              univer-border-gray-200 univer-bg-white univer-p-2
+              univer-shadow-[0_1px_6px_-2px_rgba(30,40,77,0.08),0_2px_6px_-1px_rgba(30,40,77,0.10)]
+            `}
+            style={{
+                top: `${top}px`,
+                right: `${right}px`,
+                bottom: `${bottom}px`,
+                left: `${left}px`,
+            }}
+        >
             {menus.map((groupItem) => groupItem.item && (
                 <div key={groupItem.key} className="univer-flex univer-flex-nowrap univer-gap-2 univer-px-2">
                     <ToolbarItem key={groupItem.key} {...groupItem.item} />

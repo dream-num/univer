@@ -22,23 +22,17 @@ import { DeleteCommand, DeleteLeftCommand, InsertCommand, MoveCursorOperation } 
 import { IShortcutService, KeyCode } from '@univerjs/ui';
 import { CloseQuickInsertPopupOperation, ShowQuickInsertPopupOperation } from '../commands/operations/quick-insert-popup.operation';
 import { DocQuickInsertPopupService } from '../services/doc-quick-insert-popup.service';
-import { DocQuickInsertService } from '../services/doc-quick-insert.service';
+import { builtInMenuCommandIds, textMenu } from './built-in-menus';
 
 export class DocQuickInsertTriggerController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
-        @Inject(DocQuickInsertService) private readonly _docQuickInsertService: DocQuickInsertService,
         @Inject(DocSelectionManagerService) private readonly _textSelectionManagerService: DocSelectionManagerService,
         @Inject(DocQuickInsertPopupService) private readonly _docQuickInsertPopupService: DocQuickInsertPopupService,
         @Inject(IShortcutService) private readonly _shortcutService: IShortcutService
     ) {
         super();
 
-        this._initTrigger();
-    }
-
-    // eslint-disable-next-line max-lines-per-function
-    private _initTrigger() {
         this.disposeWithMe(this._shortcutService.registerShortcut({
             id: CloseQuickInsertPopupOperation.id,
             binding: KeyCode.ESC,
@@ -46,6 +40,11 @@ export class DocQuickInsertTriggerController extends Disposable {
             priority: 1000,
         }));
 
+        this._initTrigger();
+        this._initMenuHandler();
+    }
+
+    private _initTrigger() {
         this.disposeWithMe(
             // eslint-disable-next-line complexity
             this._commandService.onCommandExecuted((commandInfo) => {
@@ -75,7 +74,7 @@ export class DocQuickInsertTriggerController extends Disposable {
                         return;
                     }
 
-                    _docQuickInsertPopupService.setFilterKeywordOffset({ start: activeRange.startOffset - 1, end: 0 });
+                    _docQuickInsertPopupService.setFilterKeywordOffset({ start: activeRange.startOffset - 1, end: activeRange.startOffset });
 
                     setTimeout(() => {
                         _commandService.executeCommand(ShowQuickInsertPopupOperation.id, {
@@ -124,5 +123,17 @@ export class DocQuickInsertTriggerController extends Disposable {
                 }
             })
         );
+    }
+
+    private _initMenuHandler() {
+        this.disposeWithMe(this._docQuickInsertPopupService.onMenuSelected((menu) => {
+            if (menu.id === textMenu.id) {
+                return;
+            }
+
+            if (builtInMenuCommandIds.has(menu.id)) {
+                this._commandService.executeCommand(menu.id);
+            }
+        }));
     }
 }

@@ -15,18 +15,16 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import { DependentOn, IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
+import { DependentOn, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import { UniverDocsDrawingPlugin } from '@univerjs/docs-drawing';
 import { UniverDrawingPlugin } from '@univerjs/drawing';
 import { UniverDrawingUIPlugin } from '@univerjs/drawing-ui';
-import { IRenderManagerService } from '@univerjs/engine-render';
 import { UniverUIPlugin } from '@univerjs/ui';
 import { DocQuickInsertTriggerController } from './controllers/doc-quick-insert-trigger.controller';
 import { DocQuickInsertUIController } from './controllers/doc-quick-insert-ui.controller';
 import { DocQuickInsertPopupService } from './services/doc-quick-insert-popup.service';
-import { DocQuickInsertService } from './services/doc-quick-insert.service';
 
-const PLUGIN_NAME = 'DOC_QUICK_INSERT_PLUGIN';
+const PLUGIN_NAME = 'DOC_QUICK_INSERT_UI_PLUGIN';
 
 @DependentOn(UniverDrawingUIPlugin, UniverDrawingPlugin, UniverDocsDrawingPlugin, UniverUIPlugin)
 export class UniverDocsQuickInsertUIPlugin extends Plugin {
@@ -34,37 +32,21 @@ export class UniverDocsQuickInsertUIPlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;
 
     constructor(
-        // private readonly _config: Partial<IUniverDocsDrawingUIConfig>,
-        @Inject(Injector) protected _injector: Injector,
-        @IRenderManagerService private readonly _renderManagerSrv: IRenderManagerService,
-        @IConfigService private readonly _configService: IConfigService
+        @Inject(Injector) protected _injector: Injector
     ) {
         super();
-
-        // Manage the plugin configuration.
-        const { ...rest } = merge(
-            {}
-            // defaultPluginConfig,
-            // this._config
-        );
-        // this._configService.setConfig(DOCS_DRAWING_UI_PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {
         const dependencies: Dependency[] = [
             [DocQuickInsertUIController],
             [DocQuickInsertTriggerController],
-            [DocQuickInsertService],
             [DocQuickInsertPopupService],
         ];
 
         dependencies.forEach((dependency) => this._injector.add(dependency));
 
         this._injector.get(DocQuickInsertUIController);
-    }
-
-    override onReady(): void {
-        // ([] as Dependency[]).forEach((m) => this._renderManagerSrv.registerRenderModule(UniverInstanceType.UNIVER_DOC, m));
     }
 
     override onRendered(): void {

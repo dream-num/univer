@@ -25,15 +25,16 @@ import { QuickInsertPopup } from '../views/QuickInsertPopup';
 
 export interface IDocPopupGroupItem {
     id: string;
+    icon?: string;
     title: string;
     children?: IDocPopupMenuItem[];
 }
 
 export interface IDocPopupMenuItem {
     id: string;
+    icon?: string;
     title: string;
     keywords: string[];
-    icon?: string;
 }
 
 export type DocPopupMenu = IDocPopupGroupItem | IDocPopupMenuItem;
@@ -41,6 +42,7 @@ export type DocPopupMenu = IDocPopupGroupItem | IDocPopupMenuItem;
 export interface IDocPopup {
     keyword: string;
     menus$: Observable<DocPopupMenu[]>;
+    placeholder?: React.ReactNode;
     preconditions?: (params: IInsertCommandParams) => boolean;
 }
 

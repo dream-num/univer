@@ -25,28 +25,28 @@ export enum QuickInsertMenuGroup {
 export const textMenu: IDocPopupMenuItem = {
     id: 'quick-insert.text.menu',
     title: 'docQuickInsert.menu.text',
-    icon: 'text',
+    icon: 'DividerSingle',
     keywords: ['text'],
 };
 
 export const numberedListMenu: IDocPopupMenuItem = {
     id: OrderListCommand.id,
     title: 'docQuickInsert.menu.numberedList',
-    icon: 'numberedList',
+    icon: 'OrderSingle',
     keywords: ['numbered', 'list', 'ordered'],
 };
 
 export const bulletedListMenu: IDocPopupMenuItem = {
     id: BulletListCommand.id,
     title: 'docQuickInsert.menu.bulletedList',
-    icon: 'bulletedList',
+    icon: 'UnorderSingle',
     keywords: ['bulleted', 'list', 'unordered'],
 };
 
 export const dividerMenu: IDocPopupMenuItem = {
     id: 'quick-insert.divider.menu',
     title: 'docQuickInsert.menu.dividedLine',
-    icon: 'divide',
+    icon: 'TextSingle',
     keywords: ['divider', 'line', 'separate'],
 };
 
@@ -62,3 +62,9 @@ export const builtInMenus: DocPopupMenu[] = [
         ],
     },
 ];
+
+export const builtInMenuCommandIds = new Set([
+    numberedListMenu.id,
+    bulletedListMenu.id,
+    dividerMenu.id,
+]);

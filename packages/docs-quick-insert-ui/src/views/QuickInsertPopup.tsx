@@ -15,10 +15,10 @@
  */
 
 import type { DocPopupMenu, IDocPopupMenuItem } from '../services/doc-quick-insert-popup.service';
-import { CommandType, Direction, DisposableCollection, ICommandService, LocaleService, toDisposable } from '@univerjs/core';
+import { CommandType, Direction, DisposableCollection, generateRandomId, ICommandService, LocaleService, toDisposable } from '@univerjs/core';
 import { clsx, Menu, MenuItem, MenuItemGroup } from '@univerjs/design';
 import { ComponentManager, IShortcutService, KeyCode, useDependency, useObservable } from '@univerjs/ui';
-import { startTransition, useEffect, useId, useMemo, useRef, useState } from 'react';
+import { startTransition, useEffect, useMemo, useRef, useState } from 'react';
 import { CloseQuickInsertPopupOperation } from '../commands/operations/quick-insert-popup.operation';
 import { DocQuickInsertPopupService } from '../services/doc-quick-insert-popup.service';
 
@@ -64,7 +64,7 @@ const QuickInsertPopup = () => {
     const shortcutService = useDependency(IShortcutService);
     const commandService = useDependency(ICommandService);
 
-    const id = useId();
+    const id = useMemo(() => generateRandomId(), []);
 
     const [focusedMenuIndex, setFocusedMenuIndex] = useState(0);
     const focusedMenuRef = useRef<IDocPopupMenuItem | null>(null);
@@ -83,7 +83,7 @@ const QuickInsertPopup = () => {
 
     useEffect(() => {
         startTransition(() => {
-            setFilteredMenus(filterMenusByKeyword(translatedMenus, filterKeyword));
+            setFilteredMenus(filterMenusByKeyword(translatedMenus, filterKeyword.toLowerCase()));
         });
     }, [translatedMenus, filterKeyword]);
 
@@ -186,18 +186,28 @@ const QuickInsertPopup = () => {
 
     function renderMenus(menus: DocPopupMenu[]) {
         return menus.map((menu) => {
+            const iconKey = (menu as IDocPopupMenuItem).icon;
+            const Icon = iconKey ? componentManager.get(iconKey) : null;
+
             if ('children' in menu) {
                 return (
-                    <MenuItemGroup key={menu.id} title={<div className="univer-mb-2 univer-text-gray-500">{localeService.t(menu.title)}</div>}>
+                    <MenuItemGroup
+                        key={menu.id}
+                        title={(
+                            <div
+                                className={`
+                                  univer-mb-2 univer-flex univer-items-center univer-text-xs univer-text-gray-400
+                                `}
+                            >
+                                {Icon && <span className="univer-mr-4 univer-inline-flex univer-text-base"><Icon /></span>}
+                                <span>{menu.title}</span>
+                            </div>
+                        )}
+                    >
                         {renderMenus(menu.children!)}
                     </MenuItemGroup>
                 );
             }
-
-            const iconKey = (menu as IDocPopupMenuItem).icon;
-            const Icon = iconKey ? componentManager.get(iconKey) : null;
-
-            const title = menu.title;
 
             const currentMenuIndex = menuIndexAccumulator.current;
             const isFocused = focusedMenuIndex === currentMenuIndex;
@@ -214,29 +224,39 @@ const QuickInsertPopup = () => {
                     key={menu.id}
                     className={clsx('univer-text-sm', {
                         'hover:univer-bg-transparent': !isFocused,
-                        'univer-bg-[rgb(var(--bg-color-hover))]': isFocused,
+                        'univer-bg-gray-100': isFocused,
                     })}
                     onClick={() => {
                         handleMenuSelect(menu as IDocPopupMenuItem);
                     }}
                 >
-                    {Icon && <span className="univer-mr-4"><Icon /></span> }
-                    <span>{localeService.t(title ?? '')}</span>
+                    <div className="univer-flex univer-items-center">
+                        {Icon && <span className="univer-mr-4 univer-inline-flex univer-text-base"><Icon /></span>}
+                        <span>{menu.title}</span>
+                    </div>
                 </MenuItem>
             );
         });
     }
 
+    const hasMenus = filteredMenus.length > 0;
+
     return (
         <div
-            className={`
-              univer-w-[230px] univer-border univer-border-solid univer-border-gray-100
-              marker:univer-rounded-lg
-            `}
+            className={clsx(`
+              univer-rounded-lg univer-border univer-border-solid univer-border-gray-100
+              univer-shadow-[0_0_10px_0_rgba(0,0,0,0.1)]
+            `)}
         >
-            <Menu>
-                {renderMenus(filteredMenus)}
-            </Menu>
+            {hasMenus
+                ? (
+                    <div className="univer-max-h-[360px] univer-w-[220px] univer-overflow-y-auto">
+                        <Menu>
+                            {renderMenus(filteredMenus)}
+                        </Menu>
+                    </div>
+                )
+                : currentPopup?.popup.placeholder}
         </div>
 
     );

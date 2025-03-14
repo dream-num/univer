@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.6.6](https://github.com/dream-num/univer/compare/v0.6.5...v0.6.6) (2025-03-14)
+
+
+### Bug Fixes
+
+* **sheets-ui:** formlua-bar edit error ([#4833](https://github.com/dream-num/univer/issues/4833)) ([db062e5](https://github.com/dream-num/univer/commit/db062e5cc3cad97d56b7c0277b8263737d119bcc))
+
+
+### Features
+
+* **docs-drawing-ui:** doc float dom influence on sheet float-dom ([#4834](https://github.com/dream-num/univer/issues/4834)) ([40acdc2](https://github.com/dream-num/univer/commit/40acdc2514b1244cddd164ccd6441507d9701bb0))
+* **docs-drawing-ui:** optimize float-dom on doc canvas ([#4824](https://github.com/dream-num/univer/issues/4824)) ([e8332bc](https://github.com/dream-num/univer/commit/e8332bcf0da726316f3ebf31cd8e660163a786ba))
+* supplement facade example ([#4825](https://github.com/dream-num/univer/issues/4825)) ([3760ee8](https://github.com/dream-num/univer/commit/3760ee82dc68216bc8a9b9d700e4feb7e3f02741))
+
 ## [0.6.5](https://github.com/dream-num/univer/compare/v0.6.4...v0.6.5) (2025-03-12)
 
 

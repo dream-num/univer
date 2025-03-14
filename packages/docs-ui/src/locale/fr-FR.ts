@@ -51,6 +51,7 @@ const locale: typeof enUS = {
         alignCenter: 'Aligner au centre',
         alignRight: 'Aligner à droite',
         alignJustify: 'Justifier',
+        horizontalLine: 'Horizontal line',
         headerFooter: 'En-tête et pied de page',
     },
     table: {

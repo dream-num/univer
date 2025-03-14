@@ -49,6 +49,7 @@ import {
     AlignTypeV,
     BooleanNumber,
     ColumnSeparatorType,
+    DataStreamTreeTokenType,
     DocumentFlavor,
     GridType,
     HorizontalAlign,
@@ -467,14 +468,24 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
     }
 }
 
-export function updateInlineDrawingCoords(ctx: ILayoutContext, pages: IDocumentSkeletonPage[]) {
+export function updateInlineDrawingCoordsAndBorder(ctx: ILayoutContext, pages: IDocumentSkeletonPage[]) {
     lineIterator(pages, (line, _, __, page) => {
         const { segmentId } = page;
-        const affectInlineDrawings = ctx.paragraphConfigCache.get(segmentId)?.get(line.paragraphIndex)?.paragraphInlineSkeDrawings;
+        const paragraphConfig = ctx.paragraphConfigCache.get(segmentId)?.get(line.paragraphIndex);
+
+        const affectInlineDrawings = paragraphConfig?.paragraphInlineSkeDrawings;
         const drawingAnchor = ctx.skeletonResourceReference?.drawingAnchor?.get(segmentId)?.get(line.paragraphIndex);
         // Update inline drawings after the line is layout.
         if (affectInlineDrawings && affectInlineDrawings.size > 0) {
             updateInlineDrawingPosition(line, affectInlineDrawings, drawingAnchor?.top);
+        }
+
+        const paragraphStyle = paragraphConfig?.paragraphStyle;
+        const lastDivide = line.divides[line.divides.length - 1];
+        const lastGlyph = lastDivide.glyphGroup[lastDivide.glyphGroup.length - 1];
+
+        if (lastGlyph.streamType === DataStreamTreeTokenType.PARAGRAPH && paragraphStyle?.borderBottom) {
+            line.borderBottom = paragraphStyle.borderBottom;
         }
     });
 }

@@ -28,6 +28,7 @@ import type { IUniverSheetsUIConfig } from './config.schema';
 import { Disposable, IConfigService, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import {
+    getSheetCommandTarget,
     MoveRangeCommand,
     ReorderRangeCommand,
     SetRangeValuesCommand,
@@ -65,21 +66,33 @@ export class AutoHeightController extends Disposable {
         return (end as number) - (start as number) + 1;
     }
 
-    getUndoRedoParamsOfAutoHeight(ranges: IRange[]) {
+    getUndoRedoParamsOfAutoHeight(ranges: IRange[], subUnitIdParam?: string): { redos: any[]; undos: any[] } {
         const { _univerInstanceService: univerInstanceService, _configService: configService } = this;
-
         const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-        const worksheet = workbook.getActiveSheet();
-        const unitId = workbook.getUnitId();
-        const subUnitId = worksheet.getSheetId();
 
+        // Better NOT use `getActiveWorksheet` method, because users may manipulate another worksheet in active sheet.
+        const unitId = workbook.getUnitId();
+        let worksheet = workbook.getActiveSheet();
+        let subUnitId = worksheet.getSheetId();
+        if (subUnitIdParam) {
+            const target = getSheetCommandTarget(univerInstanceService, { unitId, subUnitId: subUnitIdParam });
+            if (target) {
+                worksheet = target.worksheet;
+                subUnitId = worksheet.getSheetId();
+            }
+        }
         const sheetSkeletonService = this._renderManagerService.getRenderById(unitId)!.with<SheetSkeletonManagerService>(SheetSkeletonManagerService);
-        if (!subUnitId || !sheetSkeletonService.getCurrentParam()) {
+
+        // Better NOT use `getCurrentParam` method, because users may manipulate another worksheet in active sheet.
+        // const { skeleton } = sheetSkeletonService.getCurrentParam()!;
+        const skeleton = sheetSkeletonService.ensureSkeleton(subUnitId);
+        if (!skeleton) {
             return {
                 redos: [],
                 undos: [],
             };
-        }
+        };
+
         const config = configService.getConfig<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY);
         let rangeList = ranges;
         if (!Array.isArray(ranges)) {
@@ -100,7 +113,6 @@ export class AutoHeightController extends Disposable {
             };
         }
 
-        const { skeleton } = sheetSkeletonService.getCurrentParam()!;
         const rowsAutoHeightInfo = skeleton.calculateAutoHeightInRange(ranges);
 
         const redoParams: ISetWorksheetRowAutoHeightMutationParams = {
@@ -134,7 +146,7 @@ export class AutoHeightController extends Disposable {
             getMutations: (command) => {
                 if (command.id === SetRangeValuesCommand.id) {
                     const params = command.params as ISetRangeValuesRangeMutationParams;
-                    return this.getUndoRedoParamsOfAutoHeight(params.range);
+                    return this.getUndoRedoParamsOfAutoHeight(params.range, params.subUnitId);
                 }
 
                 return {
@@ -154,7 +166,7 @@ export class AutoHeightController extends Disposable {
                     };
                 }
 
-                return this.getUndoRedoParamsOfAutoHeight(command.params.ranges);
+                return this.getUndoRedoParamsOfAutoHeight(command.params.ranges, command.params.subUnitId);
             },
         }));
 
@@ -187,7 +199,7 @@ export class AutoHeightController extends Disposable {
                     };
                 }
 
-                return this.getUndoRedoParamsOfAutoHeight(selections);
+                return this.getUndoRedoParamsOfAutoHeight(selections, command.params.subUnitId);
             },
         }));
 

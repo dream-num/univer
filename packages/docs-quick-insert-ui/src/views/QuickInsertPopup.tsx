@@ -18,7 +18,7 @@ import type { DocPopupMenu, IDocPopupMenuItem } from '../services/doc-quick-inse
 import { CommandType, Direction, DisposableCollection, generateRandomId, ICommandService, LocaleService, toDisposable } from '@univerjs/core';
 import { clsx, Menu, MenuItem, MenuItemGroup } from '@univerjs/design';
 import { ComponentManager, IShortcutService, KeyCode, useDependency, useObservable } from '@univerjs/ui';
-import { startTransition, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { CloseQuickInsertPopupOperation } from '../commands/operations/quick-insert-popup.operation';
 import { DocQuickInsertPopupService } from '../services/doc-quick-insert-popup.service';
 
@@ -82,7 +82,7 @@ const QuickInsertPopup = () => {
     }, [menus]);
 
     useEffect(() => {
-        startTransition(() => {
+        requestIdleCallback(() => {
             setFilteredMenus(filterMenusByKeyword(translatedMenus, filterKeyword.toLowerCase()));
         });
     }, [translatedMenus, filterKeyword]);

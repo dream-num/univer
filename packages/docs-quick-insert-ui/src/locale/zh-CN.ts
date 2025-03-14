@@ -19,7 +19,7 @@ const locale = {
         menu: {
             numberedList: '有序列表',
             bulletedList: '无序列表',
-            dividedLine: '分隔线',
+            divider: '分隔线',
             text: '文本',
         },
         group: {

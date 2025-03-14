@@ -21,7 +21,7 @@ const locale: typeof zhCN = {
         menu: {
             numberedList: 'Список с нумерацией',
             bulletedList: 'Маркированный список',
-            dividedLine: 'Разделительная линия',
+            divider: 'Разделительная линия',
             text: 'Текст',
         },
         group: {

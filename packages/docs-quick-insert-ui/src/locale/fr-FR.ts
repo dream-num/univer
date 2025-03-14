@@ -21,7 +21,7 @@ const locale: typeof enUS = {
         menu: {
             numberedList: 'Liste numérotée',
             bulletedList: 'Liste à puces',
-            dividedLine: 'Ligne de séparation',
+            divider: 'Ligne de séparation',
             text: 'Texte',
         },
         group: {

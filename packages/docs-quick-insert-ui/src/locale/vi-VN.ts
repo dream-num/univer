@@ -21,7 +21,7 @@ const locale: typeof zhCN = {
         menu: {
             numberedList: 'Danh sách được đánh số',
             bulletedList: 'Danh sách không được đánh số',
-            dividedLine: 'Đường phân cách',
+            divider: 'Đường phân cách',
             text: 'Văn bản',
         },
         group: {

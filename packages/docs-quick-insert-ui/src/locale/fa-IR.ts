@@ -21,7 +21,7 @@ const locale: typeof zhCN = {
         menu: {
             numberedList: 'لیست شمارهدار',
             bulletedList: 'لیست نقطهدار',
-            dividedLine: 'خط تقسیم',
+            divider: 'خط تقسیم',
             text: 'متن',
         },
         group: {

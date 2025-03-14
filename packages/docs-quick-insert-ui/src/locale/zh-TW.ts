@@ -21,7 +21,7 @@ const locale: typeof zhCN = {
         menu: {
             numberedList: '有序列表',
             bulletedList: '無序列表',
-            dividedLine: '分隔線',
+            divider: '分隔線',
             text: '文本',
         },
         group: {

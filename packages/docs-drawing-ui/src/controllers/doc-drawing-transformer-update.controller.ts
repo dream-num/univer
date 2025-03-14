@@ -130,7 +130,10 @@ export class DocDrawingTransformerController extends Disposable {
                         const drawingData = documentDataModel?.getSnapshot().drawings?.[drawing.drawingId];
 
                         if (drawingData?.layoutType === PositionedObjectLayoutType.INLINE) {
-                            (object as Image).setOpacity(0.2);
+                            try {
+                                (object as Image).setOpacity(0.2);
+                            } catch (e) {
+                            }
                         }
 
                         if (drawingData != null) {
@@ -202,7 +205,10 @@ export class DocDrawingTransformerController extends Disposable {
                         const drawingCache = this._transformerCache.get(drawing?.drawingId);
 
                         if (drawingCache?.drawing.layoutType === PositionedObjectLayoutType.INLINE) {
-                            (object as Image).setOpacity(1);
+                            try {
+                                (object as Image).setOpacity(1);
+                            } catch (e) {
+                            }
                         }
                     }
 

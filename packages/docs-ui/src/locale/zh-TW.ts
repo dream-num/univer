@@ -49,6 +49,7 @@ const locale: typeof zhCN = {
         alignCenter: '居中對齊',
         alignRight: '右對齊',
         alignJustify: '兩端對齊',
+        horizontalLine: 'Horizontal line',
         headerFooter: '頁眉頁腳',
         checklist: '任務列表',
         documentFlavor: '现代模式',

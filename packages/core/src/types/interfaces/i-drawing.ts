@@ -115,6 +115,7 @@ export interface IDrawingParam extends IDrawingSearch {
     // The default value is BooleanNumber.FALSE. if it's true, Please use transforms.
     isMultiTransform?: BooleanNumber;
     groupId?: string;
+    allowTransform?: boolean;
 }
 
 // #endregion

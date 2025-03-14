@@ -49,6 +49,7 @@ const locale: typeof zhCN = {
         alignCenter: 'Выровнять по центру',
         alignRight: 'Выровнять по правому краю',
         alignJustify: 'Выровнять по ширине',
+        horizontalLine: 'Horizontal line',
         headerFooter: 'Header & Footer',
         checklist: 'Task list',
         documentFlavor: 'Modern Mode',

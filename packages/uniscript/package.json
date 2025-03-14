@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/uniscript",
-    "version": "0.6.4",
+    "version": "0.6.6",
     "private": false,
     "description": "UI component library for building exceptional Univer.",
     "author": "DreamNum <developer@univer.ai>",

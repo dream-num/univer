@@ -186,7 +186,7 @@ export class DrawingRenderService {
             }
 
             scene.addObject(rect, DRAWING_OBJECT_LAYER_INDEX);
-            if (this._drawingManagerService.getDrawingEditable()) {
+            if (this._drawingManagerService.getDrawingEditable() && param.allowTransform !== false) {
                 scene.attachTransformerTo(rect);
             }
 

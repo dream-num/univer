@@ -26,8 +26,8 @@ import { DocSelectionManagerService, DocSkeletonManagerService, RichTextEditingM
 import { IDocDrawingService } from '@univerjs/docs-drawing';
 import { docDrawingPositionToTransform, DocSelectionRenderService } from '@univerjs/docs-ui';
 import { DRAWING_IMAGE_ALLOW_IMAGE_LIST, DRAWING_IMAGE_ALLOW_SIZE, DRAWING_IMAGE_COUNT_LIMIT, DRAWING_IMAGE_HEIGHT_LIMIT, DRAWING_IMAGE_WIDTH_LIMIT, getDrawingShapeKeyByDrawingSearch, getImageSize, IDrawingManagerService, IImageIoService, ImageUploadStatusType } from '@univerjs/drawing';
-
 import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
+
 import { ILocalFileService, IMessageService } from '@univerjs/ui';
 import { debounceTime } from 'rxjs';
 import { GroupDocDrawingCommand } from '../../commands/commands/group-doc-drawing.command';
@@ -351,13 +351,22 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
             if (drawingShapes.length) {
                 for (const shape of drawingShapes) {
                     scene.detachTransformerFrom(shape);
-                    (shape as Image).setOpacity(0.5);
+                    try {
+                        (shape as Image).setOpacity(0.5);
+                    } catch (e) {
+                    }
                     if (
                         (isEditBody && drawing.isMultiTransform !== BooleanNumber.TRUE)
                         || (!isEditBody && drawing.isMultiTransform === BooleanNumber.TRUE)
                     ) {
-                        scene.attachTransformerTo(shape);
-                        (shape as Image).setOpacity(1);
+                        if (drawing.allowTransform !== false) {
+                            scene.attachTransformerTo(shape);
+                        }
+
+                        try {
+                            (shape as Image).setOpacity(1);
+                        } catch (e) {
+                        }
                     }
                 }
             }

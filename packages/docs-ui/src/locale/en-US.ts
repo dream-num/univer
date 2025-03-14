@@ -51,6 +51,7 @@ const locale: typeof zhCN = {
         alignCenter: 'Align Center',
         alignRight: 'Align Right',
         alignJustify: 'Justify',
+        horizontalLine: 'Horizontal line',
         headerFooter: 'Header & Footer',
     },
     table: {

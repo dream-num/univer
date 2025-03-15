@@ -16,7 +16,7 @@
 
 /* eslint-disable ts/explicit-function-return-type */
 
-import { AutoFillSeries, BaselineOffset, BooleanNumber, BorderStyleTypes, BorderType, ColorType, CommandType, CommonHideTypes, CopyPasteType, DataValidationErrorStyle, DataValidationOperator, DataValidationRenderMode, DataValidationStatus, DataValidationType, DeleteDirection, DeveloperMetadataVisibility, Dimension, Direction, HorizontalAlign, InterpolationPointType, LifecycleStages, LocaleType, MentionType, ProtectionType, RelativeDate, SheetTypes, TextDecoration, TextDirection, ThemeColorType, UniverInstanceType, VerticalAlign, WrapStrategy } from '@univerjs/core';
+import { AbsoluteRefType, AutoFillSeries, BaselineOffset, BooleanNumber, BorderStyleTypes, BorderType, ColorType, CommandType, CommonHideTypes, CopyPasteType, DataValidationErrorStyle, DataValidationOperator, DataValidationRenderMode, DataValidationStatus, DataValidationType, DeleteDirection, DeveloperMetadataVisibility, Dimension, Direction, HorizontalAlign, InterpolationPointType, LifecycleStages, LocaleType, MentionType, ProtectionType, RelativeDate, SheetTypes, TextDecoration, TextDirection, ThemeColorType, UniverInstanceType, VerticalAlign, WrapStrategy } from '@univerjs/core';
 
 /**
  * @hideconstructor
@@ -61,6 +61,18 @@ export class FEnum {
             // @ts-ignore
             this[key] = FEnum.prototype[key];
         }
+    }
+
+    /**
+     * Defines different types of absolute references
+     *
+     * @example
+     * ```ts
+     * console.log(univerAPI.Enum.AbsoluteRefType);
+     * ```
+     */
+    get AbsoluteRefType() {
+        return AbsoluteRefType;
     }
 
     /**

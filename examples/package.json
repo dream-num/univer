@@ -27,6 +27,7 @@
         "@univerjs/docs-drawing-ui": "workspace:*",
         "@univerjs/docs-hyper-link-ui": "workspace:*",
         "@univerjs/docs-mention-ui": "workspace:*",
+        "@univerjs/docs-quick-insert-ui": "workspace:*",
         "@univerjs/docs-thread-comment-ui": "workspace:*",
         "@univerjs/docs-ui": "workspace:*",
         "@univerjs/drawing": "workspace:*",

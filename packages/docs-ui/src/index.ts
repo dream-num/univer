@@ -59,7 +59,7 @@ export { whenDocAndEditorFocused } from './shortcuts/utils';
 export { DOC_VERTICAL_PADDING } from './types/const/padding';
 
 // #region - all commands
-
+export { HorizontalLineCommand } from './commands/commands/doc-horizontal-line.command';
 export { AfterSpaceCommand, EnterCommand, type ITabCommandParams, TabCommand } from './commands/commands/auto-format.command';
 export { BreakLineCommand } from './commands/commands/break-line.command';
 export { generateParagraphs } from './commands/commands/break-line.command';
@@ -146,7 +146,7 @@ export type { IDocTableTabCommandParams } from './commands/commands/table/doc-ta
 export { DocTableTabCommand } from './commands/commands/table/doc-table-tab.command';
 export { genTableSource, getEmptyTableCell, getEmptyTableRow, getTableColumn } from './commands/commands/table/table';
 export { DocCreateTableOperation } from './commands/operations/doc-create-table.operation';
-export { MoveSelectionOperation } from './commands/operations/doc-cursor.operation';
+export { type IMoveCursorOperationParams, MoveSelectionOperation } from './commands/operations/doc-cursor.operation';
 export { MoveCursorOperation } from './commands/operations/doc-cursor.operation';
 export { DocSelectAllCommand } from './commands/commands/doc-select-all.command';
 export { type ISetDocZoomRatioOperationParams, SetDocZoomRatioOperation } from './commands/operations/set-doc-zoom-ratio.operation';

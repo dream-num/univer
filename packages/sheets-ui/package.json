@@ -81,7 +81,7 @@
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-numfmt": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons": "^0.2.21",
+        "@univerjs/icons": "^0.2.22",
         "@univerjs/protocol": "0.1.44",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/telemetry": "workspace:*",

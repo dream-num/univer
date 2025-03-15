@@ -481,13 +481,12 @@ export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
 
     type: CommandType.COMMAND,
 
-    handler: async (accessor, params: IInnerCutCommandParams) => {
-        const { segmentId, textRanges } = params;
-        const commandService = accessor.get(ICommandService);
+    handler: (accessor, params: IInnerCutCommandParams) => {
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
+        const commandService = accessor.get(ICommandService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const selections = params.selections ?? docSelectionManagerService.getTextRanges();
 
+        const { segmentId, textRanges, selections = docSelectionManagerService.getTextRanges() } = params;
         const rectRanges = docSelectionManagerService.getRectRanges();
 
         if (

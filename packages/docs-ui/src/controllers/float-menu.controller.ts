@@ -68,6 +68,7 @@ export class FloatMenuController extends Disposable {
             {
                 componentKey: FLOAT_MENU_COMPONENT_KEY,
                 direction: range.direction === 'backward' ? 'top-center' : 'bottom-center',
+                offset: [0, 4],
             },
             unitId
         );

@@ -34,7 +34,11 @@ function filterMenusByKeyword(menus: DocPopupMenu[], keyword: string) {
 
             const keywords = (menu as IDocPopupMenuItem).keywords;
 
-            return keywords.some((word) => word.includes(keyword));
+            if (keywords) {
+                return keywords.some((word) => word.includes(keyword));
+            }
+
+            return menu.title.toLowerCase().includes(keyword);
         });
 }
 
@@ -48,7 +52,9 @@ function translateMenus(menus: DocPopupMenu[], localeService: LocaleService) {
         menu.title = localeService.t(menu.title);
 
         if ('keywords' in menu) {
-            menu.keywords = menu.keywords.concat(menu.title);
+            menu.keywords = menu.keywords!
+                .concat(menu.title)
+                .map((word) => word.toLowerCase());
         }
 
         return menu;

@@ -34,7 +34,7 @@ export interface IDocPopupMenuItem {
     id: string;
     icon?: string;
     title: string;
-    keywords: string[];
+    keywords?: string[];
 }
 
 export type DocPopupMenu = IDocPopupGroupItem | IDocPopupMenuItem;

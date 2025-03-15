@@ -39,6 +39,8 @@ export interface IMenuManagerService {
     appendRootMenu(source: MenuSchemaType): void;
 
     getMenuByPositionKey(position: string): IMenuSchema[];
+
+    getFlatMenuByPositionKey(position: string): IMenuSchema[];
 }
 
 export type MenuSchemaType = {
@@ -276,5 +278,25 @@ export class MenuManagerService extends Disposable implements IMenuManagerServic
         };
 
         return findKey(this._menu);
+    }
+
+    /**
+     * Get flat menu schema by position key
+     * @param key
+     * @returns Flat menu schema array or empty array if not found
+     */
+    getFlatMenuByPositionKey(key: string): IMenuSchema[] {
+        const menu = this.getMenuByPositionKey(key);
+
+        function flatMenuItems(items: IMenuSchema[]): IMenuSchema[] {
+            return items.reduce((acc, item) => {
+                if (item.children) {
+                    return [...acc, item, ...flatMenuItems(item.children)];
+                }
+                return [...acc, item];
+            }, [] as IMenuSchema[]);
+        }
+
+        return flatMenuItems(menu);
     }
 }

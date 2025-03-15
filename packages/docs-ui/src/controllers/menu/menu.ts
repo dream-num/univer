@@ -15,9 +15,7 @@
  */
 
 import type { DocumentDataModel, IAccessor, PresetListType } from '@univerjs/core';
-import type {
-    IRichTextEditingMutationParams,
-} from '@univerjs/docs';
+import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IMenuButtonItem, IMenuItem, IMenuSelectorItem } from '@univerjs/ui';
 import type { Subscription } from 'rxjs';
 import {

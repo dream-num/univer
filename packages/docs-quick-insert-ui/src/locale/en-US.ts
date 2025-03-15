@@ -27,6 +27,8 @@ const locale: typeof zhCN = {
         group: {
             basics: 'Basics',
         },
+        placeholder: 'No results found',
+        keywordInputPlaceholder: 'Enter keywords',
     },
 };
 

@@ -27,6 +27,8 @@ const locale: typeof zhCN = {
         group: {
             basics: '基礎',
         },
+        placeholder: '無結果',
+        keywordInputPlaceholder: '輸入關鍵詞',
     },
 };
 

@@ -279,6 +279,7 @@ export class DocCanvasPopManagerService extends Disposable {
 
         const { positions: bounds, positions$: bounds$, disposable } = this._createRangePositionObserver(range, currentRender);
         const position$ = bounds$.pipe(map((bounds) => direction.includes('top') ? bounds[0] : bounds[bounds.length - 1]));
+
         const id = this._globalPopupManagerService.addPopup({
             ...popup,
             unitId,
@@ -287,10 +288,9 @@ export class DocCanvasPopManagerService extends Disposable {
             anchorRect$: position$,
             excludeRects: bounds,
             excludeRects$: bounds$,
-            direction:
-                (direction.includes('top') || direction.includes('bottom')) ?
-                    bounds.length > 1 ? multipleDirection ?? direction : direction
-                    : 'bottom',
+            direction: (['top', 'bottom', 'horizontal'].includes(direction)) ?
+                bounds.length > 1 ? multipleDirection ?? direction : direction
+                : 'bottom',
             canvasElement: currentRender.engine.getCanvasElement(),
         });
 

@@ -27,6 +27,8 @@ const locale: typeof zhCN = {
         group: {
             basics: 'Cơ bản',
         },
+        placeholder: 'Không có kết quả',
+        keywordInputPlaceholder: 'Nhập từ khóa',
     },
 };
 

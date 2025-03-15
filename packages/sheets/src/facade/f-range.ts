@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { BorderStyleTypes, BorderType, CellValue, CustomData, ICellData, IColorStyle, IDocumentData, IObjectMatrixPrimitiveType, IRange, IStyleData, ITextDecoration, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type { AbsoluteRefType, BorderStyleTypes, BorderType, CellValue, CustomData, ICellData, IColorStyle, IDocumentData, IObjectMatrixPrimitiveType, IRange, IStyleData, ITextDecoration, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import type { ISetBorderBasicCommandParams, ISetHorizontalTextAlignCommandParams, ISetRangeValuesCommandParams, ISetSelectionsOperationParams, ISetStyleCommandParams, ISetTextRotationCommandParams, ISetTextWrapCommandParams, ISetVerticalTextAlignCommandParams, IStyleTypeValue, SplitDelimiterEnum } from '@univerjs/sheets';
 import type { IFacadeClearOptions } from './f-worksheet';
 import type { FHorizontalAlignment, FVerticalAlignment } from './utils';
@@ -1709,16 +1709,43 @@ export class FRange extends FBaseInitialable {
     /**
      * Returns a string description of the range, in A1 notation.
      * @param {boolean} [withSheet] - If true, the sheet name is included in the A1 notation.
+     * @param {AbsoluteRefType} [startAbsoluteRefType] - The absolute reference type for the start cell.
+     * @param {AbsoluteRefType} [endAbsoluteRefType] - The absolute reference type for the end cell.
      * @returns {string} The A1 notation of the range.
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // By default, the A1 notation is returned without the sheet name and without absolute reference types.
      * const fRange = fWorksheet.getRange('A1:B2');
      * console.log(fRange.getA1Notation()); // A1:B2
+     *
+     * // By setting withSheet to true, the sheet name is included in the A1 notation.
+     * fWorksheet.setName('Sheet1');
+     * console.log(fRange.getA1Notation(true)); // Sheet1!A1:B2
+     *
+     * // By setting startAbsoluteRefType, the absolute reference type for the start cell is included in the A1 notation.
+     * console.log(fRange.getA1Notation(false, univerAPI.Enum.AbsoluteRefType.ROW)); // A$1:B2
+     * console.log(fRange.getA1Notation(false, univerAPI.Enum.AbsoluteRefType.COLUMN)); // $A1:B2
+     * console.log(fRange.getA1Notation(false, univerAPI.Enum.AbsoluteRefType.ALL)); // $A$1:B2
+     *
+     * // By setting endAbsoluteRefType, the absolute reference type for the end cell is included in the A1 notation.
+     * console.log(fRange.getA1Notation(false, null, univerAPI.Enum.AbsoluteRefType.ROW)); // A1:B$2
+     * console.log(fRange.getA1Notation(false, null, univerAPI.Enum.AbsoluteRefType.COLUMN)); // A1:$B2
+     * console.log(fRange.getA1Notation(false, null, univerAPI.Enum.AbsoluteRefType.ALL)); // A1:$B$2
+     *
+     * // By setting all parameters example
+     * console.log(fRange.getA1Notation(true, univerAPI.Enum.AbsoluteRefType.ALL, univerAPI.Enum.AbsoluteRefType.ALL)); // Sheet1!$A$1:$B$2
      * ```
      */
-    getA1Notation(withSheet?: boolean): string {
-        return withSheet ? serializeRangeWithSheet(this._worksheet.getName(), this._range) : serializeRange(this._range);
+    getA1Notation(withSheet?: boolean, startAbsoluteRefType?: AbsoluteRefType, endAbsoluteRefType?: AbsoluteRefType): string {
+        const range = {
+            ...this._range,
+            startAbsoluteRefType,
+            endAbsoluteRefType,
+        };
+
+        return withSheet ? serializeRangeWithSheet(this._worksheet.getName(), range) : serializeRange(range);
     }
 
     /**

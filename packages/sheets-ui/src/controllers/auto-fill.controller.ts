@@ -318,7 +318,8 @@ export class AutoFillController extends Disposable {
         asLen: number,
         direction: Direction,
         applyType: APPLY_TYPE,
-        hasStyle: boolean = true
+        hasStyle: boolean = true,
+        location: IAutoFillLocation
     ) {
         const applyData: Array<Nullable<ICellData>> = [];
         const num = Math.floor(asLen / csLen);
@@ -356,7 +357,8 @@ export class AutoFillController extends Disposable {
                     direction,
                     applyType,
                     customApplyFunctions,
-                    copyDataPiece
+                    copyDataPiece,
+                    location
                 );
 
                 const arrIndex = getDataIndex(csLen, asLen, copySquad.index);
@@ -386,7 +388,8 @@ export class AutoFillController extends Disposable {
         direction: Direction,
         applyType: APPLY_TYPE,
         customApplyFunctions: APPLY_FUNCTIONS,
-        copyDataPiece: ICopyDataPiece
+        copyDataPiece: ICopyDataPiece,
+        location: IAutoFillLocation
     ) {
         const { data } = copySquad;
         const isReverse = direction === Direction.UP || direction === Direction.LEFT;
@@ -395,7 +398,7 @@ export class AutoFillController extends Disposable {
         if (applyType === APPLY_TYPE.COPY) {
             const custom = customApplyFunctions?.[APPLY_TYPE.COPY];
             if (custom) {
-                return custom(copySquad, len, direction, copyDataPiece);
+                return custom(copySquad, len, direction, copyDataPiece, location);
             }
             isReverse && data.reverse();
             return fillCopy(data, len);
@@ -408,7 +411,7 @@ export class AutoFillController extends Disposable {
             isReverse && data.reverse();
             // special rules, if not provide custom SERIES apply functions, will be applied as copy
             if (customApplyFunctions?.[APPLY_TYPE.COPY]) {
-                return customApplyFunctions[APPLY_TYPE.COPY](copySquad, len, direction, copyDataPiece);
+                return customApplyFunctions[APPLY_TYPE.COPY](copySquad, len, direction, copyDataPiece, location);
             }
             return fillCopy(data, len);
         }
@@ -646,7 +649,7 @@ export class AutoFillController extends Disposable {
             targetCols.forEach((_, i) => {
                 const copyD = copyData[i];
 
-                const applyData = this._getApplyData(copyD, csLen, asLen, direction, applyType, hasStyle);
+                const applyData = this._getApplyData(copyD, csLen, asLen, direction, applyType, hasStyle, location);
                 untransformedApplyDatas.push(applyData);
             });
             for (let i = 0; i < untransformedApplyDatas[0].length; i++) {
@@ -663,7 +666,7 @@ export class AutoFillController extends Disposable {
             const asLen = targetCols.length;
             targetRows.forEach((_, i) => {
                 const copyD = copyData[i];
-                const applyData = this._getApplyData(copyD, csLen, asLen, direction, applyType, hasStyle);
+                const applyData = this._getApplyData(copyD, csLen, asLen, direction, applyType, hasStyle, location);
                 const row: Array<Nullable<ICellData>> = [];
                 for (let j = 0; j < applyData.length; j++) {
                     row.push({

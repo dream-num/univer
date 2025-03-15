@@ -19,9 +19,10 @@ import { ContextMenuGroup, ContextMenuPosition, RibbonStartGroup } from '@univer
 import { DocCopyCommand, DocCutCommand, DocPasteCommand } from '../commands/commands/clipboard.command';
 import { DeleteLeftCommand } from '../commands/commands/doc-delete.command';
 import { OpenHeaderFooterPanelCommand } from '../commands/commands/doc-header-footer.command';
+import { HorizontalLineCommand } from '../commands/commands/doc-horizontal-line.command';
 import { ResetInlineFormatTextBackgroundColorCommand, SetInlineFormatBoldCommand, SetInlineFormatFontFamilyCommand, SetInlineFormatFontSizeCommand, SetInlineFormatItalicCommand, SetInlineFormatStrikethroughCommand, SetInlineFormatSubscriptCommand, SetInlineFormatSuperscriptCommand, SetInlineFormatTextBackgroundColorCommand, SetInlineFormatTextColorCommand, SetInlineFormatUnderlineCommand } from '../commands/commands/inline-format.command';
-import { BulletListCommand, CheckListCommand, OrderListCommand } from '../commands/commands/list.command';
 
+import { BulletListCommand, CheckListCommand, OrderListCommand } from '../commands/commands/list.command';
 import { AlignCenterCommand, AlignJustifyCommand, AlignLeftCommand, AlignRightCommand } from '../commands/commands/paragraph-align.command';
 import { SwitchDocModeCommand } from '../commands/commands/switch-doc-mode.command';
 import { DocTableDeleteColumnsCommand, DocTableDeleteRowsCommand, DocTableDeleteTableCommand } from '../commands/commands/table/doc-table-delete.command';
@@ -59,6 +60,7 @@ import {
     FontFamilySelectorMenuItemFactory,
     FontSizeSelectorMenuItemFactory,
     HeaderFooterMenuItemFactory,
+    HorizontalLineFactory,
     InsertTableMenuFactory,
     ItalicMenuItemFactory,
     OrderListMenuItemFactory,
@@ -144,24 +146,28 @@ export const menuSchema: MenuSchemaType = {
             order: 5,
             menuItemFactory: AlignJustifyMenuItemFactory,
         },
-        [OrderListCommand.id]: {
+        [HorizontalLineCommand.id]: {
             order: 6,
+            menuItemFactory: HorizontalLineFactory,
+        },
+        [OrderListCommand.id]: {
+            order: 7,
             menuItemFactory: OrderListMenuItemFactory,
         },
         [BulletListCommand.id]: {
-            order: 7,
+            order: 8,
             menuItemFactory: BulletListMenuItemFactory,
         },
         [CheckListCommand.id]: {
-            order: 8,
+            order: 9,
             menuItemFactory: CheckListMenuItemFactory,
         },
         [OpenHeaderFooterPanelCommand.id]: {
-            order: 9,
+            order: 10,
             menuItemFactory: HeaderFooterMenuItemFactory,
         },
         [SwitchDocModeCommand.id]: {
-            order: 10,
+            order: 11,
             menuItemFactory: DocSwitchModeMenuItemFactory,
         },
     },

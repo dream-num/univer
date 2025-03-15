@@ -35,7 +35,7 @@ import { Hyphen } from './hyphenation/hyphen';
 import { LanguageDetector } from './hyphenation/language-detector';
 import { createSkeletonPage } from './model/page';
 import { createSkeletonSection } from './model/section';
-import { getLastPage, getNullSkeleton, getPageFromPath, prepareSectionBreakConfig, resetContext, setPageParent, updateBlockIndex, updateInlineDrawingCoords } from './tools';
+import { getLastPage, getNullSkeleton, getPageFromPath, prepareSectionBreakConfig, resetContext, setPageParent, updateBlockIndex, updateInlineDrawingCoordsAndBorder } from './tools';
 
 export enum DocumentSkeletonState {
     PENDING = 'pending',
@@ -1174,15 +1174,15 @@ export class DocumentSkeleton extends Skeleton {
             removeDupPages(ctx);
             updateBlockIndex(skeleton.pages);
             // Calculate inline drawing position and update.
-            updateInlineDrawingCoords(ctx, skeleton.pages);
+            updateInlineDrawingCoordsAndBorder(ctx, skeleton.pages);
             for (const hSkeMap of skeleton.skeHeaders.values()) {
                 for (const page of hSkeMap.values()) {
-                    updateInlineDrawingCoords(ctx, [page]);
+                    updateInlineDrawingCoordsAndBorder(ctx, [page]);
                 }
             }
             for (const fSkeMap of skeleton.skeFooters.values()) {
                 for (const page of fSkeMap.values()) {
-                    updateInlineDrawingCoords(ctx, [page]);
+                    updateInlineDrawingCoordsAndBorder(ctx, [page]);
                 }
             }
             setPageParent(skeleton.pages, skeleton);

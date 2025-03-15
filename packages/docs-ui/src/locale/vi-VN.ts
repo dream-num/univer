@@ -49,6 +49,7 @@ const locale: typeof zhCN = {
         alignCenter: 'Căn giữa',
         alignRight: 'Căn phải',
         alignJustify: 'Căn đều hai bên',
+        horizontalLine: 'Horizontal line',
         headerFooter: 'Đầu trang và chân trang',
         checklist: 'Task list',
         documentFlavor: 'Modern Mode',

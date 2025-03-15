@@ -16,7 +16,7 @@
 
 import type { Workbook } from '@univerjs/core';
 import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
-import { DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, FOCUSING_FX_BAR_EDITOR, ICommandService, IContextService, IPermissionService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, FOCUSING_FX_BAR_EDITOR, ICommandService, IContextService, IPermissionService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { clsx } from '@univerjs/design';
 import { IEditorService } from '@univerjs/docs-ui';
 import { DeviceInputEventType } from '@univerjs/engine-render';
@@ -229,7 +229,7 @@ export function FormulaBar(props: IProps) {
                     {
                         visible: true,
                         eventType: DeviceInputEventType.PointerDown,
-                        unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+                        unitId: currentWorkbook?.getUnitId() ?? '',
                     } as IEditorBridgeServiceVisibleParam
                 );
                 // undoRedoService.clearUndoRedo(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);

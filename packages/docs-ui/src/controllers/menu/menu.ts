@@ -48,6 +48,7 @@ import {
 
 import { combineLatest, map, Observable } from 'rxjs';
 import { OpenHeaderFooterPanelCommand } from '../../commands/commands/doc-header-footer.command';
+import { HorizontalLineCommand } from '../../commands/commands/doc-horizontal-line.command';
 import { getStyleInTextRange, ResetInlineFormatTextBackgroundColorCommand, SetInlineFormatBoldCommand, SetInlineFormatCommand, SetInlineFormatFontFamilyCommand, SetInlineFormatFontSizeCommand, SetInlineFormatItalicCommand, SetInlineFormatStrikethroughCommand, SetInlineFormatSubscriptCommand, SetInlineFormatSuperscriptCommand, SetInlineFormatTextBackgroundColorCommand, SetInlineFormatTextColorCommand, SetInlineFormatUnderlineCommand } from '../../commands/commands/inline-format.command';
 import { BulletListCommand, CheckListCommand, getParagraphsInRange, OrderListCommand } from '../../commands/commands/list.command';
 import { AlignCenterCommand, AlignJustifyCommand, AlignLeftCommand, AlignOperationCommand, AlignRightCommand } from '../../commands/commands/paragraph-align.command';
@@ -737,6 +738,17 @@ export function AlignJustifyMenuItemFactory(accessor: IAccessor): IMenuButtonIte
 
             return disposable.dispose;
         }),
+        disabled$: disableMenuWhenNoDocRange(accessor),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC, undefined, DOCS_ZEN_EDITOR_UNIT_ID_KEY),
+    };
+}
+
+export function HorizontalLineFactory(accessor: IAccessor): IMenuButtonItem {
+    return {
+        id: HorizontalLineCommand.id,
+        type: MenuItemType.BUTTON,
+        icon: 'ReduceSingle',
+        tooltip: 'toolbar.horizontalLine',
         disabled$: disableMenuWhenNoDocRange(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC, undefined, DOCS_ZEN_EDITOR_UNIT_ID_KEY),
     };

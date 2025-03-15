@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommand, IDocumentBody, IParagraph } from '@univerjs/core';
+import type { DocumentDataModel, ICommand, IDocumentBody, IParagraph, IParagraphBorder } from '@univerjs/core';
 import { CommandType, DataStreamTreeTokenType, ICommandService, IUniverInstanceService, PresetListType, Tools, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { getTextRunAtPosition } from '../../basics/paragraph';
@@ -22,7 +22,11 @@ import { DocMenuStyleService } from '../../services/doc-menu-style.service';
 import { InsertCommand } from './core-editing.command';
 import { ToggleCheckListCommand } from './list.command';
 
-export function generateParagraphs(dataStream: string, prevParagraph?: IParagraph): IParagraph[] {
+export function generateParagraphs(
+    dataStream: string,
+    prevParagraph?: IParagraph,
+    borderBottom?: IParagraphBorder
+): IParagraph[] {
     const paragraphs: IParagraph[] = [];
 
     for (let i = 0, len = dataStream.length; i < len; i++) {
@@ -45,20 +49,34 @@ export function generateParagraphs(dataStream: string, prevParagraph?: IParagrap
 
             if (prevParagraph.paragraphStyle) {
                 paragraph.paragraphStyle = Tools.deepClone(prevParagraph.paragraphStyle);
+                delete paragraph.paragraphStyle.borderBottom;
             }
+        }
+    }
+
+    if (borderBottom) {
+        for (const paragraph of paragraphs) {
+            if (!paragraph.paragraphStyle) {
+                paragraph.paragraphStyle = {};
+            }
+            paragraph.paragraphStyle.borderBottom = borderBottom;
         }
     }
 
     return paragraphs;
 }
 
-export const BreakLineCommand: ICommand = {
+interface IBreakLineCommandParams {
+    horizontalLine?: IParagraphBorder;
+}
+
+export const BreakLineCommand: ICommand<IBreakLineCommandParams> = {
     id: 'doc.command.break-line',
 
     type: CommandType.COMMAND,
 
     // eslint-disable-next-line max-lines-per-function
-    handler: async (accessor) => {
+    handler: async (accessor, params: IBreakLineCommandParams) => {
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
@@ -81,9 +99,11 @@ export const BreakLineCommand: ICommand = {
             return true;
         }
 
+        const { horizontalLine } = params ?? {};
         const { segmentId } = activeTextRange;
         const docDataModel = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
         const body = docDataModel?.getSelfOrHeaderFooterModel(segmentId ?? '').getBody();
+
         if (docDataModel == null || body == null) {
             return false;
         }
@@ -94,6 +114,7 @@ export const BreakLineCommand: ICommand = {
 
         const paragraphs = body.paragraphs ?? [];
         const prevParagraph = paragraphs.find((p) => p.startIndex >= startOffset);
+
         if (!prevParagraph) {
             return false;
         }
@@ -106,7 +127,11 @@ export const BreakLineCommand: ICommand = {
 
         const insertBody: IDocumentBody = {
             dataStream: DataStreamTreeTokenType.PARAGRAPH,
-            paragraphs: generateParagraphs(DataStreamTreeTokenType.PARAGRAPH, prevParagraph),
+            paragraphs: generateParagraphs(
+                DataStreamTreeTokenType.PARAGRAPH,
+                prevParagraph,
+                horizontalLine
+            ),
             textRuns: [{
                 st: 0,
                 ed: 1,

@@ -134,9 +134,7 @@ interface IMergeTwoParagraphParams {
 }
 
 export const MergeTwoParagraphCommand: ICommand<IMergeTwoParagraphParams> = {
-
     id: 'doc.command.merge-two-paragraph',
-
     type: CommandType.COMMAND,
     // eslint-disable-next-line max-lines-per-function
     handler: async (accessor, params: IMergeTwoParagraphParams) => {
@@ -235,6 +233,102 @@ export const MergeTwoParagraphCommand: ICommand<IMergeTwoParagraphParams> = {
                 paragraphs: [
                     {
                         ...Tools.deepClone(curParagraph),
+                        startIndex: 0,
+                    },
+                ],
+            },
+        });
+
+        const path = getRichTextEditPath(docDataModel, segmentId);
+        doMutation.params.actions = jsonX.editOp(textX.serialize(), path);
+
+        const result = commandService.syncExecuteCommand<
+            IRichTextEditingMutationParams,
+            IRichTextEditingMutationParams
+        >(doMutation.id, doMutation.params);
+
+        return Boolean(result);
+    },
+};
+
+export const RemoveHorizontalLineCommand: ICommand = {
+    id: 'doc.command.remove-horizontal-line',
+    type: CommandType.COMMAND,
+    // eslint-disable-next-line max-lines-per-function
+    handler: async (accessor) => {
+        const docSelectionManagerService = accessor.get(DocSelectionManagerService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const commandService = accessor.get(ICommandService);
+
+        const activeRange = docSelectionManagerService.getActiveTextRange();
+        const ranges = docSelectionManagerService.getTextRanges();
+
+        if (activeRange == null || ranges == null) {
+            return false;
+        }
+        const { segmentId, style } = activeRange;
+        const docDataModel = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+        const originBody = docDataModel?.getSelfOrHeaderFooterModel(segmentId).getBody();
+        if (docDataModel == null || originBody == null) {
+            return false;
+        }
+
+        const actualRange = activeRange;
+        const unitId = docDataModel.getUnitId();
+
+        const { startOffset, collapsed } = actualRange;
+        if (!collapsed) {
+            return false;
+        }
+
+        const paragraph = originBody.paragraphs?.find((p) => p.startIndex === startOffset - 1);
+
+        if (paragraph == null) {
+            return false;
+        }
+
+        const textRanges = [
+            {
+                startOffset,
+                endOffset: startOffset,
+                style,
+            },
+        ] as ITextRangeWithStyle[];
+
+        const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
+            id: RichTextEditingMutation.id,
+            params: {
+                unitId,
+                actions: [],
+                textRanges,
+            },
+        };
+
+        const textX = new TextX();
+        const jsonX = JSONX.getInstance();
+
+        if (paragraph.startIndex > 0) {
+            textX.push({
+                t: TextXActionType.RETAIN,
+                len: paragraph.startIndex,
+            });
+        }
+
+        textX.push({
+            t: TextXActionType.RETAIN,
+            len: 1,
+            coverType: UpdateDocsAttributeType.REPLACE,
+            body: {
+                dataStream: '',
+                paragraphs: [
+                    {
+                        ...Tools.deepClone({
+                            ...paragraph,
+                            paragraphStyle: {
+                                ...paragraph.paragraphStyle,
+                                borderBottom: undefined,
+                            },
+                        }),
                         startIndex: 0,
                     },
                 ],
@@ -442,10 +536,16 @@ export const DeleteLeftCommand: ICommand = {
                     return true;
                 }
                 if (preGlyph.content === '\r') {
-                    result = await commandService.executeCommand(MergeTwoParagraphCommand.id, {
-                        direction: DeleteDirection.LEFT,
-                        range: actualRange,
-                    });
+                    const paragraph = body.paragraphs?.find((p) => p.startIndex === startOffset - 1);
+
+                    if (paragraph?.paragraphStyle?.borderBottom) {
+                        result = await commandService.executeCommand(RemoveHorizontalLineCommand.id);
+                    } else {
+                        result = await commandService.executeCommand(MergeTwoParagraphCommand.id, {
+                            direction: DeleteDirection.LEFT,
+                            range: actualRange,
+                        });
+                    }
                 } else if (preGlyph.streamType === '\b') {
                     const drawing = docDataModel.getSnapshot().drawings?.[preGlyph.drawingId ?? ''];
 

@@ -27,7 +27,7 @@ import type { ILayoutContext } from '../tools';
 import { BooleanNumber, PageOrientType } from '@univerjs/core';
 import { BreakType, DocumentSkeletonPageType } from '../../../../basics/i-document-skeleton-cached';
 import { dealWithSection } from '../block/section';
-import { resetContext, updateBlockIndex } from '../tools';
+import { resetContext, updateBlockIndex, updateInlineDrawingCoordsAndBorder } from '../tools';
 import { createSkeletonSection } from './section';
 
 function getHeaderFooterMaxHeight(pageHeight: number) {
@@ -382,6 +382,8 @@ export function createSkeletonCellPages(
     }
 
     updateBlockIndex(pages, cellNode.startIndex);
+
+    updateInlineDrawingCoordsAndBorder(ctx, pages);
 
     return pages;
 }

@@ -18,7 +18,7 @@ import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import type { IDocPopup } from '../services/doc-quick-insert-popup.service';
 import { Disposable, ICommandService, Inject } from '@univerjs/core';
 import { DividerSingle, TextSingle } from '@univerjs/icons';
-import { ComponentManager, IMenuManagerService } from '@univerjs/ui';
+import { ComponentManager } from '@univerjs/ui';
 import { of } from 'rxjs';
 import { DeleteSearchKeyCommand } from '../commands/commands/doc-quick-insert.command';
 import { CloseQuickInsertPopupOperation, ShowQuickInsertPopupOperation } from '../commands/operations/quick-insert-popup.operation';
@@ -31,8 +31,7 @@ export class DocQuickInsertUIController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(DocQuickInsertPopupService) private readonly _docQuickInsertPopupService: DocQuickInsertPopupService,
-        @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
-        @Inject(IMenuManagerService) private readonly _menuManagerService: IMenuManagerService
+        @Inject(ComponentManager) private readonly _componentManager: ComponentManager
     ) {
         super();
 

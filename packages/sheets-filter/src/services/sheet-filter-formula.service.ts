@@ -17,7 +17,7 @@
 import type { Workbook } from '@univerjs/core';
 import type { ISheetCommandSharedParams } from '@univerjs/sheets';
 import { Disposable, Inject, IUniverInstanceService } from '@univerjs/core';
-import { IActiveDirtyManagerService } from '@univerjs/engine-formula';
+import { IActiveDirtyManagerService, ISheetRowFilteredService } from '@univerjs/engine-formula';
 import { FILTER_MUTATIONS } from '../common/const';
 import { SheetsFilterService } from './sheet-filter.service';
 
@@ -27,12 +27,14 @@ import { SheetsFilterService } from './sheet-filter.service';
 export class SheetsFilterFormulaService extends Disposable {
     constructor(
         @Inject(IActiveDirtyManagerService) private _activeDirtyManagerService: IActiveDirtyManagerService,
+        @Inject(ISheetRowFilteredService) private _sheetRowFilteredService: ISheetRowFilteredService,
         @Inject(SheetsFilterService) private _sheetsFilterService: SheetsFilterService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();
 
         this._initFormulaDirtyRange();
+        this._registerSheetRowFiltered();
     }
 
     private _initFormulaDirtyRange() {
@@ -82,5 +84,11 @@ export class SheetsFilterFormulaService extends Disposable {
         }];
 
         return dirtyRanges;
+    }
+
+    private _registerSheetRowFiltered() {
+        this._sheetRowFilteredService.register((unitId, subUnitId, row) => {
+            return this._sheetsFilterService.getFilterModel(unitId, subUnitId)?.isRowFiltered(row) ?? false;
+        });
     }
 }

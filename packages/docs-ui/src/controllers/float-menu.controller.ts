@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IDisposable, ITextRangeParam, Nullable } from '@univerjs/core';
-import { Disposable, Inject, isInternalEditorID, toDisposable } from '@univerjs/core';
+import type { DocumentDataModel, IDisposable, ITextRangeParam, Nullable } from '@univerjs/core';
+import { Disposable, Inject, isInternalEditorID, IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { ComponentManager } from '@univerjs/ui';
 import { FloatToolbar } from '../components/float-toolbar/FloatToolbar';
@@ -29,7 +29,8 @@ export class FloatMenuController extends Disposable {
     constructor(
         @Inject(DocSelectionManagerService) private readonly _docSelectionManagerService: DocSelectionManagerService,
         @Inject(DocCanvasPopManagerService) private readonly _docCanvasPopManagerService: DocCanvasPopManagerService,
-        @Inject(ComponentManager) private readonly _componentManager: ComponentManager
+        @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
+        @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();
         this._registerFloatMenu();
@@ -63,6 +64,10 @@ export class FloatMenuController extends Disposable {
     }
 
     showFloatMenu(unitId: string, range: ITextRangeParam) {
+        const documentDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
+        if (!documentDataModel || documentDataModel.getDisabled()) {
+            return;
+        }
         this._floatMenu = this._docCanvasPopManagerService.attachPopupToRange(
             range,
             {

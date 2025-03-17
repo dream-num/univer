@@ -53,9 +53,6 @@ export function FloatToolbar(props: IFloatToolbarProps) {
             for (const key of avaliableMenus) {
                 const item = flatMenus.find((item) => item.key === key);
                 if (item) {
-                    // TODO: should not delete the hidden$ property, it just a hack to make the menu visible in stories
-                    delete item.item?.hidden$;
-
                     menus.push(item);
                 }
             }

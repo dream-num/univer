@@ -94,7 +94,8 @@ export type APPLY_FUNCTIONS = {
         dataWithIndex: ICopyDataInType,
         len: number,
         direction: Direction,
-        copyDataPiece: ICopyDataPiece
+        copyDataPiece: ICopyDataPiece,
+        location?: IAutoFillLocation
     ) => Array<Nullable<ICellData>>;
 };
 

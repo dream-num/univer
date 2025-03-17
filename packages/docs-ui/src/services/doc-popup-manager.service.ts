@@ -289,7 +289,7 @@ export class DocCanvasPopManagerService extends Disposable {
             excludeRects$: bounds$,
             direction:
                 (direction.includes('top') || direction.includes('bottom')) ?
-                    bounds.length > 1 ? multipleDirection : direction
+                    bounds.length > 1 ? multipleDirection ?? direction : direction
                     : 'bottom',
             canvasElement: currentRender.engine.getCanvasElement(),
         });

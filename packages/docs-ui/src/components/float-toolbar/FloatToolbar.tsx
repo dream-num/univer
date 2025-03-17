@@ -17,21 +17,28 @@
 import type { IMenuSchema } from '@univerjs/ui';
 import { IMenuManagerService, MenuManagerPosition, ToolbarItem, useDependency } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
+import { SetInlineFormatBoldCommand, SetInlineFormatFontFamilyCommand, SetInlineFormatFontSizeCommand, SetInlineFormatItalicCommand, SetInlineFormatStrikethroughCommand, SetInlineFormatSubscriptCommand, SetInlineFormatSuperscriptCommand, SetInlineFormatTextBackgroundColorCommand, SetInlineFormatTextColorCommand, SetInlineFormatUnderlineCommand } from '../../commands/commands/inline-format.command';
 
 interface IFloatToolbarProps {
     avaliableMenus?: string[];
-    position?: {
-        top?: number;
-        right?: number;
-        bottom?: number;
-        left?: number;
-    };
+
 }
 
-export function FloatToolbar(props: IFloatToolbarProps) {
-    const { avaliableMenus = [], position = { top: 0, left: 0 } } = props;
+const DEFAULT_AVALIABLE_MENUS: string[] = [
+    SetInlineFormatFontFamilyCommand.id,
+    SetInlineFormatFontSizeCommand.id,
+    SetInlineFormatBoldCommand.id,
+    SetInlineFormatItalicCommand.id,
+    SetInlineFormatUnderlineCommand.id,
+    SetInlineFormatStrikethroughCommand.id,
+    SetInlineFormatSubscriptCommand.id,
+    SetInlineFormatSuperscriptCommand.id,
+    SetInlineFormatTextColorCommand.id,
+    SetInlineFormatTextBackgroundColorCommand.id,
+];
 
-    const { top, right, bottom, left } = position;
+export function FloatToolbar(props: IFloatToolbarProps) {
+    const { avaliableMenus = DEFAULT_AVALIABLE_MENUS } = props;
 
     const menuManagerService = useDependency(IMenuManagerService);
 
@@ -66,16 +73,10 @@ export function FloatToolbar(props: IFloatToolbarProps) {
     return (
         <div
             className={`
-              univer-fixed univer-box-border univer-flex univer-rounded-xl univer-border univer-border-solid
-              univer-border-gray-200 univer-bg-white univer-p-2
+              univer-box-border univer-flex univer-rounded-xl univer-border univer-border-solid univer-border-gray-200
+              univer-bg-white univer-p-2
               univer-shadow-[0_1px_6px_-2px_rgba(30,40,77,0.08),0_2px_6px_-1px_rgba(30,40,77,0.10)]
             `}
-            style={{
-                top: `${top}px`,
-                right: `${right}px`,
-                bottom: `${bottom}px`,
-                left: `${left}px`,
-            }}
         >
             {menus.map((groupItem) => groupItem.item && (
                 <div key={groupItem.key} className="univer-flex univer-flex-nowrap univer-gap-2 univer-px-2">

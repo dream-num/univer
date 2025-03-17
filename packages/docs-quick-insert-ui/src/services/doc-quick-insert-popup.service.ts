@@ -18,7 +18,6 @@ import type { DocumentDataModel, IDisposable, Nullable } from '@univerjs/core';
 import type { IInsertCommandParams } from '@univerjs/docs-ui';
 import type { Observable } from 'rxjs';
 import { Disposable, ICommandService, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { DocFloatDomController } from '@univerjs/docs-drawing-ui';
 import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
 import { BehaviorSubject, combineLatest, distinctUntilChanged, map, tap } from 'rxjs';
 import { DeleteSearchKeyCommand } from '../commands/commands/doc-quick-insert.command';
@@ -86,7 +85,6 @@ export class DocQuickInsertPopupService extends Disposable {
         @Inject(DocCanvasPopManagerService) private readonly _docCanvasPopupManagerService: DocCanvasPopManagerService,
         @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(ICommandService) private readonly _commandService: ICommandService,
-        @Inject(DocFloatDomController) private readonly _docFloatDomController: DocFloatDomController
     ) {
         super();
 

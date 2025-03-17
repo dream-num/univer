@@ -64,7 +64,7 @@ function translateMenus(menus: DocPopupMenu[], localeService: LocaleService) {
 
 const interceptKeys = [KeyCode.ARROW_UP, KeyCode.ARROW_DOWN, KeyCode.ENTER];
 
-const QuickInsertPopup = () => {
+export const QuickInsertPopup = () => {
     const localeService = useDependency(LocaleService);
     const docQuickInsertPopupService = useDependency(DocQuickInsertPopupService);
     const componentManager = useDependency(ComponentManager);
@@ -252,7 +252,7 @@ const QuickInsertPopup = () => {
 
     const hasMenus = filteredMenus.length > 0;
 
-    const Placeholder = currentPopup?.popup.Placeholder || QuickInsertPlaceholder;
+    const Placeholder = currentPopup?.popup.Placeholder || componentManager.get(QuickInsertPlaceholder.componentKey);
 
     return (
         <div
@@ -269,12 +269,10 @@ const QuickInsertPopup = () => {
                         </Menu>
                     </div>
                 )
-                : <Placeholder />}
+                : Placeholder && <Placeholder />}
         </div>
 
     );
 };
 
-QuickInsertPopup.componentKey = 'doc.quick-insert-popup';
-
-export { QuickInsertPopup };
+QuickInsertPopup.componentKey = 'docs.quick.insert.popup';

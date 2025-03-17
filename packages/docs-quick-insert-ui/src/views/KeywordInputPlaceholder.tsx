@@ -17,12 +17,12 @@
 import { LocaleService } from '@univerjs/core';
 import { useDependency } from '@univerjs/ui';
 
-const KeywordInputPlaceholder = () => {
+export const KeywordInputPlaceholderComponentKey = 'docs.quick.insert.keyword-input-placeholder';
+
+export const KeywordInputPlaceholder = () => {
     const localeService = useDependency(LocaleService);
     // TODO: 需要根据fontSize来计算高度跟偏移
     return <div className="univer-translate-y-1.5 univer-text-sm univer-text-gray-500">{localeService.t('docQuickInsert.keywordInputPlaceholder')}</div>;
 };
 
-KeywordInputPlaceholder.componentKey = 'KeywordInputPlaceholder';
-
-export { KeywordInputPlaceholder };
+KeywordInputPlaceholder.componentKey = KeywordInputPlaceholderComponentKey;

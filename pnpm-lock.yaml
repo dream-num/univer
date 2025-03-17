@@ -1459,6 +1459,9 @@ importers:
       '@univerjs/docs-drawing':
         specifier: workspace:*
         version: link:../docs-drawing
+      '@univerjs/docs-drawing-ui':
+        specifier: workspace:*
+        version: link:../docs-drawing-ui
       '@univerjs/docs-ui':
         specifier: workspace:*
         version: link:../docs-ui

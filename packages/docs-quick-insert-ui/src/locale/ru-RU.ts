@@ -27,6 +27,8 @@ const locale: typeof zhCN = {
         group: {
             basics: 'Основные',
         },
+        placeholder: 'Нет результатов',
+        keywordInputPlaceholder: 'Введите ключевые слова',
     },
 };
 

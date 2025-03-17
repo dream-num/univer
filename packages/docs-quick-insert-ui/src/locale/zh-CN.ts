@@ -25,6 +25,8 @@ const locale = {
         group: {
             basics: '基础',
         },
+        placeholder: '暂无结果',
+        keywordInputPlaceholder: '输入关键词',
     },
 };
 

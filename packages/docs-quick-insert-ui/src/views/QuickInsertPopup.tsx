@@ -21,6 +21,7 @@ import { ComponentManager, IShortcutService, KeyCode, useDependency, useObservab
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { CloseQuickInsertPopupOperation } from '../commands/operations/quick-insert-popup.operation';
 import { DocQuickInsertPopupService } from '../services/doc-quick-insert-popup.service';
+import { QuickInsertPlaceholder } from './QuickInsertPlaceholder';
 
 function filterMenusByKeyword(menus: DocPopupMenu[], keyword: string) {
     return menus
@@ -251,6 +252,8 @@ const QuickInsertPopup = () => {
 
     const hasMenus = filteredMenus.length > 0;
 
+    const Placeholder = currentPopup?.popup.Placeholder || QuickInsertPlaceholder;
+
     return (
         <div
             className={clsx(`
@@ -266,7 +269,7 @@ const QuickInsertPopup = () => {
                         </Menu>
                     </div>
                 )
-                : currentPopup?.popup.placeholder}
+                : <Placeholder />}
         </div>
 
     );

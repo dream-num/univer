@@ -27,6 +27,8 @@ const locale: typeof enUS = {
         group: {
             basics: 'Basiques',
         },
+        placeholder: 'Aucun résultat',
+        keywordInputPlaceholder: 'Entrez des mots clés',
     },
 };
 

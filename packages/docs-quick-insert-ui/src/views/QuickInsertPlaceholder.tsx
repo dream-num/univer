@@ -14,22 +14,19 @@
  * limitations under the License.
  */
 
-import type zhCN from './zh-CN';
+import { LocaleService } from '@univerjs/core';
+import { useDependency } from '@univerjs/ui';
 
-const locale: typeof zhCN = {
-    docQuickInsert: {
-        menu: {
-            numberedList: 'لیست شمارهدار',
-            bulletedList: 'لیست نقطهدار',
-            divider: 'خط تقسیم',
-            text: 'متن',
-        },
-        group: {
-            basics: 'بنیادی',
-        },
-        placeholder: 'هیچ نتیجهای یافت نشد',
-        keywordInputPlaceholder: 'وارد کلمات کلیدی',
-    },
+export const QuickInsertPlaceholder = () => {
+    const localeService = useDependency(LocaleService);
+    return (
+        <div
+            className={`
+              univer-flex univer-h-full univer-items-center univer-justify-center univer-rounded-lg univer-bg-white
+              univer-px-12 univer-py-6 univer-text-gray-400
+            `}
+        >
+            <span>{localeService.t('docQuickInsert.placeholder')}</span>
+        </div>
+    );
 };
-
-export default locale;

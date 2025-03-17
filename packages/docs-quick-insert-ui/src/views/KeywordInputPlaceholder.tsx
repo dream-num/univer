@@ -14,22 +14,15 @@
  * limitations under the License.
  */
 
-import type zhCN from './zh-CN';
+import { LocaleService } from '@univerjs/core';
+import { useDependency } from '@univerjs/ui';
 
-const locale: typeof zhCN = {
-    docQuickInsert: {
-        menu: {
-            numberedList: 'لیست شمارهدار',
-            bulletedList: 'لیست نقطهدار',
-            divider: 'خط تقسیم',
-            text: 'متن',
-        },
-        group: {
-            basics: 'بنیادی',
-        },
-        placeholder: 'هیچ نتیجهای یافت نشد',
-        keywordInputPlaceholder: 'وارد کلمات کلیدی',
-    },
+const KeywordInputPlaceholder = () => {
+    const localeService = useDependency(LocaleService);
+    // TODO: 需要根据fontSize来计算高度跟偏移
+    return <div className="univer-translate-y-1.5 univer-text-sm univer-text-gray-500">{localeService.t('docQuickInsert.keywordInputPlaceholder')}</div>;
 };
 
-export default locale;
+KeywordInputPlaceholder.componentKey = 'KeywordInputPlaceholder';
+
+export { KeywordInputPlaceholder };

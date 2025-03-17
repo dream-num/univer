@@ -18,9 +18,11 @@ import type { DocumentDataModel, IDisposable, Nullable } from '@univerjs/core';
 import type { IInsertCommandParams } from '@univerjs/docs-ui';
 import type { Observable } from 'rxjs';
 import { Disposable, ICommandService, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { DocFloatDomController } from '@univerjs/docs-drawing-ui';
 import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
-import { BehaviorSubject, distinctUntilChanged, map } from 'rxjs';
+import { BehaviorSubject, combineLatest, distinctUntilChanged, map, tap } from 'rxjs';
 import { DeleteSearchKeyCommand } from '../commands/commands/doc-quick-insert.command';
+import { KeywordInputPlaceholder } from '../views/KeywordInputPlaceholder';
 import { QuickInsertPopup } from '../views/QuickInsertPopup';
 
 export interface IDocPopupGroupItem {
@@ -42,7 +44,7 @@ export type DocPopupMenu = IDocPopupGroupItem | IDocPopupMenuItem;
 export interface IDocPopup {
     keyword: string;
     menus$: Observable<DocPopupMenu[]>;
-    placeholder?: React.ReactNode;
+    Placeholder?: React.ComponentType;
     preconditions?: (params: IInsertCommandParams) => boolean;
 }
 
@@ -75,10 +77,16 @@ export class DocQuickInsertPopupService extends Disposable {
 
     private _menuSelectedCallbacks: Set<(menu: IDocPopupMenuItem) => void> = new Set();
 
+    private _inputPlaceholderRenderRoot: {
+        unmount?: IDisposable;
+        mount: () => void;
+    } | null = null;
+
     constructor(
         @Inject(DocCanvasPopManagerService) private readonly _docCanvasPopupManagerService: DocCanvasPopManagerService,
         @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService,
-        @Inject(ICommandService) private readonly _commandService: ICommandService
+        @Inject(ICommandService) private readonly _commandService: ICommandService,
+        @Inject(DocFloatDomController) private readonly _docFloatDomController: DocFloatDomController
     ) {
         super();
 
@@ -94,6 +102,21 @@ export class DocQuickInsertPopupService extends Disposable {
             }),
             distinctUntilChanged()
         );
+
+        this.disposeWithMe(combineLatest([
+            this.filterKeyword$.pipe(tap((filterKeyword) => {
+                if (filterKeyword.length > 0) {
+                    this._inputPlaceholderRenderRoot?.unmount?.dispose();
+                } else {
+                    this._inputPlaceholderRenderRoot?.mount();
+                }
+            })),
+            this.editPopup$.pipe(tap((popup) => {
+                if (!popup) {
+                    this._inputPlaceholderRenderRoot?.unmount?.dispose();
+                }
+            })),
+        ]).subscribe());
     }
 
     resolvePopup(keyword: string) {
@@ -106,6 +129,19 @@ export class DocQuickInsertPopupService extends Disposable {
         return () => {
             this._popups.delete(popup);
         };
+    }
+
+    private _createInputPlaceholderRenderRoot(mount: () => IDisposable) {
+        const renderRoot: {
+            unmount?: IDisposable;
+            mount: () => void;
+        } = {
+            mount() {
+                this.unmount = mount();
+            },
+        };
+
+        return renderRoot;
     }
 
     showPopup(options: { popup: IDocPopup; index: number; unitId: string }) {
@@ -124,6 +160,23 @@ export class DocQuickInsertPopupService extends Disposable {
             },
             unitId
         );
+
+        this._inputPlaceholderRenderRoot = this._createInputPlaceholderRenderRoot(() => {
+            const disposable = this._docCanvasPopupManagerService.attachPopupToRange(
+                { startOffset: index + 1, endOffset: index + 1, collapsed: false },
+                {
+                    componentKey: KeywordInputPlaceholder.componentKey,
+                    onClickOutside: () => {
+                        disposable.dispose();
+                    },
+                    direction: 'horizontal',
+                },
+                unitId
+            );
+
+            return disposable;
+        });
+        this._inputPlaceholderRenderRoot.mount();
 
         this._editPopup$.next({ disposable, popup, anchor: index, unitId });
     }

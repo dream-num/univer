@@ -28,6 +28,8 @@ export type {
 export { DocQuickInsertPopupService } from './services/doc-quick-insert-popup.service';
 export { DocQuickInsertTriggerController } from './controllers/doc-quick-insert-trigger.controller';
 export { DocQuickInsertUIController } from './controllers/doc-quick-insert-ui.controller';
+export { QuickInsertPlaceholderComponentKey } from './views/QuickInsertPlaceholder';
+export { KeywordInputPlaceholderComponentKey } from './views/KeywordInputPlaceholder';
 
 // #region - all commands
 

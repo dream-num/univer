@@ -20,7 +20,7 @@ import type { IOpenFilterPanelOperationParams } from '../../commands/operations/
 import type { IFilterConditionFormParams } from '../../models/conditions';
 import type { IFilterByValueWithTreeItem } from '../sheets-filter-panel.service';
 import { CommandType, ICommandService, Inject, Injector, LocaleService, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
-import { ActiveDirtyManagerService, IActiveDirtyManagerService } from '@univerjs/engine-formula';
+import { ActiveDirtyManagerService, IActiveDirtyManagerService, ISheetRowFilteredService, SheetRowFilteredService } from '@univerjs/engine-formula';
 import { RefRangeService, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
 import { CustomFilterOperator, SheetsFilterService, UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
 import { SetSheetsFilterCriteriaCommand } from '@univerjs/sheets-filter/commands/commands/sheets-filter.command.js';
@@ -96,6 +96,7 @@ function createSheetsFilterPanelServiceTestBed(workbookData: IWorkbookData) {
                 [SheetInterceptorService],
                 [SheetsFilterPanelService],
                 [IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }],
+                [ISheetRowFilteredService, { useClass: SheetRowFilteredService }],
             ] as Dependency[]).forEach((d) => this._injector.add(d));
         }
     }

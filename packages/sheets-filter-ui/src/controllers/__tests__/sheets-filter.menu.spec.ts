@@ -17,7 +17,7 @@
 import type { IWorkbookData, Workbook } from '@univerjs/core';
 import type { ISetSheetsFilterCriteriaMutationParams, ISetSheetsFilterRangeMutationParams } from '@univerjs/sheets-filter';
 import { AuthzIoLocalService, DisposableCollection, IAuthzIoService, ICommandService, Inject, Injector, LocaleType, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
-import { ActiveDirtyManagerService, IActiveDirtyManagerService } from '@univerjs/engine-formula';
+import { ActiveDirtyManagerService, IActiveDirtyManagerService, ISheetRowFilteredService, SheetRowFilteredService } from '@univerjs/engine-formula';
 import { ExclusiveRangeService, IExclusiveRangeService, RangeProtectionRuleModel, RefRangeService, SetWorksheetActiveOperation, SheetInterceptorService, SheetsSelectionsService, WorkbookPermissionService, WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import { RemoveSheetsFilterMutation, SetSheetsFilterCriteriaMutation, SetSheetsFilterRangeMutation, UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
 import { ClearSheetsFilterCriteriaCommand, ReCalcSheetsFilterCommand, SmartToggleSheetsFilterCommand } from '@univerjs/sheets-filter/commands/commands/sheets-filter.command.js';
@@ -79,6 +79,7 @@ function createSheetsFilterMenuTestBed() {
             injector.add([RangeProtectionRuleModel]);
             injector.add([IExclusiveRangeService, { useClass: ExclusiveRangeService, deps: [SheetsSelectionsService] }]);
             injector.add([IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }]);
+            injector.add([ISheetRowFilteredService, { useClass: SheetRowFilteredService }]);
 
             const commandService = injector.get(ICommandService);
             [

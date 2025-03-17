@@ -18,7 +18,7 @@ import type { Dependency, IOperation, IWorkbookData, Workbook } from '@univerjs/
 import type { ISetSheetsFilterRangeMutationParams } from '@univerjs/sheets-filter';
 import type { IEditorBridgeServiceVisibleParam } from '@univerjs/sheets-ui';
 import { CommandType, ICommandService, IContextService, Inject, Injector, LocaleService, LocaleType, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
-import { ActiveDirtyManagerService, IActiveDirtyManagerService } from '@univerjs/engine-formula';
+import { ActiveDirtyManagerService, IActiveDirtyManagerService, ISheetRowFilteredService, SheetRowFilteredService } from '@univerjs/engine-formula';
 import { RefRangeService, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
 import { SetSheetsFilterRangeMutation, UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -80,6 +80,7 @@ function createFilterOperationTestBed() {
                 [RefRangeService],
                 [SheetsSelectionsService],
                 [IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }],
+                [ISheetRowFilteredService, { useClass: SheetRowFilteredService }],
             ] as Dependency[]).forEach((d) => this._injector.add(d));
         }
     }

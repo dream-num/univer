@@ -32,7 +32,7 @@ import type {
     IUnitStylesData,
 } from '../basics/common';
 
-import { createIdentifier, Disposable, Inject, IUniverInstanceService, LocaleService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
+import { createIdentifier, Disposable, Inject, IResourceManagerService, IUniverInstanceService, LocaleService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
 import { convertUnitDataToRuntime } from '../basics/runtime';
 import { FormulaDataModel } from '../models/formula-data.model';
 
@@ -108,6 +108,8 @@ export interface IFormulaCurrentConfigService {
     };
 
     getSheetRowColumnCount(unitId: string, sheetId: string): { rowCount: number; columnCount: number };
+
+    getFilteredOutRows(unitId: string, sheetId: string, startRow: number, endRow: number): number[];
 }
 
 export class FormulaCurrentConfigService extends Disposable implements IFormulaCurrentConfigService {
@@ -146,6 +148,7 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
 
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        @Inject(IResourceManagerService) private readonly _resourceManagerService: IResourceManagerService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel
     ) {
@@ -276,6 +279,22 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         const { rowCount, columnCount } = snapshot;
 
         return { rowCount, columnCount };
+    }
+
+    getFilteredOutRows(unitId: string, sheetId: string, startRow: number, endRow: number) {
+        const filterResource = this._resourceManagerService.getResourcesByType(unitId, UniverInstanceType.UNIVER_SHEET).find((resource) => resource.name === 'SHEET_FILTER_PLUGIN');
+
+        if (!filterResource) {
+            return [];
+        }
+
+        const data = JSON.parse(filterResource.data)[sheetId];
+
+        if (!data?.cachedFilteredOut || data.cachedFilteredOut.length === 0) {
+            return [];
+        }
+
+        return data.cachedFilteredOut.filter((r: number) => r >= startRow && r <= endRow);
     }
 
     load(config: IFormulaDatasetConfig) {

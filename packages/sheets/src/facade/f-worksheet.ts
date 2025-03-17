@@ -183,7 +183,8 @@ export class FWorksheet extends FBaseInitialable {
      * ```
      */
     getRowDefaultStyle(index: number, keepRaw: boolean = false): Nullable<IStyleData> | string {
-        return this._worksheet.getRowStyle(index, keepRaw);
+        // TODO@VicKun4937: should use function overload here
+        return keepRaw ? this._worksheet.getRowStyle(index, keepRaw) : this._worksheet.getRowStyle(index);
     }
 
     /**
@@ -203,7 +204,8 @@ export class FWorksheet extends FBaseInitialable {
      * ```
      */
     getColumnDefaultStyle(index: number, keepRaw: boolean = false): Nullable<IStyleData> | string {
-        return this._worksheet.getColumnStyle(index, keepRaw);
+        // TODO@VicKun4937: should use function overload here
+        return keepRaw ? this._worksheet.getColumnStyle(index, keepRaw) : this._worksheet.getColumnStyle(index);
     }
 
     /**

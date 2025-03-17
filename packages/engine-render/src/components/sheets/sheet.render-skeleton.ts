@@ -1310,8 +1310,8 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
 
         const cell = this.worksheet.getCell(row, col) || this.worksheet.getCellRaw(row, col);
         const cellStyle = this._styles.getStyleByCell(cell);
-        const columnStyle = this.worksheet.getColumnStyle(col) as IStyleData;
-        const rowStyle = this.worksheet.getRowStyle(row) as IStyleData;
+        const columnStyle = this.worksheet.getColumnStyle(col);
+        const rowStyle = this.worksheet.getRowStyle(row);
         const defaultStyle = this.worksheet.getDefaultCellStyleInternal();
 
         const style = this._isRowStylePrecedeColumnStyle

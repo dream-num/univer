@@ -221,6 +221,14 @@ class DocumentDataModelSimple extends UnitModel<IDocumentData, UniverInstanceTyp
             this.snapshot.settings.zoomRatio = 1;
         }
     }
+
+    setDisabled(disabled: boolean) {
+        this.snapshot.disabled = disabled;
+    }
+
+    getDisabled() {
+        return this.snapshot.disabled;
+    }
 }
 
 export class DocumentDataModel extends DocumentDataModelSimple {

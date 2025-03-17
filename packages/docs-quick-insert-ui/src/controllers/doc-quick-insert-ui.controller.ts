@@ -31,7 +31,7 @@ export class DocQuickInsertUIController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(DocQuickInsertPopupService) private readonly _docQuickInsertPopupService: DocQuickInsertPopupService,
-        @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
+        @Inject(ComponentManager) private readonly _componentManager: ComponentManager
     ) {
         super();
 

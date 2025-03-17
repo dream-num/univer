@@ -84,7 +84,7 @@ export class DocQuickInsertPopupService extends Disposable {
     constructor(
         @Inject(DocCanvasPopManagerService) private readonly _docCanvasPopupManagerService: DocCanvasPopManagerService,
         @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService,
-        @Inject(ICommandService) private readonly _commandService: ICommandService,
+        @Inject(ICommandService) private readonly _commandService: ICommandService
     ) {
         super();
 

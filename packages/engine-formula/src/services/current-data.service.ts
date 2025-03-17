@@ -35,6 +35,7 @@ import type {
 import { createIdentifier, Disposable, Inject, IUniverInstanceService, LocaleService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
 import { convertUnitDataToRuntime } from '../basics/runtime';
 import { FormulaDataModel } from '../models/formula-data.model';
+import { ISheetRowFilteredService } from './sheet-row-filtered.service';
 
 export interface IFormulaDirtyData {
     forceCalculation: boolean;
@@ -108,6 +109,8 @@ export interface IFormulaCurrentConfigService {
     };
 
     getSheetRowColumnCount(unitId: string, sheetId: string): { rowCount: number; columnCount: number };
+
+    getFilteredOutRows(unitId: string, sheetId: string, startRow: number, endRow: number): number[];
 }
 
 export class FormulaCurrentConfigService extends Disposable implements IFormulaCurrentConfigService {
@@ -147,7 +150,8 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
-        @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel
+        @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel,
+        @Inject(ISheetRowFilteredService) private readonly _sheetRowFilteredService: ISheetRowFilteredService
     ) {
         super();
     }
@@ -276,6 +280,18 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         const { rowCount, columnCount } = snapshot;
 
         return { rowCount, columnCount };
+    }
+
+    getFilteredOutRows(unitId: string, sheetId: string, startRow: number, endRow: number) {
+        const filteredOutRows: number[] = [];
+
+        for (let r = startRow; r <= endRow; r++) {
+            if (this._sheetRowFilteredService.getRowFiltered(unitId, sheetId, r)) {
+                filteredOutRows.push(r);
+            }
+        }
+
+        return filteredOutRows;
     }
 
     load(config: IFormulaDatasetConfig) {

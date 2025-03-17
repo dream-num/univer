@@ -61,6 +61,8 @@ export class BaseReferenceObject extends ObjectClassType {
 
     private _unitStylesData: IUnitStylesData = {};
 
+    private _filteredOutRows: number[] = [];
+
     private _defaultUnitId: string = '';
 
     private _forcedUnitId: string = '';
@@ -303,6 +305,14 @@ export class BaseReferenceObject extends ObjectClassType {
 
     setUnitStylesData(unitStylesData: IUnitStylesData) {
         this._unitStylesData = unitStylesData;
+    }
+
+    getFilteredOutRows() {
+        return this._filteredOutRows;
+    }
+
+    setFilteredOutRows(filteredOutRows: number[]) {
+        this._filteredOutRows = filteredOutRows;
     }
 
     getRuntimeData() {

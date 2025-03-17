@@ -60,26 +60,15 @@ export class Subtotal extends BaseFunction {
 
     override needsReferenceObject = true;
 
+    override needsFilteredOutRows = true;
+
     override calculate(functionNum: FunctionVariantType, ...refs: FunctionVariantType[]) {
         if (functionNum.isError()) {
             return functionNum;
         }
 
         if (functionNum.isReferenceObject()) {
-            const result: BaseValueObject[][] = [];
-
-            (functionNum as BaseReferenceObject).iterator((valueObject, rowIndex, columnIndex) => {
-                if (result[rowIndex] == null) {
-                    result[rowIndex] = [];
-                }
-
-                result[rowIndex][columnIndex] = this._handleSingleObject(
-                    valueObject,
-                    ...refs
-                );
-            });
-
-            return createNewArray(result, result.length, result[0].length);
+            return (functionNum as BaseReferenceObject).toArrayValueObject().mapValue((valueObject) => this._handleSingleObject(valueObject, ...refs));
         }
 
         return this._handleSingleObject(functionNum as BaseValueObject, ...refs);
@@ -205,9 +194,15 @@ export class Subtotal extends BaseFunction {
                 return ErrorValueObject.create(ErrorType.VALUE);
             }
 
+            const filteredOutRows = (variant as BaseReferenceObject).getFilteredOutRows();
             const rowData = (variant as BaseReferenceObject).getRowData();
 
             (variant as BaseReferenceObject).iterator((valueObject, rowIndex) => {
+                // Filtered rows are always excluded.
+                if (filteredOutRows.includes(rowIndex)) {
+                    return true; // continue
+                }
+
                 if (ignoreHidden && this._isRowHidden(rowData, rowIndex)) {
                     return true;
                 }
@@ -230,9 +225,15 @@ export class Subtotal extends BaseFunction {
                 return ErrorValueObject.create(ErrorType.VALUE);
             }
 
+            const filteredOutRows = (variant as BaseReferenceObject).getFilteredOutRows();
             const rowData = (variant as BaseReferenceObject).getRowData();
 
             (variant as BaseReferenceObject).iterator((valueObject, rowIndex) => {
+                // Filtered rows are always excluded.
+                if (filteredOutRows.includes(rowIndex)) {
+                    return true; // continue
+                }
+
                 if (ignoreHidden && this._isRowHidden(rowData, rowIndex)) {
                     return true;
                 }
@@ -378,11 +379,17 @@ export class Subtotal extends BaseFunction {
                 return ErrorValueObject.create(ErrorType.VALUE);
             }
 
+            const filteredOutRows = (variant as BaseReferenceObject).getFilteredOutRows();
             const rowData = (variant as BaseReferenceObject).getRowData();
 
             let errorValue: Nullable<BaseValueObject>;
 
             (variant as BaseReferenceObject).iterator((valueObject, rowIndex) => {
+                // Filtered rows are always excluded.
+                if (filteredOutRows.includes(rowIndex)) {
+                    return true; // continue
+                }
+
                 if (ignoreHidden && this._isRowHidden(rowData, rowIndex)) {
                     return true; // continue
                 }

@@ -54,6 +54,7 @@ import { FunctionService, IFunctionService } from './services/function.service';
 import { GlobalComputingStatusService } from './services/global-computing-status.service';
 import { IOtherFormulaManagerService, OtherFormulaManagerService } from './services/other-formula-manager.service';
 import { FormulaRuntimeService, IFormulaRuntimeService } from './services/runtime.service';
+import { ISheetRowFilteredService, SheetRowFilteredService } from './services/sheet-row-filtered.service';
 import { ISuperTableService, SuperTableService } from './services/super-table.service';
 
 const PLUGIN_NAME = 'UNIVER_ENGINE_FORMULA_PLUGIN';
@@ -115,6 +116,7 @@ export class UniverFormulaEnginePlugin extends Plugin {
             [IFunctionService, { useClass: FunctionService }],
             [IDefinedNamesService, { useClass: DefinedNamesService }],
             [IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }],
+            [ISheetRowFilteredService, { useClass: SheetRowFilteredService }],
             [ISuperTableService, { useClass: SuperTableService }],
             [GlobalComputingStatusService],
             // Models

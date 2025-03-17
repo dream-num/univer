@@ -128,6 +128,10 @@ export class FunctionNode extends BaseAstNode {
                 continue;
             }
 
+            if (object.isReferenceObject() && this._functionExecutor.needsFilteredOutRows) {
+                this._setFilteredOutRows(object as BaseReferenceObject);
+            }
+
             // In the SUBTOTAL function, we need to get rowData information, we can only use ReferenceObject
             if (object.isReferenceObject() && !this._functionExecutor.needsReferenceObject) {
                 // Array converted from reference object needs to be marked
@@ -349,6 +353,18 @@ export class FunctionNode extends BaseAstNode {
 
     private _setSheetsInfo() {
         this._functionExecutor.setSheetsInfo(this._currentConfigService.getSheetsInfo());
+    }
+
+    private _setFilteredOutRows(referenceObject: BaseReferenceObject) {
+        const { startRow, endRow } = referenceObject.getRangePosition();
+        const filteredOutRows = this._currentConfigService.getFilteredOutRows(
+            referenceObject.getUnitId(),
+            referenceObject.getSheetId(),
+            startRow,
+            endRow
+        );
+
+        referenceObject.setFilteredOutRows(filteredOutRows);
     }
 }
 

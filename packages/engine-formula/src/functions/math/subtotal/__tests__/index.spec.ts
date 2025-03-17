@@ -268,6 +268,14 @@ describe('Test subtotal', () => {
             const result = calculate('=SUBTOTAL(9,A1:B2,C1:C2)');
             expect(result).toBe(ErrorType.NAME);
         });
+
+        it('FunctionNum ia array', () => {
+            const result = calculate('=SUBTOTAL(A1:B2,A1:B2)');
+            expect(result).toStrictEqual([
+                [2.5, 4],
+                [4, 4],
+            ]);
+        });
     });
 
     describe('Subtotal every function, function number is single number', () => {

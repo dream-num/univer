@@ -30,7 +30,7 @@ import {
 } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
 import { UniverDataValidationPlugin } from '@univerjs/data-validation';
-import { ActiveDirtyManagerService, DefinedNamesService, FormulaDataModel, IActiveDirtyManagerService, IDefinedNamesService, LexerTreeBuilder } from '@univerjs/engine-formula';
+import { ActiveDirtyManagerService, DefinedNamesService, FormulaDataModel, IActiveDirtyManagerService, IDefinedNamesService, ISheetRowFilteredService, LexerTreeBuilder, SheetRowFilteredService } from '@univerjs/engine-formula';
 
 import {
     RefRangeService,
@@ -128,6 +128,7 @@ export function createWorksheetTestBed(workbookData?: IWorkbookData, dependencie
                 [DataValidationCustomFormulaService],
                 [RegisterOtherFormulaService],
                 [IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }],
+                [ISheetRowFilteredService, { useClass: SheetRowFilteredService }],
                 [SheetsDataValidationValidatorService],
                 [SheetDataValidationModel],
             ] as Dependency[]).forEach((d) => {

@@ -19,6 +19,7 @@ import type { IFunctionNames } from '../basics/function';
 import type { BaseReferenceObject, FunctionVariantType, NodeValueType } from '../engine/reference-object/base-reference-object';
 import type { ArrayBinarySearchType } from '../engine/utils/compare';
 import type { ArrayValueObject } from '../engine/value-object/array-value-object';
+import type { BaseValueObject } from '../engine/value-object/base-value-object';
 import type { FormulaFunctionResultValueType, FormulaFunctionValueType } from '../engine/value-object/primitive-object';
 import type { FormulaDataModel } from '../models/formula-data.model';
 import type { IDefinedNameMapItem } from '../services/defined-names.service';
@@ -33,7 +34,7 @@ import { createNewArray } from '../engine/utils/array-object';
 import { ArrayOrderSearchType } from '../engine/utils/compare';
 import { serializeRangeToRefString } from '../engine/utils/reference';
 import { convertTonNumber } from '../engine/utils/value-object';
-import { type BaseValueObject, ErrorValueObject } from '../engine/value-object/base-value-object';
+import { ErrorValueObject } from '../engine/value-object/base-value-object';
 import { NullValueObject, NumberValueObject } from '../engine/value-object/primitive-object';
 
 export class BaseFunction {
@@ -78,6 +79,11 @@ export class BaseFunction {
      * Whether the function needs the number of rows and columns in the sheet
      */
     needsSheetRowColumnCount: boolean = false;
+
+    /**
+     * Whether the function needs to filter out rows
+     */
+    needsFilteredOutRows: boolean = false;
 
     /**
      * Minimum number of parameters

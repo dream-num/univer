@@ -54,6 +54,7 @@ import { DefinedNamesService, IDefinedNamesService } from '../../services/define
 import { FunctionService, IFunctionService } from '../../services/function.service';
 import { IOtherFormulaManagerService, OtherFormulaManagerService } from '../../services/other-formula-manager.service';
 import { FormulaRuntimeService, IFormulaRuntimeService } from '../../services/runtime.service';
+import { ISheetRowFilteredService, SheetRowFilteredService } from '../../services/sheet-row-filtered.service';
 import { ISuperTableService, SuperTableService } from '../../services/super-table.service';
 
 const getTestWorkbookData = (): IWorkbookData => {
@@ -179,6 +180,7 @@ export function createFunctionTestBed(workbookData?: IWorkbookData, dependencies
             injector.add([IOtherFormulaManagerService, { useClass: OtherFormulaManagerService }]);
             injector.add([IDefinedNamesService, { useClass: DefinedNamesService }]);
             injector.add([ISuperTableService, { useClass: SuperTableService }]);
+            injector.add([ISheetRowFilteredService, { useClass: SheetRowFilteredService }]);
 
             injector.add([IFormulaDependencyGenerator, { useClass: FormulaDependencyGenerator }]);
             injector.add([Interpreter]);

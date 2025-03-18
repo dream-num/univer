@@ -16,7 +16,7 @@
 
 import type { MenuConfig } from '@univerjs/ui';
 
-export const SHEETS_NUMFMT_UI_PLUGIN_CONFIG_KEY = 'sheets-numfmt.config';
+export const SHEETS_NUMFMT_UI_PLUGIN_CONFIG_KEY = 'sheets-numfmt-ui.config';
 
 export const configSymbol = Symbol(SHEETS_NUMFMT_UI_PLUGIN_CONFIG_KEY);
 

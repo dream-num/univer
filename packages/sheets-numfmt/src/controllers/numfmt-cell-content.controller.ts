@@ -140,7 +140,10 @@ export class SheetsNumfmtCellContentController extends Disposable {
                 if (isTextFormat(numfmtValue.pattern)) {
                     // If the user has disabled the text format mark, do not show it
                     if (this._configService.getConfig<IUniverSheetsNumfmtConfig>(SHEETS_NUMFMT_PLUGIN_CONFIG_KEY)?.disableTextFormatMark) {
-                        return next(cell);
+                        return next({
+                            ...cell,
+                            t: CellValueType.STRING,
+                        });
                     }
 
                     return next({

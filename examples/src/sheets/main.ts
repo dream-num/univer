@@ -116,7 +116,10 @@ function createNewInstance() {
 
     univer.registerPlugin(UniverSheetsPlugin, { notExecuteFormula: true });
     univer.registerPlugin(UniverSheetsUIPlugin);
-    univer.registerPlugin(UniverSheetsNumfmtPlugin);
+    univer.registerPlugin(UniverSheetsNumfmtPlugin, {
+        disableTextFormatAlert: true,
+        disableTextFormatMark: true,
+    });
     univer.registerPlugin(UniverSheetsZenEditorPlugin);
     univer.registerPlugin(UniverFormulaEnginePlugin, { notExecuteFormula: true });
     univer.registerPlugin(UniverSheetsNumfmtUIPlugin);

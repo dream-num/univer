@@ -82,11 +82,14 @@ export const QuickInsertPopup = () => {
     const filterKeyword = useObservable(docQuickInsertPopupService.filterKeyword$, '');
     const currentPopup = useObservable(docQuickInsertPopupService.editPopup$);
     const menus = useObservable<DocPopupMenu[]>(currentPopup?.popup.menus$, []);
-    const [filteredMenus, setFilteredMenus] = useState<DocPopupMenu[]>([]);
 
     const translatedMenus = useMemo(() => {
         return translateMenus(menus, localeService);
     }, [menus]);
+
+    const [filteredMenus, setFilteredMenus] = useState<DocPopupMenu[]>(() => {
+        return filterMenusByKeyword(translatedMenus, filterKeyword.toLowerCase());
+    });
 
     useEffect(() => {
         const id = requestIdleCallback(() => {

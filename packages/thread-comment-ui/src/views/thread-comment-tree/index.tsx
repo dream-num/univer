@@ -186,7 +186,7 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                 : (
                     <div className={styles.threadCommentItemContent}>
                         {transformDocument2TextNodes(item.text).map((paragraph, i) => (
-                            <div key={i}>
+                            <div key={i} className="univer-break-words">
                                 {paragraph.map((item, i) => {
                                     switch (item.type) {
                                         case 'mention':

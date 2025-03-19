@@ -265,7 +265,7 @@ export function FormulaBar(props: IProps) {
             }}
         >
             <div className={styles.nameRanges}>
-                <DefinedName disable={disableDefinedName??editDisable} />
+                <DefinedName disable={disableDefinedName ?? editDisable} />
             </div>
 
             <div className={styles.formulaBar}>

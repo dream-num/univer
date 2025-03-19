@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { ICommand, IRange } from '@univerjs/core';
+import type { ICommand, IMutationInfo, IRange } from '@univerjs/core';
 import type {
     ISetSelectionsOperationParams,
 } from '@univerjs/sheets';
-import { CommandType, Direction, ICommandService, IUniverInstanceService, RANGE_TYPE, Rectangle, Tools } from '@univerjs/core';
+import { cellToRange, CommandType, Direction, ICommandService, IUniverInstanceService, RANGE_TYPE, Rectangle, sequence, sequenceExecute, Tools } from '@univerjs/core';
 
 import { IRenderManagerService } from '@univerjs/engine-render';
 import {
@@ -28,6 +28,7 @@ import {
     getSheetCommandTarget,
     SelectionMoveType,
     SetSelectionsOperation,
+    SheetInterceptorService,
 } from '@univerjs/sheets';
 import { KeyCode } from '@univerjs/ui';
 import { SelectAllService } from '../../services/select-all/select-all.service';
@@ -445,16 +446,35 @@ export const SelectAllCommand: ICommand<ISelectAllCommandParams> = {
             selectAllService.rangesStack.push(destRange);
         }
 
-        return accessor.get(ICommandService).executeCommand(SetSelectionsOperation.id, {
-            unitId,
-            subUnitId,
-            reveal: true,
-            selections: [
-                {
-                    range: destRange,
-                    primary, // this remains unchanged
-                },
-            ],
+        const redos: IMutationInfo[] = [];
+
+        redos.push({
+            id: SetSelectionsOperation.id, params: {
+                unitId,
+                subUnitId,
+                reveal: true,
+                selections: [
+                    {
+                        range: destRange,
+                        primary, // this remains unchanged
+                    },
+                ],
+            }
         });
+
+        const sheetInterceptorService = accessor.get(SheetInterceptorService);
+        const interceptor = sheetInterceptorService.onCommandExecute({
+            id: SelectAllCommand.id,
+            params: { range }
+        })
+
+        if (interceptor.redos.length) {
+            redos.push(...interceptor.redos);
+        }
+
+        const commandService = accessor.get(ICommandService);
+        sequenceExecute(redos, commandService);
+
+        return true
     },
 };

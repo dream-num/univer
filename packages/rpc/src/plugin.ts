@@ -81,7 +81,7 @@ export class UniverRPCMainThreadPlugin extends Plugin {
         }
 
         const initConfig = this._configService.getConfig<string>(WORKER_CONFIG_INIT_KEY);
-        const worker = workerURL instanceof Worker ? workerURL : new Worker(`${workerURL}?${initConfig}`);
+        const worker = workerURL instanceof Worker ? workerURL : new Worker(initConfig?.length ? `${workerURL}?${initConfig}` : workerURL);
         this._internalWorker = workerURL instanceof Worker ? null : worker;
 
         const messageProtocol = createWebWorkerMessagePortOnMain(worker);

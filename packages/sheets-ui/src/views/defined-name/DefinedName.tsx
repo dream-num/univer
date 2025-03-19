@@ -67,6 +67,7 @@ export function DefinedName({ disable }: { disable: boolean }) {
                         <DefinedNameOverlay />
                     </div>
                 )}
+                disabled={disable}
             >
                 <a
                     className={clsx(`

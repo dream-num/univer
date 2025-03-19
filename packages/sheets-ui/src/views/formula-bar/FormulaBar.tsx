@@ -42,10 +42,11 @@ enum ArrowDirection {
 
 interface IProps {
     className?: string;
+    disableDefinedName?: boolean;
 }
 
 export function FormulaBar(props: IProps) {
-    const { className } = props;
+    const { className, disableDefinedName } = props;
 
     const [iconStyle, setIconStyle] = useState<string>(styles.formulaGrey);
     const [arrowDirection, setArrowDirection] = useState<ArrowDirection>(ArrowDirection.Down);
@@ -264,7 +265,7 @@ export function FormulaBar(props: IProps) {
             }}
         >
             <div className={styles.nameRanges}>
-                <DefinedName disable={editDisable} />
+                <DefinedName disable={disableDefinedName ?? editDisable} />
             </div>
 
             <div className={styles.formulaBar}>

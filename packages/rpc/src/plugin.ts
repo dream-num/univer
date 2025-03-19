@@ -19,7 +19,7 @@ import type {
     IUniverRPCMainThreadConfig,
     IUniverRPCWorkerThreadConfig,
 } from './controllers/config.schema';
-import { IConfigService, Inject, Injector, merge, Plugin } from '@univerjs/core';
+import { IConfigService, Inject, Injector, merge, Plugin, WORKER_CONFIG_INIT_KEY } from '@univerjs/core';
 import {
     defaultPluginMainThreadConfig,
     defaultPluginWorkerThreadConfig,
@@ -80,7 +80,8 @@ export class UniverRPCMainThreadPlugin extends Plugin {
             throw new Error('[UniverRPCMainThreadPlugin]: The workerURL is required for the RPC main thread plugin.');
         }
 
-        const worker = workerURL instanceof Worker ? workerURL : new Worker(workerURL);
+        const initConfig = this._configService.getConfig<string>(WORKER_CONFIG_INIT_KEY);
+        const worker = workerURL instanceof Worker ? workerURL : new Worker(`${workerURL}?${initConfig}`);
         this._internalWorker = workerURL instanceof Worker ? null : worker;
 
         const messageProtocol = createWebWorkerMessagePortOnMain(worker);

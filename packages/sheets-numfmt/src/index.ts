@@ -24,6 +24,7 @@ export { getCurrencyType } from './utils/currency';
 export { currencySymbols } from './base/const/currency-symbols';
 export { SheetsNumfmtCellContentController } from './controllers/numfmt-cell-content.controller';
 export { getCurrencyFormatOptions, getCurrencyOptions, getDateFormatOptions, getNumberFormatOptions } from './utils/options';
+export { type IUniverSheetsNumfmtConfig, SHEETS_NUMFMT_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 
 // #region - all commands
 

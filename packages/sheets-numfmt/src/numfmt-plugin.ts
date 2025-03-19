@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { DependentOn, ICommandService, Inject, Injector, Plugin, registerDependencies, touchDependencies, UniverInstanceType } from '@univerjs/core';
+import type { IUniverSheetsNumfmtConfig } from './controllers/config.schema';
+import { DependentOn, ICommandService, IConfigService, Inject, Injector, merge, Plugin, registerDependencies, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { SHEET_NUMFMT_PLUGIN } from './base/const/plugin-name';
 import { AddDecimalCommand } from './commands/commands/add-decimal.command';
@@ -22,6 +23,7 @@ import { SetCurrencyCommand } from './commands/commands/set-currency.command';
 import { SetNumfmtCommand } from './commands/commands/set-numfmt.command';
 import { SetPercentCommand } from './commands/commands/set-percent.command';
 import { SubtractDecimalCommand } from './commands/commands/subtract-decimal.command';
+import { defaultPluginConfig, SHEETS_NUMFMT_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { SheetsNumfmtCellContentController } from './controllers/numfmt-cell-content.controller';
 import { NumfmtCurrencyController } from './controllers/numfmt-currency.controller';
 import { MenuCurrencyService } from './service/menu.currency.service';
@@ -32,11 +34,21 @@ export class UniverSheetsNumfmtPlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(
-        private readonly _config: undefined = undefined,
+        private readonly _config: Partial<IUniverSheetsNumfmtConfig> = defaultPluginConfig,
         @Inject(Injector) override readonly _injector: Injector,
+        @IConfigService private readonly _configService: IConfigService,
         @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
+
+        // Manage the plugin configuration.
+        const { ...rest } = merge(
+            {},
+            defaultPluginConfig,
+            this._config
+        );
+
+        this._configService.setConfig(SHEETS_NUMFMT_PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {

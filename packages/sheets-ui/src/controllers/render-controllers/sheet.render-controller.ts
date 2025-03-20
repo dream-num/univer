@@ -354,7 +354,8 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
         const { rowHeader, columnHeader } = worksheet.getConfig();
         const { viewMain } = this._initViewports(scene, rowHeader, columnHeader);
 
-        const scrollConfig: IScrollBarProps | undefined = (this._configService.getConfig(SHEETS_UI_PLUGIN_CONFIG_KEY) as Partial<IUniverSheetsUIConfig>).scrollConfig;
+        const sheetsUIConfig = this._configService.getConfig(SHEETS_UI_PLUGIN_CONFIG_KEY) as Partial<IUniverSheetsUIConfig>;
+        const scrollConfig: IScrollBarProps | undefined = sheetsUIConfig?.scrollConfig;
         const _scrollBar = new ScrollBar(viewMain, scrollConfig);
 
         scene.attachControl();

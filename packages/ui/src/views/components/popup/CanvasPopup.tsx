@@ -74,6 +74,7 @@ const SingleCanvasPopup = ({ popup, children }: ISingleCanvasPopupProps) => {
 
         return () => anchorRectSub.unsubscribe();
     }, [canvasElement, hideOnInvisible, anchorRect$, hiddenRects$]);
+
     if ((hidden && hiddenType === 'destroy')) {
         return null;
     }
@@ -104,6 +105,7 @@ export function CanvasPopup() {
     return popups.map((item) => {
         const [key, popup] = item;
         const Component = componentManager.get(popup.componentKey);
+
         return (
             <SingleCanvasPopup
                 key={key}

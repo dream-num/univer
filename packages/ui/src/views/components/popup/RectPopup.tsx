@@ -121,29 +121,50 @@ function RectPopup(props: IRectPopupProps) {
     const excludeRectsRef = excludeRects;
     const anchorRectRef = useRef<IAbsolutePosition | undefined>(undefined);
 
+    function updatePosition(position: IAbsolutePosition) {
+        requestAnimationFrame(() => {
+            if (!nodeRef.current) return;
+
+            const { clientWidth, clientHeight } = nodeRef.current;
+            const innerWidth = window.innerWidth;
+            const innerHeight = window.innerHeight;
+
+            positionRef.current = calcPopupPosition(
+                {
+                    position,
+                    width: clientWidth,
+                    height: clientHeight,
+                    containerWidth: innerWidth,
+                    containerHeight: innerHeight,
+                    direction,
+                }
+            );
+
+            nodeRef.current.style.top = `${positionRef.current.top}px`;
+            nodeRef.current.style.left = `${positionRef.current.left}px`;
+        });
+    }
+
+    useEffect(() => {
+        let observer: ResizeObserver | null;
+        if (nodeRef.current) {
+            observer = new ResizeObserver(() => {
+                if (!anchorRectRef.current) return;
+                updatePosition(anchorRectRef.current);
+            });
+
+            observer.observe(nodeRef.current);
+        }
+
+        return () => {
+            observer?.disconnect();
+        };
+    }, [nodeRef.current]);
+
     useEffect(() => {
         const anchorRectSub = anchorRect$.subscribe((anchorRect) => {
             anchorRectRef.current = anchorRect;
-            requestAnimationFrame(() => {
-                if (!nodeRef.current) return;
-
-                const { clientWidth, clientHeight } = nodeRef.current;
-                const innerWidth = window.innerWidth;
-                const innerHeight = window.innerHeight;
-
-                positionRef.current = calcPopupPosition(
-                    {
-                        position: anchorRect,
-                        width: clientWidth,
-                        height: clientHeight,
-                        containerWidth: innerWidth,
-                        containerHeight: innerHeight,
-                        direction,
-                    }
-                );
-                nodeRef.current.style.top = `${positionRef.current.top}px`;
-                nodeRef.current.style.left = `${positionRef.current.left}px`;
-            });
+            updatePosition(anchorRect);
         });
 
         return () => anchorRectSub.unsubscribe();

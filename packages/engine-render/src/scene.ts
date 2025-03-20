@@ -71,7 +71,6 @@ export class Scene extends Disposable {
 
     onTransformChange$ = new EventSubject<ITransformChangeState>();
     onFileLoaded$ = new EventSubject<string>();
-    onClick$ = new EventSubject<IPointerEvent | IMouseEvent>();
     onPointerDown$ = new EventSubject<IPointerEvent | IMouseEvent>();
     onPointerMove$ = new EventSubject<IPointerEvent | IMouseEvent>();
     onPointerUp$ = new EventSubject<IPointerEvent | IMouseEvent>();
@@ -83,6 +82,8 @@ export class Scene extends Disposable {
     onDragOver$ = new EventSubject<IDragEvent>();
     onDragLeave$ = new EventSubject<IDragEvent>();
     onDrop$ = new EventSubject<IDragEvent>();
+    onClick$ = new EventSubject<IPointerEvent | IMouseEvent>();
+    onSingleClick$ = new EventSubject<IPointerEvent | IMouseEvent>();
     onDblclick$ = new EventSubject<IPointerEvent | IMouseEvent>();
     onTripleClick$ = new EventSubject<IPointerEvent | IMouseEvent>();
     onMouseWheel$ = new EventSubject<IWheelEvent>();
@@ -954,6 +955,7 @@ export class Scene extends Disposable {
         this.onDragLeave$.complete();
         this.onDrop$.complete();
 
+        this.onSingleClick$.complete();
         this.onDblclick$.complete();
         this.onTripleClick$.complete();
         this.onMouseWheel$.complete();
@@ -1072,7 +1074,7 @@ export class Scene extends Disposable {
 
     triggerSingleClick(evt: IPointerEvent | IMouseEvent) {
         if (
-            !this.onDblclick$.emitEvent(evt)?.stopPropagation &&
+            !this.onSingleClick$.emitEvent(evt)?.stopPropagation &&
             this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER
         ) {
             (this._parent as SceneViewer)?.triggerSingleClick(evt);
@@ -1083,7 +1085,7 @@ export class Scene extends Disposable {
 
     triggerClick(evt: IPointerEvent | IMouseEvent) {
         if (
-            !this.onDblclick$.emitEvent(evt)?.stopPropagation &&
+            !this.onClick$.emitEvent(evt)?.stopPropagation &&
             this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER
         ) {
             (this._parent as SceneViewer)?.triggerClick(evt);

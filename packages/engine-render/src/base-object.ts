@@ -71,6 +71,7 @@ export abstract class BaseObject extends Disposable {
     onPointerLeave$ = new EventSubject<IPointerEvent | IMouseEvent>();
     onPointerEnter$ = new EventSubject<IPointerEvent | IMouseEvent>();
 
+    onSingleClick$ = new EventSubject<IPointerEvent | IMouseEvent>();
     onClick$ = new EventSubject<IPointerEvent | IMouseEvent>();
     onDblclick$ = new EventSubject<IPointerEvent | IMouseEvent>();
     onTripleClick$ = new EventSubject<IPointerEvent | IMouseEvent>();
@@ -650,7 +651,7 @@ export abstract class BaseObject extends Disposable {
     }
 
     triggerSingleClick(evt: IPointerEvent | IMouseEvent) {
-        if (!this.onClick$.emitEvent(evt)?.stopPropagation) {
+        if (!this.onSingleClick$.emitEvent(evt)?.stopPropagation) {
             this._parent?.triggerSingleClick(evt);
             return false;
         }
@@ -779,6 +780,7 @@ export abstract class BaseObject extends Disposable {
         this.onDragOver$.complete();
         this.onDragEnter$.complete();
         this.onDrop$.complete();
+        this.onSingleClick$.complete();
         this.onClick$.complete();
         this.onDblclick$.complete();
         this.onTripleClick$.complete();

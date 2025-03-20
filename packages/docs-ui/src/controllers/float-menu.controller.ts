@@ -16,7 +16,7 @@
 
 import type { DocumentDataModel, IDisposable, ITextRangeParam, Nullable } from '@univerjs/core';
 import type { INodePosition, ITextRangeWithStyle } from '@univerjs/engine-render';
-import { deepCompare, Disposable, Inject, isInternalEditorID, IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
+import { DataStreamTreeTokenType, deepCompare, Disposable, Inject, isInternalEditorID, IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { ComponentManager } from '@univerjs/ui';
 import { FloatToolbar } from '../components/float-toolbar/FloatToolbar';
@@ -75,6 +75,10 @@ export class FloatMenuController extends Disposable {
     private _showFloatMenu(unitId: string, range: ITextRangeParam) {
         const documentDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
         if (!documentDataModel || documentDataModel.getDisabled()) {
+            return;
+        }
+
+        if (range.endOffset - range.startOffset === 1 && documentDataModel.getBody()?.dataStream[range.startOffset] === DataStreamTreeTokenType.CUSTOM_BLOCK) {
             return;
         }
 

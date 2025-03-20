@@ -649,6 +649,14 @@ export abstract class BaseObject extends Disposable {
         return true;
     }
 
+    triggerSingleClick(evt: IPointerEvent | IMouseEvent) {
+        if (!this.onClick$.emitEvent(evt)?.stopPropagation) {
+            this._parent?.triggerSingleClick(evt);
+            return false;
+        }
+        return true;
+    }
+
     triggerClick(evt: IPointerEvent | IMouseEvent) {
         if (!this.onClick$.emitEvent(evt)?.stopPropagation) {
             this._parent?.triggerClick(evt);

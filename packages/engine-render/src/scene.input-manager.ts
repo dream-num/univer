@@ -119,9 +119,30 @@ export class InputManager extends Disposable {
         }
     }
 
+    private _clickTimeout: ReturnType<typeof setTimeout> | null = null;
+    private _clickCount = 0;
     _onClick(evt: IPointerEvent) {
         if (evt.pointerId === undefined) {
             (evt as unknown as PointerEvent).pointerId = 0;
+        }
+
+        this._clickCount++;
+        if (!this._clickTimeout) {
+            this._clickTimeout = setTimeout(() => {
+                if (this._clickCount === 1) {
+                    const currentObject = this._getObjectAtPos(evt.offsetX, evt.offsetY);
+                    const isStop = currentObject?.triggerSingleClick(evt);
+                    if (!isStop && this._shouldDispatchEventToScene(currentObject)) {
+                        this._scene.onPointerDown$.emitEvent(evt);
+                    }
+                } else if (this._clickCount === 2) {
+                    // ....
+                }
+                // reset click state
+                clearTimeout(this._clickTimeout as ReturnType<typeof setTimeout>);
+                this._clickTimeout = null;
+                this._clickCount = 0;
+            }, 300);
         }
 
         const currentObject = this._getObjectAtPos(evt.offsetX, evt.offsetY);
@@ -318,6 +339,9 @@ export class InputManager extends Disposable {
                         break;
                     case 'click':
                         this._onClick(evt as IPointerEvent);
+                        break;
+                    case 'dblclick':
+                        this._onDblClick(evt as IPointerEvent);
                         break;
                     case 'pointerout':
                         this._onPointerOut(evt as IPointerEvent);

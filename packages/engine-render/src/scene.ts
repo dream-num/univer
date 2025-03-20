@@ -1070,6 +1070,17 @@ export class Scene extends Disposable {
         return true;
     }
 
+    triggerSingleClick(evt: IPointerEvent | IMouseEvent) {
+        if (
+            !this.onDblclick$.emitEvent(evt)?.stopPropagation &&
+            this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER
+        ) {
+            (this._parent as SceneViewer)?.triggerSingleClick(evt);
+            return false;
+        }
+        return true;
+    }
+
     triggerClick(evt: IPointerEvent | IMouseEvent) {
         if (
             !this.onDblclick$.emitEvent(evt)?.stopPropagation &&

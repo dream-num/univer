@@ -71,6 +71,7 @@ export class Scene extends Disposable {
 
     onTransformChange$ = new EventSubject<ITransformChangeState>();
     onFileLoaded$ = new EventSubject<string>();
+    onClick$ = new EventSubject<IPointerEvent | IMouseEvent>();
     onPointerDown$ = new EventSubject<IPointerEvent | IMouseEvent>();
     onPointerMove$ = new EventSubject<IPointerEvent | IMouseEvent>();
     onPointerUp$ = new EventSubject<IPointerEvent | IMouseEvent>();
@@ -939,7 +940,7 @@ export class Scene extends Disposable {
         this._transformer = null;
 
         this.onFileLoaded$.complete();
-
+        this.onClick$.complete();
         this.onPointerDown$.complete();
         this.onPointerMove$.complete();
         this.onPointerUp$.complete();
@@ -1069,12 +1070,12 @@ export class Scene extends Disposable {
         return true;
     }
 
-    triggerPointerMove(evt: IPointerEvent | IMouseEvent) {
+    triggerClick(evt: IPointerEvent | IMouseEvent) {
         if (
-            !this.onPointerMove$.emitEvent(evt)?.stopPropagation &&
+            !this.onDblclick$.emitEvent(evt)?.stopPropagation &&
             this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER
         ) {
-            (this._parent as SceneViewer)?.triggerPointerMove(evt);
+            (this._parent as SceneViewer)?.triggerClick(evt);
             return false;
         }
         return true;
@@ -1097,6 +1098,17 @@ export class Scene extends Disposable {
             this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER
         ) {
             (this._parent as SceneViewer)?.triggerTripleClick(evt);
+            return false;
+        }
+        return true;
+    }
+
+    triggerPointerMove(evt: IPointerEvent | IMouseEvent) {
+        if (
+            !this.onPointerMove$.emitEvent(evt)?.stopPropagation &&
+            this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER
+        ) {
+            (this._parent as SceneViewer)?.triggerPointerMove(evt);
             return false;
         }
         return true;

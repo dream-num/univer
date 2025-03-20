@@ -618,6 +618,28 @@ describe('lexer nodeMaker test', () => {
                 ]
             );
         });
+
+        it('test sequence ref with brackets', () => {
+            expect(lexerTreeBuilder.sequenceNodesBuilder('(A1,A10)')).toStrictEqual(
+                [
+                    '(',
+                    {
+                        nodeType: 4,
+                        token: 'A1',
+                        startIndex: 1,
+                        endIndex: 2,
+                    },
+                    ',',
+                    {
+                        nodeType: 4,
+                        token: 'A10',
+                        startIndex: 4,
+                        endIndex: 7,
+                    },
+                    ')',
+                ]
+            );
+        });
     });
 
     describe('convertRefersToAbsolute', () => {

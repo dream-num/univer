@@ -387,7 +387,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
     }
 
     // You can double-click on the cell or input content by keyboard to put the cell into the edit state.
-    // eslint-disable-next-line complexity
+
     private _handleEditorVisible(param: IEditorBridgeServiceVisibleParam) {
         const { eventType, keycode } = param;
         // Change `CursorChange` to changed status, when formula bar clicked.
@@ -436,8 +436,31 @@ export class EditingRenderController extends Disposable implements IRenderModule
             });
         });
 
-        // f2, continue to edit
-        if (eventType === DeviceInputEventType.Keyboard && keycode === KeyCode.F2) {
+        const clearAndEdit = () => {
+            this._emptyDocumentDataModel(documentDataModel.getSnapshot().documentStyle, !!isInArrayFormulaRange);
+            document.makeDirty();
+
+            // @JOCS, Why calculate here?
+            if (keycode === KeyCode.BACKSPACE || eventType === DeviceInputEventType.Dblclick) {
+                skeleton.calculate();
+                this._editorBridgeService.changeEditorDirty(true);
+            }
+
+            this._textSelectionManagerService.replaceDocRanges(
+                [{
+                    startOffset: 0,
+                    endOffset: 0,
+                }],
+                {
+                    unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+                    subUnitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+                }
+            );
+        };
+        if (this._isCellImageData(documentDataModel.getSnapshot())) {
+            clearAndEdit();
+        } else if (eventType === DeviceInputEventType.Keyboard && keycode === KeyCode.F2) {
+            // f2, continue to edit
             document.makeDirty();
             this._textSelectionManagerService.replaceDocRanges([
                 {
@@ -461,25 +484,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
             eventType === DeviceInputEventType.Keyboard ||
             (eventType === DeviceInputEventType.Dblclick && isInArrayFormulaRange)
         ) {
-            this._emptyDocumentDataModel(documentDataModel.getSnapshot().documentStyle, !!isInArrayFormulaRange);
-            document.makeDirty();
-
-            // @JOCS, Why calculate here?
-            if (keycode === KeyCode.BACKSPACE || eventType === DeviceInputEventType.Dblclick) {
-                skeleton.calculate();
-                this._editorBridgeService.changeEditorDirty(true);
-            }
-
-            this._textSelectionManagerService.replaceDocRanges(
-                [{
-                    startOffset: 0,
-                    endOffset: 0,
-                }],
-                {
-                    unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
-                    subUnitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
-                }
-            );
+            clearAndEdit();
         } else if (eventType === DeviceInputEventType.Dblclick) {
             if (this._contextService.getContextValue(FOCUSING_EDITOR_INPUT_FORMULA)) {
                 return;
@@ -552,7 +557,9 @@ export class EditingRenderController extends Disposable implements IRenderModule
             return;
         }
 
-        if (snapshot) {
+        const isEmpty = snapshot?.body?.dataStream.length === 2;
+        const isCellImage = editCellState.documentLayoutObject.documentModel ? this._isCellImageData(editCellState.documentLayoutObject.documentModel.getSnapshot()) : false;
+        if (snapshot && !(isEmpty && isCellImage)) {
             const res = await this._submitCellData(snapshot);
             // if the submit was rejected, don't move selection
             if (res === false) {
@@ -566,6 +573,11 @@ export class EditingRenderController extends Disposable implements IRenderModule
 
     private _getEditorObject() {
         return getEditorObject(this._editorBridgeService.getCurrentEditorId(), this._renderManagerService);
+    }
+
+    private _isCellImageData(snapshot: IDocumentData) {
+        const drawingCount = snapshot.drawingsOrder?.length ?? 0;
+        return drawingCount > 0;
     }
 
     submitCellData(documentDataModel: DocumentDataModel) {

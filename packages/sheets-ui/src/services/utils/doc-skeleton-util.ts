@@ -150,6 +150,7 @@ export const calculateDocSkeletonRects = (docSkeleton: DocumentSkeleton, padding
                     left: drawings!.get(key)!.aLeft,
                     right: drawings!.get(key)!.aLeft + drawings!.get(key)!.height,
                 },
+                drawing: drawings.get(key)!,
             }))
             : [],
     };

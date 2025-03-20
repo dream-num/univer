@@ -45,6 +45,7 @@ export class HoverRenderController extends Disposable implements IRenderModule {
     // eslint-disable-next-line max-lines-per-function
     private _initPointerEvent() {
         const disposeSet = new DisposableCollection();
+        // eslint-disable-next-line max-lines-per-function
         const handleSkeletonChange = (skeletonParam: Nullable<ISheetSkeletonManagerParam>) => {
             disposeSet.dispose();
 
@@ -72,6 +73,9 @@ export class HoverRenderController extends Disposable implements IRenderModule {
 
             disposeSet.add(mainComponent.onPointerUp$.subscribeEvent((evt) => {
                 this._hoverManagerService.triggerPointerUp(unitId, evt);
+            }));
+
+            disposeSet.add(mainComponent.onClick$.subscribeEvent((evt) => {
                 this._hoverManagerService.triggerClick(unitId, evt.offsetX, evt.offsetY);
             }));
 

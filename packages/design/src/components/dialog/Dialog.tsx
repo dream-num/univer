@@ -21,6 +21,7 @@ import RcDialog from 'rc-dialog';
 import React, { useContext, useRef, useState } from 'react';
 
 import Draggable from 'react-draggable';
+import { Button } from '../button';
 import { ConfigContext } from '../config-provider/ConfigProvider';
 import styles from './index.module.less';
 
@@ -118,6 +119,12 @@ export interface IDialogProps {
      * @default true
      */
     keyboard?: boolean;
+
+    showOk?: boolean;
+    showCancel?: boolean;
+
+    onOk?: () => void;
+    onCancel?: () => void;
 }
 
 export function Dialog(props: IDialogProps) {
@@ -133,19 +140,23 @@ export function Dialog(props: IDialogProps) {
         defaultPosition,
         destroyOnClose = false,
         preservePositionOnDestroy = false,
-        footer,
+        footer: propFooter,
         onClose,
         mask,
         keyboard = true,
         dialogStyles,
         closable,
         maskClosable,
+        showOk,
+        showCancel,
+        onOk,
+        onCancel,
     } = props;
+    const { locale } = useContext(ConfigContext);
     const [dragDisabled, setDragDisabled] = useState(false);
     const [positionOffset, setPositionOffset] = useState<{ x: number; y: number } | null>(null);
 
     const { mountContainer } = useContext(ConfigContext);
-
     const TitleIfDraggable = draggable
         ? (
             <div
@@ -176,6 +187,15 @@ export function Dialog(props: IDialogProps) {
         : (
             <div className={styles.dialogTitleContent}>{title}</div>
         );
+
+    const footer = propFooter ?? (showCancel || showOk
+        ? (
+            <div>
+                <Button className="univer-mr-2" onClick={onCancel ?? onClose}>{locale?.Confirm?.cancel ?? 'Cancel'}</Button>
+                <Button type="primary" onClick={onOk}>{locale?.Confirm?.confirm ?? 'Ok'}</Button>
+            </div>
+        )
+        : null);
 
     const modalRender = (modal: React.ReactNode) => {
         const [bounds, setBounds] = useState({ left: 0, top: 0, bottom: 0, right: 0 });

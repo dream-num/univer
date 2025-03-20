@@ -15,7 +15,7 @@
  */
 
 import type { ICustomRange, IParagraph, IPosition, Nullable, Workbook, Worksheet } from '@univerjs/core';
-import type { IBoundRectNoAngle, IMouseEvent, IPointerEvent, IRender } from '@univerjs/engine-render';
+import type { IBoundRectNoAngle, IDocumentSkeletonDrawing, IMouseEvent, IPointerEvent, IRender } from '@univerjs/engine-render';
 import type { ISheetLocation, ISheetLocationBase } from '@univerjs/sheets';
 import type { ISheetSkeletonManagerParam } from './sheet-skeleton-manager.service';
 import { Disposable, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
@@ -56,7 +56,7 @@ export interface IHoverRichTextInfo extends IHoverCellPosition {
      */
     rect?: Nullable<IBoundRectNoAngle>;
 
-    drawing?: Nullable<string>;
+    drawing?: Nullable<{ drawingId: string; rect: IBoundRectNoAngle; drawing: IDocumentSkeletonDrawing }>;
 }
 
 export interface IHoverRichTextPosition extends ISheetLocationBase {
@@ -73,7 +73,7 @@ export interface IHoverRichTextPosition extends ISheetLocationBase {
      */
     rect?: Nullable<IBoundRectNoAngle>;
 
-    drawing?: Nullable<string>;
+    drawing?: Nullable<{ drawingId: string; rect: IBoundRectNoAngle; drawing: IDocumentSkeletonDrawing }>;
 
     event?: IMouseEvent | IPointerEvent;
 }
@@ -122,6 +122,19 @@ export class HoverManagerService extends Disposable {
         )
     );
 
+    currentRichTextNoDistinct$ = this._currentRichText$.pipe(
+        map((cell) => cell && {
+            unitId: cell.location.unitId,
+            subUnitId: cell.location.subUnitId,
+            row: cell.location.row,
+            col: cell.location.col,
+            customRange: cell.customRange,
+            bullet: cell.bullet,
+            rect: cell.rect,
+            drawing: cell.drawing,
+        } as IHoverRichTextPosition)
+    );
+
     // Notify when hovering over different cells and different custom range or bullet
     currentRichText$ = this._currentRichText$.pipe(
         distinctUntilChanged(
@@ -135,7 +148,7 @@ export class HoverManagerService extends Disposable {
                 && pre?.bullet?.startIndex === aft?.bullet?.startIndex
                 && pre?.customRange?.startIndex === aft?.customRange?.startIndex
                 && pre?.customRange?.endIndex === aft?.customRange?.endIndex
-                && pre?.drawing === aft?.drawing
+                && pre?.drawing?.drawingId === aft?.drawing?.drawingId
             )
         ),
         map((cell) => cell && {
@@ -248,7 +261,6 @@ export class HoverManagerService extends Disposable {
         return { currentRender, workbook, worksheet, skeletonParam };
     }
 
-    // eslint-disable-next-line complexity
     private _calcActiveCell(currentRender: IRender, workbook: Workbook, worksheet: Worksheet, skeletonParam: ISheetSkeletonManagerParam, offsetX: number, offsetY: number) {
         const hoverPosition = getHoverCellPosition(currentRender, workbook, worksheet, skeletonParam, offsetX, offsetY);
         const skeleton = skeletonParam.skeleton;
@@ -270,6 +282,7 @@ export class HoverManagerService extends Disposable {
         let drawing: Nullable<{
             rect: IBoundRectNoAngle;
             drawingId: string;
+            drawing: IDocumentSkeletonDrawing;
         }> = null;
 
         const cell = skeleton.getCellWithCoordByIndex(overflowLocation.row, overflowLocation.col);
@@ -293,7 +306,7 @@ export class HoverManagerService extends Disposable {
             overflowLocation,
             customRange: customRange?.range,
             bullet: bullet?.paragraph,
-            drawing: drawing?.drawingId,
+            drawing,
             rect: rect && {
                 top: rect.top + cell.mergeInfo.startY + topOffset,
                 bottom: rect.bottom + cell.mergeInfo.startY + topOffset,

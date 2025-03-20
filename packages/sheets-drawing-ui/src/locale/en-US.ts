@@ -58,6 +58,11 @@ const locale: typeof zhCN = {
             'drawing-delete': 'Delete Drawing',
         },
     },
+    'cell-image': {
+        pasteTitle: 'Paste as cell image',
+        pasteContent: 'Pasting a cell image will overwrite the existing content of the cell, continue pasting',
+        pasteError: 'Sheet cell image copy paste is not supported in this unit',
+    },
 };
 
 export default locale;

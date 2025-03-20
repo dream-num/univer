@@ -64,7 +64,7 @@ export { AfterSpaceCommand, EnterCommand, type ITabCommandParams, TabCommand } f
 export { BreakLineCommand } from './commands/commands/break-line.command';
 export { generateParagraphs } from './commands/commands/break-line.command';
 export { DocCopyCommand, DocCutCommand, DocPasteCommand } from './commands/commands/clipboard.command';
-export { CutContentCommand, InnerPasteCommand } from './commands/commands/clipboard.inner.command';
+export { CutContentCommand, type IInnerPasteCommandParams, InnerPasteCommand } from './commands/commands/clipboard.inner.command';
 export type { IInnerCutCommandParams } from './commands/commands/clipboard.inner.command';
 export { getCustomBlockIdsInSelections, getCutActionsFromDocRanges } from './commands/commands/clipboard.inner.command';
 export {

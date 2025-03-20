@@ -58,6 +58,11 @@ const locale: typeof zhCN = {
             'drawing-delete': 'Delete Drawing',
         },
     },
+    'cell-image': {
+        pasteTitle: 'Вставить как изображение ячейки',
+        pasteContent: 'Вставка изображения ячейки перезапишет существующее содержимое ячейки, продолжить вставку',
+        pasteError: 'Копирование и вставка изображения ячейки не поддерживается в этом блоке',
+    },
 };
 
 export default locale;

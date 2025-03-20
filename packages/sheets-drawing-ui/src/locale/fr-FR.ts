@@ -58,6 +58,11 @@ const locale: typeof enUS = {
             'drawing-delete': 'Supprimer le dessin',
         },
     },
+    'cell-image': {
+        pasteTitle: 'Coller comme image de cellule',
+        pasteContent: 'Coller une image de cellule écrasera le contenu existant de la cellule, continuer le collage',
+        pasteError: 'Le copier-coller d\'image de cellule n\'est pas pris en charge dans cette unité',
+    },
 };
 
 export default locale;

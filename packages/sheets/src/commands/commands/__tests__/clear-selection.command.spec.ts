@@ -86,7 +86,7 @@ describe('Test clear selection content commands', () => {
                 }
 
                 expect(await commandService.executeCommand(ClearSelectionContentCommand.id)).toBeTruthy();
-                expect(getValue()).toStrictEqual({});
+                expect(getValue()).toStrictEqual(null);
                 // undo
                 expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
                 expect(getValue()).toStrictEqual({
@@ -95,7 +95,7 @@ describe('Test clear selection content commands', () => {
                 });
                 // redo
                 expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
-                expect(getValue()).toStrictEqual({});
+                expect(getValue()).toStrictEqual(null);
 
                 // Restore the original data
                 expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
@@ -304,7 +304,7 @@ describe('Test clear selection content commands', () => {
                 });
 
                 expect(await commandService.executeCommand(ClearSelectionAllCommand.id)).toBeTruthy();
-                expect(getValue()).toStrictEqual({});
+                expect(getValue()).toStrictEqual(null);
                 // undo
                 expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
                 expect(getStyle()).toStrictEqual({
@@ -312,7 +312,7 @@ describe('Test clear selection content commands', () => {
                 });
                 // redo
                 expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
-                expect(getValue()).toStrictEqual({});
+                expect(getValue()).toStrictEqual(null);
             });
             it('clear all with merged cells', async () => {
                 const selectionManager = get(SheetsSelectionsService);
@@ -372,7 +372,7 @@ describe('Test clear selection content commands', () => {
                 // clear all with merged cells
                 expect(await commandService.executeCommand(ClearSelectionAllCommand.id)).toBeTruthy();
                 // clear formats
-                expect(getValue()).toStrictEqual({});
+                expect(getValue()).toStrictEqual(null);
                 // remove merge
                 expect(getMerge()).toStrictEqual([]);
 
@@ -386,7 +386,7 @@ describe('Test clear selection content commands', () => {
                 ]);
                 // redo
                 expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
-                expect(getValue()).toStrictEqual({});
+                expect(getValue()).toStrictEqual(null);
                 expect(getMerge()).toStrictEqual([]);
             });
         });

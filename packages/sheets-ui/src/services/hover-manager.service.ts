@@ -122,6 +122,19 @@ export class HoverManagerService extends Disposable {
         )
     );
 
+    currentRichTextNoDistinct$ = this._currentRichText$.pipe(
+        map((cell) => cell && {
+            unitId: cell.location.unitId,
+            subUnitId: cell.location.subUnitId,
+            row: cell.location.row,
+            col: cell.location.col,
+            customRange: cell.customRange,
+            bullet: cell.bullet,
+            rect: cell.rect,
+            drawing: cell.drawing,
+        } as IHoverRichTextPosition)
+    );
+
     // Notify when hovering over different cells and different custom range or bullet
     currentRichText$ = this._currentRichText$.pipe(
         distinctUntilChanged(

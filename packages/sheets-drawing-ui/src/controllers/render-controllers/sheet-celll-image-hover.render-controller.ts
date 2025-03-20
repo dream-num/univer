@@ -18,9 +18,10 @@ import type { IDocImage } from '@univerjs/docs-drawing';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { Disposable, Inject } from '@univerjs/core';
 import { DrawingRenderService } from '@univerjs/drawing-ui';
-import { CURSOR_TYPE, IRenderManagerService } from '@univerjs/engine-render';
+import { CURSOR_TYPE } from '@univerjs/engine-render';
 import { SheetsSelectionsService } from '@univerjs/sheets';
 import { HoverManagerService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { throttleTime } from 'rxjs';
 
 export class SheetCellImageHoverRenderController extends Disposable implements IRenderModule {
     private _isSetCursor = false;
@@ -28,7 +29,6 @@ export class SheetCellImageHoverRenderController extends Disposable implements I
     constructor(
         private _context: IRenderContext,
         @Inject(HoverManagerService) private _hoverManagerService: HoverManagerService,
-        @Inject(IRenderManagerService) private _renderManagerService: IRenderManagerService,
         @Inject(SheetsSelectionsService) private _selectionsService: SheetsSelectionsService,
         @Inject(DrawingRenderService) private _drawingRenderService: DrawingRenderService,
         @Inject(SheetSkeletonManagerService) private _sheetSkeletonManagerService: SheetSkeletonManagerService
@@ -39,24 +39,35 @@ export class SheetCellImageHoverRenderController extends Disposable implements I
     }
 
     private _initHover() {
-        this.disposeWithMe(this._hoverManagerService.currentRichText$.subscribe((richText) => {
-            if (richText?.drawing) {
-                this._isSetCursor = true;
-                this._context.scene.setCursor(CURSOR_TYPE.ZOOM_IN);
-            } else if (this._isSetCursor) {
-                this._isSetCursor = false;
-                this._context.scene.resetCursor();
-            }
-        }));
+        this.disposeWithMe(this._hoverManagerService.currentRichTextNoDistinct$
+            .pipe(throttleTime(33))
+            .subscribe((richText) => {
+                const currentSelections = this._selectionsService.getWorkbookSelections(this._context.unitId).getCurrentSelections();
+                if (
+                    richText?.unitId === this._context.unitId &&
+                    richText?.drawing &&
+                    currentSelections.length === 1 &&
+                    currentSelections[0].primary?.actualRow === richText.row &&
+                    currentSelections[0].primary?.actualColumn === richText.col
+                ) {
+                    this._isSetCursor = true;
+                    this._context.scene.setCursor(CURSOR_TYPE.ZOOM_IN);
+                } else if (this._isSetCursor) {
+                    this._isSetCursor = false;
+                    this._context.scene.resetCursor();
+                }
+            }));
     }
 
     private _initImageClick() {
         this.disposeWithMe(this._hoverManagerService.currentClickedCell$.subscribe((click) => {
-            if (click?.drawing) {
+            if (click?.drawing && this._isSetCursor) {
                 const imageDrawing = click.drawing.drawing.drawingOrigin as IDocImage;
                 const imageEle = this._sheetSkeletonManagerService.getCurrentSkeleton()?.imageCacheMap.getImage(imageDrawing.imageSourceType, imageDrawing.source);
                 if (!imageEle) return;
                 this._drawingRenderService.previewImage('preview-cell-image', imageEle.src, imageEle.width, imageEle.height);
+                this._context.scene.resetCursor();
+                this._isSetCursor = false;
             }
         }));
     }

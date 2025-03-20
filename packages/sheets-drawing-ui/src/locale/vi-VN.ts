@@ -58,6 +58,11 @@ const locale: typeof zhCN = {
             'drawing-delete': 'Delete Drawing',
         },
     },
+    'cell-image': {
+        pasteTitle: 'Dán như hình ảnh ô',
+        pasteContent: 'Dán hình ảnh ô sẽ ghi đè lên nội dung hiện có của ô, tiếp tục dán',
+        pasteError: 'Sao chép và dán hình ảnh ô không được hỗ trợ trong đơn vị này',
+    },
 };
 
 export default locale;

@@ -59,6 +59,11 @@ const locale: typeof zhCN = {
             'drawing-delete': '刪除繪圖',
         },
     },
+    'cell-image': {
+        pasteTitle: '粘貼為儲存格圖片',
+        pasteContent: '粘貼儲存格圖片將覆蓋儲存格中的現有內容，繼續粘貼',
+        pasteError: '此單元中不支持儲存格圖片複製粘貼',
+    },
 };
 
 export default locale;

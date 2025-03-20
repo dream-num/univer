@@ -36,6 +36,7 @@ import { defaultPluginConfig, SHEETS_DRAWING_UI_PLUGIN_CONFIG_KEY } from './cont
 import { DrawingPopupMenuController } from './controllers/drawing-popup-menu.controller';
 import { SheetsDrawingRenderController } from './controllers/render-controllers/sheet-drawing.render-controller';
 import { SheetCellImageAutofillController } from './controllers/sheet-cell-image-autofill.controller';
+import { SheetCellImageCopyPasteController } from './controllers/sheet-cell-image-copy-paste.controller';
 import { SheetCellImageController } from './controllers/sheet-cell-image.controller';
 import { SheetCellImageHoverController } from './controllers/sheet-celll-image-hover.controller';
 import { SheetsDrawingCopyPasteController } from './controllers/sheet-drawing-copy-paste.controller';
@@ -84,6 +85,7 @@ export class UniverSheetsDrawingUIPlugin extends Plugin {
             [SheetCellImageController],
             [SheetCellImageHoverController],
             [SheetCellImageAutofillController],
+            [SheetCellImageCopyPasteController],
         ]);
 
         touchDependencies(this._injector, [
@@ -94,6 +96,7 @@ export class UniverSheetsDrawingUIPlugin extends Plugin {
     override onReady(): void {
         touchDependencies(this._injector, [
             [SheetsDrawingCopyPasteController],
+            [SheetCellImageCopyPasteController],
         ]);
     }
 

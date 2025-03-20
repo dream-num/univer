@@ -56,6 +56,11 @@ const locale = {
             'drawing-delete': '删除绘图',
         },
     },
+    'cell-image': {
+        pasteTitle: '粘贴为单元格图片',
+        pasteContent: '粘贴单元格图片将覆盖单元格中的现有内容，继续粘贴',
+        pasteError: '此单元中不支持单元格图片复制粘贴',
+    },
 };
 
 export default locale;

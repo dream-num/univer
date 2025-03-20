@@ -58,6 +58,11 @@ const locale: typeof zhCN = {
             'drawing-delete': 'حذف طراحی',
         },
     },
+    'cell-image': {
+        pasteTitle: 'چسباندن به عنوان تصویر سلول',
+        pasteContent: 'چسباندن تصویر سلول محتوای موجود سلول را پاک خواهد کرد، ادامه چسباندن',
+        pasteError: 'کپی و چسباندن تصویر سلول در این واحد پشتیبانی نمی‌شود',
+    },
 };
 
 export default locale;

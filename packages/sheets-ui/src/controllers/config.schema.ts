@@ -15,6 +15,7 @@
  */
 
 import type { DependencyOverride } from '@univerjs/core';
+import type { IScrollBarProps } from '@univerjs/engine-render';
 import type { MenuConfig } from '@univerjs/ui';
 
 export const SHEETS_UI_PLUGIN_CONFIG_KEY = 'sheets-ui.config';
@@ -42,6 +43,8 @@ export interface IUniverSheetsUIConfig {
     clipboardConfig?: {
         hidePasteOptions?: boolean;
     };
+
+    scrollConfig?: IScrollBarProps;
 
 }
 

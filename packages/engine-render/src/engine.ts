@@ -108,6 +108,8 @@ export class Engine extends Disposable {
 
     private _performanceMonitor: PerformanceMonitor;
 
+    private _pointerClickEvent!: (evt: Event) => void;
+
     private _pointerMoveEvent!: (evt: Event) => void;
 
     private _pointerDownEvent!: (evt: Event) => void;
@@ -421,6 +423,7 @@ export class Engine extends Disposable {
 
         const eventPrefix = getPointerPrefix();
         const canvasEle = this.getCanvasElement();
+        canvasEle.removeEventListener('click', this._pointerClickEvent);
         canvasEle.removeEventListener(`${eventPrefix}leave`, this._pointerLeaveEvent);
         canvasEle.removeEventListener(`${eventPrefix}enter`, this._pointerEnterEvent);
         canvasEle.removeEventListener(`${eventPrefix}move`, this._pointerMoveEvent);
@@ -621,6 +624,13 @@ export class Engine extends Disposable {
     // eslint-disable-next-line max-lines-per-function
     private _handlePointerAction() {
         const eventPrefix = getPointerPrefix();
+
+        this._pointerClickEvent = (e: Event) => {
+            const deviceType = this._getPointerType(e);
+            const deviceEvent = e as IPointerEvent;
+            deviceEvent.deviceType = deviceType;
+            this.onInputChanged$.emitEvent(deviceEvent);
+        };
 
         this._pointerMoveEvent = (e: Event) => {
             const evt = e as PointerEvent | MouseEvent;
@@ -866,6 +876,7 @@ export class Engine extends Disposable {
         };
 
         const canvasEle = this.getCanvasElement();
+        canvasEle.addEventListener('click', this._pointerClickEvent);
         canvasEle.addEventListener(`${eventPrefix}enter`, this._pointerEnterEvent);
         canvasEle.addEventListener(`${eventPrefix}leave`, this._pointerLeaveEvent);
         canvasEle.addEventListener(`${eventPrefix}move`, this._pointerMoveEvent);

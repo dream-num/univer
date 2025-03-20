@@ -93,6 +93,7 @@ export class CanvasPopupService extends Disposable implements ICanvasPopupServic
             },
         });
         this._update();
+
         return id;
     }
 

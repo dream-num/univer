@@ -15,13 +15,24 @@
  */
 
 import type { DocumentDataModel, IDisposable, ITextRangeParam, Nullable } from '@univerjs/core';
-import { Disposable, Inject, isInternalEditorID, IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
+import type { INodePosition, ITextRangeWithStyle } from '@univerjs/engine-render';
+import { deepCompare, Disposable, Inject, isInternalEditorID, IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { ComponentManager } from '@univerjs/ui';
 import { FloatToolbar } from '../components/float-toolbar/FloatToolbar';
 import { DocCanvasPopManagerService } from '../services/doc-popup-manager.service';
 
 const FLOAT_MENU_COMPONENT_KEY = 'univer.doc.float-menu';
+
+function isInSameLine(startNodePosition: Nullable<INodePosition>, endNodePosition: Nullable<INodePosition>) {
+    if (startNodePosition == null || endNodePosition == null) {
+        return false;
+    }
+    const { glyph: _startGlyph, ...startRest } = startNodePosition;
+    const { glyph: _endGlyph, ...endRest } = endNodePosition;
+
+    return deepCompare(startRest, endRest);
+}
 
 export class FloatMenuController extends Disposable {
     private _floatMenu: Nullable<IDisposable> = null;
@@ -44,40 +55,39 @@ export class FloatMenuController extends Disposable {
     private _initSelectionChange() {
         this.disposeWithMe(this._docSelectionManagerService.textSelection$.subscribe((selection) => {
             const { unitId, textRanges } = selection;
+            this._hideFloatMenu();
+
             if (isInternalEditorID(unitId)) {
-                this.hideFloatMenu();
                 return;
             }
 
             if ((textRanges.length > 0) && textRanges.some((range) => !range.collapsed)) {
-                this.hideFloatMenu();
-                this.showFloatMenu(unitId, textRanges.find((range) => !range.collapsed)!);
-            } else {
-                this.hideFloatMenu();
+                this._showFloatMenu(unitId, textRanges.find((range) => !range.collapsed)!);
             }
         }));
     }
 
-    hideFloatMenu() {
+    private _hideFloatMenu() {
         this._floatMenu?.dispose();
         this._floatMenu = null;
     }
 
-    showFloatMenu(unitId: string, range: ITextRangeParam) {
+    private _showFloatMenu(unitId: string, range: ITextRangeParam) {
         const documentDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
         if (!documentDataModel || documentDataModel.getDisabled()) {
             return;
         }
+
         this._floatMenu = this._docCanvasPopManagerService.attachPopupToRange(
             range,
             {
                 componentKey: FLOAT_MENU_COMPONENT_KEY,
-                direction: range.direction === 'backward' ? 'top-center' : 'bottom-center',
+                direction: range.direction === 'backward' || isInSameLine((range as ITextRangeWithStyle).startNodePosition, (range as ITextRangeWithStyle).endNodePosition) ? 'top-center' : 'bottom-center',
                 offset: [0, 4],
             },
             unitId
         );
 
-        return toDisposable(() => this.hideFloatMenu());
+        return toDisposable(() => this._hideFloatMenu());
     }
 }

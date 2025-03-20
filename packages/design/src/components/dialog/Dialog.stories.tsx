@@ -47,7 +47,8 @@ export const DialogBasic = {
                     visible={visible}
                     title="hello world"
                     closeIcon={<CloseSingle />}
-                    footer={<footer>footer</footer>}
+                    showOk
+                    showCancel
                     onClose={handleToggleVisible}
                 >
                     xxxx

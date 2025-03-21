@@ -332,14 +332,15 @@ export function getReferenceObjectFromCache(trimToken: string, type: ReferenceOb
 }
 
 export function getRangeReferenceObjectFromCache(variant1: BaseReferenceObject, variant2: BaseReferenceObject) {
-    let referenceObject: FunctionVariantType = ErrorValueObject.create(ErrorType.NAME);
+    let referenceObject: FunctionVariantType;
     if (variant1.isCell() && variant2.isCell()) {
         referenceObject = variant1.unionBy(variant2) as BaseReferenceObject;
     } else if (variant1.isRow() && variant2.isRow()) {
         referenceObject = variant1.unionBy(variant2) as BaseReferenceObject;
     } else if (variant1.isColumn() && variant2.isColumn()) {
         referenceObject = variant1.unionBy(variant2) as BaseReferenceObject;
+    } else {
+        referenceObject = ErrorValueObject.create(ErrorType.NAME);
     }
-
     return referenceObject;
 }

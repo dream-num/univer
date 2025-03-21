@@ -74,7 +74,7 @@
         "fast-diff": "1.3.0",
         "kdbush": "^4.0.2",
         "lodash-es": "^4.17.21",
-        "nanoid": "5.1.3",
+        "nanoid": "5.1.5",
         "numeral": "^2.0.6",
         "numfmt": "^2.5.2",
         "ot-json1": "^1.0.2",
@@ -87,7 +87,7 @@
         "@univerjs-infra/shared": "workspace:*",
         "rxjs": "^7.8.1",
         "typescript": "^5.8.2",
-        "vite": "^6.2.1",
-        "vitest": "^3.0.8"
+        "vite": "^6.2.2",
+        "vitest": "^3.0.9"
     }
 }

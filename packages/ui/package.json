@@ -97,8 +97,8 @@
         "tailwindcss": "^3.4.17",
         "tailwindcss-animate": "^1.0.7",
         "typescript": "^5.8.2",
-        "vite": "^6.2.1",
-        "vitest": "^3.0.8",
+        "vite": "^6.2.2",
+        "vitest": "^3.0.9",
         "vue": "^3.5.13"
     }
 }

@@ -55,23 +55,6 @@
             margin-bottom: 8px;
         }
 
-        &-list {
-            flex-grow: 1;
-            margin-top: 8px;
-            border: 1px solid rgb(var(--grey-200));
-            box-sizing: border-box;
-            border-radius: 6px;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-
-            padding: 6px 0 6px 8px;
-
-            &-inner-container {
-                padding-right: 8px;
-            }
-        }
-
         &-virtual {
             flex-grow: 1;
         }
@@ -197,39 +180,5 @@
 
     .form-dual-column-layout {
         margin-bottom: 8px;
-    }
-}
-
-.sheets-filter {
-    &-tree-node {
-        // height: 28px;
-        padding-right: 8px;
-        max-width: 245px;
-
-        .sheets-filter-tree-node-filter-only {
-            display: none;
-            padding: 0 6px;
-            height: 16px;
-            background-color: rgb(var(--grey-50));
-        }
-
-        &:hover {
-            background-color: rgb(var(--grey-50));
-            border-radius: 6px;
-
-            .sheets-filter-tree-node-filter-only {
-                display: inline-block;
-            }
-        }
-
-        &-attach {
-            height: 20px;
-            flex: 1;
-            margin-left: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            font-size: 13px;
-        }
     }
 }

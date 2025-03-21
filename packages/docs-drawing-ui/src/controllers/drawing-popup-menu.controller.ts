@@ -110,7 +110,7 @@ export class DocDrawingPopupMenuController extends RxDisposable {
 
                     const oKey = object.oKey;
                     const drawingParam = this._drawingManagerService.getDrawingOKey(oKey);
-                    if (!drawingParam) {
+                    if (!drawingParam || drawingParam.drawingType === DrawingTypeEnum.DRAWING_DOM) {
                         return;
                     }
 

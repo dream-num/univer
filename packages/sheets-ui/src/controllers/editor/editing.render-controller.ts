@@ -633,7 +633,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
                 endRow: row,
                 endColumn: column,
             },
-            value: cellData,
+            value: finalCell,
             redoUndoId,
         });
 

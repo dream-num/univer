@@ -16,9 +16,11 @@
 
 import type { ICommandInfo, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import type { ISetFormulaCalculationNotificationMutation } from '@univerjs/engine-formula';
-import type { IAfterRender$Info, IBasicFrameInfo, IExtendFrameInfo, IRenderContext, IRenderModule, ISummaryFrameInfo, ISummaryMetric, ITimeMetric, IViewportInfos, Scene } from '@univerjs/engine-render';
-import { CommandType, ICommandService, Inject, Optional, Rectangle, RxDisposable } from '@univerjs/core';
+import type { IAfterRender$Info, IBasicFrameInfo, IExtendFrameInfo, IRenderContext, IRenderModule, IScrollBarProps, ISummaryFrameInfo, ISummaryMetric, ITimeMetric, IViewportInfos, Scene } from '@univerjs/engine-render';
+import type { IUniverSheetsUIConfig } from '../config.schema';
+import { CommandType, ICommandService, IConfigService, Inject, Optional, Rectangle, RxDisposable } from '@univerjs/core';
 import { SetFormulaCalculationNotificationMutation } from '@univerjs/engine-formula';
+
 import {
     Rect,
     ScrollBar,
@@ -29,7 +31,6 @@ import {
     SpreadsheetRowHeader,
     Viewport,
 } from '@univerjs/engine-render';
-
 import { COMMAND_LISTENER_SKELETON_CHANGE, COMMAND_LISTENER_VALUE_CHANGE, MoveRangeMutation, SetRangeValuesMutation } from '@univerjs/sheets';
 import { ITelemetryService } from '@univerjs/telemetry';
 import { Subject, withLatestFrom } from 'rxjs';
@@ -40,6 +41,7 @@ import {
 } from '../../common/keys';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import { SheetsRenderService } from '../../services/sheets-render.service';
+import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../config.schema';
 
 interface ISetWorksheetMutationParams {
     unitId: string;
@@ -61,6 +63,8 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
     renderMetric$ = this._renderMetric$.asObservable();
     constructor(
         private readonly _context: IRenderContext<Workbook>,
+        @Inject(IConfigService) private readonly _configService: IConfigService,
+
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @Inject(SheetsRenderService) private readonly _sheetRenderService: SheetsRenderService,
         @ICommandService private readonly _commandService: ICommandService,
@@ -350,7 +354,9 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
         const { rowHeader, columnHeader } = worksheet.getConfig();
         const { viewMain } = this._initViewports(scene, rowHeader, columnHeader);
 
-        const _scrollBar = new ScrollBar(viewMain);
+        const sheetsUIConfig = this._configService.getConfig(SHEETS_UI_PLUGIN_CONFIG_KEY) as Partial<IUniverSheetsUIConfig>;
+        const scrollConfig: IScrollBarProps | undefined = sheetsUIConfig?.scrollConfig;
+        const _scrollBar = new ScrollBar(viewMain, scrollConfig);
 
         scene.attachControl();
         return viewMain;

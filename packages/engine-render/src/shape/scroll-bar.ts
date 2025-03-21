@@ -26,9 +26,6 @@ import { Subscription } from 'rxjs';
 import { Transform } from '../basics/transform';
 import { Rect } from './rect';
 
-/**
- * Sadly, the props name here is not the same as the members in Scrollbar.
- */
 export interface IScrollBarProps {
     mainScene?: Scene;
     thumbMargin?: number;
@@ -84,15 +81,12 @@ export class ScrollBar extends Disposable {
     placeholderBarRect: Nullable<Rect>;
 
     protected _viewport!: Viewport;
-
     private _mainScene: Nullable<Scene>;
 
     private _lastX: number = -1;
-
     private _lastY: number = -1;
 
     private _isHorizonMove = false;
-
     private _isVerticalMove = false;
 
     private _horizonPointerMoveSub: Nullable<Subscription>;

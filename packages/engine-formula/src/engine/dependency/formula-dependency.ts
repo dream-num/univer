@@ -1239,6 +1239,7 @@ export class FormulaDependencyGenerator extends Disposable {
      * @param treeList
      */
     protected _calculateRunList(treeList: IFormulaDependencyTree[]) {
+        const originalLength = treeList.length;
         const stack = treeList;
         const formulaRunList = [];
         const cacheStack: IFormulaDependencyTree[] = [];
@@ -1290,6 +1291,11 @@ export class FormulaDependencyGenerator extends Disposable {
                 tree.setAdded();
                 stack.push(tree, ...cacheStack);
             }
+        }
+
+        if (formulaRunList.length !== originalLength) {
+            console.error('length', formulaRunList.length, originalLength);
+            throw new Error('Length missmatched!');
         }
 
         return formulaRunList;

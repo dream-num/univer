@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { LocaleType, LogLevel, Univer, UserManagerService } from '@univerjs/core';
+import { CellValueType, LocaleType, LogLevel, Univer, UserManagerService } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
 import { defaultTheme } from '@univerjs/design';
 import { UniverDocsPlugin } from '@univerjs/docs';
@@ -145,25 +145,96 @@ univer.onDispose(() => {
     worker.terminate();
     window.univer = undefined;
     window.univerAPI = undefined;
+    window.switchWorkbook = undefined;
 });
 
 window.univer = univer;
-const univerAPI = window.univerAPI = FUniver.newAPI(univer);
+window.univerAPI = FUniver.newAPI(univer);
+window.switchWorkbook = (workbookId: string) => window.univerAPI?.setCurrent(workbookId);
+const univerAPI = window.univerAPI;
+
+// window.univerAPI.createWorkbook({
+//     id: 'workbook1',
+//     sheetOrder: ['sheet-01'],
+//     sheets: {
+//         'sheet-01': {
+//             id: 'sheet-01',
+//             name: 'Sheet 01',
+//             rowCount: 10,
+//             columnCount: 5,
+//             cellData: {
+//                 0: { 0: { f: "='[workbook1]Sheet 01'!C1*'[workbook2]Sheet 01'!B2" }, 2: { v: 3 } },
+//             },
+//         },
+//     },
+// });
+
+// window.univerAPI.createWorkbook(
+//     {
+//         id: 'workbook2',
+//         sheetOrder: ['sheet-01'],
+//         sheets: {
+//             'sheet-01': {
+//                 id: 'sheet-01',
+//                 name: 'Sheet 01',
+//                 rowCount: 10,
+//                 columnCount: 5,
+//                 cellData: {
+//                     0: {
+//                         0: { v: 1 },
+//                         1: { v: 2 },
+//                     },
+//                     1: {
+//                         0: { v: 3 },
+//                         1: { v: 1 },
+//                     },
+//                     2: {
+//                         0: { f: "='[workbook1]Sheet 01'!C1*'[workbook2]Sheet 01'!B2" },
+//                     },
+//                 },
+//             },
+//         },
+//     },
+//     {
+//         makeCurrent: false,
+//     }
+// );
 
 univerAPI.createWorkbook({
     id: 'workbook1',
     sheetOrder: ['sheet-01'],
+    resources: [
+    ],
     sheets: {
         'sheet-01': {
             id: 'sheet-01',
             name: 'Sheet 01',
-            rowCount: 10,
-            columnCount: 5,
-            cellData: { 0: { 0: { f: "=SUM('[workbook2]Sheet 01'!A1:B2)" } } },
+            rowCount: 20,
+            columnCount: 40,
+            cellData: {
+                0: {
+                    1: { t: CellValueType.NUMBER, v: 10 },
+                },
+                5: {
+                    0: {
+                    },
+                },
+            },
+        },
+        'sheet-02': {
+            id: 'sheet-02',
+            name: 'foobar',
+            rowCount: 20,
+            columnCount: 40,
+            cellData: {
+                5: {
+                    0: {
+                    },
+                },
+            },
         },
     },
 });
-
 univerAPI.createWorkbook(
     {
         id: 'workbook2',
@@ -172,8 +243,8 @@ univerAPI.createWorkbook(
             'sheet-01': {
                 id: 'sheet-01',
                 name: 'Sheet 01',
-                rowCount: 10,
-                columnCount: 5,
+                rowCount: 20,
+                columnCount: 40,
                 cellData: {
                     0: {
                         0: { v: 1 },
@@ -181,7 +252,23 @@ univerAPI.createWorkbook(
                     },
                     1: {
                         0: { v: 3 },
-                        1: { v: 1 },
+                        1: { v: 4 },
+                    },
+                    5: {
+                        0: {
+                        },
+                    },
+                },
+            },
+            'sheet-02': {
+                id: 'sheet-02',
+                name: 'foobar',
+                rowCount: 20,
+                columnCount: 40,
+                cellData: {
+                    5: {
+                        0: {
+                        },
                     },
                 },
             },
@@ -192,10 +279,90 @@ univerAPI.createWorkbook(
     }
 );
 
+univerAPI.createWorkbook({
+    id: 'workbook3',
+    sheetOrder: ['sheet-01'],
+    sheets: {
+        'sheet-01': {
+            id: 'sheet-01',
+            name: 'Sheet 01',
+            rowCount: 20,
+            columnCount: 40,
+            cellData: {
+                0: {
+                    0: { v: 1 },
+                    1: { v: 2 },
+                },
+                1: {
+                    0: { v: 3 },
+                    1: { v: 4 },
+                },
+                5: {
+                    0: {
+                        f: "='[workbook1]Sheet 01'!A5 * '[workbook2]Sheet 01'!A5 * '[workbook3]Sheet 01'!A5* '[workbook4]Sheet 01'!A5",
+                    },
+                },
+            },
+        },
+        'sheet-02': {
+            id: 'sheet-02',
+            name: 'foobar',
+            rowCount: 20,
+            columnCount: 40,
+            cellData: {
+                5: {
+                    0: {
+                    },
+                },
+            },
+        },
+    },
+});
+
+univerAPI.createWorkbook({
+    id: 'workbook4',
+    sheetOrder: ['sheet-01'],
+    sheets: {
+        'sheet-01': {
+            id: 'sheet-01',
+            name: 'Sheet 01',
+            rowCount: 20,
+            columnCount: 40,
+            cellData: {
+                0: {
+                    0: { v: 1 },
+                    1: { v: 2 },
+                },
+                1: {
+                    0: { v: 3 },
+                    1: { v: 4 },
+                },
+                5: {
+                    0: {
+                        f: "='[workbook1]Sheet 01'!A5 * '[workbook2]Sheet 01'!A5 * '[workbook3]Sheet 01'!A5* '[workbook4]Sheet 01'!A5",
+                    },
+                },
+            },
+        },
+        'sheet-02': {
+            id: 'sheet-02',
+            name: 'foobar',
+            rowCount: 20,
+            columnCount: 40,
+            cellData: {
+                5: {
+                    0: {
+                    },
+                },
+            },
+        },
+    },
+});
 declare global {
     // eslint-disable-next-line ts/naming-convention
     interface Window {
         univer?: Univer;
         univerAPI?: ReturnType<typeof FUniver.newAPI>;
+        switchWorkbook?: (workbookId: string) => void;
     }
 }

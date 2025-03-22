@@ -14,19 +14,21 @@
  * limitations under the License.
  */
 
-import { CountBar } from '../count-bar';
-import styles from './index.module.less';
+import type { Workbook } from '@univerjs/core';
+import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { useDependency, useObservable } from '@univerjs/ui';
-import { IUniverInstanceService, UniverInstanceType, type Workbook } from '@univerjs/core';
+import { CountBar } from '../count-bar';
 
-export const DocFooter = () => {
+export function DocFooter() {
     const univerInstanceService = useDependency(IUniverInstanceService);
     const workbook = useObservable(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET), undefined, undefined, []);
 
-    return workbook ? null : (
-        <div className={styles.docFooterContainer}>
-            <div />
-            <CountBar />
-        </div>
-    );
+    return workbook
+        ? null
+        : (
+            <div className="univer-box-border univer-flex univer-items-center univer-justify-between univer-px-5">
+                <div />
+                <CountBar />
+            </div>
+        );
 };

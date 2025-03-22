@@ -16,7 +16,6 @@
 
 import { PresetListType } from '@univerjs/core';
 import { clsx } from '@univerjs/design';
-import styles from './index.module.less';
 
 export interface IListTypePickerBaseProps {
     value?: PresetListType;
@@ -30,21 +29,28 @@ interface IListTypePickerProps extends IListTypePickerBaseProps {
 export const ListTypePicker = (props: IListTypePickerProps) => {
     const { value, onChange, options } = props;
     return (
-        <div className={clsx(styles.docListTypePicker, 'univer-theme')}>
+        <div className="univer-grid univer-grid-cols-3 univer-gap-2 univer-p-1.5">
             {options.map((item) => {
                 return (
-                    <img
+                    <a
                         key={item.value}
-                        className={styles.docListTypePickerItem + (value === item.value
-                            ? `
-                              ${styles.docListTypePickerItemActive}
-                            `
-                            : '')}
+                        className={clsx(`
+                          univer-block univer-h-20 univer-w-[72px] univer-cursor-pointer univer-overflow-hidden
+                          univer-rounded univer-border univer-border-solid univer-border-gray-200 univer-transition-all
+                          hover:univer-border-primary-500
+                        `, {
+                            'univer-border-primary-500': value === item.value,
+                        })}
                         onClick={() => {
                             onChange(item.value);
                         }}
-                        src={item.img}
-                    />
+                    >
+                        <img
+                            className="univer-size-full"
+                            src={item.img}
+                            draggable={false}
+                        />
+                    </a>
                 );
             })}
         </div>

@@ -182,7 +182,8 @@ export const AutoFillPopupMenu: React.FC<{}> = () => {
     return (
         <div className="univer-absolute univer-inset-0 univer-z-10 univer-size-0">
             <div
-                style={{ left: `${relativeX + 2}px`, top: `${relativeY + 2}px`, position: 'absolute' }}
+                className="univer-absolute"
+                style={{ left: `${relativeX + 2}px`, top: `${relativeY + 2}px` }}
                 onMouseEnter={handleMouseEnter}
                 onMouseLeave={handleMouseLeave}
             >

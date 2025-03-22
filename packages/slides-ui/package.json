@@ -74,7 +74,7 @@
         "@univerjs/docs-ui": "workspace:*",
         "@univerjs/drawing": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons": "^0.2.22",
+        "@univerjs/icons": "^0.2.27",
         "@univerjs/slides": "workspace:*",
         "@univerjs/ui": "workspace:*"
     },
@@ -86,7 +86,7 @@
         "rxjs": "^7.8.1",
         "tailwindcss": "^3.4.17",
         "typescript": "^5.8.2",
-        "vite": "^6.2.1",
-        "vitest": "^3.0.8"
+        "vite": "^6.2.2",
+        "vitest": "^3.0.9"
     }
 }

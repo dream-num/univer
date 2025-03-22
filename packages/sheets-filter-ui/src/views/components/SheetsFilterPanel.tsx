@@ -19,9 +19,8 @@ import { ICommandService, LocaleService } from '@univerjs/core';
 import { Button, Segmented } from '@univerjs/design';
 import { SheetsFilterService } from '@univerjs/sheets-filter';
 import { SheetsUIPart } from '@univerjs/sheets-ui';
-
 import { ComponentContainer, useComponentsOfPart, useDependency, useObservable } from '@univerjs/ui';
-import React, { useCallback, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { of } from 'rxjs';
 import { ChangeFilterByOperation, CloseFilterPanelOperation } from '../../commands/operations/sheets-filter.operation';
 import { FilterBy, SheetsFilterPanelService } from '../../services/sheets-filter-panel.service';

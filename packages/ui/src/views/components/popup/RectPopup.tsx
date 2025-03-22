@@ -20,7 +20,6 @@ import type { Observable } from 'rxjs';
 import React, { createContext, useContext, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useEvent } from '../../../components/hooks/event';
-import styles from './index.module.less';
 
 interface IAbsolutePosition {
     left: number;
@@ -217,13 +216,15 @@ function RectPopup(props: IRectPopupProps) {
 
     const ele = (
         <section
-            onPointerEnter={onPointerEnter}
-            onPointerLeave={onPointerLeave}
             ref={nodeRef}
+            className={`
+              univer-pointer-events-auto univer-fixed univer-left-[-9999px] univer-top-[-9999px] univer-z-[1020]
+            `}
             style={{ ...positionRef.current, ...hidden ? { display: 'none' } : null }}
-            className={styles.popupFixed}
             onPointerDown={(e) => e.stopPropagation()}
             onClick={onClick}
+            onPointerEnter={onPointerEnter}
+            onPointerLeave={onPointerLeave}
         >
             <RectPopupContext.Provider value={anchorRectRef}>
                 {children}

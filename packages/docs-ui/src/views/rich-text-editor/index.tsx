@@ -30,7 +30,6 @@ import { useKeyboardEvent, useResize } from './hooks';
 import { useEditor } from './hooks/use-editor';
 import { useLeftAndRightArrow } from './hooks/use-left-and-right-arrow';
 import { useOnChange } from './hooks/use-on-change';
-import styles from './index.module.less';
 
 export interface IRichTextEditorProps {
     className?: string;
@@ -70,6 +69,7 @@ export const RichTextEditor = (props: IRichTextEditorProps) => {
         maxHeight = 32,
         icon,
         editorRef,
+        placeholder,
     } = props;
     const editorService = useDependency(IEditorService);
     const onFocusChange = useEvent(_onFocusChange);
@@ -157,25 +157,33 @@ export const RichTextEditor = (props: IRichTextEditorProps) => {
     useOnChange(editor, onChange);
 
     return (
-        <div className={clsx(styles.richTextEditor, className)} style={style}>
+        <div className={className} style={style}>
             <div
-                className={clsx(styles.richTextEditorWrap, {
-                    [styles.richTextEditorActive]: isFocusing,
+                className={clsx(`
+                  univer-relative univer-box-border univer-flex univer-h-8 univer-w-full univer-items-center
+                  univer-justify-around univer-gap-2 univer-rounded univer-border univer-border-solid
+                  univer-border-gray-200 univer-pb-0.5 univer-pl-1.5 univer-pr-2 univer-pt-1.5
+                `, {
+                    'univer-border-primary-500': isFocusing,
                 })}
                 style={{ height }}
                 ref={sheetEmbeddingRef}
             >
                 <div
-                    className={styles.richTextEditorText}
                     ref={formulaEditorContainerRef}
+                    className="univer-relative univer-size-full"
                     onMouseUp={() => editor?.focus()}
                 />
                 {icon}
                 {!showPlaceholder
                     ? null
                     : (
-                        <div className={styles.richTextEditorPlaceholder}>
-                            {props.placeholder}
+                        <div
+                            className={`
+                              univer-absolute univer-left-[5px] univer-top-[5px] univer-text-sm univer-text-gray-500
+                            `}
+                        >
+                            {placeholder}
                         </div>
                     )}
             </div>

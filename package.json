@@ -46,17 +46,17 @@
         "release": "release-it"
     },
     "devDependencies": {
-        "@antfu/eslint-config": "4.10.0",
+        "@antfu/eslint-config": "4.10.2",
         "@commitlint/cli": "^19.8.0",
         "@commitlint/config-conventional": "^19.8.0",
-        "@eslint-react/eslint-plugin": "^1.32.0",
-        "@playwright/test": "^1.51.0",
+        "@eslint-react/eslint-plugin": "^1.37.0",
+        "@playwright/test": "^1.51.1",
         "@release-it-plugins/workspaces": "^4.2.0",
         "@release-it/conventional-changelog": "^9.0.4",
-        "@storybook/react": "8.6.4",
+        "@storybook/react": "8.6.7",
         "@types/fs-extra": "^11.0.4",
-        "@types/node": "^22.13.10",
-        "@types/react": "^19.0.10",
+        "@types/node": "^22.13.11",
+        "@types/react": "^19.0.12",
         "@types/react-dom": "^19.0.4",
         "@univerjs-infra/shared": "workspace:*",
         "@univerjs/design": "workspace:*",
@@ -64,7 +64,7 @@
         "eslint": "9.22.0",
         "eslint-plugin-format": "^1.0.1",
         "eslint-plugin-header": "^3.1.1",
-        "eslint-plugin-jsdoc": "^50.6.6",
+        "eslint-plugin-jsdoc": "^50.6.8",
         "eslint-plugin-no-barrel-import": "^0.0.2",
         "eslint-plugin-no-penetrating-import": "^0.0.1",
         "eslint-plugin-react": "^7.37.4",
@@ -72,7 +72,7 @@
         "eslint-plugin-react-refresh": "^0.4.19",
         "fs-extra": "^11.3.0",
         "husky": "^9.1.7",
-        "lint-staged": "^15.4.3",
+        "lint-staged": "^15.5.0",
         "posthog-node": "^4.10.1",
         "react": "19.0.0",
         "react-dom": "19.0.0",
@@ -81,7 +81,7 @@
         "tsx": "^4.19.3",
         "turbo": "^2.4.4",
         "typescript": "^5.8.2",
-        "vitest": "^3.0.8"
+        "vitest": "^3.0.9"
     },
     "pnpm": {
         "onlyBuiltDependencies": [

@@ -16,10 +16,9 @@
 
 import type { IFontFamilyProps } from './interface';
 import { LocaleService } from '@univerjs/core';
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 
 import { useDependency } from '../../utils/di';
-import styles from './index.module.less';
 
 export const FontFamily = (props: IFontFamilyProps) => {
     const { value } = props;
@@ -36,11 +35,13 @@ export const FontFamily = (props: IFontFamilyProps) => {
         }
 
         return fontFamily;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [value]);
 
     return (
-        <div className={styles.uiPluginSheetsFontFamily} style={{ fontFamily: value as string }}>
+        <div
+            className="univer-w-32 univer-overflow-hidden univer-truncate univer-text-[13px]"
+            style={{ fontFamily: value as string }}
+        >
             {viewValue}
         </div>
     );

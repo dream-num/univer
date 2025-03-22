@@ -100,48 +100,4 @@
             box-shadow: none;
         }
     }
-
-    &-reset-point {
-        cursor: pointer;
-
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-
-        box-sizing: border-box;
-        width: @slider-height * 2;
-        height: @slider-height;
-
-        background-color: rgb(var(--color-white));
-        border-radius: 50%;
-    }
-
-    &-value {
-        cursor: pointer;
-
-        width: @slider-value-width;
-        height: @slider-value-height;
-
-        font-size: var(--font-size-xs);
-        line-height: 2;
-        color: rgb(var(--text-color-secondary-darker));
-        text-align: center;
-
-        border-radius: var(--border-radius-base);
-
-        transition: all 0.2s;
-
-        text-decoration: none;
-
-        &:hover {
-            background-color: @slider-parts-hover-color;
-            text-decoration: inherit;
-            color: inherit;
-        }
-
-        &.dropdown-open {
-            background-color: @slider-parts-hover-color;
-        }
-    }
 }

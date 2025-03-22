@@ -16,10 +16,7 @@
 
 import type { IFontFamilyItemProps } from './interface';
 import { LocaleService } from '@univerjs/core';
-import React from 'react';
-
 import { useDependency } from '../../utils/di';
-import styles from './index.module.less';
 
 export const FontFamilyItem = (props: IFontFamilyItemProps) => {
     const { value } = props;
@@ -27,7 +24,7 @@ export const FontFamilyItem = (props: IFontFamilyItemProps) => {
     const localeService = useDependency(LocaleService);
 
     return (
-        <span className={styles.uiPluginSheetsFontFamilyItem} style={{ fontFamily: value }}>
+        <span className="univer-text-[13px]" style={{ fontFamily: value }}>
             {localeService.t(`fontFamily.${(`${value ?? ''}`).replace(/\s/g, '')}`)}
         </span>
     );

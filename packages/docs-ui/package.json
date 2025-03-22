@@ -79,7 +79,7 @@
         "@univerjs/docs": "workspace:*",
         "@univerjs/drawing": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons": "^0.2.22",
+        "@univerjs/icons": "^0.2.27",
         "@univerjs/ui": "workspace:*"
     },
     "devDependencies": {
@@ -87,7 +87,6 @@
         "@univerjs/docs-drawing": "workspace:*",
         "jest-canvas-mock": "^2.5.2",
         "jsdom": "^24.1.1",
-        "less": "^4.2.2",
         "postcss": "^8.5.3",
         "react": "18.3.1",
         "rxjs": "^7.8.1",

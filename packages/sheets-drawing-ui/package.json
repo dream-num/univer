@@ -79,7 +79,7 @@
         "@univerjs/drawing": "workspace:*",
         "@univerjs/drawing-ui": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons": "^0.2.22",
+        "@univerjs/icons": "^0.2.27",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-drawing": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",

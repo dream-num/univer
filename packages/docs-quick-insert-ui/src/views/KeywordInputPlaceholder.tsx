@@ -22,7 +22,11 @@ export const KeywordInputPlaceholderComponentKey = 'docs.quick.insert.keyword-in
 export const KeywordInputPlaceholder = () => {
     const localeService = useDependency(LocaleService);
     // TODO: 需要根据fontSize来计算高度跟偏移
-    return <div className="univer-translate-y-1.5 univer-text-sm univer-text-gray-500">{localeService.t('docQuickInsert.keywordInputPlaceholder')}</div>;
+    return (
+        <div className="univer-translate-y-1.5 univer-text-sm univer-text-gray-500">
+            {localeService.t('docQuickInsert.keywordInputPlaceholder')}
+        </div>
+    );
 };
 
 KeywordInputPlaceholder.componentKey = KeywordInputPlaceholderComponentKey;

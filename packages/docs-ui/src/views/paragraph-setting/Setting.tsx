@@ -30,7 +30,6 @@ import {
     useFirstParagraphLineSpacing,
     useFirstParagraphSpaceBelow,
 } from './hook/utils';
-import styles from './index.module.less';
 
 const AutoFocusInputNumber = (props: {
     value: number;
@@ -94,20 +93,25 @@ export function ParagraphSetting() {
     }, [spacingRule, lineSpacing]);
 
     return (
-        <div className={styles.paragraphSetting}>
-            <div className={styles.paragraphSettingTitle}>{localeService.t('doc.paragraphSetting.alignment')}</div>
+        <div>
+            <div className="univer-t-4 univer-text-[13px] univer-font-medium">{localeService.t('doc.paragraphSetting.alignment')}</div>
             <div
                 className={`
-                  ${styles.paragraphSettingIconList}
-                  ${styles.paragraphSettingMtBase}
+                  univer-mt-4 univer-box-border univer-flex univer-w-full univer-items-center univer-justify-between
+                  univer-gap-1 univer-rounded-md univer-border univer-border-solid univer-border-gray-200 univer-p-1
                 `}
             >
                 {alignmentOptions.map((item) => {
                     return (
                         <Tooltip title={item.label} key={item.value} placement="bottom">
                             <span
-                                className={clsx(styles.paragraphSettingIconListItem, { [styles.paragraphSettingIconListActive]: horizontalAlignValue === item.value })}
-
+                                className={clsx(`
+                                  univer-flex univer-cursor-pointer univer-items-center univer-justify-center
+                                  univer-rounded univer-bg-none univer-px-3 univer-py-1
+                                  hover:univer-bg-black/60
+                                `, {
+                                    'univer-bg-blend-color-dodge/90': horizontalAlignValue === item.value,
+                                })}
                                 onClick={() => horizontalAlignSet(item.value)}
                             >
                                 {item.icon}
@@ -117,65 +121,62 @@ export function ParagraphSetting() {
                     );
                 })}
             </div>
-            <div className={styles.paragraphSettingTitle}>{localeService.t('doc.paragraphSetting.indentation')}</div>
+            <div className="univer-t-4 univer-text-[13px] univer-font-medium">{localeService.t('doc.paragraphSetting.indentation')}</div>
             <div>
-                <div className={styles.paragraphSettingFlexCol}>
-                    <div className={styles.paragraphSettingLabel}>
+                <div className="univer-flex univer-justify-between univer-item-center">
+                    <div className="univer-mt-3 univer-text-xs">
                         {localeService.t('doc.paragraphSetting.left')}
                         (px)
                     </div>
-                    <AutoFocusInputNumber className={styles.paragraphSettingMtBase} value={indentStart} onChange={(v) => indentStartSet(v ?? 0)} />
+                    <AutoFocusInputNumber className="univer-mt-4" value={indentStart} onChange={(v) => indentStartSet(v ?? 0)} />
                 </div>
-                <div className={styles.paragraphSettingFlexCol}>
+                <div className="univer-flex univer-justify-between univer-item-center">
 
-                    <div className={styles.paragraphSettingLabel}>
+                    <div className="univer-mt-3 univer-text-xs">
                         {localeService.t('doc.paragraphSetting.right')}
                         (px)
                     </div>
-                    <AutoFocusInputNumber className={styles.paragraphSettingMtBase} value={indentEnd} onChange={(v) => indentEndSet(v ?? 0)} />
+                    <AutoFocusInputNumber className="univer-mt-4" value={indentEnd} onChange={(v) => indentEndSet(v ?? 0)} />
                 </div>
-                <div className={styles.paragraphSettingFlexCol}>
+                <div className="univer-flex univer-justify-between univer-item-center">
 
-                    <div className={styles.paragraphSettingLabel}>
+                    <div className="univer-mt-3 univer-text-xs">
                         {localeService.t('doc.paragraphSetting.firstLine')}
                         (px)
                     </div>
-                    <AutoFocusInputNumber className={styles.paragraphSettingMtBase} value={indentFirstLine} onChange={(v) => indentFirstLineSet(v ?? 0)} />
+                    <AutoFocusInputNumber className="univer-mt-4" value={indentFirstLine} onChange={(v) => indentFirstLineSet(v ?? 0)} />
                 </div>
-                <div className={styles.paragraphSettingFlexCol}>
+                <div className="univer-flex univer-justify-between univer-item-center">
 
-                    <div className={styles.paragraphSettingLabel}>
+                    <div className="univer-mt-3 univer-text-xs">
                         {localeService.t('doc.paragraphSetting.hanging')}
                         (px)
                     </div>
-                    <AutoFocusInputNumber className={styles.paragraphSettingMtBase} value={hanging} onChange={(v) => hangingSet(v ?? 0)} />
+                    <AutoFocusInputNumber className="univer-mt-4" value={hanging} onChange={(v) => hangingSet(v ?? 0)} />
                 </div>
             </div>
-            <div className={styles.paragraphSettingTitle}>{localeService.t('doc.paragraphSetting.spacing')}</div>
+            <div className="univer-t-4 univer-text-[13px] univer-font-medium">{localeService.t('doc.paragraphSetting.spacing')}</div>
             <div>
-                <div className={styles.paragraphSettingFlexCol}>
+                <div className="univer-flex univer-justify-betweenuniver-item-center">
 
-                    <div className={styles.paragraphSettingLabel}>
+                    <div className="univer-mt-3 univer-text-xs">
                         {localeService.t('doc.paragraphSetting.before')}
                         (px)
                     </div>
-                    <AutoFocusInputNumber className={styles.paragraphSettingMtBase} value={spaceAbove} onChange={(v) => spaceAboveSet(v ?? 0)} />
+                    <AutoFocusInputNumber className="univer-mt-4" value={spaceAbove} onChange={(v) => spaceAboveSet(v ?? 0)} />
                 </div>
-                <div className={styles.paragraphSettingFlexCol}>
+                <div className="univer-flex univer-justify-between univer-item-center">
 
-                    <div className={styles.paragraphSettingLabel}>
+                    <div className="univer-mt-3 univer-text-xs">
                         {localeService.t('doc.paragraphSetting.after')}
                         (px)
                     </div>
-                    <AutoFocusInputNumber className={styles.paragraphSettingMtBase} value={spaceBelow} onChange={(v) => spaceBelowSet(v ?? 0)} />
+                    <AutoFocusInputNumber className="univer-mt-4" value={spaceBelow} onChange={(v) => spaceBelowSet(v ?? 0)} />
                 </div>
-                <div className={styles.paragraphSettingFlexCol}>
-                    <div className={styles.paragraphSettingLabel}>{localeService.t('doc.paragraphSetting.lineSpace')}</div>
+                <div className="univer-flex univer-justify-between item-center">
+                    <div className="univer-mt-3 univer-text-xs">{localeService.t('doc.paragraphSetting.lineSpace')}</div>
                     <div
-                        className={`
-                          ${styles.paragraphSettingMtBase}
-                          ${styles.paragraphSettingSpaceLine}
-                        `}
+                        className="univer-mt-4 univer-flex univer-flex-col univer-gap-1.5"
                         style={{ width: 162 }}
                     >
                         <Select

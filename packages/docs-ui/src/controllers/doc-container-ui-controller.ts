@@ -16,7 +16,6 @@
 
 import type { LocaleType } from '@univerjs/core';
 import type { DocContainer } from '../views/doc-container/DocContainer';
-
 import type { IUniverDocsUIConfig } from './config.schema';
 import { IConfigService, Inject, Injector, LocaleService } from '@univerjs/core';
 import { DOCS_UI_PLUGIN_CONFIG_KEY } from './config.schema';

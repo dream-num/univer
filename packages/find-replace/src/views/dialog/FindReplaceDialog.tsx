@@ -19,15 +19,12 @@ import type { ForwardedRef } from 'react';
 import { ICommandService, IContextService, LocaleService } from '@univerjs/core';
 import { Button, Checkbox, FormDualColumnLayout, FormLayout, Input, MessageType, Select } from '@univerjs/design';
 import { ILayoutService, IMessageService, useDependency, useObservable } from '@univerjs/ui';
-import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef } from 'react';
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef } from 'react';
 import { fromEvent } from 'rxjs';
-
 import { ReplaceAllMatchesCommand, ReplaceCurrentMatchCommand } from '../../commands/commands/replace.command';
 import { OpenReplaceDialogOperation } from '../../commands/operations/find-replace.operation';
 import { FIND_REPLACE_DIALOG_FOCUS, FIND_REPLACE_INPUT_FOCUS } from '../../services/context-keys';
 import { FindBy, FindDirection, FindScope, IFindReplaceService } from '../../services/find-replace.service';
-import styles from './FindReplaceDialog.module.less';
-
 import { SearchInput } from './SearchInput';
 
 interface ISubFormRef {
@@ -83,10 +80,16 @@ export const FindDialog = forwardRef(function FindDialogImpl(_props, ref) {
                 findString={findString}
                 onChange={onFindStringChange}
             />
-            <div className={styles.findReplaceExpandContainer}>
-                <Button type="text" size="small" onClick={revealReplace}>
+            <div className="univer-mt-4 univer-text-center">
+                <a
+                    className={`
+                      univer-cursor-pointer univer-text-sm univer-text-primary-500 univer-transition-colors
+                      hover:univer-text-primary-500/80
+                    `}
+                    onClick={revealReplace}
+                >
                     {localeService.t('find-replace.dialog.advanced-finding')}
-                </Button>
+                </a>
             </div>
         </>
     );
@@ -228,9 +231,9 @@ export const ReplaceDialog = forwardRef(function ReplaceDIalogImpl(_props, ref) 
                     </FormLayout>
                 </>
             </FormDualColumnLayout>
-            <div className={styles.findReplaceButtonsGroup}>
+            <div className="univer-mt-6 univer-flex univer-justify-between">
                 <Button type="primary" onClick={onClickFindButton} disabled={findDisabled}>{localeService.t('find-replace.dialog.find')}</Button>
-                <span className={styles.findReplaceButtonsGroupRight}>
+                <span className="univer-inline-flex univer-gap-2">
                     <Button disabled={replaceDisabled} onClick={onClickReplaceButton}>{localeService.t('find-replace.dialog.replace')}</Button>
                     <Button disabled={replaceAllDisabled} onClick={onClickReplaceAllButton}>{localeService.t('find-replace.dialog.replace-all')}</Button>
                 </span>
@@ -294,7 +297,7 @@ export function FindReplaceDialog() {
     }, [setDialogContainerFocus, setDialogInputFocus]);
 
     return (
-        <div className={styles.findReplaceDialogContainer} ref={dialogContainerRef}>
+        <div ref={dialogContainerRef}>
             {!state.replaceRevealed ? <FindDialog ref={focusRef} /> : <ReplaceDialog ref={focusRef} />}
         </div>
     );

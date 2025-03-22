@@ -65,11 +65,10 @@
     "dependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
-        "@univerjs/docs-drawing": "workspace:*",
         "@univerjs/docs-drawing-ui": "workspace:*",
         "@univerjs/docs-ui": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons": "^0.2.22",
+        "@univerjs/icons": "^0.2.27",
         "@univerjs/mockdata": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-drawing-ui": "workspace:*",

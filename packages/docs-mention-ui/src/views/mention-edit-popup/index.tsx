@@ -19,7 +19,7 @@ import { ICommandService, IMentionIOService, IUniverInstanceService, Tools, Univ
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { IEditorService } from '@univerjs/docs-ui';
 import { useDependency, useObservable } from '@univerjs/ui';
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { filter } from 'rxjs';
 import { AddDocMentionCommand } from '../../commands/commands/doc-mention.command';
 import { DocMentionPopupService } from '../../services/doc-mention-popup.service';

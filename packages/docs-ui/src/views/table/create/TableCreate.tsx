@@ -18,8 +18,7 @@ import { LocaleService } from '@univerjs/core';
 import { InputNumber } from '@univerjs/design';
 import { useDependency } from '@univerjs/ui';
 
-import React, { useEffect, useState } from 'react';
-import styles from './index.module.less';
+import { useEffect, useState } from 'react';
 
 interface IDocCreateTableConfirmProps {
     handleRowColChange: (rowCount: number, colCount: number) => void;
@@ -50,27 +49,27 @@ export const DocCreateTableConfirm = ({
     }, [tableCreateParams]);
 
     return (
-        <div className={styles.create}>
-            <div className={styles.createItem}>
-                <span className={styles.createLabel}>{localeService.t('toolbar.table.rowCount')}</span>
+        <div className="univer-flex univer-items-center univer-justify-between">
+            <div className="univer-flex univer-items-center univer-gap-2">
+                <span>{localeService.t('toolbar.table.rowCount')}</span>
                 <InputNumber
+                    className="univer-w-28"
                     min={1}
                     max={20}
                     precision={0}
                     value={rowCount}
                     onChange={(val) => { handleInputChange(val as number, colCount); }}
-                    className={styles.createInput}
                 />
             </div>
-            <div className={styles.createItem}>
-                <span className={styles.createLabel}>{localeService.t('toolbar.table.colCount')}</span>
+            <div className="univer-flex univer-items-center univer-gap-2">
+                <span>{localeService.t('toolbar.table.colCount')}</span>
                 <InputNumber
+                    className="univer-w-28"
                     min={1}
                     max={20}
                     precision={0}
                     value={colCount}
                     onChange={(val) => { handleInputChange(rowCount, val as number); }}
-                    className={styles.createInput}
                 />
             </div>
         </div>

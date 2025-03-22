@@ -18,10 +18,8 @@ import { IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
 import { useDependency } from '@univerjs/ui';
-import React, { useEffect, useState } from 'react';
-
+import { useEffect, useState } from 'react';
 import { DocHeaderFooterOptions } from './DocHeaderFooterOptions';
-import styles from './index.module.less';
 
 export const DocHeaderFooterPanel = () => {
     const localeService = useDependency(LocaleService);
@@ -48,14 +46,13 @@ export const DocHeaderFooterPanel = () => {
         return () => {
             subscription.unsubscribe();
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (
-        <div className={styles.panel}>
+        <div className="univer-text-sm">
             {isEditHeaderFooter
                 ? <DocHeaderFooterOptions unitId={unitId} />
-                : <div className={styles.panelDisableText}>{localeService.t('headerFooter.disableText')}</div>}
+                : <div className="univer-text-gray-400">{localeService.t('headerFooter.disableText')}</div>}
         </div>
     );
 };

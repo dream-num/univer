@@ -17,6 +17,8 @@
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import type { IDocPopup } from '../services/doc-quick-insert-popup.service';
 import { Disposable, ICommandService, Inject } from '@univerjs/core';
+import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { DividerSingle, TextSingle } from '@univerjs/icons';
 import { ComponentManager } from '@univerjs/ui';
 import { of } from 'rxjs';
@@ -32,7 +34,9 @@ export class DocQuickInsertUIController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(DocQuickInsertPopupService) private readonly _docQuickInsertPopupService: DocQuickInsertPopupService,
-        @Inject(ComponentManager) private readonly _componentManager: ComponentManager
+        @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
+        @Inject(DocSelectionManagerService) private readonly _docSelectionManagerService: DocSelectionManagerService
     ) {
         super();
 
@@ -69,7 +73,27 @@ export class DocQuickInsertUIController extends Disposable {
                 keyword: '/',
                 menus$: of(builtInMenus),
                 // only show when the cursor is at the beginning of a line
-                preconditions: (params) => (params.range as ITextRangeWithStyle).startNodePosition?.glyph === 0,
+                preconditions: (params) => {
+                    const docSkeletonManagerService = this._renderManagerService.getRenderById(params.unitId)?.with(DocSkeletonManagerService);
+                    const skeleton = docSkeletonManagerService?.getSkeleton();
+                    const activeRange = this._docSelectionManagerService.getActiveTextRange();
+
+                    if (skeleton == null || activeRange == null) {
+                        return false;
+                    }
+
+                    const { startOffset } = activeRange;
+                    const curGlyph = skeleton.findNodeByCharIndex(startOffset, activeRange.segmentId, activeRange.segmentPage);
+
+                    if (curGlyph == null) {
+                        return false;
+                    }
+
+                    const isEmptyLine = !curGlyph.content.trim();
+                    const atStartOfLine = (params.range as ITextRangeWithStyle).startNodePosition?.glyph === 0;
+
+                    return atStartOfLine && isEmptyLine;
+                },
             },
         ];
 

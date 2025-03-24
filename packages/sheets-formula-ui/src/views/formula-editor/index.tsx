@@ -153,10 +153,12 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     const highlight = useEvent((text: string, isNeedResetSelection: boolean = true, isEnd?: boolean, newSelections?: ITextRange[]) => {
         if (!editorRef.current) return;
         highTextRef.current = text;
-        const sequenceNodes = getFormulaToken(text[0] === '=' ? text.slice(1) : '');
+        const formulaStr = text[0] === '=' ? text.slice(1) : '';
+        const sequenceNodes = getFormulaToken(formulaStr);
+        const parsedFormula = sequenceNodes.reduce((pre, cur) => (typeof cur === 'object' ? `${pre}${cur.token}` : `${pre}${cur}`), '');
         const ranges = highlightDoc(
             editorRef.current,
-            sequenceNodes,
+            parsedFormula === formulaStr ? sequenceNodes : [],
             isNeedResetSelection,
             newSelections
         );

@@ -379,7 +379,7 @@ export const replaceSelectionTextRuns = (params: IReplaceSelectionTextXParams) =
             // delete
             default: {
                 const action: TextXAction = {
-                    t: TextXActionType.RETAIN,
+                    t: TextXActionType.DELETE,
                     len: text.length,
                 };
                 return action;

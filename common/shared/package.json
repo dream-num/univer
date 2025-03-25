@@ -24,7 +24,7 @@
         "univer-cli": "bin/index.ts"
     },
     "dependencies": {
-        "@typescript-eslint/parser": "^8.27.0",
+        "@typescript-eslint/parser": "^8.28.0",
         "@vitejs/plugin-react": "^4.3.4",
         "@vitejs/plugin-vue": "^5.2.3",
         "@vitest/coverage-istanbul": "^3.0.9",
@@ -37,15 +37,15 @@
         "sort-keys": "^5.1.0",
         "tailwind-scrollbar": "^3.1.0",
         "tailwindcss": "^3.4.17",
-        "vite": "^6.2.2",
+        "vite": "^6.2.3",
         "vite-plugin-dts": "^4.5.3",
         "vite-plugin-external": "^6.0.1",
         "vitest": "^3.0.9"
     },
     "devDependencies": {
         "@types/fs-extra": "^11.0.4",
-        "@univerjs/icons": "^0.2.27",
-        "@univerjs/icons-svg": "^0.2.27",
+        "@univerjs/icons": "^0.2.28",
+        "@univerjs/icons-svg": "^0.2.28",
         "@univerjs/protocol": "0.1.44"
     }
 }

@@ -87,7 +87,7 @@
         "@univerjs-infra/shared": "workspace:*",
         "cross-env": "^7.0.3",
         "detect-port": "^2.1.0",
-        "esbuild": "^0.25.0",
+        "esbuild": "^0.25.1",
         "esbuild-plugin-alias": "^0.2.1",
         "esbuild-plugin-clean": "^1.0.1",
         "esbuild-plugin-copy": "^2.1.1",

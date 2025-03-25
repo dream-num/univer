@@ -73,18 +73,18 @@
         "@univerjs/docs-ui": "workspace:*",
         "@univerjs/drawing": "workspace:*",
         "@univerjs/drawing-ui": "workspace:*",
-        "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons": "^0.2.27",
+        "@univerjs/icons": "^0.2.28",
         "@univerjs/ui": "workspace:*"
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
+        "@univerjs/engine-render": "workspace:*",
         "postcss": "^8.5.3",
         "react": "18.3.1",
         "rxjs": "^7.8.1",
         "tailwindcss": "^3.4.17",
         "typescript": "^5.8.2",
-        "vite": "^6.2.2",
+        "vite": "^6.2.3",
         "vitest": "^3.0.9"
     }
 }

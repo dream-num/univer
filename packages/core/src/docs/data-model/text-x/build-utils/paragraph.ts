@@ -313,11 +313,11 @@ interface ISetParagraphStyleParams {
     segmentId?: string;
     document: DocumentDataModel;
     style: IParagraphStyle;
-    paragraphTextStyle?: ITextStyle;
+    paragraphTextRun?: ITextStyle;
 }
 
 export const setParagraphStyle = (params: ISetParagraphStyleParams) => {
-    const { textRanges, segmentId, document: docDataModel, style, paragraphTextStyle } = params;
+    const { textRanges, segmentId, document: docDataModel, style, paragraphTextRun } = params;
     const paragraphs = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.paragraphs ?? [];
     const currentParagraphs = getParagraphsInRanges(textRanges, paragraphs);
 
@@ -339,16 +339,19 @@ export const setParagraphStyle = (params: ISetParagraphStyleParams) => {
         textX.push({
             t: TextXActionType.RETAIN,
             len,
-            body: paragraphTextStyle
+            ...paragraphTextRun
                 ? {
-                    dataStream: '',
-                    textRuns: [{
-                        ts: paragraphTextStyle,
-                        st: 0,
-                        ed: len,
-                    }],
+                    body: {
+                        dataStream: '',
+                        textRuns: [{
+                            ts: paragraphTextRun,
+                            st: 0,
+                            ed: len,
+                        }],
+                    },
+                    coverType: UpdateDocsAttributeType.REPLACE,
                 }
-                : undefined,
+                : null,
         });
 
         textX.push({

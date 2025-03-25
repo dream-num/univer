@@ -50,6 +50,7 @@ export const SetParagraphNamedStyleCommand: ICommand<ISetParagraphNamedStyleComm
             style: {
                 namedStyleType: params.namedStyleType,
             },
+            paragraphTextRun: {},
         });
 
         const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
@@ -64,7 +65,6 @@ export const SetParagraphNamedStyleCommand: ICommand<ISetParagraphNamedStyleComm
         const jsonX = JSONX.getInstance();
         const path = getRichTextEditPath(documentDataModel);
         doMutation.params.actions = jsonX.editOp(textX.serialize(), path);
-
         const commandService = accessor.get(ICommandService);
         const result = commandService.syncExecuteCommand(doMutation.id, doMutation.params);
         return Boolean(result);

@@ -105,9 +105,8 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
             return (
                 <div
                     className={clsx(`
-                      univer-relative univer-flex univer-cursor-pointer univer-items-center univer-rounded
-                    `, `
-                      univer-group univer-h-6 univer-pr-5 univer-transition-colors
+                      univer-group univer-relative univer-flex univer-h-6 univer-cursor-pointer univer-items-center
+                      univer-rounded univer-pr-5 univer-transition-colors univer-animate-in univer-fade-in
                       hover:univer-bg-gray-100
                     `, {
                         'univer-text-gray-900': !disabled,
@@ -174,7 +173,8 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
                     <div
                         className={clsx(`
                           univer-relative univer-flex univer-h-6 univer-cursor-pointer univer-items-center univer-gap-2
-                          univer-rounded univer-px-1 univer-transition-colors
+                          univer-whitespace-nowrap univer-rounded univer-px-1 univer-transition-colors univer-animate-in
+                          univer-fade-in
                           hover:univer-bg-gray-100
                         `, {
                             'univer-text-gray-900': !disabled,

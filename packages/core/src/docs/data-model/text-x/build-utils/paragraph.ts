@@ -320,17 +320,17 @@ export const setParagraphStyle = (params: ISetParagraphStyleParams) => {
     const { textRanges, segmentId, document: docDataModel, style, paragraphTextRun } = params;
     const paragraphs = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.paragraphs ?? [];
     const currentParagraphs = getParagraphsInRanges(textRanges, paragraphs);
-
     const memoryCursor = new MemoryCursor();
     const textX = new TextX();
     currentParagraphs.sort((a, b) => a.startIndex - b.startIndex);
-    const start = Math.min(0, currentParagraphs[0].paragraphStart - 1);
+    const start = Math.max(0, currentParagraphs[0].paragraphStart - 1);
 
     if (start > 0) {
         textX.push({
             t: TextXActionType.RETAIN,
             len: start - memoryCursor.cursor,
         });
+        memoryCursor.moveCursorTo(start);
     }
 
     for (const paragraph of currentParagraphs) {

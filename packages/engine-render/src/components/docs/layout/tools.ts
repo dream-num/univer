@@ -54,7 +54,7 @@ import {
     GridType,
     HorizontalAlign,
     mergeWith,
-    NamedStyleType,
+    NAMED_STYLE_MAP,
     NumberUnitType,
     ObjectMatrix,
     ObjectRelativeFromH,
@@ -817,19 +817,6 @@ function getBulletParagraphTextStyle(bullet: IBullet, viewModel: DocumentViewMod
 }
 
 const DEFAULT_TEXT_RUN = { ts: {}, st: 0, ed: 0 };
-
-const NAMED_STYLE_MAP: Record<NamedStyleType, Nullable<ITextStyle>> = {
-    [NamedStyleType.HEADING_1]: { fs: 20, bl: 1 }, // Heading 1: 20pt, bold
-    [NamedStyleType.HEADING_2]: { fs: 18, bl: 1 }, // Heading 2: 18pt, bold
-    [NamedStyleType.HEADING_3]: { fs: 16, bl: 1 }, // Heading 3: 16pt, bold
-    [NamedStyleType.HEADING_4]: { fs: 14, bl: 1 }, // Heading 4: 14pt, bold
-    [NamedStyleType.HEADING_5]: { fs: 12, bl: 1 }, // Heading 5: 12pt, bold
-    [NamedStyleType.HEADING_6]: { fs: 11, bl: 1 }, // Heading 6: 11pt, bold
-    [NamedStyleType.NORMAL_TEXT]: { fs: 11 }, // Normal text: 11pt
-    [NamedStyleType.TITLE]: { fs: 26, bl: 1 }, // Title: 26pt, bold
-    [NamedStyleType.SUBTITLE]: { fs: 15 }, // Subtitle: 15pt
-    [NamedStyleType.NAMED_STYLE_TYPE_UNSPECIFIED]: null,
-};
 
 export function getFontCreateConfig(
     index: number,

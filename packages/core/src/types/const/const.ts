@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import type { Nullable } from '../../shared';
+import type { ITextStyle } from '../interfaces';
 import { DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_ZEN_EDITOR_UNIT_ID_KEY } from '../../common/const';
 import {
     BooleanNumber,
@@ -22,6 +24,7 @@ import {
     VerticalAlign,
     WrapStrategy,
 } from '../enum';
+import { NamedStyleType } from '../interfaces';
 
 /**
  * Used as an illegal range array return value
@@ -175,3 +178,16 @@ export const DEFAULT_SLIDE = {
 };
 
 export const SHEET_EDITOR_UNITS = [DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_ZEN_EDITOR_UNIT_ID_KEY, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY];
+
+export const NAMED_STYLE_MAP: Record<NamedStyleType, Nullable<ITextStyle>> = {
+    [NamedStyleType.HEADING_1]: { fs: 20, bl: 1 }, // Heading 1: 20pt, bold
+    [NamedStyleType.HEADING_2]: { fs: 18, bl: 1 }, // Heading 2: 18pt, bold
+    [NamedStyleType.HEADING_3]: { fs: 16, bl: 1 }, // Heading 3: 16pt, bold
+    [NamedStyleType.HEADING_4]: { fs: 14, bl: 1 }, // Heading 4: 14pt, bold
+    [NamedStyleType.HEADING_5]: { fs: 12, bl: 1 }, // Heading 5: 12pt, bold
+    [NamedStyleType.HEADING_6]: { fs: 11, bl: 1 }, // Heading 6: 11pt, bold
+    [NamedStyleType.NORMAL_TEXT]: { fs: 11 }, // Normal text: 11pt
+    [NamedStyleType.TITLE]: { fs: 26, bl: 1 }, // Title: 26pt, bold
+    [NamedStyleType.SUBTITLE]: { fs: 15 }, // Subtitle: 15pt
+    [NamedStyleType.NAMED_STYLE_TYPE_UNSPECIFIED]: null,
+};

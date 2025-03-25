@@ -28,6 +28,7 @@ import {
     HorizontalAlign,
     ICommandService,
     IUniverInstanceService,
+    NAMED_STYLE_MAP,
     NamedStyleType,
     ThemeService,
     UniverInstanceType,
@@ -984,11 +985,13 @@ function getFontStyleAtCursor(accessor: IAccessor) {
 
     const defaultTextStyle = docMenuStyleService.getDefaultStyle();
     const cacheStyle = docMenuStyleService.getStyleCache() ?? {};
-
+    const paragraph = getParagraphStyleAtCursor(accessor);
+    const namedStyle = paragraph?.paragraphStyle?.namedStyleType ? NAMED_STYLE_MAP[paragraph?.paragraphStyle?.namedStyleType] : null;
     if (docDataModel == null || activeRange == null) {
         return {
             ts: {
                 ...defaultTextStyle,
+                ...namedStyle,
                 ...cacheStyle,
             },
         };
@@ -1001,6 +1004,7 @@ function getFontStyleAtCursor(accessor: IAccessor) {
         return {
             ts: {
                 ...defaultTextStyle,
+                ...namedStyle,
                 ...cacheStyle,
             },
         };
@@ -1011,6 +1015,7 @@ function getFontStyleAtCursor(accessor: IAccessor) {
     return {
         ts: {
             ...curTextStyle,
+            ...namedStyle,
             ...cacheStyle,
         },
     };

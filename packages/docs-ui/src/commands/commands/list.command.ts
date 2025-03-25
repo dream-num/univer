@@ -473,7 +473,7 @@ export const QuickListCommand: ICommand<IQuickListCommandParams> = {
 };
 
 export function getParagraphsRelative(ranges: ITextRangeWithStyle[], paragraphs: IParagraph[]) {
-    const selectionParagraphs = BuildTextUtils.range.getParagraphsInRanges(ranges, paragraphs);
+    const selectionParagraphs: IParagraph[] = BuildTextUtils.range.getParagraphsInRanges(ranges, paragraphs);
     const startIndex = paragraphs.indexOf(selectionParagraphs[0]);
     const endIndex = paragraphs.indexOf(selectionParagraphs[selectionParagraphs.length - 1]);
     if (selectionParagraphs[0].bullet) {

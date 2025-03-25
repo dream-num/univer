@@ -73,6 +73,7 @@ import {
 import { AlignCenterCommand, AlignJustifyCommand, AlignLeftCommand, AlignOperationCommand, AlignRightCommand } from './commands/commands/paragraph-align.command';
 import { CoverContentCommand, ReplaceContentCommand, ReplaceSelectionCommand, ReplaceSnapshotCommand, ReplaceTextRunsCommand } from './commands/commands/replace-content.command';
 import { SetDocZoomRatioCommand } from './commands/commands/set-doc-zoom-ratio.command';
+import { SetParagraphNamedStyleCommand } from './commands/commands/set-heading.command';
 import { SwitchDocModeCommand } from './commands/commands/switch-doc-mode.command';
 import { CreateDocTableCommand } from './commands/commands/table/doc-table-create.command';
 import { DocTableDeleteColumnsCommand, DocTableDeleteRowsCommand, DocTableDeleteTableCommand } from './commands/commands/table/doc-table-delete.command';
@@ -262,8 +263,9 @@ export class UniverDocsUIPlugin extends Plugin {
             ReplaceTextRunsCommand,
             ReplaceSelectionCommand,
             InsertCustomRangeCommand,
+            SetParagraphNamedStyleCommand,
         ].forEach((e) => {
-            this._commandService.registerCommand(e);
+            this.disposeWithMe(this._commandService.registerCommand(e));
         });
 
         [DocCopyCommand, DocCutCommand, DocPasteCommand].forEach((command) => this.disposeWithMe(this._commandService.registerMultipleCommand(command)));

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { LocaleType, LogLevel, Univer, UniverInstanceType, UserManagerService } from '@univerjs/core';
+import { ICommandService, LocaleType, LogLevel, NamedStyleType, Univer, UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
 import { UniverDebuggerPlugin } from '@univerjs/debugger';
 import { defaultTheme } from '@univerjs/design';
@@ -24,7 +24,7 @@ import { UniverDocsHyperLinkUIPlugin } from '@univerjs/docs-hyper-link-ui';
 import { UniverDocsMentionUIPlugin } from '@univerjs/docs-mention-ui';
 import { UniverDocsQuickInsertUIPlugin } from '@univerjs/docs-quick-insert-ui';
 import { UniverDocsThreadCommentUIPlugin } from '@univerjs/docs-thread-comment-ui';
-import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
+import { SetParagraphNamedStyleCommand, UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { DEFAULT_DOCUMENT_DATA_CN } from '@univerjs/mockdata';
@@ -98,3 +98,14 @@ const mockUser = {
 };
 userManagerService.setCurrentUser(mockUser);
 window.univerAPI = FUniver.newAPI(univer);
+
+const commandService = injector.get(ICommandService);
+
+setTimeout(() => {
+    commandService.syncExecuteCommand(
+        SetParagraphNamedStyleCommand.id,
+        {
+            namedStyleType: NamedStyleType.HEADING_1,
+        }
+    );
+}, 2000);

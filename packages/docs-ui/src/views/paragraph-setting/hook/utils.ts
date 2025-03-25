@@ -16,7 +16,7 @@
 
 import type { DocumentDataModel, IParagraph, ISectionBreak } from '@univerjs/core';
 import type { IDocParagraphSettingCommandParams } from '../../../commands/commands/doc-paragraph-setting.command';
-import { ICommandService, IUniverInstanceService, SpacingRule, UniverInstanceType } from '@univerjs/core';
+import { BuildTextUtils, ICommandService, IUniverInstanceService, SpacingRule, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
 import { getNumberUnitValue, IRenderManagerService } from '@univerjs/engine-render';
 import { useDependency } from '@univerjs/ui';
@@ -24,7 +24,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { bufferTime, filter, map } from 'rxjs/operators';
 import { DocParagraphSettingCommand } from '../../../commands/commands/doc-paragraph-setting.command';
-import { findNearestSectionBreak, getParagraphsInRanges } from '../../../commands/commands/list.command';
+import { findNearestSectionBreak } from '../../../commands/commands/list.command';
 import { DocParagraphSettingController } from '../../../controllers/doc-paragraph-setting.controller';
 
 const useDocRanges = () => {
@@ -59,7 +59,7 @@ export const useCurrentParagraph = () => {
     const segmentId = docRanges[0].segmentId;
 
     const paragraphs = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.paragraphs ?? [];
-    const currentParagraphs = getParagraphsInRanges(docRanges, paragraphs) ?? [];
+    const currentParagraphs = BuildTextUtils.range.getParagraphsInRanges(docRanges, paragraphs) ?? [];
 
     return currentParagraphs;
 };

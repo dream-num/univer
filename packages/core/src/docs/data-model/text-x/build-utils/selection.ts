@@ -15,6 +15,7 @@
  */
 
 import type { ITextRange } from '../../../../sheets/typedef';
+import type { IParagraph } from '../../../../types/interfaces';
 
 export function makeSelection(startOffset: number, endOffset?: number): ITextRange {
     if (typeof endOffset === 'undefined') {
@@ -42,4 +43,37 @@ export function normalizeSelection(selection: ITextRange): ITextRange {
 
 export function isSegmentIntersects(start: number, end: number, start2: number, end2: number) {
     return Math.max(start, start2) <= Math.min(end, end2);
+}
+
+export function getParagraphsInRange(activeRange: ITextRange, paragraphs: IParagraph[]) {
+    const { startOffset, endOffset } = activeRange;
+    const results: IParagraph[] = [];
+
+    let start = -1;
+
+    for (const paragraph of paragraphs) {
+        const { startIndex } = paragraph;
+
+        if ((startOffset > start && startOffset <= startIndex) || (endOffset > start && endOffset <= startIndex)) {
+            results.push(paragraph);
+        } else if (startIndex >= startOffset && startIndex <= endOffset) {
+            results.push(paragraph);
+        }
+
+        start = startIndex;
+    }
+
+    return results;
+}
+
+export function getParagraphsInRanges(ranges: readonly ITextRange[], paragraphs: IParagraph[]) {
+    const results: IParagraph[] = [];
+
+    for (const range of ranges) {
+        const ps = getParagraphsInRange(range, paragraphs);
+
+        results.push(...ps);
+    }
+
+    return results;
 }

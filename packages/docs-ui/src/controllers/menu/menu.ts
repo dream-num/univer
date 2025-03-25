@@ -21,6 +21,7 @@ import type { Subscription } from 'rxjs';
 import {
     BaselineOffset,
     BooleanNumber,
+    BuildTextUtils,
     DEFAULT_STYLES,
     DOCS_ZEN_EDITOR_UNIT_ID_KEY,
     DocumentFlavor,
@@ -48,7 +49,7 @@ import { combineLatest, map, Observable } from 'rxjs';
 import { OpenHeaderFooterPanelCommand } from '../../commands/commands/doc-header-footer.command';
 import { HorizontalLineCommand } from '../../commands/commands/doc-horizontal-line.command';
 import { getStyleInTextRange, ResetInlineFormatTextBackgroundColorCommand, SetInlineFormatBoldCommand, SetInlineFormatCommand, SetInlineFormatFontFamilyCommand, SetInlineFormatFontSizeCommand, SetInlineFormatItalicCommand, SetInlineFormatStrikethroughCommand, SetInlineFormatSubscriptCommand, SetInlineFormatSuperscriptCommand, SetInlineFormatTextBackgroundColorCommand, SetInlineFormatTextColorCommand, SetInlineFormatUnderlineCommand } from '../../commands/commands/inline-format.command';
-import { BulletListCommand, CheckListCommand, getParagraphsInRange, OrderListCommand } from '../../commands/commands/list.command';
+import { BulletListCommand, CheckListCommand, OrderListCommand } from '../../commands/commands/list.command';
 import { AlignCenterCommand, AlignJustifyCommand, AlignLeftCommand, AlignOperationCommand, AlignRightCommand } from '../../commands/commands/paragraph-align.command';
 import { SwitchDocModeCommand } from '../../commands/commands/switch-doc-mode.command';
 import { DocCreateTableOperation } from '../../commands/operations/doc-create-table.operation';
@@ -774,7 +775,7 @@ const listValueFactory$ = (accessor: IAccessor) => {
 
                 if (range) {
                     const doc = docDataModel.getSelfOrHeaderFooterModel(range?.segmentId);
-                    const paragraphs = getParagraphsInRange(range, doc.getBody()?.paragraphs ?? []);
+                    const paragraphs = BuildTextUtils.range.getParagraphsInRange(range, doc.getBody()?.paragraphs ?? []);
                     let listType: string | undefined;
                     if (paragraphs.every((p) => {
                         if (!listType) {

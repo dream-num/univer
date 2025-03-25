@@ -67,7 +67,7 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
             return false;
         }
 
-        const currentParagraphs = getParagraphsInRanges(docRanges, paragraphs);
+        const currentParagraphs = BuildTextUtils.range.getParagraphsInRanges(docRanges, paragraphs);
 
         const unitId = docDataModel.getUnitId();
 
@@ -129,7 +129,7 @@ export const ChangeListTypeCommand: ICommand<IChangeListTypeCommandParams> = {
             return false;
         }
 
-        const currentParagraphs = getParagraphsInRanges(selections, paragraphs);
+        const currentParagraphs = BuildTextUtils.range.getParagraphsInRanges(selections, paragraphs);
 
         const unitId = docDataModel.getUnitId();
         const textX = BuildTextUtils.paragraph.bullet.set({
@@ -199,7 +199,7 @@ export const ChangeListNestingLevelCommand: ICommand<IChangeListNestingLevelComm
             return false;
         }
 
-        const currentParagraphs = getParagraphsInRange(activeRange, paragraphs);
+        const currentParagraphs = BuildTextUtils.range.getParagraphsInRange(activeRange, paragraphs);
 
         const unitId = docDataModel.getUnitId();
         const jsonX = JSONX.getInstance();
@@ -472,29 +472,8 @@ export const QuickListCommand: ICommand<IQuickListCommandParams> = {
     },
 };
 
-export function getParagraphsInRange(activeRange: ITextRangeWithStyle, paragraphs: IParagraph[]) {
-    const { startOffset, endOffset } = activeRange;
-    const results: IParagraph[] = [];
-
-    let start = -1;
-
-    for (const paragraph of paragraphs) {
-        const { startIndex } = paragraph;
-
-        if ((startOffset > start && startOffset <= startIndex) || (endOffset > start && endOffset <= startIndex)) {
-            results.push(paragraph);
-        } else if (startIndex >= startOffset && startIndex <= endOffset) {
-            results.push(paragraph);
-        }
-
-        start = startIndex;
-    }
-
-    return results;
-}
-
 export function getParagraphsRelative(ranges: ITextRangeWithStyle[], paragraphs: IParagraph[]) {
-    const selectionParagraphs = getParagraphsInRanges(ranges, paragraphs);
+    const selectionParagraphs = BuildTextUtils.range.getParagraphsInRanges(ranges, paragraphs);
     const startIndex = paragraphs.indexOf(selectionParagraphs[0]);
     const endIndex = paragraphs.indexOf(selectionParagraphs[selectionParagraphs.length - 1]);
     if (selectionParagraphs[0].bullet) {
@@ -517,18 +496,6 @@ export function getParagraphsRelative(ranges: ITextRangeWithStyle[], paragraphs:
     }
 
     return selectionParagraphs;
-}
-
-export function getParagraphsInRanges(ranges: ITextRangeWithStyle[], paragraphs: IParagraph[]) {
-    const results: IParagraph[] = [];
-
-    for (const range of ranges) {
-        const ps = getParagraphsInRange(range, paragraphs);
-
-        results.push(...ps);
-    }
-
-    return results;
 }
 
 export function findNearestSectionBreak(currentIndex: number, sectionBreaks: ISectionBreak[]) {

@@ -15,4 +15,4 @@
  */
 
 export { FontSize } from './FontSize';
-export { FONT_SIZE_LIST } from './interface';
+export { FONT_SIZE_LIST, HEADING_LIST } from './interface';

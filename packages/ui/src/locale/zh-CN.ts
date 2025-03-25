@@ -15,6 +15,20 @@
  */
 
 const locale = {
+    toolbar: {
+        heading: {
+            normal: '正文',
+            title: '标题',
+            subTitle: '副标题',
+            1: '标题1',
+            2: '标题2',
+            3: '标题3',
+            4: '标题4',
+            5: '标题5',
+            6: '标题6',
+            tooltip: '设置标题',
+        },
+    },
     ribbon: {
         start: '开始',
         insert: '插入',

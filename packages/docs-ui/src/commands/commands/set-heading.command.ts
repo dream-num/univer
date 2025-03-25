@@ -21,7 +21,7 @@ import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/d
 import { getRichTextEditPath } from '../util';
 
 export interface ISetParagraphNamedStyleCommandParams {
-    namedStyleType: NamedStyleType;
+    value: NamedStyleType;
 }
 
 export const SetParagraphNamedStyleCommand: ICommand<ISetParagraphNamedStyleCommandParams> = {
@@ -48,7 +48,7 @@ export const SetParagraphNamedStyleCommand: ICommand<ISetParagraphNamedStyleComm
             document: documentDataModel,
             textRanges: selections,
             style: {
-                namedStyleType: params.namedStyleType,
+                namedStyleType: params.value,
             },
             paragraphTextRun: {},
         });

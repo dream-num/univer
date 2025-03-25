@@ -24,6 +24,7 @@ import { ResetInlineFormatTextBackgroundColorCommand, SetInlineFormatBoldCommand
 
 import { BulletListCommand, CheckListCommand, OrderListCommand } from '../commands/commands/list.command';
 import { AlignCenterCommand, AlignJustifyCommand, AlignLeftCommand, AlignRightCommand } from '../commands/commands/paragraph-align.command';
+import { SetParagraphNamedStyleCommand } from '../commands/commands/set-heading.command';
 import { SwitchDocModeCommand } from '../commands/commands/switch-doc-mode.command';
 import { DocTableDeleteColumnsCommand, DocTableDeleteRowsCommand, DocTableDeleteTableCommand } from '../commands/commands/table/doc-table-delete.command';
 import { DocTableInsertColumnLeftCommand, DocTableInsertColumnRightCommand, DocTableInsertRowAboveCommand, DocTableInsertRowBellowCommand } from '../commands/commands/table/doc-table-insert.command';
@@ -60,6 +61,7 @@ import {
     FontFamilySelectorMenuItemFactory,
     FontSizeSelectorMenuItemFactory,
     HeaderFooterMenuItemFactory,
+    HeadingSelectorMenuItemFactory,
     HorizontalLineFactory,
     InsertTableMenuFactory,
     ItalicMenuItemFactory,
@@ -99,6 +101,10 @@ export const menuSchema: MenuSchemaType = {
         [SetInlineFormatSuperscriptCommand.id]: {
             order: 5,
             menuItemFactory: SuperscriptMenuItemFactory,
+        },
+        [SetParagraphNamedStyleCommand.id]: {
+            order: 5.5,
+            menuItemFactory: HeadingSelectorMenuItemFactory,
         },
         [SetInlineFormatFontSizeCommand.id]: {
             order: 6,

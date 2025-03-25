@@ -17,6 +17,20 @@
 import type zhCN from './zh-CN';
 
 const locale: typeof zhCN = {
+    toolbar: {
+        heading: {
+            normal: 'Văn bản',
+            title: 'Tiêu đề',
+            subTitle: 'Tiêu đề phụ',
+            1: 'Tiêu đề 1',
+            2: 'Tiêu đề 2',
+            3: 'Tiêu đề 3',
+            4: 'Tiêu đề 4',
+            5: 'Tiêu đề 5',
+            6: 'Tiêu đề 6',
+            tooltip: 'Đặt tiêu đề',
+        },
+    },
     ribbon: {
         start: 'Bắt đầu',
         insert: 'Chèn',

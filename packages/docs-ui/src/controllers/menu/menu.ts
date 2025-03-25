@@ -28,6 +28,7 @@ import {
     HorizontalAlign,
     ICommandService,
     IUniverInstanceService,
+    NamedStyleType,
     ThemeService,
     UniverInstanceType,
 } from '@univerjs/core';
@@ -42,6 +43,7 @@ import {
     FONT_FAMILY_LIST,
     FONT_SIZE_LIST,
     getMenuHiddenObservable,
+    HEADING_LIST,
     MenuItemType,
 } from '@univerjs/ui';
 
@@ -51,6 +53,7 @@ import { HorizontalLineCommand } from '../../commands/commands/doc-horizontal-li
 import { getStyleInTextRange, ResetInlineFormatTextBackgroundColorCommand, SetInlineFormatBoldCommand, SetInlineFormatCommand, SetInlineFormatFontFamilyCommand, SetInlineFormatFontSizeCommand, SetInlineFormatItalicCommand, SetInlineFormatStrikethroughCommand, SetInlineFormatSubscriptCommand, SetInlineFormatSuperscriptCommand, SetInlineFormatTextBackgroundColorCommand, SetInlineFormatTextColorCommand, SetInlineFormatUnderlineCommand } from '../../commands/commands/inline-format.command';
 import { BulletListCommand, CheckListCommand, OrderListCommand } from '../../commands/commands/list.command';
 import { AlignCenterCommand, AlignJustifyCommand, AlignLeftCommand, AlignOperationCommand, AlignRightCommand } from '../../commands/commands/paragraph-align.command';
+import { SetParagraphNamedStyleCommand } from '../../commands/commands/set-heading.command';
 import { SwitchDocModeCommand } from '../../commands/commands/switch-doc-mode.command';
 import { DocCreateTableOperation } from '../../commands/operations/doc-create-table.operation';
 import { getCommandSkeleton } from '../../commands/util';
@@ -523,6 +526,40 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
             });
 
             subscriber.next(DEFAULT_SIZE);
+
+            return disposable.dispose;
+        }),
+        disabled$: disableMenuWhenNoDocRange(accessor),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+    };
+}
+
+export function HeadingSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<number> {
+    const commandService = accessor.get(ICommandService);
+
+    return {
+        id: SetParagraphNamedStyleCommand.id,
+        type: MenuItemType.SELECTOR,
+        tooltip: 'toolbar.heading.tooltip',
+        selections: HEADING_LIST,
+        value$: new Observable((subscriber) => {
+            const DEFAULT_TYPE = NamedStyleType.NORMAL_TEXT;
+            const disposable = commandService.onCommandExecuted((c) => {
+                const id = c.id;
+
+                if (id === SetTextSelectionsOperation.id || id === SetInlineFormatFontSizeCommand.id) {
+                    const paragraph = getParagraphStyleAtCursor(accessor);
+                    if (paragraph == null) {
+                        subscriber.next(DEFAULT_TYPE);
+                        return;
+                    }
+
+                    const namedStyleType = paragraph.paragraphStyle?.namedStyleType ?? DEFAULT_TYPE;
+                    subscriber.next(namedStyleType);
+                }
+            });
+
+            subscriber.next(DEFAULT_TYPE);
 
             return disposable.dispose;
         }),

@@ -17,6 +17,20 @@
 import type enUS from './en-US';
 
 const locale: typeof enUS = {
+    toolbar: {
+        heading: {
+            normal: 'Normal',
+            title: 'Titre',
+            subTitle: 'Sous-titre',
+            1: 'Titre 1',
+            2: 'Titre 2',
+            3: 'Titre 3',
+            4: 'Titre 4',
+            5: 'Titre 5',
+            6: 'Titre 6',
+            tooltip: 'Définir un titre',
+        },
+    },
     ribbon: {
         start: 'Démarrer',
         insert: 'Insérer',

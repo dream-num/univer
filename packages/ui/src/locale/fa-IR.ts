@@ -17,6 +17,20 @@
 import type zhCN from './zh-CN';
 
 const locale: typeof zhCN = {
+    toolbar: {
+        heading: {
+            normal: 'متن عادی',
+            title: 'عنوان',
+            subTitle: 'زیر عنوان',
+            1: 'عنوان 1',
+            2: 'عنوان 2',
+            3: 'عنوان 3',
+            4: 'عنوان 4',
+            5: 'عنوان 5',
+            6: 'عنوان 6',
+            tooltip: 'تنظیم عنوان',
+        },
+    },
     ribbon: {
         start: 'شروع',
         insert: 'درج',

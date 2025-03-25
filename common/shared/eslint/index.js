@@ -94,6 +94,7 @@ exports.baseRules = {
     // IMPORTANT: To ensure compatibility, some features of React 19 will be disabled.
     'react/no-forward-ref': 'off',
     'react/no-context-provider': 'off',
+    'react-dom/no-render': 'off',
 
     // TODO: debatable rules
     'react/no-duplicate-key': 'warn',

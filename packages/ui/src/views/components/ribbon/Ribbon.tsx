@@ -47,11 +47,20 @@ export function Ribbon(props: IRibbonProps) {
 
     const [ribbon, setRibbon] = useState<IMenuSchema[]>([]);
     const [activatedTab, setActivatedTab] = useState<string>(RibbonPosition.START);
+    const [changingActiveTab, setChangingActiveTab] = useState(false);
     const [collapsedIds, setCollapsedIds] = useState<string[]>([]);
 
     const handleSelectTab = useCallback((group: IMenuSchema) => {
         toolbarItemRefs.current = {};
+        setChangingActiveTab(true);
+        const timer = setTimeout(() => {
+            setChangingActiveTab(false);
+        }, 300);
         setActivatedTab(group.key);
+
+        return () => {
+            clearTimeout(timer);
+        };
     }, []);
 
     // subscribe to menu changes
@@ -68,40 +77,6 @@ export function Ribbon(props: IRibbonProps) {
             subscription.unsubscribe();
         };
     }, [menuManagerService]);
-
-    // resize observer
-    useEffect(() => {
-        const observer = new ResizeObserver((entries) => {
-            requestAnimationFrame(() => {
-                const toolbar = entries[0].target;
-                const toolbarWidth = toolbar.clientWidth;
-                const toolbarItems = Object.values(toolbarItemRefs.current);
-                const collapsedIds: string[] = [];
-                let totalWidth = 0;
-
-                const allGroups = ribbon.find((group) => group.key === activatedTab)?.children ?? [];
-
-                for (const { el, key } of toolbarItems) {
-                    if (!el) continue;
-
-                    totalWidth += el?.getBoundingClientRect().width + 8;
-                    if (totalWidth > toolbarWidth - 32 - 8 * (allGroups.length - 1)) {
-                        collapsedIds.push(key);
-                    }
-                }
-
-                setCollapsedIds(collapsedIds);
-            });
-        });
-
-        if (toolbarRef.current) {
-            observer.observe(toolbarRef.current);
-        }
-
-        return () => {
-            observer.disconnect();
-        };
-    }, [ribbon, activatedTab]);
 
     const activeGroup = useMemo(() => {
         const allGroups = ribbon.find((group) => group.key === activatedTab)?.children ?? [];
@@ -125,6 +100,47 @@ export function Ribbon(props: IRibbonProps) {
             allGroups,
             visibleGroups,
             hiddenGroups,
+        };
+    }, [ribbon, activatedTab, collapsedIds]);
+
+    // resize observer
+    useEffect(() => {
+        let timer: number;
+        const observer = new ResizeObserver((entries) => {
+            timer = requestAnimationFrame(() => {
+                const toolbar = entries[0].target;
+                const toolbarWidth = toolbar.clientWidth;
+                const toolbarItems = Object.values(toolbarItemRefs.current);
+                const newCollapsedIds: string[] = [];
+                let totalWidth = 0;
+
+                const allGroups = ribbon.find((group) => group.key === activatedTab)?.children ?? [];
+
+                const gapWidth = (allGroups.length - 1) * 8;
+                totalWidth += gapWidth;
+
+                for (const { el, key } of toolbarItems) {
+                    if (!el) continue;
+
+                    totalWidth += el?.getBoundingClientRect().width + 8;
+                    if (totalWidth > toolbarWidth - 32 - 8 * (allGroups.length - 1)) {
+                        newCollapsedIds.push(key);
+                    }
+                }
+
+                if (JSON.stringify(newCollapsedIds) !== JSON.stringify(collapsedIds)) {
+                    setCollapsedIds(newCollapsedIds);
+                }
+            });
+        });
+
+        if (toolbarRef.current) {
+            observer.observe(toolbarRef.current);
+        }
+
+        return () => {
+            observer.disconnect();
+            timer && cancelAnimationFrame(timer);
         };
     }, [ribbon, activatedTab, collapsedIds]);
 
@@ -203,15 +219,17 @@ export function Ribbon(props: IRibbonProps) {
                 className={`
                   univer-relative univer-box-border univer-flex univer-h-8 univer-select-none univer-items-center
                   univer-border-0 univer-border-b univer-border-solid univer-border-b-gray-200 univer-bg-white
-                  univer-text-base univer-text-gray-800
+                  univer-text-base univer-text-gray-800 univer-transition-opacity
                   dark:univer-bg-gray-900
                 `}
             >
                 <div
-                    className={`
+                    className={clsx(`
                       univer-mx-auto univer-box-border univer-flex univer-h-full univer-flex-1 univer-items-center
                       univer-justify-center univer-gap-1 univer-overflow-hidden univer-px-4
-                    `}
+                    `, {
+                        'univer-duration-300 univer-animate-in univer-fade-in': changingActiveTab,
+                    })}
                 >
                     {activeGroup.visibleGroups.map((groupItem, index) => (groupItem.children?.length || groupItem.item) && (
                         <Fragment key={groupItem.key}>

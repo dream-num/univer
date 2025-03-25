@@ -16,13 +16,12 @@
 
 import type { DocumentDataModel } from '@univerjs/core';
 import { CustomRangeType, ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
-import { clsx, MessageType, Tooltip } from '@univerjs/design';
+import { MessageType, Tooltip } from '@univerjs/design';
 import { CopySingle, LinkSingle, UnlinkSingle, WriteSingle } from '@univerjs/icons';
 import { IMessageService, useDependency, useObservable } from '@univerjs/ui';
 import { DeleteDocHyperLinkCommand } from '../../commands/commands/delete-link.command';
 import { ShowDocHyperLinkEditPopupOperation } from '../../commands/operations/popup.operation';
 import { DocHyperLinkPopupService } from '../../services/hyper-link-popup.service';
-import styles from './index.module.less';
 
 export const DocLinkPopup = () => {
     const hyperLinkService = useDependency(DocHyperLinkPopupService);
@@ -48,22 +47,40 @@ export const DocLinkPopup = () => {
 
     return (
         <div
-            className={styles.docLink}
+            className={`
+              univer-box-border univer-flex univer-max-w-[328px] univer-items-center univer-justify-between
+              univer-overflow-hidden univer-rounded-lg univer-border univer-border-solid univer-border-gray-200
+              univer-bg-white univer-p-3 univer-shadow
+            `}
             onClick={() => {
                 hyperLinkService.hideInfoPopup();
             }}
         >
-            <div className={clsx(styles.docLinkContent)} onClick={() => window.open(url)}>
-                <div className={styles.docLinkType}>
+            <div
+                className={`
+                  univer-flex univer-h-6 univer-flex-1 univer-cursor-pointer univer-items-center univer-truncate
+                  univer-text-[13px] univer-leading-5 univer-text-primary-500
+                `}
+                onClick={() => window.open(url, undefined, 'noopener,noreferrer')}
+            >
+                <div
+                    className={`
+                      univer-mr-2 univer-flex univer-size-5 univer-flex-[0_0_auto] univer-items-center
+                      univer-justify-center univer-text-base univer-text-black
+                    `}
+                >
                     <LinkSingle />
                 </div>
                 <Tooltip showIfEllipsis title={url}>
-                    <span className={styles.docLinkUrl}>{url}</span>
+                    <span className="univer-flex-1 univer-truncate">{url}</span>
                 </Tooltip>
             </div>
-            <div className={styles.docLinkOperations}>
+            <div className="univer-flex univer-h-6 univer-flex-[0_0_auto] univer-items-center univer-justify-center">
                 <div
-                    className={clsx(styles.docLinkOperation)}
+                    className={`
+                      univer-ml-2 univer-flex univer-size-6 univer-cursor-pointer univer-items-center
+                      univer-justify-center univer-rounded univer-text-base
+                    `}
                     onClick={() => {
                         navigator.clipboard.writeText(url);
                         messageService.show({
@@ -78,7 +95,10 @@ export const DocLinkPopup = () => {
 
                 </div>
                 <div
-                    className={styles.docLinkOperation}
+                    className={`
+                      univer-ml-2 univer-flex univer-size-6 univer-cursor-pointer univer-items-center
+                      univer-justify-center univer-rounded univer-text-base
+                    `}
                     onClick={() => {
                         commandService.executeCommand(ShowDocHyperLinkEditPopupOperation.id, {
                             link: currentPopup,
@@ -90,7 +110,10 @@ export const DocLinkPopup = () => {
                     </Tooltip>
                 </div>
                 <div
-                    className={styles.docLinkOperation}
+                    className={`
+                      univer-ml-2 univer-flex univer-size-6 univer-cursor-pointer univer-items-center
+                      univer-justify-center univer-rounded univer-text-base
+                    `}
                     onClick={() => {
                         commandService.executeCommand(DeleteDocHyperLinkCommand.id, {
                             unitId,

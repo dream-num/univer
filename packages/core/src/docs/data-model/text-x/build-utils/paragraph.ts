@@ -15,7 +15,7 @@
  */
 
 import type { ITextRange } from '../../../../sheets/typedef';
-import type { ICustomTable, IParagraph, IParagraphStyle } from '../../../../types/interfaces';
+import type { ICustomTable, IParagraph, IParagraphStyle, ITextStyle } from '../../../../types/interfaces';
 import type { DocumentDataModel } from '../../document-data-model';
 import { MemoryCursor } from '../../../../common/memory-cursor';
 import { Tools, UpdateDocsAttributeType } from '../../../../shared';
@@ -313,23 +313,42 @@ interface ISetParagraphStyleParams {
     segmentId?: string;
     document: DocumentDataModel;
     style: IParagraphStyle;
+    paragraphTextStyle?: ITextStyle;
 }
 
 export const setParagraphStyle = (params: ISetParagraphStyleParams) => {
-    const { textRanges, segmentId, document: docDataModel, style } = params;
+    const { textRanges, segmentId, document: docDataModel, style, paragraphTextStyle } = params;
     const paragraphs = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.paragraphs ?? [];
     const currentParagraphs = getParagraphsInRanges(textRanges, paragraphs);
 
     const memoryCursor = new MemoryCursor();
     const textX = new TextX();
     currentParagraphs.sort((a, b) => a.startIndex - b.startIndex);
+    const start = Math.min(0, currentParagraphs[0].paragraphStart - 1);
+
+    if (start > 0) {
+        textX.push({
+            t: TextXActionType.RETAIN,
+            len: start - memoryCursor.cursor,
+        });
+    }
 
     for (const paragraph of currentParagraphs) {
         const { startIndex, paragraphStyle = {} } = paragraph;
-
+        const len = startIndex - memoryCursor.cursor;
         textX.push({
             t: TextXActionType.RETAIN,
-            len: startIndex - memoryCursor.cursor,
+            len,
+            body: paragraphTextStyle
+                ? {
+                    dataStream: '',
+                    textRuns: [{
+                        ts: paragraphTextStyle,
+                        st: 0,
+                        ed: len,
+                    }],
+                }
+                : undefined,
         });
 
         textX.push({

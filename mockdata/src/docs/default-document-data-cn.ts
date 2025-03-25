@@ -99,18 +99,6 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                     bl: BooleanNumber.TRUE,
                 },
             },
-            {
-                st: 14,
-                ed: 3064,
-                ts: {
-                    fs: 12,
-                    ff: 'Microsoft YaHei',
-                    cl: {
-                        rgb: 'rgb(30, 30, 30)',
-                    },
-                    bl: BooleanNumber.FALSE,
-                },
-            },
         ],
         paragraphs: [
             {

@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
+import type { Nullable } from '../../../../shared';
 import type { ITextRange } from '../../../../sheets/typedef';
-import type { IParagraph } from '../../../../types/interfaces';
+import type { IParagraph, IParagraphRange } from '../../../../types/interfaces';
 
 export function makeSelection(startOffset: number, endOffset?: number): ITextRange {
     if (typeof endOffset === 'undefined') {
@@ -47,17 +48,27 @@ export function isSegmentIntersects(start: number, end: number, start2: number, 
 
 export function getParagraphsInRange(activeRange: ITextRange, paragraphs: IParagraph[]) {
     const { startOffset, endOffset } = activeRange;
-    const results: IParagraph[] = [];
+    const results: IParagraphRange[] = [];
 
     let start = -1;
 
-    for (const paragraph of paragraphs) {
+    for (let i = 0; i < paragraphs.length; i++) {
+        const paragraph = paragraphs[i];
+        const prevParagraph: Nullable<IParagraph> = paragraphs[i - 1];
         const { startIndex } = paragraph;
 
         if ((startOffset > start && startOffset <= startIndex) || (endOffset > start && endOffset <= startIndex)) {
-            results.push(paragraph);
+            results.push({
+                ...paragraph,
+                paragraphStart: (prevParagraph?.startIndex ?? -1) + 1,
+                paragraphEnd: paragraph.startIndex,
+            });
         } else if (startIndex >= startOffset && startIndex <= endOffset) {
-            results.push(paragraph);
+            results.push({
+                ...paragraph,
+                paragraphStart: (prevParagraph?.startIndex ?? -1) + 1,
+                paragraphEnd: paragraph.startIndex,
+            });
         }
 
         start = startIndex;
@@ -67,7 +78,7 @@ export function getParagraphsInRange(activeRange: ITextRange, paragraphs: IParag
 }
 
 export function getParagraphsInRanges(ranges: readonly ITextRange[], paragraphs: IParagraph[]) {
-    const results: IParagraph[] = [];
+    const results: IParagraphRange[] = [];
 
     for (const range of ranges) {
         const ps = getParagraphsInRange(range, paragraphs);

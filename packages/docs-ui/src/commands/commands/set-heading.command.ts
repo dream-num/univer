@@ -40,7 +40,7 @@ export const SetParagraphNamedStyleCommand: ICommand<ISetParagraphNamedStyleComm
         const unitId = documentDataModel.getUnitId();
         const selectionService = accessor.get(DocSelectionManagerService);
         const selections = selectionService.getTextRanges({ unitId, subUnitId: unitId })?.filter((i) => !i.segmentId);
-        if (!selections) {
+        if (!selections?.length) {
             return false;
         }
 
@@ -56,7 +56,7 @@ export const SetParagraphNamedStyleCommand: ICommand<ISetParagraphNamedStyleComm
             id: RichTextEditingMutation.id,
             params: {
                 actions: [],
-                textRanges: null,
+                textRanges: selections,
                 unitId,
             },
         };

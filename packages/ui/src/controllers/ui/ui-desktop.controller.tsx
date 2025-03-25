@@ -20,6 +20,8 @@ import type { IWorkbenchOptions } from './ui.controller';
 import { Inject, Injector, IUniverInstanceService, LifecycleService, toDisposable } from '@univerjs/core';
 import { render as createRoot, unmount } from '@univerjs/design';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import { ComponentManager } from '../../common';
+import { COMMON_LABEL_COMPONENT, CommonLabel } from '../../components/common-label';
 import { ILayoutService } from '../../services/layout/layout.service';
 import { IMenuManagerService } from '../../services/menu/menu-manager.service';
 import { BuiltInUIPart, IUIPartsService } from '../../services/parts/parts.service';
@@ -40,14 +42,25 @@ export class DesktopUIController extends SingleUnitUIController {
         @ILayoutService layoutService: ILayoutService,
         @IUniverInstanceService instanceService: IUniverInstanceService,
         @IMenuManagerService menuManagerService: IMenuManagerService,
-        @IUIPartsService uiPartsService: IUIPartsService
+        @IUIPartsService uiPartsService: IUIPartsService,
+        @Inject(ComponentManager) private readonly _componentManager: ComponentManager
     ) {
         super(injector, instanceService, layoutService, lifecycleService, renderManagerService);
 
         menuManagerService.mergeMenu(menuSchema);
 
         this._initBuiltinComponents(uiPartsService);
+        this._registerComponents();
         this._bootstrapWorkbench();
+    }
+
+    private _registerComponents() {
+        this.disposeWithMe(
+            this._componentManager.register(
+                COMMON_LABEL_COMPONENT,
+                CommonLabel
+            )
+        );
     }
 
     override bootstrap(callback: (contentElement: HTMLElement, containerElement: HTMLElement) => void): IDisposable {

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+export * from './common-label';
 export * from './custom-label';
 export * from './font-family';
 export * from './font-size';

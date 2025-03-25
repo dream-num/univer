@@ -40,6 +40,7 @@ import {
 } from '@univerjs/docs';
 import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
 import {
+    COMMON_LABEL_COMPONENT,
     FONT_FAMILY_LIST,
     FONT_SIZE_LIST,
     getMenuHiddenObservable,
@@ -541,6 +542,12 @@ export function HeadingSelectorMenuItemFactory(accessor: IAccessor): IMenuSelect
         id: SetParagraphNamedStyleCommand.id,
         type: MenuItemType.SELECTOR,
         tooltip: 'toolbar.heading.tooltip',
+        label: {
+            name: COMMON_LABEL_COMPONENT,
+            props: {
+                selections: HEADING_LIST,
+            },
+        },
         selections: HEADING_LIST,
         value$: new Observable((subscriber) => {
             const DEFAULT_TYPE = NamedStyleType.NORMAL_TEXT;

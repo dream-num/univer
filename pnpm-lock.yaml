@@ -181,11 +181,11 @@ importers:
         specifier: ^11.0.4
         version: 11.0.4
       '@univerjs/icons':
-        specifier: ^0.2.28
-        version: 0.2.28(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+        specifier: ^0.2.30
+        version: 0.2.30(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       '@univerjs/icons-svg':
-        specifier: ^0.2.28
-        version: 0.2.28
+        specifier: ^0.2.30
+        version: 0.2.30
       '@univerjs/protocol':
         specifier: 0.1.45
         version: 0.1.45(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
@@ -5499,6 +5499,9 @@ packages:
   '@univerjs/icons-svg@0.2.28':
     resolution: {integrity: sha512-68ouPtI6fa/HzxJoKciAW7ZKelaN5rj6ktQGXv846NH0Fi+ClltXjbx4xenZsdFxz0se4UlH9f4iwSgxTXwBpA==}
 
+  '@univerjs/icons-svg@0.2.30':
+    resolution: {integrity: sha512-K4oYtk0XM3CPprgK+vU/yMIT0VYAZ0akiTnzllGuQ4bGPYPTVDL+4yWBtbUMp3K3ZtRhWhPpaEJphiB42u2qhw==}
+
   '@univerjs/icons@0.2.20':
     resolution: {integrity: sha512-KwQXI+6e+Qbuqv7+xYSVmK448L/Vj519f4xd5lPI8v6T+BsiB2gixPi3CQYKh6dQY3s5jdBpkTyYaAJfG3qgog==}
     peerDependencies:
@@ -5507,6 +5510,12 @@ packages:
 
   '@univerjs/icons@0.2.28':
     resolution: {integrity: sha512-aFDpi9mUFR2ntS7vHm94NLz/qRcK2uX3H+h1s87D9+F4ojbmMZAAxaGB4z6x+nAV4AvTEevRfryKOyU9K7uoGg==}
+    peerDependencies:
+      react: '19'
+      react-dom: '19'
+
+  '@univerjs/icons@0.2.30':
+    resolution: {integrity: sha512-odT3d9iKSNXaKWisPiaUVTSKibeWiSWvsspBxDisaA+s0KYn5rAlhBJjOVbSWZ83dE8tvxhhznGPjSyYANXVrw==}
     peerDependencies:
       react: '19'
       react-dom: '19'
@@ -13560,12 +13569,19 @@ snapshots:
 
   '@univerjs/icons-svg@0.2.28': {}
 
+  '@univerjs/icons-svg@0.2.30': {}
+
   '@univerjs/icons@0.2.20(react-dom@19.0.0(react@19.0.0))(react@19.0.0)':
     dependencies:
       react: 19.0.0
       react-dom: 19.0.0(react@19.0.0)
 
   '@univerjs/icons@0.2.28(react-dom@19.0.0(react@19.0.0))(react@19.0.0)':
+    dependencies:
+      react: 19.0.0
+      react-dom: 19.0.0(react@19.0.0)
+
+  '@univerjs/icons@0.2.30(react-dom@19.0.0(react@19.0.0))(react@19.0.0)':
     dependencies:
       react: 19.0.0
       react-dom: 19.0.0(react@19.0.0)

@@ -75,7 +75,7 @@
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
-        "@univerjs/icons-svg": "^0.2.28",
+        "@univerjs/icons-svg": "^0.2.30",
         "rxjs": "^7.8.1",
         "typescript": "^5.8.2",
         "vite": "^6.2.3",

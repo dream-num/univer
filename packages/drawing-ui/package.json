@@ -70,7 +70,7 @@
         "@univerjs/design": "workspace:*",
         "@univerjs/drawing": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons": "^0.2.28",
+        "@univerjs/icons": "^0.2.30",
         "@univerjs/ui": "workspace:*"
     },
     "devDependencies": {

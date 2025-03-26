@@ -38,8 +38,8 @@ import type {
     IDocumentSkeletonSection,
     ISkeletonResourceReference,
 } from '../../../basics/i-document-skeleton-cached';
-
 import type { IDocsConfig, IParagraphConfig, ISectionBreakConfig } from '../../../basics/interfaces';
+
 import type { DataStreamTreeNode } from '../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../view-model/document-view-model';
 import type { Hyphen } from './hyphenation/hyphen';
@@ -54,6 +54,7 @@ import {
     GridType,
     HorizontalAlign,
     mergeWith,
+    NAMED_STYLE_MAP,
     NumberUnitType,
     ObjectMatrix,
     ObjectRelativeFromH,
@@ -851,7 +852,7 @@ export function getFontCreateConfig(
     const customRange = viewModel.getCustomRange(index + startIndex);
     const showCustomRange = customRange && (customRange.show !== false);
     const customRangeStyle = showCustomRange ? getCustomRangeStyle(customRange) : null;
-    const hasAddonStyle = showCustomRange || showCustomDecoration || !!bullet;
+    const hasAddonStyle = showCustomRange || showCustomDecoration || !!bullet || paragraphStyle?.namedStyleType;
     const { st, ed } = textRun;
     let { ts: textStyle = {} } = textRun;
     const cache = fontCreateConfigCache.getValue(st, ed);
@@ -859,11 +860,14 @@ export function getFontCreateConfig(
         return cache;
     }
 
-    const { snapToGrid = BooleanNumber.TRUE } = paragraphStyle;
+    const { snapToGrid = BooleanNumber.TRUE, namedStyleType } = paragraphStyle;
     const bulletTextStyle = bullet ? getBulletParagraphTextStyle(bullet, viewModel) : null;
+    // Apply named style if it exists
+    const namedStyle = namedStyleType ? NAMED_STYLE_MAP[namedStyleType] : null;
 
     textStyle = {
         ...documentTextStyle,
+        ...namedStyle,
         ...textStyle,
         ...customDecorationStyle,
         ...customRangeStyle,

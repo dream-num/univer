@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-import type { ICustomTable, IParagraph } from '../../../../types/interfaces';
+import type { ITextRange } from '../../../../sheets/typedef';
+import type { ICustomTable, IParagraph, IParagraphStyle, ITextStyle } from '../../../../types/interfaces';
 import type { DocumentDataModel } from '../../document-data-model';
 import { MemoryCursor } from '../../../../common/memory-cursor';
 import { Tools, UpdateDocsAttributeType } from '../../../../shared';
 import { PRESET_LIST_TYPE, PresetListType } from '../../preset-list-type';
 import { TextXActionType } from '../action-types';
 import { TextX } from '../text-x';
+import { getParagraphsInRanges } from './selection';
 
 export interface ISwitchParagraphBulletParams {
     paragraphs: IParagraph[];
@@ -241,7 +243,7 @@ export function hasParagraphInTable(paragraph: IParagraph, tables: ICustomTable[
 }
 
 export const changeParagraphBulletNestLevel = (params: IChangeParagraphBulletNestLevelParams) => {
-    const { paragraphs: currentParagraphs, segmentId, document: docDataModel, type } = params;
+    const { paragraphs: currentParagraphs, document: docDataModel, type } = params;
     const memoryCursor = new MemoryCursor();
 
     memoryCursor.reset();
@@ -299,6 +301,76 @@ export const changeParagraphBulletNestLevel = (params: IChangeParagraphBulletNes
                 len: 1,
             });
         }
+
+        memoryCursor.moveCursorTo(startIndex + 1);
+    }
+
+    return textX;
+};
+
+interface ISetParagraphStyleParams {
+    textRanges: readonly ITextRange[];
+    segmentId?: string;
+    document: DocumentDataModel;
+    style: IParagraphStyle;
+    paragraphTextRun?: ITextStyle;
+}
+
+export const setParagraphStyle = (params: ISetParagraphStyleParams) => {
+    const { textRanges, segmentId, document: docDataModel, style, paragraphTextRun } = params;
+    const paragraphs = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.paragraphs ?? [];
+    const currentParagraphs = getParagraphsInRanges(textRanges, paragraphs);
+    const memoryCursor = new MemoryCursor();
+    const textX = new TextX();
+    currentParagraphs.sort((a, b) => a.startIndex - b.startIndex);
+    const start = Math.max(0, currentParagraphs[0].paragraphStart - 1);
+
+    if (start > 0) {
+        textX.push({
+            t: TextXActionType.RETAIN,
+            len: start - memoryCursor.cursor,
+        });
+        memoryCursor.moveCursorTo(start);
+    }
+
+    for (const paragraph of currentParagraphs) {
+        const { startIndex, paragraphStyle = {} } = paragraph;
+        const len = startIndex - memoryCursor.cursor;
+        textX.push({
+            t: TextXActionType.RETAIN,
+            len,
+            ...paragraphTextRun
+                ? {
+                    body: {
+                        dataStream: '',
+                        textRuns: [{
+                            ts: paragraphTextRun,
+                            st: 0,
+                            ed: len,
+                        }],
+                    },
+                    coverType: UpdateDocsAttributeType.REPLACE,
+                }
+                : null,
+        });
+
+        textX.push({
+            t: TextXActionType.RETAIN,
+            len: 1,
+            body: {
+                dataStream: '',
+                paragraphs: [
+                    {
+                        startIndex: 0,
+                        paragraphStyle: {
+                            ...paragraphStyle,
+                            ...style,
+                        },
+                    },
+                ],
+            },
+            coverType: UpdateDocsAttributeType.REPLACE,
+        });
 
         memoryCursor.moveCursorTo(startIndex + 1);
     }

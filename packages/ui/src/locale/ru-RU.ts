@@ -17,6 +17,20 @@
 import type zhCN from './zh-CN';
 
 const locale: typeof zhCN = {
+    toolbar: {
+        heading: {
+            normal: 'Обычный текст',
+            title: 'Заголовок',
+            subTitle: 'Подзаголовок',
+            1: 'Заголовок 1',
+            2: 'Заголовок 2',
+            3: 'Заголовок 3',
+            4: 'Заголовок 4',
+            5: 'Заголовок 5',
+            6: 'Заголовок 6',
+            tooltip: 'Установить заголовок',
+        },
+    },
     ribbon: {
         start: 'Начало',
         insert: 'Вставка',

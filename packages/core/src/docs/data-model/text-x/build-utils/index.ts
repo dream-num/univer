@@ -17,9 +17,9 @@
 import { addCustomDecorationTextX, deleteCustomDecorationTextX } from './custom-decoration';
 import { copyCustomRange, getCustomRangesInterestsWithSelection, isIntersecting } from './custom-range';
 import { addDrawing } from './drawings';
-import { changeParagraphBulletNestLevel, setParagraphBullet, switchParagraphBullet, toggleChecklistParagraph } from './paragraph';
+import { changeParagraphBulletNestLevel, setParagraphBullet, setParagraphStyle, switchParagraphBullet, toggleChecklistParagraph } from './paragraph';
 import { fromPlainText, getPlainText, isEmptyDocument } from './parse';
-import { isSegmentIntersects, makeSelection, normalizeSelection } from './selection';
+import { getParagraphsInRange, getParagraphsInRanges, isSegmentIntersects, makeSelection, normalizeSelection } from './selection';
 import { addCustomRangeTextX, deleteCustomRangeTextX, deleteSelectionTextX, replaceSelectionTextRuns, replaceSelectionTextX, retainSelectionTextX } from './text-x-utils';
 
 export class BuildTextUtils {
@@ -47,6 +47,8 @@ export class BuildTextUtils {
 
     static range = {
         isIntersects: isSegmentIntersects,
+        getParagraphsInRange,
+        getParagraphsInRanges,
     };
 
     static transform = {
@@ -61,6 +63,9 @@ export class BuildTextUtils {
             switch: switchParagraphBullet,
             toggleChecklist: toggleChecklistParagraph,
             changeNestLevel: changeParagraphBulletNestLevel,
+        },
+        style: {
+            set: setParagraphStyle,
         },
     };
 

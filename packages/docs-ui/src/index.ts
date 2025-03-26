@@ -95,7 +95,6 @@ export {
     SetInlineFormatTextColorCommand,
     SetInlineFormatUnderlineCommand,
 } from './commands/commands/inline-format.command';
-export { getParagraphsInRange, getParagraphsInRanges } from './commands/commands/list.command';
 export {
     BulletListCommand,
     ChangeListNestingLevelCommand,
@@ -150,5 +149,5 @@ export { type IMoveCursorOperationParams, MoveSelectionOperation } from './comma
 export { MoveCursorOperation } from './commands/operations/doc-cursor.operation';
 export { DocSelectAllCommand } from './commands/commands/doc-select-all.command';
 export { type ISetDocZoomRatioOperationParams, SetDocZoomRatioOperation } from './commands/operations/set-doc-zoom-ratio.operation';
-
+export { SetParagraphNamedStyleCommand } from './commands/commands/set-heading.command';
 // #endregion

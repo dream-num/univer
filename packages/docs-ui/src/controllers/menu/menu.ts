@@ -21,12 +21,15 @@ import type { Subscription } from 'rxjs';
 import {
     BaselineOffset,
     BooleanNumber,
+    BuildTextUtils,
     DEFAULT_STYLES,
     DOCS_ZEN_EDITOR_UNIT_ID_KEY,
     DocumentFlavor,
     HorizontalAlign,
     ICommandService,
     IUniverInstanceService,
+    NAMED_STYLE_MAP,
+    NamedStyleType,
     ThemeService,
     UniverInstanceType,
 } from '@univerjs/core';
@@ -38,9 +41,12 @@ import {
 } from '@univerjs/docs';
 import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
 import {
+    COMMON_LABEL_COMPONENT,
     FONT_FAMILY_LIST,
     FONT_SIZE_LIST,
     getMenuHiddenObservable,
+    HEADING_ITEM_COMPONENT,
+    HEADING_LIST,
     MenuItemType,
 } from '@univerjs/ui';
 
@@ -48,8 +54,9 @@ import { combineLatest, map, Observable } from 'rxjs';
 import { OpenHeaderFooterPanelCommand } from '../../commands/commands/doc-header-footer.command';
 import { HorizontalLineCommand } from '../../commands/commands/doc-horizontal-line.command';
 import { getStyleInTextRange, ResetInlineFormatTextBackgroundColorCommand, SetInlineFormatBoldCommand, SetInlineFormatCommand, SetInlineFormatFontFamilyCommand, SetInlineFormatFontSizeCommand, SetInlineFormatItalicCommand, SetInlineFormatStrikethroughCommand, SetInlineFormatSubscriptCommand, SetInlineFormatSuperscriptCommand, SetInlineFormatTextBackgroundColorCommand, SetInlineFormatTextColorCommand, SetInlineFormatUnderlineCommand } from '../../commands/commands/inline-format.command';
-import { BulletListCommand, CheckListCommand, getParagraphsInRange, OrderListCommand } from '../../commands/commands/list.command';
+import { BulletListCommand, CheckListCommand, OrderListCommand } from '../../commands/commands/list.command';
 import { AlignCenterCommand, AlignJustifyCommand, AlignLeftCommand, AlignOperationCommand, AlignRightCommand } from '../../commands/commands/paragraph-align.command';
+import { SetParagraphNamedStyleCommand } from '../../commands/commands/set-heading.command';
 import { SwitchDocModeCommand } from '../../commands/commands/switch-doc-mode.command';
 import { DocCreateTableOperation } from '../../commands/operations/doc-create-table.operation';
 import { getCommandSkeleton } from '../../commands/util';
@@ -530,6 +537,55 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
     };
 }
 
+export function HeadingSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<number> {
+    const commandService = accessor.get(ICommandService);
+
+    return {
+        id: SetParagraphNamedStyleCommand.id,
+        type: MenuItemType.SELECTOR,
+        tooltip: 'toolbar.heading.tooltip',
+        label: {
+            name: COMMON_LABEL_COMPONENT,
+            props: {
+                selections: HEADING_LIST,
+            },
+        },
+        selections: HEADING_LIST.map((item) => ({
+            label: {
+                name: HEADING_ITEM_COMPONENT,
+                props: {
+                    value: item.value,
+                    text: item.label,
+                },
+            },
+            value: item.value,
+        })),
+        value$: new Observable((subscriber) => {
+            const DEFAULT_TYPE = NamedStyleType.NORMAL_TEXT;
+            const disposable = commandService.onCommandExecuted((c) => {
+                const id = c.id;
+
+                if (id === SetTextSelectionsOperation.id || id === SetInlineFormatFontSizeCommand.id) {
+                    const paragraph = getParagraphStyleAtCursor(accessor);
+                    if (paragraph == null) {
+                        subscriber.next(DEFAULT_TYPE);
+                        return;
+                    }
+
+                    const namedStyleType = paragraph.paragraphStyle?.namedStyleType ?? DEFAULT_TYPE;
+                    subscriber.next(namedStyleType);
+                }
+            });
+
+            subscriber.next(DEFAULT_TYPE);
+
+            return disposable.dispose;
+        }),
+        disabled$: disableMenuWhenNoDocRange(accessor),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+    };
+}
+
 export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
     const commandService = accessor.get(ICommandService);
     const themeService = accessor.get(ThemeService);
@@ -774,7 +830,7 @@ const listValueFactory$ = (accessor: IAccessor) => {
 
                 if (range) {
                     const doc = docDataModel.getSelfOrHeaderFooterModel(range?.segmentId);
-                    const paragraphs = getParagraphsInRange(range, doc.getBody()?.paragraphs ?? []);
+                    const paragraphs = BuildTextUtils.range.getParagraphsInRange(range, doc.getBody()?.paragraphs ?? []);
                     let listType: string | undefined;
                     if (paragraphs.every((p) => {
                         if (!listType) {
@@ -939,11 +995,13 @@ function getFontStyleAtCursor(accessor: IAccessor) {
 
     const defaultTextStyle = docMenuStyleService.getDefaultStyle();
     const cacheStyle = docMenuStyleService.getStyleCache() ?? {};
-
+    const paragraph = getParagraphStyleAtCursor(accessor);
+    const namedStyle = paragraph?.paragraphStyle?.namedStyleType ? NAMED_STYLE_MAP[paragraph?.paragraphStyle?.namedStyleType] : null;
     if (docDataModel == null || activeRange == null) {
         return {
             ts: {
                 ...defaultTextStyle,
+                ...namedStyle,
                 ...cacheStyle,
             },
         };
@@ -956,6 +1014,7 @@ function getFontStyleAtCursor(accessor: IAccessor) {
         return {
             ts: {
                 ...defaultTextStyle,
+                ...namedStyle,
                 ...cacheStyle,
             },
         };
@@ -966,6 +1025,7 @@ function getFontStyleAtCursor(accessor: IAccessor) {
     return {
         ts: {
             ...curTextStyle,
+            ...namedStyle,
             ...cacheStyle,
         },
     };

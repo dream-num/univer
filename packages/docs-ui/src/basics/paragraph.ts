@@ -32,7 +32,7 @@ export function getTextRunAtPosition(
     const retTextRun: ITextRun = {
         st: 0,
         ed: 0,
-        ts: isCellEditor ? {} : defaultStyle,
+        ts: {},
     };
 
     if (isFormula) {

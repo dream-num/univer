@@ -17,6 +17,20 @@
 import type zhCN from './zh-CN';
 
 const locale: typeof zhCN = {
+    toolbar: {
+        heading: {
+            normal: '正文',
+            title: '標題',
+            subTitle: '副標題',
+            1: '標題 1',
+            2: '標題 2',
+            3: '標題 3',
+            4: '標題 4',
+            5: '標題 5',
+            6: '標題 6',
+            tooltip: '設定標題',
+        },
+    },
     ribbon: {
         start: '開始',
         insert: '插入',

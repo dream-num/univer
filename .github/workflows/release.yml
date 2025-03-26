@@ -60,7 +60,7 @@ jobs:
             - name: Install Node.js
               uses: actions/setup-node@v4
               with:
-                  node-version: 20
+                  node-version: 20.18.3
                   registry-url: https://registry.npmjs.org
 
             - name: 🚚 Install dependencies and build
@@ -135,25 +135,3 @@ jobs:
                   vercel-org-id: ${{ secrets.ORG_ID }}
                   vercel-project-id: ${{ secrets.PROJECT_ID_STORYBOOK }}
                   vercel-args: --prod
-
-    notify:
-        needs: [release-npm, build-demo, build-storybook]
-        runs-on: ubuntu-latest
-
-        steps:
-            - name: Invoke deployment hook
-              uses: distributhor/workflow-webhook@v3
-              with:
-                  webhook_url: ${{ secrets.WEBHOOK_URL }}
-                  data: >
-                      {
-                          "type": "release",
-                          "version": "${{ github.ref_name }}",
-                          "workflow": {
-                              "id": "${{ github.run_id }}"
-                          },
-                          "preview": {
-                              "📑 Examples": "${{ needs.build-demo.outputs.preview-url }}/",
-                              "📚 Storybook": "${{ needs.build-storybook.outputs.preview-url }}/"
-                          }
-                      }

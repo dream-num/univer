@@ -1,5 +1,43 @@
 # Changelog
 
+## [0.6.7](https://github.com/dream-num/univer/compare/v0.6.6...v0.6.7) (2025-03-26)
+
+
+### Bug Fixes
+
+* add event click ([#4862](https://github.com/dream-num/univer/issues/4862)) ([2e78781](https://github.com/dream-num/univer/commit/2e78781a45685c700d8bf6bc00cb7f7600082046))
+* **docs-ui:** inline format float box postion issue ([#4857](https://github.com/dream-num/univer/issues/4857)) ([f1cbe91](https://github.com/dream-num/univer/commit/f1cbe91b734494a83e500a94c7b07f75d9a7ad03))
+* **docs-ui:** insert custom range error ([#4878](https://github.com/dream-num/univer/issues/4878)) ([1f53ac2](https://github.com/dream-num/univer/commit/1f53ac29076e2e2f9ce0de8a05c272e21435298b))
+* **docs-ui:** popup direction ([#4846](https://github.com/dream-num/univer/issues/4846)) ([d8b3b65](https://github.com/dream-num/univer/commit/d8b3b65c5d547fe77566c52abecb2743749ca5a6))
+* **docs-ui:** remove hack to make hidden menu visible of FloatToolbar ([#4843](https://github.com/dream-num/univer/issues/4843)) ([fc8fee2](https://github.com/dream-num/univer/commit/fc8fee24658f12113ee140241d81c0785a27491f))
+* **formula:** fix sheets-filter hidden rows causing formula auto-fill… ([#4840](https://github.com/dream-num/univer/issues/4840)) ([e7f9867](https://github.com/dream-num/univer/commit/e7f98675a369a6dbad63c10956f7527da7659bf9))
+* **formula:** fixed the effect of filters on SUBTOTAL formula calcula… ([#4845](https://github.com/dream-num/univer/issues/4845)) ([361991e](https://github.com/dream-num/univer/commit/361991ed43ba085d558269bed39434459bc7d584))
+* get skeleton by subUnit if subUnit exists, not get current skeleton ([#4836](https://github.com/dream-num/univer/issues/4836)) ([e86cd61](https://github.com/dream-num/univer/commit/e86cd615a344d256de1972be50430cec4a65e47f))
+* **sheets-formula-ui:** formula highlight display error when delete function name ([#4871](https://github.com/dream-num/univer/issues/4871)) ([adcd070](https://github.com/dream-num/univer/commit/adcd070793bca49b1c0c25bd7296edadbbe9fc30))
+* **sheets-hyper-link-ui:** menu disable status error ([#4872](https://github.com/dream-num/univer/issues/4872)) ([580989d](https://github.com/dream-num/univer/commit/580989d309562ff52ce871ec8f79c1fbb3d5a653))
+* **sheets-ui:** update sheet font menus ([#4828](https://github.com/dream-num/univer/issues/4828)) ([c8a4d26](https://github.com/dream-num/univer/commit/c8a4d2641e59592358eb8a3beec12373187870de))
+* **thread-comment-ui:** add word break style to thread comment items ([#4856](https://github.com/dream-num/univer/issues/4856)) ([7601bab](https://github.com/dream-num/univer/commit/7601babebbe51c9b936c68041eb4c4d20b9a1abd))
+
+
+### Features
+
+* doc quick insert placeholder ([#4841](https://github.com/dream-num/univer/issues/4841)) ([263692c](https://github.com/dream-num/univer/commit/263692c6a38b2edda930fe2dcf70340e353bd493))
+* doc support horizontal line ([#4813](https://github.com/dream-num/univer/issues/4813)) ([cde1824](https://github.com/dream-num/univer/commit/cde1824026f55774e179af6b787e3fbdbcfe5219))
+* doc support quick-insert menu ([#4826](https://github.com/dream-num/univer/issues/4826)) ([976c0d1](https://github.com/dream-num/univer/commit/976c0d19ea3747170cbf333171bfd3b564ceade7))
+* **docs-drawing-ui:** optimize float-dom menu ([#4864](https://github.com/dream-num/univer/issues/4864)) ([606d9a3](https://github.com/dream-num/univer/commit/606d9a3079e14da0b3449ad3a8cde33f27c40639))
+* **docs-ui:** add custom-range insert command ([#4810](https://github.com/dream-num/univer/issues/4810)) ([c47d525](https://github.com/dream-num/univer/commit/c47d5254f88a0af4fd8067c3a0743ce293c958e3))
+* **docs-ui:** add FloatToolbar component and its stories ([#4835](https://github.com/dream-num/univer/issues/4835)) ([0477211](https://github.com/dream-num/univer/commit/04772114fac23702d464eebd483bc1150f34f417))
+* **docs-ui:** disable float-menu if doc was disabled ([#4848](https://github.com/dream-num/univer/issues/4848)) ([2611159](https://github.com/dream-num/univer/commit/2611159b05891b4b726d692e0c6d5cde36537c8f))
+* **docs-ui:** support float menu on doc ([#4842](https://github.com/dream-num/univer/issues/4842)) ([6c14ea1](https://github.com/dream-num/univer/commit/6c14ea16bd6cf9fb658b67580a8dee66fac34214))
+* event click ([#4863](https://github.com/dream-num/univer/issues/4863)) ([058a646](https://github.com/dream-num/univer/commit/058a6468f5ea86bd899b5e6efabac5b331e51137))
+* **facade:** supplement getA1Notation api params ([#4839](https://github.com/dream-num/univer/issues/4839)) ([ff0afd1](https://github.com/dream-num/univer/commit/ff0afd1d23037f65ebfa467a38457368d2fe209a))
+* **sheets-drawing-ui:** optimize cell-image behavior on editing and paste ([#4860](https://github.com/dream-num/univer/issues/4860)) ([e5414e1](https://github.com/dream-num/univer/commit/e5414e1a6799562b8d35228b3edd45d5ac9c2828))
+* **sheets-ui:** support disable defined name ([#4854](https://github.com/dream-num/univer/issues/4854)) ([0565b0d](https://github.com/dream-num/univer/commit/0565b0d5b73c30f376208af18718c0b556f4a718))
+* supplement sheets-numfmt text format alert and mark config ([#4852](https://github.com/dream-num/univer/issues/4852)) ([64034c7](https://github.com/dream-num/univer/commit/64034c78cecee75ae2dcee6fd121a59ddaf1aad2))
+* **ui:** add fade-in animation to toolbar buttons and items ([#4874](https://github.com/dream-num/univer/issues/4874)) ([039ec12](https://github.com/dream-num/univer/commit/039ec12518109abf5f07f6adae4e0f052a898915))
+* **ui:** add unitId props to float-dom component ([#4877](https://github.com/dream-num/univer/issues/4877)) ([acc9cbc](https://github.com/dream-num/univer/commit/acc9cbcaf99a017f639d80218a78404a0ff940ae))
+* **ui:** enhance styles ([#4868](https://github.com/dream-num/univer/issues/4868)) ([d34658c](https://github.com/dream-num/univer/commit/d34658c7d444e3daedf77be3cdfcda60f00ae56d))
+
 ## [0.6.6](https://github.com/dream-num/univer/compare/v0.6.5...v0.6.6) (2025-03-14)
 
 

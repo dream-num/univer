@@ -39,7 +39,7 @@ interface IBuildExecuterOptions {
 async function buildESM(sharedConfig: InlineConfig, options: IBuildExecuterOptions) {
     const { pkg, entry } = options;
 
-    return Promise.all(Object.keys(entry).map((key) => {
+    await Promise.all(Object.keys(entry).map((key) => {
         const basicConfig: InlineConfig = {
             build: {
                 emptyOutDir: false,
@@ -75,6 +75,12 @@ async function buildESM(sharedConfig: InlineConfig, options: IBuildExecuterOptio
 
         return viteBuild(config);
     }));
+
+    const __dirname = process.cwd();
+    const libDir = path.resolve(__dirname, 'lib');
+    const esmDir = path.resolve(__dirname, 'lib/es');
+
+    fs.copySync(esmDir, libDir);
 }
 
 async function buildCJS(sharedConfig: InlineConfig, options: IBuildExecuterOptions) {

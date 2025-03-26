@@ -76,7 +76,7 @@
         "@univerjs/core": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-numfmt": "workspace:*",
-        "@univerjs/protocol": "0.1.44",
+        "@univerjs/protocol": "0.1.45",
         "@univerjs/rpc": "workspace:*"
     },
     "devDependencies": {

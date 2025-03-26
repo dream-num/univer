@@ -26,7 +26,7 @@ export interface IInsertCustomRangeCommandParams {
     textRanges?: ITextRangeWithStyle[];
     properties?: Record<string, any>;
     text: string;
-
+    wholeEntity?: boolean;
 }
 
 export const InsertCustomRangeCommand: ICommand<IInsertCustomRangeCommandParams> = {
@@ -35,7 +35,7 @@ export const InsertCustomRangeCommand: ICommand<IInsertCustomRangeCommandParams>
     handler: (accessor, params) => {
         if (!params) return false;
         const commandService = accessor.get(ICommandService);
-        const { unitId, rangeId = generateRandomId(), textRanges, properties, text } = params;
+        const { unitId, rangeId = generateRandomId(), textRanges, properties, text, wholeEntity } = params;
         const replaceSelectionParams: IReplaceSelectionCommandParams = {
             unitId,
             textRanges,
@@ -47,6 +47,7 @@ export const InsertCustomRangeCommand: ICommand<IInsertCustomRangeCommandParams>
                     rangeId,
                     rangeType: CustomRangeType.CUSTOM,
                     properties,
+                    wholeEntity,
                 }],
             },
         };

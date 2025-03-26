@@ -80,9 +80,10 @@ function calcPopupPosition(layout: IPopupLayoutInfo): { top: number; left: numbe
         if (direction.includes('center')) {
             const rectWidth = endX - startX;
             const offsetX = (rectWidth - width) / 2;
-            horizontalStyle = {
-                left: startX + offsetX,
-            };
+
+            horizontalStyle = (startX + offsetX + width / 2) > containerWidth
+                ? { left: Math.max(endX - (width / 2) - offsetX, PUSHING_MINIMUM_GAP) }
+                : { left: Math.max(PUSHING_MINIMUM_GAP, Math.min(startX + offsetX, containerWidth - (width / 2) - PUSHING_MINIMUM_GAP)) };
         } else {
             // If the popup element exceed the visible area. We should "push" it back.
             horizontalStyle = (startX + width) > containerWidth

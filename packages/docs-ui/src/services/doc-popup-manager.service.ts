@@ -94,7 +94,7 @@ export const calcDocRangePositions = (range: ITextRangeParam, currentRender: IRe
     const { scene, mainComponent, engine } = currentRender;
     const skeleton = currentRender.with(DocSkeletonManagerService).getSkeleton();
     const startPosition = skeleton.findNodePositionByCharIndex(range.startOffset, true, range.segmentId, range.segmentPage);
-    const endPosition = skeleton.findNodePositionByCharIndex(range.endOffset, true, range.segmentId, range.segmentPage);
+    const endPosition = skeleton.findNodePositionByCharIndex(Math.max(range.endOffset - 1, range.startOffset), true, range.segmentId, range.segmentPage);
     const document = mainComponent as Documents;
 
     if (!endPosition || !startPosition) {

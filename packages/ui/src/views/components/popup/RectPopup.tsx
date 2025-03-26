@@ -77,17 +77,22 @@ function calcPopupPosition(layout: IPopupLayoutInfo): { top: number; left: numbe
             : { top: Math.min(endY, containerHeight - height - PUSHING_MINIMUM_GAP) };
 
         let horizontalStyle;
+
+        const minLeft = PUSHING_MINIMUM_GAP;
+        const maxLeft = containerWidth - width - PUSHING_MINIMUM_GAP;
+
         if (direction.includes('center')) {
             const rectWidth = endX - startX;
             const offsetX = (rectWidth - width) / 2;
-            horizontalStyle = {
-                left: startX + offsetX,
-            };
+
+            horizontalStyle = (Math.max(startX + offsetX, PUSHING_MINIMUM_GAP) + width) > containerWidth
+                ? { left: Math.max(Math.min(maxLeft, endX - width - offsetX), minLeft) }
+                : { left: Math.max(minLeft, Math.min(startX + offsetX, maxLeft)) };
         } else {
             // If the popup element exceed the visible area. We should "push" it back.
             horizontalStyle = (startX + width) > containerWidth
-                ? { left: Math.max(endX - width, PUSHING_MINIMUM_GAP) } // on left
-                : { left: Math.min(startX, containerWidth - width - PUSHING_MINIMUM_GAP) }; // on right
+                ? { left: Math.max(endX - width, minLeft) } // on left
+                : { left: Math.min(startX, maxLeft) }; // on right
         }
 
         return { ...verticalStyle, ...horizontalStyle };

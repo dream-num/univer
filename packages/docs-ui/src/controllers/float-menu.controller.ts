@@ -34,6 +34,11 @@ function isInSameLine(startNodePosition: Nullable<INodePosition>, endNodePositio
     return deepCompare(startRest, endRest);
 }
 
+const SKIP_SYMBOLS: string[] = [
+    DataStreamTreeTokenType.CUSTOM_BLOCK,
+    DataStreamTreeTokenType.PARAGRAPH,
+];
+
 export class FloatMenuController extends Disposable {
     private _floatMenu: Nullable<IDisposable> = null;
 
@@ -78,7 +83,8 @@ export class FloatMenuController extends Disposable {
             return;
         }
 
-        if (range.endOffset - range.startOffset === 1 && documentDataModel.getBody()?.dataStream[range.startOffset] === DataStreamTreeTokenType.CUSTOM_BLOCK) {
+        const token = documentDataModel.getBody()?.dataStream[range.startOffset];
+        if (range.endOffset - range.startOffset === 1 && token && SKIP_SYMBOLS.includes(token)) {
             return;
         }
 

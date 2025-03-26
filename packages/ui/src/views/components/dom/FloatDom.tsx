@@ -94,7 +94,7 @@ const FloatDomSingle = memo((props: { layer: IFloatDom; id: string }) => {
         };
     }, [layer.position$, size$]);
 
-    const component = useMemo(() => Component ? <Component {...layerProps} /> : null, [Component, layerProps]);
+    const component = useMemo(() => Component ? <Component {...layerProps} unitId={layer.unitId} /> : null, [Component, layerProps]);
 
     if (!position) {
         return null;

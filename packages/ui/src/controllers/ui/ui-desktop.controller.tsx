@@ -21,6 +21,7 @@ import { Inject, Injector, IUniverInstanceService, LifecycleService, toDisposabl
 import { render as createRoot, unmount } from '@univerjs/design';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { ComponentManager } from '../../common';
+import { HEADING_ITEM_COMPONENT, HeadingItem } from '../../components';
 import { COMMON_LABEL_COMPONENT, CommonLabel } from '../../components/common-label';
 import { ILayoutService } from '../../services/layout/layout.service';
 import { IMenuManagerService } from '../../services/menu/menu-manager.service';
@@ -59,6 +60,12 @@ export class DesktopUIController extends SingleUnitUIController {
             this._componentManager.register(
                 COMMON_LABEL_COMPONENT,
                 CommonLabel
+            )
+        );
+        this.disposeWithMe(
+            this._componentManager.register(
+                HEADING_ITEM_COMPONENT,
+                HeadingItem
             )
         );
     }

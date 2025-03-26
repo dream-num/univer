@@ -45,6 +45,7 @@ import {
     FONT_FAMILY_LIST,
     FONT_SIZE_LIST,
     getMenuHiddenObservable,
+    HEADING_ITEM_COMPONENT,
     HEADING_LIST,
     MenuItemType,
 } from '@univerjs/ui';
@@ -549,7 +550,16 @@ export function HeadingSelectorMenuItemFactory(accessor: IAccessor): IMenuSelect
                 selections: HEADING_LIST,
             },
         },
-        selections: HEADING_LIST,
+        selections: HEADING_LIST.map((item) => ({
+            label: {
+                name: HEADING_ITEM_COMPONENT,
+                props: {
+                    value: item.value,
+                    text: item.label,
+                },
+            },
+            value: item.value,
+        })),
         value$: new Observable((subscriber) => {
             const DEFAULT_TYPE = NamedStyleType.NORMAL_TEXT;
             const disposable = commandService.onCommandExecuted((c) => {

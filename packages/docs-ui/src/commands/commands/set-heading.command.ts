@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommand, IMutationInfo, NamedStyleType } from '@univerjs/core';
+import type { DocumentDataModel, ICommand, IMutationInfo } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import { BuildTextUtils, CommandType, ICommandService, IUniverInstanceService, JSONX, UniverInstanceType } from '@univerjs/core';
+import { BuildTextUtils, CommandType, generateRandomId, ICommandService, IUniverInstanceService, JSONX, NamedStyleType, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { getRichTextEditPath } from '../util';
 
@@ -49,8 +49,10 @@ export const SetParagraphNamedStyleCommand: ICommand<ISetParagraphNamedStyleComm
             textRanges: selections,
             style: {
                 namedStyleType: params.value,
+                headingId: !params.value || params.value === NamedStyleType.NORMAL_TEXT ? undefined : generateRandomId(6),
             },
             paragraphTextRun: {},
+
         });
 
         const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {

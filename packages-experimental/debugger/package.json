@@ -1,7 +1,7 @@
 {
     "name": "@univerjs/debugger",
-    "version": "0.2.12",
-    "private": false,
+    "version": "0.6.6",
+    "private": true,
     "description": "",
     "author": "DreamNum <developer@univer.ai>",
     "license": "Apache-2.0",

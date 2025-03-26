@@ -32,3 +32,10 @@ jobs:
 
             - name: 📦 Build
               run: pnpm build:ci
+
+            - name: Check for uncommitted changes
+              run: |
+                  if [[ -n $(git status --porcelain) ]]; then
+                      echo "Error: Uncommitted changes detected after build."
+                      exit 1
+                  fi

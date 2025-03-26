@@ -83,6 +83,8 @@ export class MoveRangeRenderController extends Disposable implements IRenderModu
                                     return;
                                 }
 
+                                false;
+
                                 const params: IMoveRangeCommandParams = {
                                     fromRange,
                                     toRange,

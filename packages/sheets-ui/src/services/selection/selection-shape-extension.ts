@@ -65,6 +65,8 @@ export class SelectionShapeExtension {
 
     private _scenePointerUpSub: Nullable<Subscription>;
 
+    private _disabled: boolean = false;
+
     /**
      * The shadow selection under cursor when move whole selection control(for moving normal selection)
      */
@@ -123,6 +125,10 @@ export class SelectionShapeExtension {
         this._fillControlColors = [];
         this._clearObserverEvent();
         this._helperSelection?.dispose();
+    }
+
+    setDisabled(disabled: boolean) {
+        this._disabled = disabled;
     }
 
     private _getFreeze() {
@@ -275,6 +281,10 @@ export class SelectionShapeExtension {
      * @param evt
      */
     private _controlPointerDownHandler(evt: IMouseEvent | IPointerEvent) {
+        if (this._disabled) {
+            return;
+        }
+
         const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
 
         const scene = this._scene;
@@ -348,6 +358,9 @@ export class SelectionShapeExtension {
         scene.disableObjectsEvent();
 
         this._scenePointerMoveSub = scene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
+            if (this._disabled) {
+                return;
+            }
             const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
 
             const permissionCheck = this._injector.get(ISheetSelectionRenderService, Quantity.OPTIONAL)

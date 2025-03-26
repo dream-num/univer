@@ -505,6 +505,12 @@ export class SelectionControl extends Disposable {
         this._controlExtension = new SelectionShapeExtension(this, options);
     }
 
+    setControlExtensionDisable(disable: boolean) {
+        if (this._controlExtension) {
+            this._controlExtension.setDisabled(disable);
+        }
+    }
+
     setEvent(state: boolean): void {
         this.leftControl.evented = state;
         this.rightControl.evented = state;

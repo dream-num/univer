@@ -37,5 +37,7 @@ jobs:
               run: |
                   if [[ -n $(git status --porcelain) ]]; then
                       echo "Error: Uncommitted changes detected after build."
+                      echo "Changed files:"
+                      git status --porcelain
                       exit 1
                   fi

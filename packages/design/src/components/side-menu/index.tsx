@@ -1,0 +1,141 @@
+/**
+ * Copyright 2023-present DreamNum Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import { forwardRef, useImperativeHandle, useRef } from 'react';
+import { clsx } from '../../helper/clsx';
+
+export interface IMenuItem {
+    text: string;
+    level: number;
+    id: string;
+    isTitle?: boolean;
+}
+
+export interface ISideMenuProps {
+    menus?: IMenuItem[];
+    onClick?: (menu: IMenuItem) => void;
+    className?: string;
+    style?: React.CSSProperties;
+    mode?: 'float' | 'side-bar';
+    maxHeight?: string;
+    activeId?: string;
+    open?: boolean;
+    onOpenChange?: (open: boolean) => void;
+}
+
+export interface ISideMenuInstance {
+    scrollTo: (id: string) => void;
+}
+
+const commonClass = 'univer-overflow-hidden univer-truncate univer-leading-[150%] univer-ellipsis univer-cursor-pointer';
+const titleClass = 'univer-text-base univer-font-semibold';
+const h1Class = 'univer-text-gray-500 univer-text-sm univer-font-semibold';
+const textClass = 'univer-text-gray-500 univer-text-sm';
+const activeClass = 'univer-text-[#466AF7]';
+
+export const SideMenu = forwardRef<ISideMenuInstance, ISideMenuProps>((props, ref) => {
+    const { menus, onClick, className, style, mode, maxHeight, activeId, open, onOpenChange } = props;
+    const isSideBar = mode === 'side-bar';
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    const instance: ISideMenuInstance = {
+        scrollTo: (id: string) => {
+            document.getElementById(`univer-side-menu-${id}`)?.scrollIntoView({ behavior: 'smooth' });
+        },
+    };
+
+    useImperativeHandle(ref, () => instance);
+
+    return (
+        <div className="univer-relative">
+            <div
+                onClick={() => onOpenChange?.(!open)}
+                className={`
+                  univer-absolute univer-left-5 univer-top-4 univer-z-[100] univer-flex univer-h-8 univer-w-8
+                  univer-cursor-pointer univer-items-center univer-justify-center univer-rounded-full univer-bg-white
+                  univer-shadow-[0px_1px_3px_-1px_rgba(30,40,77,0.10),0px_1px_4px_0px_rgba(30,40,77,0.12)]
+                `}
+            >
+                {open ? 'x' : 'o'}
+            </div>
+            <div
+                className={clsx(
+                    className,
+                    `
+                      univer-absolute univer-left-0 univer-top-0 univer-box-border univer-flex univer-min-w-[180px]
+                      univer-max-w-[480px] univer-flex-col univer-pb-4 univer-pl-5 univer-pr-5 univer-pt-14
+                      univer-transition-all univer-duration-300
+                    `,
+                    isSideBar
+                        ? ''
+                        : [
+                            'univer-bg-white',
+                            'univer-rounded-r-2xl',
+                            'univer-shadow-[0px_1px_6px_-2px_rgba(30,40,77,0.08),0px_2px_6px_-1px_rgba(30,40,77,0.10)]',
+                            'univer-backdrop-blur-[10px]',
+                        ]
+                )}
+                style={{
+                    ...style,
+                    transform: open ? 'translateX(0)' : 'translateX(-100%)',
+                    maxHeight,
+                    opacity: open ? 1 : 0,
+                }}
+            >
+                <div
+                    className={`
+                      univer-text-xs univer-font-semibold univer-leading-[150%] univer-text-gray-400 univer-font-inter
+                    `}
+                >
+                    contents
+                </div>
+                <div
+                    ref={containerRef}
+                    className={`
+                      univer-flex-1 univer-overflow-y-auto univer-overflow-x-hidden univer-scrollbar
+                      univer-scrollbar-thin univer-scrollbar-track-transparent univer-scrollbar-thumb-[#73737366]
+                      univer-scrollbar-gutter-stable
+                    `}
+                >
+                    {menus?.map((menu) => (
+                        <div
+                            id={`univer-side-menu-${menu.id}`}
+                            key={menu.id}
+                            className={clsx(
+                                commonClass,
+                                {
+                                    [titleClass]: menu.isTitle,
+                                    [h1Class]: menu.level === 1,
+                                    [textClass]: menu.level > 1,
+                                    [activeClass]: menu.id === activeId,
+                                }
+                            )}
+                            style={{
+                                paddingLeft: (menu.level - 1) * 12,
+                            }}
+                            onClick={() => {
+                                instance.scrollTo(menu.id);
+                                onClick?.(menu);
+                            }}
+                        >
+                            {menu.text}
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+});

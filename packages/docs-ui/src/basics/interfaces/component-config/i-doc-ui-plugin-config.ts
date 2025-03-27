@@ -28,6 +28,8 @@ export interface DocContainerConfig {
 
     footer?: boolean;
 
+    sideMenu?: boolean;
+
     innerLeft?: boolean;
 
     innerRight?: boolean;

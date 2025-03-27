@@ -50,7 +50,7 @@ interface IFeatureFormulaParam {
 }
 
 export function generateRandomDependencyTreeId(dependencyManagerService: IDependencyManagerService): number {
-    const idNum = dependencyManagerService.getLastTreeId() || 0;
+    const idNum = dependencyManagerService.getLastTreeId() || 1;
     return idNum;
 }
 

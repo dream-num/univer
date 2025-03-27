@@ -23,10 +23,13 @@ import animate from 'tailwindcss-animate';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-const packagesDir = fs.readdirSync(path.resolve(__dirname, '../packages')).map((dir) => path.resolve(__dirname, `../packages/${dir}`));
-const packagesExperimentalDir = fs.readdirSync(path.resolve(__dirname, '../packages-experimental')).map((dir) => path.resolve(__dirname, `../packages-experimental/${dir}`));
+const packagesDir = [
+    ...fs.readdirSync(path.resolve(__dirname, '../packages/experimental')).map((dir) => path.resolve(__dirname, `../packages/experimental/${dir}`)),
+    ...fs.readdirSync(path.resolve(__dirname, '../packages/internal')).map((dir) => path.resolve(__dirname, `../packages/internal/${dir}`)),
+    ...fs.readdirSync(path.resolve(__dirname, '../packages/stable')).map((dir) => path.resolve(__dirname, `../packages/stable/${dir}`)),
+];
 
-const tailwindProjects = packagesDir.concat(packagesExperimentalDir).reduce((acc, dir) => {
+const tailwindProjects = packagesDir.reduce((acc, dir) => {
     const tailwindConfig = path.resolve(dir, 'tailwind.config.ts');
     if (fs.existsSync(tailwindConfig)) {
         acc.push(`${dir}/src/**/*.{js,ts,jsx,tsx}`);

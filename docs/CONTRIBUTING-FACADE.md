@@ -49,4 +49,3 @@ All APIs/constants/enums should be accessible from the `univerAPI` variable.
 ## Documentation
 
 It is strongly suggested to add documentation for your code [here](https://github.com/dream-num/univer.ai/tree/dev/packages/community/src/content/docs/guides/sheet/facade). Please refer to our [documentation repo](https://github.com/dream-num/docs) for more guidance.
-

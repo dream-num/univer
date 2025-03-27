@@ -3,7 +3,7 @@
     "type": "module",
     "version": "0.6.7",
     "private": true,
-    "packageManager": "pnpm@10.6.1",
+    "packageManager": "pnpm@10.7.0",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",
     "license": "Apache-2.0",
     "funding": {
@@ -19,7 +19,7 @@
         "url": "https://github.com/dream-num/univer/issues"
     },
     "engines": {
-        "node": ">=20 || <=22",
+        "node": ">=20 || <=20.18.3 || <=22",
         "pnpm": ">=10"
     },
     "scripts": {
@@ -33,8 +33,8 @@
         "lint:types": "turbo lint:types",
         "test": "turbo test -- --passWithNoTests",
         "coverage": "turbo coverage -- --passWithNoTests",
-        "build": "turbo build --concurrency=30% --filter=!./common/*",
-        "build:ci": "turbo build --concurrency=100% --filter=!./common/*",
+        "build": "turbo build --concurrency=30% --filter=!./packages/experimental/* --filter=!./packages/internal/*",
+        "build:ci": "turbo build --concurrency=100% --filter=!./packages/experimental/* --filter=!./packages/internal/*",
         "build:demo": "pnpm --filter univer-examples build:demo",
         "build:e2e": "pnpm --filter univer-examples build:e2e",
         "serve:e2e": "serve ./examples/local",
@@ -49,7 +49,7 @@
         "@antfu/eslint-config": "4.11.0",
         "@commitlint/cli": "^19.8.0",
         "@commitlint/config-conventional": "^19.8.0",
-        "@eslint-react/eslint-plugin": "^1.38.0",
+        "@eslint-react/eslint-plugin": "^1.38.2",
         "@playwright/test": "^1.51.1",
         "@release-it-plugins/workspaces": "^4.2.0",
         "@release-it/conventional-changelog": "^9.0.4",

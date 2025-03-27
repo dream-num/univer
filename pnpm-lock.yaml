@@ -16,7 +16,7 @@ importers:
     devDependencies:
       '@antfu/eslint-config':
         specifier: 4.11.0
-        version: 4.11.0(@eslint-react/eslint-plugin@1.38.0(eslint@9.23.0(jiti@2.4.2))(ts-api-utils@2.1.0(typescript@5.8.2))(typescript@5.8.2))(@typescript-eslint/utils@8.28.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2))(@vue/compiler-sfc@3.4.38)(eslint-plugin-format@1.0.1(eslint@9.23.0(jiti@2.4.2)))(eslint-plugin-react-hooks@5.2.0(eslint@9.23.0(jiti@2.4.2)))(eslint-plugin-react-refresh@0.4.19(eslint@9.23.0(jiti@2.4.2)))(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)(vitest@3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0))
+        version: 4.11.0(@eslint-react/eslint-plugin@1.38.2(eslint@9.23.0(jiti@2.4.2))(ts-api-utils@2.1.0(typescript@5.8.2))(typescript@5.8.2))(@typescript-eslint/utils@8.28.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2))(@vue/compiler-sfc@3.4.38)(eslint-plugin-format@1.0.1(eslint@9.23.0(jiti@2.4.2)))(eslint-plugin-react-hooks@5.2.0(eslint@9.23.0(jiti@2.4.2)))(eslint-plugin-react-refresh@0.4.19(eslint@9.23.0(jiti@2.4.2)))(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)(vitest@3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0))
       '@commitlint/cli':
         specifier: ^19.8.0
         version: 19.8.0(@types/node@22.13.13)(typescript@5.8.2)
@@ -24,8 +24,8 @@ importers:
         specifier: ^19.8.0
         version: 19.8.0
       '@eslint-react/eslint-plugin':
-        specifier: ^1.38.0
-        version: 1.38.0(eslint@9.23.0(jiti@2.4.2))(ts-api-utils@2.1.0(typescript@5.8.2))(typescript@5.8.2)
+        specifier: ^1.38.2
+        version: 1.38.2(eslint@9.23.0(jiti@2.4.2))(ts-api-utils@2.1.0(typescript@5.8.2))(typescript@5.8.2)
       '@playwright/test':
         specifier: ^1.51.1
         version: 1.51.1
@@ -52,10 +52,10 @@ importers:
         version: 19.0.4(@types/react@19.0.8)
       '@univerjs-infra/shared':
         specifier: workspace:*
-        version: link:common/shared
+        version: link:packages/internal/shared
       '@univerjs/design':
         specifier: workspace:*
-        version: link:packages/design
+        version: link:packages/stable/design
       '@vitejs/plugin-react':
         specifier: ^4.3.4
         version: 4.3.4(vite@6.2.3(@types/node@22.13.13)(jiti@2.4.2)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0))
@@ -123,343 +123,188 @@ importers:
         specifier: ^3.0.9
         version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
 
-  common/shared:
-    dependencies:
-      '@typescript-eslint/parser':
-        specifier: ^8.28.0
-        version: 8.28.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
-      '@vitejs/plugin-react':
-        specifier: ^4.3.4
-        version: 4.3.4(vite@6.2.3(@types/node@22.13.13)(jiti@2.4.2)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0))
-      '@vitejs/plugin-vue':
-        specifier: ^5.2.3
-        version: 5.2.3(vite@6.2.3(@types/node@22.13.13)(jiti@2.4.2)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0))(vue@3.4.38(typescript@5.8.2))
-      '@vitest/coverage-istanbul':
-        specifier: ^3.0.9
-        version: 3.0.9(vitest@3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0))
-      autoprefixer:
-        specifier: ^10.4.21
-        version: 10.4.21(postcss@8.4.49)
-      eslint-plugin-readable-tailwind:
-        specifier: ^1.9.1
-        version: 1.9.1(eslint@9.23.0(jiti@2.4.2))(tailwindcss@3.4.17)
-      fs-extra:
-        specifier: ^11.3.0
-        version: 11.3.0
-      happy-dom:
-        specifier: 15.0.0
-        version: 15.0.0
-      javascript-obfuscator:
-        specifier: ^4.1.1
-        version: 4.1.1
-      postcss-preset-env:
-        specifier: ^10.1.5
-        version: 10.1.5(postcss@8.4.49)
-      sort-keys:
-        specifier: ^5.1.0
-        version: 5.1.0
-      tailwind-scrollbar:
-        specifier: ^3.1.0
-        version: 3.1.0(tailwindcss@3.4.17)
-      tailwindcss:
-        specifier: ^3.4.17
-        version: 3.4.17
-      vite:
-        specifier: ^6.2.3
-        version: 6.2.3(@types/node@22.13.13)(jiti@2.4.2)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
-      vite-plugin-dts:
-        specifier: ^4.5.3
-        version: 4.5.3(@types/node@22.13.13)(rollup@4.37.0)(typescript@5.8.2)(vite@6.2.3(@types/node@22.13.13)(jiti@2.4.2)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0))
-      vite-plugin-external:
-        specifier: ^6.0.1
-        version: 6.0.1
-      vitest:
-        specifier: ^3.0.9
-        version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
-    devDependencies:
-      '@types/fs-extra':
-        specifier: ^11.0.4
-        version: 11.0.4
-      '@univerjs/icons':
-        specifier: ^0.2.30
-        version: 0.2.30(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
-      '@univerjs/icons-svg':
-        specifier: ^0.2.30
-        version: 0.2.30
-      '@univerjs/protocol':
-        specifier: 0.1.45
-        version: 0.1.45(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
-
-  common/storybook:
-    dependencies:
-      '@chromatic-com/storybook':
-        specifier: ^3.2.6
-        version: 3.2.6(react@19.0.0)(storybook@8.6.7(prettier@3.4.2))
-      '@storybook/addon-essentials':
-        specifier: ^8.6.7
-        version: 8.6.7(@types/react@19.0.8)(storybook@8.6.7(prettier@3.4.2))
-      '@storybook/addon-interactions':
-        specifier: ^8.6.7
-        version: 8.6.7(storybook@8.6.7(prettier@3.4.2))
-      '@storybook/addon-links':
-        specifier: ^8.6.7
-        version: 8.6.7(react@19.0.0)(storybook@8.6.7(prettier@3.4.2))
-      '@storybook/addon-styling-webpack':
-        specifier: ^1.0.1
-        version: 1.0.1(webpack@5.98.0(@swc/core@1.10.18)(esbuild@0.25.1))
-      '@storybook/addon-webpack5-compiler-swc':
-        specifier: ^3.0.0
-        version: 3.0.0(webpack@5.98.0(@swc/core@1.10.18)(esbuild@0.25.1))
-      '@storybook/blocks':
-        specifier: ^8.6.7
-        version: 8.6.7(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(storybook@8.6.7(prettier@3.4.2))
-      '@storybook/icons':
-        specifier: ^1.4.0
-        version: 1.4.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
-      '@storybook/react':
-        specifier: ^8.6.7
-        version: 8.6.7(@storybook/test@8.6.7(storybook@8.6.7(prettier@3.4.2)))(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(storybook@8.6.7(prettier@3.4.2))(typescript@5.8.2)
-      '@storybook/react-webpack5':
-        specifier: ^8.6.7
-        version: 8.6.7(@storybook/test@8.6.7(storybook@8.6.7(prettier@3.4.2)))(@swc/core@1.10.18)(esbuild@0.25.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(storybook@8.6.7(prettier@3.4.2))(typescript@5.8.2)
-      '@storybook/types':
-        specifier: ^8.6.7
-        version: 8.6.7(storybook@8.6.7(prettier@3.4.2))
-      '@univerjs/core':
-        specifier: workspace:*
-        version: link:../../packages/core
-      '@univerjs/design':
-        specifier: workspace:*
-        version: link:../../packages/design
-      '@univerjs/ui':
-        specifier: workspace:*
-        version: link:../../packages/ui
-      css-loader:
-        specifier: ^7.1.2
-        version: 7.1.2(webpack@5.98.0(@swc/core@1.10.18)(esbuild@0.25.1))
-      less-loader:
-        specifier: ^12.2.0
-        version: 12.2.0(less@4.2.2)(webpack@5.98.0(@swc/core@1.10.18)(esbuild@0.25.1))
-      postcss-loader:
-        specifier: ^8.1.1
-        version: 8.1.1(postcss@8.5.3)(typescript@5.8.2)(webpack@5.98.0(@swc/core@1.10.18)(esbuild@0.25.1))
-      storybook:
-        specifier: ^8.6.7
-        version: 8.6.7(prettier@3.4.2)
-      storybook-addon-swc:
-        specifier: ^1.2.0
-        version: 1.2.0(@swc/core@1.10.18)(terser-webpack-plugin@5.3.11(@swc/core@1.10.18)(esbuild@0.25.1)(webpack@5.98.0(@swc/core@1.10.18)(esbuild@0.25.1)))(webpack@5.98.0(@swc/core@1.10.18)(esbuild@0.25.1))
-      style-loader:
-        specifier: ^4.0.0
-        version: 4.0.0(webpack@5.98.0(@swc/core@1.10.18)(esbuild@0.25.1))
-      tsconfig-paths-webpack-plugin:
-        specifier: ^4.2.0
-        version: 4.2.0
-      typescript:
-        specifier: ^5.8.2
-        version: 5.8.2
-    devDependencies:
-      '@types/fs-extra':
-        specifier: ^11.0.4
-        version: 11.0.4
-      '@univerjs-infra/shared':
-        specifier: workspace:*
-        version: link:../shared
-      fs-extra:
-        specifier: ^11.3.0
-        version: 11.3.0
-      postcss:
-        specifier: ^8.5.3
-        version: 8.5.3
-      tailwindcss:
-        specifier: ^3.4.17
-        version: 3.4.17
-      tailwindcss-animate:
-        specifier: ^1.0.7
-        version: 1.0.7(tailwindcss@3.4.17)
-
   examples:
     dependencies:
       '@univerjs/action-recorder':
         specifier: workspace:*
-        version: link:../packages-experimental/action-recorder
+        version: link:../packages/preview/action-recorder
       '@univerjs/core':
         specifier: workspace:*
-        version: link:../packages/core
+        version: link:../packages/stable/core
       '@univerjs/data-validation':
         specifier: workspace:*
-        version: link:../packages/data-validation
+        version: link:../packages/stable/data-validation
       '@univerjs/debugger':
         specifier: workspace:*
-        version: link:../packages-experimental/debugger
+        version: link:../packages/internal/debugger
       '@univerjs/design':
         specifier: workspace:*
-        version: link:../packages/design
+        version: link:../packages/stable/design
       '@univerjs/docs':
         specifier: workspace:*
-        version: link:../packages/docs
+        version: link:../packages/stable/docs
       '@univerjs/docs-drawing':
         specifier: workspace:*
-        version: link:../packages/docs-drawing
+        version: link:../packages/stable/docs-drawing
       '@univerjs/docs-drawing-ui':
         specifier: workspace:*
-        version: link:../packages/docs-drawing-ui
+        version: link:../packages/stable/docs-drawing-ui
       '@univerjs/docs-hyper-link-ui':
         specifier: workspace:*
-        version: link:../packages/docs-hyper-link-ui
+        version: link:../packages/stable/docs-hyper-link-ui
       '@univerjs/docs-mention-ui':
         specifier: workspace:*
-        version: link:../packages/docs-mention-ui
+        version: link:../packages/stable/docs-mention-ui
       '@univerjs/docs-quick-insert-ui':
         specifier: workspace:*
-        version: link:../packages/docs-quick-insert-ui
+        version: link:../packages/stable/docs-quick-insert-ui
       '@univerjs/docs-thread-comment-ui':
         specifier: workspace:*
-        version: link:../packages/docs-thread-comment-ui
+        version: link:../packages/stable/docs-thread-comment-ui
       '@univerjs/docs-ui':
         specifier: workspace:*
-        version: link:../packages/docs-ui
+        version: link:../packages/stable/docs-ui
       '@univerjs/drawing':
         specifier: workspace:*
-        version: link:../packages/drawing
+        version: link:../packages/stable/drawing
       '@univerjs/drawing-ui':
         specifier: workspace:*
-        version: link:../packages/drawing-ui
+        version: link:../packages/stable/drawing-ui
       '@univerjs/engine-formula':
         specifier: workspace:*
-        version: link:../packages/engine-formula
+        version: link:../packages/stable/engine-formula
       '@univerjs/engine-render':
         specifier: workspace:*
-        version: link:../packages/engine-render
+        version: link:../packages/stable/engine-render
       '@univerjs/find-replace':
         specifier: workspace:*
-        version: link:../packages/find-replace
+        version: link:../packages/stable/find-replace
       '@univerjs/icons':
         specifier: 0.2.20
         version: 0.2.20(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       '@univerjs/mockdata':
         specifier: workspace:*
-        version: link:../mockdata
+        version: link:../packages/internal/mockdata
       '@univerjs/network':
         specifier: workspace:*
-        version: link:../packages/network
+        version: link:../packages/stable/network
       '@univerjs/rpc':
         specifier: workspace:*
-        version: link:../packages/rpc
+        version: link:../packages/stable/rpc
       '@univerjs/rpc-node':
         specifier: workspace:*
-        version: link:../packages/rpc-node
+        version: link:../packages/stable/rpc-node
       '@univerjs/sheets':
         specifier: workspace:*
-        version: link:../packages/sheets
+        version: link:../packages/stable/sheets
       '@univerjs/sheets-conditional-formatting':
         specifier: workspace:*
-        version: link:../packages/sheets-conditional-formatting
+        version: link:../packages/stable/sheets-conditional-formatting
       '@univerjs/sheets-conditional-formatting-ui':
         specifier: workspace:*
-        version: link:../packages/sheets-conditional-formatting-ui
+        version: link:../packages/stable/sheets-conditional-formatting-ui
       '@univerjs/sheets-crosshair-highlight':
         specifier: workspace:*
-        version: link:../packages/sheets-crosshair-highlight
+        version: link:../packages/stable/sheets-crosshair-highlight
       '@univerjs/sheets-data-validation':
         specifier: workspace:*
-        version: link:../packages/sheets-data-validation
+        version: link:../packages/stable/sheets-data-validation
       '@univerjs/sheets-data-validation-ui':
         specifier: workspace:*
-        version: link:../packages/sheets-data-validation-ui
+        version: link:../packages/stable/sheets-data-validation-ui
       '@univerjs/sheets-drawing':
         specifier: workspace:*
-        version: link:../packages/sheets-drawing
+        version: link:../packages/stable/sheets-drawing
       '@univerjs/sheets-drawing-ui':
         specifier: workspace:*
-        version: link:../packages/sheets-drawing-ui
+        version: link:../packages/stable/sheets-drawing-ui
       '@univerjs/sheets-filter':
         specifier: workspace:*
-        version: link:../packages/sheets-filter
+        version: link:../packages/stable/sheets-filter
       '@univerjs/sheets-filter-ui':
         specifier: workspace:*
-        version: link:../packages/sheets-filter-ui
+        version: link:../packages/stable/sheets-filter-ui
       '@univerjs/sheets-find-replace':
         specifier: workspace:*
-        version: link:../packages/sheets-find-replace
+        version: link:../packages/stable/sheets-find-replace
       '@univerjs/sheets-formula':
         specifier: workspace:*
-        version: link:../packages/sheets-formula
+        version: link:../packages/stable/sheets-formula
       '@univerjs/sheets-formula-ui':
         specifier: workspace:*
-        version: link:../packages/sheets-formula-ui
+        version: link:../packages/stable/sheets-formula-ui
       '@univerjs/sheets-hyper-link':
         specifier: workspace:*
-        version: link:../packages/sheets-hyper-link
+        version: link:../packages/stable/sheets-hyper-link
       '@univerjs/sheets-hyper-link-ui':
         specifier: workspace:*
-        version: link:../packages/sheets-hyper-link-ui
+        version: link:../packages/stable/sheets-hyper-link-ui
       '@univerjs/sheets-numfmt':
         specifier: workspace:*
-        version: link:../packages/sheets-numfmt
+        version: link:../packages/stable/sheets-numfmt
       '@univerjs/sheets-numfmt-ui':
         specifier: workspace:*
-        version: link:../packages/sheets-numfmt-ui
+        version: link:../packages/stable/sheets-numfmt-ui
       '@univerjs/sheets-sort':
         specifier: workspace:*
-        version: link:../packages/sheets-sort
+        version: link:../packages/stable/sheets-sort
       '@univerjs/sheets-sort-ui':
         specifier: workspace:*
-        version: link:../packages/sheets-sort-ui
+        version: link:../packages/stable/sheets-sort-ui
       '@univerjs/sheets-source-binding':
         specifier: workspace:*
-        version: link:../packages-experimental/sheets-source-binding
+        version: link:../packages/preview/sheets-source-binding
       '@univerjs/sheets-thread-comment':
         specifier: workspace:*
-        version: link:../packages/sheets-thread-comment
+        version: link:../packages/stable/sheets-thread-comment
       '@univerjs/sheets-thread-comment-ui':
         specifier: workspace:*
-        version: link:../packages/sheets-thread-comment-ui
+        version: link:../packages/stable/sheets-thread-comment-ui
       '@univerjs/sheets-ui':
         specifier: workspace:*
-        version: link:../packages/sheets-ui
+        version: link:../packages/stable/sheets-ui
       '@univerjs/sheets-zen-editor':
         specifier: workspace:*
-        version: link:../packages/sheets-zen-editor
+        version: link:../packages/stable/sheets-zen-editor
       '@univerjs/slides':
         specifier: workspace:*
-        version: link:../packages/slides
+        version: link:../packages/preview/slides
       '@univerjs/slides-ui':
         specifier: workspace:*
-        version: link:../packages/slides-ui
+        version: link:../packages/preview/slides-ui
       '@univerjs/thread-comment':
         specifier: workspace:*
-        version: link:../packages/thread-comment
+        version: link:../packages/stable/thread-comment
       '@univerjs/thread-comment-ui':
         specifier: workspace:*
-        version: link:../packages/thread-comment-ui
+        version: link:../packages/stable/thread-comment-ui
       '@univerjs/ui':
         specifier: workspace:*
-        version: link:../packages/ui
+        version: link:../packages/stable/ui
       '@univerjs/uni-docs-ui':
         specifier: workspace:*
-        version: link:../packages-experimental/uni-docs-ui
+        version: link:../packages/experimental/uni-docs-ui
       '@univerjs/uni-formula':
         specifier: workspace:*
-        version: link:../packages-experimental/uni-formula
+        version: link:../packages/experimental/uni-formula
       '@univerjs/uni-formula-ui':
         specifier: workspace:*
-        version: link:../packages-experimental/uni-formula-ui
+        version: link:../packages/experimental/uni-formula-ui
       '@univerjs/uni-sheets-ui':
         specifier: workspace:*
-        version: link:../packages-experimental/uni-sheets-ui
+        version: link:../packages/experimental/uni-sheets-ui
       '@univerjs/uni-slides-ui':
         specifier: workspace:*
-        version: link:../packages-experimental/uni-slides-ui
+        version: link:../packages/experimental/uni-slides-ui
       '@univerjs/uniscript':
         specifier: workspace:*
-        version: link:../packages/uniscript
+        version: link:../packages/stable/uniscript
       '@univerjs/uniui':
         specifier: workspace:*
-        version: link:../packages-experimental/uniui
+        version: link:../packages/experimental/uniui
       '@univerjs/watermark':
         specifier: workspace:*
-        version: link:../packages/watermark
+        version: link:../packages/stable/watermark
       monaco-editor:
         specifier: 0.52.2
         version: 0.52.2
@@ -478,7 +323,7 @@ importers:
         version: 11.0.4
       '@univerjs-infra/shared':
         specifier: workspace:*
-        version: link:../common/shared
+        version: link:../packages/internal/shared
       cross-env:
         specifier: ^7.0.3
         version: 7.0.3
@@ -528,230 +373,33 @@ importers:
         specifier: ^5.8.2
         version: 5.8.2
 
-  mockdata:
+  packages/experimental/uni-docs-ui:
     dependencies:
       '@univerjs/core':
         specifier: workspace:*
-        version: link:../packages/core
-      '@univerjs/data-validation':
-        specifier: workspace:*
-        version: link:../packages/data-validation
+        version: link:../../stable/core
       '@univerjs/docs':
         specifier: workspace:*
-        version: link:../packages/docs
-      '@univerjs/docs-drawing':
-        specifier: workspace:*
-        version: link:../packages/docs-drawing
-      '@univerjs/drawing':
-        specifier: workspace:*
-        version: link:../packages/drawing
-      '@univerjs/engine-render':
-        specifier: workspace:*
-        version: link:../packages/engine-render
-      '@univerjs/sheets':
-        specifier: workspace:*
-        version: link:../packages/sheets
-      '@univerjs/sheets-conditional-formatting':
-        specifier: workspace:*
-        version: link:../packages/sheets-conditional-formatting
-      '@univerjs/sheets-data-validation':
-        specifier: workspace:*
-        version: link:../packages/sheets-data-validation
-      '@univerjs/sheets-drawing':
-        specifier: workspace:*
-        version: link:../packages/sheets-drawing
-      '@univerjs/sheets-filter':
-        specifier: workspace:*
-        version: link:../packages/sheets-filter
-      '@univerjs/sheets-formula':
-        specifier: workspace:*
-        version: link:../packages/sheets-formula
-      '@univerjs/sheets-hyper-link':
-        specifier: workspace:*
-        version: link:../packages/sheets-hyper-link
-      '@univerjs/sheets-sort':
-        specifier: workspace:*
-        version: link:../packages/sheets-sort
-      '@univerjs/sheets-thread-comment':
-        specifier: workspace:*
-        version: link:../packages/sheets-thread-comment
-      '@univerjs/thread-comment':
-        specifier: workspace:*
-        version: link:../packages/thread-comment
-    devDependencies:
-      '@univerjs-infra/shared':
-        specifier: workspace:*
-        version: link:../common/shared
-      typescript:
-        specifier: ^5.8.2
-        version: 5.8.2
-
-  packages-experimental/action-recorder:
-    dependencies:
-      '@univerjs/core':
-        specifier: workspace:*
-        version: link:../../packages/core
-      '@univerjs/design':
-        specifier: workspace:*
-        version: link:../../packages/design
-      '@univerjs/icons':
-        specifier: ^0.2.30
-        version: 0.2.30(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
-      '@univerjs/sheets':
-        specifier: workspace:*
-        version: link:../../packages/sheets
-      '@univerjs/sheets-filter':
-        specifier: workspace:*
-        version: link:../../packages/sheets-filter
-      '@univerjs/sheets-ui':
-        specifier: workspace:*
-        version: link:../../packages/sheets-ui
-      '@univerjs/ui':
-        specifier: workspace:*
-        version: link:../../packages/ui
-    devDependencies:
-      '@univerjs-infra/shared':
-        specifier: workspace:*
-        version: link:../../common/shared
-      less:
-        specifier: ^4.2.2
-        version: 4.2.2
-      react:
-        specifier: '19'
-        version: 19.0.0
-      rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
-      tailwindcss:
-        specifier: ^3.4.17
-        version: 3.4.17
-      typescript:
-        specifier: ^5.8.2
-        version: 5.8.2
-      vite:
-        specifier: ^6.2.3
-        version: 6.2.3(@types/node@22.13.13)(jiti@2.4.2)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
-      vitest:
-        specifier: ^3.0.9
-        version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
-
-  packages-experimental/debugger:
-    dependencies:
-      '@univerjs/core':
-        specifier: workspace:*
-        version: link:../../packages/core
-      '@univerjs/design':
-        specifier: workspace:*
-        version: link:../../packages/design
+        version: link:../../stable/docs
       '@univerjs/docs-drawing-ui':
         specifier: workspace:*
-        version: link:../../packages/docs-drawing-ui
+        version: link:../../stable/docs-drawing-ui
       '@univerjs/docs-ui':
         specifier: workspace:*
-        version: link:../../packages/docs-ui
+        version: link:../../stable/docs-ui
       '@univerjs/engine-render':
         specifier: workspace:*
-        version: link:../../packages/engine-render
-      '@univerjs/icons':
-        specifier: ^0.2.30
-        version: 0.2.30(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
-      '@univerjs/mockdata':
-        specifier: workspace:*
-        version: link:../../mockdata
-      '@univerjs/sheets':
-        specifier: workspace:*
-        version: link:../../packages/sheets
-      '@univerjs/sheets-drawing-ui':
-        specifier: workspace:*
-        version: link:../../packages/sheets-drawing-ui
+        version: link:../../stable/engine-render
       '@univerjs/ui':
         specifier: workspace:*
-        version: link:../../packages/ui
-      '@univerjs/watermark':
-        specifier: workspace:*
-        version: link:../../packages/watermark
-    devDependencies:
-      '@univerjs-infra/shared':
-        specifier: workspace:*
-        version: link:../../common/shared
-      postcss:
-        specifier: ^8.5.3
-        version: 8.5.3
-      react:
-        specifier: '19'
-        version: 19.0.0
-      rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
-      tailwindcss:
-        specifier: ^3.4.17
-        version: 3.4.17
-      typescript:
-        specifier: ^5.8.2
-        version: 5.8.2
-      vite:
-        specifier: ^6.2.3
-        version: 6.2.3(@types/node@22.13.13)(jiti@2.4.2)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
-      vitest:
-        specifier: ^3.0.9
-        version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
-    optionalDependencies:
-      vue:
-        specifier: '>=3.0.0'
-        version: 3.4.38(typescript@5.8.2)
-
-  packages-experimental/sheets-source-binding:
-    dependencies:
-      '@univerjs/core':
-        specifier: workspace:*
-        version: link:../../packages/core
-      '@univerjs/sheets':
-        specifier: workspace:*
-        version: link:../../packages/sheets
-    devDependencies:
-      '@univerjs-infra/shared':
-        specifier: workspace:*
-        version: link:../../common/shared
-      rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
-      typescript:
-        specifier: ^5.8.2
-        version: 5.8.2
-      vite:
-        specifier: ^6.2.3
-        version: 6.2.3(@types/node@22.13.13)(jiti@2.4.2)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
-      vitest:
-        specifier: ^3.0.9
-        version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
-
-  packages-experimental/uni-docs-ui:
-    dependencies:
-      '@univerjs/core':
-        specifier: workspace:*
-        version: link:../../packages/core
-      '@univerjs/docs':
-        specifier: workspace:*
-        version: link:../../packages/docs
-      '@univerjs/docs-drawing-ui':
-        specifier: workspace:*
-        version: link:../../packages/docs-drawing-ui
-      '@univerjs/docs-ui':
-        specifier: workspace:*
-        version: link:../../packages/docs-ui
-      '@univerjs/engine-render':
-        specifier: workspace:*
-        version: link:../../packages/engine-render
-      '@univerjs/ui':
-        specifier: workspace:*
-        version: link:../../packages/ui
+        version: link:../../stable/ui
       '@univerjs/uniui':
         specifier: workspace:*
         version: link:../uniui
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
-        version: link:../../common/shared
+        version: link:../../internal/shared
       postcss:
         specifier: ^8.5.3
         version: 8.5.3
@@ -771,15 +419,15 @@ importers:
         specifier: ^3.0.9
         version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
 
-  packages-experimental/uni-formula:
+  packages/experimental/uni-formula:
     dependencies:
       '@univerjs/core':
         specifier: workspace:*
-        version: link:../../packages/core
+        version: link:../../stable/core
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
-        version: link:../../common/shared
+        version: link:../../internal/shared
       typescript:
         specifier: ^5.8.2
         version: 5.8.2
@@ -790,48 +438,48 @@ importers:
         specifier: ^3.0.9
         version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
 
-  packages-experimental/uni-formula-ui:
+  packages/experimental/uni-formula-ui:
     dependencies:
       '@univerjs/core':
         specifier: workspace:*
-        version: link:../../packages/core
+        version: link:../../stable/core
       '@univerjs/design':
         specifier: workspace:*
-        version: link:../../packages/design
+        version: link:../../stable/design
       '@univerjs/docs':
         specifier: workspace:*
-        version: link:../../packages/docs
+        version: link:../../stable/docs
       '@univerjs/docs-ui':
         specifier: workspace:*
-        version: link:../../packages/docs-ui
+        version: link:../../stable/docs-ui
       '@univerjs/engine-render':
         specifier: workspace:*
-        version: link:../../packages/engine-render
+        version: link:../../stable/engine-render
       '@univerjs/icons':
         specifier: ^0.2.30
         version: 0.2.30(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       '@univerjs/rpc':
         specifier: workspace:*
-        version: link:../../packages/rpc
+        version: link:../../stable/rpc
       '@univerjs/sheets-formula':
         specifier: workspace:*
-        version: link:../../packages/sheets-formula
+        version: link:../../stable/sheets-formula
       '@univerjs/sheets-formula-ui':
         specifier: workspace:*
-        version: link:../../packages/sheets-formula-ui
+        version: link:../../stable/sheets-formula-ui
       '@univerjs/slides-ui':
         specifier: workspace:*
-        version: link:../../packages/slides-ui
+        version: link:../../preview/slides-ui
       '@univerjs/ui':
         specifier: workspace:*
-        version: link:../../packages/ui
+        version: link:../../stable/ui
       '@univerjs/uni-formula':
         specifier: workspace:*
         version: link:../uni-formula
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
-        version: link:../../common/shared
+        version: link:../../internal/shared
       postcss:
         specifier: ^8.5.3
         version: 8.5.3
@@ -854,42 +502,42 @@ importers:
         specifier: ^3.0.9
         version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
 
-  packages-experimental/uni-sheets-ui:
+  packages/experimental/uni-sheets-ui:
     dependencies:
       '@univerjs/core':
         specifier: workspace:*
-        version: link:../../packages/core
+        version: link:../../stable/core
       '@univerjs/design':
         specifier: workspace:*
-        version: link:../../packages/design
+        version: link:../../stable/design
       '@univerjs/docs':
         specifier: workspace:*
-        version: link:../../packages/docs
+        version: link:../../stable/docs
       '@univerjs/docs-ui':
         specifier: workspace:*
-        version: link:../../packages/docs-ui
+        version: link:../../stable/docs-ui
       '@univerjs/icons':
         specifier: ^0.2.30
         version: 0.2.30(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       '@univerjs/sheets':
         specifier: workspace:*
-        version: link:../../packages/sheets
+        version: link:../../stable/sheets
       '@univerjs/sheets-drawing-ui':
         specifier: workspace:*
-        version: link:../../packages/sheets-drawing-ui
+        version: link:../../stable/sheets-drawing-ui
       '@univerjs/sheets-ui':
         specifier: workspace:*
-        version: link:../../packages/sheets-ui
+        version: link:../../stable/sheets-ui
       '@univerjs/ui':
         specifier: workspace:*
-        version: link:../../packages/ui
+        version: link:../../stable/ui
       '@univerjs/uniui':
         specifier: workspace:*
         version: link:../uniui
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
-        version: link:../../common/shared
+        version: link:../../internal/shared
       postcss:
         specifier: ^8.5.3
         version: 8.5.3
@@ -912,33 +560,33 @@ importers:
         specifier: ^3.0.9
         version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
 
-  packages-experimental/uni-slides-ui:
+  packages/experimental/uni-slides-ui:
     dependencies:
       '@univerjs/core':
         specifier: workspace:*
-        version: link:../../packages/core
+        version: link:../../stable/core
       '@univerjs/design':
         specifier: workspace:*
-        version: link:../../packages/design
+        version: link:../../stable/design
       '@univerjs/engine-render':
         specifier: workspace:*
-        version: link:../../packages/engine-render
+        version: link:../../stable/engine-render
       '@univerjs/icons':
         specifier: ^0.2.30
         version: 0.2.30(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       '@univerjs/slides-ui':
         specifier: workspace:*
-        version: link:../../packages/slides-ui
+        version: link:../../preview/slides-ui
       '@univerjs/ui':
         specifier: workspace:*
-        version: link:../../packages/ui
+        version: link:../../stable/ui
       '@univerjs/uniui':
         specifier: workspace:*
         version: link:../uniui
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
-        version: link:../../common/shared
+        version: link:../../internal/shared
       less:
         specifier: ^4.2.2
         version: 4.2.2
@@ -964,39 +612,39 @@ importers:
         specifier: ^3.0.9
         version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
 
-  packages-experimental/uniui:
+  packages/experimental/uniui:
     dependencies:
       '@floating-ui/react-dom':
         specifier: ^2.1.2
         version: 2.1.2(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       '@univerjs/core':
         specifier: workspace:*
-        version: link:../../packages/core
+        version: link:../../stable/core
       '@univerjs/design':
         specifier: workspace:*
-        version: link:../../packages/design
+        version: link:../../stable/design
       '@univerjs/engine-render':
         specifier: workspace:*
-        version: link:../../packages/engine-render
+        version: link:../../stable/engine-render
       '@univerjs/icons':
         specifier: ^0.2.30
         version: 0.2.30(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       '@univerjs/sheets':
         specifier: workspace:*
-        version: link:../../packages/sheets
+        version: link:../../stable/sheets
       '@univerjs/sheets-ui':
         specifier: workspace:*
-        version: link:../../packages/sheets-ui
+        version: link:../../stable/sheets-ui
       '@univerjs/ui':
         specifier: workspace:*
-        version: link:../../packages/ui
+        version: link:../../stable/ui
       '@xyflow/react':
         specifier: ^12.4.4
         version: 12.4.4(@types/react@19.0.8)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
-        version: link:../../common/shared
+        version: link:../../internal/shared
       less:
         specifier: ^4.2.2
         version: 4.2.2
@@ -1025,7 +673,458 @@ importers:
         specifier: ^3.0.9
         version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
 
-  packages/core:
+  packages/internal/debugger:
+    dependencies:
+      '@univerjs/core':
+        specifier: workspace:*
+        version: link:../../stable/core
+      '@univerjs/design':
+        specifier: workspace:*
+        version: link:../../stable/design
+      '@univerjs/docs-drawing-ui':
+        specifier: workspace:*
+        version: link:../../stable/docs-drawing-ui
+      '@univerjs/docs-ui':
+        specifier: workspace:*
+        version: link:../../stable/docs-ui
+      '@univerjs/engine-render':
+        specifier: workspace:*
+        version: link:../../stable/engine-render
+      '@univerjs/icons':
+        specifier: ^0.2.30
+        version: 0.2.30(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      '@univerjs/mockdata':
+        specifier: workspace:*
+        version: link:../mockdata
+      '@univerjs/sheets':
+        specifier: workspace:*
+        version: link:../../stable/sheets
+      '@univerjs/sheets-drawing-ui':
+        specifier: workspace:*
+        version: link:../../stable/sheets-drawing-ui
+      '@univerjs/ui':
+        specifier: workspace:*
+        version: link:../../stable/ui
+      '@univerjs/watermark':
+        specifier: workspace:*
+        version: link:../../stable/watermark
+    devDependencies:
+      '@univerjs-infra/shared':
+        specifier: workspace:*
+        version: link:../shared
+      postcss:
+        specifier: ^8.5.3
+        version: 8.5.3
+      react:
+        specifier: '19'
+        version: 19.0.0
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.1
+      tailwindcss:
+        specifier: ^3.4.17
+        version: 3.4.17
+      typescript:
+        specifier: ^5.8.2
+        version: 5.8.2
+      vite:
+        specifier: ^6.2.3
+        version: 6.2.3(@types/node@22.13.13)(jiti@2.4.2)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
+      vitest:
+        specifier: ^3.0.9
+        version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
+    optionalDependencies:
+      vue:
+        specifier: '>=3.0.0'
+        version: 3.4.38(typescript@5.8.2)
+
+  packages/internal/mockdata:
+    dependencies:
+      '@univerjs/core':
+        specifier: workspace:*
+        version: link:../../stable/core
+      '@univerjs/data-validation':
+        specifier: workspace:*
+        version: link:../../stable/data-validation
+      '@univerjs/docs':
+        specifier: workspace:*
+        version: link:../../stable/docs
+      '@univerjs/docs-drawing':
+        specifier: workspace:*
+        version: link:../../stable/docs-drawing
+      '@univerjs/drawing':
+        specifier: workspace:*
+        version: link:../../stable/drawing
+      '@univerjs/engine-render':
+        specifier: workspace:*
+        version: link:../../stable/engine-render
+      '@univerjs/sheets':
+        specifier: workspace:*
+        version: link:../../stable/sheets
+      '@univerjs/sheets-conditional-formatting':
+        specifier: workspace:*
+        version: link:../../stable/sheets-conditional-formatting
+      '@univerjs/sheets-data-validation':
+        specifier: workspace:*
+        version: link:../../stable/sheets-data-validation
+      '@univerjs/sheets-drawing':
+        specifier: workspace:*
+        version: link:../../stable/sheets-drawing
+      '@univerjs/sheets-filter':
+        specifier: workspace:*
+        version: link:../../stable/sheets-filter
+      '@univerjs/sheets-formula':
+        specifier: workspace:*
+        version: link:../../stable/sheets-formula
+      '@univerjs/sheets-hyper-link':
+        specifier: workspace:*
+        version: link:../../stable/sheets-hyper-link
+      '@univerjs/sheets-sort':
+        specifier: workspace:*
+        version: link:../../stable/sheets-sort
+      '@univerjs/sheets-thread-comment':
+        specifier: workspace:*
+        version: link:../../stable/sheets-thread-comment
+      '@univerjs/thread-comment':
+        specifier: workspace:*
+        version: link:../../stable/thread-comment
+    devDependencies:
+      '@univerjs-infra/shared':
+        specifier: workspace:*
+        version: link:../shared
+      typescript:
+        specifier: ^5.8.2
+        version: 5.8.2
+
+  packages/internal/shared:
+    dependencies:
+      '@typescript-eslint/parser':
+        specifier: ^8.28.0
+        version: 8.28.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
+      '@vitejs/plugin-react':
+        specifier: ^4.3.4
+        version: 4.3.4(vite@6.2.3(@types/node@22.13.13)(jiti@2.4.2)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0))
+      '@vitejs/plugin-vue':
+        specifier: ^5.2.3
+        version: 5.2.3(vite@6.2.3(@types/node@22.13.13)(jiti@2.4.2)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0))(vue@3.4.38(typescript@5.8.2))
+      '@vitest/coverage-istanbul':
+        specifier: ^3.0.9
+        version: 3.0.9(vitest@3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0))
+      autoprefixer:
+        specifier: ^10.4.21
+        version: 10.4.21(postcss@8.5.3)
+      eslint-plugin-readable-tailwind:
+        specifier: ^1.9.1
+        version: 1.9.1(eslint@9.23.0(jiti@2.4.2))(tailwindcss@3.4.17)
+      fs-extra:
+        specifier: ^11.3.0
+        version: 11.3.0
+      happy-dom:
+        specifier: 15.0.0
+        version: 15.0.0
+      javascript-obfuscator:
+        specifier: ^4.1.1
+        version: 4.1.1
+      postcss-preset-env:
+        specifier: ^10.1.5
+        version: 10.1.5(postcss@8.5.3)
+      sort-keys:
+        specifier: ^5.1.0
+        version: 5.1.0
+      tailwind-scrollbar:
+        specifier: ^3.1.0
+        version: 3.1.0(tailwindcss@3.4.17)
+      tailwindcss:
+        specifier: ^3.4.17
+        version: 3.4.17
+      vite:
+        specifier: ^6.2.3
+        version: 6.2.3(@types/node@22.13.13)(jiti@2.4.2)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
+      vite-plugin-dts:
+        specifier: ^4.5.3
+        version: 4.5.3(@types/node@22.13.13)(rollup@4.37.0)(typescript@5.8.2)(vite@6.2.3(@types/node@22.13.13)(jiti@2.4.2)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0))
+      vite-plugin-external:
+        specifier: ^6.0.1
+        version: 6.0.1
+      vitest:
+        specifier: ^3.0.9
+        version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
+    devDependencies:
+      '@types/fs-extra':
+        specifier: ^11.0.4
+        version: 11.0.4
+      '@univerjs/icons':
+        specifier: ^0.2.30
+        version: 0.2.30(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      '@univerjs/icons-svg':
+        specifier: ^0.2.30
+        version: 0.2.30
+      '@univerjs/protocol':
+        specifier: 0.1.45
+        version: 0.1.45(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+
+  packages/internal/storybook:
+    dependencies:
+      '@chromatic-com/storybook':
+        specifier: ^3.2.6
+        version: 3.2.6(react@19.0.0)(storybook@8.6.7(prettier@3.4.2))
+      '@storybook/addon-essentials':
+        specifier: ^8.6.7
+        version: 8.6.7(@types/react@19.0.8)(storybook@8.6.7(prettier@3.4.2))
+      '@storybook/addon-interactions':
+        specifier: ^8.6.7
+        version: 8.6.7(storybook@8.6.7(prettier@3.4.2))
+      '@storybook/addon-links':
+        specifier: ^8.6.7
+        version: 8.6.7(react@19.0.0)(storybook@8.6.7(prettier@3.4.2))
+      '@storybook/addon-styling-webpack':
+        specifier: ^1.0.1
+        version: 1.0.1(webpack@5.98.0(@swc/core@1.10.18)(esbuild@0.25.1))
+      '@storybook/addon-webpack5-compiler-swc':
+        specifier: ^3.0.0
+        version: 3.0.0(webpack@5.98.0(@swc/core@1.10.18)(esbuild@0.25.1))
+      '@storybook/blocks':
+        specifier: ^8.6.7
+        version: 8.6.7(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(storybook@8.6.7(prettier@3.4.2))
+      '@storybook/icons':
+        specifier: ^1.4.0
+        version: 1.4.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      '@storybook/react':
+        specifier: ^8.6.7
+        version: 8.6.7(@storybook/test@8.6.7(storybook@8.6.7(prettier@3.4.2)))(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(storybook@8.6.7(prettier@3.4.2))(typescript@5.8.2)
+      '@storybook/react-webpack5':
+        specifier: ^8.6.7
+        version: 8.6.7(@storybook/test@8.6.7(storybook@8.6.7(prettier@3.4.2)))(@swc/core@1.10.18)(esbuild@0.25.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(storybook@8.6.7(prettier@3.4.2))(typescript@5.8.2)
+      '@storybook/types':
+        specifier: ^8.6.7
+        version: 8.6.7(storybook@8.6.7(prettier@3.4.2))
+      '@univerjs/core':
+        specifier: workspace:*
+        version: link:../../stable/core
+      '@univerjs/design':
+        specifier: workspace:*
+        version: link:../../stable/design
+      '@univerjs/ui':
+        specifier: workspace:*
+        version: link:../../stable/ui
+      css-loader:
+        specifier: ^7.1.2
+        version: 7.1.2(webpack@5.98.0(@swc/core@1.10.18)(esbuild@0.25.1))
+      less-loader:
+        specifier: ^12.2.0
+        version: 12.2.0(less@4.2.2)(webpack@5.98.0(@swc/core@1.10.18)(esbuild@0.25.1))
+      postcss-loader:
+        specifier: ^8.1.1
+        version: 8.1.1(postcss@8.5.3)(typescript@5.8.2)(webpack@5.98.0(@swc/core@1.10.18)(esbuild@0.25.1))
+      storybook:
+        specifier: ^8.6.7
+        version: 8.6.7(prettier@3.4.2)
+      storybook-addon-swc:
+        specifier: ^1.2.0
+        version: 1.2.0(@swc/core@1.10.18)(terser-webpack-plugin@5.3.11(@swc/core@1.10.18)(esbuild@0.25.1)(webpack@5.98.0(@swc/core@1.10.18)(esbuild@0.25.1)))(webpack@5.98.0(@swc/core@1.10.18)(esbuild@0.25.1))
+      style-loader:
+        specifier: ^4.0.0
+        version: 4.0.0(webpack@5.98.0(@swc/core@1.10.18)(esbuild@0.25.1))
+      tsconfig-paths-webpack-plugin:
+        specifier: ^4.2.0
+        version: 4.2.0
+      typescript:
+        specifier: ^5.8.2
+        version: 5.8.2
+    devDependencies:
+      '@types/fs-extra':
+        specifier: ^11.0.4
+        version: 11.0.4
+      '@univerjs-infra/shared':
+        specifier: workspace:*
+        version: link:../shared
+      fs-extra:
+        specifier: ^11.3.0
+        version: 11.3.0
+      postcss:
+        specifier: ^8.5.3
+        version: 8.5.3
+      tailwindcss:
+        specifier: ^3.4.17
+        version: 3.4.17
+      tailwindcss-animate:
+        specifier: ^1.0.7
+        version: 1.0.7(tailwindcss@3.4.17)
+
+  packages/preview/action-recorder:
+    dependencies:
+      '@univerjs/core':
+        specifier: workspace:*
+        version: link:../../stable/core
+      '@univerjs/design':
+        specifier: workspace:*
+        version: link:../../stable/design
+      '@univerjs/icons':
+        specifier: ^0.2.30
+        version: 0.2.30(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      '@univerjs/sheets':
+        specifier: workspace:*
+        version: link:../../stable/sheets
+      '@univerjs/sheets-filter':
+        specifier: workspace:*
+        version: link:../../stable/sheets-filter
+      '@univerjs/sheets-ui':
+        specifier: workspace:*
+        version: link:../../stable/sheets-ui
+      '@univerjs/ui':
+        specifier: workspace:*
+        version: link:../../stable/ui
+    devDependencies:
+      '@univerjs-infra/shared':
+        specifier: workspace:*
+        version: link:../../internal/shared
+      less:
+        specifier: ^4.2.2
+        version: 4.2.2
+      react:
+        specifier: '19'
+        version: 19.0.0
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.1
+      tailwindcss:
+        specifier: ^3.4.17
+        version: 3.4.17
+      typescript:
+        specifier: ^5.8.2
+        version: 5.8.2
+      vite:
+        specifier: ^6.2.3
+        version: 6.2.3(@types/node@22.13.13)(jiti@2.4.2)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
+      vitest:
+        specifier: ^3.0.9
+        version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
+
+  packages/preview/sheets-source-binding:
+    dependencies:
+      '@univerjs/core':
+        specifier: workspace:*
+        version: link:../../stable/core
+      '@univerjs/sheets':
+        specifier: workspace:*
+        version: link:../../stable/sheets
+    devDependencies:
+      '@univerjs-infra/shared':
+        specifier: workspace:*
+        version: link:../../internal/shared
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.1
+      typescript:
+        specifier: ^5.8.2
+        version: 5.8.2
+      vite:
+        specifier: ^6.2.3
+        version: 6.2.3(@types/node@22.13.13)(jiti@2.4.2)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
+      vitest:
+        specifier: ^3.0.9
+        version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
+
+  packages/preview/slides:
+    dependencies:
+      '@univerjs/core':
+        specifier: workspace:*
+        version: link:../../stable/core
+      '@univerjs/engine-render':
+        specifier: workspace:*
+        version: link:../../stable/engine-render
+    devDependencies:
+      '@univerjs-infra/shared':
+        specifier: workspace:*
+        version: link:../../internal/shared
+      typescript:
+        specifier: ^5.8.2
+        version: 5.8.2
+      vite:
+        specifier: ^6.2.3
+        version: 6.2.3(@types/node@22.13.13)(jiti@2.4.2)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
+      vitest:
+        specifier: ^3.0.9
+        version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
+
+  packages/preview/slides-ui:
+    dependencies:
+      '@univerjs/core':
+        specifier: workspace:*
+        version: link:../../stable/core
+      '@univerjs/design':
+        specifier: workspace:*
+        version: link:../../stable/design
+      '@univerjs/docs':
+        specifier: workspace:*
+        version: link:../../stable/docs
+      '@univerjs/docs-ui':
+        specifier: workspace:*
+        version: link:../../stable/docs-ui
+      '@univerjs/drawing':
+        specifier: workspace:*
+        version: link:../../stable/drawing
+      '@univerjs/engine-render':
+        specifier: workspace:*
+        version: link:../../stable/engine-render
+      '@univerjs/icons':
+        specifier: ^0.2.30
+        version: 0.2.30(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      '@univerjs/slides':
+        specifier: workspace:*
+        version: link:../slides
+      '@univerjs/ui':
+        specifier: workspace:*
+        version: link:../../stable/ui
+    devDependencies:
+      '@univerjs-infra/shared':
+        specifier: workspace:*
+        version: link:../../internal/shared
+      less:
+        specifier: ^4.2.2
+        version: 4.2.2
+      postcss:
+        specifier: ^8.5.3
+        version: 8.5.3
+      react:
+        specifier: '19'
+        version: 19.0.0
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.1
+      tailwindcss:
+        specifier: ^3.4.17
+        version: 3.4.17
+      typescript:
+        specifier: ^5.8.2
+        version: 5.8.2
+      vite:
+        specifier: ^6.2.3
+        version: 6.2.3(@types/node@22.13.13)(jiti@2.4.2)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
+      vitest:
+        specifier: ^3.0.9
+        version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
+
+  packages/preview/telemetry:
+    dependencies:
+      '@univerjs/core':
+        specifier: workspace:*
+        version: link:../../stable/core
+    devDependencies:
+      '@univerjs-infra/shared':
+        specifier: workspace:*
+        version: link:../../internal/shared
+      typescript:
+        specifier: ^5.8.2
+        version: 5.8.2
+      vite:
+        specifier: ^6.2.3
+        version: 6.2.3(@types/node@22.13.13)(jiti@2.4.2)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
+      vitest:
+        specifier: ^3.0.9
+        version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
+
+  packages/stable/core:
     dependencies:
       '@univerjs/protocol':
         specifier: 0.1.45
@@ -1072,7 +1171,7 @@ importers:
         version: 4.0.0
       '@univerjs-infra/shared':
         specifier: workspace:*
-        version: link:../../common/shared
+        version: link:../../internal/shared
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -1086,7 +1185,7 @@ importers:
         specifier: ^3.0.9
         version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
 
-  packages/data-validation:
+  packages/stable/data-validation:
     dependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -1094,7 +1193,7 @@ importers:
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
-        version: link:../../common/shared
+        version: link:../../internal/shared
       '@univerjs/protocol':
         specifier: 0.1.45
         version: 0.1.45(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
@@ -1114,7 +1213,7 @@ importers:
         specifier: ^3.0.9
         version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
 
-  packages/design:
+  packages/stable/design:
     dependencies:
       '@radix-ui/react-dropdown-menu':
         specifier: ^2.1.6
@@ -1185,7 +1284,7 @@ importers:
         version: 4.4.12(@types/react@19.0.8)
       '@univerjs-infra/shared':
         specifier: workspace:*
-        version: link:../../common/shared
+        version: link:../../internal/shared
       '@univerjs/core':
         specifier: workspace:*
         version: link:../core
@@ -1217,7 +1316,7 @@ importers:
         specifier: ^3.0.9
         version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
 
-  packages/docs:
+  packages/stable/docs:
     dependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -1228,7 +1327,7 @@ importers:
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
-        version: link:../../common/shared
+        version: link:../../internal/shared
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -1242,7 +1341,7 @@ importers:
         specifier: ^3.0.9
         version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
 
-  packages/docs-drawing:
+  packages/stable/docs-drawing:
     dependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -1253,7 +1352,7 @@ importers:
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
-        version: link:../../common/shared
+        version: link:../../internal/shared
       typescript:
         specifier: ^5.8.2
         version: 5.8.2
@@ -1264,7 +1363,7 @@ importers:
         specifier: ^3.0.9
         version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
 
-  packages/docs-drawing-ui:
+  packages/stable/docs-drawing-ui:
     dependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -1299,7 +1398,7 @@ importers:
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
-        version: link:../../common/shared
+        version: link:../../internal/shared
       less:
         specifier: ^4.2.2
         version: 4.2.2
@@ -1325,7 +1424,7 @@ importers:
         specifier: ^3.0.9
         version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
 
-  packages/docs-hyper-link:
+  packages/stable/docs-hyper-link:
     dependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -1333,7 +1432,7 @@ importers:
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
-        version: link:../../common/shared
+        version: link:../../internal/shared
       typescript:
         specifier: ^5.8.2
         version: 5.8.2
@@ -1344,7 +1443,7 @@ importers:
         specifier: ^3.0.9
         version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
 
-  packages/docs-hyper-link-ui:
+  packages/stable/docs-hyper-link-ui:
     dependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -1373,7 +1472,7 @@ importers:
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
-        version: link:../../common/shared
+        version: link:../../internal/shared
       postcss:
         specifier: ^8.5.3
         version: 8.5.3
@@ -1396,7 +1495,7 @@ importers:
         specifier: ^3.0.9
         version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
 
-  packages/docs-mention-ui:
+  packages/stable/docs-mention-ui:
     dependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -1416,7 +1515,7 @@ importers:
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
-        version: link:../../common/shared
+        version: link:../../internal/shared
       postcss:
         specifier: ^8.5.3
         version: 8.5.3
@@ -1439,7 +1538,7 @@ importers:
         specifier: ^3.0.9
         version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
 
-  packages/docs-quick-insert-ui:
+  packages/stable/docs-quick-insert-ui:
     dependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -1471,7 +1570,7 @@ importers:
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
-        version: link:../../common/shared
+        version: link:../../internal/shared
       '@univerjs/engine-render':
         specifier: workspace:*
         version: link:../engine-render
@@ -1497,7 +1596,7 @@ importers:
         specifier: ^3.0.9
         version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
 
-  packages/docs-thread-comment-ui:
+  packages/stable/docs-thread-comment-ui:
     dependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -1526,7 +1625,7 @@ importers:
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
-        version: link:../../common/shared
+        version: link:../../internal/shared
       postcss:
         specifier: ^8.5.3
         version: 8.5.3
@@ -1549,7 +1648,7 @@ importers:
         specifier: ^3.0.9
         version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
 
-  packages/docs-ui:
+  packages/stable/docs-ui:
     dependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -1575,7 +1674,7 @@ importers:
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
-        version: link:../../common/shared
+        version: link:../../internal/shared
       '@univerjs/docs-drawing':
         specifier: workspace:*
         version: link:../docs-drawing
@@ -1607,7 +1706,7 @@ importers:
         specifier: ^3.0.9
         version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
 
-  packages/drawing:
+  packages/stable/drawing:
     dependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -1618,7 +1717,7 @@ importers:
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
-        version: link:../../common/shared
+        version: link:../../internal/shared
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -1632,7 +1731,7 @@ importers:
         specifier: ^3.0.9
         version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
 
-  packages/drawing-ui:
+  packages/stable/drawing-ui:
     dependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -1655,7 +1754,7 @@ importers:
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
-        version: link:../../common/shared
+        version: link:../../internal/shared
       less:
         specifier: ^4.2.2
         version: 4.2.2
@@ -1681,7 +1780,7 @@ importers:
         specifier: ^3.0.9
         version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
 
-  packages/engine-formula:
+  packages/stable/engine-formula:
     dependencies:
       '@flatten-js/interval-tree':
         specifier: ^1.1.3
@@ -1704,7 +1803,7 @@ importers:
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
-        version: link:../../common/shared
+        version: link:../../internal/shared
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -1718,11 +1817,11 @@ importers:
         specifier: ^3.0.9
         version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
 
-  packages/engine-numfmt:
+  packages/stable/engine-numfmt:
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
-        version: link:../../common/shared
+        version: link:../../internal/shared
       typescript:
         specifier: ^5.8.2
         version: 5.8.2
@@ -1733,7 +1832,7 @@ importers:
         specifier: ^3.0.9
         version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
 
-  packages/engine-render:
+  packages/stable/engine-render:
     dependencies:
       '@floating-ui/dom':
         specifier: ^1.6.13
@@ -1759,7 +1858,7 @@ importers:
         version: 1.3.8
       '@univerjs-infra/shared':
         specifier: workspace:*
-        version: link:../../common/shared
+        version: link:../../internal/shared
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -1773,7 +1872,7 @@ importers:
         specifier: ^3.0.9
         version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
 
-  packages/find-replace:
+  packages/stable/find-replace:
     dependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -1793,7 +1892,7 @@ importers:
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
-        version: link:../../common/shared
+        version: link:../../internal/shared
       postcss:
         specifier: ^8.5.3
         version: 8.5.3
@@ -1816,7 +1915,7 @@ importers:
         specifier: ^3.0.9
         version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
 
-  packages/network:
+  packages/stable/network:
     dependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -1824,7 +1923,7 @@ importers:
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
-        version: link:../../common/shared
+        version: link:../../internal/shared
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -1838,7 +1937,7 @@ importers:
         specifier: ^3.0.9
         version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
 
-  packages/rpc:
+  packages/stable/rpc:
     dependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -1846,7 +1945,7 @@ importers:
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
-        version: link:../../common/shared
+        version: link:../../internal/shared
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -1860,7 +1959,7 @@ importers:
         specifier: ^3.0.9
         version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
 
-  packages/rpc-node:
+  packages/stable/rpc-node:
     dependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -1871,7 +1970,7 @@ importers:
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
-        version: link:../../common/shared
+        version: link:../../internal/shared
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -1885,7 +1984,7 @@ importers:
         specifier: ^3.0.9
         version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
 
-  packages/sheets:
+  packages/stable/sheets:
     dependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -1905,7 +2004,7 @@ importers:
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
-        version: link:../../common/shared
+        version: link:../../internal/shared
       '@univerjs/engine-render':
         specifier: workspace:*
         version: link:../engine-render
@@ -1925,7 +2024,7 @@ importers:
         specifier: ^3.0.9
         version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
 
-  packages/sheets-conditional-formatting:
+  packages/stable/sheets-conditional-formatting:
     dependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -1942,7 +2041,7 @@ importers:
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
-        version: link:../../common/shared
+        version: link:../../internal/shared
       '@univerjs/icons-svg':
         specifier: ^0.2.30
         version: 0.2.30
@@ -1959,7 +2058,7 @@ importers:
         specifier: ^3.0.9
         version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
 
-  packages/sheets-conditional-formatting-ui:
+  packages/stable/sheets-conditional-formatting-ui:
     dependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -1996,7 +2095,7 @@ importers:
         version: 19.0.0(react@19.0.0)
       react-grid-layout:
         specifier: ^1.4.4
-        version: 1.4.4(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+        version: 1.5.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       react-resizable:
         specifier: ^3.0.5
         version: 3.0.5(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
@@ -2006,7 +2105,7 @@ importers:
         version: 1.3.5
       '@univerjs-infra/shared':
         specifier: workspace:*
-        version: link:../../common/shared
+        version: link:../../internal/shared
       less:
         specifier: ^4.2.2
         version: 4.2.2
@@ -2032,7 +2131,7 @@ importers:
         specifier: ^3.0.9
         version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
 
-  packages/sheets-crosshair-highlight:
+  packages/stable/sheets-crosshair-highlight:
     dependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -2058,7 +2157,7 @@ importers:
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
-        version: link:../../common/shared
+        version: link:../../internal/shared
       postcss:
         specifier: ^8.5.3
         version: 8.5.3
@@ -2081,7 +2180,7 @@ importers:
         specifier: ^3.0.9
         version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
 
-  packages/sheets-data-validation:
+  packages/stable/sheets-data-validation:
     dependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -2104,7 +2203,7 @@ importers:
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
-        version: link:../../common/shared
+        version: link:../../internal/shared
       less:
         specifier: ^4.2.2
         version: 4.2.2
@@ -2121,7 +2220,7 @@ importers:
         specifier: ^3.0.9
         version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
 
-  packages/sheets-data-validation-ui:
+  packages/stable/sheets-data-validation-ui:
     dependencies:
       '@flatten-js/interval-tree':
         specifier: ^1.1.3
@@ -2168,7 +2267,7 @@ importers:
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
-        version: link:../../common/shared
+        version: link:../../internal/shared
       less:
         specifier: ^4.2.2
         version: 4.2.2
@@ -2194,7 +2293,7 @@ importers:
         specifier: ^3.0.9
         version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
 
-  packages/sheets-drawing:
+  packages/stable/sheets-drawing:
     dependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -2205,7 +2304,7 @@ importers:
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
-        version: link:../../common/shared
+        version: link:../../internal/shared
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -2219,7 +2318,7 @@ importers:
         specifier: ^3.0.9
         version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
 
-  packages/sheets-drawing-ui:
+  packages/stable/sheets-drawing-ui:
     dependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -2260,7 +2359,7 @@ importers:
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
-        version: link:../../common/shared
+        version: link:../../internal/shared
       less:
         specifier: ^4.2.2
         version: 4.2.2
@@ -2286,7 +2385,7 @@ importers:
         specifier: ^3.0.9
         version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
 
-  packages/sheets-filter:
+  packages/stable/sheets-filter:
     dependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -2303,7 +2402,7 @@ importers:
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
-        version: link:../../common/shared
+        version: link:../../internal/shared
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -2317,7 +2416,7 @@ importers:
         specifier: ^3.0.9
         version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
 
-  packages/sheets-filter-ui:
+  packages/stable/sheets-filter-ui:
     dependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -2349,7 +2448,7 @@ importers:
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
-        version: link:../../common/shared
+        version: link:../../internal/shared
       '@univerjs/engine-formula':
         specifier: workspace:*
         version: link:../engine-formula
@@ -2378,7 +2477,7 @@ importers:
         specifier: ^3.0.9
         version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
 
-  packages/sheets-find-replace:
+  packages/stable/sheets-find-replace:
     dependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -2398,7 +2497,7 @@ importers:
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
-        version: link:../../common/shared
+        version: link:../../internal/shared
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -2412,7 +2511,7 @@ importers:
         specifier: ^3.0.9
         version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
 
-  packages/sheets-formula:
+  packages/stable/sheets-formula:
     dependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -2429,7 +2528,7 @@ importers:
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
-        version: link:../../common/shared
+        version: link:../../internal/shared
       '@univerjs/docs':
         specifier: workspace:*
         version: link:../docs
@@ -2446,7 +2545,7 @@ importers:
         specifier: ^3.0.9
         version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
 
-  packages/sheets-formula-ui:
+  packages/stable/sheets-formula-ui:
     dependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -2484,7 +2583,7 @@ importers:
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
-        version: link:../../common/shared
+        version: link:../../internal/shared
       less:
         specifier: ^4.2.2
         version: 4.2.2
@@ -2510,7 +2609,7 @@ importers:
         specifier: ^3.0.9
         version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
 
-  packages/sheets-graphics:
+  packages/stable/sheets-graphics:
     dependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -2521,7 +2620,7 @@ importers:
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
-        version: link:../../common/shared
+        version: link:../../internal/shared
       typescript:
         specifier: ^5.8.2
         version: 5.8.2
@@ -2532,7 +2631,7 @@ importers:
         specifier: ^3.0.9
         version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
 
-  packages/sheets-hyper-link:
+  packages/stable/sheets-hyper-link:
     dependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -2552,7 +2651,7 @@ importers:
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
-        version: link:../../common/shared
+        version: link:../../internal/shared
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -2566,7 +2665,7 @@ importers:
         specifier: ^3.0.9
         version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
 
-  packages/sheets-hyper-link-ui:
+  packages/stable/sheets-hyper-link-ui:
     dependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -2610,7 +2709,7 @@ importers:
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
-        version: link:../../common/shared
+        version: link:../../internal/shared
       postcss:
         specifier: ^8.5.3
         version: 8.5.3
@@ -2633,7 +2732,7 @@ importers:
         specifier: ^3.0.9
         version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
 
-  packages/sheets-numfmt:
+  packages/stable/sheets-numfmt:
     dependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -2650,7 +2749,7 @@ importers:
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
-        version: link:../../common/shared
+        version: link:../../internal/shared
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -2664,7 +2763,7 @@ importers:
         specifier: ^3.0.9
         version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
 
-  packages/sheets-numfmt-ui:
+  packages/stable/sheets-numfmt-ui:
     dependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -2699,7 +2798,7 @@ importers:
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
-        version: link:../../common/shared
+        version: link:../../internal/shared
       less:
         specifier: ^4.2.2
         version: 4.2.2
@@ -2725,7 +2824,7 @@ importers:
         specifier: ^3.0.9
         version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
 
-  packages/sheets-sort:
+  packages/stable/sheets-sort:
     dependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -2739,7 +2838,7 @@ importers:
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
-        version: link:../../common/shared
+        version: link:../../internal/shared
       typescript:
         specifier: ^5.8.2
         version: 5.8.2
@@ -2750,7 +2849,7 @@ importers:
         specifier: ^3.0.9
         version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
 
-  packages/sheets-sort-ui:
+  packages/stable/sheets-sort-ui:
     dependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -2779,7 +2878,7 @@ importers:
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
-        version: link:../../common/shared
+        version: link:../../internal/shared
       less:
         specifier: ^4.2.2
         version: 4.2.2
@@ -2805,7 +2904,7 @@ importers:
         specifier: ^3.0.9
         version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
 
-  packages/sheets-thread-comment:
+  packages/stable/sheets-thread-comment:
     dependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -2822,7 +2921,7 @@ importers:
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
-        version: link:../../common/shared
+        version: link:../../internal/shared
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -2836,7 +2935,7 @@ importers:
         specifier: ^3.0.9
         version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
 
-  packages/sheets-thread-comment-ui:
+  packages/stable/sheets-thread-comment-ui:
     dependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -2871,7 +2970,7 @@ importers:
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
-        version: link:../../common/shared
+        version: link:../../internal/shared
       postcss:
         specifier: ^8.5.3
         version: 8.5.3
@@ -2894,7 +2993,7 @@ importers:
         specifier: ^3.0.9
         version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
 
-  packages/sheets-ui:
+  packages/stable/sheets-ui:
     dependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -2928,14 +3027,14 @@ importers:
         version: link:../sheets
       '@univerjs/telemetry':
         specifier: workspace:*
-        version: link:../telemetry
+        version: link:../../preview/telemetry
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../ui
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
-        version: link:../../common/shared
+        version: link:../../internal/shared
       less:
         specifier: ^4.2.2
         version: 4.2.2
@@ -2961,7 +3060,7 @@ importers:
         specifier: ^3.0.9
         version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
 
-  packages/sheets-zen-editor:
+  packages/stable/sheets-zen-editor:
     dependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -2993,7 +3092,7 @@ importers:
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
-        version: link:../../common/shared
+        version: link:../../internal/shared
       less:
         specifier: ^4.2.2
         version: 4.2.2
@@ -3019,106 +3118,7 @@ importers:
         specifier: ^3.0.9
         version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
 
-  packages/slides:
-    dependencies:
-      '@univerjs/core':
-        specifier: workspace:*
-        version: link:../core
-      '@univerjs/engine-render':
-        specifier: workspace:*
-        version: link:../engine-render
-    devDependencies:
-      '@univerjs-infra/shared':
-        specifier: workspace:*
-        version: link:../../common/shared
-      typescript:
-        specifier: ^5.8.2
-        version: 5.8.2
-      vite:
-        specifier: ^6.2.3
-        version: 6.2.3(@types/node@22.13.13)(jiti@2.4.2)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
-      vitest:
-        specifier: ^3.0.9
-        version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
-
-  packages/slides-ui:
-    dependencies:
-      '@univerjs/core':
-        specifier: workspace:*
-        version: link:../core
-      '@univerjs/design':
-        specifier: workspace:*
-        version: link:../design
-      '@univerjs/docs':
-        specifier: workspace:*
-        version: link:../docs
-      '@univerjs/docs-ui':
-        specifier: workspace:*
-        version: link:../docs-ui
-      '@univerjs/drawing':
-        specifier: workspace:*
-        version: link:../drawing
-      '@univerjs/engine-render':
-        specifier: workspace:*
-        version: link:../engine-render
-      '@univerjs/icons':
-        specifier: ^0.2.30
-        version: 0.2.30(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
-      '@univerjs/slides':
-        specifier: workspace:*
-        version: link:../slides
-      '@univerjs/ui':
-        specifier: workspace:*
-        version: link:../ui
-    devDependencies:
-      '@univerjs-infra/shared':
-        specifier: workspace:*
-        version: link:../../common/shared
-      less:
-        specifier: ^4.2.2
-        version: 4.2.2
-      postcss:
-        specifier: ^8.5.3
-        version: 8.5.3
-      react:
-        specifier: '19'
-        version: 19.0.0
-      rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
-      tailwindcss:
-        specifier: ^3.4.17
-        version: 3.4.17
-      typescript:
-        specifier: ^5.8.2
-        version: 5.8.2
-      vite:
-        specifier: ^6.2.3
-        version: 6.2.3(@types/node@22.13.13)(jiti@2.4.2)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
-      vitest:
-        specifier: ^3.0.9
-        version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
-
-  packages/telemetry:
-    dependencies:
-      '@univerjs/core':
-        specifier: workspace:*
-        version: link:../core
-    devDependencies:
-      '@univerjs-infra/shared':
-        specifier: workspace:*
-        version: link:../../common/shared
-      typescript:
-        specifier: ^5.8.2
-        version: 5.8.2
-      vite:
-        specifier: ^6.2.3
-        version: 6.2.3(@types/node@22.13.13)(jiti@2.4.2)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
-      vitest:
-        specifier: ^3.0.9
-        version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
-
-  packages/thread-comment:
+  packages/stable/thread-comment:
     dependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -3129,7 +3129,7 @@ importers:
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
-        version: link:../../common/shared
+        version: link:../../internal/shared
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -3143,7 +3143,7 @@ importers:
         specifier: ^3.0.9
         version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
 
-  packages/thread-comment-ui:
+  packages/stable/thread-comment-ui:
     dependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -3166,7 +3166,7 @@ importers:
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
-        version: link:../../common/shared
+        version: link:../../internal/shared
       less:
         specifier: ^4.2.2
         version: 4.2.2
@@ -3192,7 +3192,7 @@ importers:
         specifier: ^3.0.9
         version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
 
-  packages/ui:
+  packages/stable/ui:
     dependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -3221,7 +3221,7 @@ importers:
         version: 16.2.0(@testing-library/dom@10.4.0)(@types/react-dom@19.0.4(@types/react@19.0.8))(@types/react@19.0.8)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       '@univerjs-infra/shared':
         specifier: workspace:*
-        version: link:../../common/shared
+        version: link:../../internal/shared
       less:
         specifier: ^4.2.2
         version: 4.2.2
@@ -3257,7 +3257,7 @@ importers:
         specifier: '>=3.0.0'
         version: 3.4.38(typescript@5.8.2)
 
-  packages/uniscript:
+  packages/stable/uniscript:
     dependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -3280,7 +3280,7 @@ importers:
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
-        version: link:../../common/shared
+        version: link:../../internal/shared
       postcss:
         specifier: ^8.5.3
         version: 8.5.3
@@ -3303,7 +3303,7 @@ importers:
         specifier: ^3.0.9
         version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
 
-  packages/watermark:
+  packages/stable/watermark:
     dependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -3314,7 +3314,7 @@ importers:
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
-        version: link:../../common/shared
+        version: link:../../internal/shared
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -3328,48 +3328,48 @@ importers:
         specifier: ^3.0.9
         version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
 
-  tests/formula-integration:
+  packages/tests/formula-integration:
     dependencies:
       '@univerjs/core':
         specifier: workspace:*
-        version: link:../../packages/core
+        version: link:../../stable/core
       '@univerjs/data-validation':
         specifier: workspace:*
-        version: link:../../packages/data-validation
+        version: link:../../stable/data-validation
       '@univerjs/docs':
         specifier: workspace:*
-        version: link:../../packages/docs
+        version: link:../../stable/docs
       '@univerjs/engine-formula':
         specifier: workspace:*
-        version: link:../../packages/engine-formula
+        version: link:../../stable/engine-formula
       '@univerjs/mockdata':
         specifier: workspace:*
-        version: link:../../mockdata
+        version: link:../../internal/mockdata
       '@univerjs/rpc':
         specifier: workspace:*
-        version: link:../../packages/rpc
+        version: link:../../stable/rpc
       '@univerjs/sheets':
         specifier: workspace:*
-        version: link:../../packages/sheets
+        version: link:../../stable/sheets
       '@univerjs/sheets-conditional-formatting':
         specifier: workspace:*
-        version: link:../../packages/sheets-conditional-formatting
+        version: link:../../stable/sheets-conditional-formatting
       '@univerjs/sheets-data-validation':
         specifier: workspace:*
-        version: link:../../packages/sheets-data-validation
+        version: link:../../stable/sheets-data-validation
       '@univerjs/sheets-formula':
         specifier: workspace:*
-        version: link:../../packages/sheets-formula
+        version: link:../../stable/sheets-formula
       '@univerjs/sheets-numfmt':
         specifier: workspace:*
-        version: link:../../packages/sheets-numfmt
+        version: link:../../stable/sheets-numfmt
       univer-examples:
         specifier: workspace:*
-        version: link:../../examples
+        version: link:../../../examples
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
-        version: link:../../common/shared
+        version: link:../../internal/shared
       typescript:
         specifier: ^5.8.2
         version: 5.8.2
@@ -3452,10 +3452,6 @@ packages:
 
   '@babel/code-frame@7.26.2':
     resolution: {integrity: sha512-RJlIHRueQgwWitWgF8OdFYGZX328Ax5BCemNGlqHfplnRT9ESi8JkFlvaVYbS+UubVY6dpv87Fs2u5M29iNFVQ==}
-    engines: {node: '>=6.9.0'}
-
-  '@babel/compat-data@7.26.0':
-    resolution: {integrity: sha512-qETICbZSLe7uXv9VE8T/RWOdIE5qqyTucOt4zLYMafj2MRO271VGgLd4RACJMeBO37UPWhXiKMBk7YlJ0fOzQA==}
     engines: {node: '>=6.9.0'}
 
   '@babel/compat-data@7.26.5':
@@ -3559,24 +3555,8 @@ packages:
     peerDependencies:
       '@babel/core': ^7.0.0-0
 
-  '@babel/runtime@7.24.7':
-    resolution: {integrity: sha512-UwgBRMjJP+xv857DCngvqXI3Iq6J4v0wXmwc6sapg+zyhbwmQX67LUEFrkK5tbyJ30jGuG3ZvWpBiB9LCy1kWw==}
-    engines: {node: '>=6.9.0'}
-
-  '@babel/runtime@7.25.0':
-    resolution: {integrity: sha512-7dRy4DwXwtzBrPbZflqxnvfxLF8kdZXPkhymtDeFoFqE6ldzjQFgYTtYIFARcLEYDrqfBfYcZt1WqFxRoyC9Rw==}
-    engines: {node: '>=6.9.0'}
-
-  '@babel/runtime@7.25.4':
-    resolution: {integrity: sha512-DSgLeL/FNcpXuzav5wfYvHCGvynXkJbn3Zvc3823AEe9nPwW9IK4UoCSS5yGymmQzN0pCPvivtgS6/8U2kkm1w==}
-    engines: {node: '>=6.9.0'}
-
   '@babel/runtime@7.26.0':
     resolution: {integrity: sha512-FDSOghenHTiToteC/QRlv2q3DhPZ/oOXTBoirfWNx1Cx3TMVcGWQtMMmQcSvb/JjpNeGzx8Pq/b4fKEJuWm1sw==}
-    engines: {node: '>=6.9.0'}
-
-  '@babel/runtime@7.26.7':
-    resolution: {integrity: sha512-AOPI3D+a8dXnja+iwsUqGRjr1BbZIe771sXdapOtYI531gSqpi92vXivKcq2asu/DFpdl1ceFAKZyRzK2PCVcQ==}
     engines: {node: '>=6.9.0'}
 
   '@babel/runtime@7.26.9':
@@ -4154,20 +4134,20 @@ packages:
     resolution: {integrity: sha512-CCZCDJuduB9OUkFkY2IgppNZMi2lBQgD2qzwXkEia16cge2pijY/aXi96CJMquDMn3nJdlPV1A5KrJEXwfLNzQ==}
     engines: {node: ^12.0.0 || ^14.0.0 || >=16.0.0}
 
-  '@eslint-react/ast@1.38.0':
-    resolution: {integrity: sha512-4nZtK57dcWB/QgqEzTOX56w8QL5HIDjqv7xqd1X3XR+T8nQum/XXqGIaQzL7SkX8oC2VosOykFJyI0s3cLdVLQ==}
+  '@eslint-react/ast@1.38.2':
+    resolution: {integrity: sha512-tmFycPdRecIsLOfQxsSCyT6zfLGzQZgXVxdI4er+jD5SYE6/XMZH8qgC5QoZiRJAvKm/becO/jNLuD1WlIsr8Q==}
     engines: {bun: '>=1.0.15', node: '>=18.18.0'}
 
-  '@eslint-react/core@1.38.0':
-    resolution: {integrity: sha512-IJ8HO0BN1fAWCfeP4eBTAi3PAMq4Hb1wAHBLII7XPukyoRsIxqUpIYCowyZquxT0MUOPqJn6XQ/yk0RWOtCHXQ==}
+  '@eslint-react/core@1.38.2':
+    resolution: {integrity: sha512-QufGxpP8JzdFwlfBtRc4hpNqQ70cYTng+frlWVsCpW2vq1OJhj1vUF9MMH7+iI3ibnOTGgBFjBYcd9ynEZMGsQ==}
     engines: {bun: '>=1.0.15', node: '>=18.18.0'}
 
-  '@eslint-react/eff@1.38.0':
-    resolution: {integrity: sha512-09x1sQlvaoUEQVh2doARQcG3xsniRCOyI8ykKSqfsOBE3iA3tyufnHkliOJjcJPpascxk5xr/+u5keJ5kLUQcQ==}
+  '@eslint-react/eff@1.38.2':
+    resolution: {integrity: sha512-QVWZrb57Re6jkqeHBCkbzzWWCw75Tgi8LDGDj/TqVSaqe89FqpTtifKf6xugmaXoVB78e0cZuZwf2HBtv8Mz/g==}
     engines: {bun: '>=1.0.15', node: '>=18.18.0'}
 
-  '@eslint-react/eslint-plugin@1.38.0':
-    resolution: {integrity: sha512-dQ0pyFCkR5JvCaGhSFfYRr/cX+W8xt9Eb73Eh6WP1F5wj1hUaXpZ2mAEZqhKbm3gMzgG3kpvKYNM+SfmhUJw3w==}
+  '@eslint-react/eslint-plugin@1.38.2':
+    resolution: {integrity: sha512-Cnk68aF7QJRgU7J8K5fDPR5iyI4CbLkTfhWEfjIvlU9z9tSl3tS4oxZRwXYfjnLGakJ1wjtF2RDs/gz4E7Yf3Q==}
     engines: {bun: '>=1.0.15', node: '>=18.18.0'}
     peerDependencies:
       eslint: ^8.57.0 || ^9.0.0
@@ -4176,20 +4156,20 @@ packages:
       typescript:
         optional: true
 
-  '@eslint-react/jsx@1.38.0':
-    resolution: {integrity: sha512-UawUz686U0Fj24vOPff/xZntnFTo6/Yp0syw6qhtYqOagECoewTUwJ3DUfKoyjExZOUukojXSLLbintujvgCuA==}
+  '@eslint-react/jsx@1.38.2':
+    resolution: {integrity: sha512-aZ8UnbDUaIEdXv6iXUq2BENXYuNQfEKuvOJpWVcfxRSaWLWlCrm7yvczKsZAtV+abayh1gCFEl2gMp5CT2lWUg==}
     engines: {bun: '>=1.0.15', node: '>=18.18.0'}
 
-  '@eslint-react/kit@1.38.0':
-    resolution: {integrity: sha512-ngIvZxucEMWPpYqzeaAagK8igdMGOyLjZdhrh1XRnbllNESryNV6t8HGoiOE/wsfZo8KhZMD4IbY/4hPTSKGVQ==}
+  '@eslint-react/kit@1.38.2':
+    resolution: {integrity: sha512-rYE7TlP1YKoeqMoU1tqIkdf+7Fw73dfAiGvqfTlvGaAA6AFkvURZydA6A1L60JVsnK4KQPiYIwRcLMXJ65u2MQ==}
     engines: {bun: '>=1.0.15', node: '>=18.18.0'}
 
-  '@eslint-react/shared@1.38.0':
-    resolution: {integrity: sha512-8g61tCr5Qj8UBSVEbq4rs71OVrN7aDHpQRY3YCEGtSWr8OBPmgJ+rrxfBAx1Zq3p4B2KZFDy3R2ho/haII/5Vg==}
+  '@eslint-react/shared@1.38.2':
+    resolution: {integrity: sha512-iNZNurm4qTUcfudPBgW50AVsNrDJq+gZb2iApRon7PbMyCuAswB+sq/STPAq2+YoptO15JB8zq8V7BNVuvZA1w==}
     engines: {bun: '>=1.0.15', node: '>=18.18.0'}
 
-  '@eslint-react/var@1.38.0':
-    resolution: {integrity: sha512-qsytJEj4Es4fZVW5kpLHx4Yh+k5DWz8h2OeXlmNJCzIvSIYC0bRTgd43lWsexwDAVfWINWMs32qFeR88HpMU8Q==}
+  '@eslint-react/var@1.38.2':
+    resolution: {integrity: sha512-MBXA2V1ydJLHfg71JuWvCMBiLl+qUYdtk95o2HIgrdJe7HxhCSN5QiUuZdAPuKwyUk0rKaUwcm5HCYTBoMTdaA==}
     engines: {bun: '>=1.0.15', node: '>=18.18.0'}
 
   '@eslint/compat@1.2.7':
@@ -4240,14 +4220,8 @@ packages:
   '@flatten-js/interval-tree@1.1.3':
     resolution: {integrity: sha512-xhFWUBoHJFF77cJO1D6REjdgJEMRf2Y2Z+eKEPav8evGKcLSnj1ud5pLXQSbGuxF3VSvT1rWhMfVpXEKJLTL+A==}
 
-  '@floating-ui/core@1.6.4':
-    resolution: {integrity: sha512-a4IowK4QkXl4SCWTGUR0INAfEOX3wtsYw3rKK5InQEHMGObkR8Xk44qYQD9P4r6HHw0iIfK6GUKECmY8sTkqRA==}
-
   '@floating-ui/core@1.6.9':
     resolution: {integrity: sha512-uMXCuQ3BItDUbAMhIXw7UPXRfAlOAvZzdK9BWpE60MCn+Svt3aLn9jsPTi/WNGlRUu2uI0v5S7JiIUsbsvh3fw==}
-
-  '@floating-ui/dom@1.6.11':
-    resolution: {integrity: sha512-qkMCxSR24v2vGkhYDo/UzxfJN3D4syqSjyuTFz6C7XcpU1pASPRieNI0Kj5VP3/503mOfYiGY891ugBX1GlABQ==}
 
   '@floating-ui/dom@1.6.13':
     resolution: {integrity: sha512-umqzocjDgNRGTuO7Q8CU32dkHkECqI8ZdMZ5Swb6QAM0t5rnlrN3lGo1hdpscRd3WS8T6DKYK4ephgIH9iRh3w==}
@@ -6112,10 +6086,6 @@ packages:
     resolution: {integrity: sha512-BhYE+WDaywFg2TBWYNXAE+8B1ATnThNBqXHP5nQu0jWJdVvY2hvkpyB3qOmtmDePiS5/BDQ8wASEWGMWRG148g==}
     engines: {node: '>= 0.4'}
 
-  call-bind@1.0.7:
-    resolution: {integrity: sha512-GHTSNSYICQ7scH7sZ+M2rFopRoLh8t2bLSW6BbgrtLsahOIB5iyAVJf9GjWK3cYTDaMj4XdBpM1cA6pIS0Kv2w==}
-    engines: {node: '>= 0.4'}
-
   call-bind@1.0.8:
     resolution: {integrity: sha512-oKlSFMcMwpUg2ednkhQ454wfWiU/ul3CkJe/PEHcTKuiX6RpbehUiFMXu13HalGZxfUwCQzZG747YXBn1im9ww==}
     engines: {node: '>= 0.4'}
@@ -6142,9 +6112,6 @@ packages:
   camelcase@8.0.0:
     resolution: {integrity: sha512-8WB3Jcas3swSvjIeA2yvCJ+Miyz5l1ZmB6HFb9R1317dt9LCQoswg/BGrmAmkWVEszSrrg4RwmO46qIm2OEnSA==}
     engines: {node: '>=16'}
-
-  caniuse-lite@1.0.30001695:
-    resolution: {integrity: sha512-vHyLade6wTgI2u1ec3WQBxv+2BrTERV28UXQu9LO6lZ9pYeMk34vjXFLOxo1A4UBA8XTL4njRQZdno/yYaSmWw==}
 
   caniuse-lite@1.0.30001703:
     resolution: {integrity: sha512-kRlAGTRWgPsOj7oARC9m1okJEXdL/8fekFVcxA8Hl7GH4r/sN4OJn/i6Flde373T50KS7Y37oFbMwlE8+F42kQ==}
@@ -6852,10 +6819,6 @@ packages:
   endent@2.1.0:
     resolution: {integrity: sha512-r8VyPX7XL8U01Xgnb1CjZ3XV+z90cXIJ9JPE/R9SEC9vpw2P6CfsRPJmp20DppC5N7ZAMCmjYkJIa744Iyg96w==}
 
-  enhanced-resolve@5.17.1:
-    resolution: {integrity: sha512-LMHl3dXhTcfv8gM4kEzIUeTQ+7fpdA0l2tUf34BddXPkz2A5xJ5L/Pchd5BL6rdccM9QGvu0sWZzK1Z1t4wwyg==}
-    engines: {node: '>=10.13.0'}
-
   enhanced-resolve@5.18.1:
     resolution: {integrity: sha512-ZSW3ma5GkcQBIpwZTSRAI8N71Uuwgs93IezB7mf7R60tC8ZbJideoDNKjHn2O9KIlx6rkGTTEk1xUCK2E1Y2Yg==}
     engines: {node: '>=10.13.0'}
@@ -6889,10 +6852,6 @@ packages:
     resolution: {integrity: sha512-py07lI0wjxAC/DcfK1S6G7iANonniZwTISvdPzk9hzeH0IZIshbuuFxLIU96OyF89Yb9hiqWn8M/bY83KY5vzA==}
     engines: {node: '>= 0.4'}
 
-  es-define-property@1.0.0:
-    resolution: {integrity: sha512-jxayLKShrEqqzJ0eumQbVhTYQM27CfT1T35+gCgDFoL82JLsXqTJ76zv6A0YLOgEnLUMvLzsDsGIrl8NFpT2gQ==}
-    engines: {node: '>= 0.4'}
-
   es-define-property@1.0.1:
     resolution: {integrity: sha512-e3nRfgfUZ4rNGL232gUgX06QNyyez04KdjFrF+LTRoOXmrOgFKDg4BCdsjW8EnT69eqdYGmRpJwiPVYNrCaW3g==}
     engines: {node: '>= 0.4'}
@@ -6907,10 +6866,6 @@ packages:
 
   es-module-lexer@1.6.0:
     resolution: {integrity: sha512-qqnD1yMU6tk/jnaMosogGySTZP8YtUgAffA9nMN+E/rjxcfRQ6IEk7IiozUjgxKoFHBGjTLnrHB/YC45r/59EQ==}
-
-  es-object-atoms@1.0.0:
-    resolution: {integrity: sha512-MZ4iQ6JwHOBQjahnjwaC1ZtIBH+2ohjamzAO3oaHcXYup7qxjF2fixyH+Q71voWHeOkI2q/TnJao/KfXYIZWbw==}
-    engines: {node: '>= 0.4'}
 
   es-object-atoms@1.1.1:
     resolution: {integrity: sha512-FGgH2h8zKNim9ljj7dankFPcICIK9Cp5bm+c2gQSYePhpaG5+esrLODihIorn+Pe6FGJzWhXQotPv73jTaldXA==}
@@ -7248,8 +7203,8 @@ packages:
     peerDependencies:
       eslint: ^9.0.0
 
-  eslint-plugin-react-debug@1.38.0:
-    resolution: {integrity: sha512-k/VLEAimM3GRMnvWaf9ionKWbxMCN9aFKmbXvx56t2HezniRfW7lEi9l6S8s/7JToXvm+tHAWy8IdulwLXcwdA==}
+  eslint-plugin-react-debug@1.38.2:
+    resolution: {integrity: sha512-iPQ1Er8a6sy81nv72Uvp8sTjZDxNIr9eIdZray6JNOsmmb30d9SelOq+S6MvQ4COW4i/zsTNDkGY1w7hIQf+tA==}
     engines: {bun: '>=1.0.15', node: '>=18.18.0'}
     peerDependencies:
       eslint: ^8.57.0 || ^9.0.0
@@ -7258,8 +7213,8 @@ packages:
       typescript:
         optional: true
 
-  eslint-plugin-react-dom@1.38.0:
-    resolution: {integrity: sha512-xfxVeRmYDeYvrm63ltIh7Hn+/9Y/NHIfwPwYqo3j3thgmtTAagWhhy/nwFG/qQjXkGPoxERAw4OCqOqXvIJ+4g==}
+  eslint-plugin-react-dom@1.38.2:
+    resolution: {integrity: sha512-RfG11EgATK/x2bk1K6aQkOCx5my776NXkCmm9WcjFAcyBlhonOwgGpFrwmINkUHcdPy0KhV1jbn+3izpfijp4A==}
     engines: {bun: '>=1.0.15', node: '>=18.18.0'}
     peerDependencies:
       eslint: ^8.57.0 || ^9.0.0
@@ -7268,8 +7223,8 @@ packages:
       typescript:
         optional: true
 
-  eslint-plugin-react-hooks-extra@1.38.0:
-    resolution: {integrity: sha512-1nzFpfPPJ7hcZwlabpTV7svMwDCJFYpqECfUVijjKqVUEcZO98UpV/olj4WZfPBp2ll4nsm+escxO85qOrLqpg==}
+  eslint-plugin-react-hooks-extra@1.38.2:
+    resolution: {integrity: sha512-+Z+5sP+XOrPhQPgdTI+PleL1vzppHLiMZfPqzFkiOIp92t5HaCoFuRSQM5IrKekVgQvQBJ6Vvn3MXK+Rnla6zw==}
     engines: {bun: '>=1.0.15', node: '>=18.18.0'}
     peerDependencies:
       eslint: ^8.57.0 || ^9.0.0
@@ -7284,8 +7239,8 @@ packages:
     peerDependencies:
       eslint: ^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0-0 || ^9.0.0
 
-  eslint-plugin-react-naming-convention@1.38.0:
-    resolution: {integrity: sha512-QX2MRfDEubTb0EbcNY33ek4faizU+edQgKCRwUWVcBgI4Yw1AWJrbQ5dOZQjJHYRP0s/tDpBj0MZ+CCxdS3URQ==}
+  eslint-plugin-react-naming-convention@1.38.2:
+    resolution: {integrity: sha512-eZzOm9MYv3f8wLUfNbH1A/MEMWoMBI17oAy/FKBPnvH138sglNXCcZyA9ygTy3hZaAylOvQnBX3S0RLelGUeZw==}
     engines: {bun: '>=1.0.15', node: '>=18.18.0'}
     peerDependencies:
       eslint: ^8.57.0 || ^9.0.0
@@ -7299,8 +7254,8 @@ packages:
     peerDependencies:
       eslint: '>=8.40'
 
-  eslint-plugin-react-web-api@1.38.0:
-    resolution: {integrity: sha512-ub1y17j2qiJWdrMTEd+9ZKq+SBkP6W/a8H67YCIZxMvS/XKcNptLXlDJqK/ZnioC6E9WRJzzWfaatVV644218A==}
+  eslint-plugin-react-web-api@1.38.2:
+    resolution: {integrity: sha512-syUH10Igzi2QDqioFwGq56opdIZKJdfWgmu7wjbQGwqOFBSJ/lOLHSDC89DdhsMqO5sjdsq3954tTn+Io19zAg==}
     engines: {bun: '>=1.0.15', node: '>=18.18.0'}
     peerDependencies:
       eslint: ^8.57.0 || ^9.0.0
@@ -7309,8 +7264,8 @@ packages:
       typescript:
         optional: true
 
-  eslint-plugin-react-x@1.38.0:
-    resolution: {integrity: sha512-IBdmaZvJGA+NShlERuCLnEfSxLERP8lDdgvrgF3Kt2inDL8K8Wr40t969IycYHczcIUk9iGpVu2SQlp/YGnIjA==}
+  eslint-plugin-react-x@1.38.2:
+    resolution: {integrity: sha512-4XYL/+AFd8c8d6or0yYIqT8PttYANsbe1c5OCCUiLzdjJZWYwCH6NObdEieztPKaGeioyK/cl24GqWeZxod0pw==}
     engines: {bun: '>=1.0.15', node: '>=18.18.0'}
     peerDependencies:
       eslint: ^8.57.0 || ^9.0.0
@@ -7493,10 +7448,6 @@ packages:
   fast-equals@4.0.3:
     resolution: {integrity: sha512-G3BSX9cfKttjr+2o1O22tYMLq0DPluZnYtq1rXumE1SpL/F/SLIfHx08WYQoWSIpeMYf8sRbJ8++71+v6Pnxfg==}
 
-  fast-glob@3.3.2:
-    resolution: {integrity: sha512-oX2ruAFQwf/Orj8m737Y5adxDQO0LAB7/S5MnxCdTNDd4p6BsyIVsv9JQsATbTSq8KHRpLwIHbVlUNatxd+1Ow==}
-    engines: {node: '>=8.6.0'}
-
   fast-glob@3.3.3:
     resolution: {integrity: sha512-7MptL8U0cqcFdzIzwOTHoilX9x5BrNqye7Z/LuC7kCMRio1EMSyqRK3BEAUD7sXRq4iT4AzTVuZdhgQ2TCvYLg==}
     engines: {node: '>=8.6.0'}
@@ -7598,10 +7549,6 @@ packages:
       typescript: '>3.6.0'
       webpack: ^5.11.0
 
-  form-data@4.0.0:
-    resolution: {integrity: sha512-ETEklSGi5t0QMZuiXoA/Q6vcnxcLQP5vdugSpuAyi6SVGi2clPPp+xgEhuMaHC+zGgn31Kd235W35f7Hykkaww==}
-    engines: {node: '>= 6'}
-
   form-data@4.0.2:
     resolution: {integrity: sha512-hGfm/slu0ZabnNt4oaRZ6uREyfCj6P4fT/n6A1rGV+Z0VdGXjfOhVUpkn6qVQONHGIFwmveGXyDs75+nr6FM8w==}
     engines: {node: '>= 6'}
@@ -7660,14 +7607,6 @@ packages:
   get-east-asian-width@1.3.0:
     resolution: {integrity: sha512-vpeMIQKxczTD/0s2CdEWHcb0eeJe6TFjxb+J5xgX7hScxqrGuyjmv4c1D4A/gelKfyox0gJJwIHF+fLjeaM8kQ==}
     engines: {node: '>=18'}
-
-  get-intrinsic@1.2.4:
-    resolution: {integrity: sha512-5uYhsJH8VJBTv7oslg4BznJYhDoRI6waYCxMmCdnTrcCrHA/fCFKoTFz2JKKE0HdDFUF7/oQuhzumXJK7paBRQ==}
-    engines: {node: '>= 0.4'}
-
-  get-intrinsic@1.2.6:
-    resolution: {integrity: sha512-qxsEs+9A+u85HhllWJJFicJfPDhRmjzoYdl64aMWW9yRIJmSyxdn8IEkuIM530/7T+lv0TIHd8L6Q/ra0tEoeA==}
-    engines: {node: '>= 0.4'}
 
   get-intrinsic@1.2.7:
     resolution: {integrity: sha512-VW6Pxhsrk0KAOqs3WEd0klDiF/+V7gQOpAvY1jVU/LHmaD/kQO4523aiJuikX/QAKYiW6x8Jh+RJej1almdtCA==}
@@ -7777,9 +7716,6 @@ packages:
     resolution: {integrity: sha512-s3Fq41ZVh7vbbe2PN3nrW7yC7U7MFVc5c98/iTl9c2GawNMKx/J648KQRW6WKkuU8GIbbh2IXfIRQjOZnXcTnw==}
     engines: {node: '>=18'}
 
-  gopd@1.0.1:
-    resolution: {integrity: sha512-d65bNlIadxvpb/A2abVdlqKqV563juRnZ1Wtk6s1sIR8uNsXR70xqIzVqxVf1eTqDunwT2MkczEeaezCKTZhwA==}
-
   gopd@1.2.0:
     resolution: {integrity: sha512-ZUKRh6/kUFoAiTAtTYPZJ3hw9wNxx+BIBOijnlG9PnrJsCcSjs1wyyD6vJpaYtgnzDrKYRSqf3OO6Rfa93xsRg==}
     engines: {node: '>= 0.4'}
@@ -7817,16 +7753,8 @@ packages:
   has-property-descriptors@1.0.2:
     resolution: {integrity: sha512-55JNKuIW+vq4Ke1BjOTjM2YctQIvCT7GFzHwmfZPGo5wnrgkid0YQtnAleFSqumZm4az3n2BS+erby5ipJdgrg==}
 
-  has-proto@1.0.3:
-    resolution: {integrity: sha512-SJ1amZAJUiZS+PhsVLf5tGydlaVB8EdFpaSO4gmiUKUOxk8qzn5AIy4ZeJUmh22znIdk/uMAUT2pl3FxzVUH+Q==}
-    engines: {node: '>= 0.4'}
-
   has-proto@1.2.0:
     resolution: {integrity: sha512-KIL7eQPfHQRC8+XluaIw7BHUwwqL19bQn4hzNgdr+1wXoU0KKj6rufu47lhY7KbJR2C6T6+PfyN0Ea7wkSS+qQ==}
-    engines: {node: '>= 0.4'}
-
-  has-symbols@1.0.3:
-    resolution: {integrity: sha512-l3LCuF6MgDNwTDKkdYGEihYjt5pRPbEg46rtlmnSPlUbgmB8LOIrKJbYYFBSbnPaJexMKtiPO8hmeRjRz2Td+A==}
     engines: {node: '>= 0.4'}
 
   has-symbols@1.1.0:
@@ -8086,10 +8014,6 @@ packages:
     resolution: {integrity: sha512-OVa3u9kkBbw7b8Xw5F9P+D/T9X+Z4+JruYVNapTjPYZYUznQ5YfWeFkOj606XYYW8yugTfC8Pj0hYqvi4ryAhA==}
     engines: {node: '>=18'}
 
-  is-generator-function@1.0.10:
-    resolution: {integrity: sha512-jsEjy9l3yiXEQ+PsXdmBwEPcOxaXWLspKdplFUVI9vq1iZgIekeC0L167qeu86czQaxed3q/Uzuw0swL0irL8A==}
-    engines: {node: '>= 0.4'}
-
   is-generator-function@1.1.0:
     resolution: {integrity: sha512-nPUB5km40q9e8UfN/Zc24eLlzdSf9OfKByBw9CIdw4H1giPMeA0OIJvbchsCu4npfI2QcMVBsGEBHKZ7wLTWmQ==}
     engines: {node: '>= 0.4'}
@@ -8208,10 +8132,6 @@ packages:
     resolution: {integrity: sha512-+oDTluR6WEjdXEJMnC2z6A4FRwFoYuvShVVEGsS7ewc0UTi2QtAKMDJuL4BDEVt+5T7MjFo12RP8ghOM75oKJw==}
     engines: {node: '>=8'}
 
-  is-typed-array@1.1.13:
-    resolution: {integrity: sha512-uZ25/bUAlUY5fR4OKT4rZQEBrzQWYV9ZJYGGsUmEJ6thodVJ1HX64ePQ6Z0qPWP+m+Uq6e9UugrE38jeYsDSMw==}
-    engines: {node: '>= 0.4'}
-
   is-typed-array@1.1.15:
     resolution: {integrity: sha512-p3EcsicXjit7SaskXHs1hA91QxgTw46Fv6EFKKGS5DRFLD8yKnohjF3hxoju94b/OcMZoQukzpPpBE9uLVKzgQ==}
     engines: {node: '>= 0.4'}
@@ -8303,10 +8223,6 @@ packages:
   jest-worker@27.5.1:
     resolution: {integrity: sha512-7vuh85V5cdDofPyxn58nrPjBktZo0u9x1g8WtjQol+jZDaE+fhN+cIvTj11GndBnMnyfrUOG1sZQxCdjKh+DKg==}
     engines: {node: '>= 10.13.0'}
-
-  jiti@1.21.6:
-    resolution: {integrity: sha512-2yTgeWTWzMWkHu6Jp9NKgePDaYHbntiwvYuuJLbbN9vl7DC9DvXKOB2BC3ZZ92D3cvV/aflH0osDfwpHepQ53w==}
-    hasBin: true
 
   jiti@1.21.7:
     resolution: {integrity: sha512-/imKNG4EbWNrVjoNC/1H5/9GFy+tqjGBHCaSsN+P2RnPqjsLmv6UD3Ej+Kj8nBWaRAwyk7kK5ZUc+OEatnTR3A==}
@@ -8863,11 +8779,6 @@ packages:
   n-gram@2.0.2:
     resolution: {integrity: sha512-S24aGsn+HLBxUGVAUFOwGpKs7LBcG4RudKU//eWzt/mQ97/NMKQxDWHyHx63UNWk/OOdihgmzoETn1tf5nQDzQ==}
 
-  nanoid@3.3.11:
-    resolution: {integrity: sha512-N8SpfPUnUp1bK+PMYW8qSWdl9U+wwNWI4QKxOYDy9JAro3WMX7p2OeVRF9v+347pnakNevPmiHhNmZ2HbFA76w==}
-    engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
-    hasBin: true
-
   nanoid@3.3.8:
     resolution: {integrity: sha512-WNLf5Sd8oZxOm+TzppcYk8gVOgP+l58xNy58D0nbUnOxOWRWvlcCV4kUF7ltmI6PsrLl/BgKEyS4mqsGChFN0w==}
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
@@ -9196,9 +9107,6 @@ packages:
     resolution: {integrity: sha512-5HviZNaZcfqP95rwpv+1HDgUamezbqdSYTyzjTvwtJSnIH+3vnbmWsItli8OFEndS984VT55M3jduxZbX351gg==}
     engines: {node: '>=12'}
 
-  pathe@2.0.2:
-    resolution: {integrity: sha512-15Ztpk+nov8DR524R4BF7uEuzESgzUEAV4Ah7CUMNGXdE5ELuvxElxGXndBl32vMSsWa1jpNf22Z+Er3sKwq+w==}
-
   pathe@2.0.3:
     resolution: {integrity: sha512-WUjGcAqP1gQacoQe+OBJsFA7Ld4DyXuUIjZ5cc75cLHvJ7dtNsTugphxIADwspS+AraAUePCKrSVtPLFj/F88w==}
 
@@ -9506,10 +9414,6 @@ packages:
     peerDependencies:
       postcss: ^8.4
 
-  postcss-selector-parser@6.1.0:
-    resolution: {integrity: sha512-UMz42UD0UY0EApS0ZL9o1XnLhSTtvvvLe5Dc2H2O56fvRZi+KulDyf5ctDhhtYJBGKStV2FL1fy6253cmLgqVQ==}
-    engines: {node: '>=4'}
-
   postcss-selector-parser@6.1.2:
     resolution: {integrity: sha512-Q8qQfPiZ+THO/3ZrOrO0cJJKfpYCagtMUkXbnEfmgUjwXg6z/WBeOyS9APBBPCTSiDV+s4SwQGu8yFsiMRIudg==}
     engines: {node: '>=4'}
@@ -9520,10 +9424,6 @@ packages:
 
   postcss-value-parser@4.2.0:
     resolution: {integrity: sha512-1NNCs6uurfkVbeXG4S8JFT9t19m45ICnif8zWLd5oPSZ50QnwMfK+H3jv408d4jw/7Bttv5axS5IiHoLaVNHeQ==}
-
-  postcss@8.4.49:
-    resolution: {integrity: sha512-OCVPnIObs4N29kxTjzLfUryOkvZEq+pf8jTF0lg8E7uETuWHA+v7j3c/xJmiqpX450191LlmZfUKkXxkTry7nA==}
-    engines: {node: ^10 || ^12 || >=14}
 
   postcss@8.5.3:
     resolution: {integrity: sha512-dle9A3yYxlBSrt8Fu+IpjGT8SY8hN0mlaA6GY8t0P5PjIOZemULz/E2Bnm/2dcUOena75OTNkHI76uZBNUUq3A==}
@@ -9661,12 +9561,6 @@ packages:
       react: '19'
       react-dom: '19'
 
-  rc-motion@2.9.2:
-    resolution: {integrity: sha512-fUAhHKLDdkAXIDLH0GYwof3raS58dtNUmzLF2MeiR8o6n4thNpSDQhOqQzWE4WfFZDCi9VEN8n7tiB7czREcyw==}
-    peerDependencies:
-      react: '19'
-      react-dom: '19'
-
   rc-motion@2.9.3:
     resolution: {integrity: sha512-rkW47ABVkic7WEB0EKJqzySpvDqwl60/tdkY7hWP7dYnh5pm0SzJpo54oW3TDUGXV5wfxXFmMkxrzRRbotQ0+w==}
     peerDependencies:
@@ -9715,12 +9609,6 @@ packages:
   rc-select@14.16.4:
     resolution: {integrity: sha512-jP6qf7+vjnxGvPpfPWbGYfFlSl3h8L2XcD4O7g2GYXmEeBC0mw+nPD7i++OOE8v3YGqP8xtYjRKAWCMLfjgxlw==}
     engines: {node: '>=8.x'}
-    peerDependencies:
-      react: '19'
-      react-dom: '19'
-
-  rc-util@5.43.0:
-    resolution: {integrity: sha512-AzC7KKOXFqAdIBqdGWepL9Xn7cm3vnAmjlHqUnoQaTMZYhM4VlXGLkkHHxj/BZ7Td0+SOPKB4RGPboBVKT9htw==}
     peerDependencies:
       react: '19'
       react-dom: '19'
@@ -9802,12 +9690,6 @@ packages:
 
   react-draggable@4.4.6:
     resolution: {integrity: sha512-LtY5Xw1zTPqHkVmtM3X8MUOxNDOUhv/khTgBgrUvwaS064bwVvxT+q5El0uUFNx5IEPKXuRejr7UqLwBIg5pdw==}
-    peerDependencies:
-      react: '19'
-      react-dom: '19'
-
-  react-grid-layout@1.4.4:
-    resolution: {integrity: sha512-7+Lg8E8O8HfOH5FrY80GCIR1SHTn2QnAYKh27/5spoz+OHhMmEhU/14gIkRzJOtympDPaXcVRX/nT1FjmeOUmQ==}
     peerDependencies:
       react: '19'
       react-dom: '19'
@@ -11039,10 +10921,6 @@ packages:
     resolution: {integrity: sha512-K4jVyjnBdgvc86Y6BkaLZEN933SwYOuBFkdmBu9ZfkcAbdVbpITnDmjvZ/aQjRXQrv5EPkTnD1s39GiiqbngCw==}
     engines: {node: '>= 0.4'}
 
-  which-typed-array@1.1.15:
-    resolution: {integrity: sha512-oV0jmFtUky6CXfkqehVvBP/LSWJ2sy4vWMioiENyJLePrBO/yKyV9OyJySfAKosh+RYkIl5zJCNZ8/4JncrpdA==}
-    engines: {node: '>= 0.4'}
-
   which-typed-array@1.1.18:
     resolution: {integrity: sha512-qEcY+KJYlWyLH9vNbsr6/5j59AXk5ni5aakf8ldzBvGde6Iz4sxZGkJyWSAueTG7QhOvNRYb1lDdFmL5Td0QKA==}
     engines: {node: '>= 0.4'}
@@ -11202,7 +11080,7 @@ snapshots:
       '@jridgewell/gen-mapping': 0.3.8
       '@jridgewell/trace-mapping': 0.3.25
 
-  '@antfu/eslint-config@4.11.0(@eslint-react/eslint-plugin@1.38.0(eslint@9.23.0(jiti@2.4.2))(ts-api-utils@2.1.0(typescript@5.8.2))(typescript@5.8.2))(@typescript-eslint/utils@8.28.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2))(@vue/compiler-sfc@3.4.38)(eslint-plugin-format@1.0.1(eslint@9.23.0(jiti@2.4.2)))(eslint-plugin-react-hooks@5.2.0(eslint@9.23.0(jiti@2.4.2)))(eslint-plugin-react-refresh@0.4.19(eslint@9.23.0(jiti@2.4.2)))(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)(vitest@3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0))':
+  '@antfu/eslint-config@4.11.0(@eslint-react/eslint-plugin@1.38.2(eslint@9.23.0(jiti@2.4.2))(ts-api-utils@2.1.0(typescript@5.8.2))(typescript@5.8.2))(@typescript-eslint/utils@8.28.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2))(@vue/compiler-sfc@3.4.38)(eslint-plugin-format@1.0.1(eslint@9.23.0(jiti@2.4.2)))(eslint-plugin-react-hooks@5.2.0(eslint@9.23.0(jiti@2.4.2)))(eslint-plugin-react-refresh@0.4.19(eslint@9.23.0(jiti@2.4.2)))(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)(vitest@3.0.9(@types/debug@4.1.12)(@types/node@22.13.13)(happy-dom@15.0.0)(jiti@2.4.2)(jsdom@24.1.1)(less@4.2.2)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0))':
     dependencies:
       '@antfu/install-pkg': 1.0.0
       '@clack/prompts': 0.10.0
@@ -11242,7 +11120,7 @@ snapshots:
       vue-eslint-parser: 10.1.1(eslint@9.23.0(jiti@2.4.2))
       yaml-eslint-parser: 1.3.0
     optionalDependencies:
-      '@eslint-react/eslint-plugin': 1.38.0(eslint@9.23.0(jiti@2.4.2))(ts-api-utils@2.1.0(typescript@5.8.2))(typescript@5.8.2)
+      '@eslint-react/eslint-plugin': 1.38.2(eslint@9.23.0(jiti@2.4.2))(ts-api-utils@2.1.0(typescript@5.8.2))(typescript@5.8.2)
       eslint-plugin-format: 1.0.1(eslint@9.23.0(jiti@2.4.2))
       eslint-plugin-react-hooks: 5.2.0(eslint@9.23.0(jiti@2.4.2))
       eslint-plugin-react-refresh: 0.4.19(eslint@9.23.0(jiti@2.4.2))
@@ -11275,8 +11153,6 @@ snapshots:
       '@babel/helper-validator-identifier': 7.25.9
       js-tokens: 4.0.0
       picocolors: 1.1.1
-
-  '@babel/compat-data@7.26.0': {}
 
   '@babel/compat-data@7.26.5': {}
 
@@ -11322,7 +11198,7 @@ snapshots:
 
   '@babel/generator@7.26.0':
     dependencies:
-      '@babel/parser': 7.26.1
+      '@babel/parser': 7.26.9
       '@babel/types': 7.26.9
       '@jridgewell/gen-mapping': 0.3.8
       '@jridgewell/trace-mapping': 0.3.25
@@ -11338,7 +11214,7 @@ snapshots:
 
   '@babel/helper-compilation-targets@7.25.9':
     dependencies:
-      '@babel/compat-data': 7.26.0
+      '@babel/compat-data': 7.26.5
       '@babel/helper-validator-option': 7.25.9
       browserslist: 4.24.4
       lru-cache: 5.1.1
@@ -11391,7 +11267,7 @@ snapshots:
 
   '@babel/helpers@7.26.0':
     dependencies:
-      '@babel/template': 7.25.9
+      '@babel/template': 7.26.9
       '@babel/types': 7.26.9
 
   '@babel/helpers@7.26.9':
@@ -11428,23 +11304,7 @@ snapshots:
       '@babel/core': 7.26.0
       '@babel/helper-plugin-utils': 7.25.9
 
-  '@babel/runtime@7.24.7':
-    dependencies:
-      regenerator-runtime: 0.14.1
-
-  '@babel/runtime@7.25.0':
-    dependencies:
-      regenerator-runtime: 0.14.1
-
-  '@babel/runtime@7.25.4':
-    dependencies:
-      regenerator-runtime: 0.14.1
-
   '@babel/runtime@7.26.0':
-    dependencies:
-      regenerator-runtime: 0.14.1
-
-  '@babel/runtime@7.26.7':
     dependencies:
       regenerator-runtime: 0.14.1
 
@@ -11455,7 +11315,7 @@ snapshots:
   '@babel/template@7.25.9':
     dependencies:
       '@babel/code-frame': 7.26.2
-      '@babel/parser': 7.26.1
+      '@babel/parser': 7.26.9
       '@babel/types': 7.26.9
 
   '@babel/template@7.26.9':
@@ -11467,9 +11327,9 @@ snapshots:
   '@babel/traverse@7.25.9':
     dependencies:
       '@babel/code-frame': 7.26.2
-      '@babel/generator': 7.26.0
-      '@babel/parser': 7.26.1
-      '@babel/template': 7.25.9
+      '@babel/generator': 7.26.9
+      '@babel/parser': 7.26.9
+      '@babel/template': 7.26.9
       '@babel/types': 7.26.9
       debug: 4.4.0
       globals: 11.12.0
@@ -11676,215 +11536,215 @@ snapshots:
       '@csstools/css-parser-algorithms': 3.0.4(@csstools/css-tokenizer@3.0.3)
       '@csstools/css-tokenizer': 3.0.3
 
-  '@csstools/postcss-cascade-layers@5.0.1(postcss@8.4.49)':
+  '@csstools/postcss-cascade-layers@5.0.1(postcss@8.5.3)':
     dependencies:
       '@csstools/selector-specificity': 5.0.0(postcss-selector-parser@7.1.0)
-      postcss: 8.4.49
+      postcss: 8.5.3
       postcss-selector-parser: 7.1.0
 
-  '@csstools/postcss-color-function@4.0.8(postcss@8.4.49)':
+  '@csstools/postcss-color-function@4.0.8(postcss@8.5.3)':
     dependencies:
       '@csstools/css-color-parser': 3.0.8(@csstools/css-parser-algorithms@3.0.4(@csstools/css-tokenizer@3.0.3))(@csstools/css-tokenizer@3.0.3)
       '@csstools/css-parser-algorithms': 3.0.4(@csstools/css-tokenizer@3.0.3)
       '@csstools/css-tokenizer': 3.0.3
-      '@csstools/postcss-progressive-custom-properties': 4.0.0(postcss@8.4.49)
-      '@csstools/utilities': 2.0.0(postcss@8.4.49)
-      postcss: 8.4.49
+      '@csstools/postcss-progressive-custom-properties': 4.0.0(postcss@8.5.3)
+      '@csstools/utilities': 2.0.0(postcss@8.5.3)
+      postcss: 8.5.3
 
-  '@csstools/postcss-color-mix-function@3.0.8(postcss@8.4.49)':
+  '@csstools/postcss-color-mix-function@3.0.8(postcss@8.5.3)':
     dependencies:
       '@csstools/css-color-parser': 3.0.8(@csstools/css-parser-algorithms@3.0.4(@csstools/css-tokenizer@3.0.3))(@csstools/css-tokenizer@3.0.3)
       '@csstools/css-parser-algorithms': 3.0.4(@csstools/css-tokenizer@3.0.3)
       '@csstools/css-tokenizer': 3.0.3
-      '@csstools/postcss-progressive-custom-properties': 4.0.0(postcss@8.4.49)
-      '@csstools/utilities': 2.0.0(postcss@8.4.49)
-      postcss: 8.4.49
+      '@csstools/postcss-progressive-custom-properties': 4.0.0(postcss@8.5.3)
+      '@csstools/utilities': 2.0.0(postcss@8.5.3)
+      postcss: 8.5.3
 
-  '@csstools/postcss-content-alt-text@2.0.4(postcss@8.4.49)':
+  '@csstools/postcss-content-alt-text@2.0.4(postcss@8.5.3)':
     dependencies:
       '@csstools/css-parser-algorithms': 3.0.4(@csstools/css-tokenizer@3.0.3)
       '@csstools/css-tokenizer': 3.0.3
-      '@csstools/postcss-progressive-custom-properties': 4.0.0(postcss@8.4.49)
-      '@csstools/utilities': 2.0.0(postcss@8.4.49)
-      postcss: 8.4.49
+      '@csstools/postcss-progressive-custom-properties': 4.0.0(postcss@8.5.3)
+      '@csstools/utilities': 2.0.0(postcss@8.5.3)
+      postcss: 8.5.3
 
-  '@csstools/postcss-exponential-functions@2.0.7(postcss@8.4.49)':
+  '@csstools/postcss-exponential-functions@2.0.7(postcss@8.5.3)':
     dependencies:
       '@csstools/css-calc': 2.1.2(@csstools/css-parser-algorithms@3.0.4(@csstools/css-tokenizer@3.0.3))(@csstools/css-tokenizer@3.0.3)
       '@csstools/css-parser-algorithms': 3.0.4(@csstools/css-tokenizer@3.0.3)
       '@csstools/css-tokenizer': 3.0.3
-      postcss: 8.4.49
+      postcss: 8.5.3
 
-  '@csstools/postcss-font-format-keywords@4.0.0(postcss@8.4.49)':
+  '@csstools/postcss-font-format-keywords@4.0.0(postcss@8.5.3)':
     dependencies:
-      '@csstools/utilities': 2.0.0(postcss@8.4.49)
-      postcss: 8.4.49
+      '@csstools/utilities': 2.0.0(postcss@8.5.3)
+      postcss: 8.5.3
       postcss-value-parser: 4.2.0
 
-  '@csstools/postcss-gamut-mapping@2.0.8(postcss@8.4.49)':
+  '@csstools/postcss-gamut-mapping@2.0.8(postcss@8.5.3)':
     dependencies:
       '@csstools/css-color-parser': 3.0.8(@csstools/css-parser-algorithms@3.0.4(@csstools/css-tokenizer@3.0.3))(@csstools/css-tokenizer@3.0.3)
       '@csstools/css-parser-algorithms': 3.0.4(@csstools/css-tokenizer@3.0.3)
       '@csstools/css-tokenizer': 3.0.3
-      postcss: 8.4.49
+      postcss: 8.5.3
 
-  '@csstools/postcss-gradients-interpolation-method@5.0.8(postcss@8.4.49)':
+  '@csstools/postcss-gradients-interpolation-method@5.0.8(postcss@8.5.3)':
     dependencies:
       '@csstools/css-color-parser': 3.0.8(@csstools/css-parser-algorithms@3.0.4(@csstools/css-tokenizer@3.0.3))(@csstools/css-tokenizer@3.0.3)
       '@csstools/css-parser-algorithms': 3.0.4(@csstools/css-tokenizer@3.0.3)
       '@csstools/css-tokenizer': 3.0.3
-      '@csstools/postcss-progressive-custom-properties': 4.0.0(postcss@8.4.49)
-      '@csstools/utilities': 2.0.0(postcss@8.4.49)
-      postcss: 8.4.49
+      '@csstools/postcss-progressive-custom-properties': 4.0.0(postcss@8.5.3)
+      '@csstools/utilities': 2.0.0(postcss@8.5.3)
+      postcss: 8.5.3
 
-  '@csstools/postcss-hwb-function@4.0.8(postcss@8.4.49)':
+  '@csstools/postcss-hwb-function@4.0.8(postcss@8.5.3)':
     dependencies:
       '@csstools/css-color-parser': 3.0.8(@csstools/css-parser-algorithms@3.0.4(@csstools/css-tokenizer@3.0.3))(@csstools/css-tokenizer@3.0.3)
       '@csstools/css-parser-algorithms': 3.0.4(@csstools/css-tokenizer@3.0.3)
       '@csstools/css-tokenizer': 3.0.3
-      '@csstools/postcss-progressive-custom-properties': 4.0.0(postcss@8.4.49)
-      '@csstools/utilities': 2.0.0(postcss@8.4.49)
-      postcss: 8.4.49
+      '@csstools/postcss-progressive-custom-properties': 4.0.0(postcss@8.5.3)
+      '@csstools/utilities': 2.0.0(postcss@8.5.3)
+      postcss: 8.5.3
 
-  '@csstools/postcss-ic-unit@4.0.0(postcss@8.4.49)':
+  '@csstools/postcss-ic-unit@4.0.0(postcss@8.5.3)':
     dependencies:
-      '@csstools/postcss-progressive-custom-properties': 4.0.0(postcss@8.4.49)
-      '@csstools/utilities': 2.0.0(postcss@8.4.49)
-      postcss: 8.4.49
+      '@csstools/postcss-progressive-custom-properties': 4.0.0(postcss@8.5.3)
+      '@csstools/utilities': 2.0.0(postcss@8.5.3)
+      postcss: 8.5.3
       postcss-value-parser: 4.2.0
 
-  '@csstools/postcss-initial@2.0.1(postcss@8.4.49)':
+  '@csstools/postcss-initial@2.0.1(postcss@8.5.3)':
     dependencies:
-      postcss: 8.4.49
+      postcss: 8.5.3
 
-  '@csstools/postcss-is-pseudo-class@5.0.1(postcss@8.4.49)':
+  '@csstools/postcss-is-pseudo-class@5.0.1(postcss@8.5.3)':
     dependencies:
       '@csstools/selector-specificity': 5.0.0(postcss-selector-parser@7.1.0)
-      postcss: 8.4.49
+      postcss: 8.5.3
       postcss-selector-parser: 7.1.0
 
-  '@csstools/postcss-light-dark-function@2.0.7(postcss@8.4.49)':
+  '@csstools/postcss-light-dark-function@2.0.7(postcss@8.5.3)':
     dependencies:
       '@csstools/css-parser-algorithms': 3.0.4(@csstools/css-tokenizer@3.0.3)
       '@csstools/css-tokenizer': 3.0.3
-      '@csstools/postcss-progressive-custom-properties': 4.0.0(postcss@8.4.49)
-      '@csstools/utilities': 2.0.0(postcss@8.4.49)
-      postcss: 8.4.49
+      '@csstools/postcss-progressive-custom-properties': 4.0.0(postcss@8.5.3)
+      '@csstools/utilities': 2.0.0(postcss@8.5.3)
+      postcss: 8.5.3
 
-  '@csstools/postcss-logical-float-and-clear@3.0.0(postcss@8.4.49)':
+  '@csstools/postcss-logical-float-and-clear@3.0.0(postcss@8.5.3)':
     dependencies:
-      postcss: 8.4.49
+      postcss: 8.5.3
 
-  '@csstools/postcss-logical-overflow@2.0.0(postcss@8.4.49)':
+  '@csstools/postcss-logical-overflow@2.0.0(postcss@8.5.3)':
     dependencies:
-      postcss: 8.4.49
+      postcss: 8.5.3
 
-  '@csstools/postcss-logical-overscroll-behavior@2.0.0(postcss@8.4.49)':
+  '@csstools/postcss-logical-overscroll-behavior@2.0.0(postcss@8.5.3)':
     dependencies:
-      postcss: 8.4.49
+      postcss: 8.5.3
 
-  '@csstools/postcss-logical-resize@3.0.0(postcss@8.4.49)':
+  '@csstools/postcss-logical-resize@3.0.0(postcss@8.5.3)':
     dependencies:
-      postcss: 8.4.49
+      postcss: 8.5.3
       postcss-value-parser: 4.2.0
 
-  '@csstools/postcss-logical-viewport-units@3.0.3(postcss@8.4.49)':
+  '@csstools/postcss-logical-viewport-units@3.0.3(postcss@8.5.3)':
     dependencies:
       '@csstools/css-tokenizer': 3.0.3
-      '@csstools/utilities': 2.0.0(postcss@8.4.49)
-      postcss: 8.4.49
+      '@csstools/utilities': 2.0.0(postcss@8.5.3)
+      postcss: 8.5.3
 
-  '@csstools/postcss-media-minmax@2.0.7(postcss@8.4.49)':
+  '@csstools/postcss-media-minmax@2.0.7(postcss@8.5.3)':
     dependencies:
       '@csstools/css-calc': 2.1.2(@csstools/css-parser-algorithms@3.0.4(@csstools/css-tokenizer@3.0.3))(@csstools/css-tokenizer@3.0.3)
       '@csstools/css-parser-algorithms': 3.0.4(@csstools/css-tokenizer@3.0.3)
       '@csstools/css-tokenizer': 3.0.3
       '@csstools/media-query-list-parser': 4.0.2(@csstools/css-parser-algorithms@3.0.4(@csstools/css-tokenizer@3.0.3))(@csstools/css-tokenizer@3.0.3)
-      postcss: 8.4.49
+      postcss: 8.5.3
 
-  '@csstools/postcss-media-queries-aspect-ratio-number-values@3.0.4(postcss@8.4.49)':
+  '@csstools/postcss-media-queries-aspect-ratio-number-values@3.0.4(postcss@8.5.3)':
     dependencies:
       '@csstools/css-parser-algorithms': 3.0.4(@csstools/css-tokenizer@3.0.3)
       '@csstools/css-tokenizer': 3.0.3
       '@csstools/media-query-list-parser': 4.0.2(@csstools/css-parser-algorithms@3.0.4(@csstools/css-tokenizer@3.0.3))(@csstools/css-tokenizer@3.0.3)
-      postcss: 8.4.49
+      postcss: 8.5.3
 
-  '@csstools/postcss-nested-calc@4.0.0(postcss@8.4.49)':
+  '@csstools/postcss-nested-calc@4.0.0(postcss@8.5.3)':
     dependencies:
-      '@csstools/utilities': 2.0.0(postcss@8.4.49)
-      postcss: 8.4.49
+      '@csstools/utilities': 2.0.0(postcss@8.5.3)
+      postcss: 8.5.3
       postcss-value-parser: 4.2.0
 
-  '@csstools/postcss-normalize-display-values@4.0.0(postcss@8.4.49)':
+  '@csstools/postcss-normalize-display-values@4.0.0(postcss@8.5.3)':
     dependencies:
-      postcss: 8.4.49
+      postcss: 8.5.3
       postcss-value-parser: 4.2.0
 
-  '@csstools/postcss-oklab-function@4.0.8(postcss@8.4.49)':
+  '@csstools/postcss-oklab-function@4.0.8(postcss@8.5.3)':
     dependencies:
       '@csstools/css-color-parser': 3.0.8(@csstools/css-parser-algorithms@3.0.4(@csstools/css-tokenizer@3.0.3))(@csstools/css-tokenizer@3.0.3)
       '@csstools/css-parser-algorithms': 3.0.4(@csstools/css-tokenizer@3.0.3)
       '@csstools/css-tokenizer': 3.0.3
-      '@csstools/postcss-progressive-custom-properties': 4.0.0(postcss@8.4.49)
-      '@csstools/utilities': 2.0.0(postcss@8.4.49)
-      postcss: 8.4.49
+      '@csstools/postcss-progressive-custom-properties': 4.0.0(postcss@8.5.3)
+      '@csstools/utilities': 2.0.0(postcss@8.5.3)
+      postcss: 8.5.3
 
-  '@csstools/postcss-progressive-custom-properties@4.0.0(postcss@8.4.49)':
+  '@csstools/postcss-progressive-custom-properties@4.0.0(postcss@8.5.3)':
     dependencies:
-      postcss: 8.4.49
+      postcss: 8.5.3
       postcss-value-parser: 4.2.0
 
-  '@csstools/postcss-random-function@1.0.3(postcss@8.4.49)':
+  '@csstools/postcss-random-function@1.0.3(postcss@8.5.3)':
     dependencies:
       '@csstools/css-calc': 2.1.2(@csstools/css-parser-algorithms@3.0.4(@csstools/css-tokenizer@3.0.3))(@csstools/css-tokenizer@3.0.3)
       '@csstools/css-parser-algorithms': 3.0.4(@csstools/css-tokenizer@3.0.3)
       '@csstools/css-tokenizer': 3.0.3
-      postcss: 8.4.49
+      postcss: 8.5.3
 
-  '@csstools/postcss-relative-color-syntax@3.0.8(postcss@8.4.49)':
+  '@csstools/postcss-relative-color-syntax@3.0.8(postcss@8.5.3)':
     dependencies:
       '@csstools/css-color-parser': 3.0.8(@csstools/css-parser-algorithms@3.0.4(@csstools/css-tokenizer@3.0.3))(@csstools/css-tokenizer@3.0.3)
       '@csstools/css-parser-algorithms': 3.0.4(@csstools/css-tokenizer@3.0.3)
       '@csstools/css-tokenizer': 3.0.3
-      '@csstools/postcss-progressive-custom-properties': 4.0.0(postcss@8.4.49)
-      '@csstools/utilities': 2.0.0(postcss@8.4.49)
-      postcss: 8.4.49
+      '@csstools/postcss-progressive-custom-properties': 4.0.0(postcss@8.5.3)
+      '@csstools/utilities': 2.0.0(postcss@8.5.3)
+      postcss: 8.5.3
 
-  '@csstools/postcss-scope-pseudo-class@4.0.1(postcss@8.4.49)':
+  '@csstools/postcss-scope-pseudo-class@4.0.1(postcss@8.5.3)':
     dependencies:
-      postcss: 8.4.49
+      postcss: 8.5.3
       postcss-selector-parser: 7.1.0
 
-  '@csstools/postcss-sign-functions@1.1.2(postcss@8.4.49)':
+  '@csstools/postcss-sign-functions@1.1.2(postcss@8.5.3)':
     dependencies:
       '@csstools/css-calc': 2.1.2(@csstools/css-parser-algorithms@3.0.4(@csstools/css-tokenizer@3.0.3))(@csstools/css-tokenizer@3.0.3)
       '@csstools/css-parser-algorithms': 3.0.4(@csstools/css-tokenizer@3.0.3)
       '@csstools/css-tokenizer': 3.0.3
-      postcss: 8.4.49
+      postcss: 8.5.3
 
-  '@csstools/postcss-stepped-value-functions@4.0.7(postcss@8.4.49)':
+  '@csstools/postcss-stepped-value-functions@4.0.7(postcss@8.5.3)':
     dependencies:
       '@csstools/css-calc': 2.1.2(@csstools/css-parser-algorithms@3.0.4(@csstools/css-tokenizer@3.0.3))(@csstools/css-tokenizer@3.0.3)
       '@csstools/css-parser-algorithms': 3.0.4(@csstools/css-tokenizer@3.0.3)
       '@csstools/css-tokenizer': 3.0.3
-      postcss: 8.4.49
+      postcss: 8.5.3
 
-  '@csstools/postcss-text-decoration-shorthand@4.0.2(postcss@8.4.49)':
+  '@csstools/postcss-text-decoration-shorthand@4.0.2(postcss@8.5.3)':
     dependencies:
       '@csstools/color-helpers': 5.0.2
-      postcss: 8.4.49
+      postcss: 8.5.3
       postcss-value-parser: 4.2.0
 
-  '@csstools/postcss-trigonometric-functions@4.0.7(postcss@8.4.49)':
+  '@csstools/postcss-trigonometric-functions@4.0.7(postcss@8.5.3)':
     dependencies:
       '@csstools/css-calc': 2.1.2(@csstools/css-parser-algorithms@3.0.4(@csstools/css-tokenizer@3.0.3))(@csstools/css-tokenizer@3.0.3)
       '@csstools/css-parser-algorithms': 3.0.4(@csstools/css-tokenizer@3.0.3)
       '@csstools/css-tokenizer': 3.0.3
-      postcss: 8.4.49
+      postcss: 8.5.3
 
-  '@csstools/postcss-unset-value@4.0.0(postcss@8.4.49)':
+  '@csstools/postcss-unset-value@4.0.0(postcss@8.5.3)':
     dependencies:
-      postcss: 8.4.49
+      postcss: 8.5.3
 
   '@csstools/selector-resolve-nested@3.0.0(postcss-selector-parser@7.1.0)':
     dependencies:
@@ -11894,9 +11754,9 @@ snapshots:
     dependencies:
       postcss-selector-parser: 7.1.0
 
-  '@csstools/utilities@2.0.0(postcss@8.4.49)':
+  '@csstools/utilities@2.0.0(postcss@8.5.3)':
     dependencies:
-      postcss: 8.4.49
+      postcss: 8.5.3
 
   '@dprint/formatter@0.3.0': {}
 
@@ -12026,9 +11886,9 @@ snapshots:
 
   '@eslint-community/regexpp@4.12.1': {}
 
-  '@eslint-react/ast@1.38.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)':
+  '@eslint-react/ast@1.38.2(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)':
     dependencies:
-      '@eslint-react/eff': 1.38.0
+      '@eslint-react/eff': 1.38.2
       '@typescript-eslint/types': 8.28.0
       '@typescript-eslint/typescript-estree': 8.28.0(typescript@5.8.2)
       '@typescript-eslint/utils': 8.28.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
@@ -12039,14 +11899,14 @@ snapshots:
       - supports-color
       - typescript
 
-  '@eslint-react/core@1.38.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)':
+  '@eslint-react/core@1.38.2(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)':
     dependencies:
-      '@eslint-react/ast': 1.38.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
-      '@eslint-react/eff': 1.38.0
-      '@eslint-react/jsx': 1.38.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
-      '@eslint-react/kit': 1.38.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
-      '@eslint-react/shared': 1.38.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
-      '@eslint-react/var': 1.38.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
+      '@eslint-react/ast': 1.38.2(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
+      '@eslint-react/eff': 1.38.2
+      '@eslint-react/jsx': 1.38.2(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
+      '@eslint-react/kit': 1.38.2(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
+      '@eslint-react/shared': 1.38.2(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
+      '@eslint-react/var': 1.38.2(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
       '@typescript-eslint/scope-manager': 8.28.0
       '@typescript-eslint/type-utils': 8.28.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
       '@typescript-eslint/types': 8.28.0
@@ -12058,35 +11918,35 @@ snapshots:
       - supports-color
       - typescript
 
-  '@eslint-react/eff@1.38.0': {}
+  '@eslint-react/eff@1.38.2': {}
 
-  '@eslint-react/eslint-plugin@1.38.0(eslint@9.23.0(jiti@2.4.2))(ts-api-utils@2.1.0(typescript@5.8.2))(typescript@5.8.2)':
+  '@eslint-react/eslint-plugin@1.38.2(eslint@9.23.0(jiti@2.4.2))(ts-api-utils@2.1.0(typescript@5.8.2))(typescript@5.8.2)':
     dependencies:
-      '@eslint-react/eff': 1.38.0
-      '@eslint-react/kit': 1.38.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
-      '@eslint-react/shared': 1.38.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
+      '@eslint-react/eff': 1.38.2
+      '@eslint-react/kit': 1.38.2(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
+      '@eslint-react/shared': 1.38.2(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
       '@typescript-eslint/scope-manager': 8.28.0
       '@typescript-eslint/type-utils': 8.28.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
       '@typescript-eslint/types': 8.28.0
       '@typescript-eslint/utils': 8.28.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
       eslint: 9.23.0(jiti@2.4.2)
-      eslint-plugin-react-debug: 1.38.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
-      eslint-plugin-react-dom: 1.38.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
-      eslint-plugin-react-hooks-extra: 1.38.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
-      eslint-plugin-react-naming-convention: 1.38.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
-      eslint-plugin-react-web-api: 1.38.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
-      eslint-plugin-react-x: 1.38.0(eslint@9.23.0(jiti@2.4.2))(ts-api-utils@2.1.0(typescript@5.8.2))(typescript@5.8.2)
+      eslint-plugin-react-debug: 1.38.2(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
+      eslint-plugin-react-dom: 1.38.2(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
+      eslint-plugin-react-hooks-extra: 1.38.2(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
+      eslint-plugin-react-naming-convention: 1.38.2(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
+      eslint-plugin-react-web-api: 1.38.2(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
+      eslint-plugin-react-x: 1.38.2(eslint@9.23.0(jiti@2.4.2))(ts-api-utils@2.1.0(typescript@5.8.2))(typescript@5.8.2)
     optionalDependencies:
       typescript: 5.8.2
     transitivePeerDependencies:
       - supports-color
       - ts-api-utils
 
-  '@eslint-react/jsx@1.38.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)':
+  '@eslint-react/jsx@1.38.2(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)':
     dependencies:
-      '@eslint-react/ast': 1.38.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
-      '@eslint-react/eff': 1.38.0
-      '@eslint-react/var': 1.38.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
+      '@eslint-react/ast': 1.38.2(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
+      '@eslint-react/eff': 1.38.2
+      '@eslint-react/var': 1.38.2(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
       '@typescript-eslint/scope-manager': 8.28.0
       '@typescript-eslint/types': 8.28.0
       '@typescript-eslint/utils': 8.28.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
@@ -12096,9 +11956,9 @@ snapshots:
       - supports-color
       - typescript
 
-  '@eslint-react/kit@1.38.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)':
+  '@eslint-react/kit@1.38.2(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)':
     dependencies:
-      '@eslint-react/eff': 1.38.0
+      '@eslint-react/eff': 1.38.2
       '@typescript-eslint/utils': 8.28.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
       ts-pattern: 5.6.2
     transitivePeerDependencies:
@@ -12106,10 +11966,10 @@ snapshots:
       - supports-color
       - typescript
 
-  '@eslint-react/shared@1.38.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)':
+  '@eslint-react/shared@1.38.2(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)':
     dependencies:
-      '@eslint-react/eff': 1.38.0
-      '@eslint-react/kit': 1.38.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
+      '@eslint-react/eff': 1.38.2
+      '@eslint-react/kit': 1.38.2(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
       '@typescript-eslint/utils': 8.28.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
       picomatch: 4.0.2
       ts-pattern: 5.6.2
@@ -12118,10 +11978,10 @@ snapshots:
       - supports-color
       - typescript
 
-  '@eslint-react/var@1.38.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)':
+  '@eslint-react/var@1.38.2(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)':
     dependencies:
-      '@eslint-react/ast': 1.38.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
-      '@eslint-react/eff': 1.38.0
+      '@eslint-react/ast': 1.38.2(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
+      '@eslint-react/eff': 1.38.2
       '@typescript-eslint/scope-manager': 8.28.0
       '@typescript-eslint/types': 8.28.0
       '@typescript-eslint/utils': 8.28.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
@@ -12189,17 +12049,8 @@ snapshots:
 
   '@flatten-js/interval-tree@1.1.3': {}
 
-  '@floating-ui/core@1.6.4':
-    dependencies:
-      '@floating-ui/utils': 0.2.9
-
   '@floating-ui/core@1.6.9':
     dependencies:
-      '@floating-ui/utils': 0.2.9
-
-  '@floating-ui/dom@1.6.11':
-    dependencies:
-      '@floating-ui/core': 1.6.4
       '@floating-ui/utils': 0.2.9
 
   '@floating-ui/dom@1.6.13':
@@ -12209,7 +12060,7 @@ snapshots:
 
   '@floating-ui/react-dom@2.1.2(react-dom@19.0.0(react@19.0.0))(react@19.0.0)':
     dependencies:
-      '@floating-ui/dom': 1.6.11
+      '@floating-ui/dom': 1.6.13
       react: 19.0.0
       react-dom: 19.0.0(react@19.0.0)
 
@@ -12756,19 +12607,19 @@ snapshots:
 
   '@rc-component/mini-decimal@1.1.0':
     dependencies:
-      '@babel/runtime': 7.26.0
+      '@babel/runtime': 7.26.9
 
   '@rc-component/portal@1.1.2(react-dom@19.0.0(react@19.0.0))(react@19.0.0)':
     dependencies:
-      '@babel/runtime': 7.24.7
+      '@babel/runtime': 7.26.9
       classnames: 2.5.1
-      rc-util: 5.43.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      rc-util: 5.44.2(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       react: 19.0.0
       react-dom: 19.0.0(react@19.0.0)
 
   '@rc-component/trigger@2.2.6(react-dom@19.0.0(react@19.0.0))(react@19.0.0)':
     dependencies:
-      '@babel/runtime': 7.26.0
+      '@babel/runtime': 7.26.9
       '@rc-component/portal': 1.1.2(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       classnames: 2.5.1
       rc-motion: 2.9.3(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
@@ -12808,7 +12659,7 @@ snapshots:
 
   '@rollup/pluginutils@5.1.4(rollup@4.37.0)':
     dependencies:
-      '@types/estree': 1.0.6
+      '@types/estree': 1.0.7
       estree-walker: 2.0.2
       picomatch: 4.0.2
     optionalDependencies:
@@ -13307,7 +13158,7 @@ snapshots:
 
   '@testing-library/react@16.2.0(@testing-library/dom@10.4.0)(@types/react-dom@19.0.4(@types/react@19.0.8))(@types/react@19.0.8)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)':
     dependencies:
-      '@babel/runtime': 7.26.7
+      '@babel/runtime': 7.26.9
       '@testing-library/dom': 10.4.0
       react: 19.0.0
       react-dom: 19.0.0(react@19.0.0)
@@ -13385,11 +13236,11 @@ snapshots:
   '@types/eslint-scope@3.7.7':
     dependencies:
       '@types/eslint': 9.6.1
-      '@types/estree': 1.0.6
+      '@types/estree': 1.0.7
 
   '@types/eslint@9.6.1':
     dependencies:
-      '@types/estree': 1.0.6
+      '@types/estree': 1.0.7
       '@types/json-schema': 7.0.15
 
   '@types/estree@1.0.6': {}
@@ -13736,7 +13587,7 @@ snapshots:
 
   '@vue/compiler-core@3.4.38':
     dependencies:
-      '@babel/parser': 7.26.1
+      '@babel/parser': 7.26.9
       '@vue/shared': 3.4.38
       entities: 4.5.0
       estree-walker: 2.0.2
@@ -13762,7 +13613,7 @@ snapshots:
 
   '@vue/compiler-sfc@3.4.38':
     dependencies:
-      '@babel/parser': 7.26.1
+      '@babel/parser': 7.26.9
       '@vue/compiler-core': 3.4.38
       '@vue/compiler-dom': 3.4.38
       '@vue/compiler-ssr': 3.4.38
@@ -14162,14 +14013,14 @@ snapshots:
       stubborn-fs: 1.2.5
       when-exit: 2.1.3
 
-  autoprefixer@10.4.21(postcss@8.4.49):
+  autoprefixer@10.4.21(postcss@8.5.3):
     dependencies:
       browserslist: 4.24.4
       caniuse-lite: 1.0.30001703
       fraction.js: 4.3.7
       normalize-range: 0.1.2
       picocolors: 1.1.1
-      postcss: 8.4.49
+      postcss: 8.5.3
       postcss-value-parser: 4.2.0
 
   available-typed-arrays@1.0.7:
@@ -14247,7 +14098,7 @@ snapshots:
 
   browserslist@4.24.4:
     dependencies:
-      caniuse-lite: 1.0.30001695
+      caniuse-lite: 1.0.30001703
       electron-to-chromium: 1.5.88
       node-releases: 2.0.19
       update-browserslist-db: 1.1.2(browserslist@4.24.4)
@@ -14274,14 +14125,6 @@ snapshots:
       es-errors: 1.3.0
       function-bind: 1.1.2
 
-  call-bind@1.0.7:
-    dependencies:
-      es-define-property: 1.0.0
-      es-errors: 1.3.0
-      function-bind: 1.1.2
-      get-intrinsic: 1.2.4
-      set-function-length: 1.2.2
-
   call-bind@1.0.8:
     dependencies:
       call-bind-apply-helpers: 1.0.1
@@ -14292,7 +14135,7 @@ snapshots:
   call-bound@1.0.3:
     dependencies:
       call-bind-apply-helpers: 1.0.1
-      get-intrinsic: 1.2.6
+      get-intrinsic: 1.2.7
 
   callsites@3.1.0: {}
 
@@ -14306,8 +14149,6 @@ snapshots:
   camelcase@7.0.1: {}
 
   camelcase@8.0.0: {}
-
-  caniuse-lite@1.0.30001695: {}
 
   caniuse-lite@1.0.30001703: {}
 
@@ -14584,7 +14425,7 @@ snapshots:
       conventional-commits-filter: 5.0.0
       handlebars: 4.7.8
       meow: 13.2.0
-      semver: 7.6.3
+      semver: 7.7.1
 
   conventional-changelog@6.0.0(conventional-commits-filter@5.0.0):
     dependencies:
@@ -14669,15 +14510,15 @@ snapshots:
 
   crypt@0.0.2: {}
 
-  css-blank-pseudo@7.0.1(postcss@8.4.49):
+  css-blank-pseudo@7.0.1(postcss@8.5.3):
     dependencies:
-      postcss: 8.4.49
+      postcss: 8.5.3
       postcss-selector-parser: 7.1.0
 
-  css-has-pseudo@7.0.2(postcss@8.4.49):
+  css-has-pseudo@7.0.2(postcss@8.5.3):
     dependencies:
       '@csstools/selector-specificity': 5.0.0(postcss-selector-parser@7.1.0)
-      postcss: 8.4.49
+      postcss: 8.5.3
       postcss-selector-parser: 7.1.0
       postcss-value-parser: 4.2.0
 
@@ -14699,17 +14540,17 @@ snapshots:
       icss-utils: 5.1.0(postcss@8.5.3)
       postcss: 8.5.3
       postcss-modules-extract-imports: 3.1.0(postcss@8.5.3)
-      postcss-modules-local-by-default: 4.0.5(postcss@8.5.3)
-      postcss-modules-scope: 3.2.0(postcss@8.5.3)
+      postcss-modules-local-by-default: 4.2.0(postcss@8.5.3)
+      postcss-modules-scope: 3.2.1(postcss@8.5.3)
       postcss-modules-values: 4.0.0(postcss@8.5.3)
       postcss-value-parser: 4.2.0
-      semver: 7.6.3
+      semver: 7.7.1
     optionalDependencies:
       webpack: 5.98.0(@swc/core@1.10.18)(esbuild@0.25.1)
 
-  css-prefers-color-scheme@10.0.0(postcss@8.4.49):
+  css-prefers-color-scheme@10.0.0(postcss@8.5.3):
     dependencies:
-      postcss: 8.4.49
+      postcss: 8.5.3
 
   css-select@4.3.0:
     dependencies:
@@ -14843,9 +14684,9 @@ snapshots:
 
   define-data-property@1.1.4:
     dependencies:
-      es-define-property: 1.0.0
+      es-define-property: 1.0.1
       es-errors: 1.3.0
-      gopd: 1.0.1
+      gopd: 1.2.0
 
   define-lazy-prop@2.0.0: {}
 
@@ -14930,7 +14771,7 @@ snapshots:
 
   dom-helpers@5.2.1:
     dependencies:
-      '@babel/runtime': 7.26.0
+      '@babel/runtime': 7.26.9
       csstype: 3.1.3
 
   dom-serializer@1.4.1:
@@ -14985,11 +14826,6 @@ snapshots:
       dedent: 0.7.0
       fast-json-parse: 1.0.3
       objectorarray: 1.0.5
-
-  enhanced-resolve@5.17.1:
-    dependencies:
-      graceful-fs: 4.2.11
-      tapable: 2.2.1
 
   enhanced-resolve@5.18.1:
     dependencies:
@@ -15069,10 +14905,6 @@ snapshots:
       unbox-primitive: 1.1.0
       which-typed-array: 1.1.18
 
-  es-define-property@1.0.0:
-    dependencies:
-      get-intrinsic: 1.2.4
-
   es-define-property@1.0.1: {}
 
   es-errors@1.3.0: {}
@@ -15097,10 +14929,6 @@ snapshots:
       safe-array-concat: 1.1.3
 
   es-module-lexer@1.6.0: {}
-
-  es-object-atoms@1.0.0:
-    dependencies:
-      es-errors: 1.3.0
 
   es-object-atoms@1.1.1:
     dependencies:
@@ -15464,15 +15292,15 @@ snapshots:
       tinyglobby: 0.2.12
       yaml-eslint-parser: 1.3.0
 
-  eslint-plugin-react-debug@1.38.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2):
+  eslint-plugin-react-debug@1.38.2(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2):
     dependencies:
-      '@eslint-react/ast': 1.38.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
-      '@eslint-react/core': 1.38.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
-      '@eslint-react/eff': 1.38.0
-      '@eslint-react/jsx': 1.38.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
-      '@eslint-react/kit': 1.38.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
-      '@eslint-react/shared': 1.38.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
-      '@eslint-react/var': 1.38.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
+      '@eslint-react/ast': 1.38.2(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
+      '@eslint-react/core': 1.38.2(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
+      '@eslint-react/eff': 1.38.2
+      '@eslint-react/jsx': 1.38.2(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
+      '@eslint-react/kit': 1.38.2(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
+      '@eslint-react/shared': 1.38.2(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
+      '@eslint-react/var': 1.38.2(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
       '@typescript-eslint/scope-manager': 8.28.0
       '@typescript-eslint/type-utils': 8.28.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
       '@typescript-eslint/types': 8.28.0
@@ -15485,15 +15313,15 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-plugin-react-dom@1.38.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2):
+  eslint-plugin-react-dom@1.38.2(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2):
     dependencies:
-      '@eslint-react/ast': 1.38.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
-      '@eslint-react/core': 1.38.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
-      '@eslint-react/eff': 1.38.0
-      '@eslint-react/jsx': 1.38.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
-      '@eslint-react/kit': 1.38.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
-      '@eslint-react/shared': 1.38.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
-      '@eslint-react/var': 1.38.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
+      '@eslint-react/ast': 1.38.2(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
+      '@eslint-react/core': 1.38.2(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
+      '@eslint-react/eff': 1.38.2
+      '@eslint-react/jsx': 1.38.2(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
+      '@eslint-react/kit': 1.38.2(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
+      '@eslint-react/shared': 1.38.2(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
+      '@eslint-react/var': 1.38.2(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
       '@typescript-eslint/scope-manager': 8.28.0
       '@typescript-eslint/types': 8.28.0
       '@typescript-eslint/utils': 8.28.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
@@ -15506,15 +15334,15 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-plugin-react-hooks-extra@1.38.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2):
+  eslint-plugin-react-hooks-extra@1.38.2(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2):
     dependencies:
-      '@eslint-react/ast': 1.38.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
-      '@eslint-react/core': 1.38.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
-      '@eslint-react/eff': 1.38.0
-      '@eslint-react/jsx': 1.38.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
-      '@eslint-react/kit': 1.38.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
-      '@eslint-react/shared': 1.38.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
-      '@eslint-react/var': 1.38.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
+      '@eslint-react/ast': 1.38.2(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
+      '@eslint-react/core': 1.38.2(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
+      '@eslint-react/eff': 1.38.2
+      '@eslint-react/jsx': 1.38.2(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
+      '@eslint-react/kit': 1.38.2(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
+      '@eslint-react/shared': 1.38.2(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
+      '@eslint-react/var': 1.38.2(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
       '@typescript-eslint/scope-manager': 8.28.0
       '@typescript-eslint/type-utils': 8.28.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
       '@typescript-eslint/types': 8.28.0
@@ -15531,15 +15359,15 @@ snapshots:
     dependencies:
       eslint: 9.23.0(jiti@2.4.2)
 
-  eslint-plugin-react-naming-convention@1.38.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2):
+  eslint-plugin-react-naming-convention@1.38.2(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2):
     dependencies:
-      '@eslint-react/ast': 1.38.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
-      '@eslint-react/core': 1.38.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
-      '@eslint-react/eff': 1.38.0
-      '@eslint-react/jsx': 1.38.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
-      '@eslint-react/kit': 1.38.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
-      '@eslint-react/shared': 1.38.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
-      '@eslint-react/var': 1.38.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
+      '@eslint-react/ast': 1.38.2(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
+      '@eslint-react/core': 1.38.2(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
+      '@eslint-react/eff': 1.38.2
+      '@eslint-react/jsx': 1.38.2(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
+      '@eslint-react/kit': 1.38.2(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
+      '@eslint-react/shared': 1.38.2(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
+      '@eslint-react/var': 1.38.2(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
       '@typescript-eslint/scope-manager': 8.28.0
       '@typescript-eslint/type-utils': 8.28.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
       '@typescript-eslint/types': 8.28.0
@@ -15556,15 +15384,15 @@ snapshots:
     dependencies:
       eslint: 9.23.0(jiti@2.4.2)
 
-  eslint-plugin-react-web-api@1.38.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2):
+  eslint-plugin-react-web-api@1.38.2(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2):
     dependencies:
-      '@eslint-react/ast': 1.38.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
-      '@eslint-react/core': 1.38.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
-      '@eslint-react/eff': 1.38.0
-      '@eslint-react/jsx': 1.38.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
-      '@eslint-react/kit': 1.38.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
-      '@eslint-react/shared': 1.38.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
-      '@eslint-react/var': 1.38.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
+      '@eslint-react/ast': 1.38.2(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
+      '@eslint-react/core': 1.38.2(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
+      '@eslint-react/eff': 1.38.2
+      '@eslint-react/jsx': 1.38.2(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
+      '@eslint-react/kit': 1.38.2(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
+      '@eslint-react/shared': 1.38.2(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
+      '@eslint-react/var': 1.38.2(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
       '@typescript-eslint/scope-manager': 8.28.0
       '@typescript-eslint/types': 8.28.0
       '@typescript-eslint/utils': 8.28.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
@@ -15576,15 +15404,15 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-plugin-react-x@1.38.0(eslint@9.23.0(jiti@2.4.2))(ts-api-utils@2.1.0(typescript@5.8.2))(typescript@5.8.2):
+  eslint-plugin-react-x@1.38.2(eslint@9.23.0(jiti@2.4.2))(ts-api-utils@2.1.0(typescript@5.8.2))(typescript@5.8.2):
     dependencies:
-      '@eslint-react/ast': 1.38.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
-      '@eslint-react/core': 1.38.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
-      '@eslint-react/eff': 1.38.0
-      '@eslint-react/jsx': 1.38.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
-      '@eslint-react/kit': 1.38.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
-      '@eslint-react/shared': 1.38.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
-      '@eslint-react/var': 1.38.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
+      '@eslint-react/ast': 1.38.2(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
+      '@eslint-react/core': 1.38.2(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
+      '@eslint-react/eff': 1.38.2
+      '@eslint-react/jsx': 1.38.2(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
+      '@eslint-react/kit': 1.38.2(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
+      '@eslint-react/shared': 1.38.2(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
+      '@eslint-react/var': 1.38.2(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
       '@typescript-eslint/scope-manager': 8.28.0
       '@typescript-eslint/type-utils': 8.28.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
       '@typescript-eslint/types': 8.28.0
@@ -15794,7 +15622,7 @@ snapshots:
 
   estree-walker@3.0.3:
     dependencies:
-      '@types/estree': 1.0.6
+      '@types/estree': 1.0.7
 
   esutils@2.0.3: {}
 
@@ -15853,14 +15681,6 @@ snapshots:
   fast-diff@1.3.0: {}
 
   fast-equals@4.0.3: {}
-
-  fast-glob@3.3.2:
-    dependencies:
-      '@nodelib/fs.stat': 2.0.5
-      '@nodelib/fs.walk': 1.2.8
-      glob-parent: 5.1.2
-      merge2: 1.4.1
-      micromatch: 4.0.8
 
   fast-glob@3.3.3:
     dependencies:
@@ -15968,12 +15788,6 @@ snapshots:
       typescript: 5.8.2
       webpack: 5.98.0(@swc/core@1.10.18)(esbuild@0.25.1)
 
-  form-data@4.0.0:
-    dependencies:
-      asynckit: 0.4.0
-      combined-stream: 1.0.8
-      mime-types: 2.1.35
-
   form-data@4.0.2:
     dependencies:
       asynckit: 0.4.0
@@ -16031,27 +15845,6 @@ snapshots:
   get-caller-file@2.0.5: {}
 
   get-east-asian-width@1.3.0: {}
-
-  get-intrinsic@1.2.4:
-    dependencies:
-      es-errors: 1.3.0
-      function-bind: 1.1.2
-      has-proto: 1.0.3
-      has-symbols: 1.0.3
-      hasown: 2.0.2
-
-  get-intrinsic@1.2.6:
-    dependencies:
-      call-bind-apply-helpers: 1.0.1
-      dunder-proto: 1.0.1
-      es-define-property: 1.0.1
-      es-errors: 1.3.0
-      es-object-atoms: 1.0.0
-      function-bind: 1.1.2
-      gopd: 1.2.0
-      has-symbols: 1.1.0
-      hasown: 2.0.2
-      math-intrinsics: 1.1.0
 
   get-intrinsic@1.2.7:
     dependencies:
@@ -16198,10 +15991,6 @@ snapshots:
       slash: 5.1.0
       unicorn-magic: 0.1.0
 
-  gopd@1.0.1:
-    dependencies:
-      get-intrinsic: 1.2.4
-
   gopd@1.2.0: {}
 
   graceful-fs@4.2.10: {}
@@ -16233,21 +16022,17 @@ snapshots:
 
   has-property-descriptors@1.0.2:
     dependencies:
-      es-define-property: 1.0.0
-
-  has-proto@1.0.3: {}
+      es-define-property: 1.0.1
 
   has-proto@1.2.0:
     dependencies:
       dunder-proto: 1.0.1
 
-  has-symbols@1.0.3: {}
-
   has-symbols@1.1.0: {}
 
   has-tostringtag@1.0.2:
     dependencies:
-      has-symbols: 1.0.3
+      has-symbols: 1.1.0
 
   hasown@2.0.2:
     dependencies:
@@ -16410,7 +16195,7 @@ snapshots:
 
   is-arguments@1.1.1:
     dependencies:
-      call-bind: 1.0.7
+      call-bind: 1.0.8
       has-tostringtag: 1.0.2
 
   is-array-buffer@3.0.5:
@@ -16483,10 +16268,6 @@ snapshots:
     dependencies:
       get-east-asian-width: 1.3.0
 
-  is-generator-function@1.0.10:
-    dependencies:
-      has-tostringtag: 1.0.2
-
   is-generator-function@1.1.0:
     dependencies:
       call-bound: 1.0.3
@@ -16527,7 +16308,7 @@ snapshots:
 
   is-nan@1.3.2:
     dependencies:
-      call-bind: 1.0.7
+      call-bind: 1.0.8
       define-properties: 1.2.1
 
   is-npm@6.0.0: {}
@@ -16588,10 +16369,6 @@ snapshots:
   is-text-path@2.0.0:
     dependencies:
       text-extensions: 2.4.0
-
-  is-typed-array@1.1.13:
-    dependencies:
-      which-typed-array: 1.1.15
 
   is-typed-array@1.1.15:
     dependencies:
@@ -16725,8 +16502,6 @@ snapshots:
       merge-stream: 2.0.0
       supports-color: 8.1.1
 
-  jiti@1.21.6: {}
-
   jiti@1.21.7: {}
 
   jiti@2.4.2: {}
@@ -16750,7 +16525,7 @@ snapshots:
       cssstyle: 4.0.1
       data-urls: 5.0.0
       decimal.js: 10.4.3
-      form-data: 4.0.0
+      form-data: 4.0.2
       html-encoding-sniffer: 4.0.0
       http-proxy-agent: 7.0.2
       https-proxy-agent: 7.0.6
@@ -17404,7 +17179,7 @@ snapshots:
   mlly@1.7.4:
     dependencies:
       acorn: 8.14.0
-      pathe: 2.0.2
+      pathe: 2.0.3
       pkg-types: 1.3.1
       ufo: 1.5.4
 
@@ -17437,8 +17212,6 @@ snapshots:
       thenify-all: 1.6.0
 
   n-gram@2.0.2: {}
-
-  nanoid@3.3.11: {}
 
   nanoid@3.3.8: {}
 
@@ -17476,7 +17249,7 @@ snapshots:
   normalize-package-data@6.0.2:
     dependencies:
       hosted-git-info: 7.0.2
-      semver: 7.6.3
+      semver: 7.7.1
       validate-npm-package-license: 3.0.4
 
   normalize-path@3.0.0: {}
@@ -17509,7 +17282,7 @@ snapshots:
 
   object-is@1.1.6:
     dependencies:
-      call-bind: 1.0.7
+      call-bind: 1.0.8
       define-properties: 1.2.1
 
   object-keys@1.1.1: {}
@@ -17732,7 +17505,7 @@ snapshots:
 
   parse-json@8.1.0:
     dependencies:
-      '@babel/code-frame': 7.26.0
+      '@babel/code-frame': 7.26.2
       index-to-position: 0.1.2
       type-fest: 4.26.1
 
@@ -17788,8 +17561,6 @@ snapshots:
 
   path-type@5.0.0: {}
 
-  pathe@2.0.2: {}
-
   pathe@2.0.3: {}
 
   pathval@2.0.0: {}
@@ -17817,7 +17588,7 @@ snapshots:
     dependencies:
       confbox: 0.1.8
       mlly: 1.7.4
-      pathe: 2.0.2
+      pathe: 2.0.3
 
   pkg-types@2.1.0:
     dependencies:
@@ -17845,140 +17616,140 @@ snapshots:
 
   possible-typed-array-names@1.0.0: {}
 
-  postcss-attribute-case-insensitive@7.0.1(postcss@8.4.49):
+  postcss-attribute-case-insensitive@7.0.1(postcss@8.5.3):
     dependencies:
-      postcss: 8.4.49
+      postcss: 8.5.3
       postcss-selector-parser: 7.1.0
 
-  postcss-clamp@4.1.0(postcss@8.4.49):
+  postcss-clamp@4.1.0(postcss@8.5.3):
     dependencies:
-      postcss: 8.4.49
+      postcss: 8.5.3
       postcss-value-parser: 4.2.0
 
-  postcss-color-functional-notation@7.0.8(postcss@8.4.49):
+  postcss-color-functional-notation@7.0.8(postcss@8.5.3):
     dependencies:
       '@csstools/css-color-parser': 3.0.8(@csstools/css-parser-algorithms@3.0.4(@csstools/css-tokenizer@3.0.3))(@csstools/css-tokenizer@3.0.3)
       '@csstools/css-parser-algorithms': 3.0.4(@csstools/css-tokenizer@3.0.3)
       '@csstools/css-tokenizer': 3.0.3
-      '@csstools/postcss-progressive-custom-properties': 4.0.0(postcss@8.4.49)
-      '@csstools/utilities': 2.0.0(postcss@8.4.49)
-      postcss: 8.4.49
+      '@csstools/postcss-progressive-custom-properties': 4.0.0(postcss@8.5.3)
+      '@csstools/utilities': 2.0.0(postcss@8.5.3)
+      postcss: 8.5.3
 
-  postcss-color-hex-alpha@10.0.0(postcss@8.4.49):
+  postcss-color-hex-alpha@10.0.0(postcss@8.5.3):
     dependencies:
-      '@csstools/utilities': 2.0.0(postcss@8.4.49)
-      postcss: 8.4.49
+      '@csstools/utilities': 2.0.0(postcss@8.5.3)
+      postcss: 8.5.3
       postcss-value-parser: 4.2.0
 
-  postcss-color-rebeccapurple@10.0.0(postcss@8.4.49):
+  postcss-color-rebeccapurple@10.0.0(postcss@8.5.3):
     dependencies:
-      '@csstools/utilities': 2.0.0(postcss@8.4.49)
-      postcss: 8.4.49
+      '@csstools/utilities': 2.0.0(postcss@8.5.3)
+      postcss: 8.5.3
       postcss-value-parser: 4.2.0
 
-  postcss-custom-media@11.0.5(postcss@8.4.49):
+  postcss-custom-media@11.0.5(postcss@8.5.3):
     dependencies:
       '@csstools/cascade-layer-name-parser': 2.0.4(@csstools/css-parser-algorithms@3.0.4(@csstools/css-tokenizer@3.0.3))(@csstools/css-tokenizer@3.0.3)
       '@csstools/css-parser-algorithms': 3.0.4(@csstools/css-tokenizer@3.0.3)
       '@csstools/css-tokenizer': 3.0.3
       '@csstools/media-query-list-parser': 4.0.2(@csstools/css-parser-algorithms@3.0.4(@csstools/css-tokenizer@3.0.3))(@csstools/css-tokenizer@3.0.3)
-      postcss: 8.4.49
+      postcss: 8.5.3
 
-  postcss-custom-properties@14.0.4(postcss@8.4.49):
+  postcss-custom-properties@14.0.4(postcss@8.5.3):
     dependencies:
       '@csstools/cascade-layer-name-parser': 2.0.4(@csstools/css-parser-algorithms@3.0.4(@csstools/css-tokenizer@3.0.3))(@csstools/css-tokenizer@3.0.3)
       '@csstools/css-parser-algorithms': 3.0.4(@csstools/css-tokenizer@3.0.3)
       '@csstools/css-tokenizer': 3.0.3
-      '@csstools/utilities': 2.0.0(postcss@8.4.49)
-      postcss: 8.4.49
+      '@csstools/utilities': 2.0.0(postcss@8.5.3)
+      postcss: 8.5.3
       postcss-value-parser: 4.2.0
 
-  postcss-custom-selectors@8.0.4(postcss@8.4.49):
+  postcss-custom-selectors@8.0.4(postcss@8.5.3):
     dependencies:
       '@csstools/cascade-layer-name-parser': 2.0.4(@csstools/css-parser-algorithms@3.0.4(@csstools/css-tokenizer@3.0.3))(@csstools/css-tokenizer@3.0.3)
       '@csstools/css-parser-algorithms': 3.0.4(@csstools/css-tokenizer@3.0.3)
       '@csstools/css-tokenizer': 3.0.3
-      postcss: 8.4.49
+      postcss: 8.5.3
       postcss-selector-parser: 7.1.0
 
-  postcss-dir-pseudo-class@9.0.1(postcss@8.4.49):
+  postcss-dir-pseudo-class@9.0.1(postcss@8.5.3):
     dependencies:
-      postcss: 8.4.49
+      postcss: 8.5.3
       postcss-selector-parser: 7.1.0
 
-  postcss-double-position-gradients@6.0.0(postcss@8.4.49):
+  postcss-double-position-gradients@6.0.0(postcss@8.5.3):
     dependencies:
-      '@csstools/postcss-progressive-custom-properties': 4.0.0(postcss@8.4.49)
-      '@csstools/utilities': 2.0.0(postcss@8.4.49)
-      postcss: 8.4.49
+      '@csstools/postcss-progressive-custom-properties': 4.0.0(postcss@8.5.3)
+      '@csstools/utilities': 2.0.0(postcss@8.5.3)
+      postcss: 8.5.3
       postcss-value-parser: 4.2.0
 
-  postcss-focus-visible@10.0.1(postcss@8.4.49):
+  postcss-focus-visible@10.0.1(postcss@8.5.3):
     dependencies:
-      postcss: 8.4.49
+      postcss: 8.5.3
       postcss-selector-parser: 7.1.0
 
-  postcss-focus-within@9.0.1(postcss@8.4.49):
+  postcss-focus-within@9.0.1(postcss@8.5.3):
     dependencies:
-      postcss: 8.4.49
+      postcss: 8.5.3
       postcss-selector-parser: 7.1.0
 
-  postcss-font-variant@5.0.0(postcss@8.4.49):
+  postcss-font-variant@5.0.0(postcss@8.5.3):
     dependencies:
-      postcss: 8.4.49
+      postcss: 8.5.3
 
-  postcss-gap-properties@6.0.0(postcss@8.4.49):
+  postcss-gap-properties@6.0.0(postcss@8.5.3):
     dependencies:
-      postcss: 8.4.49
+      postcss: 8.5.3
 
-  postcss-image-set-function@7.0.0(postcss@8.4.49):
+  postcss-image-set-function@7.0.0(postcss@8.5.3):
     dependencies:
-      '@csstools/utilities': 2.0.0(postcss@8.4.49)
-      postcss: 8.4.49
+      '@csstools/utilities': 2.0.0(postcss@8.5.3)
+      postcss: 8.5.3
       postcss-value-parser: 4.2.0
 
-  postcss-import@15.1.0(postcss@8.4.49):
+  postcss-import@15.1.0(postcss@8.5.3):
     dependencies:
-      postcss: 8.4.49
+      postcss: 8.5.3
       postcss-value-parser: 4.2.0
       read-cache: 1.0.0
       resolve: 1.22.10
 
-  postcss-js@4.0.1(postcss@8.4.49):
+  postcss-js@4.0.1(postcss@8.5.3):
     dependencies:
       camelcase-css: 2.0.1
-      postcss: 8.4.49
+      postcss: 8.5.3
 
-  postcss-lab-function@7.0.8(postcss@8.4.49):
+  postcss-lab-function@7.0.8(postcss@8.5.3):
     dependencies:
       '@csstools/css-color-parser': 3.0.8(@csstools/css-parser-algorithms@3.0.4(@csstools/css-tokenizer@3.0.3))(@csstools/css-tokenizer@3.0.3)
       '@csstools/css-parser-algorithms': 3.0.4(@csstools/css-tokenizer@3.0.3)
       '@csstools/css-tokenizer': 3.0.3
-      '@csstools/postcss-progressive-custom-properties': 4.0.0(postcss@8.4.49)
-      '@csstools/utilities': 2.0.0(postcss@8.4.49)
-      postcss: 8.4.49
+      '@csstools/postcss-progressive-custom-properties': 4.0.0(postcss@8.5.3)
+      '@csstools/utilities': 2.0.0(postcss@8.5.3)
+      postcss: 8.5.3
 
-  postcss-load-config@4.0.2(postcss@8.4.49):
+  postcss-load-config@4.0.2(postcss@8.5.3):
     dependencies:
       lilconfig: 3.1.3
       yaml: 2.7.0
     optionalDependencies:
-      postcss: 8.4.49
+      postcss: 8.5.3
 
   postcss-loader@8.1.1(postcss@8.5.3)(typescript@5.8.2)(webpack@5.98.0(@swc/core@1.10.18)(esbuild@0.25.1)):
     dependencies:
       cosmiconfig: 9.0.0(typescript@5.8.2)
-      jiti: 1.21.6
+      jiti: 1.21.7
       postcss: 8.5.3
-      semver: 7.6.3
+      semver: 7.7.1
     optionalDependencies:
       webpack: 5.98.0(@swc/core@1.10.18)(esbuild@0.25.1)
     transitivePeerDependencies:
       - typescript
 
-  postcss-logical@8.1.0(postcss@8.4.49):
+  postcss-logical@8.1.0(postcss@8.5.3):
     dependencies:
-      postcss: 8.4.49
+      postcss: 8.5.3
       postcss-value-parser: 4.2.0
 
   postcss-modules-extract-imports@3.1.0(postcss@8.5.3):
@@ -17989,7 +17760,7 @@ snapshots:
     dependencies:
       icss-utils: 5.1.0(postcss@8.5.3)
       postcss: 8.5.3
-      postcss-selector-parser: 6.1.0
+      postcss-selector-parser: 6.1.2
       postcss-value-parser: 4.2.0
 
   postcss-modules-local-by-default@4.2.0(postcss@8.5.3):
@@ -18002,7 +17773,7 @@ snapshots:
   postcss-modules-scope@3.2.0(postcss@8.5.3):
     dependencies:
       postcss: 8.5.3
-      postcss-selector-parser: 6.1.0
+      postcss-selector-parser: 6.1.2
 
   postcss-modules-scope@3.2.1(postcss@8.5.3):
     dependencies:
@@ -18026,121 +17797,116 @@ snapshots:
       postcss-modules-values: 4.0.0(postcss@8.5.3)
       string-hash: 1.1.3
 
-  postcss-nested@6.2.0(postcss@8.4.49):
+  postcss-nested@6.2.0(postcss@8.5.3):
     dependencies:
-      postcss: 8.4.49
+      postcss: 8.5.3
       postcss-selector-parser: 6.1.2
 
-  postcss-nesting@13.0.1(postcss@8.4.49):
+  postcss-nesting@13.0.1(postcss@8.5.3):
     dependencies:
       '@csstools/selector-resolve-nested': 3.0.0(postcss-selector-parser@7.1.0)
       '@csstools/selector-specificity': 5.0.0(postcss-selector-parser@7.1.0)
-      postcss: 8.4.49
+      postcss: 8.5.3
       postcss-selector-parser: 7.1.0
 
-  postcss-opacity-percentage@3.0.0(postcss@8.4.49):
+  postcss-opacity-percentage@3.0.0(postcss@8.5.3):
     dependencies:
-      postcss: 8.4.49
+      postcss: 8.5.3
 
-  postcss-overflow-shorthand@6.0.0(postcss@8.4.49):
+  postcss-overflow-shorthand@6.0.0(postcss@8.5.3):
     dependencies:
-      postcss: 8.4.49
+      postcss: 8.5.3
       postcss-value-parser: 4.2.0
 
-  postcss-page-break@3.0.4(postcss@8.4.49):
+  postcss-page-break@3.0.4(postcss@8.5.3):
     dependencies:
-      postcss: 8.4.49
+      postcss: 8.5.3
 
-  postcss-place@10.0.0(postcss@8.4.49):
+  postcss-place@10.0.0(postcss@8.5.3):
     dependencies:
-      postcss: 8.4.49
+      postcss: 8.5.3
       postcss-value-parser: 4.2.0
 
-  postcss-preset-env@10.1.5(postcss@8.4.49):
+  postcss-preset-env@10.1.5(postcss@8.5.3):
     dependencies:
-      '@csstools/postcss-cascade-layers': 5.0.1(postcss@8.4.49)
-      '@csstools/postcss-color-function': 4.0.8(postcss@8.4.49)
-      '@csstools/postcss-color-mix-function': 3.0.8(postcss@8.4.49)
-      '@csstools/postcss-content-alt-text': 2.0.4(postcss@8.4.49)
-      '@csstools/postcss-exponential-functions': 2.0.7(postcss@8.4.49)
-      '@csstools/postcss-font-format-keywords': 4.0.0(postcss@8.4.49)
-      '@csstools/postcss-gamut-mapping': 2.0.8(postcss@8.4.49)
-      '@csstools/postcss-gradients-interpolation-method': 5.0.8(postcss@8.4.49)
-      '@csstools/postcss-hwb-function': 4.0.8(postcss@8.4.49)
-      '@csstools/postcss-ic-unit': 4.0.0(postcss@8.4.49)
-      '@csstools/postcss-initial': 2.0.1(postcss@8.4.49)
-      '@csstools/postcss-is-pseudo-class': 5.0.1(postcss@8.4.49)
-      '@csstools/postcss-light-dark-function': 2.0.7(postcss@8.4.49)
-      '@csstools/postcss-logical-float-and-clear': 3.0.0(postcss@8.4.49)
-      '@csstools/postcss-logical-overflow': 2.0.0(postcss@8.4.49)
-      '@csstools/postcss-logical-overscroll-behavior': 2.0.0(postcss@8.4.49)
-      '@csstools/postcss-logical-resize': 3.0.0(postcss@8.4.49)
-      '@csstools/postcss-logical-viewport-units': 3.0.3(postcss@8.4.49)
-      '@csstools/postcss-media-minmax': 2.0.7(postcss@8.4.49)
-      '@csstools/postcss-media-queries-aspect-ratio-number-values': 3.0.4(postcss@8.4.49)
-      '@csstools/postcss-nested-calc': 4.0.0(postcss@8.4.49)
-      '@csstools/postcss-normalize-display-values': 4.0.0(postcss@8.4.49)
-      '@csstools/postcss-oklab-function': 4.0.8(postcss@8.4.49)
-      '@csstools/postcss-progressive-custom-properties': 4.0.0(postcss@8.4.49)
-      '@csstools/postcss-random-function': 1.0.3(postcss@8.4.49)
-      '@csstools/postcss-relative-color-syntax': 3.0.8(postcss@8.4.49)
-      '@csstools/postcss-scope-pseudo-class': 4.0.1(postcss@8.4.49)
-      '@csstools/postcss-sign-functions': 1.1.2(postcss@8.4.49)
-      '@csstools/postcss-stepped-value-functions': 4.0.7(postcss@8.4.49)
-      '@csstools/postcss-text-decoration-shorthand': 4.0.2(postcss@8.4.49)
-      '@csstools/postcss-trigonometric-functions': 4.0.7(postcss@8.4.49)
-      '@csstools/postcss-unset-value': 4.0.0(postcss@8.4.49)
-      autoprefixer: 10.4.21(postcss@8.4.49)
+      '@csstools/postcss-cascade-layers': 5.0.1(postcss@8.5.3)
+      '@csstools/postcss-color-function': 4.0.8(postcss@8.5.3)
+      '@csstools/postcss-color-mix-function': 3.0.8(postcss@8.5.3)
+      '@csstools/postcss-content-alt-text': 2.0.4(postcss@8.5.3)
+      '@csstools/postcss-exponential-functions': 2.0.7(postcss@8.5.3)
+      '@csstools/postcss-font-format-keywords': 4.0.0(postcss@8.5.3)
+      '@csstools/postcss-gamut-mapping': 2.0.8(postcss@8.5.3)
+      '@csstools/postcss-gradients-interpolation-method': 5.0.8(postcss@8.5.3)
+      '@csstools/postcss-hwb-function': 4.0.8(postcss@8.5.3)
+      '@csstools/postcss-ic-unit': 4.0.0(postcss@8.5.3)
+      '@csstools/postcss-initial': 2.0.1(postcss@8.5.3)
+      '@csstools/postcss-is-pseudo-class': 5.0.1(postcss@8.5.3)
+      '@csstools/postcss-light-dark-function': 2.0.7(postcss@8.5.3)
+      '@csstools/postcss-logical-float-and-clear': 3.0.0(postcss@8.5.3)
+      '@csstools/postcss-logical-overflow': 2.0.0(postcss@8.5.3)
+      '@csstools/postcss-logical-overscroll-behavior': 2.0.0(postcss@8.5.3)
+      '@csstools/postcss-logical-resize': 3.0.0(postcss@8.5.3)
+      '@csstools/postcss-logical-viewport-units': 3.0.3(postcss@8.5.3)
+      '@csstools/postcss-media-minmax': 2.0.7(postcss@8.5.3)
+      '@csstools/postcss-media-queries-aspect-ratio-number-values': 3.0.4(postcss@8.5.3)
+      '@csstools/postcss-nested-calc': 4.0.0(postcss@8.5.3)
+      '@csstools/postcss-normalize-display-values': 4.0.0(postcss@8.5.3)
+      '@csstools/postcss-oklab-function': 4.0.8(postcss@8.5.3)
+      '@csstools/postcss-progressive-custom-properties': 4.0.0(postcss@8.5.3)
+      '@csstools/postcss-random-function': 1.0.3(postcss@8.5.3)
+      '@csstools/postcss-relative-color-syntax': 3.0.8(postcss@8.5.3)
+      '@csstools/postcss-scope-pseudo-class': 4.0.1(postcss@8.5.3)
+      '@csstools/postcss-sign-functions': 1.1.2(postcss@8.5.3)
+      '@csstools/postcss-stepped-value-functions': 4.0.7(postcss@8.5.3)
+      '@csstools/postcss-text-decoration-shorthand': 4.0.2(postcss@8.5.3)
+      '@csstools/postcss-trigonometric-functions': 4.0.7(postcss@8.5.3)
+      '@csstools/postcss-unset-value': 4.0.0(postcss@8.5.3)
+      autoprefixer: 10.4.21(postcss@8.5.3)
       browserslist: 4.24.4
-      css-blank-pseudo: 7.0.1(postcss@8.4.49)
-      css-has-pseudo: 7.0.2(postcss@8.4.49)
-      css-prefers-color-scheme: 10.0.0(postcss@8.4.49)
+      css-blank-pseudo: 7.0.1(postcss@8.5.3)
+      css-has-pseudo: 7.0.2(postcss@8.5.3)
+      css-prefers-color-scheme: 10.0.0(postcss@8.5.3)
       cssdb: 8.2.3
-      postcss: 8.4.49
-      postcss-attribute-case-insensitive: 7.0.1(postcss@8.4.49)
-      postcss-clamp: 4.1.0(postcss@8.4.49)
-      postcss-color-functional-notation: 7.0.8(postcss@8.4.49)
-      postcss-color-hex-alpha: 10.0.0(postcss@8.4.49)
-      postcss-color-rebeccapurple: 10.0.0(postcss@8.4.49)
-      postcss-custom-media: 11.0.5(postcss@8.4.49)
-      postcss-custom-properties: 14.0.4(postcss@8.4.49)
-      postcss-custom-selectors: 8.0.4(postcss@8.4.49)
-      postcss-dir-pseudo-class: 9.0.1(postcss@8.4.49)
-      postcss-double-position-gradients: 6.0.0(postcss@8.4.49)
-      postcss-focus-visible: 10.0.1(postcss@8.4.49)
-      postcss-focus-within: 9.0.1(postcss@8.4.49)
-      postcss-font-variant: 5.0.0(postcss@8.4.49)
-      postcss-gap-properties: 6.0.0(postcss@8.4.49)
-      postcss-image-set-function: 7.0.0(postcss@8.4.49)
-      postcss-lab-function: 7.0.8(postcss@8.4.49)
-      postcss-logical: 8.1.0(postcss@8.4.49)
-      postcss-nesting: 13.0.1(postcss@8.4.49)
-      postcss-opacity-percentage: 3.0.0(postcss@8.4.49)
-      postcss-overflow-shorthand: 6.0.0(postcss@8.4.49)
-      postcss-page-break: 3.0.4(postcss@8.4.49)
-      postcss-place: 10.0.0(postcss@8.4.49)
-      postcss-pseudo-class-any-link: 10.0.1(postcss@8.4.49)
-      postcss-replace-overflow-wrap: 4.0.0(postcss@8.4.49)
-      postcss-selector-not: 8.0.1(postcss@8.4.49)
+      postcss: 8.5.3
+      postcss-attribute-case-insensitive: 7.0.1(postcss@8.5.3)
+      postcss-clamp: 4.1.0(postcss@8.5.3)
+      postcss-color-functional-notation: 7.0.8(postcss@8.5.3)
+      postcss-color-hex-alpha: 10.0.0(postcss@8.5.3)
+      postcss-color-rebeccapurple: 10.0.0(postcss@8.5.3)
+      postcss-custom-media: 11.0.5(postcss@8.5.3)
+      postcss-custom-properties: 14.0.4(postcss@8.5.3)
+      postcss-custom-selectors: 8.0.4(postcss@8.5.3)
+      postcss-dir-pseudo-class: 9.0.1(postcss@8.5.3)
+      postcss-double-position-gradients: 6.0.0(postcss@8.5.3)
+      postcss-focus-visible: 10.0.1(postcss@8.5.3)
+      postcss-focus-within: 9.0.1(postcss@8.5.3)
+      postcss-font-variant: 5.0.0(postcss@8.5.3)
+      postcss-gap-properties: 6.0.0(postcss@8.5.3)
+      postcss-image-set-function: 7.0.0(postcss@8.5.3)
+      postcss-lab-function: 7.0.8(postcss@8.5.3)
+      postcss-logical: 8.1.0(postcss@8.5.3)
+      postcss-nesting: 13.0.1(postcss@8.5.3)
+      postcss-opacity-percentage: 3.0.0(postcss@8.5.3)
+      postcss-overflow-shorthand: 6.0.0(postcss@8.5.3)
+      postcss-page-break: 3.0.4(postcss@8.5.3)
+      postcss-place: 10.0.0(postcss@8.5.3)
+      postcss-pseudo-class-any-link: 10.0.1(postcss@8.5.3)
+      postcss-replace-overflow-wrap: 4.0.0(postcss@8.5.3)
+      postcss-selector-not: 8.0.1(postcss@8.5.3)
 
-  postcss-pseudo-class-any-link@10.0.1(postcss@8.4.49):
+  postcss-pseudo-class-any-link@10.0.1(postcss@8.5.3):
     dependencies:
-      postcss: 8.4.49
+      postcss: 8.5.3
       postcss-selector-parser: 7.1.0
 
-  postcss-replace-overflow-wrap@4.0.0(postcss@8.4.49):
+  postcss-replace-overflow-wrap@4.0.0(postcss@8.5.3):
     dependencies:
-      postcss: 8.4.49
+      postcss: 8.5.3
 
-  postcss-selector-not@8.0.1(postcss@8.4.49):
+  postcss-selector-not@8.0.1(postcss@8.5.3):
     dependencies:
-      postcss: 8.4.49
+      postcss: 8.5.3
       postcss-selector-parser: 7.1.0
-
-  postcss-selector-parser@6.1.0:
-    dependencies:
-      cssesc: 3.0.0
-      util-deprecate: 1.0.2
 
   postcss-selector-parser@6.1.2:
     dependencies:
@@ -18153,12 +17919,6 @@ snapshots:
       util-deprecate: 1.0.2
 
   postcss-value-parser@4.2.0: {}
-
-  postcss@8.4.49:
-    dependencies:
-      nanoid: 3.3.11
-      picocolors: 1.1.1
-      source-map-js: 1.2.1
 
   postcss@8.5.3:
     dependencies:
@@ -18276,17 +18036,17 @@ snapshots:
 
   rc-dialog@9.6.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0):
     dependencies:
-      '@babel/runtime': 7.25.4
+      '@babel/runtime': 7.26.9
       '@rc-component/portal': 1.1.2(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       classnames: 2.5.1
-      rc-motion: 2.9.2(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
-      rc-util: 5.43.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      rc-motion: 2.9.3(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      rc-util: 5.44.2(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       react: 19.0.0
       react-dom: 19.0.0(react@19.0.0)
 
   rc-dropdown@4.2.1(react-dom@19.0.0(react@19.0.0))(react@19.0.0):
     dependencies:
-      '@babel/runtime': 7.26.0
+      '@babel/runtime': 7.26.9
       '@rc-component/trigger': 2.2.6(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       classnames: 2.5.1
       rc-util: 5.44.2(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
@@ -18295,75 +18055,67 @@ snapshots:
 
   rc-input-number@9.3.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0):
     dependencies:
-      '@babel/runtime': 7.26.0
+      '@babel/runtime': 7.26.9
       '@rc-component/mini-decimal': 1.1.0
       classnames: 2.5.1
       rc-input: 1.6.3(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
-      rc-util: 5.43.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      rc-util: 5.44.2(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       react: 19.0.0
       react-dom: 19.0.0(react@19.0.0)
 
   rc-input@1.6.3(react-dom@19.0.0(react@19.0.0))(react@19.0.0):
     dependencies:
-      '@babel/runtime': 7.25.0
+      '@babel/runtime': 7.26.9
       classnames: 2.5.1
-      rc-util: 5.43.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      rc-util: 5.44.2(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       react: 19.0.0
       react-dom: 19.0.0(react@19.0.0)
 
   rc-menu@9.16.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0):
     dependencies:
-      '@babel/runtime': 7.26.0
+      '@babel/runtime': 7.26.9
       '@rc-component/trigger': 2.2.6(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       classnames: 2.5.1
       rc-motion: 2.9.3(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       rc-overflow: 1.3.2(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
-      rc-util: 5.43.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
-      react: 19.0.0
-      react-dom: 19.0.0(react@19.0.0)
-
-  rc-motion@2.9.2(react-dom@19.0.0(react@19.0.0))(react@19.0.0):
-    dependencies:
-      '@babel/runtime': 7.25.4
-      classnames: 2.5.1
-      rc-util: 5.43.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      rc-util: 5.44.2(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       react: 19.0.0
       react-dom: 19.0.0(react@19.0.0)
 
   rc-motion@2.9.3(react-dom@19.0.0(react@19.0.0))(react@19.0.0):
     dependencies:
-      '@babel/runtime': 7.26.0
+      '@babel/runtime': 7.26.9
       classnames: 2.5.1
-      rc-util: 5.43.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      rc-util: 5.44.2(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       react: 19.0.0
       react-dom: 19.0.0(react@19.0.0)
 
   rc-notification@5.6.2(react-dom@19.0.0(react@19.0.0))(react@19.0.0):
     dependencies:
-      '@babel/runtime': 7.25.4
+      '@babel/runtime': 7.26.9
       classnames: 2.5.1
-      rc-motion: 2.9.2(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
-      rc-util: 5.43.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      rc-motion: 2.9.3(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      rc-util: 5.44.2(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       react: 19.0.0
       react-dom: 19.0.0(react@19.0.0)
 
   rc-overflow@1.3.2(react-dom@19.0.0(react@19.0.0))(react@19.0.0):
     dependencies:
-      '@babel/runtime': 7.26.0
+      '@babel/runtime': 7.26.9
       classnames: 2.5.1
       rc-resize-observer: 1.4.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
-      rc-util: 5.43.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      rc-util: 5.44.2(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       react: 19.0.0
       react-dom: 19.0.0(react@19.0.0)
 
   rc-picker@4.9.0(dayjs@1.11.13)(react-dom@19.0.0(react@19.0.0))(react@19.0.0):
     dependencies:
-      '@babel/runtime': 7.26.0
+      '@babel/runtime': 7.26.9
       '@rc-component/trigger': 2.2.6(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       classnames: 2.5.1
       rc-overflow: 1.3.2(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       rc-resize-observer: 1.4.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
-      rc-util: 5.43.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      rc-util: 5.44.2(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       react: 19.0.0
       react-dom: 19.0.0(react@19.0.0)
     optionalDependencies:
@@ -18371,42 +18123,35 @@ snapshots:
 
   rc-resize-observer@1.4.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0):
     dependencies:
-      '@babel/runtime': 7.24.7
+      '@babel/runtime': 7.26.9
       classnames: 2.5.1
-      rc-util: 5.43.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      rc-util: 5.44.2(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       react: 19.0.0
       react-dom: 19.0.0(react@19.0.0)
       resize-observer-polyfill: 1.5.1
 
   rc-select@14.16.4(react-dom@19.0.0(react@19.0.0))(react@19.0.0):
     dependencies:
-      '@babel/runtime': 7.26.0
+      '@babel/runtime': 7.26.9
       '@rc-component/trigger': 2.2.6(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       classnames: 2.5.1
       rc-motion: 2.9.3(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       rc-overflow: 1.3.2(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
-      rc-util: 5.43.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      rc-util: 5.44.2(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       rc-virtual-list: 3.16.1(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       react: 19.0.0
       react-dom: 19.0.0(react@19.0.0)
 
-  rc-util@5.43.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0):
-    dependencies:
-      '@babel/runtime': 7.24.7
-      react: 19.0.0
-      react-dom: 19.0.0(react@19.0.0)
-      react-is: 18.3.1
-
   rc-util@5.44.2(react-dom@19.0.0(react@19.0.0))(react@19.0.0):
     dependencies:
-      '@babel/runtime': 7.26.0
+      '@babel/runtime': 7.26.9
       react: 19.0.0
       react-dom: 19.0.0(react@19.0.0)
       react-is: 18.3.1
 
   rc-virtual-list@3.16.1(react-dom@19.0.0(react@19.0.0))(react@19.0.0):
     dependencies:
-      '@babel/runtime': 7.26.0
+      '@babel/runtime': 7.26.9
       classnames: 2.5.1
       rc-resize-observer: 1.4.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       rc-util: 5.44.2(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
@@ -18499,17 +18244,6 @@ snapshots:
       react: 19.0.0
       react-dom: 19.0.0(react@19.0.0)
 
-  react-grid-layout@1.4.4(react-dom@19.0.0(react@19.0.0))(react@19.0.0):
-    dependencies:
-      clsx: 2.1.1
-      fast-equals: 4.0.3
-      prop-types: 15.8.1
-      react: 19.0.0
-      react-dom: 19.0.0(react@19.0.0)
-      react-draggable: 4.4.6(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
-      react-resizable: 3.0.5(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
-      resize-observer-polyfill: 1.5.1
-
   react-grid-layout@1.5.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0):
     dependencies:
       clsx: 2.1.1
@@ -18586,7 +18320,7 @@ snapshots:
 
   react-transition-group@4.4.5(react-dom@19.0.0(react@19.0.0))(react@19.0.0):
     dependencies:
-      '@babel/runtime': 7.26.0
+      '@babel/runtime': 7.26.9
       dom-helpers: 5.2.1
       loose-envify: 1.4.0
       prop-types: 15.8.1
@@ -18960,8 +18694,8 @@ snapshots:
       define-data-property: 1.1.4
       es-errors: 1.3.0
       function-bind: 1.1.2
-      get-intrinsic: 1.2.4
-      gopd: 1.0.1
+      get-intrinsic: 1.2.7
+      gopd: 1.2.0
       has-property-descriptors: 1.0.2
 
   set-function-name@2.0.2:
@@ -18998,14 +18732,14 @@ snapshots:
     dependencies:
       call-bound: 1.0.3
       es-errors: 1.3.0
-      get-intrinsic: 1.2.6
+      get-intrinsic: 1.2.7
       object-inspect: 1.13.3
 
   side-channel-weakmap@1.0.2:
     dependencies:
       call-bound: 1.0.3
       es-errors: 1.3.0
-      get-intrinsic: 1.2.6
+      get-intrinsic: 1.2.7
       object-inspect: 1.13.3
       side-channel-map: 1.0.1
 
@@ -19106,7 +18840,7 @@ snapshots:
 
   storybook-addon-swc@1.2.0(@swc/core@1.10.18)(terser-webpack-plugin@5.3.11(@swc/core@1.10.18)(esbuild@0.25.1)(webpack@5.98.0(@swc/core@1.10.18)(esbuild@0.25.1)))(webpack@5.98.0(@swc/core@1.10.18)(esbuild@0.25.1)):
     dependencies:
-      '@babel/runtime': 7.24.7
+      '@babel/runtime': 7.26.9
       '@swc/core': 1.10.18
       deepmerge: 4.3.1
       swc-loader: 0.1.16(@swc/core@1.10.18)(webpack@5.98.0(@swc/core@1.10.18)(esbuild@0.25.1))
@@ -19304,7 +19038,7 @@ snapshots:
       chokidar: 3.6.0
       didyoumean: 1.2.2
       dlv: 1.1.3
-      fast-glob: 3.3.2
+      fast-glob: 3.3.3
       glob-parent: 6.0.2
       is-glob: 4.0.3
       jiti: 1.21.7
@@ -19313,11 +19047,11 @@ snapshots:
       normalize-path: 3.0.0
       object-hash: 3.0.0
       picocolors: 1.1.1
-      postcss: 8.4.49
-      postcss-import: 15.1.0(postcss@8.4.49)
-      postcss-js: 4.0.1(postcss@8.4.49)
-      postcss-load-config: 4.0.2(postcss@8.4.49)
-      postcss-nested: 6.2.0(postcss@8.4.49)
+      postcss: 8.5.3
+      postcss-import: 15.1.0(postcss@8.5.3)
+      postcss-js: 4.0.1(postcss@8.5.3)
+      postcss-load-config: 4.0.2(postcss@8.5.3)
+      postcss-nested: 6.2.0(postcss@8.5.3)
       postcss-selector-parser: 6.1.2
       resolve: 1.22.10
       sucrase: 3.35.0
@@ -19432,7 +19166,7 @@ snapshots:
   tsconfig-paths-webpack-plugin@4.2.0:
     dependencies:
       chalk: 4.1.2
-      enhanced-resolve: 5.17.1
+      enhanced-resolve: 5.18.1
       tapable: 2.2.1
       tsconfig-paths: 4.2.0
 
@@ -19658,9 +19392,9 @@ snapshots:
     dependencies:
       inherits: 2.0.4
       is-arguments: 1.1.1
-      is-generator-function: 1.0.10
-      is-typed-array: 1.1.13
-      which-typed-array: 1.1.15
+      is-generator-function: 1.1.0
+      is-typed-array: 1.1.15
+      which-typed-array: 1.1.18
 
   utila@0.4.0: {}
 
@@ -19852,7 +19586,7 @@ snapshots:
   webpack@5.98.0(@swc/core@1.10.18)(esbuild@0.25.1):
     dependencies:
       '@types/eslint-scope': 3.7.7
-      '@types/estree': 1.0.6
+      '@types/estree': 1.0.7
       '@webassemblyjs/ast': 1.14.1
       '@webassemblyjs/wasm-edit': 1.14.1
       '@webassemblyjs/wasm-parser': 1.14.1
@@ -19924,14 +19658,6 @@ snapshots:
       is-set: 2.0.3
       is-weakmap: 2.0.2
       is-weakset: 2.0.4
-
-  which-typed-array@1.1.15:
-    dependencies:
-      available-typed-arrays: 1.0.7
-      call-bind: 1.0.7
-      for-each: 0.3.3
-      gopd: 1.0.1
-      has-tostringtag: 1.0.2
 
   which-typed-array@1.1.18:
     dependencies:

@@ -742,7 +742,7 @@ describe('Test set range values commands', () => {
 
                 // undo
                 expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
-                expect(getValues(1, 1, 1, 4)).toStrictEqual([[{}, null, null, {}]]);
+                expect(getValues(1, 1, 1, 4)).toStrictEqual([[null, null, null, null]]);
 
                 // redo
                 expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
@@ -900,7 +900,7 @@ describe('Test set range values commands', () => {
 
                 // undo
                 expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
-                expect(getValues(0, 2, 0, 5)).toStrictEqual([[{ s: 's5' }, { s: 's5' }, {}, { v: 1, t: CellValueType.NUMBER }]]);
+                expect(getValues(0, 2, 0, 5)).toStrictEqual([[{ s: 's5' }, { s: 's5' }, null, { v: 1, t: CellValueType.NUMBER }]]);
 
                 // redo
                 expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();

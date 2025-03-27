@@ -165,7 +165,7 @@ describe('Test auto fill with formula', () => {
                 t: 2,
                 v: 1,
             });
-            expect(B3).toStrictEqual({});
+            expect(B3).toBeNull();
 
             // redo
             expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
@@ -258,12 +258,12 @@ describe('Test auto fill with formula', () => {
             D2 = values && values[1][2];
             D3 = values && values[2][2];
 
-            expect(C1).toStrictEqual({});
-            expect(C2).toStrictEqual({});
-            expect(C3).toStrictEqual({});
-            expect(D1).toStrictEqual({});
-            expect(D2).toStrictEqual({});
-            expect(D3).toStrictEqual({});
+            expect(C1).toBeNull();
+            expect(C2).toBeNull();
+            expect(C3).toBeNull();
+            expect(D1).toBeNull();
+            expect(D2).toBeNull();
+            expect(D3).toBeNull();
 
             // redo
             expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
@@ -339,9 +339,9 @@ describe('Test auto fill with formula', () => {
             A8 = values && values[1][0];
             A9 = values && values[2][0];
 
-            expect(A7).toStrictEqual({});
-            expect(A8).toStrictEqual({});
-            expect(A9).toStrictEqual({});
+            expect(A7).toBeNull();
+            expect(A8).toBeNull();
+            expect(A9).toBeNull();
 
             // redo
             expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
@@ -410,10 +410,10 @@ describe('Test auto fill with formula', () => {
             A18 = values && values[2][0];
             A19 = values && values[3][0];
 
-            expect(A16).toStrictEqual({});
-            expect(A17).toStrictEqual({});
-            expect(A18).toStrictEqual({});
-            expect(A19).toStrictEqual({});
+            expect(A16).toBeNull();
+            expect(A17).toBeNull();
+            expect(A18).toBeNull();
+            expect(A19).toBeNull();
 
             // redo
             expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();

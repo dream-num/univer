@@ -64,8 +64,8 @@
         "build": "univer-cli build"
     },
     "peerDependencies": {
-        "react": ">=16.9.0",
-        "react-dom": ">=16.9.0"
+        "react": "^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc",
+        "react-dom": "^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc"
     },
     "dependencies": {
         "@radix-ui/react-dropdown-menu": "^2.1.6",

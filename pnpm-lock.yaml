@@ -1462,6 +1462,9 @@ importers:
       '@univerjs/drawing-ui':
         specifier: workspace:*
         version: link:../drawing-ui
+      '@univerjs/engine-render':
+        specifier: workspace:*
+        version: link:../engine-render
       '@univerjs/icons':
         specifier: ^0.2.30
         version: 0.2.30(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
@@ -1472,9 +1475,6 @@ importers:
       '@univerjs-infra/shared':
         specifier: workspace:*
         version: link:../../common/shared
-      '@univerjs/engine-render':
-        specifier: workspace:*
-        version: link:../engine-render
       postcss:
         specifier: ^8.5.3
         version: 8.5.3

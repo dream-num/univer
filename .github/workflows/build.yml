@@ -39,5 +39,7 @@ jobs:
                       echo "Error: Uncommitted changes detected after build."
                       echo "Changed files:"
                       git status --porcelain
+                      echo "Diff of changes:"
+                      git diff
                       exit 1
                   fi

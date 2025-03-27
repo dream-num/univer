@@ -15,10 +15,10 @@
  */
 
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import type { IDeleteCommandParams, IInsertCommandParams, IMoveCursorOperationParams } from '@univerjs/docs-ui';
+import type { IDeleteCommandParams, IIMEInputCommandParams, IInsertCommandParams, IMoveCursorOperationParams } from '@univerjs/docs-ui';
 import { DeleteDirection, Direction, Disposable, ICommandService, Inject } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
-import { DeleteCommand, DeleteLeftCommand, InsertCommand, MoveCursorOperation } from '@univerjs/docs-ui';
+import { DeleteCommand, DeleteLeftCommand, IMEInputCommand, InsertCommand, MoveCursorOperation } from '@univerjs/docs-ui';
 import { IShortcutService, KeyCode } from '@univerjs/ui';
 import { CloseQuickInsertPopupOperation, ShowQuickInsertPopupOperation } from '../commands/operations/quick-insert-popup.operation';
 import { DocQuickInsertPopupService } from '../services/doc-quick-insert-popup.service';
@@ -44,9 +44,10 @@ export class DocQuickInsertTriggerController extends Disposable {
         this._initMenuHandler();
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _initTrigger() {
         this.disposeWithMe(
-            // eslint-disable-next-line complexity
+            // eslint-disable-next-line complexity, max-lines-per-function
             this._commandService.onCommandExecuted((commandInfo) => {
                 const { _docQuickInsertPopupService, _textSelectionManagerService, _commandService } = this;
                 if (commandInfo.id === InsertCommand.id) {
@@ -83,6 +84,17 @@ export class DocQuickInsertTriggerController extends Disposable {
                             popup,
                         });
                     }, 100);
+                }
+
+                if (commandInfo.id === IMEInputCommand.id) {
+                    const params = commandInfo.params as IIMEInputCommandParams;
+                    if (!_docQuickInsertPopupService.isComposing && params.isCompositionStart) {
+                        _docQuickInsertPopupService.setIsComposing(true);
+                    }
+
+                    if (_docQuickInsertPopupService.isComposing && params.isCompositionEnd) {
+                        _docQuickInsertPopupService.setIsComposing(false);
+                    }
                 }
 
                 if (commandInfo.id === RichTextEditingMutation.id) {

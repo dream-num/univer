@@ -80,7 +80,7 @@ export {
 export { DeleteCustomBlockCommand, DeleteLeftCommand, DeleteRightCommand, type IDeleteCustomBlockParams, MergeTwoParagraphCommand } from './commands/commands/doc-delete.command';
 export { getCursorWhenDelete } from './commands/commands/doc-delete.command';
 
-export { IMEInputCommand } from './commands/commands/ime-input.command';
+export { type IIMEInputCommandParams, IMEInputCommand } from './commands/commands/ime-input.command';
 export {
     ResetInlineFormatTextBackgroundColorCommand,
     SetInlineFormatBoldCommand,

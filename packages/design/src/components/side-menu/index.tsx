@@ -17,7 +17,7 @@
 import { forwardRef, useImperativeHandle, useRef } from 'react';
 import { clsx } from '../../helper/clsx';
 
-export interface IMenuItem {
+export interface ISideMenuItem {
     text: string;
     level: number;
     id: string;
@@ -25,8 +25,8 @@ export interface IMenuItem {
 }
 
 export interface ISideMenuProps {
-    menus?: IMenuItem[];
-    onClick?: (menu: IMenuItem) => void;
+    menus?: ISideMenuItem[];
+    onClick?: (menu: ISideMenuItem) => void;
     className?: string;
     style?: React.CSSProperties;
     mode?: 'float' | 'side-bar';

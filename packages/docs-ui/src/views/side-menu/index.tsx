@@ -15,6 +15,7 @@
  */
 
 import type { DocumentDataModel } from '@univerjs/core';
+import type { ISideMenuItem } from '@univerjs/design';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IParagraphBound } from '../../services/doc-event-manager.service';
 import { debounce, fromEventSubject, getPlainText, ICommandService, isInternalEditorID, IUniverInstanceService, NamedStyleType, UniverInstanceType } from '@univerjs/core';
@@ -23,7 +24,7 @@ import { RichTextEditingMutation } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useMemo, useState } from 'react';
-import { of } from 'rxjs';
+import { of, throttleTime } from 'rxjs';
 import { VIEWPORT_KEY } from '../../basics/docs-view-key';
 import { DocEventManagerService } from '../../services/doc-event-manager.service';
 
@@ -77,7 +78,7 @@ export function DocSideMenu() {
     const canvasHeight = renderer?.engine.height ?? 0;
     const scaleY = renderer?.scene.scaleY ?? 1;
     const bottom = scrollTop + (canvasHeight / scaleY);
-    useObservable(useMemo(() => (renderer?.engine.onTransformChange$ ? fromEventSubject(renderer?.engine.onTransformChange$) : of(null)), [renderer?.engine.onTransformChange$]));
+    useObservable(useMemo(() => (renderer?.engine.onTransformChange$ ? fromEventSubject(renderer?.engine.onTransformChange$).pipe(throttleTime(33)) : of(null)), [renderer?.engine.onTransformChange$]));
     const mode = left < 180 ? 'float' : 'side-bar';
     let minLevel = Infinity;
     const menus = paragraphBounds?.filter(({ paragraph: p }) => p.paragraphStyle?.namedStyleType !== undefined && p.paragraphStyle!.namedStyleType !== NamedStyleType.SUBTITLE).map(({ paragraph: p }) => {
@@ -116,13 +117,25 @@ export function DocSideMenu() {
             return;
         }
 
-        const sub = fromEventSubject(viewport.onScrollAfter$).subscribe((params) => {
+        const sub = fromEventSubject(viewport.onScrollAfter$).pipe(throttleTime(33)).subscribe((params) => {
             setScrollTop(params.viewportScrollY);
         });
         return () => {
             sub.unsubscribe();
         };
     }, [renderer]);
+
+    const handleClick = (menu: ISideMenuItem) => {
+        const bound = paragraphBounds?.find((p) => p.paragraph.paragraphStyle?.headingId === menu.id);
+        if (!bound) {
+            return;
+        }
+        const viewport = renderer?.scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
+        if (!viewport) {
+            return;
+        }
+        viewport.scrollToViewportPos({ viewportScrollY: bound.rect.top });
+    };
 
     if (!currentDoc || isInternalEditorID(unitId) || !menus?.length) {
         return null;
@@ -138,6 +151,7 @@ export function DocSideMenu() {
                 maxWidth={mode === 'float' ? undefined : Math.floor(left)}
                 wrapperClass="univer-mt-12"
                 activeId={activeId}
+                onClick={handleClick}
             />
         </div>
     );

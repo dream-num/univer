@@ -69,6 +69,8 @@ export class BuildTextUtils {
         },
         util: {
             transform: transformParagraphs,
+            getParagraphsInRange,
+            getParagraphsInRanges,
         },
     };
 

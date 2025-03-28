@@ -27,6 +27,7 @@ export enum QuickListType {
     ORDER_LIST_QUICK_5 = 'A.',
     ORDER_LIST_QUICK_6 = 'I.',
     ORDER_LIST_QUICK_7 = '01.',
+    BULLET_LIST = '*',
 }
 
 export enum PresetListType {
@@ -287,4 +288,5 @@ export const QuickListTypeMap = {
     [QuickListType.ORDER_LIST_QUICK_5]: PresetListType.ORDER_LIST_3,
     [QuickListType.ORDER_LIST_QUICK_6]: PresetListType.ORDER_LIST_QUICK_6,
     [QuickListType.ORDER_LIST_QUICK_7]: PresetListType.ORDER_LIST_5,
+    [QuickListType.BULLET_LIST]: PresetListType.BULLET_LIST,
 };

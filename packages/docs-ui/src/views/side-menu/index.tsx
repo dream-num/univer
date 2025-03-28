@@ -16,13 +16,16 @@
 
 import type { DocumentDataModel } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import { BuildTextUtils, debounce, fromEventSubject, getPlainText, ICommandService, isInternalEditorID, IUniverInstanceService, NamedStyleType, UniverInstanceType } from '@univerjs/core';
+import type { IParagraphBound } from '../../services/doc-event-manager.service';
+import { debounce, fromEventSubject, getPlainText, ICommandService, isInternalEditorID, IUniverInstanceService, NamedStyleType, UniverInstanceType } from '@univerjs/core';
 import { SideMenu } from '@univerjs/design';
 import { RichTextEditingMutation } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useMemo, useState } from 'react';
 import { of } from 'rxjs';
+import { VIEWPORT_KEY } from '../../basics/docs-view-key';
+import { DocEventManagerService } from '../../services/doc-event-manager.service';
 
 const transformNamedStyleTypeToLevel = (type: NamedStyleType) => {
     switch (type) {
@@ -45,22 +48,39 @@ const transformNamedStyleTypeToLevel = (type: NamedStyleType) => {
     }
 };
 
+function findActiveHeading(paragraphBounds: IParagraphBound[], scrollTop: number, bottom: number) {
+    const paragraphIndex = paragraphBounds?.findIndex((p) => p.paragraph.paragraphStart !== p.paragraph.paragraphEnd && p.rect.top < bottom && p.rect.bottom > scrollTop);
+    if (paragraphIndex === -1) return undefined;
+    for (let i = paragraphIndex; i >= 0; i--) {
+        const paragraph = paragraphBounds?.[i];
+        if (paragraph.paragraph.paragraphStyle?.headingId) {
+            return paragraph.paragraph.paragraphStyle.headingId;
+        }
+    }
+
+    return undefined;
+}
+
 export function DocSideMenu() {
     const commandService = useDependency(ICommandService);
     const instanceService = useDependency(IUniverInstanceService);
     const currentDoc = useObservable(useMemo(() => instanceService.getCurrentTypeOfUnit$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC), []));
     const renderManagerService = useDependency(IRenderManagerService);
-    const paragraphs = currentDoc?.getBody()?.paragraphs;
     const fullDataStream = currentDoc?.getBody()?.dataStream ?? '';
     const [_updateKey, setUpdateKey] = useState(0);
     const unitId = currentDoc?.getUnitId() ?? '';
     const renderer = renderManagerService.getRenderById(unitId);
+    const docEventManagerService = renderer?.with(DocEventManagerService);
+    const paragraphBounds = docEventManagerService?.paragraphBounds;
     const left = renderer?.mainComponent?.left ?? 0;
+    const [scrollTop, setScrollTop] = useState(0);
+    const canvasHeight = renderer?.engine.height ?? 0;
+    const scaleY = renderer?.scene.scaleY ?? 1;
+    const bottom = scrollTop + (canvasHeight / scaleY);
     useObservable(useMemo(() => (renderer?.engine.onTransformChange$ ? fromEventSubject(renderer?.engine.onTransformChange$) : of(null)), [renderer?.engine.onTransformChange$]));
     const mode = left < 180 ? 'float' : 'side-bar';
-
     let minLevel = Infinity;
-    const menus = BuildTextUtils.paragraph.util.transform(paragraphs ?? []).filter((p) => p.paragraphStyle?.namedStyleType !== undefined && p.paragraphStyle!.namedStyleType !== NamedStyleType.SUBTITLE).map((p) => {
+    const menus = paragraphBounds?.filter(({ paragraph: p }) => p.paragraphStyle?.namedStyleType !== undefined && p.paragraphStyle!.namedStyleType !== NamedStyleType.SUBTITLE).map(({ paragraph: p }) => {
         const level = transformNamedStyleTypeToLevel(p.paragraphStyle!.namedStyleType!);
         minLevel = Math.min(minLevel, level);
 
@@ -68,9 +88,12 @@ export function DocSideMenu() {
             id: p.paragraphStyle!.headingId!,
             text: getPlainText(fullDataStream.slice(p.paragraphStart, p.paragraphEnd)),
             level,
+            isTitle: p.paragraphStyle?.namedStyleType === NamedStyleType.TITLE,
         };
     });
+
     const [open, setOpen] = useState(false);
+    const activeId = findActiveHeading(paragraphBounds ?? [], scrollTop, bottom);
 
     useEffect(() => {
         const debounceUpdater = debounce(setUpdateKey, 100);
@@ -87,8 +110,21 @@ export function DocSideMenu() {
             sub.dispose();
         };
     }, [commandService, currentDoc]);
+    useEffect(() => {
+        const viewport = renderer?.scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
+        if (!viewport) {
+            return;
+        }
 
-    if (!currentDoc || isInternalEditorID(unitId) || !menus.length) {
+        const sub = fromEventSubject(viewport.onScrollAfter$).subscribe((params) => {
+            setScrollTop(params.viewportScrollY);
+        });
+        return () => {
+            sub.unsubscribe();
+        };
+    }, [renderer]);
+
+    if (!currentDoc || isInternalEditorID(unitId) || !menus?.length) {
         return null;
     }
 
@@ -101,6 +137,7 @@ export function DocSideMenu() {
                 mode={mode}
                 maxWidth={mode === 'float' ? undefined : Math.floor(left)}
                 wrapperClass="univer-mt-12"
+                activeId={activeId}
             />
         </div>
     );

@@ -47,15 +47,14 @@ export interface ISideMenuInstance {
 
 const commonClass = 'univer-overflow-hidden univer-truncate univer-leading-[150%] univer-ellipsis univer-cursor-pointer';
 const titleClass = 'univer-text-base univer-font-semibold';
-const h1Class = 'univer-text-gray-500 univer-text-sm univer-font-semibold';
-const textClass = 'univer-text-gray-500 univer-text-sm';
+const h1Class = 'univer-text-sm univer-font-semibold';
+const textClass = 'univer-text-sm';
 const activeClass = 'univer-text-[#466AF7]';
 
 export const SideMenu = forwardRef<ISideMenuInstance, ISideMenuProps>((props, ref) => {
     const { menus, onClick, className, style, mode, maxHeight, activeId, open, onOpenChange, maxWidth, wrapperClass, wrapperStyle, iconClass, iconStyle } = props;
     const isSideBar = mode === 'side-bar';
     const containerRef = useRef<HTMLDivElement>(null);
-
     const instance: ISideMenuInstance = {
         scrollTo: (id: string) => {
             document.getElementById(`univer-side-menu-${id}`)?.scrollIntoView({ behavior: 'smooth' });
@@ -129,6 +128,7 @@ export const SideMenu = forwardRef<ISideMenuInstance, ISideMenuProps>((props, re
                                     [h1Class]: menu.level === 1,
                                     [textClass]: menu.level > 1,
                                     [activeClass]: menu.id === activeId,
+                                    'univer-text-gray-500': menu.id !== activeId,
                                 }
                             )}
                             style={{

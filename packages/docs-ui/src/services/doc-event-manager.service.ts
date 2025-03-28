@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICustomRange, IParagraph, ITextRangeParam, Nullable } from '@univerjs/core';
+import type { DocumentDataModel, ICustomRange, IParagraph, IParagraphRange, ITextRangeParam, Nullable } from '@univerjs/core';
 import type { Documents, DocumentSkeleton, IBoundRectNoAngle, IDocumentSkeletonGlyph, IDocumentSkeletonPage, IMouseEvent, IPointerEvent, IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import { Disposable, fromEventSubject, Inject } from '@univerjs/core';
+import { BuildTextUtils, Disposable, fromEventSubject, Inject } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { CURSOR_TYPE, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '@univerjs/engine-render';
 import { BehaviorSubject, distinctUntilChanged, filter, map, Subject, switchMap, take, throttleTime } from 'rxjs';
@@ -25,24 +25,29 @@ import { transformOffset2Bound } from './doc-popup-manager.service';
 import { NodePositionConvertToCursor } from './selection/convert-text-range';
 import { getLineBounding } from './selection/text-range';
 
-interface ICustomRangeBound {
+export interface ICustomRangeBound {
     customRange: ICustomRange;
     rects: IBoundRectNoAngle[];
     segmentId?: string;
     segmentPageIndex: number;
 }
 
-interface IBulletBound {
+export interface IBulletBound {
     rect: IBoundRectNoAngle;
     segmentId?: string;
     segmentPageIndex: number;
     paragraph: IParagraph;
 }
 
+export interface IParagraphBound {
+    rect: IBoundRectNoAngle;
+    paragraph: IParagraphRange;
+}
+
 const calcDocRangePositions = (range: ITextRangeParam, documents: Documents, skeleton: DocumentSkeleton, pageIndex: number): IBoundRectNoAngle[] | undefined => {
     const startPosition = skeleton.findNodePositionByCharIndex(range.startOffset, true, range.segmentId, pageIndex);
     const skeletonData = skeleton.getSkeletonData();
-    let end = range.endOffset;
+    let end = range.collapsed ? range.startOffset : range.endOffset - 1;
     if (range.segmentId) {
         const root = Array.from(skeletonData?.skeFooters.get(range.segmentId)?.values() ?? [])[0] ?? Array.from(skeletonData?.skeHeaders.get(range.segmentId)?.values() ?? [])[0];
         if (root) {
@@ -65,6 +70,50 @@ const calcDocRangePositions = (range: ITextRangeParam, documents: Documents, ske
         left: rect.left + documentOffsetConfig.docsLeft,
         right: rect.right + documentOffsetConfig.docsLeft,
     }));
+};
+
+const calcDocParagraphPositions = (startIndex: number, endIndex: number, documents: Documents, skeleton: DocumentSkeleton): Nullable<IBoundRectNoAngle> => {
+    const startPosition = skeleton.findNodePositionByCharIndex(startIndex, true, undefined, -1);
+    const endPosition = skeleton.findNodePositionByCharIndex(endIndex, true, undefined, -1);
+    if (!endPosition || !startPosition) {
+        return null;
+    }
+
+    const documentOffsetConfig = documents.getOffsetConfig();
+    const convertor = new NodePositionConvertToCursor(documentOffsetConfig, skeleton);
+    const { borderBoxPointGroup } = convertor.getRangePointData(startPosition, endPosition);
+    const bounds = getLineBounding(borderBoxPointGroup);
+    if (!bounds.length) {
+        return null;
+    }
+    const rects = bounds.map((rect) => ({
+        top: rect.top + documentOffsetConfig.docsTop - DOC_VERTICAL_PADDING,
+        bottom: rect.bottom + documentOffsetConfig.docsTop + DOC_VERTICAL_PADDING,
+        left: rect.left + documentOffsetConfig.docsLeft,
+        right: rect.right + documentOffsetConfig.docsLeft,
+    }));
+
+    let left;
+    let right;
+    let top;
+    let bottom;
+
+    for (const rect of rects) {
+        if (left === undefined || rect.left < left) {
+            left = rect.left;
+        }
+        if (right === undefined || rect.right > right) {
+            right = rect.right;
+        }
+        if (top === undefined || rect.top < top) {
+            top = rect.top;
+        }
+        if (bottom === undefined || rect.bottom > bottom) {
+            bottom = rect.bottom;
+        }
+    }
+
+    return { left: left!, right: right!, top: top!, bottom: bottom! };
 };
 
 export const calcDocGlyphPosition = (glyph: IDocumentSkeletonGlyph, documents: Documents, skeleton: DocumentSkeleton, pageIndex = -1): IBoundRectNoAngle | undefined => {
@@ -117,6 +166,7 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
 
     private _customRangeDirty = true;
     private _bulletDirty = true;
+    private _paragraphDirty = true;
 
     /**
      * cache the bounding of custom ranges,
@@ -128,6 +178,11 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
      * it will be updated when the doc-skeleton is recalculated
      */
     private _bulletBounds: IBulletBound[] = [];
+    /**
+     * cache the bounding of paragraphs,
+     * it will be updated when the doc-skeleton is recalculated
+     */
+    private _paragraphBounds: IParagraphBound[] = [];
 
     private get _skeleton() {
         return this._docSkeletonManagerService.getSkeleton();
@@ -170,6 +225,7 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
         this.disposeWithMe(this._skeleton.dirty$.subscribe(() => {
             this._customRangeDirty = true;
             this._bulletDirty = true;
+            this._paragraphDirty = true;
         }));
 
         this.disposeWithMe(
@@ -178,6 +234,7 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
             ).subscribe(() => {
                 this._customRangeDirty = true;
                 this._bulletDirty = true;
+                this._paragraphDirty = true;
             })
         );
     }
@@ -221,7 +278,6 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
     private _buildCustomRangeBoundsBySegment(segmentId?: string, segmentPage = -1) {
         const customRanges = this._context.unit.getSelfOrHeaderFooterModel(segmentId)?.getBody()?.customRanges ?? [];
         const layouts: ICustomRangeBound[] = [];
-
         customRanges.forEach((range) => {
             const textRange: ITextRangeParam = {
                 startOffset: range.startIndex,
@@ -386,5 +442,42 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
             return false;
         });
         return bullet;
+    }
+
+    private _buildParagraphBoundsBySegment(segmentId?: string, pageIndex = -1) {
+        const paragraphs = BuildTextUtils.paragraph.util.transform(this._context.unit.getBody()?.paragraphs ?? []);
+        return paragraphs.map((paragraph) => {
+            return {
+                paragraph,
+                segmentId,
+                pageIndex,
+                rect: calcDocParagraphPositions(paragraph.paragraphStart, paragraph.paragraphEnd, this._documents, this._skeleton),
+            } as IParagraphBound;
+        });
+    }
+
+    private _buildParagraphBounds() {
+        if (!this._paragraphDirty) {
+            return;
+        }
+        this._paragraphDirty = false;
+
+        this._paragraphBounds = [];
+        this._paragraphBounds.push(...this._buildParagraphBoundsBySegment());
+
+        this._skeleton.getSkeletonData()?.pages.forEach((page, pageIndex) => {
+            if (page.headerId) {
+                this._paragraphBounds.push(...this._buildParagraphBoundsBySegment(page.headerId, pageIndex));
+            }
+
+            if (page.footerId) {
+                this._paragraphBounds.push(...this._buildParagraphBoundsBySegment(page.footerId, pageIndex));
+            }
+        });
+    }
+
+    get paragraphBounds() {
+        this._buildParagraphBounds();
+        return this._paragraphBounds;
     }
 }

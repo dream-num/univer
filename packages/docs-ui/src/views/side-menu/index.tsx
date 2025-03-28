@@ -16,11 +16,13 @@
 
 import type { DocumentDataModel } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import { BuildTextUtils, getPlainText, ICommandService, IUniverInstanceService, NamedStyleType, UniverInstanceType } from '@univerjs/core';
+import { BuildTextUtils, debounce, fromEventSubject, getPlainText, ICommandService, isInternalEditorID, IUniverInstanceService, NamedStyleType, UniverInstanceType } from '@univerjs/core';
 import { SideMenu } from '@univerjs/design';
 import { RichTextEditingMutation } from '@univerjs/docs';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useMemo, useState } from 'react';
+import { of } from 'rxjs';
 
 const transformNamedStyleTypeToLevel = (type: NamedStyleType) => {
     switch (type) {
@@ -47,9 +49,16 @@ export function DocSideMenu() {
     const commandService = useDependency(ICommandService);
     const instanceService = useDependency(IUniverInstanceService);
     const currentDoc = useObservable(useMemo(() => instanceService.getCurrentTypeOfUnit$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC), []));
+    const renderManagerService = useDependency(IRenderManagerService);
     const paragraphs = currentDoc?.getBody()?.paragraphs;
     const fullDataStream = currentDoc?.getBody()?.dataStream ?? '';
     const [_updateKey, setUpdateKey] = useState(0);
+    const unitId = currentDoc?.getUnitId() ?? '';
+    const renderer = renderManagerService.getRenderById(unitId);
+    const left = renderer?.mainComponent?.left ?? 0;
+    useObservable(useMemo(() => (renderer?.engine.onTransformChange$ ? fromEventSubject(renderer?.engine.onTransformChange$) : of(null)), [renderer?.engine.onTransformChange$]));
+    const mode = left < 180 ? 'float' : 'side-bar';
+
     let minLevel = Infinity;
     const menus = BuildTextUtils.paragraph.util.transform(paragraphs ?? []).filter((p) => p.paragraphStyle?.namedStyleType !== undefined && p.paragraphStyle!.namedStyleType !== NamedStyleType.SUBTITLE).map((p) => {
         const level = transformNamedStyleTypeToLevel(p.paragraphStyle!.namedStyleType!);
@@ -64,11 +73,13 @@ export function DocSideMenu() {
     const [open, setOpen] = useState(false);
 
     useEffect(() => {
+        const debounceUpdater = debounce(setUpdateKey, 100);
+
         const sub = commandService.onCommandExecuted((commandInfo) => {
             if (commandInfo.id === RichTextEditingMutation.id) {
                 const params = commandInfo.params as IRichTextEditingMutationParams;
                 if (params.unitId === currentDoc?.getUnitId()) {
-                    setUpdateKey((prev) => prev + 1);
+                    debounceUpdater((prev) => prev + 1);
                 }
             }
         });
@@ -77,17 +88,20 @@ export function DocSideMenu() {
         };
     }, [commandService, currentDoc]);
 
-    if (!currentDoc || !menus.length) {
+    if (!currentDoc || isInternalEditorID(unitId) || !menus.length) {
         return null;
     }
 
     return (
-        <div
-            className={`
-              univer-absolute univer-bottom-0 univer-left-0 univer-top-0 univer-z-[100] univer-w-[0px] univer-pb-12
-            `}
-        >
-            <SideMenu menus={menus} open={open} onOpenChange={setOpen} mode="side-bar" />
+        <div className="univer-absolute univer-bottom-0 univer-left-0 univer-top-0 univer-z-[100] univer-w-[0px]">
+            <SideMenu
+                menus={menus}
+                open={open}
+                onOpenChange={setOpen}
+                mode={mode}
+                maxWidth={mode === 'float' ? undefined : Math.floor(left)}
+                wrapperClass="univer-mt-12"
+            />
         </div>
     );
 }

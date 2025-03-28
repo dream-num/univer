@@ -34,6 +34,11 @@ export interface ISideMenuProps {
     activeId?: string;
     open?: boolean;
     onOpenChange?: (open: boolean) => void;
+    maxWidth?: number;
+    wrapperClass?: string;
+    wrapperStyle?: React.CSSProperties;
+    iconClass?: string;
+    iconStyle?: React.CSSProperties;
 }
 
 export interface ISideMenuInstance {
@@ -47,7 +52,7 @@ const textClass = 'univer-text-gray-500 univer-text-sm';
 const activeClass = 'univer-text-[#466AF7]';
 
 export const SideMenu = forwardRef<ISideMenuInstance, ISideMenuProps>((props, ref) => {
-    const { menus, onClick, className, style, mode, maxHeight, activeId, open, onOpenChange } = props;
+    const { menus, onClick, className, style, mode, maxHeight, activeId, open, onOpenChange, maxWidth, wrapperClass, wrapperStyle, iconClass, iconStyle } = props;
     const isSideBar = mode === 'side-bar';
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -60,14 +65,15 @@ export const SideMenu = forwardRef<ISideMenuInstance, ISideMenuProps>((props, re
     useImperativeHandle(ref, () => instance);
 
     return (
-        <div className="univer-relative">
+        <div className={clsx('univer-relative', wrapperClass)} style={wrapperStyle}>
             <div
                 onClick={() => onOpenChange?.(!open)}
-                className={`
+                className={clsx(`
                   univer-absolute univer-left-5 univer-top-4 univer-z-[100] univer-flex univer-h-8 univer-w-8
                   univer-cursor-pointer univer-items-center univer-justify-center univer-rounded-full univer-bg-white
                   univer-shadow-[0px_1px_3px_-1px_rgba(30,40,77,0.10),0px_1px_4px_0px_rgba(30,40,77,0.12)]
-                `}
+                `, iconClass)}
+                style={iconStyle}
             >
                 {open ? 'x' : 'o'}
             </div>
@@ -76,8 +82,8 @@ export const SideMenu = forwardRef<ISideMenuInstance, ISideMenuProps>((props, re
                     className,
                     `
                       univer-absolute univer-left-0 univer-top-0 univer-box-border univer-flex univer-min-w-[180px]
-                      univer-max-w-[480px] univer-flex-col univer-pb-4 univer-pl-5 univer-pr-5 univer-pt-14
-                      univer-transition-all univer-duration-300
+                      univer-flex-col univer-pb-4 univer-pl-5 univer-pr-5 univer-pt-14 univer-transition-all
+                      univer-duration-300
                     `,
                     isSideBar
                         ? ''
@@ -93,6 +99,8 @@ export const SideMenu = forwardRef<ISideMenuInstance, ISideMenuProps>((props, re
                     transform: open ? 'translateX(0)' : 'translateX(-100%)',
                     maxHeight,
                     opacity: open ? 1 : 0,
+                    maxWidth: maxWidth ?? 480,
+                    paddingRight: mode === 'float' ? undefined : 0,
                 }}
             >
                 <div

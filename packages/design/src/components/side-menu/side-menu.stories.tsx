@@ -15,7 +15,7 @@
  */
 
 import type { Meta } from '@storybook/react';
-import type { IMenuItem } from './index';
+import type { ISideMenuItem } from './index';
 
 import React, { useState } from 'react';
 import { SideMenu } from './index';
@@ -34,7 +34,7 @@ export default meta;
 export const SideMenuBasic = {
     render() {
         const [open, setOpen] = useState(false);
-        const menus: IMenuItem[] = [
+        const menus: ISideMenuItem[] = [
             { text: 'Section 1', level: 1, id: 'section1' },
             { text: 'Item 1.1', level: 2, id: 'item1.1' },
             { text: 'Item 1.2', level: 2, id: 'item1.2' },
@@ -43,7 +43,7 @@ export const SideMenuBasic = {
             { text: 'Item 2.2', level: 2, id: 'item2.2' },
         ];
 
-        const handleClick = (_menu: IMenuItem) => {
+        const handleClick = (_menu: ISideMenuItem) => {
         };
 
         return (
@@ -67,7 +67,7 @@ export const EmptySideMenu = {
 
 export const CustomStyledSideMenu = {
     render() {
-        const menus: IMenuItem[] = [
+        const menus: ISideMenuItem[] = [
             { text: 'Section 1', level: 1, id: 'section1' },
             { text: 'Item 1.1', level: 2, id: 'item1.1' },
             { text: 'Item 1.2', level: 2, id: 'item1.2' },
@@ -85,7 +85,7 @@ export const CustomStyledSideMenu = {
 
 export const MultiLevelSideMenu = {
     render() {
-        const menus: IMenuItem[] = [
+        const menus: ISideMenuItem[] = [
             { text: 'Section 1', level: 1, id: 'section1' },
             { text: 'Item 1.1', level: 2, id: 'item1.1' },
             { text: 'Subitem 1.1.1', level: 3, id: 'subitem1.1.1' },
@@ -95,7 +95,7 @@ export const MultiLevelSideMenu = {
             { text: 'Item 2.1', level: 2, id: 'item2.1' },
         ];
 
-        const handleClick = (_menu: IMenuItem) => {
+        const handleClick = (_menu: ISideMenuItem) => {
         };
 
         return <SideMenu menus={menus} onClick={handleClick} />;

@@ -15,10 +15,10 @@ export const RemoveRangeThemeMutation: IMutation<IRemoveRangeThemeMutationParams
             return false;
         }
 
-        const { styleName } = params;
+        const { styleName, unitId } = params;
 
         const rangeRuleModel = accessor.get(SheetRangeThemeModel);
-        rangeRuleModel.unRegisterDefaultRangeTheme(styleName);
+        rangeRuleModel.unregisterRangeThemeStyle(unitId, styleName);
 
         return true;
     },

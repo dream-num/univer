@@ -16,12 +16,12 @@ export const AddRangeThemeMutation: IMutation<IAddRangeThemeMutationParams> = {
         if (!params) {
             return false
         }
-        const { styleJSON } = params;
+        const { styleJSON, unitId } = params;
 
         const rangeRuleModel = accessor.get(SheetRangeThemeModel);
         const rangeThemeStyle = new RangeThemeStyle(styleJSON.name);
         rangeThemeStyle.fromJson(styleJSON);
-        rangeRuleModel.registerDefaultRangeTheme(rangeThemeStyle);
+        rangeRuleModel.registerRangeThemeStyle(unitId, rangeThemeStyle);
 
         return true;
     }

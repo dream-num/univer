@@ -45,7 +45,7 @@ export interface ISideMenuInstance {
     scrollTo: (id: string) => void;
 }
 
-const commonClass = 'univer-overflow-hidden univer-truncate univer-leading-[150%] univer-ellipsis univer-cursor-pointer';
+const commonClass = 'univer-overflow-hidden univer-truncate univer-h-[24px] univer-mb-2 univer-leading-[24px] univer-ellipsis univer-cursor-pointer';
 const titleClass = 'univer-text-base univer-font-semibold';
 const h1Class = 'univer-text-sm univer-font-semibold';
 const textClass = 'univer-text-sm';
@@ -104,13 +104,14 @@ export const SideMenu = forwardRef<ISideMenuInstance, ISideMenuProps>((props, re
                     transform: open ? 'translateX(0)' : 'translateX(-100%)',
                     maxHeight,
                     opacity: open ? 1 : 0,
-                    maxWidth: maxWidth ?? 480,
+                    maxWidth: maxWidth ?? (mode === 'side-bar' ? 480 : 180),
                     paddingRight: mode === 'float' ? undefined : 0,
                 }}
             >
                 <div
                     className={`
                       univer-text-xs univer-font-semibold univer-leading-[150%] univer-text-gray-400 univer-font-inter
+                      univer-mb-2
                     `}
                 >
                     contents

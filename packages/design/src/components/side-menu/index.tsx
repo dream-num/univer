@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { forwardRef, useImperativeHandle, useRef } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef } from 'react';
 import { clsx } from '../../helper/clsx';
 
 export interface ISideMenuItem {
@@ -55,13 +55,19 @@ export const SideMenu = forwardRef<ISideMenuInstance, ISideMenuProps>((props, re
     const { menus, onClick, className, style, mode, maxHeight, activeId, open, onOpenChange, maxWidth, wrapperClass, wrapperStyle, iconClass, iconStyle } = props;
     const isSideBar = mode === 'side-bar';
     const containerRef = useRef<HTMLDivElement>(null);
-    const instance: ISideMenuInstance = {
+    const instance: ISideMenuInstance = useMemo(() => ({
         scrollTo: (id: string) => {
             document.getElementById(`univer-side-menu-${id}`)?.scrollIntoView({ behavior: 'smooth' });
         },
-    };
+    }), []);
 
     useImperativeHandle(ref, () => instance);
+
+    useEffect(() => {
+        if (activeId) {
+            instance.scrollTo(activeId);
+        }
+    }, [activeId, instance]);
 
     return (
         <div className={clsx('univer-relative', wrapperClass)} style={wrapperStyle}>
@@ -135,7 +141,6 @@ export const SideMenu = forwardRef<ISideMenuInstance, ISideMenuProps>((props, re
                                 paddingLeft: (menu.level - 1) * 12,
                             }}
                             onClick={() => {
-                                instance.scrollTo(menu.id);
                                 onClick?.(menu);
                             }}
                         >

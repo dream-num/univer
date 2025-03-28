@@ -281,10 +281,6 @@ export class SelectionShapeExtension {
      * @param evt
      */
     private _controlPointerDownHandler(evt: IMouseEvent | IPointerEvent) {
-        if (this._disabled) {
-            return;
-        }
-
         const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
 
         const scene = this._scene;

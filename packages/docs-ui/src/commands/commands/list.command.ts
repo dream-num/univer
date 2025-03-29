@@ -377,7 +377,7 @@ export const QuickListCommand: ICommand<IQuickListCommandParams> = {
             return false;
         }
 
-        const { segmentId } = activeRange;
+        const { segmentId, startOffset } = activeRange;
         const { listType, paragraph } = params;
         const { paragraphStart, paragraphEnd } = paragraph;
         // const selection =
@@ -428,8 +428,15 @@ export const QuickListCommand: ICommand<IQuickListCommandParams> = {
 
         textX.push({
             t: TextXActionType.DELETE,
-            len: paragraphEnd - paragraphStart,
+            len: startOffset - paragraphStart,
         });
+
+        if (paragraphEnd > startOffset) {
+            textX.push({
+                t: TextXActionType.RETAIN,
+                len: paragraphEnd - startOffset,
+            });
+        }
 
         textX.push({
             t: TextXActionType.RETAIN,

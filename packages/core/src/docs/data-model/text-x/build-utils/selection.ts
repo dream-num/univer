@@ -88,3 +88,25 @@ export function getParagraphsInRanges(ranges: readonly ITextRange[], paragraphs:
 
     return results;
 }
+
+export function transformParagraphs(paragraphs: IParagraph[]) {
+    const results: IParagraphRange[] = [];
+
+    let start = -1;
+
+    for (let i = 0; i < paragraphs.length; i++) {
+        const paragraph = paragraphs[i];
+        const prevParagraph: Nullable<IParagraph> = paragraphs[i - 1];
+        const { startIndex } = paragraph;
+
+        results.push({
+            ...paragraph,
+            paragraphStart: (prevParagraph?.startIndex ?? -1) + 1,
+            paragraphEnd: paragraph.startIndex,
+        });
+
+        start = startIndex;
+    }
+
+    return results;
+}

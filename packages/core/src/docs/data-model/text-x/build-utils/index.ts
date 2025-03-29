@@ -19,7 +19,7 @@ import { copyCustomRange, getCustomRangesInterestsWithSelection, isIntersecting 
 import { addDrawing } from './drawings';
 import { changeParagraphBulletNestLevel, setParagraphBullet, setParagraphStyle, switchParagraphBullet, toggleChecklistParagraph } from './paragraph';
 import { fromPlainText, getPlainText, isEmptyDocument } from './parse';
-import { getParagraphsInRange, getParagraphsInRanges, isSegmentIntersects, makeSelection, normalizeSelection } from './selection';
+import { getParagraphsInRange, getParagraphsInRanges, isSegmentIntersects, makeSelection, normalizeSelection, transformParagraphs } from './selection';
 import { addCustomRangeTextX, deleteCustomRangeTextX, deleteSelectionTextX, replaceSelectionTextRuns, replaceSelectionTextX, retainSelectionTextX } from './text-x-utils';
 
 export class BuildTextUtils {
@@ -66,6 +66,11 @@ export class BuildTextUtils {
         },
         style: {
             set: setParagraphStyle,
+        },
+        util: {
+            transform: transformParagraphs,
+            getParagraphsInRange,
+            getParagraphsInRanges,
         },
     };
 

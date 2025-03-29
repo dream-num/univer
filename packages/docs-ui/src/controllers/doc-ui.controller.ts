@@ -56,6 +56,7 @@ import {
     UnderlineShortCut,
 } from '../shortcuts/toolbar.shortcut';
 import { DocFooter } from '../views/doc-footer';
+import { DocSideMenu } from '../views/side-menu';
 import { DOCS_UI_PLUGIN_CONFIG_KEY } from './config.schema';
 import { menuSchema } from './menu.schema';
 
@@ -92,6 +93,10 @@ export class DocUIController extends Disposable {
         const config = this._configService.getConfig<IUniverDocsUIConfig>(DOCS_UI_PLUGIN_CONFIG_KEY);
         if (config?.layout?.docContainerConfig?.footer) {
             this.disposeWithMe(this._uiPartsService.registerComponent(BuiltInUIPart.FOOTER, () => connectInjector(DocFooter, this._injector)));
+        }
+
+        if (config?.layout?.docContainerConfig?.sideMenu ?? true) {
+            this.disposeWithMe(this._uiPartsService.registerComponent(BuiltInUIPart.CONTENT, () => connectInjector(DocSideMenu, this._injector)));
         }
     }
 

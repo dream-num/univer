@@ -22,6 +22,7 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import { AfterSpaceCommand, EnterCommand, TabCommand } from '../commands/commands/auto-format.command';
 import { BreakLineCommand } from '../commands/commands/break-line.command';
 import { ChangeListNestingLevelCommand, ChangeListNestingLevelType, ListOperationCommand, QuickListCommand } from '../commands/commands/list.command';
+import { QUICK_HEADING_MAP, QuickHeadingCommand } from '../commands/commands/set-heading.command';
 import { DocTableTabCommand } from '../commands/commands/table/doc-table-tab.command';
 import { DocAutoFormatService } from '../services/doc-auto-format.service';
 import { isInSameTableCellData } from '../services/selection/convert-rect-range';
@@ -34,7 +35,7 @@ export class DocAutoFormatController extends Disposable {
         super();
 
         this._initListTabAutoFormat();
-        this._initListSpaceAutoFormat();
+        this._initSpaceAutoFormat();
         this._initDefaultEnterFormat();
         this._initExitListAutoFormat();
     }
@@ -115,7 +116,7 @@ export class DocAutoFormatController extends Disposable {
         );
     }
 
-    private _initListSpaceAutoFormat() {
+    private _initSpaceAutoFormat() {
         this.disposeWithMe(
             this._docAutoFormatService.registerAutoFormat({
                 id: AfterSpaceCommand.id,
@@ -127,15 +128,18 @@ export class DocAutoFormatController extends Disposable {
                     if (paragraphs.length !== 1) {
                         return false;
                     }
-                    const text = unit.getBody()?.dataStream.slice(paragraphs[0].paragraphStart, paragraphs[0].paragraphEnd - 1);
-                    if (text && Object.keys(QuickListTypeMap).includes(text)) {
+                    if (!selection.collapsed) {
+                        return false;
+                    }
+                    const text = unit.getBody()?.dataStream.slice(paragraphs[0].paragraphStart, selection.startOffset - 1);
+                    if (text && (Object.keys(QuickListTypeMap).includes(text) || Object.keys(QUICK_HEADING_MAP).includes(text))) {
                         return true;
                     }
                     return false;
                 },
                 getMutations(context) {
-                    const { paragraphs, unit } = context;
-                    const text = unit.getBody()?.dataStream.slice(paragraphs[0].paragraphStart, paragraphs[0].paragraphEnd - 1);
+                    const { paragraphs, unit, selection } = context;
+                    const text = unit.getBody()?.dataStream.slice(paragraphs[0].paragraphStart, selection.startOffset - 1);
                     if (text && Object.keys(QuickListTypeMap).includes(text)) {
                         const type = QuickListTypeMap[text as keyof typeof QuickListTypeMap];
                         return [{
@@ -143,6 +147,16 @@ export class DocAutoFormatController extends Disposable {
                             params: {
                                 listType: type,
                                 paragraph: paragraphs[0],
+                            },
+                        }];
+                    }
+
+                    if (text && Object.keys(QUICK_HEADING_MAP).includes(text)) {
+                        const type = QUICK_HEADING_MAP[text as keyof typeof QUICK_HEADING_MAP];
+                        return [{
+                            id: QuickHeadingCommand.id,
+                            params: {
+                                value: type,
                             },
                         }];
                     }

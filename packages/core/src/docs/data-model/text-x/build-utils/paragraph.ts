@@ -314,23 +314,45 @@ interface ISetParagraphStyleParams {
     document: DocumentDataModel;
     style: IParagraphStyle;
     paragraphTextRun?: ITextStyle;
+    cursor?: number;
+    deleteLen?: number;
+    textX?: TextX;
 }
 
 export const setParagraphStyle = (params: ISetParagraphStyleParams) => {
-    const { textRanges, segmentId, document: docDataModel, style, paragraphTextRun } = params;
+    const {
+        textRanges,
+        segmentId,
+        document: docDataModel,
+        style,
+        paragraphTextRun,
+        cursor,
+        deleteLen,
+        textX: _textX,
+    } = params;
     const paragraphs = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.paragraphs ?? [];
     const currentParagraphs = getParagraphsInRanges(textRanges, paragraphs);
     const memoryCursor = new MemoryCursor();
-    const textX = new TextX();
+    if (cursor) {
+        memoryCursor.moveCursorTo(cursor);
+    }
+    const textX = _textX ?? new TextX();
     currentParagraphs.sort((a, b) => a.startIndex - b.startIndex);
     const start = Math.max(0, currentParagraphs[0].paragraphStart - 1);
 
-    if (start > 0) {
+    if (start > memoryCursor.cursor) {
         textX.push({
             t: TextXActionType.RETAIN,
             len: start - memoryCursor.cursor,
         });
         memoryCursor.moveCursorTo(start);
+    }
+
+    if (deleteLen) {
+        textX.push({
+            t: TextXActionType.DELETE,
+            len: deleteLen,
+        });
     }
 
     for (const paragraph of currentParagraphs) {

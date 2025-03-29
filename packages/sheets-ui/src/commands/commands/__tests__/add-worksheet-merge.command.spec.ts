@@ -15,6 +15,7 @@
  */
 
 import type { IDisposable, Injector, IRange, Univer, Workbook } from '@univerjs/core';
+import type { IConfirmPartMethodOptions } from '@univerjs/ui';
 import {
     ICommandService,
     IUniverInstanceService,
@@ -53,7 +54,7 @@ import {
     SetSelectionsOperation,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
-import { type IConfirmPartMethodOptions, IConfirmService } from '@univerjs/ui';
+import { IConfirmService } from '@univerjs/ui';
 import { Subject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
@@ -464,6 +465,50 @@ describe('Test add worksheet merge commands', () => {
             const res = getClearContentMutationParamForRange(worksheet, { startRow: 0, startColumn: 2, endRow: 2, endColumn: 2 });
             expect(res.getValue(0, 2)?.p).toBeTruthy();
             expect(res.getValue(2, 2)).toBeNull();
+        });
+
+        it('test merge range first cell is blank, second cell is percent number format', async () => {
+            const univerInstanceService = get(IUniverInstanceService);
+            const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+            const worksheet = workbook.getActiveSheet();
+            if (!worksheet) throw new Error('No active sheet found');
+
+            expect(worksheet.getCellRaw(20, 0)).toBeUndefined();
+            expect(worksheet.getCellRaw(20, 1)).toStrictEqual({
+                v: 2,
+                t: 2,
+                s: {
+                    n: {
+                        pattern: '0%',
+                    },
+                },
+            });
+
+            const selectionManager = get(SheetsSelectionsService);
+            selectionManager.addSelections([
+                {
+                    range: {
+                        startRow: 20,
+                        startColumn: 0,
+                        endRow: 21,
+                        endColumn: 1,
+                        rangeType: RANGE_TYPE.NORMAL,
+                    },
+                    primary: null,
+                    style: null,
+                },
+            ]);
+
+            const commandService = get(ICommandService);
+            await commandService.executeCommand(AddWorksheetMergeAllCommand.id);
+
+            expect(worksheet.getCellRaw(20, 0)?.v).toStrictEqual(2);
+            expect(worksheet.getCellStyle(20, 0)).toStrictEqual({
+                n: {
+                    pattern: '0%',
+                },
+            });
+            expect(worksheet.getCellRaw(20, 1)).toBeUndefined();
         });
     });
 

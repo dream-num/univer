@@ -18,6 +18,7 @@ import type { Dependency, IWorkbookData, Workbook } from '@univerjs/core';
 import type { IRenderContext } from '@univerjs/engine-render';
 import {
     BooleanNumber,
+    CellValueType,
     DisposableCollection,
     ILogService,
     Inject,
@@ -65,6 +66,18 @@ const getTestWorkbookDataDemo = (): IWorkbookData => {
                         },
                         1: {
                             v: 'A2',
+                        },
+                    },
+                    // 20 test merge cell, do not change value here
+                    20: {
+                        1: {
+                            v: 2,
+                            t: CellValueType.NUMBER,
+                            s: {
+                                n: {
+                                    pattern: '0%',
+                                },
+                            },
                         },
                     },
                 },

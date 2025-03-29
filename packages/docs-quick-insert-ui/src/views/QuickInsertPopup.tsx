@@ -236,7 +236,7 @@ export const QuickInsertPopup = () => {
                     onMouseEnter={() => setFocusedMenuIndex(currentMenuIndex)}
                     onMouseLeave={() => setFocusedMenuIndex(Number.NaN)}
                     key={menu.id}
-                    className={clsx('univer-text-sm', {
+                    className={clsx('univer-w-[calc(220px-var(--padding-base)*2)] univer-text-sm', {
                         'hover:univer-bg-transparent': !isFocused,
                         'univer-bg-gray-100': isFocused,
                     })}
@@ -244,9 +244,11 @@ export const QuickInsertPopup = () => {
                         handleMenuSelect(menu as IDocPopupMenuItem);
                     }}
                 >
-                    <div className="univer-flex univer-items-center univer-px-1">
+                    <div
+                        className="univer-flex univer-w-full univer-items-center univer-px-1"
+                    >
                         {Icon && <span className="univer-mr-2 univer-inline-flex univer-text-base"><Icon /></span>}
-                        <span>{menu.title}</span>
+                        <span className="univer-truncate">{menu.title}</span>
                     </div>
                 </MenuItem>
             );

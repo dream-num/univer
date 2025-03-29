@@ -48,6 +48,14 @@ export const MENU_OPTIONS: Array<{ label: string; pattern: string | null } | '|'
         label: 'sheet.numfmt.number',
         pattern: '0',
     },
+    {
+        label: 'sheet.numfmt.percent',
+        pattern: '0.00%',
+    },
+    {
+        label: 'sheet.numfmt.scientific',
+        pattern: '0.00E+00',
+    },
     '|',
     {
         label: 'sheet.numfmt.accounting',
@@ -81,11 +89,6 @@ export const MENU_OPTIONS: Array<{ label: string; pattern: string | null } | '|'
     {
         label: 'sheet.numfmt.timeDuration',
         pattern: 'h:mm:ss',
-    },
-    '|',
-    {
-        label: 'sheet.numfmt.percent',
-        pattern: '0.00%',
     },
     '|',
     {

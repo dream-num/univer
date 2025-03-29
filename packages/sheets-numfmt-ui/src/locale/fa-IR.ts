@@ -19,7 +19,6 @@ import type zhCN from './zh-CN';
 const locale: typeof zhCN = {
     sheet: {
         numfmt: {
-            percent: 'درصد',
             title: 'قالب‌بندی عدد',
             numfmtType: 'انواع قالب‌بندی',
             cancel: 'انصراف',
@@ -28,6 +27,8 @@ const locale: typeof zhCN = {
             accounting: 'حسابداری',
             text: 'متن',
             number: 'عدد',
+            percent: 'درصد',
+            scientific: 'علمی',
             currency: 'ارز',
             date: 'تاریخ',
             time: 'زمان',

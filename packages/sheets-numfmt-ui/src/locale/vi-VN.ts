@@ -19,7 +19,6 @@ import type zhCN from './zh-CN';
 const locale: typeof zhCN = {
     sheet: {
         numfmt: {
-            percent: 'Phần trăm',
             title: 'Định dạng số',
             numfmtType: 'Loại định dạng',
             cancel: 'Hủy bỏ',
@@ -28,6 +27,8 @@ const locale: typeof zhCN = {
             accounting: 'Kế toán',
             text: 'Văn bản',
             number: 'Số',
+            percent: 'Phần trăm',
+            scientific: 'Chính xác',
             currency: 'Tiền tệ',
             date: 'Ngày',
             time: 'Thời gian',

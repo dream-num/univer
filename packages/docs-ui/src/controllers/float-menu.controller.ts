@@ -87,6 +87,10 @@ export class FloatMenuController extends Disposable {
         if (range.endOffset - range.startOffset === 1 && token && SKIP_SYMBOLS.includes(token)) {
             return;
         }
+        const wholeCustomRanges = documentDataModel.getBody()?.customRanges?.filter((range) => range.wholeEntity);
+        if (wholeCustomRanges?.some((customRange) => customRange.startIndex === range.startOffset && customRange.endIndex === range.endOffset - 1)) {
+            return;
+        }
 
         this._floatMenu = this._docCanvasPopManagerService.attachPopupToRange(
             range,

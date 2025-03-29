@@ -152,6 +152,7 @@ export function DocSideMenu() {
                 wrapperClass="univer-mt-12"
                 activeId={activeId}
                 onClick={handleClick}
+                maxHeight={`${canvasHeight - 48}px`}
             />
         </div>
     );

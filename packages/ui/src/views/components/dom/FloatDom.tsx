@@ -15,7 +15,7 @@
  */
 
 import type { IFloatDom } from '../../../services/dom/canvas-dom-layer.service';
-import { IUniverInstanceService } from '@univerjs/core';
+import { DocumentDataModel, IUniverInstanceService } from '@univerjs/core';
 import React, { memo, useEffect, useMemo, useRef } from 'react';
 import { distinctUntilChanged, first } from 'rxjs';
 import { ComponentManager } from '../../../common';
@@ -33,7 +33,7 @@ const FloatDomSingle = memo((props: { layer: IFloatDom; id: string }) => {
                 prev.endY - prev.startY === curr.endY - curr.startY
         )
     ), [layer.position$]);
-
+    const univerInstanceService = useDependency(IUniverInstanceService);
     const position = useObservable(useMemo(() => layer.position$.pipe(first()), [layer.position$]));
     const domRef = useRef<HTMLDivElement>(null);
     const innerDomRef = useRef<HTMLDivElement>(null);
@@ -94,7 +94,21 @@ const FloatDomSingle = memo((props: { layer: IFloatDom; id: string }) => {
         };
     }, [layer.position$, size$]);
 
-    const component = useMemo(() => Component ? <Component {...layerProps} unitId={layer.unitId} floatDomId={layer.id} /> : null, [Component, layerProps]);
+    const instance = univerInstanceService.getUnit(layer.unitId);
+    const docDisabled = instance instanceof DocumentDataModel ? instance.getDisabled() : undefined;
+    const component = useMemo(() => Component
+        ? (
+            <Component
+                {...layerProps}
+                unitId={layer.unitId}
+                unit={instance}
+                floatDomId={layer.id}
+                context={{
+                    docDisabled,
+                }}
+            />
+        )
+        : null, [Component, layerProps]);
 
     if (!position) {
         return null;

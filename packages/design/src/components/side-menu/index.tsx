@@ -110,14 +110,14 @@ export const SideMenu = forwardRef<ISideMenuInstance, ISideMenuProps>((props, re
                     paddingRight: mode === 'float' ? undefined : 0,
                 }}
             >
-                <div
+                {/* <div
                     className={`
                       univer-text-xs univer-font-semibold univer-leading-[150%] univer-text-gray-400 univer-font-inter
                       univer-mb-2
                     `}
                 >
                     contents
-                </div>
+                </div> */}
                 <div
                     ref={containerRef}
                     className={`

@@ -16,7 +16,7 @@
 
 import type { DocPopupMenu, IDocPopupMenuItem } from '../services/doc-quick-insert-popup.service';
 import { CommandType, Direction, DisposableCollection, generateRandomId, ICommandService, LocaleService, toDisposable } from '@univerjs/core';
-import { clsx, Menu, MenuItem, MenuItemGroup } from '@univerjs/design';
+import { clsx, Menu, MenuItem, MenuItemGroup, Tooltip } from '@univerjs/design';
 import { ComponentManager, IShortcutService, KeyCode, useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { CloseQuickInsertPopupOperation } from '../commands/operations/quick-insert-popup.operation';
@@ -248,7 +248,9 @@ export const QuickInsertPopup = () => {
                         className="univer-flex univer-w-full univer-items-center univer-px-1"
                     >
                         {Icon && <span className="univer-mr-2 univer-inline-flex univer-text-base"><Icon /></span>}
-                        <span className="univer-truncate">{menu.title}</span>
+                        <Tooltip showIfEllipsis title={menu.title} placement="right">
+                            <span className="univer-truncate">{menu.title}</span>
+                        </Tooltip>
                     </div>
                 </MenuItem>
             );

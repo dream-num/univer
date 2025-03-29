@@ -17,7 +17,6 @@
 const locale = {
     sheet: {
         numfmt: {
-            percent: '百分比',
             title: '数字格式',
             numfmtType: '格式类型',
             cancel: '取消',
@@ -26,6 +25,8 @@ const locale = {
             accounting: '会计',
             text: '文本',
             number: '数值',
+            percent: '百分比',
+            scientific: '科学记数',
             currency: '货币',
             date: '日期',
             time: '时间',

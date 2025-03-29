@@ -19,7 +19,6 @@ import type zhCN from './zh-CN';
 const locale: typeof zhCN = {
     sheet: {
         numfmt: {
-            percent: 'Процент',
             title: 'Формат числа',
             numfmtType: 'Типы форматов',
             cancel: 'Отмена',
@@ -28,6 +27,8 @@ const locale: typeof zhCN = {
             accounting: 'Бухгалтерский',
             text: 'Текст',
             number: 'Число',
+            percent: 'Процент',
+            scientific: 'Экспоненциальный',
             currency: 'Валюта',
             date: 'Дата',
             time: 'Время',

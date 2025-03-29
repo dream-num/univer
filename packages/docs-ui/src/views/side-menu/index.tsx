@@ -93,7 +93,7 @@ export function DocSideMenu() {
         };
     });
 
-    const [open, setOpen] = useState(false);
+    const [open, setOpen] = useState(true);
     const activeId = findActiveHeading(paragraphBounds ?? [], scrollTop, bottom);
 
     useEffect(() => {

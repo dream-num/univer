@@ -229,6 +229,10 @@ class DocumentDataModelSimple extends UnitModel<IDocumentData, UniverInstanceTyp
     getDisabled() {
         return this.snapshot.disabled;
     }
+
+    getTitle() {
+        return this.snapshot.title;
+    }
 }
 
 export class DocumentDataModel extends DocumentDataModelSimple {

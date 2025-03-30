@@ -50,10 +50,18 @@ const transformNamedStyleTypeToLevel = (type: NamedStyleType) => {
 };
 
 function findActiveHeading(paragraphBounds: IParagraphBound[], scrollTop: number, bottom: number) {
-    const paragraphIndex = paragraphBounds?.findIndex((p) => p.paragraph.paragraphStart !== p.paragraph.paragraphEnd && p.rect.top < bottom && p.rect.bottom > scrollTop);
+    const paragraphIndex = paragraphBounds.findIndex((p) => p.paragraph.paragraphStart !== p.paragraph.paragraphEnd && p.rect.top < bottom && p.rect.bottom > scrollTop);
     if (paragraphIndex === -1) return undefined;
+    const lastParagraphIndex = paragraphBounds?.findLastIndex((p) => p.paragraph.paragraphStart !== p.paragraph.paragraphEnd && p.rect.top < bottom && p.rect.bottom > scrollTop);
+    for (let i = paragraphIndex; i <= lastParagraphIndex; i++) {
+        const paragraph = paragraphBounds[i];
+        if (paragraph.paragraph.paragraphStyle?.headingId) {
+            return paragraph.paragraph.paragraphStyle.headingId;
+        }
+    }
+
     for (let i = paragraphIndex; i >= 0; i--) {
-        const paragraph = paragraphBounds?.[i];
+        const paragraph = paragraphBounds[i];
         if (paragraph.paragraph.paragraphStyle?.headingId) {
             return paragraph.paragraph.paragraphStyle.headingId;
         }

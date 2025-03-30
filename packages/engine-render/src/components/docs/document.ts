@@ -573,6 +573,7 @@ export class Documents extends DocComponent {
         y += marginTop + top + line.lineHeight + (line.borderBottom?.padding ?? 0);
 
         ctx.save();
+        ctx.setLineWidthByPrecision(1);
         ctx.strokeStyle = line.borderBottom?.color.rgb ?? '#CDD0D8';
         drawLineByBorderType(ctx, BORDER_LTRB.BOTTOM, 0, {
             startX: x,

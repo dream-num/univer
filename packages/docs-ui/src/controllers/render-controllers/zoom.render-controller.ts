@@ -25,6 +25,7 @@ import {
     ICommandService,
     IContextService,
     Inject,
+    isInternalEditorID,
     IUniverInstanceService,
 } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
@@ -54,6 +55,10 @@ export class DocZoomRenderController extends Disposable implements IRenderModule
 
         // TODO: do not use setTimeout.
         setTimeout(() => this.updateViewZoom(1, true), 20);
+
+        if (!isInternalEditorID(this._context.unitId)) {
+            this._initZoomEventListener();
+        }
     }
 
     private _initRenderRefresher() {
@@ -157,5 +162,36 @@ export class DocZoomRenderController extends Disposable implements IRenderModule
         }
 
         docObject.scene.getTransformer()?.clearSelectedObjects();
+    }
+
+    private _initZoomEventListener() {
+        const scene = this._context.scene;
+
+        this.disposeWithMe(
+            // hold ctrl & mousewheel ---> zoom
+            scene.onMouseWheel$.subscribeEvent((e: IWheelEvent) => {
+                if (!e.ctrlKey) {
+                    return;
+                }
+
+                const deltaFactor = Math.abs(e.deltaX);
+                let ratioDelta = deltaFactor < 40 ? 0.2 : deltaFactor < 80 ? 0.4 : 0.2;
+                ratioDelta *= e.deltaY > 0 ? -1 : 1;
+                if (scene.scaleX < 1) {
+                    ratioDelta /= 2;
+                }
+
+                const currentRatio = this._context.unit.zoomRatio;
+                let nextRatio = +Number.parseFloat(`${currentRatio + ratioDelta}`).toFixed(1);
+                nextRatio = nextRatio >= 4 ? 4 : nextRatio <= 0.1 ? 0.1 : nextRatio;
+
+                this._commandService.executeCommand(SetDocZoomRatioCommand.id, {
+                    zoomRatio: Math.round(nextRatio * 10) / 10,
+                    documentId: this._context.unitId,
+                });
+
+                e.preventDefault();
+            })
+        );
     }
 }

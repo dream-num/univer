@@ -971,8 +971,8 @@ export interface ITableCellMargin {
  */
 export interface ITableCellBorder {
     color: IColorStyle; // color
-    width: INumberUnit; // width
-    dashStyle: DashStyleType; // dashStyle
+    width?: INumberUnit; // width
+    dashStyle?: DashStyleType; // dashStyle
 }
 
 // 17.18.101ST_VerticalJc (Vertical Alignment Type)

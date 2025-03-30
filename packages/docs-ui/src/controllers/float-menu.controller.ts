@@ -40,7 +40,7 @@ const SKIP_SYMBOLS: string[] = [
 ];
 
 export class FloatMenuController extends Disposable {
-    private _floatMenu: Nullable<IDisposable> = null;
+    private _floatMenu: Nullable<{ disposable: IDisposable; start: number; end: number }> = null;
 
     constructor(
         @Inject(DocSelectionManagerService) private readonly _docSelectionManagerService: DocSelectionManagerService,
@@ -60,20 +60,28 @@ export class FloatMenuController extends Disposable {
     private _initSelectionChange() {
         this.disposeWithMe(this._docSelectionManagerService.textSelection$.subscribe((selection) => {
             const { unitId, textRanges } = selection;
-            this._hideFloatMenu();
 
             if (isInternalEditorID(unitId)) {
+                this._hideFloatMenu();
                 return;
             }
 
-            if ((textRanges.length > 0) && textRanges.some((range) => !range.collapsed)) {
-                this._showFloatMenu(unitId, textRanges.find((range) => !range.collapsed)!);
+            const range = (textRanges.length > 0) && textRanges.find((range) => !range.collapsed);
+            if (range) {
+                if (range.startOffset === this._floatMenu?.start && range.endOffset === this._floatMenu?.end) {
+                    return;
+                }
+                this._hideFloatMenu();
+                this._showFloatMenu(unitId, range);
+                return;
             }
+
+            this._hideFloatMenu();
         }));
     }
 
     private _hideFloatMenu() {
-        this._floatMenu?.dispose();
+        this._floatMenu?.disposable.dispose();
         this._floatMenu = null;
     }
 
@@ -92,15 +100,19 @@ export class FloatMenuController extends Disposable {
             return;
         }
 
-        this._floatMenu = this._docCanvasPopManagerService.attachPopupToRange(
-            range,
-            {
-                componentKey: FLOAT_MENU_COMPONENT_KEY,
-                direction: range.direction === 'backward' || isInSameLine((range as ITextRangeWithStyle).startNodePosition, (range as ITextRangeWithStyle).endNodePosition) ? 'top-center' : 'bottom-center',
-                offset: [0, 4],
-            },
-            unitId
-        );
+        this._floatMenu = {
+            disposable: this._docCanvasPopManagerService.attachPopupToRange(
+                range,
+                {
+                    componentKey: FLOAT_MENU_COMPONENT_KEY,
+                    direction: range.direction === 'backward' || isInSameLine((range as ITextRangeWithStyle).startNodePosition, (range as ITextRangeWithStyle).endNodePosition) ? 'top-center' : 'bottom-center',
+                    offset: [0, 4],
+                },
+                unitId
+            ),
+            start: range.startOffset,
+            end: range.endOffset,
+        };
 
         return toDisposable(() => this._hideFloatMenu());
     }

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { IDocumentRenderConfig, IScale, Nullable } from '@univerjs/core';
+import type { IDocumentRenderConfig, IScale, ITableCellBorder, Nullable } from '@univerjs/core';
 
-import type { IDocumentSkeletonGlyph, IDocumentSkeletonLine, IDocumentSkeletonPage, IDocumentSkeletonTable } from '../../basics/i-document-skeleton-cached';
+import type { IDocumentSkeletonGlyph, IDocumentSkeletonLine, IDocumentSkeletonPage, IDocumentSkeletonRow, IDocumentSkeletonTable } from '../../basics/i-document-skeleton-cached';
 import type { Transform } from '../../basics/transform';
 import type { IBoundRectNoAngle, IViewportInfo } from '../../basics/vector2';
 import type { UniverRenderingContext } from '../../context';
@@ -37,6 +37,12 @@ import { DocComponent } from './doc-component';
 import { DOCS_EXTENSION_TYPE } from './doc-extension';
 import { Liquid } from './liquid';
 import './extensions';
+
+const DEFAULT_BORDER_COLOR: ITableCellBorder = {
+    color: {
+        rgb: '#000000',
+    },
+};
 
 export interface IPageRenderConfig {
     page: IDocumentSkeletonPage;
@@ -567,6 +573,7 @@ export class Documents extends DocComponent {
         y += marginTop + top + line.lineHeight + (line.borderBottom?.padding ?? 0);
 
         ctx.save();
+        ctx.setLineWidthByPrecision(1);
         ctx.strokeStyle = line.borderBottom?.color.rgb ?? '#CDD0D8';
         drawLineByBorderType(ctx, BORDER_LTRB.BOTTOM, 0, {
             startX: x,
@@ -594,7 +601,7 @@ export class Documents extends DocComponent {
         if (this._drawLiquid == null) {
             return;
         }
-        this._drawTableCellBorders(ctx, page, cell);
+        this._drawTableCellBordersAndBg(ctx, page, cell);
         const { sections, marginLeft, marginTop } = cell;
 
         // eslint-disable-next-line no-param-reassign
@@ -756,13 +763,25 @@ export class Documents extends DocComponent {
         ctx.restore();
     }
 
-    private _drawTableCellBorders(
+    private _drawTableCellBordersAndBg(
         ctx: UniverRenderingContext,
         page: IDocumentSkeletonPage,
         cell: IDocumentSkeletonPage
     ) {
         const { marginLeft, marginTop } = page;
         const { pageWidth, pageHeight } = cell;
+        const rowSke = cell.parent as IDocumentSkeletonRow;
+        const index = rowSke.cells.indexOf(cell);
+        const cellSource = rowSke.rowSource.tableCells[index];
+
+        const {
+            borderTop = DEFAULT_BORDER_COLOR,
+            borderBottom = DEFAULT_BORDER_COLOR,
+            borderLeft = DEFAULT_BORDER_COLOR,
+            borderRight = DEFAULT_BORDER_COLOR,
+            backgroundColor,
+        } = cellSource;
+
         if (this._drawLiquid == null) {
             return;
         }
@@ -771,33 +790,61 @@ export class Documents extends DocComponent {
         x += marginLeft;
         y += marginTop;
 
+        // Draw cell bg.
+        if (backgroundColor && backgroundColor.rgb) {
+            ctx.save();
+            ctx.fillStyle = backgroundColor.rgb;
+            ctx.beginPath();
+            ctx.rectByPrecision(x, y, pageWidth, pageHeight);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        ctx.save();
+        ctx.setLineWidthByPrecision (1);
+
+        ctx.save();
+        ctx.strokeStyle = borderLeft.color.rgb ?? DEFAULT_BORDER_COLOR.color.rgb!;
         drawLineByBorderType(ctx, BORDER_LTRB.LEFT, 0, {
             startX: x,
             startY: y,
             endX: x + pageWidth,
             endY: y + pageHeight,
         });
+        ctx.restore();
 
+        ctx.save();
+        ctx.strokeStyle = borderTop.color.rgb ?? DEFAULT_BORDER_COLOR.color.rgb!;
         drawLineByBorderType(ctx, BORDER_LTRB.TOP, 0, {
             startX: x,
             startY: y,
             endX: x + pageWidth,
             endY: y + pageHeight,
         });
+        ctx.restore();
 
+        ctx.save();
+        ctx.strokeStyle = borderRight.color.rgb ?? DEFAULT_BORDER_COLOR.color.rgb!;
         drawLineByBorderType(ctx, BORDER_LTRB.RIGHT, 0, {
             startX: x,
             startY: y,
             endX: x + pageWidth,
             endY: y + pageHeight,
         });
+        ctx.restore();
 
+        ctx.save();
+        ctx.strokeStyle = borderBottom.color.rgb ?? DEFAULT_BORDER_COLOR.color.rgb!;
         drawLineByBorderType(ctx, BORDER_LTRB.BOTTOM, 0, {
             startX: x,
             startY: y,
             endX: x + pageWidth,
             endY: y + pageHeight,
         });
+        ctx.restore();
+
+        // restore setLineWidthByPrecision.
+        ctx.restore();
     }
 
     private _drawHeaderFooter(

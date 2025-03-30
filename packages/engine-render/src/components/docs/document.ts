@@ -794,10 +794,8 @@ export class Documents extends DocComponent {
         if (backgroundColor && backgroundColor.rgb) {
             ctx.save();
             ctx.fillStyle = backgroundColor.rgb;
-            ctx.beginPath();
-            ctx.rectByPrecision(x, y, pageWidth, pageHeight);
-            ctx.closePath();
-            ctx.fill();
+            ctx.fillRectByPrecision(x, y, pageWidth, pageHeight);
+            ctx.restore();
         }
 
         ctx.save();

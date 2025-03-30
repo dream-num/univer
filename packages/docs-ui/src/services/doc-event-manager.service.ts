@@ -79,41 +79,45 @@ const calcDocParagraphPositions = (startIndex: number, endIndex: number, documen
         return null;
     }
 
-    const documentOffsetConfig = documents.getOffsetConfig();
-    const convertor = new NodePositionConvertToCursor(documentOffsetConfig, skeleton);
-    const { borderBoxPointGroup } = convertor.getRangePointData(startPosition, endPosition);
-    const bounds = getLineBounding(borderBoxPointGroup);
-    if (!bounds.length) {
+    try {
+        const documentOffsetConfig = documents.getOffsetConfig();
+        const convertor = new NodePositionConvertToCursor(documentOffsetConfig, skeleton);
+        const { borderBoxPointGroup } = convertor.getRangePointData(startPosition, endPosition);
+        const bounds = getLineBounding(borderBoxPointGroup);
+        if (!bounds.length) {
+            return null;
+        }
+        const rects = bounds.map((rect) => ({
+            top: rect.top + documentOffsetConfig.docsTop - DOC_VERTICAL_PADDING,
+            bottom: rect.bottom + documentOffsetConfig.docsTop + DOC_VERTICAL_PADDING,
+            left: rect.left + documentOffsetConfig.docsLeft,
+            right: rect.right + documentOffsetConfig.docsLeft,
+        }));
+
+        let left;
+        let right;
+        let top;
+        let bottom;
+
+        for (const rect of rects) {
+            if (left === undefined || rect.left < left) {
+                left = rect.left;
+            }
+            if (right === undefined || rect.right > right) {
+                right = rect.right;
+            }
+            if (top === undefined || rect.top < top) {
+                top = rect.top;
+            }
+            if (bottom === undefined || rect.bottom > bottom) {
+                bottom = rect.bottom;
+            }
+        }
+
+        return { left: left!, right: right!, top: top!, bottom: bottom! };
+    } catch (e) {
         return null;
     }
-    const rects = bounds.map((rect) => ({
-        top: rect.top + documentOffsetConfig.docsTop - DOC_VERTICAL_PADDING,
-        bottom: rect.bottom + documentOffsetConfig.docsTop + DOC_VERTICAL_PADDING,
-        left: rect.left + documentOffsetConfig.docsLeft,
-        right: rect.right + documentOffsetConfig.docsLeft,
-    }));
-
-    let left;
-    let right;
-    let top;
-    let bottom;
-
-    for (const rect of rects) {
-        if (left === undefined || rect.left < left) {
-            left = rect.left;
-        }
-        if (right === undefined || rect.right > right) {
-            right = rect.right;
-        }
-        if (top === undefined || rect.top < top) {
-            top = rect.top;
-        }
-        if (bottom === undefined || rect.bottom > bottom) {
-            bottom = rect.bottom;
-        }
-    }
-
-    return { left: left!, right: right!, top: top!, bottom: bottom! };
 };
 
 export const calcDocGlyphPosition = (glyph: IDocumentSkeletonGlyph, documents: Documents, skeleton: DocumentSkeleton, pageIndex = -1): IBoundRectNoAngle | undefined => {
@@ -453,7 +457,7 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
                 pageIndex,
                 rect: calcDocParagraphPositions(paragraph.paragraphStart, paragraph.paragraphEnd, this._documents, this._skeleton),
             } as IParagraphBound;
-        });
+        }).filter((layout) => layout.rect !== null);
     }
 
     private _buildParagraphBounds() {

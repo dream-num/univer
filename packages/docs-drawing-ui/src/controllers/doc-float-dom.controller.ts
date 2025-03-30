@@ -47,8 +47,8 @@ function calcDocFloatDomPosition(
         startY: (top - viewportScrollY) * scaleY,
         endX: (left + width - viewportScrollX) * scaleX,
         endY: (top + height - viewportScrollY) * scaleY,
-        width,
-        height,
+        width: width * scaleX,
+        height: height * scaleY,
         rotate: angle,
         absolute: {
             left: false,

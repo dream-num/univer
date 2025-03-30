@@ -62,6 +62,8 @@ function findActiveHeading(paragraphBounds: IParagraphBound[], scrollTop: number
     return undefined;
 }
 
+const TITLE_ID = '__title';
+
 export function DocSideMenu() {
     const commandService = useDependency(ICommandService);
     const instanceService = useDependency(IUniverInstanceService);
@@ -71,6 +73,7 @@ export function DocSideMenu() {
     const [_updateKey, setUpdateKey] = useState(0);
     const unitId = currentDoc?.getUnitId() ?? '';
     const renderer = renderManagerService.getRenderById(unitId);
+    const title = currentDoc?.getTitle();
     const docEventManagerService = renderer?.with(DocEventManagerService);
     const paragraphBounds = docEventManagerService?.paragraphBounds;
     const left = renderer?.mainComponent?.left ?? 0;
@@ -81,7 +84,7 @@ export function DocSideMenu() {
     useObservable(useMemo(() => (renderer?.engine.onTransformChange$ ? fromEventSubject(renderer?.engine.onTransformChange$).pipe(throttleTime(33)) : of(null)), [renderer?.engine.onTransformChange$]));
     const mode = left < 180 ? 'float' : 'side-bar';
     let minLevel = Infinity;
-    const menus = paragraphBounds?.filter(({ paragraph: p }) => p.paragraphStyle?.namedStyleType !== undefined && p.paragraphStyle!.namedStyleType !== NamedStyleType.SUBTITLE).map(({ paragraph: p }) => {
+    const paragraphMenus = paragraphBounds?.filter(({ paragraph: p }) => p.paragraphStyle?.namedStyleType !== undefined && p.paragraphStyle!.namedStyleType !== NamedStyleType.SUBTITLE).map(({ paragraph: p }) => {
         const level = transformNamedStyleTypeToLevel(p.paragraphStyle!.namedStyleType!);
         minLevel = Math.min(minLevel, level);
 
@@ -92,6 +95,18 @@ export function DocSideMenu() {
             isTitle: p.paragraphStyle?.namedStyleType === NamedStyleType.TITLE,
         };
     });
+
+    const menus = [
+        ...(title
+            ? [{
+                id: TITLE_ID,
+                text: title,
+                level: NamedStyleType.TITLE,
+                isTitle: true,
+            }]
+            : []),
+        ...(paragraphMenus ?? []),
+    ].filter(Boolean);
 
     const [open, setOpen] = useState(true);
     const activeId = findActiveHeading(paragraphBounds ?? [], scrollTop, bottom);
@@ -126,14 +141,20 @@ export function DocSideMenu() {
     }, [renderer]);
 
     const handleClick = (menu: ISideMenuItem) => {
-        const bound = paragraphBounds?.find((p) => p.paragraph.paragraphStyle?.headingId === menu.id);
-        if (!bound) {
-            return;
-        }
         const viewport = renderer?.scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
         if (!viewport) {
             return;
         }
+
+        if (menu.id === TITLE_ID) {
+            viewport.scrollToViewportPos({ viewportScrollY: 0 });
+            return;
+        }
+        const bound = paragraphBounds?.find((p) => p.paragraph.paragraphStyle?.headingId === menu.id);
+        if (!bound) {
+            return;
+        }
+
         viewport.scrollToViewportPos({ viewportScrollY: bound.rect.top });
     };
 

@@ -30,7 +30,7 @@ import type {
     IFloatObject,
     ILayoutContext,
 } from '../../tools';
-import { BooleanNumber, DataStreamTreeTokenType, GridType, ObjectRelativeFromV, PositionedObjectLayoutType, SpacingRule, TableTextWrapType } from '@univerjs/core';
+import { BooleanNumber, DataStreamTreeTokenType, GridType, NAMED_STYLE_SPACE_MAP, ObjectRelativeFromV, PositionedObjectLayoutType, SpacingRule, TableTextWrapType } from '@univerjs/core';
 import { GlyphType, LineType } from '../../../../../basics/i-document-skeleton-cached';
 import { BreakPointType } from '../../line-breaker/break';
 import { addGlyphToDivide, createSkeletonBulletGlyph } from '../../model/glyph';
@@ -448,7 +448,7 @@ function _lineOperator(
     const glyphLineHeight = defaultGlyphLineHeight || (ascent + descent);
 
     const {
-        paragraphStyle = {},
+        paragraphStyle: originParagraphStyle = {},
         paragraphNonInlineSkeDrawings,
         skeTablesInParagraph,
         skeHeaders,
@@ -456,6 +456,13 @@ function _lineOperator(
         pDrawingAnchor,
         paragraphIndex,
     } = paragraphConfig;
+    const { namedStyleType } = originParagraphStyle;
+    const namedStyle = namedStyleType !== undefined ? NAMED_STYLE_SPACE_MAP[namedStyleType] : null;
+    const paragraphStyle = {
+        ...originParagraphStyle,
+        spaceAbove: originParagraphStyle.spaceAbove ?? namedStyle?.spaceAbove,
+        spaceBelow: originParagraphStyle.spaceBelow ?? namedStyle?.spaceBelow,
+    };
 
     const {
         // direction,

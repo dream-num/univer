@@ -15,7 +15,7 @@
  */
 
 import type { Nullable } from '../../shared';
-import type { ITextStyle } from '../interfaces';
+import type { IParagraphStyle, ITextStyle } from '../interfaces';
 import { DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_ZEN_EDITOR_UNIT_ID_KEY } from '../../common/const';
 import {
     BooleanNumber,
@@ -185,9 +185,76 @@ export const NAMED_STYLE_MAP: Record<NamedStyleType, Nullable<ITextStyle>> = {
     [NamedStyleType.HEADING_3]: { fs: 16, bl: 1 }, // Heading 3: 16pt, bold
     [NamedStyleType.HEADING_4]: { fs: 14, bl: 1 }, // Heading 4: 14pt, bold
     [NamedStyleType.HEADING_5]: { fs: 12, bl: 1 }, // Heading 5: 12pt, bold
-    [NamedStyleType.HEADING_6]: { fs: 11, bl: 1 }, // Heading 6: 11pt, bold
     [NamedStyleType.NORMAL_TEXT]: { fs: 11 }, // Normal text: 11pt
     [NamedStyleType.TITLE]: { fs: 26, bl: 1 }, // Title: 26pt, bold
     [NamedStyleType.SUBTITLE]: { fs: 15, cl: { rgb: '#999999' } }, // Subtitle: 15pt
+    [NamedStyleType.NAMED_STYLE_TYPE_UNSPECIFIED]: null,
+};
+
+export const NAMED_STYLE_SPACE_MAP: Record<NamedStyleType, Nullable<IParagraphStyle>> = {
+    [NamedStyleType.HEADING_1]: {
+        spaceAbove: {
+            v: 20,
+        },
+        spaceBelow: {
+            v: 6,
+        },
+    },
+    [NamedStyleType.HEADING_2]: {
+        spaceAbove: {
+            v: 18,
+        },
+        spaceBelow: {
+            v: 6,
+        },
+    },
+    [NamedStyleType.HEADING_3]: {
+        spaceAbove: {
+            v: 18,
+        },
+        spaceBelow: {
+            v: 6,
+        },
+    },
+    [NamedStyleType.HEADING_4]: {
+        spaceAbove: {
+            v: 16,
+        },
+        spaceBelow: {
+            v: 4,
+        },
+    },
+    [NamedStyleType.HEADING_5]: {
+        spaceAbove: {
+            v: 14,
+        },
+        spaceBelow: {
+            v: 4,
+        },
+    },
+    [NamedStyleType.NORMAL_TEXT]: {
+        spaceAbove: {
+            v: 0,
+        },
+        spaceBelow: {
+            v: 0,
+        },
+    },
+    [NamedStyleType.TITLE]: {
+        spaceAbove: {
+            v: 0,
+        },
+        spaceBelow: {
+            v: 3,
+        },
+    },
+    [NamedStyleType.SUBTITLE]: {
+        spaceAbove: {
+            v: 0,
+        },
+        spaceBelow: {
+            v: 16,
+        },
+    },
     [NamedStyleType.NAMED_STYLE_TYPE_UNSPECIFIED]: null,
 };

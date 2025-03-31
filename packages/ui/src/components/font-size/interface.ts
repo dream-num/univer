@@ -127,8 +127,4 @@ export const HEADING_LIST = [
         label: 'toolbar.heading.5',
         value: NamedStyleType.HEADING_5,
     },
-    {
-        label: 'toolbar.heading.6',
-        value: NamedStyleType.HEADING_6,
-    },
 ];

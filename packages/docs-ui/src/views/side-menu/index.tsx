@@ -40,8 +40,6 @@ const transformNamedStyleTypeToLevel = (type: NamedStyleType) => {
             return 4;
         case NamedStyleType.HEADING_5:
             return 5;
-        case NamedStyleType.HEADING_6:
-            return 6;
         case NamedStyleType.TITLE:
             return 1;
         default:

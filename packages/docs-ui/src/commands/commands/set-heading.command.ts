@@ -149,5 +149,4 @@ export const QUICK_HEADING_MAP = {
     '###': NamedStyleType.HEADING_3,
     '####': NamedStyleType.HEADING_4,
     '#####': NamedStyleType.HEADING_5,
-    '######': NamedStyleType.HEADING_6,
 };

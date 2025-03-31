@@ -173,7 +173,9 @@ export function DocSideMenu() {
     }
 
     return (
-        <div className="univer-absolute univer-bottom-0 univer-left-0 univer-top-0 univer-z-[100] univer-w-[0px]">
+        <div
+            className="univer-absolute univer-bottom-0 univer-left-0 univer-top-0 univer-z-[100] univer-w-[0px]"
+        >
             <SideMenu
                 menus={menus}
                 open={open}
@@ -183,7 +185,7 @@ export function DocSideMenu() {
                 wrapperClass="univer-mt-12"
                 activeId={activeId}
                 onClick={handleClick}
-                maxHeight={`${canvasHeight - 48}px`}
+                maxHeight={canvasHeight - 48}
             />
         </div>
     );

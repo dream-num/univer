@@ -117,7 +117,9 @@ export function FilterByValue(props: { model: ByValuesModel }) {
                             >
                                 <span className={styles.sheetsFilterPanelValuesItemCount}>{`(${item.count})`}</span>
                                 <a
-                                    className="univer-box-border univer-hidden univer-h-4 univer-px-1.5"
+                                    className={`
+                                      univer-box-border univer-hidden univer-h-4 univer-whitespace-nowrap univer-px-1.5
+                                    `}
                                     onClick={() => {
                                         const filterValues = [];
                                         if (item.children) {

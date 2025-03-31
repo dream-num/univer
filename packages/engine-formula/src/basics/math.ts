@@ -85,7 +85,7 @@ export function calculateMdeterm(matrix: number[][]): number {
     const { rowSwap, smallPivotDetected, luMatrix, permutation } = performLUDecomposition(matrix);
 
     if (smallPivotDetected) {
-        return 0; // 矩阵不可逆
+        return 0; // Matrix is irreversible
     }
 
     let det = rowSwap ? 1 : -1;
@@ -101,7 +101,7 @@ export function calculateMinverse(matrix: number[][]): number[][] | null {
     const det = calculateMdeterm(matrix);
 
     if (det === 0) {
-        return null; // 矩阵不可逆
+        return null; // Matrix is irreversible
     }
 
     if (matrix.length === 1) {

@@ -1052,8 +1052,8 @@ function getFontStyleAtCursor(accessor: IAccessor) {
 
     return {
         ts: {
-            ...curTextStyle,
             ...namedStyle,
+            ...curTextStyle,
             ...cacheStyle,
         },
     };

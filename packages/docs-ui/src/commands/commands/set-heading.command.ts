@@ -50,6 +50,8 @@ export const SetParagraphNamedStyleCommand: ICommand<ISetParagraphNamedStyleComm
             style: {
                 namedStyleType: params.value,
                 headingId: !params.value || params.value === NamedStyleType.NORMAL_TEXT ? undefined : generateRandomId(6),
+                spaceAbove: undefined,
+                spaceBelow: undefined,
             },
             paragraphTextRun: {},
 
@@ -147,5 +149,4 @@ export const QUICK_HEADING_MAP = {
     '###': NamedStyleType.HEADING_3,
     '####': NamedStyleType.HEADING_4,
     '#####': NamedStyleType.HEADING_5,
-    '######': NamedStyleType.HEADING_6,
 };

@@ -760,7 +760,6 @@ export enum NamedStyleType {
     HEADING_3, // Heading 3.
     HEADING_4, // Heading 4.
     HEADING_5, // Heading 5.
-    HEADING_6, // Heading 6.
 }
 
 // export enum Alignment {

@@ -247,24 +247,27 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         title: 'Set bold',
         tooltip: 'toolbar.bold',
         activated$: new Observable<boolean>((subscriber) => {
+            const calc = () => {
+                const textRun = getFontStyleAtCursor(accessor);
+
+                if (textRun == null) {
+                    subscriber.next(false);
+                    return;
+                }
+
+                const bl = textRun.ts?.bl;
+
+                subscriber.next(bl === BooleanNumber.TRUE);
+            };
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
 
                 if (id === SetTextSelectionsOperation.id || id === SetInlineFormatCommand.id) {
-                    const textRun = getFontStyleAtCursor(accessor);
-
-                    if (textRun == null) {
-                        subscriber.next(false);
-                        return;
-                    }
-
-                    const bl = textRun.ts?.bl;
-
-                    subscriber.next(bl === BooleanNumber.TRUE);
+                    calc();
                 }
             });
 
-            subscriber.next(false);
+            calc();
 
             return disposable.dispose;
         }),
@@ -283,24 +286,27 @@ export function ItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         title: 'Set italic',
         tooltip: 'toolbar.italic',
         activated$: new Observable<boolean>((subscriber) => {
+            const calc = () => {
+                const textRun = getFontStyleAtCursor(accessor);
+
+                if (textRun == null) {
+                    subscriber.next(false);
+                    return;
+                }
+
+                const it = textRun.ts?.it;
+
+                subscriber.next(it === BooleanNumber.TRUE);
+            };
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
 
                 if (id === SetTextSelectionsOperation.id || id === SetInlineFormatCommand.id) {
-                    const textRun = getFontStyleAtCursor(accessor);
-
-                    if (textRun == null) {
-                        subscriber.next(false);
-                        return;
-                    }
-
-                    const it = textRun.ts?.it;
-
-                    subscriber.next(it === BooleanNumber.TRUE);
+                    calc();
                 }
             });
 
-            subscriber.next(false);
+            calc();
 
             return disposable.dispose;
         }),
@@ -319,24 +325,27 @@ export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         title: 'Set underline',
         tooltip: 'toolbar.underline',
         activated$: new Observable<boolean>((subscriber) => {
+            const calc = () => {
+                const textRun = getFontStyleAtCursor(accessor);
+
+                if (textRun == null) {
+                    subscriber.next(false);
+                    return;
+                }
+
+                const ul = textRun.ts?.ul;
+
+                subscriber.next(ul?.s === BooleanNumber.TRUE);
+            };
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
 
                 if (id === SetTextSelectionsOperation.id || id === SetInlineFormatCommand.id) {
-                    const textRun = getFontStyleAtCursor(accessor);
-
-                    if (textRun == null) {
-                        subscriber.next(false);
-                        return;
-                    }
-
-                    const ul = textRun.ts?.ul;
-
-                    subscriber.next(ul?.s === BooleanNumber.TRUE);
+                    calc();
                 }
             });
 
-            subscriber.next(false);
+            calc();
 
             return disposable.dispose;
         }),
@@ -355,24 +364,27 @@ export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonIt
         title: 'Set strike through',
         tooltip: 'toolbar.strikethrough',
         activated$: new Observable<boolean>((subscriber) => {
+            const calc = () => {
+                const textRun = getFontStyleAtCursor(accessor);
+
+                if (textRun == null) {
+                    subscriber.next(false);
+                    return;
+                }
+
+                const st = textRun.ts?.st;
+
+                subscriber.next(st?.s === BooleanNumber.TRUE);
+            };
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
 
                 if (id === SetTextSelectionsOperation.id || id === SetInlineFormatCommand.id) {
-                    const textRun = getFontStyleAtCursor(accessor);
-
-                    if (textRun == null) {
-                        subscriber.next(false);
-                        return;
-                    }
-
-                    const st = textRun.ts?.st;
-
-                    subscriber.next(st?.s === BooleanNumber.TRUE);
+                    calc();
                 }
             });
 
-            subscriber.next(false);
+            calc();
 
             return disposable.dispose;
         }),
@@ -390,24 +402,27 @@ export function SubscriptMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         icon: 'SubscriptSingle',
         tooltip: 'toolbar.subscript',
         activated$: new Observable<boolean>((subscriber) => {
+            const calc = () => {
+                const textRun = getFontStyleAtCursor(accessor);
+
+                if (textRun == null) {
+                    subscriber.next(false);
+                    return;
+                }
+
+                const va = textRun.ts?.va;
+
+                subscriber.next(va === BaselineOffset.SUBSCRIPT);
+            };
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
 
                 if (id === SetTextSelectionsOperation.id || id === SetInlineFormatCommand.id) {
-                    const textRun = getFontStyleAtCursor(accessor);
-
-                    if (textRun == null) {
-                        subscriber.next(false);
-                        return;
-                    }
-
-                    const va = textRun.ts?.va;
-
-                    subscriber.next(va === BaselineOffset.SUBSCRIPT);
+                    calc();
                 }
             });
 
-            subscriber.next(false);
+            calc();
 
             return disposable.dispose;
         }),
@@ -425,24 +440,27 @@ export function SuperscriptMenuItemFactory(accessor: IAccessor): IMenuButtonItem
         icon: 'SuperscriptSingle',
         tooltip: 'toolbar.superscript',
         activated$: new Observable<boolean>((subscriber) => {
+            const calc = () => {
+                const textRun = getFontStyleAtCursor(accessor);
+
+                if (textRun == null) {
+                    subscriber.next(false);
+                    return;
+                }
+
+                const va = textRun.ts?.va;
+
+                subscriber.next(va === BaselineOffset.SUPERSCRIPT);
+            };
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
 
                 if (id === SetTextSelectionsOperation.id || id === SetInlineFormatCommand.id) {
-                    const textRun = getFontStyleAtCursor(accessor);
-
-                    if (textRun == null) {
-                        subscriber.next(false);
-                        return;
-                    }
-
-                    const va = textRun.ts?.va;
-
-                    subscriber.next(va === BaselineOffset.SUPERSCRIPT);
+                    calc();
                 }
             });
 
-            subscriber.next(false);
+            calc();
 
             return disposable.dispose;
         }),
@@ -469,24 +487,27 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
         value$: new Observable((subscriber) => {
             const defaultValue = DEFAULT_STYLES.ff;
 
+            const calc = () => {
+                const textRun = getFontStyleAtCursor(accessor);
+
+                if (textRun == null) {
+                    subscriber.next(defaultValue);
+                    return;
+                }
+
+                const ff = textRun.ts?.ff;
+
+                subscriber.next(ff ?? defaultValue);
+            };
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
 
                 if (id === SetTextSelectionsOperation.id || id === SetInlineFormatFontFamilyCommand.id) {
-                    const textRun = getFontStyleAtCursor(accessor);
-
-                    if (textRun == null) {
-                        subscriber.next(defaultValue);
-                        return;
-                    }
-
-                    const ff = textRun.ts?.ff;
-
-                    subscriber.next(ff ?? defaultValue);
+                    calc();
                 }
             });
 
-            subscriber.next(defaultValue);
+            calc();
             return disposable.dispose;
         }),
         disabled$: disableMenuWhenNoDocRange(accessor),
@@ -513,22 +534,25 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
         // disabled$,
         value$: new Observable((subscriber) => {
             const DEFAULT_SIZE = DEFAULT_STYLES.fs;
+            const calc = () => {
+                const textRun = getFontStyleAtCursor(accessor);
+                if (textRun == null) {
+                    subscriber.next(DEFAULT_SIZE);
+                    return;
+                }
+
+                const fs = textRun.ts?.fs;
+                subscriber.next(fs ?? DEFAULT_SIZE);
+            };
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
 
                 if (id === SetTextSelectionsOperation.id || id === SetInlineFormatFontSizeCommand.id) {
-                    const textRun = getFontStyleAtCursor(accessor);
-                    if (textRun == null) {
-                        subscriber.next(DEFAULT_SIZE);
-                        return;
-                    }
-
-                    const fs = textRun.ts?.fs;
-                    subscriber.next(fs ?? DEFAULT_SIZE);
+                    calc();
                 }
             });
 
-            subscriber.next(DEFAULT_SIZE);
+            calc();
 
             return disposable.dispose;
         }),
@@ -562,22 +586,26 @@ export function HeadingSelectorMenuItemFactory(accessor: IAccessor): IMenuSelect
         })),
         value$: new Observable((subscriber) => {
             const DEFAULT_TYPE = NamedStyleType.NORMAL_TEXT;
+            const calc = () => {
+                const paragraph = getParagraphStyleAtCursor(accessor);
+                if (paragraph == null) {
+                    subscriber.next(DEFAULT_TYPE);
+                    return;
+                }
+
+                const namedStyleType = paragraph.paragraphStyle?.namedStyleType ?? DEFAULT_TYPE;
+                subscriber.next(namedStyleType);
+            };
+
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
 
                 if (id === SetTextSelectionsOperation.id || id === SetInlineFormatFontSizeCommand.id) {
-                    const paragraph = getParagraphStyleAtCursor(accessor);
-                    if (paragraph == null) {
-                        subscriber.next(DEFAULT_TYPE);
-                        return;
-                    }
-
-                    const namedStyleType = paragraph.paragraphStyle?.namedStyleType ?? DEFAULT_TYPE;
-                    subscriber.next(namedStyleType);
+                    calc();
                 }
             });
 
-            subscriber.next(DEFAULT_TYPE);
+            calc();
 
             return disposable.dispose;
         }),

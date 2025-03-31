@@ -111,7 +111,7 @@ export function DocSideMenu() {
                 ? [{
                     id: TITLE_ID,
                     text: title,
-                    level: NamedStyleType.TITLE,
+                    level: 1,
                     isTitle: true,
                 }]
                 : []),

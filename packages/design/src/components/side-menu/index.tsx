@@ -62,10 +62,25 @@ export const SideMenu = forwardRef<ISideMenuInstance, ISideMenuProps>((props, re
         scrollTo: (id: string) => {
             if (!menusRef.current) return;
             const index = menusRef.current.findIndex((menu) => menu.id === id);
-            if (index === -1) return;
+            if (index === -1 || !containerRef.current) return;
+
+            // Find the actual DOM element by its ID
+            const targetElement = document.getElementById(`univer-side-menu-${id}`);
+            if (!targetElement) return;
+
+            // Get the element's offsetTop relative to its parent
+            const targetTop = targetElement.offsetTop;
+
+            // Get container's scrollable height
+            const containerHeight = containerRef.current.clientHeight;
+            const maxScrollTop = containerRef.current.scrollHeight - containerHeight;
+
+            // Calculate the scroll position to center the element if possible
+            const scrollPosition = Math.max(0, Math.min(targetTop - containerHeight / 2 + targetElement.clientHeight / 2, maxScrollTop));
+
             containerRef.current?.scrollTo({
                 behavior: 'smooth',
-                top: Math.min(32 * index, (32 * menusRef.current.length - maxHeight)),
+                top: scrollPosition,
             });
         },
     }), []);

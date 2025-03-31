@@ -157,6 +157,7 @@ export const MergeTwoParagraphCommand: ICommand<IMergeTwoParagraphParams> = {
             return false;
         }
 
+        const dataStream = originBody.dataStream;
         const actualRange = activeRange;
         const unitId = docDataModel.getUnitId();
 
@@ -223,21 +224,24 @@ export const MergeTwoParagraphCommand: ICommand<IMergeTwoParagraphParams> = {
                 len: nextParagraph.startIndex - curParagraph.startIndex - 1,
             });
         }
-
-        textX.push({
-            t: TextXActionType.RETAIN,
-            len: 1,
-            coverType: UpdateDocsAttributeType.REPLACE,
-            body: {
-                dataStream: '',
-                paragraphs: [
-                    {
-                        ...Tools.deepClone(curParagraph),
-                        startIndex: 0,
-                    },
-                ],
-            },
-        });
+        const tokens = Object.values(DataStreamTreeTokenType) as string[];
+        const lastToken = dataStream[curParagraph.startIndex - 1];
+        if ((lastToken && !tokens.includes(lastToken)) || lastToken === ' ') {
+            textX.push({
+                t: TextXActionType.RETAIN,
+                len: 1,
+                coverType: UpdateDocsAttributeType.REPLACE,
+                body: {
+                    dataStream: '',
+                    paragraphs: [
+                        {
+                            ...Tools.deepClone(curParagraph),
+                            startIndex: 0,
+                        },
+                    ],
+                },
+            });
+        }
 
         const path = getRichTextEditPath(docDataModel, segmentId);
         doMutation.params.actions = jsonX.editOp(textX.serialize(), path);

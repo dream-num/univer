@@ -56,9 +56,17 @@ export const SideMenu = forwardRef<ISideMenuInstance, ISideMenuProps>((props, re
     const { menus, onClick, className, style, mode, maxHeight, activeId, open, onOpenChange, maxWidth, wrapperClass, wrapperStyle, iconClass, iconStyle } = props;
     const isSideBar = mode === 'side-bar';
     const containerRef = useRef<HTMLDivElement>(null);
+    const menusRef = useRef(menus);
+    menusRef.current = menus;
     const instance: ISideMenuInstance = useMemo(() => ({
         scrollTo: (id: string) => {
-            document.getElementById(`univer-side-menu-${id}`)?.scrollIntoView({ behavior: 'smooth' });
+            if (!menusRef.current) return;
+            const index = menusRef.current.findIndex((menu) => menu.id === id);
+            if (index === -1) return;
+            containerRef.current?.scrollTo({
+                behavior: 'smooth',
+                top: 32 * index,
+            });
         },
     }), []);
 

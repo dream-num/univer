@@ -104,17 +104,19 @@ export function DocSideMenu() {
         };
     });
 
-    const menus = [
-        ...(title
-            ? [{
-                id: TITLE_ID,
-                text: title,
-                level: NamedStyleType.TITLE,
-                isTitle: true,
-            }]
-            : []),
-        ...(paragraphMenus ?? []),
-    ].filter(Boolean);
+    const menus = paragraphMenus?.find((p) => p.isTitle)
+        ? paragraphMenus
+        : [
+            ...(title
+                ? [{
+                    id: TITLE_ID,
+                    text: title,
+                    level: NamedStyleType.TITLE,
+                    isTitle: true,
+                }]
+                : []),
+            ...(paragraphMenus ?? []),
+        ].filter(Boolean);
 
     const [open, setOpen] = useState(true);
     const activeId = findActiveHeading(paragraphBounds ?? [], scrollTop, bottom);

@@ -31,7 +31,7 @@ export interface ISideMenuProps {
     className?: string;
     style?: React.CSSProperties;
     mode?: 'float' | 'side-bar';
-    maxHeight?: string;
+    maxHeight: number;
     activeId?: string;
     open?: boolean;
     onOpenChange?: (open: boolean) => void;
@@ -65,7 +65,7 @@ export const SideMenu = forwardRef<ISideMenuInstance, ISideMenuProps>((props, re
             if (index === -1) return;
             containerRef.current?.scrollTo({
                 behavior: 'smooth',
-                top: 32 * index,
+                top: Math.min(32 * index, (32 * menusRef.current.length - maxHeight)),
             });
         },
     }), []);

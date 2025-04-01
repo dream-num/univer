@@ -1048,10 +1048,11 @@ function getFontStyleAtCursor(accessor: IAccessor) {
         };
     }
 
-    const curTextStyle = getStyleInTextRange(body, activeRange, defaultTextStyle);
+    const curTextStyle = getStyleInTextRange(body, activeRange, {});
 
     return {
         ts: {
+            ...defaultTextStyle,
             ...namedStyle,
             ...curTextStyle,
             ...cacheStyle,

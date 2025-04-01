@@ -191,13 +191,15 @@ export const NAMED_STYLE_MAP: Record<NamedStyleType, Nullable<ITextStyle>> = {
     [NamedStyleType.NAMED_STYLE_TYPE_UNSPECIFIED]: null,
 };
 
+const BOTTOM_P = 4;
+
 export const NAMED_STYLE_SPACE_MAP: Record<NamedStyleType, Nullable<IParagraphStyle>> = {
     [NamedStyleType.HEADING_1]: {
         spaceAbove: {
             v: 20,
         },
         spaceBelow: {
-            v: 6,
+            v: 6 + BOTTOM_P,
         },
     },
     [NamedStyleType.HEADING_2]: {
@@ -205,31 +207,31 @@ export const NAMED_STYLE_SPACE_MAP: Record<NamedStyleType, Nullable<IParagraphSt
             v: 18,
         },
         spaceBelow: {
-            v: 6,
+            v: 6 + BOTTOM_P,
         },
     },
     [NamedStyleType.HEADING_3]: {
         spaceAbove: {
-            v: 18,
+            v: 16,
         },
         spaceBelow: {
-            v: 6,
+            v: 6 + BOTTOM_P,
         },
     },
     [NamedStyleType.HEADING_4]: {
         spaceAbove: {
-            v: 16,
+            v: 14,
         },
         spaceBelow: {
-            v: 4,
+            v: 4 + BOTTOM_P,
         },
     },
     [NamedStyleType.HEADING_5]: {
         spaceAbove: {
-            v: 14,
+            v: 12,
         },
         spaceBelow: {
-            v: 4,
+            v: 4 + BOTTOM_P,
         },
     },
     [NamedStyleType.NORMAL_TEXT]: {
@@ -245,7 +247,7 @@ export const NAMED_STYLE_SPACE_MAP: Record<NamedStyleType, Nullable<IParagraphSt
             v: 0,
         },
         spaceBelow: {
-            v: 3,
+            v: 3 + BOTTOM_P,
         },
     },
     [NamedStyleType.SUBTITLE]: {

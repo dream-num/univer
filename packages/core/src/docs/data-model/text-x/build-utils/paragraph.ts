@@ -308,7 +308,7 @@ export const changeParagraphBulletNestLevel = (params: IChangeParagraphBulletNes
     return textX;
 };
 
-interface ISetParagraphStyleParams {
+export interface ISetParagraphStyleParams {
     textRanges: readonly ITextRange[];
     segmentId?: string;
     document: DocumentDataModel;

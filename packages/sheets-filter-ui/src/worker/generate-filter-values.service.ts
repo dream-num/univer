@@ -135,6 +135,7 @@ export function getFilterByValueItems(
     return items;
 }
 
+// eslint-disable-next-line max-lines-per-function, complexity
 export function getFilterTreeByValueItems(
     filters: boolean,
     localeService: LocaleService,
@@ -275,7 +276,7 @@ function generateFilterTreeBySort(tree: IFilterByValueWithTreeItem[]) {
     return Array.from(tree).sort((a, b) => {
         if (a.children && !b.children) return -1;
         if (!a.children && b.children) return 1;
-        return b.title.localeCompare(a.title);
+        return compare(a.title, b.title);
     }).map((yearItem) => {
         if (yearItem.children) {
             yearItem.children.sort((a, b) => {
@@ -294,4 +295,21 @@ function generateFilterTreeBySort(tree: IFilterByValueWithTreeItem[]) {
         }
         return yearItem;
     });
+}
+
+const isNumeric = (str: string) => !Number.isNaN(Number(str)) && !Number.isNaN(Number.parseFloat(str)); ;
+
+function compare(strA: string, strB: string) {
+    const aIsNumeric = isNumeric(strA);
+    const bIsNumeric = isNumeric(strB);
+
+    if (aIsNumeric && bIsNumeric) {
+        return Number.parseFloat(strA) - Number.parseFloat(strB);
+    } else if (aIsNumeric && !bIsNumeric) {
+        return -1;
+    } else if (!aIsNumeric && bIsNumeric) {
+        return 1;
+    } else {
+        return strA.localeCompare(strB);
+    }
 }

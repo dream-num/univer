@@ -30,6 +30,15 @@ export type FontStyle = 'normal' | 'italic';
 export type FontWeight = 'normal' | 'bold';
 
 /**
+ * The type of the style to get.
+ *
+ * - `row`: get composed style of row, col and default worksheet style. Row style has the highest priority, then col style.
+ * - `col`: get composed style of col, row and default worksheet style. Col style has the highest priority, then row style.
+ * - `cell`: get style of cell without merging row style, col style and default worksheet style.
+ */
+export type GetStyleType = 'row' | 'col' | 'cell';
+
+/**
  * Represents a range of cells in a sheet. You can call methods on this Facade API object
  * to read contents or manipulate the range.
  *
@@ -220,7 +229,14 @@ export class FRange extends FBaseInitialable {
     }
 
     /**
-     * Return first cell style data in this range
+     * Return first cell style data in this range. Please note that if there are row styles, col styles and (or)
+     * worksheet style, they will be merged into the cell style. You can use `type` to specify the type of the style to get.
+     *
+     * @param {GetStyleType} type - The type of the style to get. 'row' means get the composed style of row, col and
+     * default worksheet style. 'col' means get the composed style of col, row and default worksheet style.
+     * 'cell' means get the style of cell without merging row style, col style and default worksheet style.
+     * Default is 'row'.
+     *
      * @returns {IStyleData | null} The cell style data
      * @example
      * ```ts
@@ -230,18 +246,64 @@ export class FRange extends FBaseInitialable {
      * console.log(fRange.getCellStyleData());
      * ```
      */
-    getCellStyleData(): IStyleData | null {
-        const cell = this.getCellData();
-        const styles = this._workbook.getStyles();
-        if (cell && styles) {
-            return styles.getStyleByCell(cell) ?? null;
+    getCellStyleData(type: GetStyleType = 'row'): IStyleData | null {
+        if (type !== 'cell') {
+            return this._worksheet.getComposedCellStyle(this._range.startRow, this._range.startColumn, type === 'row');
         }
 
-        return null;
+        return this._worksheet.getCellStyle(this._range.startRow, this._range.startColumn) as IStyleData | null;
     }
 
     /**
-     * Return first cell style in this range
+     * Get the font family of the cell.
+     *
+     * @param {GetStyleType} type - The type of the style to get. 'row' means get the composed style of row, col and
+     * default worksheet style. 'col' means get the composed style of col, row and default worksheet style.
+     * 'cell' means get the style of cell without merging row style, col style and default worksheet style.
+     * Default is 'row'.
+     *
+     * @returns {string | null} The font family of the cell
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:B2');
+     * console.log(fRange.getFontFamily());
+     * ```
+     */
+    getFontFamily(type: GetStyleType = 'row'): string | null {
+        return this.getCellStyleData(type)?.ff ?? null;
+    }
+
+    /**
+     * Get the font size of the cell.
+     *
+     * @param {GetStyleType} type - The type of the style to get. 'row' means get the composed style of row, col and
+     * default worksheet style. 'col' means get the composed style of col, row and default worksheet style.
+     * 'cell' means get the style of cell without merging row style, col style and default worksheet style.
+     * Default is 'row'.
+     *
+     * @returns {number | null} The font size of the cell
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:B2');
+     * console.log(fRange.getFontSize());
+     * ```
+     */
+    getFontSize(type: GetStyleType = 'row'): number | null {
+        return this.getCellStyleData(type)?.fs ?? null;
+    }
+
+    /**
+     * Return first cell style in this range.
+     *
+     * @param {GetStyleType} type - The type of the style to get. 'row' means get the composed style of row, col and
+     * default worksheet style. 'col' means get the composed style of col, row and default worksheet style.
+     * 'cell' means get the style of cell without merging row style, col style and default worksheet style.
+     * Default is 'row'.
+     *
      * @returns {TextStyleValue | null} The cell style
      * @example
      * ```ts
@@ -251,13 +313,19 @@ export class FRange extends FBaseInitialable {
      * console.log(fRange.getCellStyle());
      * ```
      */
-    getCellStyle(): TextStyleValue | null {
-        const data = this.getCellStyleData();
+    getCellStyle(type: GetStyleType = 'row'): TextStyleValue | null {
+        const data = this.getCellStyleData(type);
         return data ? TextStyleValue.create(data) : null;
     }
 
     /**
      * Returns the cell styles for the cells in the range.
+     *
+     * @param {GetStyleType} type - The type of the style to get. 'row' means get the composed style of row, col and
+     * default worksheet style. 'col' means get the composed style of col, row and default worksheet style.
+     * 'cell' means get the style of cell without merging row style, col style and default worksheet style.
+     * Default is 'row'.
+     *
      * @returns {Array<Array<TextStyleValue | null>>} A two-dimensional array of cell styles.
      * @example
      * ```ts
@@ -267,12 +335,15 @@ export class FRange extends FBaseInitialable {
      * console.log(fRange.getCellStyles());
      * ```
      */
-    getCellStyles(): Array<Array<TextStyleValue | null>> {
+    getCellStyles(type: GetStyleType = 'row'): Array<Array<TextStyleValue | null>> {
         const cells = this.getCellDatas();
-        const styles = this._workbook.getStyles();
-        return cells.map((row) => row.map((cell) => {
+        return cells.map((row, rowIndex) => row.map((cell, colIndex) => {
             if (!cell) return null;
-            const style = styles.getStyleByCell(cell);
+            const style = type !== 'cell'
+                // NOTE: this has potential performance issue. Because in the implementation of getComposedCellStyle,
+                // it will get default worksheet style, row styles and col styles, which can be cached.
+                ? this._worksheet.getComposedCellStyle(rowIndex + this._range.startRow, colIndex + this._range.startColumn, type === 'row')
+                : this._worksheet.getCellStyle(rowIndex + this._range.startRow, colIndex + this._range.startColumn);
             return style ? TextStyleValue.create(style) : null;
         }));
     }

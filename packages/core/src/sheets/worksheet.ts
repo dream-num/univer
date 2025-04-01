@@ -182,31 +182,6 @@ export class Worksheet {
     }
 
     /**
-     * this function is used to mixin default style to cell raw{number}
-     * @param {number} row The row index
-     * @param {number} col The column index
-     * @param cellRaw The cell raw data
-     * @param {boolean} isRowStylePrecedeColumnStyle The priority of row style and column style
-     */
-    mixinDefaultStyleToCellRaw(row: number, col: number, cellRaw: Nullable<ICellData>, isRowStylePrecedeColumnStyle: boolean) {
-        const columnStyle = this.getColumnStyle(col) as Nullable<IStyleData>;
-        const rowStyle = this.getRowStyle(row) as Nullable<IStyleData>;
-        const defaultStyle = this.getDefaultCellStyleInternal();
-        if (defaultStyle || columnStyle || rowStyle) {
-            let cellStyle = cellRaw?.s;
-            if (typeof cellStyle === 'string') {
-                cellStyle = this._styles.get(cellStyle);
-            }
-            const s = isRowStylePrecedeColumnStyle ? composeStyles(defaultStyle, columnStyle, rowStyle, cellStyle) : composeStyles(defaultStyle, rowStyle, columnStyle, cellStyle);
-            if (!cellRaw) {
-                // eslint-disable-next-line no-param-reassign
-                cellRaw = {};
-            }
-            cellRaw.s = s;
-        }
-    }
-
-    /**
      * Get the default style of the worksheet.
      * @returns {Nullable<IStyleData>} Default Style
      */
@@ -238,6 +213,24 @@ export class Worksheet {
         }
 
         return null;
+    }
+
+    /**
+     * Get the composed style of the cell. If you want to get the style of the cell without merging row style,
+     * col style and default style, please use {@link getCellStyle} instead.
+     *
+     * @param {number} row The row index of the cell
+     * @param {number} col The column index of the cell
+     * @returns {IStyleData} The composed style of the cell
+     */
+    getComposedCellStyle(row: number, col: number, rowPriority = true): IStyleData {
+        const cell = this.getCellStyle(row, col);
+        const defaultStyle = this.getDefaultCellStyleInternal();
+        const rowStyle = this.getRowStyle(row);
+        const colStyle = this.getColumnStyle(col);
+        return rowPriority
+            ? composeStyles(defaultStyle, rowStyle, colStyle, cell)
+            : composeStyles(defaultStyle, colStyle, rowStyle, cell);
     }
 
     /**

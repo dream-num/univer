@@ -472,11 +472,7 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
                 let fs = defaultValue;
                 const primary = selectionManagerService.getCurrentLastSelection()?.primary;
                 if (primary != null) {
-                    const cell = worksheet.getCellStyle(primary.startRow, primary.startColumn);
-                    const defaultStyle = worksheet.getDefaultCellStyleInternal();
-                    const rowStyle = worksheet.getRowStyle(primary.startRow);
-                    const colStyle = worksheet.getColumnStyle(primary.startColumn);
-                    const style = composeStyles(defaultStyle, rowStyle, colStyle, cell);
+                    const style = worksheet.getComposedCellStyle(primary.startRow, primary.startColumn);
                     if (style.fs) {
                         fs = style.fs;
                     }

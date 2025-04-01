@@ -40,7 +40,7 @@ import './extensions';
 
 const DEFAULT_BORDER_COLOR: ITableCellBorder = {
     color: {
-        rgb: '#000000',
+        rgb: '#dee0e3',
     },
 };
 

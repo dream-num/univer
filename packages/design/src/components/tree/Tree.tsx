@@ -182,7 +182,7 @@ export function Tree(props: ITreeProps) {
                         }}
                     >
                         <Tooltip className="univer-w-full univer-truncate" showIfEllipsis placement="top" title={title}>
-                            {title}
+                            <span>{title}</span>
                         </Tooltip>
                     </div>
 

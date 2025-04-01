@@ -38,6 +38,8 @@ import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
 import { UniverSheetsNumfmtUIPlugin } from '@univerjs/sheets-numfmt-ui';
 import { UniverSheetsSortPlugin } from '@univerjs/sheets-sort';
 import { UniverSheetsBindingSourcePlugin } from '@univerjs/sheets-source-binding';
+import { UniverSheetTablePlugin } from '@univerjs/sheets-table';
+import { UniverSheetTableUIPlugin } from '@univerjs/sheets-table-ui';
 import { UniverSheetsThreadCommentPlugin } from '@univerjs/sheets-thread-comment';
 import { UniverSheetsThreadCommentUIPlugin } from '@univerjs/sheets-thread-comment-ui';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
@@ -66,6 +68,7 @@ import '@univerjs/sheets-zen-editor/facade';
 import '@univerjs/sheets-source-binding/facade';
 import '@univerjs/sheets-crosshair-highlight/facade';
 import '@univerjs/sheets-formula-ui/facade';
+import '@univerjs/sheets-table/facade';
 import '@univerjs/sheets-sort/facade';
 import '@univerjs/network/facade';
 import '../global.css';
@@ -134,6 +137,9 @@ function createNewInstance() {
     univer.registerPlugin(UniverSheetsThreadCommentUIPlugin);
     univer.registerPlugin(UniverSheetsBindingSourcePlugin);
     univer.registerPlugin(UniverSheetsCustomMenuPlugin);
+
+    univer.registerPlugin(UniverSheetTablePlugin);
+    univer.registerPlugin(UniverSheetTableUIPlugin);
     univer.registerPlugin(UniverNetworkPlugin);
 
     // If we are running in e2e platform, we should immediately register the debugger plugin.

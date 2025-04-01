@@ -261,15 +261,6 @@ export class SheetRangeThemeModel extends Disposable {
     fromJSON(unitId: string, json: ISheetRangeThemeModelJSON) {
         const { rangeThemeStyleRuleMap: rangeThemeStyleRuleMapJSON, rangeThemeStyleMapJson } = json;
 
-        if (rangeThemeStyleRuleMapJSON) {
-            Object.keys(rangeThemeStyleRuleMapJSON).forEach((key) => {
-                const ruleMap = rangeThemeStyleRuleMapJSON[key];
-                const { themeName, rangeInfo } = ruleMap;
-                this.registerRangeThemeRule(themeName, rangeInfo);
-                const rTreeCollection = this._ensureRTreeCollection(rangeInfo.unitId);
-                rTreeCollection.insert({ unitId: key, sheetId: rangeInfo.subUnitId, range: rangeInfo.range, id: key });
-            });
-        }
         Object.keys(rangeThemeStyleRuleMapJSON).forEach((key) => {
             const ruleMap = rangeThemeStyleRuleMapJSON[key];
             const { themeName, rangeInfo } = ruleMap;

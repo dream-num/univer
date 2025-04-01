@@ -31,6 +31,7 @@ import {
     NAMED_STYLE_MAP,
     NamedStyleType,
     ThemeService,
+    Tools,
     UniverInstanceType,
 } from '@univerjs/core';
 import {
@@ -1049,7 +1050,7 @@ function getFontStyleAtCursor(accessor: IAccessor) {
     }
 
     const curTextStyle = getStyleInTextRange(body, activeRange, {});
-
+    Tools.deleteNull(curTextStyle);
     return {
         ts: {
             ...defaultTextStyle,

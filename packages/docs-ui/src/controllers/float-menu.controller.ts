@@ -51,6 +51,10 @@ export class FloatMenuController extends Disposable {
         super();
         this._registerFloatMenu();
         this._initSelectionChange();
+
+        this.disposeWithMe(() => {
+            this._hideFloatMenu();
+        });
     }
 
     private _registerFloatMenu() {

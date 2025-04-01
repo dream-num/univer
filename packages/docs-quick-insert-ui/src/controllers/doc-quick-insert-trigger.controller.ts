@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
+import type { DocumentDataModel } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IDeleteCommandParams, IIMEInputCommandParams, IInsertCommandParams, IMoveCursorOperationParams } from '@univerjs/docs-ui';
-import { DeleteDirection, Direction, Disposable, ICommandService, Inject } from '@univerjs/core';
+import { DeleteDirection, Direction, Disposable, ICommandService, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { DeleteCommand, DeleteLeftCommand, IMEInputCommand, InsertCommand, MoveCursorOperation } from '@univerjs/docs-ui';
 import { IShortcutService, KeyCode } from '@univerjs/ui';
@@ -29,7 +30,8 @@ export class DocQuickInsertTriggerController extends Disposable {
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(DocSelectionManagerService) private readonly _textSelectionManagerService: DocSelectionManagerService,
         @Inject(DocQuickInsertPopupService) private readonly _docQuickInsertPopupService: DocQuickInsertPopupService,
-        @Inject(IShortcutService) private readonly _shortcutService: IShortcutService
+        @Inject(IShortcutService) private readonly _shortcutService: IShortcutService,
+        @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();
 
@@ -50,6 +52,11 @@ export class DocQuickInsertTriggerController extends Disposable {
             // eslint-disable-next-line complexity, max-lines-per-function
             this._commandService.onCommandExecuted((commandInfo) => {
                 const { _docQuickInsertPopupService, _textSelectionManagerService, _commandService } = this;
+                const documentDataModel = this._univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+                if (documentDataModel?.getDisabled()) {
+                    return;
+                }
+
                 if (commandInfo.id === InsertCommand.id) {
                     const params = commandInfo.params as IInsertCommandParams;
                     if (_docQuickInsertPopupService.editPopup) {

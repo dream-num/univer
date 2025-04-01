@@ -193,18 +193,6 @@ export class DocQuickInsertPopupService extends Disposable {
 
         this.closePopup();
 
-        const disposable = this._docCanvasPopupManagerService.attachPopupToRange(
-            { startOffset: index, endOffset: index, collapsed: true },
-            {
-                componentKey: QuickInsertPopup.componentKey,
-                onClickOutside: () => {
-                    this.closePopup();
-                },
-                direction: 'bottom',
-            },
-            unitId
-        );
-
         this._inputPlaceholderRenderRoot = this._createInputPlaceholderRenderRoot(() => {
             const docSkeletonManagerService = this._renderManagerService.getRenderById(unitId)?.with(DocSkeletonManagerService);
             const activeRange = this._docSelectionManagerService.getActiveTextRange();
@@ -235,6 +223,18 @@ export class DocQuickInsertPopupService extends Disposable {
             return disposable;
         });
         this._inputPlaceholderRenderRoot.mount();
+
+        const disposable = this._docCanvasPopupManagerService.attachPopupToRange(
+            { startOffset: index, endOffset: index, collapsed: true },
+            {
+                componentKey: QuickInsertPopup.componentKey,
+                onClickOutside: () => {
+                    this.closePopup();
+                },
+                direction: 'bottom',
+            },
+            unitId
+        );
 
         this._editPopup$.next({ disposable, popup, anchor: index, unitId });
     }

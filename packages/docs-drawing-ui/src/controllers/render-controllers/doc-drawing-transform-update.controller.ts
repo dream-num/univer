@@ -307,7 +307,12 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
         };
 
         if (this._lifecycleService.stage >= LifecycleStages.Rendered) {
-            init();
+            if (this._docSkeletonManagerService.getSkeleton()) {
+                init();
+            } else {
+                // wait render-unit ready
+                setTimeout(init, 500);
+            }
         } else {
             this._lifecycleService.lifecycle$.pipe(filter((stage) => stage === LifecycleStages.Rendered)).subscribe(init);
         }

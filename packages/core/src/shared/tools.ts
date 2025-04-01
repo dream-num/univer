@@ -116,6 +116,15 @@ function diffObject(oneObject: IKeyValue, twoObject: IKeyValue) {
  * Universal tool library
  */
 export class Tools {
+    static deleteNull(obj: any) {
+        for (const key in obj) {
+            if (obj[key] === null || obj[key] === undefined) {
+                delete obj[key];
+            }
+        }
+        return obj;
+    }
+
     static stringAt(index: number): string {
         let str = '';
         let idx = index;

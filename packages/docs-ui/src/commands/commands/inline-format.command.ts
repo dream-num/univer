@@ -475,8 +475,9 @@ export function getStyleInTextRange(
     const style = Tools.deepClone(defaultStyle);
 
     // Get the min font size in range.
-    style.fs = Math.max(...textRuns.map((t) => t?.ts?.fs ?? style.fs!));
-    style.fs = Number.isNaN(style.fs) ? undefined : style.fs;
+    const fsArr = textRuns.map((t) => t?.ts?.fs).filter(Boolean) as number[];
+    style.fs = style.fs ? Math.max(style.fs!, ...fsArr) : fsArr.length ? Math.max(...fsArr) : undefined;
+    style.fs = !style.fs || Number.isNaN(style.fs) ? undefined : style.fs;
     style.ff = textRuns.find((t) => t.ts?.ff != null)?.ts?.ff ?? style.ff;
     style.it = textRuns.length && textRuns.every((t) => t.ts?.it === BooleanNumber.TRUE) ? BooleanNumber.TRUE : BooleanNumber.FALSE;
     style.bl = textRuns.length && textRuns.every((t) => t.ts?.bl === BooleanNumber.TRUE) ? BooleanNumber.TRUE : BooleanNumber.FALSE;

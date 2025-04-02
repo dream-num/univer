@@ -95,6 +95,7 @@ exports.baseRules = {
     'react/no-forward-ref': 'off',
     'react/no-context-provider': 'off',
     'react-dom/no-render': 'off',
+    'react/no-use-context': 'off',
 
     // TODO: debatable rules
     'react/no-duplicate-key': 'warn',

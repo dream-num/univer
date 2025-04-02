@@ -20,7 +20,7 @@ import type { Observable } from 'rxjs';
 import type { IUniverUIConfig } from '../../../controllers/config.schema';
 import { IConfigService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import React, { createContext, use, useEffect, useRef } from 'react';
+import React, { createContext, useContext, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useEvent } from '../../../components/hooks/event';
 import { UI_PLUGIN_CONFIG_KEY } from '../../../controllers/config.schema';
@@ -249,6 +249,6 @@ function RectPopup(props: IRectPopupProps) {
 
 RectPopup.calcPopupPosition = calcPopupPosition;
 
-RectPopup.useContext = () => use(RectPopupContext);
+RectPopup.useContext = () => useContext(RectPopupContext);
 
 export { RectPopup };

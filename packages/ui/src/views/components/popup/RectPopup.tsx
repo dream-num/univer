@@ -17,9 +17,13 @@
 import type { Nullable } from '@univerjs/core';
 import type { RefObject } from 'react';
 import type { Observable } from 'rxjs';
-import React, { createContext, useContext, useEffect, useRef } from 'react';
+import type { IUniverUIConfig } from '../../../controllers/config.schema';
+import { IConfigService } from '@univerjs/core';
+import { useDependency } from '@wendellhu/redi/react-bindings';
+import React, { createContext, use, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useEvent } from '../../../components/hooks/event';
+import { UI_PLUGIN_CONFIG_KEY } from '../../../controllers/config.schema';
 
 interface IAbsolutePosition {
     left: number;
@@ -123,7 +127,10 @@ function RectPopup(props: IRectPopupProps) {
         left: -9999,
     });
     const excludeRectsRef = excludeRects;
+    const configService = useDependency(IConfigService);
     const anchorRectRef = useRef<IAbsolutePosition | undefined>(undefined);
+    const uiConfig = configService.getConfig(UI_PLUGIN_CONFIG_KEY) as IUniverUIConfig;
+    const popupRootId = uiConfig?.popupRootId ?? 'univer-popup-portal';
 
     function updatePosition(position: IAbsolutePosition) {
         requestAnimationFrame(() => {
@@ -237,11 +244,11 @@ function RectPopup(props: IRectPopupProps) {
         </section>
     );
 
-    return !portal ? ele : createPortal(ele, document.getElementById('univer-popup-portal')!);
+    return !portal ? ele : document.getElementById(popupRootId) ? createPortal(ele, document.getElementById(popupRootId)!) : null;
 }
 
 RectPopup.calcPopupPosition = calcPopupPosition;
 
-RectPopup.useContext = () => useContext(RectPopupContext);
+RectPopup.useContext = () => use(RectPopupContext);
 
 export { RectPopup };

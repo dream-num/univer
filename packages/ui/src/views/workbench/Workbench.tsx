@@ -16,11 +16,13 @@
 
 import type { DocumentDataModel, IDocumentData, Nullable } from '@univerjs/core';
 import type { ILocale } from '@univerjs/design';
+import type { IUniverUIConfig } from '../../controllers/config.schema';
 import type { IWorkbenchOptions } from '../../controllers/ui/ui.controller';
-import { DocumentFlavor, IUniverInstanceService, LocaleService, ThemeService, UniverInstanceType } from '@univerjs/core';
+import { DocumentFlavor, IConfigService, IUniverInstanceService, LocaleService, ThemeService, UniverInstanceType } from '@univerjs/core';
 import { clsx, ConfigContext, ConfigProvider, defaultTheme, themeInstance } from '@univerjs/design';
-import { useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { use, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { UI_PLUGIN_CONFIG_KEY } from '../../controllers/config.schema';
 import { BuiltInUIPart } from '../../services/parts/parts.service';
 import { useDependency } from '../../utils/di';
 import { ComponentContainer, useComponentsOfPart } from '../components/ComponentContainer';
@@ -50,7 +52,8 @@ export function DesktopWorkbench(props: IUniverWorkbenchProps) {
     const themeService = useDependency(ThemeService);
     const instanceService = useDependency(IUniverInstanceService);
     const contentRef = useRef<HTMLDivElement>(null);
-
+    const configService = useDependency(IConfigService);
+    const uiConfig = configService.getConfig(UI_PLUGIN_CONFIG_KEY) as IUniverUIConfig;
     const customHeaderComponents = useComponentsOfPart(BuiltInUIPart.CUSTOM_HEADER);
     const footerComponents = useComponentsOfPart(BuiltInUIPart.FOOTER);
     const headerComponents = useComponentsOfPart(BuiltInUIPart.HEADER);
@@ -59,8 +62,8 @@ export function DesktopWorkbench(props: IUniverWorkbenchProps) {
     const leftSidebarComponents = useComponentsOfPart(BuiltInUIPart.LEFT_SIDEBAR);
     const globalComponents = useComponentsOfPart(BuiltInUIPart.GLOBAL);
     const toolbarComponents = useComponentsOfPart(BuiltInUIPart.TOOLBAR);
-
     const [docSnapShot, setDocSnapShot] = useState<Nullable<IDocumentData>>(null);
+    const popupRootId = uiConfig?.popupRootId ?? 'univer-popup-portal';
 
     useEffect(() => {
         const sub = instanceService.focused$.subscribe((id) => {
@@ -196,13 +199,13 @@ export function DesktopWorkbench(props: IUniverWorkbenchProps) {
             <GlobalZone />
             {contextMenu && <DesktopContextMenu />}
             <FloatingContainer />
-            <div id="univer-popup-portal" />
+            <div id={popupRootId} />
         </ConfigProvider>
     );
 }
 
 function FloatingContainer() {
-    const { mountContainer } = useContext(ConfigContext);
+    const { mountContainer } = use(ConfigContext);
     const floatingComponents = useComponentsOfPart(BuiltInUIPart.FLOATING);
 
     return createPortal(<ComponentContainer key="floating" components={floatingComponents} />, mountContainer!);

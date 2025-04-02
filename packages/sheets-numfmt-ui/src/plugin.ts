@@ -20,7 +20,6 @@ import { DependentOn, IConfigService, Inject, Injector, merge, Plugin, registerD
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
-import { UI_PLUGIN_CONFIG_KEY } from '@univerjs/ui';
 import { defaultPluginConfig } from './controllers/config.schema';
 import { NumfmtAlertRenderController } from './controllers/numfmt-alert-render.controller';
 import { SheetNumfmtUIController } from './controllers/numfmt.controller';
@@ -53,7 +52,7 @@ export class UniverSheetsNumfmtUIPlugin extends Plugin {
             this._configService.setConfig('menu', menu, { merge: true });
         }
 
-        this._configService.setConfig(UI_PLUGIN_CONFIG_KEY, rest);
+        this._configService.setConfig('sheets-numfmt-ui.config', rest);
     }
 
     override onStarting(): void {

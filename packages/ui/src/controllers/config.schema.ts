@@ -29,6 +29,8 @@ export interface IUniverUIConfig extends IWorkbenchOptions {
     override?: DependencyOverride;
 
     menu?: MenuConfig;
+
+    popupRootId?: string;
 }
 
 export const defaultPluginConfig: IUniverUIConfig = {};

@@ -50,7 +50,7 @@ export default antfu(
     },
     {
         files: ['**/*.ts', '**/*.tsx'],
-        ignores: ['**/*.d.ts', '**/vite.config.ts', '**/vitest.config.ts', 'playwright.config.ts'],
+        ignores: ['**/*.d.ts', '**/vite.config.ts', '**/vitest.config.ts', '**/vitest.workspace.ts', 'playwright.config.ts'],
         plugins: {
             header,
             barrel,

@@ -198,6 +198,14 @@ export const QuickInsertPopup = () => {
         setFocusedMenuIndex(0);
     }, [filteredMenus]);
 
+    const menuNodeMapRef = useRef<Map<string, HTMLElement>>(new Map());
+
+    useEffect(() => {
+        return () => {
+            menuNodeMapRef.current.clear();
+        };
+    }, []);
+
     function renderMenus(menus: DocPopupMenu[]) {
         return menus.map((menu) => {
             const iconKey = (menu as IDocPopupMenuItem).icon;
@@ -227,12 +235,22 @@ export const QuickInsertPopup = () => {
             const isFocused = focusedMenuIndex === currentMenuIndex;
             if (isFocused) {
                 focusedMenuRef.current = menu as IDocPopupMenuItem;
+                const node = menuNodeMapRef.current.get(menu.id);
+                node?.scrollIntoView({
+                    block: 'nearest',
+                });
             }
 
             menuIndexAccumulator.current++;
 
             return (
                 <MenuItem
+                    // @ts-expect-error
+                    ref={(node) => {
+                        if (node) {
+                            menuNodeMapRef.current.set(menu.id, node);
+                        }
+                    }}
                     onMouseEnter={() => setFocusedMenuIndex(currentMenuIndex)}
                     onMouseLeave={() => setFocusedMenuIndex(Number.NaN)}
                     key={menu.id}
@@ -270,7 +288,11 @@ export const QuickInsertPopup = () => {
         >
             {hasMenus
                 ? (
-                    <div className="univer-max-h-[360px] univer-w-[220px] univer-overflow-y-auto">
+                    <div
+                        className={`
+                          univer-max-h-[360px] univer-w-[220px] univer-overflow-y-auto univer-overflow-x-hidden
+                        `}
+                    >
                         <Menu>
                             {renderMenus(filteredMenus)}
                         </Menu>

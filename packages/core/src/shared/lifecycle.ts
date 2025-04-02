@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 
-import type { Subscription, SubscriptionLike } from 'rxjs';
+import type { SubscriptionLike } from 'rxjs';
 import type { IDisposable } from '../common/di';
-import { Subject } from 'rxjs';
-import { isSubscription } from 'rxjs/internal/Subscription';
-import { isSubject } from './rxjs';
+import { Subject, Subscription } from 'rxjs';
 
 type DisposableLike = IDisposable | SubscriptionLike | (() => void);
+
+// eslint-disable-next-line ts/no-explicit-any
+function isSubscriptionLike(value: any): value is SubscriptionLike {
+    return value instanceof Subscription || value instanceof Subject ||
+    (value && 'closed' in value && typeof value.unsubscribe !== 'undefined');
+}
 
 export function toDisposable(disposable: IDisposable): IDisposable;
 export function toDisposable(subscription: SubscriptionLike): IDisposable;
@@ -35,13 +39,7 @@ export function toDisposable(v: DisposableLike): IDisposable {
         });
     }
 
-    if (isSubject(v)) {
-        return {
-            dispose: () => v.unsubscribe(),
-        };
-    }
-
-    if (isSubscription(v)) {
+    if (isSubscriptionLike(v)) {
         return {
             dispose: () => v.unsubscribe(),
         };

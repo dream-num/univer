@@ -20,7 +20,7 @@ import type { IUniverUIConfig } from '../../controllers/config.schema';
 import type { IWorkbenchOptions } from '../../controllers/ui/ui.controller';
 import { DocumentFlavor, IConfigService, IUniverInstanceService, LocaleService, ThemeService, UniverInstanceType } from '@univerjs/core';
 import { clsx, ConfigContext, ConfigProvider, defaultTheme, themeInstance } from '@univerjs/design';
-import { use, useEffect, useMemo, useRef, useState } from 'react';
+import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { UI_PLUGIN_CONFIG_KEY } from '../../controllers/config.schema';
 import { BuiltInUIPart } from '../../services/parts/parts.service';
@@ -205,7 +205,7 @@ export function DesktopWorkbench(props: IUniverWorkbenchProps) {
 }
 
 function FloatingContainer() {
-    const { mountContainer } = use(ConfigContext);
+    const { mountContainer } = useContext(ConfigContext);
     const floatingComponents = useComponentsOfPart(BuiltInUIPart.FLOATING);
 
     return createPortal(<ComponentContainer key="floating" components={floatingComponents} />, mountContainer!);

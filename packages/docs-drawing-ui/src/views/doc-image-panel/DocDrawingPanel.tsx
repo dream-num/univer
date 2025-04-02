@@ -37,7 +37,6 @@ export const DocDrawingPanel = () => {
         return () => {
             focusDispose.unsubscribe();
         };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return !!drawings?.length && (

@@ -17,8 +17,7 @@
 import { LocaleService } from '@univerjs/core';
 import { Radio, RadioGroup } from '@univerjs/design';
 import { useDependency } from '@univerjs/ui';
-import React, { useState } from 'react';
-import styles from './index.module.less';
+import { useState } from 'react';
 
 export interface IExtendConfirmProps {
     onChange: (value: string) => void;
@@ -28,10 +27,10 @@ export const ExtendConfirm = (props: IExtendConfirmProps) => {
     const [extend, setExtend] = useState<string>('0');
     const localeService = useDependency(LocaleService);
     return (
-        <div className={styles.extendConfirmContent}>
+        <div className="univer-text-sm">
             <div className="extend-confirm-desc">{localeService.t('sheets-sort.dialog.sort-reminder-desc')}</div>
             <RadioGroup
-                className={styles.extendConfirmRadioGroup}
+                className="univer-mt-4"
                 value={extend}
                 direction="vertical"
                 onChange={(value) => {
@@ -39,9 +38,7 @@ export const ExtendConfirm = (props: IExtendConfirmProps) => {
                     props.onChange(value as string);
                 }}
             >
-                <Radio
-                    value="0"
-                >
+                <Radio value="0">
                     {localeService.t('sheets-sort.dialog.sort-reminder-no')}
                 </Radio>
                 <Radio value="1">

@@ -18,6 +18,7 @@ import type { Subscription, SubscriptionLike } from 'rxjs';
 import type { IDisposable } from '../common/di';
 import { Subject } from 'rxjs';
 import { isSubscription } from 'rxjs/internal/Subscription';
+import { isSubject } from './rxjs';
 
 type DisposableLike = IDisposable | SubscriptionLike | (() => void);
 
@@ -32,6 +33,12 @@ export function toDisposable(v: DisposableLike): IDisposable {
         return toDisposable(() => {
             // empty
         });
+    }
+
+    if (isSubject(v)) {
+        return {
+            dispose: () => v.unsubscribe(),
+        };
     }
 
     if (isSubscription(v)) {

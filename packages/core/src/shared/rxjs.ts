@@ -16,9 +16,16 @@
 
 import type { OperatorFunction } from 'rxjs';
 import type { IDisposable } from '../common/di';
-import { debounceTime, map, Observable, ReplaySubject, take, tap } from 'rxjs';
+import { debounceTime, map, Observable, ReplaySubject, Subject, take, tap } from 'rxjs';
+import { isFunction } from 'rxjs/internal/util/isFunction';
 
 type CallbackFn<T extends readonly unknown[]> = (cb: (...args: T) => void) => IDisposable;
+
+// eslint-disable-next-line ts/no-explicit-any
+export function isSubject(value: any): value is Subject<any> {
+    return value instanceof Subject ||
+    (value && 'closed' in value && isFunction(value.next) && isFunction(value.error) && isFunction(value.complete) && isFunction(value.unsubscribe));
+}
 
 /**
  * Creates an observable from a callback function.

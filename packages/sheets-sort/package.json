@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-sort",
-    "version": "0.6.7",
+    "version": "0.6.8",
     "private": false,
     "description": "A library for sorting data in Univer Sheet",
     "author": "DreamNum <developer@univer.ai>",

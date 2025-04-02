@@ -1,5 +1,58 @@
 # Changelog
 
+## [0.6.8](https://github.com/dream-num/univer/compare/v0.6.7...v0.6.8) (2025-04-02)
+
+
+### Bug Fixes
+
+* build core type error ([#4922](https://github.com/dream-num/univer/issues/4922)) ([e3c2707](https://github.com/dream-num/univer/commit/e3c270774e97953751f4524a8a7aff73831ec296))
+* build core type error ([#4923](https://github.com/dream-num/univer/issues/4923)) ([3d2d6d1](https://github.com/dream-num/univer/commit/3d2d6d15e333cb501ff1abbfc236d24170725d90))
+* clear content should not be set empty object ([#4861](https://github.com/dream-num/univer/issues/4861)) ([33bc6bb](https://github.com/dream-num/univer/commit/33bc6bb488c3590ccb56105ab54dd1d57e680fa4))
+* **deps:** update react peer dependency version range ([#4887](https://github.com/dream-num/univer/issues/4887)) ([89c144c](https://github.com/dream-num/univer/commit/89c144cafdd155f05b6fe6c95922a623f47b05a9))
+* **docs-drawing-ui:** remove custom-block error ([#4892](https://github.com/dream-num/univer/issues/4892)) ([f860829](https://github.com/dream-num/univer/commit/f86082954527395276c474435204a175c674e2b6))
+* **docs-ui:** calc range position error & scale by mouse ([#4903](https://github.com/dream-num/univer/issues/4903)) ([f3c1066](https://github.com/dream-num/univer/commit/f3c10660dca16a5169b72315efc45d5cd4be9b86))
+* **docs-ui:** disable float-menu on whole custom-range ([#4893](https://github.com/dream-num/univer/issues/4893)) ([57fa7d0](https://github.com/dream-num/univer/commit/57fa7d076e611bef67c54950e41e60ed5f3d1d88))
+* **docs-ui:** doc float menu font size calc error ([#4915](https://github.com/dream-num/univer/issues/4915)) ([cb802d5](https://github.com/dream-num/univer/commit/cb802d531335595bdb8622002fce620c3001db4c))
+* **docs-ui:** docs heading-menu auto scroll ([#4906](https://github.com/dream-num/univer/issues/4906)) ([2990f2a](https://github.com/dream-num/univer/commit/2990f2a0efd31dbf24c481e58b4f90a246298253))
+* **docs-ui:** float-menu and heading space ([#4914](https://github.com/dream-num/univer/issues/4914)) ([1d62662](https://github.com/dream-num/univer/commit/1d626623c0a1ec89ac77b6eb4df876dd22a0f173))
+* **docs-ui:** menu default value calculate error ([#4908](https://github.com/dream-num/univer/issues/4908)) ([9ae264b](https://github.com/dream-num/univer/commit/9ae264b7bf761f91839a6af6144bfa06d59d1d7b))
+* **docs-ui:** menu font-size calc error on heading case ([#4910](https://github.com/dream-num/univer/issues/4910)) ([9e0d700](https://github.com/dream-num/univer/commit/9e0d70093f8c855d180454f4b03530d659d966b0))
+* **docs-ui:** popup float menu position ([#4881](https://github.com/dream-num/univer/issues/4881)) ([610f710](https://github.com/dream-num/univer/commit/610f7103485a1ff6c29288f2afa51454e10bde89))
+* **docs-ui:** support heading spacing style ([#4912](https://github.com/dream-num/univer/issues/4912)) ([908e15d](https://github.com/dream-num/univer/commit/908e15da3a8d654fcf75964717617474fee4617f))
+* **docs:** default table border color ([#4920](https://github.com/dream-num/univer/issues/4920)) ([77ce7d4](https://github.com/dream-num/univer/commit/77ce7d44930865519b7575ed1f74ae291f749d2e))
+* **docs:** quick insert ([#4885](https://github.com/dream-num/univer/issues/4885)) ([b65b263](https://github.com/dream-num/univer/commit/b65b2639aba90ca379cf1f6978c705fa772ca22f))
+* **docs:** render table cell bg ([#4904](https://github.com/dream-num/univer/issues/4904)) ([966c582](https://github.com/dream-num/univer/commit/966c58241d7c0cc83cc59c87a4f5f88aa0114aba))
+* fix filter panel sort ([#4921](https://github.com/dream-num/univer/issues/4921)) ([9e88497](https://github.com/dream-num/univer/commit/9e884971e8c79034dd0eb0597c36873d53d1be91))
+* fix formula calculation for empty strings ([#4900](https://github.com/dream-num/univer/issues/4900)) ([0cbb5c9](https://github.com/dream-num/univer/commit/0cbb5c983620211f47b462827b369a5a4f12fba1))
+* fix merge cell bug ([#4898](https://github.com/dream-num/univer/issues/4898)) ([79bf4b8](https://github.com/dream-num/univer/commit/79bf4b83df63d42857b7fc64fdb99482ffac964b))
+* **formula:** fix formula MDETERM calculation method ([#4907](https://github.com/dream-num/univer/issues/4907)) ([733535d](https://github.com/dream-num/univer/commit/733535d6b5b396a152755e7cf397bf2b622e5d66))
+* label hidden in filter panel ([#4919](https://github.com/dream-num/univer/issues/4919)) ([0bbf87e](https://github.com/dream-num/univer/commit/0bbf87e61c1e85664e43b81b23955af031fab2d0))
+* menu popup priority greater than placeholder ([#4916](https://github.com/dream-num/univer/issues/4916)) ([4459634](https://github.com/dream-num/univer/commit/44596347ed188d70dfff53e189bbb907eb09a0f4))
+* **sheets-data-validation:** data-validation status change event not triggered ([#4928](https://github.com/dream-num/univer/issues/4928)) ([c6a93d5](https://github.com/dream-num/univer/commit/c6a93d50bf1b4f366cb41501231c9ceec28fa84e))
+* **sheets-filter:** fix the style issues of the filter panel ([#4911](https://github.com/dream-num/univer/issues/4911)) ([d302f39](https://github.com/dream-num/univer/commit/d302f398a88c0211f736b7d15ffe6c01e27801d6))
+* **sheets:** facade should return composed style info ([#4917](https://github.com/dream-num/univer/issues/4917)) ([8a49f15](https://github.com/dream-num/univer/commit/8a49f15d09d725a1682b785efe26cbb49c8314fb))
+* **ui:** replace use with useContext for ConfigContext ([#4929](https://github.com/dream-num/univer/issues/4929)) ([7859d92](https://github.com/dream-num/univer/commit/7859d922c7270a49e57bdb595dae1584f256eae4))
+* update RectPopup to use useContext and adjust ESLint rules ([#4926](https://github.com/dream-num/univer/issues/4926)) ([b5d8a8a](https://github.com/dream-num/univer/commit/b5d8a8abb5dfb947aa594be217d7b32e60e51d7c))
+
+
+### Features
+
+* add float dom id to Comp ([#4886](https://github.com/dream-num/univer/issues/4886)) ([a17a041](https://github.com/dream-num/univer/commit/a17a0419e3fb34e06ad99277792ac8bffb59c73b))
+* **docs-drawing-ui:** mount drawing on rendered phase ([#4913](https://github.com/dream-num/univer/issues/4913)) ([e786e51](https://github.com/dream-num/univer/commit/e786e519e7d98e200ba76180909541e90659f39f))
+* **docs-ui:** open menu default ([#4899](https://github.com/dream-num/univer/issues/4899)) ([8f3024e](https://github.com/dream-num/univer/commit/8f3024e3c7b8d5351e035153f5b52d8edc288771))
+* **docs-ui:** optimize doc heading-menu  ([#4905](https://github.com/dream-num/univer/issues/4905)) ([0bcabf2](https://github.com/dream-num/univer/commit/0bcabf2a23b9f206c6cd302a2f6f7a197c45d63b))
+* **docs-ui:** optimize doc menu scroller ([#4909](https://github.com/dream-num/univer/issues/4909)) ([20772c3](https://github.com/dream-num/univer/commit/20772c3de2f2b76bbcc2f2a78f9e0464a22a9cb8))
+* **docs-ui:** skip float-menu flash ([#4897](https://github.com/dream-num/univer/issues/4897)) ([f1a1f9a](https://github.com/dream-num/univer/commit/f1a1f9a6caf2ee0c033ff09e4f7734684149a241))
+* **docs-ui:** support doc heading menu ([#4891](https://github.com/dream-num/univer/issues/4891)) ([b17785e](https://github.com/dream-num/univer/commit/b17785e640cae6396ece94da03aafc4ad38f500d))
+* **docs-ui:** update side-menu style ([#4896](https://github.com/dream-num/univer/issues/4896)) ([a2c620c](https://github.com/dream-num/univer/commit/a2c620c56cbc0dd362bb348353a3b67bcbaa0f75))
+* **docs:** update draw cursor and horizontal line ([#4902](https://github.com/dream-num/univer/issues/4902)) ([5cd9523](https://github.com/dream-num/univer/commit/5cd9523b75c8eaae505d7ff55f1634e428dc1163))
+* **doc:** table support border and bg ([#4901](https://github.com/dream-num/univer/issues/4901)) ([c6e33dd](https://github.com/dream-num/univer/commit/c6e33dd30b311856cf65303ae40c9c5fe386c4c6))
+* number format menu item adds scientific notation ([#4895](https://github.com/dream-num/univer/issues/4895)) ([d427835](https://github.com/dream-num/univer/commit/d4278357fed7d8039a315f5ca81cc8e5e2930371))
+* **pivot:** support custom sort ([#4889](https://github.com/dream-num/univer/issues/4889)) ([4e4ac70](https://github.com/dream-num/univer/commit/4e4ac707440cd6792c3f1fa62aeb8472042999bf))
+* quick insert background white ([#4918](https://github.com/dream-num/univer/issues/4918)) ([a41882d](https://github.com/dream-num/univer/commit/a41882d6456055c90184803dea5ee2190e91deec))
+* support doc heading ([#4875](https://github.com/dream-num/univer/issues/4875)) ([b605b83](https://github.com/dream-num/univer/commit/b605b8303064b2bd79d1aef8e143554ae41db6d4))
+* **ui:** optimize popup portal to support multi-instance ([#4924](https://github.com/dream-num/univer/issues/4924)) ([8b980be](https://github.com/dream-num/univer/commit/8b980be6e6196cac2c921fb68ac9b030aa59a476))
+
 ## [0.6.7](https://github.com/dream-num/univer/compare/v0.6.6...v0.6.7) (2025-03-26)
 
 

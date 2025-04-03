@@ -1,0 +1,10 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+# Your rule content
+
+- Please always use design token in less file, design token file is [base.less](mdc:packages/design/src/themes/base.less), but make sure all used token are reasonable, make sure value is the same.
+- If you use color token, please add `rgb` or `rgba` function. eg. `rgb(--var(--color-white))`, `rgb(--var(--color-white), 0.7)`.

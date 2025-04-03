@@ -1,23 +1,21 @@
 .menu {
     box-sizing: border-box;
     margin: 0;
-    padding: 4px 8px;
+    padding: var(--padding-xs) var(--padding-sm);
 
     font-size: var(--font-size-xs);
     list-style: none;
 
-    background-color: #ffffff;
-    border-radius: 12px;
+    background-color: rgb(var(--bg-color-secondary));
+    border-radius: var(--border-radius-xl);
     outline: none;
-    box-shadow:
-        0px 2px 6px -1px rgba(30, 40, 77, 0.1),
-        0px 1px 6px -2px rgba(30, 40, 77, 0.08);
-    border: 1px solid #e3e5ea;
+    box-shadow: var(--box-shadow-lg);
+    border: 1px solid rgb(var(--border-color));
     min-width: 212px;
 
     &-vertical {
         display: grid;
-        gap: 4px;
+        gap: var(--margin-xxs);
     }
 
     &-hidden,
@@ -27,46 +25,47 @@
 
     &-item {
         &-group {
-            padding: 4px 0;
+            padding: var(--padding-xs) 0;
 
             &:not(:last-child) {
-                border-bottom: 1px solid #e3e5ea;
+                border-bottom: 1px solid rgb(var(--border-color));
             }
         }
     }
 
     &-item-group-list {
         display: grid;
-        gap: 4px;
+        gap: var(--margin-xxs);
         margin: 0;
         padding: 0;
     }
 
     &-item-group-title {
-        padding: 0 8px;
-        color: #979dac;
-        font-size: 12px;
+        padding: 0 var(--padding-sm);
+        color: rgb(var(--grey-500));
+        font-size: var(--font-size-xxs);
         font-weight: 600;
         line-height: 1.5em;
         margin-bottom: 4px;
+        margin-top: 6px;
     }
 
     &-item-active,
     &-submenu-active {
-        background-color: #eeeff1;
-        border-radius: 6px;
+        background-color: rgb(var(--bg-color-hover-light));
+        border-radius: var(--border-radius-base);
     }
 
     &-item-selected {
         // fix chrome render bug
         transform: translateZ(0);
-        background-color: #eeeff1;
-        border-radius: 6px;
+        background-color: rgb(var(--bg-color-hover-light));
+        border-radius: var(--border-radius-base);
     }
 
     &-submenu-selected {
-        background-color: #eeeff1;
-        border-radius: 6px;
+        background-color: rgb(var(--bg-color-hover-light));
+        border-radius: var(--border-radius-base);
     }
 
     & > li&-submenu {
@@ -83,21 +82,21 @@
 
     &-item {
         display: flex;
-        gap: 8px;
+        gap: var(--margin-sm);
         align-items: center;
-        padding: 0 8px;
+        padding: 0 var(--padding-sm);
         min-height: 32px;
-        color: #181c2a;
-        font-size: 14px;
+        color: rgb(var(--text-color));
+        font-size: var(--font-size-sm);
         line-height: 1.5em;
-        border-radius: 6px;
+        border-radius: var(--border-radius-base);
 
         &:hover {
-            background-color: #eeeff1;
+            background-color: rgb(var(--bg-color-hover-light));
         }
 
         .icon {
-            color: #5f6574;
+            color: rgb(var(--text-color-secondary));
         }
     }
 
@@ -113,7 +112,7 @@
         // Disabled state sets text to gray and nukes hover/tab effects
         &.menu-item-disabled,
         &.menu-submenu-disabled {
-            color: #979dac !important;
+            color: rgb(var(--text-color-tertiary)) !important;
             cursor: not-allowed;
         }
     }
@@ -124,7 +123,7 @@
             z-index: 1070;
 
             .submenu-title-wrapper {
-                padding-right: 20px;
+                padding-right: var(--padding-xl);
             }
         }
 
@@ -133,10 +132,10 @@
             align-items: center;
             justify-content: space-between;
             height: 100%;
-            padding: 0 8px;
+            padding: 0 var(--padding-sm);
             min-height: 32px;
-            color: #181c2a;
-            font-size: 14px;
+            color: rgb(var(--text-color));
+            font-size: var(--font-size-sm);
             line-height: 1.5em;
         }
     }
@@ -144,9 +143,9 @@
     .menu-submenu-title,
     .menu-item {
         &-more-icon {
-            margin-left: 8px;
+            margin-left: var(--margin-xs);
             font-size: var(--font-size-sm);
-            color: #5f6574;
+            color: rgb(var(--text-color-secondary));
         }
     }
 

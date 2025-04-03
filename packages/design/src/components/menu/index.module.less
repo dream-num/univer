@@ -15,7 +15,6 @@
 
     &-vertical {
         display: grid;
-        gap: var(--margin-xxs);
     }
 
     &-hidden,
@@ -46,26 +45,30 @@
         font-size: var(--font-size-xxs);
         font-weight: 600;
         line-height: 1.5em;
-        margin-bottom: 4px;
-        margin-top: 6px;
+        padding: 4px;
+        padding-top: 6px;
+    }
+
+    &-item-group-title:empty {
+        display: none;
     }
 
     &-item-active,
     &-submenu-active {
         background-color: rgb(var(--bg-color-hover-light));
-        border-radius: var(--border-radius-base);
+        border-radius: var(--border-radius-lg);
     }
 
     &-item-selected {
         // fix chrome render bug
         transform: translateZ(0);
         background-color: rgb(var(--bg-color-hover-light));
-        border-radius: var(--border-radius-base);
+        border-radius: var(--border-radius-lg);
     }
 
     &-submenu-selected {
         background-color: rgb(var(--bg-color-hover-light));
-        border-radius: var(--border-radius-base);
+        border-radius: var(--border-radius-lg);
     }
 
     & > li&-submenu {
@@ -89,7 +92,7 @@
         color: rgb(var(--text-color));
         font-size: var(--font-size-sm);
         line-height: 1.5em;
-        border-radius: var(--border-radius-base);
+        border-radius: var(--border-radius-lg);
 
         &:hover {
             background-color: rgb(var(--bg-color-hover-light));

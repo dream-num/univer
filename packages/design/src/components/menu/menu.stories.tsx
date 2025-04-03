@@ -37,13 +37,17 @@ export const Default = () => {
                 <MenuItem>Item 4</MenuItem>
                 <MenuItem>Item 5</MenuItem>
             </MenuItemGroup>
-            <MenuItemGroup title={null}>
+            <MenuItemGroup>
                 <SubMenu title="SubMenu">
-                    <MenuItem>Item 6</MenuItem>
+                    <MenuItemGroup>
+                        <MenuItem>Item 6</MenuItem>
+                    </MenuItemGroup>
                 </SubMenu>
                 <SubMenu title="SubMenu2">
-                    <MenuItem>Item 7</MenuItem>
-                    <MenuItem>Item 8</MenuItem>
+                    <MenuItemGroup>
+                        <MenuItem>Item 7</MenuItem>
+                        <MenuItem>Item 8</MenuItem>
+                    </MenuItemGroup>
                 </SubMenu>
             </MenuItemGroup>
         </Menu>

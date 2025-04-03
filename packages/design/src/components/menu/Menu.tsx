@@ -23,19 +23,17 @@ import styles from './index.module.less';
 
 export const Menu = React.forwardRef<MenuRef, MenuProps>((props, ref) => {
     const { mountContainer } = useContext(ConfigContext);
-    return mountContainer && React.cloneElement(<RcMenu ref={ref} prefixCls={clsx(styles.menu, props.className)} getPopupContainer={() => mountContainer} />, {
-        ...props,
-    });
+    return mountContainer && <RcMenu ref={ref} prefixCls={clsx(styles.menu, props.className)} getPopupContainer={() => mountContainer} {...props} />;
 });
 
 export function MenuItem(props: MenuItemProps) {
-    return React.cloneElement(<RcMenuItem />, { ...props });
+    return <RcMenuItem {...props} />;
 }
 
 export function SubMenu(props: SubMenuProps) {
-    return React.cloneElement(<RcSubMenu />, { ...props });
+    return <RcSubMenu {...props} />;
 }
 
 export function MenuItemGroup(props: MenuItemGroupProps) {
-    return React.cloneElement(<RcMenuItemGroup />, { ...props });
+    return <RcMenuItemGroup {...props} />;
 }

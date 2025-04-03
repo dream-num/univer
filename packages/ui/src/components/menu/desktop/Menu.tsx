@@ -292,16 +292,18 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
                     )}
                     expandIcon={<MoreSingle className={styles.menuItemMoreIcon} />}
                 >
-                    {selections.length > 0 && (
-                        <MenuOptionsWrapper
-                            parentKey={item.id}
-                            menuType={item.id}
-                            options={selections}
-                            onOptionSelect={(v) => {
-                                onClick({ value: v.value, id: item.id, commandId: v.commandId });
-                            }}
-                        />
-                    )}
+                    <DesignMenuItemGroup>
+                        {selections.length > 0 && (
+                            <MenuOptionsWrapper
+                                parentKey={item.id}
+                                menuType={item.id}
+                                options={selections}
+                                onOptionSelect={(v) => {
+                                    onClick({ value: v.value, id: item.id, commandId: v.commandId });
+                                }}
+                            />
+                        )}
+                    </DesignMenuItemGroup>
                 </DesignSubMenu>
             );
         }
@@ -339,7 +341,9 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
                 )}
                 expandIcon={<MoreSingle className={styles.menuItemMoreIcon} />}
             >
-                {subMenuItems.length && <MenuWrapper menuType={item.id} parentKey={item.id} onOptionSelect={onClick} />}
+                <DesignMenuItemGroup>
+                    {subMenuItems.length && <MenuWrapper menuType={item.id} parentKey={item.id} onOptionSelect={onClick} />}
+                </DesignMenuItemGroup>
             </DesignSubMenu>
         );
     };

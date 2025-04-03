@@ -64,6 +64,10 @@ export enum ContextMenuPosition {
     ROW_HEADER = 'contextMenu.rowHeader',
     FOOTER_TABS = 'contextMenu.footerTabs',
     FOOTER_MENU = 'contextMenu.footerMenu',
+    /**
+     * paragraph context menu in doc
+     */
+    PARAGRAPH = 'contextMenu.paragraph',
 }
 
 export enum ContextMenuGroup {

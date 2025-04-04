@@ -16,6 +16,7 @@
 
 import type { Workbook } from '@univerjs/core';
 import { Disposable, Inject, IPermissionService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { BehaviorSubject } from 'rxjs';
 import { RangeProtectionRuleModel } from '../../../model/range-protection-rule.model';
 import { getAllRangePermissionPoint } from '../range-permission/util';
 import { WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '../worksheet-permission';
@@ -23,6 +24,9 @@ import { getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPa
 import { getAllWorkbookPermissionPoint } from './util';
 
 export class WorkbookPermissionService extends Disposable {
+    private _unitPermissionInitStateChange = new BehaviorSubject<boolean>(false);
+    unitPermissionInitStateChange$ = this._unitPermissionInitStateChange.asObservable();
+
     constructor(
         @Inject(IPermissionService) private _permissionService: IPermissionService,
         @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
@@ -79,5 +83,9 @@ export class WorkbookPermissionService extends Disposable {
             this._worksheetProtectionPointModel.deleteUnitModel(unitId);
             this._worksheetProtectionRuleModel.deleteUnitModel(unitId);
         }));
+    }
+
+    changeUnitInitState(state: boolean) {
+        this._unitPermissionInitStateChange.next(state);
     }
 }

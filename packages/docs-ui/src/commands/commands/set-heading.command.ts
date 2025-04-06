@@ -150,3 +150,91 @@ export const QUICK_HEADING_MAP = {
     '####': NamedStyleType.HEADING_4,
     '#####': NamedStyleType.HEADING_5,
 };
+
+export const H1HeadingCommand: ICommand<ISetParagraphNamedStyleCommandParams> = {
+    id: 'doc.command.h1-heading',
+    type: CommandType.COMMAND,
+    handler: (accessor) => {
+        const commandService = accessor.get(ICommandService);
+        return commandService.syncExecuteCommand(SetParagraphNamedStyleCommand.id, {
+            value: NamedStyleType.HEADING_1,
+        });
+    },
+};
+
+export const H2HeadingCommand: ICommand<ISetParagraphNamedStyleCommandParams> = {
+    id: 'doc.command.h2-heading',
+    type: CommandType.COMMAND,
+    handler: (accessor) => {
+        const commandService = accessor.get(ICommandService);
+        return commandService.syncExecuteCommand(SetParagraphNamedStyleCommand.id, {
+            value: NamedStyleType.HEADING_2,
+        });
+    },
+};
+
+export const H3HeadingCommand: ICommand<ISetParagraphNamedStyleCommandParams> = {
+    id: 'doc.command.h3-heading',
+    type: CommandType.COMMAND,
+    handler: (accessor) => {
+        const commandService = accessor.get(ICommandService);
+        return commandService.syncExecuteCommand(SetParagraphNamedStyleCommand.id, {
+            value: NamedStyleType.HEADING_3,
+        });
+    },
+};
+
+export const H4HeadingCommand: ICommand<ISetParagraphNamedStyleCommandParams> = {
+    id: 'doc.command.h4-heading',
+    type: CommandType.COMMAND,
+    handler: (accessor) => {
+        const commandService = accessor.get(ICommandService);
+        return commandService.syncExecuteCommand(SetParagraphNamedStyleCommand.id, {
+            value: NamedStyleType.HEADING_4,
+        });
+    },
+};
+
+export const H5HeadingCommand: ICommand<ISetParagraphNamedStyleCommandParams> = {
+    id: 'doc.command.h5-heading',
+    type: CommandType.COMMAND,
+    handler: (accessor) => {
+        const commandService = accessor.get(ICommandService);
+        return commandService.syncExecuteCommand(SetParagraphNamedStyleCommand.id, {
+            value: NamedStyleType.HEADING_5,
+        });
+    },
+};
+
+export const NormalTextHeadingCommand: ICommand<ISetParagraphNamedStyleCommandParams> = {
+    id: 'doc.command.normal-text-heading',
+    type: CommandType.COMMAND,
+    handler: (accessor) => {
+        const commandService = accessor.get(ICommandService);
+        return commandService.syncExecuteCommand(SetParagraphNamedStyleCommand.id, {
+            value: NamedStyleType.NORMAL_TEXT,
+        });
+    },
+};
+
+export const TitleHeadingCommand: ICommand<ISetParagraphNamedStyleCommandParams> = {
+    id: 'doc.command.title',
+    type: CommandType.COMMAND,
+    handler: (accessor) => {
+        const commandService = accessor.get(ICommandService);
+        return commandService.syncExecuteCommand(SetParagraphNamedStyleCommand.id, {
+            value: NamedStyleType.TITLE,
+        });
+    },
+};
+
+export const SubtitleHeadingCommand: ICommand<ISetParagraphNamedStyleCommandParams> = {
+    id: 'doc.command.subtitle-heading',
+    type: CommandType.COMMAND,
+    handler: (accessor) => {
+        const commandService = accessor.get(ICommandService);
+        return commandService.syncExecuteCommand(SetParagraphNamedStyleCommand.id, {
+            value: NamedStyleType.SUBTITLE,
+        });
+    },
+};

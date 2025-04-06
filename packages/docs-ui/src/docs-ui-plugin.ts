@@ -36,10 +36,10 @@ import { IShortcutService } from '@univerjs/ui';
 import { DOC_UI_PLUGIN_NAME } from './basics/const/plugin-name';
 import { AfterSpaceCommand, EnterCommand, TabCommand } from './commands/commands/auto-format.command';
 import { BreakLineCommand } from './commands/commands/break-line.command';
-import { DocCopyCommand, DocCutCommand, DocPasteCommand } from './commands/commands/clipboard.command';
+import { DocCopyCommand, DocCopyCurrentParagraphCommand, DocCutCommand, DocCutCurrentParagraphCommand, DocPasteCommand } from './commands/commands/clipboard.command';
 import { CutContentCommand, InnerPasteCommand } from './commands/commands/clipboard.inner.command';
 import { DeleteCommand, InsertCommand, UpdateCommand } from './commands/commands/core-editing.command';
-import { DeleteCustomBlockCommand, DeleteLeftCommand, DeleteRightCommand, MergeTwoParagraphCommand, RemoveHorizontalLineCommand } from './commands/commands/doc-delete.command';
+import { DeleteCurrentParagraphCommand, DeleteCustomBlockCommand, DeleteLeftCommand, DeleteRightCommand, MergeTwoParagraphCommand, RemoveHorizontalLineCommand } from './commands/commands/doc-delete.command';
 import { CloseHeaderFooterCommand } from './commands/commands/doc-header-footer.command';
 import { HorizontalLineCommand } from './commands/commands/doc-horizontal-line.command';
 import { DocParagraphSettingCommand } from './commands/commands/doc-paragraph-setting.command';
@@ -73,7 +73,7 @@ import {
 import { AlignCenterCommand, AlignJustifyCommand, AlignLeftCommand, AlignOperationCommand, AlignRightCommand } from './commands/commands/paragraph-align.command';
 import { CoverContentCommand, ReplaceContentCommand, ReplaceSelectionCommand, ReplaceSnapshotCommand, ReplaceTextRunsCommand } from './commands/commands/replace-content.command';
 import { SetDocZoomRatioCommand } from './commands/commands/set-doc-zoom-ratio.command';
-import { QuickHeadingCommand, SetParagraphNamedStyleCommand } from './commands/commands/set-heading.command';
+import { H1HeadingCommand, H2HeadingCommand, H3HeadingCommand, H4HeadingCommand, H5HeadingCommand, QuickHeadingCommand, SetParagraphNamedStyleCommand } from './commands/commands/set-heading.command';
 import { SwitchDocModeCommand } from './commands/commands/switch-doc-mode.command';
 import { CreateDocTableCommand } from './commands/commands/table/doc-table-create.command';
 import { DocTableDeleteColumnsCommand, DocTableDeleteRowsCommand, DocTableDeleteTableCommand } from './commands/commands/table/doc-table-delete.command';
@@ -115,6 +115,7 @@ import { DocEventManagerService } from './services/doc-event-manager.service';
 import { DocIMEInputManagerService } from './services/doc-ime-input-manager.service';
 import { DocMenuStyleService } from './services/doc-menu-style.service';
 import { DocPageLayoutService } from './services/doc-page-layout.service';
+import { DocParagraphMenuService } from './services/doc-paragraph-menu.service';
 import { DocCanvasPopManagerService } from './services/doc-popup-manager.service';
 import { DocStateChangeManagerService } from './services/doc-state-change-manager.service';
 import { DocsRenderService } from './services/docs-render.service';
@@ -194,6 +195,7 @@ export class UniverDocsUIPlugin extends Plugin {
         ]);
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _initCommand() {
         [
             DeleteLeftCommand,
@@ -265,6 +267,14 @@ export class UniverDocsUIPlugin extends Plugin {
             InsertCustomRangeCommand,
             SetParagraphNamedStyleCommand,
             QuickHeadingCommand,
+            DeleteCurrentParagraphCommand,
+            DocCopyCurrentParagraphCommand,
+            DocCutCurrentParagraphCommand,
+            H1HeadingCommand,
+            H2HeadingCommand,
+            H3HeadingCommand,
+            H4HeadingCommand,
+            H5HeadingCommand,
         ].forEach((e) => {
             this.disposeWithMe(this._commandService.registerCommand(e));
         });
@@ -352,6 +362,7 @@ export class UniverDocsUIPlugin extends Plugin {
     private _initRenderModules(): void {
         ([
             [DocEventManagerService],
+            [DocParagraphMenuService],
             [DocBackScrollRenderController],
             [DocSelectionRenderController],
             [DocHeaderFooterController],

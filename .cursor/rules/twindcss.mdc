@@ -1,0 +1,52 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+# Your rule content
+
+- The config file of tailwindcss is on [tailwind.config.ts](mdc:common/shared/tailwind/tailwind.config.ts), Please read this file first before you start to write component.
+- The prefix is `univer-`, eg. `univer-cursor-pointer`
+
+## Colors
+We use a consistent color system across the application. Here are the main color variables:
+
+### Primary Colors
+- Primary: `primary-{50,100,200,300,400,500,600,700,800,900}`
+  - Example: `univer-text-primary-500` for primary text color
+
+### Gray Scale
+- Gray: `gray-{50,100,200,300,400,500,600,700,800,900}`
+  - Example: `univer-bg-gray-100` for light gray background
+
+### Status Colors
+- Blue: `blue-{50,100,200,300,400,500,600,700,800,900}`
+- Red: `red-{50,100,200,300,400,500,600,700,800,900}`
+- Orange: `orange-{50,100,200,300,400,500,600,700,800,900}`
+- Yellow: `yellow-{50,100,200,300,400,500,600,700,800,900}`
+- Green: `green-{50,100,200,300,400,500,600,700,800,900}`
+
+### Additional Colors
+- Jiqing: `jiqing-{50,100,200,300,400,500,600,700,800,900}`
+- Indigo: `indigo-{50,100,200,300,400,500,600,700,800,900}`
+- Purple: `purple-{50,100,200,300,400,500,600,700,800,900}`
+- Pink: `pink-{50,100,200,300,400,500,600,700,800,900}`
+
+## Common Color Usage Examples
+
+### Text Colors
+- Primary text: `univer-text-gray-800` (#181C2A)
+- Secondary text: `univer-text-gray-400` (#979DAC)
+- Disabled text: `univer-text-gray-300` (#CDD0D8)
+
+### Background Colors
+- Primary background: `univer-bg-gray-100` (#EEEFF1)
+- Secondary background: `univer-bg-gray-50` (#F9FAFB)
+- Active/Selected: `univer-bg-primary-50` (#F3F5FF)
+
+### Border Colors
+- Default border: `univer-border-gray-200` (#E3E5EA)
+- Active border: `univer-border-primary-500` (#466AF7)
+
+Remember to always prefix class names with `univer-` when using these colors. 

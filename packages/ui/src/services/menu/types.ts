@@ -71,6 +71,10 @@ export enum ContextMenuPosition {
 }
 
 export enum ContextMenuGroup {
+    /**
+     * quick context menu, displayed as icon
+     */
+    QUICK = 'contextMenu.quick',
     FORMAT = 'contextMenu.format',
     LAYOUT = 'contextMenu.layout',
     DATA = 'contextMenu.data',

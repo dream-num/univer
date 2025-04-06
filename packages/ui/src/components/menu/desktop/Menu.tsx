@@ -39,6 +39,7 @@ import { ComponentManager } from '../../../common';
 import { ILayoutService } from '../../../services/layout/layout.service';
 import { MenuItemType } from '../../../services/menu/menu';
 import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
+import { ContextMenuGroup } from '../../../services/menu/types';
 import { useDependency, useObservable } from '../../../utils/di';
 import { CustomLabel } from '../../custom-label/CustomLabel';
 import { useScrollYOverContainer } from '../../hooks/layout';
@@ -70,7 +71,6 @@ function MenuWrapper(props: IBaseMenuProps) {
     const menuItems = useMemo(() => menuType ? menuManagerService.getMenuByPositionKey(menuType) : [], [menuType, menuManagerService]);
 
     const [hiddenStates, setHiddenStates] = useState<Record<string, boolean>>({});
-
     const filteredMenuItems = useMemo(() => {
         return menuItems.filter((item) => {
             if (!item.children) return item;
@@ -116,7 +116,7 @@ function MenuWrapper(props: IBaseMenuProps) {
             />
         )
         : item.children?.length
-            ? item.tiny
+            ? item.key === ContextMenuGroup.QUICK
                 ? (
                     <DesignTinyMenuGroup
                         items={item.children.map((child) => ({

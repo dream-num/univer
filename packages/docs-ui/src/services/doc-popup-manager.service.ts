@@ -293,7 +293,7 @@ export class DocCanvasPopManagerService extends Disposable {
                 ? bounds.length > 1
                     ? multipleDirection ?? direction
                     : direction
-                : 'bottom',
+                : direction,
             canvasElement: currentRender.engine.getCanvasElement(),
         });
 

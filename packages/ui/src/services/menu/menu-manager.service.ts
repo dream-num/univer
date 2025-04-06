@@ -114,6 +114,27 @@ export class MenuManagerService extends Disposable implements IMenuManagerServic
         [MenuManagerPosition.CONTEXT_MENU]: {
             [ContextMenuPosition.MAIN_AREA]: {
                 order: 0,
+                [ContextMenuGroup.QUICK]: {
+                    order: -1,
+                },
+                [ContextMenuGroup.FORMAT]: {
+                    order: 0,
+                },
+                [ContextMenuGroup.LAYOUT]: {
+                    order: 1,
+                },
+                [ContextMenuGroup.DATA]: {
+                    order: 2,
+                },
+                [ContextMenuGroup.OTHERS]: {
+                    order: 3,
+                },
+            },
+            [ContextMenuPosition.PARAGRAPH]: {
+                order: 0,
+                [ContextMenuGroup.QUICK]: {
+                    order: -1,
+                },
                 [ContextMenuGroup.FORMAT]: {
                     order: 0,
                 },

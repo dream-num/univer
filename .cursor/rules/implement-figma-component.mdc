@@ -7,10 +7,9 @@ alwaysApply: false
 # Your rule content
 
 When I give you a figma link, it means you need to get the design from figma. And help me to implements it as a react component. 
-Please only use less and html element (don't use button) only to write this component. 
+Please only use tailwindcss and html element (don't use button) only to write this component. 
 Please write a storybook demo for this component, please put storbook demo in the same directory with the component, storybook demo like packages/design/src/components/date-picker/DatePicker.stories.tsx.
 Please note all interface should start with `I`. 
 Please make all svg file to react-component. make sure all files in one dir. 
 If the component include list items. you should using dataset and map to make sure this is configurable.
-Please note that design token file is [base.less](mdc:packages/design/src/themes/base.less)
 

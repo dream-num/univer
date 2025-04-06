@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import type { IAccessor, IContextService, IMultiCommand } from '@univerjs/core';
-import { CommandType, EDITOR_ACTIVATED, FOCUSING_DOC } from '@univerjs/core';
+import type { DocumentDataModel, IAccessor, IContextService, IMultiCommand } from '@univerjs/core';
+import { BuildTextUtils, CommandType, DOC_RANGE_TYPE, EDITOR_ACTIVATED, FOCUSING_DOC, IUniverInstanceService, SliceBodyType, UniverInstanceType } from '@univerjs/core';
+import { DocSelectionManagerService } from '@univerjs/docs';
 import { CopyCommand, CutCommand, IClipboardInterfaceService, PasteCommand } from '@univerjs/ui';
 import { IDocClipboardService } from '../../services/clipboard/clipboard.service';
 
@@ -45,6 +46,35 @@ export const DocCopyCommand: IMultiCommand = {
     },
 };
 
+export const DocCopyCurrentParagraphCommand = {
+    id: 'doc.command.copy-current-paragraph',
+    type: CommandType.COMMAND,
+    handler: async (accessor: IAccessor) => {
+        const docClipboardService = accessor.get(IDocClipboardService);
+        const instanceService = accessor.get(IUniverInstanceService);
+        const docSelectionManagerService = accessor.get(DocSelectionManagerService);
+        const range = docSelectionManagerService.getActiveTextRange();
+        const doc = instanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+        if (!range || !range.collapsed || !doc || range.segmentId) {
+            return false;
+        }
+
+        const paragraph = BuildTextUtils.range.getParagraphsInRange(range, doc.getBody()?.paragraphs ?? [])[0];
+        if (!paragraph) {
+            return false;
+        }
+
+        return docClipboardService.copy(
+            SliceBodyType.copy,
+            [{
+                startOffset: paragraph.paragraphStart,
+                endOffset: paragraph.paragraphEnd + 1,
+                collapsed: false,
+            }]
+        );
+    },
+};
+
 export const DocCutCommand: IMultiCommand = {
     id: CutCommand.id,
     name: 'doc.command.cut',
@@ -55,6 +85,35 @@ export const DocCutCommand: IMultiCommand = {
     handler: async (accessor: IAccessor) => {
         const docClipboardService = accessor.get(IDocClipboardService);
         return docClipboardService.cut();
+    },
+};
+
+export const DocCutCurrentParagraphCommand = {
+    id: 'doc.command.cut-current-paragraph',
+    type: CommandType.COMMAND,
+    handler: async (accessor: IAccessor) => {
+        const docClipboardService = accessor.get(IDocClipboardService);
+        const instanceService = accessor.get(IUniverInstanceService);
+        const docSelectionManagerService = accessor.get(DocSelectionManagerService);
+        const range = docSelectionManagerService.getActiveTextRange();
+        const doc = instanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+        if (!range || !range.collapsed || !doc || range.segmentId) {
+            return false;
+        }
+
+        const paragraph = BuildTextUtils.range.getParagraphsInRange(range, doc.getBody()?.paragraphs ?? [])[0];
+        if (!paragraph) {
+            return false;
+        }
+
+        return docClipboardService.cut(
+            [{
+                startOffset: paragraph.paragraphStart,
+                endOffset: paragraph.paragraphEnd + 1,
+                collapsed: false,
+                rangeType: DOC_RANGE_TYPE.TEXT,
+            }]
+        );
     },
 };
 

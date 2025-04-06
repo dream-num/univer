@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { Menu, MenuItem, MenuItemGroup, SubMenu } from './Menu';
+import { CopyIcon, CutIcon, DeleteIcon } from '../context-menu/icons';
+import { Menu, MenuItem, MenuItemGroup, SubMenu, TinyMenuGroup } from './Menu';
 
 export default {
     title: 'Components / Menu',
@@ -28,25 +29,114 @@ export default {
 export const Default = () => {
     return (
         <Menu>
+            <TinyMenuGroup
+                items={[
+                    {
+                        onClick: () => {},
+                        className: '',
+                        Icon: CopyIcon,
+                        key: 'copy',
+                    },
+                    {
+                        onClick: () => {},
+                        className: '',
+                        Icon: CutIcon,
+                        key: 'cut',
+                    },
+                    {
+                        onClick: () => {},
+                        className: '',
+                        Icon: DeleteIcon,
+                        key: 'delete',
+                    },
+                    {
+                        onClick: () => {},
+                        className: '',
+                        Icon: CopyIcon,
+                        key: 'copy1',
+                    },
+                    {
+                        onClick: () => {},
+                        className: '',
+                        Icon: CutIcon,
+                        key: 'cut1',
+                    },
+                    {
+                        onClick: () => {},
+                        className: '',
+                        Icon: DeleteIcon,
+                        key: 'delete1',
+                    },
+                    {
+                        onClick: () => {},
+                        className: '',
+                        Icon: CopyIcon,
+                        key: 'copy2',
+                    },
+                    {
+                        onClick: () => {},
+                        className: '',
+                        Icon: CutIcon,
+                        key: 'cut2',
+                    },
+                    {
+                        onClick: () => {},
+                        className: '',
+                        Icon: DeleteIcon,
+                        key: 'delete2',
+                    },
+                ]}
+            />
             <MenuItemGroup>
-                <MenuItem>Item 1</MenuItem>
-                <MenuItem>Item 2</MenuItem>
-                <MenuItem>Item 3</MenuItem>
+                <MenuItem>
+                    <CopyIcon />
+                    Item 1
+                </MenuItem>
+                <MenuItem>
+                    <CutIcon />
+                    Item 2
+                </MenuItem>
+                <MenuItem>
+                    <DeleteIcon />
+                    Item 3
+                </MenuItem>
             </MenuItemGroup>
             <MenuItemGroup title="Group 1">
-                <MenuItem>Item 4</MenuItem>
-                <MenuItem>Item 5</MenuItem>
+                <MenuItem>
+                    <CopyIcon />
+                    Item 4
+                </MenuItem>
+                <MenuItem>
+                    <CutIcon />
+                    Item 5
+                </MenuItem>
             </MenuItemGroup>
             <MenuItemGroup>
-                <SubMenu title="SubMenu">
+                <SubMenu
+                    title={(
+                        <div>
+                            <CopyIcon />
+                            SubMenu
+                        </div>
+                    )}
+                >
                     <MenuItemGroup>
-                        <MenuItem>Item 6</MenuItem>
+                        <MenuItem>
+                            <CopyIcon />
+                            Item 6
+                        </MenuItem>
                     </MenuItemGroup>
                 </SubMenu>
                 <SubMenu title="SubMenu2">
                     <MenuItemGroup>
-                        <MenuItem>Item 7</MenuItem>
-                        <MenuItem>Item 8</MenuItem>
+                        <MenuItem>
+                            <CopyIcon />
+                            Item 7
+                        </MenuItem>
+                        <MenuItem>
+                            <CutIcon />
+                            Item 8
+                        </MenuItem>
                     </MenuItemGroup>
                 </SubMenu>
             </MenuItemGroup>

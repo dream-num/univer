@@ -37,3 +37,38 @@ export function SubMenu(props: SubMenuProps) {
 export function MenuItemGroup(props: MenuItemGroupProps) {
     return <RcMenuItemGroup {...props} />;
 }
+
+export interface ITinyMenuItem {
+    onClick: () => void;
+    className: string;
+    Icon: React.ComponentType<{ className?: string }>;
+    key: string;
+}
+
+export interface ITinyMenuGroupProps {
+    items: ITinyMenuItem[];
+}
+
+export function TinyMenuGroup({ items }: ITinyMenuGroupProps) {
+    return (
+        <div
+            className={`
+              univer-flex univer-flex-wrap univer-gap-2.5 univer-menu-item-group univer-p-1 univer-pl-0 univer-pr-0
+            `}
+        >
+            {items.map((item) => (
+                <div
+                    key={item.key}
+                    onClick={() => item.onClick()}
+                    className={`
+                      univer-flex univer-h-6 univer-w-6 univer-cursor-pointer univer-items-center univer-justify-center
+                      univer-rounded-md
+                      hover:univer-bg-[#EEEFF1]
+                    `}
+                >
+                    <item.Icon className="univer-h-4 univer-w-4 univer-text-[#181C2A]" />
+                </div>
+            ))}
+        </div>
+    );
+}

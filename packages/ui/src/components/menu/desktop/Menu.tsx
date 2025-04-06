@@ -30,10 +30,12 @@ import {
     MenuItem as DesignMenuItem,
     MenuItemGroup as DesignMenuItemGroup,
     SubMenu as DesignSubMenu,
+    TinyMenuGroup as DesignTinyMenuGroup,
 } from '@univerjs/design';
 import { CheckMarkSingle, MoreSingle } from '@univerjs/icons';
 import { useEffect, useMemo, useState } from 'react';
 import { combineLatest, isObservable, of } from 'rxjs';
+import { ComponentManager } from '../../../common';
 import { ILayoutService } from '../../../services/layout/layout.service';
 import { MenuItemType } from '../../../services/menu/menu';
 import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
@@ -62,7 +64,7 @@ export interface IBaseMenuProps {
 /** @deprecated */
 function MenuWrapper(props: IBaseMenuProps) {
     const { menuType, onOptionSelect } = props;
-
+    const componetManager = useDependency(ComponentManager);
     const menuManagerService = useDependency(IMenuManagerService);
 
     const menuItems = useMemo(() => menuType ? menuManagerService.getMenuByPositionKey(menuType) : [], [menuType, menuManagerService]);
@@ -114,21 +116,39 @@ function MenuWrapper(props: IBaseMenuProps) {
             />
         )
         : item.children?.length
-            ? (
-                <DesignMenuItemGroup key={item.key} eventKey={item.key}>
-                    {item.children.map((child) => (
-                        child.item && (
-                            <MenuItem
-                                key={child.key}
-                                menuItem={child.item}
-                                onClick={(object: Partial<IValueOption>) => {
-                                    onOptionSelect?.({ value: '', label: child.key, ...object });
-                                }}
-                            />
-                        )
-                    ))}
-                </DesignMenuItemGroup>
-            )
+            ? item.tiny
+                ? (
+                    <DesignTinyMenuGroup
+                        items={item.children.map((child) => ({
+                            key: child.key,
+                            onClick: () => {
+                                onOptionSelect?.({
+                                    value: '',
+                                    label: child.key,
+                                    commandId: child.item?.commandId,
+                                    id: child.item?.id,
+                                });
+                            },
+                            className: '',
+                            Icon: componetManager.get(child.item!.icon as string)!,
+                        }))}
+                    />
+                )
+                : (
+                    <DesignMenuItemGroup key={item.key} eventKey={item.key}>
+                        {item.children.map((child) => (
+                            child.item && (
+                                <MenuItem
+                                    key={child.key}
+                                    menuItem={child.item}
+                                    onClick={(object: Partial<IValueOption>) => {
+                                        onOptionSelect?.({ value: '', label: child.key, ...object });
+                                    }}
+                                />
+                            )
+                        ))}
+                    </DesignMenuItemGroup>
+                )
             : null);
 }
 
@@ -195,7 +215,6 @@ export const Menu = (props: IBaseMenuProps) => {
             setMenuEl(ref.list);
         }
     }
-
     return (
         <DesignMenu
             ref={handleSetMenuEl}

@@ -29,6 +29,7 @@ export interface IMenuSchema {
     order: number;
     item?: IMenuItem;
     children?: IMenuSchema[];
+    tiny?: boolean;
 }
 
 export interface IMenuManagerService {

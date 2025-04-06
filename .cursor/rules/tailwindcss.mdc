@@ -6,10 +6,11 @@ alwaysApply: true
 
 # Your rule content
 
-- The config file of tailwindcss is on [tailwind.config.ts](mdc:common/shared/tailwind/tailwind.config.ts), Please read this file first before you start to write component.
+- The config file of tailwindcss is on [tailwind.config.ts](mdc:common/shared/tailwind/tailwind.config.ts).
 - The prefix is `univer-`, eg. `univer-cursor-pointer`
 
 ## Colors
+
 We use a consistent color system across the application. Here are the main color variables:
 
 ### Primary Colors

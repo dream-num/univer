@@ -43,6 +43,7 @@ export interface ITinyMenuItem {
     className: string;
     Icon: React.ComponentType<{ className?: string }>;
     key: string;
+    active?: boolean;
 }
 
 export interface ITinyMenuGroupProps {
@@ -64,6 +65,7 @@ export function TinyMenuGroup({ items }: ITinyMenuGroupProps) {
                       univer-flex univer-h-6 univer-w-6 univer-cursor-pointer univer-items-center univer-justify-center
                       univer-rounded-md
                       hover:univer-bg-[#EEEFF1]
+                      ${item.active ? 'univer-bg-[#EEEFF1]' : ''}
                     `}
                 >
                     <item.Icon className="univer-h-4 univer-w-4 univer-text-[#181C2A]" />

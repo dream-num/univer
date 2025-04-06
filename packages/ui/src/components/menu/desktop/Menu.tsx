@@ -30,7 +30,6 @@ import {
     MenuItem as DesignMenuItem,
     MenuItemGroup as DesignMenuItemGroup,
     SubMenu as DesignSubMenu,
-    TinyMenuGroup as DesignTinyMenuGroup,
 } from '@univerjs/design';
 import { CheckMarkSingle, MoreSingle } from '@univerjs/icons';
 import { useEffect, useMemo, useState } from 'react';
@@ -44,6 +43,7 @@ import { useDependency, useObservable } from '../../../utils/di';
 import { CustomLabel } from '../../custom-label/CustomLabel';
 import { useScrollYOverContainer } from '../../hooks/layout';
 import styles from './index.module.less';
+import { UITinyMenuGroup } from './tiny-menu-group';
 
 // TODO: @jikkai disabled and hidden are not working
 
@@ -117,23 +117,7 @@ function MenuWrapper(props: IBaseMenuProps) {
         )
         : item.children?.length
             ? item.key === ContextMenuGroup.QUICK
-                ? (
-                    <DesignTinyMenuGroup
-                        items={item.children.map((child) => ({
-                            key: child.key,
-                            onClick: () => {
-                                onOptionSelect?.({
-                                    value: '',
-                                    label: child.key,
-                                    commandId: child.item?.commandId,
-                                    id: child.item?.id,
-                                });
-                            },
-                            className: '',
-                            Icon: componetManager.get(child.item!.icon as string)!,
-                        }))}
-                    />
-                )
+                ? <UITinyMenuGroup item={item} onOptionSelect={onOptionSelect} />
                 : (
                     <DesignMenuItemGroup key={item.key} eventKey={item.key}>
                         {item.children.map((child) => (

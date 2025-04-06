@@ -19,6 +19,7 @@ import { BuildTextUtils, CommandType, DOC_RANGE_TYPE, EDITOR_ACTIVATED, FOCUSING
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { CopyCommand, CutCommand, IClipboardInterfaceService, PasteCommand } from '@univerjs/ui';
 import { IDocClipboardService } from '../../services/clipboard/clipboard.service';
+import { DocParagraphMenuService } from '../../services/doc-paragraph-menu.service';
 
 export function whenDocOrEditor(contextService: IContextService): boolean {
     return contextService.getContextValue(FOCUSING_DOC) || contextService.getContextValue(EDITOR_ACTIVATED);
@@ -52,6 +53,11 @@ export const DocCopyCurrentParagraphCommand = {
     handler: async (accessor: IAccessor) => {
         const docClipboardService = accessor.get(IDocClipboardService);
         const instanceService = accessor.get(IUniverInstanceService);
+        const docParagraphMenuService = accessor.get(DocParagraphMenuService);
+        const activeParagraph = docParagraphMenuService.activeParagraph;
+        if (!activeParagraph) {
+            return false;
+        }
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
         const range = docSelectionManagerService.getActiveTextRange();
         const doc = instanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);

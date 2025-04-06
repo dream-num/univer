@@ -15,31 +15,30 @@
  */
 
 import type { IPopup } from '@univerjs/ui';
-import { debounce, ICommandService } from '@univerjs/core';
+import { ICommandService } from '@univerjs/core';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { DownSingle, H1Single } from '@univerjs/icons';
 import { ContextMenuPosition, DesktopMenu, ILayoutService, RectPopup, useDependency } from '@univerjs/ui';
 import { useMemo, useRef, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
+import { DocParagraphMenuService } from '../../services/doc-paragraph-menu.service';
 
-export const ParagraphButton = ({ popup }: { popup: IPopup }) => {
+export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
     const [visible, setVisible] = useState(false);
     const contentRef = useRef<HTMLDivElement>(null);
     const commandService = useDependency(ICommandService);
     const layoutService = useDependency(ILayoutService);
     const anchorRef = useRef<HTMLDivElement>(null);
     const isMouseOver = useRef(false);
+    const renderManagerService = useDependency(IRenderManagerService);
+    const renderUnit = renderManagerService.getRenderById(popup.unitId);
+    const docParagraphMenuService = renderUnit?.with(DocParagraphMenuService);
     const anchorRect$ = useMemo(() => new BehaviorSubject({
         left: 0,
         right: 0,
         top: 0,
         bottom: 0,
     }), []);
-
-    const hidePopup = useMemo(() => debounce(() => {
-        if (!isMouseOver.current) {
-            setVisible(false);
-        }
-    }, 300), []);
 
     return (
         <>
@@ -52,7 +51,6 @@ export const ParagraphButton = ({ popup }: { popup: IPopup }) => {
                 onMouseEnter={(e) => {
                     popup.onPointerEnter?.(e);
                     isMouseOver.current = true;
-                    setVisible(true);
                     const boundingRect = anchorRef.current?.getBoundingClientRect();
                     anchorRect$.next({
                         left: (boundingRect?.left ?? 0) - 4,
@@ -61,10 +59,12 @@ export const ParagraphButton = ({ popup }: { popup: IPopup }) => {
                         bottom: boundingRect?.bottom ?? 0,
                     });
                 }}
-                onMouseLeave={(e) => {
-                    popup.onPointerLeave?.(e);
+                onMouseLeave={() => {
                     isMouseOver.current = false;
-                    hidePopup();
+                }}
+                onClick={() => {
+                    setVisible(true);
+                    docParagraphMenuService?.setParagraphMenuActive(true);
                 }}
             >
                 <H1Single className="univer-h-4 univer-w-4 univer-text-[#181C2A]" />
@@ -78,10 +78,8 @@ export const ParagraphButton = ({ popup }: { popup: IPopup }) => {
                             popup.onPointerEnter?.(e);
                             isMouseOver.current = true;
                         }}
-                        onMouseLeave={(e) => {
-                            popup.onPointerLeave?.(e);
+                        onMouseLeave={() => {
                             isMouseOver.current = false;
-                            hidePopup();
                         }}
                     >
                         <DesktopMenu
@@ -96,6 +94,7 @@ export const ParagraphButton = ({ popup }: { popup: IPopup }) => {
                                 layoutService.focus();
 
                                 setVisible(false);
+                                docParagraphMenuService?.hideParagraphMenu(true);
                             }}
                         />
                     </section>

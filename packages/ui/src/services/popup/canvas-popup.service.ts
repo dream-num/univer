@@ -36,7 +36,8 @@ export interface IPopup extends Omit<IRectPopupProps, 'children' | 'hidden' | 'e
     hideOnInvisible?: boolean;
     hiddenType?: 'hide' | 'destroy';
     hiddenRects$?: Observable<IBoundRectNoAngle[]>;
-    customEnterLeave?: boolean;
+    customActive?: boolean;
+    onActiveChange?: (active: boolean) => void;
 }
 
 export interface ICanvasPopupService {
@@ -83,12 +84,13 @@ export class CanvasPopupService extends Disposable implements ICanvasPopupServic
         const id = Tools.generateRandomId();
         this._popupMap.set(id, {
             ...item,
-            onPointerEnter: () => {
-                this._activePopupId = id;
-            },
-            onPointerLeave: () => {
-                if (this._activePopupId === id) {
-                    this._activePopupId = null;
+            onActiveChange: (active: boolean) => {
+                if (active) {
+                    this._activePopupId = id;
+                } else {
+                    if (this._activePopupId === id) {
+                        this._activePopupId = null;
+                    }
                 }
             },
         });

@@ -39,7 +39,7 @@ import {
 } from '../components/font-family';
 import { FONT_SIZE_COMPONENT, FontSize } from '../components/font-size';
 import { BULLET_LIST_TYPE_COMPONENT, BulletListTypePicker, ORDER_LIST_TYPE_COMPONENT, OrderListTypePicker } from '../components/list-type-picker';
-import { ParagraphButton } from '../components/paragraph-button';
+import { ParagraphMenu } from '../components/paragraph-menu';
 import { DocSelectionRenderService } from '../services/selection/doc-selection-render.service';
 import { TabShortCut } from '../shortcuts/format.shortcut';
 import {
@@ -87,7 +87,7 @@ export class DocUIController extends Disposable {
         this.disposeWithMe(componentManager.register(BULLET_LIST_TYPE_COMPONENT, BulletListTypePicker));
         this.disposeWithMe(componentManager.register(ORDER_LIST_TYPE_COMPONENT, OrderListTypePicker));
         this.disposeWithMe(componentManager.register('TodoList', TodoList));
-        this.disposeWithMe(componentManager.register('doc.paragraph.menu', ParagraphButton));
+        this.disposeWithMe(componentManager.register('doc.paragraph.menu', ParagraphMenu));
         this.disposeWithMe(componentManager.register('CutSingle', CutSingle));
         this.disposeWithMe(componentManager.register('DeleteSingle', DeleteSingle));
     }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommand, IMutationInfo } from '@univerjs/core';
+import type { DocumentDataModel, ICommand, IMutationInfo, ITextRangeParam } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { BuildTextUtils, CommandType, generateRandomId, ICommandService, IUniverInstanceService, JSONX, NamedStyleType, TextX, TextXActionType, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
@@ -22,6 +22,7 @@ import { getRichTextEditPath } from '../util';
 
 export interface ISetParagraphNamedStyleCommandParams {
     value: NamedStyleType;
+    textRanges?: ITextRangeParam[];
 }
 
 export const SetParagraphNamedStyleCommand: ICommand<ISetParagraphNamedStyleCommandParams> = {
@@ -39,7 +40,7 @@ export const SetParagraphNamedStyleCommand: ICommand<ISetParagraphNamedStyleComm
         }
         const unitId = documentDataModel.getUnitId();
         const selectionService = accessor.get(DocSelectionManagerService);
-        const selections = selectionService.getTextRanges({ unitId, subUnitId: unitId })?.filter((i) => !i.segmentId);
+        const selections = params.textRanges ?? selectionService.getTextRanges({ unitId, subUnitId: unitId })?.filter((i) => !i.segmentId);
         if (!selections?.length) {
             return false;
         }

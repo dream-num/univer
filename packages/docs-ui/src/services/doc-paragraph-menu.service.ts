@@ -14,19 +14,25 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, INeedCheckDisposable } from '@univerjs/core';
+import type { DocumentDataModel, INeedCheckDisposable, IParagraphRange } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { Disposable, Inject, isInternalEditorID } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { ComponentManager } from '@univerjs/ui';
+import { first } from 'rxjs';
 import { DocEventManagerService } from './doc-event-manager.service';
 import { DocCanvasPopManagerService } from './doc-popup-manager.service';
 
 export class DocParagraphMenuService extends Disposable implements IRenderModule {
     private _paragrahMenu: {
-        index: number;
+        paragraph: IParagraphRange;
         disposable: INeedCheckDisposable;
+        active: boolean;
     } | null = null;
+
+    get activeParagraph() {
+        return this._paragrahMenu?.paragraph;
+    }
 
     constructor(
         private _context: IRenderContext<DocumentDataModel>,
@@ -44,48 +50,92 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
         this._init();
     }
 
+    _isCursorInActiveParagraph() {
+        if (!this._paragrahMenu) {
+            return false;
+        }
+
+        const activeTextRange = this._docSelectionManagerService.getActiveTextRange();
+        if (!activeTextRange?.collapsed) {
+            return false;
+        }
+
+        if (
+            !activeTextRange?.collapsed ||
+            activeTextRange.startOffset < this._paragrahMenu.paragraph.paragraphStart ||
+            activeTextRange.startOffset > this._paragrahMenu.paragraph.paragraphEnd
+        ) {
+            return false;
+        }
+
+        return true;
+    }
+
+    setParagraphMenuActive(active: boolean) {
+        if (this._paragrahMenu) {
+            this._paragrahMenu.active = active;
+            if (!this._isCursorInActiveParagraph()) {
+                this._docSelectionManagerService.replaceDocRanges([{
+                    startOffset: this._paragrahMenu.paragraph.paragraphStart,
+                    endOffset: this._paragrahMenu.paragraph.paragraphStart,
+                }]);
+            }
+        }
+    }
+
     private _init() {
         this.disposeWithMe(
             this._docEventManagerService.hoverParagraph$.subscribe((paragraph) => {
-                if (paragraph) {
-                    this.showParagraphMenu(paragraph.paragraph.paragraphStart);
+                if (this._paragrahMenu?.active) {
                     return;
                 }
 
-                this.hideParagraphMenu();
+                if (paragraph) {
+                    this.showParagraphMenu(paragraph.paragraph);
+                    return;
+                }
+
+                this.hideParagraphMenu(true);
             })
         );
     }
 
-    showParagraphMenu(paragraphStart: number) {
-        if (this._paragrahMenu?.index === paragraphStart) {
+    showParagraphMenu(paragraph: IParagraphRange) {
+        if (this._paragrahMenu?.paragraph.startIndex === paragraph.startIndex) {
             return;
         }
 
-        this.hideParagraphMenu();
+        this.hideParagraphMenu(true);
 
         const disposable = this._docPopupManagerService.attachPopupToRange(
             {
-                startOffset: paragraphStart,
-                endOffset: paragraphStart + 1,
+                startOffset: paragraph.paragraphStart,
+                endOffset: paragraph.paragraphStart + 1,
                 collapsed: false,
             },
             {
                 componentKey: 'doc.paragraph.menu',
                 direction: 'left',
-                customEnterLeave: true,
+                onClickOutside: () => {
+                    this._docSelectionManagerService.textSelection$.pipe(first()).subscribe((textSelection) => {
+                        if (!this._isCursorInActiveParagraph()) {
+                            this.hideParagraphMenu(true);
+                        }
+                    });
+                },
             },
             this._context.unitId
         );
 
         this._paragrahMenu = {
-            index: paragraphStart,
+            paragraph,
             disposable,
+            active: false,
         };
     }
 
-    hideParagraphMenu() {
-        if (this._paragrahMenu && this._paragrahMenu.disposable.canDispose()) {
+    hideParagraphMenu(force = false) {
+        if (this._paragrahMenu && ((this._paragrahMenu.disposable.canDispose() || force))) {
             this._paragrahMenu.disposable.dispose();
             this._paragrahMenu = null;
         }

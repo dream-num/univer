@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import type { FC } from 'react';
+import type { IPopup } from '@univerjs/ui';
 import { debounce, ICommandService } from '@univerjs/core';
 import { DownSingle, H1Single } from '@univerjs/icons';
 import { ContextMenuPosition, DesktopMenu, ILayoutService, RectPopup, useDependency } from '@univerjs/ui';
 import { useMemo, useRef, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 
-export const ParagraphButton: FC = () => {
+export const ParagraphButton = ({ popup }: { popup: IPopup }) => {
     const [visible, setVisible] = useState(false);
     const contentRef = useRef<HTMLDivElement>(null);
     const commandService = useDependency(ICommandService);
@@ -34,6 +34,7 @@ export const ParagraphButton: FC = () => {
         top: 0,
         bottom: 0,
     }), []);
+
     const hidePopup = useMemo(() => debounce(() => {
         if (!isMouseOver.current) {
             setVisible(false);
@@ -48,7 +49,8 @@ export const ParagraphButton: FC = () => {
                   univer-mr-2 univer-inline-flex univer-h-7 univer-cursor-pointer univer-items-center univer-gap-1
                   univer-rounded-full univer-bg-[#EEEFF1] univer-px-2.5 univer-py-0
                 `}
-                onMouseEnter={() => {
+                onMouseEnter={(e) => {
+                    popup.onPointerEnter?.(e);
                     isMouseOver.current = true;
                     setVisible(true);
                     const boundingRect = anchorRef.current?.getBoundingClientRect();
@@ -59,7 +61,8 @@ export const ParagraphButton: FC = () => {
                         bottom: boundingRect?.bottom ?? 0,
                     });
                 }}
-                onMouseLeave={() => {
+                onMouseLeave={(e) => {
+                    popup.onPointerLeave?.(e);
                     isMouseOver.current = false;
                     hidePopup();
                 }}
@@ -71,10 +74,12 @@ export const ParagraphButton: FC = () => {
                 <RectPopup anchorRect$={anchorRect$} direction="left">
                     <section
                         ref={contentRef}
-                        onMouseEnter={() => {
+                        onMouseEnter={(e) => {
+                            popup.onPointerEnter?.(e);
                             isMouseOver.current = true;
                         }}
-                        onMouseLeave={() => {
+                        onMouseLeave={(e) => {
+                            popup.onPointerLeave?.(e);
                             isMouseOver.current = false;
                             hidePopup();
                         }}

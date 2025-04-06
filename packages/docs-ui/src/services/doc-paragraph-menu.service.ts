@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IDisposable } from '@univerjs/core';
+import type { DocumentDataModel, INeedCheckDisposable } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import { BuildTextUtils, Disposable, Inject, isInternalEditorID } from '@univerjs/core';
+import { Disposable, Inject, isInternalEditorID } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { ComponentManager } from '@univerjs/ui';
 import { DocEventManagerService } from './doc-event-manager.service';
@@ -25,7 +25,7 @@ import { DocCanvasPopManagerService } from './doc-popup-manager.service';
 export class DocParagraphMenuService extends Disposable implements IRenderModule {
     private _paragrahMenu: {
         index: number;
-        disposable: IDisposable;
+        disposable: INeedCheckDisposable;
     } | null = null;
 
     constructor(
@@ -46,27 +46,13 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
 
     private _init() {
         this.disposeWithMe(
-            this._docSelectionManagerService.textSelection$.subscribe((selection) => {
-                if (selection.unitId !== this._context.unitId) {
+            this._docEventManagerService.hoverParagraph$.subscribe((paragraph) => {
+                if (paragraph) {
+                    this.showParagraphMenu(paragraph.paragraph.paragraphStart);
                     return;
                 }
 
-                if (selection.textRanges.length === 1 && selection.textRanges[0].collapsed) {
-                    const paragraph = BuildTextUtils.range.getParagraphsInRange(
-                        selection.textRanges[0],
-                        this._context.unit.getBody()!.paragraphs!
-                    )[0];
-
-                    if (paragraph) {
-                        const bound = this._docEventManagerService.paragraphBounds.find((item) => item.paragraph.startIndex === paragraph.startIndex);
-                        if (bound) {
-                            this.showParagraphMenu(paragraph.paragraphStart);
-                            return;
-                        }
-                    }
-
-                    this.hideParagraphMenu();
-                }
+                this.hideParagraphMenu();
             })
         );
     }
@@ -78,14 +64,19 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
 
         this.hideParagraphMenu();
 
-        const disposable = this._docPopupManagerService.attachPopupToRange({
-            startOffset: paragraphStart,
-            endOffset: paragraphStart + 1,
-            collapsed: false,
-        }, {
-            componentKey: 'doc.paragraph.menu',
-            direction: 'left',
-        }, this._context.unitId);
+        const disposable = this._docPopupManagerService.attachPopupToRange(
+            {
+                startOffset: paragraphStart,
+                endOffset: paragraphStart + 1,
+                collapsed: false,
+            },
+            {
+                componentKey: 'doc.paragraph.menu',
+                direction: 'left',
+                customEnterLeave: true,
+            },
+            this._context.unitId
+        );
 
         this._paragrahMenu = {
             index: paragraphStart,
@@ -94,7 +85,7 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
     }
 
     hideParagraphMenu() {
-        if (this._paragrahMenu) {
+        if (this._paragrahMenu && this._paragrahMenu.disposable.canDispose()) {
             this._paragrahMenu.disposable.dispose();
             this._paragrahMenu = null;
         }

@@ -36,7 +36,7 @@ export interface IPopup extends Omit<IRectPopupProps, 'children' | 'hidden' | 'e
     hideOnInvisible?: boolean;
     hiddenType?: 'hide' | 'destroy';
     hiddenRects$?: Observable<IBoundRectNoAngle[]>;
-
+    customEnterLeave?: boolean;
 }
 
 export interface ICanvasPopupService {

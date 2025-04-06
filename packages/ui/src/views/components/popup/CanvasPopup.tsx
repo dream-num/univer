@@ -87,8 +87,14 @@ const SingleCanvasPopup = ({ popup, children }: ISingleCanvasPopupProps) => {
             onClickOutside={popup.onClickOutside}
             excludeOutside={popup.excludeOutside}
             excludeRects={excludeRectsRef}
-            onPointerEnter={popup.onPointerEnter}
-            onPointerLeave={popup.onPointerLeave}
+            {
+                ...popup.customEnterLeave
+                    ? null
+                    : {
+                        onPointerEnter: popup.onPointerEnter,
+                        onPointerLeave: popup.onPointerLeave,
+                    }
+            }
             onClick={popup.onClick}
             onContextMenu={popup.onContextMenu}
         >

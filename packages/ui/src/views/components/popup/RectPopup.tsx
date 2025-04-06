@@ -50,8 +50,8 @@ export interface IRectPopupProps {
     excludeOutside?: HTMLElement[];
     onContextMenu?: () => void;
 
-    onPointerEnter?: (e: React.PointerEvent<HTMLElement>) => void;
-    onPointerLeave?: (e: React.PointerEvent<HTMLElement>) => void;
+    onPointerEnter?: (e: React.MouseEvent<HTMLElement>) => void;
+    onPointerLeave?: (e: React.MouseEvent<HTMLElement>) => void;
     onClick?: (e: React.MouseEvent<HTMLElement>) => void;
     // #endregion
     portal?: boolean;

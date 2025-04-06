@@ -42,6 +42,8 @@ export interface IBulletBound {
 export interface IParagraphBound {
     rect: IBoundRectNoAngle;
     paragraph: IParagraphRange;
+    segmentId?: string;
+    segmentPageIndex: number;
 }
 
 const calcDocRangePositions = (range: ITextRangeParam, documents: Documents, skeleton: DocumentSkeleton, pageIndex: number): IBoundRectNoAngle[] | undefined => {
@@ -155,6 +157,13 @@ interface IBulletActive {
     rect: IBoundRectNoAngle;
 }
 
+interface IParagraphActive {
+    paragraph: IParagraphRange;
+    segmentId?: string;
+    segmentPageIndex: number;
+    rect: IBoundRectNoAngle;
+}
+
 export class DocEventManagerService extends Disposable implements IRenderModule {
     private readonly _hoverCustomRanges$ = new BehaviorSubject<ICustomRangeActive[]>([]);
     readonly hoverCustomRanges$ = this._hoverCustomRanges$.pipe(distinctUntilChanged((pre, aft) => pre.length === aft.length && pre.every((item, i) => aft[i].range.rangeId === item.range.rangeId && aft[i].segmentId === item.segmentId && aft[i].segmentPageIndex === item.segmentPageIndex && aft[i].range.startIndex === item.range.startIndex)));
@@ -167,6 +176,9 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
 
     private readonly _clickBullet$ = new Subject<IBulletActive>();
     readonly clickBullets$ = this._clickBullet$.asObservable();
+
+    private readonly _hoverParagraph$ = new Subject<Nullable<IParagraphActive>>();
+    readonly hoverParagraph$ = this._hoverParagraph$.pipe(distinctUntilChanged((pre, aft) => pre?.paragraph.startIndex === aft?.paragraph.startIndex && pre?.segmentId === aft?.segmentId && pre?.segmentPageIndex === aft?.segmentPageIndex));
 
     private _customRangeDirty = true;
     private _bulletDirty = true;
@@ -248,6 +260,10 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
             this._hoverCustomRanges$.next(
                 this._calcActiveRanges(evt)
             );
+            this._hoverParagraph$.next(
+                this._calcActiveParagraph(evt)
+            );
+
             this._hoverBullet$.next(
                 this._calcActiveBullet(evt)
             );
@@ -456,6 +472,7 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
                 segmentId,
                 pageIndex,
                 rect: calcDocParagraphPositions(paragraph.paragraphStart, paragraph.paragraphEnd, this._documents, this._skeleton),
+                segmentPageIndex: pageIndex,
             } as IParagraphBound;
         }).filter((layout) => layout.rect !== null);
     }
@@ -478,6 +495,29 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
                 this._paragraphBounds.push(...this._buildParagraphBoundsBySegment(page.footerId, pageIndex));
             }
         });
+    }
+
+    private _calcActiveParagraph(evt: IPointerEvent | IMouseEvent) {
+        this._buildParagraphBounds();
+
+        const { offsetX, offsetY } = evt;
+        const { x, y } = transformOffset2Bound(offsetX, offsetY, this._context.scene);
+        const paragraph = this._paragraphBounds.find((layout) => {
+            const { left, right, top, bottom } = layout.rect;
+            if (x >= left && x <= right && y >= top && y <= bottom) {
+                return true;
+            }
+            return false;
+        });
+
+        return paragraph
+            ? {
+                paragraph: paragraph.paragraph,
+                segmentId: paragraph.segmentId,
+                segmentPageIndex: paragraph.segmentPageIndex,
+                rect: paragraph.rect,
+            }
+            : null;
     }
 
     get paragraphBounds() {

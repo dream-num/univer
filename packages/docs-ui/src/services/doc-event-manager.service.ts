@@ -648,7 +648,7 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
             ...bound,
             rect: {
                 left: bound.rect.left - 60,
-                right: bound.rect.left - 4,
+                right: bound.rect.left,
                 top: bound.rect.top,
                 bottom: bound.rect.bottom,
             },

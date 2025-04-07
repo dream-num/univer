@@ -334,10 +334,9 @@ export function getSetCellValueMutations(
     matrix.forValue((row, col, value) => {
         const { row: realRow, col: realCol } = mapFunc(row, col);
 
-        const cellValue = {
+        const cellValue: ICellData = {
             v: value.v,
             t: value.t,
-            s: value.s,
         };
 
         if (!value.p && value.v && !pasteFrom) {
@@ -348,7 +347,9 @@ export function getSetCellValueMutations(
 
             if (isTextFormat(style?.n?.pattern)) {
                 cellValue.t = CellValueType.STRING;
-                cellValue.s = style;
+                cellValue.s = {
+                    n: style?.n,
+                };
             } else {
                 const content = String(value.v);
                 const numfmtValue = numfmt.parseValue(content);

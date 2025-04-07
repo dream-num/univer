@@ -16,7 +16,7 @@
 
 import type { IValueOption } from '../../../services/menu/menu';
 import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
-import { convertObservableToBehaviorSubject } from '@univerjs/core';
+import { convertObservableToBehaviorSubject, LocaleService } from '@univerjs/core';
 import {
     TinyMenuGroup as DesignTinyMenuGroup,
 } from '@univerjs/design';
@@ -34,6 +34,7 @@ export function UITinyMenuGroup(props: IUITinyMenuGroupProps) {
     const { item, onOptionSelect } = props;
     const [activeItems, setActiveItems] = useState<string[]>([]);
     const componentManager = useDependency(ComponentManager);
+    const localeService = useDependency(LocaleService);
 
     useEffect(() => {
         if (!item.children) return;
@@ -60,6 +61,7 @@ export function UITinyMenuGroup(props: IUITinyMenuGroupProps) {
                         label: child.key,
                         commandId: child.item?.commandId,
                         id: child.item?.id,
+                        tooltip: child.item?.tooltip && localeService.t(child.item?.tooltip),
                     });
                 },
                 className: '',

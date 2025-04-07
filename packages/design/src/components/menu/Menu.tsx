@@ -19,6 +19,7 @@ import RcMenu, { MenuItem as RcMenuItem, MenuItemGroup as RcMenuItemGroup, SubMe
 import React, { useContext } from 'react';
 import { clsx } from '../../helper/clsx';
 import { ConfigContext } from '../config-provider/ConfigProvider';
+import { Tooltip } from '../tooltip';
 import styles from './index.module.less';
 
 export const Menu = React.forwardRef<MenuRef, MenuProps>((props, ref) => {
@@ -44,6 +45,7 @@ export interface ITinyMenuItem {
     Icon: React.ComponentType<{ className?: string }>;
     key: string;
     active?: boolean;
+    tooltip?: string;
 }
 
 export interface ITinyMenuGroupProps {
@@ -57,20 +59,31 @@ export function TinyMenuGroup({ items }: ITinyMenuGroupProps) {
               univer-flex univer-flex-wrap univer-gap-2.5 univer-menu-item-group univer-p-1 univer-pl-0 univer-pr-0
             `}
         >
-            {items.map((item) => (
-                <div
-                    key={item.key}
-                    onClick={() => item.onClick()}
-                    className={`
-                      univer-flex univer-h-6 univer-w-6 univer-cursor-pointer univer-items-center univer-justify-center
-                      univer-rounded-md
-                      hover:univer-bg-[#EEEFF1]
-                      ${item.active ? 'univer-bg-[#EEEFF1]' : ''}
-                    `}
-                >
-                    <item.Icon className="univer-h-4 univer-w-4 univer-text-[#181C2A]" />
-                </div>
-            ))}
+            {items.map((item) => {
+                const ele = (
+                    <div
+                        key={item.key}
+                        onClick={() => item.onClick()}
+                        className={`
+                          univer-flex univer-h-6 univer-w-6 univer-cursor-pointer univer-items-center
+                          univer-justify-center univer-rounded-md
+                          hover:univer-bg-[#EEEFF1]
+                          ${item.active ? 'univer-bg-[#EEEFF1]' : ''}
+                        `}
+                    >
+                        <item.Icon className="univer-h-4 univer-w-4 univer-text-[#181C2A]" />
+                    </div>
+                );
+                return item.tooltip
+                    ? (
+                        <Tooltip title={item.tooltip}>
+                            {ele}
+                        </Tooltip>
+                    )
+                    : (
+                        ele
+                    );
+            })}
         </div>
     );
 }

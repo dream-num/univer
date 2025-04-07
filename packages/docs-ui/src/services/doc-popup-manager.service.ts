@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDisposable, INeedCheckDisposable, ITextRangeParam } from '@univerjs/core';
+import type { INeedCheckDisposable, ITextRangeParam } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { BaseObject, Documents, IBoundRectNoAngle, IRender, Scene } from '@univerjs/engine-render';
 import type { IPopup } from '@univerjs/ui';
@@ -134,20 +134,10 @@ export class DocCanvasPopManagerService extends Disposable {
         super();
     }
 
-    private _createObjectPositionObserver(
-        targetObject: BaseObject,
-        currentRender: IRender
-    ) {
+    private _createRectPositionObserver(rect: IBoundRectNoAngle | (() => IBoundRectNoAngle), currentRender: IRender) {
         const calc = () => {
             const { scene, engine } = currentRender;
-            const { left, top, width, height } = targetObject;
-
-            const bound: IBoundRectNoAngle = {
-                left,
-                right: left + width,
-                top,
-                bottom: top + height,
-            };
+            const bound: IBoundRectNoAngle = typeof rect === 'function' ? rect() : rect;
             const canvasElement = engine.getCanvasElement();
             const canvasClientRect = canvasElement.getBoundingClientRect();
             const widthOfCanvas = pxToNum(canvasElement.style.width); // declared width
@@ -192,6 +182,24 @@ export class DocCanvasPopManagerService extends Disposable {
         };
     }
 
+    private _createObjectPositionObserver(
+        targetObject: BaseObject,
+        currentRender: IRender
+    ) {
+        const getBound = () => {
+            const { left, top, width, height } = targetObject;
+            const bound: IBoundRectNoAngle = {
+                left,
+                right: left + width,
+                top,
+                bottom: top + height,
+            };
+            return bound;
+        };
+
+        return this._createRectPositionObserver(getBound, currentRender);
+    }
+
     private _createRangePositionObserver(range: ITextRangeParam, currentRender: IRender) {
         const positions = calcDocRangePositions(range, currentRender) ?? [];
         const positions$ = new BehaviorSubject(positions);
@@ -226,6 +234,32 @@ export class DocCanvasPopManagerService extends Disposable {
         };
     }
 
+    attachPopupToRect(rect: IBoundRectNoAngle, popup: IDocCanvasPopup, unitId: string): INeedCheckDisposable {
+        const currentRender = this._renderManagerService.getRenderById(unitId);
+        if (!currentRender) {
+            throw new Error(`Current render not found, unitId: ${unitId}`);
+        }
+
+        const { position, position$, disposable } = this._createRectPositionObserver(rect, currentRender);
+        const id = this._globalPopupManagerService.addPopup({
+            ...popup,
+            unitId,
+            subUnitId: 'default',
+            anchorRect: position,
+            anchorRect$: position$,
+            canvasElement: currentRender.engine.getCanvasElement(),
+        });
+
+        return {
+            dispose: () => {
+                this._globalPopupManagerService.removePopup(id);
+                position$.complete();
+                disposable.dispose();
+            },
+            canDispose: () => this._globalPopupManagerService.activePopupId !== id,
+        };
+    }
+
     // #region attach to object
     /**
      * attach a popup to canvas object
@@ -233,7 +267,7 @@ export class DocCanvasPopManagerService extends Disposable {
      * @param popup popup item
      * @returns disposable
      */
-    attachPopupToObject(targetObject: BaseObject, popup: IDocCanvasPopup, unitId: string): IDisposable {
+    attachPopupToObject(targetObject: BaseObject, popup: IDocCanvasPopup, unitId: string): INeedCheckDisposable {
         const currentRender = this._renderManagerService.getRenderById(unitId);
         if (!currentRender) {
             throw new Error(`Current render not found, unitId: ${unitId}`);
@@ -255,6 +289,7 @@ export class DocCanvasPopManagerService extends Disposable {
                 position$.complete();
                 disposable.dispose();
             },
+            canDispose: () => this._globalPopupManagerService.activePopupId !== id,
         };
     }
 

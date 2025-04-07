@@ -266,6 +266,18 @@ export const menuSchema: MenuSchemaType = {
                 order: 5,
                 menuItemFactory: NormalTextHeadingMenuItemFactory,
             },
+            [OrderListCommand.id]: {
+                order: 6,
+                menuItemFactory: OrderListMenuItemFactory,
+            },
+            [BulletListCommand.id]: {
+                order: 7,
+                menuItemFactory: BulletListMenuItemFactory,
+            },
+            [CheckListCommand.id]: {
+                order: 8,
+                menuItemFactory: CheckListMenuItemFactory,
+            },
         },
         [ContextMenuGroup.FORMAT]: {
             [DocCopyCurrentParagraphCommand.id]: {

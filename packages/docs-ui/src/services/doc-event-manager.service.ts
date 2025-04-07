@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICustomRange, IParagraph, IParagraphRange, ITextRangeParam, Nullable } from '@univerjs/core';
-import type { Documents, DocumentSkeleton, IBoundRectNoAngle, IDocumentSkeletonGlyph, IDocumentSkeletonPage, IMouseEvent, IPointerEvent, IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import { BuildTextUtils, Disposable, fromEventSubject, Inject } from '@univerjs/core';
+import type { DocumentDataModel, ICustomRange, IParagraph, ITextRangeParam, Nullable } from '@univerjs/core';
+import type { Documents, DocumentSkeleton, IBoundRectNoAngle, IDocumentSkeletonGlyph, IDocumentSkeletonPage, IDocumentSkeletonSection, IMouseEvent, IPointerEvent, IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import { Disposable, fromEventSubject, Inject } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { CURSOR_TYPE, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '@univerjs/engine-render';
 import { BehaviorSubject, distinctUntilChanged, filter, map, Subject, switchMap, take, throttleTime } from 'rxjs';
@@ -37,13 +37,6 @@ export interface IBulletBound {
     segmentId?: string;
     segmentPageIndex: number;
     paragraph: IParagraph;
-}
-
-export interface IParagraphBound {
-    rect: IBoundRectNoAngle;
-    paragraph: IParagraphRange;
-    segmentId?: string;
-    segmentPageIndex: number;
 }
 
 const calcDocRangePositions = (range: ITextRangeParam, documents: Documents, skeleton: DocumentSkeleton, pageIndex: number): IBoundRectNoAngle[] | undefined => {
@@ -74,52 +67,57 @@ const calcDocRangePositions = (range: ITextRangeParam, documents: Documents, ske
     }));
 };
 
-const calcDocParagraphPositions = (startIndex: number, endIndex: number, documents: Documents, skeleton: DocumentSkeleton): Nullable<IBoundRectNoAngle> => {
-    const startPosition = skeleton.findNodePositionByCharIndex(startIndex, true, undefined, -1);
-    const endPosition = skeleton.findNodePositionByCharIndex(endIndex, true, undefined, -1);
-    if (!endPosition || !startPosition) {
-        return null;
+interface ICustomRangeBoundBase {
+    paragraphStart: number;
+    paragraphEnd: number;
+    startIndex: number;
+    rect: IBoundRectNoAngle;
+    fisrtLine: IBoundRectNoAngle;
+}
+
+const calcDocParagraphPositions = (sections: IDocumentSkeletonSection[], top: number, left: number): ICustomRangeBoundBase[] => {
+    const paragraphBounds: ICustomRangeBoundBase[] = [];
+
+    for (const section of sections) {
+        const sectionTop = section.top;
+        for (const column of section.columns) {
+            const columnLeft = column.left;
+            const width = column.width;
+            let currentParagraph: ICustomRangeBoundBase | null = null;
+            for (const line of column.lines) {
+                const startIndex = line.paragraphIndex;
+                if (line.paragraphStart) {
+                    if (currentParagraph) {
+                        paragraphBounds.push(currentParagraph);
+                        currentParagraph = null;
+                    }
+                    const lineRect = {
+                        top: top + sectionTop + line.top,
+                        left: left + columnLeft,
+                        right: left + columnLeft + width,
+                        bottom: top + sectionTop + line.top + line.lineHeight,
+                    };
+                    currentParagraph = {
+                        paragraphStart: line.st,
+                        paragraphEnd: startIndex,
+                        startIndex,
+                        rect: lineRect,
+                        fisrtLine: lineRect,
+                    };
+                } else {
+                    if (currentParagraph && currentParagraph.startIndex === startIndex) {
+                        currentParagraph.rect.bottom = top + sectionTop + line.top + line.lineHeight;
+                    }
+                }
+            }
+
+            if (currentParagraph) {
+                paragraphBounds.push(currentParagraph);
+            }
+        }
     }
 
-    try {
-        const documentOffsetConfig = documents.getOffsetConfig();
-        const convertor = new NodePositionConvertToCursor(documentOffsetConfig, skeleton);
-        const { borderBoxPointGroup } = convertor.getRangePointData(startPosition, endPosition);
-        const bounds = getLineBounding(borderBoxPointGroup);
-        if (!bounds.length) {
-            return null;
-        }
-        const rects = bounds.map((rect) => ({
-            top: rect.top + documentOffsetConfig.docsTop - DOC_VERTICAL_PADDING,
-            bottom: rect.bottom + documentOffsetConfig.docsTop + DOC_VERTICAL_PADDING,
-            left: rect.left + documentOffsetConfig.docsLeft,
-            right: rect.right + documentOffsetConfig.docsLeft,
-        }));
-
-        let left;
-        let right;
-        let top;
-        let bottom;
-
-        for (const rect of rects) {
-            if (left === undefined || rect.left < left) {
-                left = rect.left;
-            }
-            if (right === undefined || rect.right > right) {
-                right = rect.right;
-            }
-            if (top === undefined || rect.top < top) {
-                top = rect.top;
-            }
-            if (bottom === undefined || rect.bottom > bottom) {
-                bottom = rect.bottom;
-            }
-        }
-
-        return { left: left!, right: right!, top: top!, bottom: bottom! };
-    } catch (e) {
-        return null;
-    }
+    return paragraphBounds;
 };
 
 export const calcDocGlyphPosition = (glyph: IDocumentSkeletonGlyph, documents: Documents, skeleton: DocumentSkeleton, pageIndex = -1): IBoundRectNoAngle | undefined => {
@@ -157,11 +155,15 @@ interface IBulletActive {
     rect: IBoundRectNoAngle;
 }
 
-interface IParagraphActive {
-    paragraph: IParagraphRange;
-    segmentId?: string;
-    segmentPageIndex: number;
+export interface IMutiPageParagraphBound {
     rect: IBoundRectNoAngle;
+    paragraphStart: number;
+    paragraphEnd: number;
+    startIndex: number;
+    rects: IBoundRectNoAngle[];
+    pageIndex: number;
+    segmentId?: string;
+    firstLine: IBoundRectNoAngle;
 }
 
 export class DocEventManagerService extends Disposable implements IRenderModule {
@@ -177,8 +179,8 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
     private readonly _clickBullet$ = new Subject<IBulletActive>();
     readonly clickBullets$ = this._clickBullet$.asObservable();
 
-    private readonly _hoverParagraph$ = new Subject<Nullable<IParagraphActive>>();
-    readonly hoverParagraph$ = this._hoverParagraph$.pipe(distinctUntilChanged((pre, aft) => pre?.paragraph.startIndex === aft?.paragraph.startIndex && pre?.segmentId === aft?.segmentId && pre?.segmentPageIndex === aft?.segmentPageIndex));
+    private readonly _hoverParagraph$ = new Subject<Nullable<IMutiPageParagraphBound>>();
+    readonly hoverParagraph$ = this._hoverParagraph$.pipe(distinctUntilChanged((pre, aft) => pre?.startIndex === aft?.startIndex && pre?.segmentId === aft?.segmentId && pre?.pageIndex === aft?.pageIndex));
 
     private _customRangeDirty = true;
     private _bulletDirty = true;
@@ -198,7 +200,9 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
      * cache the bounding of paragraphs,
      * it will be updated when the doc-skeleton is recalculated
      */
-    private _paragraphBounds: IParagraphBound[] = [];
+    private _paragraphBounds: Map<number, IMutiPageParagraphBound> = new Map();
+
+    private _segmentParagraphBounds: Map<string, Map<number, IMutiPageParagraphBound[]>> = new Map();
 
     private get _skeleton() {
         return this._docSkeletonManagerService.getSkeleton();
@@ -464,17 +468,69 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
         return bullet;
     }
 
-    private _buildParagraphBoundsBySegment(segmentId?: string, pageIndex = -1) {
-        const paragraphs = BuildTextUtils.paragraph.util.transform(this._context.unit.getBody()?.paragraphs ?? []);
-        return paragraphs.map((paragraph) => {
-            return {
-                paragraph,
-                segmentId,
-                pageIndex,
-                rect: calcDocParagraphPositions(paragraph.paragraphStart, paragraph.paragraphEnd, this._documents, this._skeleton),
-                segmentPageIndex: pageIndex,
-            } as IParagraphBound;
-        }).filter((layout) => layout.rect !== null);
+    private _buildParagraphBoundsBySegment(segmentId?: string) {
+        const skeletonData = this._skeleton.getSkeletonData();
+        const documents = this._documents;
+        const documentOffsetConfig = documents.getOffsetConfig();
+        if (!skeletonData) {
+            return null;
+        }
+
+        const calc = (pages: IDocumentSkeletonPage[]) => {
+            const paragraphMap: Map<number, IMutiPageParagraphBound> = new Map();
+            const handlePage = (page: IDocumentSkeletonPage, pageIndex: number, top: number, left: number) => {
+                const bounds = calcDocParagraphPositions(page.sections, top, left);
+                bounds.forEach((bound) => {
+                    if (!paragraphMap.has(bound.startIndex)) {
+                        paragraphMap.set(bound.startIndex, {
+                            rect: bound.rect,
+                            paragraphStart: bound.paragraphStart,
+                            paragraphEnd: bound.paragraphEnd,
+                            startIndex: bound.startIndex,
+                            rects: [bound.rect],
+                            pageIndex,
+                            segmentId,
+                            firstLine: bound.fisrtLine,
+                        });
+                    } else {
+                        const current = paragraphMap.get(bound.startIndex);
+                        if (current) {
+                            current.rect.bottom = bound.rect.bottom;
+                            current.rects.push(bound.rect);
+                        }
+                    }
+                });
+            };
+            for (let i = 0; i < pages.length; i++) {
+                const page = pages[i];
+                const top = page.marginTop + documentOffsetConfig.docsTop;
+                const left = page.marginLeft + documentOffsetConfig.docsLeft;
+                handlePage(page, i, top, left);
+                if (page.skeTables) {
+                    Array.from(page.skeTables.values()).forEach((table) => {
+                        table.rows.forEach((row) => {
+                            row.cells.forEach((cell) => {
+                                const top = table.top + documentOffsetConfig.docsTop + page.marginTop + row.top + cell.marginTop;
+                                const left = table.left + documentOffsetConfig.docsLeft + page.marginLeft + cell.left + cell.marginLeft;
+                                handlePage(cell, i, top, left);
+                            });
+                        });
+                    });
+                }
+            }
+
+            return paragraphMap;
+        };
+
+        if (segmentId) {
+            const page = skeletonData.skeFooters.get(segmentId)?.values() ?? skeletonData.skeHeaders.get(segmentId)?.values();
+            if (!page) {
+                return null;
+            }
+            return calc(Array.from(page));
+        }
+
+        return calc(skeletonData.pages);
     }
 
     private _buildParagraphBounds() {
@@ -483,16 +539,19 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
         }
         this._paragraphDirty = false;
 
-        this._paragraphBounds = [];
-        this._paragraphBounds.push(...this._buildParagraphBoundsBySegment());
+        this._paragraphBounds = this._buildParagraphBoundsBySegment() ?? new Map();
 
-        this._skeleton.getSkeletonData()?.pages.forEach((page, pageIndex) => {
+        const handleSegment = (segmentId: string) => {
+            this._segmentParagraphBounds.set(segmentId, this._buildParagraphBoundsBySegment(segmentId) ?? new Map());
+        };
+
+        this._skeleton.getSkeletonData()?.pages.forEach((page) => {
             if (page.headerId) {
-                this._paragraphBounds.push(...this._buildParagraphBoundsBySegment(page.headerId, pageIndex));
+                handleSegment(page.headerId);
             }
 
             if (page.footerId) {
-                this._paragraphBounds.push(...this._buildParagraphBoundsBySegment(page.footerId, pageIndex));
+                handleSegment(page.footerId);
             }
         });
     }
@@ -502,22 +561,17 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
 
         const { offsetX, offsetY } = evt;
         const { x, y } = transformOffset2Bound(offsetX, offsetY, this._context.scene);
-        const paragraph = this._paragraphBounds.find((layout) => {
-            const { left, right, top, bottom } = layout.rect;
-            if (x >= left && x <= right && y >= top && y <= bottom) {
-                return true;
-            }
-            return false;
+        const paragraph = this._paragraphBounds.values().find((bounds) => {
+            return bounds.rects.some((rect) => {
+                const { left, right, top, bottom } = rect;
+                if (x >= left && x <= right && y >= top && y <= bottom) {
+                    return true;
+                }
+                return false;
+            });
         });
 
-        return paragraph
-            ? {
-                paragraph: paragraph.paragraph,
-                segmentId: paragraph.segmentId,
-                segmentPageIndex: paragraph.segmentPageIndex,
-                rect: paragraph.rect,
-            }
-            : null;
+        return paragraph;
     }
 
     get paragraphBounds() {

@@ -91,7 +91,7 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
                 }
 
                 if (paragraph) {
-                    this.showParagraphMenu(paragraph.paragraph);
+                    this.showParagraphMenu(paragraph);
                     return;
                 }
 
@@ -106,13 +106,13 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
         }
 
         this.hideParagraphMenu(true);
+        const bound = this._docEventManagerService.paragraphBounds.get(paragraph.startIndex);
+        if (!bound) {
+            return;
+        }
 
-        const disposable = this._docPopupManagerService.attachPopupToRange(
-            {
-                startOffset: paragraph.paragraphStart,
-                endOffset: paragraph.paragraphStart + 1,
-                collapsed: false,
-            },
+        const disposable = this._docPopupManagerService.attachPopupToRect(
+            bound.firstLine,
             {
                 componentKey: 'doc.paragraph.menu',
                 direction: 'left',

@@ -559,7 +559,8 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
                         const tableTop = table.top + top;
                         const tableRight = tableLeft + table.width;
                         const tableBottom = tableTop + table.height;
-                        this._tableBounds.set(table.tableId, {
+                        const tableId = table.tableId;
+                        this._tableBounds.set(tableId, {
                             rect: {
                                 left: tableLeft,
                                 top: tableTop,
@@ -567,7 +568,7 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
                                 bottom: tableBottom,
                             },
                             pageIndex: i,
-                            tableId: table.tableId,
+                            tableId,
                         });
 
                         table.rows.forEach((row, rowIndex) => {
@@ -575,10 +576,10 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
                                 const top = (((page.pageHeight === Infinity ? 0 : page.pageHeight) + documentOffsetConfig.pageMarginTop) * i) + table.top + documentOffsetConfig.docsTop + page.marginTop + row.top + cell.marginTop;
                                 const left = table.left + documentOffsetConfig.docsLeft + page.marginLeft + cell.left + cell.marginLeft;
                                 const bounds = calcDocParagraphPositions(cell.sections, top, left, cell.pageWidth - cell.marginLeft - cell.marginRight);
-                                let arr = this._tableParagraphBounds.get(table.tableId);
+                                let arr = this._tableParagraphBounds.get(tableId);
                                 if (!arr) {
                                     arr = [];
-                                    this._tableParagraphBounds.set(table.tableId, arr);
+                                    this._tableParagraphBounds.set(tableId, arr);
                                 }
 
                                 arr.push(...bounds.map((bound) => ({
@@ -591,14 +592,15 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
                                     rowIndex,
                                     colIndex,
                                     firstLine: bound.fisrtLine,
-                                    tableId: table.tableId,
+                                    tableId,
                                 }))
                                 );
 
-                                let cellBounds = this._tableCellBounds.get(table.tableId);
+                                let cellBounds = this._tableCellBounds.get(tableId);
+
                                 if (!cellBounds) {
                                     cellBounds = [];
-                                    this._tableCellBounds.set(table.tableId, cellBounds);
+                                    this._tableCellBounds.set(tableId, cellBounds);
                                 }
 
                                 cellBounds.push({
@@ -611,7 +613,7 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
                                     pageIndex: i,
                                     rowIndex,
                                     colIndex,
-                                    tableId: table.tableId,
+                                    tableId,
                                 });
                             });
                         });
@@ -642,8 +644,8 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
         this._paragraphDirty = false;
         this._tableParagraphBounds = new Map();
         this._tableCellBounds = new Map();
+        this._tableBounds = new Map();
         this._paragraphBounds = this._buildParagraphBoundsBySegment() ?? new Map();
-
         this._paragraphLeftBounds = Array.from(this._paragraphBounds.values()).map((bound) => ({
             ...bound,
             rect: {

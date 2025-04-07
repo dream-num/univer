@@ -105,20 +105,27 @@ export function DocSideMenu() {
     const mode = left < 180 ? 'float' : 'side-bar';
     let minLevel = Infinity;
 
-    const paragraphMenus = paragraphs?.filter((p) => p.paragraphStyle?.namedStyleType !== undefined && p.paragraphStyle!.namedStyleType !== NamedStyleType.SUBTITLE).map((p) => {
-        const level = transformNamedStyleTypeToLevel(p.paragraphStyle!.namedStyleType!);
-        minLevel = Math.min(minLevel, level);
-        const bound = paragraphBounds?.get(p.startIndex);
-        if (!bound) return null;
-        const { paragraphStart, paragraphEnd } = bound;
+    const paragraphMenus = paragraphs
+        ?.filter((p) =>
+            p.paragraphStyle?.namedStyleType !== undefined &&
+            p.paragraphStyle!.namedStyleType !== NamedStyleType.SUBTITLE &&
+            p.paragraphStyle.namedStyleType !== NamedStyleType.NORMAL_TEXT
+        )
+        .map((p) => {
+            const level = transformNamedStyleTypeToLevel(p.paragraphStyle!.namedStyleType!);
+            minLevel = Math.min(minLevel, level);
+            const bound = paragraphBounds?.get(p.startIndex);
+            if (!bound) return null;
+            const { paragraphStart, paragraphEnd } = bound;
 
-        return {
-            id: p.paragraphStyle!.headingId!,
-            text: getPlainText(fullDataStream.slice(paragraphStart, paragraphEnd)),
-            level,
-            isTitle: p.paragraphStyle?.namedStyleType === NamedStyleType.TITLE,
-        };
-    }).filter(Boolean) as ISideMenuItem[];
+            return {
+                id: p.paragraphStyle!.headingId!,
+                text: getPlainText(fullDataStream.slice(paragraphStart, paragraphEnd)),
+                level,
+                isTitle: p.paragraphStyle?.namedStyleType === NamedStyleType.TITLE,
+            };
+        })
+        .filter(Boolean) as ISideMenuItem[];
 
     const menus = paragraphMenus?.find((p) => p.isTitle)
         ? paragraphMenus

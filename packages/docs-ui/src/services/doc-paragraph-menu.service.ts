@@ -100,7 +100,13 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
             })
         );
 
-        this.disposeWithMe(this._context.scene.getViewport(VIEWPORT_KEY.VIEW_MAIN)!.onScrollAfter$.subscribeEvent(() => {
+        let lastScrollY = 0;
+        this.disposeWithMe(this._context.scene.getViewport(VIEWPORT_KEY.VIEW_MAIN)!.onScrollAfter$.subscribeEvent((e) => {
+            if (lastScrollY === e.scrollY) {
+                return;
+            }
+
+            lastScrollY = e.scrollY;
             this.hideParagraphMenu(true);
         }));
     }

@@ -20,6 +20,7 @@ import { Disposable, Inject, isInternalEditorID } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { ComponentManager } from '@univerjs/ui';
 import { first, throttleTime } from 'rxjs';
+import { VIEWPORT_KEY } from '../basics/docs-view-key';
 import { DocEventManagerService } from './doc-event-manager.service';
 import { DocCanvasPopManagerService } from './doc-popup-manager.service';
 
@@ -98,6 +99,10 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
                 this.hideParagraphMenu(true);
             })
         );
+
+        this.disposeWithMe(this._context.scene.getViewport(VIEWPORT_KEY.VIEW_MAIN)!.onScrollAfter$.subscribeEvent(() => {
+            this.hideParagraphMenu(true);
+        }));
     }
 
     showParagraphMenu(paragraph: IParagraphRange) {

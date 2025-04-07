@@ -71,7 +71,7 @@ export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
                 <DownSingle className="univer-h-3 univer-w-3 univer-text-[#979DAC]" />
             </div>
             {visible && (
-                <RectPopup anchorRect$={anchorRect$} direction="left">
+                <RectPopup anchorRect$={anchorRect$} direction="left-center">
                     <section
                         ref={contentRef}
                         onMouseEnter={(e) => {

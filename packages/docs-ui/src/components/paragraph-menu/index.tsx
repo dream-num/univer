@@ -83,7 +83,7 @@ export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
             <div
                 ref={anchorRef}
                 className={`
-                  univer-mr-2 univer-inline-flex univer-h-7 univer-cursor-pointer univer-items-center univer-gap-1
+                  univer-mr-1 univer-inline-flex univer-h-7 univer-cursor-pointer univer-items-center univer-gap-1
                   univer-rounded-full univer-bg-[#EEEFF1] univer-px-2.5 univer-py-0
                 `}
                 onMouseEnter={(e) => {

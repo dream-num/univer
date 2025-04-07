@@ -16,6 +16,7 @@
 
 import type { DocumentDataModel, INeedCheckDisposable, IParagraphRange } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import type { IMutiPageParagraphBound } from './doc-event-manager.service';
 import { Disposable, Inject, isInternalEditorID } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { ComponentManager } from '@univerjs/ui';
@@ -51,7 +52,7 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
         this._init();
     }
 
-    _isCursorInActiveParagraph() {
+    private _isCursorInActiveParagraph() {
         if (!this._paragrahMenu) {
             return false;
         }
@@ -111,24 +112,20 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
         }));
     }
 
-    showParagraphMenu(paragraph: IParagraphRange) {
+    showParagraphMenu(paragraph: IMutiPageParagraphBound) {
         if (this._paragrahMenu?.paragraph.startIndex === paragraph.startIndex) {
             return;
         }
 
         this.hideParagraphMenu(true);
-        const bound = this._docEventManagerService.paragraphBounds.get(paragraph.startIndex);
-        if (!bound) {
-            return;
-        }
 
         const disposable = this._docPopupManagerService.attachPopupToRect(
-            bound.firstLine,
+            paragraph.firstLine,
             {
                 componentKey: 'doc.paragraph.menu',
                 direction: 'left-center',
                 onClickOutside: () => {
-                    this._docSelectionManagerService.textSelection$.pipe(first()).subscribe((textSelection) => {
+                    this._docSelectionManagerService.textSelection$.pipe(first()).subscribe(() => {
                         if (!this._isCursorInActiveParagraph()) {
                             this.hideParagraphMenu(true);
                         }

@@ -162,11 +162,11 @@ export class FUniver extends Disposable {
 
         this.registerEventHandler(
             this.Event.CommandExecuted,
-            () => commandService.onCommandExecuted((commandInfo) => {
+            () => commandService.onCommandExecuted((commandInfo, options) => {
                 const { id, type: propType, params } = commandInfo;
                 if (commandInfo.id !== RedoCommand.id && commandInfo.id !== UndoCommand.id) {
                     const type = propType!;
-                    const eventParams: ICommandEvent = { id, type, params };
+                    const eventParams: ICommandEvent = { id, type, params, options };
                     this.fireEvent(this.Event.CommandExecuted, eventParams);
                 }
             })
@@ -210,11 +210,11 @@ export class FUniver extends Disposable {
 
         this.registerEventHandler(
             this.Event.BeforeCommandExecute,
-            () => commandService.beforeCommandExecuted((commandInfo) => {
+            () => commandService.beforeCommandExecuted((commandInfo, options) => {
                 const { id, type: propType, params } = commandInfo;
                 if (commandInfo.id !== RedoCommand.id && commandInfo.id !== UndoCommand.id) {
                     const type = propType!;
-                    const eventParams: ICommandEvent = { id, type, params };
+                    const eventParams: ICommandEvent = { id, type, params, options };
                     this.fireEvent(this.Event.BeforeCommandExecute, eventParams);
 
                     if (eventParams.cancel) {

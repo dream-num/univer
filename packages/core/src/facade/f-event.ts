@@ -16,7 +16,7 @@
 
 /* eslint-disable ts/explicit-function-return-type */
 
-import type { CommandType, IDocumentData, LifecycleStages, UniverInstanceType } from '@univerjs/core';
+import type { CommandType, IDocumentData, IExecutionOptions, LifecycleStages, UniverInstanceType } from '@univerjs/core';
 import type { FDoc } from './f-doc';
 
 /**
@@ -81,6 +81,8 @@ export interface ICommandEvent extends IEventBase {
     id: string;
     /** Type of the command */
     type: CommandType;
+    /** optional execution options for the command */
+    options?: IExecutionOptions;
 }
 
 /**
@@ -259,7 +261,7 @@ export class FEventName {
      * @example
      * ```ts
      * const disposable = univerAPI.addEvent(univerAPI.Event.CommandExecuted, (event) => {
-     *   const { params, id, type } = event;
+     *   const { params, id, type, options } = event;
      *   console.log('command executed', event);
      * });
      *
@@ -276,7 +278,7 @@ export class FEventName {
      * @example
      * ```ts
      * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeCommandExecute, (event) => {
-     *   const { params, id, type } = event;
+     *   const { params, id, type, options } = event;
      *   console.log('before command executed', event);
      *
      *   // Cancel the command execution

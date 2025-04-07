@@ -26,12 +26,11 @@ import { AddRangeProtectionMutation } from '../../commands/mutations/add-range-p
 import { AddWorksheetProtectionMutation } from '../../commands/mutations/add-worksheet-protection.mutation';
 import { SetWorksheetPermissionPointsMutation } from '../../commands/mutations/set-worksheet-permission-points.mutation';
 import { RangeProtectionRuleModel } from '../../model/range-protection-rule.model';
-import { RangeProtectionCache } from '../../model/range-protection.cache';
 import { defaultWorksheetPermissionPoint, getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel } from '../../services/permission';
 import { baseProtectionActions, getAllRangePermissionPoint } from '../../services/permission/range-permission/util';
 import { defaultWorkbookPermissionPoints, getAllWorkbookPermissionPoint } from '../../services/permission/workbook-permission';
+import { WorkbookPermissionService } from '../../services/permission/workbook-permission/workbook-permission.service';
 import { WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '../../services/permission/worksheet-permission';
-import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 
 export class SheetPermissionInitController extends Disposable {
     constructor(
@@ -42,10 +41,9 @@ export class SheetPermissionInitController extends Disposable {
         @Inject(WorksheetProtectionRuleModel) private _worksheetProtectionRuleModel: WorksheetProtectionRuleModel,
         @Inject(UserManagerService) private _userManagerService: UserManagerService,
         @Inject(WorksheetProtectionPointModel) private _worksheetProtectionPointRuleModel: WorksheetProtectionPointModel,
-        @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
+        @Inject(WorkbookPermissionService) private _workbookPermissionService: WorkbookPermissionService,
         @Inject(IUndoRedoService) private _undoRedoService: IUndoRedoService,
-        @Inject(ICommandService) private _commandService: ICommandService,
-        @Inject(RangeProtectionCache) private _rangeProtectionCache: RangeProtectionCache
+        @Inject(ICommandService) private _commandService: ICommandService
     ) {
         super();
     }
@@ -178,6 +176,7 @@ export class SheetPermissionInitController extends Disposable {
 
     private async _initWorkbookPermissionFromSnapshot() {
         await Promise.all(this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET).map((workbook) => this.initWorkbookPermissionChange(workbook.getUnitId())));
+        this._workbookPermissionService.changeUnitInitState(true);
     }
 
     private _initWorksheetPermissionChange() {

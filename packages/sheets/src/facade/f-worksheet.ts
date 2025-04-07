@@ -2349,7 +2349,7 @@ export class FWorksheet extends FBaseInitialable {
      * ```ts
      * // The code below inserts a defined name
      * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
-     * fWorksheet.insertDefinedName('MyDefinedName', 'Sheet1!A1');
+     * fWorksheet.insertDefinedName('MyDefinedName', 'Sheet1!$A$1');
      * ```
      */
     insertDefinedName(name: string, formulaOrRefString: string): void {
@@ -2367,7 +2367,7 @@ export class FWorksheet extends FBaseInitialable {
      * // The code below gets all the defined names in the worksheet
      * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
      * const definedNames = fWorksheet.getDefinedNames();
-     * console.log(definedNames);
+     * console.log(definedNames, definedNames[0]?.getFormulaOrRefString());
      * ```
      */
     getDefinedNames(): FDefinedName[] {

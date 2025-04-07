@@ -459,6 +459,9 @@ export class Font extends SheetExtension {
 
         const documentDataModel = documentSkeleton.getViewModel().getDataModel();
         let { startX, startY, endX, endY } = renderFontCtx;
+        const cellWidth = endX - startX;
+        const cellHeight = endY - startY;
+
         // WRAP means next line
         if (wrapStrategy === WrapStrategy.WRAP && vertexAngle === 0) {
             documentDataModel.updateDocumentDataPageSize(endX - startX);
@@ -503,7 +506,7 @@ export class Font extends SheetExtension {
             bottom: endY - startY,
         };
         documentSkeleton.makeDirty(false);
-        documents.resize(endX - startX, endY - startY);
+        documents.resize(cellWidth, cellHeight);
         documents.changeSkeleton(documentSkeleton).render(ctx, {
             viewBound: {
                 left: 0,

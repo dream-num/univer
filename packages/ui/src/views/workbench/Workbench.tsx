@@ -43,6 +43,7 @@ export function DesktopWorkbench(props: IUniverWorkbenchProps) {
         header = true,
         toolbar = true,
         footer = true,
+        headerMenu = true,
         contextMenu = true,
         mountContainer,
         onRendered,
@@ -145,6 +146,7 @@ export function DesktopWorkbench(props: IUniverWorkbenchProps) {
                             components={toolbarComponents}
                             sharedProps={{
                                 headerMenuComponents,
+                                headerMenu,
                             }}
                         />
                     </header>

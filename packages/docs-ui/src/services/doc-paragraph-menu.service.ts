@@ -19,7 +19,7 @@ import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { Disposable, Inject, isInternalEditorID } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { ComponentManager } from '@univerjs/ui';
-import { first } from 'rxjs';
+import { first, throttleTime } from 'rxjs';
 import { DocEventManagerService } from './doc-event-manager.service';
 import { DocCanvasPopManagerService } from './doc-popup-manager.service';
 
@@ -85,7 +85,7 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
 
     private _init() {
         this.disposeWithMe(
-            this._docEventManagerService.hoverParagraph$.subscribe((paragraph) => {
+            this._docEventManagerService.hoverParagraphRealTime$.pipe(throttleTime(16)).subscribe((paragraph) => {
                 if (this._paragrahMenu?.active) {
                     return;
                 }
@@ -115,7 +115,7 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
             bound.firstLine,
             {
                 componentKey: 'doc.paragraph.menu',
-                direction: 'left',
+                direction: 'left-center',
                 onClickOutside: () => {
                     this._docSelectionManagerService.textSelection$.pipe(first()).subscribe((textSelection) => {
                         if (!this._isCursorInActiveParagraph()) {

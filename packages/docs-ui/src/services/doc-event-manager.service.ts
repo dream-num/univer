@@ -102,7 +102,7 @@ const calcDocParagraphPositions = (sections: IDocumentSkeletonSection[], top: nu
                         paragraphEnd: startIndex,
                         startIndex,
                         rect: lineRect,
-                        fisrtLine: lineRect,
+                        fisrtLine: { ...lineRect },
                     };
                 } else {
                     if (currentParagraph && currentParagraph.startIndex === startIndex) {
@@ -181,6 +181,7 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
 
     private readonly _hoverParagraph$ = new Subject<Nullable<IMutiPageParagraphBound>>();
     readonly hoverParagraph$ = this._hoverParagraph$.pipe(distinctUntilChanged((pre, aft) => pre?.startIndex === aft?.startIndex && pre?.segmentId === aft?.segmentId && pre?.pageIndex === aft?.pageIndex));
+    readonly hoverParagraphRealTime$ = this._hoverParagraph$.asObservable();
 
     private _customRangeDirty = true;
     private _bulletDirty = true;

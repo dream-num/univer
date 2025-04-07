@@ -42,7 +42,7 @@ export interface IRectPopupProps {
      */
     anchorRect$: Observable<IAbsolutePosition>;
     excludeRects?: RefObject<Nullable<IAbsolutePosition[]>>;
-    direction?: 'vertical' | 'horizontal' | 'top' | 'right' | 'left' | 'bottom' | 'bottom-center' | 'top-center';
+    direction?: 'vertical' | 'horizontal' | 'top' | 'right' | 'left' | 'right-center' | 'left-center' | 'bottom' | 'bottom-center' | 'top-center';
 
     hidden?: boolean;
     // #region closing behavior
@@ -105,14 +105,26 @@ function calcPopupPosition(layout: IPopupLayoutInfo): { top: number; left: numbe
     // In x-axis
     const { left: startX, top: startY, right: endX, bottom: endY } = position;
     // const horizontalStyle = ((endX + width) > containerWidth || direction === 'left')
-    const horizontalStyle = direction === 'left'
+    const horizontalStyle = direction.includes('left')
         ? { left: Math.max(startX - width, PUSHING_MINIMUM_GAP) } // on left
         : { left: Math.min(endX, containerWidth - width - PUSHING_MINIMUM_GAP) }; // on right
+    let verticalStyle;
+    const minTop = PUSHING_MINIMUM_GAP;
+    const maxTop = containerHeight - height - PUSHING_MINIMUM_GAP;
 
-    // If the popup element exceed the visible area. We should "push" it back.
-    const verticalStyle = ((startY + height) > containerHeight)
-        ? { top: Math.max(endY - height, PUSHING_MINIMUM_GAP) } // on top
-        : { top: Math.min(startY, containerHeight - height - PUSHING_MINIMUM_GAP) }; // on bottom
+    if (direction.includes('center')) {
+        const rectHeight = endY - startY;
+        const offsetY = (rectHeight - height) / 2;
+
+        verticalStyle = (Math.max(startY + offsetY, PUSHING_MINIMUM_GAP) + height) > containerHeight
+            ? { top: Math.max(Math.min(maxTop, endY - height - offsetY), minTop) }
+            : { top: Math.max(minTop, Math.min(startY + offsetY, maxTop)) };
+    } else {
+        // If the popup element exceed the visible area. We should "push" it back.
+        verticalStyle = ((startY + height) > containerHeight)
+            ? { top: Math.max(endY - height, PUSHING_MINIMUM_GAP) } // on top
+            : { top: Math.min(startY, containerHeight - height - PUSHING_MINIMUM_GAP) }; // on bottom
+    }
 
     return { ...verticalStyle, ...horizontalStyle };
 };

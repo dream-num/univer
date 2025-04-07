@@ -470,6 +470,7 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
 
     private _buildParagraphBoundsBySegment(segmentId?: string) {
         const skeletonData = this._skeleton.getSkeletonData();
+
         const documents = this._documents;
         const documentOffsetConfig = documents.getOffsetConfig();
         if (!skeletonData) {
@@ -480,6 +481,7 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
             const paragraphMap: Map<number, IMutiPageParagraphBound> = new Map();
             const handlePage = (page: IDocumentSkeletonPage, pageIndex: number, top: number, left: number) => {
                 const bounds = calcDocParagraphPositions(page.sections, top, left);
+
                 bounds.forEach((bound) => {
                     if (!paragraphMap.has(bound.startIndex)) {
                         paragraphMap.set(bound.startIndex, {
@@ -503,20 +505,23 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
             };
             for (let i = 0; i < pages.length; i++) {
                 const page = pages[i];
-                const top = page.marginTop + documentOffsetConfig.docsTop;
+                const top = ((page.pageHeight === Infinity ? 0 : page.pageHeight) + documentOffsetConfig.pageMarginTop) * i + page.marginTop + documentOffsetConfig.docsTop;
                 const left = page.marginLeft + documentOffsetConfig.docsLeft;
-                handlePage(page, i, top, left);
                 if (page.skeTables) {
                     Array.from(page.skeTables.values()).forEach((table) => {
                         table.rows.forEach((row) => {
+                            // TODO@weird94 skip repeat row first, should fixed later
+                            if (row.isRepeatRow) return;
                             row.cells.forEach((cell) => {
-                                const top = table.top + documentOffsetConfig.docsTop + page.marginTop + row.top + cell.marginTop;
+                                const top = (((page.pageHeight === Infinity ? 0 : page.pageHeight) + documentOffsetConfig.pageMarginTop) * i) + table.top + documentOffsetConfig.docsTop + page.marginTop + row.top + cell.marginTop;
                                 const left = table.left + documentOffsetConfig.docsLeft + page.marginLeft + cell.left + cell.marginLeft;
                                 handlePage(cell, i, top, left);
                             });
                         });
                     });
                 }
+
+                handlePage(page, i, top, left);
             }
 
             return paragraphMap;
@@ -540,7 +545,6 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
         this._paragraphDirty = false;
 
         this._paragraphBounds = this._buildParagraphBoundsBySegment() ?? new Map();
-
         const handleSegment = (segmentId: string) => {
             this._segmentParagraphBounds.set(segmentId, this._buildParagraphBoundsBySegment(segmentId) ?? new Map());
         };

@@ -27,8 +27,6 @@ import { getParagraphStyleAtCursor } from '../../controllers/menu/menu';
 import { HEADING_ICON_MAP } from '../../controllers/menu/paragraph-menu';
 import { DocParagraphMenuService } from '../../services/doc-paragraph-menu.service';
 
-HEADING_ICON_MAP;
-
 export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
     const [visible, setVisible] = useState(false);
     const contentRef = useRef<HTMLDivElement>(null);
@@ -75,6 +73,11 @@ export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
         bottom: 0,
     }), []);
 
+    const handleHideMenu = () => {
+        setVisible(false);
+        docParagraphMenuService?.hideParagraphMenu(true);
+    };
+
     return (
         <>
             <div
@@ -106,7 +109,14 @@ export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
                 <DownSingle className="univer-h-3 univer-w-3 univer-text-[#979DAC]" />
             </div>
             {visible && (
-                <RectPopup anchorRect$={anchorRect$} direction="left-center">
+                <RectPopup
+                    portal
+                    mask
+                    maskZIndex={100}
+                    anchorRect$={anchorRect$}
+                    direction="left-center"
+                    onMaskClick={handleHideMenu}
+                >
                     <section
                         ref={contentRef}
                         onMouseEnter={(e) => {
@@ -127,9 +137,7 @@ export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
                                 }
 
                                 layoutService.focus();
-
-                                setVisible(false);
-                                docParagraphMenuService?.hideParagraphMenu(true);
+                                handleHideMenu();
                             }}
                         />
                     </section>

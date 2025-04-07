@@ -55,6 +55,11 @@ export interface IRectPopupProps {
     onClick?: (e: React.MouseEvent<HTMLElement>) => void;
     // #endregion
     portal?: boolean;
+
+    mask?: boolean;
+    zIndex?: number;
+    maskZIndex?: number;
+    onMaskClick?: () => void;
 }
 
 export interface IPopupLayoutInfo extends Pick<IRectPopupProps, 'direction'> {
@@ -130,7 +135,24 @@ function calcPopupPosition(layout: IPopupLayoutInfo): { top: number; left: numbe
 };
 
 function RectPopup(props: IRectPopupProps) {
-    const { portal, children, anchorRect$, direction = 'vertical', onClickOutside, excludeOutside, excludeRects, onPointerEnter, onPointerLeave, onClick, hidden, onContextMenu } = props;
+    const {
+        mask,
+        portal,
+        children,
+        anchorRect$,
+        direction = 'vertical',
+        onClickOutside,
+        excludeOutside,
+        excludeRects,
+        onPointerEnter,
+        onPointerLeave,
+        onClick,
+        hidden,
+        onContextMenu,
+        zIndex = 1020,
+        maskZIndex = 100,
+        onMaskClick,
+    } = props;
     const nodeRef = useRef<HTMLElement>(null);
     const clickOtherFn = useEvent(onClickOutside ?? (() => { /* empty */ }));
     const contextMenuFn = useEvent(onContextMenu ?? (() => { /* empty */ }));
@@ -239,21 +261,30 @@ function RectPopup(props: IRectPopupProps) {
     }, [contextMenuFn]);
 
     const ele = (
-        <section
-            ref={nodeRef}
-            className={`
-              univer-pointer-events-auto univer-fixed univer-left-[-9999px] univer-top-[-9999px] univer-z-[1020]
-            `}
-            style={{ ...positionRef.current, ...hidden ? { display: 'none' } : null }}
-            onPointerDown={(e) => e.stopPropagation()}
-            onClick={onClick}
-            onPointerEnter={onPointerEnter}
-            onPointerLeave={onPointerLeave}
-        >
-            <RectPopupContext.Provider value={anchorRectRef}>
-                {children}
-            </RectPopupContext.Provider>
-        </section>
+        <>
+            {mask && (
+                <div
+                    className="univer-fixed univer-bottom-0 univer-left-0 univer-right-0 univer-top-0 univer-z-[100]"
+                    style={{ zIndex: maskZIndex }}
+                    onClick={onMaskClick}
+                />
+            )}
+            <section
+                ref={nodeRef}
+                className={`
+                  univer-pointer-events-auto univer-fixed univer-left-[-9999px] univer-top-[-9999px] univer-z-[1020]
+                `}
+                style={{ ...positionRef.current, ...hidden ? { display: 'none' } : null, zIndex }}
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={onClick}
+                onPointerEnter={onPointerEnter}
+                onPointerLeave={onPointerLeave}
+            >
+                <RectPopupContext.Provider value={anchorRectRef}>
+                    {children}
+                </RectPopupContext.Provider>
+            </section>
+        </>
     );
 
     return !portal ? ele : document.getElementById(popupRootId) ? createPortal(ele, document.getElementById(popupRootId)!) : null;

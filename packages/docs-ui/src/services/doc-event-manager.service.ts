@@ -101,7 +101,12 @@ const calcDocParagraphPositions = (sections: IDocumentSkeletonSection[], top: nu
                         paragraphEnd: startIndex,
                         startIndex,
                         rect: lineRect,
-                        fisrtLine: { ...lineRect },
+                        fisrtLine: {
+                            top: top + sectionTop + line.top + line.marginTop + line.paddingTop,
+                            left: left + columnLeft,
+                            right: left + columnLeft + width,
+                            bottom: top + sectionTop + line.top + line.marginTop + line.paddingTop + line.contentHeight,
+                        },
                     };
                 } else {
                     if (currentParagraph && currentParagraph.startIndex === startIndex) {

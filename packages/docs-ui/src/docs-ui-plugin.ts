@@ -76,7 +76,7 @@ import {
 import { AlignCenterCommand, AlignJustifyCommand, AlignLeftCommand, AlignOperationCommand, AlignRightCommand } from './commands/commands/paragraph-align.command';
 import { CoverContentCommand, ReplaceContentCommand, ReplaceSelectionCommand, ReplaceSnapshotCommand, ReplaceTextRunsCommand } from './commands/commands/replace-content.command';
 import { SetDocZoomRatioCommand } from './commands/commands/set-doc-zoom-ratio.command';
-import { H1HeadingCommand, H2HeadingCommand, H3HeadingCommand, H4HeadingCommand, H5HeadingCommand, QuickHeadingCommand, SetParagraphNamedStyleCommand } from './commands/commands/set-heading.command';
+import { H1HeadingCommand, H2HeadingCommand, H3HeadingCommand, H4HeadingCommand, H5HeadingCommand, NormalTextHeadingCommand, QuickHeadingCommand, SetParagraphNamedStyleCommand, SubtitleHeadingCommand, TitleHeadingCommand } from './commands/commands/set-heading.command';
 import { SwitchDocModeCommand } from './commands/commands/switch-doc-mode.command';
 import { CreateDocTableCommand } from './commands/commands/table/doc-table-create.command';
 import { DocTableDeleteColumnsCommand, DocTableDeleteRowsCommand, DocTableDeleteTableCommand } from './commands/commands/table/doc-table-delete.command';
@@ -278,6 +278,9 @@ export class UniverDocsUIPlugin extends Plugin {
             H3HeadingCommand,
             H4HeadingCommand,
             H5HeadingCommand,
+            NormalTextHeadingCommand,
+            TitleHeadingCommand,
+            SubtitleHeadingCommand,
             InsertBulletListBellowCommand,
             InsertOrderListBellowCommand,
             InsertCheckListBellowCommand,

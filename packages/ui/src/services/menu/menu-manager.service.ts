@@ -229,7 +229,7 @@ export class MenuManagerService extends Disposable implements IMenuManagerServic
                 _target[_key] = merge({}, _target[_key], source[_key]);
 
                 this.menuChanged$.next();
-            } else {
+            } else if (typeof value === 'object') {
                 this.mergeMenu(source, value);
             }
         }

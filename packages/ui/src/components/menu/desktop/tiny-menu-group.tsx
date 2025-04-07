@@ -38,7 +38,8 @@ export function UITinyMenuGroup(props: IUITinyMenuGroupProps) {
 
     useEffect(() => {
         if (!item.children) return;
-        const subscription = combineLatest(item.children.map((child) => convertObservableToBehaviorSubject(child.item?.activated$ ?? of(false), false))).subscribe((activedArr) => {
+        const observables = item.children.map((child) => convertObservableToBehaviorSubject(child.item?.activated$ ?? of(false), false));
+        const subscription = combineLatest(observables).subscribe((activedArr) => {
             const actived = activedArr.map((actived, index) => ({ actived, item: item.children![index].item!.id })).filter((actived) => actived.actived);
             if (actived.length === 0) {
                 setActiveItems([]);
@@ -47,7 +48,12 @@ export function UITinyMenuGroup(props: IUITinyMenuGroupProps) {
             }
         });
 
-        return () => subscription.unsubscribe();
+        return () => {
+            subscription.unsubscribe();
+            observables.forEach((observable) => {
+                observable.complete();
+            });
+        };
     }, [item]);
 
     if (!item.children) return null;

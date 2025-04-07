@@ -222,6 +222,10 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
     readonly hoverParagraph$ = this._hoverParagraph$.pipe(distinctUntilChanged((pre, aft) => pre?.startIndex === aft?.startIndex && pre?.segmentId === aft?.segmentId && pre?.pageIndex === aft?.pageIndex));
     readonly hoverParagraphRealTime$ = this._hoverParagraph$.asObservable();
 
+    private readonly _hoverParagraphLeft$ = new Subject<Nullable<IMutiPageParagraphBound>>();
+    readonly hoverParagraphLeft$ = this._hoverParagraphLeft$.pipe(distinctUntilChanged((pre, aft) => pre?.startIndex === aft?.startIndex && pre?.segmentId === aft?.segmentId && pre?.pageIndex === aft?.pageIndex));
+    readonly hoverParagraphLeftRealTime$ = this._hoverParagraphLeft$.asObservable();
+
     private readonly _hoverTableCell$ = new Subject<Nullable<ITableCellBound>>();
     readonly hoverTableCell$ = this._hoverTableCell$.pipe(distinctUntilChanged((pre, aft) => pre?.rowIndex === aft?.rowIndex && pre?.colIndex === aft?.colIndex && pre?.tableId === aft?.tableId && pre?.pageIndex === aft?.pageIndex));
     readonly hoverTableCellRealTime$ = this._hoverTableCell$.asObservable();
@@ -249,11 +253,11 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
      * it will be updated when the doc-skeleton is recalculated
      */
     private _paragraphBounds: Map<number, IMutiPageParagraphBound> = new Map();
+    private _paragraphLeftBounds: IMutiPageParagraphBound[] = [];
     private _tableParagraphBounds: Map<string, ITableParagraphBound[]> = new Map();
     private _segmentParagraphBounds: Map<string, Map<number, IMutiPageParagraphBound[]>> = new Map();
 
     private _tableCellBounds: Map<string, ITableCellBound[]> = new Map();
-
     private _tableBounds: Map<string, ITableBound> = new Map();
 
     private get _skeleton() {
@@ -320,7 +324,9 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
             this._hoverParagraph$.next(
                 this._calcActiveParagraph({ x, y })
             );
-
+            this._hoverParagraphLeft$.next(
+                this._calcActiveParagraphLeft({ x, y })
+            );
             this._hoverBullet$.next(
                 this._calcActiveBullet({ x, y })
             );
@@ -637,6 +643,16 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
         this._tableParagraphBounds = new Map();
         this._tableCellBounds = new Map();
         this._paragraphBounds = this._buildParagraphBoundsBySegment() ?? new Map();
+
+        this._paragraphLeftBounds = Array.from(this._paragraphBounds.values()).map((bound) => ({
+            ...bound,
+            rect: {
+                left: bound.rect.left - 60,
+                right: bound.rect.left - 4,
+                top: bound.rect.top,
+                bottom: bound.rect.bottom,
+            },
+        }));
         const handleSegment = (segmentId: string) => {
             this._segmentParagraphBounds.set(segmentId, this._buildParagraphBoundsBySegment(segmentId) ?? new Map());
         };
@@ -680,6 +696,14 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
             return bounds.rects.some((rect) => isPointInRect(x, y, rect));
         });
 
+        return paragraph;
+    }
+
+    private _calcActiveParagraphLeft(evt: { x: number; y: number }): Nullable<IMutiPageParagraphBound> {
+        this._buildParagraphBounds();
+        const { x, y } = evt;
+
+        const paragraph = this._paragraphLeftBounds.find((bound) => isPointInRect(x, y, bound.rect));
         return paragraph;
     }
 

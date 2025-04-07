@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, INeedCheckDisposable, IParagraphRange } from '@univerjs/core';
+import type { DocumentDataModel, INeedCheckDisposable, IParagraphRange, Nullable } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import type { IMutiPageParagraphBound } from './doc-event-manager.service';
 import { Disposable, Inject, isInternalEditorID } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { ComponentManager } from '@univerjs/ui';
-import { first, throttleTime } from 'rxjs';
+import { combineLatest, first, throttleTime } from 'rxjs';
 import { VIEWPORT_KEY } from '../basics/docs-view-key';
 import { DocEventManagerService } from './doc-event-manager.service';
 import { DocCanvasPopManagerService } from './doc-popup-manager.service';
@@ -86,19 +86,26 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
     }
 
     private _init() {
+        const handleHoverParagraph = (paragraph: Nullable<IMutiPageParagraphBound>) => {
+            if (this._paragrahMenu?.active) {
+                return;
+            }
+
+            if (paragraph) {
+                this.showParagraphMenu(paragraph);
+                return;
+            }
+
+            this.hideParagraphMenu(true);
+        };
+
         this.disposeWithMe(
-            this._docEventManagerService.hoverParagraphRealTime$.pipe(throttleTime(16)).subscribe((paragraph) => {
-                if (this._paragrahMenu?.active) {
-                    return;
-                }
-
-                if (paragraph) {
-                    this.showParagraphMenu(paragraph);
-                    return;
-                }
-
-                this.hideParagraphMenu(true);
-            })
+            combineLatest([this._docEventManagerService.hoverParagraphRealTime$, this._docEventManagerService.hoverParagraphLeft$])
+                .pipe(throttleTime(16))
+                .subscribe(([p, left]) => {
+                    const paragraph = p ?? left;
+                    handleHoverParagraph(paragraph);
+                })
         );
 
         let lastScrollY = 0;

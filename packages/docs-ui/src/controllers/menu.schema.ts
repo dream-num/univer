@@ -19,10 +19,10 @@ import { ContextMenuGroup, ContextMenuPosition, RibbonStartGroup } from '@univer
 import { DocCopyCommand, DocCopyCurrentParagraphCommand, DocCutCommand, DocCutCurrentParagraphCommand, DocPasteCommand } from '../commands/commands/clipboard.command';
 import { DeleteCurrentParagraphCommand, DeleteLeftCommand } from '../commands/commands/doc-delete.command';
 import { OpenHeaderFooterPanelCommand } from '../commands/commands/doc-header-footer.command';
-import { HorizontalLineCommand } from '../commands/commands/doc-horizontal-line.command';
+import { HorizontalLineCommand, InsertHorizontalLineBellowCommand } from '../commands/commands/doc-horizontal-line.command';
 import { ResetInlineFormatTextBackgroundColorCommand, SetInlineFormatBoldCommand, SetInlineFormatFontFamilyCommand, SetInlineFormatFontSizeCommand, SetInlineFormatItalicCommand, SetInlineFormatStrikethroughCommand, SetInlineFormatSubscriptCommand, SetInlineFormatSuperscriptCommand, SetInlineFormatTextBackgroundColorCommand, SetInlineFormatTextColorCommand, SetInlineFormatUnderlineCommand } from '../commands/commands/inline-format.command';
 
-import { BulletListCommand, CheckListCommand, OrderListCommand } from '../commands/commands/list.command';
+import { BulletListCommand, CheckListCommand, InsertBulletListBellowCommand, InsertCheckListBellowCommand, InsertOrderListBellowCommand, OrderListCommand } from '../commands/commands/list.command';
 import { AlignCenterCommand, AlignJustifyCommand, AlignLeftCommand, AlignRightCommand } from '../commands/commands/paragraph-align.command';
 import { H1HeadingCommand, H2HeadingCommand, H3HeadingCommand, H4HeadingCommand, H5HeadingCommand, NormalTextHeadingCommand, SetParagraphNamedStyleCommand } from '../commands/commands/set-heading.command';
 import { SwitchDocModeCommand } from '../commands/commands/switch-doc-mode.command';
@@ -75,7 +75,7 @@ import {
     TextColorSelectorMenuItemFactory,
     UnderlineMenuItemFactory,
 } from './menu/menu';
-import { CopyCurrentParagraphMenuItemFactory, CutCurrentParagraphMenuItemFactory, DeleteCurrentParagraphMenuItemFactory, H1HeadingMenuItemFactory, H2HeadingMenuItemFactory, H3HeadingMenuItemFactory, H4HeadingMenuItemFactory, H5HeadingMenuItemFactory, NormalTextHeadingMenuItemFactory } from './menu/paragraph-menu';
+import { CopyCurrentParagraphMenuItemFactory, CutCurrentParagraphMenuItemFactory, DeleteCurrentParagraphMenuItemFactory, H1HeadingMenuItemFactory, H2HeadingMenuItemFactory, H3HeadingMenuItemFactory, H4HeadingMenuItemFactory, H5HeadingMenuItemFactory, InsertBulletListBellowMenuItemFactory, InsertCheckListBellowMenuItemFactory, InsertHorizontalLineBellowMenuItemFactory, InsertOrderListBellowMenuItemFactory, NormalTextHeadingMenuItemFactory } from './menu/paragraph-menu';
 
 export const menuSchema: MenuSchemaType = {
     [RibbonStartGroup.FORMAT]: {
@@ -293,6 +293,24 @@ export const menuSchema: MenuSchemaType = {
                 menuItemFactory: DeleteCurrentParagraphMenuItemFactory,
             },
         },
-
+        [ContextMenuGroup.LAYOUT]: {
+            title: 'rightClick.insertBellow',
+            [InsertBulletListBellowCommand.id]: {
+                order: 0,
+                menuItemFactory: InsertBulletListBellowMenuItemFactory,
+            },
+            [InsertOrderListBellowCommand.id]: {
+                order: 1,
+                menuItemFactory: InsertOrderListBellowMenuItemFactory,
+            },
+            [InsertCheckListBellowCommand.id]: {
+                order: 2,
+                menuItemFactory: InsertCheckListBellowMenuItemFactory,
+            },
+            [InsertHorizontalLineBellowCommand.id]: {
+                order: 3,
+                menuItemFactory: InsertHorizontalLineBellowMenuItemFactory,
+            },
+        },
     },
 };

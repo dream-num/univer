@@ -75,14 +75,13 @@ interface ICustomRangeBoundBase {
     fisrtLine: IBoundRectNoAngle;
 }
 
-const calcDocParagraphPositions = (sections: IDocumentSkeletonSection[], top: number, left: number): ICustomRangeBoundBase[] => {
+const calcDocParagraphPositions = (sections: IDocumentSkeletonSection[], top: number, left: number, pageWidth: number): ICustomRangeBoundBase[] => {
     const paragraphBounds: ICustomRangeBoundBase[] = [];
-
     for (const section of sections) {
         const sectionTop = section.top;
         for (const column of section.columns) {
             const columnLeft = column.left;
-            const width = column.width;
+            const width = section.colCount === 1 ? pageWidth : column.width;
             let currentParagraph: ICustomRangeBoundBase | null = null;
             for (const line of column.lines) {
                 const startIndex = line.paragraphIndex;
@@ -471,7 +470,6 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
 
     private _buildParagraphBoundsBySegment(segmentId?: string) {
         const skeletonData = this._skeleton.getSkeletonData();
-
         const documents = this._documents;
         const documentOffsetConfig = documents.getOffsetConfig();
         if (!skeletonData) {
@@ -481,7 +479,7 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
         const calc = (pages: IDocumentSkeletonPage[]) => {
             const paragraphMap: Map<number, IMutiPageParagraphBound> = new Map();
             const handlePage = (page: IDocumentSkeletonPage, pageIndex: number, top: number, left: number) => {
-                const bounds = calcDocParagraphPositions(page.sections, top, left);
+                const bounds = calcDocParagraphPositions(page.sections, top, left, page.pageWidth - page.marginLeft - page.marginRight);
 
                 bounds.forEach((bound) => {
                     if (!paragraphMap.has(bound.startIndex)) {

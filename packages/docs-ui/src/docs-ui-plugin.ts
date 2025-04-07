@@ -41,7 +41,7 @@ import { CutContentCommand, InnerPasteCommand } from './commands/commands/clipbo
 import { DeleteCommand, InsertCommand, UpdateCommand } from './commands/commands/core-editing.command';
 import { DeleteCurrentParagraphCommand, DeleteCustomBlockCommand, DeleteLeftCommand, DeleteRightCommand, MergeTwoParagraphCommand, RemoveHorizontalLineCommand } from './commands/commands/doc-delete.command';
 import { CloseHeaderFooterCommand } from './commands/commands/doc-header-footer.command';
-import { HorizontalLineCommand } from './commands/commands/doc-horizontal-line.command';
+import { HorizontalLineCommand, InsertHorizontalLineBellowCommand } from './commands/commands/doc-horizontal-line.command';
 import { DocParagraphSettingCommand } from './commands/commands/doc-paragraph-setting.command';
 import { DocSelectAllCommand } from './commands/commands/doc-select-all.command';
 import { IMEInputCommand } from './commands/commands/ime-input.command';
@@ -65,6 +65,9 @@ import {
     ChangeListNestingLevelCommand,
     ChangeListTypeCommand,
     CheckListCommand,
+    InsertBulletListBellowCommand,
+    InsertCheckListBellowCommand,
+    InsertOrderListBellowCommand,
     ListOperationCommand,
     OrderListCommand,
     QuickListCommand,
@@ -275,6 +278,10 @@ export class UniverDocsUIPlugin extends Plugin {
             H3HeadingCommand,
             H4HeadingCommand,
             H5HeadingCommand,
+            InsertBulletListBellowCommand,
+            InsertOrderListBellowCommand,
+            InsertCheckListBellowCommand,
+            InsertHorizontalLineBellowCommand,
         ].forEach((e) => {
             this.disposeWithMe(this._commandService.registerCommand(e));
         });

@@ -27,6 +27,7 @@ export const IMenuManagerService = createIdentifier<IMenuManagerService>('univer
 export interface IMenuSchema {
     key: string;
     order: number;
+    title?: string;
     item?: IMenuItem;
     children?: IMenuSchema[];
     tiny?: boolean;
@@ -47,6 +48,7 @@ export interface IMenuManagerService {
 export type MenuSchemaType = {
     order?: number;
     menuItemFactory?: (accessor: IAccessor) => IMenuItem;
+    title?: string;
 } | {
     [key: string]: MenuSchemaType;
 };
@@ -245,6 +247,7 @@ export class MenuManagerService extends Disposable implements IMenuManagerServic
             const menuItem: Partial<IMenuSchema> = {
                 key,
                 order: value.order,
+                title: value.title,
             };
 
             if (value.menuItemFactory) {
@@ -261,14 +264,15 @@ export class MenuManagerService extends Disposable implements IMenuManagerServic
                     }
                 }
             }
+            if (typeof value === 'object') {
+                const children = this._buildMenuSchema(value);
+                if (children.length > 0) {
+                    menuItem.children = children.sort((a, b) => a.order - b.order);
+                }
 
-            const children = this._buildMenuSchema(value);
-            if (children.length > 0) {
-                menuItem.children = children.sort((a, b) => a.order - b.order);
-            }
-
-            if (menuItem.item || menuItem.children) {
-                result.push(menuItem as IMenuSchema); // 使用类型断言补充缺失字段
+                if (menuItem.item || menuItem.children) {
+                    result.push(menuItem as IMenuSchema); // 使用类型断言补充缺失字段
+                }
             }
         }
 

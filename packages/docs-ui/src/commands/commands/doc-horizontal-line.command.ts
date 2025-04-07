@@ -14,21 +14,24 @@
  * limitations under the License.
  */
 
-import type { ICommand } from '@univerjs/core';
+import type { ICommand, ITextRangeParam } from '@univerjs/core';
 import { CommandType, DashStyleType, ICommandService } from '@univerjs/core';
 import { BreakLineCommand } from './break-line.command';
+import { getCurrentParagraph } from './util';
 
-interface IHorizontalCommandParams {}
+interface IHorizontalCommandParams {
+    insertRange?: ITextRangeParam;
+}
 
 export const HorizontalLineCommand: ICommand<IHorizontalCommandParams> = {
     id: 'doc.command.horizontal-line',
 
     type: CommandType.COMMAND,
 
-    handler: (accessor, _params: IHorizontalCommandParams) => {
+    handler: (accessor, params: IHorizontalCommandParams) => {
         const commandService = accessor.get(ICommandService);
 
-        return commandService.executeCommand(BreakLineCommand.id, {
+        return commandService.syncExecuteCommand(BreakLineCommand.id, {
             horizontalLine: {
                 padding: 5,
                 color: {
@@ -36,6 +39,26 @@ export const HorizontalLineCommand: ICommand<IHorizontalCommandParams> = {
                 },
                 width: 1,
                 dashStyle: DashStyleType.SOLID,
+            },
+            textRange: params?.insertRange,
+        });
+    },
+};
+
+export const InsertHorizontalLineBellowCommand: ICommand<IHorizontalCommandParams> = {
+    id: 'doc.command.insert-horizontal-line-bellow',
+    type: CommandType.COMMAND,
+    handler: (accessor) => {
+        const commandService = accessor.get(ICommandService);
+        const paragraph = getCurrentParagraph(accessor);
+        if (!paragraph) {
+            return false;
+        }
+
+        return commandService.syncExecuteCommand(HorizontalLineCommand.id, {
+            insertRange: {
+                startOffset: paragraph.startIndex + 1,
+                endOffset: paragraph.startIndex + 1,
             },
         });
     },

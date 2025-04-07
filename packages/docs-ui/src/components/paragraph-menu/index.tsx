@@ -63,6 +63,8 @@ export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
         });
 
         calc();
+
+        return () => disposable.dispose();
     }), [commandService]));
 
     const icon = HEADING_ICON_MAP[textType ?? NamedStyleType.NORMAL_TEXT];

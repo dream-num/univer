@@ -23,7 +23,9 @@ import { ComponentManager, getMenuHiddenObservable, MenuItemType } from '@univer
 import { Observable } from 'rxjs';
 import { DocCopyCurrentParagraphCommand, DocCutCurrentParagraphCommand } from '../../commands/commands/clipboard.command';
 import { DeleteCurrentParagraphCommand } from '../../commands/commands/doc-delete.command';
+import { InsertHorizontalLineBellowCommand } from '../../commands/commands/doc-horizontal-line.command';
 import { SetInlineFormatFontSizeCommand } from '../../commands/commands/inline-format.command';
+import { InsertBulletListBellowCommand, InsertCheckListBellowCommand, InsertOrderListBellowCommand } from '../../commands/commands/list.command';
 import { H1HeadingCommand, H2HeadingCommand, H3HeadingCommand, H4HeadingCommand, H5HeadingCommand, NormalTextHeadingCommand, SubtitleHeadingCommand, TitleHeadingCommand } from '../../commands/commands/set-heading.command';
 import { disableMenuWhenNoDocRange, getParagraphStyleAtCursor } from './menu';
 
@@ -124,5 +126,50 @@ export const DeleteCurrentParagraphMenuItemFactory = (accessor: IAccessor): IMen
         type: MenuItemType.BUTTON,
         icon: 'DeleteSingle',
         title: 'rightClick.delete',
+    };
+};
+
+export const InsertBulletListBellowMenuItemFactory = (accessor: IAccessor): IMenuItem => {
+    return {
+        id: InsertBulletListBellowCommand.id,
+        type: MenuItemType.BUTTON,
+        icon: 'UnorderSingle',
+        title: 'rightClick.bulletList',
+    };
+};
+
+export const InsertOrderListBellowMenuItemFactory = (accessor: IAccessor): IMenuItem => {
+    return {
+        id: InsertOrderListBellowCommand.id,
+        type: MenuItemType.BUTTON,
+        icon: 'OrderSingle',
+        title: 'rightClick.orderList',
+    };
+};
+
+export const InsertCheckListBellowMenuItemFactory = (accessor: IAccessor): IMenuItem => {
+    return {
+        id: InsertCheckListBellowCommand.id,
+        type: MenuItemType.BUTTON,
+        icon: 'TodoList',
+        title: 'rightClick.checkList',
+    };
+};
+
+// export const InsertTableBellowMenuItemFactory = (accessor: IAccessor): IMenuItem => {
+//     return {
+//         id: InsertTableBellowCommand.id,
+//         type: MenuItemType.BUTTON,
+//         icon: 'Table',
+//         title: 'rightClick.insertTableBellow',
+//     };
+// };
+
+export const InsertHorizontalLineBellowMenuItemFactory = (accessor: IAccessor): IMenuItem => {
+    return {
+        id: InsertHorizontalLineBellowCommand.id,
+        type: MenuItemType.BUTTON,
+        icon: 'ReduceSingle',
+        title: 'toolbar.horizontalLine',
     };
 };

@@ -23,7 +23,7 @@ import type {
     IValueOption,
     MenuItemDefaultValueType,
 } from '../../../services/menu/menu';
-import { isRealNum } from '@univerjs/core';
+import { isRealNum, LocaleService } from '@univerjs/core';
 import {
     clsx,
     Menu as DesignMenu,
@@ -34,7 +34,6 @@ import {
 import { CheckMarkSingle, MoreSingle } from '@univerjs/icons';
 import { useEffect, useMemo, useState } from 'react';
 import { combineLatest, isObservable, of } from 'rxjs';
-import { ComponentManager } from '../../../common';
 import { ILayoutService } from '../../../services/layout/layout.service';
 import { MenuItemType } from '../../../services/menu/menu';
 import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
@@ -65,7 +64,7 @@ export interface IBaseMenuProps {
 /** @deprecated */
 function MenuWrapper(props: IBaseMenuProps) {
     const { menuType, onOptionSelect } = props;
-    const componetManager = useDependency(ComponentManager);
+    const localeService = useDependency(LocaleService);
     const menuManagerService = useDependency(IMenuManagerService);
 
     const menuItems = useMemo(() => menuType ? menuManagerService.getMenuByPositionKey(menuType) : [], [menuType, menuManagerService]);
@@ -119,7 +118,7 @@ function MenuWrapper(props: IBaseMenuProps) {
             ? item.key === ContextMenuGroup.QUICK
                 ? <UITinyMenuGroup item={item} onOptionSelect={onOptionSelect} />
                 : (
-                    <DesignMenuItemGroup key={item.key} eventKey={item.key}>
+                    <DesignMenuItemGroup key={item.key} eventKey={item.key} title={item.title ? localeService.t(item.title) : undefined}>
                         {item.children.map((child) => (
                             child.item && (
                                 <MenuItem

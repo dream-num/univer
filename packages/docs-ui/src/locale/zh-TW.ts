@@ -98,6 +98,12 @@ const locale: typeof zhCN = {
             fixedValue: 'Fixed Value(px)',
         },
     },
+    rightClick: {
+        bulletList: '無序列表',
+        orderList: '有序列表',
+        checkList: '任務列表',
+        insertBellow: '在下方插入',
+    },
 };
 
 export default locale;

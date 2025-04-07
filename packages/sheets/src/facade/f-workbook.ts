@@ -760,7 +760,11 @@ export class FWorkbook extends FBaseInitialable {
      * // The code below gets the defined name by name
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const definedName = fWorkbook.getDefinedName('MyDefinedName');
-     * console.log(definedName);
+     * console.log(definedName?.getFormulaOrRefString());
+     *
+     * if (definedName) {
+     *   definedName.setName('NewDefinedName');
+     * }
      * ```
      */
     getDefinedName(name: string): FDefinedName | null {
@@ -780,7 +784,7 @@ export class FWorkbook extends FBaseInitialable {
      * // The code below gets all the defined names in the workbook
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const definedNames = fWorkbook.getDefinedNames();
-     * console.log(definedNames);
+     * console.log(definedNames, definedNames[0]?.getFormulaOrRefString());
      * ```
      */
     getDefinedNames(): FDefinedName[] {
@@ -802,7 +806,7 @@ export class FWorkbook extends FBaseInitialable {
      * ```ts
      * // The code below inserts a defined name
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * fWorkbook.insertDefinedName('MyDefinedName', 'Sheet1!A1');
+     * fWorkbook.insertDefinedName('MyDefinedName', 'Sheet1!$A$1');
      * ```
      */
     insertDefinedName(name: string, formulaOrRefString: string): FWorkbook {
@@ -863,11 +867,17 @@ export class FWorkbook extends FBaseInitialable {
      * ```ts
      * // The code below updates the defined name with the given name
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const definedNameBuilder = fWorkbook.getDefinedName('MyDefinedName').toBuilder();
-     * const param = definedNameBuilder.setRef('Sheet1!A2')
-     *   .setName('NewDefinedName')
-     *   .build();
-     * fWorkbook.updateDefinedNameBuilder(param);
+     * const definedName = fWorkbook.getDefinedName('MyDefinedName');
+     * console.log(definedName?.getFormulaOrRefString());
+     *
+     * // Update the defined name
+     * if (definedName) {
+     *   const newDefinedNameParam = definedName.toBuilder()
+     *     .setName('NewDefinedName')
+     *     .setRef('Sheet1!$A$2')
+     *     .build();
+     *   fWorkbook.updateDefinedNameBuilder(newDefinedNameParam);
+     * }
      * ```
      */
     updateDefinedNameBuilder(param: ISetDefinedNameMutationParam): void {

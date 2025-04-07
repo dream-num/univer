@@ -57,7 +57,9 @@ const createHeadingSelectorMenuItemFactory = (headingType: NamedStyleType) => (a
     const commandService = accessor.get(ICommandService);
     const componentManager = accessor.get(ComponentManager);
     const icon = HEADING_ICON_MAP[headingType];
-    componentManager.register(icon.key, icon.component);
+    if (!componentManager.get(icon.key)) {
+        componentManager.register(icon.key, icon.component);
+    }
 
     return {
         id: HEADING_MAP[headingType]!.id,

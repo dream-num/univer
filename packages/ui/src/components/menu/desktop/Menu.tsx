@@ -116,7 +116,7 @@ function MenuWrapper(props: IBaseMenuProps) {
         )
         : item.children?.length
             ? item.key === ContextMenuGroup.QUICK
-                ? <UITinyMenuGroup item={item} onOptionSelect={onOptionSelect} />
+                ? <UITinyMenuGroup key={item.key} item={item} onOptionSelect={onOptionSelect} />
                 : (
                     <DesignMenuItemGroup key={item.key} eventKey={item.key} title={item.title ? localeService.t(item.title) : undefined}>
                         {item.children.map((child) => (

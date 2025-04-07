@@ -69,6 +69,7 @@ export function TinyMenuGroup({ items }: ITinyMenuGroupProps) {
                           univer-justify-center univer-rounded-md
                           hover:univer-bg-[#EEEFF1]
                           ${item.active ? 'univer-bg-[#EEEFF1]' : ''}
+                          ${item.className}
                         `}
                     >
                         <item.Icon className="univer-h-4 univer-w-4 univer-text-[#181C2A]" />
@@ -76,7 +77,7 @@ export function TinyMenuGroup({ items }: ITinyMenuGroupProps) {
                 );
                 return item.tooltip
                     ? (
-                        <Tooltip title={item.tooltip}>
+                        <Tooltip key={item.key} title={item.tooltip}>
                             {ele}
                         </Tooltip>
                     )

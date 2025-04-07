@@ -57,6 +57,7 @@ export function UITinyMenuGroup(props: IUITinyMenuGroupProps) {
     }, [item]);
 
     if (!item.children) return null;
+
     return (
         <DesignTinyMenuGroup
             items={item.children.map((child) => ({

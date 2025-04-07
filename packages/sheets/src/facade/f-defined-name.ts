@@ -62,6 +62,7 @@ export class FDefinedNameBuilder {
             unitId: '',
             name: '',
             formulaOrRefString: '',
+            localSheetId: SCOPE_WORKBOOK_VALUE_DEFINED_NAME,
         };
     }
 
@@ -71,11 +72,12 @@ export class FDefinedNameBuilder {
      * @returns {FDefinedNameBuilder} The instance of `FDefinedNameBuilder` for method chaining.
      * @example
      * ```ts
-     * const workbook = univerAPI.getActiveWorkbook();
+     * const fWorkbook = univerAPI.getActiveWorkbook();
      * const definedNameBuilder = univerAPI.newDefinedName()
      *   .setName('MyDefinedName')
+     *   .setRef('Sheet1!$A$1')
      *   .build();
-     * workbook.insertDefinedNameBuilder(definedNameBuilder);
+     * fWorkbook.insertDefinedNameBuilder(definedNameBuilder);
      * ```
      */
     setName(name: string): FDefinedNameBuilder {
@@ -89,12 +91,12 @@ export class FDefinedNameBuilder {
      * @returns {FDefinedNameBuilder} The instance of `FDefinedNameBuilder` for method chaining.
      * @example
      * ```ts
-     * const workbook = univerAPI.getActiveWorkbook();
+     * const fWorkbook = univerAPI.getActiveWorkbook();
      * const definedNameBuilder = univerAPI.newDefinedName()
-     *   .setFormula('SUM(Sheet1!$A$1)')
      *   .setName('MyDefinedName')
+     *   .setFormula('SUM(Sheet1!$A$1)')
      *   .build();
-     * workbook.insertDefinedNameBuilder(definedNameBuilder);
+     * fWorkbook.insertDefinedNameBuilder(definedNameBuilder);
      * ```
      */
     setFormula(formula: string): FDefinedNameBuilder {
@@ -108,11 +110,12 @@ export class FDefinedNameBuilder {
      * @returns {FDefinedNameBuilder} The instance of `FDefinedNameBuilder` for method chaining.
      * @example
      * ```ts
-     * const workbook = univerAPI.getActiveWorkbook();
+     * const fWorkbook = univerAPI.getActiveWorkbook();
      * const definedNameBuilder = univerAPI.newDefinedName()
+     *   .setName('MyDefinedName')
      *   .setRef('Sheet1!$A$1')
      *   .build();
-     * workbook.insertDefinedNameBuilder(definedNameBuilder);
+     * fWorkbook.insertDefinedNameBuilder(definedNameBuilder);
      * ```
      */
     setRef(a1Notation: string): FDefinedNameBuilder {
@@ -122,18 +125,19 @@ export class FDefinedNameBuilder {
 
     /**
      * Sets the reference of the defined name builder by range .
-     * @param {number} row The start row of the range.
-     * @param {number} column The start column of the range.
+     * @param {number} row The start row index of the range. index start at 0.
+     * @param {number} column The start column index of the range. index start at 0.
      * @param {number} numRows The number of rows in the range.
      * @param {number} numColumns The number of columns in the range.
      * @returns {FDefinedNameBuilder} The instance of `FDefinedNameBuilder` for method chaining.
      * @example
      * ```ts
-     * const workbook = univerAPI.getActiveWorkbook();
+     * const fWorkbook = univerAPI.getActiveWorkbook();
      * const definedNameBuilder = univerAPI.newDefinedName()
-     *   .setRefByRange(1, 3, 2, 5)
+     *   .setName('MyDefinedName')
+     *   .setRefByRange(1, 3, 2, 5) // D2:H3
      *   .build();
-     * workbook.insertDefinedNameBuilder(definedNameBuilder);
+     * fWorkbook.insertDefinedNameBuilder(definedNameBuilder);
      * ```
      */
     setRefByRange(row: number, column: number, numRows: number, numColumns: number): FDefinedNameBuilder {
@@ -152,15 +156,61 @@ export class FDefinedNameBuilder {
      * @returns {FDefinedNameBuilder} The instance of `FDefinedNameBuilder` for method chaining.
      * @example
      * ```ts
-     * const workbook = univerAPI.getActiveWorkbook();
+     * const fWorkbook = univerAPI.getActiveWorkbook();
      * const definedNameBuilder = univerAPI.newDefinedName()
-     *   .setComment('This is a comment')
+     *   .setName('MyDefinedName')
+     *   .setRef('Sheet1!$A$1')
+     *   .setComment('A reference to A1 cell in Sheet1')
      *   .build();
-     * workbook.insertDefinedNameBuilder(definedNameBuilder);
+     * fWorkbook.insertDefinedNameBuilder(definedNameBuilder);
      * ```
      */
     setComment(comment: string): FDefinedNameBuilder {
         this._definedNameParam.comment = comment;
+        return this;
+    }
+
+    /**
+     * Sets the scope of the defined name to the worksheet.
+     * @param {FWorksheet} worksheet The worksheet to set the scope to.
+     * @returns {FDefinedNameBuilder} The instance of `FDefinedNameBuilder` for method chaining.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const sheets = fWorkbook.getSheets();
+     *
+     * // Create a defined name and make it available only in the second worksheet
+     * const definedNameBuilder = univerAPI.newDefinedName()
+     *   .setName('MyDefinedName')
+     *   .setRef('Sheet1!$A$1')
+     *   .setScopeToWorksheet(sheets[1])
+     *   .build();
+     * fWorkbook.insertDefinedNameBuilder(definedNameBuilder);
+     * ```
+     */
+    setScopeToWorksheet(worksheet: FWorksheet): FDefinedNameBuilder {
+        this._definedNameParam.localSheetId = worksheet.getSheetId();
+        return this;
+    }
+
+    /**
+     * Sets the scope of the defined name to the workbook.
+     * @returns {FDefinedNameBuilder} The instance of `FDefinedNameBuilder` for method chaining.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     *
+     * // Create a defined name and make it available in the entire workbook
+     * const definedNameBuilder = univerAPI.newDefinedName()
+     *   .setName('MyDefinedName')
+     *   .setRef('Sheet1!$A$1')
+     *   .setScopeToWorkbook()
+     *   .build();
+     * fWorkbook.insertDefinedNameBuilder(definedNameBuilder);
+     * ```
+     */
+    setScopeToWorkbook(): FDefinedNameBuilder {
+        this._definedNameParam.localSheetId = SCOPE_WORKBOOK_VALUE_DEFINED_NAME;
         return this;
     }
 
@@ -170,11 +220,13 @@ export class FDefinedNameBuilder {
      * @returns {FDefinedNameBuilder} The instance of `FDefinedNameBuilder` for method chaining.
      * @example
      * ```ts
-     * const workbook = univerAPI.getActiveWorkbook();
+     * const fWorkbook = univerAPI.getActiveWorkbook();
      * const definedNameBuilder = univerAPI.newDefinedName()
+     *   .setName('MyDefinedName')
+     *   .setRef('Sheet1!$A$1')
      *   .setHidden(true)
      *   .build();
-     * workbook.insertDefinedNameBuilder(definedNameBuilder);
+     * fWorkbook.insertDefinedNameBuilder(definedNameBuilder);
      * ```
      */
     setHidden(hidden: boolean): FDefinedNameBuilder {
@@ -187,13 +239,13 @@ export class FDefinedNameBuilder {
      * @returns {ISetDefinedNameMutationParam} The defined name mutation parameter.
      * @example
      * ```ts
-     * const workbook = univerAPI.getActiveWorkbook();
+     * const fWorkbook = univerAPI.getActiveWorkbook();
      * const definedNameBuilder = univerAPI.newDefinedName()
-     *   .setRef('Sheet1!$A$1')
      *   .setName('MyDefinedName')
-     *   .setComment('This is a comment')
+     *   .setRef('Sheet1!$A$1')
+     *   .setComment('A reference to A1 cell in Sheet1')
      *   .build();
-     * workbook.insertDefinedNameBuilder(definedNameBuilder);
+     * fWorkbook.insertDefinedNameBuilder(definedNameBuilder);
      * ```
      */
     build(): ISetDefinedNameMutationParam {
@@ -206,17 +258,17 @@ export class FDefinedNameBuilder {
      * @returns {FDefinedNameBuilder} The instance of `FDefinedNameBuilder` for method chaining.
      * @example
      * ```ts
-     * const workbook = univerAPI.getActiveWorkbook();
+     * const fWorkbook = univerAPI.getActiveWorkbook();
      * const definedNameParam = {
      *   id: '4TMPceoqg8',
-     *   unitId: workbook.getId(),
+     *   unitId: fWorkbook.getId(),
      *   name: 'MyDefinedName',
      *   formulaOrRefString: 'Sheet1!$A$1',
      * }
      * const definedNameBuilder = univerAPI.newDefinedName()
      *   .load(definedNameParam)
      *   .build();
-     * workbook.insertDefinedNameBuilder(definedNameBuilder);
+     * fWorkbook.insertDefinedNameBuilder(definedNameBuilder);
      * ```
      */
     load(param: ISetDefinedNameMutationParam): FDefinedNameBuilder {
@@ -256,8 +308,8 @@ export class FDefinedName extends FBase {
      * @returns {string} The name of the defined name.
      * @example
      * ```ts
-     * const workbook = univerAPI.getActiveWorkbook();
-     * const definedName = workbook.getDefinedNames()[0];
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const definedName = fWorkbook.getDefinedNames()[0];
      * console.log(definedName?.getName());
      * ```
      */
@@ -270,8 +322,8 @@ export class FDefinedName extends FBase {
      * @param {string} name The name of the defined name.
      * @example
      * ```ts
-     * const workbook = univerAPI.getActiveWorkbook();
-     * const definedName = workbook.getDefinedNames()[0];
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const definedName = fWorkbook.getDefinedNames()[0];
      * definedName?.setName('NewDefinedName');
      * ```
      */
@@ -285,8 +337,8 @@ export class FDefinedName extends FBase {
      * @param {string} formula The formula of the defined name.
      * @example
      * ```ts
-     * const workbook = univerAPI.getActiveWorkbook();
-     * const definedName = workbook.getDefinedNames()[0];
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const definedName = fWorkbook.getDefinedNames()[0];
      * definedName?.setFormula('SUM(Sheet1!$A$1)');
      * ```
      */
@@ -300,8 +352,8 @@ export class FDefinedName extends FBase {
      * @param {string} refString The reference of the defined name.
      * @example
      * ```ts
-     * const workbook = univerAPI.getActiveWorkbook();
-     * const definedName = workbook.getDefinedNames()[0];
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const definedName = fWorkbook.getDefinedNames()[0];
      * definedName?.setRef('Sheet1!$A$1');
      * ```
      */
@@ -315,8 +367,8 @@ export class FDefinedName extends FBase {
      * @returns {string} The formula or reference string of the defined name.
      * @example
      * ```ts
-     * const workbook = univerAPI.getActiveWorkbook();
-     * const definedName = workbook.getDefinedNames()[0];
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const definedName = fWorkbook.getDefinedNames()[0];
      * console.log(definedName?.getFormulaOrRefString());
      * ```
      */
@@ -332,9 +384,9 @@ export class FDefinedName extends FBase {
      * @param {number} numColumns The number of columns in the range.
      * @example
      * ```ts
-     * const workbook = univerAPI.getActiveWorkbook();
-     * const definedName = workbook.getDefinedNames()[0];
-     * definedName?.setRefByRange(1, 3, 2, 5);
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const definedName = fWorkbook.getDefinedNames()[0];
+     * definedName?.setRefByRange(1, 3, 2, 5); // D2:H3
      * ```
      */
     setRefByRange(row: number, column: number, numRows: number, numColumns: number): void {
@@ -352,8 +404,8 @@ export class FDefinedName extends FBase {
      * @returns {string | undefined} The comment of the defined name.
      * @example
      * ```ts
-     * const workbook = univerAPI.getActiveWorkbook();
-     * const definedName = workbook.getDefinedNames()[0];
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const definedName = fWorkbook.getDefinedNames()[0];
      * console.log(definedName?.getComment());
      * ```
      */
@@ -366,8 +418,8 @@ export class FDefinedName extends FBase {
      * @param {string} comment The comment of the defined name.
      * @example
      * ```ts
-     * const workbook = univerAPI.getActiveWorkbook();
-     * const definedName = workbook.getDefinedNames()[0];
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const definedName = fWorkbook.getDefinedNames()[0];
      * definedName?.setComment('This is a comment');
      * ```
      */
@@ -381,10 +433,12 @@ export class FDefinedName extends FBase {
      * @param {FWorksheet} worksheet The worksheet to set the scope to.
      * @example
      * ```ts
-     * const workbook = univerAPI.getActiveWorkbook();
-     * const worksheet = workbook.getSheets()[0];
-     * const definedName = workbook.getDefinedNames()[0];
-     * definedName?.setScopeToWorksheet(worksheet);
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const sheets = fWorkbook.getSheets();
+     *
+     * // Get the first defined name and make it available only in the second worksheet
+     * const definedName = fWorkbook.getDefinedNames()[0];
+     * definedName?.setScopeToWorksheet(sheets[1]);
      * ```
      */
     setScopeToWorksheet(worksheet: FWorksheet): void {
@@ -396,8 +450,8 @@ export class FDefinedName extends FBase {
      * Sets the scope of the defined name to the workbook.
      * @example
      * ```ts
-     * const workbook = univerAPI.getActiveWorkbook();
-     * const definedName = workbook.getDefinedNames()[0];
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const definedName = fWorkbook.getDefinedNames()[0];
      * definedName?.setScopeToWorkbook();
      * ```
      */
@@ -411,8 +465,8 @@ export class FDefinedName extends FBase {
      * @param {boolean} hidden The hidden status of the defined name.
      * @example
      * ```ts
-     * const workbook = univerAPI.getActiveWorkbook();
-     * const definedName = workbook.getDefinedNames()[0];
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const definedName = fWorkbook.getDefinedNames()[0];
      * definedName?.setHidden(true);
      * ```
      */
@@ -425,8 +479,8 @@ export class FDefinedName extends FBase {
      * Deletes the defined name.
      * @example
      * ```ts
-     * const workbook = univerAPI.getActiveWorkbook();
-     * const definedName = workbook.getDefinedNames()[0];
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const definedName = fWorkbook.getDefinedNames()[0];
      * definedName?.delete();
      * ```
      */
@@ -439,8 +493,8 @@ export class FDefinedName extends FBase {
      * @returns {string | undefined} The local sheet id of the defined name.
      * @example
      * ```ts
-     * const workbook = univerAPI.getActiveWorkbook();
-     * const definedName = workbook.getDefinedNames()[0];
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const definedName = fWorkbook.getDefinedNames()[0];
      * console.log(definedName?.getLocalSheetId());
      * ```
      */
@@ -453,8 +507,8 @@ export class FDefinedName extends FBase {
      * @returns {boolean} True if the defined name is in the workbook scope, false otherwise.
      * @example
      * ```ts
-     * const workbook = univerAPI.getActiveWorkbook();
-     * const definedName = workbook.getDefinedNames()[0];
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const definedName = fWorkbook.getDefinedNames()[0];
      * console.log(definedName?.isWorkbookScope());
      * ```
      */
@@ -467,15 +521,15 @@ export class FDefinedName extends FBase {
      * @returns {FDefinedNameBuilder} The defined name builder.
      * @example
      * ```ts
-     * const workbook = univerAPI.getActiveWorkbook();
-     * const definedName = workbook.getDefinedNames()[0];
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const definedName = fWorkbook.getDefinedNames()[0];
      * if (!definedName) return;
      * const definedNameBuilder = definedName
      *   .toBuilder()
      *   .setName('NewDefinedName')
      *   .setFormula('SUM(Sheet1!$A$1)')
      *   .build();
-     * workbook.updateDefinedNameBuilder(definedNameBuilder);
+     * fWorkbook.updateDefinedNameBuilder(definedNameBuilder);
      * ```
      */
     toBuilder(): FDefinedNameBuilder {

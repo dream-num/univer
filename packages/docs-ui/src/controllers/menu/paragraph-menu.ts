@@ -39,7 +39,7 @@ const HEADING_MAP: Record<NamedStyleType, ICommand> = {
     [NamedStyleType.NAMED_STYLE_TYPE_UNSPECIFIED]: NormalTextHeadingCommand,
 };
 
-export const HEADING_ICON_MAP: Record<NamedStyleType, { key: string; component: React.ComponentType }> = {
+export const HEADING_ICON_MAP: Record<NamedStyleType, { key: string; component: React.ComponentType<{ className: string }> }> = {
     [NamedStyleType.HEADING_1]: { key: 'H1Single', component: H1Single },
     [NamedStyleType.HEADING_2]: { key: 'H2Single', component: H2Single },
     [NamedStyleType.HEADING_3]: { key: 'H3Single', component: H3Single },

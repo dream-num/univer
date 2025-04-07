@@ -15,13 +15,19 @@
  */
 
 import type { IPopup } from '@univerjs/ui';
-import { ICommandService } from '@univerjs/core';
+import { ICommandService, Injector, NamedStyleType } from '@univerjs/core';
+import { SetTextSelectionsOperation } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { DownSingle, H1Single } from '@univerjs/icons';
-import { ContextMenuPosition, DesktopMenu, ILayoutService, RectPopup, useDependency } from '@univerjs/ui';
+import { DownSingle } from '@univerjs/icons';
+import { ContextMenuPosition, DesktopMenu, ILayoutService, RectPopup, useDependency, useObservable } from '@univerjs/ui';
 import { useMemo, useRef, useState } from 'react';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { SetInlineFormatFontSizeCommand } from '../../commands/commands/inline-format.command';
+import { getParagraphStyleAtCursor } from '../../controllers/menu/menu';
+import { HEADING_ICON_MAP } from '../../controllers/menu/paragraph-menu';
 import { DocParagraphMenuService } from '../../services/doc-paragraph-menu.service';
+
+HEADING_ICON_MAP;
 
 export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
     const [visible, setVisible] = useState(false);
@@ -33,6 +39,33 @@ export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
     const renderManagerService = useDependency(IRenderManagerService);
     const renderUnit = renderManagerService.getRenderById(popup.unitId);
     const docParagraphMenuService = renderUnit?.with(DocParagraphMenuService);
+
+    const accessor = useDependency(Injector);
+    const textType = useObservable(useMemo(() => new Observable<NamedStyleType>((subscriber) => {
+        const DEFAULT_TYPE = NamedStyleType.NORMAL_TEXT;
+        const calc = () => {
+            const paragraph = getParagraphStyleAtCursor(accessor);
+            if (paragraph == null) {
+                subscriber.next(DEFAULT_TYPE);
+                return;
+            }
+
+            const namedStyleType = paragraph.paragraphStyle?.namedStyleType ?? DEFAULT_TYPE;
+            subscriber.next(namedStyleType);
+        };
+
+        const disposable = commandService.onCommandExecuted((c) => {
+            const id = c.id;
+
+            if (id === SetTextSelectionsOperation.id || id === SetInlineFormatFontSizeCommand.id) {
+                calc();
+            }
+        });
+
+        calc();
+    }), [commandService]));
+
+    const icon = HEADING_ICON_MAP[textType ?? NamedStyleType.NORMAL_TEXT];
     const anchorRect$ = useMemo(() => new BehaviorSubject({
         left: 0,
         right: 0,
@@ -67,7 +100,7 @@ export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
                     docParagraphMenuService?.setParagraphMenuActive(true);
                 }}
             >
-                <H1Single className="univer-h-4 univer-w-4 univer-text-[#181C2A]" />
+                <icon.component className="univer-h-4 univer-w-4 univer-text-[#181C2A]" />
                 <DownSingle className="univer-h-3 univer-w-3 univer-text-[#979DAC]" />
             </div>
             {visible && (

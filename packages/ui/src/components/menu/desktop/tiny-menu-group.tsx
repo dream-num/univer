@@ -16,6 +16,7 @@
 
 import type { IValueOption } from '../../../services/menu/menu';
 import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
+import { convertObservableToBehaviorSubject } from '@univerjs/core';
 import {
     TinyMenuGroup as DesignTinyMenuGroup,
 } from '@univerjs/design';
@@ -36,7 +37,7 @@ export function UITinyMenuGroup(props: IUITinyMenuGroupProps) {
 
     useEffect(() => {
         if (!item.children) return;
-        const subscription = combineLatest(item.children.map((child) => child.item?.activated$ ?? of(false))).subscribe((activedArr) => {
+        const subscription = combineLatest(item.children.map((child) => convertObservableToBehaviorSubject(child.item?.activated$ ?? of(false), false))).subscribe((activedArr) => {
             const actived = activedArr.map((actived, index) => ({ actived, item: item.children![index].item!.id })).filter((actived) => actived.actived);
             if (actived.length === 0) {
                 setActiveItems([]);

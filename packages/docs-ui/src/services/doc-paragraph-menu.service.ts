@@ -24,6 +24,7 @@ import { combineLatest, first, throttleTime } from 'rxjs';
 import { VIEWPORT_KEY } from '../basics/docs-view-key';
 import { DocEventManagerService } from './doc-event-manager.service';
 import { DocCanvasPopManagerService } from './doc-popup-manager.service';
+import { DocFloatMenuService } from './float-menu.service';
 
 export class DocParagraphMenuService extends Disposable implements IRenderModule {
     private _paragrahMenu: {
@@ -41,7 +42,8 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
         @Inject(DocSelectionManagerService) private _docSelectionManagerService: DocSelectionManagerService,
         @Inject(DocEventManagerService) private _docEventManagerService: DocEventManagerService,
         @Inject(DocCanvasPopManagerService) private _docPopupManagerService: DocCanvasPopManagerService,
-        @Inject(DocSkeletonManagerService) private _docSkeletonManagerService: DocSkeletonManagerService
+        @Inject(DocSkeletonManagerService) private _docSkeletonManagerService: DocSkeletonManagerService,
+        @Inject(DocFloatMenuService) private _floatMenuService: DocFloatMenuService
     ) {
         super();
 
@@ -88,7 +90,7 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
     private _init() {
         const handleHoverParagraph = (paragraph: Nullable<IMutiPageParagraphBound>) => {
             const viewModel = this._docSkeletonManagerService.getViewModel();
-            if (viewModel.getEditArea() === DocumentEditArea.BODY) {
+            if (viewModel.getEditArea() === DocumentEditArea.BODY && !this._floatMenuService.floatMenu) {
                 if (this._paragrahMenu?.active) {
                     return;
                 }

@@ -58,20 +58,21 @@ export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
         setVisible(false);
         docParagraphMenuService?.hideParagraphMenu(true);
     };
-    if (!activeParagraph) return null;
 
-    const paragraphDataStream = dataStream.slice(activeParagraph.paragraphStart, activeParagraph.paragraphEnd);
+    const paragraphDataStream = activeParagraph ? dataStream.slice(activeParagraph.paragraphStart, activeParagraph.paragraphEnd) : '';
     const isOnlyImage = paragraphDataStream === '\b';
 
-    if (isOnlyImage) return null;
+    const shouldHidden = isOnlyImage || !activeParagraph;
 
     return (
         <>
             <div
+
                 ref={anchorRef}
                 className={`
                   univer-mr-1 univer-inline-flex univer-h-7 univer-cursor-pointer univer-items-center univer-gap-1
                   univer-rounded-full univer-bg-[#EEEFF1] univer-px-2.5 univer-py-0
+                  ${shouldHidden ? 'univer-pointer-events-none univer-opacity-0' : ''}
                 `}
                 onMouseEnter={(e) => {
                     popup.onPointerEnter?.(e);

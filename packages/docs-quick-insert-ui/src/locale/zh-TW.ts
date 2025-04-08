@@ -23,6 +23,8 @@ const locale: typeof zhCN = {
             bulletedList: '無序列表',
             divider: '分隔線',
             text: '文本',
+            table: '表格',
+            image: '圖片',
         },
         group: {
             basics: '基礎',

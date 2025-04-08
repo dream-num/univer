@@ -17,6 +17,7 @@
 import type { Dependency } from '@univerjs/core';
 import { DependentOn, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import { UniverDocsDrawingPlugin } from '@univerjs/docs-drawing';
+import { UniverDocsDrawingUIPlugin } from '@univerjs/docs-drawing-ui';
 import { UniverDrawingPlugin } from '@univerjs/drawing';
 import { UniverDrawingUIPlugin } from '@univerjs/drawing-ui';
 import { UniverUIPlugin } from '@univerjs/ui';
@@ -26,7 +27,7 @@ import { DocQuickInsertPopupService } from './services/doc-quick-insert-popup.se
 
 const PLUGIN_NAME = 'DOC_QUICK_INSERT_UI_PLUGIN';
 
-@DependentOn(UniverDrawingUIPlugin, UniverDrawingPlugin, UniverDocsDrawingPlugin, UniverUIPlugin)
+@DependentOn(UniverDrawingUIPlugin, UniverDrawingPlugin, UniverDocsDrawingUIPlugin, UniverDocsDrawingPlugin, UniverUIPlugin)
 export class UniverDocsQuickInsertUIPlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_DOC;
     static override pluginName = PLUGIN_NAME;

@@ -23,6 +23,8 @@ const locale: typeof zhCN = {
             bulletedList: 'Danh sách không được đánh số',
             divider: 'Đường phân cách',
             text: 'Văn bản',
+            table: 'Bảng',
+            image: 'Hình ảnh',
         },
         group: {
             basics: 'Cơ bản',

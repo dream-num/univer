@@ -18,8 +18,8 @@ import type { DocumentDataModel, INeedCheckDisposable, IParagraphRange, Nullable
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import type { IMutiPageParagraphBound } from './doc-event-manager.service';
 import { Disposable, Inject, isInternalEditorID } from '@univerjs/core';
-import { DocSelectionManagerService } from '@univerjs/docs';
-import { ComponentManager } from '@univerjs/ui';
+import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
+import { DocumentEditArea } from '@univerjs/engine-render';
 import { combineLatest, first, throttleTime } from 'rxjs';
 import { VIEWPORT_KEY } from '../basics/docs-view-key';
 import { DocEventManagerService } from './doc-event-manager.service';
@@ -41,7 +41,7 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
         @Inject(DocSelectionManagerService) private _docSelectionManagerService: DocSelectionManagerService,
         @Inject(DocEventManagerService) private _docEventManagerService: DocEventManagerService,
         @Inject(DocCanvasPopManagerService) private _docPopupManagerService: DocCanvasPopManagerService,
-        @Inject(ComponentManager) private _componentManager: ComponentManager
+        @Inject(DocSkeletonManagerService) private _docSkeletonManagerService: DocSkeletonManagerService
     ) {
         super();
 
@@ -87,13 +87,16 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
 
     private _init() {
         const handleHoverParagraph = (paragraph: Nullable<IMutiPageParagraphBound>) => {
-            if (this._paragrahMenu?.active) {
-                return;
-            }
+            const viewModel = this._docSkeletonManagerService.getViewModel();
+            if (viewModel.getEditArea() === DocumentEditArea.BODY) {
+                if (this._paragrahMenu?.active) {
+                    return;
+                }
 
-            if (paragraph) {
-                this.showParagraphMenu(paragraph);
-                return;
+                if (paragraph) {
+                    this.showParagraphMenu(paragraph);
+                    return;
+                }
             }
 
             this.hideParagraphMenu(true);

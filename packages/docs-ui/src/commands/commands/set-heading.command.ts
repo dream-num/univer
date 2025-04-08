@@ -16,6 +16,7 @@
 
 import type { DocumentDataModel, ICommand, IMutationInfo, ITextRangeParam } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
+import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import { BuildTextUtils, CommandType, generateRandomId, ICommandService, IUniverInstanceService, JSONX, NamedStyleType, TextX, TextXActionType, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { getRichTextEditPath } from '../util';
@@ -34,19 +35,19 @@ export const SetParagraphNamedStyleCommand: ICommand<ISetParagraphNamedStyleComm
         }
 
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const documentDataModel = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
-        if (!documentDataModel) {
+        const doc = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+        if (!doc) {
             return false;
         }
-        const unitId = documentDataModel.getUnitId();
+        const unitId = doc.getUnitId();
         const selectionService = accessor.get(DocSelectionManagerService);
-        const selections = params.textRanges ?? selectionService.getTextRanges({ unitId, subUnitId: unitId })?.filter((i) => !i.segmentId);
+        const selections = params.textRanges ?? selectionService.getTextRanges({ unitId, subUnitId: unitId });
         if (!selections?.length) {
             return false;
         }
-
+        const segmentId = selections[0].segmentId;
         const textX = BuildTextUtils.paragraph.style.set({
-            document: documentDataModel,
+            document: doc.getSelfOrHeaderFooterModel(segmentId),
             textRanges: selections,
             style: {
                 namedStyleType: params.value,
@@ -62,13 +63,14 @@ export const SetParagraphNamedStyleCommand: ICommand<ISetParagraphNamedStyleComm
             id: RichTextEditingMutation.id,
             params: {
                 actions: [],
-                textRanges: selections,
+                textRanges: selections as ITextRangeWithStyle[],
                 unitId,
+                segmentId,
             },
         };
 
         const jsonX = JSONX.getInstance();
-        const path = getRichTextEditPath(documentDataModel);
+        const path = getRichTextEditPath(doc, segmentId);
         doMutation.params.actions = jsonX.editOp(textX.serialize(), path);
         const commandService = accessor.get(ICommandService);
         const result = commandService.syncExecuteCommand(doMutation.id, doMutation.params);

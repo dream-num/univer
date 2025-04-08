@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDisposable, IDocumentBody, IDocumentData, Nullable } from '@univerjs/core';
+import type { IDisposable, IDocumentBody, IDocumentData } from '@univerjs/core';
 import type { IDocImage } from '@univerjs/docs-drawing';
 import type { IRectRangeWithStyle, ITextRangeWithStyle } from '@univerjs/engine-render';
 
@@ -53,8 +53,8 @@ export interface IDocClipboardHook {
 }
 
 export interface IDocClipboardService {
-    copy(sliceType?: SliceBodyType): Promise<boolean>;
-    cut(): Promise<boolean>;
+    copy(sliceType?: SliceBodyType, ranges?: ITextRangeWithStyle[]): Promise<boolean>;
+    cut(ranges?: ITextRangeWithStyle[]): Promise<boolean>;
     paste(items: ClipboardItem[]): Promise<boolean>;
     legacyPaste(options: { html?: string; text?: string; files: File[] }): Promise<boolean>;
     addClipboardHook(hook: IDocClipboardHook): IDisposable;
@@ -110,16 +110,15 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         super();
     }
 
-    async copy(sliceType: SliceBodyType = SliceBodyType.copy): Promise<boolean> {
-        const { newSnapshotList = [], needCache = false, snapshot } = this._getDocumentBodyInRanges(sliceType) ?? {};
+    async copy(sliceType: SliceBodyType = SliceBodyType.copy, ranges?: ITextRangeWithStyle[]): Promise<boolean> {
+        const { newSnapshotList = [], needCache = false, snapshot, ranges: allRanges } = this._getDocumentBodyInRanges(sliceType, ranges) ?? {};
 
         if (newSnapshotList.length === 0 || snapshot == null) {
             return false;
         }
 
         try {
-            const activeRange = this._docSelectionManagerService.getActiveTextRange();
-            const isCopyInHeaderFooter = !!activeRange?.segmentId;
+            const isCopyInHeaderFooter = !!allRanges?.[0]?.segmentId;
 
             this._setClipboardData(newSnapshotList, !isCopyInHeaderFooter && needCache);
         } catch (e) {
@@ -130,8 +129,8 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         return true;
     }
 
-    async cut(): Promise<boolean> {
-        return this._cut();
+    async cut(ranges?: ITextRangeWithStyle[]): Promise<boolean> {
+        return this._cut(ranges);
     }
 
     async paste(items: ClipboardItem[]): Promise<boolean> {
@@ -164,15 +163,14 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         return this._paste(partDocData);
     }
 
-    private async _cut(): Promise<boolean> {
+    private async _cut(ranges?: ITextRangeWithStyle[]): Promise<boolean> {
+        const textRanges = ranges?.filter((range) => range.rangeType === DOC_RANGE_TYPE.TEXT) ?? this._docSelectionManagerService.getTextRanges() ?? [];
+        const rectRanges = ranges?.filter((range) => range.rangeType === DOC_RANGE_TYPE.RECT) as IRectRangeWithStyle[] ?? this._docSelectionManagerService.getRectRanges() ?? [];
         const {
             segmentId,
             endOffset: activeEndOffset,
             style,
-        } = this._docSelectionManagerService.getActiveTextRange() ?? {};
-        const textRanges = this._docSelectionManagerService.getTextRanges() ?? [];
-        const rectRanges = this._docSelectionManagerService.getRectRanges() ?? [];
-
+        } = textRanges[0] ?? {};
         if (segmentId == null) {
             this._logService.error('[DocClipboardController] segmentId is not existed');
         }
@@ -182,7 +180,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         }
 
         // Set content to clipboard.
-        this.copy(SliceBodyType.cut);
+        this.copy(SliceBodyType.cut, ranges);
 
         try {
             let cursor = 0;
@@ -212,7 +210,12 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
                 },
             ];
 
-            return this._commandService.executeCommand(CutContentCommand.id, { segmentId, textRanges: newTextRanges });
+            return this._commandService.executeCommand(CutContentCommand.id, {
+                segmentId,
+                textRanges: newTextRanges,
+                rectRanges,
+                selections: textRanges,
+            });
             // eslint-disable-next-line unused-imports/no-unused-vars
         } catch (_e) {
             this._logService.error('[DocClipboardController] cut content failed');
@@ -353,13 +356,9 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         });
     }
 
-    private _getDocumentBodyInRanges(sliceType: SliceBodyType): Nullable<{
-        newSnapshotList: IDocumentData[];
-        needCache: boolean;
-        snapshot: IDocumentData;
-    }> {
+    private _getDocumentBodyInRanges(sliceType: SliceBodyType, ranges?: ITextRangeWithStyle[]) {
         const docDataModel = this._univerInstanceService.getCurrentUniverDocInstance();
-        const allRanges = this._docSelectionManagerService.getDocRanges();
+        const allRanges = ranges ?? this._docSelectionManagerService.getDocRanges();
 
         const results: IDocumentData['body'][] = [];
         let needCache = true;
@@ -415,6 +414,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
             newSnapshotList: results.map((e) => ({ ...snapshot, body: e })),
             needCache,
             snapshot,
+            ranges: allRanges,
         };
     }
 

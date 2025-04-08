@@ -98,6 +98,12 @@ const locale: typeof zhCN = {
             fixedValue: 'Fixed Value(px)',
         },
     },
+    rightClick: {
+        bulletList: 'Danh sách không thứ tự',
+        orderList: 'Danh sách có thứ tự',
+        checkList: 'Danh sách công việc',
+        insertBellow: 'Chèn dưới',
+    },
 };
 
 export default locale;

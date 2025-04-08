@@ -1,0 +1,8 @@
+---
+description: when generate git commit message
+globs: 
+alwaysApply: false
+---
+
+# Your rule content
+- git commit message must not be longer than 100 characters

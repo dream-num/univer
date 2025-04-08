@@ -14,5 +14,5 @@
  * limitations under the License.
  */
 
-export { Menu, MenuItem, MenuItemGroup, SubMenu } from './Menu';
+export { Menu, MenuItem, MenuItemGroup, SubMenu, TinyMenuGroup } from './Menu';
 export type { MenuRef } from 'rc-menu';

@@ -96,6 +96,12 @@ const locale = {
             fixedValue: '固定值(px)',
         },
     },
+    rightClick: {
+        bulletList: '无序列表',
+        orderList: '有序列表',
+        checkList: '任务列表',
+        insertBellow: '在下方插入',
+    },
 };
 
 export default locale;

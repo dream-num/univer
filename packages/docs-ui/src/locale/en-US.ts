@@ -98,6 +98,12 @@ const locale: typeof zhCN = {
             fixedValue: 'Fixed Value(px)',
         },
     },
+    rightClick: {
+        bulletList: 'Bullet list',
+        orderList: 'Ordered list',
+        checkList: 'Task list',
+        insertBellow: 'Insert below',
+    },
 };
 
 export default locale;

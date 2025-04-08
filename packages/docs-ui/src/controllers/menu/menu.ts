@@ -214,7 +214,7 @@ function getTableDisabledObservable(accessor: IAccessor): Observable<boolean> {
     });
 }
 
-function disableMenuWhenNoDocRange(accessor: IAccessor): Observable<boolean> {
+export function disableMenuWhenNoDocRange(accessor: IAccessor): Observable<boolean> {
     const docSelectionManagerService = accessor.get(DocSelectionManagerService);
 
     return new Observable((subscriber) => {
@@ -1061,7 +1061,7 @@ function getFontStyleAtCursor(accessor: IAccessor) {
     };
 }
 
-function getParagraphStyleAtCursor(accessor: IAccessor) {
+export function getParagraphStyleAtCursor(accessor: IAccessor) {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const textSelectionService = accessor.get(DocSelectionManagerService);
 

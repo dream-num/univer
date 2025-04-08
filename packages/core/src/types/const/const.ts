@@ -185,7 +185,7 @@ export const NAMED_STYLE_MAP: Record<NamedStyleType, Nullable<ITextStyle>> = {
     [NamedStyleType.HEADING_3]: { fs: 16, bl: 1 }, // Heading 3: 16pt, bold
     [NamedStyleType.HEADING_4]: { fs: 14, bl: 1 }, // Heading 4: 14pt, bold
     [NamedStyleType.HEADING_5]: { fs: 12, bl: 1 }, // Heading 5: 12pt, bold
-    [NamedStyleType.NORMAL_TEXT]: { fs: 11 }, // Normal text: 11pt
+    [NamedStyleType.NORMAL_TEXT]: null, // Normal text: using global font size
     [NamedStyleType.TITLE]: { fs: 26, bl: 1 }, // Title: 26pt, bold
     [NamedStyleType.SUBTITLE]: { fs: 15, cl: { rgb: '#999999' } }, // Subtitle: 15pt
     [NamedStyleType.NAMED_STYLE_TYPE_UNSPECIFIED]: null,

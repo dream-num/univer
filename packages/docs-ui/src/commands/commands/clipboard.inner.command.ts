@@ -474,6 +474,7 @@ export interface IInnerCutCommandParams {
     segmentId: string;
     textRanges: ITextRangeWithStyle[];
     selections?: ITextRange[];
+    rectRanges?: IRectRangeWithStyle[];
 }
 
 export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
@@ -486,8 +487,7 @@ export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
         const commandService = accessor.get(ICommandService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const { segmentId, textRanges, selections = docSelectionManagerService.getTextRanges() } = params;
-        const rectRanges = docSelectionManagerService.getRectRanges();
+        const { segmentId, textRanges, selections = docSelectionManagerService.getTextRanges(), rectRanges = docSelectionManagerService.getRectRanges() } = params;
 
         if (
             (!Array.isArray(selections) || selections.length === 0)

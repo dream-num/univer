@@ -988,7 +988,7 @@ export class Scene extends Disposable {
 
         const scrollBarRect = pickedViewport.pickScrollBar(coord);
         if (scrollBarRect) {
-            if (!scrollBarRect._eventPass === true) {
+            if (scrollBarRect.evented) {
                 return scrollBarRect;
             }
         }

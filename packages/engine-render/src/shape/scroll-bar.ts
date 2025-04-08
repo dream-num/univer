@@ -104,9 +104,9 @@ export class ScrollBar extends Disposable {
     };
 
     private readonly _colors = {
-        thumbDefault: '#D9D9D9',
-        thumbHover: '#BFBFBF',
-        thumbActive: '#8C8C8C',
+        thumbDefault: 'rgba(24, 28, 42, 0.20)',
+        thumbHover: 'rgba(24, 28, 42, 0.30)',
+        thumbActive: 'rgba(24, 28, 42, 0.40)',
         trackBackground: 'rgba(255,255,255,0.5)',
         trackBorder: 'rgba(255,255,255,0.7)',
     } as const;
@@ -116,8 +116,6 @@ export class ScrollBar extends Disposable {
      * ThumbSize = trackSize - thumbMargin * 2
      */
     private _trackThickness: number = DEFAULT_TRACK_SIZE;
-    // private _hTrackThickness: number = DEFAULT_TRACK_SIZE;
-    // private _vTrackThickness: number = DEFAULT_TRACK_SIZE;
 
     /**
      * The margin between thumb and bar.
@@ -183,6 +181,14 @@ export class ScrollBar extends Disposable {
             this._hThumbMargin = props.thumbMargin;
             this._vThumbMargin = props.thumbMargin;
         }
+    }
+
+    get verticalScrollTrack() {
+        return this._scrollElements.verticalTrack;
+    }
+
+    get horizonScrollTrack() {
+        return this._scrollElements.horizonTrack;
     }
 
     get enableHorizontal() {
@@ -605,8 +611,6 @@ export class ScrollBar extends Disposable {
 
             this._scrollElements.horizonTrack = horizonTrack;
             this._scrollElements.horizonThumb = horizonThumb;
-            // this._mainScene?.addObject(horizonTrack);
-            // this._mainScene?.addObject(horizonThumb);
         }
 
         if (this._enableVertical) {
@@ -629,9 +633,17 @@ export class ScrollBar extends Disposable {
 
             this._scrollElements.verticalTrack = verticalTrack;
             this._scrollElements.verticalThumb = verticalThumb;
-            // this._mainScene?.addObject(verticalTrack);
-            // this._mainScene?.addObject(verticalThumb);
         }
+    }
+
+    private _setHorizonEvented(evented: boolean) {
+        this._scrollElements.horizonThumb && (this._scrollElements.horizonThumb.evented = evented);
+        this._scrollElements.horizonTrack && (this._scrollElements.horizonTrack.evented = evented);
+    }
+
+    private _setVerticalEvented(evented: boolean) {
+        this._scrollElements.verticalThumb && (this._scrollElements.verticalThumb.evented = evented);
+        this._scrollElements.verticalTrack && (this._scrollElements.verticalTrack.evented = evented);
     }
 
     private _initialVerticalEvent() {
@@ -650,8 +662,9 @@ export class ScrollBar extends Disposable {
 
             // Pointer leave event
             this._eventSub.add(verticalThumb.onPointerLeave$.subscribeEvent((evt: unknown, state: EventState) => {
-                if (verticalThumb._eventPass === true) return;
-                this._verticalHoverLeaveFunc(thumbDefault, evt, state);
+                if (verticalThumb.evented) {
+                    this._verticalHoverLeaveFunc(thumbDefault, evt, state);
+                }
             }));
 
             // Pointer down event
@@ -662,10 +675,8 @@ export class ScrollBar extends Disposable {
                 this._pointerState.lastY = e.offsetY;
 
                 verticalThumb.setProps({ fill: thumbActive });
-                verticalThumb.setProps({ eventPass: true });
-                this._scrollElements.verticalTrack?.setProps({ eventPass: true });
+                this._setVerticalEvented(false);
                 mainScene.setCaptureObject(verticalThumb);
-                // mainScene.disableObjectsEvent();
                 this.makeViewDirty(true);
                 state.stopPropagation();
             }));
@@ -695,8 +706,7 @@ export class ScrollBar extends Disposable {
             mainScene.enableObjectsEvent();
             if (verticalThumb) {
                 verticalThumb.setProps({ fill: thumbHover });
-                verticalThumb.setProps({ eventPass: false });
-                this._scrollElements.verticalTrack?.setProps({ eventPass: false });
+                this._setVerticalEvented(true);
             }
             this.makeViewDirty(true);
         });
@@ -719,8 +729,9 @@ export class ScrollBar extends Disposable {
 
             this._eventSub.add(
                 horizonThumb.onPointerLeave$.subscribeEvent((evt: unknown, state: EventState) => {
-                    if (horizonThumb._eventPass === true) return;
-                    this._horizonHoverLeaveFunc(thumbDefault, evt, state);
+                    if (horizonThumb.evented) {
+                        this._horizonHoverLeaveFunc(thumbDefault, evt, state);
+                    }
                 })
             );
         }
@@ -748,11 +759,10 @@ export class ScrollBar extends Disposable {
                     this._pointerState.lastY = e.offsetY;
 
                     horizonThumb.setProps({ fill: thumbActive });
-                    horizonThumb.setProps({ eventPass: true });
-                    this._scrollElements.horizonTrack?.setProps({ eventPass: true });
-                    this.makeViewDirty(true);
+                    this._setHorizonEvented(false);
                     mainScene.setCaptureObject(horizonThumb);
                     // mainScene.disableObjectsEvent();
+                    this.makeViewDirty(true);
                     state.stopPropagation();
                 })
             );
@@ -776,9 +786,8 @@ export class ScrollBar extends Disposable {
             this._horizonHoverLeaveFunc(thumbDefault, evt, state);
             this._scrollElements.horizonThumb?.setProps({
                 fill: thumbDefault,
-                eventPass: false,
             });
-            this._scrollElements.horizonTrack?.setProps({ eventPass: false });
+            this._setHorizonEvented(true);
             this.makeViewDirty(true);
         });
     }

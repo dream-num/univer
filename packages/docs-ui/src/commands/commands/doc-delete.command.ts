@@ -39,6 +39,7 @@ import { DeleteDirection } from '../../types/delete-direction';
 import { getCommandSkeleton, getRichTextEditPath } from '../util';
 import { CutContentCommand } from './clipboard.inner.command';
 import { DeleteCommand, UpdateCommand } from './core-editing.command';
+import { getCurrentParagraph } from './util';
 
 export interface IDeleteCustomBlockParams {
     direction: DeleteDirection;
@@ -805,7 +806,6 @@ export const DeleteCurrentParagraphCommand: ICommand = {
     id: 'doc.command.delete-current-paragraph',
     type: CommandType.COMMAND,
     handler: async (accessor) => {
-        const docSelectionManagerService = accessor.get(DocSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
         const docDataModel = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
@@ -813,16 +813,9 @@ export const DeleteCurrentParagraphCommand: ICommand = {
             return false;
         }
 
-        const activeRange = docSelectionManagerService.getActiveTextRange();
-        if (!activeRange) {
-            return false;
-        }
-        const range = docSelectionManagerService.getActiveTextRange();
-        if (!range || !range.collapsed || range.segmentId) {
-            return false;
-        }
+        const dataStream = docDataModel.getBody()?.dataStream ?? '';
+        const paragraph = getCurrentParagraph(accessor);
 
-        const paragraph = BuildTextUtils.range.getParagraphsInRange(range, docDataModel.getBody()?.paragraphs ?? [])[0];
         if (!paragraph) {
             return false;
         }
@@ -830,7 +823,9 @@ export const DeleteCurrentParagraphCommand: ICommand = {
         const actions = BuildTextUtils.selection.delete(
             [{
                 startOffset: paragraph.paragraphStart,
-                endOffset: paragraph.paragraphEnd + 1,
+                endOffset: dataStream[paragraph.paragraphEnd + 1] === '\n'
+                    ? paragraph.paragraphEnd
+                    : paragraph.paragraphEnd + 1,
                 collapsed: false,
             }],
             docDataModel.getBody()!,

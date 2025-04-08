@@ -58,8 +58,10 @@ export const useCurrentParagraph = () => {
 
     const segmentId = docRanges[0].segmentId;
 
-    const paragraphs = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.paragraphs ?? [];
-    const currentParagraphs = BuildTextUtils.range.getParagraphsInRanges(docRanges, paragraphs) ?? [];
+    const segment = docDataModel.getSelfOrHeaderFooterModel(segmentId);
+    const paragraphs = segment.getBody()?.paragraphs ?? [];
+    const dataStream = segment.getBody()?.dataStream ?? '';
+    const currentParagraphs = BuildTextUtils.range.getParagraphsInRanges(docRanges, paragraphs, dataStream) ?? [];
 
     return currentParagraphs;
 };

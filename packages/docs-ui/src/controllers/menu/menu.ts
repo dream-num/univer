@@ -859,7 +859,8 @@ const listValueFactory$ = (accessor: IAccessor) => {
 
                 if (range) {
                     const doc = docDataModel.getSelfOrHeaderFooterModel(range?.segmentId);
-                    const paragraphs = BuildTextUtils.range.getParagraphsInRange(range, doc.getBody()?.paragraphs ?? []);
+
+                    const paragraphs = BuildTextUtils.range.getParagraphsInRange(range, doc.getBody()?.paragraphs ?? [], doc.getBody()?.dataStream ?? '');
                     let listType: string | undefined;
                     if (paragraphs.every((p) => {
                         if (!listType) {

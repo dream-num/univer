@@ -15,8 +15,8 @@
  */
 
 import type { IRange } from '@univerjs/core';
+import type { Engine, Scene } from '@univerjs/engine-render';
 import { createInterceptorKey, Disposable, InterceptorManager } from '@univerjs/core';
-import type { Scene } from '@univerjs/engine-render';
 
 interface ISheetPos {
     unitId: string;
@@ -24,7 +24,7 @@ interface ISheetPos {
 }
 
 const PRINTING_RANGE = createInterceptorKey<IRange, ISheetPos>('PRINTING_RANGE');
-const PRINTING_COMPONENT_COLLECT = createInterceptorKey<undefined, ISheetPos & { scene: Scene }>('PRINTING_COMPONENT_COLLECT');
+const PRINTING_COMPONENT_COLLECT = createInterceptorKey<undefined, ISheetPos & { scene: Scene; engine: Engine }>('PRINTING_COMPONENT_COLLECT');
 
 export class SheetPrintInterceptorService extends Disposable {
     readonly interceptor = new InterceptorManager({

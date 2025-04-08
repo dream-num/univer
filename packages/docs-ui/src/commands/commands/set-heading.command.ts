@@ -97,7 +97,10 @@ export const QuickHeadingCommand: ICommand<ISetParagraphNamedStyleCommandParams>
         }
 
         const { segmentId, startOffset } = activeRange;
-        const paragraph = BuildTextUtils.paragraph.util.getParagraphsInRange(activeRange, docDataModel.getBody()?.paragraphs ?? [])[0];
+        const segment = docDataModel.getSelfOrHeaderFooterModel(segmentId);
+        const paragraphs = segment.getBody()?.paragraphs ?? [];
+        const dataStream = segment.getBody()?.dataStream ?? '';
+        const paragraph = BuildTextUtils.paragraph.util.getParagraphsInRange(activeRange, paragraphs, dataStream)[0];
         if (!paragraph) {
             return false;
         }

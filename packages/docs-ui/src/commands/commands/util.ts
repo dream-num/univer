@@ -27,6 +27,6 @@ export function getCurrentParagraph(accessor: IAccessor) {
         return false;
     }
 
-    const paragraph = BuildTextUtils.range.getParagraphsInRange(range, doc.getBody()?.paragraphs ?? [])[0];
+    const paragraph = BuildTextUtils.range.getParagraphsInRange(range, doc.getBody()?.paragraphs ?? [], doc.getBody()?.dataStream ?? '')[0];
     return paragraph;
 }

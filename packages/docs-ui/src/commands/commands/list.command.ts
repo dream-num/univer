@@ -63,13 +63,15 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
 
         const segmentId = docRanges[0].segmentId;
 
-        const paragraphs = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.paragraphs;
+        const segment = docDataModel.getSelfOrHeaderFooterModel(segmentId);
+        const paragraphs = segment.getBody()?.paragraphs ?? [];
+        const dataStream = segment.getBody()?.dataStream ?? '';
 
-        if (paragraphs == null) {
+        if (!paragraphs.length) {
             return false;
         }
 
-        const currentParagraphs = BuildTextUtils.range.getParagraphsInRanges(docRanges, paragraphs);
+        const currentParagraphs = BuildTextUtils.range.getParagraphsInRanges(docRanges, paragraphs, dataStream);
 
         const unitId = docDataModel.getUnitId();
 
@@ -125,13 +127,15 @@ export const ChangeListTypeCommand: ICommand<IChangeListTypeCommandParams> = {
         }
 
         const { segmentId } = activeRanges[0];
-        const paragraphs = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.paragraphs;
+        const segment = docDataModel.getSelfOrHeaderFooterModel(segmentId);
+        const paragraphs = segment.getBody()?.paragraphs ?? [];
+        const dataStream = segment.getBody()?.dataStream ?? '';
 
-        if (paragraphs == null) {
+        if (!paragraphs.length) {
             return false;
         }
 
-        const currentParagraphs = BuildTextUtils.range.getParagraphsInRanges(activeRanges, paragraphs);
+        const currentParagraphs = BuildTextUtils.range.getParagraphsInRanges(activeRanges, paragraphs, dataStream);
 
         const unitId = docDataModel.getUnitId();
         const textX = BuildTextUtils.paragraph.bullet.set({
@@ -195,13 +199,15 @@ export const ChangeListNestingLevelCommand: ICommand<IChangeListNestingLevelComm
 
         const { segmentId } = activeRange;
         const selections = docSelectionManagerService.getDocRanges() ?? [];
-        const paragraphs = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.paragraphs;
+        const segment = docDataModel.getSelfOrHeaderFooterModel(segmentId);
+        const paragraphs = segment.getBody()?.paragraphs ?? [];
+        const dataStream = segment.getBody()?.dataStream ?? '';
 
-        if (paragraphs == null) {
+        if (!paragraphs.length) {
             return false;
         }
 
-        const currentParagraphs = BuildTextUtils.range.getParagraphsInRange(activeRange, paragraphs);
+        const currentParagraphs = BuildTextUtils.range.getParagraphsInRange(activeRange, paragraphs, dataStream);
 
         const unitId = docDataModel.getUnitId();
         const jsonX = JSONX.getInstance();
@@ -569,8 +575,8 @@ export const InsertCheckListBellowCommand: ICommand<IQuickListCommandParams> = {
     },
 };
 
-export function getParagraphsRelative(ranges: ITextRangeWithStyle[], paragraphs: IParagraph[]) {
-    const selectionParagraphs: IParagraph[] = BuildTextUtils.range.getParagraphsInRanges(ranges, paragraphs);
+export function getParagraphsRelative(ranges: ITextRangeWithStyle[], paragraphs: IParagraph[], dataStream: string) {
+    const selectionParagraphs: IParagraph[] = BuildTextUtils.range.getParagraphsInRanges(ranges, paragraphs, dataStream);
     const startIndex = paragraphs.indexOf(selectionParagraphs[0]);
     const endIndex = paragraphs.indexOf(selectionParagraphs[selectionParagraphs.length - 1]);
     if (selectionParagraphs[0].bullet) {

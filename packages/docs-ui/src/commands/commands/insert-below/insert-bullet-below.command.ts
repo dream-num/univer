@@ -45,8 +45,10 @@ export const InsertBulletBelowCommand: ICommand<IInsertBulletBelowCommandParams>
         if (!(textRanges?.length === 1 && textRanges[0].startOffset === textRanges[0].endOffset)) {
             return false;
         }
-        const paragraphs = docDataModel.getSelfOrHeaderFooterModel(textRanges[0].segmentId).getBody()?.paragraphs ?? [];
-        const currentParagraph = BuildTextUtils.range.getParagraphsInRange(textRanges[0], paragraphs)[0];
+        const segment = docDataModel.getSelfOrHeaderFooterModel(textRanges[0].segmentId);
+        const paragraphs = segment.getBody()?.paragraphs ?? [];
+        const dataStream = segment.getBody()?.dataStream ?? '';
+        const currentParagraph = BuildTextUtils.range.getParagraphsInRange(textRanges[0], paragraphs, dataStream)[0];
         if (!currentParagraph) {
             return false;
         }

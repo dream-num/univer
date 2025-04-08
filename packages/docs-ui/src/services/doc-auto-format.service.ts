@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommandInfo, ICustomRange, IDisposable, IParagraph, IParagraphRange, ITextRange, Nullable } from '@univerjs/core';
+import type { DocumentDataModel, ICommandInfo, ICustomRange, IDisposable, IParagraphRange, Nullable } from '@univerjs/core';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import { BuildTextUtils, Disposable, Inject, IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
@@ -44,37 +44,6 @@ export interface IAutoFormat {
     match: (context: IAutoFormatContext) => boolean;
     getMutations: (context: IAutoFormatContext) => ICommandInfo[];
     priority?: number;
-}
-
-function getParagraphsInRange(activeRange: ITextRange, paragraphs: IParagraph[]) {
-    const { startOffset, endOffset } = activeRange;
-    const results: IParagraphRange[] = [];
-
-    let start = -1;
-
-    for (let i = 0; i < paragraphs.length; i++) {
-        const paragraph = paragraphs[i];
-        const prevParagraph: Nullable<IParagraph> = paragraphs[i - 1];
-        const { startIndex } = paragraph;
-
-        if ((startOffset > start && startOffset <= startIndex) || (endOffset > start && endOffset <= startIndex)) {
-            results.push({
-                ...paragraph,
-                paragraphStart: (prevParagraph?.startIndex ?? -1) + 1,
-                paragraphEnd: paragraph.startIndex,
-            });
-        } else if (startIndex >= startOffset && startIndex <= endOffset) {
-            results.push({
-                ...paragraph,
-                paragraphStart: (prevParagraph?.startIndex ?? -1) + 1,
-                paragraphEnd: paragraph.startIndex,
-            });
-        }
-
-        start = startIndex;
-    }
-
-    return results;
 }
 
 /**
@@ -121,7 +90,7 @@ export class DocAutoFormatService extends Disposable {
                 unit: doc,
                 selection,
                 isBody: !selection.segmentId,
-                paragraphs: getParagraphsInRange(selection, doc.getBody()?.paragraphs ?? []),
+                paragraphs: BuildTextUtils.range.getParagraphsInRange(selection, doc.getBody()?.paragraphs ?? [], doc.getBody()?.dataStream ?? ''),
                 customRanges: BuildTextUtils.customRange.getCustomRangesInterestsWithSelection(selection, doc.getBody()?.customRanges ?? []),
                 commandId: id,
                 commandParams: params,

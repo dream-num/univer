@@ -340,9 +340,6 @@ export class InputManager extends Disposable {
                     case 'click':
                         this._onClick(evt as IPointerEvent);
                         break;
-                    case 'dblclick':
-                        this._onDblClick(evt as IPointerEvent);
-                        break;
                     case 'pointerout':
                         this._onPointerOut(evt as IPointerEvent);
                         break;

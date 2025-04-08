@@ -133,20 +133,11 @@ export const SideMenu = forwardRef<ISideMenuInstance, ISideMenuProps>((props, re
                     paddingRight: mode === 'float' ? undefined : 0,
                 }}
             >
-                {/* <div
-                    className={`
-                      univer-text-xs univer-font-semibold univer-leading-[150%] univer-text-gray-400 univer-font-inter
-                      univer-mb-2
-                    `}
-                >
-                    contents
-                </div> */}
                 <div
                     ref={containerRef}
                     className={`
-                      univer-flex-1 univer-overflow-y-auto univer-overflow-x-hidden univer-scrollbar
-                      univer-scrollbar-thin univer-scrollbar-track-transparent univer-scrollbar-thumb-[#73737366]
-                      univer-scrollbar-gutter-stable
+                      univer-flex-1 univer-overflow-y-auto univer-overflow-x-hidden univer-scrollbar-none
+                      [&::-webkit-scrollbar]:univer-hidden
                     `}
                 >
                     {menus?.map((menu) => (

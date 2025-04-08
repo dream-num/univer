@@ -78,7 +78,7 @@
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons": "^0.2.31",
+        "@univerjs/icons": "^0.2.34",
         "@wendellhu/redi": "0.17.1",
         "localforage": "^1.10.0",
         "rc-notification": "^5.6.2"

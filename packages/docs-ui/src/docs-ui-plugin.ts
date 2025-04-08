@@ -100,7 +100,6 @@ import { DocMoveCursorController } from './controllers/doc-move-cursor.controlle
 import { DocParagraphSettingController } from './controllers/doc-paragraph-setting.controller';
 import { DocTableController } from './controllers/doc-table.controller';
 import { DocUIController } from './controllers/doc-ui.controller';
-import { FloatMenuController } from './controllers/float-menu.controller';
 import { DocBackScrollRenderController } from './controllers/render-controllers/back-scroll.render-controller';
 import { DocChecklistRenderController } from './controllers/render-controllers/doc-checklist.render-controller';
 import { DocClipboardController } from './controllers/render-controllers/doc-clipboard.controller';
@@ -123,6 +122,7 @@ import { DocCanvasPopManagerService } from './services/doc-popup-manager.service
 import { DocStateChangeManagerService } from './services/doc-state-change-manager.service';
 import { DocsRenderService } from './services/docs-render.service';
 import { EditorService, IEditorService } from './services/editor/editor-manager.service';
+import { DocFloatMenuService } from './services/float-menu.service';
 import { IRangeSelectorService, RangeSelectorService } from './services/range-selector/range-selector.service';
 import { DocSelectionRenderService } from './services/selection/doc-selection-render.service';
 import { BreakLineShortcut, DeleteLeftShortcut, DeleteRightShortcut } from './shortcuts/core-editing.shortcut';
@@ -194,7 +194,6 @@ export class UniverDocsUIPlugin extends Plugin {
             // FIXME: LifecycleStages.Rendered must be used, otherwise the menu cannot be added to the DOM, but the sheet ui
             // plugin can be added in LifecycleStages.Ready
             [DocUIController],
-            [FloatMenuController],
         ]);
     }
 
@@ -330,7 +329,7 @@ export class UniverDocsUIPlugin extends Plugin {
             [DocStateChangeManagerService],
             [DocAutoFormatService],
             [DocMenuStyleService],
-            [FloatMenuController],
+
         ], this._config.override);
         dependencies.forEach((d) => injector.add(d));
     }
@@ -372,6 +371,7 @@ export class UniverDocsUIPlugin extends Plugin {
     private _initRenderModules(): void {
         ([
             [DocEventManagerService],
+            [DocFloatMenuService],
             [DocParagraphMenuService],
             [DocBackScrollRenderController],
             [DocSelectionRenderController],

@@ -317,6 +317,17 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
 
     private _initEvents() {
         this.disposeWithMe(fromEventSubject(this._context.scene.onPointerMove$).pipe(throttleTime(30)).subscribe((evt) => {
+            if (evt.buttons > 0) {
+                this._hoverBullet$.next(null);
+                this._hoverCustomRanges$.next([]);
+                this._hoverParagraph$.next(null);
+                this._hoverParagraphLeft$.next(null);
+                this._hoverTableCell$.next(null);
+                this._hoverTable$.next(null);
+
+                return;
+            }
+
             const { x, y } = transformOffset2Bound(evt.offsetX, evt.offsetY, this._context.scene);
             this._hoverCustomRanges$.next(
                 this._calcActiveRanges({ x, y })

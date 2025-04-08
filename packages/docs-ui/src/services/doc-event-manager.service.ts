@@ -345,12 +345,13 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
             if (down.button === 2) {
                 return;
             }
-            const ranges = this._calcActiveRanges(down);
+            const point = transformOffset2Bound(down.offsetX, down.offsetY, this._context.scene);
+            const ranges = this._calcActiveRanges(point);
             if (ranges.length) {
                 this._clickCustomRanges$.next(ranges.pop()!);
             }
 
-            const bullet = this._calcActiveBullet(down);
+            const bullet = this._calcActiveBullet(point);
             if (bullet) {
                 this._clickBullet$.next(bullet);
             }

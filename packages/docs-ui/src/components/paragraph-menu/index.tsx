@@ -14,17 +14,16 @@
  * limitations under the License.
  */
 
+import type { DocumentDataModel } from '@univerjs/core';
 import type { IPopup } from '@univerjs/ui';
-import { ICommandService, Injector, NamedStyleType } from '@univerjs/core';
-import { SetTextSelectionsOperation } from '@univerjs/docs';
+import { ICommandService, IUniverInstanceService, NamedStyleType, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { DownSingle } from '@univerjs/icons';
 import { ContextMenuPosition, DesktopMenu, ILayoutService, RectPopup, useDependency, useObservable } from '@univerjs/ui';
 import { useMemo, useRef, useState } from 'react';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { SetInlineFormatFontSizeCommand } from '../../commands/commands/inline-format.command';
-import { getParagraphStyleAtCursor } from '../../controllers/menu/menu';
+import { BehaviorSubject } from 'rxjs';
 import { HEADING_ICON_MAP } from '../../controllers/menu/paragraph-menu';
+import { DocEventManagerService } from '../../services/doc-event-manager.service';
 import { DocParagraphMenuService } from '../../services/doc-paragraph-menu.service';
 
 export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
@@ -35,37 +34,17 @@ export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
     const anchorRef = useRef<HTMLDivElement>(null);
     const isMouseOver = useRef(false);
     const renderManagerService = useDependency(IRenderManagerService);
+    const univerInstanceService = useDependency(IUniverInstanceService);
     const renderUnit = renderManagerService.getRenderById(popup.unitId);
+    const doc = univerInstanceService.getUnit<DocumentDataModel>(popup.unitId, UniverInstanceType.UNIVER_DOC);
     const docParagraphMenuService = renderUnit?.with(DocParagraphMenuService);
-
-    const accessor = useDependency(Injector);
-    const textType = useObservable(useMemo(() => new Observable<NamedStyleType>((subscriber) => {
-        const DEFAULT_TYPE = NamedStyleType.NORMAL_TEXT;
-        const calc = () => {
-            const paragraph = getParagraphStyleAtCursor(accessor);
-            if (paragraph == null) {
-                subscriber.next(DEFAULT_TYPE);
-                return;
-            }
-
-            const namedStyleType = paragraph.paragraphStyle?.namedStyleType ?? DEFAULT_TYPE;
-            subscriber.next(namedStyleType);
-        };
-
-        const disposable = commandService.onCommandExecuted((c) => {
-            const id = c.id;
-
-            if (id === SetTextSelectionsOperation.id || id === SetInlineFormatFontSizeCommand.id) {
-                calc();
-            }
-        });
-
-        calc();
-
-        return () => disposable.dispose();
-    }), [commandService]));
-
-    const icon = HEADING_ICON_MAP[textType ?? NamedStyleType.NORMAL_TEXT];
+    const docEventManagerService = renderUnit?.with(DocEventManagerService);
+    const paragraph = useObservable(docEventManagerService?.hoverParagraph$);
+    const paragraphLeft = useObservable(docEventManagerService?.hoverParagraphLeft$);
+    const startIndex = (paragraph ?? paragraphLeft)?.startIndex;
+    const paragraphObj = useMemo(() => doc?.getBody()?.paragraphs?.find((p) => p.startIndex === startIndex), [doc, startIndex]);
+    const namedStyleType = paragraphObj?.paragraphStyle?.namedStyleType;
+    const icon = HEADING_ICON_MAP[namedStyleType ?? NamedStyleType.NORMAL_TEXT];
     const anchorRect$ = useMemo(() => new BehaviorSubject({
         left: 0,
         right: 0,

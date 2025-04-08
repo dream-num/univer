@@ -445,7 +445,7 @@ export function getSetCellStyleMutations(
         // Here the text format need to be handled, other number format need to discuss. TODO: @wzhudev @ybzky
         const style = worksheet?.getCellStyle(actualRow, actualCol);
 
-        if (!pasteFrom && isTextFormat(style?.n?.pattern)) {
+        if (value.v && !pasteFrom && isTextFormat(style?.n?.pattern)) {
             if (!newValue.s) {
                 newValue.s = {};
             }

@@ -38,6 +38,11 @@ export interface IWorkbenchOptions {
      * If Univer should make the context menu usable.
      */
     contextMenu?: boolean;
+
+    /**
+     * If Univer should make the header menu visible.
+     */
+    headerMenu?: boolean;
 }
 
 export interface IUIController { }

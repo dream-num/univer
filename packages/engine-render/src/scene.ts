@@ -984,7 +984,9 @@ export class Scene extends Disposable {
 
         const scrollBarRect = pickedViewport.pickScrollBar(coord);
         if (scrollBarRect) {
-            return scrollBarRect;
+            if (!scrollBarRect._eventPass === true) {
+                return scrollBarRect;
+            }
         }
 
         const vecFromSheetContent = pickedViewport.transformVector2SceneCoord(coord);

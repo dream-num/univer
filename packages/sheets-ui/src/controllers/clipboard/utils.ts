@@ -87,7 +87,7 @@ export function getDefaultOnPasteCellMutations(
         undoMutationsInfo.push(...setValuesUndos);
 
         // set styles
-        const { undos: setStyleUndos, redos: setStyleRedos } = getSetCellStyleMutations(pasteTo, data, accessor, true);
+        const { undos: setStyleUndos, redos: setStyleRedos } = getSetCellStyleMutations(pasteTo, pasteFrom, data, accessor, true);
         redoMutationsInfo.push(...setStyleRedos);
         undoMutationsInfo.push(...setStyleUndos);
 
@@ -347,9 +347,6 @@ export function getSetCellValueMutations(
 
             if (isTextFormat(style?.n?.pattern)) {
                 cellValue.t = CellValueType.STRING;
-                cellValue.s = {
-                    n: style?.n,
-                };
             } else {
                 const content = String(value.v);
                 const numfmtValue = numfmt.parseValue(content);
@@ -403,6 +400,7 @@ export function getSetCellValueMutations(
  */
 export function getSetCellStyleMutations(
     pasteTo: ISheetDiscreteRangeLocation,
+    pasteFrom: Nullable<ISheetDiscreteRangeLocation>,
     matrix: ObjectMatrix<ICellDataWithSpanInfo>,
     accessor: IAccessor,
     withRichFormat = false
@@ -410,6 +408,7 @@ export function getSetCellStyleMutations(
     const redoMutationsInfo: IMutationInfo[] = [];
     const undoMutationsInfo: IMutationInfo[] = [];
     const { unitId, subUnitId, range } = pasteTo;
+    const worksheet = accessor.get(IUniverInstanceService).getUniverSheetInstance(unitId)?.getSheetBySheetId(subUnitId);
     const valueMatrix = new ObjectMatrix<ICellData>();
 
     const { mapFunc } = virtualizeDiscreteRanges([range]);
@@ -439,21 +438,35 @@ export function getSetCellStyleMutations(
             }
         }
 
-        const content = String(value.v);
-        const numfmtValue = numfmt.parseValue(content);
-        if (numfmtValue?.z) {
+        const { row: actualRow, col: actualCol } = mapFunc(row, col);
+
+        // pasteFrom is null, means the data is pasted from outside, at this time, the data has no number format.
+        // If the paste to cell has a number format, google sheet will apply the number format, but excel will not.
+        // Here the text format need to be handled, other number format need to discuss. TODO: @wzhudev @ybzky
+        const style = worksheet?.getCellStyle(actualRow, actualCol);
+
+        if (!pasteFrom && isTextFormat(style?.n?.pattern)) {
             if (!newValue.s) {
                 newValue.s = {};
             }
-            if (typeof newValue.s === 'object') {
-                if (!newValue.s?.n) {
-                    newValue.s.n = { pattern: numfmtValue.z };
-                } else {
-                    newValue.s.n.pattern = numfmtValue.z;
+            (newValue.s as IStyleData).n = style?.n;
+        } else {
+            const content = String(value.v);
+            const numfmtValue = numfmt.parseValue(content);
+            if (numfmtValue?.z) {
+                if (!newValue.s) {
+                    newValue.s = {};
+                }
+                if (typeof newValue.s === 'object') {
+                    if (!newValue.s?.n) {
+                        newValue.s.n = { pattern: numfmtValue.z };
+                    } else {
+                        newValue.s.n.pattern = numfmtValue.z;
+                    }
                 }
             }
         }
-        const { row: actualRow, col: actualCol } = mapFunc(row, col);
+
         valueMatrix.setValue(actualRow, actualCol, newValue);
     });
     // set cell style

@@ -25,6 +25,7 @@ export interface IRectProps extends IShapeProps {
     radius?: number;
     visualHeight?: number;
     visualWidth?: number;
+    eventPass?: boolean;
 }
 
 export const RECT_OBJECT_ARRAY = ['radius'];

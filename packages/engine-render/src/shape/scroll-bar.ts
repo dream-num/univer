@@ -147,6 +147,7 @@ export class ScrollBar extends Disposable {
         }
         this.setProps(props);
         this._viewport = view;
+        this._mainScene = view.scene;
         this._initialScrollRect();
         this._initialHorizontalEvent();
         this._initialVerticalEvent();
@@ -607,6 +608,8 @@ export class ScrollBar extends Disposable {
 
             this._scrollElements.horizonTrack = horizonTrack;
             this._scrollElements.horizonThumb = horizonThumb;
+            // this._mainScene?.addObject(horizonTrack);
+            // this._mainScene?.addObject(horizonThumb);
         }
 
         if (this._enableVertical) {
@@ -629,6 +632,8 @@ export class ScrollBar extends Disposable {
 
             this._scrollElements.verticalTrack = verticalTrack;
             this._scrollElements.verticalThumb = verticalThumb;
+            // this._mainScene?.addObject(verticalTrack);
+            // this._mainScene?.addObject(verticalThumb);
         }
     }
 
@@ -648,6 +653,7 @@ export class ScrollBar extends Disposable {
 
             // Pointer leave event
             this._eventSub.add(verticalThumb.onPointerLeave$.subscribeEvent((evt: unknown, state: EventState) => {
+                if (verticalThumb._eventPass === true) return;
                 this._verticalHoverLeaveFunc(thumbDefault, evt, state);
             }));
 
@@ -659,8 +665,10 @@ export class ScrollBar extends Disposable {
                 this._pointerState.lastY = e.offsetY;
 
                 verticalThumb.setProps({ fill: thumbActive });
+                verticalThumb.setProps({ eventPass: true });
+                this._scrollElements.verticalTrack?.setProps({ eventPass: true });
                 mainScene.setCaptureObject(verticalThumb);
-                mainScene.disableObjectsEvent();
+                // mainScene.disableObjectsEvent();
                 this.makeViewDirty(true);
                 state.stopPropagation();
             }));
@@ -680,16 +688,100 @@ export class ScrollBar extends Disposable {
         });
 
         // Handle pointer up events
-        this._subscriptions.verticalUp = mainScene.onPointerUp$.subscribeEvent((_evt: unknown, _state: EventState) => {
+        this._subscriptions.verticalUp = mainScene.onPointerUp$.subscribeEvent((evt: unknown, state: EventState) => {
             const { verticalThumb } = this._scrollElements;
             const { thumbHover } = this._colors;
 
             this._pointerState.isVerticalMove = false;
+            this._verticalHoverLeaveFunc(thumbDefault, evt, state);
             mainScene.releaseCapturedObject();
             mainScene.enableObjectsEvent();
             if (verticalThumb) {
                 verticalThumb.setProps({ fill: thumbHover });
+                verticalThumb.setProps({ eventPass: false });
+                this._scrollElements.verticalTrack?.setProps({ eventPass: false });
             }
+            this.makeViewDirty(true);
+        });
+    }
+
+    private _initialHorizontalEvent() {
+        if (!this._enableHorizontal) return;
+
+        const mainScene = this._mainScene || this._viewport.scene;
+        const { horizonThumb, horizonTrack } = this._scrollElements;
+        const { thumbHover, thumbDefault, thumbActive } = this._colors;
+
+        // Thumb hover events
+        if (horizonThumb) {
+            this._eventSub.add(
+                horizonThumb.onPointerEnter$.subscribeEvent((evt: unknown, state: EventState) => {
+                    this._horizonHoverFunc(thumbHover, evt, state);
+                })
+            );
+
+            this._eventSub.add(
+                horizonThumb.onPointerLeave$.subscribeEvent((evt: unknown, state: EventState) => {
+                    if (horizonThumb._eventPass === true) return;
+                    this._horizonHoverLeaveFunc(thumbDefault, evt, state);
+                })
+            );
+        }
+
+        // Track click events
+        if (horizonTrack) {
+            this._eventSub.add(
+                horizonTrack.onPointerDown$.subscribeEvent((evt: unknown, state: EventState) => {
+                    const e = evt as IPointerEvent | IMouseEvent;
+                    this._viewport.scrollToBarPos({
+                        x: e.offsetX - this._viewport.left - this._horizontalMetrics.thumbSize / 2,
+                    });
+                    state.stopPropagation();
+                })
+            );
+        }
+
+        // Thumb drag events
+        if (horizonThumb) {
+            this._eventSub.add(
+                horizonThumb.onPointerDown$.subscribeEvent((evt: unknown, state: EventState) => {
+                    const e = evt as IPointerEvent | IMouseEvent;
+                    this._pointerState.isHorizonMove = true;
+                    this._pointerState.lastX = e.offsetX;
+                    this._pointerState.lastY = e.offsetY;
+
+                    horizonThumb.setProps({ fill: thumbActive });
+                    horizonThumb.setProps({ eventPass: true });
+                    this._scrollElements.horizonTrack?.setProps({ eventPass: true });
+                    this.makeViewDirty(true);
+                    mainScene.setCaptureObject(horizonThumb);
+                    // mainScene.disableObjectsEvent();
+                    state.stopPropagation();
+                })
+            );
+        }
+        // pointer down then move on scrollbar
+        this._subscriptions.horizonMove = mainScene.onPointerMove$.subscribeEvent((evt: unknown, _state: EventState) => {
+            const e = evt as IPointerEvent | IMouseEvent;
+            if (!this._pointerState.isHorizonMove) {
+                return;
+            }
+            this._viewport.scrollByBarDeltaValue({
+                x: e.offsetX - this._pointerState.lastX,
+            });
+            this._pointerState.lastX = e.offsetX;
+            mainScene.getEngine()?.setCapture();
+        });
+        this._subscriptions.horizonUp = mainScene.onPointerUp$.subscribeEvent((evt: unknown, state: EventState) => {
+            this._pointerState.isHorizonMove = false;
+            mainScene.releaseCapturedObject();
+            mainScene.enableObjectsEvent();
+            this._horizonHoverLeaveFunc(thumbDefault, evt, state);
+            this._scrollElements.horizonThumb?.setProps({
+                fill: thumbDefault,
+                eventPass: false,
+            });
+            this._scrollElements.horizonTrack?.setProps({ eventPass: false });
             this.makeViewDirty(true);
         });
     }
@@ -733,82 +825,5 @@ export class ScrollBar extends Disposable {
             this._resizeHorizontal();
             this.makeViewDirty(true);
         };
-    }
-
-    private _initialHorizontalEvent() {
-        if (!this._enableHorizontal) return;
-
-        const mainScene = this._mainScene || this._viewport.scene;
-        const { horizonThumb, horizonTrack } = this._scrollElements;
-        const { thumbHover, thumbDefault, thumbActive } = this._colors;
-
-        // Thumb hover events
-        if (horizonThumb) {
-            this._eventSub.add(
-                horizonThumb.onPointerEnter$.subscribeEvent((evt: unknown, state: EventState) => {
-                    this._horizonHoverFunc(thumbHover, evt, state);
-                })
-            );
-
-            this._eventSub.add(
-                horizonThumb.onPointerLeave$.subscribeEvent((evt: unknown, state: EventState) => {
-                    this._horizonHoverLeaveFunc(thumbDefault, evt, state);
-                })
-            );
-        }
-
-        // Track click events
-        if (horizonTrack) {
-            this._eventSub.add(
-                horizonTrack.onPointerDown$.subscribeEvent((evt: unknown, state: EventState) => {
-                    const e = evt as IPointerEvent | IMouseEvent;
-                    this._viewport.scrollToBarPos({
-                        x: e.offsetX - this._viewport.left - this._horizontalMetrics.thumbSize / 2,
-                    });
-                    state.stopPropagation();
-                })
-            );
-        }
-
-        // Thumb drag events
-        if (horizonThumb) {
-            this._eventSub.add(
-                horizonThumb.onPointerDown$.subscribeEvent((evt: unknown, state: EventState) => {
-                    const e = evt as IPointerEvent | IMouseEvent;
-                    this._pointerState.isHorizonMove = true;
-                    this._pointerState.lastX = e.offsetX;
-                    this._pointerState.lastY = e.offsetY;
-
-                    horizonThumb.setProps({ fill: thumbActive });
-                    this.makeViewDirty(true);
-                    mainScene.setCaptureObject(horizonThumb);
-                    mainScene.disableObjectsEvent();
-                    state.stopPropagation();
-                })
-            );
-        }
-
-        // pointer down then move on scrollbar
-        this._subscriptions.horizonMove = mainScene.onPointerMove$.subscribeEvent((evt: unknown, _state: EventState) => {
-            const e = evt as IPointerEvent | IMouseEvent;
-            if (!this._pointerState.isHorizonMove) {
-                return;
-            }
-            this._viewport.scrollByBarDeltaValue({
-                x: e.offsetX - this._pointerState.lastX,
-            });
-            this._pointerState.lastX = e.offsetX;
-            mainScene.getEngine()?.setCapture();
-        });
-        this._subscriptions.horizonUp = mainScene.onPointerUp$.subscribeEvent((evt: unknown, state: EventState) => {
-            ;
-            this._pointerState.isHorizonMove = false;
-            mainScene.releaseCapturedObject();
-            mainScene.enableObjectsEvent();
-            this._scrollElements.horizonThumb?.setProps({
-                fill: thumbDefault,
-            });
-            this.makeViewDirty(true);
-        });
     }
 }

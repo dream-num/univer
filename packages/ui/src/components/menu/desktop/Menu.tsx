@@ -59,6 +59,7 @@ export interface IBaseMenuProps {
      */
     overViewport?: 'scroll';
     onOptionSelect?: (option: IValueOption) => void;
+    style?: React.CSSProperties;
 }
 
 /** @deprecated */
@@ -187,7 +188,7 @@ function MenuOptionsWrapper(props: IBaseMenuProps) {
 
 /** @deprecated */
 export const Menu = (props: IBaseMenuProps) => {
-    const { overViewport, ...restProps } = props;
+    const { overViewport, style, ...restProps } = props;
     const [menuEl, setMenuEl] = useState<HTMLDListElement>();
     const layoutService = useDependency(ILayoutService);
 
@@ -200,6 +201,7 @@ export const Menu = (props: IBaseMenuProps) => {
     }
     return (
         <DesignMenu
+            style={style}
             ref={handleSetMenuEl}
             selectable={false}
         >

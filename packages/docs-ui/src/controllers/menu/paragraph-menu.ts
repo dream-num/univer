@@ -15,7 +15,7 @@
  */
 
 import type { IAccessor, ICommand } from '@univerjs/core';
-import type { IMenuItem } from '@univerjs/ui';
+import type { IMenuItem, IMenuSelectorItem } from '@univerjs/ui';
 import { ICommandService, NamedStyleType, UniverInstanceType } from '@univerjs/core';
 import { SetTextSelectionsOperation } from '@univerjs/docs';
 import { H1Single, H2Single, H3Single, H4Single, H5Single, TextTypeSingle } from '@univerjs/icons';
@@ -158,15 +158,6 @@ export const InsertCheckListBellowMenuItemFactory = (accessor: IAccessor): IMenu
     };
 };
 
-// export const InsertTableBellowMenuItemFactory = (accessor: IAccessor): IMenuItem => {
-//     return {
-//         id: InsertTableBellowCommand.id,
-//         type: MenuItemType.BUTTON,
-//         icon: 'Table',
-//         title: 'rightClick.insertTableBellow',
-//     };
-// };
-
 export const InsertHorizontalLineBellowMenuItemFactory = (accessor: IAccessor): IMenuItem => {
     return {
         id: InsertHorizontalLineBellowCommand.id,
@@ -175,3 +166,14 @@ export const InsertHorizontalLineBellowMenuItemFactory = (accessor: IAccessor): 
         title: 'toolbar.horizontalLine',
     };
 };
+
+export const INSERT_BELLOW_MENU_ID = 'doc.menu.insert-bellow';
+
+export function DocInsertBellowMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
+    return {
+        id: INSERT_BELLOW_MENU_ID,
+        type: MenuItemType.SUBITEMS,
+        title: 'rightClick.insertBellow',
+        icon: 'FreezeToSelectedSingle',
+    };
+}

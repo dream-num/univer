@@ -41,10 +41,12 @@ export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
     const docEventManagerService = renderUnit?.with(DocEventManagerService);
     const paragraph = useObservable(docEventManagerService?.hoverParagraph$);
     const paragraphLeft = useObservable(docEventManagerService?.hoverParagraphLeft$);
-    const startIndex = (paragraph ?? paragraphLeft)?.startIndex;
+    const activeParagraph = paragraph ?? paragraphLeft;
+    const startIndex = activeParagraph?.startIndex;
     const paragraphObj = useMemo(() => doc?.getBody()?.paragraphs?.find((p) => p.startIndex === startIndex), [doc, startIndex]);
     const namedStyleType = paragraphObj?.paragraphStyle?.namedStyleType;
     const icon = HEADING_ICON_MAP[namedStyleType ?? NamedStyleType.NORMAL_TEXT];
+    const dataStream = doc?.getBody()?.dataStream ?? '';
     const anchorRect$ = useMemo(() => new BehaviorSubject({
         left: 0,
         right: 0,
@@ -56,6 +58,12 @@ export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
         setVisible(false);
         docParagraphMenuService?.hideParagraphMenu(true);
     };
+    if (!activeParagraph) return null;
+
+    const paragraphDataStream = dataStream.slice(activeParagraph.paragraphStart, activeParagraph.paragraphEnd);
+    const isOnlyImage = paragraphDataStream === '\b';
+
+    if (isOnlyImage) return null;
 
     return (
         <>
@@ -93,7 +101,7 @@ export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
                     mask
                     maskZIndex={100}
                     anchorRect$={anchorRect$}
-                    direction="left-center"
+                    direction="left"
                     onMaskClick={handleHideMenu}
                 >
                     <section
@@ -107,6 +115,7 @@ export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
                         }}
                     >
                         <DesktopMenu
+                            style={{ width: 212 }}
                             menuType={ContextMenuPosition.PARAGRAPH}
                             onOptionSelect={(params) => {
                                 const { label: id, commandId, value } = params;

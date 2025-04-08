@@ -93,7 +93,7 @@ export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
                     mask
                     maskZIndex={100}
                     anchorRect$={anchorRect$}
-                    direction="left-center"
+                    direction="left"
                     onMaskClick={handleHideMenu}
                 >
                     <section

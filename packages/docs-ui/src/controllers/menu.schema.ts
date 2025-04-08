@@ -75,7 +75,7 @@ import {
     TextColorSelectorMenuItemFactory,
     UnderlineMenuItemFactory,
 } from './menu/menu';
-import { CopyCurrentParagraphMenuItemFactory, CutCurrentParagraphMenuItemFactory, DeleteCurrentParagraphMenuItemFactory, H1HeadingMenuItemFactory, H2HeadingMenuItemFactory, H3HeadingMenuItemFactory, H4HeadingMenuItemFactory, H5HeadingMenuItemFactory, InsertBulletListBellowMenuItemFactory, InsertCheckListBellowMenuItemFactory, InsertHorizontalLineBellowMenuItemFactory, InsertOrderListBellowMenuItemFactory, NormalTextHeadingMenuItemFactory } from './menu/paragraph-menu';
+import { CopyCurrentParagraphMenuItemFactory, CutCurrentParagraphMenuItemFactory, DeleteCurrentParagraphMenuItemFactory, DocInsertBellowMenuItemFactory, H1HeadingMenuItemFactory, H2HeadingMenuItemFactory, H3HeadingMenuItemFactory, H4HeadingMenuItemFactory, H5HeadingMenuItemFactory, INSERT_BELLOW_MENU_ID, InsertBulletListBellowMenuItemFactory, InsertCheckListBellowMenuItemFactory, InsertHorizontalLineBellowMenuItemFactory, InsertOrderListBellowMenuItemFactory, NormalTextHeadingMenuItemFactory } from './menu/paragraph-menu';
 
 export const menuSchema: MenuSchemaType = {
     [RibbonStartGroup.FORMAT]: {
@@ -294,22 +294,25 @@ export const menuSchema: MenuSchemaType = {
             },
         },
         [ContextMenuGroup.LAYOUT]: {
-            title: 'rightClick.insertBellow',
-            [InsertBulletListBellowCommand.id]: {
-                order: 0,
-                menuItemFactory: InsertBulletListBellowMenuItemFactory,
-            },
-            [InsertOrderListBellowCommand.id]: {
-                order: 1,
-                menuItemFactory: InsertOrderListBellowMenuItemFactory,
-            },
-            [InsertCheckListBellowCommand.id]: {
-                order: 2,
-                menuItemFactory: InsertCheckListBellowMenuItemFactory,
-            },
-            [InsertHorizontalLineBellowCommand.id]: {
-                order: 3,
-                menuItemFactory: InsertHorizontalLineBellowMenuItemFactory,
+            // title: 'rightClick.insertBellow',
+            [INSERT_BELLOW_MENU_ID]: {
+                menuItemFactory: DocInsertBellowMenuItemFactory,
+                [InsertBulletListBellowCommand.id]: {
+                    order: 0,
+                    menuItemFactory: InsertBulletListBellowMenuItemFactory,
+                },
+                [InsertOrderListBellowCommand.id]: {
+                    order: 1,
+                    menuItemFactory: InsertOrderListBellowMenuItemFactory,
+                },
+                [InsertCheckListBellowCommand.id]: {
+                    order: 2,
+                    menuItemFactory: InsertCheckListBellowMenuItemFactory,
+                },
+                [InsertHorizontalLineBellowCommand.id]: {
+                    order: 3,
+                    menuItemFactory: InsertHorizontalLineBellowMenuItemFactory,
+                },
             },
         },
     },

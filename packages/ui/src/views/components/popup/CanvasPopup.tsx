@@ -81,6 +81,7 @@ const SingleCanvasPopup = ({ popup, children }: ISingleCanvasPopupProps) => {
 
     return (
         <RectPopup
+            {...popup}
             hidden={hidden}
             anchorRect$={anchorRect$}
             direction={popup.direction}

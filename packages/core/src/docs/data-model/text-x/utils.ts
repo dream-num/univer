@@ -17,7 +17,7 @@
 import type { ICustomBlock, ICustomDecoration, ICustomRange, IDocumentBody, IParagraph, ISectionBreak, ITextRun } from '../../../types/interfaces/i-document-data';
 import type { IRetainAction } from './action-types';
 import { UpdateDocsAttributeType } from '../../../shared/command-enum';
-import { Tools } from '../../../shared/tools';
+import { generateRandomId, Tools } from '../../../shared/tools';
 import { normalizeTextRuns } from './apply-utils/common';
 import { coverTextRuns } from './apply-utils/update-apply';
 
@@ -114,7 +114,11 @@ export function getParagraphsSlice(
     for (const paragraph of paragraphs) {
         const { startIndex } = paragraph;
         if (startIndex >= startOffset && startIndex < endOffset) {
-            newParagraphs.push(Tools.deepClone(paragraph));
+            const copy = Tools.deepClone(paragraph);
+            newParagraphs.push(copy);
+            if (copy.paragraphStyle?.headingId) {
+                copy.paragraphStyle.headingId = generateRandomId(6);
+            }
         }
     }
 

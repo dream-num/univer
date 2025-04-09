@@ -83,16 +83,16 @@ export function DocSideMenu() {
     const renderManagerService = useDependency(IRenderManagerService);
     const fullDataStream = currentDoc?.getBody()?.dataStream ?? '';
     const [_updateKey, setUpdateKey] = useState(0);
+    const [activeId, setActiveId] = useState<string | undefined>(undefined);
     const unitId = currentDoc?.getUnitId() ?? '';
     const renderer = renderManagerService.getRenderById(unitId);
     const title = currentDoc?.getTitle();
     const docEventManagerService = renderer?.with(DocEventManagerService);
     const paragraphBounds = docEventManagerService?.paragraphBounds;
     const left = renderer?.mainComponent?.left ?? 0;
-    const [scrollTop, setScrollTop] = useState(0);
     const canvasHeight = renderer?.engine.height ?? 0;
     const scaleY = renderer?.scene.scaleY ?? 1;
-    const bottom = scrollTop + (canvasHeight / scaleY);
+
     const paragraphs = currentDoc?.getBody()?.paragraphs ?? [];
     const paragraphMap = useMemo(() => {
         const map = new Map<number, IParagraph>();
@@ -127,6 +127,15 @@ export function DocSideMenu() {
         })
         .filter(Boolean) as ISideMenuItem[];
 
+    const handleScroll = useEvent((params) => {
+        const scrollTop = params.viewportScrollY;
+        const bottom = scrollTop + (canvasHeight / scaleY);
+        const activeId = findActiveHeading(paragraphBounds, paragraphMap, scrollTop, bottom);
+        if (activeId) {
+            setActiveId(activeId);
+        }
+    });
+
     const menus = paragraphMenus?.find((p) => p.isTitle)
         ? paragraphMenus
         : [
@@ -142,7 +151,6 @@ export function DocSideMenu() {
         ].filter(Boolean) as ISideMenuItem[];
 
     const [open, setOpen] = useState(true);
-    const activeId = findActiveHeading(paragraphBounds, paragraphMap, scrollTop, bottom);
 
     useEffect(() => {
         const debounceUpdater = debounce(setUpdateKey, 100);
@@ -159,15 +167,15 @@ export function DocSideMenu() {
             sub.dispose();
         };
     }, [commandService, currentDoc]);
+
     useEffect(() => {
         const viewport = renderer?.scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
         if (!viewport) {
             return;
         }
 
-        const sub = fromEventSubject(viewport.onScrollAfter$).pipe(throttleTime(33)).subscribe((params) => {
-            setScrollTop(params.viewportScrollY);
-        });
+        const sub = fromEventSubject(viewport.onScrollAfter$).pipe(throttleTime(33)).subscribe(handleScroll);
+
         return () => {
             sub.unsubscribe();
         };
@@ -193,6 +201,7 @@ export function DocSideMenu() {
         }
 
         viewport.scrollToViewportPos({ viewportScrollY: bound.rect.top });
+        setActiveId(menu.id);
     });
 
     if (!currentDoc || isInternalEditorID(unitId) || !menus?.length) {

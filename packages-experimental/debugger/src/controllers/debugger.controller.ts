@@ -85,7 +85,6 @@ export class DebuggerController extends Disposable {
 
     private _initCustomComponents(): void {
         const componentManager = this._componentManager;
-        // this.disposeWithMe(componentManager.register(TEST_EDITOR_CONTAINER_COMPONENT, TestEditorContainer));
         this.disposeWithMe(componentManager.register('VueI18nIcon', VueI18nIcon, {
             framework: 'vue3',
         }));

@@ -91,6 +91,7 @@ export interface IUniverInstanceService {
 
     getUnit<T extends UnitModel>(id: string, type?: UnitType): Nullable<T>;
     getAllUnitsForType<T>(type: UnitType): T[];
+    getAllUnitsOfType$<T>(type: UnitType): Observable<T[]>;
     getUnitType(unitId: string): UnitType;
 
     /** @deprecated */

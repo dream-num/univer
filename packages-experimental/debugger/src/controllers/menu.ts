@@ -37,7 +37,7 @@ import { SidebarOperation } from '../commands/operations/sidebar.operation';
 import { ThemeOperation } from '../commands/operations/theme.operation';
 import { UNIVER_WATERMARK_MENU } from './watermark.menu.controller';
 
-export function LocaleMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
+export function LocaleMenuItemFactory(): IMenuSelectorItem {
     return {
         id: LocaleOperation.id,
         icon: 'VueI18nIcon',
@@ -72,7 +72,7 @@ export function LocaleMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
     };
 }
 
-export function DarkModeMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
+export function DarkModeMenuItemFactory(): IMenuSelectorItem {
     return {
         id: DarkModeOperation.id,
         title: '🌓',
@@ -95,7 +95,7 @@ export function DarkModeMenuItemFactory(accessor: IAccessor): IMenuSelectorItem 
     };
 }
 
-export function ThemeMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
+export function ThemeMenuItemFactory(): IMenuSelectorItem {
     return {
         id: ThemeOperation.id,
         title: 'Theme',
@@ -114,7 +114,7 @@ export function ThemeMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
     };
 }
 
-export function NotificationMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
+export function NotificationMenuItemFactory(): IMenuSelectorItem {
     return {
         id: NotificationOperation.id,
         title: 'Notification',
@@ -141,7 +141,7 @@ export function NotificationMenuItemFactory(accessor: IAccessor): IMenuSelectorI
     };
 }
 
-export function DialogMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
+export function DialogMenuItemFactory(): IMenuSelectorItem {
     return {
         id: DialogOperation.id,
         title: 'Dialog',
@@ -160,7 +160,7 @@ export function DialogMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
     };
 }
 
-export function ConfirmMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
+export function ConfirmMenuItemFactory(): IMenuSelectorItem {
     return {
         id: ConfirmOperation.id,
         title: 'Confirm',
@@ -322,7 +322,7 @@ export function CreateFloatDOMMenuItemFactory(): IMenuButtonItem {
     };
 }
 
-export function ShowCellContentMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function ShowCellContentMenuItemFactory(): IMenuButtonItem {
     return {
         id: ShowCellContentOperation.id,
         type: MenuItemType.BUTTON,
@@ -354,7 +354,7 @@ export function ChangeUserMenuItemFactory(): IMenuSelectorItem {
     };
 }
 
-export function WatermarkMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function WatermarkMenuItemFactory(): IMenuButtonItem {
     return {
         id: OpenWatermarkPanelOperation.id,
         title: 'univer-watermark.title',

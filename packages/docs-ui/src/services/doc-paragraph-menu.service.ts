@@ -151,6 +151,7 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
                         }
                     });
                 },
+                zIndex: 101,
             },
             this._context.unitId
         );

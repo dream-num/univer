@@ -114,6 +114,7 @@ export function Select(props: ISelectProps) {
             labelRender={labelRender}
             open={open}
             dropdownStyle={dropdownStyle}
+            dropdownClassName="univer-theme"
             onDropdownVisibleChange={onDropdownVisibleChange}
             notFoundContent={locale?.Select.empty}
             disabled={disabled}

@@ -123,7 +123,6 @@ import { DocStateChangeManagerService } from './services/doc-state-change-manage
 import { DocsRenderService } from './services/docs-render.service';
 import { EditorService, IEditorService } from './services/editor/editor-manager.service';
 import { DocFloatMenuService } from './services/float-menu.service';
-import { IRangeSelectorService, RangeSelectorService } from './services/range-selector/range-selector.service';
 import { DocSelectionRenderService } from './services/selection/doc-selection-render.service';
 import { BreakLineShortcut, DeleteLeftShortcut, DeleteRightShortcut } from './shortcuts/core-editing.shortcut';
 import {
@@ -322,7 +321,6 @@ export class UniverDocsUIPlugin extends Plugin {
             [AppUIController],
             [DocParagraphSettingController],
             [IEditorService, { useClass: EditorService }],
-            [IRangeSelectorService, { useClass: RangeSelectorService }],
             [IDocClipboardService, { useClass: DocClipboardService }],
             [DocCanvasPopManagerService],
             [DocsRenderService],

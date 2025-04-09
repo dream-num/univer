@@ -43,7 +43,6 @@ export { DocStateChangeManagerService } from './services/doc-state-change-manage
 export { DocsRenderService } from './services/docs-render.service';
 export { Editor } from './services/editor/editor';
 export { EditorService, IEditorService } from './services/editor/editor-manager.service';
-export { type IRangeSelectorRange, IRangeSelectorService, RangeSelectorService } from './services/range-selector/range-selector.service';
 export { isInSameTableCell, isValidRectRange, NodePositionConvertToRectRange } from './services/selection/convert-rect-range';
 
 export { NodePositionConvertToCursor } from './services/selection/convert-text-range';

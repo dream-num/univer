@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel } from '@univerjs/core';
+import type { DocumentDataModel, IParagraph } from '@univerjs/core';
 import type { ISideMenuItem } from '@univerjs/design';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import type { IParagraphBound } from '../../services/doc-event-manager.service';
+import type { IMutiPageParagraphBound } from '../../services/doc-event-manager.service';
 import { debounce, fromEventSubject, getPlainText, ICommandService, isInternalEditorID, IUniverInstanceService, NamedStyleType, UniverInstanceType } from '@univerjs/core';
 import { SideMenu } from '@univerjs/design';
 import { RichTextEditingMutation } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { useDependency, useObservable } from '@univerjs/ui';
+import { useDependency, useEvent, useObservable } from '@univerjs/ui';
 import { useEffect, useMemo, useState } from 'react';
 import { of, throttleTime } from 'rxjs';
 import { VIEWPORT_KEY } from '../../basics/docs-view-key';
@@ -47,21 +47,27 @@ const transformNamedStyleTypeToLevel = (type: NamedStyleType) => {
     }
 };
 
-function findActiveHeading(paragraphBounds: IParagraphBound[], scrollTop: number, bottom: number) {
-    const paragraphIndex = paragraphBounds.findIndex((p) => p.paragraph.paragraphStart !== p.paragraph.paragraphEnd && p.rect.top < bottom && p.rect.bottom > scrollTop);
+function findActiveHeading(boundMap: Map<number, IMutiPageParagraphBound> | undefined, paragraphMap: Map<number, IParagraph>, scrollTop: number, bottom: number) {
+    if (!boundMap) {
+        return undefined;
+    }
+    const paragraphBounds = Array.from(boundMap.values());
+    const paragraphIndex = paragraphBounds.findIndex((p) => p.paragraphStart !== p.paragraphEnd && p.rect.top < bottom && p.rect.bottom > scrollTop);
     if (paragraphIndex === -1) return undefined;
-    const lastParagraphIndex = paragraphBounds?.findLastIndex((p) => p.paragraph.paragraphStart !== p.paragraph.paragraphEnd && p.rect.top < bottom && p.rect.bottom > scrollTop);
+    const lastParagraphIndex = paragraphBounds?.findLastIndex((p) => p.paragraphStart !== p.paragraphEnd && p.rect.top < bottom && p.rect.bottom > scrollTop);
     for (let i = paragraphIndex; i <= lastParagraphIndex; i++) {
-        const paragraph = paragraphBounds[i];
-        if (paragraph.paragraph.paragraphStyle?.headingId) {
-            return paragraph.paragraph.paragraphStyle.headingId;
+        const bound = paragraphBounds[i];
+        const paragraph = paragraphMap.get(bound.startIndex);
+        if (paragraph?.paragraphStyle?.headingId) {
+            return paragraph.paragraphStyle.headingId;
         }
     }
 
     for (let i = paragraphIndex; i >= 0; i--) {
-        const paragraph = paragraphBounds[i];
-        if (paragraph.paragraph.paragraphStyle?.headingId) {
-            return paragraph.paragraph.paragraphStyle.headingId;
+        const bound = paragraphBounds[i];
+        const paragraph = paragraphMap.get(bound.startIndex);
+        if (paragraph?.paragraphStyle?.headingId) {
+            return paragraph.paragraphStyle.headingId;
         }
     }
 
@@ -87,20 +93,39 @@ export function DocSideMenu() {
     const canvasHeight = renderer?.engine.height ?? 0;
     const scaleY = renderer?.scene.scaleY ?? 1;
     const bottom = scrollTop + (canvasHeight / scaleY);
+    const paragraphs = currentDoc?.getBody()?.paragraphs ?? [];
+    const paragraphMap = useMemo(() => {
+        const map = new Map<number, IParagraph>();
+        paragraphs.forEach((p) => {
+            map.set(p.startIndex, p);
+        });
+        return map;
+    }, [paragraphs]);
     useObservable(useMemo(() => (renderer?.engine.onTransformChange$ ? fromEventSubject(renderer?.engine.onTransformChange$).pipe(throttleTime(33)) : of(null)), [renderer?.engine.onTransformChange$]));
     const mode = left < 180 ? 'float' : 'side-bar';
     let minLevel = Infinity;
-    const paragraphMenus = paragraphBounds?.filter(({ paragraph: p }) => p.paragraphStyle?.namedStyleType !== undefined && p.paragraphStyle!.namedStyleType !== NamedStyleType.SUBTITLE).map(({ paragraph: p }) => {
-        const level = transformNamedStyleTypeToLevel(p.paragraphStyle!.namedStyleType!);
-        minLevel = Math.min(minLevel, level);
 
-        return {
-            id: p.paragraphStyle!.headingId!,
-            text: getPlainText(fullDataStream.slice(p.paragraphStart, p.paragraphEnd)),
-            level,
-            isTitle: p.paragraphStyle?.namedStyleType === NamedStyleType.TITLE,
-        };
-    });
+    const paragraphMenus = paragraphs
+        ?.filter((p) =>
+            p.paragraphStyle?.namedStyleType !== undefined &&
+            p.paragraphStyle!.namedStyleType !== NamedStyleType.SUBTITLE &&
+            p.paragraphStyle.namedStyleType !== NamedStyleType.NORMAL_TEXT
+        )
+        .map((p) => {
+            const level = transformNamedStyleTypeToLevel(p.paragraphStyle!.namedStyleType!);
+            minLevel = Math.min(minLevel, level);
+            const bound = paragraphBounds?.get(p.startIndex);
+            if (!bound) return null;
+            const { paragraphStart, paragraphEnd } = bound;
+
+            return {
+                id: p.paragraphStyle!.headingId!,
+                text: getPlainText(fullDataStream.slice(paragraphStart, paragraphEnd)),
+                level,
+                isTitle: p.paragraphStyle?.namedStyleType === NamedStyleType.TITLE,
+            };
+        })
+        .filter(Boolean) as ISideMenuItem[];
 
     const menus = paragraphMenus?.find((p) => p.isTitle)
         ? paragraphMenus
@@ -114,10 +139,10 @@ export function DocSideMenu() {
                 }]
                 : []),
             ...(paragraphMenus ?? []),
-        ].filter(Boolean);
+        ].filter(Boolean) as ISideMenuItem[];
 
     const [open, setOpen] = useState(true);
-    const activeId = findActiveHeading(paragraphBounds ?? [], scrollTop, bottom);
+    const activeId = findActiveHeading(paragraphBounds, paragraphMap, scrollTop, bottom);
 
     useEffect(() => {
         const debounceUpdater = debounce(setUpdateKey, 100);
@@ -148,7 +173,7 @@ export function DocSideMenu() {
         };
     }, [renderer]);
 
-    const handleClick = (menu: ISideMenuItem) => {
+    const handleClick = useEvent((menu: ISideMenuItem) => {
         const viewport = renderer?.scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
         if (!viewport) {
             return;
@@ -158,13 +183,17 @@ export function DocSideMenu() {
             viewport.scrollToViewportPos({ viewportScrollY: 0 });
             return;
         }
-        const bound = paragraphBounds?.find((p) => p.paragraph.paragraphStyle?.headingId === menu.id);
+        const paragraph = paragraphs.find((p) => p.paragraphStyle?.headingId === menu.id);
+        if (!paragraph) {
+            return;
+        }
+        const bound = paragraphBounds?.get(paragraph.startIndex);
         if (!bound) {
             return;
         }
 
         viewport.scrollToViewportPos({ viewportScrollY: bound.rect.top });
-    };
+    });
 
     if (!currentDoc || isInternalEditorID(unitId) || !menus?.length) {
         return null;

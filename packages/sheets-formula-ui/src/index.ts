@@ -29,6 +29,8 @@ export { RefSelectionsRenderService } from './services/render-services/ref-selec
 export { GlobalRangeSelectorService, type IShowRangeSelectorDialogOptions } from './services/range-selector.service';
 // #region - all commands
 
+export { FormulaReorderController } from './controllers/formula-reorder.controller';
+
 export { FORMULA_PROMPT_ACTIVATED } from './services/prompt.service';
 export { UniverSheetsFormulaUIPlugin } from './sheets-formula-ui.plugin';
 

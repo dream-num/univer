@@ -112,6 +112,7 @@ import { SHEETS_UI_PLUGIN_CONFIG_KEY } from './config.schema';
 import { menuSchema } from './menu.schema';
 import {
     EditorBreakLineShortcut,
+    EditorCursorCtrlEnterShortcut,
     EditorCursorEnterShortcut,
     EditorCursorEscShortcut,
     EditorCursorTabShortcut,
@@ -338,6 +339,7 @@ export class SheetUIController extends Disposable {
             EditorDeleteLeftShortcut,
             EditorDeleteLeftShortcutInActive,
             EditorCursorEscShortcut,
+            EditorCursorCtrlEnterShortcut,
 
             // operation shortcuts
             SetRowHiddenShortcutItem,

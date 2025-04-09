@@ -32,6 +32,7 @@ import { FormulaAutoFillController } from './controllers/formula-auto-fill.contr
 import { FormulaClipboardController } from './controllers/formula-clipboard.controller';
 import { FormulaEditorShowController } from './controllers/formula-editor-show.controller';
 import { FormulaRenderManagerController } from './controllers/formula-render.controller';
+import { FormulaReorderController } from './controllers/formula-reorder.controller';
 import { FormulaUIController } from './controllers/formula-ui.controller';
 import { FormulaPromptService, IFormulaPromptService } from './services/prompt.service';
 import { GlobalRangeSelectorService } from './services/range-selector.service';
@@ -77,6 +78,7 @@ export class UniverSheetsFormulaUIPlugin extends Plugin {
             [FormulaClipboardController],
             [FormulaEditorShowController],
             [FormulaRenderManagerController],
+            [FormulaReorderController],
         ]);
     }
 
@@ -101,6 +103,7 @@ export class UniverSheetsFormulaUIPlugin extends Plugin {
 
     override onSteady(): void {
         this._injector.get(FormulaAutoFillController);
+        this._injector.get(FormulaReorderController);
     }
 
     private _initUIPart(): void {

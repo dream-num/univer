@@ -15,12 +15,13 @@
  */
 
 import type { DocumentDataModel, IDisposable, ITextRangeParam, Nullable } from '@univerjs/core';
-import type { INodePosition, ITextRangeWithStyle } from '@univerjs/engine-render';
+import type { INodePosition, IRenderContext, IRenderModule, ITextRangeWithStyle } from '@univerjs/engine-render';
 import { DataStreamTreeTokenType, deepCompare, Disposable, Inject, isInternalEditorID, IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { ComponentManager } from '@univerjs/ui';
 import { FloatToolbar } from '../components/float-toolbar/FloatToolbar';
-import { DocCanvasPopManagerService } from '../services/doc-popup-manager.service';
+import { DocCanvasPopManagerService } from './doc-popup-manager.service';
+import { DocSelectionRenderService } from './selection/doc-selection-render.service';
 
 const FLOAT_MENU_COMPONENT_KEY = 'univer.doc.float-menu';
 
@@ -39,16 +40,22 @@ const SKIP_SYMBOLS: string[] = [
     DataStreamTreeTokenType.PARAGRAPH,
 ];
 
-export class FloatMenuController extends Disposable {
+export class DocFloatMenuService extends Disposable implements IRenderModule {
     private _floatMenu: Nullable<{ disposable: IDisposable; start: number; end: number }> = null;
 
     constructor(
+        private _context: IRenderContext<DocumentDataModel>,
         @Inject(DocSelectionManagerService) private readonly _docSelectionManagerService: DocSelectionManagerService,
         @Inject(DocCanvasPopManagerService) private readonly _docCanvasPopManagerService: DocCanvasPopManagerService,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
-        @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService
+        @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService,
+        @Inject(DocSelectionRenderService) private readonly _docSelectionRenderService: DocSelectionRenderService
     ) {
         super();
+
+        if (isInternalEditorID(this._context.unitId)) {
+            return;
+        }
         this._registerFloatMenu();
         this._initSelectionChange();
 
@@ -57,16 +64,22 @@ export class FloatMenuController extends Disposable {
         });
     }
 
+    get floatMenu() {
+        return this._floatMenu;
+    }
+
     private _registerFloatMenu() {
         this.disposeWithMe(this._componentManager.register(FLOAT_MENU_COMPONENT_KEY, FloatToolbar));
     }
 
     private _initSelectionChange() {
+        this.disposeWithMe(this._docSelectionRenderService.onSelectionStart$.subscribe(() => {
+            this._hideFloatMenu();
+        }));
+
         this.disposeWithMe(this._docSelectionManagerService.textSelection$.subscribe((selection) => {
             const { unitId, textRanges } = selection;
-
-            if (isInternalEditorID(unitId)) {
-                this._hideFloatMenu();
+            if (unitId !== this._context.unitId) {
                 return;
             }
 

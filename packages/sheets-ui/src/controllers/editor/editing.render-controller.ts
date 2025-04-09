@@ -19,7 +19,7 @@
 import type { DocumentDataModel, ICellData, ICommandInfo, IDisposable, IDocumentBody, IDocumentData, IDocumentStyle, IMutationInfo, IStyleData, Nullable, Styles, Workbook } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import type { MutationsAffectRange, WorkbookSelectionModel } from '@univerjs/sheets';
+import type { ISetRangeValuesCommandParams, MutationsAffectRange, WorkbookSelectionModel } from '@univerjs/sheets';
 
 import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 import {
@@ -64,7 +64,7 @@ import {
 } from '@univerjs/engine-render';
 
 import { adjustRangeOnMutation, COMMAND_LISTENER_SKELETON_CHANGE, InsertColMutation, InsertRowMutation, MoveColsMutation, MoveRowsMutation, REF_SELECTIONS_ENABLED, RemoveColMutation, RemoveRowMutation, SetRangeValuesCommand, SetSelectionsOperation, SetWorksheetActivateCommand, SetWorksheetActiveOperation, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
-import { KeyCode } from '@univerjs/ui';
+import { KeyCode, MetaKeys } from '@univerjs/ui';
 import { distinctUntilChanged, filter } from 'rxjs';
 import { getEditorObject } from '../../basics/editor/get-editor-object';
 import { MoveSelectionCommand, MoveSelectionEnterAndTabCommand } from '../../commands/commands/set-selection.command';
@@ -114,7 +114,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(LocaleService) protected readonly _localService: LocaleService,
         @IEditorService private readonly _editorService: IEditorService,
-        @Inject(SheetCellEditorResizeService) private readonly _sheetCellEditorResizeService: SheetCellEditorResizeService,
+        @Inject(SheetCellEditorResizeService) private readonly _sheetCellEditorResizeService: SheetCellEditorResizeService, // RenderModule
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService
     ) {
@@ -183,12 +183,12 @@ export class EditingRenderController extends Disposable implements IRenderModule
         this.disposeWithMe(
             this._editorBridgeService.visible$
                 .pipe(distinctUntilChanged((prev, curr) => prev.visible === curr.visible))
-                .subscribe((param) => {
-                    if ((param.unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY || param.unitId === this._context.unitId) && param.visible) {
+                .subscribe((params) => {
+                    if ((params.unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY || params.unitId === this._context.unitId) && params.visible) {
                         this._isUnitEditing = true;
-                        this._handleEditorVisible(param);
+                        this._handleEditorVisible(params);
                     } else if (this._isUnitEditing) {
-                        this._handleEditorInvisible(param);
+                        this._handleEditorInvisible(params);
                         this._isUnitEditing = false;
                     }
                 })
@@ -558,13 +558,13 @@ export class EditingRenderController extends Disposable implements IRenderModule
         }
 
         const isEmpty = snapshot?.body?.dataStream.length === 2;
-        const isCellImage = editCellState.documentLayoutObject.documentModel ? this._isCellImageData(editCellState.documentLayoutObject.documentModel.getSnapshot()) : false;
+        const isCellImage = editCellState.documentLayoutObject.documentModel
+            ? this._isCellImageData(editCellState.documentLayoutObject.documentModel.getSnapshot())
+            : false;
+
         if (snapshot && !(isEmpty && isCellImage)) {
-            const res = await this._submitCellData(snapshot);
-            // if the submit was rejected, don't move selection
-            if (res === false) {
-                return;
-            }
+            const res = await this._submitEdit(snapshot, keycode === (MetaKeys.CTRL_COMMAND | KeyCode.ENTER));
+            if (res === false) return; // if the submit was rejected, don't move selection
         }
 
         // moveSelection need to put behind of SetRangeValuesCommand, fix https://github.com/dream-num/univer/issues/1155
@@ -581,10 +581,10 @@ export class EditingRenderController extends Disposable implements IRenderModule
     }
 
     submitCellData(documentDataModel: DocumentDataModel) {
-        return this._submitCellData(documentDataModel.getSnapshot());
+        return this._submitEdit(documentDataModel.getSnapshot());
     }
 
-    private async _submitCellData(snapshot: IDocumentData) {
+    private async _submitEdit(snapshot: IDocumentData, wholeSelection = false) {
         const editCellState = this._editorBridgeService.getEditCellState();
         if (editCellState == null) {
             return true;
@@ -618,21 +618,25 @@ export class EditingRenderController extends Disposable implements IRenderModule
             return true;
         }
 
-        const finalCell = this._sheetInterceptorService.onWriteCell(workbook, worksheet, row, column, cellData);
+        const finalCell = this._sheetInterceptorService.onWriteCell(workbook, worksheet, row, column, cellData) as ICellData;
         if (finalCell === worksheet.getCellRaw(row, column)) {
             return true;
         }
 
-        const redoUndoId = generateRandomId(6);
-        const res = this._commandService.syncExecuteCommand(SetRangeValuesCommand.id, {
-            subUnitId: sheetId,
-            unitId,
-            range: {
+        const range = wholeSelection
+            ? this._workbookSelections.getCurrentLastSelection()?.range
+            : {
                 startRow: row,
                 startColumn: column,
                 endRow: row,
                 endColumn: column,
-            },
+            };
+
+        const redoUndoId = generateRandomId(6);
+        const res = this._commandService.syncExecuteCommand<ISetRangeValuesCommandParams>(SetRangeValuesCommand.id, {
+            subUnitId: sheetId,
+            unitId,
+            range,
             value: finalCell,
             redoUndoId,
         });

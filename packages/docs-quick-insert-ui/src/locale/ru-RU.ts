@@ -23,6 +23,8 @@ const locale: typeof zhCN = {
             bulletedList: 'Маркированный список',
             divider: 'Разделительная линия',
             text: 'Текст',
+            table: 'Таблица',
+            image: 'Изображение',
         },
         group: {
             basics: 'Основные',

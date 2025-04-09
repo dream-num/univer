@@ -214,7 +214,7 @@ function getTableDisabledObservable(accessor: IAccessor): Observable<boolean> {
     });
 }
 
-function disableMenuWhenNoDocRange(accessor: IAccessor): Observable<boolean> {
+export function disableMenuWhenNoDocRange(accessor: IAccessor): Observable<boolean> {
     const docSelectionManagerService = accessor.get(DocSelectionManagerService);
 
     return new Observable((subscriber) => {
@@ -859,7 +859,8 @@ const listValueFactory$ = (accessor: IAccessor) => {
 
                 if (range) {
                     const doc = docDataModel.getSelfOrHeaderFooterModel(range?.segmentId);
-                    const paragraphs = BuildTextUtils.range.getParagraphsInRange(range, doc.getBody()?.paragraphs ?? []);
+
+                    const paragraphs = BuildTextUtils.range.getParagraphsInRange(range, doc.getBody()?.paragraphs ?? [], doc.getBody()?.dataStream ?? '');
                     let listType: string | undefined;
                     if (paragraphs.every((p) => {
                         if (!listType) {
@@ -1061,7 +1062,7 @@ function getFontStyleAtCursor(accessor: IAccessor) {
     };
 }
 
-function getParagraphStyleAtCursor(accessor: IAccessor) {
+export function getParagraphStyleAtCursor(accessor: IAccessor) {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const textSelectionService = accessor.get(DocSelectionManagerService);
 

@@ -21,6 +21,8 @@ const locale = {
             bulletedList: '无序列表',
             divider: '分隔线',
             text: '文本',
+            table: '表格',
+            image: '图片',
         },
         group: {
             basics: '基础',

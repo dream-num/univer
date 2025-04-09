@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import type { Dependency } from '@univerjs/core';
 import type { IUniverDebuggerConfig } from './controllers/config.schema';
-import { IConfigService, Inject, Injector, merge, Plugin } from '@univerjs/core';
+import { IConfigService, Inject, Injector, merge, Plugin, registerDependencies, touchDependencies } from '@univerjs/core';
 import { DEBUGGER_PLUGIN_CONFIG_KEY, defaultPluginConfig } from './controllers/config.schema';
 import { DarkModeController } from './controllers/dark-mode.controller';
 import { DebuggerController } from './controllers/debugger.controller';
 import { E2EController } from './controllers/e2e/e2e.controller';
+import { MultiUnitsController } from './controllers/multi-units/multi-units.controller';
 import { PerformanceMonitorController } from './controllers/performance-monitor.controller';
 import { UniverWatermarkMenuController } from './controllers/watermark.menu.controller';
 
@@ -49,25 +49,33 @@ export class UniverDebuggerPlugin extends Plugin {
     }
 
     override onStarting(): void {
-        ([
+        registerDependencies(this._injector, [
             [PerformanceMonitorController],
             [DarkModeController],
             [DebuggerController],
+            [MultiUnitsController],
             [E2EController],
             [UniverWatermarkMenuController],
-        ] as Dependency[]).forEach((d) => this._injector.add(d));
+        ]);
 
-        this._injector.get(E2EController);
+        touchDependencies(this._injector, [
+            [E2EController],
+        ]);
     }
 
     override onReady(): void {
-        this._injector.get(DebuggerController);
+        touchDependencies(this._injector, [
+            [DebuggerController],
+            [MultiUnitsController],
+        ]);
     }
 
     override onRendered(): void {
-        this._injector.get(DarkModeController);
-        this._injector.get(PerformanceMonitorController);
-        this._injector.get(UniverWatermarkMenuController);
+        touchDependencies(this._injector, [
+            [DarkModeController],
+            [PerformanceMonitorController],
+            [UniverWatermarkMenuController],
+        ]);
     }
 
     getDebuggerController() {

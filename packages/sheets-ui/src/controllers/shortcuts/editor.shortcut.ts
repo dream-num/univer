@@ -123,6 +123,17 @@ export const EditorCursorEscShortcut: IShortcutItem = {
     },
 };
 
+export const EditorCursorCtrlEnterShortcut: IShortcutItem = {
+    id: SetCellEditVisibleOperation.id,
+    binding: KeyCode.ENTER | MetaKeys.CTRL_COMMAND,
+    preconditions: (contextService) => whenEditorDidNotInputFormulaActivated(contextService),
+    staticParameters: {
+        visible: false,
+        eventType: DeviceInputEventType.Keyboard,
+        keycode: KeyCode.ENTER | MetaKeys.CTRL_COMMAND,
+    },
+};
+
 export const EditorBreakLineShortcut: IShortcutItem = {
     id: BreakLineCommand.id,
     description: 'shortcut.sheet.break-line',

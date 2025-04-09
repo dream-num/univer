@@ -121,7 +121,7 @@ export { UNIVER_UI_PLUGIN_NAME } from './ui-plugin';
 export * from './utils';
 export { ComponentContainer, type IComponentContainerProps, useComponentsOfPart } from './views/components/ComponentContainer';
 export { ZenZone } from './views/components/zen-zone/ZenZone';
-
+export { Menu as DesktopMenu } from './components/menu/desktop/Menu';
 // #region - workbench components
 
 export { type IConfirmPartMethodOptions } from './views/components/confirm-part/interface';

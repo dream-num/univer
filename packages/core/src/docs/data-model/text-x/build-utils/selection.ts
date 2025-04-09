@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '../../../../shared';
 import type { ITextRange } from '../../../../sheets/typedef';
 import type { IParagraph, IParagraphRange } from '../../../../types/interfaces';
+import { DataStreamTreeTokenType } from '../../types';
 
 export function makeSelection(startOffset: number, endOffset?: number): ITextRange {
     if (typeof endOffset === 'undefined') {
@@ -46,29 +46,20 @@ export function isSegmentIntersects(start: number, end: number, start2: number, 
     return Math.max(start, start2) <= Math.min(end, end2);
 }
 
-export function getParagraphsInRange(activeRange: ITextRange, paragraphs: IParagraph[]) {
+export function getParagraphsInRange(activeRange: ITextRange, paragraphs: IParagraph[], dataStream: string, paragraphRanges?: IParagraphRange[]) {
     const { startOffset, endOffset } = activeRange;
+    const fullParagraphs = paragraphRanges ?? transformParagraphs(paragraphs, dataStream);
     const results: IParagraphRange[] = [];
 
     let start = -1;
 
-    for (let i = 0; i < paragraphs.length; i++) {
-        const paragraph = paragraphs[i];
-        const prevParagraph: Nullable<IParagraph> = paragraphs[i - 1];
+    for (let i = 0; i < fullParagraphs.length; i++) {
+        const paragraph = fullParagraphs[i];
         const { startIndex } = paragraph;
-
         if ((startOffset > start && startOffset <= startIndex) || (endOffset > start && endOffset <= startIndex)) {
-            results.push({
-                ...paragraph,
-                paragraphStart: (prevParagraph?.startIndex ?? -1) + 1,
-                paragraphEnd: paragraph.startIndex,
-            });
+            results.push(paragraph);
         } else if (startIndex >= startOffset && startIndex <= endOffset) {
-            results.push({
-                ...paragraph,
-                paragraphStart: (prevParagraph?.startIndex ?? -1) + 1,
-                paragraphEnd: paragraph.startIndex,
-            });
+            results.push(paragraph);
         }
 
         start = startIndex;
@@ -77,11 +68,11 @@ export function getParagraphsInRange(activeRange: ITextRange, paragraphs: IParag
     return results;
 }
 
-export function getParagraphsInRanges(ranges: readonly ITextRange[], paragraphs: IParagraph[]) {
+export function getParagraphsInRanges(ranges: readonly ITextRange[], paragraphs: IParagraph[], dataStream: string) {
     const results: IParagraphRange[] = [];
-
+    const fullParagraphs = transformParagraphs(paragraphs, dataStream);
     for (const range of ranges) {
-        const ps = getParagraphsInRange(range, paragraphs);
+        const ps = getParagraphsInRange(range, paragraphs, dataStream, fullParagraphs);
 
         results.push(...ps);
     }
@@ -89,23 +80,33 @@ export function getParagraphsInRanges(ranges: readonly ITextRange[], paragraphs:
     return results;
 }
 
-export function transformParagraphs(paragraphs: IParagraph[]) {
-    const results: IParagraphRange[] = [];
+const NOT_PARAGRAPH_TOKENS: string[] = [
+    DataStreamTreeTokenType.PARAGRAPH,
+    DataStreamTreeTokenType.TABLE_START,
+    DataStreamTreeTokenType.TABLE_END,
+    DataStreamTreeTokenType.TABLE_ROW_START,
+    DataStreamTreeTokenType.TABLE_CELL_START,
+    DataStreamTreeTokenType.TABLE_CELL_END,
 
-    let start = -1;
+];
+export function transformParagraphs(paragraphs: IParagraph[], dataStream: string) {
+    const results: IParagraphRange[] = [];
 
     for (let i = 0; i < paragraphs.length; i++) {
         const paragraph = paragraphs[i];
-        const prevParagraph: Nullable<IParagraph> = paragraphs[i - 1];
         const { startIndex } = paragraph;
+
+        let j = startIndex - 1;
+
+        while (!NOT_PARAGRAPH_TOKENS.includes(dataStream[j]) && j >= 0) {
+            j--;
+        }
 
         results.push({
             ...paragraph,
-            paragraphStart: (prevParagraph?.startIndex ?? -1) + 1,
+            paragraphStart: j + 1,
             paragraphEnd: paragraph.startIndex,
         });
-
-        start = startIndex;
     }
 
     return results;

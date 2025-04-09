@@ -98,6 +98,12 @@ const locale: typeof enUS = {
             fixedValue: 'Valeur fixe(px)',
         },
     },
+    rightClick: {
+        bulletList: 'Liste non ordonnée',
+        orderList: 'Liste ordonnée',
+        checkList: 'Liste de tâches',
+        insertBellow: 'Insérer dans le bas',
+    },
 };
 
 export default locale;

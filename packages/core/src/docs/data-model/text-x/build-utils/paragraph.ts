@@ -319,6 +319,7 @@ export interface ISetParagraphStyleParams {
     textX?: TextX;
 }
 
+// eslint-disable-next-line max-lines-per-function
 export const setParagraphStyle = (params: ISetParagraphStyleParams) => {
     const {
         textRanges,
@@ -330,8 +331,10 @@ export const setParagraphStyle = (params: ISetParagraphStyleParams) => {
         deleteLen,
         textX: _textX,
     } = params;
-    const paragraphs = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.paragraphs ?? [];
-    const currentParagraphs = getParagraphsInRanges(textRanges, paragraphs);
+    const segment = docDataModel.getSelfOrHeaderFooterModel(segmentId);
+    const paragraphs = segment.getBody()?.paragraphs ?? [];
+    const dataStream = segment.getBody()?.dataStream ?? '';
+    const currentParagraphs = getParagraphsInRanges(textRanges, paragraphs, dataStream);
     const memoryCursor = new MemoryCursor();
     if (cursor) {
         memoryCursor.moveCursorTo(cursor);

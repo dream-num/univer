@@ -73,7 +73,7 @@
         "@radix-ui/react-separator": "^1.1.2",
         "@radix-ui/react-tooltip": "^1.1.8",
         "@rc-component/trigger": "^2.2.6",
-        "@univerjs/icons": "^0.2.31",
+        "@univerjs/icons": "^0.2.34",
         "clsx": "^2.1.1",
         "dayjs": "^1.11.13",
         "rc-dialog": "^9.6.0",

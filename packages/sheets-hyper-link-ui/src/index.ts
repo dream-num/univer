@@ -16,6 +16,7 @@
 
 import './global.css';
 
+export type { IUniverSheetsHyperLinkUIConfig } from './controllers/config.schema';
 export { SheetsHyperLinkCopyPasteController } from './controllers/copy-paste.controller';
 export { InsertLinkShortcut } from './controllers/menu';
 export { UniverSheetsHyperLinkUIPlugin } from './plugin';

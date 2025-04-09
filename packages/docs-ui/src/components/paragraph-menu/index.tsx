@@ -41,12 +41,10 @@ export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
     const docEventManagerService = renderUnit?.with(DocEventManagerService);
     const paragraph = useObservable(docEventManagerService?.hoverParagraph$);
     const paragraphLeft = useObservable(docEventManagerService?.hoverParagraphLeft$);
-    const activeParagraph = paragraph ?? paragraphLeft;
-    const startIndex = activeParagraph?.startIndex;
-    const paragraphObj = useMemo(() => doc?.getBody()?.paragraphs?.find((p) => p.startIndex === startIndex), [doc, startIndex]);
+    const startIndex = (paragraph ?? paragraphLeft)?.startIndex;
+    const paragraphObj = useMemo(() => doc?.getBody()?.paragraphs?.find((p) => p.startIndex === startIndex), [doc, paragraph]);
     const namedStyleType = paragraphObj?.paragraphStyle?.namedStyleType;
     const icon = HEADING_ICON_MAP[namedStyleType ?? NamedStyleType.NORMAL_TEXT];
-    const dataStream = doc?.getBody()?.dataStream ?? '';
     const anchorRect$ = useMemo(() => new BehaviorSubject({
         left: 0,
         right: 0,
@@ -59,11 +57,6 @@ export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
         docParagraphMenuService?.hideParagraphMenu(true);
     };
 
-    const paragraphDataStream = activeParagraph ? dataStream.slice(activeParagraph.paragraphStart, activeParagraph.paragraphEnd) : '';
-    const isOnlyImage = paragraphDataStream === '\b';
-
-    const shouldHidden = isOnlyImage || !activeParagraph;
-
     return (
         <>
             <div
@@ -72,7 +65,6 @@ export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
                 className={`
                   univer-mr-1 univer-inline-flex univer-h-7 univer-cursor-pointer univer-items-center univer-gap-1
                   univer-rounded-full univer-bg-[#EEEFF1] univer-px-2.5 univer-py-0
-                  ${shouldHidden ? 'univer-pointer-events-none univer-opacity-0' : ''}
                 `}
                 onMouseEnter={(e) => {
                     popup.onPointerEnter?.(e);

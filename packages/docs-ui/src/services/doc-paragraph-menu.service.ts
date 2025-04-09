@@ -130,6 +130,14 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
         }
 
         this.hideParagraphMenu(true);
+        const dataStream = this._context.unit.getBody()?.dataStream ?? '';
+        const paragraphDataStream = paragraph ? dataStream.slice(paragraph.paragraphStart, paragraph.paragraphEnd) : '';
+        const isOnlyImage = paragraphDataStream === '\b';
+        const shouldHidden = isOnlyImage;
+
+        if (shouldHidden) {
+            return;
+        }
 
         const disposable = this._docPopupManagerService.attachPopupToRect(
             paragraph.firstLine,

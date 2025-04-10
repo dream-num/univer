@@ -54,6 +54,9 @@ const noopDisposable = {
 };
 export class DocQuickInsertPopupService extends Disposable {
     private readonly _popups: Set<IDocPopup> = new Set();
+    get popups() {
+        return Array.from(this._popups);
+    }
 
     private readonly _editPopup$ = new BehaviorSubject<Nullable<{
         popup: IDocPopup;

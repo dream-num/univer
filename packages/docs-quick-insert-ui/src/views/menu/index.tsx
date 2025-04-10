@@ -15,12 +15,14 @@
  */
 
 import type { DocumentDataModel } from '@univerjs/core';
+import type { IDocPopup } from '../../services/doc-quick-insert-popup.service';
 import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocEventManagerService } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { PlusSingle } from '@univerjs/icons';
 import { useDependency, useObservable } from '@univerjs/ui';
 import { useMemo } from 'react';
+import { combineLatest, map } from 'rxjs';
 import { DocQuickInsertPopupService } from '../../services/doc-quick-insert-popup.service';
 
 interface IQuickInsertButtonProps {
@@ -44,10 +46,15 @@ export const QuickInsertButton = ({
         if (!p) {
             return;
         }
-        const popup = docQuickInsertPopupService.resolvePopup('/');
-        if (!popup) {
-            return;
-        }
+        // combine all popups into one
+        const popup: IDocPopup = {
+            keyword: docQuickInsertPopupService.popups.map((p) => p.keyword).join('+'),
+            menus$: combineLatest(docQuickInsertPopupService.popups.map((p) => p.menus$))
+                .pipe(
+                    map((menusCollections) => menusCollections.flat())
+                ),
+        };
+
         docQuickInsertPopupService.showPopup({
             popup,
             index: p.startIndex - 1,

@@ -20,7 +20,7 @@ import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocEventManagerService } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { PlusSingle } from '@univerjs/icons';
-import { useDependency, useObservable } from '@univerjs/ui';
+import { ILayoutService, useDependency, useObservable } from '@univerjs/ui';
 import { useMemo } from 'react';
 import { combineLatest, map } from 'rxjs';
 import { DocQuickInsertPopupService } from '../../services/doc-quick-insert-popup.service';
@@ -40,12 +40,14 @@ export const QuickInsertButton = ({
     const docEventManagerService = currentUnit?.with(DocEventManagerService);
     const paragraph = useObservable(docEventManagerService?.hoverParagraph$);
     const paragraphLeft = useObservable(docEventManagerService?.hoverParagraphLeft$);
+    const layoutService = useDependency(ILayoutService);
 
-    const onClick = () => {
+    const onClick: React.MouseEventHandler<HTMLDivElement> = (event) => {
         const p = paragraph ?? paragraphLeft;
         if (!p) {
             return;
         }
+
         // combine all popups into one
         const popup: IDocPopup = {
             keyword: docQuickInsertPopupService.popups.map((p) => p.keyword).join('+'),
@@ -59,6 +61,10 @@ export const QuickInsertButton = ({
             popup,
             index: p.startIndex - 1,
             unitId: currentDoc?.getUnitId() ?? '',
+        });
+        setTimeout(() => {
+            // keep the cursor in doc
+            layoutService.focus();
         });
     };
     return (

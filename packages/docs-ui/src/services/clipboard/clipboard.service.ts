@@ -18,7 +18,7 @@ import type { IDisposable, IDocumentBody, IDocumentData } from '@univerjs/core';
 import type { IDocImage } from '@univerjs/docs-drawing';
 import type { IRectRangeWithStyle, ITextRangeWithStyle } from '@univerjs/engine-render';
 
-import { BuildTextUtils, createIdentifier, DataStreamTreeTokenType, Disposable, DOC_RANGE_TYPE, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DrawingTypeEnum, getBodySlice, ICommandService, ILogService, Inject, IUniverInstanceService, normalizeBody, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, SliceBodyType, toDisposable, Tools, UniverInstanceType } from '@univerjs/core';
+import { BuildTextUtils, createIdentifier, DataStreamTreeTokenType, Disposable, DOC_RANGE_TYPE, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DrawingTypeEnum, generateRandomId, getBodySlice, ICommandService, ILogService, Inject, IUniverInstanceService, normalizeBody, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, SliceBodyType, toDisposable, Tools, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { ImageSourceType } from '@univerjs/drawing';
 import {
@@ -245,6 +245,12 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
 
         // copy custom ranges
         body.customRanges = body.customRanges?.map(BuildTextUtils.customRange.copyCustomRange);
+
+        body.paragraphs?.forEach((copy) => {
+            if (copy.paragraphStyle?.headingId) {
+                copy.paragraphStyle.headingId = generateRandomId(6);
+            }
+        });
 
         const activeRange = this._docSelectionManagerService.getActiveTextRange();
         const { segmentId, endOffset: activeEndOffset, style } = activeRange || {};

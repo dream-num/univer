@@ -26,7 +26,7 @@
         "@storybook/icons": "^1.4.0",
         "@storybook/react": "^8.6.7",
         "@storybook/react-webpack5": "^8.6.7",
-        "@storybook/types": "^8.6.7",
+        "@storybook/types": "^8.6.12",
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/ui": "workspace:*",

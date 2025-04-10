@@ -48,10 +48,11 @@ export const QuickInsertButton = ({
             return;
         }
 
+        const allPopups = docQuickInsertPopupService.popups;
         // combine all popups into one
         const popup: IDocPopup = {
-            keyword: docQuickInsertPopupService.popups.map((p) => p.keyword).join('+'),
-            menus$: combineLatest(docQuickInsertPopupService.popups.map((p) => p.menus$))
+            keyword: allPopups.map((p) => p.keyword).join('+'),
+            menus$: combineLatest(allPopups.map((p) => p.menus$))
                 .pipe(
                     map((menusCollections) => menusCollections.flat())
                 ),

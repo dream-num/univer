@@ -18,12 +18,17 @@ import type { DocumentDataModel, INeedCheckDisposable, Nullable } from '@univerj
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { Disposable, Inject } from '@univerjs/core';
 import { DocCanvasPopManagerService, DocEventManagerService } from '@univerjs/docs-ui';
-import { combineLatest } from 'rxjs';
+import { BehaviorSubject, combineLatest } from 'rxjs';
 import { DocQuickInsertPopupService } from '../services/doc-quick-insert-popup.service';
-import { QuickInsertButton } from '../views/menu';
+import { QuickInsertButtonComponentKey } from '../views/menu/const';
 
 export class DocQuickInsertMenuController extends Disposable implements IRenderModule {
-    private _popup: Nullable<{ startIndex: number; disposable: INeedCheckDisposable }> = null;
+    private _popup$ = new BehaviorSubject<Nullable<{ startIndex: number; disposable: INeedCheckDisposable }>>(null);
+    readonly popup$ = this._popup$.asObservable();
+    get popup() {
+        return this._popup$.value;
+    }
+
     constructor(
         private _context: IRenderContext<DocumentDataModel>,
         @Inject(DocEventManagerService) private _docEventManagerService: DocEventManagerService,
@@ -43,17 +48,17 @@ export class DocQuickInsertMenuController extends Disposable implements IRenderM
                 return;
             }
 
-            if (p.paragraphStart === p.paragraphEnd && p.startIndex !== this._popup?.startIndex) {
+            if (p.paragraphStart === p.paragraphEnd && p.startIndex !== this.popup?.startIndex) {
                 this._hideMenu(true);
                 const disposable = this._docCanvasPopManagerService.attachPopupToRect(p.firstLine, {
-                    componentKey: QuickInsertButton.componentKey,
+                    componentKey: QuickInsertButtonComponentKey,
                     direction: 'left-center',
                 }, this._context.unit.getUnitId());
 
-                this._popup = {
+                this._popup$.next({
                     startIndex: p.startIndex,
                     disposable,
-                };
+                });
             } else {
                 this._hideMenu(true);
             }
@@ -62,9 +67,9 @@ export class DocQuickInsertMenuController extends Disposable implements IRenderM
 
     private _hideMenu(force: boolean) {
         if (this._docQuickInsertPopupService.editPopup) return;
-        if (this._popup && (force || this._popup.disposable.canDispose())) {
-            this._popup.disposable.dispose();
-            this._popup = null;
+        if (this.popup && (force || this.popup.disposable.canDispose())) {
+            this.popup.disposable.dispose();
+            this._popup$.next(null);
         }
     }
 }

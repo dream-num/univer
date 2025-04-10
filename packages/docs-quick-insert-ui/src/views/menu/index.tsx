@@ -18,13 +18,14 @@ import type { DocumentDataModel } from '@univerjs/core';
 import type { IDocPopup } from '../../services/doc-quick-insert-popup.service';
 import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
-import { DocEventManagerService } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { PlusSingle } from '@univerjs/icons';
 import { ILayoutService, useDependency, useEvent, useObservable } from '@univerjs/ui';
 import { useMemo } from 'react';
 import { combineLatest, map } from 'rxjs';
+import { DocQuickInsertMenuController } from '../../controllers/doc-quick-insert-menu.controller';
 import { DocQuickInsertPopupService } from '../../services/doc-quick-insert-popup.service';
+import { QuickInsertButtonComponentKey } from './const';
 
 interface IQuickInsertButtonProps {
     className?: string;
@@ -36,12 +37,12 @@ export const QuickInsertButton = ({ className = '' }: IQuickInsertButtonProps) =
     const renderManagerService = useDependency(IRenderManagerService);
     const currentDoc = useObservable(useMemo(() => univerInstanceService.getCurrentTypeOfUnit$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC), [univerInstanceService]));
     const currentUnit = currentDoc && renderManagerService.getRenderById(currentDoc.getUnitId());
-    const docEventManagerService = currentUnit?.with(DocEventManagerService);
+    const docQuickInsertMenuController = currentUnit?.with(DocQuickInsertMenuController);
     const layoutService = useDependency(ILayoutService);
     const docSelectionManagerService = useDependency(DocSelectionManagerService);
 
     const onClick: React.MouseEventHandler<HTMLDivElement> = useEvent((event) => {
-        const p = docEventManagerService?.hoverParagraph ?? docEventManagerService?.hoverParagraphLeft;
+        const p = docQuickInsertMenuController?.popup;
         if (!p) {
             return;
         }
@@ -87,4 +88,4 @@ export const QuickInsertButton = ({ className = '' }: IQuickInsertButtonProps) =
     );
 };
 
-QuickInsertButton.componentKey = 'doc.quick-insert.button';
+QuickInsertButton.componentKey = QuickInsertButtonComponentKey;

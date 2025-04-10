@@ -90,7 +90,11 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
     private _init() {
         const handleHoverParagraph = (paragraph: Nullable<IMutiPageParagraphBound>) => {
             const viewModel = this._docSkeletonManagerService.getViewModel();
-            if (viewModel.getEditArea() === DocumentEditArea.BODY && !this._floatMenuService.floatMenu) {
+            if (
+                viewModel.getEditArea() === DocumentEditArea.BODY &&
+                !this._floatMenuService.floatMenu &&
+                !this._context.unit.getDisabled()
+            ) {
                 if (this._paragrahMenu?.active) {
                     return;
                 }

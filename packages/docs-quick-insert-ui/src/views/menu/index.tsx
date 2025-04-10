@@ -54,7 +54,7 @@ export const QuickInsertButton = ({
             keyword: allPopups.map((p) => p.keyword).join('+'),
             menus$: combineLatest(allPopups.map((p) => p.menus$))
                 .pipe(
-                    map((menusCollections) => menusCollections.flat())
+                    map((menusCollection) => menusCollection.flat())
                 ),
         };
 

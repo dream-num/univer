@@ -21,7 +21,7 @@ import { DocSelectionManagerService } from '@univerjs/docs';
 import { DocEventManagerService } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { PlusSingle } from '@univerjs/icons';
-import { ILayoutService, useDependency, useObservable } from '@univerjs/ui';
+import { ILayoutService, useDependency, useEvent, useObservable } from '@univerjs/ui';
 import { useMemo } from 'react';
 import { combineLatest, map } from 'rxjs';
 import { DocQuickInsertPopupService } from '../../services/doc-quick-insert-popup.service';
@@ -30,22 +30,18 @@ interface IQuickInsertButtonProps {
     className?: string;
 }
 
-export const QuickInsertButton = ({
-    className = '',
-}: IQuickInsertButtonProps) => {
+export const QuickInsertButton = ({ className = '' }: IQuickInsertButtonProps) => {
     const docQuickInsertPopupService = useDependency(DocQuickInsertPopupService);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const renderManagerService = useDependency(IRenderManagerService);
     const currentDoc = useObservable(useMemo(() => univerInstanceService.getCurrentTypeOfUnit$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC), [univerInstanceService]));
     const currentUnit = currentDoc && renderManagerService.getRenderById(currentDoc.getUnitId());
     const docEventManagerService = currentUnit?.with(DocEventManagerService);
-    const paragraph = useObservable(docEventManagerService?.hoverParagraph$);
-    const paragraphLeft = useObservable(docEventManagerService?.hoverParagraphLeft$);
     const layoutService = useDependency(ILayoutService);
     const docSelectionManagerService = useDependency(DocSelectionManagerService);
 
-    const onClick: React.MouseEventHandler<HTMLDivElement> = (event) => {
-        const p = paragraph ?? paragraphLeft;
+    const onClick: React.MouseEventHandler<HTMLDivElement> = useEvent((event) => {
+        const p = docEventManagerService?.hoverParagraph ?? docEventManagerService?.hoverParagraphLeft;
         if (!p) {
             return;
         }
@@ -73,7 +69,7 @@ export const QuickInsertButton = ({
             // keep the cursor in doc
             layoutService.focus();
         });
-    };
+    });
     return (
         <div
             className={`

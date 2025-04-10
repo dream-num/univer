@@ -36,7 +36,7 @@ export class DocQuickInsertMenuController extends Disposable implements IRenderM
     }
 
     private _init() {
-        this.disposeWithMe(combineLatest([this._docEventManagerService.hoverParagraphLeft$, this._docEventManagerService.hoverParagraph$]).subscribe(([left, paragraph]) => {
+        this.disposeWithMe(combineLatest([this._docEventManagerService.hoverParagraphLeftRealTime$, this._docEventManagerService.hoverParagraphRealTime$]).subscribe(([left, paragraph]) => {
             const p = left ?? paragraph;
             if (!p) {
                 this._hideMenu(true);
@@ -61,6 +61,7 @@ export class DocQuickInsertMenuController extends Disposable implements IRenderM
     }
 
     private _hideMenu(force: boolean) {
+        if (this._docQuickInsertPopupService.editPopup) return;
         if (this._popup && (force || this._popup.disposable.canDispose())) {
             this._popup.disposable.dispose();
             this._popup = null;

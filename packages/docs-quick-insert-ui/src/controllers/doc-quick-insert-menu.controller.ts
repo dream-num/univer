@@ -47,8 +47,8 @@ export class DocQuickInsertMenuController extends Disposable implements IRenderM
                 this._hideMenu(true);
                 return;
             }
-
-            if (p.paragraphStart === p.paragraphEnd && p.startIndex !== this.popup?.startIndex) {
+            if (p.paragraphStart === p.paragraphEnd) {
+                if (this._docQuickInsertPopupService.editPopup || p.startIndex === this.popup?.startIndex) return;
                 this._hideMenu(true);
                 const disposable = this._docCanvasPopManagerService.attachPopupToRect(p.firstLine, {
                     componentKey: QuickInsertButtonComponentKey,

@@ -17,7 +17,7 @@
 import type { ComponentType } from 'react';
 import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
 import { LocaleService } from '@univerjs/core';
-import { clsx, Separator } from '@univerjs/design';
+import { clsx } from '@univerjs/design';
 import { MoreFunctionSingle } from '@univerjs/icons';
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
@@ -33,10 +33,6 @@ interface IRibbonProps {
     headerMenu?: boolean;
 }
 
-function Divider() {
-    return <Separator className="!univer-h-5" orientation="vertical" />;
-}
-
 export function Ribbon(props: IRibbonProps) {
     const { headerMenuComponents, headerMenu = true } = props;
 
@@ -50,6 +46,12 @@ export function Ribbon(props: IRibbonProps) {
     const [activatedTab, setActivatedTab] = useState<string>(RibbonPosition.START);
     const [changingActiveTab, setChangingActiveTab] = useState(false);
     const [collapsedIds, setCollapsedIds] = useState<string[]>([]);
+
+    const separatorClassName = `[&>*:last-child:after]:univer-absolute [&>*:last-child:after]:-univer-right-2
+    [&>*:last-child:after]:univer-top-1/2 [&>*:last-child:after]:univer-h-5 [&>*:last-child:after]:univer-translate-x-[3px]
+    [&>*:last-child:after]:univer-w-px [&>*:last-child:after]:-univer-translate-y-1/2
+    [&>*:last-child:after]:univer-bg-gray-200 [&>*:last-child:after]:univer-content-['']
+    [&>*:last-child]:univer-relative`;
 
     const handleSelectTab = useCallback((group: IMenuSchema) => {
         toolbarItemRefs.current = {};
@@ -148,7 +150,7 @@ export function Ribbon(props: IRibbonProps) {
     const fakeToolbarContent = useMemo(() => (
         activeGroup.allGroups.map((groupItem) => (
             <Fragment key={groupItem.key}>
-                <div className="univer-flex univer-flex-nowrap univer-gap-2 univer-px-2">
+                <div className={clsx('univer-flex univer-flex-nowrap univer-gap-2 univer-px-2', separatorClassName)}>
                     {groupItem.children?.map((child) => (
                         child.item && (
                             <ToolbarItem
@@ -166,7 +168,6 @@ export function Ribbon(props: IRibbonProps) {
                         )
                     ))}
                 </div>
-                <Divider />
             </Fragment>
         ))
     ), [activeGroup.allGroups]);
@@ -234,9 +235,9 @@ export function Ribbon(props: IRibbonProps) {
                         'univer-duration-300 univer-animate-in univer-fade-in': changingActiveTab,
                     })}
                 >
-                    {activeGroup.visibleGroups.map((groupItem, index) => (groupItem.children?.length || groupItem.item) && (
+                    {activeGroup.visibleGroups.map((groupItem) => (groupItem.children?.length || groupItem.item) && (
                         <Fragment key={groupItem.key}>
-                            <div className="univer-flex univer-flex-nowrap univer-gap-2 univer-px-2">
+                            <div className={clsx('univer-flex univer-flex-nowrap univer-gap-2 univer-px-2', separatorClassName)}>
                                 {groupItem.children
                                     ? groupItem.children?.map((child) => (
                                         child.item && <ToolbarItem key={child.key} {...child.item} />
@@ -245,14 +246,12 @@ export function Ribbon(props: IRibbonProps) {
                                         groupItem.item && <ToolbarItem key={groupItem.key} {...groupItem.item} />
                                     )}
                             </div>
-                            {index < activeGroup.visibleGroups.length - 1 && activeGroup.visibleGroups.some((groupItem) => groupItem.children?.length || !!groupItem.item) && <Divider />}
                         </Fragment>
                     ))}
 
                     {/* overflow menu items */}
                     {collapsedIds.length > 0 && (
                         <>
-                            <Divider />
                             <TooltipWrapper title={localeService.t('ribbon.more')} placement="bottom">
                                 <DropdownWrapper
                                     align="end"

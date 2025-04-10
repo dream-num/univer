@@ -283,7 +283,7 @@ export const QuickInsertPopup = () => {
         <div className={clsx('univer-mt-2')}>
             {hasMenus
                 ? (
-                    <Menu wrapperClass="univer-max-h-[360px] univer-w-[220px]">
+                    <Menu wrapperClass="univer-max-h-[360px] univer-w-[220px] univer-overflow-y-auto univer-overflow-x-hidden">
                         {renderMenus(filteredMenus)}
                     </Menu>
                 )

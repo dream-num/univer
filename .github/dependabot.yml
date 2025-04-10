@@ -5,9 +5,9 @@
 
 version: 2
 updates:
-  - package-ecosystem: "npm" # See documentation for possible values
-    directory: "/" # Location of package manifests
-    schedule:
-      interval: "weekly"
-    versioning-strategy: auto
-    open-pull-requests-limit: 5
+    - package-ecosystem: npm # See documentation for possible values
+      directory: / # Location of package manifests
+      schedule:
+          interval: weekly
+      versioning-strategy: auto
+      open-pull-requests-limit: 5

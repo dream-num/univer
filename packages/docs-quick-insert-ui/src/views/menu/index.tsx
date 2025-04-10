@@ -53,16 +53,12 @@ export const QuickInsertButton = ({
         const allPopups = docQuickInsertPopupService.popups;
         // combine all popups into one
         const popup: IDocPopup = {
-            keyword: allPopups.map((p) => p.keyword).join('+'),
+            keyword: '',
             menus$: combineLatest(allPopups.map((p) => p.menus$))
                 .pipe(
                     map((menusCollection) => menusCollection.flat())
                 ),
         };
-
-        if (!popup) {
-            return;
-        }
 
         docSelectionManagerService.replaceDocRanges([{
             startOffset: p.startIndex,

@@ -69,7 +69,7 @@
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons": "^0.2.34",
+        "@univerjs/icons": "^0.2.35",
         "@univerjs/rpc": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-filter": "workspace:*",

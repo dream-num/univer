@@ -1,5 +1,38 @@
 # Changelog
 
+## [0.6.10-alpha.0](https://github.com/dream-num/univer/compare/v0.6.9...v0.6.10-alpha.0) (2025-04-10)
+
+
+### Bug Fixes
+
+* **core:** correct range check in getCustomBlockSlice function ([#4970](https://github.com/dream-num/univer/issues/4970)) ([638001e](https://github.com/dream-num/univer/commit/638001eefd91bc5ae421bf0a922860203d98e00e))
+* **docs-ui:** delete paragraph error on table ([#4955](https://github.com/dream-num/univer/issues/4955)) ([2053892](https://github.com/dream-num/univer/commit/205389258ac85d94d79d610325ee3560d329e077))
+* **docs-ui:** paragraph menu issues ([#4951](https://github.com/dream-num/univer/issues/4951)) ([ec94108](https://github.com/dream-num/univer/commit/ec94108fe918c05b9cf13ccff8e04b79461a0058))
+* **docs-ui:** remove SetInlineFormatFontFamilyCommand from FloatToolbar ([#4969](https://github.com/dream-num/univer/issues/4969)) ([fd624b9](https://github.com/dream-num/univer/commit/fd624b9f42dead3a9e01c6813ecef8344f820701))
+* **docs-ui:** ui issues about paragraph menu ([#4952](https://github.com/dream-num/univer/issues/4952)) ([b5493c0](https://github.com/dream-num/univer/commit/b5493c016fdc93caed7892f53da3b48d15fba92c))
+* document size do not affected by overflow ([#4940](https://github.com/dream-num/univer/issues/4940)) ([6132592](https://github.com/dream-num/univer/commit/6132592891cc4476654e4dd42b3d68372a89f1b0))
+* **engine-render:** remove duplicated dbClick event ([#4948](https://github.com/dream-num/univer/issues/4948)) ([092e1b5](https://github.com/dream-num/univer/commit/092e1b57160b9a4c34f352ca2f76c9da53b88835))
+* **formula:** fixed the issue where the formula in the range is messed up after the range reorder ([#4959](https://github.com/dream-num/univer/issues/4959)) ([4c0e665](https://github.com/dream-num/univer/commit/4c0e6654540a7a1714787bcf0e4497c96ad51cdf))
+* **support:** network supports form data ([#4950](https://github.com/dream-num/univer/issues/4950)) ([61d233d](https://github.com/dream-num/univer/commit/61d233db959975c504a2887ea7463ca16e3f8072))
+
+
+### Features
+
+* auto-scroll to the selected menu ([#4931](https://github.com/dream-num/univer/issues/4931)) ([f298839](https://github.com/dream-num/univer/commit/f2988394a2a2561836ae9641aface590f7049ab4))
+* **design:** add dropdownClassName prop for custom select dropdown styling ([#4964](https://github.com/dream-num/univer/issues/4964)) ([5525841](https://github.com/dream-num/univer/commit/5525841c74e27ae9ec4220eeacc92708f105784b))
+* **docs-quick-insert-ui:** implement quick insert menu functionality ([#4983](https://github.com/dream-num/univer/issues/4983)) ([d5dbaa1](https://github.com/dream-num/univer/commit/d5dbaa1d4644d3e2cc6d8eecd361c4b002e6be95))
+* **docs-quick-insert-ui:** quick-insert support table and image ([#4949](https://github.com/dream-num/univer/issues/4949)) ([b7f599d](https://github.com/dream-num/univer/commit/b7f599d3101ea5bda0e90cf5a940b9c39963fe45))
+* **docs-ui:** add click event handling to hide paragraph menu ([#4968](https://github.com/dream-num/univer/issues/4968)) ([3a49e63](https://github.com/dream-num/univer/commit/3a49e636a3607f9be0791d402bb61a182b30032a))
+* **docs-ui:** optimize doc side-menu active item calc logic ([#4967](https://github.com/dream-num/univer/issues/4967)) ([4a58711](https://github.com/dream-num/univer/commit/4a58711dbdebe8367c4eacba5efb7068c6ed4952))
+* **docs-ui:** optimize paragraph menu hover ([#4958](https://github.com/dream-num/univer/issues/4958)) ([7808452](https://github.com/dream-num/univer/commit/780845226e22318520a1d0b95bb05e3ec36a55b0))
+* **docs-ui:** optimize paragraph-menu and float-menu interact ([#4954](https://github.com/dream-num/univer/issues/4954)) ([b66db54](https://github.com/dream-num/univer/commit/b66db5423ffd25b209b2d086447b4e73e4de24cf))
+* **docs-ui:** support paragraph menu ([#4943](https://github.com/dream-num/univer/issues/4943)) ([7c0fa4e](https://github.com/dream-num/univer/commit/7c0fa4e107e3cb9fecb90fad4183fbc94b15a4e9))
+* **facade:** add Proxy for method existence check in newAPI ([#4960](https://github.com/dream-num/univer/issues/4960)) ([ea4fa58](https://github.com/dream-num/univer/commit/ea4fa58a36408eb02b7dab26256d91003a330998))
+* **facade:** command execute event callback add options parameters ([#4945](https://github.com/dream-num/univer/issues/4945)) ([13ce55c](https://github.com/dream-num/univer/commit/13ce55c05f23c6cb7e2709670b92b553ff95ffae))
+* **sheets-ui:** add ctrl enter shortcut ([#4956](https://github.com/dream-num/univer/issues/4956)) ([741547a](https://github.com/dream-num/univer/commit/741547a9f4a201e802f18ec775a9640d41a2bf04))
+* supplement config type export ([#4965](https://github.com/dream-num/univer/issues/4965)) ([8a14b67](https://github.com/dream-num/univer/commit/8a14b67f8d757279289070d3cf63f8955b27216c))
+* supplement defined names facade example and notes ([#4942](https://github.com/dream-num/univer/issues/4942)) ([791e490](https://github.com/dream-num/univer/commit/791e4906b8cdc39b3d2cb0e128f73a33cdf6784d))
+
 ## [0.6.9](https://github.com/dream-num/univer/compare/v0.6.8...v0.6.9) (2025-04-02)
 
 ## [0.6.8](https://github.com/dream-num/univer/compare/v0.6.7...v0.6.8) (2025-04-02)

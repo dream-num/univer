@@ -69,8 +69,8 @@
         "@univerjs/protocol": "0.1.45",
         "@univerjs/sheets": "workspace:*",
         "rxjs": "^7.8.1",
-        "typescript": "^5.8.2",
-        "vite": "^6.2.3",
-        "vitest": "^3.0.9"
+        "typescript": "^5.8.3",
+        "vite": "^6.2.6",
+        "vitest": "^3.1.1"
     }
 }

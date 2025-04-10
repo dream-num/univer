@@ -35,7 +35,7 @@
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/find-replace": "workspace:*",
-        "@univerjs/icons": "0.2.31",
+        "@univerjs/icons": "0.2.35",
         "@univerjs/mockdata": "workspace:*",
         "@univerjs/network": "workspace:*",
         "@univerjs/rpc": "workspace:*",
@@ -78,8 +78,8 @@
         "@univerjs/uniui": "workspace:*",
         "@univerjs/watermark": "workspace:*",
         "monaco-editor": "0.52.2",
-        "react": "19.0.0",
-        "react-dom": "19.0.0",
+        "react": "19.1.0",
+        "react-dom": "19.1.0",
         "react-mosaic-component": "^6.1.1"
     },
     "devDependencies": {
@@ -87,7 +87,7 @@
         "@univerjs-infra/shared": "workspace:*",
         "cross-env": "^7.0.3",
         "detect-port": "^2.1.0",
-        "esbuild": "^0.25.1",
+        "esbuild": "^0.25.2",
         "esbuild-plugin-alias": "^0.2.1",
         "esbuild-plugin-clean": "^1.0.1",
         "esbuild-plugin-copy": "^2.1.1",
@@ -95,11 +95,11 @@
         "esbuild-style-plugin": "^1.6.3",
         "fast-glob": "^3.3.3",
         "fs-extra": "^11.3.0",
-        "less": "^4.2.2",
+        "less": "^4.3.0",
         "minimist": "^1.2.8",
         "postcss": "^8.5.3",
         "tailwindcss": "^3.4.17",
         "tailwindcss-animate": "^1.0.7",
-        "typescript": "^5.8.2"
+        "typescript": "^5.8.3"
     }
 }

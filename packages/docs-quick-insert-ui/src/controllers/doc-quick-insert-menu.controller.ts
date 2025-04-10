@@ -43,7 +43,8 @@ export class DocQuickInsertMenuController extends Disposable implements IRenderM
     private _init() {
         this.disposeWithMe(combineLatest([this._docEventManagerService.hoverParagraphLeftRealTime$, this._docEventManagerService.hoverParagraphRealTime$]).subscribe(([left, paragraph]) => {
             const p = left ?? paragraph;
-            if (!p) {
+            const isDisabled = this._context.unit.getDisabled();
+            if (!p || isDisabled) {
                 this._hideMenu(true);
                 return;
             }

@@ -78,7 +78,7 @@ export const QuickInsertButton = ({
         <div
             className={`
               univer-mr-1 univer-flex univer-cursor-pointer univer-items-center univer-gap-2.5 univer-rounded-full
-              univer-border univer-border-gray-200 univer-bg-white univer-p-1.5 univer-shadow-sm
+              univer-border univer-border-solid univer-border-gray-200 univer-bg-white univer-p-1.5 univer-shadow-sm
               hover:univer-bg-gray-100
               ${className}
             `}

@@ -40,6 +40,7 @@ export const QuickInsertButton = ({ className = '' }: IQuickInsertButtonProps) =
     const docQuickInsertMenuController = currentUnit?.with(DocQuickInsertMenuController);
     const layoutService = useDependency(ILayoutService);
     const docSelectionManagerService = useDependency(DocSelectionManagerService);
+    const editPopup = useObservable(docQuickInsertPopupService.editPopup$);
 
     const onClick: React.MouseEventHandler<HTMLDivElement> = useEvent((event) => {
         const p = docQuickInsertMenuController?.popup;
@@ -75,9 +76,10 @@ export const QuickInsertButton = ({ className = '' }: IQuickInsertButtonProps) =
         <div
             className={`
               univer-mr-1 univer-flex univer-cursor-pointer univer-items-center univer-gap-2.5 univer-rounded-full
-              univer-border univer-border-solid univer-border-gray-200 univer-bg-white univer-p-1.5 univer-shadow-sm
+              univer-border univer-border-solid univer-border-gray-200 univer-p-1.5 univer-shadow-sm
               hover:univer-bg-gray-100
               ${className}
+              ${editPopup ? 'univer-bg-gray-100' : 'univer-bg-white'}
             `}
             onClick={onClick}
             role="button"

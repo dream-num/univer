@@ -16,6 +16,7 @@
 
 import type { DocumentDataModel } from '@univerjs/core';
 import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { DocSelectionManagerService } from '@univerjs/docs';
 import { DocEventManagerService } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { PlusSingle } from '@univerjs/icons';
@@ -38,6 +39,7 @@ export const QuickInsertButton = ({
     const docEventManagerService = currentUnit?.with(DocEventManagerService);
     const paragraph = useObservable(docEventManagerService?.hoverParagraph$);
     const paragraphLeft = useObservable(docEventManagerService?.hoverParagraphLeft$);
+    const docSelectionManagerService = useDependency(DocSelectionManagerService);
 
     const onClick = () => {
         const p = paragraph ?? paragraphLeft;
@@ -48,6 +50,11 @@ export const QuickInsertButton = ({
         if (!popup) {
             return;
         }
+
+        docSelectionManagerService.replaceDocRanges([{
+            startOffset: p.startIndex,
+            endOffset: p.startIndex,
+        }]);
         docQuickInsertPopupService.showPopup({
             popup,
             index: p.startIndex - 1,

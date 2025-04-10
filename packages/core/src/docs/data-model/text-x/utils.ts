@@ -163,7 +163,7 @@ export function getCustomBlockSlice(
 
     for (const block of customBlocks) {
         const { startIndex } = block;
-        if (startIndex >= startOffset && startIndex <= endOffset) {
+        if (startIndex >= startOffset && startIndex < endOffset) {
             newCustomBlocks.push(Tools.deepClone(block));
         }
     }

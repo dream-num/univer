@@ -280,23 +280,12 @@ export const QuickInsertPopup = () => {
     const Placeholder = currentPopup?.popup.Placeholder || componentManager.get(QuickInsertPlaceholder.componentKey);
 
     return (
-        <div
-            className={clsx(`
-              univer-rounded-lg univer-border univer-border-solid univer-border-gray-100 univer-bg-white
-              univer-shadow-[0_0_10px_0_rgba(0,0,0,0.1)]
-            `)}
-        >
+        <div className={clsx('univer-mt-2')}>
             {hasMenus
                 ? (
-                    <div
-                        className={`
-                          univer-max-h-[360px] univer-w-[220px] univer-overflow-y-auto univer-overflow-x-hidden
-                        `}
-                    >
-                        <Menu>
-                            {renderMenus(filteredMenus)}
-                        </Menu>
-                    </div>
+                    <Menu wrapperClass="univer-max-h-[360px] univer-w-[220px]">
+                        {renderMenus(filteredMenus)}
+                    </Menu>
                 )
                 : Placeholder && <Placeholder />}
         </div>

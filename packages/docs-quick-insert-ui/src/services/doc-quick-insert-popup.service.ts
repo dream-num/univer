@@ -19,7 +19,7 @@ import type { IInsertCommandParams } from '@univerjs/docs-ui';
 import type { Observable } from 'rxjs';
 import { Disposable, ICommandService, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
-import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
+import { DocCanvasPopManagerService, DocEventManagerService } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { BehaviorSubject, combineLatest, distinctUntilChanged, map, tap } from 'rxjs';
 import { DeleteSearchKeyCommand } from '../commands/commands/doc-quick-insert.command';
@@ -95,6 +95,10 @@ export class DocQuickInsertPopupService extends Disposable {
         unmount?: IDisposable;
         mount: () => void;
     } | null = null;
+
+    private getDocEventManagerService(unitId: string) {
+        return this._renderManagerService.getRenderById(unitId)?.with(DocEventManagerService);
+    }
 
     constructor(
         @Inject(DocCanvasPopManagerService) private readonly _docCanvasPopupManagerService: DocCanvasPopManagerService,
@@ -192,6 +196,15 @@ export class DocQuickInsertPopupService extends Disposable {
         const { popup, index, unitId } = options;
 
         this.closePopup();
+        const currentDoc = this._univerInstanceService.getUnit<DocumentDataModel>(unitId);
+        const paragraph = currentDoc?.getBody()?.paragraphs?.find((p) => p.startIndex > index);
+        if (!paragraph) {
+            return;
+        }
+        const paragraphBound = this.getDocEventManagerService(unitId)?.paragraphBounds.get(paragraph.startIndex);
+        if (!paragraphBound) {
+            return;
+        }
 
         this._inputPlaceholderRenderRoot = this._createInputPlaceholderRenderRoot(() => {
             const docSkeletonManagerService = this._renderManagerService.getRenderById(unitId)?.with(DocSkeletonManagerService);
@@ -224,8 +237,8 @@ export class DocQuickInsertPopupService extends Disposable {
         });
         this._inputPlaceholderRenderRoot.mount();
 
-        const disposable = this._docCanvasPopupManagerService.attachPopupToRange(
-            { startOffset: index, endOffset: index, collapsed: true },
+        const disposable = this._docCanvasPopupManagerService.attachPopupToRect(
+            paragraphBound.firstLine,
             {
                 componentKey: QuickInsertPopup.componentKey,
                 onClickOutside: () => {

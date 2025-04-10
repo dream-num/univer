@@ -64,7 +64,9 @@ export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
                 ref={anchorRef}
                 className={`
                   univer-mr-1 univer-inline-flex univer-h-7 univer-cursor-pointer univer-items-center univer-gap-1
-                  univer-rounded-full univer-bg-[#EEEFF1] univer-px-2.5 univer-py-0
+                  univer-rounded-full univer-border univer-border-solid univer-border-gray-200 univer-px-2.5 univer-py-0
+                  hover:univer-bg-gray-100
+                  ${visible ? 'univer-bg-gray-100' : 'univer-bg-white'}
                 `}
                 onMouseEnter={(e) => {
                     popup.onPointerEnter?.(e);

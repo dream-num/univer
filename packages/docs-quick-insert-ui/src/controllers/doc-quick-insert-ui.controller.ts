@@ -24,6 +24,7 @@ import { DeleteSearchKeyCommand } from '../commands/commands/doc-quick-insert.co
 import { CloseQuickInsertPopupOperation, ShowQuickInsertPopupOperation } from '../commands/operations/quick-insert-popup.operation';
 import { DocQuickInsertPopupService } from '../services/doc-quick-insert-popup.service';
 import { KeywordInputPlaceholder } from '../views/KeywordInputPlaceholder';
+import { QuickInsertButton } from '../views/menu';
 import { QuickInsertPlaceholder } from '../views/QuickInsertPlaceholder';
 import { QuickInsertPopup } from '../views/QuickInsertPopup';
 import { builtInMenus } from './built-in-menus';
@@ -58,6 +59,7 @@ export class DocQuickInsertUIController extends Disposable {
             [QuickInsertPlaceholder.componentKey, QuickInsertPlaceholder],
             [DividerSingle.displayName, DividerSingle],
             [TextSingle.displayName, TextSingle],
+            [QuickInsertButton.componentKey, QuickInsertButton],
         ] as const).forEach(([name, component]) => {
             if (name) {
                 this.disposeWithMe(this._componentManager.register(name, component));

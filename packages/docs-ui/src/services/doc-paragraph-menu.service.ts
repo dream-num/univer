@@ -122,6 +122,10 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
             lastScrollY = e.scrollY;
             this.hideParagraphMenu(true);
         }));
+
+        this.disposeWithMe(this._docEventManagerService.clickCustomRanges$.subscribe(() => {
+            this.hideParagraphMenu(true);
+        }));
     }
 
     showParagraphMenu(paragraph: IMutiPageParagraphBound) {

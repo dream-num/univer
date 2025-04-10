@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-zen-editor",
-    "version": "0.6.9",
+    "version": "0.6.10-alpha.0",
     "private": false,
     "description": "Zen Editor plugin for Univer Sheets.",
     "author": "DreamNum <developer@univer.ai>",
@@ -79,7 +79,7 @@
         "@univerjs/docs": "workspace:*",
         "@univerjs/docs-ui": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons": "^0.2.34",
+        "@univerjs/icons": "^0.2.35",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*"

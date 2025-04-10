@@ -282,7 +282,7 @@ export const QuickInsertPopup = () => {
     return (
         <div
             className={clsx(`
-              univer-rounded-lg univer-border univer-border-solid univer-border-gray-100 univer-bg-white
+              univer-mt-1 univer-rounded-lg univer-border univer-border-solid univer-border-gray-100 univer-bg-white
               univer-shadow-[0_0_10px_0_rgba(0,0,0,0.1)]
             `)}
         >

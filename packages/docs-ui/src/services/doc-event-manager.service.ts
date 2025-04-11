@@ -733,4 +733,15 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
         this._buildParagraphBounds();
         return this._paragraphBounds;
     }
+
+    findParagraphBoundByIndex(index: number) {
+        this._buildParagraphBounds();
+        const paragraph = this._paragraphBounds.get(index);
+        if (paragraph) {
+            return paragraph;
+        }
+
+        const tableParagraph = Array.from(this._tableParagraphBounds.values()).flat().find((bound) => bound.startIndex === index);
+        return tableParagraph;
+    }
 }

@@ -197,14 +197,14 @@ export class DocQuickInsertPopupService extends Disposable {
 
     showPopup(options: { popup: IDocPopup; index: number; unitId: string }) {
         const { popup, index, unitId } = options;
-
         this.closePopup();
         const currentDoc = this._univerInstanceService.getUnit<DocumentDataModel>(unitId);
         const paragraph = currentDoc?.getBody()?.paragraphs?.find((p) => p.startIndex > index);
         if (!paragraph) {
             return;
         }
-        const paragraphBound = this.getDocEventManagerService(unitId)?.paragraphBounds.get(paragraph.startIndex);
+        const docEventManagerService = this.getDocEventManagerService(unitId);
+        const paragraphBound = docEventManagerService?.findParagraphBoundByIndex(paragraph.startIndex);
         if (!paragraphBound) {
             return;
         }

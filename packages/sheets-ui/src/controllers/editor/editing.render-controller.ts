@@ -153,12 +153,7 @@ export class EditingRenderController extends Disposable {
                 .pipe(distinctUntilChanged((prev, curr) => prev.visible === curr.visible))
                 .subscribe((params) => {
                     if (params.visible) {
-                        if (params.unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) {
-                            this._editingUnit = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SHEET)?.getUnitId() ?? '';
-                        } else {
-                            this._editingUnit = params.unitId;
-                        }
-
+                        this._editingUnit = params.unitId;
                         this._handleEditorVisible(params);
                     } else if (this._editingUnit) {
                         this._handleEditorInvisible(params);

@@ -40,9 +40,11 @@ export interface IRefSelection {
     index: number;
 }
 
+// eslint-disable-next-line complexity
 export function calcHighlightRanges(opts: {
     unitId: string;
     subUnitId: string;
+    currentWorkbook: Workbook;
     refSelections: IRefSelection[];
     editor: Editor | undefined;
     refSelectionsService: SheetsSelectionsService;
@@ -54,6 +56,7 @@ export function calcHighlightRanges(opts: {
     const {
         unitId,
         subUnitId,
+        currentWorkbook,
         refSelections,
         editor,
         refSelectionsService,
@@ -65,7 +68,8 @@ export function calcHighlightRanges(opts: {
     const workbook = univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
     const worksheet = workbook?.getActiveSheet();
     const selectionWithStyle: ISelectionWithStyle[] = [];
-    if (!workbook || !worksheet) {
+    const currentActiveWorksheet = currentWorkbook?.getActiveSheet();
+    if (!workbook || !worksheet || !currentActiveWorksheet) {
         refSelectionsService.setSelections(selectionWithStyle);
         return;
     }
@@ -82,11 +86,11 @@ export function calcHighlightRanges(opts: {
 
         const unitRangeName = deserializeRangeWithSheet(token);
         const { unitId: refUnitId, sheetName, range: rawRange } = unitRangeName;
-        if (refUnitId && unitId !== refUnitId) {
+        const refSheetId = getSheetIdByName(sheetName);
+
+        if (currentWorkbook.getUnitId() !== unitId && refUnitId !== currentWorkbook.getUnitId()) {
             continue;
         }
-
-        const refSheetId = getSheetIdByName(sheetName);
 
         if ((refSheetId && refSheetId !== currentSheetId) || (!refSheetId && currentSheetId !== subUnitId)) {
             continue;
@@ -130,12 +134,15 @@ export function useSheetHighlight(unitId: string, subUnitId: string) {
     const render = renderManagerService.getRenderById(unitId);
     const refSelectionsRenderService = render?.with(RefSelectionsRenderService);
     const sheetSkeletonManagerService = render?.with(SheetSkeletonManagerService);
+    const currentWorkbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
 
     const highlightSheet = useEvent((refSelections: IRefSelection[], editor?: Editor) => {
+        if (!currentWorkbook) return;
         if (refSelectionsRenderService?.selectionMoving) return;
         const selectionWithStyle = calcHighlightRanges({
             unitId,
             subUnitId,
+            currentWorkbook,
             refSelections,
             editor,
             refSelectionsService,

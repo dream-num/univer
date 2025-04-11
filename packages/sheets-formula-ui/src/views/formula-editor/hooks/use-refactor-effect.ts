@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { EDITOR_ACTIVATED, IContextService } from '@univerjs/core';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { EDITOR_ACTIVATED, IContextService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { getCurrentTypeOfRenderer, IRenderManagerService } from '@univerjs/engine-render';
 import { IRefSelectionsService, REF_SELECTIONS_ENABLED } from '@univerjs/sheets';
 import { IContextMenuService, useDependency } from '@univerjs/ui';
 
@@ -27,8 +27,8 @@ export const useRefactorEffect = (isNeed: boolean, selecting: boolean, unitId: s
     const contextService = useDependency(IContextService);
     const contextMenuService = useDependency(IContextMenuService);
     const refSelectionsService = useDependency(IRefSelectionsService);
-
-    const render = renderManagerService.getRenderById(unitId);
+    const univerInstanceService = useDependency(IUniverInstanceService);
+    const render = getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET, univerInstanceService, renderManagerService);
     const refSelectionsRenderService = render?.with(RefSelectionsRenderService);
 
     useLayoutEffect(() => {

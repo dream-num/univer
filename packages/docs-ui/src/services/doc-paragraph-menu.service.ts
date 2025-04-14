@@ -90,7 +90,11 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
     private _init() {
         const handleHoverParagraph = (paragraph: Nullable<IMutiPageParagraphBound>) => {
             const viewModel = this._docSkeletonManagerService.getViewModel();
-            if (viewModel.getEditArea() === DocumentEditArea.BODY && !this._floatMenuService.floatMenu) {
+            if (
+                viewModel.getEditArea() === DocumentEditArea.BODY &&
+                !this._floatMenuService.floatMenu &&
+                !this._context.unit.getDisabled()
+            ) {
                 if (this._paragrahMenu?.active) {
                     return;
                 }
@@ -122,6 +126,10 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
             lastScrollY = e.scrollY;
             this.hideParagraphMenu(true);
         }));
+
+        this.disposeWithMe(this._docEventManagerService.clickCustomRanges$.subscribe(() => {
+            this.hideParagraphMenu(true);
+        }));
     }
 
     showParagraphMenu(paragraph: IMutiPageParagraphBound) {
@@ -133,7 +141,8 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
         const dataStream = this._context.unit.getBody()?.dataStream ?? '';
         const paragraphDataStream = paragraph ? dataStream.slice(paragraph.paragraphStart, paragraph.paragraphEnd) : '';
         const isOnlyImage = paragraphDataStream === '\b';
-        const shouldHidden = isOnlyImage;
+        const isEmptyParagraph = paragraphDataStream === '';
+        const shouldHidden = isOnlyImage || isEmptyParagraph;
 
         if (shouldHidden) {
             return;
@@ -151,6 +160,7 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
                         }
                     });
                 },
+                zIndex: 101,
             },
             this._context.unitId
         );

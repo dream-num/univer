@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/action-recorder",
-    "version": "0.6.9",
+    "version": "0.6.10-alpha.0",
     "private": false,
     "description": "",
     "author": "DreamNum <developer@univer.ai>",
@@ -68,7 +68,7 @@
     "dependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
-        "@univerjs/icons": "^0.2.34",
+        "@univerjs/icons": "^0.2.35",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-filter": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
@@ -76,12 +76,12 @@
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
-        "less": "^4.2.2",
+        "less": "^4.3.0",
         "react": "18.3.1",
         "rxjs": "^7.8.1",
         "tailwindcss": "^3.4.17",
-        "typescript": "^5.8.2",
-        "vite": "^6.2.3",
-        "vitest": "^3.0.9"
+        "typescript": "^5.8.3",
+        "vite": "^6.2.6",
+        "vitest": "^3.1.1"
     }
 }

@@ -19,7 +19,6 @@ import { IMenuManagerService, MenuManagerPosition, ToolbarItem, useDependency } 
 import { useEffect, useState } from 'react';
 import {
     SetInlineFormatBoldCommand,
-    SetInlineFormatFontFamilyCommand,
     SetInlineFormatFontSizeCommand,
     SetInlineFormatItalicCommand,
     SetInlineFormatStrikethroughCommand,
@@ -35,7 +34,6 @@ interface IFloatToolbarProps {
 }
 
 const DEFAULT_AVALIABLE_MENUS: string[] = [
-    SetInlineFormatFontFamilyCommand.id,
     SetInlineFormatFontSizeCommand.id,
     SetInlineFormatBoldCommand.id,
     SetInlineFormatItalicCommand.id,

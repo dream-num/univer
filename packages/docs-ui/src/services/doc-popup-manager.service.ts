@@ -84,7 +84,7 @@ export function transformOffset2Bound(offsetX: number, offsetY: number, scene: S
     };
 }
 
-export interface IDocCanvasPopup extends Pick<IPopup, 'direction' | 'excludeOutside' | 'componentKey' | 'offset' | 'onClickOutside' | 'hideOnInvisible' | 'customActive'> {
+export interface IDocCanvasPopup extends Omit<IPopup, 'anchorRect$' | 'children' | 'unitId' | 'subUnitId' | 'canvasElement'> {
     mask?: boolean;
     extraProps?: Record<string, any>;
     multipleDirection?: IPopup['direction'];

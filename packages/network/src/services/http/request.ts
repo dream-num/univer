@@ -17,7 +17,7 @@
 import type { HTTPHeaders } from './headers';
 import type { HTTPResponseType } from './http';
 import type { HTTPParams } from './params';
-import { ApplicationJSONType } from './headers';
+import { ApplicationJSONType, isApplicationJSONType } from './headers';
 
 export type HTTPRequestMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
 
@@ -62,10 +62,15 @@ export class HTTPRequest {
         return `${this.url}${this.url.includes('?') ? '&' : '?'}${params}`;
     }
 
-    getBody(): string | null {
+    getBody(): string | FormData | null {
         const contentType = this.headers.get('Content-Type') ?? ApplicationJSONType;
         const body = this.requestParams?.body;
-        if (contentType === ApplicationJSONType && body && typeof body === 'object') {
+
+        if (body instanceof FormData) {
+            return body;
+        }
+
+        if (isApplicationJSONType(contentType) && body && typeof body === 'object') {
             return JSON.stringify(body);
         }
 
@@ -73,7 +78,7 @@ export class HTTPRequest {
     }
 
     getHeadersInit(): HeadersInit {
-        const headersInit = this.headers.toHeadersInit();
+        const headersInit = this.headers.toHeadersInit(this.requestParams?.body);
         return headersInit;
     }
 }

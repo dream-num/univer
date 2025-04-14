@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { Content } from '@radix-ui/react-popover';
 import type { ComponentProps, ReactNode } from 'react';
 import { useState } from 'react';
 import {
@@ -53,7 +52,7 @@ export interface IDropdownProps {
     onOpenChange?: (open: boolean) => void;
 }
 
-export function DropdownMenu(props: IDropdownProps & ComponentProps<typeof Content>) {
+export function DropdownMenu(props: IDropdownProps & ComponentProps<typeof DropdownMenuContent>) {
     const {
         children,
         items,

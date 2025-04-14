@@ -174,6 +174,5 @@ export function DocInsertBellowMenuItemFactory(accessor: IAccessor): IMenuSelect
         id: INSERT_BELLOW_MENU_ID,
         type: MenuItemType.SUBITEMS,
         title: 'rightClick.insertBellow',
-        icon: 'FreezeToSelectedSingle',
     };
 }

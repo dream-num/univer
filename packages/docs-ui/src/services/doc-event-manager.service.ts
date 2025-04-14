@@ -218,13 +218,21 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
     private readonly _clickBullet$ = new Subject<IBulletActive>();
     readonly clickBullets$ = this._clickBullet$.asObservable();
 
-    private readonly _hoverParagraph$ = new Subject<Nullable<IMutiPageParagraphBound>>();
+    private readonly _hoverParagraph$ = new BehaviorSubject<Nullable<IMutiPageParagraphBound>>(null);
     readonly hoverParagraph$ = this._hoverParagraph$.pipe(distinctUntilChanged((pre, aft) => pre?.startIndex === aft?.startIndex && pre?.segmentId === aft?.segmentId && pre?.pageIndex === aft?.pageIndex));
     readonly hoverParagraphRealTime$ = this._hoverParagraph$.asObservable();
 
-    private readonly _hoverParagraphLeft$ = new Subject<Nullable<IMutiPageParagraphBound>>();
+    get hoverParagraph() {
+        return this._hoverParagraph$.value;
+    }
+
+    private readonly _hoverParagraphLeft$ = new BehaviorSubject<Nullable<IMutiPageParagraphBound>>(null);
     readonly hoverParagraphLeft$ = this._hoverParagraphLeft$.pipe(distinctUntilChanged((pre, aft) => pre?.startIndex === aft?.startIndex && pre?.segmentId === aft?.segmentId && pre?.pageIndex === aft?.pageIndex));
     readonly hoverParagraphLeftRealTime$ = this._hoverParagraphLeft$.asObservable();
+
+    get hoverParagraphLeft() {
+        return this._hoverParagraphLeft$.value;
+    }
 
     private readonly _hoverTableCell$ = new Subject<Nullable<ITableCellBound>>();
     readonly hoverTableCell$ = this._hoverTableCell$.pipe(distinctUntilChanged((pre, aft) => pre?.rowIndex === aft?.rowIndex && pre?.colIndex === aft?.colIndex && pre?.tableId === aft?.tableId && pre?.pageIndex === aft?.pageIndex));
@@ -724,5 +732,16 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
     get paragraphBounds() {
         this._buildParagraphBounds();
         return this._paragraphBounds;
+    }
+
+    findParagraphBoundByIndex(index: number) {
+        this._buildParagraphBounds();
+        const paragraph = this._paragraphBounds.get(index);
+        if (paragraph) {
+            return paragraph;
+        }
+
+        const tableParagraph = Array.from(this._tableParagraphBounds.values()).flat().find((bound) => bound.startIndex === index);
+        return tableParagraph;
     }
 }

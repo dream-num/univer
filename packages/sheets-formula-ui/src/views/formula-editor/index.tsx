@@ -110,7 +110,7 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
     useImperativeHandle(ref, () => ({
         isClickOutSide: (e: MouseEvent) => {
             if (sheetEmbeddingRef.current) {
-                return sheetEmbeddingRef.current.contains(e.target as Node);
+                return !sheetEmbeddingRef.current.contains(e.target as Node);
             }
             return false;
         },

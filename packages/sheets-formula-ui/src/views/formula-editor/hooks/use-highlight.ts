@@ -40,7 +40,7 @@ export interface IRefSelection {
     index: number;
 }
 
-// eslint-disable-next-line complexity
+// eslint-disable-next-line complexity, max-lines-per-function
 export function calcHighlightRanges(opts: {
     unitId: string;
     subUnitId: string;
@@ -65,11 +65,12 @@ export function calcHighlightRanges(opts: {
         themeService,
         univerInstanceService,
     } = opts;
+    const currentUnitId = currentWorkbook.getUnitId();
     const workbook = univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
     const worksheet = workbook?.getActiveSheet();
     const selectionWithStyle: ISelectionWithStyle[] = [];
     const currentActiveWorksheet = currentWorkbook?.getActiveSheet();
-    if (!workbook || !worksheet || !currentActiveWorksheet) {
+    if (!workbook || !worksheet || (currentUnitId !== unitId && !currentActiveWorksheet)) {
         refSelectionsService.setSelections(selectionWithStyle);
         return;
     }
@@ -78,7 +79,6 @@ export function calcHighlightRanges(opts: {
 
     const skeleton = sheetSkeletonManagerService?.getWorksheetSkeleton(currentSheetId)?.skeleton;
     if (!skeleton) return;
-
     const endIndexes: number[] = [];
     for (let i = 0, len = refSelections.length; i < len; i++) {
         const refSelection = refSelections[i];
@@ -88,7 +88,11 @@ export function calcHighlightRanges(opts: {
         const { unitId: refUnitId, sheetName, range: rawRange } = unitRangeName;
         const refSheetId = getSheetIdByName(sheetName);
 
-        if (currentWorkbook.getUnitId() !== unitId && refUnitId !== currentWorkbook.getUnitId()) {
+        if (currentUnitId !== unitId && refUnitId !== currentUnitId) {
+            continue;
+        }
+
+        if (refUnitId && refUnitId !== currentUnitId) {
             continue;
         }
 
@@ -151,7 +155,6 @@ export function useSheetHighlight(unitId: string, subUnitId: string) {
             themeService,
             univerInstanceService,
         });
-
         if (!selectionWithStyle) return;
         const allControls = refSelectionsRenderService?.getSelectionControls() || [];
         if (allControls.length === selectionWithStyle.length) {

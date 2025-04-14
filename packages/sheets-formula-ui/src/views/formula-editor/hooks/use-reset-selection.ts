@@ -29,6 +29,10 @@ export const useResetSelection = (isNeed: boolean, unitId: string, subUnitId: st
             const selections = [...sheetsSelectionsService.getWorkbookSelections(unitId).getSelectionsOfWorksheet(subUnitId)];
             const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
             const currentSheet = workbook?.getActiveSheet();
+            if (workbook?.getUnitId() !== unitId) {
+                univerInstanceService.setCurrentUnitForType(unitId);
+            }
+
             if (currentSheet && currentSheet.getSheetId() === subUnitId) {
                 sheetsSelectionsService.setSelections(selections);
             }

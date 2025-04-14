@@ -111,7 +111,8 @@ export class EditingRenderController extends Disposable {
         @Inject(LocaleService) protected readonly _localService: LocaleService,
         @IEditorService private readonly _editorService: IEditorService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService
+        @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
+        @Inject(SheetCellEditorResizeService) private readonly _sheetCellEditorResizeService: SheetCellEditorResizeService
     ) {
         super();
 
@@ -161,14 +162,6 @@ export class EditingRenderController extends Disposable {
                     }
                 })
         );
-    }
-
-    private get _sheetCellEditorResizeService() {
-        const render = this._renderManagerService.getRenderById(this._editingUnit);
-        if (!render) {
-            return null;
-        }
-        return render.with(SheetCellEditorResizeService);
     }
 
     private _listenEditorFocus(d: DisposableCollection) {
@@ -484,7 +477,7 @@ export class EditingRenderController extends Disposable {
         const snapshot = Tools.deepClone(documentDataModel?.getSnapshot());
         let { keycode } = param;
         this._cursorChange = CursorChange.InitialState;
-
+        const currentUnitId = editCellState?.unitId ?? '';
         this._exitInput(param);
 
         if (editCellState == null) {
@@ -547,7 +540,7 @@ export class EditingRenderController extends Disposable {
         }
 
         // moveSelection need to put behind of SetRangeValuesCommand, fix https://github.com/dream-num/univer/issues/1155
-        this._moveSelection(keycode);
+        this._moveSelection(keycode, currentUnitId);
     }
 
     private _getEditorObject() {
@@ -655,7 +648,7 @@ export class EditingRenderController extends Disposable {
         this._undoRedoService.clearUndoRedo(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
     }
 
-    private _moveSelection(keycode?: KeyCode) {
+    private _moveSelection(keycode: KeyCode | undefined, currentUnitId: string) {
         if (keycode == null || !MOVE_SELECTION_KEYCODE_LIST.includes(keycode)) {
             return;
         }
@@ -681,6 +674,10 @@ export class EditingRenderController extends Disposable {
             case KeyCode.ARROW_RIGHT:
                 direction = Direction.RIGHT;
                 break;
+        }
+        const currentUnit = this._univerInstanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_SHEET);
+        if (currentUnitId && currentUnit?.getUnitId() !== currentUnitId) {
+            this._univerInstanceService.setCurrentUnitForType(currentUnitId);
         }
 
         if (keycode === KeyCode.ENTER || keycode === KeyCode.TAB) {

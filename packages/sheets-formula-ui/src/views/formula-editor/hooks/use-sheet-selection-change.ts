@@ -85,8 +85,8 @@ export const useSheetSelectionChange = (
     const sheetName = useMemo(() => getSheetNameById(subUnitId), [getSheetNameById, subUnitId]);
     const activeSheet = useObservable(workbook?.activeSheet$);
     const contextRef = useStateRef({ activeSheet, sheetName });
-    const currentUnit = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
-    const render = currentUnit && renderManagerService.getRenderById(currentUnit.getUnitId());
+    const currentUnit = useObservable(useMemo(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET), [univerInstanceService]));
+    const render = renderManagerService.getRenderById(currentUnit?.getUnitId() ?? '');
 
     const refSelectionsRenderService = render?.with(RefSelectionsRenderService);
     const sheetSkeletonManagerService = render?.with(SheetSkeletonManagerService);
@@ -338,6 +338,7 @@ export const useSheetSelectionChange = (
                 sheetSkeletonManagerService,
                 themeService,
                 univerInstanceService,
+                currentWorkbook: currentUnit!,
             });
         });
 

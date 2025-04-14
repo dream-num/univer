@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IPosition, Nullable, Workbook } from '@univerjs/core';
-import type { DocumentSkeleton, IDocumentLayoutObject, IRenderContext, IRenderModule, Scene } from '@univerjs/engine-render';
-import { Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, HorizontalAlign, Inject, IUniverInstanceService, UniverInstanceType, VerticalAlign, WrapStrategy } from '@univerjs/core';
+import type { DocumentDataModel, IPosition, Nullable } from '@univerjs/core';
+import type { DocumentSkeleton, IDocumentLayoutObject, Scene } from '@univerjs/engine-render';
+import { Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, HorizontalAlign, IUniverInstanceService, UniverInstanceType, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { DOCS_COMPONENT_MAIN_LAYER_INDEX, VIEWPORT_KEY } from '@univerjs/docs-ui';
-import { convertTextRotation, fixLineWidthByScale, IRenderManagerService, Rect, ScrollBar } from '@univerjs/engine-render';
+import { convertTextRotation, fixLineWidthByScale, getCurrentTypeOfRenderer, IRenderManagerService, Rect, ScrollBar } from '@univerjs/engine-render';
 import { ILayoutService } from '@univerjs/ui';
 import { getEditorObject } from '../../basics/editor/get-editor-object';
 import { SHEET_FOOTER_BAR_HEIGHT } from '../../views/sheet-container/SheetContainer';
@@ -36,17 +36,23 @@ interface ICanvasOffset {
     top: number;
 }
 
-export class SheetCellEditorResizeService extends Disposable implements IRenderModule {
+export class SheetCellEditorResizeService extends Disposable {
     constructor(
-        private readonly _context: IRenderContext<Workbook>,
         @ILayoutService private readonly _layoutService: ILayoutService,
         @ICellEditorManagerService private readonly _cellEditorManagerService: ICellEditorManagerService,
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();
+    }
+
+    get _sheetSkeletonManagerService() {
+        return getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET, this._univerInstanceService, this._renderManagerService)?.with(SheetSkeletonManagerService);
+    }
+
+    get engine() {
+        return getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET, this._univerInstanceService, this._renderManagerService)?.engine;
     }
 
     // eslint-disable-next-line complexity
@@ -73,7 +79,7 @@ export class SheetCellEditorResizeService extends Disposable implements IRenderM
             scaleX,
             scaleY
         );
-        if (!info) return;
+        if (!info || info.actualWidth <= 0) return;
         let { actualWidth, actualHeight } = info;
         const { verticalAlign, horizontalAlign, paddingData, fill } = documentLayoutObject;
         actualWidth = actualWidth + (paddingData.l ?? 0) + (paddingData.r ?? 0);
@@ -170,7 +176,6 @@ export class SheetCellEditorResizeService extends Disposable implements IRenderM
         documentSkeleton.calculate();
 
         const size = documentSkeleton.getActualSize();
-
         let editorWidth = endX - startX;
 
         if (editorWidth < size.actualWidth * scaleX + EDITOR_INPUT_SELF_EXTEND_GAP * scaleX) {
@@ -203,7 +208,8 @@ export class SheetCellEditorResizeService extends Disposable implements IRenderM
             return Number.parseInt(width.replace('px', ''));
         }
 
-        const engine = this._context.engine;
+        const engine = this.engine;
+        if (!engine) return;
         const canvasElement = engine.getCanvasElement();
         const canvasClientRect = canvasElement.getBoundingClientRect();
 
@@ -212,7 +218,7 @@ export class SheetCellEditorResizeService extends Disposable implements IRenderM
         const { width } = canvasClientRect; // real width affected by scale
         const scaleAdjust = width / widthOfCanvas;
         const { startX, startY, endX } = position;
-        const enginWidth = this._context.engine.width;
+        const enginWidth = engine.width;
 
         const clientHeight =
             document.body.clientHeight -
@@ -260,7 +266,8 @@ export class SheetCellEditorResizeService extends Disposable implements IRenderM
             return;
         }
 
-        const engine = this._context.engine;
+        const engine = this.engine;
+        if (!engine) return;
         const canvasElement = engine.getCanvasElement();
 
         // We should take the scale into account when canvas is scaled by CSS.
@@ -394,7 +401,7 @@ export class SheetCellEditorResizeService extends Disposable implements IRenderM
         const editCellState = this._editorBridgeService.getEditCellState();
         if (!editCellState) return;
 
-        const skeleton = this._sheetSkeletonManagerService.getSkeletonParam(editCellState.sheetId)?.skeleton;
+        const skeleton = this._sheetSkeletonManagerService?.getSkeletonParam(editCellState.sheetId)?.skeleton;
         if (!skeleton) return;
         const { row, column, scaleX, scaleY, position, canvasOffset, documentLayoutObject } = editCellState;
         const { horizontalAlign } = documentLayoutObject;

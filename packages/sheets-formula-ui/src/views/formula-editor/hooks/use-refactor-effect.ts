@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
+import type { Workbook } from '@univerjs/core';
 import { EDITOR_ACTIVATED, IContextService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { getCurrentTypeOfRenderer, IRenderManagerService } from '@univerjs/engine-render';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { IRefSelectionsService, REF_SELECTIONS_ENABLED } from '@univerjs/sheets';
-import { IContextMenuService, useDependency } from '@univerjs/ui';
+import { IContextMenuService, useDependency, useObservable } from '@univerjs/ui';
 
-import { useEffect, useLayoutEffect } from 'react';
+import { useEffect, useLayoutEffect, useMemo } from 'react';
 import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render-service';
 
 export const useRefactorEffect = (isNeed: boolean, selecting: boolean, unitId: string, disableContextMenu = true) => {
@@ -28,7 +29,8 @@ export const useRefactorEffect = (isNeed: boolean, selecting: boolean, unitId: s
     const contextMenuService = useDependency(IContextMenuService);
     const refSelectionsService = useDependency(IRefSelectionsService);
     const univerInstanceService = useDependency(IUniverInstanceService);
-    const render = getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET, univerInstanceService, renderManagerService);
+    const currentUnit = useObservable(useMemo(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET), [univerInstanceService]));
+    const render = renderManagerService.getRenderById(currentUnit?.getUnitId() ?? '');
     const refSelectionsRenderService = render?.with(RefSelectionsRenderService);
 
     useLayoutEffect(() => {

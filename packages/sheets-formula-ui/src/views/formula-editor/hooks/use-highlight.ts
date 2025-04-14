@@ -138,9 +138,9 @@ export function useSheetHighlight(unitId: string, subUnitId: string) {
     const render = renderManagerService.getRenderById(unitId);
     const refSelectionsRenderService = render?.with(RefSelectionsRenderService);
     const sheetSkeletonManagerService = render?.with(SheetSkeletonManagerService);
-    const currentWorkbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
 
     const highlightSheet = useEvent((refSelections: IRefSelection[], editor?: Editor) => {
+        const currentWorkbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         if (!currentWorkbook) return;
         if (refSelectionsRenderService?.selectionMoving) return;
         const selectionWithStyle = calcHighlightRanges({

@@ -149,26 +149,27 @@ export class EditingRenderController extends Disposable {
     }
 
     private _initEditorVisibilityListener(): void {
-        this.disposeWithMe(this._univerInstanceService.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_SHEET).subscribe((unit) => {
+        this.disposeWithMe(this._univerInstanceService.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_SHEET).subscribe(async (unit) => {
             if (unit?.getUnitId() !== this._editingUnit && !this._editorBridgeService.isForceKeepVisible()) {
-                this._handleEditorInvisible({
+                await this._handleEditorInvisible({
                     visible: false,
                     eventType: DeviceInputEventType.Keyboard,
                     keycode: KeyCode.ESC,
                     unitId: this._editingUnit,
                 });
+                this._editingUnit = '';
             }
         }));
 
         this.disposeWithMe(
             this._editorBridgeService.visible$
                 .pipe(distinctUntilChanged((prev, curr) => prev.visible === curr.visible))
-                .subscribe((params) => {
+                .subscribe(async (params) => {
                     if (params.visible) {
                         this._editingUnit = params.unitId;
                         this._handleEditorVisible(params);
                     } else if (this._editingUnit) {
-                        this._handleEditorInvisible(params);
+                        await this._handleEditorInvisible(params);
                         this._editingUnit = '';
                     }
                 })
@@ -490,7 +491,6 @@ export class EditingRenderController extends Disposable {
         this._cursorChange = CursorChange.InitialState;
         const currentUnitId = editCellState?.unitId ?? '';
         this._exitInput(param);
-
         if (editCellState == null) {
             return;
         }
@@ -502,7 +502,7 @@ export class EditingRenderController extends Disposable {
             keycode = KeyCode.ESC;
         }
 
-        const workbook = this._getEditingUnit();
+        const workbook = this._univerInstanceService.getUnit<Workbook>(currentUnitId, UniverInstanceType.UNIVER_SHEET);
         if (!workbook) {
             return;
         }
@@ -572,10 +572,9 @@ export class EditingRenderController extends Disposable {
         if (editCellState == null) {
             return true;
         }
-
         const { unitId, sheetId, row, column } = editCellState;
 
-        const workbook = this._getEditingUnit();
+        const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
         if (!workbook) {
             return true;
         }

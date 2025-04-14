@@ -18,7 +18,7 @@
 
 import type { DocumentDataModel, ICellData, ICommandInfo, IDisposable, IDocumentBody, IDocumentData, IDocumentStyle, IMutationInfo, IStyleData, Nullable, Styles, Workbook } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import type { ISetRangeValuesCommandParams, MutationsAffectRange, WorkbookSelectionModel } from '@univerjs/sheets';
+import type { ISetRangeValuesCommandParams, MutationsAffectRange } from '@univerjs/sheets';
 
 import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 import {
@@ -62,7 +62,7 @@ import {
     IRenderManagerService,
 } from '@univerjs/engine-render';
 
-import { adjustRangeOnMutation, COMMAND_LISTENER_SKELETON_CHANGE, InsertColMutation, InsertRowMutation, MoveColsMutation, MoveRowsMutation, REF_SELECTIONS_ENABLED, RemoveColMutation, RemoveRowMutation, SetRangeValuesCommand, SetSelectionsOperation, SetWorksheetActivateCommand, SetWorksheetActiveOperation, SheetInterceptorService } from '@univerjs/sheets';
+import { adjustRangeOnMutation, COMMAND_LISTENER_SKELETON_CHANGE, InsertColMutation, InsertRowMutation, MoveColsMutation, MoveRowsMutation, REF_SELECTIONS_ENABLED, RemoveColMutation, RemoveRowMutation, SetRangeValuesCommand, SetSelectionsOperation, SetWorksheetActivateCommand, SetWorksheetActiveOperation, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
 import { KeyCode, MetaKeys } from '@univerjs/ui';
 import { distinctUntilChanged, filter } from 'rxjs';
 import { getEditorObject } from '../../basics/editor/get-editor-object';
@@ -94,8 +94,6 @@ export class EditingRenderController extends Disposable {
     /** If the corresponding unit is active and prepared for editing. */
     private _editingUnit = '';
 
-    private _workbookSelections: WorkbookSelectionModel;
-
     _cursorTimeout: NodeJS.Timeout;
 
     constructor(
@@ -112,7 +110,8 @@ export class EditingRenderController extends Disposable {
         @IEditorService private readonly _editorService: IEditorService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
-        @Inject(SheetCellEditorResizeService) private readonly _sheetCellEditorResizeService: SheetCellEditorResizeService
+        @Inject(SheetCellEditorResizeService) private readonly _sheetCellEditorResizeService: SheetCellEditorResizeService,
+        @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService
     ) {
         super();
 
@@ -125,6 +124,10 @@ export class EditingRenderController extends Disposable {
 
     override dispose(): void {
         super.dispose();
+    }
+
+    private get _workbookSelections() {
+        return this._selectionManagerService.getWorkbookSelections(this._editingUnit);
     }
 
     private _init(): IDisposable {
@@ -488,6 +491,7 @@ export class EditingRenderController extends Disposable {
         const documentDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
         const snapshot = Tools.deepClone(documentDataModel?.getSnapshot());
         let { keycode } = param;
+        const originalKeycode = keycode;
         this._cursorChange = CursorChange.InitialState;
         const currentUnitId = editCellState?.unitId ?? '';
         this._exitInput(param);
@@ -527,14 +531,18 @@ export class EditingRenderController extends Disposable {
             if (this._editorBridgeService.isForceKeepVisible()) {
                 this._editorBridgeService.disableForceKeepVisible();
             }
-            const selections = this._workbookSelections.getCurrentSelections();
-            if (selections) {
-                this._contextService.setContextValue(REF_SELECTIONS_ENABLED, false);
-                this._commandService.syncExecuteCommand(SetSelectionsOperation.id, {
-                    unitId: workbookId,
-                    subUnitId: sheetId,
-                    selections,
-                });
+            if (originalKeycode !== KeyCode.ESC) {
+                this._moveSelection(originalKeycode, currentUnitId);
+            } else {
+                const selections = this._workbookSelections.getCurrentSelections();
+                if (selections) {
+                    this._contextService.setContextValue(REF_SELECTIONS_ENABLED, false);
+                    this._commandService.syncExecuteCommand(SetSelectionsOperation.id, {
+                        unitId: workbookId,
+                        subUnitId: sheetId,
+                        selections,
+                    });
+                }
             }
 
             return;
@@ -551,7 +559,7 @@ export class EditingRenderController extends Disposable {
         }
 
         // moveSelection need to put behind of SetRangeValuesCommand, fix https://github.com/dream-num/univer/issues/1155
-        this._moveSelection(keycode, currentUnitId);
+        this._moveSelection(originalKeycode, currentUnitId);
     }
 
     private _getEditorObject() {

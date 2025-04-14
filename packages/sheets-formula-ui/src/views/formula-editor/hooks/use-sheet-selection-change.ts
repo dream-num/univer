@@ -21,7 +21,7 @@ import type { Editor } from '@univerjs/docs-ui';
 import type { ISelectionWithCoord, ISetSelectionsOperationParams } from '@univerjs/sheets';
 import type { RefObject } from 'react';
 import type { IRefSelection } from './use-highlight';
-import { DisposableCollection, ICommandService, IUniverInstanceService, ThemeService } from '@univerjs/core';
+import { DisposableCollection, ICommandService, IUniverInstanceService, ThemeService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { deserializeRangeWithSheet, generateStringWithSequence, LexerTreeBuilder, sequenceNodeType, serializeRange, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -85,11 +85,12 @@ export const useSheetSelectionChange = (
     const sheetName = useMemo(() => getSheetNameById(subUnitId), [getSheetNameById, subUnitId]);
     const activeSheet = useObservable(workbook?.activeSheet$);
     const contextRef = useStateRef({ activeSheet, sheetName });
-    const render = renderManagerService.getRenderById(unitId);
+    const currentUnit = useObservable(useMemo(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET), [univerInstanceService]));
+    const render = renderManagerService.getRenderById(currentUnit?.getUnitId() ?? '');
+
     const refSelectionsRenderService = render?.with(RefSelectionsRenderService);
     const sheetSkeletonManagerService = render?.with(SheetSkeletonManagerService);
     const refSelectionsService = useDependency(IRefSelectionsService);
-
     // eslint-disable-next-line complexity
     const onSelectionsChange = useEvent((selections: IRange[], isEnd: boolean) => {
         const ctx = prepareSelectionChangeContext({ editor, lexerTreeBuilder });
@@ -105,11 +106,12 @@ export const useSheetSelectionChange = (
                 const rangeSheetId = range.sheetId ?? subUnitId;
                 const unitRangeName = {
                     range,
-                    unitId: range.unitId ?? unitId,
+                    unitId: range.unitId ?? currentUnit!.getUnitId(),
                     sheetName: getSheetNameById(rangeSheetId),
                 };
                 const isAcrossSheet = rangeSheetId !== subUnitId;
-                const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet && isAcrossSheet, sheetName);
+                const isAcrossWorkbook = currentUnit?.getUnitId() !== unitId;
+                const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet && (isAcrossSheet || isAcrossWorkbook), sheetName, isAcrossWorkbook);
                 sequenceNodes.push({ token: refRanges[0], nodeType: sequenceNodeType.REFERENCE } as any);
                 const newSequenceNodes = [...sequenceNodes, ...lastNodes];
                 const result = sequenceNodeToText(newSequenceNodes);
@@ -336,6 +338,7 @@ export const useSheetSelectionChange = (
                 sheetSkeletonManagerService,
                 themeService,
                 univerInstanceService,
+                currentWorkbook: currentUnit!,
             });
         });
 

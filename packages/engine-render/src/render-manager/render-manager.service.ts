@@ -352,7 +352,7 @@ export function getCurrentTypeOfRenderer(
     instanceService: IUniverInstanceService,
     renderManageService: IRenderManagerService
 ): Nullable<IRender> {
-    const currentUnit = instanceService.getCurrentUnitForType(type);
+    const currentUnit = instanceService.getCurrentUnitOfType(type);
     if (currentUnit == null) {
         return null;
     }

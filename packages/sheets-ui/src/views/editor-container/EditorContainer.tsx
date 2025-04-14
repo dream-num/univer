@@ -104,14 +104,12 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
         return () => {
             sub.unsubscribe();
         };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []); // Empty dependency array means this effect runs once on mount and clean up on unmount
 
     useEffect(() => {
         if (!disableAutoFocus) {
             cellEditorManagerService.setFocus(true);
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [disableAutoFocus, state]);
 
     const handleClickSideBar = useEvent(() => {

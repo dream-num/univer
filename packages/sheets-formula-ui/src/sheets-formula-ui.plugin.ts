@@ -80,11 +80,21 @@ export class UniverSheetsFormulaUIPlugin extends Plugin {
             [FormulaRenderManagerController],
             [FormulaReorderController],
         ]);
+
+        this._initUIPart();
+    }
+
+    override onReady(): void {
+        // render basics
+        ([
+            [RefSelectionsRenderService],
+        ] as Dependency[]).forEach((dep) => {
+            this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, dep));
+        });
     }
 
     override onRendered(): void {
         ([
-            [RefSelectionsRenderService],
             [FormulaAlertRenderController],
         ] as Dependency[]).forEach((dep) => {
             this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, dep));
@@ -95,10 +105,6 @@ export class UniverSheetsFormulaUIPlugin extends Plugin {
             [FormulaClipboardController],
             [FormulaRenderManagerController],
         ]);
-
-        // Since component FormulaEditor relies on RefSelectionsRenderService, it should be
-        // registered after RefSelectionsRenderService is registered.
-        this._initUIPart();
     }
 
     override onSteady(): void {

@@ -47,12 +47,29 @@ export class SheetCellEditorResizeService extends Disposable {
         super();
     }
 
-    get _sheetSkeletonManagerService() {
-        return getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET, this._univerInstanceService, this._renderManagerService)?.with(SheetSkeletonManagerService);
+    private get _currentRenderer() {
+        return getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET, this._univerInstanceService, this._renderManagerService);
     }
 
-    get engine() {
-        return getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET, this._univerInstanceService, this._renderManagerService)?.engine;
+    private get _editingUnitId() {
+        return this._editorBridgeService.getEditCellState()?.unitId ?? '';
+    }
+
+    private get _editingRenderer() {
+        return this._renderManagerService.getRenderById(this._editingUnitId);
+    }
+
+    private get _renderer() {
+        const currentUnitId = this._univerInstanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_SHEET)?.getUnitId();
+        return this._editingUnitId === currentUnitId ? this._editingRenderer : this._currentRenderer;
+    }
+
+    private get _sheetSkeletonManagerService() {
+        return this._renderer?.with(SheetSkeletonManagerService);
+    }
+
+    private get engine() {
+        return this._renderer?.engine;
     }
 
     // eslint-disable-next-line complexity

@@ -17,7 +17,7 @@
 import type { DocumentDataModel, IDisposable, ITextRange } from '@univerjs/core';
 import type { Editor, IKeyboardEventConfig } from '@univerjs/docs-ui';
 import type { KeyCode, MetaKeys } from '@univerjs/ui';
-import type { CSSProperties, ReactNode } from 'react';
+import type { CSSProperties, ReactNode, Ref } from 'react';
 import type { FormulaSelectingType } from './hooks/use-formula-selection';
 import type { IRefSelection } from './hooks/use-highlight';
 import { BuildTextUtils, createInternalEditorID, generateRandomId, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
@@ -26,7 +26,7 @@ import { DocBackScrollRenderController, DocSelectionRenderService, IEditorServic
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { EMBEDDING_FORMULA_EDITOR } from '@univerjs/sheets-ui';
 import { useDependency, useEvent, useObservable, useUpdateEffect } from '@univerjs/ui';
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { findIndexFromSequenceNodes, findRefSequenceIndex } from '../range-selector/utils/find-index-from-sequence-nodes';
 import { HelpFunction } from './help-function/HelpFunction';
 import { useFocus } from './hooks/use-focus';
@@ -55,9 +55,6 @@ export interface IFormulaEditorProps {
     onFocus?: () => void;
     onBlur?: () => void;
     isSupportAcrossSheet?: boolean;
-    actions?: {
-        handleOutClick?: (e: MouseEvent, cb: () => void) => void;
-    };
     className?: string;
     editorId?: string;
     moveCursor?: boolean;
@@ -76,7 +73,12 @@ export interface IFormulaEditorProps {
 }
 
 const noop = () => { };
-export function FormulaEditor(props: IFormulaEditorProps) {
+
+export interface IFormulaEditorRef {
+    isClickOutSide: (e: MouseEvent) => boolean;
+}
+
+export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IFormulaEditorRef>) => {
     const {
         errorText,
         initValue,
@@ -88,7 +90,6 @@ export function FormulaEditor(props: IFormulaEditorProps) {
         onBlur = noop,
         onChange: propOnChange,
         onVerify,
-        actions,
         className,
         editorId: propEditorId,
         moveCursor = true,
@@ -106,16 +107,14 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     const editorService = useDependency(IEditorService);
     const sheetEmbeddingRef = useRef<HTMLDivElement>(null);
     const onChange = useEvent(propOnChange);
-    // init actions
-    if (actions) {
-        actions.handleOutClick = (e: MouseEvent, cb: () => void) => {
+    useImperativeHandle(ref, () => ({
+        isClickOutSide: (e: MouseEvent) => {
             if (sheetEmbeddingRef.current) {
-                const isContain = sheetEmbeddingRef.current.contains(e.target as Node);
-                !isContain && cb();
+                return sheetEmbeddingRef.current.contains(e.target as Node);
             }
-        };
-    }
-
+            return false;
+        },
+    }));
     const onFormulaSelectingChange = useEvent(propOnFormulaSelectingChange);
     const searchFunctionRef = useRef<HTMLElement>(null);
     const editorRef = useRef<Editor>(undefined);
@@ -352,4 +351,4 @@ export function FormulaEditor(props: IFormulaEditorProps) {
         </div>
     )
     ;
-}
+});

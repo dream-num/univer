@@ -16,11 +16,13 @@
 
 import type { Workbook } from '@univerjs/core';
 import type { IIconSet, IIconType } from '@univerjs/sheets-conditional-formatting';
-import type { IStyleEditorProps } from './type';
+import type { IFormulaEditorRef } from '@univerjs/sheets-formula-ui';
 
+import type { IStyleEditorProps } from './type';
 import { get, IUniverInstanceService, LocaleService, set, Tools, UniverInstanceType } from '@univerjs/core';
 import { Checkbox, clsx, Dropdown, InputNumber, Select } from '@univerjs/design';
 import { MoreDownSingle, SlashSingle } from '@univerjs/icons';
+
 import {
     CFNumberOperator,
     CFRuleType,
@@ -33,11 +35,10 @@ import {
     iconGroup,
     iconMap,
 } from '@univerjs/sheets-conditional-formatting';
-
 import { FormulaEditor } from '@univerjs/sheets-formula-ui';
 import { ILayoutService, useDependency, useScrollYOverContainer, useSidebarClick } from '@univerjs/ui';
 
-import React, { forwardRef, useEffect, useMemo, useRef, useState } from 'react';
+import { forwardRef, useEffect, useMemo, useRef, useState } from 'react';
 
 import stylesBase from '../index.module.less';
 import styles from './index.module.less';
@@ -58,12 +59,12 @@ const TextInput = (props: { id: number; type: CFValueType; value: number | strin
         return '';
     }, [props.error]);
 
-    const formulaEditorActionsRef = useRef<Parameters<typeof FormulaEditor>[0]['actions']>({});
+    const formulaEditorRef = useRef<IFormulaEditorRef>(null);
     const [isFocusFormulaEditor, isFocusFormulaEditorSet] = useState(false);
 
     useSidebarClick((e: MouseEvent) => {
-        const handleOutClick = formulaEditorActionsRef.current?.handleOutClick;
-        handleOutClick && handleOutClick(e, () => isFocusFormulaEditorSet(false));
+        const isOutSide = formulaEditorRef.current?.isClickOutSide(e);
+        isOutSide && isFocusFormulaEditorSet(false);
     });
     return (
         <div className={styles.positionRelative}>
@@ -90,7 +91,7 @@ const TextInput = (props: { id: number; type: CFValueType; value: number | strin
                                 props.onChange(formula);
                             }}
                             onFocus={() => isFocusFormulaEditorSet(true)}
-                            actions={formulaEditorActionsRef.current}
+                            ref={formulaEditorRef}
                         />
                     </div>
                 )}

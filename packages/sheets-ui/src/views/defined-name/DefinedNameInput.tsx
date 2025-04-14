@@ -201,12 +201,12 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
         setTypeValue(type);
     };
 
-    const formulaEditorActionsRef = useRef<any>({});
+    const formulaEditorRef = useRef<any>(null);
     const [isFocusFormulaEditor, isFocusFormulaEditorSet] = useState(false);
 
     useSidebarClick((e: MouseEvent) => {
-        const handleOutClick = formulaEditorActionsRef.current?.handleOutClick;
-        handleOutClick && handleOutClick(e, () => isFocusFormulaEditorSet(false));
+        const isOutSide = formulaEditorRef.current?.isClickOutSide(e);
+        isOutSide && isFocusFormulaEditorSet(false);
     });
 
     return (
@@ -249,7 +249,7 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
                         }}
 
                         onFocus={() => isFocusFormulaEditorSet(true)}
-                        actions={formulaEditorActionsRef.current}
+                        ref={formulaEditorRef}
                     />
                 ))}
             <div>

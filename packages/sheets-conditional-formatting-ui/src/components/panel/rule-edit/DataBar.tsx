@@ -16,14 +16,15 @@
 
 import type { Workbook } from '@univerjs/core';
 import type { IConditionalFormattingRuleConfig, IValueConfig } from '@univerjs/sheets-conditional-formatting';
+import type { IFormulaEditorRef } from '@univerjs/sheets-formula-ui';
 import type { IStyleEditorProps } from './type';
 import { IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { Checkbox, InputNumber, Radio, RadioGroup, Select } from '@univerjs/design';
-import { CFRuleType, CFValueType, createDefaultValueByValueType, defaultDataBarNativeColor, defaultDataBarPositiveColor } from '@univerjs/sheets-conditional-formatting';
 
+import { CFRuleType, CFValueType, createDefaultValueByValueType, defaultDataBarNativeColor, defaultDataBarPositiveColor } from '@univerjs/sheets-conditional-formatting';
 import { FormulaEditor } from '@univerjs/sheets-formula-ui';
 import { useDependency, useSidebarClick } from '@univerjs/ui';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { ColorPicker } from '../../color-picker';
 import { Preview } from '../../preview';
 import stylesBase from '../index.module.less';
@@ -37,12 +38,12 @@ const InputText = (props: { disabled?: boolean; id: string; className: string; t
     const unitId = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId();
     const subUnitId = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()?.getSheetId();
 
-    const formulaEditorActionsRef = useRef<Parameters<typeof FormulaEditor>[0]['actions']>({});
+    const formulaEditorRef = useRef<IFormulaEditorRef>(null);
     const [isFocusFormulaEditor, isFocusFormulaEditorSet] = useState(false);
 
     useSidebarClick((e: MouseEvent) => {
-        const handleOutClick = formulaEditorActionsRef.current?.handleOutClick;
-        handleOutClick && handleOutClick(e, () => isFocusFormulaEditorSet(false));
+        const isOutSide = formulaEditorRef.current?.isClickOutSide(e);
+        isOutSide && isFocusFormulaEditorSet(false);
     });
 
     const _value = useRef(value);
@@ -72,7 +73,7 @@ const InputText = (props: { disabled?: boolean; id: string; className: string; t
                         onChange(formula);
                     }}
                     onFocus={() => isFocusFormulaEditorSet(true)}
-                    actions={formulaEditorActionsRef.current}
+                    ref={formulaEditorRef}
                 />
             </div>
         );

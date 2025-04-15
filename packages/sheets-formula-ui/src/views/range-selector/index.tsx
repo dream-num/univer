@@ -173,7 +173,7 @@ export function RangeSelectorDialog(props: IRangeSelectorDialogProps) {
                 {ranges.map((text, index) => (
                     <div key={index} className={styles.sheetRangeSelectorDialogItem}>
                         <Input
-                            affixWrapperStyle={{ width: '100%' }}
+                            className="univer-w-full"
                             placeholder={localeService.t('rangeSelector.placeHolder')}
                             onFocus={() => setFocusIndex(index)}
                             value={text}

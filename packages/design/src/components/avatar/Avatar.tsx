@@ -17,14 +17,14 @@
 import type { CSSProperties, ReactNode } from 'react';
 import { clsx } from '../../helper/clsx';
 
-import styles from './index.module.less';
-
 type Shape = 'circle' | 'square';
 type AvatarSize = number | 'middle' | 'small';
 type ImageFit = 'fill' | 'contain' | 'cover' | 'none' | 'scale-down';
 
 export interface IAvatarProps {
     children?: ReactNode;
+
+    className?: string;
 
     /** Semantic DOM style */
     style?: CSSProperties;
@@ -69,6 +69,7 @@ export interface IAvatarProps {
 export function Avatar(props: IAvatarProps) {
     const {
         children,
+        className,
         style,
         title,
         alt,
@@ -89,20 +90,33 @@ export function Avatar(props: IAvatarProps) {
             }
             : {};
 
-    const _className = clsx(styles.avatar, {
-        [styles.avatarCircle]: shape === 'circle',
-        [styles.avatarSquare]: shape === 'square',
-        [styles.avatarImage]: src,
-        [styles.avatarMiddle]: size === 'middle',
-        [styles.avatarSmall]: size === 'small',
-    });
+    const _className = clsx(`
+      univer-relative univer-inline-block univer-overflow-hidden univer-whitespace-nowrap univer-bg-gray-200
+      univer-text-center univer-align-middle univer-text-white
+    `, {
+        'univer-rounded-full': shape === 'circle',
+        'univer-rounded': shape === 'square',
+        'univer-bg-transparent': src,
+        'univer-size-9 univer-leading-9': size === 'middle',
+        'univer-size-7 univer-leading-7': size === 'small',
+    }, className);
 
     const fitStyle = { objectFit: fit };
 
     if (src) {
         return (
-            <span className={_className} style={{ ...sizeStyle, ...style, ...fitStyle }}>
-                <img src={src} title={title} alt={alt} onError={onError} onLoad={onLoad} />
+            <span
+                className={_className}
+                style={{ ...sizeStyle, ...style, ...fitStyle }}
+            >
+                <img
+                    className="univer-block univer-size-full"
+                    src={src}
+                    title={title}
+                    alt={alt}
+                    onError={onError}
+                    onLoad={onLoad}
+                />
                 {children}
             </span>
         );

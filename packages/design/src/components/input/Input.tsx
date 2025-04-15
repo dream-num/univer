@@ -23,7 +23,7 @@ type InputProps = React.InputHTMLAttributes<HTMLInputElement>;
 export interface IInputProps extends Pick<InputProps, 'onFocus' | 'onBlur'> {
     autoFocus?: boolean;
     className?: string;
-    affixWrapperStyle?: React.CSSProperties;
+    style?: React.CSSProperties;
     type?: 'text' | 'password';
     placeholder?: string;
     value?: string;
@@ -33,13 +33,12 @@ export interface IInputProps extends Pick<InputProps, 'onFocus' | 'onBlur'> {
     onClick?: (e: React.MouseEvent<HTMLInputElement>) => void;
     onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
     onChange?: (value: string) => void;
-    style?: React.CSSProperties;
 }
 
 export const Input = ({
     autoFocus = false,
     className,
-    affixWrapperStyle,
+    style,
     type = 'text',
     placeholder,
     value,
@@ -75,7 +74,7 @@ export const Input = ({
                 disabled && 'univer-cursor-not-allowed univer-opacity-50',
                 className
             )}
-            style={affixWrapperStyle}
+            style={style}
         >
             <input
                 type={type}

@@ -69,8 +69,7 @@ export function calcHighlightRanges(opts: {
     const workbook = univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
     const worksheet = workbook?.getActiveSheet();
     const selectionWithStyle: ISelectionWithStyle[] = [];
-    const currentActiveWorksheet = currentWorkbook?.getActiveSheet();
-    if (!workbook || !worksheet || (currentUnitId !== unitId && !currentActiveWorksheet)) {
+    if (!workbook || !worksheet) {
         refSelectionsService.setSelections(selectionWithStyle);
         return;
     }

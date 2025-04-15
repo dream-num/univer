@@ -18,7 +18,7 @@
 
 import type { DocumentDataModel, ICellData, ICommandInfo, IDisposable, IDocumentBody, IDocumentData, IDocumentStyle, IMutationInfo, IStyleData, Nullable, Styles, Workbook } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import type { ISetRangeValuesCommandParams, MutationsAffectRange, WorkbookSelectionModel } from '@univerjs/sheets';
+import type { ISetRangeValuesCommandParams, MutationsAffectRange } from '@univerjs/sheets';
 
 import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 import {
@@ -62,7 +62,7 @@ import {
     IRenderManagerService,
 } from '@univerjs/engine-render';
 
-import { adjustRangeOnMutation, COMMAND_LISTENER_SKELETON_CHANGE, InsertColMutation, InsertRowMutation, MoveColsMutation, MoveRowsMutation, REF_SELECTIONS_ENABLED, RemoveColMutation, RemoveRowMutation, SetRangeValuesCommand, SetSelectionsOperation, SetWorksheetActivateCommand, SetWorksheetActiveOperation, SheetInterceptorService } from '@univerjs/sheets';
+import { adjustRangeOnMutation, COMMAND_LISTENER_SKELETON_CHANGE, InsertColMutation, InsertRowMutation, MoveColsMutation, MoveRowsMutation, REF_SELECTIONS_ENABLED, RemoveColMutation, RemoveRowMutation, SetRangeValuesCommand, SetSelectionsOperation, SetWorksheetActivateCommand, SetWorksheetActiveOperation, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
 import { KeyCode, MetaKeys } from '@univerjs/ui';
 import { distinctUntilChanged, filter } from 'rxjs';
 import { getEditorObject } from '../../basics/editor/get-editor-object';
@@ -72,6 +72,7 @@ import { ScrollToRangeOperation } from '../../commands/operations/scroll-to-rang
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { ICellEditorManagerService } from '../../services/editor/cell-editor-manager.service';
 import { SheetCellEditorResizeService } from '../../services/editor/cell-editor-resize.service';
+import { EditorBridgeRenderController } from '../render-controllers/editor-bridge.render-controller';
 import { MOVE_SELECTION_KEYCODE_LIST } from '../shortcuts/editor.shortcut';
 import { extractStringFromForceString, isForceString } from '../utils/cell-tools';
 import { normalizeString } from '../utils/char-tools';
@@ -94,8 +95,6 @@ export class EditingRenderController extends Disposable {
     /** If the corresponding unit is active and prepared for editing. */
     private _editingUnit = '';
 
-    private _workbookSelections: WorkbookSelectionModel;
-
     _cursorTimeout: NodeJS.Timeout;
 
     constructor(
@@ -112,7 +111,8 @@ export class EditingRenderController extends Disposable {
         @IEditorService private readonly _editorService: IEditorService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
-        @Inject(SheetCellEditorResizeService) private readonly _sheetCellEditorResizeService: SheetCellEditorResizeService
+        @Inject(SheetCellEditorResizeService) private readonly _sheetCellEditorResizeService: SheetCellEditorResizeService,
+        @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService
     ) {
         super();
 
@@ -125,6 +125,10 @@ export class EditingRenderController extends Disposable {
 
     override dispose(): void {
         super.dispose();
+    }
+
+    private get _workbookSelections() {
+        return this._selectionManagerService.getWorkbookSelections(this._editingUnit);
     }
 
     private _init(): IDisposable {
@@ -151,13 +155,16 @@ export class EditingRenderController extends Disposable {
     private _initEditorVisibilityListener(): void {
         this.disposeWithMe(this._univerInstanceService.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_SHEET).subscribe(async (unit) => {
             if (this._editingUnit && unit?.getUnitId() !== this._editingUnit && !this._editorBridgeService.isForceKeepVisible()) {
-                await this._handleEditorInvisible({
+                this._commandService.syncExecuteCommand(SetCellEditVisibleOperation.id, {
                     visible: false,
                     eventType: DeviceInputEventType.Keyboard,
                     keycode: KeyCode.ESC,
                     unitId: this._editingUnit,
                 });
-                this._editingUnit = '';
+                const editorBridgeRenderController = this._renderManagerService.getRenderById(unit!.getUnitId())?.with(EditorBridgeRenderController);
+                if (editorBridgeRenderController) {
+                    editorBridgeRenderController.refreshEditorPosition();
+                }
             }
         }));
 
@@ -487,19 +494,12 @@ export class EditingRenderController extends Disposable {
         const editCellState = this._editorBridgeService.getEditCellState();
         const documentDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
         const snapshot = Tools.deepClone(documentDataModel?.getSnapshot());
-        let { keycode } = param;
+        const { keycode } = param;
         this._cursorChange = CursorChange.InitialState;
         const currentUnitId = editCellState?.unitId ?? '';
         this._exitInput(param);
         if (editCellState == null) {
             return;
-        }
-
-        // If neither the formula bar editor nor the cell editor has been edited,
-        // it is considered that the content has not changed and returns directly.
-        const editorIsDirty = this._editorBridgeService.getEditorDirty();
-        if (editorIsDirty === false) {
-            keycode = KeyCode.ESC;
         }
 
         const workbook = this._univerInstanceService.getUnit<Workbook>(currentUnitId, UniverInstanceType.UNIVER_SHEET);
@@ -522,11 +522,22 @@ export class EditingRenderController extends Disposable {
             });
         }
 
+        // If neither the formula bar editor nor the cell editor has been edited,
+        // it is considered that the content has not changed and returns directly.
+        const editorIsDirty = this._editorBridgeService.getEditorDirty();
+        if (editorIsDirty === false) {
+            if (this._editorBridgeService.isForceKeepVisible()) {
+                this._editorBridgeService.disableForceKeepVisible();
+            }
+            this._moveSelection(keycode, currentUnitId);
+        }
+
         // Reselect the current selections, when exist cell editor by press ESC.I
         if (keycode === KeyCode.ESC) {
             if (this._editorBridgeService.isForceKeepVisible()) {
                 this._editorBridgeService.disableForceKeepVisible();
             }
+
             const selections = this._workbookSelections.getCurrentSelections();
             if (selections) {
                 this._contextService.setContextValue(REF_SELECTIONS_ENABLED, false);

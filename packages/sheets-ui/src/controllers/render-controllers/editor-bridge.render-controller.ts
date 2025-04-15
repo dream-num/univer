@@ -117,6 +117,16 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
         }
     }
 
+    refreshEditorPosition() {
+        const workbookSelections = this._selectionManagerService.getWorkbookSelections(this._context.unitId);
+        if (workbookSelections) {
+            const selections = workbookSelections.getCurrentSelections();
+            if (selections) {
+                this._updateEditorPosition([...selections]);
+            }
+        }
+    }
+
     private _initEventListener(d: DisposableCollection) {
         const sheetObject = this._getSheetObject();
         const { spreadsheet, spreadsheetColumnHeader, spreadsheetLeftTopPlaceholder, spreadsheetRowHeader } = sheetObject;

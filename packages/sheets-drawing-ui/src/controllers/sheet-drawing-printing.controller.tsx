@@ -17,7 +17,7 @@
 import type { IRange } from '@univerjs/core';
 import type { IFloatDomData } from '@univerjs/sheets-drawing';
 import type { IPrintingFloatDomProps } from '../views/printing-float-dom';
-import { Disposable, DrawingTypeEnum, Inject, Injector, Tools } from '@univerjs/core';
+import { Disposable, Inject, Injector, Tools } from '@univerjs/core';
 import { render, unmount } from '@univerjs/design';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { DrawingRenderService } from '@univerjs/drawing-ui';
@@ -87,7 +87,7 @@ export class SheetDrawingPrintingController extends Disposable {
 
                         const { scaleX, scaleY } = renderer.scene;
                         const newRange: IRange = range ? { ...range } : { startColumn: 0, endColumn: 0, endRow: 0, startRow: 0 };
-                        const data = subUnitData.order.map((key) => subUnitData.data[key]).filter((item) => item.drawingType !== DrawingTypeEnum.DRAWING_DOM);
+                        const data = subUnitData.order.map((key) => subUnitData.data[key]);
                         if (data.length) {
                             data.forEach((param) => {
                                 if (!param.groupId && param.transform && Tools.isDefine(param.transform.left) && Tools.isDefine(param.transform.top) && Tools.isDefine(param.transform.width) && Tools.isDefine(param.transform.height)) {

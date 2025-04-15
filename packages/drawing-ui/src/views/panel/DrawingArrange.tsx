@@ -109,7 +109,6 @@ export const DrawingArrange = (props: IDrawingArrangeProps) => {
                             <TopmostSingle />
                             {localeService.t('image-panel.arrange.front')}
                         </span>
-
                     </Button>
                 </div>
                 <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSpan2)}>
@@ -118,11 +117,9 @@ export const DrawingArrange = (props: IDrawingArrangeProps) => {
                             <BottomSingle />
                             {localeService.t('image-panel.arrange.back')}
                         </span>
-
                     </Button>
                 </div>
             </div>
         </div>
-
     );
 };

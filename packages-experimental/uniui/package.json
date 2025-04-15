@@ -69,7 +69,7 @@
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@xyflow/react": "^12.4.4"
+        "@xyflow/react": "^12.5.5"
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",

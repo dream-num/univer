@@ -30,7 +30,6 @@ exports[`ColorPicker > should render correctly 1`] = `
         class="
                   univer-relative univer-h-2 univer-w-full univer-cursor-pointer univer-rounded-full univer-shadow-inner
                 "
-        style=""
       >
         <div
           class="
@@ -389,7 +388,6 @@ exports[`ColorPicker > should render with showAlpha 1`] = `
         class="
                   univer-relative univer-h-2 univer-w-full univer-cursor-pointer univer-rounded-full univer-shadow-inner
                 "
-        style=""
       >
         <div
           class="
@@ -412,7 +410,6 @@ exports[`ColorPicker > should render with showAlpha 1`] = `
         class="
                   univer-relative univer-h-2 univer-w-full univer-cursor-pointer univer-rounded-full univer-shadow-inner
                 "
-        style=""
       >
         <div
           class="
@@ -790,7 +787,6 @@ exports[`ColorPicker > should render with value 1`] = `
         class="
                   univer-relative univer-h-2 univer-w-full univer-cursor-pointer univer-rounded-full univer-shadow-inner
                 "
-        style=""
       >
         <div
           class="

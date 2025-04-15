@@ -53,9 +53,9 @@ function SwitchUnitMenuFactory(accessor: IAccessor): IMenuSelectorItem {
 }
 
 export const menuSchema: MenuSchemaType = {
-    [RibbonStartGroup.FORMAT]: {
+    [RibbonStartGroup.OTHERS]: {
         [SwitchUnitOperation.id]: {
-            order: -1,
+            order: 999,
             menuItemFactory: SwitchUnitMenuFactory,
         },
     },

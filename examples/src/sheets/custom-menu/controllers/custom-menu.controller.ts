@@ -76,11 +76,11 @@ export class CustomMenuController extends Disposable {
         this._menuManagerService.mergeMenu({
             [RibbonStartGroup.OTHERS]: {
                 [SingleButtonOperation.id]: {
-                    order: 10,
+                    order: 9999,
                     menuItemFactory: CustomMenuItemSingleButtonFactory,
                 },
                 [CUSTOM_MENU_DROPDOWN_LIST_OPERATION_ID]: {
-                    order: 11,
+                    order: 9998.5,
                     menuItemFactory: CustomMenuItemDropdownListMainButtonFactory,
                     [DropdownListFirstItemOperation.id]: {
                         order: 0,
@@ -96,11 +96,11 @@ export class CustomMenuController extends Disposable {
             [ContextMenuPosition.MAIN_AREA]: {
                 [ContextMenuGroup.OTHERS]: {
                     [SingleButtonOperation.id]: {
-                        order: 12,
+                        order: 9999,
                         menuItemFactory: CustomMenuItemSingleButtonFactory,
                     },
                     [CUSTOM_MENU_DROPDOWN_LIST_OPERATION_ID]: {
-                        order: 9,
+                        order: 9998,
                         menuItemFactory: CustomMenuItemDropdownListMainButtonFactory,
                         [DropdownListFirstItemOperation.id]: {
                             order: 0,

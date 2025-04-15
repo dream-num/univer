@@ -29,7 +29,7 @@ export { Dialog, type IDialogProps } from './components/dialog';
 export { DropdownLegacy, type IDropdownLegacyProps } from './components/dropdown-legacy';
 export { Dropdown } from './components/dropdown';
 export { FormDualColumnLayout, FormLayout, type IFormDualColumnLayoutProps, type IFormLayoutProps } from './components/form-layout';
-export { type IInputProps, type IInputWithSlotProps, Input, InputWithSlot } from './components/input';
+export { type IInputProps, Input } from './components/input';
 export { type IInputNumberProps, InputNumber } from './components/input-number';
 export { Menu, MenuItem, MenuItemGroup, type MenuRef, SubMenu, TinyMenuGroup } from './components/menu';
 export { type IMessageProps, message, Messager, MessageType, removeMessage } from './components/message';

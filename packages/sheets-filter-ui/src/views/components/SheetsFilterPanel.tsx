@@ -94,10 +94,16 @@ export function FilterPanel() {
                     <div style={{ flex: 1 }} />
                 )}
             <div className={styles.sheetsFilterPanelFooter}>
-                <Button type="link" onClick={onClearCriteria} disabled={clearFilterDisabled}>{localeService.t('sheets-filter.panel.clear-filter')}</Button>
+                <Button type="link" onClick={onClearCriteria} disabled={clearFilterDisabled}>
+                    {localeService.t('sheets-filter.panel.clear-filter')}
+                </Button>
                 <span className={styles.sheetsFilterPanelFooterPrimaryButtons}>
-                    <Button type="default" onClick={onCancel}>{localeService.t('sheets-filter.panel.cancel')}</Button>
-                    <Button disabled={!canApply} type="primary" onClick={onApply}>{localeService.t('sheets-filter.panel.confirm')}</Button>
+                    <Button type="default" onClick={onCancel}>
+                        {localeService.t('sheets-filter.panel.cancel')}
+                    </Button>
+                    <Button disabled={!canApply} type="primary" onClick={onApply}>
+                        {localeService.t('sheets-filter.panel.confirm')}
+                    </Button>
                 </span>
             </div>
         </div>

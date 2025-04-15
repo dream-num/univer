@@ -25,8 +25,10 @@ import type {
     ISetSelectionsOperationParams,
 } from '@univerjs/sheets';
 import type { ICellDataWithSpanInfo, ICopyPastePayload, ISheetDiscreteRangeLocation } from '../../services/clipboard/type';
-import { cellToRange, CustomRangeType, DEFAULT_STYLES, generateRandomId, IUniverInstanceService, numfmt, ObjectMatrix, Range, Rectangle, Tools } from '@univerjs/core';
+import type { IDiscreteRange } from '../utils/range-tools';
 
+import { cellToRange, CellValueType, CustomRangeType, DEFAULT_STYLES, generateRandomId, IUniverInstanceService, numfmt, ObjectMatrix, Range, Rectangle, Tools } from '@univerjs/core';
+import { isTextFormat } from '@univerjs/engine-numfmt';
 import { DEFAULT_PADDING_DATA } from '@univerjs/engine-render';
 import {
     AddMergeUndoMutationFactory,
@@ -44,7 +46,7 @@ import {
 } from '@univerjs/sheets';
 import { COPY_TYPE } from '../../services/clipboard/type';
 import { isRichText } from '../editor/editing.render-controller';
-import { discreteRangeToRange, type IDiscreteRange, virtualizeDiscreteRanges } from '../utils/range-tools';
+import { discreteRangeToRange, virtualizeDiscreteRanges } from '../utils/range-tools';
 
 // if special paste need append mutations instead of replace the default, it can use this function to generate default mutations.
 /**
@@ -85,7 +87,7 @@ export function getDefaultOnPasteCellMutations(
         undoMutationsInfo.push(...setValuesUndos);
 
         // set styles
-        const { undos: setStyleUndos, redos: setStyleRedos } = getSetCellStyleMutations(pasteTo, data, accessor, true);
+        const { undos: setStyleUndos, redos: setStyleRedos } = getSetCellStyleMutations(pasteTo, pasteFrom, data, accessor, true);
         redoMutationsInfo.push(...setStyleRedos);
         undoMutationsInfo.push(...setStyleUndos);
 
@@ -323,27 +325,42 @@ export function getSetCellValueMutations(
     accessor: IAccessor
 ) {
     const { unitId, subUnitId, range } = pasteTo;
+    const worksheet = accessor.get(IUniverInstanceService).getUniverSheetInstance(unitId)?.getSheetBySheetId(subUnitId);
     const redoMutationsInfo: IMutationInfo[] = [];
     const undoMutationsInfo: IMutationInfo[] = [];
     const { mapFunc } = virtualizeDiscreteRanges([range]);
     const valueMatrix = new ObjectMatrix<ICellData>();
 
     matrix.forValue((row, col, value) => {
-        let originNumberValue;
-        if (!value.p && value.v && !pasteFrom) {
-            const content = String(value.v);
-            const numfmtValue = numfmt.parseValue(content);
-            if (numfmtValue?.v !== undefined && typeof numfmtValue.v === 'number') {
-                originNumberValue = numfmtValue.v;
-            }
-        }
         const { row: realRow, col: realCol } = mapFunc(row, col);
 
+        const cellValue: ICellData = {
+            v: value.v,
+            t: value.t,
+        };
+
+        if (!value.p && value.v && !pasteFrom) {
+            // pasteFrom is null, means the data is pasted from outside, at this time, the data has no number format.
+            // If the paste to cell has a number format, google sheet will apply the number format, but excel will not.
+            // Here the text format need to be handled, other number format need to discuss. TODO: @wzhudev @ybzky
+            const style = worksheet?.getCellStyle(realRow, realCol);
+
+            if (isTextFormat(style?.n?.pattern)) {
+                cellValue.t = CellValueType.STRING;
+            } else {
+                const content = String(value.v);
+                const numfmtValue = numfmt.parseValue(content);
+                if (numfmtValue?.v !== undefined && typeof numfmtValue.v === 'number') {
+                    cellValue.v = numfmtValue.v;
+                }
+            }
+        }
+
         if (value.p?.body && isRichText(value.p.body)) {
-            const newValue = Tools.deepClone({ p: value.p, v: originNumberValue ?? value.v });
+            const newValue = Tools.deepClone({ p: value.p, v: value.v });
             valueMatrix.setValue(realRow, realCol, newValue);
         } else {
-            valueMatrix.setValue(realRow, realCol, Tools.deepClone({ v: originNumberValue ?? value.v, t: value.t }));
+            valueMatrix.setValue(realRow, realCol, Tools.deepClone(cellValue));
         }
     });
     // set cell value and style
@@ -383,6 +400,7 @@ export function getSetCellValueMutations(
  */
 export function getSetCellStyleMutations(
     pasteTo: ISheetDiscreteRangeLocation,
+    pasteFrom: Nullable<ISheetDiscreteRangeLocation>,
     matrix: ObjectMatrix<ICellDataWithSpanInfo>,
     accessor: IAccessor,
     withRichFormat = false
@@ -390,6 +408,7 @@ export function getSetCellStyleMutations(
     const redoMutationsInfo: IMutationInfo[] = [];
     const undoMutationsInfo: IMutationInfo[] = [];
     const { unitId, subUnitId, range } = pasteTo;
+    const worksheet = accessor.get(IUniverInstanceService).getUniverSheetInstance(unitId)?.getSheetBySheetId(subUnitId);
     const valueMatrix = new ObjectMatrix<ICellData>();
 
     const { mapFunc } = virtualizeDiscreteRanges([range]);
@@ -419,21 +438,35 @@ export function getSetCellStyleMutations(
             }
         }
 
-        const content = String(value.v);
-        const numfmtValue = numfmt.parseValue(content);
-        if (numfmtValue?.z) {
+        const { row: actualRow, col: actualCol } = mapFunc(row, col);
+
+        // pasteFrom is null, means the data is pasted from outside, at this time, the data has no number format.
+        // If the paste to cell has a number format, google sheet will apply the number format, but excel will not.
+        // Here the text format need to be handled, other number format need to discuss. TODO: @wzhudev @ybzky
+        const style = worksheet?.getCellStyle(actualRow, actualCol);
+
+        if (value.v && !pasteFrom && isTextFormat(style?.n?.pattern)) {
             if (!newValue.s) {
                 newValue.s = {};
             }
-            if (typeof newValue.s === 'object') {
-                if (!newValue.s?.n) {
-                    newValue.s.n = { pattern: numfmtValue.z };
-                } else {
-                    newValue.s.n.pattern = numfmtValue.z;
+            (newValue.s as IStyleData).n = style?.n;
+        } else {
+            const content = String(value.v);
+            const numfmtValue = numfmt.parseValue(content);
+            if (numfmtValue?.z) {
+                if (!newValue.s) {
+                    newValue.s = {};
+                }
+                if (typeof newValue.s === 'object') {
+                    if (!newValue.s?.n) {
+                        newValue.s.n = { pattern: numfmtValue.z };
+                    } else {
+                        newValue.s.n.pattern = numfmtValue.z;
+                    }
                 }
             }
         }
-        const { row: actualRow, col: actualCol } = mapFunc(row, col);
+
         valueMatrix.setValue(actualRow, actualCol, newValue);
     });
     // set cell style

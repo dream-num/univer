@@ -720,6 +720,7 @@ export class SheetClipboardController extends RxDisposable {
                 const { undos: setStyleUndos, redos: setStyleRedos } = this._injector.invoke((accessor) => {
                     return getSetCellStyleMutations(
                         pasteTo,
+                        pasteFrom,
                         matrix,
                         accessor
                     );

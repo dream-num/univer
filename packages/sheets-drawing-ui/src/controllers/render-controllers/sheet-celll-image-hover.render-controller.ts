@@ -19,7 +19,7 @@ import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { Disposable, Inject } from '@univerjs/core';
 import { DrawingRenderService } from '@univerjs/drawing-ui';
 import { CURSOR_TYPE } from '@univerjs/engine-render';
-import { ISelectionWithStyle, SheetsSelectionsService } from '@univerjs/sheets';
+import { type ISelectionWithStyle, SheetsSelectionsService } from '@univerjs/sheets';
 import { HoverManagerService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { throttleTime } from 'rxjs';
 

@@ -15,9 +15,7 @@
  */
 
 import { MoreLeftSingle, MoreRightSingle } from '@univerjs/icons';
-import React, { Fragment, useMemo } from 'react';
-
-import styles from './index.module.less';
+import { useMemo } from 'react';
 
 export interface IPagerProps {
     text?: string;
@@ -55,20 +53,34 @@ export function Pager(props: IPagerProps) {
     };
 
     return (
-        <div className={styles.pager}>
+        <div className="univer-flex univer-flex-shrink-0 univer-items-center univer-text-[13px] univer-text-gray-700">
             {hasValue
                 ? (
-                    <Fragment>
-                        <div role="button" className={styles.pagerLeftArrow} onClick={onClickLeftArrow}>
+                    <>
+                        <div
+                            className={`
+                              univer-inline-flex univer-size-4 univer-cursor-pointer univer-items-center univer-rounded
+                              hover:univer-bg-gray-50
+                            `}
+                            role="button"
+                            onClick={onClickLeftArrow}
+                        >
                             <MoreLeftSingle />
                         </div>
-                        <div className={styles.pagerNumber}>{text}</div>
-                        <div role="button" className={styles.pagerRightArrow} onClick={onClickRightArrow}>
+                        <div className="univer-mx-1">{text}</div>
+                        <div
+                            className={`
+                              univer-inline-flex univer-size-4 univer-cursor-pointer univer-items-center univer-rounded
+                              hover:univer-bg-gray-50
+                            `}
+                            role="button"
+                            onClick={onClickRightArrow}
+                        >
                             <MoreRightSingle />
                         </div>
-                    </Fragment>
+                    </>
                 )
-                : <div className={styles.pagerNumber}>{text}</div>}
+                : <div className="univer-mx-1">{text}</div>}
         </div>
     );
 }

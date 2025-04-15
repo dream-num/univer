@@ -25,7 +25,6 @@ import styles from './index.module.less';
 export interface IDrawingAlignProps {
     drawings: IDrawingParam[];
     alignShow: boolean;
-
 }
 
 export const DrawingAlign = (props: IDrawingAlignProps) => {

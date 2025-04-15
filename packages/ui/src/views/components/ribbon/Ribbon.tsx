@@ -40,7 +40,7 @@ export function Ribbon(props: IRibbonProps) {
     const localeService = useDependency(LocaleService);
 
     const toolbarRef = useRef<HTMLDivElement>(null);
-    const toolbarItemRefs = useRef<Record<string, { el: HTMLSpanElement; key: string }>>({});
+    const toolbarItemRefs = useRef<Record<string, { el: HTMLSpanElement; key: string; groupOrder: number; order: number }>>({});
 
     const [ribbon, setRibbon] = useState<IMenuSchema[]>([]);
     const [activatedTab, setActivatedTab] = useState<string>(RibbonPosition.START);
@@ -108,33 +108,36 @@ export function Ribbon(props: IRibbonProps) {
 
     // resize observer
     useEffect(() => {
-        let timer: number;
         const observer = new ResizeObserver((entries) => {
-            timer = requestAnimationFrame(() => {
-                const toolbar = entries[0].target;
-                const toolbarWidth = toolbar.clientWidth;
-                const toolbarItems = Object.values(toolbarItemRefs.current);
-                const newCollapsedIds: string[] = [];
-                let totalWidth = 0;
-
-                const allGroups = ribbon.find((group) => group.key === activatedTab)?.children ?? [];
-
-                const gapWidth = (allGroups.length - 1) * 8;
-                totalWidth += gapWidth;
-
-                for (const { el, key } of toolbarItems) {
-                    if (!el) continue;
-
-                    totalWidth += el?.getBoundingClientRect().width + 8;
-                    if (totalWidth > toolbarWidth - 32 - 8 * (allGroups.length - 1)) {
-                        newCollapsedIds.push(key);
-                    }
+            const toolbar = entries[0].target;
+            const toolbarWidth = toolbar.clientWidth;
+            const toolbarItems = Object.values(toolbarItemRefs.current);
+            const sortedToolbarItems = toolbarItems.sort((a, b) => {
+                if (a.groupOrder === b.groupOrder) {
+                    return a.order - b.order;
                 }
-
-                if (JSON.stringify(newCollapsedIds) !== JSON.stringify(collapsedIds)) {
-                    setCollapsedIds(newCollapsedIds);
-                }
+                return a.groupOrder - b.groupOrder;
             });
+            const newCollapsedIds: string[] = [];
+            let totalWidth = 0;
+
+            const allGroups = ribbon.find((group) => group.key === activatedTab)?.children ?? [];
+
+            const gapWidth = (allGroups.length - 1) * 8;
+            totalWidth += gapWidth;
+
+            for (const { el, key } of sortedToolbarItems) {
+                if (!el) continue;
+
+                totalWidth += el?.getBoundingClientRect().width + 8;
+                if (totalWidth > toolbarWidth - 32 - 8 * (allGroups.length - 1)) {
+                    newCollapsedIds.push(key);
+                }
+            }
+
+            if (JSON.stringify(newCollapsedIds) !== JSON.stringify(collapsedIds)) {
+                setCollapsedIds(newCollapsedIds);
+            }
         });
 
         if (toolbarRef.current) {
@@ -143,7 +146,6 @@ export function Ribbon(props: IRibbonProps) {
 
         return () => {
             observer.disconnect();
-            timer && cancelAnimationFrame(timer);
         };
     }, [ribbon, activatedTab, collapsedIds]);
 
@@ -161,6 +163,8 @@ export function Ribbon(props: IRibbonProps) {
                                         toolbarItemRefs.current[child.key] = {
                                             el: ref.el,
                                             key: child.key,
+                                            groupOrder: groupItem.order,
+                                            order: child.order,
                                         };
                                     }
                                 }}

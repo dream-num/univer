@@ -72,6 +72,7 @@ import { ScrollToRangeOperation } from '../../commands/operations/scroll-to-rang
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { ICellEditorManagerService } from '../../services/editor/cell-editor-manager.service';
 import { SheetCellEditorResizeService } from '../../services/editor/cell-editor-resize.service';
+import { EditorBridgeRenderController } from '../render-controllers/editor-bridge.render-controller';
 import { MOVE_SELECTION_KEYCODE_LIST } from '../shortcuts/editor.shortcut';
 import { extractStringFromForceString, isForceString } from '../utils/cell-tools';
 import { normalizeString } from '../utils/char-tools';
@@ -160,6 +161,10 @@ export class EditingRenderController extends Disposable {
                     keycode: KeyCode.ESC,
                     unitId: this._editingUnit,
                 });
+                const editorBridgeRenderController = this._renderManagerService.getRenderById(unit!.getUnitId())?.with(EditorBridgeRenderController);
+                if (editorBridgeRenderController) {
+                    editorBridgeRenderController.refreshEditorPosition();
+                }
             }
         }));
 

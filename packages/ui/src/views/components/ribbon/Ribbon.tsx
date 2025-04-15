@@ -30,6 +30,7 @@ import { DropdownWrapper, TooltipWrapper } from './TooltipButtonWrapper';
 
 interface IRibbonProps {
     headerMenuComponents?: Set<ComponentType>;
+    headerMenu?: boolean;
 }
 
 function Divider() {
@@ -37,7 +38,7 @@ function Divider() {
 }
 
 export function Ribbon(props: IRibbonProps) {
-    const { headerMenuComponents } = props;
+    const { headerMenuComponents, headerMenu = true } = props;
 
     const menuManagerService = useDependency(IMenuManagerService);
     const localeService = useDependency(LocaleService);
@@ -173,46 +174,48 @@ export function Ribbon(props: IRibbonProps) {
     return (
         <>
             {/* header */}
-            <header className="univer-relative univer-select-none">
-                <div
-                    className={clsx(`
-                      univer-flex univer-h-0 univer-items-center univer-justify-center univer-gap-2
-                      univer-overflow-hidden univer-transition-all univer-animate-in
-                    `, {
-                        'univer-h-8 univer-slide-in-from-top-full': ribbon.length > 1 || (headerMenuComponents && headerMenuComponents.size > 0),
-                    })}
-                >
-                    {ribbon.length > 1 && ribbon.map((group) => (
-                        <a
-                            key={group.key}
-                            className={clsx(`
-                              univer-box-border univer-cursor-pointer univer-rounded univer-px-2 univer-py-0.5
-                              univer-text-sm univer-text-gray-700 univer-transition-colors
-                              hover:univer-bg-gray-300
-                            `, {
-                                'univer-bg-primary-500 univer-text-white hover:!univer-bg-primary-500': group.key === activatedTab,
-                            })}
-                            onClick={() => handleSelectTab(group)}
-                        >
-                            {localeService.t(group.key)}
-                        </a>
-                    ))}
-                </div>
-
-                {(headerMenuComponents && headerMenuComponents.size > 0) && (
+            {headerMenu && (
+                <header className="univer-relative univer-select-none">
                     <div
-                        className={`
-                          univer-absolute univer-right-2 univer-top-0 univer-flex univer-h-full univer-items-center
-                          univer-gap-2
-                          [&>*]:univer-inline-flex [&>*]:univer-h-6 [&>*]:univer-items-center [&>*]:univer-rounded
-                          [&>*]:univer-px-1 [&>*]:univer-transition-colors
-                          hover:[&>*]:univer-bg-gray-300
-                        `}
+                        className={clsx(`
+                          univer-flex univer-h-0 univer-items-center univer-justify-center univer-gap-2
+                          univer-overflow-hidden univer-transition-all univer-animate-in
+                        `, {
+                            'univer-h-8 univer-slide-in-from-top-full': ribbon.length > 1 || (headerMenuComponents && headerMenuComponents.size > 0),
+                        })}
                     >
-                        <ComponentContainer components={headerMenuComponents} />
+                        {ribbon.length > 1 && ribbon.map((group) => (
+                            <a
+                                key={group.key}
+                                className={clsx(`
+                                  univer-box-border univer-cursor-pointer univer-rounded univer-px-2 univer-py-0.5
+                                  univer-text-sm univer-text-gray-700 univer-transition-colors
+                                  hover:univer-bg-gray-300
+                                `, {
+                                    'univer-bg-primary-500 univer-text-white hover:!univer-bg-primary-500': group.key === activatedTab,
+                                })}
+                                onClick={() => handleSelectTab(group)}
+                            >
+                                {localeService.t(group.key)}
+                            </a>
+                        ))}
                     </div>
-                )}
-            </header>
+
+                    {(headerMenuComponents && headerMenuComponents.size > 0) && (
+                        <div
+                            className={`
+                              univer-absolute univer-right-2 univer-top-0 univer-flex univer-h-full univer-items-center
+                              univer-gap-2
+                              [&>*]:univer-inline-flex [&>*]:univer-h-6 [&>*]:univer-items-center [&>*]:univer-rounded
+                              [&>*]:univer-px-1 [&>*]:univer-transition-colors
+                              hover:[&>*]:univer-bg-gray-300
+                            `}
+                        >
+                            <ComponentContainer components={headerMenuComponents} />
+                        </div>
+                    )}
+                </header>
+            )}
 
             <section
                 role="toolbar"

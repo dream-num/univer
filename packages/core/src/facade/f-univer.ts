@@ -57,7 +57,25 @@ export class FUniver extends Disposable {
      */
     static newAPI(wrapped: Univer | Injector): FUniver {
         const injector = wrapped instanceof Univer ? wrapped.__getInjector() : wrapped;
-        return injector.createInstance(FUniver);
+        const instance = injector.createInstance(FUniver);
+
+        /**
+         * Uses Proxy to intercept method calls and check if the method exists.
+         */
+        return new Proxy(instance, {
+            get(target, prop, receiver): FUniver {
+                const value = Reflect.get(target, prop, receiver);
+                if (typeof value !== 'undefined') {
+                    return value;
+                } else {
+                    throw new TypeError(
+                        `[FUniver]: The method '${String(prop)}' does not exist on the FUniver instance. ` +
+                        'This may occur if you haven\'t imported the required facade package or if you\'re calling an incorrect method. ' +
+                        'Please verify the method name and ensure all necessary modules are imported.'
+                    );
+                }
+            },
+        });
     }
 
     declare private [InitializerSymbol]: Initializers | undefined;
@@ -162,11 +180,11 @@ export class FUniver extends Disposable {
 
         this.registerEventHandler(
             this.Event.CommandExecuted,
-            () => commandService.onCommandExecuted((commandInfo) => {
+            () => commandService.onCommandExecuted((commandInfo, options) => {
                 const { id, type: propType, params } = commandInfo;
                 if (commandInfo.id !== RedoCommand.id && commandInfo.id !== UndoCommand.id) {
                     const type = propType!;
-                    const eventParams: ICommandEvent = { id, type, params };
+                    const eventParams: ICommandEvent = { id, type, params, options };
                     this.fireEvent(this.Event.CommandExecuted, eventParams);
                 }
             })
@@ -210,11 +228,11 @@ export class FUniver extends Disposable {
 
         this.registerEventHandler(
             this.Event.BeforeCommandExecute,
-            () => commandService.beforeCommandExecuted((commandInfo) => {
+            () => commandService.beforeCommandExecuted((commandInfo, options) => {
                 const { id, type: propType, params } = commandInfo;
                 if (commandInfo.id !== RedoCommand.id && commandInfo.id !== UndoCommand.id) {
                     const type = propType!;
-                    const eventParams: ICommandEvent = { id, type, params };
+                    const eventParams: ICommandEvent = { id, type, params, options };
                     this.fireEvent(this.Event.BeforeCommandExecute, eventParams);
 
                     if (eventParams.cancel) {

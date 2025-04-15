@@ -20,7 +20,7 @@ import type { IRender, IRenderContext, IRenderModule } from '@univerjs/engine-re
 import type { ISelectionWithStyle, ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import type { ICurrentEditCellParam, IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 import { DisposableCollection, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, FOCUSING_FX_BAR_EDITOR, FOCUSING_SHEET, ICommandService, IContextService, Inject, IUniverInstanceService, RxDisposable, toDisposable, UniverInstanceType } from '@univerjs/core';
-import { DocSelectionRenderService, IEditorService, IRangeSelectorService } from '@univerjs/docs-ui';
+import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
 import {
     ClearSelectionFormatCommand,
@@ -46,14 +46,9 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
         @IUniverInstanceService private readonly _instanceSrv: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
-        // FIXME: should use WorkbookSelectionModel
-        // FIXME: should check if it is the current sheet, if it becomes the current sheet,
-        // it should update cell params, otherwise it should do nothing.
         @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
-        @IRangeSelectorService private readonly _rangeSelectorService: IRangeSelectorService,
         @IContextService private readonly _contextService: IContextService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @IEditorService private readonly _editorService: IEditorService,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService
     ) {
         super();
@@ -65,8 +60,6 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
                 this._disposeCurrent();
             }
         }));
-
-        this._initialRangeSelector();
     }
 
     private _init(): IDisposable {
@@ -93,7 +86,6 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
 
     private _updateEditorPosition(params: Nullable<ISelectionWithStyle[]>) {
         if (this._editorBridgeService.isVisible().visible) return;
-        if (this._rangeSelectorService.selectorModalVisible) return;
 
         const primary = params?.[params.length - 1]?.primary;
         if (primary) {
@@ -122,6 +114,16 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
                 unitId,
                 sheetId,
             });
+        }
+    }
+
+    refreshEditorPosition() {
+        const workbookSelections = this._selectionManagerService.getWorkbookSelections(this._context.unitId);
+        if (workbookSelections) {
+            const selections = workbookSelections.getCurrentSelections();
+            if (selections) {
+                this._updateEditorPosition([...selections]);
+            }
         }
     }
 
@@ -258,56 +260,6 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
             eventType: DeviceInputEventType.PointerDown,
             unitId: this._context.unitId,
         });
-    }
-
-    private _initialRangeSelector() {
-        this.disposeWithMe(this._selectionManagerService.selectionMoving$.subscribe(this._rangeSelector.bind(this)));
-        this.disposeWithMe(this._selectionManagerService.selectionMoveStart$.subscribe(this._rangeSelector.bind(this)));
-
-        // TODO: this method shouldn't be here. Fix in when refactor the range selector.
-
-        /**
-         * pro/issues/388
-         * When the range selector is opened,
-         * the current selection needs to be synchronized to the range selector.
-         */
-        this.disposeWithMe(
-            this._rangeSelectorService.openSelector$.subscribe(() => {
-                const { unitId, sheetId, sheetName } = this._getCurrentUnitIdAndSheetId();
-                if (!sheetId || !sheetName) return;
-
-                const selectionWithStyle = this._selectionManagerService.getCurrentSelections();
-                const ranges = selectionWithStyle?.map((value) => ({ range: value.range, unitId, sheetId, sheetName }));
-                if (ranges) {
-                    this._rangeSelectorService.selectionChange(ranges);
-                }
-            })
-        );
-    }
-
-    private _rangeSelector(selectionWithStyle: Nullable<ISelectionWithStyle[]>) {
-        if (!selectionWithStyle) {
-            return;
-        }
-
-        const { unitId, sheetId, sheetName } = this._getCurrentUnitIdAndSheetId();
-        if (!sheetId || !sheetName) return;
-
-        const ranges = selectionWithStyle.map((value: ISelectionWithStyle) => {
-            return { range: value.range, unitId, sheetId, sheetName };
-        });
-
-        this._rangeSelectorService.selectionChange(ranges);
-    }
-
-    private _getCurrentUnitIdAndSheetId() {
-        const workbook = this._context.unit;
-        const worksheet = workbook.getActiveSheet();
-        return {
-            unitId: workbook.getUnitId(),
-            sheetId: worksheet?.getSheetId(),
-            sheetName: worksheet?.getName(),
-        };
     }
 
     private _getSheetObject() {

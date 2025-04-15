@@ -139,6 +139,7 @@ export class UniverSheetsUIPlugin extends Plugin {
             [SheetCanvasPopManagerService],
             [CellAlertManagerService],
             [SelectAllService],
+            [SheetCellEditorResizeService],
 
             // controllers
             [ActiveWorksheetController],
@@ -153,6 +154,7 @@ export class UniverSheetsUIPlugin extends Plugin {
             [SheetsDefinedNameController],
             [EditorDataSyncController],
             [SheetCheckboxController],
+            [EditingRenderController],
 
             // permission
             [SheetPermissionPanelModel],
@@ -198,6 +200,7 @@ export class UniverSheetsUIPlugin extends Plugin {
             [AutoWidthController],
             [EditorDataSyncController],
             [SheetCheckboxController],
+            [EditingRenderController],
         ]);
     }
 
@@ -232,7 +235,6 @@ export class UniverSheetsUIPlugin extends Plugin {
             [SheetsScrollRenderController],
             [HeaderFreezeRenderController],
             [SheetsZoomRenderController],
-            [SheetCellEditorResizeService],
 
             [FormatPainterRenderController],
             [ClipboardRenderController],
@@ -248,7 +250,6 @@ export class UniverSheetsUIPlugin extends Plugin {
 
             // editor
             [EditorBridgeRenderController],
-            [EditingRenderController],
 
             // permission
             [SheetPermissionInterceptorCanvasRenderController],

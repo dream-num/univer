@@ -46,11 +46,10 @@ export interface ISideMenuInstance {
     scrollTo: (id: string) => void;
 }
 
-const commonClass = 'univer-overflow-hidden univer-truncate univer-h-[24px] univer-mb-2 univer-leading-[24px] univer-ellipsis univer-cursor-pointer';
+const commonClass = 'univer-overflow-hidden univer-font-[500] univer-truncate univer-h-[24px] univer-mb-2 univer-leading-[24px] univer-ellipsis univer-cursor-pointer';
 const titleClass = 'univer-text-base univer-font-semibold';
 const h1Class = 'univer-text-sm univer-font-semibold';
 const textClass = 'univer-text-sm';
-const activeClass = 'univer-text-[#466AF7]';
 
 export const SideMenu = forwardRef<ISideMenuInstance, ISideMenuProps>((props, ref) => {
     const { menus, onClick, className, style, mode, maxHeight, activeId, open, onOpenChange, maxWidth, wrapperClass, wrapperStyle, iconClass, iconStyle } = props;
@@ -100,7 +99,7 @@ export const SideMenu = forwardRef<ISideMenuInstance, ISideMenuProps>((props, re
                 className={clsx(`
                   univer-absolute univer-left-5 univer-top-4 univer-z-[100] univer-flex univer-h-8 univer-w-8
                   univer-cursor-pointer univer-items-center univer-justify-center univer-rounded-full univer-bg-white
-                  univer-text-blue-500
+                  univer-text-gray-800
                   univer-shadow-[0px_1px_3px_-1px_rgba(30,40,77,0.10),0px_1px_4px_0px_rgba(30,40,77,0.12)]
                 `, iconClass)}
                 style={iconStyle}
@@ -133,20 +132,11 @@ export const SideMenu = forwardRef<ISideMenuInstance, ISideMenuProps>((props, re
                     paddingRight: mode === 'float' ? undefined : 0,
                 }}
             >
-                {/* <div
-                    className={`
-                      univer-text-xs univer-font-semibold univer-leading-[150%] univer-text-gray-400 univer-font-inter
-                      univer-mb-2
-                    `}
-                >
-                    contents
-                </div> */}
                 <div
                     ref={containerRef}
                     className={`
-                      univer-flex-1 univer-overflow-y-auto univer-overflow-x-hidden univer-scrollbar
-                      univer-scrollbar-thin univer-scrollbar-track-transparent univer-scrollbar-thumb-[#73737366]
-                      univer-scrollbar-gutter-stable
+                      univer-flex-1 univer-overflow-y-auto univer-overflow-x-hidden univer-scrollbar-none
+                      [&::-webkit-scrollbar]:univer-hidden
                     `}
                 >
                     {menus?.map((menu) => (
@@ -159,8 +149,8 @@ export const SideMenu = forwardRef<ISideMenuInstance, ISideMenuProps>((props, re
                                     [titleClass]: menu.isTitle,
                                     [h1Class]: menu.level === 1,
                                     [textClass]: menu.level > 1,
-                                    [activeClass]: menu.id === activeId,
                                     'univer-text-gray-500': menu.id !== activeId,
+                                    'univer-text-gray-800': menu.id === activeId,
                                 }
                             )}
                             style={{

@@ -15,7 +15,8 @@
  */
 
 import type { DocPopupMenu, IDocPopupMenuItem } from '../services/doc-quick-insert-popup.service';
-import { BulletListCommand, HorizontalLineCommand, OrderListCommand } from '@univerjs/docs-ui';
+import { InsertDocImageCommand } from '@univerjs/docs-drawing-ui';
+import { BulletListCommand, DocCreateTableOperation, HorizontalLineCommand, OrderListCommand } from '@univerjs/docs-ui';
 
 export enum QuickInsertMenuGroup {
     Basic = 'quick.insert.group.basic',
@@ -50,6 +51,20 @@ export const dividerMenu: IDocPopupMenuItem = {
     keywords: ['divider', 'line', 'separate'],
 };
 
+export const tableMenu: IDocPopupMenuItem = {
+    id: DocCreateTableOperation.id,
+    title: 'docQuickInsert.menu.table',
+    icon: 'GridSingle',
+    keywords: ['table', 'grid', 'spreadsheet'],
+};
+
+export const imageMenu: IDocPopupMenuItem = {
+    id: InsertDocImageCommand.id,
+    title: 'docQuickInsert.menu.image',
+    icon: 'addition-and-subtraction-single',
+    keywords: ['image', 'picture', 'photo'],
+};
+
 export const builtInMenus: DocPopupMenu[] = [
     {
         title: 'docQuickInsert.group.basics',
@@ -59,6 +74,8 @@ export const builtInMenus: DocPopupMenu[] = [
             numberedListMenu,
             bulletedListMenu,
             dividerMenu,
+            tableMenu,
+            imageMenu,
         ],
     },
 ];
@@ -67,4 +84,6 @@ export const builtInMenuCommandIds = new Set([
     numberedListMenu.id,
     bulletedListMenu.id,
     dividerMenu.id,
+    tableMenu.id,
+    imageMenu.id,
 ]);

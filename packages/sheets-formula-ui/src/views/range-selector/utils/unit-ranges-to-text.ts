@@ -15,7 +15,7 @@
  */
 
 import type { IUnitRangeName, IUniverInstanceService, Workbook } from '@univerjs/core';
-import { serializeRange, serializeRangeWithSheet } from '@univerjs/engine-formula';
+import { serializeRange, serializeRangeToRefString, serializeRangeWithSheet } from '@univerjs/engine-formula';
 
 export function getSheetIdByName(univerInstanceService: IUniverInstanceService, unitId: string, name: string) {
     return univerInstanceService.getUnit<Workbook>(unitId)?.getSheetBySheetName(name)?.getSheetId() || '';
@@ -24,11 +24,14 @@ export function getSheetNameById(univerInstanceService: IUniverInstanceService, 
     return univerInstanceService.getUnit<Workbook>(unitId)?.getSheetBySheetId(sheetId)?.getName() || '';
 }
 
-export const unitRangesToText = (ranges: IUnitRangeName[], isNeedSheetName: boolean = false, originSheetName = '') => {
-    if (!isNeedSheetName) {
+export const unitRangesToText = (ranges: IUnitRangeName[], isNeedSheetName: boolean = false, originSheetName = '', isNeedWorkbookName = false) => {
+    if (!isNeedSheetName && !isNeedWorkbookName) {
         return ranges.map((item) => serializeRange(item.range));
     } else {
         return ranges.map((item) => {
+            if (isNeedWorkbookName) {
+                return serializeRangeToRefString(item);
+            }
             if (item.sheetName !== '' && item.sheetName !== originSheetName) {
                 return serializeRangeWithSheet(item.sheetName, item.range);
             }

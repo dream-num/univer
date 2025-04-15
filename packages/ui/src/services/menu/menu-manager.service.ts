@@ -27,8 +27,10 @@ export const IMenuManagerService = createIdentifier<IMenuManagerService>('univer
 export interface IMenuSchema {
     key: string;
     order: number;
+    title?: string;
     item?: IMenuItem;
     children?: IMenuSchema[];
+    tiny?: boolean;
 }
 
 export interface IMenuManagerService {
@@ -46,6 +48,7 @@ export interface IMenuManagerService {
 export type MenuSchemaType = {
     order?: number;
     menuItemFactory?: (accessor: IAccessor) => IMenuItem;
+    title?: string;
 } | {
     [key: string]: MenuSchemaType;
 };
@@ -113,6 +116,27 @@ export class MenuManagerService extends Disposable implements IMenuManagerServic
         [MenuManagerPosition.CONTEXT_MENU]: {
             [ContextMenuPosition.MAIN_AREA]: {
                 order: 0,
+                [ContextMenuGroup.QUICK]: {
+                    order: -1,
+                },
+                [ContextMenuGroup.FORMAT]: {
+                    order: 0,
+                },
+                [ContextMenuGroup.LAYOUT]: {
+                    order: 1,
+                },
+                [ContextMenuGroup.DATA]: {
+                    order: 2,
+                },
+                [ContextMenuGroup.OTHERS]: {
+                    order: 3,
+                },
+            },
+            [ContextMenuPosition.PARAGRAPH]: {
+                order: 0,
+                [ContextMenuGroup.QUICK]: {
+                    order: -1,
+                },
                 [ContextMenuGroup.FORMAT]: {
                     order: 0,
                 },
@@ -205,7 +229,7 @@ export class MenuManagerService extends Disposable implements IMenuManagerServic
                 _target[_key] = merge({}, _target[_key], source[_key]);
 
                 this.menuChanged$.next();
-            } else {
+            } else if (typeof value === 'object') {
                 this.mergeMenu(source, value);
             }
         }
@@ -223,6 +247,7 @@ export class MenuManagerService extends Disposable implements IMenuManagerServic
             const menuItem: Partial<IMenuSchema> = {
                 key,
                 order: value.order,
+                title: value.title,
             };
 
             if (value.menuItemFactory) {
@@ -239,14 +264,15 @@ export class MenuManagerService extends Disposable implements IMenuManagerServic
                     }
                 }
             }
+            if (typeof value === 'object') {
+                const children = this._buildMenuSchema(value);
+                if (children.length > 0) {
+                    menuItem.children = children.sort((a, b) => a.order - b.order);
+                }
 
-            const children = this._buildMenuSchema(value);
-            if (children.length > 0) {
-                menuItem.children = children.sort((a, b) => a.order - b.order);
-            }
-
-            if (menuItem.item || menuItem.children) {
-                result.push(menuItem as IMenuSchema); // 使用类型断言补充缺失字段
+                if (menuItem.item || menuItem.children) {
+                    result.push(menuItem as IMenuSchema); // 使用类型断言补充缺失字段
+                }
             }
         }
 

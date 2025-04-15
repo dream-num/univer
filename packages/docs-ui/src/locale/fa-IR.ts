@@ -98,6 +98,12 @@ const locale: typeof zhCN = {
             fixedValue: 'مقدار ثابت(px)',
         },
     },
+    rightClick: {
+        bulletList: 'لیست بدون شماره',
+        orderList: 'لیست شماره‌دار',
+        checkList: 'لیست وظیفه',
+        insertBellow: 'درج در پایین',
+    },
 };
 
 export default locale;

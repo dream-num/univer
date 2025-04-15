@@ -179,6 +179,7 @@ export class ImageUpdateController extends Disposable {
             }
 
             const images = await this._drawingRenderService.renderImages(imageParam, renderObject.scene);
+            this._drawingManagerService.refreshTransform([imageParam]);
 
             if (images == null || images.length === 0) {
                 return;

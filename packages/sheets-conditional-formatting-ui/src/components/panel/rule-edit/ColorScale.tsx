@@ -16,13 +16,14 @@
 
 import type { Workbook } from '@univerjs/core';
 import type { IColorScale, IConditionalFormattingRuleConfig } from '@univerjs/sheets-conditional-formatting';
+import type { IFormulaEditorRef } from '@univerjs/sheets-formula-ui';
 import type { IStyleEditorProps } from './type';
 import { IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { clsx, InputNumber, Select } from '@univerjs/design';
 import { CFRuleType, CFValueType, createDefaultValueByValueType } from '@univerjs/sheets-conditional-formatting';
 import { FormulaEditor } from '@univerjs/sheets-formula-ui';
 import { useDependency, useSidebarClick } from '@univerjs/ui';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { ColorPicker } from '../../color-picker';
 import { Preview } from '../../preview';
 import stylesBase from '../index.module.less';
@@ -38,6 +39,7 @@ const TextInput = (props: { id: string; type: CFValueType | 'none'; value: numbe
     const formulaInitValue = useMemo(() => {
         return String(value).startsWith('=') ? String(value) : '=';
     }, [value]);
+
     const config = useMemo(() => {
         if ([CFValueType.max, CFValueType.min, 'none'].includes(type as CFValueType)) {
             return { disabled: true };
@@ -54,12 +56,12 @@ const TextInput = (props: { id: string; type: CFValueType | 'none'; value: numbe
         };
     }, [type]);
 
-    const formulaEditorActionsRef = useRef<Parameters<typeof FormulaEditor>[0]['actions']>({});
+    const formulaEditorRef = useRef<IFormulaEditorRef>(null);
     const [isFocusFormulaEditor, isFocusFormulaEditorSet] = useState(false);
 
     useSidebarClick((e: MouseEvent) => {
-        const handleOutClick = formulaEditorActionsRef.current?.handleOutClick;
-        handleOutClick && handleOutClick(e, () => isFocusFormulaEditorSet(false));
+        const isOutSide = formulaEditorRef.current?.isClickOutSide(e);
+        isOutSide && isFocusFormulaEditorSet(false);
     });
 
     if (type === CFValueType.formula) {
@@ -75,7 +77,7 @@ const TextInput = (props: { id: string; type: CFValueType | 'none'; value: numbe
                         onChange(formula);
                     }}
                     onFocus={() => isFocusFormulaEditorSet(true)}
-                    actions={formulaEditorActionsRef.current}
+                    ref={formulaEditorRef}
                 />
             </div>
         );

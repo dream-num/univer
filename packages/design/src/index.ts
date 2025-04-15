@@ -31,7 +31,7 @@ export { Dropdown } from './components/dropdown';
 export { FormDualColumnLayout, FormLayout, type IFormDualColumnLayoutProps, type IFormLayoutProps } from './components/form-layout';
 export { type IInputProps, type IInputWithSlotProps, Input, InputWithSlot } from './components/input';
 export { type IInputNumberProps, InputNumber } from './components/input-number';
-export { Menu, MenuItem, MenuItemGroup, type MenuRef, SubMenu } from './components/menu';
+export { Menu, MenuItem, MenuItemGroup, type MenuRef, SubMenu, TinyMenuGroup } from './components/menu';
 export { type IMessageProps, message, Messager, MessageType, removeMessage } from './components/message';
 export { type IPagerProps, Pager } from './components/pager';
 export { type IPopupProps, Popup } from './components/popup';

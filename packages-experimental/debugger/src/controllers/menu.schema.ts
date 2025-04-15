@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { type MenuSchemaType, RibbonOthersGroup } from '@univerjs/ui';
+import type { MenuSchemaType } from '@univerjs/ui';
+import { RibbonOthersGroup } from '@univerjs/ui';
 import { CreateFloatDomCommand } from '../commands/commands/float-dom.command';
 import { CreateEmptySheetCommand, DisposeCurrentUnitCommand, DisposeUniverCommand, LoadSheetSnapshotCommand } from '../commands/commands/unit.command';
 import { ShowCellContentOperation } from '../commands/operations/cell.operation';

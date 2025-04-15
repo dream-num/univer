@@ -138,7 +138,8 @@ export interface IFUniverSheetsMixin {
      * @returns {Nullable<{ workbook: FWorkbook; worksheet: FWorksheet }>} - The target of the sheet.
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.CommandExecuted, (commandInfo) => {
+     * univerAPI.addEvent(univerAPI.Event.CommandExecuted, (event) => {
+     *   const { options, ...commandInfo } = event;
      *   const target = univerAPI.getCommandSheetTarget(commandInfo);
      *   if (!target) return;
      *   const { workbook, worksheet } = target;

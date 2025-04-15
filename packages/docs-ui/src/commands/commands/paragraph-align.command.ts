@@ -60,14 +60,15 @@ export const AlignOperationCommand: ICommand<IAlignOperationCommandParams> = {
         }
 
         const segmentId = allRanges[0].segmentId;
-
-        const paragraphs = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.paragraphs;
+        const segment = docDataModel.getSelfOrHeaderFooterModel(segmentId);
+        const paragraphs = segment.getBody()?.paragraphs ?? [];
+        const dataStream = segment.getBody()?.dataStream ?? '';
 
         if (paragraphs == null) {
             return false;
         }
 
-        const currentParagraphs = BuildTextUtils.range.getParagraphsInRanges(allRanges, paragraphs);
+        const currentParagraphs = BuildTextUtils.range.getParagraphsInRanges(allRanges, paragraphs, dataStream);
 
         const unitId = docDataModel.getUnitId();
         const isAlreadyAligned = currentParagraphs.every((paragraph) => paragraph.paragraphStyle?.horizontalAlign === alignType);

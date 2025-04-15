@@ -114,7 +114,8 @@ export function getParagraphsSlice(
     for (const paragraph of paragraphs) {
         const { startIndex } = paragraph;
         if (startIndex >= startOffset && startIndex < endOffset) {
-            newParagraphs.push(Tools.deepClone(paragraph));
+            const copy = Tools.deepClone(paragraph);
+            newParagraphs.push(copy);
         }
     }
 
@@ -159,7 +160,7 @@ export function getCustomBlockSlice(
 
     for (const block of customBlocks) {
         const { startIndex } = block;
-        if (startIndex >= startOffset && startIndex <= endOffset) {
+        if (startIndex >= startOffset && startIndex < endOffset) {
             newCustomBlocks.push(Tools.deepClone(block));
         }
     }

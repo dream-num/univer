@@ -19,6 +19,7 @@ import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IRectRangeWithStyle, ITextRangeWithStyle } from '@univerjs/engine-render';
 import {
     BlockType,
+    BuildTextUtils,
     CommandType,
     DataStreamTreeTokenType,
     ICommandService,
@@ -38,6 +39,7 @@ import { DeleteDirection } from '../../types/delete-direction';
 import { getCommandSkeleton, getRichTextEditPath } from '../util';
 import { CutContentCommand } from './clipboard.inner.command';
 import { DeleteCommand, UpdateCommand } from './core-editing.command';
+import { getCurrentParagraph } from './util';
 
 export interface IDeleteCustomBlockParams {
     direction: DeleteDirection;
@@ -799,3 +801,51 @@ function getTextRangesWhenDelete(activeRange: ITextRangeWithStyle, ranges: reado
 
     return textRanges;
 }
+
+export const DeleteCurrentParagraphCommand: ICommand = {
+    id: 'doc.command.delete-current-paragraph',
+    type: CommandType.COMMAND,
+    handler: async (accessor) => {
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const commandService = accessor.get(ICommandService);
+        const docDataModel = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+        if (!docDataModel) {
+            return false;
+        }
+
+        const dataStream = docDataModel.getBody()?.dataStream ?? '';
+        const paragraph = getCurrentParagraph(accessor);
+
+        if (!paragraph) {
+            return false;
+        }
+
+        const actions = BuildTextUtils.selection.delete(
+            [{
+                startOffset: paragraph.paragraphStart,
+                endOffset: dataStream[paragraph.paragraphEnd + 1] === '\n'
+                    ? paragraph.paragraphEnd
+                    : paragraph.paragraphEnd + 1,
+                collapsed: false,
+            }],
+            docDataModel.getBody()!,
+            0,
+            undefined,
+            true
+        );
+
+        const path = getRichTextEditPath(docDataModel);
+
+        const params: IRichTextEditingMutationParams = {
+            unitId: docDataModel.getUnitId(),
+            actions: JSONX.getInstance().editOp(actions, path),
+            textRanges: [{
+                startOffset: paragraph.paragraphStart,
+                endOffset: paragraph.paragraphStart,
+                collapsed: true,
+            }],
+        };
+
+        return commandService.syncExecuteCommand(RichTextEditingMutation.id, params);
+    },
+};

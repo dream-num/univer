@@ -32,6 +32,7 @@ import { FormulaAutoFillController } from './controllers/formula-auto-fill.contr
 import { FormulaClipboardController } from './controllers/formula-clipboard.controller';
 import { FormulaEditorShowController } from './controllers/formula-editor-show.controller';
 import { FormulaRenderManagerController } from './controllers/formula-render.controller';
+import { FormulaReorderController } from './controllers/formula-reorder.controller';
 import { FormulaUIController } from './controllers/formula-ui.controller';
 import { FormulaPromptService, IFormulaPromptService } from './services/prompt.service';
 import { GlobalRangeSelectorService } from './services/range-selector.service';
@@ -77,12 +78,23 @@ export class UniverSheetsFormulaUIPlugin extends Plugin {
             [FormulaClipboardController],
             [FormulaEditorShowController],
             [FormulaRenderManagerController],
+            [FormulaReorderController],
         ]);
+
+        this._initUIPart();
+    }
+
+    override onReady(): void {
+        // render basics
+        ([
+            [RefSelectionsRenderService],
+        ] as Dependency[]).forEach((dep) => {
+            this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, dep));
+        });
     }
 
     override onRendered(): void {
         ([
-            [RefSelectionsRenderService],
             [FormulaAlertRenderController],
         ] as Dependency[]).forEach((dep) => {
             this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, dep));
@@ -93,14 +105,11 @@ export class UniverSheetsFormulaUIPlugin extends Plugin {
             [FormulaClipboardController],
             [FormulaRenderManagerController],
         ]);
-
-        // Since component FormulaEditor relies on RefSelectionsRenderService, it should be
-        // registered after RefSelectionsRenderService is registered.
-        this._initUIPart();
     }
 
     override onSteady(): void {
         this._injector.get(FormulaAutoFillController);
+        this._injector.get(FormulaReorderController);
     }
 
     private _initUIPart(): void {

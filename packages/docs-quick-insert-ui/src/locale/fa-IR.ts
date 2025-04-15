@@ -23,6 +23,8 @@ const locale: typeof zhCN = {
             bulletedList: 'لیست نقطهدار',
             divider: 'خط تقسیم',
             text: 'متن',
+            table: 'جدول',
+            image: 'تصویر',
         },
         group: {
             basics: 'بنیادی',

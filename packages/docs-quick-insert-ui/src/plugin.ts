@@ -17,22 +17,26 @@
 import type { Dependency } from '@univerjs/core';
 import { DependentOn, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import { UniverDocsDrawingPlugin } from '@univerjs/docs-drawing';
+import { UniverDocsDrawingUIPlugin } from '@univerjs/docs-drawing-ui';
 import { UniverDrawingPlugin } from '@univerjs/drawing';
 import { UniverDrawingUIPlugin } from '@univerjs/drawing-ui';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { UniverUIPlugin } from '@univerjs/ui';
+import { DocQuickInsertMenuController } from './controllers/doc-quick-insert-menu.controller';
 import { DocQuickInsertTriggerController } from './controllers/doc-quick-insert-trigger.controller';
 import { DocQuickInsertUIController } from './controllers/doc-quick-insert-ui.controller';
 import { DocQuickInsertPopupService } from './services/doc-quick-insert-popup.service';
 
 const PLUGIN_NAME = 'DOC_QUICK_INSERT_UI_PLUGIN';
 
-@DependentOn(UniverDrawingUIPlugin, UniverDrawingPlugin, UniverDocsDrawingPlugin, UniverUIPlugin)
+@DependentOn(UniverDrawingUIPlugin, UniverDrawingPlugin, UniverDocsDrawingUIPlugin, UniverDocsDrawingPlugin, UniverUIPlugin)
 export class UniverDocsQuickInsertUIPlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_DOC;
     static override pluginName = PLUGIN_NAME;
 
     constructor(
-        @Inject(Injector) protected _injector: Injector
+        @Inject(Injector) protected _injector: Injector,
+        @Inject(IRenderManagerService) private _renderManagerSrv: IRenderManagerService
     ) {
         super();
     }
@@ -52,5 +56,11 @@ export class UniverDocsQuickInsertUIPlugin extends Plugin {
     override onRendered(): void {
         this._injector.get(DocQuickInsertTriggerController);
         this._injector.get(DocQuickInsertPopupService);
+
+        ([
+            [DocQuickInsertMenuController],
+        ] as Dependency[]).forEach((m) => {
+            this._renderManagerSrv.registerRenderModule(UniverInstanceType.UNIVER_DOC, m);
+        });
     }
 }

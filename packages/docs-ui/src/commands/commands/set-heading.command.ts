@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommand, IMutationInfo } from '@univerjs/core';
+import type { DocumentDataModel, ICommand, IMutationInfo, ITextRangeParam } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
+import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import { BuildTextUtils, CommandType, generateRandomId, ICommandService, IUniverInstanceService, JSONX, NamedStyleType, TextX, TextXActionType, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { getRichTextEditPath } from '../util';
 
 export interface ISetParagraphNamedStyleCommandParams {
     value: NamedStyleType;
+    textRanges?: ITextRangeParam[];
 }
 
 export const SetParagraphNamedStyleCommand: ICommand<ISetParagraphNamedStyleCommandParams> = {
@@ -33,19 +35,19 @@ export const SetParagraphNamedStyleCommand: ICommand<ISetParagraphNamedStyleComm
         }
 
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const documentDataModel = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
-        if (!documentDataModel) {
+        const doc = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+        if (!doc) {
             return false;
         }
-        const unitId = documentDataModel.getUnitId();
+        const unitId = doc.getUnitId();
         const selectionService = accessor.get(DocSelectionManagerService);
-        const selections = selectionService.getTextRanges({ unitId, subUnitId: unitId })?.filter((i) => !i.segmentId);
+        const selections = params.textRanges ?? selectionService.getTextRanges({ unitId, subUnitId: unitId });
         if (!selections?.length) {
             return false;
         }
-
+        const segmentId = selections[0].segmentId;
         const textX = BuildTextUtils.paragraph.style.set({
-            document: documentDataModel,
+            document: doc.getSelfOrHeaderFooterModel(segmentId),
             textRanges: selections,
             style: {
                 namedStyleType: params.value,
@@ -61,13 +63,14 @@ export const SetParagraphNamedStyleCommand: ICommand<ISetParagraphNamedStyleComm
             id: RichTextEditingMutation.id,
             params: {
                 actions: [],
-                textRanges: selections,
+                textRanges: selections as ITextRangeWithStyle[],
                 unitId,
+                segmentId,
             },
         };
 
         const jsonX = JSONX.getInstance();
-        const path = getRichTextEditPath(documentDataModel);
+        const path = getRichTextEditPath(doc, segmentId);
         doMutation.params.actions = jsonX.editOp(textX.serialize(), path);
         const commandService = accessor.get(ICommandService);
         const result = commandService.syncExecuteCommand(doMutation.id, doMutation.params);
@@ -94,7 +97,10 @@ export const QuickHeadingCommand: ICommand<ISetParagraphNamedStyleCommandParams>
         }
 
         const { segmentId, startOffset } = activeRange;
-        const paragraph = BuildTextUtils.paragraph.util.getParagraphsInRange(activeRange, docDataModel.getBody()?.paragraphs ?? [])[0];
+        const segment = docDataModel.getSelfOrHeaderFooterModel(segmentId);
+        const paragraphs = segment.getBody()?.paragraphs ?? [];
+        const dataStream = segment.getBody()?.dataStream ?? '';
+        const paragraph = BuildTextUtils.paragraph.util.getParagraphsInRange(activeRange, paragraphs, dataStream)[0];
         if (!paragraph) {
             return false;
         }
@@ -149,4 +155,92 @@ export const QUICK_HEADING_MAP = {
     '###': NamedStyleType.HEADING_3,
     '####': NamedStyleType.HEADING_4,
     '#####': NamedStyleType.HEADING_5,
+};
+
+export const H1HeadingCommand: ICommand<ISetParagraphNamedStyleCommandParams> = {
+    id: 'doc.command.h1-heading',
+    type: CommandType.COMMAND,
+    handler: (accessor) => {
+        const commandService = accessor.get(ICommandService);
+        return commandService.syncExecuteCommand(SetParagraphNamedStyleCommand.id, {
+            value: NamedStyleType.HEADING_1,
+        });
+    },
+};
+
+export const H2HeadingCommand: ICommand<ISetParagraphNamedStyleCommandParams> = {
+    id: 'doc.command.h2-heading',
+    type: CommandType.COMMAND,
+    handler: (accessor) => {
+        const commandService = accessor.get(ICommandService);
+        return commandService.syncExecuteCommand(SetParagraphNamedStyleCommand.id, {
+            value: NamedStyleType.HEADING_2,
+        });
+    },
+};
+
+export const H3HeadingCommand: ICommand<ISetParagraphNamedStyleCommandParams> = {
+    id: 'doc.command.h3-heading',
+    type: CommandType.COMMAND,
+    handler: (accessor) => {
+        const commandService = accessor.get(ICommandService);
+        return commandService.syncExecuteCommand(SetParagraphNamedStyleCommand.id, {
+            value: NamedStyleType.HEADING_3,
+        });
+    },
+};
+
+export const H4HeadingCommand: ICommand<ISetParagraphNamedStyleCommandParams> = {
+    id: 'doc.command.h4-heading',
+    type: CommandType.COMMAND,
+    handler: (accessor) => {
+        const commandService = accessor.get(ICommandService);
+        return commandService.syncExecuteCommand(SetParagraphNamedStyleCommand.id, {
+            value: NamedStyleType.HEADING_4,
+        });
+    },
+};
+
+export const H5HeadingCommand: ICommand<ISetParagraphNamedStyleCommandParams> = {
+    id: 'doc.command.h5-heading',
+    type: CommandType.COMMAND,
+    handler: (accessor) => {
+        const commandService = accessor.get(ICommandService);
+        return commandService.syncExecuteCommand(SetParagraphNamedStyleCommand.id, {
+            value: NamedStyleType.HEADING_5,
+        });
+    },
+};
+
+export const NormalTextHeadingCommand: ICommand<ISetParagraphNamedStyleCommandParams> = {
+    id: 'doc.command.normal-text-heading',
+    type: CommandType.COMMAND,
+    handler: (accessor) => {
+        const commandService = accessor.get(ICommandService);
+        return commandService.syncExecuteCommand(SetParagraphNamedStyleCommand.id, {
+            value: NamedStyleType.NORMAL_TEXT,
+        });
+    },
+};
+
+export const TitleHeadingCommand: ICommand<ISetParagraphNamedStyleCommandParams> = {
+    id: 'doc.command.title',
+    type: CommandType.COMMAND,
+    handler: (accessor) => {
+        const commandService = accessor.get(ICommandService);
+        return commandService.syncExecuteCommand(SetParagraphNamedStyleCommand.id, {
+            value: NamedStyleType.TITLE,
+        });
+    },
+};
+
+export const SubtitleHeadingCommand: ICommand<ISetParagraphNamedStyleCommandParams> = {
+    id: 'doc.command.subtitle-heading',
+    type: CommandType.COMMAND,
+    handler: (accessor) => {
+        const commandService = accessor.get(ICommandService);
+        return commandService.syncExecuteCommand(SetParagraphNamedStyleCommand.id, {
+            value: NamedStyleType.SUBTITLE,
+        });
+    },
 };

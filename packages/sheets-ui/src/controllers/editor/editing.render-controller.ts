@@ -18,8 +18,7 @@
 
 import type { DocumentDataModel, ICellData, ICommandInfo, IDisposable, IDocumentBody, IDocumentData, IDocumentStyle, IMutationInfo, IStyleData, Nullable, Styles, Workbook } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import type { MutationsAffectRange, WorkbookSelectionModel } from '@univerjs/sheets';
+import type { ISetRangeValuesCommandParams, MutationsAffectRange } from '@univerjs/sheets';
 
 import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 import {
@@ -64,7 +63,7 @@ import {
 } from '@univerjs/engine-render';
 
 import { adjustRangeOnMutation, COMMAND_LISTENER_SKELETON_CHANGE, InsertColMutation, InsertRowMutation, MoveColsMutation, MoveRowsMutation, REF_SELECTIONS_ENABLED, RemoveColMutation, RemoveRowMutation, SetRangeValuesCommand, SetSelectionsOperation, SetWorksheetActivateCommand, SetWorksheetActiveOperation, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
-import { KeyCode } from '@univerjs/ui';
+import { KeyCode, MetaKeys } from '@univerjs/ui';
 import { distinctUntilChanged, filter } from 'rxjs';
 import { getEditorObject } from '../../basics/editor/get-editor-object';
 import { MoveSelectionCommand, MoveSelectionEnterAndTabCommand } from '../../commands/commands/set-selection.command';
@@ -73,6 +72,7 @@ import { ScrollToRangeOperation } from '../../commands/operations/scroll-to-rang
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { ICellEditorManagerService } from '../../services/editor/cell-editor-manager.service';
 import { SheetCellEditorResizeService } from '../../services/editor/cell-editor-resize.service';
+import { EditorBridgeRenderController } from '../render-controllers/editor-bridge.render-controller';
 import { MOVE_SELECTION_KEYCODE_LIST } from '../shortcuts/editor.shortcut';
 import { extractStringFromForceString, isForceString } from '../utils/cell-tools';
 import { normalizeString } from '../utils/char-tools';
@@ -86,23 +86,18 @@ enum CursorChange {
     CursorChange,
 }
 
-export class EditingRenderController extends Disposable implements IRenderModule {
+export class EditingRenderController extends Disposable {
     /**
      * It is used to distinguish whether the user has actively moved the cursor in the editor, mainly through mouse clicks.
      */
     private _cursorChange: CursorChange = CursorChange.InitialState;
 
     /** If the corresponding unit is active and prepared for editing. */
-    private _isUnitEditing = false;
+    private _editingUnit = '';
 
-    private _workbookSelections: WorkbookSelectionModel;
-
-    private _d: Nullable<IDisposable>;
     _cursorTimeout: NodeJS.Timeout;
 
     constructor(
-        private readonly _context: IRenderContext<Workbook>,
-        @Inject(SheetsSelectionsService) selectionManagerService: SheetsSelectionsService,
         @IUndoRedoService private readonly _undoRedoService: IUndoRedoService,
         @IContextService private readonly _contextService: IContextService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
@@ -114,48 +109,26 @@ export class EditingRenderController extends Disposable implements IRenderModule
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(LocaleService) protected readonly _localService: LocaleService,
         @IEditorService private readonly _editorService: IEditorService,
-        @Inject(SheetCellEditorResizeService) private readonly _sheetCellEditorResizeService: SheetCellEditorResizeService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService
+        @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
+        @Inject(SheetCellEditorResizeService) private readonly _sheetCellEditorResizeService: SheetCellEditorResizeService,
+        @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService
     ) {
         super();
 
-        this._workbookSelections = selectionManagerService.getWorkbookSelections(this._context.unitId);
-
         // EditingRenderController is per unit. It should only handle keyboard events when the unit is
         // the current of its type.
-        this.disposeWithMe(this._univerInstanceService.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => {
-            if (workbook?.getUnitId() === this._context.unitId) {
-                this._d = this._init();
-            } else {
-                this._disposeCurrent();
 
-                // Force ending editor when he switch to another workbook.
-                if (this._isUnitEditing) {
-                    this._handleEditorInvisible({
-                        visible: false,
-                        eventType: DeviceInputEventType.Keyboard,
-                        keycode: KeyCode.ESC,
-                        unitId: this._context.unitId,
-                    });
-
-                    this._isUnitEditing = false;
-                }
-            }
-        }));
-
+        this.disposeWithMe(this._init());
         this._initEditorVisibilityListener();
     }
 
     override dispose(): void {
         super.dispose();
-
-        this._disposeCurrent();
     }
 
-    private _disposeCurrent(): void {
-        this._d?.dispose();
-        this._d = null;
+    private get _workbookSelections() {
+        return this._selectionManagerService.getWorkbookSelections(this._editingUnit);
     }
 
     private _init(): IDisposable {
@@ -180,16 +153,31 @@ export class EditingRenderController extends Disposable implements IRenderModule
     }
 
     private _initEditorVisibilityListener(): void {
+        this.disposeWithMe(this._univerInstanceService.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_SHEET).subscribe(async (unit) => {
+            if (this._editingUnit && unit?.getUnitId() !== this._editingUnit && !this._editorBridgeService.isForceKeepVisible()) {
+                this._commandService.syncExecuteCommand(SetCellEditVisibleOperation.id, {
+                    visible: false,
+                    eventType: DeviceInputEventType.Keyboard,
+                    keycode: KeyCode.ESC,
+                    unitId: this._editingUnit,
+                });
+                const editorBridgeRenderController = this._renderManagerService.getRenderById(unit!.getUnitId())?.with(EditorBridgeRenderController);
+                if (editorBridgeRenderController) {
+                    editorBridgeRenderController.refreshEditorPosition();
+                }
+            }
+        }));
+
         this.disposeWithMe(
             this._editorBridgeService.visible$
                 .pipe(distinctUntilChanged((prev, curr) => prev.visible === curr.visible))
-                .subscribe((param) => {
-                    if ((param.unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY || param.unitId === this._context.unitId) && param.visible) {
-                        this._isUnitEditing = true;
-                        this._handleEditorVisible(param);
-                    } else if (this._isUnitEditing) {
-                        this._handleEditorInvisible(param);
-                        this._isUnitEditing = false;
+                .subscribe(async (params) => {
+                    if (params.visible) {
+                        this._editingUnit = params.unitId;
+                        this._handleEditorVisible(params);
+                    } else if (this._editingUnit) {
+                        await this._handleEditorInvisible(params);
+                        this._editingUnit = '';
                     }
                 })
         );
@@ -202,7 +190,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
         d.add(renderConfig.document.onPointerDown$.subscribeEvent(() => {
             // fix https://github.com/dream-num/univer/issues/628, need to recalculate the cell editor size after
             // it acquire focus.
-            if (this._isUnitEditing && this._editorBridgeService.isVisible()) {
+            if (this._editingUnit && this._editorBridgeService.isVisible()) {
                 const param = this._editorBridgeService.getEditCellState();
                 const editorId = this._editorBridgeService.getCurrentEditorId();
 
@@ -210,7 +198,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
                     return;
                 }
 
-                this._sheetCellEditorResizeService.fitTextSize();
+                this._sheetCellEditorResizeService?.fitTextSize();
             }
         }));
     }
@@ -260,7 +248,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
                 }
             }
 
-            this._sheetCellEditorResizeService.resizeCellEditor(() => {
+            this._sheetCellEditorResizeService?.resizeCellEditor(() => {
                 this._textSelectionManagerService.refreshSelection({
                     unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
                     subUnitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
@@ -341,7 +329,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
                 const { unitId: commandUnitId } = params;
 
                 // Only when the sheet it attached to is focused. Maybe we should change it to the render unit sys.
-                if (!this._isCurrentSheetFocused() || isRangeSelector(commandUnitId)) {
+                if (isRangeSelector(commandUnitId)) {
                     return;
                 }
 
@@ -352,7 +340,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
                 }
 
                 if (commandUnitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY) {
-                    this._sheetCellEditorResizeService.fitTextSize();
+                    this._sheetCellEditorResizeService?.fitTextSize();
                 }
             }
         }));
@@ -387,7 +375,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
     }
 
     // You can double-click on the cell or input content by keyboard to put the cell into the edit state.
-
+    // eslint-disable-next-line complexity
     private _handleEditorVisible(param: IEditorBridgeServiceVisibleParam) {
         const { eventType, keycode } = param;
         // Change `CursorChange` to changed status, when formula bar clicked.
@@ -428,7 +416,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
             return;
         }
 
-        this._sheetCellEditorResizeService.fitTextSize(() => {
+        this._sheetCellEditorResizeService?.fitTextSize(() => {
             const viewMain = scene.getViewport(DOC_VIEWPORT_KEY.VIEW_MAIN);
             viewMain?.scrollToViewportPos({
                 viewportScrollX: Number.POSITIVE_INFINITY,
@@ -506,25 +494,20 @@ export class EditingRenderController extends Disposable implements IRenderModule
         const editCellState = this._editorBridgeService.getEditCellState();
         const documentDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
         const snapshot = Tools.deepClone(documentDataModel?.getSnapshot());
-        let { keycode } = param;
+        const { keycode } = param;
         this._cursorChange = CursorChange.InitialState;
-
+        const currentUnitId = editCellState?.unitId ?? '';
         this._exitInput(param);
-
         if (editCellState == null) {
             return;
         }
 
-        // If neither the formula bar editor nor the cell editor has been edited,
-        // it is considered that the content has not changed and returns directly.
-        const editorIsDirty = this._editorBridgeService.getEditorDirty();
-        if (editorIsDirty === false) {
-            keycode = KeyCode.ESC;
+        const workbook = this._univerInstanceService.getUnit<Workbook>(currentUnitId, UniverInstanceType.UNIVER_SHEET);
+        if (!workbook) {
+            return;
         }
-
-        const workbook = this._context.unit;
         const worksheet = workbook.getActiveSheet();
-        const workbookId = this._context.unitId;
+        const workbookId = workbook.getUnitId();
         const worksheetId = worksheet.getSheetId();
 
         const { unitId, sheetId } = editCellState;
@@ -539,16 +522,27 @@ export class EditingRenderController extends Disposable implements IRenderModule
             });
         }
 
+        // If neither the formula bar editor nor the cell editor has been edited,
+        // it is considered that the content has not changed and returns directly.
+        const editorIsDirty = this._editorBridgeService.getEditorDirty();
+        if (editorIsDirty === false) {
+            if (this._editorBridgeService.isForceKeepVisible()) {
+                this._editorBridgeService.disableForceKeepVisible();
+            }
+            this._moveSelection(keycode, currentUnitId);
+        }
+
         // Reselect the current selections, when exist cell editor by press ESC.I
         if (keycode === KeyCode.ESC) {
             if (this._editorBridgeService.isForceKeepVisible()) {
                 this._editorBridgeService.disableForceKeepVisible();
             }
+
             const selections = this._workbookSelections.getCurrentSelections();
             if (selections) {
                 this._contextService.setContextValue(REF_SELECTIONS_ENABLED, false);
                 this._commandService.syncExecuteCommand(SetSelectionsOperation.id, {
-                    unitId: this._context.unit.getUnitId(),
+                    unitId: workbookId,
                     subUnitId: sheetId,
                     selections,
                 });
@@ -558,17 +552,17 @@ export class EditingRenderController extends Disposable implements IRenderModule
         }
 
         const isEmpty = snapshot?.body?.dataStream.length === 2;
-        const isCellImage = editCellState.documentLayoutObject.documentModel ? this._isCellImageData(editCellState.documentLayoutObject.documentModel.getSnapshot()) : false;
+        const isCellImage = editCellState.documentLayoutObject.documentModel
+            ? this._isCellImageData(editCellState.documentLayoutObject.documentModel.getSnapshot())
+            : false;
+
         if (snapshot && !(isEmpty && isCellImage)) {
-            const res = await this._submitCellData(snapshot);
-            // if the submit was rejected, don't move selection
-            if (res === false) {
-                return;
-            }
+            const res = await this._submitEdit(snapshot, keycode === (MetaKeys.CTRL_COMMAND | KeyCode.ENTER));
+            if (res === false) return; // if the submit was rejected, don't move selection
         }
 
         // moveSelection need to put behind of SetRangeValuesCommand, fix https://github.com/dream-num/univer/issues/1155
-        this._moveSelection(keycode);
+        this._moveSelection(keycode, currentUnitId);
     }
 
     private _getEditorObject() {
@@ -581,18 +575,20 @@ export class EditingRenderController extends Disposable implements IRenderModule
     }
 
     submitCellData(documentDataModel: DocumentDataModel) {
-        return this._submitCellData(documentDataModel.getSnapshot());
+        return this._submitEdit(documentDataModel.getSnapshot());
     }
 
-    private async _submitCellData(snapshot: IDocumentData) {
+    private async _submitEdit(snapshot: IDocumentData, wholeSelection = false) {
         const editCellState = this._editorBridgeService.getEditCellState();
         if (editCellState == null) {
             return true;
         }
-
         const { unitId, sheetId, row, column } = editCellState;
 
-        const workbook = this._context.unit;
+        const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
+        if (!workbook) {
+            return true;
+        }
         let worksheet = workbook.getActiveSheet();
 
         // If the target cell does not exist, there is no need to execute setRangeValue
@@ -618,21 +614,25 @@ export class EditingRenderController extends Disposable implements IRenderModule
             return true;
         }
 
-        const finalCell = this._sheetInterceptorService.onWriteCell(workbook, worksheet, row, column, cellData);
+        const finalCell = this._sheetInterceptorService.onWriteCell(workbook, worksheet, row, column, cellData) as ICellData;
         if (finalCell === worksheet.getCellRaw(row, column)) {
             return true;
         }
 
-        const redoUndoId = generateRandomId(6);
-        const res = this._commandService.syncExecuteCommand(SetRangeValuesCommand.id, {
-            subUnitId: sheetId,
-            unitId,
-            range: {
+        const range = wholeSelection
+            ? this._workbookSelections.getCurrentLastSelection()?.range
+            : {
                 startRow: row,
                 startColumn: column,
                 endRow: row,
                 endColumn: column,
-            },
+            };
+
+        const redoUndoId = generateRandomId(6);
+        const res = this._commandService.syncExecuteCommand<ISetRangeValuesCommandParams>(SetRangeValuesCommand.id, {
+            subUnitId: sheetId,
+            unitId,
+            range,
             value: finalCell,
             redoUndoId,
         });
@@ -669,7 +669,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
         this._undoRedoService.clearUndoRedo(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
     }
 
-    private _moveSelection(keycode?: KeyCode) {
+    private _moveSelection(keycode: KeyCode | undefined, currentUnitId: string) {
         if (keycode == null || !MOVE_SELECTION_KEYCODE_LIST.includes(keycode)) {
             return;
         }
@@ -695,6 +695,10 @@ export class EditingRenderController extends Disposable implements IRenderModule
             case KeyCode.ARROW_RIGHT:
                 direction = Direction.RIGHT;
                 break;
+        }
+        const currentUnit = this._univerInstanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_SHEET);
+        if (currentUnitId && currentUnit?.getUnitId() !== currentUnitId) {
+            this._univerInstanceService.setCurrentUnitForType(currentUnitId);
         }
 
         if (keycode === KeyCode.ENTER || keycode === KeyCode.TAB) {
@@ -751,18 +755,16 @@ export class EditingRenderController extends Disposable implements IRenderModule
         return this._univerInstanceService.getUnit<DocumentDataModel>(DOCS_NORMAL_EDITOR_UNIT_ID_KEY, UniverInstanceType.UNIVER_DOC);
     }
 
-    // WTF: this is should not exist at all. It is because all editor instances reuse the singleton
-    // "DocSelectionManagerService" and other modules. Which will be refactored soon in August, 2024.
-    private _isCurrentSheetFocused(): boolean {
-        return this._univerInstanceService.getFocusedUnit()?.getUnitId() === this._context.unitId;
-    }
-
     private _getEditorSkeleton(editorId: string) {
         return this._renderManagerService.getRenderById(editorId)?.with(DocSkeletonManagerService).getSkeleton();
     }
 
     private _getEditorViewModel(editorId: string) {
         return this._renderManagerService.getRenderById(editorId)?.with(DocSkeletonManagerService).getViewModel();
+    }
+
+    private _getEditingUnit() {
+        return this._editingUnit ? this._univerInstanceService.getUnit<Workbook>(this._editingUnit, UniverInstanceType.UNIVER_SHEET) : null;
     }
 
     private _emptyDocumentDataModel(documentStyle: IDocumentStyle, removeStyle: boolean) {

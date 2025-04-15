@@ -27,7 +27,6 @@ import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 're
 import { EMPTY, merge, of, switchMap } from 'rxjs';
 import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
 import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY } from '../../common/keys';
-import { useActiveWorkbook } from '../../components/hook';
 import { SheetsUIPart } from '../../consts/ui-name';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { IFormulaEditorManagerService } from '../../services/editor/formula-editor-manager.service';
@@ -47,10 +46,8 @@ interface IProps {
 
 export function FormulaBar(props: IProps) {
     const { className, disableDefinedName } = props;
-
     const [iconStyle, setIconStyle] = useState<string>(styles.formulaGrey);
     const [arrowDirection, setArrowDirection] = useState<ArrowDirection>(ArrowDirection.Down);
-
     const formulaEditorManagerService = useDependency(IFormulaEditorManagerService);
     const editorBridgeService = useDependency(IEditorBridgeService);
     const worksheetProtectionRuleModel = useDependency(WorksheetProtectionRuleModel);
@@ -65,7 +62,6 @@ export function FormulaBar(props: IProps) {
         viewDisable: false,
     });
     const [imageDisable, setImageDisable] = useState<boolean>(false);
-    const currentWorkbook = useActiveWorkbook();
     const componentManager = useDependency(ComponentManager);
     const workbook = useObservable(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET), undefined, undefined, [])!;
     const isRefSelecting = useRef<0 | 1 | 2>(0);
@@ -194,7 +190,7 @@ export function FormulaBar(props: IProps) {
                 visible: false,
                 eventType: DeviceInputEventType.Keyboard,
                 keycode: KeyCode.ESC,
-                unitId: currentWorkbook?.getUnitId() ?? '',
+                unitId: editState!.unitId,
             });
         }
     }
@@ -206,7 +202,7 @@ export function FormulaBar(props: IProps) {
             commandService.executeCommand(SetCellEditVisibleOperation.id, {
                 visible: false,
                 eventType: DeviceInputEventType.PointerDown,
-                unitId: currentWorkbook?.getUnitId() ?? '',
+                unitId: editState!.unitId,
             });
         }
     }
@@ -230,7 +226,7 @@ export function FormulaBar(props: IProps) {
                     {
                         visible: true,
                         eventType: DeviceInputEventType.PointerDown,
-                        unitId: currentWorkbook?.getUnitId() ?? '',
+                        unitId: editState!.unitId,
                     } as IEditorBridgeServiceVisibleParam
                 );
                 // undoRedoService.clearUndoRedo(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);

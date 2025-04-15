@@ -33,6 +33,7 @@ export { DocUIController } from './controllers/doc-ui.controller';
 export { menuSchema as DocsUIMenuSchema } from './controllers/menu.schema';
 export { DocBackScrollRenderController } from './controllers/render-controllers/back-scroll.render-controller';
 export { DocRenderController } from './controllers/render-controllers/doc.render-controller';
+export type { IUniverDocsUIConfig } from './controllers/config.schema';
 export * from './docs-ui-plugin';
 export * from './services';
 export { IDocClipboardService } from './services/clipboard/clipboard.service';
@@ -43,7 +44,6 @@ export { DocStateChangeManagerService } from './services/doc-state-change-manage
 export { DocsRenderService } from './services/docs-render.service';
 export { Editor } from './services/editor/editor';
 export { EditorService, IEditorService } from './services/editor/editor-manager.service';
-export { type IRangeSelectorRange, IRangeSelectorService, RangeSelectorService } from './services/range-selector/range-selector.service';
 export { isInSameTableCell, isValidRectRange, NodePositionConvertToRectRange } from './services/selection/convert-rect-range';
 
 export { NodePositionConvertToCursor } from './services/selection/convert-text-range';

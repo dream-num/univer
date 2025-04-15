@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommand, IDocumentBody, IMutationInfo, IParagraph, IParagraphBorder } from '@univerjs/core';
+import type { DocumentDataModel, ICommand, IDocumentBody, IMutationInfo, IParagraph, IParagraphBorder, ITextRangeParam } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import { BuildTextUtils, CommandType, DataStreamTreeTokenType, ICommandService, IUniverInstanceService, JSONX, PresetListType, TextX, TextXActionType, Tools, UniverInstanceType, UpdateDocsAttributeType } from '@univerjs/core';
+import { BuildTextUtils, CommandType, DataStreamTreeTokenType, generateRandomId, ICommandService, IUniverInstanceService, JSONX, PresetListType, TextX, TextXActionType, Tools, UniverInstanceType, UpdateDocsAttributeType } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { getTextRunAtPosition } from '../../basics/paragraph';
 import { DocMenuStyleService } from '../../services/doc-menu-style.service';
@@ -50,6 +50,9 @@ export function generateParagraphs(
             if (prevParagraph.paragraphStyle) {
                 paragraph.paragraphStyle = Tools.deepClone(prevParagraph.paragraphStyle);
                 delete paragraph.paragraphStyle.borderBottom;
+                if (prevParagraph.paragraphStyle.headingId) {
+                    paragraph.paragraphStyle.headingId = generateRandomId(6);
+                }
             }
         }
     }
@@ -68,6 +71,7 @@ export function generateParagraphs(
 
 interface IBreakLineCommandParams {
     horizontalLine?: IParagraphBorder;
+    textRange?: ITextRangeParam;
 }
 
 export const BreakLineCommand: ICommand<IBreakLineCommandParams> = {
@@ -75,13 +79,13 @@ export const BreakLineCommand: ICommand<IBreakLineCommandParams> = {
 
     type: CommandType.COMMAND,
 
-    // eslint-disable-next-line max-lines-per-function
-    handler: async (accessor, params: IBreakLineCommandParams) => {
+    // eslint-disable-next-line max-lines-per-function, complexity
+    handler: (accessor, params: IBreakLineCommandParams) => {
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
         const docMenuStyleService = accessor.get(DocMenuStyleService);
-        const activeTextRange = docSelectionManagerService.getActiveTextRange();
+        const activeTextRange = params?.textRange ?? docSelectionManagerService.getActiveTextRange();
         const rectRanges = docSelectionManagerService.getRectRanges();
         if (activeTextRange == null) {
             return false;
@@ -118,12 +122,11 @@ export const BreakLineCommand: ICommand<IBreakLineCommandParams> = {
         if (!prevParagraph) {
             return false;
         }
-
+        const isAtParagraphEnd = startOffset === prevParagraph.startIndex;
         const prevParagraphIndex = prevParagraph.startIndex;
         const defaultTextStyle = docMenuStyleService.getDefaultStyle();
         const styleCache = docMenuStyleService.getStyleCache();
         const curTextRun = getTextRunAtPosition(originBody, endOffset, defaultTextStyle, styleCache);
-
         const insertBody: IDocumentBody = {
             dataStream: DataStreamTreeTokenType.PARAGRAPH,
             paragraphs: generateParagraphs(
@@ -209,8 +212,12 @@ export const BreakLineCommand: ICommand<IBreakLineCommandParams> = {
                             ...prevParagraph,
                             paragraphStyle: {
                                 ...prevParagraph.paragraphStyle,
-                                headingId: undefined,
-                                namedStyleType: undefined,
+                                ...isAtParagraphEnd
+                                    ? {
+                                        headingId: undefined,
+                                        namedStyleType: undefined,
+                                    }
+                                    : null,
                             },
                             startIndex: 0,
                             bullet: prevParagraph.paragraphStyle?.headingId
@@ -234,7 +241,6 @@ export const BreakLineCommand: ICommand<IBreakLineCommandParams> = {
 
         const path = getRichTextEditPath(docDataModel, segmentId);
         doMutation.params.actions = jsonX.editOp(textX.serialize(), path);
-
         const result = commandService.syncExecuteCommand<
             IRichTextEditingMutationParams,
             IRichTextEditingMutationParams

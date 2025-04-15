@@ -16,6 +16,7 @@
 
 import type { IFormulaInputProps } from '@univerjs/data-validation';
 import type { ListValidator } from '@univerjs/sheets-data-validation';
+import type { IFormulaEditorRef } from '@univerjs/sheets-formula-ui';
 import type { CSSProperties } from 'react';
 import { DataValidationType, isFormulaString, LocaleService, Tools } from '@univerjs/core';
 import { DataValidationModel, DataValidatorRegistryService } from '@univerjs/data-validation';
@@ -308,12 +309,12 @@ export function ListFormulaInput(props: IFormulaInputProps) {
         }
     });
 
-    const formulaEditorActionsRef = useRef<Parameters<typeof FormulaEditor>[0]['actions']>({});
+    const formulaEditorRef = useRef<IFormulaEditorRef>(null);
     const [isFocusFormulaEditor, isFocusFormulaEditorSet] = useState(false);
 
     useSidebarClick((e: MouseEvent) => {
-        const handleOutClick = formulaEditorActionsRef.current?.handleOutClick;
-        handleOutClick && handleOutClick(e, () => isFocusFormulaEditorSet(false));
+        const isOutSide = formulaEditorRef.current?.isClickOutSide(e);
+        isOutSide && isFocusFormulaEditorSet(false);
     });
 
     return (
@@ -351,8 +352,8 @@ export function ListFormulaInput(props: IFormulaInputProps) {
                             }}
                             errorText={(formula1Res || localError) || undefined}
                             onFocus={() => isFocusFormulaEditorSet(true)}
-                            actions={formulaEditorActionsRef.current}
                             isSupportAcrossSheet
+                            ref={formulaEditorRef}
                         />
                         <div ref={containerRef} style={{ marginTop: '12px' }}>
                             {refFinalList.map((item) => {

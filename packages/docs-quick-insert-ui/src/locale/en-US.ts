@@ -23,6 +23,8 @@ const locale: typeof zhCN = {
             bulletedList: 'Bulleted List',
             divider: 'Divider',
             text: 'Text',
+            table: 'Table',
+            image: 'Image',
         },
         group: {
             basics: 'Basics',

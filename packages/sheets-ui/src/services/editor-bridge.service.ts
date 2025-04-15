@@ -113,7 +113,7 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
     private _editorIsDirty: boolean = false;
 
     private _isDisabled: boolean = false;
-    private _visible: IEditorBridgeServiceVisibleParam = {
+    private _visibleParams: IEditorBridgeServiceVisibleParam = {
         visible: false,
         eventType: DeviceInputEventType.Dblclick,
         unitId: '',
@@ -134,11 +134,11 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
         switchMap((editCellState) => this._currentEditCellLayout$.pipe(map((layout) => (editCellState && layout ? { ...editCellState, ...layout } : null))))
     );
 
-    private readonly _visible$ = new BehaviorSubject<IEditorBridgeServiceVisibleParam>(this._visible);
-    readonly visible$ = this._visible$.asObservable();
+    private readonly _visibleParams$ = new BehaviorSubject<IEditorBridgeServiceVisibleParam>(this._visibleParams);
+    readonly visible$ = this._visibleParams$.asObservable();
 
-    private readonly _afterVisible$ = new BehaviorSubject<IEditorBridgeServiceVisibleParam>(this._visible);
-    readonly afterVisible$ = this._afterVisible$.asObservable();
+    private readonly _afterVisibleParams$ = new BehaviorSubject<IEditorBridgeServiceVisibleParam>(this._visibleParams);
+    readonly afterVisible$ = this._afterVisibleParams$.asObservable();
 
     private readonly _forceKeepVisible$ = new BehaviorSubject(false);
     readonly forceKeepVisible$ = this._forceKeepVisible$.asObservable();
@@ -427,20 +427,20 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
         return this._editorUnitId;
     }
 
-    changeVisible(param: IEditorBridgeServiceVisibleParam) {
-        this._visible = param;
+    changeVisible(params: IEditorBridgeServiceVisibleParam) {
+        this._visibleParams = params;
 
         // Reset the dirty status when the editor is visible.
-        if (param.visible) {
+        if (params.visible) {
             this._editorIsDirty = false;
         }
 
-        this._visible$.next(this._visible);
-        this._afterVisible$.next(this._visible);
+        this._visibleParams$.next(this._visibleParams);
+        this._afterVisibleParams$.next(this._visibleParams);
     }
 
     isVisible() {
-        return this._visible;
+        return this._visibleParams;
     }
 
     enableForceKeepVisible(): void {

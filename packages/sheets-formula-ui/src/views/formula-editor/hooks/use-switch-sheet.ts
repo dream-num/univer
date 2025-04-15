@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, ICommandService } from '@univerjs/core';
+import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { IEditorService } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SetWorksheetActiveOperation } from '@univerjs/sheets';
@@ -22,29 +22,48 @@ import { useDependency } from '@univerjs/ui';
 import { useEffect } from 'react';
 import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render-service';
 
-export const useSwitchSheet = (isNeed: boolean, unitId: string, isSupportAcrossSheet: boolean, isFocusSet: (v: boolean) => void, onBlur: () => void, refresh: () => void) => {
+export const useSwitchSheet = (
+    isNeed: boolean,
+    unitId: string,
+    isSupportAcrossSheet: boolean,
+    isFocusSet: (v: boolean) => void,
+    onBlur: () => void,
+    refresh: () => void
+) => {
     const commandService = useDependency(ICommandService);
     const editorService = useDependency(IEditorService);
     const renderManagerService = useDependency(IRenderManagerService);
     const render = renderManagerService.getRenderById(unitId);
+    const univerInstanceService = useDependency(IUniverInstanceService);
     const refSelectionsRenderService = render?.with(RefSelectionsRenderService);
 
     useEffect(() => {
         if (isNeed && refSelectionsRenderService) {
             if (isSupportAcrossSheet) {
+                const handleRefresh = () => {
+                    const length = refSelectionsRenderService.getSelectionControls().length;
+                    for (let index = 1; index <= length; index++) {
+                        refSelectionsRenderService.clearLastSelection();
+                    }
+
+                    return setTimeout(() => {
+                        refresh();
+                    }, 30);
+                };
+
                 const d = commandService.onCommandExecuted((info) => {
                     if (info.id === SetWorksheetActiveOperation.id) {
-                        const length = refSelectionsRenderService.getSelectionControls().length;
-                        for (let index = 1; index <= length; index++) {
-                            refSelectionsRenderService.clearLastSelection();
-                        }
-                        setTimeout(() => {
-                            refresh();
-                        }, 30);
+                        handleRefresh();
                     }
                 });
+
+                const d2 = univerInstanceService.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_SHEET).subscribe((unit) => {
+                    handleRefresh();
+                });
+
                 return () => {
                     d.dispose();
+                    d2.unsubscribe();
                 };
             } else {
                 const d = commandService.beforeCommandExecuted((info) => {

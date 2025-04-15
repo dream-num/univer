@@ -89,7 +89,10 @@ export class TableFilters {
             for (let row = startRow; row <= endRow; row++) {
                 // const cellValue = sheet.getCell(row, column);
                 const conditionType = isConditionFilter(filter) ? filter.filterInfo.conditionType : TableConditionTypeEnum.String;
-                if (!executeFunc(getCellValueWithConditionType(sheet, row, column, conditionType))) {
+                const cellValue = getCellValueWithConditionType(sheet, row, column, conditionType);
+                if (cellValue === null) {
+                    filterOutRows.add(row);
+                } else if (!executeFunc(getCellValueWithConditionType(sheet, row, column, conditionType))) {
                     filterOutRows.add(row);
                 }
             }

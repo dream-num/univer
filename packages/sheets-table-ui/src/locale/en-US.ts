@@ -26,6 +26,7 @@ const locale = {
         tableStyle: 'Table Style',
         defaultStyle: 'Default Style',
         customStyle: 'Custom Style',
+        customTooMore: 'The number of custom themes exceeds the maximum limit, please delete some unnecessary themes and add them again',
         setTheme: 'Set Table Theme',
         removeTable: 'Remove Table',
         cancel: 'Cancel',

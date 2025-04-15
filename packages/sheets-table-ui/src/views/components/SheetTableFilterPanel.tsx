@@ -94,6 +94,17 @@ export function SheetTableFilterPanel() {
                     filteredItems.push(itemInfo.title);
                 }
             }
+            const originFilter = table.getTableFilterColumn(columnIndex) as ITableManualFilterItem | undefined;
+            if (originFilter) {
+                const originValue = originFilter.values;
+                if (originValue.join(',') === filteredItems.join(',')) {
+                    closeDialog();
+                    return;
+                }
+            } else if (filteredItems.length === 0) {
+                closeDialog();
+                return;
+            }
             const tableFilter: ITableManualFilterItem = {
                 filterType: TableColumnFilterTypeEnum.manual,
                 values: filteredItems,

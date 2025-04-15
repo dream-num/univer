@@ -26,6 +26,7 @@ const locale = {
         tableStyle: 'Style du tableau',
         defaultStyle: 'Style par défaut',
         customStyle: 'Style personnalisé',
+        customTooMore: 'Le nombre de thèmes personnalisés dépasse la limite maximale, veuillez supprimer certains thèmes inutiles et les ajouter à nouveau',
         setTheme: 'Définir le thème du tableau',
         removeTable: 'Supprimer le tableau',
         cancel: 'Annuler',

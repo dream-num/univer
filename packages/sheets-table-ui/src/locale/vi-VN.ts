@@ -26,6 +26,7 @@ const locale = {
         tableStyle: 'Kiểu bảng',
         defaultStyle: 'Kiểu mặc định',
         customStyle: 'Kiểu tùy chỉnh',
+        customTooMore: 'Số lượng chủ đề tùy chỉnh vượt quá giới hạn tối đa, vui lòng xóa một số chủ đề không cần thiết và thêm lại',
         setTheme: 'Thiết lập chủ đề bảng',
         removeTable: 'Xóa bảng',
         cancel: 'Hủy',

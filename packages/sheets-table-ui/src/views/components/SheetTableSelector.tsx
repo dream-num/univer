@@ -44,7 +44,11 @@ export const SheetTableSelector = (props: ITableSelectionInfo & {
                 subUnitId={subUnitId}
                 initialValue={serializeRange(range)}
                 onChange={(_, text) => {
-                    const range = deserializeRangeWithSheet(text).range;
+                    const originValue = serializeRange(range);
+                    if (originValue === text) {
+                        return;
+                    }
+                    const newRange = deserializeRangeWithSheet(text).range;
                     const target = getSheetCommandTarget(univerInstanceService, { unitId, subUnitId });
                     if (!target) {
                         return;
@@ -52,7 +56,7 @@ export const SheetTableSelector = (props: ITableSelectionInfo & {
                     const worksheet = target.worksheet;
                     const merges = worksheet.getMergeData();
                     const hasOverlapWithMerge = merges.some((merge) => {
-                        return Rectangle.intersects(range, merge);
+                        return Rectangle.intersects(newRange, merge);
                     });
 
                     if (hasOverlapWithMerge) {
@@ -65,7 +69,7 @@ export const SheetTableSelector = (props: ITableSelectionInfo & {
                             return false;
                         }
                         const tableRange = table.getRange();
-                        return Rectangle.intersects(range, tableRange);
+                        return Rectangle.intersects(newRange, tableRange);
                     });
 
                     if (hasOverlapWithOtherTable) {
@@ -77,9 +81,14 @@ export const SheetTableSelector = (props: ITableSelectionInfo & {
                         const table = tableManager.getTableById(unitId, tableId);
                         if (table) {
                             const oldRange = table.getRange();
-                            if (Rectangle.intersects(range, oldRange) && oldRange.startRow === range.startRow) {
-                                setSelectedRange(range);
+                            if (Rectangle.intersects(newRange, oldRange) && oldRange.startRow === newRange.startRow) {
+                                setSelectedRange(newRange);
                                 setRangeError('');
+                                onConfirm({
+                                    unitId,
+                                    subUnitId,
+                                    range: newRange,
+                                });
                                 return;
                             } else {
                                 setRangeError(localeService.t('sheets-table.updateError'));

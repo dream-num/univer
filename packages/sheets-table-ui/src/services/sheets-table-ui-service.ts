@@ -64,6 +64,20 @@ export class SheetsTableUiService extends Disposable {
                         this._itemsCache.delete(overlapTable.getId() + colIndex);
                     }
                 });
+            } else if (command.id === SetSheetTableFilterCommand.id) {
+                const { unitId, tableId } = command.params as ISetSheetTableParams;
+                const table = this._tableManager.getTable(unitId, tableId);
+                if (!table) {
+                    return;
+                }
+                const subUnitId = table.getSubunitId();
+                const allSubTables = this._tableManager.getTablesBySubunitId(unitId, subUnitId);
+                allSubTables.forEach((table) => {
+                    const range = table.getRange();
+                    for (let i = range.startColumn; i <= range.endColumn; i++) {
+                        this._itemsCache.delete(table.getId() + i);
+                    }
+                });
             }
         });
     }
@@ -130,6 +144,10 @@ export class SheetsTableUiService extends Disposable {
         const map = new Map<string, number>();
         let allItemsCount = 0;
         for (let row = startRow; row <= endRow; row++) {
+            const isFiltered = worksheet.isRowFiltered(row);
+            if (isFiltered) {
+                continue;
+            }
             const stringItem = this._sheetTableService.getCellValueWithConditionType(worksheet, row, column) as string;
 
             if (!map.has(stringItem)) {

@@ -16,7 +16,7 @@
 
 import type { IRangeThemeStyleItem, ISetRangeThemeMutationParams } from '@univerjs/sheets';
 import type { IAddTableThemeCommandParams, ISetSheetTableCommandParams, ITableSetConfig } from '@univerjs/sheets-table';
-import { ColorKit, ICommandService, LocaleService } from '@univerjs/core';
+import { ColorKit, ErrorService, ICommandService, LocaleService } from '@univerjs/core';
 import { ColorPicker, Dropdown } from '@univerjs/design';
 import { DropdownSingle } from '@univerjs/icons';
 import { RangeThemeStyle, SetRangeThemeMutation, SheetRangeThemeModel } from '@univerjs/sheets';
@@ -52,6 +52,8 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
     const rangeThemeMapChanged$ = useObservable(rangeThemeModel.rangeThemeMapChange$);
     const tableRefresh$ = useObservable(sheetTableThemeUIController.refreshTable$);
 
+    const errorService = useDependency(ErrorService);
+
     const [, setRefresh] = useState(Math.random());
 
     const themeConfig = useObservable(tableManager.tableThemeChanged$, {
@@ -83,6 +85,10 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
     };
 
     const handleAddCustomTheme = () => {
+        if (customRangeThemes.length >= 11) {
+            errorService.emit(localeService.t('sheets-table.customTooMore'));
+            return;
+        }
         const lastCustomTheme = customRangeThemes[customRangeThemes.length - 1];
         let newThemeName = `${TABLE_CUSTOM_NAME_PREFIX}1`;
         if (lastCustomTheme) {

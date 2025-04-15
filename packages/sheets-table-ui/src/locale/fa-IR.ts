@@ -26,6 +26,7 @@ const locale = {
         tableStyle: 'سبک جدول',
         defaultStyle: 'سبک پیش‌فرض',
         customStyle: 'سبک سفارشی',
+        customTooMore: 'تعداد تم‌های سفارشی از حد مجاز فراتر رفته است، لطفاً برخی از تم‌های غیرضروری را حذف کرده و دوباره اضافه کنید',
         setTheme: 'تنظیم قالب جدول',
         removeTable: 'حذف جدول',
         cancel: 'لغو',

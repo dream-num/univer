@@ -118,7 +118,7 @@ export function SheetTableItemsFilterPanel(props: ISheetTableItemsFilterPanelPro
                             />
                             <div
                                 className={`
-                                  univer-ml-1 univer-flex univer-h-5 univer-flex-1 univer-items-center univer-text-xs
+                                  univer-ml-1 univer-flex univer-h-5 univer-flex-1 univer-items-center univer-text-sm
                                 `}
                             >
                                 <span className="univer-inline-block univer-truncate">{`${localeService.t('sheets-filter.panel.select-all')}`}</span>
@@ -135,7 +135,7 @@ export function SheetTableItemsFilterPanel(props: ISheetTableItemsFilterPanelPro
                                     <div
                                         className={`
                                           univer-ml-1 univer-flex univer-h-5 univer-flex-1 univer-items-start
-                                          univer-text-xs
+                                          univer-text-sm
                                         `}
                                     >
 

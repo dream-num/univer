@@ -468,7 +468,7 @@ export class SheetTableRefRangeController extends Disposable {
             }
         });
 
-        return { undos, redos };
+        return { undos, redos, preRedos, preUndos };
     }
 
     private _initCommandListener() {
@@ -480,7 +480,7 @@ export class SheetTableRefRangeController extends Disposable {
                 const allTables = this._tableManager.getTablesBySubunitId(unitId, subUnitId);
                 allTables.forEach((table) => {
                     const tableRange = table.getRange();
-                    if (range.startRow < tableRange.startRow) {
+                    if (range.startRow <= tableRange.startRow) {
                         this._tableManager.updateTableRange(unitId, table.getId(), {
                             newRange: {
                                 ...tableRange,

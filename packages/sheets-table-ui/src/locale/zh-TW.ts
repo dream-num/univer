@@ -26,6 +26,7 @@ const locale = {
         tableStyle: '表格樣式',
         defaultStyle: '預設樣式',
         customStyle: '自定義樣式',
+        customTooMore: '自定義主題數量超出最大限制，請刪除一些無用的主題後再次添加',
         setTheme: '設置表格主題',
         removeTable: '刪除表格',
         cancel: '取消',

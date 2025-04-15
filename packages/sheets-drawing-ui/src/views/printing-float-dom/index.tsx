@@ -28,14 +28,10 @@ export interface IPrintingFloatDomProps {
     scene: Scene;
     skeleton: SpreadsheetSkeleton;
     worksheet: Worksheet;
-    offset: {
-        offsetX: number;
-        offsetY: number;
-    };
 };
 
 export const PrintingFloatDom = (props: IPrintingFloatDomProps) => {
-    const { floatDomInfos, scene, skeleton, worksheet, offset } = props;
+    const { floatDomInfos, scene, skeleton, worksheet } = props;
     const floatDomParams = useMemo(() => floatDomInfos.map((info) => {
         const { width, height, angle, left, top } = info.transform!;
         const offsetBound = transformBound2DOMBound(
@@ -47,15 +43,17 @@ export const PrintingFloatDom = (props: IPrintingFloatDomProps) => {
             },
             scene,
             skeleton,
-            worksheet
+            worksheet,
+            undefined,
+            true
         );
         const { scaleX, scaleY } = scene.getAncestorScale();
 
         const domPos: IFloatDomLayout = {
-            startX: offsetBound.left + offset.offsetX,
-            endX: offsetBound.right + offset.offsetX,
-            startY: offsetBound.top + offset.offsetY,
-            endY: offsetBound.bottom + offset.offsetY,
+            startX: offsetBound.left,
+            endX: offsetBound.right,
+            startY: offsetBound.top,
+            endY: offsetBound.bottom,
             rotate: angle!,
             width: width! * scaleX,
             height: height! * scaleY,

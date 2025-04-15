@@ -140,7 +140,7 @@ export class SheetDrawingPrintingController extends Disposable {
                         const PrintingFloatDomInjector = connectInjector(PrintingFloatDom, this._injector) as React.ComponentType<IPrintingFloatDomProps>;
 
                         render(
-                            <PrintingFloatDomInjector offset={pos.offset} floatDomInfos={floatDomInfos} scene={pos.scene} skeleton={pos.skeleton} worksheet={pos.worksheet} />,
+                            <PrintingFloatDomInjector floatDomInfos={floatDomInfos} scene={pos.scene} skeleton={pos.skeleton} worksheet={pos.worksheet} />,
                             pos.root
                         );
 

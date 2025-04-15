@@ -111,7 +111,7 @@ export interface ILimitBound extends IBoundRectNoAngle {
  * @returns ILimitBound
  */
 // eslint-disable-next-line max-lines-per-function
-export function transformBound2DOMBound(posOfFloatObject: IBoundRectNoAngle, scene: Scene, skeleton: SpreadsheetSkeleton, worksheet: Worksheet, floatDomInfo?: ICanvasFloatDomInfo): ILimitBound {
+export function transformBound2DOMBound(posOfFloatObject: IBoundRectNoAngle, scene: Scene, skeleton: SpreadsheetSkeleton, worksheet: Worksheet, floatDomInfo?: ICanvasFloatDomInfo, skipBoundsOfViewArea = false): ILimitBound {
     const { scaleX, scaleY } = scene.getAncestorScale();
     const viewMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
 
@@ -137,8 +137,8 @@ export function transformBound2DOMBound(posOfFloatObject: IBoundRectNoAngle, sce
     const { boundsOfViewArea: specBoundsOfViewArea, scrollDirectionResponse } = floatDomInfo || {};
     const { rowHeaderWidth, columnHeaderHeight } = skeleton;
     const boundsOfViewArea = {
-        top: columnHeaderHeight,
-        left: rowHeaderWidth,
+        top: skipBoundsOfViewArea ? 0 : columnHeaderHeight,
+        left: skipBoundsOfViewArea ? 0 : rowHeaderWidth,
     };
     if (specBoundsOfViewArea) {
         if (Tools.isDefine(boundsOfViewArea.top)) {

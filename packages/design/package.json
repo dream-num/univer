@@ -78,7 +78,7 @@
         "dayjs": "^1.11.13",
         "rc-dialog": "^9.6.0",
         "rc-dropdown": "^4.2.1",
-        "rc-input-number": "^9.3.0",
+        "rc-input-number": "^9.5.0",
         "rc-menu": "^9.16.0",
         "rc-picker": "^4.9.0",
         "rc-select": "^14.16.4",

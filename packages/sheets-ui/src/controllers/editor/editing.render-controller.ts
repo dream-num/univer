@@ -154,13 +154,12 @@ export class EditingRenderController extends Disposable {
     private _initEditorVisibilityListener(): void {
         this.disposeWithMe(this._univerInstanceService.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_SHEET).subscribe(async (unit) => {
             if (this._editingUnit && unit?.getUnitId() !== this._editingUnit && !this._editorBridgeService.isForceKeepVisible()) {
-                await this._handleEditorInvisible({
+                this._commandService.syncExecuteCommand(SetCellEditVisibleOperation.id, {
                     visible: false,
                     eventType: DeviceInputEventType.Keyboard,
                     keycode: KeyCode.ESC,
                     unitId: this._editingUnit,
                 });
-                this._editingUnit = '';
             }
         }));
 

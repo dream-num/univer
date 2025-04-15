@@ -50,10 +50,6 @@ export interface ICanvasFloatDom {
      */
     subUnitId?: string;
     /**
-     * @deprecated Please use `data`. for saving to disk, everything add to float-dom must be serializable.
-     */
-    props?: Record<string, any>;
-    /**
      * data of component, will save to snapshot, json-like data
      */
     data?: Serializable;
@@ -73,7 +69,7 @@ enum ScrollDirectionResponse {
     HORIZONTAL = 'HORIZONTAL',
     VERTICAL = 'VERTICAL',
 }
-interface ICanvasFloatDomInfo {
+export interface ICanvasFloatDomInfo {
     position$: BehaviorSubject<IFloatDomLayout>;
     dispose: IDisposable;
     rect: Rect;
@@ -82,6 +78,7 @@ interface ICanvasFloatDomInfo {
     boundsOfViewArea?: IBoundRectNoAngle;
     scrollDirectionResponse?: ScrollDirectionResponse; // update float dom pos by scrolling
     domAnchor?: IDOMAnchor;
+    id: string;
 }
 
 export interface IDOMAnchor {
@@ -269,15 +266,7 @@ export const calcSheetFloatDomPosition = (
     return domPos;
 };
 
-export interface ISheetCanvasFloatDomHook {
-    onGetFloatDomProps: (id: string) => Record<string, any>;
-}
-
 export class SheetCanvasFloatDomManagerService extends Disposable {
-    /**
-     * for update dom container position when scrolling and zoom
-     */
-    private _domLayerMap: Map<string, Map<string, Map<string, { props?: any }>>> = new Map();
     /**
      * for update dom container position when scrolling and zoom
      */
@@ -291,8 +280,6 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
 
     private _remove$ = new Subject<{ unitId: string; subUnitId: string; id: string }>();
     remove$ = this._remove$.asObservable();
-
-    private _hooks: ISheetCanvasFloatDomHook[] = [];
 
     constructor(
         @Inject(IRenderManagerService) private _renderManagerService: IRenderManagerService,
@@ -316,29 +303,12 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         });
     }
 
-    /**
-     * For scrolling and zoom
-     * @param unitId
-     * @param subUnitId
-     */
-    private _ensureMap(unitId: string, subUnitId: string) {
-        let unitMap = this._domLayerMap.get(unitId);
-        if (!unitMap) {
-            unitMap = new Map();
-            this._domLayerMap.set(unitId, unitMap);
-        }
-
-        let subUnitMap = unitMap.get(subUnitId);
-        if (!subUnitMap) {
-            subUnitMap = new Map();
-            unitMap.set(subUnitId, subUnitMap);
-        }
-
-        return subUnitMap;
-    }
-
     getFloatDomInfo(id: string) {
         return this._domLayerInfoMap.get(id);
+    }
+
+    getFloatDomsBySubUnitId(unitId: string, subUnitId: string) {
+        return Array.from(this._domLayerInfoMap.values()).filter((info) => info.subUnitId === subUnitId && info.unitId === unitId);
     }
 
     private _getSceneAndTransformerByDrawingSearch(unitId: Nullable<string>) {
@@ -356,17 +326,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
 
         const transformer = scene.getTransformerByCreate();
         const canvas = renderUnit.engine.getCanvasElement();
-
         return { scene, transformer, renderUnit, canvas };
-    }
-
-    private _getFloatDomProps(id: string) {
-        let props;
-        this._hooks.forEach((hook) => {
-            props = hook.onGetFloatDomProps(id);
-        });
-
-        return props;
     }
 
     // eslint-disable-next-line max-lines-per-function
@@ -375,7 +335,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
 
             // eslint-disable-next-line max-lines-per-function
             this._drawingManagerService.add$.subscribe((params: IDrawingSearch[]) => {
-                // eslint-disable-next-line max-lines-per-function, complexity
+                // eslint-disable-next-line max-lines-per-function
                 (params).forEach((param) => {
                     const { unitId, subUnitId, drawingId } = param;
                     const target = getSheetCommandTarget(this._univerInstanceService, { unitId, subUnitId });
@@ -462,7 +422,6 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                     if (floatDomParam.allowTransform !== false) {
                         scene.attachTransformerTo(rect);
                     }
-                    const map = this._ensureMap(unitId, subUnitId);
                     const disposableCollection = new DisposableCollection();
                     const initPosition = calcSheetFloatDomPosition(rect, renderObject.renderUnit.scene, skeleton.skeleton, target.worksheet);
                     const position$ = new BehaviorSubject<IFloatDomLayout>(initPosition);
@@ -473,6 +432,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                         position$,
                         unitId,
                         subUnitId,
+                        id: drawingId,
                     };
 
                     this._canvasFloatDomService.addFloatDom({
@@ -491,7 +451,6 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                         onWheel: (evt: WheelEvent) => {
                             canvas.dispatchEvent(new WheelEvent(evt.type, evt));
                         },
-                        props: map.get(drawingId)?.props ?? this._getFloatDomProps(drawingId),
                         data,
                         unitId,
                     });
@@ -508,9 +467,6 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                     });
                     listener && disposableCollection.add(listener);
                     this._domLayerInfoMap.set(drawingId, info);
-                    map.set(drawingId, {
-                        ...map.get(drawingId),
-                    });
                 });
             })
         );
@@ -539,8 +495,10 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
     private _scrollUpdateListener() {
         const updateSheet = (unitId: string, subUnitId: string) => {
             const renderObject = this._getSceneAndTransformerByDrawingSearch(unitId);
-            const map = this._ensureMap(unitId, subUnitId);
-            const ids = Array.from(map.keys());
+            const ids = Array.from(this._domLayerInfoMap.keys())
+                .map((id) => ({ id, ...this._domLayerInfoMap.get(id) }))
+                .filter((info) => info.subUnitId === subUnitId && info.unitId === unitId)
+                .map((info) => info.id);
             const target = getSheetCommandTarget(this._univerInstanceService, { unitId, subUnitId });
             const skeleton = this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService).getSkeletonParam(subUnitId);
             if (!renderObject || !target || !skeleton) {
@@ -586,7 +544,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             if (commandInfo.id === SetZoomRatioOperation.id) {
                 const params = (commandInfo.params) as any;
                 const { unitId } = params;
-                const subUnitIds = Array.from(this._domLayerMap.get(unitId)?.keys() ?? []);
+                const subUnitIds = Array.from(this._domLayerInfoMap.values()).filter((info) => info.unitId === unitId).map((info) => info.subUnitId);
                 subUnitIds.forEach((subUnitId) => {
                     updateSheet(unitId, subUnitId);
                 });
@@ -699,8 +657,6 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         if (sheetTransform == null) {
             return;
         }
-        const map = this._ensureMap(unitId, subUnitId);
-        map.set(id, layer);
 
         const sheetDrawingParam: ISheetFloatDom = {
             unitId,
@@ -751,8 +707,6 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         }
 
         if (removeDrawing) {
-            const map = this._ensureMap(unitId, subUnitId);
-            map.delete(id);
             const param = this._drawingManagerService.getDrawingByParam({ unitId, subUnitId, drawingId: id });
             if (!param) {
                 return;
@@ -762,17 +716,6 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             const { redo, objects } = jsonOp;
             this._commandService.syncExecuteCommand(SetDrawingApplyMutation.id, { unitId, subUnitId, op: redo, objects, type: DrawingApplyType.REMOVE });
         }
-    }
-
-    addHook(hook: ISheetCanvasFloatDomHook): IDisposable {
-        this._hooks.push(hook);
-
-        return {
-            dispose: () => {
-                const index = this._hooks.findIndex((h) => h === hook);
-                this._hooks.splice(index, 1);
-            },
-        };
     }
 
     // eslint-disable-next-line max-lines-per-function, complexity
@@ -800,8 +743,6 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         if (sheetTransform == null) {
             return;
         }
-        const map = this._ensureMap(unitId, subUnitId);
-        map.set(id, config);
 
         const scene = renderObject.scene;
         const { scaleX } = scene.getAncestorScale();
@@ -914,7 +855,6 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             if (floatDomParam.allowTransform !== false) {
                 scene.attachTransformerTo(domRect);
             }
-            const map = this._ensureMap(unitId, subUnitId);
             const disposableCollection = new DisposableCollection();
 
             const viewMain = scene.getMainViewport();
@@ -951,7 +891,6 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                 onWheel: (evt: WheelEvent) => {
                     canvas.dispatchEvent(new WheelEvent(evt.type, evt));
                 },
-                props: map.get(drawingId)?.props ?? this._getFloatDomProps(drawingId),
                 data,
                 unitId,
             };
@@ -1017,9 +956,6 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             });
             listener && disposableCollection.add(listener);
             this._domLayerInfoMap.set(drawingId, floatDomInfo);
-            map.set(drawingId, {
-                ...map.get(drawingId),
-            });
         }
 
         return {
@@ -1064,9 +1000,6 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         if (sheetTransform == null) {
             return;
         }
-
-        const map = this._ensureMap(unitId, subUnitId);
-        map.set(id, config);
 
         const sheetDrawingParam: ISheetFloatDom = {
             unitId,
@@ -1165,7 +1098,6 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             if (floatDomParam.allowTransform !== false) {
                 scene.attachTransformerTo(domRect);
             }
-            const map = this._ensureMap(unitId, subUnitId);
             const disposableCollection = new DisposableCollection();
 
             const viewMain = scene.getMainViewport();
@@ -1200,7 +1132,6 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                 onWheel: (evt: WheelEvent) => {
                     canvas.dispatchEvent(new WheelEvent(evt.type, evt));
                 },
-                props: map.get(drawingId)?.props ?? this._getFloatDomProps(drawingId),
                 data,
                 unitId,
             };
@@ -1266,9 +1197,6 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             });
             listener && disposableCollection.add(listener);
             this._domLayerInfoMap.set(drawingId, floatDomInfo);
-            map.set(drawingId, {
-                ...map.get(drawingId),
-            });
         }
 
         return {

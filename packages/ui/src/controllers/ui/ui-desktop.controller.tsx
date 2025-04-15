@@ -15,11 +15,13 @@
  */
 
 import type { IDisposable } from '@univerjs/core';
+import type { IUniverWorkbenchProps } from '../../views/workbench/Workbench';
 import type { IUniverUIConfig } from '../config.schema';
 import type { IWorkbenchOptions } from './ui.controller';
 import { Inject, Injector, IUniverInstanceService, LifecycleService, toDisposable } from '@univerjs/core';
 import { render as createRoot, unmount } from '@univerjs/design';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import React from 'react';
 import { ComponentManager } from '../../common';
 import { HEADING_ITEM_COMPONENT, HeadingItem } from '../../components';
 import { COMMON_LABEL_COMPONENT, CommonLabel } from '../../components/common-label';
@@ -102,7 +104,7 @@ function bootstrap(
         mountContainer = createContainer('univer');
     }
 
-    const ConnectedApp = connectInjector(DesktopWorkbench, injector);
+    const ConnectedApp = connectInjector(DesktopWorkbench, injector) as React.ComponentType<IUniverWorkbenchProps>;
     const onRendered = (contentElement: HTMLElement) => callback(contentElement, mountContainer);
 
     function render() {

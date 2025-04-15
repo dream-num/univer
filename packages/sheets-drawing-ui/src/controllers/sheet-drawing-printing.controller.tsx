@@ -15,22 +15,32 @@
  */
 
 import type { IRange } from '@univerjs/core';
-import { Disposable, DrawingTypeEnum, Inject, Tools } from '@univerjs/core';
+import type { IFloatDomData } from '@univerjs/sheets-drawing';
+import type { IPrintingFloatDomProps } from '../views/printing-float-dom';
+import { Disposable, DrawingTypeEnum, Inject, Injector, Tools } from '@univerjs/core';
+import { render, unmount } from '@univerjs/design';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { DrawingRenderService } from '@univerjs/drawing-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetPrintInterceptorService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { ComponentManager, connectInjector } from '@univerjs/ui';
+import { SheetCanvasFloatDomManagerService } from '../services/canvas-float-dom-manager.service';
+import { PrintingFloatDom } from '../views/printing-float-dom';
 
 export class SheetDrawingPrintingController extends Disposable {
     constructor(
         @Inject(SheetPrintInterceptorService) private readonly _sheetPrintInterceptorService: SheetPrintInterceptorService,
         @Inject(DrawingRenderService) private readonly _drawingRenderService: DrawingRenderService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
+        @Inject(SheetCanvasFloatDomManagerService) private readonly _canvasFloatDomManagerService: SheetCanvasFloatDomManagerService,
+        @Inject(ComponentManager) private readonly _componetManager: ComponentManager,
+        @Inject(Injector) private readonly _injector: Injector
     ) {
         super();
 
         this._initPrinting();
+        this._initPrintingDom();
     }
 
     private _initPrinting() {
@@ -104,6 +114,41 @@ export class SheetDrawingPrintingController extends Disposable {
                         }
 
                         return next(range);
+                    },
+                }
+            )
+        );
+    }
+
+    private _initPrintingDom() {
+        this.disposeWithMe(
+            this._sheetPrintInterceptorService.interceptor.intercept(
+                this._sheetPrintInterceptorService.interceptor.getInterceptPoints().PRINTING_DOM_COLLECT,
+                {
+                    handler: (disposableCollection, pos, next) => {
+                        const { unitId, subUnitId } = pos;
+                        const floatDomInfos = this._canvasFloatDomManagerService.getFloatDomsBySubUnitId(unitId, subUnitId)
+                            .map((i) => {
+                                const drawing = this._drawingManagerService.getDrawingByParam({ drawingId: i.id, unitId, subUnitId }) as IFloatDomData;
+
+                                return drawing && {
+                                    ...drawing,
+                                    componentKey: this._componetManager.get(drawing.componentKey) as any,
+                                };
+                            })
+                            .filter(Boolean) as IFloatDomData[];
+                        const PrintingFloatDomInjector = connectInjector(PrintingFloatDom, this._injector) as React.ComponentType<IPrintingFloatDomProps>;
+
+                        render(
+                            <PrintingFloatDomInjector offset={pos.offset} floatDomInfos={floatDomInfos} scene={pos.scene} skeleton={pos.skeleton} worksheet={pos.worksheet} />,
+                            pos.root
+                        );
+
+                        disposableCollection?.add(() => {
+                            unmount(pos.root);
+                        });
+
+                        return next(disposableCollection);
                     },
                 }
             )

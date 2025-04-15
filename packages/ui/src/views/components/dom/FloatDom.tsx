@@ -22,9 +22,9 @@ import { ComponentManager } from '../../../common';
 import { CanvasFloatDomService } from '../../../services/dom/canvas-dom-layer.service';
 import { useDependency, useObservable } from '../../../utils/di';
 
-const FloatDomSingle = memo((props: { layer: IFloatDom; id: string }) => {
+export const FloatDomSingle = memo((props: { layer: IFloatDom; id: string }) => {
     const { layer, id } = props;
-    const componentManager = useDependency(ComponentManager);
+
     const size$ = useMemo(() => layer.position$.pipe(
         distinctUntilChanged(
             (prev, curr) => prev.absolute.left === curr.absolute.left &&
@@ -43,7 +43,7 @@ const FloatDomSingle = memo((props: { layer: IFloatDom; id: string }) => {
     const innerStyle = useRef<React.CSSProperties>({
 
     });
-    const Component = typeof layer.componentKey === 'string' ? componentManager.get(layer.componentKey) : layer.componentKey;
+    const Component = typeof layer.componentKey === 'string' ? useDependency(ComponentManager).get(layer.componentKey) : layer.componentKey;
     const layerProps: any = useMemo(() => ({
         data: layer.data,
         ...layer.props,

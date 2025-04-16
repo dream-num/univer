@@ -21,7 +21,7 @@ import { ICommandService, LocaleService } from '@univerjs/core';
 import { Button, Segmented } from '@univerjs/design';
 import { AscendingSingle, DescendingSingle } from '@univerjs/icons';
 import { SortRangeCommand, SortType } from '@univerjs/sheets-sort';
-import { SheetsTableSortStateEnum, TableColumnFilterTypeEnum, TableManager } from '@univerjs/sheets-table';
+import { SheetsTableSortStateEnum, TableColumnFilterTypeEnum, TableDateCompareTypeEnum, TableManager } from '@univerjs/sheets-table';
 import { useDependency } from '@univerjs/ui';
 import { useMemo, useState } from 'react';
 import { SheetsTableComponentController } from '../../controllers/sheet-table-component.controller';
@@ -111,14 +111,23 @@ export function SheetTableFilterPanel() {
             };
             tableUiService.setTableFilter(unitId, tableId, columnIndex, tableFilter);
         } else {
-            const tableFilter: ITableConditionFilterItem = {
-                filterType: TableColumnFilterTypeEnum.condition,
-                // @ts-ignore
-                filterInfo: {
+            let filterInfo;
+            if (conditionInfo.compare === TableDateCompareTypeEnum.Quarter || conditionInfo.compare === TableDateCompareTypeEnum.Month) {
+                filterInfo = {
+                    conditionType: conditionInfo.type,
+                    compareType: Object.values(conditionInfo.info)[0],
+                };
+            } else {
+                filterInfo = {
                     conditionType: conditionInfo.type,
                     compareType: conditionInfo.compare,
                     expectedValue: Object.values(conditionInfo.info)[0],
-                },
+                };
+            }
+            const tableFilter: ITableConditionFilterItem = {
+                filterType: TableColumnFilterTypeEnum.condition,
+                // @ts-ignore
+                filterInfo,
             };
             tableUiService.setTableFilter(unitId, tableId, columnIndex, tableFilter);
         }

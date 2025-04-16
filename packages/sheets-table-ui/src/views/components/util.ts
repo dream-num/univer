@@ -356,6 +356,25 @@ export function getInitConditionInfo(tableFilter?: ITableFilterItem) {
                     date: filterInfo.expectedValue,
                 },
             };
+        } else {
+            const quarter = new Set([TableDateCompareTypeEnum.Q1, TableDateCompareTypeEnum.Q2, TableDateCompareTypeEnum.Q3, TableDateCompareTypeEnum.Q4]);
+            if (quarter.has(compareType as TableDateCompareTypeEnum)) {
+                return {
+                    type: conditionType,
+                    compare: TableDateCompareTypeEnum.Quarter,
+                    info: {
+                        dateSelect: filterInfo.compareType,
+                    },
+                };
+            } else {
+                return {
+                    type: conditionType,
+                    compare: TableDateCompareTypeEnum.Month,
+                    info: {
+                        dateSelect: filterInfo.compareType,
+                    },
+                };
+            }
         }
     } else if (conditionType === TableConditionTypeEnum.Number) {
         if (compareType === TableNumberCompareTypeEnum.Between || compareType === TableNumberCompareTypeEnum.NotBetween) {

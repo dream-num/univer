@@ -63,6 +63,7 @@ export function SheetTableInsertRowMenuFactory(accessor: IAccessor) {
         id: SheetTableInsertRowCommand.id,
         type: MenuItemType.BUTTON,
         title: 'sheets-table.insert.row',
+        hidden$: getSheetTableHeaderOperationHidden$(accessor),
     };
 }
 
@@ -79,6 +80,7 @@ export function SheetTableRemoveRowMenuFactory(accessor: IAccessor) {
         id: SheetTableRemoveRowCommand.id,
         type: MenuItemType.BUTTON,
         title: 'sheets-table.remove.row',
+        hidden$: getSheetTableHeaderOperationHidden$(accessor),
     };
 }
 
@@ -109,8 +111,42 @@ export function getSheetTableRowColOperationHidden$(accessor: IAccessor): Observ
                             const sheetsTableController = accessor.get(SheetsTableController);
 
                             const isInTable = sheetsTableController.getContainerTableWithRange(workbook.getUnitId(), sheet.getSheetId(), range);
-
                             return of(!isInTable);
+                        })
+                    );
+                })
+            );
+        })
+    );
+}
+
+export function getSheetTableHeaderOperationHidden$(accessor: IAccessor): Observable<boolean> {
+    const sheetsSelectionsService = accessor.get(SheetsSelectionsService);
+    const univerInstanceService = accessor.get(IUniverInstanceService);
+    const workbook$ = univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET);
+
+    return workbook$.pipe(
+        switchMap((workbook) => {
+            if (!workbook) return of(true);
+            return workbook.activeSheet$.pipe(
+                switchMap((sheet) => {
+                    if (!sheet) return of(true);
+                    return sheetsSelectionsService.selectionMoveEnd$.pipe(
+                        switchMap((selections) => {
+                            if (!selections.length || selections.length > 1) return of(true);
+                            const selection = selections[0];
+                            const range = selection.range;
+                            const sheetsTableController = accessor.get(SheetsTableController);
+
+                            const isInTable = sheetsTableController.getContainerTableWithRange(workbook.getUnitId(), sheet.getSheetId(), range);
+                            if (!isInTable) {
+                                return of(true);
+                            }
+                            const tableRange = isInTable.getRange();
+                            if (range.startRow === tableRange.startRow) {
+                                return of(true);
+                            }
+                            return of(false);
                         })
                     );
                 })

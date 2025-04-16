@@ -30,7 +30,7 @@ describe('lexer nodeMaker test', () => {
                 '=lambda(x,y, x*y*x)(sum(1,(1+2)*3),2)+1-max(100,200)'
             ) as LexerNode;
             expect(JSON.stringify(node.serialize())).toStrictEqual(
-                '{"token":"R_1","st":-1,"ed":-1,"children":[{"token":"lambda","st":0,"ed":5,"children":[{"token":"L_1","st":14,"ed":16,"children":[{"token":"P_1","st":15,"ed":17,"children":[{"token":"sum","st":19,"ed":21,"children":[{"token":"P_1","st":19,"ed":21,"children":["1"]},{"token":"P_1","st":21,"ed":23,"children":["1","2","+","3","*"]}]}]},{"token":"P_1","st":30,"ed":32,"children":["2"]}]},{"token":"P_1","st":3,"ed":5,"children":["x"]},{"token":"P_1","st":5,"ed":7,"children":["y"]},{"token":"P_1","st":7,"ed":9,"children":[" x","y","*","x","*"]}]},"1","+",{"token":"max","st":39,"ed":41,"children":[{"token":"P_1","st":39,"ed":41,"children":["100"]},{"token":"P_1","st":43,"ed":45,"children":["200"]}]},"-"]}'
+                '{"token":"R_1","st":-1,"ed":-1,"children":[{"token":"lambda","st":0,"ed":5,"children":[{"token":"L_1","st":14,"ed":16,"children":[{"token":"P_1","st":15,"ed":17,"children":[{"token":"sum","st":19,"ed":21,"children":[{"token":"P_1","st":19,"ed":21,"children":["1"]},{"token":"P_1","st":21,"ed":23,"children":["1","2","+","3","*"]}]}]},{"token":"P_1","st":30,"ed":32,"children":["2"]}]},{"token":"P_1","st":3,"ed":5,"children":["x"]},{"token":"P_1","st":5,"ed":7,"children":["y"]},{"token":"P_1","st":7,"ed":9,"children":["x","y","*","x","*"]}]},"1","+",{"token":"max","st":39,"ed":41,"children":[{"token":"P_1","st":39,"ed":41,"children":["100"]},{"token":"P_1","st":43,"ed":45,"children":["200"]}]},"-"]}'
             );
         });
 
@@ -39,7 +39,7 @@ describe('lexer nodeMaker test', () => {
                 '=(-(1+2)--@A1:B2 + 5)/2 + -sum(indirect(A5):B10# + B6# + A1:offset(C5, 1, 1)  ,  100) + {1,2,3;4,5,6;7,8,10} + lambda(x,y,z, x*y*z)(sum(1,(1+2)*3),2,lambda(x,y, @offset(A1:B0,x#*y#))(1,2):C20) + sum((1+2%)*30%, 1+2)%'
             ) as LexerNode;
             expect(JSON.stringify(node.serialize())).toStrictEqual(
-                '{"token":"R_1","st":-1,"ed":-1,"children":[{"token":"-","st":1,"ed":1,"children":[{"token":"P_1","st":-1,"ed":1,"children":["1","2","+"]}]},{"token":"-","st":-1,"ed":-1,"children":[{"token":"@","st":-1,"ed":-1,"children":[{"token":":","st":-1,"ed":-1,"children":[{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"A1","st":-1,"ed":-1,"children":[]}]},{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"B2 ","st":-1,"ed":-1,"children":[]}]}]}]}]},"-"," 5","+","2 ","/",{"token":" -sum","st":24,"ed":28,"children":[{"token":"P_1","st":26,"ed":28,"children":[{"token":"#","st":-1,"ed":-1,"children":[{"token":":","st":-1,"ed":-1,"children":[{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"indirect","st":30,"ed":37,"children":[{"token":"P_1","st":35,"ed":37,"children":["A5"]}]}]},{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"B10","st":-1,"ed":-1,"children":[]}]}]}]},{"token":"#","st":-1,"ed":-1,"children":[" B6"]}," +",{"token":":","st":-1,"ed":-1,"children":[{"token":"P_1","st":-1,"ed":-1,"children":[{"token":" A1","st":-1,"ed":-1,"children":[]}]},{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"offset","st":59,"ed":64,"children":[{"token":"P_1","st":62,"ed":64,"children":["C5"]},{"token":"P_1","st":65,"ed":67,"children":[" 1"]},{"token":"P_1","st":68,"ed":70,"children":[" 1"]}]}]}]}," +"]},{"token":"P_1","st":74,"ed":76,"children":["  100"]}]},"+"," {1,2,3;4,5,6;7,8,10}"," +",{"token":" lambda","st":109,"ed":115,"children":[{"token":"L_1","st":126,"ed":128,"children":[{"token":"P_1","st":127,"ed":129,"children":[{"token":"sum","st":131,"ed":133,"children":[{"token":"P_1","st":131,"ed":133,"children":["1"]},{"token":"P_1","st":133,"ed":135,"children":["1","2","+","3","*"]}]}]},{"token":"P_1","st":142,"ed":144,"children":["2"]},{"token":"P_1","st":144,"ed":146,"children":[{"token":":","st":-1,"ed":-1,"children":[{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"lambda","st":148,"ed":153,"children":[{"token":"L_1","st":177,"ed":179,"children":[{"token":"P_1","st":178,"ed":180,"children":["1"]},{"token":"P_1","st":180,"ed":182,"children":["2"]}]},{"token":"P_1","st":151,"ed":153,"children":["x"]},{"token":"P_1","st":153,"ed":155,"children":["y"]},{"token":"P_1","st":155,"ed":157,"children":[{"token":" @offset","st":159,"ed":166,"children":[{"token":"P_1","st":164,"ed":166,"children":[{"token":":","st":-1,"ed":-1,"children":[{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"A1","st":-1,"ed":-1,"children":[]}]},{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"B0","st":-1,"ed":-1,"children":[]}]}]}]},{"token":"P_1","st":170,"ed":172,"children":[{"token":"#","st":-1,"ed":-1,"children":["x"]},{"token":"#","st":-1,"ed":-1,"children":["y"]},"*"]}]}]}]}]},{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"C20","st":-1,"ed":-1,"children":[]}]}]}]}]},{"token":"P_1","st":113,"ed":115,"children":["x"]},{"token":"P_1","st":115,"ed":117,"children":["y"]},{"token":"P_1","st":117,"ed":119,"children":["z"]},{"token":"P_1","st":119,"ed":121,"children":[" x","y","*","z","*"]}]}," +",{"token":"%","st":-1,"ed":-1,"children":[{"token":" sum","st":193,"ed":196,"children":[{"token":"P_1","st":194,"ed":196,"children":["1",{"token":"%","st":-1,"ed":-1,"children":["2"]},"+",{"token":"%","st":-1,"ed":-1,"children":["30"]},"*"]},{"token":"P_1","st":205,"ed":207,"children":[" 1","2","+"]}]}]}," +"]}'
+                '{"token":"R_1","st":-1,"ed":-1,"children":[{"token":"-","st":1,"ed":1,"children":[{"token":"P_1","st":-1,"ed":1,"children":["1","2","+"]}]},{"token":"-","st":-1,"ed":-1,"children":[{"token":"@","st":-1,"ed":-1,"children":[{"token":":","st":-1,"ed":-1,"children":[{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"A1","st":-1,"ed":-1,"children":[]}]},{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"B2 ","st":-1,"ed":-1,"children":[]}]}]}]}]},"-","5","+","2 ","/",{"token":"-sum","st":25,"ed":28,"children":[{"token":"P_1","st":26,"ed":28,"children":[{"token":"#","st":-1,"ed":-1,"children":[{"token":":","st":-1,"ed":-1,"children":[{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"indirect","st":30,"ed":37,"children":[{"token":"P_1","st":35,"ed":37,"children":["A5"]}]}]},{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"B10","st":-1,"ed":-1,"children":[]}]}]}]},{"token":"#","st":-1,"ed":-1,"children":["B6"]},"+",{"token":":","st":-1,"ed":-1,"children":[{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"A1","st":-1,"ed":-1,"children":[]}]},{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"offset","st":59,"ed":64,"children":[{"token":"P_1","st":62,"ed":64,"children":["C5"]},{"token":"P_1","st":65,"ed":67,"children":["1"]},{"token":"P_1","st":68,"ed":70,"children":["1"]}]}]}]},"+"]},{"token":"P_1","st":74,"ed":76,"children":["100"]}]},"+","{1,2,3;4,5,6;7,8,10}","+",{"token":"lambda","st":110,"ed":115,"children":[{"token":"L_1","st":126,"ed":128,"children":[{"token":"P_1","st":127,"ed":129,"children":[{"token":"sum","st":131,"ed":133,"children":[{"token":"P_1","st":131,"ed":133,"children":["1"]},{"token":"P_1","st":133,"ed":135,"children":["1","2","+","3","*"]}]}]},{"token":"P_1","st":142,"ed":144,"children":["2"]},{"token":"P_1","st":144,"ed":146,"children":[{"token":":","st":-1,"ed":-1,"children":[{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"lambda","st":148,"ed":153,"children":[{"token":"L_1","st":177,"ed":179,"children":[{"token":"P_1","st":178,"ed":180,"children":["1"]},{"token":"P_1","st":180,"ed":182,"children":["2"]}]},{"token":"P_1","st":151,"ed":153,"children":["x"]},{"token":"P_1","st":153,"ed":155,"children":["y"]},{"token":"P_1","st":155,"ed":157,"children":[{"token":"@offset","st":160,"ed":166,"children":[{"token":"P_1","st":164,"ed":166,"children":[{"token":":","st":-1,"ed":-1,"children":[{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"A1","st":-1,"ed":-1,"children":[]}]},{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"B0","st":-1,"ed":-1,"children":[]}]}]}]},{"token":"P_1","st":170,"ed":172,"children":[{"token":"#","st":-1,"ed":-1,"children":["x"]},{"token":"#","st":-1,"ed":-1,"children":["y"]},"*"]}]}]}]}]},{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"C20","st":-1,"ed":-1,"children":[]}]}]}]}]},{"token":"P_1","st":113,"ed":115,"children":["x"]},{"token":"P_1","st":115,"ed":117,"children":["y"]},{"token":"P_1","st":117,"ed":119,"children":["z"]},{"token":"P_1","st":119,"ed":121,"children":["x","y","*","z","*"]}]},"+",{"token":"%","st":-1,"ed":-1,"children":[{"token":"sum","st":194,"ed":196,"children":[{"token":"P_1","st":194,"ed":196,"children":["1",{"token":"%","st":-1,"ed":-1,"children":["2"]},"+",{"token":"%","st":-1,"ed":-1,"children":["30"]},"*"]},{"token":"P_1","st":205,"ed":207,"children":["1","2","+"]}]}]},"+"]}'
             );
         });
 
@@ -57,7 +57,7 @@ describe('lexer nodeMaker test', () => {
                 '=(sum(max(B1:C10,10)*5-100,((1+1)*2+5)/2,10, lambda(x,y, x*y*x)(sum(1,(1+2)*3),2))+lambda(x,y, x*y*x)(sum(1,(1+2)*3),2)+count(B1:C10,10*5-100))*5-100'
             ) as LexerNode;
             expect(JSON.stringify(node.serialize())).toStrictEqual(
-                '{"token":"R_1","st":-1,"ed":-1,"children":[{"token":"sum","st":1,"ed":3,"children":[{"token":"P_1","st":1,"ed":3,"children":[{"token":"max","st":5,"ed":7,"children":[{"token":"P_1","st":5,"ed":7,"children":[{"token":":","st":-1,"ed":-1,"children":[{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"B1","st":-1,"ed":-1,"children":[]}]},{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"C10","st":-1,"ed":-1,"children":[]}]}]}]},{"token":"P_1","st":12,"ed":14,"children":["10"]}]},"5","*","100","-"]},{"token":"P_1","st":22,"ed":24,"children":["1","1","+","2","*","5","+","2","/"]},{"token":"P_1","st":36,"ed":38,"children":["10"]},{"token":"P_1","st":39,"ed":41,"children":[{"token":" lambda","st":43,"ed":49,"children":[{"token":"L_1","st":58,"ed":60,"children":[{"token":"P_1","st":59,"ed":61,"children":[{"token":"sum","st":63,"ed":65,"children":[{"token":"P_1","st":63,"ed":65,"children":["1"]},{"token":"P_1","st":65,"ed":67,"children":["1","2","+","3","*"]}]}]},{"token":"P_1","st":74,"ed":76,"children":["2"]}]},{"token":"P_1","st":47,"ed":49,"children":["x"]},{"token":"P_1","st":49,"ed":51,"children":["y"]},{"token":"P_1","st":51,"ed":53,"children":[" x","y","*","x","*"]}]}]}]},{"token":"lambda","st":82,"ed":87,"children":[{"token":"L_1","st":96,"ed":98,"children":[{"token":"P_1","st":97,"ed":99,"children":[{"token":"sum","st":101,"ed":103,"children":[{"token":"P_1","st":101,"ed":103,"children":["1"]},{"token":"P_1","st":103,"ed":105,"children":["1","2","+","3","*"]}]}]},{"token":"P_1","st":112,"ed":114,"children":["2"]}]},{"token":"P_1","st":85,"ed":87,"children":["x"]},{"token":"P_1","st":87,"ed":89,"children":["y"]},{"token":"P_1","st":89,"ed":91,"children":[" x","y","*","x","*"]}]},"+",{"token":"count","st":119,"ed":123,"children":[{"token":"P_1","st":121,"ed":123,"children":[{"token":":","st":-1,"ed":-1,"children":[{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"B1","st":-1,"ed":-1,"children":[]}]},{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"C10","st":-1,"ed":-1,"children":[]}]}]}]},{"token":"P_1","st":128,"ed":130,"children":["10","5","*","100","-"]}]},"+","5","*","100","-"]}'
+                '{"token":"R_1","st":-1,"ed":-1,"children":[{"token":"sum","st":1,"ed":3,"children":[{"token":"P_1","st":1,"ed":3,"children":[{"token":"max","st":5,"ed":7,"children":[{"token":"P_1","st":5,"ed":7,"children":[{"token":":","st":-1,"ed":-1,"children":[{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"B1","st":-1,"ed":-1,"children":[]}]},{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"C10","st":-1,"ed":-1,"children":[]}]}]}]},{"token":"P_1","st":12,"ed":14,"children":["10"]}]},"5","*","100","-"]},{"token":"P_1","st":22,"ed":24,"children":["1","1","+","2","*","5","+","2","/"]},{"token":"P_1","st":36,"ed":38,"children":["10"]},{"token":"P_1","st":39,"ed":41,"children":[{"token":"lambda","st":44,"ed":49,"children":[{"token":"L_1","st":58,"ed":60,"children":[{"token":"P_1","st":59,"ed":61,"children":[{"token":"sum","st":63,"ed":65,"children":[{"token":"P_1","st":63,"ed":65,"children":["1"]},{"token":"P_1","st":65,"ed":67,"children":["1","2","+","3","*"]}]}]},{"token":"P_1","st":74,"ed":76,"children":["2"]}]},{"token":"P_1","st":47,"ed":49,"children":["x"]},{"token":"P_1","st":49,"ed":51,"children":["y"]},{"token":"P_1","st":51,"ed":53,"children":["x","y","*","x","*"]}]}]}]},{"token":"lambda","st":82,"ed":87,"children":[{"token":"L_1","st":96,"ed":98,"children":[{"token":"P_1","st":97,"ed":99,"children":[{"token":"sum","st":101,"ed":103,"children":[{"token":"P_1","st":101,"ed":103,"children":["1"]},{"token":"P_1","st":103,"ed":105,"children":["1","2","+","3","*"]}]}]},{"token":"P_1","st":112,"ed":114,"children":["2"]}]},{"token":"P_1","st":85,"ed":87,"children":["x"]},{"token":"P_1","st":87,"ed":89,"children":["y"]},{"token":"P_1","st":89,"ed":91,"children":["x","y","*","x","*"]}]},"+",{"token":"count","st":119,"ed":123,"children":[{"token":"P_1","st":121,"ed":123,"children":[{"token":":","st":-1,"ed":-1,"children":[{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"B1","st":-1,"ed":-1,"children":[]}]},{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"C10","st":-1,"ed":-1,"children":[]}]}]}]},{"token":"P_1","st":128,"ed":130,"children":["10","5","*","100","-"]}]},"+","5","*","100","-"]}'
             );
         });
 
@@ -71,14 +71,14 @@ describe('lexer nodeMaker test', () => {
         it('REDUCE', () => {
             const node = lexerTreeBuilder.treeBuilder('=REDUCE(1, A1:C2, LAMBDA(a,b,a+b^2))') as LexerNode;
             expect(JSON.stringify(node.serialize())).toStrictEqual(
-                '{"token":"R_1","st":-1,"ed":-1,"children":[{"token":"REDUCE","st":0,"ed":5,"children":[{"token":"P_1","st":3,"ed":5,"children":["1"]},{"token":"P_1","st":5,"ed":7,"children":[{"token":":","st":-1,"ed":-1,"children":[{"token":"P_1","st":-1,"ed":-1,"children":[{"token":" A1","st":-1,"ed":-1,"children":[]}]},{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"C2","st":-1,"ed":-1,"children":[]}]}]}]},{"token":"P_1","st":12,"ed":14,"children":[{"token":" LAMBDA","st":16,"ed":22,"children":[{"token":"P_1","st":20,"ed":22,"children":["a"]},{"token":"P_1","st":22,"ed":24,"children":["b"]},{"token":"P_1","st":24,"ed":26,"children":["a","b","2","^","+"]}]}]}]}]}'
+                '{"token":"R_1","st":-1,"ed":-1,"children":[{"token":"REDUCE","st":0,"ed":5,"children":[{"token":"P_1","st":3,"ed":5,"children":["1"]},{"token":"P_1","st":5,"ed":7,"children":[{"token":":","st":-1,"ed":-1,"children":[{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"A1","st":-1,"ed":-1,"children":[]}]},{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"C2","st":-1,"ed":-1,"children":[]}]}]}]},{"token":"P_1","st":12,"ed":14,"children":[{"token":"LAMBDA","st":17,"ed":22,"children":[{"token":"P_1","st":20,"ed":22,"children":["a"]},{"token":"P_1","st":22,"ed":24,"children":["b"]},{"token":"P_1","st":24,"ed":26,"children":["a","b","2","^","+"]}]}]}]}]}'
             );
         });
 
         it('missing default arguments', () => {
             const node = lexerTreeBuilder.treeBuilder('=SUM(, A1:B1)') as LexerNode;
             expect(JSON.stringify(node.serialize())).toStrictEqual(
-                '{"token":"R_1","st":-1,"ed":-1,"children":[{"token":"SUM","st":0,"ed":2,"children":[{"token":"P_1","st":0,"ed":2,"children":[]},{"token":"P_1","st":1,"ed":3,"children":[{"token":":","st":-1,"ed":-1,"children":[{"token":"P_1","st":-1,"ed":-1,"children":[{"token":" A1","st":-1,"ed":-1,"children":[]}]},{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"B1","st":-1,"ed":-1,"children":[]}]}]}]}]}]}'
+                '{"token":"R_1","st":-1,"ed":-1,"children":[{"token":"SUM","st":0,"ed":2,"children":[{"token":"P_1","st":0,"ed":2,"children":[]},{"token":"P_1","st":1,"ed":3,"children":[{"token":":","st":-1,"ed":-1,"children":[{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"A1","st":-1,"ed":-1,"children":[]}]},{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"B1","st":-1,"ed":-1,"children":[]}]}]}]}]}]}'
             );
         });
 
@@ -131,14 +131,13 @@ describe('lexer nodeMaker test', () => {
             // eslint-disable-next-line no-console
             console.log(`Elapsed time: ${elapsed} ms`);
 
-            const expectedMaxTime = 3000; // 毫秒数 // CI may time out TODO: performance test
             expect(elapsed).toBeGreaterThan(0);
         });
 
         it('error include function test', () => {
             const node = lexerTreeBuilder.treeBuilder('=sum(#REF! + 5 , #REF!)') as LexerNode;
             expect(JSON.stringify(node.serialize())).toStrictEqual(
-                '{"token":"R_1","st":-1,"ed":-1,"children":[{"token":"sum","st":0,"ed":2,"children":[{"token":"P_1","st":0,"ed":2,"children":["#REF!"," 5 "," +"]},{"token":"P_1","st":11,"ed":13,"children":["#REF!"]}]}]}'
+                '{"token":"R_1","st":-1,"ed":-1,"children":[{"token":"sum","st":0,"ed":2,"children":[{"token":"P_1","st":0,"ed":2,"children":["#REF!","5 ","+"]},{"token":"P_1","st":11,"ed":13,"children":["#REF!"]}]}]}'
             );
         });
 
@@ -149,17 +148,17 @@ describe('lexer nodeMaker test', () => {
 
         it('minus test complex', () => {
             const node = lexerTreeBuilder.treeBuilder('= ( 2019-09-09 ) ') as LexerNode;
-            expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":[" 2019","09","-","09 ","-"]}');
+            expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":["2019","09","-","09 ","-"]}');
         });
 
         it('sheet range', () => {
             const node = lexerTreeBuilder.treeBuilder('=SUM(SUM(Sheet5:Sheet6!A1:B10) + 100, 1)') as LexerNode;
-            expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":[{"token":"SUM","st":0,"ed":2,"children":[{"token":"P_1","st":0,"ed":2,"children":[{"token":"SUM","st":4,"ed":6,"children":[{"token":"P_1","st":4,"ed":6,"children":[{"token":":","st":-1,"ed":-1,"children":[{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"Sheet5","st":-1,"ed":-1,"children":[]}]},{"token":"P_1","st":-1,"ed":-1,"children":[{"token":":","st":-1,"ed":-1,"children":[{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"Sheet6!A1","st":-1,"ed":-1,"children":[]}]},{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"B10","st":-1,"ed":-1,"children":[]}]}]}]}]}]}]}," 100"," +"]},{"token":"P_1","st":32,"ed":34,"children":[" 1"]}]}]}');
+            expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":[{"token":"SUM","st":0,"ed":2,"children":[{"token":"P_1","st":0,"ed":2,"children":[{"token":"SUM","st":4,"ed":6,"children":[{"token":"P_1","st":4,"ed":6,"children":[{"token":":","st":-1,"ed":-1,"children":[{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"Sheet5","st":-1,"ed":-1,"children":[]}]},{"token":"P_1","st":-1,"ed":-1,"children":[{"token":":","st":-1,"ed":-1,"children":[{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"Sheet6!A1","st":-1,"ed":-1,"children":[]}]},{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"B10","st":-1,"ed":-1,"children":[]}]}]}]}]}]}]},"100","+"]},{"token":"P_1","st":32,"ed":34,"children":["1"]}]}]}');
         });
 
         it('minus ref', () => {
             const node = lexerTreeBuilder.treeBuilder('= 1--A1 ') as LexerNode;
-            expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":[" 1","-A1 ","-"]}');
+            expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":["1","-A1 ","-"]}');
         });
 
         it('negative ref', () => {
@@ -209,7 +208,7 @@ describe('lexer nodeMaker test', () => {
 
         it('error as parameter', () => {
             const node = lexerTreeBuilder.treeBuilder('=sum(#NUM! + #VALUE!) + #SPILL! - (#CALC!)') as LexerNode;
-            expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":[{"token":"sum","st":0,"ed":2,"children":[{"token":"P_1","st":0,"ed":2,"children":["#NUM!","#VALUE!"," +"]}]},"#SPILL!"," +","#CALC!","-"]}');
+            expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":[{"token":"sum","st":0,"ed":2,"children":[{"token":"P_1","st":0,"ed":2,"children":["#NUM!","#VALUE!","+"]}]},"#SPILL!","+","#CALC!","-"]}');
         });
 
         it('error type lexer function', () => {
@@ -234,7 +233,7 @@ describe('lexer nodeMaker test', () => {
 
         it('one minus for formula', () => {
             const node = lexerTreeBuilder.treeBuilder('=   -A1') as LexerNode;
-            expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":["   -A1"]}');
+            expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":["-A1"]}');
         });
 
         it('operator with concatenate test', () => {
@@ -468,11 +467,12 @@ describe('lexer nodeMaker test', () => {
                     token: '"TRUE"',
                 },
                 ',',
+                ' ',
                 {
                     endIndex: 27,
                     nodeType: 2,
-                    startIndex: 20,
-                    token: ' "FALSE"',
+                    startIndex: 21,
+                    token: '"FALSE"',
                 },
                 ')',
             ]);
@@ -550,11 +550,17 @@ describe('lexer nodeMaker test', () => {
         it('multi blank to minus formula', () => {
             expect(lexerTreeBuilder.sequenceNodesBuilder('=      -A1')).toStrictEqual(
                 [
+                    ' ',
+                    ' ',
+                    ' ',
+                    ' ',
+                    ' ',
+                    ' ',
                     {
                         endIndex: 6,
                         nodeType: 0,
-                        startIndex: 0,
-                        token: '      -',
+                        startIndex: 6,
+                        token: '-',
                     },
                     {
                         endIndex: 8,
@@ -570,7 +576,12 @@ describe('lexer nodeMaker test', () => {
         it('one minus sequences error', () => {
             expect(lexerTreeBuilder.sequenceNodesBuilder('=-\r\n')).toStrictEqual(
                 [
-                    '-',
+                    {
+                        endIndex: 1,
+                        nodeType: 3,
+                        startIndex: 0,
+                        token: '- ',
+                    },
                 ]
             );
         });
@@ -653,7 +664,7 @@ describe('lexer nodeMaker test', () => {
 
         it('Complex Formula', () => {
             const result = lexerTreeBuilder.convertRefersToAbsolute('=SUM(A1:B10) + LAMBDA(x, y, x*y*x)(A1:B10, A10) + MAX(A1:B10,SUM(A2))', AbsoluteRefType.ALL, AbsoluteRefType.ALL);
-            expect(result).toStrictEqual('=SUM($A$1:$B$10) + LAMBDA(x, y, x*y*x)($A$1:$B$10,$A$10) + MAX($A$1:$B$10,SUM($A$2))');
+            expect(result).toStrictEqual('=SUM($A$1:$B$10) + LAMBDA(x, y, x*y*x)($A$1:$B$10, $A$10) + MAX($A$1:$B$10,SUM($A$2))');
         });
 
         it('manually set current sheet name', () => {
@@ -730,6 +741,20 @@ describe('lexer nodeMaker test', () => {
 
             result = lexerTreeBuilder.moveFormulaRefOffset("=SUM( 'dv-test'!F26)", -1, 0, true);
             expect(result).toStrictEqual("=SUM( 'dv-test'!E26)");
+        });
+    });
+
+    describe('bad cases from users', () => {
+        it('univer-pro #4120', () => {
+            // The space before [workbook4] will lead to error.
+            const node = lexerTreeBuilder.treeBuilder("'[workbook1]Sheet 01'!A5* [workbook4]aaa!A5") as LexerNode;
+            expect(node.serialize()).toStrictEqual(
+                { token: 'R_1', st: -1, ed: -1, children: [
+                    "'[workbook1]Sheet 01'!A5",
+                    '[workbook4]aaa!A5',
+                    '*',
+                ] }
+            );
         });
     });
 });

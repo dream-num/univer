@@ -154,6 +154,12 @@
     // Disable the default formatter, use eslint instead
     "prettier.enable": false,
     "search.followSymlinks": false,
+    "search.exclude": {
+        "**/node_modules": true,
+        "**/bower_components": true,
+        "**/*.code-search": true,
+        "**/lib": true
+    },
 
     // Auto fix
     "editor.formatOnSave": false,

@@ -15,14 +15,13 @@
  */
 
 import type { Injector, IWorkbookData, Univer, Workbook } from '@univerjs/core';
+import type { LexerNode } from '../lexer-node';
 import { LocaleType } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-
+import { IFormulaCurrentConfigService } from '../../../services/current-data.service';
 import { IDefinedNamesService } from '../../../services/defined-names.service';
 import { Lexer } from '../lexer';
-import type { LexerNode } from '../lexer-node';
 import { LexerTreeBuilder } from '../lexer-tree-builder';
-import { IFormulaCurrentConfigService } from '../../../services/current-data.service';
 import { createCommandTestBed } from './create-command-test-bed';
 
 const TEST_WORKBOOK_DATA: IWorkbookData = {
@@ -85,7 +84,11 @@ describe('lexer test', () => {
 
         // runtimeService.setCurrent(0, 0, 4, 1, 'sheet1', 'test');
 
-        lexer = new Lexer(definedNamesService, lexerTreeBuilder, formulaCurrentConfigService);
+        lexer = new Lexer(
+            definedNamesService,
+            lexerTreeBuilder,
+            formulaCurrentConfigService
+        );
     });
 
     afterEach(() => {
@@ -94,23 +97,161 @@ describe('lexer test', () => {
 
     describe('lexer definedName', () => {
         it('simple', () => {
-            definedNamesService.registerDefinedName('test', { id: 'test1', name: 'myName', formulaOrRefString: '$A$10:$C$100' });
+            definedNamesService.registerDefinedName('test', {
+                id: 'test1',
+                name: 'myName',
+                formulaOrRefString: '$A$10:$C$100',
+            });
 
             const node = lexer.treeBuilder('=myName') as LexerNode;
 
-            expect(JSON.stringify(node.serialize())).toStrictEqual(
-                '{"token":"R_1","st":-1,"ed":-1,"children":[{"token":":","st":-1,"ed":-1,"children":[{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"$A$10","st":-1,"ed":-1,"children":[]}]},{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"$C$100","st":-1,"ed":-1,"children":[]}]}]}]}'
-            );
+            expect(node.serialize()).toStrictEqual({
+                token: 'R_1',
+                st: -1,
+                ed: -1,
+                children: [
+                    {
+                        token: ':',
+                        st: -1,
+                        ed: -1,
+                        children: [
+                            {
+                                token: 'P_1',
+                                st: -1,
+                                ed: -1,
+                                children: [
+                                    {
+                                        token: '$A$10',
+                                        st: -1,
+                                        ed: -1,
+                                        children: [],
+                                    },
+                                ],
+                            },
+                            {
+                                token: 'P_1',
+                                st: -1,
+                                ed: -1,
+                                children: [
+                                    {
+                                        token: '$C$100',
+                                        st: -1,
+                                        ed: -1,
+                                        children: [],
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                ],
+            });
         });
 
         it('lambda', () => {
-            definedNamesService.registerDefinedName('test', { id: 'test2', name: 'myName', formulaOrRefString: 'lambda(x, y , x*x*y)' });
+            definedNamesService.registerDefinedName('test', {
+                id: 'test2',
+                name: 'myName',
+                formulaOrRefString: 'lambda(x, y , x*x*y)',
+            });
 
-            const node = lexer.treeBuilder('=myName(1+sum(A1:B1), 100)') as LexerNode;
-
-            expect(JSON.stringify(node.serialize())).toStrictEqual(
-                '{"token":"R_1","st":-1,"ed":-1,"children":[{"token":"lambda","st":0,"ed":5,"children":[{"token":"L_1","st":16,"ed":18,"children":[{"token":"P_1","st":17,"ed":19,"children":["1",{"token":"sum","st":23,"ed":25,"children":[{"token":"P_1","st":23,"ed":25,"children":[{"token":":","st":-1,"ed":-1,"children":[{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"A1","st":-1,"ed":-1,"children":[]}]},{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"B1","st":-1,"ed":-1,"children":[]}]}]}]}]},"+"]},{"token":"P_1","st":30,"ed":32,"children":[" 100"]}]},{"token":"P_1","st":3,"ed":5,"children":["x"]},{"token":"P_1","st":5,"ed":7,"children":[" y "]},{"token":"P_1","st":9,"ed":11,"children":[" x","x","*","y","*"]}]}]}'
-            );
+            const node = lexer.treeBuilder(
+                '=myName(1+sum(A1:B1), 100)'
+            ) as LexerNode;
+            expect(node.serialize()).toStrictEqual({
+                token: 'R_1',
+                st: -1,
+                ed: -1,
+                children: [
+                    {
+                        token: 'lambda',
+                        st: 0,
+                        ed: 5,
+                        children: [
+                            {
+                                token: 'L_1',
+                                st: 16,
+                                ed: 18,
+                                children: [
+                                    {
+                                        token: 'P_1',
+                                        st: 17,
+                                        ed: 19,
+                                        children: [
+                                            '1',
+                                            {
+                                                token: 'sum',
+                                                st: 23,
+                                                ed: 25,
+                                                children: [
+                                                    {
+                                                        token: 'P_1',
+                                                        st: 23,
+                                                        ed: 25,
+                                                        children: [
+                                                            {
+                                                                token: ':',
+                                                                st: -1,
+                                                                ed: -1,
+                                                                children: [
+                                                                    {
+                                                                        token: 'P_1',
+                                                                        st: -1,
+                                                                        ed: -1,
+                                                                        children:
+                                                                            [
+                                                                                {
+                                                                                    token: 'A1',
+                                                                                    st: -1,
+                                                                                    ed: -1,
+                                                                                    children:
+                                                                                        [],
+                                                                                },
+                                                                            ],
+                                                                    },
+                                                                    {
+                                                                        token: 'P_1',
+                                                                        st: -1,
+                                                                        ed: -1,
+                                                                        children:
+                                                                            [
+                                                                                {
+                                                                                    token: 'B1',
+                                                                                    st: -1,
+                                                                                    ed: -1,
+                                                                                    children:
+                                                                                        [],
+                                                                                },
+                                                                            ],
+                                                                    },
+                                                                ],
+                                                            },
+                                                        ],
+                                                    },
+                                                ],
+                                            },
+                                            '+',
+                                        ],
+                                    },
+                                    {
+                                        token: 'P_1',
+                                        st: 30,
+                                        ed: 32,
+                                        children: ['100'],
+                                    },
+                                ],
+                            },
+                            { token: 'P_1', st: 3, ed: 5, children: ['x'] },
+                            { token: 'P_1', st: 5, ed: 7, children: ['y '] },
+                            {
+                                token: 'P_1',
+                                st: 9,
+                                ed: 11,
+                                children: ['x', 'x', '*', 'y', '*'],
+                            },
+                        ],
+                    },
+                ],
+            });
         });
     });
 });

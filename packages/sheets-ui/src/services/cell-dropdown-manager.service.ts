@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDisposable, Nullable } from '@univerjs/core';
+import type { IDisposable } from '@univerjs/core';
 import type { ISheetLocation } from '@univerjs/sheets';
 import type { ICellDropdown } from '../views/dropdown';
 import { Disposable, DisposableCollection, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, Inject } from '@univerjs/core';
@@ -26,6 +26,7 @@ import { SheetCanvasPopManagerService } from './canvas-pop-manager.service';
 export type IDropdownParam = {
     location: ISheetLocation;
     onHide?: () => void;
+    closeOnOutSide?: boolean;
 } & ICellDropdown;
 
 export interface IDropdownComponentProps {
@@ -48,8 +49,8 @@ export class SheetCellDropdownManagerService extends Disposable {
         });
     }
 
-    showDropdown(param: IDropdownParam, closeOnOutSide = true): Nullable<IDisposable> {
-        const { location, onHide } = param;
+    showDropdown(param: IDropdownParam): IDisposable {
+        const { location, onHide, closeOnOutSide = true } = param;
         const { row, col, unitId, subUnitId } = location;
         if (this._zenZoneService.visible) {
             throw new Error('[SheetCellDropdownManagerService]: cannot show dropdown when zen mode is visible');

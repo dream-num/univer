@@ -236,7 +236,7 @@ describe('lexer test', () => {
                                         token: 'P_1',
                                         st: 30,
                                         ed: 32,
-                                        children: [' 100'],
+                                        children: ['100'],
                                     },
                                 ],
                             },

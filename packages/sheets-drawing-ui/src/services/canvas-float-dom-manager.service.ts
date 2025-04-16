@@ -398,11 +398,12 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                     };
 
                     const isChart = drawingType === DrawingTypeEnum.DRAWING_CHART;
+                    imageConfig.rotateEnabled = false;
 
                     if (isChart) {
                         const backgroundColor = data ? (data as Record<string, string>).backgroundColor : 'white';
                         imageConfig.fill = backgroundColor;
-                        imageConfig.rotateEnabled = false;
+
                         if (data && (data as Record<string, string>).border) {
                             imageConfig.stroke = (data as Record<string, string>).border;
                         }

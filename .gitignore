@@ -1,6 +1,7 @@
 #ide
 *.DS_Store
 .idea
+.cursor
 # .vscode
 
 #npm

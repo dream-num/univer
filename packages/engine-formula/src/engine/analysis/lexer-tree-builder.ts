@@ -1252,7 +1252,7 @@ export class LexerTreeBuilder extends Disposable {
         }
     }
 
-    // TODO@wzhudev: this method is over complex, need to refactor. Using recursive descend to parse the formula string
+    // NOTE@wzhudev: this method is over complex, need to refactor. Using recursive descend to parse the formula string
     // without a standalone lexer phase
     // eslint-disable-next-line max-lines-per-function, complexity
     private _nodeMaker(formulaStringRaw: string, sequenceArray?: ISequenceArray[], matchCurrentNodeIndex?: number) {
@@ -1419,7 +1419,6 @@ export class LexerTreeBuilder extends Disposable {
                     }
                     this._closeTableBracket();
                 } else {
-                    // FIXME: 这里不能立即 push segment, 可能
                     this._pushSegment(currentString);
                 }
             } else if (

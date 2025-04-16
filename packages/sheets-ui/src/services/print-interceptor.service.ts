@@ -14,22 +14,37 @@
  * limitations under the License.
  */
 
-import type { IRange } from '@univerjs/core';
+import type { DisposableCollection, IRange, Worksheet } from '@univerjs/core';
+import type { Engine, Scene, Spreadsheet, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import { createInterceptorKey, Disposable, InterceptorManager } from '@univerjs/core';
-import type { Scene } from '@univerjs/engine-render';
 
-interface ISheetPos {
+interface ISheetPrintContext {
     unitId: string;
     subUnitId: string;
+    scene: Scene;
+    engine: Engine;
+    root: HTMLElement;
+    worksheet: Worksheet;
+    skeleton: SpreadsheetSkeleton;
+    offset: {
+        offsetX: number;
+        offsetY: number;
+    };
 }
 
-const PRINTING_RANGE = createInterceptorKey<IRange, ISheetPos>('PRINTING_RANGE');
-const PRINTING_COMPONENT_COLLECT = createInterceptorKey<undefined, ISheetPos & { scene: Scene }>('PRINTING_COMPONENT_COLLECT');
+interface ISheetPrintComponentContext extends ISheetPrintContext {
+    spreadsheet: Spreadsheet;
+}
+
+const PRINTING_RANGE = createInterceptorKey<IRange, { unitId: string; subUnitId: string }>('PRINTING_RANGE');
+const PRINTING_COMPONENT_COLLECT = createInterceptorKey<undefined, ISheetPrintComponentContext>('PRINTING_COMPONENT_COLLECT');
+const PRINTING_DOM_COLLECT = createInterceptorKey<DisposableCollection, ISheetPrintContext>('PRINTING_DOM_COLLECT');
 
 export class SheetPrintInterceptorService extends Disposable {
     readonly interceptor = new InterceptorManager({
         PRINTING_RANGE,
         PRINTING_COMPONENT_COLLECT,
+        PRINTING_DOM_COLLECT,
     });
 
     constructor() {
@@ -40,6 +55,11 @@ export class SheetPrintInterceptorService extends Disposable {
         }));
 
         this.disposeWithMe(this.interceptor.intercept(this.interceptor.getInterceptPoints().PRINTING_COMPONENT_COLLECT, {
+            priority: -1,
+            handler: (_value) => _value,
+        }));
+
+        this.disposeWithMe(this.interceptor.intercept(this.interceptor.getInterceptPoints().PRINTING_DOM_COLLECT, {
             priority: -1,
             handler: (_value) => _value,
         }));

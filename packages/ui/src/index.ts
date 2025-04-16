@@ -114,7 +114,7 @@ export { useSidebarClick } from './services/sidebar/hooks/use-sidebar-click';
 export { ILeftSidebarService, ISidebarService } from './services/sidebar/sidebar.service';
 export { DesktopZenZoneService } from './services/zen-zone/desktop-zen-zone.service';
 export { IZenZoneService } from './services/zen-zone/zen-zone.service';
-
+export { FloatDomSingle } from './views/components/dom/FloatDom';
 export { DISABLE_AUTO_FOCUS_KEY, UniverUIPlugin } from './ui-plugin';
 
 export { UNIVER_UI_PLUGIN_NAME } from './ui-plugin';

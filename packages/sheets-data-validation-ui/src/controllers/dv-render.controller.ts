@@ -116,8 +116,8 @@ export class SheetsDataValidationRenderController extends RxDisposable {
                             worksheet,
                         },
                         trigger: 'editor-bridge',
-                    },
-                    false
+                        closeOnOutSide: false,
+                    }
                 );
             }
         }));

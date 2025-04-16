@@ -110,6 +110,7 @@ export function cleanupPkgPlugin(): Plugin {
                     require: './lib/cjs/facade.js',
                     types: './lib/types/facade/index.d.ts',
                 };
+                pkg.publishConfig.exports['./lib/facade'] = pkg.publishConfig.exports['./facade'];
             }
             pkg.publishConfig.exports['./lib/*'] = './lib/*';
 

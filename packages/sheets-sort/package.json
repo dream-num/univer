@@ -51,6 +51,11 @@
                 "require": "./lib/cjs/facade.js",
                 "types": "./lib/types/facade/index.d.ts"
             },
+            "./lib/facade": {
+                "import": "./lib/es/facade.js",
+                "require": "./lib/cjs/facade.js",
+                "types": "./lib/types/facade/index.d.ts"
+            },
             "./lib/*": "./lib/*"
         }
     },
@@ -75,7 +80,7 @@
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
         "typescript": "^5.8.3",
-        "vite": "^6.2.6",
+        "vite": "^6.3.0",
         "vitest": "^3.1.1"
     }
 }

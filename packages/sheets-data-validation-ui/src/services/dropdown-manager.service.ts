@@ -509,4 +509,3 @@ export class DataValidationDropdownManagerService extends Disposable {
         });
     }
 }
-

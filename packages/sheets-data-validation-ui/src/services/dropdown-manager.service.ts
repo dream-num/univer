@@ -18,13 +18,13 @@ import type { CellValue, IDisposable, Nullable, Workbook } from '@univerjs/core'
 import type { ISetRangeValuesCommandParams, ISheetLocation } from '@univerjs/sheets';
 import type { ListValidator } from '@univerjs/sheets-data-validation';
 import type { IDropdownParam, IEditorBridgeServiceVisibleParam } from '@univerjs/sheets-ui';
-import { CellValueType, DataValidationErrorStyle, DataValidationRenderMode, dayjs, Disposable, DisposableCollection, ICommandService, Inject, IUniverInstanceService, numfmt, UniverInstanceType } from '@univerjs/core';
+import { CellValueType, DataValidationErrorStyle, DataValidationRenderMode, dayjs, Disposable, DisposableCollection, ICommandService, Inject, Injector, IUniverInstanceService, numfmt, UniverInstanceType } from '@univerjs/core';
 import { DataValidatorDropdownType, DataValidatorRegistryService } from '@univerjs/data-validation';
-import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
+import { DeviceInputEventType } from '@univerjs/engine-render';
 import { SetRangeValuesCommand, SheetsSelectionsService } from '@univerjs/sheets';
 import { getCellValueOrigin, getDataValidationCellValue, serializeListOptions, SheetDataValidationModel } from '@univerjs/sheets-data-validation';
 import { getPatternType } from '@univerjs/sheets-numfmt';
-import { IEditorBridgeService, SetCellEditVisibleOperation, SheetCanvasPopManagerService, SheetCellDropdownManagerService } from '@univerjs/sheets-ui';
+import { IEditorBridgeService, SetCellEditVisibleOperation, SheetCellDropdownManagerService } from '@univerjs/sheets-ui';
 import { IZenZoneService, KeyCode } from '@univerjs/ui';
 import { Subject } from 'rxjs';
 import { OpenValidationPanelOperation } from '../commands/operations/data-validation.operation';
@@ -89,18 +89,16 @@ export class DataValidationDropdownManagerService extends Disposable {
     }
 
     constructor(
-        @Inject(SheetCanvasPopManagerService) private readonly _canvasPopupManagerService: SheetCanvasPopManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(DataValidatorRegistryService) private readonly _dataValidatorRegistryService: DataValidatorRegistryService,
         @IZenZoneService private readonly _zenZoneService: IZenZoneService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(SheetDataValidationModel) private readonly _dataValidationModel: SheetDataValidationModel,
         @Inject(SheetsSelectionsService) private readonly _sheetsSelectionsService: SheetsSelectionsService,
         @Inject(SheetCellDropdownManagerService) private readonly _cellDropdownManagerService: SheetCellDropdownManagerService,
         @Inject(SheetDataValidationModel) private readonly _sheetDataValidationModel: SheetDataValidationModel,
         @ICommandService private readonly _commandService: ICommandService,
-        @Inject(DataValidationRejectInputController) private readonly _rejectInputController: DataValidationRejectInputController,
-        @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService
+        @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
+        @Inject(Injector) private readonly _injector: Injector
     ) {
         super();
         this._init();
@@ -235,7 +233,10 @@ export class DataValidationDropdownManagerService extends Disposable {
                 });
                 return true;
             } else {
-                this._rejectInputController.showReject(validator.getRuleFinalError(rule, { row, col, unitId, subUnitId }));
+                if (this._injector.has(DataValidationRejectInputController)) {
+                    const rejectInputController = this._injector.get(DataValidationRejectInputController);
+                    rejectInputController.showReject(validator.getRuleFinalError(rule, { row, col, unitId, subUnitId }));
+                }
                 return false;
             }
         };

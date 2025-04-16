@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import React, { useContext } from 'react';
+import type { ILocale } from '../../locale/interface';
 
+import React, { useContext } from 'react';
 import { Button } from '../button/Button';
 import { ConfigContext } from '../config-provider/ConfigProvider';
 import { Dialog } from '../dialog/Dialog';
-import type { ILocale } from '../../locale/interface';
 import styles from './index.module.less';
 
 export interface IConfirmProps {
@@ -69,7 +69,7 @@ function Footer(props: { locale: ILocale['design']; cancelText?: string; confirm
     return (
         <footer className={styles.confirmFooter}>
             <Button onClick={onClose}>{cancelText ?? locale?.Confirm.cancel}</Button>
-            <Button type="primary" onClick={onConfirm}>
+            <Button variant="primary" onClick={onConfirm}>
                 {confirmText ?? locale?.Confirm.confirm}
             </Button>
         </footer>

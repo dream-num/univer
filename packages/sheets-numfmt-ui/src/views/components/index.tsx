@@ -132,7 +132,7 @@ export const SheetNumfmtPanel: FC<ISheetNumfmtPanelProps> = (props) => {
                 <Button size="small" onClick={handleCancel} className="m-r-12">
                     {t('sheet.numfmt.cancel')}
                 </Button>
-                <Button type="primary" size="small" onClick={handleConfirm}>
+                <Button variant="primary" size="small" onClick={handleConfirm}>
                     {t('sheet.numfmt.confirm')}
                 </Button>
             </div>

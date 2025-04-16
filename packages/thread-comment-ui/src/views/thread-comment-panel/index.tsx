@@ -254,8 +254,8 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
                         {isFiltering
                             ? (
                                 <Button
+                                    variant="link"
                                     onClick={onReset}
-                                    type="link"
                                 >
                                     {localeService.t('threadCommentUI.panel.reset')}
                                 </Button>
@@ -264,7 +264,7 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
                                 <Button
                                     id="thread-comment-add"
                                     className={styles.threadCommentPanelAdd}
-                                    type="primary"
+                                    variant="primary"
                                     onClick={onAdd}
                                     disabled={disableAdd}
                                 >

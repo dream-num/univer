@@ -192,7 +192,7 @@ export function Dialog(props: IDialogProps) {
         ? (
             <div>
                 <Button className="univer-mr-2" onClick={onCancel ?? onClose}>{locale?.Confirm?.cancel ?? 'Cancel'}</Button>
-                <Button type="primary" onClick={onOk}>{locale?.Confirm?.confirm ?? 'Ok'}</Button>
+                <Button variant="primary" onClick={onOk}>{locale?.Confirm?.confirm ?? 'Ok'}</Button>
             </div>
         )
         : null);

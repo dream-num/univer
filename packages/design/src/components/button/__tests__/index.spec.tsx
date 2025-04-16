@@ -22,7 +22,7 @@ import { Button } from '../Button';
 
 describe('Button', () => {
     it('renders correctly', () => {
-        const { container } = render(<Button type="primary">btn1</Button>);
+        const { container } = render(<Button variant="primary">btn1</Button>);
         expect(container);
     });
 

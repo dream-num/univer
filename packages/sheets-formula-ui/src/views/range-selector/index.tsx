@@ -151,6 +151,7 @@ export function RangeSelectorDialog(props: IRangeSelectorDialogProps) {
                     <Button onClick={onClose}>{localeService.t('rangeSelector.cancel')}</Button>
                     <Button
                         style={{ marginLeft: 10 }}
+                        variant="primary"
                         onClick={() => {
                             onConfirm(
                                 ranges
@@ -161,7 +162,6 @@ export function RangeSelectorDialog(props: IRangeSelectorDialogProps) {
                                     .map((text) => deserializeRangeWithSheet(text)).map((unitRange) => ({ ...unitRange, range: rangePreProcess(unitRange.range) }))
                             );
                         }}
-                        type="primary"
                     >
                         {localeService.t('rangeSelector.confirm')}
                     </Button>
@@ -173,7 +173,7 @@ export function RangeSelectorDialog(props: IRangeSelectorDialogProps) {
                 {ranges.map((text, index) => (
                     <div key={index} className={styles.sheetRangeSelectorDialogItem}>
                         <Input
-                            affixWrapperStyle={{ width: '100%' }}
+                            className="univer-w-full"
                             placeholder={localeService.t('rangeSelector.placeHolder')}
                             onFocus={() => setFocusIndex(index)}
                             value={text}
@@ -185,7 +185,7 @@ export function RangeSelectorDialog(props: IRangeSelectorDialogProps) {
                 ))}
                 {ranges.length < maxRangeCount && (
                     <div>
-                        <Button type="link" size="small" onClick={handleRangeAdd}>
+                        <Button variant="link" size="small" onClick={handleRangeAdd}>
                             <IncreaseSingle />
                             <span>{localeService.t('rangeSelector.addAnotherRange')}</span>
                         </Button>

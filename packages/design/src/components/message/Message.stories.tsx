@@ -41,19 +41,19 @@ export const Playground = {
 
         return (
             <section className="univer-space-x-2">
-                <Button type="primary" onClick={() => handleOpen(MessageType.Success)}>
+                <Button variant="primary" onClick={() => handleOpen(MessageType.Success)}>
                     success
                 </Button>
-                <Button type="primary" onClick={() => handleOpen(MessageType.Info)}>
+                <Button variant="primary" onClick={() => handleOpen(MessageType.Info)}>
                     info / default
                 </Button>
-                <Button type="primary" onClick={() => handleOpen(MessageType.Warning)}>
+                <Button variant="primary" onClick={() => handleOpen(MessageType.Warning)}>
                     warning
                 </Button>
-                <Button type="primary" onClick={() => handleOpen(MessageType.Error)}>
+                <Button variant="primary" onClick={() => handleOpen(MessageType.Error)}>
                     error
                 </Button>
-                <Button type="primary" onClick={() => handleOpen(MessageType.Loading)}>
+                <Button variant="primary" onClick={() => handleOpen(MessageType.Loading)}>
                     loading
                 </Button>
 

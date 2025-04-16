@@ -581,7 +581,7 @@ export const CellLinkEdit = () => {
                     {localeService.t('hyperLink.form.cancel')}
                 </Button>
                 <Button
-                    type="primary"
+                    variant="primary"
                     style={{ marginLeft: 8 }}
                     onClick={async () => {
                         handleSubmit();

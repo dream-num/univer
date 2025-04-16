@@ -160,8 +160,19 @@ export function CustomSortPanel() {
                 </div>
             </div>
             <div className={styles.customSortPanelFooter}>
-                <Button className={styles.customSortPanelFooterBtn} type="default" onClick={() => cancel()}>{localeService.t('sheets-sort.dialog.cancel')}</Button>
-                <Button className={styles.customSortPanelFooterBtn} type="primary" onClick={() => apply(list, hasTitle)}>{localeService.t('sheets-sort.dialog.confirm')}</Button>
+                <Button
+                    className={styles.customSortPanelFooterBtn}
+                    onClick={() => cancel()}
+                >
+                    {localeService.t('sheets-sort.dialog.cancel')}
+                </Button>
+                <Button
+                    className={styles.customSortPanelFooterBtn}
+                    variant="primary"
+                    onClick={() => apply(list, hasTitle)}
+                >
+                    {localeService.t('sheets-sort.dialog.confirm')}
+                </Button>
             </div>
         </div>
     );

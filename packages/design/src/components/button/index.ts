@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export { Button, type ButtonSize, type ButtonType, type IButtonProps } from './Button';
+export { Button, type IButtonProps } from './Button';

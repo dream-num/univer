@@ -29,7 +29,7 @@ export const AlertDialog = ({ errorMsg }: { errorMsg: string }) => {
             <p>{errorMsg || localeService.t('permission.dialog.alertContent')}</p>
             <div className={styles.sheetPermissionAlertDialogButton}>
                 <Button
-                    type="primary"
+                    variant="primary"
                     onClick={() => {
                         dialogService.close(UNIVER_SHEET_PERMISSION_ALERT_DIALOG_ID);
                     }}

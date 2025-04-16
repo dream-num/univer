@@ -161,7 +161,7 @@ export const DocHyperLinkEdit = () => {
                     {localeService.t('docLink.edit.cancel')}
                 </Button>
                 <Button
-                    type="primary"
+                    variant="primary"
                     disabled={!link}
                     onClick={handleConfirm}
                 >

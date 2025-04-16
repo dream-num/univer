@@ -136,7 +136,7 @@ export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThr
                             {localeService.t('threadCommentUI.editor.cancel')}
                         </Button>
                         <Button
-                            type="primary"
+                            variant="primary"
                             disabled={!canSubmit}
                             onClick={handleSave}
                         >

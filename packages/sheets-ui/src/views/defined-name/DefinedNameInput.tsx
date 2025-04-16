@@ -212,7 +212,13 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
     return (
         <div className={styles.definedNameInput} style={{ display: state ? 'block' : 'none' }}>
             <div>
-                <Input placeholder={localeService.t('definedName.inputNamePlaceholder')} value={nameValue} allowClear onChange={setNameValue} affixWrapperStyle={widthStyle} />
+                <Input
+                    style={widthStyle}
+                    placeholder={localeService.t('definedName.inputNamePlaceholder')}
+                    value={nameValue}
+                    allowClear
+                    onChange={setNameValue}
+                />
             </div>
             <div>
                 <RadioGroup value={typeValue} onChange={typeValueChange}>
@@ -247,7 +253,6 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
                         onVerify={(res: boolean) => {
                             setValidFormulaOrRange(res);
                         }}
-
                         onFocus={() => isFocusFormulaEditorSet(true)}
                         ref={formulaEditorRef}
                     />
@@ -256,7 +261,12 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
                 <Select style={widthStyle} value={localSheetIdValue} options={options} onChange={setLocalSheetIdValue} />
             </div>
             <div>
-                <Input affixWrapperStyle={widthStyle} placeholder={localeService.t('definedName.inputCommentPlaceholder')} value={commentValue} onChange={setCommentValue} />
+                <Input
+                    style={widthStyle}
+                    placeholder={localeService.t('definedName.inputCommentPlaceholder')}
+                    value={commentValue}
+                    onChange={setCommentValue}
+                />
             </div>
             <div style={{ display: validString.length === 0 ? 'none' : 'flex' }} className={styles.definedNameInputValidation}>
                 <span>
@@ -274,7 +284,7 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
                 </Button>
                 <Button
                     style={{ marginLeft: 15 }}
-                    type="primary"
+                    variant="primary"
                     onClick={confirmChange}
                 >
                     {localeService.t('definedName.confirm')}

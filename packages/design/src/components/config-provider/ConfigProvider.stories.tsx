@@ -15,11 +15,11 @@
  */
 
 import type { Meta } from '@storybook/react';
-import React, { useState } from 'react';
+import type { ILocale } from '../../locale/interface';
 
+import { useState } from 'react';
 import enUS from '../../locale/en-US';
 import zhCN from '../../locale/zh-CN';
-import type { ILocale } from '../../locale/interface';
 import { Button } from '../button/Button';
 import { Confirm } from '../confirm/Confirm';
 import { ConfigProvider } from './ConfigProvider';

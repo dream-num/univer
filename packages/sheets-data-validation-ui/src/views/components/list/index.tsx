@@ -123,7 +123,7 @@ export function DataValidationList(props: { workbook: Workbook }) {
                         </Button>
                     )
                     : null}
-                <Button className={styles.dataValidationListButton} type="primary" onClick={handleAddRule}>
+                <Button className={styles.dataValidationListButton} variant="primary" onClick={handleAddRule}>
                     {localeService.t('dataValidation.panel.add')}
                 </Button>
             </div>

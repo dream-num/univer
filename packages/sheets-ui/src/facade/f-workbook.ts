@@ -80,7 +80,7 @@ export interface IFWorkbookSheetsUIMixin {
      *     title: (
      *       <>
      *         <Button onClick={() => { console.log('Cancel clicked') }}>Cancel</Button>
-     *         <Button type="primary" onClick={() => { console.log('Confirm clicked') }} style={{marginLeft: '10px'}}>Confirm</Button>
+     *         <Button variant="primary" onClick={() => { console.log('Confirm clicked') }} style={{marginLeft: '10px'}}>Confirm</Button>
      *       </>
      *     )
      *   },

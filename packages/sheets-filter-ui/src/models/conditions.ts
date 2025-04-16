@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,8 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { BooleanNumber } from '@univerjs/core';
 import type { ICustomFilters, IFilterColumn } from '@univerjs/sheets-filter';
+import { BooleanNumber } from '@univerjs/core';
 import { CustomFilterOperator } from '@univerjs/sheets-filter';
 import { ExtendCustomFilterOperator, OperatorOrder } from './extended-operators';
 
@@ -580,8 +580,10 @@ export namespace FilterConditionItems {
         numOfParameters: 2,
 
         getDefaultFormParams: () => ({
-            operator1: CustomFilterOperator.LESS_THAN, val1: '',
-            operator2: CustomFilterOperator.GREATER_THAN, val2: '',
+            operator1: CustomFilterOperator.LESS_THAN,
+            val1: '',
+            operator2: CustomFilterOperator.GREATER_THAN,
+            val2: '',
         }),
         testMappingParams: (params) => {
             const { and, operator1, operator2 } = params;

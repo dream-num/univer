@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,12 @@
 import type { ICommandInfo } from '@univerjs/core';
 import type { MenuConfig } from '@univerjs/ui';
 
-import { Disposable, ICommandService, Inject, Injector, IUniverInstanceService, LocaleService, Tools } from '@univerjs/core';
+import type { IOpenFilterPanelOperationParams } from '../commands/operations/sheets-filter.operation';
 
+import { Disposable, ICommandService, Inject, Injector, IUniverInstanceService, LocaleService, Tools } from '@univerjs/core';
 import { expandToContinuousRange, getSheetCommandTarget, RangeProtectionPermissionViewPoint, SheetPermissionCheckController, SheetsSelectionsService, WorksheetFilterPermission, WorksheetViewPermission } from '@univerjs/sheets';
 import { SheetsFilterService, SmartToggleSheetsFilterCommand } from '@univerjs/sheets-filter';
-import { type IOpenFilterPanelOperationParams, OpenFilterPanelOperation } from '../commands/operations/sheets-filter.operation';
+import { OpenFilterPanelOperation } from '../commands/operations/sheets-filter.operation';
 
 export interface IUniverSheetsFilterUIConfig {
     menu: MenuConfig;

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { createIdentifier, Disposable, toDisposable } from '@univerjs/core';
 import type { IDisposable } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent } from '@univerjs/engine-render';
+import { createIdentifier, Disposable, toDisposable } from '@univerjs/core';
 
 export interface IContextMenuHandler {
     /** A callback to open context menu with given position and menu type. */
@@ -34,7 +34,6 @@ export interface IContextMenuService {
     disable(): void;
     triggerContextMenu(event: IPointerEvent | IMouseEvent, menuType: string): void;
     hideContextMenu(): void;
-
     registerContextMenuHandler(handler: IContextMenuHandler): IDisposable;
 }
 
@@ -42,7 +41,6 @@ export const IContextMenuService = createIdentifier<IContextMenuService>('ui.con
 
 export class ContextMenuService extends Disposable implements IContextMenuService {
     private _currentHandler: IContextMenuHandler | null = null;
-
     disabled: boolean = false;
 
     get visible(): boolean {

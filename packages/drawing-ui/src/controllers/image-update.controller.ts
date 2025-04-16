@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import {
     Disposable,
     DrawingTypeEnum,
     ICommandService,
+    ImageSourceType,
     Inject,
     IUniverInstanceService,
     toDisposable,
@@ -164,7 +165,7 @@ export class ImageUpdateController extends Disposable {
 
     private _insertImages(params: IDrawingSearch[]) {
         (params).forEach(async (param) => {
-            const { unitId, subUnitId, drawingId } = param;
+            const { unitId, subUnitId } = param;
             const renderObject = this._getSceneAndTransformerByDrawingSearch(unitId);
             const currentSubUnitId = getCurrentUnitInfo(this._currentUniverService, unitId)?.subUnitId;
 
@@ -178,6 +179,7 @@ export class ImageUpdateController extends Disposable {
             }
 
             const images = await this._drawingRenderService.renderImages(imageParam, renderObject.scene);
+            this._drawingManagerService.refreshTransform([imageParam]);
 
             if (images == null || images.length === 0) {
                 return;
@@ -229,9 +231,9 @@ export class ImageUpdateController extends Disposable {
 
                     imageShape.setSrcRect(srcRect);
                     imageShape.setPrstGeom(prstGeom);
-                    // if (source != null && source.length > 0 && (imageSourceType === ImageSourceType.BASE64 || imageSourceType === ImageSourceType.URL)) {
-                    //     imageShape.changeSource(source);
-                    // }
+                    if (source != null && source.length > 0 && (imageSourceType === ImageSourceType.BASE64 || imageSourceType === ImageSourceType.URL)) {
+                        imageShape.changeSource(source);
+                    }
                 });
             })
         );

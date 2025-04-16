@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,10 @@
  */
 
 import type { IMutation, IMutationCommonParams, JSONXActions, Nullable } from '@univerjs/core';
+import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import type { IDocStateChangeInfo } from '../../services/doc-state-emit.service';
 import { CommandType, IUniverInstanceService, JSONX } from '@univerjs/core';
-import { IRenderManagerService, type ITextRangeWithStyle } from '@univerjs/engine-render';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { DocSelectionManagerService } from '../../services/doc-selection-manager.service';
 import { DocSkeletonManagerService } from '../../services/doc-skeleton-manager.service';
 import { DocStateEmitService } from '../../services/doc-state-emit.service';
@@ -97,6 +98,7 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
         // Step 1: Update Doc Data Model.
         const undoActions = JSONX.invertWithDoc(actions, documentDataModel.getSnapshot());
         documentDataModel.apply(actions);
+
         // Step 2: Update Doc View Model.
         documentViewModel.reset(documentDataModel);
         // Step 3: Update cursor & selection.

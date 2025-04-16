@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 
 import type { ICellData, ObjectMatrix } from '@univerjs/core';
 
-import type { ICellDataWithSpanInfo, IClipboardPropertyItem, ISheetClipboardHook } from '../type';
 import type { IDiscreteRange } from '../../../controllers/utils/range-tools';
+import type { ICellDataWithSpanInfo, IClipboardPropertyItem, ISheetClipboardHook } from '../type';
 
 /**
  *
@@ -87,7 +87,7 @@ function getColStyle(cols: number[], hooks: ISheetClipboardHook[]) {
                 .filter((v) => !!v) as IClipboardPropertyItem[];
             const mergedProperties = mergeProperties(properties);
             const str = zipClipboardPropertyItemToString(mergedProperties);
-            return `<col ${str}>`;
+            return `<col ${str} />`;
         })
         .join('');
 
@@ -109,18 +109,7 @@ function mergeProperties(properties: IClipboardPropertyItem[]): IClipboardProper
 }
 
 function zipClipboardPropertyItemToString(item: IClipboardPropertyItem) {
-    return Object.keys(item).reduce((acc, cur) => {
-        acc += ` ${cur}="${item[cur]}"`;
-        return acc;
-    }, '');
-}
-
-function getArrayFromTo(f: number, to: number): number[] {
-    const arr: number[] = [];
-    for (let i = f; i <= to; i++) {
-        arr.push(i);
-    }
-    return arr;
+    return Object.keys(item).reduce((acc, cur) => `${acc} ${cur}="${item[cur]}"`, '');
 }
 
 export class USMToHtmlService {

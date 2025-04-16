@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import type { Plugin, PluginCtor } from '@univerjs/core';
 import { UniverSheetsFilterUIPlugin } from '@univerjs/sheets-filter-ui';
 import { UniverDocUniFormulaUIPlugin } from '@univerjs/uni-formula-ui';
-import type { Plugin, PluginCtor } from '@univerjs/core';
 // import { UniverUniscriptPlugin } from '@univerjs/uniscript';
 
 export default function getLazyPlugins(): Array<[PluginCtor<Plugin>] | [PluginCtor<Plugin>, unknown]> {

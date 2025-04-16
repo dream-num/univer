@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ import type { IRuntimeUnitDataType, IUnitData, IUnitSheetNameMap, IUnitStylesDat
 
 import type { BaseValueObject, IArrayValueObject } from '../value-object/base-value-object';
 import { CellValueType, moveRangeByOffset } from '@univerjs/core';
-import { DEFAULT_TEXT_FORMAT } from '@univerjs/engine-numfmt';
+import { isTextFormat } from '@univerjs/engine-numfmt';
 import { FormulaAstLRU } from '../../basics/cache-lru';
 import { ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
 import { isNullCellForFormula } from '../../basics/is-null-cell';
@@ -60,6 +60,8 @@ export class BaseReferenceObject extends ObjectClassType {
     private _unitData: IUnitData = {};
 
     private _unitStylesData: IUnitStylesData = {};
+
+    private _filteredOutRows: number[] = [];
 
     private _defaultUnitId: string = '';
 
@@ -305,6 +307,14 @@ export class BaseReferenceObject extends ObjectClassType {
         this._unitStylesData = unitStylesData;
     }
 
+    getFilteredOutRows() {
+        return this._filteredOutRows;
+    }
+
+    setFilteredOutRows(filteredOutRows: number[]) {
+        this._filteredOutRows = filteredOutRows;
+    }
+
     getRuntimeData() {
         return this._runtimeData;
     }
@@ -405,7 +415,7 @@ export class BaseReferenceObject extends ObjectClassType {
         if (cell.t === CellValueType.NUMBER) {
             const pattern = this._getPatternByCell(cell);
 
-            if (pattern === DEFAULT_TEXT_FORMAT) {
+            if (isTextFormat(pattern)) {
                 return StringValueObject.create(value.toString());
             }
 

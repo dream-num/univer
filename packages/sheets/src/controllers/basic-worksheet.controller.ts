@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import { DataSyncPrimaryController } from '@univerjs/rpc';
 import { AddRangeProtectionCommand } from '../commands/commands/add-range-protection.command';
 import { AddWorksheetProtectionCommand } from '../commands/commands/add-worksheet-protection.command';
 import { SetWorksheetRangeThemeStyleCommand } from '../commands/commands/add-worksheet-range-theme.command';
+import { AppendRowCommand } from '../commands/commands/append-row.command';
 import { ClearSelectionAllCommand } from '../commands/commands/clear-selection-all.command';
 import { ClearSelectionContentCommand } from '../commands/commands/clear-selection-content.command';
 import { ClearSelectionFormatCommand } from '../commands/commands/clear-selection-format.command';
@@ -38,6 +39,10 @@ import {
     InsertColBeforeCommand,
     InsertColByRangeCommand,
     InsertColCommand,
+    InsertMultiColsLeftCommand,
+    InsertMultiColsRightCommand,
+    InsertMultiRowsAboveCommand,
+    InsertMultiRowsAfterCommand,
     InsertRowAfterCommand,
     InsertRowBeforeCommand,
     InsertRowByRangeCommand,
@@ -152,7 +157,7 @@ import {
 import { ToggleGridlinesMutation } from '../commands/mutations/toggle-gridlines.mutation';
 import { UnregisterWorksheetRangeThemeStyleMutation } from '../commands/mutations/unregister-range-theme-style.mutation';
 import { ScrollToCellOperation } from '../commands/operations/scroll-to-cell.operation';
-import { SetSelectionsOperation } from '../commands/operations/selection.operation';
+import { SelectRangeCommand, SetSelectionsOperation } from '../commands/operations/selection.operation';
 import { SetWorksheetActiveOperation } from '../commands/operations/set-worksheet-active.operation';
 import { ONLY_REGISTER_FORMULA_RELATED_MUTATIONS_KEY } from './config';
 import { MAX_CELL_PER_SHEET_DEFAULT, MAX_CELL_PER_SHEET_KEY } from './config/config';
@@ -195,8 +200,6 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             EmptyMutation,
             SetRowHiddenMutation, // formula SUBTOTAL
             SetRowVisibleMutation,
-            SetColHiddenMutation,
-            SetColVisibleMutation,
         ] as IMutation<object>[]).forEach((mutation) => {
             this._commandService.registerCommand(mutation);
             this._dataSyncPrimaryController?.registerSyncingMutations(mutation);
@@ -205,6 +208,7 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
         const onlyRegisterFormulaRelatedMutations = this._configService.getConfig(ONLY_REGISTER_FORMULA_RELATED_MUTATIONS_KEY) ?? false;
         if (!onlyRegisterFormulaRelatedMutations) {
             [
+                AppendRowCommand,
                 ClearSelectionAllCommand,
                 ClearSelectionContentCommand,
                 ClearSelectionFormatCommand,
@@ -215,12 +219,16 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
                 DeltaRowHeightCommand,
                 InsertColAfterCommand,
                 InsertColBeforeCommand,
+                InsertMultiColsLeftCommand,
+                InsertMultiColsRightCommand,
                 InsertColByRangeCommand,
                 InsertColCommand,
                 InsertRangeMoveDownCommand,
                 InsertRangeMoveRightCommand,
                 InsertRowAfterCommand,
                 InsertRowBeforeCommand,
+                InsertMultiRowsAfterCommand,
+                InsertMultiRowsAboveCommand,
                 InsertRowByRangeCommand,
                 InsertRowCommand,
                 InsertSheetCommand,
@@ -244,6 +252,8 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
                 SetBorderPositionCommand,
                 SetBorderStyleCommand,
                 SetColHiddenCommand,
+                SetColHiddenMutation,
+                SetColVisibleMutation,
                 SetColWidthCommand,
                 SetColDataCommand,
                 SetColDataMutation,
@@ -284,6 +294,7 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
                 SetWorksheetColWidthMutation,
                 // SetWorksheetColIsAutoWidthCommand,
 
+                SelectRangeCommand,
                 SetSelectionsOperation,
                 ScrollToCellOperation,
                 InsertDefinedNameCommand,

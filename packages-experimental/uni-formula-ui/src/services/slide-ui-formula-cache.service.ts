@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import { CustomRangeType, Disposable } from '@univerjs/core';
-import { ISlideEditorBridgeService } from '@univerjs/slides-ui';
-import { IUniFormulaService } from '@univerjs/uni-formula';
 import type { RichText } from '@univerjs/engine-render';
 import type { IAddSlideUniFormulaCommandParams } from '../commands/commands/slide.command';
 import type { UniFormulaService } from './uni-formula.service';
+import { CustomRangeType, Disposable } from '@univerjs/core';
+import { ISlideEditorBridgeService } from '@univerjs/slides-ui';
+import { IUniFormulaService } from '@univerjs/uni-formula';
 
 export class SlideUIFormulaCacheService extends Disposable {
     private readonly _caches: Map<string, IAddSlideUniFormulaCommandParams> = new Map();

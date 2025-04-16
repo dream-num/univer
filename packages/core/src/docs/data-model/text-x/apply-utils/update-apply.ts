@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,17 +15,11 @@
  */
 
 import type { Nullable } from '../../../../shared';
+import type { ICustomBlock, ICustomDecoration, ICustomRange, ICustomTable, IDocumentBody, IParagraph, ISectionBreak, ITextRun } from '../../../../types/interfaces';
 import { Tools, UpdateDocsAttributeType } from '../../../../shared';
 import {
     CustomDecorationType,
-    type ICustomBlock,
-    type ICustomDecoration,
-    type ICustomRange,
-    type ICustomTable,
-    type IDocumentBody,
-    type IParagraph,
-    type ISectionBreak,
-    type ITextRun,
+
 } from '../../../../types/interfaces';
 import { PresetListType } from '../../preset-list-type';
 import {

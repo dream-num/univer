@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,6 +44,8 @@ export interface ISetRangeValuesCommandParams extends Partial<ISheetCommandShare
      * 3. IObjectMatrixPrimitiveType<ICellData>: Bring the row/column information MATRIX, indicating the data of multiple cells
      */
     value: ICellData | ICellData[][] | IObjectMatrixPrimitiveType<ICellData>;
+
+    redoUndoId?: string;
 }
 
 /**
@@ -64,7 +66,7 @@ export const SetRangeValuesCommand: ICommand = {
         if (!target) return false;
 
         const { subUnitId, unitId, workbook, worksheet } = target;
-        const { value, range } = params;
+        const { value, range, redoUndoId } = params;
         const currentSelections = range ? [range] : selectionManagerService.getCurrentSelections()?.map((s) => s.range);
 
         if (!currentSelections || !currentSelections.length) return false;
@@ -111,7 +113,6 @@ export const SetRangeValuesCommand: ICommand = {
         const result = sequenceExecute([...redos], commandService);
         if (result.result) {
             const selectionOperation = followSelectionOperation(range ?? cellValue.getRange(), workbook, worksheet);
-
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
                 undoMutations: [
@@ -124,6 +125,7 @@ export const SetRangeValuesCommand: ICommand = {
                     ...redos,
                     Tools.deepClone(selectionOperation),
                 ],
+                id: redoUndoId,
             });
 
             return true;

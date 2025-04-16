@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import { CommandType, ICommandService, IUndoRedoService } from '@univerjs/core';
 import type { IAccessor, ICellData, ICommand, IObjectArrayPrimitiveType } from '@univerjs/core';
 import type { IReplaceAllResult } from '@univerjs/find-replace';
-import { type ISetRangeValuesCommandParams, SetRangeValuesCommand } from '@univerjs/sheets';
+import type { ISetRangeValuesCommandParams } from '@univerjs/sheets';
+import { CommandType, ICommandService, IUndoRedoService } from '@univerjs/core';
+import { SetRangeValuesCommand } from '@univerjs/sheets';
 
 export interface ISheetReplaceCommandParams {
     unitId: string;

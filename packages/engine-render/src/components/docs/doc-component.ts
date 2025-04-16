@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,7 +82,7 @@ export abstract class DocComponent extends RenderComponent<
         }
     }
 
-    override render(mainCtx: UniverRenderingContext, bounds?: IViewportInfo) {
+    override render(mainCtx: UniverRenderingContext, bounds?: Partial<IViewportInfo>) {
         if (!this.visible) {
             this.makeDirty(false);
             return this;
@@ -146,5 +146,5 @@ export abstract class DocComponent extends RenderComponent<
         return false;
     }
 
-    protected abstract _draw(ctx: UniverRenderingContext, bounds?: IViewportInfo): void;
+    protected abstract _draw(ctx: UniverRenderingContext, bounds?: Partial<IViewportInfo>): void;
 }

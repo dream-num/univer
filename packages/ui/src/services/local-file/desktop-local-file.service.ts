@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { Disposable } from '@univerjs/core';
-
 import type { ILocalFileService, IOpenFileOptions } from './local-file.service';
+
+import { Disposable } from '@univerjs/core';
 
 export class DesktopLocalFileService extends Disposable implements ILocalFileService {
     openFile(options?: IOpenFileOptions): Promise<File[]> {

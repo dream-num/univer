@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 
-import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
+import { DeviceInputEventType, getCurrentTypeOfRenderer, IRenderManagerService } from '@univerjs/engine-render';
 import {
     AddMergeUndoMutationFactory,
     AddWorksheetMergeMutation,
@@ -184,7 +184,7 @@ export class AutoFillController extends Disposable {
             // Each range change requires re-listening.
             disposableCollection.dispose();
 
-            const currentRenderer = this._renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET);
+            const currentRenderer = getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET, this._univerInstanceService, this._renderManagerService);
             if (!currentRenderer) return;
 
             const selectionRenderService = currentRenderer.with(ISheetSelectionRenderService);
@@ -231,11 +231,14 @@ export class AutoFillController extends Disposable {
                 disposableCollection.add(controlSelection.fillControl.onPointerDown$.subscribeEvent(() => {
                     const visibleState = this._editorBridgeService.isVisible();
                     if (visibleState.visible) {
-                        this._editorBridgeService.changeVisible({
-                            visible: false,
-                            eventType: DeviceInputEventType.PointerDown,
-                            unitId: currentRenderer.unitId,
-                        });
+                        this._commandService.syncExecuteCommand(
+                            SetCellEditVisibleOperation.id,
+                            {
+                                visible: false,
+                                eventType: DeviceInputEventType.PointerDown,
+                                unitId: currentRenderer.unitId,
+                            }
+                        );
                     }
                 }));
             });
@@ -315,7 +318,8 @@ export class AutoFillController extends Disposable {
         asLen: number,
         direction: Direction,
         applyType: APPLY_TYPE,
-        hasStyle: boolean = true
+        hasStyle: boolean = true,
+        location: IAutoFillLocation
     ) {
         const applyData: Array<Nullable<ICellData>> = [];
         const num = Math.floor(asLen / csLen);
@@ -353,7 +357,8 @@ export class AutoFillController extends Disposable {
                     direction,
                     applyType,
                     customApplyFunctions,
-                    copyDataPiece
+                    copyDataPiece,
+                    location
                 );
 
                 const arrIndex = getDataIndex(csLen, asLen, copySquad.index);
@@ -383,7 +388,8 @@ export class AutoFillController extends Disposable {
         direction: Direction,
         applyType: APPLY_TYPE,
         customApplyFunctions: APPLY_FUNCTIONS,
-        copyDataPiece: ICopyDataPiece
+        copyDataPiece: ICopyDataPiece,
+        location: IAutoFillLocation
     ) {
         const { data } = copySquad;
         const isReverse = direction === Direction.UP || direction === Direction.LEFT;
@@ -392,7 +398,7 @@ export class AutoFillController extends Disposable {
         if (applyType === APPLY_TYPE.COPY) {
             const custom = customApplyFunctions?.[APPLY_TYPE.COPY];
             if (custom) {
-                return custom(copySquad, len, direction, copyDataPiece);
+                return custom(copySquad, len, direction, copyDataPiece, location);
             }
             isReverse && data.reverse();
             return fillCopy(data, len);
@@ -405,7 +411,7 @@ export class AutoFillController extends Disposable {
             isReverse && data.reverse();
             // special rules, if not provide custom SERIES apply functions, will be applied as copy
             if (customApplyFunctions?.[APPLY_TYPE.COPY]) {
-                return customApplyFunctions[APPLY_TYPE.COPY](copySquad, len, direction, copyDataPiece);
+                return customApplyFunctions[APPLY_TYPE.COPY](copySquad, len, direction, copyDataPiece, location);
             }
             return fillCopy(data, len);
         }
@@ -643,7 +649,7 @@ export class AutoFillController extends Disposable {
             targetCols.forEach((_, i) => {
                 const copyD = copyData[i];
 
-                const applyData = this._getApplyData(copyD, csLen, asLen, direction, applyType, hasStyle);
+                const applyData = this._getApplyData(copyD, csLen, asLen, direction, applyType, hasStyle, location);
                 untransformedApplyDatas.push(applyData);
             });
             for (let i = 0; i < untransformedApplyDatas[0].length; i++) {
@@ -660,7 +666,7 @@ export class AutoFillController extends Disposable {
             const asLen = targetCols.length;
             targetRows.forEach((_, i) => {
                 const copyD = copyData[i];
-                const applyData = this._getApplyData(copyD, csLen, asLen, direction, applyType, hasStyle);
+                const applyData = this._getApplyData(copyD, csLen, asLen, direction, applyType, hasStyle, location);
                 const row: Array<Nullable<ICellData>> = [];
                 for (let j = 0; j < applyData.length; j++) {
                     row.push({

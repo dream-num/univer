@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ const locale: typeof zhCN = {
             'close-dialog': 'بستن پنجره گفتگوی یافتن و جایگزینی',
             'go-to-next-match': 'رفتن به تطابق بعدی',
             'go-to-previous-match': 'رفتن به تطابق قبلی',
+            'focus-selection': 'تمرکز بر روی انتخاب',
         },
         dialog: {
             title: 'یافتن',

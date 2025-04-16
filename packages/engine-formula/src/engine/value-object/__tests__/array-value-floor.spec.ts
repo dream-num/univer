@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,9 @@
 
 import { describe, expect, it } from 'vitest';
 
+import { stripArrayValue } from '../../../functions/__tests__/create-function-test-bed';
 import { ArrayValueObject, transformToValueObject } from '../array-value-object';
 import { NumberValueObject } from '../primitive-object';
-import { stripArrayValue } from '../../../functions/__tests__/create-function-test-bed';
 
 describe('arrayValueObject floor method test', () => {
     const originArrayValueObject = ArrayValueObject.create({

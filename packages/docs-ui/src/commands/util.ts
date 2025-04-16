@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import type { DocumentDataModel, IAccessor } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import type { DocumentDataModel, IAccessor } from '@univerjs/core';
 
 /**
  * Get the skeleton of the command's target.

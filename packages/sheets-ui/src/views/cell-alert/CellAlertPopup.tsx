@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,8 @@
 
 import type { ICanvasPopup } from '../../services/canvas-pop-manager.service';
 import type { ICellAlert } from '../../services/cell-alert-manager.service';
+import { clsx } from '@univerjs/design';
 import { ErrorSingle, WarningSingle } from '@univerjs/icons';
-import cs from 'clsx';
-import React from 'react';
 import { CellAlertType } from '../../services/cell-alert-manager.service';
 import styles from './index.module.less';
 
@@ -36,9 +35,9 @@ export function CellAlert({ popup }: { popup: ICanvasPopup }) {
     const { type, title, message } = alert as ICellAlert;
 
     const iconMap = {
-        [CellAlertType.ERROR]: <ErrorSingle className={cs(styles.cellAlertIcon, styles.cellAlertIconError)} />,
-        [CellAlertType.INFO]: <WarningSingle className={cs(styles.cellAlertIcon, styles.cellAlertIconInfo)} />,
-        [CellAlertType.WARNING]: <WarningSingle className={cs(styles.cellAlertIcon, styles.cellAlertIconWarning)} />,
+        [CellAlertType.ERROR]: <ErrorSingle className={clsx(styles.cellAlertIcon, styles.cellAlertIconError)} />,
+        [CellAlertType.INFO]: <WarningSingle className={clsx(styles.cellAlertIcon, styles.cellAlertIconInfo)} />,
+        [CellAlertType.WARNING]: <WarningSingle className={clsx(styles.cellAlertIcon, styles.cellAlertIconWarning)} />,
     };
 
     return (

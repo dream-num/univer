@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ import type { Dependency, IWorkbookData, Workbook } from '@univerjs/core';
 import type { IRenderContext } from '@univerjs/engine-render';
 import {
     BooleanNumber,
+    CellValueType,
     DisposableCollection,
     ILogService,
     Inject,
@@ -39,7 +40,11 @@ import {
     RangeProtectionRuleModel,
     SheetInterceptorService,
 
-    SheetsSelectionsService, WorkbookPermissionService, WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel,
+    SheetsSelectionsService,
+    WorkbookPermissionService,
+    WorksheetPermissionService,
+    WorksheetProtectionPointModel,
+    WorksheetProtectionRuleModel,
 } from '@univerjs/sheets';
 import { BehaviorSubject } from 'rxjs';
 import enUS from '../../../locale/en-US';
@@ -61,6 +66,18 @@ const getTestWorkbookDataDemo = (): IWorkbookData => {
                         },
                         1: {
                             v: 'A2',
+                        },
+                    },
+                    // 20 test merge cell, do not change value here
+                    20: {
+                        1: {
+                            v: 2,
+                            t: CellValueType.NUMBER,
+                            s: {
+                                n: {
+                                    pattern: '0%',
+                                },
+                            },
                         },
                     },
                 },

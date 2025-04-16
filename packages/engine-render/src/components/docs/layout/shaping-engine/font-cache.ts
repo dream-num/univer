@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -218,8 +218,12 @@ export class FontCache {
         }, fontStyle);
     }
 
-    // 获取有值单元格文本大小
-    // let measureTextCache = {}, measureTextCacheTimeOut = null;
+    /**
+     * Measure text on another canvas.
+     * @param content
+     * @param fontString
+     * @returns IMeasureTextCache
+     */
     static getMeasureText(content: string, fontString: string): IMeasureTextCache {
         if (!this._context) {
             const canvas = document.createElement('canvas');
@@ -242,7 +246,6 @@ export class FontCache {
         if (mtc != null) {
             return mtc;
         }
-
         ctx.font = fontString;
 
         const textMetrics = ctx.measureText(content);

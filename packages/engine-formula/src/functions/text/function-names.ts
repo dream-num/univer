@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ export enum FUNCTION_NAMES_TEXT {
     LOWER = 'LOWER',
     MID = 'MID',
     MIDB = 'MIDB',
+    NUMBERSTRING = 'NUMBERSTRING',
     NUMBERVALUE = 'NUMBERVALUE',
     PHONETIC = 'PHONETIC',
     PROPER = 'PROPER',

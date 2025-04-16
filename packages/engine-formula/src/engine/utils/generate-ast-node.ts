@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,11 @@ import type { Lexer } from '../analysis/lexer';
 import type { LexerNode } from '../analysis/lexer-node';
 import type { AstTreeBuilder } from '../analysis/parser';
 import type { AstRootNode } from '../ast-node/ast-root-node';
+import type { BaseAstNode } from '../ast-node/base-ast-node';
 import type { IFormulaDependencyTree } from '../dependency/dependency-tree';
 import { FormulaAstLRU } from '../../basics/cache-lru';
 import { ERROR_TYPE_SET } from '../../basics/error-type';
-import { type BaseAstNode, ErrorNode } from '../ast-node/base-ast-node';
+import { ErrorNode } from '../ast-node/base-ast-node';
 
 const FORMULA_CACHE_LRU_COUNT = 5000;
 

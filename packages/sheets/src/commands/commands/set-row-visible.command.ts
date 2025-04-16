@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,7 +84,9 @@ export const SetSpecificRowsVisibleCommand: ICommand<ISetSpecificRowsVisibleComm
             [
                 { id: SetRowVisibleMutation.id, params: redoMutationParams },
                 { id: SetSelectionsOperation.id, params: setSelectionOperationParams },
-            ], commandService);
+            ],
+            commandService
+        );
 
         const intercepted = sheetInterceptorService.onCommandExecute({
             id: SetSpecificRowsVisibleCommand.id,

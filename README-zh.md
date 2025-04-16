@@ -135,6 +135,10 @@ Univer 内置多种语言支持，包括：
 
 Univer has a rich ecosystem that includes a wide range of tools and resources to help you get started with Univer: -->
 
+## 🔒 安全
+
+Univer 致力于维护一个安全的代码库。我们遵循安全最佳实践并定期更新我们的依赖项。有关更多信息，请参阅我们的[安全政策](./SECURITY.md)。
+
 ## 💬 社区
 
 [![][github-community-badge]][github-community-link] [![][discord-community-badge]][discord-community-link] [![][stackoverflow-community-badge]][stackoverflow-community-link]

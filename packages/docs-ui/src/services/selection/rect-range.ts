@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
+import type { Nullable } from '@univerjs/core';
 import type { Documents, DocumentSkeleton, INodePosition, IPoint, ITextSelectionStyle, Scene } from '@univerjs/engine-render';
 import type { IDocRange } from './range-interface';
-import { COLORS, DOC_RANGE_TYPE, type Nullable, RANGE_DIRECTION, Rectangle, Tools } from '@univerjs/core';
+import { COLORS, DOC_RANGE_TYPE, RANGE_DIRECTION, Rectangle, Tools } from '@univerjs/core';
 import { getColor, NORMAL_TEXT_SELECTION_PLUGIN_STYLE, RegularPolygon } from '@univerjs/engine-render';
 import { compareNodePositionInTable, NodePositionConvertToRectRange } from './convert-rect-range';
 import { TEXT_RANGE_LAYER_INDEX } from './text-range';
@@ -39,7 +40,14 @@ export function convertPositionsToRectRanges(
     const nodePositionGroup = convertor.getNodePositionGroup(anchorNodePosition, focusNodePosition);
 
     return (nodePositionGroup ?? []).map((position) => new RectRange(
-        scene, document, docSkeleton, position.anchor, position.focus, style, segmentId, segmentPage
+        scene,
+        document,
+        docSkeleton,
+        position.anchor,
+        position.focus,
+        style,
+        segmentId,
+        segmentPage
     ));
 }
 

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,8 @@ import { BooleanNumber, CustomRangeType } from '@univerjs/core';
 export function getCustomRangeStyle(customRange: ICustomRangeForInterceptor): Nullable<ITextStyle> {
     if (
         customRange.rangeType === CustomRangeType.HYPERLINK ||
-        customRange.rangeType === CustomRangeType.MENTION
+        customRange.rangeType === CustomRangeType.MENTION ||
+        customRange.rangeType === CustomRangeType.CUSTOM
     ) {
         return {
             ...(customRange.active ?? true) ? { ul: { s: BooleanNumber.TRUE } } : null,

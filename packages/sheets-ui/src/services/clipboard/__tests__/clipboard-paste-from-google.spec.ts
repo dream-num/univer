@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { ICellData, Injector, IStyleData, Nullable, Univer } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, LocaleType, RANGE_TYPE } from '@univerjs/core';
 import {
     AddWorksheetMergeMutation,
@@ -26,7 +27,6 @@ import {
     SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import type { ICellData, Injector, IStyleData, Nullable, Univer } from '@univerjs/core';
 
 import { SheetSkeletonManagerService } from '../../sheet-skeleton-manager.service';
 
@@ -207,15 +207,21 @@ describe('Test clipboard', () => {
             expect(richTextStyle?.body?.textRuns).toStrictEqual([
                 { ed: 1, st: 0, ts: { fs: 10, ff: 'Arial' } },
                 {
-                    st: 1, ed: 4, ts: {
+                    st: 1,
+                    ed: 4,
+                    ts: {
                         bl: 1,
                         cl:
                             { rgb: 'rgb(217,210,233)' },
-                        ff: 'Arial', fs: 18, it: 1,
+                        ff: 'Arial',
+                        fs: 18,
+                        it: 1,
                     },
                 },
                 {
-                    ed: 6, st: 4, ts: { fs: 10, ff: 'Arial' },
+                    ed: 6,
+                    st: 4,
+                    ts: { fs: 10, ff: 'Arial' },
                 },
             ]);
         });

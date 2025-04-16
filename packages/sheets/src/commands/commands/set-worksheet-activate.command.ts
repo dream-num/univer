@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,9 @@
  */
 
 import type { IAccessor, ICommand, IExecutionOptions } from '@univerjs/core';
-import { CommandType, ICommandService, IUniverInstanceService } from '@univerjs/core';
-
 import type { ISetWorksheetActiveOperationParams } from '../operations/set-worksheet-active.operation';
+
+import { CommandType, ICommandService, IUniverInstanceService } from '@univerjs/core';
 import { SetWorksheetActiveOperation } from '../operations/set-worksheet-active.operation';
 import { getSheetCommandTarget } from './utils/target-util';
 

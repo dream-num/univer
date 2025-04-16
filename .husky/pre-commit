@@ -1,5 +1,1 @@
-#!/usr/bin/env sh
-# . "$(dirname -- "$0")/_/husky.sh"
-
-# lint all changed files
-npx --no lint-staged --concurrent false
+pnpm lint-staged

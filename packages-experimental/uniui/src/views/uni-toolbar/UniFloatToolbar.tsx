@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
+import type { Nullable } from '@univerjs/core';
 import type { IMenuItem } from '@univerjs/ui';
 import type { IUnitRendererProps } from '../workbench/UniWorkbench';
 import { flip, offset, shift, useFloating } from '@floating-ui/react-dom';
-import { IUniverInstanceService, type Nullable, useDependency, useObservable } from '@univerjs/core';
-import { ComponentContainer, IMenuManagerService, ToolbarItem, useComponentsOfPart } from '@univerjs/ui';
+import { IUniverInstanceService } from '@univerjs/core';
+import { ComponentContainer, IMenuManagerService, ToolbarItem, useComponentsOfPart, useDependency, useObservable } from '@univerjs/ui';
 import React, { useEffect, useImperativeHandle, useState } from 'react';
 import { DELETE_MENU_ID, DOWNLOAD_MENU_ID, LOCK_MENU_ID, PRINT_MENU_ID, SHARE_MENU_ID, UNI_MENU_POSITIONS, ZEN_MENU_ID } from '../../controllers/menu';
 import styles from './index.module.less';
@@ -105,7 +106,7 @@ export const UniFloatingToolbar = React.forwardRef<IFloatingToolbarRef, { node: 
 });
 
 export function UniDiv() {
-    return <div className={styles.uniDiv}></div>;
+    return <div className={styles.uniDiv} />;
 }
 
 export function UnitName({ unitId }: { unitId: string }) {

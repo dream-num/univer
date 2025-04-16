@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,30 +16,17 @@
 
 import type { ISheetDataValidationRule, Workbook } from '@univerjs/core';
 import type { IAddSheetDataValidationCommandParams } from '@univerjs/sheets-data-validation';
-import { ICommandService, Injector, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
+import { ICommandService, Injector, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { Button } from '@univerjs/design';
 import { checkRangesEditablePermission } from '@univerjs/sheets';
 import { AddSheetDataValidationCommand, createDefaultNewRule, RemoveSheetAllDataValidationCommand, SheetDataValidationModel } from '@univerjs/sheets-data-validation';
-import { useObservable } from '@univerjs/ui';
+import { useDependency, useObservable } from '@univerjs/ui';
 import React, { useEffect, useState } from 'react';
 import { DataValidationPanelService } from '../../../services/data-validation-panel.service';
 import { DataValidationItem } from '../item';
 import styles from './index.module.less';
 
-export function DataValidationList() {
-    const univerInstanceService = useDependency(IUniverInstanceService);
-    const workbook = useObservable(
-        () => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET),
-        undefined,
-        undefined,
-        []
-    );
-
-    if (!workbook) return null;
-    return <DataValidationListWithWorkbook workbook={workbook} />;
-}
-
-function DataValidationListWithWorkbook(props: { workbook: Workbook }) {
+export function DataValidationList(props: { workbook: Workbook }) {
     const sheetDataValidationModel = useDependency(SheetDataValidationModel);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const commandService = useDependency(ICommandService);

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,9 @@
 
 import type { IMutation } from '@univerjs/core';
 
+import type { IAnchor } from '../../utils/anchor';
 import { CommandType } from '@univerjs/core';
 import { ConditionalFormattingRuleModel } from '../../models/conditional-formatting-rule-model';
-import type { IAnchor } from '../../utils/anchor';
 import { anchorUndoFactory } from '../../utils/anchor';
 
 export interface IMoveConditionalRuleMutationParams {
@@ -50,7 +50,6 @@ export const MoveConditionalRuleMutationUndoFactory = (param: IMoveConditionalRu
     }
     const [start, end] = undo;
 
-    return [{ id: MoveConditionalRuleMutation.id,
-              params: { unitId, subUnitId, start, end } as IMoveConditionalRuleMutationParams },
+    return [{ id: MoveConditionalRuleMutation.id, params: { unitId, subUnitId, start, end } as IMoveConditionalRuleMutationParams },
     ];
 };

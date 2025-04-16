@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,6 +58,11 @@ const locale: typeof zhCN = {
             'drawing-move-right': '右移繪圖',
             'drawing-delete': '刪除繪圖',
         },
+    },
+    'cell-image': {
+        pasteTitle: '粘貼為儲存格圖片',
+        pasteContent: '粘貼儲存格圖片將覆蓋儲存格中的現有內容，繼續粘貼',
+        pasteError: '此單元中不支持儲存格圖片複製粘貼',
     },
 };
 

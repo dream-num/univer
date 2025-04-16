@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IEventBase, Injector } from '@univerjs/core';
+import type { ICommandInfo, Injector } from '@univerjs/core';
+import type { IEventBase } from '@univerjs/core/facade';
 import type { ISetSheetsFilterCriteriaCommandParams } from '@univerjs/sheets-filter';
 import type { FWorkbook, FWorksheet } from '@univerjs/sheets/facade';
-import { FEventName, FUniver, ICommandService } from '@univerjs/core';
+import { ICommandService } from '@univerjs/core';
+import { FEventName, FUniver } from '@univerjs/core/facade';
 import { ClearSheetsFilterCriteriaCommand, SetSheetsFilterCriteriaCommand } from '@univerjs/sheets-filter';
 import { FSheetEventName } from '@univerjs/sheets/facade';
 
@@ -27,53 +29,74 @@ import { FSheetEventName } from '@univerjs/sheets/facade';
 export interface IFSheetFilterEventMixin {
     /**
      * This event will be emitted when the filter criteria on a column is changed.
-     * Type of the event is {@link ISheetRangeFilteredParams}.
+     * @see {@link ISheetRangeFilteredParams}
      * @example
      * ```typescript
      * const callbackDisposable = univerAPI.addEvent(univerAPI.Event.SheetRangeFiltered, (params) => {
+     *   console.log(params);
      *   const { workbook, worksheet, col, criteria } = params;
      *
      *   // your custom logic
      * });
+     *
+     * // Remove the event listener, use `callbackDisposable.dispose()`
      * ```
      */
     readonly SheetRangeFiltered: 'SheetRangeFiltered';
+
     /**
      * This event will be emitted before the filter criteria on a column is changed.
-     * Type of the event is {@link ISheetRangeFilteredParams}.
+     * @see {@link ISheetRangeFilteredParams}
      * @example
      * ```typescript
      * const callbackDisposable = univerAPI.addEvent(univerAPI.Event.SheetBeforeRangeFilter, (params) => {
+     *   console.log(params);
      *   const { workbook, worksheet, col, criteria } = params;
      *
      *   // your custom logic
+     *
+     *   // Cancel the filter criteria change operation
+     *   params.cancel = true;
      * });
+     *
+     * // Remove the event listener, use `callbackDisposable.dispose()`
      * ```
      */
     readonly SheetBeforeRangeFilter: 'SheetBeforeRangeFilter';
+
     /**
      * This event will be emitted when the filter on a worksheet is cleared.
-     * Type of the event is {@link ISheetRangeFilterClearedEventParams}.
+     * @see {@link ISheetRangeFilterClearedEventParams}
      * @example
      * ```typescript
      * const callbackDisposable = univerAPI.addEvent(univerAPI.Event.SheetRangeFilterCleared, (params) => {
+     *   console.log(params);
      *   const { workbook, worksheet } = params;
      *
      *   // your custom logic
      * });
+     *
+     * // Remove the event listener, use `callbackDisposable.dispose()`
      * ```
      */
     readonly SheetRangeFilterCleared: 'SheetRangeFilterCleared';
+
     /**
      * This event will be emitted after the filter on a worksheet is cleared.
-     * Type of the event is {@link ISheetRangeFilterClearedEventParams}.
+     * @see {@link ISheetRangeFilterClearedEventParams}
      * @example
      * ```typescript
      * const callbackDisposable = univerAPI.addEvent(univerAPI.Event.SheetBeforeRangeFilterClear, (params) => {
+     *   console.log(params);
      *   const { workbook, worksheet } = params;
      *
      *   // your custom logic
+     *
+     *   // Cancel the filter clear operation
+     *   params.cancel = true;
      * });
+     *
+     * // Remove the event listener, use `callbackDisposable.dispose()`
      * ```
      */
     readonly SheetBeforeRangeFilterClear: 'SheetBeforeRangeFilterClear';
@@ -87,7 +110,7 @@ export class FSheetFilterEventName extends FEventName implements IFSheetFilterEv
 }
 
 FEventName.extend(FSheetFilterEventName);
-declare module '@univerjs/core' {
+declare module '@univerjs/core/facade' {
     // eslint-disable-next-line ts/naming-convention
     interface FEventName extends IFSheetFilterEventMixin { }
 }
@@ -125,7 +148,7 @@ interface ISheetRangeFilterEventParamConfig {
 }
 
 FEventName.extend(FSheetEventName);
-declare module '@univerjs/core' {
+declare module '@univerjs/core/facade' {
     // eslint-disable-next-line ts/naming-convention
     interface FEventName extends IFSheetFilterEventMixin { }
     interface IEventParamConfig extends ISheetRangeFilterEventParamConfig { }
@@ -138,27 +161,43 @@ class FUniverSheetsFilterEventMixin extends FUniver {
     override _initialize(injector: Injector): void {
         const commandService = injector.get(ICommandService);
 
-        this.disposeWithMe(commandService.beforeCommandExecuted((commandInfo) => {
-            switch (commandInfo.id) {
-                case SetSheetsFilterCriteriaCommand.id:
+        // Register filter criteria set event handlers
+        this.registerEventHandler(
+            this.Event.SheetBeforeRangeFilter,
+            () => commandService.beforeCommandExecuted((commandInfo) => {
+                if (commandInfo.id === SetSheetsFilterCriteriaCommand.id) {
                     this._beforeRangeFilter(commandInfo as Readonly<ICommandInfo<ISetSheetsFilterCriteriaCommandParams>>);
-                    break;
-                case ClearSheetsFilterCriteriaCommand.id:
-                    this._beforeRangeFilterClear();
-                    break;
-            }
-        }));
+                }
+            })
+        );
 
-        this.disposeWithMe(commandService.onCommandExecuted((commandInfo) => {
-            switch (commandInfo.id) {
-                case SetSheetsFilterCriteriaCommand.id:
+        this.registerEventHandler(
+            this.Event.SheetBeforeRangeFilterClear,
+            () => commandService.beforeCommandExecuted((commandInfo) => {
+                if (commandInfo.id === ClearSheetsFilterCriteriaCommand.id) {
+                    this._beforeRangeFilterClear();
+                }
+            })
+        );
+
+        // Register filter criteria execution event handlers
+        this.registerEventHandler(
+            this.Event.SheetRangeFiltered,
+            () => commandService.onCommandExecuted((commandInfo) => {
+                if (commandInfo.id === SetSheetsFilterCriteriaCommand.id) {
                     this._onRangeFiltered(commandInfo as Readonly<ICommandInfo<ISetSheetsFilterCriteriaCommandParams>>);
-                    break;
-                case ClearSheetsFilterCriteriaCommand.id:
+                }
+            })
+        );
+
+        this.registerEventHandler(
+            this.Event.SheetRangeFilterCleared,
+            () => commandService.onCommandExecuted((commandInfo) => {
+                if (commandInfo.id === ClearSheetsFilterCriteriaCommand.id) {
                     this._onRangeFilterCleared();
-                    break;
-            }
-        }));
+                }
+            })
+        );
     }
 
     private _beforeRangeFilter(commandInfo: Readonly<ICommandInfo<ISetSheetsFilterCriteriaCommandParams>>): void {
@@ -188,9 +227,6 @@ class FUniverSheetsFilterEventMixin extends FUniver {
         };
 
         this.fireEvent(this.Event.SheetRangeFiltered, eventParams);
-        if (eventParams.cancel) {
-            throw new Error('SetSheetsFilterCriteriaCommand canceled.');
-        }
     }
 
     private _beforeRangeFilterClear(): void {
@@ -218,9 +254,6 @@ class FUniverSheetsFilterEventMixin extends FUniver {
         };
 
         this.fireEvent(this.Event.SheetRangeFilterCleared, eventParams);
-        if (eventParams.cancel) {
-            throw new Error('SetSheetsFilterCriteriaCommand canceled.');
-        }
     }
 }
 

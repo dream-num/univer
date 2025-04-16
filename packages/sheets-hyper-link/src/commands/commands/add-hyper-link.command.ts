@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 import type { ICellData, ICommand, IDocumentData, IMutationInfo } from '@univerjs/core';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import type { ISheetHyperLink } from '../../types/interfaces/i-hyper-link';
-import { BuildTextUtils, CellValueType, CommandType, CustomRangeType, generateRandomId, ICommandService, IUndoRedoService, IUniverInstanceService, sequenceExecuteAsync, TextX, Tools } from '@univerjs/core';
+import { BuildTextUtils, CellValueType, CommandType, CustomRangeType, generateRandomId, ICommandService, IUndoRedoService, IUniverInstanceService, sequenceExecute, TextX, Tools } from '@univerjs/core';
 import { addCustomRangeBySelectionFactory } from '@univerjs/docs';
 import { getSheetCommandTarget, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory, SheetInterceptorService } from '@univerjs/sheets';
 import { HyperLinkModel } from '../../models/hyper-link.model';
@@ -108,7 +108,7 @@ export const AddHyperLinkCommand: ICommand<IAddHyperLinkCommandParams> = {
             t: CellValueType.STRING,
         };
 
-        const finalCellData = await sheetInterceptorService.onWriteCell(workbook, worksheet, row, column, newCellData);
+        const finalCellData = sheetInterceptorService.onWriteCell(workbook, worksheet, row, column, newCellData);
         const redoParams: ISetRangeValuesMutationParams = {
             unitId,
             subUnitId,
@@ -151,8 +151,13 @@ export const AddHyperLinkCommand: ICommand<IAddHyperLinkCommandParams> = {
             });
         }
 
-        const res = await sequenceExecuteAsync(redos, commandService);
+        const res = await sequenceExecute(redos, commandService);
         if (res) {
+            const isValid = await sheetInterceptorService.onValidateCell(workbook, worksheet, row, column);
+            if (isValid === false) {
+                sequenceExecute(undos, commandService);
+                return false;
+            }
             undoRedoService.pushUndoRedo({
                 redoMutations: redos,
                 undoMutations: undos,

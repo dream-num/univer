@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
+import type { Ctor } from '@univerjs/core';
 import type { IFunctionNames } from '../basics/function';
 import type { BaseFunction } from '../functions/base-function';
-import type { IUniverEngineFormulaConfig } from './config.schema';
 
-import { Disposable, ICommandService, IConfigService } from '@univerjs/core';
-import { type Ctor, Optional } from '@univerjs/core';
+import type { IUniverEngineFormulaConfig } from './config.schema';
+import { Disposable, ICommandService, IConfigService, Optional } from '@univerjs/core';
 import { DataSyncPrimaryController } from '@univerjs/rpc';
 import { RegisterFunctionMutation } from '../commands/mutations/register-function.mutation';
 import { SetArrayFormulaDataMutation } from '../commands/mutations/set-array-formula-data.mutation';

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -327,7 +327,8 @@ export default {
             value1: {
                 name: '值 1',
                 detail: '要計算其中數字的數量的第一項、單元格引用或區域。 ',
-            }, value2: {
+            },
+            value2: {
                 name: '值 2',
                 detail: '要計算其中數字的個數的其他項目、儲存格參考或區域，最多可包含 255 個。 ',
             },

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,9 @@
 
 import type { IDisposable } from '@univerjs/core';
 import type { IUniverUIConfig, IWorkbenchOptions } from '@univerjs/ui';
-import { connectInjector, Disposable, Inject, Injector, LifecycleService, LifecycleStages, Optional, toDisposable } from '@univerjs/core';
+import { Disposable, Inject, Injector, LifecycleService, LifecycleStages, Optional, toDisposable } from '@univerjs/core';
 import { render as createRoot, unmount } from '@univerjs/design';
-import { BuiltInUIPart, CanvasPopup, FloatDom, ILayoutService, IUIPartsService } from '@univerjs/ui';
-import React from 'react';
+import { BuiltInUIPart, CanvasPopup, connectInjector, FloatDom, ILayoutService, IUIPartsService } from '@univerjs/ui';
 import { delay, filter, take } from 'rxjs';
 
 import { UniWorkbench } from '../views/workbench/UniWorkbench';

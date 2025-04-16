@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,11 @@
  */
 
 import type { DocumentDataModel, ITypeMentionList } from '@univerjs/core';
-import { ICommandService, IMentionIOService, IUniverInstanceService, Tools, UniverInstanceType, useDependency, useObservable } from '@univerjs/core';
+import { ICommandService, IMentionIOService, IUniverInstanceService, Tools, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { IEditorService } from '@univerjs/docs-ui';
-import React, { useEffect, useMemo, useState } from 'react';
+import { useDependency, useObservable } from '@univerjs/ui';
+import { useEffect, useMemo, useState } from 'react';
 import { filter } from 'rxjs';
 import { AddDocMentionCommand } from '../../commands/commands/doc-mention.command';
 import { DocMentionPopupService } from '../../services/doc-mention-popup.service';

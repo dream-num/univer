@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,10 @@
  */
 
 import type { ICellData, IMutationInfo, IObjectMatrixPrimitiveType, IRange, Nullable } from '@univerjs/core';
+import type { IFormulaData, IFormulaDataItem, IRangeChange, ISequenceNode } from '@univerjs/engine-formula';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { cellToRange, Direction, isFormulaId, isFormulaString, ObjectMatrix, Rectangle, Tools } from '@univerjs/core';
-import { deserializeRangeWithSheetWithCache, type IFormulaData, type IFormulaDataItem, type IRangeChange, type ISequenceNode, sequenceNodeType, serializeRangeToRefString } from '@univerjs/engine-formula';
+import { deserializeRangeWithSheetWithCache, sequenceNodeType, serializeRangeToRefString } from '@univerjs/engine-formula';
 import { EffectRefRangId, handleDeleteRangeMoveLeft, handleDeleteRangeMoveUp, handleInsertCol, handleInsertRangeMoveDown, handleInsertRangeMoveRight, handleInsertRow, handleIRemoveCol, handleIRemoveRow, handleMoveCols, handleMoveRange, handleMoveRows, runRefRangeMutations, SetRangeValuesMutation } from '@univerjs/sheets';
 import { checkFormulaDataNull } from './offset-formula-data';
 
@@ -58,9 +59,7 @@ const formulaReferenceSheetList = [
     FormulaReferenceMoveType.RemoveDefinedName,
 ];
 
-export function getFormulaReferenceMoveUndoRedo(oldFormulaData: IFormulaData,
-    newFormulaData: IFormulaData,
-    formulaReferenceMoveParam: IFormulaReferenceMoveParam) {
+export function getFormulaReferenceMoveUndoRedo(oldFormulaData: IFormulaData, newFormulaData: IFormulaData, formulaReferenceMoveParam: IFormulaReferenceMoveParam) {
     const { type } = formulaReferenceMoveParam;
 
     if (formulaReferenceSheetList.includes(type)) {
@@ -70,8 +69,7 @@ export function getFormulaReferenceMoveUndoRedo(oldFormulaData: IFormulaData,
     }
 }
 
-export function getFormulaReferenceSheet(oldFormulaData: IFormulaData,
-    newFormulaData: IFormulaData) {
+export function getFormulaReferenceSheet(oldFormulaData: IFormulaData, newFormulaData: IFormulaData) {
     const undos: IMutationInfo[] = [];
     const redos: IMutationInfo[] = [];
 
@@ -145,9 +143,7 @@ export function getFormulaReferenceSheet(oldFormulaData: IFormulaData,
     };
 }
 
-export function getFormulaReferenceRange(oldFormulaData: IFormulaData,
-    newFormulaData: IFormulaData,
-    formulaReferenceMoveParam: IFormulaReferenceMoveParam) {
+export function getFormulaReferenceRange(oldFormulaData: IFormulaData, newFormulaData: IFormulaData, formulaReferenceMoveParam: IFormulaReferenceMoveParam) {
     const { redoFormulaData, undoFormulaData } = refRangeFormula(oldFormulaData, newFormulaData, formulaReferenceMoveParam);
 
         // If the formula data is the same, no operation is required
@@ -208,9 +204,7 @@ export function getFormulaReferenceRange(oldFormulaData: IFormulaData,
  * @param formulaReferenceMoveParam
  * @returns
  */
-export function refRangeFormula(oldFormulaData: IFormulaData,
-    newFormulaData: IFormulaData,
-    formulaReferenceMoveParam: IFormulaReferenceMoveParam) {
+export function refRangeFormula(oldFormulaData: IFormulaData, newFormulaData: IFormulaData, formulaReferenceMoveParam: IFormulaReferenceMoveParam) {
     const redoFormulaData: Record<string, Record<string, IObjectMatrixPrimitiveType<Nullable<ICellData>>>> = {};
     const undoFormulaData: Record<string, Record<string, IObjectMatrixPrimitiveType<Nullable<ICellData>>>> = {};
 
@@ -623,8 +617,7 @@ export function formulaDataItemToCellData(formulaDataItem: Nullable<IFormulaData
  * @param formulaData
  * @returns
  */
-export function formulaDataToCellData(formulaData: IObjectMatrixPrimitiveType<IFormulaDataItem | null>
-): IObjectMatrixPrimitiveType<Nullable<ICellData>> {
+export function formulaDataToCellData(formulaData: IObjectMatrixPrimitiveType<IFormulaDataItem | null>): IObjectMatrixPrimitiveType<Nullable<ICellData>> {
     const cellData = new ObjectMatrix<Nullable<ICellData>>({});
     const formulaDataMatrix = new ObjectMatrix(formulaData);
 

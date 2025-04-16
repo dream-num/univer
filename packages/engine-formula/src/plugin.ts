@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ import type { Dependency } from '@univerjs/core';
 import type { IUniverEngineFormulaConfig } from './controller/config.schema';
 import { IConfigService, Inject, Injector, merge, Plugin, touchDependencies } from '@univerjs/core';
 import { CalculateController } from './controller/calculate.controller';
+import { ComputingStatusReporterController } from './controller/computing-status.controller';
 import { defaultPluginConfig, ENGINE_FORMULA_PLUGIN_CONFIG_KEY } from './controller/config.schema';
 import { FormulaController } from './controller/formula.controller';
 import { SetDependencyController } from './controller/set-dependency.controller';
@@ -50,8 +51,10 @@ import {
     IFeatureCalculationManagerService,
 } from './services/feature-calculation-manager.service';
 import { FunctionService, IFunctionService } from './services/function.service';
+import { GlobalComputingStatusService } from './services/global-computing-status.service';
 import { IOtherFormulaManagerService, OtherFormulaManagerService } from './services/other-formula-manager.service';
 import { FormulaRuntimeService, IFormulaRuntimeService } from './services/runtime.service';
+import { ISheetRowFilteredService, SheetRowFilteredService } from './services/sheet-row-filtered.service';
 import { ISuperTableService, SuperTableService } from './services/super-table.service';
 
 const PLUGIN_NAME = 'UNIVER_ENGINE_FORMULA_PLUGIN';
@@ -106,44 +109,39 @@ export class UniverFormulaEnginePlugin extends Plugin {
     }
 
     private _initialize() {
+        const shouldPerformComputing = !this._config.notExecuteFormula;
         // worker and main thread
         const dependencies: Dependency[] = [
             // Services
             [IFunctionService, { useClass: FunctionService }],
             [IDefinedNamesService, { useClass: DefinedNamesService }],
             [IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }],
+            [ISheetRowFilteredService, { useClass: SheetRowFilteredService }],
             [ISuperTableService, { useClass: SuperTableService }],
-
+            [GlobalComputingStatusService],
             // Models
             [FormulaDataModel],
-
             // Engine
             [LexerTreeBuilder],
-
             //Controllers
             [FormulaController],
             [SetSuperTableController],
+            [ComputingStatusReporterController],
         ];
 
-        if (!this._config?.notExecuteFormula) {
-            // only worker
+        if (shouldPerformComputing) {
             dependencies.push(
                 // Services
-
                 [IOtherFormulaManagerService, { useClass: OtherFormulaManagerService }],
                 [IFormulaRuntimeService, { useClass: FormulaRuntimeService }],
                 [IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }],
-
                 [IFeatureCalculationManagerService, { useClass: FeatureCalculationManagerService }],
-
                 //Controller
                 [CalculateController],
                 [SetOtherFormulaController],
                 [SetDependencyController],
                 [SetFeatureCalculationController],
-
                 // Calculation engine
-
                 [Interpreter],
                 [AstTreeBuilder],
                 [Lexer],

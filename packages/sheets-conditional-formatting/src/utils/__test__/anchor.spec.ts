@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { beforeEach, describe, expect, it } from 'vitest';
-import type { IAnchor } from '../anchor';
-import { anchorUndoFactory, moveByAnchor, transformSupportSymmetryAnchor } from '../anchor';
 import type { IConditionFormattingRule } from '../../models/type';
+import type { IAnchor } from '../anchor';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { anchorUndoFactory, moveByAnchor, transformSupportSymmetryAnchor } from '../anchor';
 
 describe('Test anchor', () => {
     let list: IConditionFormattingRule[] = [];

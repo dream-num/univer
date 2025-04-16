@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,10 +33,7 @@ describe('test-color-scale', () => {
                 stopIfTrue: false,
                 rule: {
                     type: CFRuleType.colorScale,
-                    config: [{ index: 0, value: { type: CFValueType.num, value: 10 }, color: 'red' },
-                        { index: 1, value: { type: CFValueType.num, value: 20 }, color: 'white' },
-                        { index: 2, value: { type: CFValueType.num, value: 30 }, color: 'green' },
-                    ],
+                    config: [{ index: 0, value: { type: CFValueType.num, value: 10 }, color: 'red' }, { index: 1, value: { type: CFValueType.num, value: 20 }, color: 'white' }, { index: 2, value: { type: CFValueType.num, value: 30 }, color: 'green' }],
                 } as IColorScale,
             },
             limit: 1000,

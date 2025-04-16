@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,11 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { FUNCTION_NAMES_LOGICAL } from '../../function-names';
-import { Not } from '../index';
+import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
-import { ErrorType } from '../../../../basics/error-type';
+import { FUNCTION_NAMES_LOGICAL } from '../../function-names';
+import { Not } from '../index';
 
 describe('Test not function', () => {
     const textFunction = new Not(FUNCTION_NAMES_LOGICAL.NOT);

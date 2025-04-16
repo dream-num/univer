@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,8 @@ export class ConditionalFormattingViewModel extends Disposable {
         @Inject(Injector) private _injector: Injector,
         @Inject(ConditionalFormattingRuleModel) private _conditionalFormattingRuleModel: ConditionalFormattingRuleModel,
         @Inject(ConditionalFormattingFormulaService) private _conditionalFormattingFormulaService: ConditionalFormattingFormulaService,
-        @IUniverInstanceService private _univerInstanceService: IUniverInstanceService) {
+        @IUniverInstanceService private _univerInstanceService: IUniverInstanceService
+    ) {
         super();
         this._initRuleListener();
         this._handleCustomFormulasSeparately();
@@ -65,7 +66,8 @@ export class ConditionalFormattingViewModel extends Disposable {
                 if (isAllFinished) {
                     this._markRuleDirtyAtOnce(unitId, subUnitId, cfId, isAllFinished);
                 }
-            }));
+            })
+        );
     }
 
     public getCellCfs(unitId: string, subUnitId: string, row: number, col: number) {
@@ -121,7 +123,9 @@ export class ConditionalFormattingViewModel extends Disposable {
         }
 
         this._markDirty$.next({
-            unitId, subUnitId, cfId,
+            unitId,
+            subUnitId,
+            cfId,
         });
     };
 
@@ -169,7 +173,8 @@ export class ConditionalFormattingViewModel extends Disposable {
                         this._conditionalFormattingFormulaService.deleteCache(unitId, subUnitId, oldRule.cfId);
                     }
                 }
-            }));
+            })
+        );
     }
 
     private _initRuleListener() {
@@ -215,7 +220,8 @@ export class ConditionalFormattingViewModel extends Disposable {
                         }
                     }
                 }
-            }));
+            })
+        );
     }
 
     private _ensureCalculateUnitManager(unitId: string, subUnitId: string) {

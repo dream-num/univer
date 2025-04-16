@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +15,12 @@
  */
 
 import type { IFloatDom } from '../../../services/dom/canvas-dom-layer.service';
-import { IUniverInstanceService, UniverInstanceType, useDependency } from '@univerjs/core';
+import { DocumentDataModel, IUniverInstanceService } from '@univerjs/core';
 import React, { memo, useEffect, useMemo, useRef } from 'react';
 import { distinctUntilChanged, first } from 'rxjs';
 import { ComponentManager } from '../../../common';
-import { useObservable } from '../../../components/hooks/observable';
 import { CanvasFloatDomService } from '../../../services/dom/canvas-dom-layer.service';
-import styles from './index.module.less';
+import { useDependency, useObservable } from '../../../utils/di';
 
 const FloatDomSingle = memo((props: { layer: IFloatDom; id: string }) => {
     const { layer, id } = props;
@@ -34,7 +33,7 @@ const FloatDomSingle = memo((props: { layer: IFloatDom; id: string }) => {
                 prev.endY - prev.startY === curr.endY - curr.startY
         )
     ), [layer.position$]);
-
+    const univerInstanceService = useDependency(IUniverInstanceService);
     const position = useObservable(useMemo(() => layer.position$.pipe(first()), [layer.position$]));
     const domRef = useRef<HTMLDivElement>(null);
     const innerDomRef = useRef<HTMLDivElement>(null);
@@ -59,6 +58,7 @@ const FloatDomSingle = memo((props: { layer: IFloatDom; id: string }) => {
                 domRef.current.style.transform = transformRef.current;
                 domRef.current.style.top = `${topRef.current}px`;
                 domRef.current.style.left = `${leftRef.current}px`;
+                domRef.current.style.opacity = `${position.opacity ?? 1}`;
             }
         });
 
@@ -94,7 +94,21 @@ const FloatDomSingle = memo((props: { layer: IFloatDom; id: string }) => {
         };
     }, [layer.position$, size$]);
 
-    const component = useMemo(() => Component ? <Component {...layerProps} /> : null, [Component, layerProps]);
+    const instance = univerInstanceService.getUnit(layer.unitId);
+    const docDisabled = instance instanceof DocumentDataModel ? instance.getDisabled() : undefined;
+    const component = useMemo(() => Component
+        ? (
+            <Component
+                {...layerProps}
+                unitId={layer.unitId}
+                unit={instance}
+                floatDomId={layer.id}
+                context={{
+                    docDisabled,
+                }}
+            />
+        )
+        : null, [Component, layerProps]);
 
     if (!position) {
         return null;
@@ -105,7 +119,7 @@ const FloatDomSingle = memo((props: { layer: IFloatDom; id: string }) => {
     return (
         <div
             ref={domRef}
-            className={styles.floatDomWrapper}
+            className="univer-z-10"
             style={{
                 position: 'absolute',
                 top: topRef.current,
@@ -132,7 +146,7 @@ const FloatDomSingle = memo((props: { layer: IFloatDom; id: string }) => {
             <div
                 id={id}
                 ref={innerDomRef}
-                className={styles.floatDom}
+                className="univer-overflow-hidden"
                 style={{ position: 'absolute', ...innerStyle.current }}
             >
                 {component}
@@ -145,7 +159,7 @@ export const FloatDom = ({ unitId }: { unitId?: string }) => {
     const instanceService = useDependency(IUniverInstanceService);
     const domLayerService = useDependency(CanvasFloatDomService);
     const layers = useObservable(domLayerService.domLayers$);
-    const currentUnitId = unitId || instanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SHEET)?.getUnitId();
+    const currentUnitId = unitId || instanceService.getFocusedUnit()?.getUnitId();
 
     return layers?.filter((layer) => layer[1].unitId === currentUnitId)?.map((layer) => (
         <FloatDomSingle

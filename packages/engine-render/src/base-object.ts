@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,6 +71,8 @@ export abstract class BaseObject extends Disposable {
     onPointerLeave$ = new EventSubject<IPointerEvent | IMouseEvent>();
     onPointerEnter$ = new EventSubject<IPointerEvent | IMouseEvent>();
 
+    onSingleClick$ = new EventSubject<IPointerEvent | IMouseEvent>();
+    onClick$ = new EventSubject<IPointerEvent | IMouseEvent>();
     onDblclick$ = new EventSubject<IPointerEvent | IMouseEvent>();
     onTripleClick$ = new EventSubject<IPointerEvent | IMouseEvent>();
     onMouseWheel$ = new EventSubject<IWheelEvent>();
@@ -648,13 +650,28 @@ export abstract class BaseObject extends Disposable {
         return true;
     }
 
+    triggerSingleClick(evt: IPointerEvent | IMouseEvent) {
+        if (!this.onSingleClick$.emitEvent(evt)?.stopPropagation) {
+            this._parent?.triggerSingleClick(evt);
+            return false;
+        }
+        return true;
+    }
+
+    triggerClick(evt: IPointerEvent | IMouseEvent) {
+        if (!this.onClick$.emitEvent(evt)?.stopPropagation) {
+            this._parent?.triggerClick(evt);
+            return false;
+        }
+        return true;
+    }
+
     triggerDblclick(evt: IPointerEvent | IMouseEvent) {
         if (!this.onDblclick$.emitEvent(evt)?.stopPropagation) {
             this._parent?.triggerDblclick(evt);
 
             return false;
         }
-
         return true;
     }
 
@@ -763,6 +780,8 @@ export abstract class BaseObject extends Disposable {
         this.onDragOver$.complete();
         this.onDragEnter$.complete();
         this.onDrop$.complete();
+        this.onSingleClick$.complete();
+        this.onClick$.complete();
         this.onDblclick$.complete();
         this.onTripleClick$.complete();
         this.onIsAddedToParent$.complete();

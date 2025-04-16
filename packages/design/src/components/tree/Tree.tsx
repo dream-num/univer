@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,10 @@
  */
 
 import { DropdownSingle } from '@univerjs/icons';
-import clsx from 'clsx';
 import VirtualList from 'rc-virtual-list';
 import React, { useEffect, useMemo, useState } from 'react';
+import { clsx } from '../../helper/clsx';
 import { Checkbox } from '../checkbox';
-
 import { Tooltip } from '../tooltip';
 import styles from './index.module.less';
 import { createCacheWithFindNodePathFromTree, isIntermediated } from './util';
@@ -175,17 +174,17 @@ export function Tree(props: ITreeProps) {
                             onChange?.(treeItem);
                         }}
                     />
-                    <Tooltip showIfEllipsis placement="top" title={title}>
-                        <span
-                            className={styles.treeListItemTitle}
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                handleExpendItem(treeItem);
-                            }}
-                        >
-                            {title}
-                        </span>
-                    </Tooltip>
+                    <div
+                        className={styles.treeListItemTitle}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            handleExpendItem(treeItem);
+                        }}
+                    >
+                        <Tooltip className="univer-w-full univer-truncate" showIfEllipsis placement="top" title={title}>
+                            <span>{title}</span>
+                        </Tooltip>
+                    </div>
 
                     {attachRender && attachRender(treeItem)}
                 </div>

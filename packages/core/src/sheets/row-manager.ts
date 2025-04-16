@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
+import type { IObjectArrayPrimitiveType } from '../shared/object-matrix';
 import type { Nullable } from '../shared/types';
 import type { IStyleData } from '../types/interfaces';
 import type { CustomData, IRange, IRowData, IWorksheetData } from './typedef';
 import type { SheetViewModel } from './view-model';
-import { getArrayLength, type IObjectArrayPrimitiveType } from '../shared/object-matrix';
+import { getArrayLength } from '../shared/object-matrix';
 import { BooleanNumber } from '../types/enum';
 import { RANGE_TYPE } from './typedef';
 

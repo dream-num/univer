@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
-import React, { useEffect, useState } from 'react';
-
-import { Button, Switch } from '@univerjs/design';
-import clsx from 'clsx';
-import { IAuthzIoService, ICommandService, IPermissionService, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
 import type { Workbook } from '@univerjs/core';
-import { IDialogService } from '@univerjs/ui';
-import { getAllWorksheetPermissionPoint, SetWorksheetPermissionPointsCommand, WorksheetProtectionPointModel } from '@univerjs/sheets';
+
 import type { ICollaborator, UnitAction } from '@univerjs/protocol';
+import { IAuthzIoService, ICommandService, IPermissionService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
+import { Button, clsx, Switch } from '@univerjs/design';
 import { ObjectScope, UnitObject, UnitRole } from '@univerjs/protocol';
-import Spin from '../spin';
+import { getAllWorksheetPermissionPoint, SetWorksheetPermissionPointsCommand, WorksheetProtectionPointModel } from '@univerjs/sheets';
+import { IDialogService, useDependency } from '@univerjs/ui';
+import { useEffect, useState } from 'react';
 import { defaultWorksheetUnitActionList, subUnitPermissionTypeMap, UNIVER_SHEET_PERMISSION_DIALOG_ID } from '../../../consts/permission';
+import Spin from '../spin';
 import styles from './index.module.less';
 
 interface IPermissionMap {
@@ -200,7 +199,7 @@ export const SheetPermissionDialog = () => {
                         </div>
                     );
                 })}
-                <div className={styles.sheetPermissionDialogSplit}></div>
+                <div className={styles.sheetPermissionDialogSplit} />
                 <div className={styles.sheetPermissionUserDialogFooter}>
 
                     <Button

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,7 +91,8 @@ export class MobileSelectionControl extends SelectionControl {
 
         // put into scene
         const objs = [
-            this._fillControlTopLeft, this._fillControlBottomRight,
+            this._fillControlTopLeft,
+            this._fillControlBottomRight,
         ] as BaseObject[];
 
         // do not use this.model.rangeType, model has not been initialized yet

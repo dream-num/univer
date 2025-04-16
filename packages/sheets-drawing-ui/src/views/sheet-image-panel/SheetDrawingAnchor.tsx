@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,13 @@
 import type { IDrawingParam, Nullable } from '@univerjs/core';
 import type { BaseObject } from '@univerjs/engine-render';
 import type { ISheetDrawing } from '@univerjs/sheets-drawing';
-import { ICommandService, LocaleService, useDependency } from '@univerjs/core';
-import { Radio, RadioGroup } from '@univerjs/design';
+import { ICommandService, LocaleService } from '@univerjs/core';
+import { clsx, Radio, RadioGroup } from '@univerjs/design';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetDrawingAnchorType } from '@univerjs/sheets-drawing';
-import clsx from 'clsx';
-import React, { useEffect, useState } from 'react';
+import { useDependency } from '@univerjs/ui';
+import { useEffect, useState } from 'react';
 import { SetSheetDrawingCommand } from '../../commands/commands/set-sheet-drawing.command';
 import styles from './index.module.less';
 

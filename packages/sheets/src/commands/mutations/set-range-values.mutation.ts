@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import type {
     IObjectMatrixPrimitiveType,
     IRange,
     Nullable,
+    Styles,
     Workbook,
 } from '@univerjs/core';
 import { CommandType, IUniverInstanceService, ObjectMatrix, Tools } from '@univerjs/core';
@@ -123,50 +124,62 @@ export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, bo
         newValues.forValue((row, col, newVal) => {
             // clear all
             if (!newVal) {
-                cellMatrix?.setValue(row, col, {});
+                cellMatrix.realDeleteValue(row, col);
             } else {
-                const oldVal = cellMatrix.getValue(row, col) || {};
+                let oldVal = cellMatrix.getValue(row, col) || {};
+                oldVal = mergeCellData(newVal, oldVal, styles);
 
-                // NOTE: we may need to take `p` into account
-                const type = getCellType(styles, newVal, oldVal);
-
-                if (newVal.f !== undefined) {
-                    oldVal.f = newVal.f;
+                if (Tools.isEmptyObject(oldVal)) {
+                    cellMatrix.realDeleteValue(row, col);
+                } else {
+                    cellMatrix.setValue(row, col, oldVal);
                 }
-
-                if (newVal.si !== undefined) {
-                    oldVal.si = newVal.si;
-                }
-
-                if (newVal.p !== undefined) {
-                    oldVal.p = newVal.p;
-                }
-
-                // Set to null, clear content
-                if (newVal.v !== undefined) {
-                    oldVal.v = getCellValue(type, newVal);
-                }
-
-                if (oldVal.v !== undefined) {
-                    oldVal.t = type;
-                    // The text format may be set for the numeric cell, and cell.v needs to be converted to text
-                    oldVal.v = getCellValue(type, oldVal);
-                }
-
-                // handle style
-                if (newVal.s !== undefined) {
-                    handleStyle(styles, oldVal, newVal);
-                }
-
-                if (newVal.custom !== undefined) {
-                    // Custom will overwrite the original value
-                    oldVal.custom = newVal.custom;
-                }
-
-                cellMatrix.setValue(row, col, Tools.removeNull(oldVal));
             }
         });
 
         return true;
     },
 };
+
+function mergeCellData(newValue: ICellData, oldValue: ICellData, styles: Styles) {
+    const overwriteCellPropertiesSet = new Set(['f', 'p', 'si', 'custom']);
+    const type = getCellType(styles, newValue, oldValue);
+    Object.keys(newValue).forEach((key) => {
+        const cellPropertyKey = key as keyof ICellData;
+        if (overwriteCellPropertiesSet.has(cellPropertyKey)) {
+            const propertyValue = newValue[cellPropertyKey];
+            updateCellProperty(oldValue, cellPropertyKey, propertyValue);
+        } else if (cellPropertyKey === 'v') {
+            if (newValue.v !== undefined) {
+                oldValue.v = getCellValue(type, newValue);
+            }
+        } else if (cellPropertyKey === 's') {
+            handleStyle(styles, oldValue, newValue);
+        }
+    });
+
+    if (oldValue.v !== undefined) {
+        oldValue.t = type;
+        oldValue.v = getCellValue(type, oldValue);
+    }
+    if (oldValue.v === null) {
+        delete oldValue.t;
+        delete oldValue.v;
+    }
+
+    return oldValue;
+}
+
+function updateCellProperty<K extends keyof ICellData>(
+    cell: ICellData,
+    key: K,
+    value: ICellData[K]
+): void {
+    if (value === undefined) {
+        // Do nothing if the value is undefined
+    } else if (value === null) {
+        delete cell[key];
+    } else {
+        cell[key] = value;
+    }
+}

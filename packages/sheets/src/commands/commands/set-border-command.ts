@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import type {
     IStyleData,
 } from '@univerjs/core';
 
+import type { IBorderInfo } from '../../services/border-style-manager.service';
 import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
 import type { IResult } from './utils/target-util';
 import {
@@ -36,7 +37,7 @@ import {
     ObjectMatrix,
     Tools,
 } from '@univerjs/core';
-import { BorderStyleManagerService, type IBorderInfo } from '../../services/border-style-manager.service';
+import { BorderStyleManagerService } from '../../services/border-style-manager.service';
 import { SheetsSelectionsService } from '../../services/selections/selection.service';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
 import { getSheetCommandTarget } from './utils/target-util';
@@ -53,8 +54,9 @@ function forEach(range: IRange, action: (row: number, column: number) => void): 
 export interface ISetBorderBasicCommandParams {
     unitId?: string;
     subUnitId?: string;
-
+    ranges: IRange[];
     value: IBorderInfo;
+
 }
 
 export interface ISetBorderPositionCommandParams {
@@ -68,6 +70,7 @@ export interface ISetBorderStyleCommandParams {
 export interface ISetBorderCommandParams {
     unitId?: string;
     subUnitId?: string;
+    ranges?: IRange[];
 }
 
 export interface ISetBorderColorCommandParams {
@@ -220,8 +223,12 @@ function getBorderContext(borderStyleManagerService: BorderStyleManagerService, 
         },
     };
     return {
-        worksheet, unitId, subUnitId,
-        style, color, type,
+        worksheet,
+        unitId,
+        subUnitId,
+        style,
+        color,
+        type,
         top,
         left,
         right,
@@ -546,15 +553,15 @@ export const SetBorderCommand: ICommand = {
         const target = getSheetCommandTarget(univerInstanceService, params);
         if (!target) return false;
 
-        const selections = selectionManagerService.getCurrentSelections()?.map((s) => s.range);
-        if (!selections?.length) {
+        const ranges = params?.ranges || selectionManagerService.getCurrentSelections()?.map((s) => s.range);
+        if (!ranges?.length) {
             return false;
         }
 
         const { activeBorderType } = borderStyleManagerService.getBorderInfo();
         if (!activeBorderType) return false;
 
-        const borderContext = getBorderContext(borderStyleManagerService, target, selections);
+        const borderContext = getBorderContext(borderStyleManagerService, target, ranges);
         innerBorder(borderContext);
         outlineBorder(borderContext);
         otherBorders(borderContext);
@@ -626,7 +633,7 @@ export const SetBorderBasicCommand: ICommand<ISetBorderBasicCommandParams> = {
     id: 'sheet.command.set-border-basic',
     type: CommandType.COMMAND,
     handler: (accessor: IAccessor, params: ISetBorderBasicCommandParams) => {
-        const { unitId, subUnitId, value } = params;
+        const { unitId, subUnitId, value, ranges } = params;
         const { type, color, style } = value;
 
         const commandService = accessor.get(ICommandService);
@@ -639,6 +646,7 @@ export const SetBorderBasicCommand: ICommand<ISetBorderBasicCommandParams> = {
         return commandService.syncExecuteCommand(SetBorderCommand.id, {
             unitId,
             subUnitId,
+            ranges,
         });
     },
 };

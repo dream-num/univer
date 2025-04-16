@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,16 @@
  */
 
 import type { Nullable } from '../shared';
+import type { CellValueType, TextDirection } from '../types/enum';
+import type { IDocumentData, IPaddingData, IStyleBase, IStyleData, ITextRotation, ITextStyle } from '../types/interfaces';
 import type { IRange, IUnitRange } from './typedef';
 import { DEFAULT_EMPTY_DOCUMENT_VALUE } from '../common/const';
 import { BuildTextUtils, DocumentDataModel } from '../docs';
 import { TextX } from '../docs/data-model/text-x/text-x';
 import { convertTextRotation } from '../docs/data-model/utils';
 import { Rectangle } from '../shared';
-import { type CellValueType, HorizontalAlign, type TextDirection, VerticalAlign, WrapStrategy } from '../types/enum';
-import { CustomRangeType, type IDocumentData, type IPaddingData, type IStyleBase, type IStyleData, type ITextRotation, type ITextStyle } from '../types/interfaces';
+import { HorizontalAlign, VerticalAlign, WrapStrategy } from '../types/enum';
+import { CustomRangeType } from '../types/interfaces';
 
 export interface IFontLocale {
     fontList: string[];

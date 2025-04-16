@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import type { ICellData, Injector, IRange, IStyleData, Nullable, Univer } from '@univerjs/core';
+import type { IClipboardItem } from './mock-clipboard';
 import { ICommandService, IUniverInstanceService, RANGE_TYPE, Rectangle, RedoCommand, UndoCommand } from '@univerjs/core';
 import {
     AddWorksheetMergeMutation,
@@ -25,15 +27,13 @@ import {
     SetWorksheetRowHeightMutation,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import type { ICellData, Injector, IRange, IStyleData, Nullable, Univer } from '@univerjs/core';
 
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { discreteRangeToRange } from '../../../controllers/utils/range-tools';
 import { ISheetClipboardService, PREDEFINED_HOOK_NAME } from '../clipboard.service';
 import { COPY_TYPE } from '../type';
 import { clipboardTestBed } from './clipboard-test-bed';
 import { MockClipboard } from './mock-clipboard';
-import type { IClipboardItem } from './mock-clipboard';
 
 describe('Test clipboard', () => {
     let univer: Univer;

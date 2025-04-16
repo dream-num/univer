@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,11 @@
  */
 
 import type { IPopup } from '../../../services/popup/canvas-popup.service';
-import { useDependency } from '@univerjs/core';
 import React, { useEffect, useMemo, useState } from 'react';
 import { animationFrameScheduler, combineLatest, map, of, throttleTime } from 'rxjs';
 import { ComponentManager } from '../../../common';
-import { useObservable, useObservableRef } from '../../../components/hooks/observable';
 import { ICanvasPopupService } from '../../../services/popup/canvas-popup.service';
+import { useDependency, useObservable, useObservableRef } from '../../../utils/di';
 import { RectPopup } from './RectPopup';
 
 interface ISingleCanvasPopupProps {
@@ -75,20 +74,28 @@ const SingleCanvasPopup = ({ popup, children }: ISingleCanvasPopupProps) => {
 
         return () => anchorRectSub.unsubscribe();
     }, [canvasElement, hideOnInvisible, anchorRect$, hiddenRects$]);
+
     if ((hidden && hiddenType === 'destroy')) {
         return null;
     }
 
     return (
         <RectPopup
+            {...popup}
             hidden={hidden}
             anchorRect$={anchorRect$}
             direction={popup.direction}
             onClickOutside={popup.onClickOutside}
             excludeOutside={popup.excludeOutside}
             excludeRects={excludeRectsRef}
-            onPointerEnter={popup.onPointerEnter}
-            onPointerLeave={popup.onPointerLeave}
+            {
+                ...popup.customActive
+                    ? null
+                    : {
+                        onPointerEnter: () => popup.onActiveChange?.(true),
+                        onPointerLeave: () => popup.onActiveChange?.(false),
+                    }
+            }
             onClick={popup.onClick}
             onContextMenu={popup.onContextMenu}
         >
@@ -105,6 +112,7 @@ export function CanvasPopup() {
     return popups.map((item) => {
         const [key, popup] = item;
         const Component = componentManager.get(popup.componentKey);
+
         return (
             <SingleCanvasPopup
                 key={key}

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 
 import type { IAccessor, ICommand } from '@univerjs/core';
 import { CommandType, LocaleService } from '@univerjs/core';
-import { ISidebarService } from '@univerjs/ui';
 import { IDrawingManagerService } from '@univerjs/drawing';
+import { ISidebarService } from '@univerjs/ui';
 import { COMPONENT_DOC_DRAWING_PANEL } from '../../views/doc-image-panel/component-name';
 
 export interface IUIComponentCommandParams {
@@ -51,4 +51,3 @@ export const SidebarDocDrawingOperation: ICommand = {
         return true;
     },
 };
-

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,12 @@
 
 import type { Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import { Disposable, Inject, isRealNum, LocaleService } from '@univerjs/core';
+import type { IUniverSheetsNumfmtConfig } from '@univerjs/sheets-numfmt';
+import { Disposable, IConfigService, Inject, isRealNum, LocaleService } from '@univerjs/core';
 import { FormulaDataModel } from '@univerjs/engine-formula';
-import { DEFAULT_TEXT_FORMAT } from '@univerjs/engine-numfmt';
+import { isTextFormat } from '@univerjs/engine-numfmt';
 import { INumfmtService } from '@univerjs/sheets';
+import { SHEETS_NUMFMT_PLUGIN_CONFIG_KEY } from '@univerjs/sheets-numfmt';
 import { CellAlertManagerService, CellAlertType, HoverManagerService } from '@univerjs/sheets-ui';
 import { IZenZoneService } from '@univerjs/ui';
 import { debounceTime } from 'rxjs';
@@ -34,7 +36,8 @@ export class NumfmtAlertRenderController extends Disposable implements IRenderMo
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel,
         @IZenZoneService private readonly _zenZoneService: IZenZoneService,
-        @Inject(INumfmtService) private _numfmtService: INumfmtService
+        @Inject(INumfmtService) private _numfmtService: INumfmtService,
+        @IConfigService private readonly _configService: IConfigService
     ) {
         super();
         this._init();
@@ -76,7 +79,12 @@ export class NumfmtAlertRenderController extends Disposable implements IRenderMo
                 }
 
                 // Preventing blank object
-                if (numfmtValue.pattern === DEFAULT_TEXT_FORMAT && cellData?.v && isRealNum(cellData.v)) {
+                if (isTextFormat(numfmtValue.pattern) && cellData?.v && isRealNum(cellData.v)) {
+                    // If the user has disabled the text format alert, do not show it
+                    if (this._configService.getConfig<IUniverSheetsNumfmtConfig>(SHEETS_NUMFMT_PLUGIN_CONFIG_KEY)?.disableTextFormatAlert) {
+                        return;
+                    }
+
                     const currentAlert = this._cellAlertManagerService.currentAlert.get(ALERT_KEY);
                     const currentLoc = currentAlert?.alert?.location;
                     if (
@@ -90,7 +98,7 @@ export class NumfmtAlertRenderController extends Disposable implements IRenderMo
                     }
 
                     this._cellAlertManagerService.showAlert({
-                        type: CellAlertType.ERROR,
+                        type: CellAlertType.WARNING,
                         title: this._localeService.t('info.error'),
                         message: this._localeService.t('info.forceStringInfo'),
                         location,

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,8 @@
 import { installShims } from './common/shims';
 
 installShims();
-
+export { getPlainText } from './docs/data-model/text-x/build-utils/parse';
+export type { INumfmt } from './shared/types/numfmt.type';
 export { debounce, get, merge, mergeWith, set } from 'lodash-es';
 export { textDiff } from './shared/text-diff';
 export { dedupe, groupBy, makeArray, remove, rotate } from './common/array';
@@ -33,13 +34,6 @@ export { AsyncInterceptorManager, composeInterceptors, createAsyncInterceptorKey
 export type { Serializable } from './common/json';
 export { MemoryCursor } from './common/memory-cursor';
 export { mixinClass } from './common/mixin';
-export { FBase, FBaseInitialable } from './facade/f-base';
-export { FUniver } from './facade/f-univer';
-export { FHooks } from './facade/f-hooks';
-export { FBlob, type IFBlobSource } from './facade/f-blob';
-export { FEventName, type IEventBase, type IEventParamConfig } from './facade/f-event';
-export { FEnum } from './facade/f-enum';
-export { FUtil } from './facade/f-util';
 export { isNumeric, isSafeNumeric } from './common/number';
 export { Registry, RegistryAsMap } from './common/registry';
 export { requestImmediateMacroTask } from './common/request-immediate-macro-task';
@@ -122,9 +116,8 @@ export type { IPermissionParam } from './services/permission/type';
 
 export type { IPermissionPoint } from './services/permission/type';
 export type { IPermissionTypes, RangePermissionPointConstructor, WorkbookPermissionPointConstructor, WorkSheetPermissionPointConstructor } from './services/permission/type';
-export { Plugin } from './services/plugin/plugin';
-export type { PluginCtor } from './services/plugin/plugin';
-export { DependentOn, PluginService } from './services/plugin/plugin.service';
+export type { PluginCtor } from './services/plugin/plugin.service.ts';
+export { DependentOn, Plugin, PluginService } from './services/plugin/plugin.service';
 export { type DependencyOverride, mergeOverrideWithDependencies } from './services/plugin/plugin-override';
 export { IResourceLoaderService } from './services/resource-loader/type';
 export { ResourceManagerService } from './services/resource-manager/resource-manager.service';
@@ -153,7 +146,7 @@ export { isBlackColor, isWhiteColor } from './shared/color/color-kit';
 export { cellToRange } from './shared/common';
 export { getIntersectRange } from './shared/range';
 export { nameCharacterCheck } from './shared/name';
-export { afterTime, bufferDebounceTime, fromCallback, takeAfter } from './shared/rxjs';
+export { afterTime, bufferDebounceTime, convertObservableToBehaviorSubject, fromCallback, takeAfter } from './shared/rxjs';
 export { awaitTime, delayAnimationFrame } from './shared/timer';
 export { Range } from './sheets/range';
 export {

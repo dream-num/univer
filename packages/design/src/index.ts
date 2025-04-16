@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,11 +27,11 @@ export { Confirm, type IConfirmProps } from './components/confirm';
 export { DatePanel, DatePicker, type IDatePanelProps, type IDatePickerProps } from './components/date-picker';
 export { Dialog, type IDialogProps } from './components/dialog';
 export { DropdownLegacy, type IDropdownLegacyProps } from './components/dropdown-legacy';
-export { DropdownOverlay, DropdownProvider, DropdownTrigger, type IDropdownOverlayProps } from './components/dropdown';
+export { Dropdown } from './components/dropdown';
 export { FormDualColumnLayout, FormLayout, type IFormDualColumnLayoutProps, type IFormLayoutProps } from './components/form-layout';
-export { type IInputProps, type IInputWithSlotProps, Input, InputWithSlot } from './components/input';
+export { type IInputProps, Input } from './components/input';
 export { type IInputNumberProps, InputNumber } from './components/input-number';
-export { Menu, MenuItem, MenuItemGroup, type MenuRef, SubMenu } from './components/menu';
+export { Menu, MenuItem, MenuItemGroup, type MenuRef, SubMenu, TinyMenuGroup } from './components/menu';
 export { type IMessageProps, message, Messager, MessageType, removeMessage } from './components/message';
 export { type IPagerProps, Pager } from './components/pager';
 export { type IPopupProps, Popup } from './components/popup';
@@ -40,8 +40,7 @@ export { type IRadioGroupProps, RadioGroup } from './components/radio-group';
 export { type IScrollbarProps, Scrollbar } from './components/scrollbar';
 export { type ISelectProps, Select } from './components/select';
 export { type ISelectListProps, SelectList } from './components/select-list';
-export { type ISegmentedProps, Segmented } from './components/segmented';
-export { type ISliderProps, Slider } from './components/slider';
+export { Segmented } from './components/segmented';
 export { type ITooltipProps, Tooltip } from './components/tooltip';
 export { filterLeafNode, findNodePathFromTree, findSubTreeFromPath, type ITreeNodeProps, type ITreeProps, mergeTreeSelected, Tree, TreeSelectionMode } from './components/tree';
 export { Switch } from './components/switch';
@@ -50,4 +49,9 @@ export { defaultTheme, greenTheme, themeInstance } from './themes';
 export { DraggableList, type IDraggableListProps } from './components/draggable-list';
 export { clsx } from './helper/clsx';
 export { resizeObserverCtor } from './helper/resize-observer';
-export { render, unmount } from './utils/render';
+export { render, unmount } from './helper/react-dom';
+export { isBrowser } from './helper/is-browser';
+export { DropdownMenu, type IDropdownProps } from './components/dropdown-menu';
+export { Separator } from './components/separator';
+export { DateRangePicker } from './components/date-range-picker';
+export * from './components/side-menu';

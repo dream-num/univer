@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-import { ICommandService, useDependency } from '@univerjs/core';
-import { Button } from '@univerjs/design';
+import { ICommandService } from '@univerjs/core';
+import { Button, clsx } from '@univerjs/design';
 import { RecordSingle } from '@univerjs/icons';
-import { useObservable } from '@univerjs/ui';
-import clsx from 'clsx';
+import { useDependency, useObservable } from '@univerjs/ui';
 import React, { useCallback } from 'react';
 import { CompleteRecordingActionCommand, StartRecordingActionCommand, StopRecordingActionCommand } from '../../commands/commands/record.command';
 import { CloseRecordPanelOperation } from '../../commands/operations/operation';
@@ -75,4 +74,3 @@ function RecordPanelImpl() {
         </div>
     );
 }
-

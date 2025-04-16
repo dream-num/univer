@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 import type { IInterceptor } from '../common/interceptor';
 import type { IObjectMatrixPrimitiveType, Nullable } from '../shared';
+import type { BooleanNumber, HorizontalAlign, TextDirection, VerticalAlign, WrapStrategy } from '../types/enum';
 import type { IDocumentData, IDocumentRenderConfig, IPaddingData, IStyleData, ITextRotation } from '../types/interfaces';
 import type { Styles } from './styles';
 import type { CustomData, ICellData, ICellDataForSheetInterceptor, ICellDataWithSpanAndDisplay, IFreeze, IRange, ISelectionCell, IWorksheetData } from './typedef';
@@ -24,7 +25,7 @@ import { convertTextRotation, getFontStyleString } from '../docs/data-model/util
 import { composeStyles, ObjectMatrix, Tools } from '../shared';
 import { createRowColIter } from '../shared/row-col-iter';
 import { DEFAULT_STYLES } from '../types/const';
-import { type BooleanNumber, CellValueType, type HorizontalAlign, type TextDirection, type VerticalAlign, type WrapStrategy } from '../types/enum';
+import { CellValueType } from '../types/enum';
 import { ColumnManager } from './column-manager';
 import { Range } from './range';
 import { RowManager } from './row-manager';
@@ -138,6 +139,8 @@ export class Worksheet {
      * @param {boolean} [keepRaw] If true, return the raw style data, otherwise return the style data object
      * @returns {Nullable<IStyleData>|string} The style of the column
      */
+    getColumnStyle(column: number, keepRaw: true): string | Nullable<IStyleData>;
+    getColumnStyle(column: number): Nullable<IStyleData>;
     getColumnStyle(column: number, keepRaw = false): string | Nullable<IStyleData> {
         if (keepRaw) {
             return this._columnManager.getColumnStyle(column);
@@ -160,6 +163,8 @@ export class Worksheet {
      * @param {boolean} [keepRaw] If true, return the raw style data, otherwise return the style data object
      * @returns {Nullable<IStyleData>} The style of the row
      */
+    getRowStyle(row: number, keepRaw: true): string | Nullable<IStyleData>;
+    getRowStyle(row: number): Nullable<IStyleData>;
     getRowStyle(row: number, keepRaw = false): string | Nullable<IStyleData> {
         if (keepRaw) {
             return this._rowManager.getRowStyle(row);
@@ -174,31 +179,6 @@ export class Worksheet {
      */
     setRowStyle(row: number, style: string | Nullable<IStyleData>): void {
         this._rowManager.setRowStyle(row, style);
-    }
-
-    /**
-     * this function is used to mixin default style to cell raw{number}
-     * @param {number} row The row index
-     * @param {number} col The column index
-     * @param cellRaw The cell raw data
-     * @param {boolean} isRowStylePrecedeColumnStyle The priority of row style and column style
-     */
-    mixinDefaultStyleToCellRaw(row: number, col: number, cellRaw: Nullable<ICellData>, isRowStylePrecedeColumnStyle: boolean) {
-        const columnStyle = this.getColumnStyle(col) as Nullable<IStyleData>;
-        const rowStyle = this.getRowStyle(row) as Nullable<IStyleData>;
-        const defaultStyle = this.getDefaultCellStyleInternal();
-        if (defaultStyle || columnStyle || rowStyle) {
-            let cellStyle = cellRaw?.s;
-            if (typeof cellStyle === 'string') {
-                cellStyle = this._styles.get(cellStyle);
-            }
-            const s = isRowStylePrecedeColumnStyle ? composeStyles(defaultStyle, columnStyle, rowStyle, cellStyle) : composeStyles(defaultStyle, rowStyle, columnStyle, cellStyle);
-            if (!cellRaw) {
-                // eslint-disable-next-line no-param-reassign
-                cellRaw = {};
-            }
-            cellRaw.s = s;
-        }
     }
 
     /**
@@ -220,6 +200,37 @@ export class Worksheet {
      */
     setDefaultCellStyle(style: Nullable<IStyleData> | string): void {
         this._snapshot.defaultStyle = style;
+    }
+
+    getCellStyle(row: number, col: number): Nullable<IStyleData> {
+        const cell = this.getCell(row, col);
+        if (cell) {
+            const style = cell.s;
+            if (typeof style === 'string') {
+                return this._styles.get(style);
+            }
+            return style;
+        }
+
+        return null;
+    }
+
+    /**
+     * Get the composed style of the cell. If you want to get the style of the cell without merging row style,
+     * col style and default style, please use {@link getCellStyle} instead.
+     *
+     * @param {number} row The row index of the cell
+     * @param {number} col The column index of the cell
+     * @returns {IStyleData} The composed style of the cell
+     */
+    getComposedCellStyle(row: number, col: number, rowPriority = true): IStyleData {
+        const cell = this.getCellStyle(row, col);
+        const defaultStyle = this.getDefaultCellStyleInternal();
+        const rowStyle = this.getRowStyle(row);
+        const colStyle = this.getColumnStyle(col);
+        return rowPriority
+            ? composeStyles(defaultStyle, rowStyle, colStyle, cell)
+            : composeStyles(defaultStyle, colStyle, rowStyle, cell);
     }
 
     /**

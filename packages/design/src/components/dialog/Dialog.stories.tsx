@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,8 @@ export const DialogBasic = {
                     visible={visible}
                     title="hello world"
                     closeIcon={<CloseSingle />}
-                    footer={<footer>footer</footer>}
+                    showOk
+                    showCancel
                     onClose={handleToggleVisible}
                 >
                     xxxx

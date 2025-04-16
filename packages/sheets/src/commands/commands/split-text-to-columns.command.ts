@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,11 @@
 
 import type { IAccessor, ICellData, IRange, Nullable, Workbook } from '@univerjs/core';
 import type { IInsertColMutationParams, IRemoveColMutationParams } from '../../basics';
-import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
+import type { SplitDelimiterEnum } from '../../basics/split-range-text';
 
+import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
 import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, ObjectMatrix, Range, sequenceExecute, UniverInstanceType } from '@univerjs/core';
-import { type SplitDelimiterEnum, splitRangeText } from '../../basics/split-range-text';
+import { splitRangeText } from '../../basics/split-range-text';
 import { InsertColMutation, InsertColMutationUndoFactory } from '../mutations/insert-row-col.mutation';
 import { RemoveColMutation } from '../mutations/remove-row-col.mutation';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';

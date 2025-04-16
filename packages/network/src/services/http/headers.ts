@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,18 @@ interface IHeadersConstructorProps {
 
 // Header keys in `HTTPHeaders` should be in lower case.
 export const ApplicationJSONType = 'application/json';
+
+/**
+ * Check if the content type is application/json
+ * "application/json" or "application/json; charset=utf-8" or ["application/json"]
+ * @param contentType
+ */
+export function isApplicationJSONType(contentType: string | string[]): boolean {
+    if (Array.isArray(contentType)) {
+        return contentType.some((type) => type.includes(ApplicationJSONType));
+    }
+    return contentType.includes(ApplicationJSONType);
+}
 
 /**
  * It wraps headers of HTTP requests' and responses' headers.
@@ -54,14 +66,18 @@ export class HTTPHeaders {
         this._setHeader(key, value);
     }
 
-    toHeadersInit(): HeadersInit {
+    toHeadersInit(body?: any): HeadersInit {
         const headers: HeadersInit = {};
         this._headers.forEach((values, key) => {
             headers[key] = values.join(',');
         });
 
         headers.accept ??= 'application/json, text/plain, */*';
-        headers['content-type'] ??= 'application/json;charset=UTF-8';
+
+        // If the request body is FormData, the browser will automatically generate Content Type with boundary
+        if (!(body instanceof FormData)) {
+            headers['content-type'] ??= 'application/json;charset=UTF-8';
+        }
 
         return headers;
     }

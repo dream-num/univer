@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-import type { ICellData, IDocDrawingBase, IRange, Nullable } from '@univerjs/core';
+import type { ICellData, IDocDrawingBase, Nullable } from '@univerjs/core';
+import type { IReplaceSnapshotCommandParams } from '@univerjs/docs-ui';
 import type { IImageData } from '@univerjs/drawing';
-import type { IAddWorksheetMergeMutationParams, IRemoveWorksheetMergeMutationParams, ISetWorksheetColWidthMutationParams, ISetWorksheetRowAutoHeightMutationParams, ISetWorksheetRowHeightMutationParams, ISetWorksheetRowIsAutoHeightMutationParams, ISheetLocationBase } from '@univerjs/sheets';
-import { Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_ZEN_EDITOR_UNIT_ID_KEY, ICommandService, Inject, Injector, InterceptorEffectEnum, IUniverInstanceService, Range } from '@univerjs/core';
+import type { ISheetLocationBase } from '@univerjs/sheets';
+import { Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_ZEN_EDITOR_UNIT_ID_KEY, ICommandService, Inject, Injector, InterceptorEffectEnum } from '@univerjs/core';
 import { DocDrawingController } from '@univerjs/docs-drawing';
-import { type IReplaceSnapshotCommandParams, ReplaceSnapshotCommand } from '@univerjs/docs-ui';
+import { ReplaceSnapshotCommand } from '@univerjs/docs-ui';
 import { IDrawingManagerService } from '@univerjs/drawing';
-import { AddWorksheetMergeMutation, AFTER_CELL_EDIT, getSheetCommandTarget, InterceptCellContentPriority, INTERCEPTOR_POINT, RemoveWorksheetMergeMutation, SetWorksheetColWidthMutation, SetWorksheetRowAutoHeightMutation, SetWorksheetRowHeightMutation, SetWorksheetRowIsAutoHeightMutation, SheetInterceptorService } from '@univerjs/sheets';
+import { InterceptCellContentPriority, INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
 import { getDrawingSizeByCell } from './sheet-drawing-update.controller';
 
@@ -64,7 +65,6 @@ export class SheetCellImageController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(Injector) private readonly _injector: Injector,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
         @Inject(DocDrawingController) private readonly _docDrawingController: DocDrawingController,
@@ -72,58 +72,8 @@ export class SheetCellImageController extends Disposable {
     ) {
         super();
 
-        this._initHandleResize();
         this._handleInitEditor();
-        this._handleWriteCell();
         this._initCellContentInterceptor();
-    }
-
-    private _initHandleResize() {
-        this.disposeWithMe(this._commandService.onCommandExecuted((commandInfo) => {
-            let sheetTarget: Nullable<ReturnType<typeof getSheetCommandTarget>>;
-            let ranges: IRange[] = [];
-            if (commandInfo.id === SetWorksheetRowHeightMutation.id) {
-                const params = commandInfo.params as ISetWorksheetRowHeightMutationParams;
-                ranges = params.ranges;
-                sheetTarget = getSheetCommandTarget(this._univerInstanceService, { unitId: params.unitId, subUnitId: params.subUnitId });
-            } else if (commandInfo.id === SetWorksheetColWidthMutation.id) {
-                const params = commandInfo.params as ISetWorksheetColWidthMutationParams;
-                ranges = params.ranges;
-                sheetTarget = getSheetCommandTarget(this._univerInstanceService, { unitId: params.unitId, subUnitId: params.subUnitId });
-            } else if (commandInfo.id === SetWorksheetRowIsAutoHeightMutation.id) {
-                const params = commandInfo.params as ISetWorksheetRowIsAutoHeightMutationParams;
-                ranges = params.ranges;
-                sheetTarget = getSheetCommandTarget(this._univerInstanceService, { unitId: params.unitId, subUnitId: params.subUnitId });
-            } else if (commandInfo.id === SetWorksheetRowAutoHeightMutation.id) {
-                const params = commandInfo.params as ISetWorksheetRowAutoHeightMutationParams;
-                sheetTarget = getSheetCommandTarget(this._univerInstanceService, { unitId: params.unitId, subUnitId: params.subUnitId });
-                ranges = params.rowsAutoHeightInfo.map((info) => ({
-                    startRow: info.row,
-                    endRow: info.row,
-                    startColumn: 0,
-                    endColumn: 9999,
-                }));
-            } else if (commandInfo.id === AddWorksheetMergeMutation.id) {
-                const params = commandInfo.params as IAddWorksheetMergeMutationParams;
-                ranges = params.ranges;
-                sheetTarget = getSheetCommandTarget(this._univerInstanceService, { unitId: params.unitId, subUnitId: params.subUnitId });
-            } else if (commandInfo.id === RemoveWorksheetMergeMutation.id) {
-                const params = commandInfo.params as IRemoveWorksheetMergeMutationParams;
-                ranges = params.ranges;
-                sheetTarget = getSheetCommandTarget(this._univerInstanceService, { unitId: params.unitId, subUnitId: params.subUnitId });
-            }
-
-            if (sheetTarget && (ranges.length)) {
-                ranges.forEach((range) => {
-                    const normalizedRange = Range.transformRange(range, sheetTarget.worksheet);
-                    for (let row = normalizedRange.startRow; row <= normalizedRange.endRow; row++) {
-                        for (let col = normalizedRange.startColumn; col <= normalizedRange.endColumn; col++) {
-                            resizeImageByCell(this._injector, { unitId: sheetTarget.unitId, subUnitId: sheetTarget.subUnitId, row, col }, sheetTarget.worksheet.getCellRaw(row, col));
-                        }
-                    }
-                });
-            }
-        }));
     }
 
     private _handleInitEditor() {
@@ -150,16 +100,6 @@ export class SheetCellImageController extends Disposable {
         }));
     }
 
-    private _handleWriteCell() {
-        this.disposeWithMe(this._sheetInterceptorService.writeCellInterceptor.intercept(AFTER_CELL_EDIT, {
-            priority: 9999,
-            handler: (cell, context, next) => {
-                resizeImageByCell(this._injector, { unitId: context.unitId, subUnitId: context.subUnitId, row: context.row, col: context.col }, cell);
-                return next(cell);
-            },
-        }));
-    }
-
     private _initCellContentInterceptor() {
         this.disposeWithMe(
             this._sheetInterceptorService.intercept(
@@ -172,8 +112,9 @@ export class SheetCellImageController extends Disposable {
                             if (!cell.interceptorStyle) {
                                 cell.interceptorStyle = {};
                             }
-
                             cell.interceptorStyle.tr = { a: 0 };
+
+                            resizeImageByCell(this._injector, { unitId: pos.unitId, subUnitId: pos.subUnitId, row: pos.row, col: pos.col }, cell);
                         }
 
                         return next(cell);

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,9 @@
  */
 
 import type { IDocumentBody, Nullable } from '@univerjs/core';
-import { checkParagraphHasIndentByStyle, DataStreamTreeTokenType } from '@univerjs/core';
-
 import type { IDocumentSkeletonGlyph } from './i-document-skeleton-cached';
+
+import { checkParagraphHasIndentByStyle, DataStreamTreeTokenType } from '@univerjs/core';
 import { GlyphType } from './i-document-skeleton-cached';
 
 export function hasListGlyph(glyph: Nullable<IDocumentSkeletonGlyph>) {

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+import type { Univer } from '../../univer';
 import { beforeEach, describe, expect, it } from 'vitest';
+import { UniverInstanceType } from '../../common/unit';
 import { IResourceLoaderService } from '../resource-loader/type';
 import { IResourceManagerService } from '../resource-manager/type';
-import type { Univer } from '../../univer';
-import { UniverInstanceType } from '../../common/unit';
 import { createTestBed } from './index';
 
 describe('Test resources service', () => {

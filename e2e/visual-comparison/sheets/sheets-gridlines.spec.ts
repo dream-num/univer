@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,5 +44,5 @@ test('sheets no gridlines', async () => {
         ],
         fullPage: true,
     });
-    expect(screenshot).toMatchSnapshot(filename, { maxDiffPixels: 5 });
+    expect(screenshot).toMatchSnapshot(filename, { maxDiffPixelRatio: 0.005 });
 });

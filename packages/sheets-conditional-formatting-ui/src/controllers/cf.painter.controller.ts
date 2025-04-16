@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -229,13 +229,17 @@ export class ConditionalFormattingPainterController extends Disposable {
                     const ranges = findAllRectangle(createTopMatrixFromMatrix(item));
                     if (ranges.length) {
                         const params: ISetConditionalRuleMutationParams = {
-                            unitId: sourceUnitId, subUnitId: sourceSubUnitId, rule: { ...rule, ranges },
+                            unitId: sourceUnitId,
+                            subUnitId: sourceSubUnitId,
+                            rule: { ...rule, ranges },
                         };
                         redos.push({ id: SetConditionalRuleMutation.id, params });
                         undos.push(...setConditionalRuleMutationUndoFactory(this._injector, params));
                     } else {
                         const params: IDeleteConditionalRuleMutationParams = {
-                            unitId: sourceUnitId, subUnitId: sourceSubUnitId, cfId: rule.cfId,
+                            unitId: sourceUnitId,
+                            subUnitId: sourceSubUnitId,
+                            cfId: rule.cfId,
                         };
                         redos.push({ id: DeleteConditionalRuleMutation.id, params });
                         undos.push(...DeleteConditionalRuleMutationUndoFactory(this._injector, params));
@@ -263,13 +267,17 @@ export class ConditionalFormattingPainterController extends Disposable {
                     } else {
                         if (ranges.length) {
                             const params: ISetConditionalRuleMutationParams = {
-                                unitId: targetUnitId, subUnitId: targetSubUnitId, rule: { ...rule, ranges },
+                                unitId: targetUnitId,
+                                subUnitId: targetSubUnitId,
+                                rule: { ...rule, ranges },
                             };
                             redos.push({ id: SetConditionalRuleMutation.id, params });
                             undos.push(...setConditionalRuleMutationUndoFactory(this._injector, params));
                         } else {
                             const params: IDeleteConditionalRuleMutationParams = {
-                                unitId: targetUnitId, subUnitId: targetSubUnitId, cfId: rule.cfId,
+                                unitId: targetUnitId,
+                                subUnitId: targetSubUnitId,
+                                cfId: rule.cfId,
                             };
                             redos.push({ id: DeleteConditionalRuleMutation.id, params });
                             undos.push(...DeleteConditionalRuleMutationUndoFactory(this._injector, params));

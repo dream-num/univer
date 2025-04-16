@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,13 @@
  */
 
 import type { IAccessor, ICommand } from '@univerjs/core';
+import type { ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
 import {
     CommandType,
     ICommandService,
     IUndoRedoService,
 } from '@univerjs/core';
-import { type ISetDefinedNameMutationParam, RemoveDefinedNameMutation, SetDefinedNameMutation } from '@univerjs/engine-formula';
+import { RemoveDefinedNameMutation, SetDefinedNameMutation } from '@univerjs/engine-formula';
 
 /**
  * The command to insert new defined name

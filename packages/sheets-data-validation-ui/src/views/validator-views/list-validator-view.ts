@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-import { DataValidationType, type Nullable } from '@univerjs/core';
-import { DataValidatorDropdownType, type IBaseDataValidationWidget } from '@univerjs/data-validation';
+import type { Nullable } from '@univerjs/core';
+import type { IBaseDataValidationWidget } from '@univerjs/data-validation';
+import { DataValidationType } from '@univerjs/core';
+import { DataValidatorDropdownType } from '@univerjs/data-validation';
 import { LIST_FORMULA_INPUT_NAME } from '../components/formula-input';
 import { ListRenderModeInput } from '../components/render-mode';
 import { DropdownWidget } from '../widgets/dropdown-widget';

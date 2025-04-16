@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { compareToken } from '../../../basics/token';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import { compareToken } from '../../../basics/token';
 import { BaseFunction } from '../../base-function';
 
 export class Compare extends BaseFunction {

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,6 +57,11 @@ const locale: typeof zhCN = {
             'drawing-move-right': 'Move Drawing right',
             'drawing-delete': 'Delete Drawing',
         },
+    },
+    'cell-image': {
+        pasteTitle: 'Dán như hình ảnh ô',
+        pasteContent: 'Dán hình ảnh ô sẽ ghi đè lên nội dung hiện có của ô, tiếp tục dán',
+        pasteError: 'Sao chép và dán hình ảnh ô không được hỗ trợ trong đơn vị này',
     },
 };
 

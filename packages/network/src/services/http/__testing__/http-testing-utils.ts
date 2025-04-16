@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,13 @@
 /* eslint-disable ts/no-this-alias */
 
 import type { Observer } from 'rxjs';
-import { Observable, Subject } from 'rxjs';
-import { Disposable, Injector } from '@univerjs/core';
-
-import { IHTTPImplementation } from '../implementations/implementation';
 import type { HTTPRequest } from '../request';
 import type { HTTPEvent, HTTPResponse, HTTPResponseError } from '../response';
+
+import { Disposable, Injector } from '@univerjs/core';
+import { Observable, Subject } from 'rxjs';
 import { HTTPService } from '../http.service';
+import { IHTTPImplementation } from '../implementations/implementation';
 
 /**
  * A mocked HTTP implementation service for testing purposes. Besides methods in the interface, it

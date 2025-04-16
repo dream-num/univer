@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,39 +14,12 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICellData, IObjectMatrixPrimitiveType, IRange, Workbook } from '@univerjs/core';
-import { IUniverInstanceService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
+import type { ICellData, IObjectMatrixPrimitiveType, IRange } from '@univerjs/core';
+import { ObjectMatrix } from '@univerjs/core';
 
 export interface IDiscreteRange {
     rows: number[];
     cols: number[];
-}
-
-export function rangeToDiscreteRange(range: IRange, accessor: IAccessor, unitId?: string, subUnitId?: string): IDiscreteRange | null {
-    const univerInstanceService = accessor.get(IUniverInstanceService);
-    const workbook = unitId
-        ? univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET)
-        : univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
-    const worksheet = subUnitId ? workbook?.getSheetBySheetId(subUnitId) : workbook?.getActiveSheet();
-    if (!worksheet) {
-        return null;
-    }
-    const { startRow, endRow, startColumn, endColumn } = range;
-
-    const rows = [];
-    const cols = [];
-    for (let r = startRow; r <= endRow; r++) {
-        if (!worksheet.getRowFiltered(r)) {
-            rows.push(r);
-        }
-    }
-    for (let c = startColumn; c <= endColumn; c++) {
-        cols.push(c);
-    }
-    return {
-        rows,
-        cols,
-    };
 }
 
 export function discreteRangeToRange(discreteRange: IDiscreteRange): IRange {

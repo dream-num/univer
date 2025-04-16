@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
+import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
-import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
-import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
-import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 
 export class Offset extends BaseFunction {
     override minParams = 3;

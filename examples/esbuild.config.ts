@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,10 @@ import type { BuildOptions, Plugin, SameShape } from 'esbuild';
 import { execSync } from 'node:child_process';
 import path from 'node:path';
 import process from 'node:process';
+import { fileURLToPath } from 'node:url';
 import detect from 'detect-port';
 import esbuild from 'esbuild';
+import aliasPlugin from 'esbuild-plugin-alias';
 import cleanPlugin from 'esbuild-plugin-clean';
 import copyPlugin from 'esbuild-plugin-copy';
 import vue from 'esbuild-plugin-vue3';
@@ -27,13 +29,17 @@ import stylePlugin from 'esbuild-style-plugin';
 import glob from 'fast-glob';
 import fs from 'fs-extra';
 import minimist from 'minimist';
+import React from 'react';
 import tailwindcss from 'tailwindcss';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const LINK_TO_LIB = process.env.LINK_TO_LIB === 'true';
 const nodeModules = path.resolve(process.cwd(), './node_modules');
 
 const args = minimist(process.argv.slice(2));
 const isE2E = !!args.e2e;
+const isReact16 = React.version.startsWith('16');
 
 // User should also config their bundler to build monaco editor's resources for web worker.
 const monacoEditorEntryPoints = [
@@ -139,6 +145,24 @@ function generateAliases() {
     return aliases;
 }
 
+function nodeBuildTask() {
+    return esbuild.build({
+        bundle: true,
+        color: true,
+        minify: false,
+        target: 'chrome70',
+        entryPoints: [
+            './src/node/cases/basic.ts',
+            './src/node/sdk/worker.ts',
+        ],
+        platform: 'node',
+        outdir: './dist',
+        define: {
+            'process.env.NODE_ENV': '"production"',
+        },
+    });
+}
+
 /**
  * Build monaco editor's resources for web worker
  */
@@ -183,6 +207,9 @@ const entryPoints = [
 
     // sheets-multi
     './src/sheets-multi/main.tsx',
+
+    // sheets-multi-units
+    './src/sheets-multi-units/main.ts',
 
     // sheets-uniscript
     './src/sheets-uniscript/main.ts',
@@ -245,7 +272,7 @@ const config: SameShape<BuildOptions, BuildOptions> = {
         ...(LINK_TO_LIB ? [] : [skipLibCssEsbuildPlugin]),
         stylePlugin({
             postcss: {
-                plugins: [tailwindcss],
+                plugins: [tailwindcss as any],
             },
             cssModulesOptions: {
                 localsConvention: 'camelCaseOnly',
@@ -265,24 +292,32 @@ const config: SameShape<BuildOptions, BuildOptions> = {
     alias: LINK_TO_LIB ? generateAliases() : {},
 };
 
+if (isReact16) {
+    config.plugins?.push(
+        aliasPlugin({
+            'react-dom/client': path.resolve(__dirname, './src/client.ts'),
+        })
+    );
+}
+
 /**
  * Build the project
  */
 async function main() {
+    await monacoBuildTask();
+
     if (args.watch) {
         const ctx = await esbuild.context(config);
-        await monacoBuildTask();
+        await nodeBuildTask();
         await ctx.watch();
 
         const port = isE2E ? 3000 : await detect(3002);
-
         await ctx.serve({
             servedir: './local',
             port,
         });
 
         const url = `http://localhost:${port}`;
-
         console.log(`Local server: ${url}`);
     } else {
         await esbuild.build(config);

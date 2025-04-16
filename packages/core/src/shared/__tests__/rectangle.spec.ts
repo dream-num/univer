@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
+import type { IRange } from '../../sheets/typedef';
 import { describe, expect, it } from 'vitest';
 import { Range } from '../../sheets/range';
 import { AbsoluteRefType } from '../../sheets/typedef';
 import { ObjectMatrix } from '../object-matrix';
 import { multiSubtractMultiRanges } from '../object-matrix-query';
 import { Rectangle } from '../rectangle';
-import type { IRange } from '../../sheets/typedef';
 
 function rangesToMatrix(ranges: IRange[]) {
     // return JSON.stringify(ranges);

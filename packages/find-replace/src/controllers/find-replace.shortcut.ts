@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
-import { type IShortcutItem, KeyCode, MetaKeys } from '@univerjs/ui';
+import type { IContextService } from '@univerjs/core';
+import type { IShortcutItem } from '@univerjs/ui';
 
-import { EDITOR_ACTIVATED, FOCUSING_SHEET, type IContextService } from '@univerjs/core';
+import { EDITOR_ACTIVATED, FOCUSING_SHEET } from '@univerjs/core';
+import { KeyCode, MetaKeys } from '@univerjs/ui';
 import {
+    FocusSelectionOperation,
     GoToNextMatchOperation,
     GoToPreviousMatchOperation,
     OpenFindDialogOperation,
@@ -98,5 +101,16 @@ export const GoToPreviousFindMatchShortcutItem: IShortcutItem = {
     priority: 1000,
     preconditions(contextService) {
         return whenFindReplaceInputFocused(contextService) && whenFindReplaceDialogFocused(contextService);
+    },
+};
+
+export const FocusSelectionShortcutItem: IShortcutItem = {
+    id: FocusSelectionOperation.id,
+    description: 'find-replace.shortcut.focus-selection',
+    binding: KeyCode.ESC,
+    group: FIND_REPLACE_SHORTCUT_GROUP,
+    priority: 1000,
+    preconditions(contextService) {
+        return whenFindReplaceDialogFocused(contextService);
     },
 };

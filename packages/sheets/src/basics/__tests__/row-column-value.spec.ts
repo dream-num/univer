@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { BooleanNumber, type IColumnData, type IRowData } from '@univerjs/core';
+import type { IColumnData, IRowData } from '@univerjs/core';
+import { BooleanNumber } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { getOldColumnData, getOldRowData } from '../row-column-value';
 

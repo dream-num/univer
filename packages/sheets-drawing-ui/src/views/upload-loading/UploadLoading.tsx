@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import { LocaleService, useDependency } from '@univerjs/core';
-import React, { useEffect } from 'react';
+import { LocaleService } from '@univerjs/core';
 import { IImageIoService } from '@univerjs/drawing';
+import { useDependency } from '@univerjs/ui';
+import React, { useEffect } from 'react';
 
 import styles from './index.module.less';
 
@@ -39,7 +40,7 @@ export const UploadLoading = () => {
     return (
         <div style={{ display: remain > 0 ? 'block' : 'none' }} className={styles.uploadLoading}>
             <div className={styles.uploadLoadingBody}>
-                <div className={styles.uploadLoadingBodyAnimation}></div>
+                <div className={styles.uploadLoadingBodyAnimation} />
                 <div className={styles.uploadLoadingBodyText}>{`${localeService.t('uploadLoading.loading')}: ${remain}` }</div>
             </div>
         </div>

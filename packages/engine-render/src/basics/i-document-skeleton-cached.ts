@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import type {
     IDocumentRenderConfig,
     INestingLevel,
     IParagraph,
+    IParagraphBorder,
     IParagraphProperties,
     ITable,
     ITableRow,
@@ -168,7 +169,6 @@ export interface IDocumentSkeletonLine {
     // line坐标系相对于column
     divides: IDocumentSkeletonDivide[]; // divides 受到对象影响，把行切分为N部分
     divideLen: number; // divideLen 被对象分割为多少块
-
     lineHeight: number; // 行总体高度 lineHeight =max(glyph.fontBoundingBoxAscent + glyph.fontBoundingBoxDescent, glyph2.....) + space
     contentHeight: number; // contentHeight 行内容高度，contentHeight,=max(glyph.fontBoundingBoxAscent + glyph.fontBoundingBoxDescent, glyph2.....)
     top: number; // top paragraph(spaceAbove, spaceBelow, lineSpacing*PreLineHeight)
@@ -179,17 +179,16 @@ export interface IDocumentSkeletonLine {
     marginTop: number; // marginTop 针对段落的spaceAbove
     marginBottom: number; // marginBottom 针对段落的spaceBlow
     spaceBelowApply: number; // spaceBelowApply 计算后的下间距，只参与计算
-    width?: number; // the actual width of a line
     st: number; // startIndex 文本开始索引
     ed: number; // endIndex 文本结束索引
-
     lineIndex: number; // lineIndex 行号
-    bullet?: IDocumentSkeletonBullet; // 无序和有序列表标题
     paragraphStart: boolean; // Paragraph start 默认 false
-
     isBehindTable: boolean; // 在 DataStream 中，如果段落包含 table，那么段落第一行 isBehindTable 为 true, 并且 tableId 不为空，主要用来计算 st\ed.
     tableId: string; // tableId 如果段落包含 table，那么 tableId 不为空，主要用来计算 st\ed.
 
+    borderBottom?: IParagraphBorder; // borderBottom
+    bullet?: IDocumentSkeletonBullet; // 无序和有序列表标题
+    width?: number; // the actual width of a line
     // dtId: string[]; // drawingTBIds 影响行的元素id集合，会切割divide，影响上下
     // bmt: number; // benchmarkTop， drawing的位置是根据paragraph的位置进行相对定位的，段落跨页后，需要一个校准
     parent?: IDocumentSkeletonColumn;

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import clsx from 'clsx';
-import React from 'react';
+import type { CSSProperties, ReactNode } from 'react';
+import { clsx } from '../../helper/clsx';
 
 import styles from './index.module.less';
 
@@ -24,10 +24,10 @@ type AvatarSize = number | 'middle' | 'small';
 type ImageFit = 'fill' | 'contain' | 'cover' | 'none' | 'scale-down';
 
 export interface IAvatarProps {
-    children?: React.ReactNode;
+    children?: ReactNode;
 
     /** Semantic DOM style */
-    style?: React.CSSProperties;
+    style?: CSSProperties;
 
     /** The title of the image avatar */
     title?: string;

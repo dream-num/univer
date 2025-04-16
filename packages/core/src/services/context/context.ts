@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,4 +54,3 @@ export const FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE = 'FOCUSING_UNIVER_ED
 export const FOCUSING_COMMON_DRAWINGS = 'FOCUSING_COMMON_DRAWINGS';
 
 export const FORMULA_EDITOR_ACTIVATED = 'FORMULA_EDITOR_ACTIVATED';
-

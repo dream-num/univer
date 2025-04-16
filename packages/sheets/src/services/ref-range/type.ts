@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,22 +17,22 @@
 import type { ICommandInfo, IRange } from '@univerjs/core';
 
 import type { IDeleteRangeMoveLeftCommandParams } from '../../commands/commands/delete-range-move-left.command';
-import { DeleteRangeMoveLeftCommandId } from '../../commands/commands/delete-range-move-left.command';
 import type { IDeleteRangeMoveUpCommandParams } from '../../commands/commands/delete-range-move-up.command';
-import { DeleteRangeMoveUpCommandId } from '../../commands/commands/delete-range-move-up.command';
 import type { InsertRangeMoveDownCommandParams } from '../../commands/commands/insert-range-move-down.command';
-import { InsertRangeMoveDownCommandId } from '../../commands/commands/insert-range-move-down.command';
 import type { InsertRangeMoveRightCommandParams } from '../../commands/commands/insert-range-move-right.command';
-import { InsertRangeMoveRightCommandId } from '../../commands/commands/insert-range-move-right.command';
 import type { IInsertColCommandParams, IInsertRowCommandParams } from '../../commands/commands/insert-row-col.command';
-import { InsertColCommandId, InsertRowCommandId } from '../../commands/commands/insert-row-col.command';
 import type { IMoveRangeCommandParams } from '../../commands/commands/move-range.command';
-import { MoveRangeCommandId } from '../../commands/commands/move-range.command';
 import type { IMoveColsCommandParams, IMoveRowsCommandParams } from '../../commands/commands/move-rows-cols.command';
-import { MoveColsCommandId, MoveRowsCommandId } from '../../commands/commands/move-rows-cols.command';
 import type { IRemoveRowColCommandParams } from '../../commands/commands/remove-row-col.command';
-import { RemoveColCommandId, RemoveRowCommandId } from '../../commands/commands/remove-row-col.command';
 import type { IReorderRangeCommandParams } from '../../commands/commands/reorder-range.command';
+import { DeleteRangeMoveLeftCommandId } from '../../commands/commands/delete-range-move-left.command';
+import { DeleteRangeMoveUpCommandId } from '../../commands/commands/delete-range-move-up.command';
+import { InsertRangeMoveDownCommandId } from '../../commands/commands/insert-range-move-down.command';
+import { InsertRangeMoveRightCommandId } from '../../commands/commands/insert-range-move-right.command';
+import { InsertColCommandId, InsertRowCommandId } from '../../commands/commands/insert-row-col.command';
+import { MoveRangeCommandId } from '../../commands/commands/move-range.command';
+import { MoveColsCommandId, MoveRowsCommandId } from '../../commands/commands/move-rows-cols.command';
+import { RemoveColCommandId, RemoveRowCommandId } from '../../commands/commands/remove-row-col.command';
 import { ReorderRangeCommandId } from '../../commands/commands/reorder-range.command';
 
 export type IMoveRowsCommand = ICommandInfo<IMoveRowsCommandParams> & { id: typeof MoveRowsCommandId };

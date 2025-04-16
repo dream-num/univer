@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-import { UniverInstanceType } from '@univerjs/core';
 import type { IAccessor } from '@univerjs/core';
-
+import type { IMenuButtonItem } from '../../services/menu/menu';
+import { UniverInstanceType } from '@univerjs/core';
 import { ToggleShortcutPanelOperation } from '../../commands/operations/toggle-shortcut-panel.operation';
 import { getMenuHiddenObservable } from '../../common/menu-hidden-observable';
-import type { IMenuButtonItem } from '../../services/menu/menu';
 import { MenuItemType } from '../../services/menu/menu';
 
 export function ShortcutPanelMenuItemFactory(accessor: IAccessor): IMenuButtonItem {

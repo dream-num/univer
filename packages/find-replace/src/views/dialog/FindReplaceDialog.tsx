@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,15 @@
 
 import type { IDisposable, Nullable } from '@univerjs/core';
 import type { ForwardedRef } from 'react';
-import { ICommandService, IContextService, LocaleService, useDependency } from '@univerjs/core';
+import { ICommandService, IContextService, LocaleService } from '@univerjs/core';
 import { Button, Checkbox, FormDualColumnLayout, FormLayout, Input, MessageType, Select } from '@univerjs/design';
-import { ILayoutService, IMessageService, useObservable } from '@univerjs/ui';
-import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef } from 'react';
+import { ILayoutService, IMessageService, useDependency, useObservable } from '@univerjs/ui';
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef } from 'react';
 import { fromEvent } from 'rxjs';
-
 import { ReplaceAllMatchesCommand, ReplaceCurrentMatchCommand } from '../../commands/commands/replace.command';
 import { OpenReplaceDialogOperation } from '../../commands/operations/find-replace.operation';
 import { FIND_REPLACE_DIALOG_FOCUS, FIND_REPLACE_INPUT_FOCUS } from '../../services/context-keys';
 import { FindBy, FindDirection, FindScope, IFindReplaceService } from '../../services/find-replace.service';
-import styles from './FindReplaceDialog.module.less';
-
 import { SearchInput } from './SearchInput';
 
 interface ISubFormRef {
@@ -83,10 +80,16 @@ export const FindDialog = forwardRef(function FindDialogImpl(_props, ref) {
                 findString={findString}
                 onChange={onFindStringChange}
             />
-            <div className={styles.findReplaceExpandContainer}>
-                <Button type="text" size="small" onClick={revealReplace}>
+            <div className="univer-mt-4 univer-text-center">
+                <a
+                    className={`
+                      univer-cursor-pointer univer-text-sm univer-text-primary-500 univer-transition-colors
+                      hover:univer-text-primary-500/80
+                    `}
+                    onClick={revealReplace}
+                >
                     {localeService.t('find-replace.dialog.advanced-finding')}
-                </Button>
+                </a>
             </div>
         </>
     );
@@ -197,10 +200,10 @@ export const ReplaceDialog = forwardRef(function ReplaceDIalogImpl(_props, ref) 
             <FormDualColumnLayout>
                 <>
                     <FormLayout label={localeService.t('find-replace.dialog.find-scope.title')}>
-                        <Select value={findScope} options={findScopeOptions} onChange={onChangeFindScope}></Select>
+                        <Select value={findScope} options={findScopeOptions} onChange={onChangeFindScope} />
                     </FormLayout>
                     <FormLayout label={localeService.t('find-replace.dialog.find-by.title')}>
-                        <Select value={findBy} options={findByOptions} onChange={onChangeFindBy}></Select>
+                        <Select value={findBy} options={findByOptions} onChange={onChangeFindBy} />
                     </FormLayout>
                 </>
             </FormDualColumnLayout>
@@ -228,9 +231,9 @@ export const ReplaceDialog = forwardRef(function ReplaceDIalogImpl(_props, ref) 
                     </FormLayout>
                 </>
             </FormDualColumnLayout>
-            <div className={styles.findReplaceButtonsGroup}>
+            <div className="univer-mt-6 univer-flex univer-justify-between">
                 <Button type="primary" onClick={onClickFindButton} disabled={findDisabled}>{localeService.t('find-replace.dialog.find')}</Button>
-                <span className={styles.findReplaceButtonsGroupRight}>
+                <span className="univer-inline-flex univer-gap-2">
                     <Button disabled={replaceDisabled} onClick={onClickReplaceButton}>{localeService.t('find-replace.dialog.replace')}</Button>
                     <Button disabled={replaceAllDisabled} onClick={onClickReplaceAllButton}>{localeService.t('find-replace.dialog.replace-all')}</Button>
                 </span>
@@ -259,10 +262,12 @@ export function FindReplaceDialog() {
     const focusRef = useRef<ISubFormRef>(null);
     const setDialogContainerFocus = useCallback(
         (focused: boolean) => contextService.setContextValue(FIND_REPLACE_DIALOG_FOCUS, focused),
-        [contextService]);
+        [contextService]
+    );
     const setDialogInputFocus = useCallback(
         (focused: boolean) => contextService.setContextValue(FIND_REPLACE_INPUT_FOCUS, focused),
-        [contextService]);
+        [contextService]
+    );
 
     useEffect(() => {
         const focusSubscription = fromEvent(document, 'focusin').subscribe((event) => {
@@ -292,7 +297,7 @@ export function FindReplaceDialog() {
     }, [setDialogContainerFocus, setDialogInputFocus]);
 
     return (
-        <div className={styles.findReplaceDialogContainer} ref={dialogContainerRef}>
+        <div ref={dialogContainerRef}>
             {!state.replaceRevealed ? <FindDialog ref={focusRef} /> : <ReplaceDialog ref={focusRef} />}
         </div>
     );
@@ -305,7 +310,6 @@ function useFindScopeOptions(localeService: LocaleService): Array<{ label: strin
             { label: localeService.t('find-replace.dialog.find-scope.current-sheet'), value: FindScope.SUBUNIT },
             { label: localeService.t('find-replace.dialog.find-scope.workbook'), value: FindScope.UNIT },
         ];
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [locale]);
 
     return options;
@@ -318,7 +322,6 @@ function useFindDirectionOptions(localeService: LocaleService): Array<{ label: s
             { label: localeService.t('find-replace.dialog.find-direction.row'), value: FindDirection.ROW },
             { label: localeService.t('find-replace.dialog.find-direction.column'), value: FindDirection.COLUMN },
         ];
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [locale]);
 
     return options;
@@ -331,7 +334,6 @@ function useFindByOptions(localeService: LocaleService): Array<{ label: string; 
             { label: localeService.t('find-replace.dialog.find-by.value'), value: FindBy.VALUE },
             { label: localeService.t('find-replace.dialog.find-by.formula'), value: FindBy.FORMULA },
         ];
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [locale]);
 
     return options;

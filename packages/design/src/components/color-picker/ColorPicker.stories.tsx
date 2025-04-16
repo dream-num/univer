@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ export default meta;
 
 export const Playground = {
     render() {
-        const [value, setValue] = useState('rgba(100,150,200,0.8)');
+        const [value, setValue] = useState('#FF0000');
         const [format] = useState<'hex' | 'rgb' | 'hsl'>('rgb');
 
         return (

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,10 @@
  */
 
 import type { IAccessor, Workbook } from '@univerjs/core';
+import type { IMenuButtonItem } from '@univerjs/ui';
 import { BooleanNumber, DisposableCollection, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { SetWorksheetActiveOperation, ToggleGridlinesCommand, ToggleGridlinesMutation, WorkbookEditablePermission, WorksheetEditPermission } from '@univerjs/sheets';
-import { type IMenuButtonItem, MenuItemType } from '@univerjs/ui';
+import { MenuItemType } from '@univerjs/ui';
 import { Observable } from 'rxjs';
 import { getCurrentRangeDisable$ } from './menu-util';
 
@@ -53,4 +54,3 @@ export function ToggleGridlinesMenuFactory(accessor: IAccessor): IMenuButtonItem
         disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission] }),
     };
 }
-

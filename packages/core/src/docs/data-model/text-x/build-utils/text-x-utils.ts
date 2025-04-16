@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
+import type { Nullable } from '../../../../shared';
 import type { ITextRange, ITextRangeParam } from '../../../../sheets/typedef';
 import type { CustomRangeType, IDocumentBody, ITextRun } from '../../../../types/interfaces';
 import type { DocumentDataModel } from '../../document-data-model';
 import type { TextXAction } from '../action-types';
 import type { TextXSelection } from '../text-x';
-import { type Nullable, Tools, UpdateDocsAttributeType } from '../../../../shared';
+import { Tools, UpdateDocsAttributeType } from '../../../../shared';
 import { textDiff } from '../../../../shared/text-diff';
 import { TextXActionType } from '../action-types';
 import { TextX } from '../text-x';

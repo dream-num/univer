@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -695,10 +695,15 @@ export class DrawingUpdateController extends Disposable {
                     }
 
                     const {
-                        left = 0, top = 0, width = 0, height = 0,
+                        left = 0,
+                        top = 0,
+                        width = 0,
+                        height = 0,
                         angle = 0,
-                        flipX = false, flipY = false,
-                        skewX = 0, skewY = 0,
+                        flipX = false,
+                        flipY = false,
+                        skewX = 0,
+                        skewY = 0,
                     } = transform;
 
                     drawingShape.transformByState({ left, top, width, height, angle, flipX, flipY, skewX, skewY });

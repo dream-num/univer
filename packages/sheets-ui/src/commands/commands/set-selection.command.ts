@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -134,6 +134,7 @@ export const MoveSelectionCommand: ICommand<IMoveSelectionCommandParams> = {
             selections,
             type: SelectionMoveType.MOVE_END,
             extra,
+            reveal: true,
         } as ISetSelectionsOperationParams);
         return rs;
     },
@@ -304,6 +305,7 @@ export const MoveSelectionEnterAndTabCommand: ICommand<IMoveSelectionEnterAndTab
             subUnitId: sheetId,
             type: SelectionMoveType.MOVE_END,
             selections,
+            reveal: true,
             extra: params.extra,
         });
         const renderManagerService = accessor.get(IRenderManagerService);
@@ -361,7 +363,7 @@ export const ExpandSelectionCommand: ICommand<IExpandSelectionCommandParams> = {
         return accessor.get(ICommandService).syncExecuteCommand(SetSelectionsOperation.id, {
             unitId,
             subUnitId,
-            type: SelectionMoveType.ONLY_SET,
+            type: SelectionMoveType.MOVE_END,
             selections: [
                 {
                     range: destRange,
@@ -369,6 +371,7 @@ export const ExpandSelectionCommand: ICommand<IExpandSelectionCommandParams> = {
                 },
             ],
             extra,
+            reveal: true,
         });
     },
 };
@@ -445,7 +448,7 @@ export const SelectAllCommand: ICommand<ISelectAllCommandParams> = {
         return accessor.get(ICommandService).executeCommand(SetSelectionsOperation.id, {
             unitId,
             subUnitId,
-
+            reveal: true,
             selections: [
                 {
                     range: destRange,

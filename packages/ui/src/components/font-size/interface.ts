@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 import type { Observable } from 'rxjs';
 import type { ICustomComponentProps } from '../../services/menu/menu';
+import { NamedStyleType } from '@univerjs/core';
 
 export interface IFontSizeProps extends ICustomComponentProps<string> {
     value: string;
@@ -90,5 +91,40 @@ export const FONT_SIZE_LIST = [
     {
         label: '72',
         value: 72,
+    },
+];
+
+export const HEADING_LIST = [
+    {
+        label: 'toolbar.heading.normal',
+        value: NamedStyleType.NORMAL_TEXT,
+    },
+    {
+        label: 'toolbar.heading.title',
+        value: NamedStyleType.TITLE,
+    },
+    {
+        label: 'toolbar.heading.subTitle',
+        value: NamedStyleType.SUBTITLE,
+    },
+    {
+        label: 'toolbar.heading.1',
+        value: NamedStyleType.HEADING_1,
+    },
+    {
+        label: 'toolbar.heading.2',
+        value: NamedStyleType.HEADING_2,
+    },
+    {
+        label: 'toolbar.heading.3',
+        value: NamedStyleType.HEADING_3,
+    },
+    {
+        label: 'toolbar.heading.4',
+        value: NamedStyleType.HEADING_4,
+    },
+    {
+        label: 'toolbar.heading.5',
+        value: NamedStyleType.HEADING_5,
     },
 ];

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+/* eslint-disable antfu/consistent-list-newline */
 export default new Uint8Array([
     0, 8, 14, 0, 0, 0, 0, 0, 176, 232, 0, 0, 1, 181, 15, 74, 240, 237, 157, 11, 140, 93, 69, 25, 199, 231, 178, 187,
     183, 123, 31, 187, 237, 46, 108, 193, 194, 22, 104, 41, 200, 242, 48, 128, 104, 16, 129, 152, 162, 64, 42, 10, 193,

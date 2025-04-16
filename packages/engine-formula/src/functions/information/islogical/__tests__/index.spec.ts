@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,11 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { FUNCTION_NAMES_INFORMATION } from '../../function-names';
-import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorType } from '../../../../basics/error-type';
-import { Islogical } from '../index';
+import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { BooleanValueObject } from '../../../../engine/value-object/primitive-object';
+import { FUNCTION_NAMES_INFORMATION } from '../../function-names';
+import { Islogical } from '../index';
 
 describe('Test islogical function', () => {
     const testFunction = new Islogical(FUNCTION_NAMES_INFORMATION.ISLOGICAL);

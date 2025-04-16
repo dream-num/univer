@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
 import { normalINV } from '../../../basics/statistical';
 import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
-import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
+import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
-import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 
 export class NormSInv extends BaseFunction {
     override minParams = 1;

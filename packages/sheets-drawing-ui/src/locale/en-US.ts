@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,6 +57,11 @@ const locale: typeof zhCN = {
             'drawing-move-right': 'Move Drawing right',
             'drawing-delete': 'Delete Drawing',
         },
+    },
+    'cell-image': {
+        pasteTitle: 'Paste as cell image',
+        pasteContent: 'Pasting a cell image will overwrite the existing content of the cell, continue pasting',
+        pasteError: 'Sheet cell image copy paste is not supported in this unit',
     },
 };
 

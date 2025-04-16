@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+import type { Nullable, Workbook } from '@univerjs/core';
+import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, SpreadsheetColumnHeader, SpreadsheetHeader } from '@univerjs/engine-render';
+import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
 import {
     Disposable,
     ICommandService,
@@ -24,9 +27,6 @@ import { CURSOR_TYPE, Rect } from '@univerjs/engine-render';
 import { SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { ContextMenuPosition, IContextMenuService } from '@univerjs/ui';
 import { Subscription } from 'rxjs';
-import type { Nullable, Workbook } from '@univerjs/core';
-import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, SpreadsheetColumnHeader, SpreadsheetHeader } from '@univerjs/engine-render';
-import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
 
 import { SHEET_COMPONENT_HEADER_LAYER_INDEX, SHEET_VIEW_KEY } from '../../common/keys';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';

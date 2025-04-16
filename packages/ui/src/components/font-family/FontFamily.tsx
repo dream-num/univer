@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { LocaleService, useDependency } from '@univerjs/core';
-import React, { useMemo } from 'react';
-
-import styles from './index.module.less';
 import type { IFontFamilyProps } from './interface';
+import { LocaleService } from '@univerjs/core';
+import { useMemo } from 'react';
+
+import { useDependency } from '../../utils/di';
 
 export const FontFamily = (props: IFontFamilyProps) => {
     const { value } = props;
@@ -35,11 +35,13 @@ export const FontFamily = (props: IFontFamilyProps) => {
         }
 
         return fontFamily;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [value]);
 
     return (
-        <div className={styles.uiPluginSheetsFontFamily} style={{ fontFamily: value as string }}>
+        <div
+            className="univer-w-32 univer-overflow-hidden univer-truncate univer-text-[13px]"
+            style={{ fontFamily: value as string }}
+        >
             {viewValue}
         </div>
     );

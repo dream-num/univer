@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,11 @@
  */
 
 import type { IDisposable } from '@univerjs/core';
-import { debounce, FUniver } from '@univerjs/core';
+import type { IRegisterFunctionParams } from '@univerjs/sheets-formula';
+import { debounce } from '@univerjs/core';
+import { FUniver } from '@univerjs/core/facade';
 import { SetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
-import { type IRegisterFunctionParams, IRegisterFunctionService, RegisterFunctionService } from '@univerjs/sheets-formula';
+import { IRegisterFunctionService, RegisterFunctionService } from '@univerjs/sheets-formula';
 
 /**
  * @ignore
@@ -78,7 +80,7 @@ export class FUniverSheetsFormulaMixin extends FUniver implements IFUniverSheets
 }
 
 FUniver.extend(FUniverSheetsFormulaMixin);
-declare module '@univerjs/core' {
+declare module '@univerjs/core/facade' {
     // eslint-disable-next-line ts/naming-convention
     interface FUniver extends IFUniverSheetsFormulaMixin {}
 }

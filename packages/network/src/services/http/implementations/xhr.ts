@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,12 @@
 /* eslint-disable max-lines-per-function */
 /* eslint-disable ts/no-explicit-any */
 
+import type { Nullable } from '@univerjs/core';
 import type { Observer } from 'rxjs';
 import type { HTTPRequest } from '../request';
 import type { HTTPEvent } from '../response';
 import type { IHTTPImplementation } from './implementation';
-import { ILogService, type Nullable } from '@univerjs/core';
+import { ILogService } from '@univerjs/core';
 import { Observable } from 'rxjs';
 import { HTTPHeaders } from '../headers';
 import { ErrorStatusCodeLowerBound, HTTPStatusCode, SuccessStatusCodeLowerBound } from '../http';
@@ -139,7 +140,7 @@ export class XHRHTTPImplementation implements IHTTPImplementation {
             const body = request.getBody();
             xhr.send(body);
 
-            this._logService.debug(`[XHRHTTPImplementation]: sending request to url ${urlWithParams} with params ${fetchParams}`);
+            this._logService.debug('[XHRHTTPImplementation]', `sending request to url ${urlWithParams} with params ${fetchParams}`);
 
             // Abort the request if the subscription is disposed before the request completes.
             return () => {

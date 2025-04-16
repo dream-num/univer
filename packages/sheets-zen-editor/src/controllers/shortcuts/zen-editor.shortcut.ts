@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,9 @@
  */
 
 import type { IContextService } from '@univerjs/core';
+import type { IShortcutItem } from '@univerjs/ui';
 import { EDITOR_ACTIVATED, FOCUSING_DOC, FOCUSING_EDITOR_STANDALONE, FOCUSING_UNIVER_EDITOR } from '@univerjs/core';
-import { type IShortcutItem, KeyCode, MetaKeys } from '@univerjs/ui';
+import { KeyCode, MetaKeys } from '@univerjs/ui';
 
 import { CancelZenEditCommand, ConfirmZenEditCommand } from '../../commands/commands/zen-editor.command';
 

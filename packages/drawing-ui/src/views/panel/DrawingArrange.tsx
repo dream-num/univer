@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,12 @@
  */
 
 import type { IDrawingParam } from '@univerjs/core';
-import { ArrangeTypeEnum, LocaleService, useDependency } from '@univerjs/core';
-import { Button } from '@univerjs/design';
+import { ArrangeTypeEnum, LocaleService } from '@univerjs/core';
+import { Button, clsx } from '@univerjs/design';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { BottomSingle, MoveDownSingle, MoveUpSingle, TopmostSingle } from '@univerjs/icons';
-import clsx from 'clsx';
-import React, { useEffect, useState } from 'react';
+import { useDependency } from '@univerjs/ui';
+import { useEffect, useState } from 'react';
 import styles from './index.module.less';
 
 export interface IDrawingArrangeProps {
@@ -48,7 +48,6 @@ export const DrawingArrange = (props: IDrawingArrangeProps) => {
         return () => {
             focusDispose.unsubscribe();
         };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const onArrangeBtnClick = (arrangeType: ArrangeTypeEnum) => {
@@ -110,7 +109,6 @@ export const DrawingArrange = (props: IDrawingArrangeProps) => {
                             <TopmostSingle />
                             {localeService.t('image-panel.arrange.front')}
                         </span>
-
                     </Button>
                 </div>
                 <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSpan2)}>
@@ -119,11 +117,9 @@ export const DrawingArrange = (props: IDrawingArrangeProps) => {
                             <BottomSingle />
                             {localeService.t('image-panel.arrange.back')}
                         </span>
-
                     </Button>
                 </div>
             </div>
         </div>
-
     );
 };

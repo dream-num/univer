@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,9 @@
 
 import type { Dependency } from '@univerjs/core';
 import { Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
-import { DumbUniFormulaService, IUniFormulaService } from './services/uni-formula.service';
 import { UNI_FORMULA_PLUGIN_NAME } from './const';
 import { UniFormulaController } from './controller/uni-formula.controller';
+import { DumbUniFormulaService, IUniFormulaService } from './services/uni-formula.service';
 
 export class UniverDocUniFormulaPlugin extends Plugin {
     static override pluginName: string = UNI_FORMULA_PLUGIN_NAME;

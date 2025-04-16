@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,11 @@
  */
 
 import type { Direction, IDisposable } from '@univerjs/core';
+import type { IFunctionInfo, ISequenceNode } from '@univerjs/engine-formula';
 import type { ISearchItem } from '@univerjs/sheets-formula';
 import type { Observable } from 'rxjs';
 import { createIdentifier, IContextService } from '@univerjs/core';
-import { type IFunctionInfo, type ISequenceNode, sequenceNodeType } from '@univerjs/engine-formula';
+import { sequenceNodeType } from '@univerjs/engine-formula';
 import { Subject } from 'rxjs';
 
 /** If the formula prompt is visible. */

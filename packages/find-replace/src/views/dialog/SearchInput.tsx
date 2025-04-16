@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,11 @@
  */
 
 import type { LocaleService } from '@univerjs/core';
-import type { IInputWithSlotProps } from '@univerjs/design';
-import { InputWithSlot, Pager } from '@univerjs/design';
-import React from 'react';
+import type { IInputProps } from '@univerjs/design';
 import type { IFindReplaceService } from '../../services/find-replace.service';
+import { Input, Pager } from '@univerjs/design';
 
-export interface ISearchInputProps extends Pick<IInputWithSlotProps, 'onFocus' | 'onBlur' | 'className' | 'onChange'> {
+export interface ISearchInputProps extends Pick<IInputProps, 'onFocus' | 'onBlur' | 'className' | 'onChange'> {
     findCompleted: boolean;
     localeService: LocaleService;
     findReplaceService: IFindReplaceService;
@@ -39,31 +38,32 @@ export function SearchInput(props: ISearchInputProps) {
             : undefined;
 
     return (
-        <InputWithSlot
-            autoFocus={true}
-            placeholder={localeService.t('find-replace.dialog.find-placeholder')}
-            slot={(
-                <Pager
-                    loop={true}
-                    text={text}
-                    value={matchesPosition}
-                    total={matchesCount}
-                    onChange={(newIndex) => {
-                        if (matchesPosition === matchesCount && newIndex === 1) {
-                            findReplaceService.moveToNextMatch();
-                        } else if (matchesPosition === 1 && newIndex === matchesCount) {
-                            findReplaceService.moveToPreviousMatch();
-                        } else if (newIndex < matchesPosition) {
-                            findReplaceService.moveToPreviousMatch();
-                        } else {
-                            findReplaceService.moveToNextMatch();
-                        }
-                    }}
-                />
-            )}
-            value={findString}
-            onChange={(value) => onChange?.(value)}
-            {...rest}
-        />
+        <div className="univer-relative univer-flex univer-items-center univer-gap-2" onDrag={(e) => e.stopPropagation()}>
+            <Input
+                autoFocus
+                placeholder={localeService.t('find-replace.dialog.find-placeholder')}
+                value={findString}
+                onChange={(value) => onChange?.(value)}
+                {...rest}
+            />
+
+            <Pager
+                loop
+                text={text}
+                value={matchesPosition}
+                total={matchesCount}
+                onChange={(newIndex) => {
+                    if (matchesPosition === matchesCount && newIndex === 1) {
+                        findReplaceService.moveToNextMatch();
+                    } else if (matchesPosition === 1 && newIndex === matchesCount) {
+                        findReplaceService.moveToPreviousMatch();
+                    } else if (newIndex < matchesPosition) {
+                        findReplaceService.moveToPreviousMatch();
+                    } else {
+                        findReplaceService.moveToNextMatch();
+                    }
+                }}
+            />
+        </div>
     );
 }

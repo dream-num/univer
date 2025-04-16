@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,9 @@
 
 import type { IDisposable, Nullable } from '@univerjs/core';
 import type { IFunctionNames } from '@univerjs/engine-formula';
-import { FUNCTION_NAMES_MATH, FUNCTION_NAMES_STATISTICAL } from '@univerjs/engine-formula';
-import { createIdentifier } from '@univerjs/core';
 import type { Observable } from 'rxjs';
+import { createIdentifier } from '@univerjs/core';
+import { FUNCTION_NAMES_MATH, FUNCTION_NAMES_STATISTICAL } from '@univerjs/engine-formula';
 import { BehaviorSubject } from 'rxjs';
 
 export interface IStatusBarService {

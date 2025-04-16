@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,10 @@ import type { ICommandInfo } from '@univerjs/core';
 import type { IUniverUIConfig } from '@univerjs/ui';
 import type { IBaseSheetBarProps } from './SheetBarItem';
 import type { IScrollState } from './utils/slide-tab-bar';
-import { ICommandService, IConfigService, IPermissionService, LocaleService, nameCharacterCheck, Quantity, useDependency } from '@univerjs/core';
+import { ICommandService, IConfigService, IPermissionService, LocaleService, nameCharacterCheck, Quantity } from '@univerjs/core';
 import { DropdownLegacy } from '@univerjs/design';
-
 import { LockSingle } from '@univerjs/icons';
+
 import {
     InsertSheetMutation,
     RangeProtectionRuleModel,
@@ -37,7 +37,7 @@ import {
     WorkbookRenameSheetPermission,
     WorksheetProtectionRuleModel,
 } from '@univerjs/sheets';
-import { ContextMenuPosition, IConfirmService, UI_PLUGIN_CONFIG_KEY, UIMenu, useObservable } from '@univerjs/ui';
+import { ContextMenuPosition, IConfirmService, UI_PLUGIN_CONFIG_KEY, UIMenu, useDependency, useObservable } from '@univerjs/ui';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { merge } from 'rxjs';
 import { useActiveWorkbook } from '../../../components/hook';

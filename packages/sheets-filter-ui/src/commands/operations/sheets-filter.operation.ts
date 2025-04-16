@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,11 @@
  */
 
 import type { IOperation } from '@univerjs/core';
+import type { FilterBy } from '../../services/sheets-filter-panel.service';
 import { CommandType, ICommandService, IContextService, Quantity } from '@univerjs/core';
 import { SheetsFilterService } from '@univerjs/sheets-filter';
-import { ILayoutService } from '@univerjs/ui';
 import { SetCellEditVisibleOperation } from '@univerjs/sheets-ui';
-import type { FilterBy } from '../../services/sheets-filter-panel.service';
+import { ILayoutService } from '@univerjs/ui';
 import { SheetsFilterPanelService } from '../../services/sheets-filter-panel.service';
 
 export const FILTER_PANEL_OPENED_KEY = 'FILTER_PANEL_OPENED';

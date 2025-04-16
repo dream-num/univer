@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,9 +33,9 @@ export interface IFWorksheetFilter {
      * const workbook = univerAPI.getActiveWorkbook();
      * const worksheet = workbook.getActiveSheet();
      * const filter = worksheet.getFilter();
-     * ````
+     * console.log(filter, filter?.getRange().getA1Notation());
+     * ```
      */
-
     getFilter(): FFilter | null;
 }
 

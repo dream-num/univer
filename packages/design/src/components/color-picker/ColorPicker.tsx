@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import canUseDom from 'rc-util/lib/Dom/canUseDom';
 import React, { useCallback, useEffect, useState } from 'react';
+import { isBrowser } from '../../helper/is-browser';
 import { AlphaSlider } from './AlphaSlider';
 import { hexToHsv, hsvToHex, hsvToRgb, rgbToHex } from './color-conversion';
 import { ColorInput } from './ColorInput';
@@ -37,7 +37,7 @@ export interface IColorPickerProps {
 }
 
 export function ColorPicker({ format = 'hex', value = '#000000', showAlpha = false, onChange }: IColorPickerProps) {
-    if (!canUseDom) return null;
+    if (!isBrowser) return null;
 
     const [hsv, setHsv] = useState<[number, number, number]>([0, 100, 100]);
     const [alpha, setAlpha] = useState(1);

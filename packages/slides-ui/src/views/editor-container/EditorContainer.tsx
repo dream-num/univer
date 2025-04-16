@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,11 @@
  */
 
 import type { IDocumentData } from '@univerjs/core';
-import { DEFAULT_EMPTY_DOCUMENT_VALUE, DocumentFlavor, IContextService, useDependency } from '@univerjs/core';
+import { DEFAULT_EMPTY_DOCUMENT_VALUE, DocumentFlavor, IContextService } from '@univerjs/core';
 import { IEditorService } from '@univerjs/docs-ui';
-
 import { FIX_ONE_PIXEL_BLUR_OFFSET } from '@univerjs/engine-render';
-import { DISABLE_AUTO_FOCUS_KEY, useObservable } from '@univerjs/ui';
+
+import { DISABLE_AUTO_FOCUS_KEY, useDependency, useObservable } from '@univerjs/ui';
 import React, { useEffect, useState } from 'react';
 import { SLIDE_EDITOR_ID } from '../../const';
 // import { ICellEditorManagerService } from '../../services/editor/cell-editor-manager.service';
@@ -111,14 +111,12 @@ export const SlideEditorContainer: React.FC<ICellIEditorProps> = () => {
                 slideEditorManagerService.setRect({ left, top, width, height });
             }
         });
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []); // Empty dependency array means this effect runs once on mount and clean up on unmount
 
     useEffect(() => {
         if (!disableAutoFocus) {
             slideEditorManagerService.setFocus(true);
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [disableAutoFocus, state]);
 
     return (

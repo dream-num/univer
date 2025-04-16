@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -133,12 +133,10 @@ export class SheetsHyperLinkRefRangeController extends Disposable {
             startRow: link.row,
             endRow: link.row,
         };
-        this._watchDisposableMap.set(id,
-            this._refRangeService.watchRange(unitId, subUnitId, oldRange, (before, after) => {
-                const { redos } = this._handlePositionChange(unitId, subUnitId, link, after, true);
-                sequenceExecuteAsync(redos, this._commandService, { onlyLocal: true });
-            }, true)
-        );
+        this._watchDisposableMap.set(id, this._refRangeService.watchRange(unitId, subUnitId, oldRange, (before, after) => {
+            const { redos } = this._handlePositionChange(unitId, subUnitId, link, after, true);
+            sequenceExecuteAsync(redos, this._commandService, { onlyLocal: true });
+        }, true));
     }
 
     private _unregisterPosition(id: string) {

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,7 @@ import {
     OtherFormulaManagerService,
 } from '../../../services/other-formula-manager.service';
 import { FormulaRuntimeService, IFormulaRuntimeService } from '../../../services/runtime.service';
+import { ISheetRowFilteredService, SheetRowFilteredService } from '../../../services/sheet-row-filtered.service';
 import { ISuperTableService, SuperTableService } from '../../../services/super-table.service';
 import { AstRootNodeFactory } from '../../ast-node/ast-root-node';
 import { FunctionNodeFactory } from '../../ast-node/function-node';
@@ -299,6 +300,7 @@ function registerFormulaDependencies(injector: Injector) {
     injector.add([ISuperTableService, { useClass: SuperTableService }]);
     injector.add([IFeatureCalculationManagerService, { useClass: FeatureCalculationManagerService }]);
     injector.add([IDependencyManagerService, { useClass: DependencyManagerService }]);
+    injector.add([ISheetRowFilteredService, { useClass: SheetRowFilteredService }]);
 
     injector.add([IFormulaDependencyGenerator, { useClass: FormulaDependencyGenerator }]);
     injector.add([Interpreter]);

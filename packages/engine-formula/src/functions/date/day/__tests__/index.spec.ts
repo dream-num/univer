@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,12 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { FUNCTION_NAMES_DATE } from '../../function-names';
-import { Day } from '../index';
-import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
-import { ErrorType } from '../../../../basics/error-type';
+import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { FUNCTION_NAMES_DATE } from '../../function-names';
+import { Day } from '../index';
 
 describe('Test day function', () => {
     const testFunction = new Day(FUNCTION_NAMES_DATE.DAY);
@@ -46,8 +46,7 @@ describe('Test day function', () => {
 
         it('Serial number is array', () => {
             const serialNumber = ArrayValueObject.create({
-                calculateValueList: transformToValueObject([[1, ' ', 1.23, true, false, null],
-                    [0, '100', '2.34', 'test', -3, 1900]]),
+                calculateValueList: transformToValueObject([[1, ' ', 1.23, true, false, null], [0, '100', '2.34', 'test', -3, 1900]]),
                 rowCount: 2,
                 columnCount: 6,
                 unitId: '',

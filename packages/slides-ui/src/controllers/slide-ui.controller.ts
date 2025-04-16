@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { connectInjector, Disposable, ICommandService, Inject, Injector } from '@univerjs/core';
+import { Disposable, ICommandService, Inject, Injector } from '@univerjs/core';
 import { AddImageSingle, GraphSingle, TextSingle } from '@univerjs/icons';
-import { BuiltInUIPart, ComponentManager, IMenuManagerService, IShortcutService, IUIPartsService } from '@univerjs/ui';
+import { BuiltInUIPart, ComponentManager, connectInjector, IMenuManagerService, IShortcutService, IUIPartsService } from '@univerjs/ui';
 import { ActivateSlidePageOperation } from '../commands/operations/activate.operation';
 import { AppendSlideOperation } from '../commands/operations/append-slide.operation';
 import { DeleteSlideElementOperation } from '../commands/operations/delete-element.operation';

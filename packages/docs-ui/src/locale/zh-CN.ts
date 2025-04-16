@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,7 @@ const locale = {
         alignCenter: '居中对齐',
         alignRight: '右对齐',
         alignJustify: '两端对齐',
+        horizontalLine: '水平分割线',
         headerFooter: '页眉页脚',
     },
     table: {
@@ -94,6 +95,12 @@ const locale = {
             multiSpace: '多倍行距',
             fixedValue: '固定值(px)',
         },
+    },
+    rightClick: {
+        bulletList: '无序列表',
+        orderList: '有序列表',
+        checkList: '任务列表',
+        insertBellow: '在下方插入',
     },
 };
 

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-
 import type { Univer } from '../../univer';
+
 import type { Workbook } from '../workbook';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { createCoreTestBed } from './create-core-test-bed';
 
 describe('Test workbook', () => {

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,9 @@
  */
 
 import type { IAccessor, ICommand } from '@univerjs/core';
+import type { ISetWorkbookNameMutationParams } from '../mutations/set-workbook-name.mutation';
 import { CommandType, ICommandService, IUniverInstanceService, sequenceExecute, UniverInstanceType } from '@univerjs/core';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
-import type { ISetWorkbookNameMutationParams } from '../mutations/set-workbook-name.mutation';
 import { SetWorkbookNameMutation } from '../mutations/set-workbook-name.mutation';
 
 export interface ISetWorkbookNameCommandParams {

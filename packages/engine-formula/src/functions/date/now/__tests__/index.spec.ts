@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,9 @@
 
 import { describe, expect, it, vi } from 'vitest';
 
+import { stripErrorMargin } from '../../../../engine/utils/math-kit';
 import { FUNCTION_NAMES_DATE } from '../../function-names';
 import { Now } from '../index';
-import { stripErrorMargin } from '../../../../engine/utils/math-kit';
 
 // mock new Date() use V
 const _Date = Date;

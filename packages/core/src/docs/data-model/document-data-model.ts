@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import { Tools } from '../../shared/tools';
 import { getEmptySnapshot } from './empty-snapshot';
 import { JSONX } from './json-x/json-x';
 import { PRESET_LIST_TYPE } from './preset-list-type';
+import { getPlainText } from './text-x/build-utils/parse';
 import { getBodySlice, SliceBodyType } from './text-x/utils';
 
 export const DEFAULT_DOC = {
@@ -220,6 +221,18 @@ class DocumentDataModelSimple extends UnitModel<IDocumentData, UniverInstanceTyp
             this.snapshot.settings.zoomRatio = 1;
         }
     }
+
+    setDisabled(disabled: boolean) {
+        this.snapshot.disabled = disabled;
+    }
+
+    getDisabled() {
+        return this.snapshot.disabled;
+    }
+
+    getTitle() {
+        return this.snapshot.title;
+    }
 }
 
 export class DocumentDataModel extends DocumentDataModelSimple {
@@ -355,5 +368,9 @@ export class DocumentDataModel extends DocumentDataModelSimple {
         super.updateDocumentId(unitId);
 
         this._unitId = unitId;
+    }
+
+    getPlainText() {
+        return getPlainText(this.getBody()?.dataStream ?? '');
     }
 }

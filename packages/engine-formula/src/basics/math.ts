@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,20 +82,26 @@ export function calculateMdeterm(matrix: number[][]): number {
         return matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0];
     }
 
-    let det = 0;
+    const { rowSwap, smallPivotDetected, luMatrix, permutation } = performLUDecomposition(matrix);
 
-    for (let col = 0; col < n; col++) {
-        det += ((col % 2 === 0 ? 1 : -1) * matrix[0][col] * calculateMdeterm(minor(matrix, 0, col)));
+    if (smallPivotDetected) {
+        return 0; // Matrix is irreversible
     }
 
-    return det;
+    let det = rowSwap ? 1 : -1;
+
+    for (let i = 0; i < permutation.length; i++) {
+        det *= luMatrix[i][i];
+    }
+
+    return det === 0 ? 0 : det; // deal with -0 case
 }
 
 export function calculateMinverse(matrix: number[][]): number[][] | null {
     const det = calculateMdeterm(matrix);
 
     if (det === 0) {
-        return null; // 矩阵不可逆
+        return null; // Matrix is irreversible
     }
 
     if (matrix.length === 1) {
@@ -121,7 +127,8 @@ function adjoint(matrix: number[][]): number[][] {
     for (let i = 0; i < n; i++) {
         for (let j = 0; j < n; j++) {
             const sign = ((i + j) % 2 === 0 ? 1 : -1);
-            adj[j][i] = sign * calculateMdeterm(minor(matrix, i, j));
+            const res = sign * calculateMdeterm(minor(matrix, i, j));
+            adj[j][i] = (res === 0 ? 0 : res); // deal with -0 case
         }
     }
 

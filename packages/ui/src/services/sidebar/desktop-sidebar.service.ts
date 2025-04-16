@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,8 @@
  */
 
 import type { IDisposable } from '@univerjs/core';
-import type { ISidebarMethodOptions } from '../../views/components/sidebar/interface';
+import type { ISidebarMethodOptions } from '../../views/components/sidebar/Sidebar';
 import type { ISidebarService } from './sidebar.service';
-
 import { toDisposable } from '@univerjs/core';
 import { Subject } from 'rxjs';
 
@@ -27,7 +26,7 @@ export class DesktopSidebarService implements ISidebarService {
 
     readonly scrollEvent$ = new Subject<Event>();
 
-    private container?: HTMLElement;
+    private _container?: HTMLElement;
 
     get visible(): boolean {
         return this._sidebarOptions.visible || false;
@@ -64,10 +63,10 @@ export class DesktopSidebarService implements ISidebarService {
     }
 
     getContainer() {
-        return this.container;
+        return this._container;
     }
 
     setContainer(element: HTMLElement) {
-        this.container = element;
+        this._container = element;
     }
 }

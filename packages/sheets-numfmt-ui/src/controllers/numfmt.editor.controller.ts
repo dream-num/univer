@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import {
     toDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
-import { DEFAULT_TEXT_FORMAT } from '@univerjs/engine-numfmt';
+import { isTextFormat } from '@univerjs/engine-numfmt';
 import {
     AFTER_CELL_EDIT,
     BEFORE_CELL_EDIT,
@@ -95,40 +95,38 @@ export class NumfmtEditorController extends Disposable {
 
         this.disposeWithMe(
             toDisposable(
-                this._sheetInterceptorService.writeCellInterceptor.intercept(BEFORE_CELL_EDIT,
-                    {
-                        handler: (value, context, next) => {
-                            const row = context.row;
-                            const col = context.col;
-                            const numfmtCell = this._numfmtService.getValue(
-                                context.unitId,
-                                context.subUnitId,
-                                row,
-                                col
-                            );
-                            if (numfmtCell) {
-                                const type = getPatternType(numfmtCell.pattern);
-                                switch (type) {
-                                    case 'scientific':
-                                    case 'currency':
-                                    case 'grouped':
-                                    case 'number': {
-                                        const cell = context.worksheet.getCellRaw(row, col);
-                                        return next && next(cell);
-                                    }
-                                    case 'percent':
-                                    case 'date':
-                                    case 'time':
-                                    case 'datetime':
-                                    default: {
-                                        return next && next(value);
-                                    }
+                this._sheetInterceptorService.writeCellInterceptor.intercept(BEFORE_CELL_EDIT, {
+                    handler: (value, context, next) => {
+                        const row = context.row;
+                        const col = context.col;
+                        const numfmtCell = this._numfmtService.getValue(
+                            context.unitId,
+                            context.subUnitId,
+                            row,
+                            col
+                        );
+                        if (numfmtCell) {
+                            const type = getPatternType(numfmtCell.pattern);
+                            switch (type) {
+                                case 'scientific':
+                                case 'currency':
+                                case 'grouped':
+                                case 'number': {
+                                    const cell = context.worksheet.getCellRaw(row, col);
+                                    return next && next(cell);
+                                }
+                                case 'percent':
+                                case 'date':
+                                case 'time':
+                                case 'datetime':
+                                default: {
+                                    return next && next(value);
                                 }
                             }
-                            return next(value);
-                        },
-                    }
-                )
+                        }
+                        return next(value);
+                    },
+                })
             )
         );
     }
@@ -142,21 +140,20 @@ export class NumfmtEditorController extends Disposable {
     private _initInterceptorEditorEnd() {
         this.disposeWithMe(
             toDisposable(
-                this._sheetInterceptorService.writeCellInterceptor.intercept(AFTER_CELL_EDIT,
-                    {
+                this._sheetInterceptorService.writeCellInterceptor.intercept(AFTER_CELL_EDIT, {
                         // eslint-disable-next-line complexity
-                        handler: (value, context, next) => {
+                    handler: (value, context, next) => {
                             // clear the effect
-                            this._collectEffectMutation.clean();
-                            const currentNumfmtValue = this._numfmtService.getValue(
-                                context.unitId,
-                                context.subUnitId,
-                                context.row,
-                                context.col
-                            );
-                            const currentNumfmtType = (currentNumfmtValue && getPatternType(currentNumfmtValue.pattern)) ?? '';
-                            const clean = () => {
-                                currentNumfmtValue &&
+                        this._collectEffectMutation.clean();
+                        const currentNumfmtValue = this._numfmtService.getValue(
+                            context.unitId,
+                            context.subUnitId,
+                            context.row,
+                            context.col
+                        );
+                        const currentNumfmtType = (currentNumfmtValue && getPatternType(currentNumfmtValue.pattern)) ?? '';
+                        const clean = () => {
+                            currentNumfmtValue &&
                                     this._collectEffectMutation.add(
                                         context.unitId,
                                         context.subUnitId,
@@ -164,54 +161,53 @@ export class NumfmtEditorController extends Disposable {
                                         context.col,
                                         null
                                     );
-                            };
-                            if (!value?.v && !value?.p) {
-                                return next(value);
-                            }
+                        };
+                        if (!value?.v && !value?.p) {
+                            return next(value);
+                        }
 
                             // if the cell is text format or force string, do not convert the value
-                            if (currentNumfmtValue?.pattern === DEFAULT_TEXT_FORMAT || value.t === CellValueType.FORCE_STRING) {
-                                return next(value);
-                            }
-
-                            const body = value.p?.body;
-                            const content = value?.p?.body?.dataStream ? value.p.body.dataStream.replace(/\r\n$/, '') : String(value.v);
-                            const numfmtInfo = numfmt.parseDate(content) || numfmt.parseTime(content) || numfmt.parseNumber(content);
-
-                            if (body) {
-                                if (!canConvertRichTextToNumfmt(body)) {
-                                    return next(value);
-                                } else {
-                                    const { dataStream } = body;
-                                    const dataStreamWithoutEnd = dataStream.replace(/\r\n$/, '');
-                                    const num = Number(dataStreamWithoutEnd);
-                                    if (Number.isNaN(num) && !numfmtInfo) {
-                                        return next(value);
-                                    }
-                                }
-                            }
-
-                            if (numfmtInfo) {
-                                if (numfmtInfo.z) {
-                                    this._collectEffectMutation.add(
-                                        context.unitId,
-                                        context.subUnitId,
-                                        context.row,
-                                        context.col,
-                                        {
-                                            pattern: numfmtInfo.z,
-                                        }
-                                    );
-                                }
-                                const v = Number(numfmtInfo.v);
-                                return next({ ...value, p: undefined, v, t: CellValueType.NUMBER });
-                            } else if (['date', 'time', 'datetime', 'percent'].includes(currentNumfmtType) || !isNumeric(content)) {
-                                clean();
-                            }
+                        if (isTextFormat(currentNumfmtValue?.pattern) || value.t === CellValueType.FORCE_STRING) {
                             return next(value);
-                        },
-                    }
-                )
+                        }
+
+                        const body = value.p?.body;
+                        const content = value?.p?.body?.dataStream ? value.p.body.dataStream.replace(/\r\n$/, '') : String(value.v);
+                        const numfmtInfo = numfmt.parseDate(content) || numfmt.parseTime(content) || numfmt.parseNumber(content);
+
+                        if (body) {
+                            if (!canConvertRichTextToNumfmt(body)) {
+                                return next(value);
+                            } else {
+                                const { dataStream } = body;
+                                const dataStreamWithoutEnd = dataStream.replace(/\r\n$/, '');
+                                const num = Number(dataStreamWithoutEnd);
+                                if (Number.isNaN(num) && !numfmtInfo) {
+                                    return next(value);
+                                }
+                            }
+                        }
+
+                        if (numfmtInfo) {
+                            if (numfmtInfo.z) {
+                                this._collectEffectMutation.add(
+                                    context.unitId,
+                                    context.subUnitId,
+                                    context.row,
+                                    context.col,
+                                    {
+                                        pattern: numfmtInfo.z,
+                                    }
+                                );
+                            }
+                            const v = Number(numfmtInfo.v);
+                            return next({ ...value, p: undefined, v, t: CellValueType.NUMBER });
+                        } else if (['date', 'time', 'datetime', 'percent'].includes(currentNumfmtType) || !isNumeric(content)) {
+                            clean();
+                        }
+                        return next(value);
+                    },
+                })
             )
         );
     }

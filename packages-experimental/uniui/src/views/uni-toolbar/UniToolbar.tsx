@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,9 @@
 
 import type { IMenuItem } from '@univerjs/ui';
 import type { ComponentType } from 'react';
-import { IUniverInstanceService, UniverInstanceType, useDependency, useObservable } from '@univerjs/core';
+import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { useWorkbooks } from '@univerjs/sheets-ui';
-import { IMenuManagerService, ToolbarItem } from '@univerjs/ui';
+import { IMenuManagerService, ToolbarItem, useDependency, useObservable } from '@univerjs/ui';
 import React, { useEffect, useState } from 'react';
 import { UNI_MENU_POSITIONS } from '../../controllers/menu';
 import { UniToolbarService } from '../../services/toolbar/uni-toolbar-service';

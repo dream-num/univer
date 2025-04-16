@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-import canUseDom from 'rc-util/lib/Dom/canUseDom';
-import { useEffect } from 'react';
-
 import type { Nullable } from '@univerjs/core';
-import { resizeObserverCtor } from '@univerjs/design';
+import { isBrowser, resizeObserverCtor } from '@univerjs/design';
+import { useEffect } from 'react';
 import { useEvent } from './event';
+
 /**
  * These hooks are used for browser layout
  * Prefer to client-side
@@ -40,12 +39,12 @@ export function useScrollYOverContainer(element: Nullable<HTMLElement>, containe
 
         const elStyle = element.style;
         const elRect = element.getBoundingClientRect();
-        const { y } = elRect;
+        const { y, height } = elRect;
         const containerRect = container.getBoundingClientRect();
 
-        const scrolled = element.scrollHeight > elRect.height;
+        const scrolled = element.scrollHeight > height;
 
-        const isOverViewport = y < 0 || (y + elRect.height > containerRect.height);
+        const isOverViewport = y < 0 || (y + height > containerRect.height);
 
         if (!isOverViewport && !scrolled) {
             elStyle.overflowY = '';
@@ -54,15 +53,14 @@ export function useScrollYOverContainer(element: Nullable<HTMLElement>, containe
         }
 
         if (isOverViewport) {
-            elStyle.overflowY = 'scroll';
+            elStyle.overflowY = 'auto';
             elStyle.maxHeight = y < 0 ? `${element.scrollHeight + y}px` : `${containerRect.height - y}px`;
         }
     });
 
     useEffect(() => {
-        if (!canUseDom() || !element || !container) {
-            return;
-        }
+        if (!isBrowser() || !element || !container) return;
+
         updater();
 
         const resizeObserver = resizeObserverCtor(updater);

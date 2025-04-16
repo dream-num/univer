@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
+import type { IRange } from '../typedef';
 import { describe, expect, it } from 'vitest';
 import { Rectangle } from '../../shared';
 import { SpanModel } from '../span-model';
-import { type IRange, RANGE_TYPE } from '../typedef';
+import { RANGE_TYPE } from '../typedef';
 
 function getMergeRange(mergeData: IRange[], startRow: number, startColumn: number, endRow: number, endColumn: number) {
     const ranges: IRange[] = [];

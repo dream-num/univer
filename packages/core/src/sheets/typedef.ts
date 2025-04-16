@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -571,7 +571,7 @@ export interface IRangeCellData {
 export type IRangeType = IRange | IRangeStringData | IRangeArrayData | IRangeCellData;
 
 /**
- * Whether to clear only the contents.	Whether to clear only the format; note that clearing format also clears data validation rules.
+ * Whether to clear only the contents. Whether to clear only the format; note that clearing format also clears data validation rules.
  */
 export interface IOptionData {
     /**

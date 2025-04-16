@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,20 @@
 import type zhCN from './zh-CN';
 
 const locale: typeof zhCN = {
+    toolbar: {
+        heading: {
+            normal: 'متن عادی',
+            title: 'عنوان',
+            subTitle: 'زیر عنوان',
+            1: 'عنوان 1',
+            2: 'عنوان 2',
+            3: 'عنوان 3',
+            4: 'عنوان 4',
+            5: 'عنوان 5',
+            6: 'عنوان 6',
+            tooltip: 'تنظیم عنوان',
+        },
+    },
     ribbon: {
         start: 'شروع',
         insert: 'درج',
@@ -76,6 +90,9 @@ const locale: typeof zhCN = {
         cancel: 'انصراف',
     },
     'global-shortcut': 'کلید میانبر جهانی',
+    'zoom-slider': {
+        resetTo: 'بازنشانی به',
+    },
 };
 
 export default locale;

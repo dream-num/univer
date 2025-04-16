@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,7 @@ const locale: typeof zhCN = {
         alignCenter: 'Выровнять по центру',
         alignRight: 'Выровнять по правому краю',
         alignJustify: 'Выровнять по ширине',
+        horizontalLine: 'Horizontal line',
         headerFooter: 'Header & Footer',
         checklist: 'Task list',
         documentFlavor: 'Modern Mode',
@@ -96,6 +97,12 @@ const locale: typeof zhCN = {
             multiSpace: 'Multi Space',
             fixedValue: 'Fixed Value(px)',
         },
+    },
+    rightClick: {
+        bulletList: 'Неупорядоченный список',
+        orderList: 'Упорядоченный список',
+        checkList: 'Список задач',
+        insertBellow: 'Вставить ниже',
     },
 };
 

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,9 @@
 
 import type { ITransformState } from '@univerjs/core';
 
+import type { IRect } from './interfaces';
 import { degToRad, precisionTo, radToDeg } from './tools';
 import { Vector2 } from './vector2';
-import type { IRect } from './interfaces';
 
 export const INITIAL_MATRIX: number[] = [1, 0, 0, 1, 0, 0];
 

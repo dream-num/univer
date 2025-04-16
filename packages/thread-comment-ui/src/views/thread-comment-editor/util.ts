@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
+import type { IDocumentBody } from '@univerjs/core';
 import type { IThreadCommentMention } from '@univerjs/thread-comment';
-import { CustomRangeType, getBodySlice, type IDocumentBody } from '@univerjs/core';
+import { CustomRangeType, getBodySlice } from '@univerjs/core';
 
 export type TextNode = {
     type: 'text';

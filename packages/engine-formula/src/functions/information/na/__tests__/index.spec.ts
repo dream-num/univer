@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,9 @@
 
 import { describe, expect, it } from 'vitest';
 
+import { ErrorType } from '../../../../basics/error-type';
 import { FUNCTION_NAMES_INFORMATION } from '../../function-names';
 import { Na } from '../index';
-import { ErrorType } from '../../../../basics/error-type';
 
 describe('Test na function', () => {
     const testFunction = new Na(FUNCTION_NAMES_INFORMATION.NA);

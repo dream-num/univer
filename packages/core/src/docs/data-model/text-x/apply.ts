@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,11 @@
  */
 
 import type { IDocumentBody } from '../../../types/interfaces';
+import type { TextXAction } from './action-types';
 import { MemoryCursor } from '../../../common/memory-cursor';
 import { Tools } from '../../../shared';
 import { UpdateDocsAttributeType } from '../../../shared/command-enum';
-import { type TextXAction, TextXActionType } from './action-types';
+import { TextXActionType } from './action-types';
 import { updateAttributeByDelete } from './apply-utils/delete-apply';
 import { updateAttributeByInsert } from './apply-utils/insert-apply';
 import { updateAttribute } from './apply-utils/update-apply';

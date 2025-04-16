@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,7 +90,7 @@ export function getClearContentMutationParamsForRanges(
 
 export function getClearContentMutationParamForRange(worksheet: Worksheet, range: IRange): ObjectMatrix<Nullable<ICellData>> {
     const { startRow, startColumn, endColumn, endRow } = range;
-    const cellMatrix = worksheet.getMatrixWithMergedCells(startRow, startColumn, endRow, endColumn, CellModeEnum.Intercepted);
+    const cellMatrix = worksheet.getMatrixWithMergedCells(startRow, startColumn, endRow, endColumn, CellModeEnum.Raw);
     const redoMatrix = new ObjectMatrix<Nullable<ICellData>>();
     let leftTopCellValue: Nullable<ICellData> = null;
     cellMatrix.forValue((row, col, cellData) => {

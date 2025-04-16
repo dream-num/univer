@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ const exampleTables = [
     ['Faculty Council', 'June 1, 2205', 'Building 35 Room 5'],
     ['Faculty Council', 'June 15, 2205', 'Building 35 Room 5'],
     ['Faculty Council', 'June 30, 2205', 'Building 35 Room 5'],
-    ['Commencement Meeting	', 'December 15, 2205', 'Building 42 Room 10'],
+    ['Commencement Meeting', 'December 15, 2205', 'Building 42 Room 10'],
     ['Dean\'s Council', 'February 1, 2206', 'Building 35 Room 5'],
     ['Faculty Council', 'March 1, 2206', 'Building 35 Room 5'],
 ];
@@ -177,6 +177,26 @@ const tableCell: ITableCell = {
             v: 5,
         },
     },
+    borderTop: {
+        color: {
+            rgb: '#dee0e3',
+        },
+    },
+    borderBottom: {
+        color: {
+            rgb: '#dee0e3',
+        },
+    },
+    borderLeft: {
+        color: {
+            rgb: '#dee0e3',
+        },
+    },
+    borderRight: {
+        color: {
+            rgb: '#dee0e3',
+        },
+    },
 };
 
 const tableRow: ITableRow = {
@@ -198,10 +218,21 @@ const tableColumn: ITableColumn = {
 };
 
 const tableRows: ITableRow[] = [...new Array(exampleTables.length).fill(null).map((_, i) => {
+    const row = Tools.deepClone(tableRow);
+    const isFirstRow = i === 0 ? BooleanNumber.TRUE : BooleanNumber.FALSE;
+
+    if (isFirstRow === BooleanNumber.TRUE) {
+        row.tableCells.forEach((cell) => {
+            cell.backgroundColor = {
+                rgb: 'rgba(245, 246, 247, 0.9)',
+            };
+        });
+    }
+
     return {
-        ...Tools.deepClone(tableRow),
-        isFirstRow: i === 0 ? BooleanNumber.TRUE : BooleanNumber.FALSE,
-        repeatHeaderRow: i === 0 ? BooleanNumber.TRUE : BooleanNumber.FALSE,
+        ...row,
+        isFirstRow,
+        repeatHeaderRow: isFirstRow,
     };
 })];
 const tableColumns = [...new Array(exampleTables[0].length).fill(null).map(() => Tools.deepClone(tableColumn))];

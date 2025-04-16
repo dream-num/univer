@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { EDITOR_ACTIVATED, FOCUSING_SHEET, IContextService, UniverInstanceType } from '@univerjs/core';
-import type { IMenuButtonItem } from '@univerjs/ui';
-import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import type { IAccessor } from '@univerjs/core';
+import type { IMenuButtonItem } from '@univerjs/ui';
+import { EDITOR_ACTIVATED, FOCUSING_SHEET, IContextService, UniverInstanceType } from '@univerjs/core';
+import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { combineLatest, map } from 'rxjs';
 
 import { OpenFindDialogOperation } from '../commands/operations/find-replace.operation';

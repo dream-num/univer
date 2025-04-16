@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 
 import type { Workbook } from '@univerjs/core';
+import type { RenderUnit } from '@univerjs/engine-render';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
 import { createIdentifier, Disposable, Inject, IUniverInstanceService, ThemeService, Tools, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -112,10 +113,10 @@ export class MarkSelectionService extends Disposable implements IMarkSelectionSe
                 return;
             }
 
-            const renderUnit = this._renderManagerService.getRenderById(unitId);
+            const renderUnit = this._renderManagerService.getRenderById(unitId) as RenderUnit;
             if (!renderUnit) return;
 
-            const skeleton = this._renderManagerService.withCurrentTypeOfUnit(UniverInstanceType.UNIVER_SHEET, SheetSkeletonManagerService)?.getCurrentSkeleton();
+            const skeleton = renderUnit.with(SheetSkeletonManagerService).getCurrentSkeleton();
             if (!skeleton) return;
 
             const { scene } = renderUnit;

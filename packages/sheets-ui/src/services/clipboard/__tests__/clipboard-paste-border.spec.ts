@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,8 @@ import {
 } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { ISheetClipboardService } from '../clipboard.service';
 import { SheetSkeletonManagerService } from '../../sheet-skeleton-manager.service';
+import { ISheetClipboardService } from '../clipboard.service';
 import { clipboardTestBed } from './clipboard-test-bed';
 import { borderSampleByExcel, borderSampleByGoogle, borderSampleByUniver } from './constant';
 

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
+import type { DocumentDataModel, ICommand, IDocumentData, Injector, IStyleBase, Univer } from '@univerjs/core';
+import type { IInnerCutCommandParams, IInnerPasteCommandParams } from '../clipboard.inner.command';
 import { BooleanNumber, ICommandService, IUniverInstanceService, UndoCommand, UniverInstanceType } from '@univerjs/core';
+
 import { DocSelectionManagerService, RichTextEditingMutation, SetTextSelectionsOperation } from '@univerjs/docs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-
-import type { DocumentDataModel, ICommand, IDocumentData, Injector, IStyleBase, Univer } from '@univerjs/core';
 import { CutContentCommand, InnerPasteCommand } from '../clipboard.inner.command';
 import { createCommandTestBed } from './create-command-test-bed';
-import type { IInnerCutCommandParams, IInnerPasteCommandParams } from '../clipboard.inner.command';
 
 function getDocumentData() {
     const TEST_DOCUMENT_DATA_EN: IDocumentData = {

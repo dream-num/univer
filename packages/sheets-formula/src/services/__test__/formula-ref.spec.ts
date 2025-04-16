@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
+import type { IRange } from '@univerjs/core';
 import type { ITestBed } from './util';
-import { ICommandService, type IRange } from '@univerjs/core';
+import { ICommandService } from '@univerjs/core';
 import { InsertColCommand, MoveRangeCommand, RemoveColCommand } from '@univerjs/sheets';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { FormulaRefRangeService } from '../formula-ref-range.service';

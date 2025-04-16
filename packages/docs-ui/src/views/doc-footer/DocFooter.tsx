@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,21 @@
  * limitations under the License.
  */
 
-import React from 'react';
+import type { Workbook } from '@univerjs/core';
+import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { useDependency, useObservable } from '@univerjs/ui';
 import { CountBar } from '../count-bar';
-import styles from './index.module.less';
 
-export const DocFooter = () => {
-    return (
-        <div className={styles.docFooterContainer}>
-            <div />
-            <CountBar />
-        </div>
-    );
+export function DocFooter() {
+    const univerInstanceService = useDependency(IUniverInstanceService);
+    const workbook = useObservable(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET), undefined, undefined, []);
+
+    return workbook
+        ? null
+        : (
+            <div className="univer-box-border univer-flex univer-items-center univer-justify-between univer-px-5">
+                <div />
+                <CountBar />
+            </div>
+        );
 };

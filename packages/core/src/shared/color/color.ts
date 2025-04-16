@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import type { Nullable } from '../types';
 import { THEME_COLORS } from '../../types/const/theme-color-map';
 import { ColorType, ThemeColors, ThemeColorType } from '../../types/enum';
-import type { Nullable } from '../types';
 
 export class ColorBuilder {
     private _themeValue: ThemeColorType = ThemeColorType.LIGHT1;

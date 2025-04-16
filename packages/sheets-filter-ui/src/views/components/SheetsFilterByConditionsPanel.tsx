@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,10 @@
 import type { ISelectProps } from '@univerjs/design';
 import type { FilterOperator, IFilterConditionFormParams } from '../../models/conditions';
 import type { ByConditionsModel } from '../../services/sheets-filter-panel.service';
-import { LocaleService, useDependency } from '@univerjs/core';
+import { LocaleService } from '@univerjs/core';
 import { Input, Radio, RadioGroup, Select } from '@univerjs/design';
+import { useDependency, useObservable } from '@univerjs/ui';
 
-import { useObservable } from '@univerjs/ui';
 import React, { useCallback, useMemo } from 'react';
 import { FilterConditionItems } from '../../models/conditions';
 
@@ -87,7 +87,7 @@ export function FilterByCondition(props: { model: ByConditionsModel }) {
                                 {condition.numOfParameters >= 2 && renderSecondaryCondition(formParams.operator2!, formParams.val2 ?? '', 'operator2')}
                                 <div className={styles.sheetsFilterPanelConditionsDesc}>
                                     {localeService.t('sheets-filter.panel.?')}
-                                    <br></br>
+                                    <br />
                                     {localeService.t('sheets-filter.panel.*')}
                                 </div>
                             </div>
@@ -140,9 +140,7 @@ function usePrimaryOptions(localeService: LocaleService): ISelectProps['options'
                 { label: localeService.t(FilterConditionItems.CUSTOM.label), value: FilterConditionItems.CUSTOM.operator },
             ],
         },
-    ] as ISelectProps['options'],
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    [locale, localeService]);
+    ] as ISelectProps['options'], [locale, localeService]);
 }
 
 function useSecondaryOptions(localeService: LocaleService): ISelectProps['options'] {
@@ -150,7 +148,5 @@ function useSecondaryOptions(localeService: LocaleService): ISelectProps['option
 
     return useMemo(() => FilterConditionItems.ALL_CONDITIONS
         .filter((c) => c.numOfParameters !== 2)
-        .map((c) => ({ label: localeService.t(c.label), value: c.operator })) as ISelectProps['options'],
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    [locale, localeService]);
+        .map((c) => ({ label: localeService.t(c.label), value: c.operator })) as ISelectProps['options'], [locale, localeService]);
 }

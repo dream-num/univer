@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { Disposable, type ITextRange, type Nullable } from '@univerjs/core';
+import type { ITextRange, Nullable } from '@univerjs/core';
 import type { IThreadComment } from '@univerjs/thread-comment';
+import { Disposable, Inject } from '@univerjs/core';
 import { ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
 import { ISidebarService } from '@univerjs/ui';
-import { Inject } from '@univerjs/core';
 import { BehaviorSubject } from 'rxjs';
 
 export class DocThreadCommentService extends Disposable {

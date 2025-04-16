@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     sheet: {
         numfmt: {
-            percent: 'Pourcentage',
             title: 'Format de nombre',
             numfmtType: 'Types de format',
             cancel: 'Annuler',
@@ -28,6 +27,8 @@ const locale: typeof enUS = {
             accounting: 'Comptabilité',
             text: 'Texte',
             number: 'Nombre',
+            percent: 'Pourcentage',
+            scientific: 'Scientifique',
             currency: 'Devise',
             date: 'Date',
             time: 'Heure',

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import {
     UndoCommand,
     UniverInstanceType,
 } from '@univerjs/core';
-import { DEFAULT_TEXT_FORMAT } from '@univerjs/engine-numfmt';
+import { DEFAULT_TEXT_FORMAT_EXCEL } from '@univerjs/engine-numfmt';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { SheetsSelectionsService } from '../../../services/selections/selection.service';
 import { SetRangeValuesMutation } from '../../mutations/set-range-values.mutation';
@@ -123,7 +123,7 @@ const getTestWorkbookDataDemo = (): IWorkbookData => ({
         s4: { fs: 12 },
         s5: {
             n: {
-                pattern: DEFAULT_TEXT_FORMAT, // text
+                pattern: DEFAULT_TEXT_FORMAT_EXCEL, // text
             },
         },
     },
@@ -142,10 +142,7 @@ describe('Test set range values commands', () => {
         endColumn: number
     ) => Nullable<Array<Array<Nullable<ICellData>>>>;
     let getStyle: () => any;
-    let getStyles: (startRow: number,
-        startColumn: number,
-        endRow: number,
-        endColumn: number) => Nullable<Nullable<IStyleData>[][]>;
+    let getStyles: (startRow: number, startColumn: number, endRow: number, endColumn: number) => Nullable<Nullable<IStyleData>[][]>;
 
     beforeEach(() => {
         const testBed = createCommandTestBed(getTestWorkbookDataDemo());
@@ -192,10 +189,7 @@ describe('Test set range values commands', () => {
             }
         };
 
-        getStyles = (startRow: number,
-            startColumn: number,
-            endRow: number,
-            endColumn: number): Nullable<Nullable<IStyleData>[][]> => {
+        getStyles = (startRow: number, startColumn: number, endRow: number, endColumn: number): Nullable<Nullable<IStyleData>[][]> => {
             const values = getValues(startRow, startColumn, endRow, endColumn);
             const styles = get(IUniverInstanceService).getUniverSheetInstance('test')?.getStyles();
 
@@ -748,7 +742,7 @@ describe('Test set range values commands', () => {
 
                 // undo
                 expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
-                expect(getValues(1, 1, 1, 4)).toStrictEqual([[{}, null, null, {}]]);
+                expect(getValues(1, 1, 1, 4)).toStrictEqual([[null, null, null, null]]);
 
                 // redo
                 expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
@@ -895,7 +889,7 @@ describe('Test set range values commands', () => {
             it('set value when origin cell has text number format', async () => {
                 function getParams() {
                     const params: ISetRangeValuesCommandParams = {
-                        value: { 0: { 2: { v: '01' }, 3: { v: '0.20' }, 4: { v: '001', t: CellValueType.FORCE_STRING }, 5: { s: { n: { pattern: DEFAULT_TEXT_FORMAT } } } } },
+                        value: { 0: { 2: { v: '01' }, 3: { v: '0.20' }, 4: { v: '001', t: CellValueType.FORCE_STRING }, 5: { s: { n: { pattern: DEFAULT_TEXT_FORMAT_EXCEL } } } } },
                     };
 
                     return params;
@@ -906,7 +900,7 @@ describe('Test set range values commands', () => {
 
                 // undo
                 expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
-                expect(getValues(0, 2, 0, 5)).toStrictEqual([[{ s: 's5' }, { s: 's5' }, {}, { v: 1, t: CellValueType.NUMBER }]]);
+                expect(getValues(0, 2, 0, 5)).toStrictEqual([[{ s: 's5' }, { s: 's5' }, null, { v: 1, t: CellValueType.NUMBER }]]);
 
                 // redo
                 expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();

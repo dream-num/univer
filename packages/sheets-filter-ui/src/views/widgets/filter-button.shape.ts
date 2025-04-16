@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
+import type { IMouseEvent, IPointerEvent, IShapeProps, UniverRenderingContext2D } from '@univerjs/engine-render';
+import type { IOpenFilterPanelOperationParams } from '../../commands/operations/sheets-filter.operation';
 import { ICommandService, IContextService, Inject, ThemeService } from '@univerjs/core';
-import { type IMouseEvent, type IPointerEvent, type IShapeProps, Shape, type UniverRenderingContext2D } from '@univerjs/engine-render';
 
-import { FILTER_PANEL_OPENED_KEY, type IOpenFilterPanelOperationParams, OpenFilterPanelOperation } from '../../commands/operations/sheets-filter.operation';
+import { Shape } from '@univerjs/engine-render';
+import { FILTER_PANEL_OPENED_KEY, OpenFilterPanelOperation } from '../../commands/operations/sheets-filter.operation';
 import { FilterButton } from './drawings';
 
 export const FILTER_ICON_SIZE = 16;

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,6 @@
  */
 
 import React from 'react';
-
-import styles from './index.module.less';
 import { ZoomSlider } from './ZoomSlider';
 
 interface ICountBarProps {
@@ -24,9 +22,9 @@ interface ICountBarProps {
     onChange?: (value: string) => void;
 }
 
-export function CountBar(props: ICountBarProps) {
+export function CountBar(_props: ICountBarProps) {
     return (
-        <section className={styles.docCountBar}>
+        <section className="univer-flex univer-flex-shrink-0 univer-flex-grow-0 univer-basis-[260px] univer-justify-end">
             <ZoomSlider />
         </section>
     );

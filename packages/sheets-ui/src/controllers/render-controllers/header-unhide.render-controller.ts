@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,28 +15,16 @@
  */
 
 import type { Workbook, Worksheet } from '@univerjs/core';
+import type { IRenderContext } from '@univerjs/engine-render';
+import type { ISetSpecificColsVisibleCommandParams, ISetSpecificRowsVisibleCommandParams } from '@univerjs/sheets';
 import {
     ICommandService,
     Inject,
     RxDisposable,
 } from '@univerjs/core';
-import type { IRenderContext } from '@univerjs/engine-render';
-import type { ISetSpecificColsVisibleCommandParams, ISetSpecificRowsVisibleCommandParams } from '@univerjs/sheets';
 import {
-    InsertColMutation,
-    InsertRowMutation,
-    MoveColsMutation,
-    MoveRowsMutation,
-    RemoveColMutation,
-    RemoveRowMutation,
-    SetColHiddenMutation,
-    SetColVisibleMutation,
-    SetRowHiddenMutation,
-    SetRowVisibleMutation,
     SetSpecificColsVisibleCommand,
     SetSpecificRowsVisibleCommand,
-    SetWorksheetColWidthMutation,
-    SetWorksheetRowIsAutoHeightMutation,
 } from '@univerjs/sheets';
 import { takeUntil } from 'rxjs';
 
@@ -46,21 +34,6 @@ import { HeaderUnhideShape, HeaderUnhideShapeType, UNHIDE_ICON_SIZE } from '../.
 import { getCoordByCell, getSheetObject } from '../utils/component-tools';
 
 const HEADER_UNHIDE_CONTROLLER_SHAPE = '__SpreadsheetHeaderUnhideSHAPEControllerShape__';
-
-const RENDER_COMMANDS: string[] = [
-    InsertColMutation.id,
-    InsertRowMutation.id,
-    RemoveColMutation.id,
-    RemoveRowMutation.id,
-    MoveColsMutation.id,
-    MoveRowsMutation.id,
-    SetWorksheetColWidthMutation.id,
-    SetWorksheetRowIsAutoHeightMutation.id,
-    SetRowHiddenMutation.id,
-    SetRowVisibleMutation.id,
-    SetColHiddenMutation.id,
-    SetColVisibleMutation.id,
-];
 
 /**
  * This controller controls rendering of the buttons to unhide hidden rows and columns.

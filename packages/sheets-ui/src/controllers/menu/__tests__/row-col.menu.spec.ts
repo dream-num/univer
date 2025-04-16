@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 
 import type { Univer, Workbook } from '@univerjs/core';
+import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
 import {
     DisposableCollection,
     ICommandService,
@@ -37,7 +38,6 @@ import {
     SetSpecificColsVisibleCommand,
     SetSpecificRowsVisibleCommand,
 } from '@univerjs/sheets';
-import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { ShowColMenuItemFactory, ShowRowMenuItemFactory } from '../menu';

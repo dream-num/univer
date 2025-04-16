@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,10 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import type { IWatermarkConfigWithType } from '../common/type';
+import type { IWatermarkConfigWithType } from '@univerjs/engine-render';
 import { Disposable, ILocalStorageService, Inject } from '@univerjs/core';
+import { UNIVER_WATERMARK_STORAGE_KEY } from '@univerjs/engine-render';
 import { Subject } from 'rxjs';
-import { UNIVER_WATERMARK_STORAGE_KEY } from '../common/const';
 
 export class WatermarkService extends Disposable {
     private readonly _updateConfig$ = new Subject<Nullable<IWatermarkConfigWithType>>();

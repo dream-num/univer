@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+import type { Dependency } from '@univerjs/core';
 import type { IUniverFindReplaceConfig } from './controllers/config.schema';
-import { IConfigService, merge, Plugin } from '@univerjs/core';
 
-import { type Dependency, Inject, Injector } from '@univerjs/core';
+import { IConfigService, Inject, Injector, merge, Plugin } from '@univerjs/core';
 import { defaultPluginConfig, FIND_REPLACE_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { FindReplaceController } from './controllers/find-replace.controller';
 import { FindReplaceService, IFindReplaceService } from './services/find-replace.service';

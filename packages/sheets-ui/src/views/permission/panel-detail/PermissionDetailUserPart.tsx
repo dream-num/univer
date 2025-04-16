@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,11 @@
 
 import type { Workbook } from '@univerjs/core';
 import type { ICollaborator } from '@univerjs/protocol';
-import { IAuthzIoService, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency, useObservable, UserManagerService } from '@univerjs/core';
+import { IAuthzIoService, IUniverInstanceService, LocaleService, UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { Avatar, FormLayout, Radio, RadioGroup, Select } from '@univerjs/design';
 import { UnitRole } from '@univerjs/protocol';
 import { EditStateEnum, ViewStateEnum } from '@univerjs/sheets';
-import { IDialogService } from '@univerjs/ui';
+import { IDialogService, useDependency, useObservable } from '@univerjs/ui';
 import React, { useEffect } from 'react';
 import { UNIVER_SHEET_PERMISSION_USER_DIALOG, UNIVER_SHEET_PERMISSION_USER_DIALOG_ID } from '../../../consts/permission';
 import { SheetPermissionUserManagerService } from '../../../services/permission/sheet-permission-user-list.service';
@@ -116,7 +116,7 @@ export const PermissionDetailUserPart = (props: IPermissionDetailUserPartProps) 
                         <span>{localeService.t('permission.panel.designedPerson')}</span>
                         <span className={styles.sheetPermissionDesignPersonPanelHeaderAdd} onClick={handleAddPerson}>{localeService.t('permission.panel.addPerson')}</span>
                     </div>
-                    <div className={styles.sheetPermissionDesignPersonPanelSplit}></div>
+                    <div className={styles.sheetPermissionDesignPersonPanelSplit} />
                     <div className={styles.sheetPermissionDesignPersonPanelContent}>
                         {selectUserList?.length > 0
                             ? selectUserList.map((item) => {

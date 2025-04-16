@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,11 @@
 
 import type { IDrawingParam, IDrawingSearch, Nullable } from '@univerjs/core';
 import type { JSONOp, JSONOpList } from 'ot-json1';
+import type { Observable } from 'rxjs';
 import type { IDrawingGroupUpdateParam, IDrawingMap, IDrawingMapItemData, IDrawingOrderMapParam, IDrawingOrderUpdateParam, IDrawingSubunitMap, IDrawingVisibleParam, IUnitDrawingService } from './drawing-manager.service';
 import { sortRules, sortRulesByDesc } from '@univerjs/core';
 import * as json1 from 'ot-json1';
-import { type Observable, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 
 export interface IDrawingJsonUndo1 {
     undo: JSONOp;

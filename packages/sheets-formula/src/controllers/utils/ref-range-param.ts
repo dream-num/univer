@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import type {
     IRemoveSheetCommandParams,
     ISetWorksheetNameCommandParams,
 } from '@univerjs/sheets';
+import type { IFormulaReferenceMoveParam } from './ref-range-formula';
 import {
     RANGE_TYPE,
 } from '@univerjs/core';
@@ -56,7 +57,7 @@ import {
     SetDefinedNameCommand,
     SetWorksheetNameCommand,
 } from '@univerjs/sheets';
-import { FormulaReferenceMoveType, type IFormulaReferenceMoveParam } from './ref-range-formula';
+import { FormulaReferenceMoveType } from './ref-range-formula';
 
 export function getReferenceMoveParams(workbook: Workbook, command: ICommandInfo) {
     const { id } = command;

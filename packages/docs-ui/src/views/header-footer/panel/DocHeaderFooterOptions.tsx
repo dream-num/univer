@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,16 +15,15 @@
  */
 
 import type { IDocumentStyle } from '@univerjs/core';
-import { BooleanNumber, ICommandService, IUniverInstanceService, LocaleService, Tools, useDependency } from '@univerjs/core';
+import type { IHeaderFooterProps } from '../../../commands/commands/doc-header-footer.command';
+import { BooleanNumber, ICommandService, IUniverInstanceService, LocaleService, Tools } from '@univerjs/core';
 import { Button, Checkbox, InputNumber } from '@univerjs/design';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
-import { ILayoutService } from '@univerjs/ui';
-import clsx from 'clsx';
-import React, { useEffect, useState } from 'react';
-import { CloseHeaderFooterCommand, CoreHeaderFooterCommandId, type IHeaderFooterProps } from '../../../commands/commands/doc-header-footer.command';
+import { ILayoutService, useDependency } from '@univerjs/ui';
+import { useEffect, useState } from 'react';
+import { CloseHeaderFooterCommand, CoreHeaderFooterCommandId } from '../../../commands/commands/doc-header-footer.command';
 import { DocSelectionRenderService } from '../../../services/selection/doc-selection-render.service';
-import styles from './index.module.less';
 
 function getSegmentId(documentStyle: IDocumentStyle, editArea: DocumentEditArea, pageIndex: number): string {
     const { useFirstPageHeaderFooter, evenAndOddHeaders, defaultHeaderId, defaultFooterId, firstPageHeaderId, firstPageFooterId, evenPageHeaderId, evenPageFooterId } = documentStyle;
@@ -203,9 +202,9 @@ export const DocHeaderFooterOptions = (props: IDocHeaderFooterOptionsProps) => {
     }, [unitId]);
 
     return (
-        <div className={styles.options}>
-            <div className={styles.optionsSection}>
-                <div className={styles.optionsFormItem}>
+        <div className="univer-grid univer-gap-4">
+            <div className="univer-grid univer-gap-2">
+                <div>
                     <Checkbox
                         checked={options.useFirstPageHeaderFooter === BooleanNumber.TRUE}
                         onChange={(val) => { handleCheckboxChange(val as boolean, 'useFirstPageHeaderFooter'); }}
@@ -213,7 +212,7 @@ export const DocHeaderFooterOptions = (props: IDocHeaderFooterOptionsProps) => {
                         {localeService.t('headerFooter.firstPageCheckBox')}
                     </Checkbox>
                 </div>
-                <div className={styles.optionsFormItem}>
+                <div>
                     <Checkbox
                         checked={options.evenAndOddHeaders === BooleanNumber.TRUE}
                         onChange={(val) => { handleCheckboxChange(val as boolean, 'evenAndOddHeaders'); }}
@@ -222,34 +221,35 @@ export const DocHeaderFooterOptions = (props: IDocHeaderFooterOptionsProps) => {
                     </Checkbox>
                 </div>
             </div>
-            <div className={clsx(styles.optionsSection, styles.optionsMarginSetting)}>
-                <div className={styles.optionsMarginItem}>
+
+            <div className="univer-mb-1 univer-flex">
+                <div>
                     <span>{localeService.t('headerFooter.headerTopMargin')}</span>
                     <InputNumber
+                        className="univer-mt-1.5 univer-w-4/5"
                         min={0}
                         max={200}
                         precision={1}
                         value={options.marginHeader}
                         onChange={(val) => { handleMarginChange(val as number, 'marginHeader'); }}
-                        className={styles.optionsInput}
                     />
                 </div>
-                <div className={styles.optionsMarginItem}>
+                <div>
                     <span>{localeService.t('headerFooter.footerBottomMargin')}</span>
                     <InputNumber
+                        className="univer-mt-1.5 univer-w-4/5"
                         min={0}
                         max={200}
                         precision={1}
                         value={options.marginFooter}
                         onChange={(val) => { handleMarginChange(val as number, 'marginFooter'); }}
-                        className={styles.optionsInput}
                     />
                 </div>
             </div>
-            <div className={styles.optionsSection}>
+
+            <div className="univer-flex univer-justify-end">
                 <Button onClick={closeHeaderFooter}>{localeService.t('headerFooter.closeHeaderFooter')}</Button>
             </div>
         </div>
     );
 };
-

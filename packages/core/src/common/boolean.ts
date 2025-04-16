@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+const BooleanStringSet = new Set(['true', 'false']);
 export function isBooleanString(str: string): boolean {
-    return ['true', 'false'].includes(str.toLowerCase());
+    return BooleanStringSet.has(str.toLowerCase());
 }

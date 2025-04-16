@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ import type { IAccessor } from '@univerjs/core';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import {
     BooleanNumber,
+    composeStyles,
     DEFAULT_STYLES,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     EDITOR_ACTIVATED,
@@ -405,37 +406,38 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
         selections: FONT_FAMILY_LIST.map((item) => ({
             label: {
                 name: FONT_FAMILY_ITEM_COMPONENT,
-                hoverable: true,
             },
             value: item.value,
         })),
 
         disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission], rangeTypes: [RangeProtectionPermissionEditPoint] }, true),
         value$: deriveStateFromActiveSheet$(univerInstanceService, defaultValue, ({ worksheet }) => new Observable((subscriber) => {
-            const disposable = commandService.onCommandExecuted((c) => {
-                const id = c.id;
-                if (id !== SetRangeValuesMutation.id && id !== SetSelectionsOperation.id && id !== SetWorksheetActiveOperation.id) {
-                    return;
-                }
+            const updateSheet = () => {
+                let ff = defaultValue;
 
                 const primary = selectionManagerService.getCurrentLastSelection()?.primary;
-                let ff;
                 if (primary != null) {
-                    const range = worksheet.getRange(primary.startRow, primary.startColumn);
-                    ff = range?.getFontFamily();
+                    const cell = worksheet.getCellStyle(primary.startRow, primary.startColumn);
+                    const defaultStyle = worksheet.getDefaultCellStyleInternal();
+                    const rowStyle = worksheet.getRowStyle(primary.startRow);
+                    const colStyle = worksheet.getColumnStyle(primary.startColumn);
+                    const style = composeStyles(defaultStyle, rowStyle, colStyle, cell);
+                    if (style.ff) {
+                        ff = style.ff;
+                    }
                 }
 
-                subscriber.next(ff ?? defaultValue);
+                subscriber.next(ff);
+            };
+
+            const disposable = commandService.onCommandExecuted((c) => {
+                const id = c.id;
+                if (id === SetRangeValuesMutation.id || id === SetSelectionsOperation.id || id === SetWorksheetActiveOperation.id) {
+                    updateSheet();
+                }
             });
 
-            const primary = selectionManagerService.getCurrentLastSelection()?.primary;
-            let ff;
-            if (primary != null) {
-                const range = worksheet.getRange(primary.startRow, primary.startColumn);
-                ff = range?.getFontFamily();
-            }
-
-            subscriber.next(ff ?? defaultValue);
+            updateSheet();
             return disposable.dispose;
         })),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
@@ -466,16 +468,30 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
         selections: FONT_SIZE_LIST,
         disabled$,
         value$: deriveStateFromActiveSheet$(univerInstanceService, defaultValue, ({ worksheet }) => new Observable((subscriber) => {
+            const updateSheet = () => {
+                let fs = defaultValue;
+                const primary = selectionManagerService.getCurrentLastSelection()?.primary;
+                if (primary != null) {
+                    const style = worksheet.getComposedCellStyle(primary.startRow, primary.startColumn);
+                    if (style.fs) {
+                        fs = style.fs;
+                    }
+                }
+                subscriber.next(fs);
+            };
+
+            const updateSheetEditor = () => {
+                const textRun = getFontStyleAtCursor(accessor);
+                if (textRun != null) {
+                    const fs = textRun.ts?.fs ?? defaultValue;
+                    subscriber.next(fs);
+                }
+            };
+
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
                 if (id === SetRangeValuesMutation.id || id === SetSelectionsOperation.id || id === SetWorksheetActiveOperation.id) {
-                    const primary = selectionManagerService.getCurrentLastSelection()?.primary;
-                    let fs;
-                    if (primary != null) {
-                        const range = worksheet.getRange(primary.startRow, primary.startColumn);
-                        fs = range?.getFontSize();
-                    }
-                    subscriber.next(fs ?? defaultValue);
+                    updateSheet();
                 }
 
                 if (
@@ -483,25 +499,11 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
                     contextService.getContextValue(EDITOR_ACTIVATED) &&
                     contextService.getContextValue(FOCUSING_SHEET)
                 ) {
-                    const textRun = getFontStyleAtCursor(accessor);
-
-                    if (textRun == null) {
-                        return;
-                    }
-
-                    const fs = textRun.ts?.fs;
-                    subscriber.next(fs ?? defaultValue);
+                    updateSheetEditor();
                 }
             });
 
-            const primary = selectionManagerService.getCurrentLastSelection()?.primary;
-            let fs;
-            if (primary != null) {
-                const range = worksheet.getRange(primary.startRow, primary.startColumn);
-                fs = range?.getFontSize();
-            }
-            subscriber.next(fs ?? defaultValue);
-
+            updateSheet();
             return disposable.dispose;
         })),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
@@ -527,13 +529,13 @@ export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSele
         id: SetRangeTextColorCommand.id,
         icon: 'FontColor',
         tooltip: 'toolbar.textColor.main',
-
         type: MenuItemType.BUTTON_SELECTOR,
         selections: [
             {
                 label: {
                     name: COLOR_PICKER_COMPONENT,
                     hoverable: false,
+                    selectable: false,
                 },
             },
         ],
@@ -578,6 +580,7 @@ export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMe
                 label: {
                     name: COLOR_PICKER_COMPONENT,
                     hoverable: false,
+                    selectable: false,
                 },
             },
         ],

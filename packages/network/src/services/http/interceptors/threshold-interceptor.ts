@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { Observable } from 'rxjs';
 import type { Nullable } from '@univerjs/core';
-import { remove } from '@univerjs/core';
 import type { HTTPInterceptorFnFactory } from '../interceptor';
+import { remove } from '@univerjs/core';
+import { Observable } from 'rxjs';
 
 export interface IThresholdInterceptorFactoryParams {
     maxParallel?: number;

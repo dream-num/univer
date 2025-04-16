@@ -1,0 +1,103 @@
+@slider-bg: rgb(var(--text-color-secondary));
+@slider-width: 116px;
+@slider-height: 2px;
+@slider-radius: 15px;
+
+@slider-handle-size: 12px;
+
+@slider-value-width: 55px;
+@slider-value-height: 28px;
+
+@slider-parts-hover-color: rgb(var(--border-color));
+
+:export {
+    --slider-width: unit(@slider-width);
+    --slider-handle-size: unit(@slider-handle-size);
+}
+
+.slider {
+    user-select: none;
+    display: flex;
+    gap: var(--margin-xxs);
+    align-items: center;
+
+    &-disabled {
+        cursor: not-allowed;
+
+        .slider {
+            &-rail {
+                background-color: rgb(var(--grey-300));
+            }
+
+            &-handle {
+                background-color: rgb(var(--grey-300));
+                box-shadow: none;
+
+                &:hover {
+                    cursor: not-allowed;
+                    background-color: rgb(var(--grey-300));
+                }
+            }
+
+            &-reset-point {
+                cursor: not-allowed;
+            }
+
+            &-value {
+                &:hover {
+                    cursor: not-allowed;
+                    background-color: rgb(var(--grey-300));
+                }
+            }
+
+            &-value {
+                pointer-events: none;
+                color: rgb(var(--grey-300));
+
+                &:hover {
+                    background-color: transparent;
+                }
+            }
+        }
+    }
+
+    &-rail {
+        @padding: (@slider-handle-size / 2);
+
+        position: relative;
+
+        width: @slider-width;
+        height: @slider-height;
+        padding: 0 @padding;
+
+        background-color: @slider-bg;
+        border-radius: @slider-radius;
+    }
+
+    &-inner-rail {
+        position: relative;
+        height: @slider-height;
+    }
+
+    &-handle {
+        cursor: pointer;
+
+        position: absolute;
+        top: calc(50% - @slider-handle-size / 2);
+        transform: translateX(-50%);
+
+        width: @slider-handle-size;
+        height: @slider-handle-size;
+
+        background-color: rgb(var(--color-white));
+        border-radius: 50%;
+        box-shadow: 0 0 6px 0 rgb(0 0 0 / 10%);
+
+        transition: background 0.2s;
+
+        &:hover {
+            background-color: @slider-parts-hover-color;
+            box-shadow: none;
+        }
+    }
+}

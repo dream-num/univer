@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,13 @@
 
 import type {
     ICellData,
-    ICellDataWithSpanAndDisplay, IDisposable,
+    ICellDataWithSpanAndDisplay,
+    IDisposable,
     IMutationInfo,
     IRange,
-    Nullable, Workbook, Worksheet,
+    Nullable,
+    Workbook,
+    Worksheet,
 } from '@univerjs/core';
 import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
 import type { Observable } from 'rxjs';
@@ -37,7 +40,11 @@ import type {
 } from './type';
 import {
     CellModeEnum,
-    createIdentifier, Disposable, ErrorService, extractPureTextFromCell, ICommandService,
+    createIdentifier,
+    Disposable,
+    ErrorService,
+    extractPureTextFromCell,
+    ICommandService,
     ILogService,
     Inject,
     Injector,
@@ -52,10 +59,11 @@ import {
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { IRenderManagerService, withCurrentTypeOfRenderer } from '@univerjs/engine-render';
 
 import {
     getPrimaryForRange,
+    rangeToDiscreteRange,
     SetSelectionsOperation,
     SetWorksheetActiveOperation,
 
@@ -64,7 +72,7 @@ import {
 import { FILE__BMP_CLIPBOARD_MIME_TYPE, FILE__JPEG_CLIPBOARD_MIME_TYPE, FILE__WEBP_CLIPBOARD_MIME_TYPE, FILE_PNG_CLIPBOARD_MIME_TYPE, HTML_CLIPBOARD_MIME_TYPE, IClipboardInterfaceService, imageMimeTypeSet, INotificationService, IPlatformService, PLAIN_TEXT_CLIPBOARD_MIME_TYPE } from '@univerjs/ui';
 
 import { BehaviorSubject } from 'rxjs';
-import { rangeToDiscreteRange, virtualizeDiscreteRanges } from '../../controllers/utils/range-tools';
+import { virtualizeDiscreteRanges } from '../../controllers/utils/range-tools';
 import { IMarkSelectionService } from '../mark-selection/mark-selection.service';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import { createCopyPasteSelectionStyle } from '../utils/selection-util';
@@ -76,7 +84,7 @@ import { UniverPastePlugin } from './html-to-usm/paste-plugins/plugin-univer';
 import { WordPastePlugin } from './html-to-usm/paste-plugins/plugin-word';
 import { COPY_TYPE } from './type';
 import { USMToHtmlService } from './usm-to-html/convertor';
-import { convertTextToTable, discreteRangeContainsRange, htmlIsFromExcel, mergeSetRangeValues, rangeIntersectWithDiscreteRange } from './utils';
+import { convertTextToTable, discreteRangeContainsRange, htmlContainsImage, htmlIsFromExcel, mergeSetRangeValues, rangeIntersectWithDiscreteRange } from './utils';
 
 export const PREDEFINED_HOOK_NAME = {
     DEFAULT_COPY: 'default-copy',
@@ -175,8 +183,14 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         @Inject(Injector) private readonly _injector: Injector
     ) {
         super();
+
         this._htmlToUSM = new HtmlToUSMService({
-            getCurrentSkeleton: () => this._renderManagerService.withCurrentTypeOfUnit(UniverInstanceType.UNIVER_SHEET, SheetSkeletonManagerService)?.getCurrentParam(),
+            getCurrentSkeleton: () => withCurrentTypeOfRenderer(
+                UniverInstanceType.UNIVER_SHEET,
+                SheetSkeletonManagerService,
+                this._univerInstanceService,
+                this._renderManagerService
+            )?.getCurrentParam(),
         });
 
         this._usmToHtml = new USMToHtmlService();
@@ -202,8 +216,11 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         return this._copyContentCache;
     }
 
-    generateCopyContent(workbookId: string, worksheetId: string, range: IRange): Nullable<ICopyContent> {
+    generateCopyContent(workbookId: string, worksheetId: string, range: IRange, copyType: COPY_TYPE = COPY_TYPE.COPY): Nullable<ICopyContent> {
+        const hooks = this._clipboardHooks;
+        hooks.forEach((h) => h.onBeforeCopy?.(workbookId, worksheetId, range, copyType));
         const copyContent = this._generateCopyContent(workbookId, worksheetId, range, this._clipboardHooks);
+        hooks.forEach((h) => h.onAfterCopy?.());
 
         return copyContent;
     }
@@ -219,13 +236,10 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         if (!worksheet) {
             return false;
         }
-        const hooks = this._clipboardHooks;
         const workbookId = workbook.getUnitId();
         const worksheetId = worksheet.getSheetId();
 
-        hooks.forEach((h) => h.onBeforeCopy?.(workbookId, worksheetId, selection.range, copyType));
         const copyContent = this.generateCopyContent(workbookId, worksheetId, selection.range);
-        hooks.forEach((h) => h.onAfterCopy?.());
 
         if (!copyContent) {
             return false;
@@ -270,27 +284,12 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
                 ? await item.getType(HTML_CLIPBOARD_MIME_TYPE).then((blob) => blob && blob.text())
                 : '';
 
-        const isFromExcel = htmlIsFromExcel(html);
-
-        // clipboard item from excel may contain image, so we need to check if the clipboard item is from excel
         const imageIndex = types.findIndex((type) => imageMimeTypeSet.has(type));
-        if (imageIndex !== -1 && !isFromExcel) {
-            const imageMimeType = types[imageIndex]!;
-            const imageBlob = await item.getType(imageMimeType);
 
-            if (imageBlob) {
-                const file = new File(
-                    [imageBlob],
-                    `clipboard-image.${IMAGE_MIME_TO_EXTENSION[imageMimeType as keyof typeof IMAGE_MIME_TO_EXTENSION]}`,
-                    { type: imageMimeType });
-
-                return this._pasteFiles([file], pasteType);
-            }
-        }
-
-        if (html) {
+        const shouldUseHTMLPaste = imageIndex === -1 || !htmlContainsImage(html);
+        if (html && shouldUseHTMLPaste) {
             // Firstly see if the html content is from Excel
-            if (this._platformService.isWindows && isFromExcel) {
+            if (this._platformService.isWindows && htmlIsFromExcel(html)) {
                 this._notificationService.show({
                     type: 'warning',
                     title: this._localeService.t('clipboard.shortCutNotify.title'),
@@ -301,6 +300,23 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             }
 
             return this._pasteHTML(html, pasteType);
+        }
+
+        // clipboard item from excel may contain image, so we need to check if the clipboard item is from excel
+        if (imageIndex !== -1) {
+            const imageMimeType = types[imageIndex]!;
+            const imageBlob = await item.getType(imageMimeType);
+
+            if (imageBlob) {
+                const imageExtension = IMAGE_MIME_TO_EXTENSION[imageMimeType as keyof typeof IMAGE_MIME_TO_EXTENSION];
+                const file = new File(
+                    [imageBlob],
+                    `clipboard-image.${imageExtension}`,
+                    { type: imageMimeType }
+                );
+
+                return this._pasteFiles([file], pasteType);
+            }
         }
 
         if (text) {
@@ -470,10 +486,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         unitId: string;
         subUnitId: string;
         range: IDiscreteRange;
-    }) => undefined | ({
-        undos: IMutationInfo[];
-        redos: IMutationInfo[];
-    })): Promise<boolean> {
+    }) => undefined | ({ undos: IMutationInfo[]; redos: IMutationInfo[] })): Promise<boolean> {
         const target = this._getPastingTarget();
         if (!target.subUnitId || !target.selection) {
             return false;
@@ -906,7 +919,9 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
                     endRow,
                     startColumn,
                     endColumn,
-                }, primary, style: null,
+                },
+                primary,
+                style: null,
             }],
         };
         return {

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,9 @@
 
 import type { DocumentDataModel, IAccessor, ICommand, IMutationInfo, IParagraphStyle } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import { CommandType, ICommandService, IUniverInstanceService, JSONX, MemoryCursor, TextX, TextXActionType, UniverInstanceType, UpdateDocsAttributeType } from '@univerjs/core';
+import { BuildTextUtils, CommandType, ICommandService, IUniverInstanceService, JSONX, MemoryCursor, TextX, TextXActionType, UniverInstanceType, UpdateDocsAttributeType } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { getRichTextEditPath } from '../util';
-import { getParagraphsInRanges } from './list.command';
 
 export interface IDocParagraphSettingCommandParams {
     paragraph: Partial<Pick<IParagraphStyle, 'hanging' | 'horizontalAlign' | 'spaceBelow' | 'spaceAbove' | 'indentEnd' | 'indentStart' | 'lineSpacing' | 'indentFirstLine' | 'snapToGrid' | 'spacingRule'>>;
@@ -45,8 +44,10 @@ export const DocParagraphSettingCommand: ICommand<IDocParagraphSettingCommandPar
 
         const unitId = docDataModel.getUnitId();
 
-        const allParagraphs = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.paragraphs ?? [];
-        const paragraphs = getParagraphsInRanges(docRanges, allParagraphs) ?? [];
+        const segment = docDataModel.getSelfOrHeaderFooterModel(segmentId);
+        const allParagraphs = segment.getBody()?.paragraphs ?? [];
+        const dataStream = segment.getBody()?.dataStream ?? '';
+        const paragraphs = BuildTextUtils.range.getParagraphsInRanges(docRanges, allParagraphs, dataStream) ?? [];
 
         const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
             id: RichTextEditingMutation.id,

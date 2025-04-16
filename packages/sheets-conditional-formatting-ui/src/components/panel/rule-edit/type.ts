@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { createInterceptorKey } from '@univerjs/core';
 import type { InterceptorManager } from '@univerjs/core';
 import type { IConditionalFormattingRuleConfig } from '@univerjs/sheets-conditional-formatting';
+import { createInterceptorKey } from '@univerjs/core';
 
 export const beforeSubmit = createInterceptorKey<boolean, null>('beforeSubmit');
 export const submit = createInterceptorKey<any, null>('submit');

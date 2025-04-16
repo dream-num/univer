@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,14 +22,8 @@ import type {
     ISetNumfmtMutationParams,
     ISetRangeValuesMutationParams,
 } from '@univerjs/sheets';
-import { CellValueType,
-    CommandType,
-    ICommandService,
-    IUndoRedoService,
-    IUniverInstanceService,
-    ObjectMatrix,
-    sequenceExecute } from '@univerjs/core';
-import { DEFAULT_TEXT_FORMAT } from '@univerjs/engine-numfmt';
+import { CellValueType, CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, ObjectMatrix, sequenceExecute } from '@univerjs/core';
+import { isTextFormat } from '@univerjs/engine-numfmt';
 import {
     checkCellValueType,
     factoryRemoveNumfmtUndoMutation,
@@ -82,7 +76,7 @@ export const SetNumfmtCommand: ICommand<ISetNumfmtCommandParams> = {
         const undos: Array<IMutationInfo<IRemoveNumfmtMutationParams | ISetNumfmtMutationParams | ISetRangeValuesMutationParams>> = [];
         if (setCells.length) {
             const setCellTypeObj = setCells.reduce((pre, cur) => {
-                if (cur.pattern === DEFAULT_TEXT_FORMAT) {
+                if (isTextFormat(cur.pattern)) {
                     pre.setValue(cur.row, cur.col, { t: CellValueType.STRING });
                 }
                 const cell = worksheet.getCellRaw(cur.row, cur.col);

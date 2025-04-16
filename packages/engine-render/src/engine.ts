@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -107,6 +107,10 @@ export class Engine extends Disposable {
     private _deltaTime = 0;
 
     private _performanceMonitor: PerformanceMonitor;
+
+    private _pointerClickEvent!: (evt: Event) => void;
+
+    private _pointerDblClickEvent!: (evt: Event) => void;
 
     private _pointerMoveEvent!: (evt: Event) => void;
 
@@ -415,12 +419,14 @@ export class Engine extends Disposable {
         const scenes = { ...this.getScenes() };
         const sceneKeys = Object.keys(scenes);
         sceneKeys.forEach((key) => {
-            (scenes[key] as any).dispose();
+            (scenes[key] as IDisposable).dispose();
         });
         this._scenes = {};
 
         const eventPrefix = getPointerPrefix();
         const canvasEle = this.getCanvasElement();
+        canvasEle.removeEventListener('click', this._pointerClickEvent);
+        canvasEle.removeEventListener('dblclick', this._pointerDblClickEvent);
         canvasEle.removeEventListener(`${eventPrefix}leave`, this._pointerLeaveEvent);
         canvasEle.removeEventListener(`${eventPrefix}enter`, this._pointerEnterEvent);
         canvasEle.removeEventListener(`${eventPrefix}move`, this._pointerMoveEvent);
@@ -438,11 +444,14 @@ export class Engine extends Disposable {
         this._renderFrameTasks = [];
         this._performanceMonitor.dispose();
         this.getCanvas().dispose();
-        this.onTransformChange$.complete();
+
+        this._resizeObserver?.disconnect();
 
         this.onTransformChange$.complete();
         this._beginFrame$.complete();
         this._endFrame$.complete();
+        this.renderFrameTags$.complete();
+        this.renderFrameTimeMetric$.complete();
 
         this._clearResizeListener();
         this._container = null;
@@ -618,6 +627,20 @@ export class Engine extends Disposable {
     // eslint-disable-next-line max-lines-per-function
     private _handlePointerAction() {
         const eventPrefix = getPointerPrefix();
+
+        this._pointerClickEvent = (e: Event) => {
+            const deviceType = this._getPointerType(e);
+            const deviceEvent = e as IPointerEvent;
+            deviceEvent.deviceType = deviceType;
+            this.onInputChanged$.emitEvent(deviceEvent);
+        };
+
+        this._pointerDblClickEvent = (e: Event) => {
+            const deviceType = this._getPointerType(e);
+            const deviceEvent = e as IPointerEvent;
+            deviceEvent.deviceType = deviceType;
+            this.onInputChanged$.emitEvent(deviceEvent);
+        };
 
         this._pointerMoveEvent = (e: Event) => {
             const evt = e as PointerEvent | MouseEvent;
@@ -863,6 +886,8 @@ export class Engine extends Disposable {
         };
 
         const canvasEle = this.getCanvasElement();
+        canvasEle.addEventListener('click', this._pointerClickEvent);
+        canvasEle.addEventListener('dblclick', this._pointerDblClickEvent);
         canvasEle.addEventListener(`${eventPrefix}enter`, this._pointerEnterEvent);
         canvasEle.addEventListener(`${eventPrefix}leave`, this._pointerLeaveEvent);
         canvasEle.addEventListener(`${eventPrefix}move`, this._pointerMoveEvent);

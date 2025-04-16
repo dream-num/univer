@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -738,8 +738,7 @@ export default {
         links: [{
             title: '教導',
             url: 'https://support.microsoft.com/zh-tw/office/radians-%E5%87%BD%E6%95%B0-ac409508-3d48-45f5-ac02-1497c92de5bf',
-        },
-        ],
+        }],
         functionParameter: {
             angle: { name: '角度', detail: '要轉換的角度 (以度數為單位)。' },
         },

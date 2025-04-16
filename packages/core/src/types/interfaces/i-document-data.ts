@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -216,13 +216,13 @@ export enum FollowNumberWithType {
  */
 export enum ListGlyphType {
     BULLET, // The glyph type is unspecified or unsupported.
-    NONE, // 	An empty string.
-    DECIMAL, // 	A number, like 1, 2, or 3.
-    DECIMAL_ZERO, // 	A number where single digit numbers are prefixed with a zero, like 01, 02, or 03. Numbers with more than one digit are not prefixed with a zero.
-    UPPER_LETTER, // 	An uppercase letter, like A, B, or C.
-    LOWER_LETTER, // 	A lowercase letter, like a, b, or c.
+    NONE, // An empty string.
+    DECIMAL, // A number, like 1, 2, or 3.
+    DECIMAL_ZERO, // A number where single digit numbers are prefixed with a zero, like 01, 02, or 03. Numbers with more than one digit are not prefixed with a zero.
+    UPPER_LETTER, // An uppercase letter, like A, B, or C.
+    LOWER_LETTER, // A lowercase letter, like a, b, or c.
     UPPER_ROMAN, // An uppercase Roman numeral, like I, II, or III.
-    LOWER_ROMAN, // 	A lowercase Roman numeral, like i, ii, or iii.
+    LOWER_ROMAN, // A lowercase Roman numeral, like i, ii, or iii.
 
     /**
      * Not yet achieved, aligned with Excel's standards.
@@ -287,13 +287,13 @@ export enum ListGlyphType {
  * The types of alignment for a bullet.
  */
 export enum BulletAlignment {
-    BULLET_ALIGNMENT_UNSPECIFIED, //	The bullet alignment is unspecified.
-    START, //	The bullet is aligned to the start of the space allotted for rendering the bullet. Left-aligned for LTR text, right-aligned otherwise.
-    CENTER, //	The bullet is aligned to the center of the space allotted for rendering the bullet.
-    END, //	The bullet is aligned to the end of the space allotted for rendering the bullet. Right-aligned for LTR text, left-aligned otherwise.
+    BULLET_ALIGNMENT_UNSPECIFIED, // The bullet alignment is unspecified.
+    START, // bullet is aligned to the start of the space allotted for rendering the bullet. Left-aligned for LTR text, right-aligned otherwise.
+    CENTER, // The bullet is aligned to the center of the space allotted for rendering the bullet.
+    END, // The bullet is aligned to the end of the space allotted for rendering the bullet. Right-aligned for LTR text, left-aligned otherwise.
 
     //Not achieved, aligned with Excel's standards.
-    BOTH, //	The bullet is aligned such that it is equidistant from both the start and end of the space allotted for rendering the bullet.
+    BOTH, // The bullet is aligned such that it is equidistant from both the start and end of the space allotted for rendering the bullet.
 }
 
 // /**
@@ -709,11 +709,11 @@ export interface ITextStyle extends IStyleBase {
 }
 
 export interface IIndentStart {
-    indentFirstLine?: INumberUnit ; // indentFirstLine，17.3.1.12 ind (Paragraph Indentation)
-    hanging?: INumberUnit ; // hanging，offset of first word except first line
-    indentStart?: INumberUnit ; // indentStart
+    indentFirstLine?: INumberUnit; // indentFirstLine，17.3.1.12 ind (Paragraph Indentation)
+    hanging?: INumberUnit; // hanging，offset of first word except first line
+    indentStart?: INumberUnit; // indentStart
     tabStops?: ITabStop[]; // tabStops
-    indentEnd?: INumberUnit ; // indentEnd
+    indentEnd?: INumberUnit; // indentEnd
 }
 
 /**
@@ -732,8 +732,8 @@ export interface IParagraphProperties extends IIndentStart {
     direction?: TextDirection; // direction
     spacingRule?: SpacingRule; // SpacingRule
     snapToGrid?: BooleanNumber; // snapToGrid 17.3.2.34 snapToGrid (Use Document Grid Settings For Inter-Character Spacing)
-    spaceAbove?: INumberUnit ; // spaceAbove before beforeLines (Spacing Above Paragraph)
-    spaceBelow?: INumberUnit ; // spaceBelow after afterLines (Spacing Below Paragraph)
+    spaceAbove?: INumberUnit; // spaceAbove before beforeLines (Spacing Above Paragraph)
+    spaceBelow?: INumberUnit; // spaceBelow after afterLines (Spacing Below Paragraph)
     borderBetween?: IParagraphBorder; // borderBetween
     borderTop?: IParagraphBorder; // borderTop
     borderBottom?: IParagraphBorder; // borderBottom
@@ -755,20 +755,19 @@ export enum NamedStyleType {
     NORMAL_TEXT, // Normal text.
     TITLE, // Title.
     SUBTITLE, // Subtitle.
-    HEADING_1, //	Heading 1.
+    HEADING_1, // Heading 1.
     HEADING_2, // Heading 2.
-    HEADING_3, //	Heading 3.
-    HEADING_4, //	Heading 4.
-    HEADING_5, //	Heading 5.
-    HEADING_6, //	Heading 6.
+    HEADING_3, // Heading 3.
+    HEADING_4, // Heading 4.
+    HEADING_5, // Heading 5.
 }
 
 // export enum Alignment {
 //     ALIGNMENT_UNSPECIFIED, //The paragraph alignment is inherited from the parent.
 //     START, //The paragraph is aligned to the start of the line. Left-aligned for LTR text, right-aligned otherwise.
-//     CENTER, //	The paragraph is centered.
+//     CENTER, // The paragraph is centered.
 //     END, //The paragraph is aligned to the end of the line. Right-aligned for LTR text, left-aligned otherwise.
-//     JUSTIFIED, //	The paragraph is justified.
+//     JUSTIFIED, // The paragraph is justified.
 // }
 
 export enum SpacingRule {
@@ -971,8 +970,8 @@ export interface ITableCellMargin {
  */
 export interface ITableCellBorder {
     color: IColorStyle; // color
-    width: INumberUnit; // width
-    dashStyle: DashStyleType; // dashStyle
+    width?: INumberUnit; // width
+    dashStyle?: DashStyleType; // dashStyle
 }
 
 // 17.18.101ST_VerticalJc (Vertical Alignment Type)
@@ -1029,7 +1028,7 @@ export enum ObjectRelativeFromH {
     RIGHT_MARGIN,
 }
 
-// 20.4.3.4 ST_RelFromH (Horizontal Relative Positioning)
+// 20.4.3.4 ST_RelFromH (Vertical Relative Positioning)
 export enum ObjectRelativeFromV {
     PAGE,
     PARAGRAPH,
@@ -1083,4 +1082,3 @@ export enum PageOrientType {
 }
 
 // #region - tech dept
-

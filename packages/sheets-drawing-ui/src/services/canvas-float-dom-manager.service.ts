@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,8 +89,8 @@ export interface IDOMAnchor {
     height: number;
     horizonOffsetAlign?: 'left' | 'right';
     verticalOffsetAlign?: 'top' | 'bottom';
-    marginX?: number;
-    marginY?: number;
+    marginX?: number | string;
+    marginY?: number | string;
 }
 
 export interface ILimitBound extends IBoundRectNoAngle {
@@ -370,10 +370,13 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         return props;
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _drawingAddListener() {
         this.disposeWithMe(
 
+            // eslint-disable-next-line max-lines-per-function
             this._drawingManagerService.add$.subscribe((params: IDrawingSearch[]) => {
+                // eslint-disable-next-line max-lines-per-function, complexity
                 (params).forEach((param) => {
                     const { unitId, subUnitId, drawingId } = param;
                     const target = getSheetCommandTarget(this._univerInstanceService, { unitId, subUnitId });

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,8 @@
  */
 
 import type { Injector, IPageElement, Nullable, PageElementType } from '@univerjs/core';
-import { Registry } from '@univerjs/core';
 import type { BaseObject, Scene } from '@univerjs/engine-render';
+import { Registry } from '@univerjs/core';
 
 export abstract class ObjectAdaptor {
     zIndex = 0;

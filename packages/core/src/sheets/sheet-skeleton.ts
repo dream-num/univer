@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,7 +97,7 @@ export class SheetSkeleton extends Skeleton {
         this._isRowStylePrecedeColumnStyle = this._configService.getConfig(IS_ROW_STYLE_PRECEDE_COLUMN_STYLE) ?? false;
     }
 
-    _resetCache() {
+    resetCache() {
         //
     }
 
@@ -447,10 +447,14 @@ export class SheetSkeleton extends Skeleton {
      * @param bounds
      */
     calculate(): Nullable<SheetSkeleton> {
-        this._resetCache();
+        this.resetCache();
         this._updateLayout();
 
         return this;
+    }
+
+    resetRangeCache(_ranges: IRange[]): void {
+        // ...
     }
 
     private _dynamicallyUpdateRowHeaderWidth(rowHeader: {

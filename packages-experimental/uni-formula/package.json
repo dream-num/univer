@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/uni-formula",
-    "version": "0.2.6",
+    "version": "0.6.6",
     "private": true,
     "description": "",
     "author": "DreamNum <developer@univer.ai>",
@@ -56,13 +56,12 @@
         "build": "univer-cli build"
     },
     "dependencies": {
-        "@univerjs/core": "workspace:*",
-        "clsx": "^2.1.1"
+        "@univerjs/core": "workspace:*"
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
-        "typescript": "^5.7.3",
-        "vite": "^6.0.11",
-        "vitest": "^3.0.4"
+        "typescript": "^5.8.3",
+        "vite": "^6.2.6",
+        "vitest": "^3.1.1"
     }
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +23,13 @@ import type {
 import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, SpreadsheetColumnHeader, SpreadsheetHeader } from '@univerjs/engine-render';
 import type { IMoveColsCommandParams, IMoveRowsCommandParams, ISelectionWithStyle, WorkbookSelectionModel } from '@univerjs/sheets';
 import {
-    createInterceptorKey, Disposable, ICommandService,
+    createInterceptorKey,
+    Disposable,
+    ICommandService,
     Inject,
     InterceptorManager,
-    RANGE_TYPE } from '@univerjs/core';
+    RANGE_TYPE,
+} from '@univerjs/core';
 import {
     CURSOR_TYPE,
     Rect,

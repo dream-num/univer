@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,35 +15,34 @@
  */
 
 import type { DocumentDataModel, IDisposable, ITextRange } from '@univerjs/core';
-import type { Editor } from '@univerjs/docs-ui';
+import type { Editor, IKeyboardEventConfig } from '@univerjs/docs-ui';
 import type { KeyCode, MetaKeys } from '@univerjs/ui';
-import type { ReactNode } from 'react';
-import type { IRefSelection } from '../range-selector/hooks/useHighlight';
-import type { IKeyboardEventConfig } from '../range-selector/hooks/useKeyboardEvent';
-import type { FormulaSelectingType } from './hooks/useFormulaSelection';
-import { BuildTextUtils, createInternalEditorID, generateRandomId, IUniverInstanceService, UniverInstanceType, useDependency, useObservable } from '@univerjs/core';
-import { DocBackScrollRenderController, DocSelectionRenderService, IEditorService } from '@univerjs/docs-ui';
+import type { CSSProperties, ReactNode, Ref } from 'react';
+import type { FormulaSelectingType } from './hooks/use-formula-selection';
+import type { IRefSelection } from './hooks/use-highlight';
+import { BuildTextUtils, createInternalEditorID, generateRandomId, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { clsx } from '@univerjs/design';
+import { DocBackScrollRenderController, DocSelectionRenderService, IEditorService, useKeyboardEvent, useResize } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { EMBEDDING_FORMULA_EDITOR } from '@univerjs/sheets-ui';
-import { useEvent, useUpdateEffect } from '@univerjs/ui';
-import clsx from 'clsx';
-import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { useFocus } from '../range-selector/hooks/useFocus';
-import { useFormulaToken } from '../range-selector/hooks/useFormulaToken';
-import { useDocHight, useSheetHighlight } from '../range-selector/hooks/useHighlight';
-import { useKeyboardEvent } from '../range-selector/hooks/useKeyboardEvent';
-import { useLeftAndRightArrow } from '../range-selector/hooks/useLeftAndRightArrow';
-import { useRefactorEffect } from '../range-selector/hooks/useRefactorEffect';
-import { useResetSelection } from '../range-selector/hooks/useResetSelection';
-import { useResize } from '../range-selector/hooks/useResize';
-import { useSwitchSheet } from '../range-selector/hooks/useSwitchSheet';
+import { useDependency, useEvent, useObservable, useUpdateEffect } from '@univerjs/ui';
+import { forwardRef, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { findIndexFromSequenceNodes, findRefSequenceIndex } from '../range-selector/utils/find-index-from-sequence-nodes';
 import { HelpFunction } from './help-function/HelpFunction';
-import { useFormulaSelecting } from './hooks/useFormulaSelection';
-import { useSheetSelectionChange } from './hooks/useSheetSelectionChange';
-import { useVerify } from './hooks/useVerify';
+import { useFocus } from './hooks/use-focus';
+import { useFormulaSelecting } from './hooks/use-formula-selection';
+import { useFormulaToken } from './hooks/use-formula-token';
+import { useDocHight, useSheetHighlight } from './hooks/use-highlight';
+import { useLeftAndRightArrow } from './hooks/use-left-and-right-arrow';
+import { useRefactorEffect } from './hooks/use-refactor-effect';
+import { useResetSelection } from './hooks/use-reset-selection';
+import { useSheetSelectionChange } from './hooks/use-sheet-selection-change';
+import { useStateRef } from './hooks/use-state-ref';
+import { useSwitchSheet } from './hooks/use-switch-sheet';
+import { useVerify } from './hooks/use-verify';
 import styles from './index.module.less';
 import { SearchFunction } from './search-function/SearchFunction';
-import { getFormulaText } from './utils/getFormulaText';
+import { getFormulaText } from './utils/get-formula-text';
 
 export interface IFormulaEditorProps {
     unitId: string;
@@ -56,9 +55,6 @@ export interface IFormulaEditorProps {
     onFocus?: () => void;
     onBlur?: () => void;
     isSupportAcrossSheet?: boolean;
-    actions?: {
-        handleOutClick?: (e: MouseEvent, cb: () => void) => void;
-    };
     className?: string;
     editorId?: string;
     moveCursor?: boolean;
@@ -73,11 +69,16 @@ export interface IFormulaEditorProps {
      */
     disableSelectionOnClick?: boolean;
     disableContextMenu?: boolean;
-    style?: React.CSSProperties;
+    style?: CSSProperties;
 }
 
 const noop = () => { };
-export function FormulaEditor(props: IFormulaEditorProps) {
+
+export interface IFormulaEditorRef {
+    isClickOutSide: (e: MouseEvent) => boolean;
+}
+
+export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IFormulaEditorRef>) => {
     const {
         errorText,
         initValue,
@@ -89,7 +90,6 @@ export function FormulaEditor(props: IFormulaEditorProps) {
         onBlur = noop,
         onChange: propOnChange,
         onVerify,
-        actions,
         className,
         editorId: propEditorId,
         moveCursor = true,
@@ -107,16 +107,14 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     const editorService = useDependency(IEditorService);
     const sheetEmbeddingRef = useRef<HTMLDivElement>(null);
     const onChange = useEvent(propOnChange);
-    // init actions
-    if (actions) {
-        actions.handleOutClick = (e: MouseEvent, cb: () => void) => {
+    useImperativeHandle(ref, () => ({
+        isClickOutSide: (e: MouseEvent) => {
             if (sheetEmbeddingRef.current) {
-                const isContain = sheetEmbeddingRef.current.contains(e.target as Node);
-                !isContain && cb();
+                return !sheetEmbeddingRef.current.contains(e.target as Node);
             }
-        };
-    }
-
+            return false;
+        },
+    }));
     const onFormulaSelectingChange = useEvent(propOnFormulaSelectingChange);
     const searchFunctionRef = useRef<HTMLElement>(null);
     const editorRef = useRef<Editor>(undefined);
@@ -130,9 +128,10 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     useObservable(document?.change$);
     const getFormulaToken = useFormulaToken();
     const formulaText = BuildTextUtils.transform.getPlainText(document?.getBody()?.dataStream ?? '');
+    const formulaTextRef = useStateRef(formulaText);
     const formulaWithoutEqualSymbol = useMemo(() => getFormulaText(formulaText), [formulaText]);
     const sequenceNodes = useMemo(() => getFormulaToken(formulaWithoutEqualSymbol), [formulaWithoutEqualSymbol, getFormulaToken]);
-    const { isSelecting } = useFormulaSelecting(editorId, isFocus, disableSelectionOnClick);
+    const { isSelecting, isSelectingRef } = useFormulaSelecting({ unitId, subUnitId, editorId, isFocus, disableOnClick: disableSelectionOnClick });
     const highTextRef = useRef('');
     const renderManagerService = useDependency(IRenderManagerService);
     const renderer = renderManagerService.getRenderById(editorId);
@@ -151,29 +150,52 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     const highlightDoc = useDocHight('=');
     const highlightSheet = useSheetHighlight(unitId, subUnitId);
     const highlight = useEvent((text: string, isNeedResetSelection: boolean = true, isEnd?: boolean, newSelections?: ITextRange[]) => {
-        if (!editorRef.current) {
-            return;
-        }
+        if (!editorRef.current) return;
         highTextRef.current = text;
-        const sequenceNodes = getFormulaToken(text[0] === '=' ? text.slice(1) : '');
+        const formulaStr = text[0] === '=' ? text.slice(1) : '';
+        const sequenceNodes = getFormulaToken(formulaStr);
+        const parsedFormula = sequenceNodes.reduce((pre, cur) => (typeof cur === 'object' ? `${pre}${cur.token}` : `${pre}${cur}`), '');
         const ranges = highlightDoc(
             editorRef.current,
-            sequenceNodes,
+            parsedFormula === formulaStr ? sequenceNodes : [],
             isNeedResetSelection,
             newSelections
         );
         refSelections.current = ranges;
 
         if (isEnd) {
+            const currentDocSelections = newSelections ?? editor?.getSelectionRanges();
+            if (currentDocSelections?.length !== 1) {
+                return;
+            }
+            const docRange = currentDocSelections[0];
+            const offset = docRange.startOffset - 1;
+            const nodeIndex = findIndexFromSequenceNodes(sequenceNodes, offset, false);
+            const refIndex = findRefSequenceIndex(sequenceNodes, nodeIndex);
+            // make sure current editing selection is at the end
+            if (refIndex >= 0) {
+                const target = ranges.splice(refIndex, 1)[0];
+                target && ranges.push(target);
+            }
+
             highlightSheet(isFocus ? ranges : [], editorRef.current);
         }
     });
 
+    // re highlight when focus
     useEffect(() => {
         if (isFocus) {
             highlight(formulaText, false, true);
         }
-    }, [formulaText, isFocus, highlight]);
+    }, [isFocus]);
+
+    // re highlight when formula text changed
+    useEffect(() => {
+        if (isFocus) {
+            if (highTextRef.current === formulaText) return;
+            highlight(formulaText, false, true);
+        }
+    }, [formulaText]);
 
     useVerify(isFocus, onVerify, formulaText);
     const focus = useFocus(editor);
@@ -253,17 +275,18 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     useSheetSelectionChange(
         isFocus && Boolean(isSelecting && docFocusing),
         isFocus,
-        isSelecting,
+        isSelectingRef,
         unitId,
         subUnitId,
-        sequenceNodes,
         refSelections,
         isSupportAcrossSheet,
         Boolean(selectingMode),
         editor,
         handleSelectionChange
     );
-    useSwitchSheet(isFocus && Boolean(isSelecting && docFocusing), unitId, isSupportAcrossSheet, isFocusSet, onBlur, noop);
+    useSwitchSheet(isFocus && Boolean(isSelecting && docFocusing), unitId, isSupportAcrossSheet, isFocusSet, onBlur, () => {
+        highlight(formulaTextRef.current, false, true);
+    });
 
     const handleFunctionSelect = (res: { text: string; offset: number }) => {
         if (res) {
@@ -301,8 +324,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
                     className={styles.sheetEmbeddingFormulaEditorText}
                     ref={formulaEditorContainerRef}
                     onMouseUp={handleMouseUp}
-                >
-                </div>
+                />
             </div>
             {errorText !== undefined ? <div className={styles.sheetEmbeddingFormulaEditorErrorWrap}>{errorText}</div> : null}
             {editor
@@ -329,4 +351,4 @@ export function FormulaEditor(props: IFormulaEditorProps) {
         </div>
     )
     ;
-}
+});

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 
 export { UniverDocUniFormulaPlugin } from './uni-formula.plugin';
-export { IUniFormulaService, DumbUniFormulaService } from './services/uni-formula.service';
+export { DumbUniFormulaService, IUniFormulaService } from './services/uni-formula.service';
 export { UNI_FORMULA_PLUGIN_NAME as DOC_FORMULA_PLUGIN_NAME } from './const';
 export type { IDocFormulaCache, IDocFormulaData, IDocFormulaReference } from './models/doc-formula';
 export type { ISlideFormulaCache, ISlideFormulaData, ISlideFormulaReference } from './models/slide-formula';
@@ -23,10 +23,10 @@ export type { ISlideFormulaCache, ISlideFormulaData, ISlideFormulaReference } fr
 // #region - all commands
 
 export {
+    AddDocUniFormulaMutation,
     type IAddDocUniFormulaMutationParams,
     type IRemoveDocUniFormulaMutationParams,
     type IUpdateDocUniFormulaMutationParams,
-    AddDocUniFormulaMutation,
     RemoveDocUniFormulaMutation,
     UpdateDocUniFormulaMutation,
 } from './commands/mutations/doc-formula.mutation';

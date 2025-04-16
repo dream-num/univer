@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,9 @@ import type {
     AsyncObject,
     BaseReferenceObject,
     FunctionVariantType,
-    NodeValueType } from '../reference-object/base-reference-object';
+    NodeValueType,
+} from '../reference-object/base-reference-object';
+import type { BaseValueObject } from '../value-object/base-value-object';
 import type { FormulaFunctionResultValueType } from '../value-object/primitive-object';
 import { Inject, Injector } from '@univerjs/core';
 import { AstNodePromiseType } from '../../basics/common';
@@ -32,11 +34,10 @@ import { FormulaDataModel } from '../../models/formula-data.model';
 import { IFormulaCurrentConfigService } from '../../services/current-data.service';
 import { IDefinedNamesService } from '../../services/defined-names.service';
 import { IFunctionService } from '../../services/function.service';
-
 import { IFormulaRuntimeService } from '../../services/runtime.service';
-import { prefixHandler } from '../utils/prefixHandler';
+import { prefixHandler } from '../utils/prefix-handler';
 import { ArrayValueObject, transformToValueObject, ValueObjectFactory } from '../value-object/array-value-object';
-import { type BaseValueObject, ErrorValueObject } from '../value-object/base-value-object';
+import { ErrorValueObject } from '../value-object/base-value-object';
 import { BaseAstNode, ErrorNode } from './base-ast-node';
 import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './base-ast-node-factory';
 import { NODE_ORDER_MAP, NodeType } from './node-type';
@@ -125,6 +126,10 @@ export class FunctionNode extends BaseAstNode {
 
             if (object == null) {
                 continue;
+            }
+
+            if (object.isReferenceObject() && this._functionExecutor.needsFilteredOutRows) {
+                this._setFilteredOutRows(object as BaseReferenceObject);
             }
 
             // In the SUBTOTAL function, we need to get rowData information, we can only use ReferenceObject
@@ -348,6 +353,18 @@ export class FunctionNode extends BaseAstNode {
 
     private _setSheetsInfo() {
         this._functionExecutor.setSheetsInfo(this._currentConfigService.getSheetsInfo());
+    }
+
+    private _setFilteredOutRows(referenceObject: BaseReferenceObject) {
+        const { startRow, endRow } = referenceObject.getRangePosition();
+        const filteredOutRows = this._currentConfigService.getFilteredOutRows(
+            referenceObject.getUnitId(),
+            referenceObject.getSheetId(),
+            startRow,
+            endRow
+        );
+
+        referenceObject.setFilteredOutRows(filteredOutRows);
     }
 }
 

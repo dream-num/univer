@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,12 +22,12 @@ import { combineLatest, merge, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { MenuItemType } from '../../services/menu/menu';
 
-const undoRedoDisableFactory$ = (accessor: IAccessor) => {
+const undoRedoDisableFactory$ = (accessor: IAccessor, isUndo: boolean) => {
     const undoRedoService = accessor.get(IUndoRedoService);
     const contextService = accessor.get(IContextService);
 
     return combineLatest([
-        undoRedoService.undoRedoStatus$.pipe(map((v) => v.undos <= 0)),
+        undoRedoService.undoRedoStatus$.pipe(map((v) => isUndo ? v.undos <= 0 : v.redos <= 0)),
         merge([of({}), contextService.contextChanged$]),
     ]).pipe(map(([undoDisable]) => {
         return undoDisable || contextService.getContextValue(EDITOR_ACTIVATED) || contextService.getContextValue(FOCUSING_FX_BAR_EDITOR);
@@ -41,7 +41,7 @@ export function UndoMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         icon: 'UndoSingle',
         title: 'Undo',
         tooltip: 'toolbar.undo',
-        disabled$: undoRedoDisableFactory$(accessor),
+        disabled$: undoRedoDisableFactory$(accessor, true),
     };
 }
 
@@ -52,6 +52,6 @@ export function RedoMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         icon: 'RedoSingle',
         title: 'Redo',
         tooltip: 'toolbar.redo',
-        disabled$: undoRedoDisableFactory$(accessor),
+        disabled$: undoRedoDisableFactory$(accessor, false),
     };
 }

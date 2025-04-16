@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,27 +34,42 @@ export function InsertFunctionMenuItemFactory(accessor: IAccessor): IMenuItem {
         type: MenuItemType.SELECTOR,
         selections: [
             {
-                label: 'SUM',
+                label: {
+                    name: 'SUM',
+                    selectable: false,
+                },
                 value: 'SUM',
                 icon: 'SumSingle',
             },
             {
-                label: 'AVERAGE',
+                label: {
+                    name: 'AVERAGE',
+                    selectable: false,
+                },
                 value: 'AVERAGE',
                 icon: 'AvgSingle',
             },
             {
-                label: 'COUNT',
+                label: {
+                    name: 'COUNT',
+                    selectable: false,
+                },
                 value: 'COUNT',
                 icon: 'CntSingle',
             },
             {
-                label: 'MAX',
+                label: {
+                    name: 'MAX',
+                    selectable: false,
+                },
                 value: 'MAX',
                 icon: 'MaxSingle',
             },
             {
-                label: 'MIN',
+                label: {
+                    name: 'MIN',
+                    selectable: false,
+                },
                 value: 'MIN',
                 icon: 'MinSingle',
             },

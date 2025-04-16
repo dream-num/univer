@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,12 @@
 
 import { describe, expect, it } from 'vitest';
 
+import { ErrorType } from '../../../../basics/error-type';
+import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
+import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
+import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { FUNCTION_NAMES_ENGINEERING } from '../../function-names';
 import { Bitrshift } from '../index';
-import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
-import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
-import { ErrorType } from '../../../../basics/error-type';
-import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 
 describe('Test bitrshift function', () => {
     const testFunction = new Bitrshift(FUNCTION_NAMES_ENGINEERING.BITRSHIFT);

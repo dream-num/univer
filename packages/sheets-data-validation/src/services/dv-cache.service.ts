@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import { Subject } from 'rxjs';
 
 export class DataValidationCacheService extends Disposable {
     private _cacheMatrix: Map<string, Map<string, ObjectMatrix<Nullable<DataValidationStatus>>>> = new Map();
-    private _dirtyRanges$ = new Subject<{ unitId: string; subUnitId: string; ranges: IRange[] }>();
+    private _dirtyRanges$ = new Subject<{ unitId: string; subUnitId: string; ranges: IRange[]; isSetRange?: boolean }>();
 
     readonly dirtyRanges$ = this._dirtyRanges$.asObservable();
 
@@ -42,7 +42,7 @@ export class DataValidationCacheService extends Disposable {
                 if (cellValue) {
                     const range = new ObjectMatrix(cellValue).getDataRange();
                     if (range.endRow === -1) return;
-                    this.markRangeDirty(unitId, subUnitId, [range]);
+                    this.markRangeDirty(unitId, subUnitId, [range], true);
                 }
             }
         }));
@@ -93,7 +93,7 @@ export class DataValidationCacheService extends Disposable {
         this._deleteRange(unitId, subUnitId, rule.ranges);
     }
 
-    markRangeDirty(unitId: string, subUnitId: string, ranges: IRange[]) {
+    markRangeDirty(unitId: string, subUnitId: string, ranges: IRange[], isSetRange?: boolean) {
         const cache = this._ensureCache(unitId, subUnitId);
         ranges.forEach((range) => {
             Range.foreach(range, (row, col) => {
@@ -101,7 +101,7 @@ export class DataValidationCacheService extends Disposable {
             });
         });
 
-        this._dirtyRanges$.next({ unitId, subUnitId, ranges });
+        this._dirtyRanges$.next({ unitId, subUnitId, ranges, isSetRange });
     }
 
     private _deleteRange(unitId: string, subUnitId: string, ranges: IRange[]) {

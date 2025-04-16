@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,14 @@
  */
 
 import type { IActionInfo, IAllowedRequest, IBatchAllowedResponse, ICollaborator, ICreateRequest, ICreateRequest_SelectRangeObject, IListPermPointRequest, IPermissionPoint, IPutCollaboratorsRequest, IUnitRoleKV, IUpdatePermPointRequest, UnitAction, UnitObject } from '@univerjs/protocol';
+import type { IAuthzIoService } from './type';
 import { ObjectScope, UnitRole, UniverType } from '@univerjs/protocol';
 import { Inject } from '../../common/di';
 import { generateRandomId } from '../../shared/tools';
 import { IResourceManagerService } from '../resource-manager/type';
-import { UserManagerService } from '../user-manager/user-manager.service';
 import { createDefaultUser, isDevRole } from '../user-manager/const';
 
-import type { IAuthzIoService } from './type';
+import { UserManagerService } from '../user-manager/user-manager.service';
 
 /**
  * Do not use the mock implementation in a production environment as it is a minimal version.

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,10 @@
 import type { ISearchItem } from '@univerjs/sheets-formula';
 import type { INavigateParam, ISearchFunctionOperationParams } from '../../../services/prompt.service';
 
-import { Direction, IUniverInstanceService, useDependency } from '@univerjs/core';
+import { Direction, IUniverInstanceService } from '@univerjs/core';
 import { Popup } from '@univerjs/design';
 import { IEditorService } from '@univerjs/docs-ui';
+import { useDependency } from '@univerjs/ui';
 import React, { useEffect, useRef, useState } from 'react';
 import { IFormulaPromptService } from '../../../services/prompt.service';
 import styles from './index.module.less';

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,9 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import type { Dependency } from '@univerjs/core';
 import type { ISheetNumfmtPanelProps } from '../index';
-import { LocaleService, LocaleType, RediContext } from '@univerjs/core';
-import React, { useContext, useState } from 'react';
+import { LocaleService, LocaleType } from '@univerjs/core';
+import { RediContext } from '@univerjs/ui';
+import { useContext, useState } from 'react';
 import { UserHabitController } from '../../../controllers/user-habit.controller';
 import enUS from '../../../locale/en-US';
 import ruRU from '../../../locale/ru-RU';
@@ -35,7 +36,6 @@ const meta: Meta = {
 export default meta;
 
 export const Test: StoryObj<ISheetNumfmtPanelProps> = {
-
     render() {
         const { injector } = useContext(RediContext);
 

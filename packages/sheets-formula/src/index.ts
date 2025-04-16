@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ export { UpdateDefinedNameController } from './controllers/update-defined-name.c
 export { TriggerCalculationController } from './controllers/trigger-calculation.controller';
 export { CalculationMode, type IUniverSheetsFormulaBaseConfig, PLUGIN_CONFIG_KEY_BASE } from './controllers/config.schema';
 export type { IRegisterAsyncFunction, IRegisterFunction, ISingleFunctionRegisterParams } from './services/register-function.service';
-
+export { calculateFormula } from './util/calculate';
 // #region - all commands
 
 export { UpdateFormulaController } from './controllers/update-formula.controller';

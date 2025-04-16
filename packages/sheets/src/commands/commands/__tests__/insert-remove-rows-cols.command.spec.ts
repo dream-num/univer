@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,10 @@ import {
     InsertColBeforeCommand,
     InsertColByRangeCommand,
     InsertColCommand,
+    InsertMultiColsLeftCommand,
+    InsertMultiColsRightCommand,
+    InsertMultiRowsAboveCommand,
+    InsertMultiRowsAfterCommand,
     InsertRowAfterCommand,
     InsertRowBeforeCommand,
     InsertRowByRangeCommand,
@@ -68,8 +72,12 @@ describe('Test insert and remove rows cols commands', () => {
             InsertRowCommand,
             InsertRowBeforeCommand,
             InsertRowAfterCommand,
+            InsertMultiRowsAboveCommand,
+            InsertMultiRowsAfterCommand,
             InsertColAfterCommand,
             InsertColBeforeCommand,
+            InsertMultiColsLeftCommand,
+            InsertMultiColsRightCommand,
             InsertColCommand,
             InsertColByRangeCommand,
             InsertRowByRangeCommand,
@@ -349,10 +357,6 @@ const TEST_ROW_COL_INSERTION_DEMO: IWorkbookData = {
     id: 'test',
     appVersion: '3.0.0-alpha',
     sheets: {
-        // 1
-        //  2-3-
-        // 	4
-        //  |
         sheet1: {
             id: 'sheet1',
             cellData: {

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +23,13 @@ import {
     CancelFrozenCommand,
     ClearSelectionAllCommand,
     ClearSelectionContentCommand,
-    ClearSelectionFormatCommand, CopySheetCommand,
-    InsertColAfterCommand,
+    ClearSelectionFormatCommand,
+    CopySheetCommand,
     InsertColBeforeCommand,
-    InsertRowAfterCommand,
+    InsertMultiColsLeftCommand,
+    InsertMultiColsRightCommand,
+    InsertMultiRowsAboveCommand,
+    InsertMultiRowsAfterCommand,
     InsertRowBeforeCommand,
     RemoveWorksheetMergeCommand,
     ResetBackgroundColorCommand,
@@ -37,10 +40,12 @@ import {
     SetHorizontalTextAlignCommand,
     SetRowHeightCommand,
     SetSelectedColsVisibleCommand,
-    SetSelectedRowsVisibleCommand, SetTabColorCommand,
+    SetSelectedRowsVisibleCommand,
+    SetTabColorCommand,
     SetTextRotationCommand,
     SetTextWrapCommand,
-    SetVerticalTextAlignCommand, SetWorksheetHideCommand,
+    SetVerticalTextAlignCommand,
+    SetWorksheetHideCommand,
     SetWorksheetRowIsAutoHeightCommand,
     ToggleGridlinesCommand,
 } from '@univerjs/sheets';
@@ -95,15 +100,14 @@ import { ToggleGridlinesMenuFactory } from './menu/gridlines.menu';
 import {
     CELL_INSERT_MENU_ID,
     CellInsertMenuItemFactory,
-    COL_INSERT_MENU_ID,
-    ColInsertMenuItemFactory,
-    InsertColAfterMenuItemFactory,
-    InsertColBeforeMenuItemFactory,
+    InsertColLeftCellMenuItemFactory,
+    InsertMultiColsLeftHeaderMenuItemFactory,
+    InsertMultiColsRightHeaderMenuItemFactory,
+    InsertMultiRowsAboveHeaderMenuItemFactory,
+    InsertMultiRowsAfterHeaderMenuItemFactory,
     InsertRangeMoveDownMenuItemFactory,
     InsertRangeMoveRightMenuItemFactory,
-    InsertRowAfterMenuItemFactory,
-    InsertRowBeforeMenuItemFactory,
-    ROW_INSERT_MENU_ID, RowInsertMenuItemFactory,
+    InsertRowBeforeCellMenuItemFactory,
 } from './menu/insert.menu';
 import {
     BackgroundColorSelectorMenuItemFactory,
@@ -169,7 +173,6 @@ import {
     HideSheetMenuItemFactory,
     RenameSheetMenuItemFactory,
     ShowMenuItemFactory,
-    // UnHideSheetMenuItemFactory,
 } from './menu/sheet.menu';
 
 export const menuSchema: MenuSchemaType = {
@@ -325,11 +328,11 @@ export const menuSchema: MenuSchemaType = {
                 menuItemFactory: CellInsertMenuItemFactory,
                 [InsertRowBeforeCommand.id]: {
                     order: 0,
-                    menuItemFactory: InsertRowBeforeMenuItemFactory,
+                    menuItemFactory: InsertRowBeforeCellMenuItemFactory,
                 },
                 [InsertColBeforeCommand.id]: {
                     order: 1,
-                    menuItemFactory: InsertColBeforeMenuItemFactory,
+                    menuItemFactory: InsertColLeftCellMenuItemFactory,
                 },
                 [InsertRangeMoveRightConfirmCommand.id]: {
                     order: 2,
@@ -461,17 +464,13 @@ export const menuSchema: MenuSchemaType = {
         },
         [ContextMenuGroup.LAYOUT]: {
             order: 1,
-            [COL_INSERT_MENU_ID]: {
+            [InsertMultiColsLeftCommand.id]: {
                 order: 0,
-                menuItemFactory: ColInsertMenuItemFactory,
-                [InsertColBeforeCommand.id]: {
-                    order: 0,
-                    menuItemFactory: InsertColBeforeMenuItemFactory,
-                },
-                [InsertColAfterCommand.id]: {
-                    order: 1,
-                    menuItemFactory: InsertColAfterMenuItemFactory,
-                },
+                menuItemFactory: InsertMultiColsLeftHeaderMenuItemFactory,
+            },
+            [InsertMultiColsRightCommand.id]: {
+                order: 0,
+                menuItemFactory: InsertMultiColsRightHeaderMenuItemFactory,
             },
             [HideColConfirmCommand.id]: {
                 order: 1,
@@ -586,17 +585,13 @@ export const menuSchema: MenuSchemaType = {
         },
         [ContextMenuGroup.LAYOUT]: {
             order: 1,
-            [ROW_INSERT_MENU_ID]: {
+            [InsertMultiRowsAboveCommand.id]: {
                 order: 0,
-                menuItemFactory: RowInsertMenuItemFactory,
-                [InsertRowBeforeCommand.id]: {
-                    order: 0,
-                    menuItemFactory: InsertRowBeforeMenuItemFactory,
-                },
-                [InsertRowAfterCommand.id]: {
-                    order: 1,
-                    menuItemFactory: InsertRowAfterMenuItemFactory,
-                },
+                menuItemFactory: InsertMultiRowsAboveHeaderMenuItemFactory,
+            },
+            [InsertMultiRowsAfterCommand.id]: {
+                order: 1,
+                menuItemFactory: InsertMultiRowsAfterHeaderMenuItemFactory,
             },
             [RemoveRowConfirmCommand.id]: {
                 order: 1,

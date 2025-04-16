@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,9 @@ import { CURSOR_TYPE, Rect, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine
 
 import {
     DeltaColumnWidthCommand,
-    DeltaRowHeightCommand, SetWorksheetRowIsAutoHeightCommand, SheetsSelectionsService,
+    DeltaRowHeightCommand,
+    SetWorksheetRowIsAutoHeightCommand,
+    SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { Subscription } from 'rxjs';
 import { SetWorksheetColAutoWidthCommand } from '../../commands/commands/set-worksheet-auto-col-width.command';
@@ -371,12 +373,6 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
                 scene.addObject(this._resizeHelperShape, SHEET_COMPONENT_HEADER_LAYER_INDEX);
                 scene.disableObjectsEvent();
 
-                // TODO: do it in another way
-                // this._editorBridgeService.changeVisible({
-                //     visible: false,
-                //     eventType: DeviceInputEventType.PointerDown,
-                // });
-
                 this._scenePointerMoveSub = scene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
                     const relativeCoords = scene.getCoordRelativeToViewport(
                         Vector2.FromArray([this._startOffsetX, this._startOffsetY])
@@ -523,7 +519,8 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
                         }
 
                         this._commandService.executeCommand<ISetWorksheetColIsAutoWidthCommandParams>(
-                            SetWorksheetColAutoWidthCommand.id, { ranges }
+                            SetWorksheetColAutoWidthCommand.id,
+                            { ranges }
                         );
                         this._columnResizeRect?.hide();
                         break;

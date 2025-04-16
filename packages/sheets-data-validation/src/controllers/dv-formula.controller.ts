@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,11 @@
  */
 
 import type { ICellDataForSheetInterceptor, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type { ICellPermission } from '@univerjs/sheets';
 import { Disposable, Inject, IPermissionService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { deserializeRangeWithSheetWithCache, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { UnitAction } from '@univerjs/protocol';
-import { type ICellPermission, WorksheetViewPermission } from '@univerjs/sheets';
+import { WorksheetViewPermission } from '@univerjs/sheets';
 
 export class DataValidationFormulaController extends Disposable {
     constructor(

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import React, { useContext } from 'react';
+import type { ILocale } from '../../locale/interface';
 
+import React, { useContext } from 'react';
 import { Button } from '../button/Button';
 import { ConfigContext } from '../config-provider/ConfigProvider';
 import { Dialog } from '../dialog/Dialog';
-import type { ILocale } from '../../locale/interface';
 import styles from './index.module.less';
 
 export interface IConfirmProps {

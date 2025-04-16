@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -474,6 +474,7 @@ export interface IInnerCutCommandParams {
     segmentId: string;
     textRanges: ITextRangeWithStyle[];
     selections?: ITextRange[];
+    rectRanges?: IRectRangeWithStyle[];
 }
 
 export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
@@ -481,14 +482,12 @@ export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
 
     type: CommandType.COMMAND,
 
-    handler: async (accessor, params: IInnerCutCommandParams) => {
-        const { segmentId, textRanges } = params;
-        const commandService = accessor.get(ICommandService);
+    handler: (accessor, params: IInnerCutCommandParams) => {
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
+        const commandService = accessor.get(ICommandService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const selections = params.selections ?? docSelectionManagerService.getTextRanges();
 
-        const rectRanges = docSelectionManagerService.getRectRanges();
+        const { segmentId, textRanges, selections = docSelectionManagerService.getTextRanges(), rectRanges = docSelectionManagerService.getRectRanges() } = params;
 
         if (
             (!Array.isArray(selections) || selections.length === 0)
@@ -534,4 +533,3 @@ export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
         return Boolean(result);
     },
 };
-

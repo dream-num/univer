@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ import type {
     IUnitRange,
     Nullable,
 } from '@univerjs/core';
+import type { IFormulaReferenceMoveParam } from './ref-range-formula';
+
 import {
     Direction,
     getIntersectRange,
@@ -27,7 +29,6 @@ import {
 } from '@univerjs/core';
 
 import { ErrorType, serializeRangeToRefString } from '@univerjs/engine-formula';
-
 import {
     EffectRefRangId,
     handleDeleteRangeMoveLeft,
@@ -43,7 +44,7 @@ import {
     handleMoveRows,
     runRefRangeMutations,
 } from '@univerjs/sheets';
-import { checkIsSameUnitAndSheet, FormulaReferenceMoveType, type IFormulaReferenceMoveParam } from './ref-range-formula';
+import { checkIsSameUnitAndSheet, FormulaReferenceMoveType } from './ref-range-formula';
 
 export interface IUnitRangeWithOffset extends IUnitRange {
     refOffsetX: number;

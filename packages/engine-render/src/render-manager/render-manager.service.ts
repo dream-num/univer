@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import type { SheetComponent } from '../components/sheets/sheet-component';
 import type { Slide } from '../components/slides/slide';
 import type { IRender } from './render-unit';
 import { createIdentifier, Disposable, Inject, Injector, IUniverInstanceService, remove, toDisposable, UniverInstanceType } from '@univerjs/core';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 import { Engine } from '../engine';
 import { Scene } from '../scene';
 import { RenderUnit } from './render-unit';
@@ -31,9 +31,6 @@ import { RenderUnit } from './render-unit';
 export type RenderComponentType = SheetComponent | DocComponent | Slide | BaseObject;
 
 export interface IRenderManagerService extends IDisposable {
-    currentRender$: Observable<Nullable<string>>;
-    getCurrent(): Nullable<IRender>;
-
     addRender(unitId: string, renderer: IRender): void;
 
     /**
@@ -43,7 +40,6 @@ export interface IRenderManagerService extends IDisposable {
      */
     createRender(unitId: string): IRender;
     removeRender(unitId: string): void;
-    setCurrent(unitId: string): void;
     /**
      * Get RenderUnit By Id, RenderUnit implements IRender
      * @param unitId
@@ -55,7 +51,6 @@ export interface IRenderManagerService extends IDisposable {
      */
     getRenderUnitById(unitId: string): Nullable<IRender>;
     getAllRenderersOfType(type: UniverInstanceType): RenderUnit[];
-    getCurrentTypeOfRenderer(type: UniverInstanceType): Nullable<RenderUnit>;
     getRenderAll(): Map<string, IRender>;
     defaultEngine: Engine;
 
@@ -72,11 +67,7 @@ export interface IRenderManagerService extends IDisposable {
     created$: Observable<IRender>;
     disposed$: Observable<string>;
 
-    /** @deprecated There will be multi units to render at the same time, so there is no *first*. */
-    getFirst(): Nullable<IRender>;
-
     has(unitId: string): boolean;
-    withCurrentTypeOfUnit<T>(type: UniverInstanceType, id: DependencyIdentifier<T>): Nullable<T>;
 
     /**
      * add dep to _renderDependencies(type, dep)
@@ -93,12 +84,7 @@ const SCENE_NAMESPACE = '_UNIVER_SCENE_';
 export class RenderManagerService extends Disposable implements IRenderManagerService {
     private _defaultEngine!: Engine;
 
-    private _currentUnitId: string = '';
-
     private _renderMap: Map<string, IRender> = new Map();
-
-    private readonly _currentRender$ = new BehaviorSubject<Nullable<string>>(this._currentUnitId);
-    readonly currentRender$ = this._currentRender$.asObservable();
 
     private readonly _createRender$ = new Subject<string>();
     /** @deprecated */
@@ -132,8 +118,6 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
         this._renderMap.forEach((item) => this._disposeItem(item));
         this._renderDependencies.clear();
         this._renderMap.clear();
-        this._currentRender$.complete();
-
         this._renderCreated$.complete();
         this._renderDisposed$.complete();
     }
@@ -215,20 +199,6 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
         }
 
         return renderUnits;
-    }
-
-    getCurrentTypeOfRenderer(type: UniverInstanceType): Nullable<RenderUnit> {
-        const current = this._univerInstanceService.getCurrentUnitForType(type);
-        if (!current) return null;
-
-        return this.getRenderById(current.getUnitId()) as RenderUnit;
-    }
-
-    withCurrentTypeOfUnit<T>(type: UniverInstanceType, id: DependencyIdentifier<T>): Nullable<T> {
-        const current = this._univerInstanceService.getCurrentUnitForType(type);
-        if (!current) return null;
-
-        return this.getRenderById(current.getUnitId())?.with(id);
     }
 
     /**
@@ -329,19 +299,6 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
         return this._renderMap.has(unitId);
     }
 
-    setCurrent(unitId: string): void {
-        this._currentUnitId = unitId;
-        this._currentRender$.next(unitId);
-    }
-
-    getCurrent(): Nullable<IRender> {
-        return this._renderMap.get(this._currentUnitId);
-    }
-
-    getFirst(): Nullable<IRender> {
-        return [...this.getRenderAll().values()][0];
-    }
-
     /**
      * @deprecated use getRenderUnitById instead
      * Get RenderUnit from this._renderMap.
@@ -388,4 +345,28 @@ export const IRenderManagerService = createIdentifier<IRenderManagerService>('en
 export function isDisposable(thing: unknown): thing is IDisposable {
     // eslint-disable-next-line ts/no-explicit-any
     return !!thing && typeof (thing as any).dispose === 'function';
+}
+
+export function getCurrentTypeOfRenderer(
+    type: UniverInstanceType,
+    instanceService: IUniverInstanceService,
+    renderManageService: IRenderManagerService
+): Nullable<IRender> {
+    const currentUnit = instanceService.getCurrentUnitOfType(type);
+    if (currentUnit == null) {
+        return null;
+    }
+
+    return renderManageService.getRenderUnitById(currentUnit.getUnitId());
+}
+
+export function withCurrentTypeOfRenderer<T>(
+    type: UniverInstanceType,
+    id: DependencyIdentifier<T>,
+    instanceService: IUniverInstanceService,
+    renderManagerService: IRenderManagerService
+): Nullable<T> {
+    const renderer = getCurrentTypeOfRenderer(type, instanceService, renderManagerService);
+    if (renderer) return renderer.with(id);
+    return null;
 }

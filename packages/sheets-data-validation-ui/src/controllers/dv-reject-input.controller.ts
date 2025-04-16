@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { DataValidationErrorStyle, Disposable, Inject, LocaleService } from '@univerjs/core';
+import { DataValidationErrorStyle, DataValidationStatus, Disposable, Inject, LocaleService } from '@univerjs/core';
 import { DataValidatorRegistryService } from '@univerjs/data-validation';
 import { Button } from '@univerjs/design';
-import { AFTER_CELL_EDIT_ASYNC, SheetInterceptorService } from '@univerjs/sheets';
-import { getCellValueOrigin, SheetDataValidationModel } from '@univerjs/sheets-data-validation';
+import { SheetInterceptorService, VALIDATE_CELL } from '@univerjs/sheets';
+import { SheetDataValidationModel, SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
 import { IDialogService } from '@univerjs/ui';
 import React from 'react';
 
@@ -28,7 +28,8 @@ export class DataValidationRejectInputController extends Disposable {
         @Inject(SheetDataValidationModel) private readonly _dataValidationModel: SheetDataValidationModel,
         @Inject(DataValidatorRegistryService) private readonly _dataValidatorRegistryService: DataValidatorRegistryService,
         @IDialogService private readonly _dialogService: IDialogService,
-        @Inject(LocaleService) private readonly _localeService: LocaleService
+        @Inject(LocaleService) private readonly _localeService: LocaleService,
+        @Inject(SheetsDataValidationValidatorService) private readonly _sheetsDataValidationValidatorService: SheetsDataValidationValidatorService
     ) {
         super();
         this._initEditorBridgeInterceptor();
@@ -36,41 +37,30 @@ export class DataValidationRejectInputController extends Disposable {
 
     private _initEditorBridgeInterceptor() {
         this._sheetInterceptorService.writeCellInterceptor.intercept(
-            AFTER_CELL_EDIT_ASYNC,
+            VALIDATE_CELL,
             {
-                handler: async (cellPromise, context, next) => {
-                    const cell = await cellPromise;
-                    const { worksheet, row, col, unitId, subUnitId, workbook } = context;
+                handler: async (lastResult, context, next) => {
+                    const cell = await lastResult;
+                    const { row, col, unitId, subUnitId } = context;
                     const ruleId = this._dataValidationModel.getRuleIdByLocation(unitId, subUnitId, row, col);
                     const rule = ruleId ? this._dataValidationModel.getRuleById(unitId, subUnitId, ruleId) : undefined;
+                    if (cell === false) {
+                        return next(Promise.resolve(false))!;
+                    }
+
                     if (!rule || rule.errorStyle !== DataValidationErrorStyle.STOP) {
-                        return next(Promise.resolve(cell));
+                        return next(Promise.resolve(true))!;
                     }
-
-                    const validator = await this._dataValidatorRegistryService.getValidatorItem(rule.type);
+                    const validator = this._dataValidatorRegistryService.getValidatorItem(rule.type);
                     if (!validator) {
-                        return next(Promise.resolve(cell));
+                        return next(Promise.resolve(true))!;
                     }
 
-                    const success = await validator.validator(
-                        {
-                            value: getCellValueOrigin(cell),
-                            interceptValue: getCellValueOrigin(context?.origin ?? cell),
-                            row,
-                            column: col,
-                            unitId,
-                            subUnitId,
-                            worksheet,
-                            workbook,
-                            t: cell?.t,
-                        }, rule
-                    );
-
-                    if (success) {
-                        return next(Promise.resolve(cell));
+                    const res = await this._sheetsDataValidationValidatorService.validatorCell(unitId, subUnitId, row, col);
+                    if (res === DataValidationStatus.VALID) {
+                        return next(Promise.resolve(true))!;
                     }
 
-                    const oldCell = worksheet.getCellRaw(row, col);
                     this._dialogService.open({
                         width: 368,
                         title: {
@@ -94,7 +84,8 @@ export class DataValidationRejectInputController extends Disposable {
                             this._dialogService.close('reject-input-dialog');
                         },
                     });
-                    return next(Promise.resolve(oldCell));
+
+                    return next(Promise.resolve(false))!; // Add explicit return for invalid data
                 },
             }
         );

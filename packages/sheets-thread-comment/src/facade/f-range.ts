@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
+import type { IDocumentBody, Nullable } from '@univerjs/core';
 import type { IThreadComment } from '@univerjs/thread-comment';
-import { generateRandomId, ICommandService, type IDocumentBody, type Nullable, Range, Tools, UserManagerService } from '@univerjs/core';
+import { generateRandomId, ICommandService, Range, Tools, UserManagerService } from '@univerjs/core';
 import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment';
 import { FRange } from '@univerjs/sheets/facade';
 import { AddCommentCommand, DeleteCommentTreeCommand, getDT } from '@univerjs/thread-comment';
@@ -53,23 +54,30 @@ export interface IFRangeCommentMixin {
      * ```
      */
     getComments(): FThreadComment[];
+
     /**
      * @deprecated use `addCommentAsync` as instead.
      */
     addComment(content: IDocumentBody | FTheadCommentBuilder): Promise<boolean>;
+
     /**
      * Add a comment to the start cell in the current range.
      * @param content The content of the comment.
      * @returns Whether the comment is added successfully.
      * @example
      * ```ts
-     * const range = univerAPI.getActiveWorkbook()
-     *  .getActiveSheet()
-     *  .getActiveRange();
+     * // Create a new comment
+     * const richText = univerAPI.newRichText().insertText('hello univer');
+     * const commentBuilder = univerAPI.newTheadComment()
+     *   .setContent(richText);
+     * console.log(commentBuilder.content.toPlainText());
      *
-     * const comment = univerAPI.newTheadComment()
-     *  .setContent(univerAPI.newRichText().insertText('hello zhangsan'));
-     * const success = await range.addCommentAsync(comment);
+     * // Add the comment to the cell A1
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const cell = fWorksheet.getRange('A1');
+     * const result = await cell.addCommentAsync(commentBuilder);
+     * console.log(result);
      * ```
      */
     addCommentAsync(content: IDocumentBody | FTheadCommentBuilder): Promise<boolean>;
@@ -78,15 +86,18 @@ export interface IFRangeCommentMixin {
      * @deprecated use `clearCommentAsync` as instead.
      */
     clearComment(): Promise<boolean>;
+
      /**
       * Clear the comment of the start cell in the current range.
       * @returns Whether the comment is cleared successfully.
       */
     clearCommentAsync(): Promise<boolean>;
+
     /**
-     * @deprecated use `clearComments` as instead.
+     * @deprecated use `clearCommentsAsync` as instead.
      */
     clearComments(): Promise<boolean>;
+
     /**
      * Clear all of the comments in the current range.
      * @returns Whether the comments are cleared successfully.

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-import { ICommandService, IUniverInstanceService, SpacingRule, UniverInstanceType, useDependency } from '@univerjs/core';
+import type { DocumentDataModel, IParagraph, ISectionBreak } from '@univerjs/core';
+import type { IDocParagraphSettingCommandParams } from '../../../commands/commands/doc-paragraph-setting.command';
+import { BuildTextUtils, ICommandService, IUniverInstanceService, SpacingRule, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
 import { getNumberUnitValue, IRenderManagerService } from '@univerjs/engine-render';
+import { useDependency } from '@univerjs/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { bufferTime, filter, map } from 'rxjs/operators';
-import type { DocumentDataModel, IParagraph, ISectionBreak } from '@univerjs/core';
 import { DocParagraphSettingCommand } from '../../../commands/commands/doc-paragraph-setting.command';
-import { findNearestSectionBreak, getParagraphsInRanges } from '../../../commands/commands/list.command';
+import { findNearestSectionBreak } from '../../../commands/commands/list.command';
 import { DocParagraphSettingController } from '../../../controllers/doc-paragraph-setting.controller';
-import type { IDocParagraphSettingCommandParams } from '../../../commands/commands/doc-paragraph-setting.command';
 
 const useDocRanges = () => {
     const docSelectionManagerService = useDependency(DocSelectionManagerService);
@@ -57,8 +58,10 @@ export const useCurrentParagraph = () => {
 
     const segmentId = docRanges[0].segmentId;
 
-    const paragraphs = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.paragraphs ?? [];
-    const currentParagraphs = getParagraphsInRanges(docRanges, paragraphs) ?? [];
+    const segment = docDataModel.getSelfOrHeaderFooterModel(segmentId);
+    const paragraphs = segment.getBody()?.paragraphs ?? [];
+    const dataStream = segment.getBody()?.dataStream ?? '';
+    const currentParagraphs = BuildTextUtils.range.getParagraphsInRanges(docRanges, paragraphs, dataStream) ?? [];
 
     return currentParagraphs;
 };
@@ -303,7 +306,8 @@ export const useFirstParagraphLineSpacing = (paragraph: IParagraph[]) => {
                     });
                     return a;
                 }, {} as { spacingRule?: SpacingRule; lineSpacing?: number });
-            })).subscribe((v) => {
+            })
+        ).subscribe((v) => {
             return commandService.executeCommand(DocParagraphSettingCommand.id, {
                 paragraph: { ...v },
             } as IDocParagraphSettingCommandParams);

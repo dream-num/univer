@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,11 @@
  */
 
 import type { Meta } from '@storybook/react';
-import React, { useState } from 'react';
+import type { ILocale } from '../../locale/interface';
 
+import React, { useState } from 'react';
 import enUS from '../../locale/en-US';
 import zhCN from '../../locale/zh-CN';
-import type { ILocale } from '../../locale/interface';
 import { Button } from '../button/Button';
 import { Confirm } from '../confirm/Confirm';
 import { ConfigProvider } from './ConfigProvider';

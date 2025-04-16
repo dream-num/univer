@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,15 @@
 
 import type { Meta } from '@storybook/react';
 import type { Dependency } from '@univerjs/core';
-import { LocaleService, LocaleType, RediContext } from '@univerjs/core';
-import React, { useContext, useMemo, useState } from 'react';
+import { LocaleService, LocaleType } from '@univerjs/core';
+import { DesktopLayoutService, ILayoutService, RediContext } from '@univerjs/ui';
 
-import { DesktopLayoutService, ILayoutService } from '@univerjs/ui';
-import { FindReplaceService, IFindReplaceService } from '../../services/find-replace.service';
+import React, { useContext, useMemo, useState } from 'react';
 import { FindReplaceController } from '../../controllers/find-replace.controller';
 import enUS from '../../locale/en-US';
-import zhCN from '../../locale/zh-CN';
 import ruRU from '../../locale/ru-RU';
+import zhCN from '../../locale/zh-CN';
+import { FindReplaceService, IFindReplaceService } from '../../services/find-replace.service';
 import { FindReplaceDialog } from './FindReplaceDialog';
 
 const meta: Meta = {

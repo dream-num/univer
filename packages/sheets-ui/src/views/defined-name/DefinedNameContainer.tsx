@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,13 @@
 import type { Nullable, Workbook } from '@univerjs/core';
 
 import type { IDefinedNamesServiceParam, ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
-import { ICommandService, IUniverInstanceService, LocaleService, Tools, UniverInstanceType, useDependency } from '@univerjs/core';
-import { Confirm, Tooltip } from '@univerjs/design';
+import { ICommandService, IUniverInstanceService, LocaleService, Tools, UniverInstanceType } from '@univerjs/core';
+import { clsx, Confirm, Tooltip } from '@univerjs/design';
 import { IDefinedNamesService, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { CheckMarkSingle, DeleteSingle, IncreaseSingle } from '@univerjs/icons';
 import { InsertDefinedNameCommand, RemoveDefinedNameCommand, SCOPE_WORKBOOK_VALUE_DEFINED_NAME, SetDefinedNameCommand, SetWorksheetShowCommand, SheetsSelectionsService } from '@univerjs/sheets';
-import clsx from 'clsx';
-import React, { useEffect, useState } from 'react';
+import { useDependency } from '@univerjs/ui';
+import { useEffect, useState } from 'react';
 import { DefinedNameInput } from './DefinedNameInput';
 import styles from './index.module.less';
 
@@ -203,9 +203,15 @@ export const DefinedNameContainer = () => {
                                     </div>
                                 </Tooltip>
                             </div>
-                            <Confirm visible={deleteConformKey === definedName.id} onClose={handleDeleteClose} onConfirm={() => { handleDeleteConfirm(definedName.id); }}>
+
+                            <Confirm
+                                visible={deleteConformKey === definedName.id}
+                                onClose={handleDeleteClose}
+                                onConfirm={() => { handleDeleteConfirm(definedName.id); }}
+                            >
                                 {localeService.t('definedName.deleteConfirmText')}
                             </Confirm>
+
                             {definedName.id === editorKey && (
                                 <DefinedNameInput
                                     confirm={insertConfirm}

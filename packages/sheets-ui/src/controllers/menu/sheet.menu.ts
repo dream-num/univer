@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 import type { IAccessor, Workbook } from '@univerjs/core';
+import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
+import type { Subscriber } from 'rxjs';
 import { BooleanNumber, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import {
     CopySheetCommand,
@@ -30,9 +32,7 @@ import {
     WorkbookHideSheetPermission,
     WorkbookRenameSheetPermission,
 } from '@univerjs/sheets';
-import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
-import type { Subscriber } from 'rxjs';
 import { combineLatest, combineLatestWith, map, Observable } from 'rxjs';
 
 import { RemoveSheetConfirmCommand } from '../../commands/commands/remove-sheet-confirm.command';
@@ -225,7 +225,8 @@ export function ShowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
             return disposable.dispose;
         }).pipe(
             combineLatestWith(getWorkbookPermissionDisable$(accessor, [WorkbookEditablePermission, WorkbookHideSheetPermission])),
-            map(([defaultDisabled, permissionDisabled]) => defaultDisabled || permissionDisabled)),
+            map(([defaultDisabled, permissionDisabled]) => defaultDisabled || permissionDisabled)
+        ),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }

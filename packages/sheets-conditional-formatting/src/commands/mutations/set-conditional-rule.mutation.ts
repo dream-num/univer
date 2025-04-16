@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,9 @@
  */
 
 import type { IAccessor, IMutation } from '@univerjs/core';
+import type { IConditionFormattingRule } from '../../models/type';
 import { CommandType, Tools } from '@univerjs/core';
 import { ConditionalFormattingRuleModel } from '../../models/conditional-formatting-rule-model';
-import type { IConditionFormattingRule } from '../../models/type';
 
 export interface ISetConditionalRuleMutationParams {
     unitId: string;
@@ -56,8 +56,7 @@ export const setConditionalRuleMutationUndoFactory = (accessor: IAccessor, param
                 cfId,
                 rule: Tools.deepClone(rule),
             } as ISetConditionalRuleMutationParams,
-        },
-        ];
+        }];
     }
     return [];
 };

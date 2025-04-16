@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,26 +73,6 @@ export class SelectionRenderModel implements IRangeWithCoord {
             return true;
         }
 
-        return false;
-    }
-
-    /**
-     * @deprecated, Duplicate with `Rectangle`
-     */
-    isInclude(rangeWithCoord: IRangeWithCoord) {
-        const { startColumn, startRow, endColumn, endRow } = this;
-        const {
-            startColumn: newStartColumn,
-            startRow: newStartRow,
-            endColumn: newEndColumn,
-            endRow: newEndRow,
-        } = rangeWithCoord;
-
-        if (
-            !(newEndColumn < startColumn || newStartColumn > endColumn || newStartRow > endRow || newEndRow < startRow)
-        ) {
-            return true;
-        }
         return false;
     }
 

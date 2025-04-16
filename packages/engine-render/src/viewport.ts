@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import type { IWheelEvent } from './basics/i-events';
 import type { IBoundRectNoAngle, IViewportInfo } from './basics/vector2';
 import type { UniverRenderingContext } from './context';
 import type { Scene } from './scene';
-import type { BaseScrollBar } from './shape/base-scroll-bar';
+import type { ScrollBar } from './shape/scroll-bar';
 import { EventSubject, Tools } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { RENDER_CLASS_TYPE } from './basics/const';
@@ -178,7 +178,7 @@ export class Viewport {
 
     private _scene!: Scene;
 
-    private _scrollBar?: Nullable<BaseScrollBar>;
+    private _scrollBar?: Nullable<ScrollBar>;
 
     private _isWheelPreventDefaultX: boolean = false;
     private _isWheelPreventDefaultY: boolean = false;
@@ -461,7 +461,7 @@ export class Viewport {
         } as IViewportReSizeParam);
     }
 
-    setScrollBar(instance: BaseScrollBar) {
+    setScrollBar(instance: ScrollBar) {
         this._scrollBar = instance;
         this._updateScrollByViewportScrollValue();
     }

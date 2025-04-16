@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
+import type { IMultiCommand } from '../command.service';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { Injector } from '../../../common/di';
 
+import { Injector } from '../../../common/di';
 import { ContextService, IContextService } from '../../context/context.service';
 import { DesktopLogService, ILogService } from '../../log/log.service';
-import type { IMultiCommand } from '../command.service';
 import {
     CommandService,
     CommandType,

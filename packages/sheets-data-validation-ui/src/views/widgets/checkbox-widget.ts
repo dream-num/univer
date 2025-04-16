@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ import type { IBaseDataValidationWidget, IFormulaResult } from '@univerjs/data-v
 import type { IMouseEvent, IPointerEvent, UniverRenderingContext, UniverRenderingContext2D } from '@univerjs/engine-render';
 import type { ISetRangeValuesCommandParams } from '@univerjs/sheets';
 import type { CheckboxValidator } from '@univerjs/sheets-data-validation';
-import { HorizontalAlign, ICommandService, Inject, isFormulaString, ThemeService, UniverInstanceType, VerticalAlign } from '@univerjs/core';
-import { CheckboxShape as Checkbox, CURSOR_TYPE, fixLineWidthByScale, IRenderManagerService, Transform } from '@univerjs/engine-render';
+import { HorizontalAlign, ICommandService, Inject, isFormulaString, IUniverInstanceService, ThemeService, UniverInstanceType, VerticalAlign } from '@univerjs/core';
+import { CheckboxShape as Checkbox, CURSOR_TYPE, fixLineWidthByScale, getCurrentTypeOfRenderer, IRenderManagerService, Transform } from '@univerjs/engine-render';
 import { SetRangeValuesCommand } from '@univerjs/sheets';
 import { CHECKBOX_FORMULA_1, CHECKBOX_FORMULA_2, DataValidationFormulaService, getCellValueOrigin, getFormulaResult, isLegalFormulaResult, SheetDataValidationModel, transformCheckboxValue } from '@univerjs/sheets-data-validation';
 
@@ -69,6 +69,7 @@ export class CheckboxRender implements IBaseDataValidationWidget {
 
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(DataValidationFormulaService) private readonly _formulaService: DataValidationFormulaService,
         @Inject(ThemeService) private readonly _themeService: ThemeService,
         @Inject(IRenderManagerService) private readonly _renderManagerService: IRenderManagerService,
@@ -217,10 +218,14 @@ export class CheckboxRender implements IBaseDataValidationWidget {
     };
 
     onPointerEnter(info: ICellRenderContext, evt: IPointerEvent | IMouseEvent) {
-        this._renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET)?.mainComponent?.setCursor(CURSOR_TYPE.POINTER);
+        getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET, this._univerInstanceService, this._renderManagerService)
+            ?.mainComponent
+            ?.setCursor(CURSOR_TYPE.POINTER);
     }
 
     onPointerLeave(info: ICellRenderContext, evt: IPointerEvent | IMouseEvent) {
-        this._renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET)?.mainComponent?.setCursor(CURSOR_TYPE.DEFAULT);
+        getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET, this._univerInstanceService, this._renderManagerService)
+            ?.mainComponent
+            ?.setCursor(CURSOR_TYPE.DEFAULT);
     }
 }

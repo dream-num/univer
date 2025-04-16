@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import React, { useState } from 'react';
 import type { IConditionFormattingRule } from '@univerjs/sheets-conditional-formatting';
+import React, { useState } from 'react';
 import styles from './index.module.less';
-import { RuleList } from './rule-list';
 import { RuleEdit } from './rule-edit';
+import { RuleList } from './rule-list';
 
 interface IConditionFormattingPanelProps { rule?: IConditionFormattingRule };
 

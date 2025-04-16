@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,4 +15,4 @@
  */
 
 export { type ITreeNodeProps, type ITreeProps, Tree, TreeSelectionMode } from './Tree';
-export { mergeTreeSelected, findSubTreeFromPath, findNodePathFromTree, filterLeafNode } from './util';
+export { filterLeafNode, findNodePathFromTree, findSubTreeFromPath, mergeTreeSelected } from './util';

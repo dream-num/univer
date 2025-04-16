@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,8 @@
  */
 
 import type { ICommand } from '@univerjs/core';
-import { CommandType, ICommandService } from '@univerjs/core';
 import type { IWorksheetProtectionPointRule } from '../../services/permission/type';
+import { CommandType, ICommandService } from '@univerjs/core';
 import { SetWorksheetPermissionPointsMutation } from '../mutations/set-worksheet-permission-points.mutation';
 
 export interface ISetWorksheetPermissionPointsCommandParams {

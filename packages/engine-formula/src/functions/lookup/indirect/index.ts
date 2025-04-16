@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 import type { BaseReferenceObject } from '../../../engine/reference-object/base-reference-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
 import { regexTestColumn, regexTestRow, regexTestSingeRange } from '../../../basics/regex';
 import { operatorToken } from '../../../basics/token';
@@ -23,10 +24,10 @@ import { CellReferenceObject } from '../../../engine/reference-object/cell-refer
 import { ColumnReferenceObject } from '../../../engine/reference-object/column-reference-object';
 import { RangeReferenceObject } from '../../../engine/reference-object/range-reference-object';
 import { RowReferenceObject } from '../../../engine/reference-object/row-reference-object';
-import { deserializeRangeForR1C1 } from '../../../engine/utils/r1c1-reference';
 
+import { deserializeRangeForR1C1 } from '../../../engine/utils/r1c1-reference';
 import { deserializeRangeWithSheetWithCache } from '../../../engine/utils/reference-cache';
-import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
+import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
 
 export class Indirect extends BaseFunction {

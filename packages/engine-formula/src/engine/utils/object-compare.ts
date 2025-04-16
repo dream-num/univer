@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { compareToken } from '../../basics/token';
 import type { ArrayValueObject } from '../value-object/array-value-object';
-import { ValueObjectFactory } from '../value-object/array-value-object';
 import type { BaseValueObject } from '../value-object/base-value-object';
+import { compareToken } from '../../basics/token';
+import { ValueObjectFactory } from '../value-object/array-value-object';
 import { BooleanValueObject, createBooleanValueObjectByRawValue } from '../value-object/primitive-object';
 import { expandArrayValueObject } from './array-object';
 

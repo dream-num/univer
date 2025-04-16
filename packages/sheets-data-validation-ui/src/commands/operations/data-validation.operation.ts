@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { CommandType, type ICommand, ICommandService, IUniverInstanceService } from '@univerjs/core';
+import type { ICommand } from '@univerjs/core';
+import { CommandType, ICommandService, IUniverInstanceService } from '@univerjs/core';
 import { DataValidationModel } from '@univerjs/data-validation';
 import { getSheetCommandTarget } from '@univerjs/sheets';
 import { ISidebarService } from '@univerjs/ui';

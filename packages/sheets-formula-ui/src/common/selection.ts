@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
+import type { ThemeService } from '@univerjs/core';
 import type { ISelectionStyle } from '@univerjs/sheets';
-import { ColorKit, type ThemeService } from '@univerjs/core';
+import { ColorKit } from '@univerjs/core';
 
 export const FORMULA_REF_SELECTION_PLUGIN_NAME = 'formula_reference_selection_plugin_name';
 

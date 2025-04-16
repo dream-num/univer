@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import { beforeEach, describe, expect, it } from 'vitest';
-import { firstValueFrom } from 'rxjs';
-import { UnitAction, UnitObject } from '@univerjs/protocol';
-import { PermissionService } from '../permission/permission.service';
-import type { IPermissionPoint, PermissionStatus } from '../permission/type';
 import type { Univer } from '../../univer';
+import type { IPermissionPoint, PermissionStatus } from '../permission/type';
+import { UnitAction, UnitObject } from '@univerjs/protocol';
+import { firstValueFrom } from 'rxjs';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { PermissionService } from '../permission/permission.service';
 import { createTestBed } from './index';
 
 class TestPermissionPoint implements IPermissionPoint {

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import { Disposable, Inject } from '@univerjs/core';
-
-import { IDefinedNamesService } from '../../services/defined-names.service';
 import type { ISequenceArray } from '../utils/sequence';
-import { sequenceNodeType } from '../utils/sequence';
+
+import { Disposable, Inject } from '@univerjs/core';
+import { ErrorType } from '../../basics/error-type';
 import { operatorToken } from '../../basics/token';
 import { IFormulaCurrentConfigService } from '../../services/current-data.service';
-import { ErrorType } from '../../basics/error-type';
+import { IDefinedNamesService } from '../../services/defined-names.service';
+import { sequenceNodeType } from '../utils/sequence';
 import { LexerTreeBuilder } from './lexer-tree-builder';
 
 export class Lexer extends Disposable {

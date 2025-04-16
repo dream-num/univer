@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,9 @@
  */
 
 import type { ByValuesModel, IFilterByValueWithTreeItem } from '../../services/sheets-filter-panel.service';
-import { LocaleService, useDependency } from '@univerjs/core';
-import { Button, Checkbox, Input, Tree } from '@univerjs/design';
-import { useObservable } from '@univerjs/ui';
+import { LocaleService } from '@univerjs/core';
+import { Checkbox, Input, Tree } from '@univerjs/design';
+import { useDependency, useObservable } from '@univerjs/ui';
 import React, { useCallback } from 'react';
 import { statisticFilterByValueItems } from '../../models/utils';
 import styles from './index.module.less';
@@ -63,8 +63,18 @@ export function FilterByValue(props: { model: ByValuesModel }) {
 
     return (
         <div className={styles.sheetsFilterPanelValuesContainer}>
-            <Input autoFocus value={searchText} placeholder={localeService.t('sheets-filter.panel.search-placeholder')} onChange={onSearchValueChange} />
-            <div className={styles.sheetsFilterPanelValuesList}>
+            <Input
+                autoFocus
+                value={searchText}
+                placeholder={localeService.t('sheets-filter.panel.search-placeholder')}
+                onChange={onSearchValueChange}
+            />
+            <div
+                className={`
+                  univer-mt-2 univer-box-border univer-flex univer-flex-grow univer-flex-col univer-overflow-hidden
+                  univer-rounded-md univer-border univer-border-solid univer-border-gray-200 univer-px-2 univer-py-2.5
+                `}
+            >
                 {/* The on-top select all button */}
                 <div className={styles.sheetsFilterPanelValuesItem}>
                     <div className={styles.sheetsFilterPanelValuesItemInner}>
@@ -73,10 +83,13 @@ export function FilterByValue(props: { model: ByValuesModel }) {
                             disabled={items.length === 0}
                             checked={allChecked}
                             onChange={onCheckAllToggled}
-                        >
-                        </Checkbox>
-                        <span className={styles.sheetsFilterPanelValuesItemText}>{`${localeService.t('sheets-filter.panel.select-all')}`}</span>
-                        <span className={styles.sheetsFilterPanelValuesItemCount}>{`(${stat.checked}/${stat.checked + stat.unchecked})`}</span>
+                        />
+                        <span className={styles.sheetsFilterPanelValuesItemText}>
+                            {`${localeService.t('sheets-filter.panel.select-all')}`}
+                        </span>
+                        <span className={styles.sheetsFilterPanelValuesItemCount}>
+                            {`(${stat.checked}/${stat.checked + stat.unchecked})`}
+                        </span>
                     </div>
                 </div>
                 <div className={styles.sheetsFilterPanelValuesVirtual}>
@@ -90,15 +103,23 @@ export function FilterByValue(props: { model: ByValuesModel }) {
                         }}
                         defaultCache={treeMap}
                         itemHeight={28}
-                        treeNodeClassName={styles.sheetsFilterTreeNode}
+                        treeNodeClassName={`
+                          univer-pr-2 univer-border-box univer-max-w-[245px] univer-rounded-md
+                          [&:hover_a]:univer-inline-block
+                          hover:univer-bg-gray-50 univer-h-full
+                        `}
                         attachRender={(item) => (
-                            <div className={styles.sheetsFilterTreeNodeAttach}>
+                            <div
+                                className={`
+                                  univer-ml-1 univer-flex univer-h-5 univer-flex-1 univer-cursor-pointer
+                                  univer-items-center univer-justify-between univer-text-[13px] univer-text-primary-500
+                                `}
+                            >
                                 <span className={styles.sheetsFilterPanelValuesItemCount}>{`(${item.count})`}</span>
-                                <Button
-                                    className={styles.sheetsFilterTreeNodeFilterOnly}
-
-                                    size="small"
-                                    type="link"
+                                <a
+                                    className={`
+                                      univer-box-border univer-hidden univer-h-4 univer-whitespace-nowrap univer-px-1.5
+                                    `}
                                     onClick={() => {
                                         const filterValues = [];
                                         if (item.children) {
@@ -118,11 +139,10 @@ export function FilterByValue(props: { model: ByValuesModel }) {
                                     }}
                                 >
                                     {filterOnly}
-                                </Button>
+                                </a>
                             </div>
                         )}
-                    >
-                    </Tree>
+                    />
                 </div>
             </div>
         </div>

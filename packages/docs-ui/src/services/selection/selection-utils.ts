@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,9 +30,10 @@
  * limitations under the License.
  */
 
+import type { Nullable } from '@univerjs/core';
 import type { Documents, DocumentSkeleton, Engine, IDocumentSkeletonGlyph, INodePosition, IRectRangeWithStyle, ITextRangeWithStyle, ITextSelectionStyle, Scene } from '@univerjs/engine-render';
 import type { IDocRange } from './range-interface';
-import { type Nullable, RANGE_DIRECTION, Tools } from '@univerjs/core';
+import { RANGE_DIRECTION, Tools } from '@univerjs/core';
 import { getOffsetRectForDom } from '@univerjs/engine-render';
 import { isInSameTableCell, isInSameTableCellData, isValidRectRange } from './convert-rect-range';
 import { convertPositionsToRectRanges, RectRange } from './rect-range';

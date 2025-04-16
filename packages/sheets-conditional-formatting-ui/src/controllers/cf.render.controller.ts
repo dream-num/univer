@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,13 +30,7 @@ export class SheetsCfRenderController extends Disposable {
      * The solution here is to store all the asynchronous tasks and focus on processing after the last callback
      */
     private _ruleChangeCacheMap: Map<string, Array<{ oldRule: IConditionFormattingRule; rule: IConditionFormattingRule; dispose: () => boolean }>> = new Map();
-    constructor(@Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
-        @Inject(ConditionalFormattingService) private _conditionalFormattingService: ConditionalFormattingService,
-        @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
-        @Inject(IRenderManagerService) private _renderManagerService: IRenderManagerService,
-        @Inject(ConditionalFormattingViewModel) private _conditionalFormattingViewModel: ConditionalFormattingViewModel,
-        @Inject(ConditionalFormattingRuleModel) private _conditionalFormattingRuleModel: ConditionalFormattingRuleModel
-    ) {
+    constructor(@Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService, @Inject(ConditionalFormattingService) private _conditionalFormattingService: ConditionalFormattingService, @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService, @Inject(IRenderManagerService) private _renderManagerService: IRenderManagerService, @Inject(ConditionalFormattingViewModel) private _conditionalFormattingViewModel: ConditionalFormattingViewModel, @Inject(ConditionalFormattingRuleModel) private _conditionalFormattingRuleModel: ConditionalFormattingRuleModel) {
         super();
 
         this._initViewModelInterceptor();

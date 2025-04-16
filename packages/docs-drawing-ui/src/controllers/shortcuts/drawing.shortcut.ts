@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,12 @@
  */
 
 import type { IContextService } from '@univerjs/core';
-import { Direction, FOCUSING_COMMON_DRAWINGS, FOCUSING_UNIVER_EDITOR } from '@univerjs/core';
 import type { IShortcutItem } from '@univerjs/ui';
+import type { IMoveDrawingsCommandParams } from '../../commands/commands/move-drawings.command';
+import { Direction, FOCUSING_COMMON_DRAWINGS, FOCUSING_UNIVER_EDITOR } from '@univerjs/core';
 import { KeyCode } from '@univerjs/ui';
-import { type IMoveDrawingsCommandParams, MoveDocDrawingsCommand } from '../../commands/commands/move-drawings.command';
 import { DeleteDocDrawingsCommand } from '../../commands/commands/delete-doc-drawing.command';
+import { MoveDocDrawingsCommand } from '../../commands/commands/move-drawings.command';
 
 export function whenDocDrawingFocused(contextService: IContextService): boolean {
     return (

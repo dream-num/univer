@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -321,7 +321,10 @@ export class ImageCropperController extends Disposable {
                         ...drawingParam,
                         transform: {
                             ...drawingParam.transform,
-                            left, top, height, width,
+                            left,
+                            top,
+                            height,
+                            width,
                         },
                         srcRect: srcRect.srcRectAngle,
                     }] as IImageData[]);

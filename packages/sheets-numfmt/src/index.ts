@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-export { countryCurrencyMap } from './base/const/CURRENCY-SYMBOLS';
-export { CURRENCYFORMAT, DATEFMTLISG, NUMBERFORMAT } from './base/const/FORMATDETAIL';
+export { countryCurrencyMap } from './base/const/currency-symbols';
+export { CURRENCYFORMAT, DATEFMTLISG, NUMBERFORMAT } from './base/const/formatdetail';
 export { UniverSheetsNumfmtPlugin } from './numfmt-plugin';
 export { MenuCurrencyService } from './service/menu.currency.service';
 export { getPatternPreview, getPatternPreviewIgnoreGeneral, getPatternType } from './utils/pattern';
 export { getDecimalFromPattern, getDecimalString, isPatternEqualWithoutDecimal, isPatternHasDecimal, setPatternDecimal } from './utils/decimal';
 export { getCurrencyType } from './utils/currency';
-export { currencySymbols } from './base/const/CURRENCY-SYMBOLS';
+export { currencySymbols } from './base/const/currency-symbols';
 export { SheetsNumfmtCellContentController } from './controllers/numfmt-cell-content.controller';
 export { getCurrencyFormatOptions, getCurrencyOptions, getDateFormatOptions, getNumberFormatOptions } from './utils/options';
+export { type IUniverSheetsNumfmtConfig, SHEETS_NUMFMT_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 
 // #region - all commands
 

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import type {
     IFloatObject,
     ILayoutContext,
 } from '../../tools';
-import { BooleanNumber, DataStreamTreeTokenType, GridType, ObjectRelativeFromV, PositionedObjectLayoutType, SpacingRule, TableTextWrapType } from '@univerjs/core';
+import { BooleanNumber, DataStreamTreeTokenType, GridType, NAMED_STYLE_SPACE_MAP, ObjectRelativeFromV, PositionedObjectLayoutType, SpacingRule, TableTextWrapType } from '@univerjs/core';
 import { GlyphType, LineType } from '../../../../../basics/i-document-skeleton-cached';
 import { BreakPointType } from '../../line-breaker/break';
 import { addGlyphToDivide, createSkeletonBulletGlyph } from '../../model/glyph';
@@ -398,14 +398,7 @@ function _divideOperator(
                         );
                     }
 
-                    _divideOperator(ctx,
-                        glyphGroup,
-                        pages,
-                        sectionBreakConfig,
-                        paragraphConfig,
-                        isParagraphFirstShapedText,
-
-                        breakPointType);
+                    _divideOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, isParagraphFirstShapedText, breakPointType);
 
                     return;
                 }
@@ -414,15 +407,7 @@ function _divideOperator(
             updateDivideInfo(divide, { breakType: breakPointType });
         }
     } else {
-        _lineOperator(ctx,
-            glyphGroup,
-            pages,
-            sectionBreakConfig,
-            paragraphConfig,
-            isParagraphFirstShapedText,
-
-            breakPointType,
-            defaultSpanLineHeight);
+        _lineOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, isParagraphFirstShapedText, breakPointType, defaultSpanLineHeight);
     }
 }
 
@@ -463,7 +448,7 @@ function _lineOperator(
     const glyphLineHeight = defaultGlyphLineHeight || (ascent + descent);
 
     const {
-        paragraphStyle = {},
+        paragraphStyle: originParagraphStyle = {},
         paragraphNonInlineSkeDrawings,
         skeTablesInParagraph,
         skeHeaders,
@@ -471,6 +456,13 @@ function _lineOperator(
         pDrawingAnchor,
         paragraphIndex,
     } = paragraphConfig;
+    const { namedStyleType } = originParagraphStyle;
+    const namedStyle = namedStyleType !== undefined ? NAMED_STYLE_SPACE_MAP[namedStyleType] : null;
+    const paragraphStyle = {
+        ...originParagraphStyle,
+        spaceAbove: originParagraphStyle.spaceAbove ?? namedStyle?.spaceAbove,
+        spaceBelow: originParagraphStyle.spaceBelow ?? namedStyle?.spaceBelow,
+    };
 
     const {
         // direction,
@@ -483,7 +475,12 @@ function _lineOperator(
     } = paragraphStyle;
 
     const {
-        paragraphLineGapDefault, linePitch, lineSpacing, spacingRule, snapToGrid, gridType,
+        paragraphLineGapDefault,
+        linePitch,
+        lineSpacing,
+        spacingRule,
+        snapToGrid,
+        gridType,
     } = getLineHeightConfig(
         sectionBreakConfig,
         paragraphConfig
@@ -761,7 +758,13 @@ function __getWrapTablePosition(
 
     const left = getPositionHorizon(positionH, column, page, width, isPageBreak) ?? 0;
     const top = getPositionVertical(
-        positionV, page, lineTop, lineHeight, height, drawingAnchorTop, isPageBreak
+        positionV,
+        page,
+        lineTop,
+        lineHeight,
+        height,
+        drawingAnchorTop,
+        isPageBreak
     ) ?? 0;
 
     return { left, top };
@@ -1038,18 +1041,9 @@ function _columnOperator(
     const columnIsFull = isColumnFull(lastPage);
 
     if (columnIsFull === true) {
-        _pageOperator(ctx,
-            glyphGroup,
-            pages,
-            sectionBreakConfig,
-            paragraphConfig,
-            isParagraphFirstShapedText,
-
-            breakPointType, defaultSpanLineHeight);
+        _pageOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, isParagraphFirstShapedText, breakPointType, defaultSpanLineHeight);
     } else {
-        _lineOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig,
-            isParagraphFirstShapedText,
-            breakPointType, defaultSpanLineHeight);
+        _lineOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, isParagraphFirstShapedText, breakPointType, defaultSpanLineHeight);
     }
 }
 
@@ -1067,14 +1061,7 @@ function _pageOperator(
     const { skeHeaders, skeFooters } = paragraphConfig;
 
     pages.push(createSkeletonPage(ctx, sectionBreakConfig, { skeHeaders, skeFooters }, curSkeletonPage?.pageNumber + 1));
-    _columnOperator(ctx, glyphGroup,
-        pages,
-        sectionBreakConfig,
-        paragraphConfig,
-        isParagraphFirstShapedText,
-
-        breakPointType,
-        defaultSpanLineHeight);
+    _columnOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, isParagraphFirstShapedText, breakPointType, defaultSpanLineHeight);
 }
 
 /**
@@ -1301,7 +1288,13 @@ function __getDrawingPosition(
 
         drawing.aLeft = getPositionHorizon(positionH, column, page, width, isPageBreak) ?? 0;
         drawing.aTop = getPositionVertical(
-            positionV, page, lineTop, lineHeight, height, blockAnchorTop, isPageBreak
+            positionV,
+            page,
+            lineTop,
+            lineHeight,
+            height,
+            blockAnchorTop,
+            isPageBreak
         ) ?? 0;
         drawing.width = width;
         drawing.height = height;

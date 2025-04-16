@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { IUser } from '../services/user-manager/user-manager.service';
-import { Inject, Injector } from '../common/di';
-import { UserManagerService } from '../services/user-manager/user-manager.service';
+import type { IUser } from '@univerjs/core';
+import { Inject, Injector, UserManagerService } from '@univerjs/core';
 import { FBase } from './f-base';
 
 /**

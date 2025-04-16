@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,16 +26,22 @@ export type SortColumnSpec = { column: number; ascending: boolean } | number;
 export interface IFRangeSort {
     /**
      * Sorts the cells in the given range, by column(s) and order specified.
-     * @param {SortColumnSpec | SortColumnSpec[]} column The column index with order or an array of column indexes with order. The column index starts from 1.
-     * @returns The range itself for chaining.
+     * @param {SortColumnSpec | SortColumnSpec[]} column The column index with order or an array of column indexes with order. The range first column index is 0.
+     * @returns {FRange} The range itself for chaining.
      * @example
      * ```typescript
-     * const activeSpreadsheet = univerAPI.getActiveWorkbook();
-     * const activeSheet = activeSpreadsheet.getActiveSheet();
-     * const range = activeSheet.getRange(0, 0, 10, 10);
-     * range.sort(1); // Sorts the range by the first column in ascending order.
-     * range.sort({ column: 1, ascending: false }); // Sorts the range by the first column in descending order.
-     * range.sort([{ column: 1, ascending: false }, 2]); // Sorts the range by the first column in descending order and the second column in ascending order.
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('D1:G10');
+     *
+     * // Sorts the range by the first column in ascending order.
+     * fRange.sort(0);
+     *
+     * // Sorts the range by the first column in descending order.
+     * fRange.sort({ column: 0, ascending: false });
+     *
+     * // Sorts the range by the first column in descending order and the second column in ascending order.
+     * fRange.sort([{ column: 0, ascending: false }, 1]);
      * ```
      */
     sort(column: SortColumnSpec | SortColumnSpec[]): FRange;

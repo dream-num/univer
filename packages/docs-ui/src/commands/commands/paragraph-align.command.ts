@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,9 @@ import type { ICommand, IMutationInfo, IParagraphStyle } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 
 import {
-    CommandType, HorizontalAlign,
+    BuildTextUtils,
+    CommandType,
+    HorizontalAlign,
     ICommandService,
     IUniverInstanceService,
     JSONX,
@@ -29,7 +31,6 @@ import {
 } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { getRichTextEditPath } from '../util';
-import { getParagraphsInRanges } from './list.command';
 
 interface IAlignOperationCommandParams {
     alignType: HorizontalAlign;
@@ -59,14 +60,15 @@ export const AlignOperationCommand: ICommand<IAlignOperationCommandParams> = {
         }
 
         const segmentId = allRanges[0].segmentId;
-
-        const paragraphs = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.paragraphs;
+        const segment = docDataModel.getSelfOrHeaderFooterModel(segmentId);
+        const paragraphs = segment.getBody()?.paragraphs ?? [];
+        const dataStream = segment.getBody()?.dataStream ?? '';
 
         if (paragraphs == null) {
             return false;
         }
 
-        const currentParagraphs = getParagraphsInRanges(allRanges, paragraphs);
+        const currentParagraphs = BuildTextUtils.range.getParagraphsInRanges(allRanges, paragraphs, dataStream);
 
         const unitId = docDataModel.getUnitId();
         const isAlreadyAligned = currentParagraphs.every((paragraph) => paragraph.paragraphStyle?.horizontalAlign === alignType);

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,13 @@
  */
 
 import type { Meta } from '@storybook/react';
+import { Inject, Injector, LocaleType, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
 import React, { useState } from 'react';
-import { Inject, Injector, LocaleType, Plugin, RediContext, Univer, UniverInstanceType } from '@univerjs/core';
-import { IShortcutService, ShortcutService } from '../../../services/shortcut/shortcut.service';
-import { IPlatformService, PlatformService } from '../../../services/platform/platform.service';
 import { ComponentManager } from '../../../common';
 import { ContextMenuPosition } from '../../../services/menu/types';
+import { IPlatformService, PlatformService } from '../../../services/platform/platform.service';
+import { IShortcutService, ShortcutService } from '../../../services/shortcut/shortcut.service';
+import { RediContext } from '../../../utils/di';
 import { MobileMenu } from './MobileMenu';
 
 const meta: Meta = {

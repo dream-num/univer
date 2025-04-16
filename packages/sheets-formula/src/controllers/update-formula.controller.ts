@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,19 +44,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 
-import { deserializeRangeWithSheetWithCache,
-    ErrorType,
-    FormulaDataModel,
-    generateStringWithSequence,
-    IDefinedNamesService,
-    initSheetFormulaData,
-    LexerTreeBuilder,
-    sequenceNodeType,
-    serializeRangeToRefString,
-    SetArrayFormulaDataMutation,
-    SetFormulaCalculationStartMutation,
-    SetFormulaDataMutation,
-} from '@univerjs/engine-formula';
+import { deserializeRangeWithSheetWithCache, ErrorType, FormulaDataModel, generateStringWithSequence, IDefinedNamesService, initSheetFormulaData, LexerTreeBuilder, sequenceNodeType, serializeRangeToRefString, SetArrayFormulaDataMutation, SetFormulaCalculationStartMutation, SetFormulaDataMutation } from '@univerjs/engine-formula';
 import {
     ClearSelectionFormatCommand,
     InsertSheetMutation,
@@ -274,12 +262,12 @@ export class UpdateFormulaController extends Disposable {
 
         const config = this._configService.getConfig<IUniverSheetsFormulaBaseConfig>(PLUGIN_CONFIG_KEY_BASE);
         const calculationMode = config?.initialFormulaComputing ?? CalculationMode.WHEN_EMPTY;
-        const params = this._getDiryDataByCalculationMode(calculationMode);
+        const params = this._getDirtyDataByCalculationMode(calculationMode);
 
         this._commandService.executeCommand(SetFormulaCalculationStartMutation.id, params, { onlyLocal: true });
     }
 
-    private _getDiryDataByCalculationMode(calculationMode: CalculationMode): IFormulaDirtyData {
+    private _getDirtyDataByCalculationMode(calculationMode: CalculationMode): IFormulaDirtyData {
         const forceCalculation = calculationMode === CalculationMode.FORCED;
 
         // loop all sheets cell data, and get the dirty data

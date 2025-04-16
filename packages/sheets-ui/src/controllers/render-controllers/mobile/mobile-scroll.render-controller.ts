@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,11 @@
 
 import type { IFreeze, IRange, IWorksheetData, Nullable, Workbook } from '@univerjs/core';
 import type { IMouseEvent, IPoint, IPointerEvent, IRenderContext, IRenderModule, IScrollObserverParam } from '@univerjs/engine-render';
+import type { IScrollToCellOperationParams } from '@univerjs/sheets';
 import type { IExpandSelectionCommandParams } from '../../../commands/commands/set-selection.command';
 import type { IScrollState, IScrollStateSearchParam, IViewportScrollState } from '../../../services/scroll-manager.service';
-import type { ISheetSkeletonManagerParam } from '../../../services/sheet-skeleton-manager.service';
 
+import type { ISheetSkeletonManagerParam } from '../../../services/sheet-skeleton-manager.service';
 import {
     Direction,
     Disposable,
@@ -90,7 +91,7 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
                 if (SHEET_NAVIGATION_COMMANDS.includes(command.id)) {
                     this._scrollToSelection();
                 } else if (command.id === ScrollToCellOperation.id) {
-                    const param = command.params as IRange;
+                    const param = (command.params as IScrollToCellOperationParams).range;
                     this.scrollToRange(param);
                 } else if (command.id === ExpandSelectionCommand.id) {
                     const param = command.params as IExpandSelectionCommandParams;
@@ -228,7 +229,8 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
                     offsetY: rowOffset,
                     viewportScrollX,
                     viewportScrollY,
-                    scrollX, scrollY,
+                    scrollX,
+                    scrollY,
                 };
                 // lastestScrollInfo derived from viewportScrollX, viewportScrollY from onScrollAfter$
                 this._scrollManagerService.setValidScrollStateToCurrSheet(scrollInfo);
@@ -301,7 +303,8 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
                     }
                     this._updateSceneSize(param as unknown as ISheetSkeletonManagerParam);
                 }
-            })));
+            })
+        ));
     }
 
     /**

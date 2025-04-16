@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,8 @@
 
 import type { HTTPEvent, HTTPRequestMethod, HTTPResponse, IPostRequestParams, IRequestParams } from '@univerjs/network';
 import type { Observable } from 'rxjs';
-import { FBase, Inject, Injector } from '@univerjs/core';
+import { Inject, Injector } from '@univerjs/core';
+import { FBase } from '@univerjs/core/facade';
 import { HTTPService } from '@univerjs/network';
 
 /**

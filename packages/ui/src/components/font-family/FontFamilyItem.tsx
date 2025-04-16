@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-import { LocaleService, useDependency } from '@univerjs/core';
-import React from 'react';
-
-import styles from './index.module.less';
 import type { IFontFamilyItemProps } from './interface';
+import { LocaleService } from '@univerjs/core';
+import { useDependency } from '../../utils/di';
 
 export const FontFamilyItem = (props: IFontFamilyItemProps) => {
     const { value } = props;
@@ -26,7 +24,7 @@ export const FontFamilyItem = (props: IFontFamilyItemProps) => {
     const localeService = useDependency(LocaleService);
 
     return (
-        <span className={styles.uiPluginSheetsFontFamilyItem} style={{ fontFamily: value }}>
+        <span className="univer-text-[13px]" style={{ fontFamily: value }}>
             {localeService.t(`fontFamily.${(`${value ?? ''}`).replace(/\s/g, '')}`)}
         </span>
     );

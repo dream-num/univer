@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,10 @@
  */
 
 import type { Injector } from '@univerjs/core';
+import type { MockHTTPImplementation } from '../../__testing__/http-testing-utils';
 import { awaitTime } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { createHTTPTestBed, type MockHTTPImplementation } from '../../__testing__/http-testing-utils';
+import { createHTTPTestBed } from '../../__testing__/http-testing-utils';
 import { HTTPHeaders } from '../../headers';
 import { HTTPService } from '../../http.service';
 import { IHTTPImplementation } from '../../implementations/implementation';

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,10 @@ const disables = new Set<string>([
 export const getShouldDisableCellLink = (accessor: IAccessor, worksheet: Worksheet, row: number, col: number) => {
     const cell = worksheet.getCell(row, col);
     if (cell?.f || cell?.si) {
+        return DisableLinkType.DISABLED_BY_CELL;
+    }
+
+    if (cell?.p?.body?.customBlocks?.length) {
         return DisableLinkType.DISABLED_BY_CELL;
     }
 

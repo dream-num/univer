@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,15 +15,14 @@
  */
 
 import type { DocumentDataModel } from '@univerjs/core';
-import { BuildTextUtils, getBodySlice, ICommandService, IUniverInstanceService, LocaleService, Tools, UniverInstanceType, useDependency, useObservable } from '@univerjs/core';
+import { BuildTextUtils, getBodySlice, ICommandService, IUniverInstanceService, LocaleService, Tools, UniverInstanceType } from '@univerjs/core';
 import { Button, FormLayout, Input } from '@univerjs/design';
 import { DocSelectionManagerService } from '@univerjs/docs';
-import { KeyCode } from '@univerjs/ui';
-import React, { useEffect, useState } from 'react';
+import { KeyCode, useDependency, useObservable } from '@univerjs/ui';
+import { useEffect, useState } from 'react';
 import { AddDocHyperLinkCommand } from '../../commands/commands/add-link.command';
 import { UpdateDocHyperLinkCommand } from '../../commands/commands/update-link.command';
 import { DocHyperLinkPopupService } from '../../services/hyper-link-popup.service';
-import styles from './index.module.less';
 
 function hasProtocol(urlString: string) {
     const pattern = /^[a-zA-Z]+:\/\//;
@@ -115,7 +114,12 @@ export const DocHyperLinkEdit = () => {
     }
 
     return (
-        <div className={styles.docsLinkEdit}>
+        <div
+            className={`
+              univer-box-border univer-w-[328px] univer-rounded-xl univer-border univer-border-solid
+              univer-border-gray-200 univer-bg-white univer-px-6 univer-py-5 univer-shadow
+            `}
+        >
             <div>
                 {editing
                     ? (
@@ -152,17 +156,13 @@ export const DocHyperLinkEdit = () => {
                     />
                 </FormLayout>
             </div>
-            <div className={styles.docsLinkEditButtons}>
-                <Button
-                    className={styles.docsLinkEditButton}
-                    onClick={handleCancel}
-                >
+            <div className="univer-flex univer-justify-end univer-gap-3">
+                <Button onClick={handleCancel}>
                     {localeService.t('docLink.edit.cancel')}
                 </Button>
                 <Button
-                    disabled={!link}
-                    className={styles.docsLinkEditButton}
                     type="primary"
+                    disabled={!link}
                     onClick={handleConfirm}
                 >
                     {localeService.t('docLink.edit.confirm')}

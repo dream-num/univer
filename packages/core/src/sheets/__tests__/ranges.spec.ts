@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from 'vitest';
-import { isAllFormatInTextRuns } from '../range';
 import type { IDocumentBody } from '../../types/interfaces';
+import { describe, expect, it } from 'vitest';
 import { BooleanNumber } from '../../types/enum';
+import { isAllFormatInTextRuns } from '../range';
 
 describe('Test isAllFormatInTextRuns', () => {
     it('should return true when all content is bold', () => {

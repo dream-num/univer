@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import { connectInjector, Disposable, ICommandService, Inject, Injector } from '@univerjs/core';
+import { Disposable, ICommandService, Inject, Injector } from '@univerjs/core';
 import { RecordSingle } from '@univerjs/icons';
-import { AddWorksheetMergeAllCommand,
+import {
+    AddWorksheetMergeAllCommand,
     AddWorksheetMergeCommand,
     AddWorksheetMergeHorizontalCommand,
     AddWorksheetMergeVerticalCommand,
@@ -47,7 +48,10 @@ import { AddWorksheetMergeAllCommand,
     SetWorksheetActiveOperation,
 } from '@univerjs/sheets';
 import { RemoveSheetFilterCommand, SetSheetFilterRangeCommand, SetSheetsFilterCriteriaCommand } from '@univerjs/sheets-filter';
-import { AutoFillCommand, RefillCommand, SetRangeBoldCommand,
+import {
+    AutoFillCommand,
+    RefillCommand,
+    SetRangeBoldCommand,
     SetRangeFontFamilyCommand,
     SetRangeFontSizeCommand,
     SetRangeItalicCommand,
@@ -68,6 +72,7 @@ import { AutoFillCommand, RefillCommand, SetRangeBoldCommand,
 import {
     BuiltInUIPart,
     ComponentManager,
+    connectInjector,
     IMenuManagerService,
     IUIPartsService,
 } from '@univerjs/ui';

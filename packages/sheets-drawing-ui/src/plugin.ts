@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,10 +34,11 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import { UniverSheetsDrawingPlugin } from '@univerjs/sheets-drawing';
 import { defaultPluginConfig, SHEETS_DRAWING_UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { DrawingPopupMenuController } from './controllers/drawing-popup-menu.controller';
+import { SheetCellImageHoverRenderController } from './controllers/render-controllers/sheet-celll-image-hover.render-controller';
 import { SheetsDrawingRenderController } from './controllers/render-controllers/sheet-drawing.render-controller';
 import { SheetCellImageAutofillController } from './controllers/sheet-cell-image-autofill.controller';
+import { SheetCellImageCopyPasteController } from './controllers/sheet-cell-image-copy-paste.controller';
 import { SheetCellImageController } from './controllers/sheet-cell-image.controller';
-import { SheetCellImageHoverController } from './controllers/sheet-celll-image-hover.controller';
 import { SheetsDrawingCopyPasteController } from './controllers/sheet-drawing-copy-paste.controller';
 import { SheetDrawingPermissionController } from './controllers/sheet-drawing-permission.controller';
 import { SheetDrawingPrintingController } from './controllers/sheet-drawing-printing.controller';
@@ -82,8 +83,8 @@ export class UniverSheetsDrawingUIPlugin extends Plugin {
             [SheetDrawingPermissionController],
             [SheetsDrawingCopyPasteController],
             [SheetCellImageController],
-            [SheetCellImageHoverController],
             [SheetCellImageAutofillController],
+            [SheetCellImageCopyPasteController],
         ]);
 
         touchDependencies(this._injector, [
@@ -94,6 +95,7 @@ export class UniverSheetsDrawingUIPlugin extends Plugin {
     override onReady(): void {
         touchDependencies(this._injector, [
             [SheetsDrawingCopyPasteController],
+            [SheetCellImageCopyPasteController],
         ]);
     }
 
@@ -105,7 +107,6 @@ export class UniverSheetsDrawingUIPlugin extends Plugin {
             [SheetDrawingPrintingController],
             [SheetDrawingUIController],
             [SheetCellImageController],
-            [SheetCellImageHoverController],
             [SheetCellImageAutofillController],
         ]);
     }
@@ -119,6 +120,7 @@ export class UniverSheetsDrawingUIPlugin extends Plugin {
             [SheetDrawingUpdateController],
             [SheetDrawingTransformAffectedController],
             [SheetsDrawingRenderController],
+            [SheetCellImageHoverRenderController],
         ] as Dependency[]).forEach((m) => {
             this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, m));
         });

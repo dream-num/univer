@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,21 +53,6 @@ export class SheetExtension extends ComponentExtension<SpreadsheetSkeleton, SHEE
 
         return false;
     }
-
-    // isRenderDiffRangesByColumn(column: number, diffRanges?: IRange[]) {
-    //     if (diffRanges == null || diffRanges.length === 0) {
-    //         return true;
-    //     }
-
-    //     for (const range of diffRanges) {
-    //         const { startColumn, endColumn } = range;
-    //         if (column >= startColumn && column <= endColumn) {
-    //             return true;
-    //         }
-    //     }
-
-    //     return false;
-    // }
 
     isRenderDiffRangesByColumn(curStartColumn: number, curEndColumn: number, diffRanges?: IRange[]) {
         if (diffRanges == null || diffRanges.length === 0) {

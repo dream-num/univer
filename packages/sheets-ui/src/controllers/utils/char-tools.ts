@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+/* eslint-disable antfu/consistent-list-newline */
 import type { IFunctionService, ISequenceNode, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { LocaleType, numfmt } from '@univerjs/core';
 import { matchToken, sequenceNodeType } from '@univerjs/engine-formula';

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { DOCS_VIEW_KEY } from '@univerjs/docs-ui';
 import type { Nullable } from '@univerjs/core';
 import type { DocBackground, Documents, Engine, IRenderManagerService, Scene } from '@univerjs/engine-render';
+import { DOCS_VIEW_KEY } from '@univerjs/docs-ui';
 
 export interface IDocObjectParam {
     document: Documents;

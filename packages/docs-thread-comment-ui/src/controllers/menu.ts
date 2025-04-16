@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,9 @@
 
 import type { IAccessor } from '@univerjs/core';
 import type { IMenuButtonItem } from '@univerjs/ui';
-import { SHEET_EDITOR_UNITS, UniverInstanceType } from '@univerjs/core';
+import { IUniverInstanceService, SHEET_EDITOR_UNITS, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
-import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
+import { DocumentEditArea, IRenderManagerService, withCurrentTypeOfRenderer } from '@univerjs/engine-render';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { debounceTime, Observable } from 'rxjs';
 import { StartAddCommentOperation, ToggleCommentPanelOperation } from '../commands/operations/show-comment-panel.operation';
@@ -26,8 +26,13 @@ import { StartAddCommentOperation, ToggleCommentPanelOperation } from '../comman
 export const shouldDisableAddComment = (accessor: IAccessor) => {
     const renderManagerService = accessor.get(IRenderManagerService);
     const docSelectionManagerService = accessor.get(DocSelectionManagerService);
-    const render = renderManagerService.getCurrent();
-    const skeleton = render?.with(DocSkeletonManagerService).getSkeleton();
+    const skeleton = withCurrentTypeOfRenderer(
+        UniverInstanceType.UNIVER_DOC,
+        DocSkeletonManagerService,
+        accessor.get(IUniverInstanceService),
+        renderManagerService
+    )?.getSkeleton();
+
     const editArea = skeleton?.getViewModel().getEditArea();
     if (editArea === DocumentEditArea.FOOTER || editArea === DocumentEditArea.HEADER) {
         return true;

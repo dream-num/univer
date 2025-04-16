@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/uniui",
-    "version": "0.2.6",
+    "version": "0.6.6",
     "private": true,
     "description": "",
     "author": "DreamNum <developer@univer.ai>",
@@ -56,8 +56,8 @@
         "build": "univer-cli build"
     },
     "peerDependencies": {
-        "react": ">=16.9.0 || >=17 || >=18 || >=19",
-        "react-dom": ">=16.9.0 || >=17 || >=18 || >=19",
+        "react": "^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc",
+        "react-dom": "^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
@@ -65,24 +65,22 @@
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons": "^0.2.14",
+        "@univerjs/icons": "^0.2.35",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@xyflow/react": "^12.3.5",
-        "clsx": "^2.1.1",
-        "rc-util": "^5.43.0"
+        "@xyflow/react": "^12.5.5"
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
-        "less": "^4.2.2",
-        "postcss": "^8.5.1",
+        "less": "^4.3.0",
+        "postcss": "^8.5.3",
         "react": "18.3.1",
         "react-dom": "18.3.1",
         "rxjs": "^7.8.1",
         "tailwindcss": "^3.4.17",
-        "typescript": "^5.7.3",
-        "vite": "^6.0.11",
-        "vitest": "^3.0.4"
+        "typescript": "^5.8.3",
+        "vite": "^6.2.6",
+        "vitest": "^3.1.1"
     }
 }

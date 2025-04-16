@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,11 @@
  */
 
 import type { Workbook } from '@univerjs/core';
+import type { IPointerEvent, IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import type { ISelectionWithStyle } from '@univerjs/sheets';
 import { Disposable, Inject, RANGE_TYPE, Tools } from '@univerjs/core';
-import { type IPointerEvent, type IRenderContext, type IRenderModule, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
-import { type ISelectionWithStyle, SheetsSelectionsService } from '@univerjs/sheets';
+import { SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
+import { SheetsSelectionsService } from '@univerjs/sheets';
 import { ContextMenuPosition, IContextMenuService, ILayoutService } from '@univerjs/ui';
 import { ISheetSelectionRenderService } from '../../../services/selection/base-selection-render.service';
 import { attachSelectionWithCoord } from '../../../services/selection/util';

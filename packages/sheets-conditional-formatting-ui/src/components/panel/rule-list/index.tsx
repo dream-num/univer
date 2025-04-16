@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,29 +15,33 @@
  */
 
 import type { IRange, Workbook } from '@univerjs/core';
-import type { IConditionFormattingRule } from '@univerjs/sheets-conditional-formatting';
-import type { IDeleteCfCommandParams } from '../../../commands/commands/delete-cf.command';
-import type { IMoveCfCommand } from '../../../commands/commands/move-cf.command';
-
-import { ICommandService, Injector, IUniverInstanceService, LocaleService, Rectangle, UniverInstanceType, useDependency } from '@univerjs/core';
-import { Select, Tooltip } from '@univerjs/design';
+import type { IConditionFormattingRule, IDeleteCfCommandParams, IMoveCfCommandParams } from '@univerjs/sheets-conditional-formatting';
+import { ICommandService, Injector, IUniverInstanceService, LocaleService, Rectangle, UniverInstanceType } from '@univerjs/core';
+import { clsx, Select, Tooltip } from '@univerjs/design';
 import { serializeRange } from '@univerjs/engine-formula';
 import { DeleteSingle, IncreaseSingle, SequenceSingle } from '@univerjs/icons';
 import { checkRangesEditablePermission, SetSelectionsOperation, SetWorksheetActiveOperation, SheetsSelectionsService } from '@univerjs/sheets';
-import { AddConditionalRuleMutation, CFRuleType, CFSubRuleType, ConditionalFormattingRuleModel, DeleteConditionalRuleMutation, MoveConditionalRuleMutation, SetConditionalRuleMutation } from '@univerjs/sheets-conditional-formatting';
+import {
+    AddConditionalRuleMutation,
+    CFRuleType,
+    CFSubRuleType,
+    ClearWorksheetCfCommand,
+    ConditionalFormattingRuleModel,
+    DeleteCfCommand,
+    DeleteConditionalRuleMutation,
+    MoveCfCommand,
+    MoveConditionalRuleMutation,
+    SetConditionalRuleMutation,
+} from '@univerjs/sheets-conditional-formatting';
 import { useHighlightRange } from '@univerjs/sheets-ui';
-import { useObservable } from '@univerjs/ui';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { ISidebarService, useDependency, useObservable } from '@univerjs/ui';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import GridLayout from 'react-grid-layout';
 import { debounceTime, Observable } from 'rxjs';
-import { ClearWorksheetCfCommand } from '../../../commands/commands/clear-worksheet-cf.command';
-import { DeleteCfCommand } from '../../../commands/commands/delete-cf.command';
-import { MoveCfCommand } from '../../../commands/commands/move-cf.command';
 import { ConditionalFormattingI18nController } from '../../../controllers/cf.i18n.controller';
 import { Preview } from '../../preview';
 import styles from './index.module.less';
 import 'react-grid-layout/css/styles.css';
-
 import 'react-resizable/css/styles.css';
 
 interface IRuleListProps {
@@ -103,6 +107,7 @@ const getRuleDescribe = (rule: IConditionFormattingRule, localeService: LocaleSe
         }
     }
 };
+
 let defaultWidth = 0;
 export const RuleList = (props: IRuleListProps) => {
     const { onClick } = props;
@@ -112,6 +117,7 @@ export const RuleList = (props: IRuleListProps) => {
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
     const injector = useDependency(Injector);
+    const sidebarService = useDependency(ISidebarService);
 
     const conditionalFormattingI18nController = useDependency(ConditionalFormattingI18nController);
 
@@ -125,10 +131,10 @@ export const RuleList = (props: IRuleListProps) => {
     const subUnitId = worksheet.getSheetId();
 
     const [currentRuleRanges, currentRuleRangesSet] = useState<IRange[]>([]);
-    const [selectValue, selectValueSet] = useState('2');
-    const [fetchRuleListId, fetchRuleListIdSet] = useState(0);
-    const [draggingId, draggingIdSet] = useState<number>(-1);
-    const [layoutWidth, layoutWidthSet] = useState(defaultWidth);
+    const [selectValue, setSelectValue] = useState('2');
+    const [fetchRuleListId, setFetchRuleListId] = useState(0);
+    const [draggingId, setDraggingId] = useState<number>(-1);
+    const [layoutWidth, setLayoutWidth] = useState(defaultWidth);
     const layoutContainerRef = useRef<HTMLDivElement>(null);
 
     const selectOption = [
@@ -164,7 +170,7 @@ export const RuleList = (props: IRuleListProps) => {
     useEffect(() => {
         const disposable = commandService.onCommandExecuted((commandInfo) => {
             if (commandInfo.id === SetWorksheetActiveOperation.id) {
-                fetchRuleListIdSet(Math.random());
+                setFetchRuleListId(Math.random());
             }
         });
         return () => disposable.dispose();
@@ -183,7 +189,7 @@ export const RuleList = (props: IRuleListProps) => {
                 const commandList = [SetSelectionsOperation.id, AddConditionalRuleMutation.id, SetConditionalRuleMutation.id, DeleteConditionalRuleMutation.id, MoveConditionalRuleMutation.id];
                 const disposable = commandService.onCommandExecuted((commandInfo) => {
                     const { id, params } = commandInfo;
-                    const unitId = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId();
+                    const unitId = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId();
                     if (commandList.includes(id) && (params as { unitId: string }).unitId === unitId) {
                         commandSubscribe.next(null);
                     }
@@ -199,7 +205,7 @@ export const RuleList = (props: IRuleListProps) => {
 
     useEffect(() => {
         const dispose = conditionalFormattingRuleModel.$ruleChange.subscribe(() => {
-            fetchRuleListIdSet(Math.random());
+            setFetchRuleListId(Math.random());
         });
         return () => dispose.unsubscribe();
     }, [conditionalFormattingRuleModel]);
@@ -209,12 +215,12 @@ export const RuleList = (props: IRuleListProps) => {
         // Also set a global width as the default width to avoid a gap before the first calculation.
         const getWidth = () => {
             // 8 is padding-left
-            const width = Math.max(0, (layoutContainerRef.current?.getBoundingClientRect().width || 0) - 8);
+            const width = Math.max(0, (layoutContainerRef.current?.getBoundingClientRect().width ?? 0) - 8);
             defaultWidth = width;
             return width;
         };
         const observer = new Observable((subscribe) => {
-            const targetElement = document.querySelector('.univer-sidebar');
+            const targetElement = sidebarService.getContainer();
             if (targetElement) {
                 let time = setTimeout(() => {
                     subscribe.next();
@@ -237,7 +243,7 @@ export const RuleList = (props: IRuleListProps) => {
             }
         });
         const subscription = observer.pipe(debounceTime(16)).subscribe(() => {
-            layoutWidthSet(getWidth());
+            setLayoutWidth(getWidth());
         });
         return () => {
             subscription.unsubscribe();
@@ -245,8 +251,8 @@ export const RuleList = (props: IRuleListProps) => {
     }, []);
 
     const handleDelete = (rule: IConditionFormattingRule) => {
-        const unitId = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId();
-        const subUnitId = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()?.getSheetId();
+        const unitId = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId();
+        const subUnitId = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()?.getSheetId();
         if (!unitId || !subUnitId) {
             throw new Error('No active sheet found');
         }
@@ -254,13 +260,13 @@ export const RuleList = (props: IRuleListProps) => {
     };
 
     const handleDragStart = (_layout: unknown, from: { y: number }) => {
-        draggingIdSet(from.y);
+        setDraggingId(from.y);
     };
 
     const handleDragStop = (_layout: unknown, from: { y: number }, to: { y: number }) => {
-        draggingIdSet(-1);
-        const unitId = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId();
-        const subUnitId = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()?.getSheetId();
+        setDraggingId(-1);
+        const unitId = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId();
+        const subUnitId = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()?.getSheetId();
         if (!unitId || !subUnitId) {
             throw new Error('No active sheet found');
         }
@@ -272,7 +278,7 @@ export const RuleList = (props: IRuleListProps) => {
         const cfId = ruleList[getSaveIndex(from.y)].cfId;
         const targetCfId = ruleList[getSaveIndex(to.y)].cfId;
         if (cfId !== targetCfId) {
-            commandService.executeCommand(MoveCfCommand.id, { unitId, subUnitId, start: { id: cfId, type: 'self' }, end: { id: targetCfId, type: to.y > from.y ? 'after' : 'before' } } as IMoveCfCommand);
+            commandService.executeCommand(MoveCfCommand.id, { unitId, subUnitId, start: { id: cfId, type: 'self' }, end: { id: targetCfId, type: to.y > from.y ? 'after' : 'before' } } as IMoveCfCommandParams);
         }
     };
 
@@ -291,7 +297,7 @@ export const RuleList = (props: IRuleListProps) => {
         }
     };
     const ruleListByPermissionCheck = useMemo(() => {
-        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet();
         return ruleList.filter((rule) => {
             const ranges = rule.ranges;
@@ -303,7 +309,7 @@ export const RuleList = (props: IRuleListProps) => {
     const layout = ruleListByPermissionCheck.map((rule, index) => ({ i: rule.cfId, x: 0, w: 12, y: index, h: 1, isResizable: false }));
 
     const isHasAllRuleEditPermission = useMemo(() => {
-        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet();
         return ruleList.every((rule) => {
             const ranges = rule.ranges;
@@ -316,17 +322,20 @@ export const RuleList = (props: IRuleListProps) => {
         <div className={styles.cfRuleList}>
             <div className={styles.ruleSelector}>
                 <div>
-                    {conditionalFormattingI18nController.tWithReactNode('sheet.cf.panel.managerRuleSelect',
-                        <Select className={styles.select} options={selectOption} value={selectValue} onChange={(v) => { selectValueSet(v); }} />
-                    )
-                        .map((ele, index) => <span key={index}>{ele}</span>)}
+                    {conditionalFormattingI18nController.tWithReactNode(
+                        'sheet.cf.panel.managerRuleSelect',
+                        <Select
+                            className={styles.select}
+                            options={selectOption}
+                            value={selectValue}
+                            onChange={(v) => { setSelectValue(v); }}
+                        />
+                    ).map((ele, index) => <span key={index}>{ele}</span>)}
                 </div>
                 <div className={styles.btnList}>
                     <Tooltip title={localeService.t('sheet.cf.panel.createRule')} placement="bottom">
                         <div
-                            className={`
-                              ${styles.icon}
-                            `}
+                            className={styles.icon}
                             onClick={handleCreate}
                         >
                             <IncreaseSingle />
@@ -336,10 +345,7 @@ export const RuleList = (props: IRuleListProps) => {
                         ? (
                             <Tooltip title={localeService.t('sheet.cf.panel.clear')} placement="bottom">
                                 <div
-                                    className={`
-                                      ${styles.gap}
-                                      ${styles.icon}
-                                    `}
+                                    className={clsx(styles.gap, styles.icon)}
                                     onClick={handleClear}
                                 >
                                     <DeleteSingle />
@@ -347,11 +353,7 @@ export const RuleList = (props: IRuleListProps) => {
                             </Tooltip>
                         )
                         : (
-                            <div className={`
-                              ${styles.gap}
-                              ${styles.disabled}
-                            `}
-                            >
+                            <div className={clsx(styles.gap, styles.disabled)}>
                                 <DeleteSingle />
                             </div>
                         )}
@@ -363,19 +365,22 @@ export const RuleList = (props: IRuleListProps) => {
                 {layoutWidth
                     ? (
                         <GridLayout
-                            onDragStop={handleDragStop}
-                            onDragStart={handleDragStart}
+                            draggableHandle=".draggableHandle"
                             layout={layout}
                             cols={12}
                             rowHeight={60}
                             width={layoutWidth}
                             margin={[0, 10]}
-                            draggableHandle=".draggableHandle"
+                            onDragStop={handleDragStop}
+                            onDragStart={handleDragStart}
                         >
                             {ruleListByPermissionCheck?.map((rule, index) => {
                                 return (
                                     <div key={`${rule.cfId}`}>
                                         <div
+                                            className={clsx(styles.ruleItem, {
+                                                [styles.active]: draggingId === index,
+                                            })}
                                             onMouseMove={() => {
                                                 rule.ranges !== currentRuleRanges && currentRuleRangesSet(rule.ranges);
                                             }}
@@ -383,30 +388,28 @@ export const RuleList = (props: IRuleListProps) => {
                                             onClick={() => {
                                                 onClick(rule);
                                             }}
-                                            className={`
-                                              ${styles.ruleItem}
-                                              ${draggingId === index ? styles.active : ''}
-                                            `}
                                         >
                                             <div
-                                                className={`
-                                                  ${styles.draggableHandle}
-                                                  draggableHandle
-                                                `}
+                                                className={clsx(styles.draggableHandle, 'draggableHandle')}
                                                 onClick={(e) => e.stopPropagation()}
                                             >
                                                 <SequenceSingle />
                                             </div>
                                             <div className={styles.ruleDescribe}>
-                                                <div className={styles.ruleType}>{getRuleDescribe(rule, localeService)}</div>
-                                                <div className={styles.ruleRange}>{rule.ranges.map((range) => serializeRange(range)).join(',')}</div>
+                                                <div className={styles.ruleType}>
+                                                    {getRuleDescribe(rule, localeService)}
+                                                </div>
+                                                <div className={styles.ruleRange}>
+                                                    {rule.ranges.map((range) => serializeRange(range)).join(',')}
+                                                </div>
                                             </div>
-                                            <div className={styles.preview}><Preview rule={rule.rule} /></div>
+                                            <div className={styles.preview}>
+                                                <Preview rule={rule.rule} />
+                                            </div>
                                             <div
-                                                className={`
-                                                  ${styles.deleteItem}
-                                                  ${draggingId === index ? styles.active : ''}
-                                                `}
+                                                className={clsx(styles.deleteItem, {
+                                                    [styles.active]: draggingId === index,
+                                                })}
                                                 onClick={(e) => {
                                                     e.stopPropagation();
                                                     handleDelete(rule);
@@ -422,7 +425,6 @@ export const RuleList = (props: IRuleListProps) => {
                         </GridLayout>
                     )
                     : null}
-
             </div>
         </div>
     );

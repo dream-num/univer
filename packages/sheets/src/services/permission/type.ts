@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,4 +38,3 @@ export type IModel = Map<string, Map<string, IWorksheetProtectionRule>>;
 
 export type IObjectPointModel = Record<string, IWorksheetProtectionPointRule[]>;
 export type IPointRuleModel = Map<string, Map<string, IWorksheetProtectionPointRule>>;
-

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,10 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { FUNCTION_NAMES_STATISTICAL } from '../../function-names';
-import { Minifs } from '../index';
 import { ArrayValueObject, transformToValue } from '../../../../engine/value-object/array-value-object';
 import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { FUNCTION_NAMES_STATISTICAL } from '../../function-names';
+import { Minifs } from '../index';
 
 describe('Test minifs function', () => {
     const testFunction = new Minifs(FUNCTION_NAMES_STATISTICAL.MINIFS);

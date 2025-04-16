@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
+import type { IUser, UniverInstanceType } from '@univerjs/core';
 import type { IAddCommentCommandParams, IThreadComment, IUpdateCommentCommandParams } from '@univerjs/thread-comment';
 import type { IThreadCommentEditorInstance } from '../thread-comment-editor';
-import { generateRandomId, useDependency } from '@univerjs/core';
-import { ICommandService, type IUser, LocaleService, type UniverInstanceType, UserManagerService } from '@univerjs/core';
-import { DropdownLegacy, Menu, MenuItem, Tooltip } from '@univerjs/design';
+import { generateRandomId, ICommandService, LocaleService, UserManagerService } from '@univerjs/core';
+import { clsx, Dropdown, Tooltip } from '@univerjs/design';
 import { DeleteSingle, MoreHorizontalSingle, ReplyToCommentSingle, ResolvedSingle, SolveSingle } from '@univerjs/icons';
 import { AddCommentCommand, DeleteCommentCommand, DeleteCommentTreeCommand, getDT, ResolveCommentCommand, ThreadCommentModel, UpdateCommentCommand } from '@univerjs/thread-comment';
-import { useObservable } from '@univerjs/ui';
-import cs from 'clsx';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useDependency, useObservable } from '@univerjs/ui';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { debounceTime } from 'rxjs';
 import { SetActiveCommentOperation } from '../../commands/operations/comment.operations';
 import { ThreadCommentEditor } from '../thread-comment-editor';
@@ -118,18 +117,40 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                         )}
                     {isCommentBySelf && !isMock && !resolved
                         ? (
-                            <DropdownLegacy
+                            <Dropdown
                                 overlay={(
-                                    <Menu>
-                                        <MenuItem key="edit" onClick={() => onEditingChange?.(true)}>{localeService.t('threadCommentUI.item.edit')}</MenuItem>
-                                        <MenuItem key="delete" onClick={handleDeleteItem}>{localeService.t('threadCommentUI.item.delete')}</MenuItem>
-                                    </Menu>
+                                    <div className="univer-rounded-lg univer-p-4 univer-theme">
+                                        <ul
+                                            className={`
+                                              univer-m-0 univer-grid univer-list-none univer-gap-2 univer-p-0
+                                              univer-text-sm
+                                              [&_a]:univer-cursor-pointer [&_a]:univer-rounded [&_a]:univer-p-1
+                                            `}
+                                        >
+                                            <li>
+                                                <a
+                                                    className="hover:univer-bg-gray-200"
+                                                    onClick={() => onEditingChange?.(true)}
+                                                >
+                                                    {localeService.t('threadCommentUI.item.edit')}
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a
+                                                    className="hover:univer-bg-gray-200"
+                                                    onClick={handleDeleteItem}
+                                                >
+                                                    {localeService.t('threadCommentUI.item.delete')}
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
                                 )}
                             >
                                 <div className={styles.threadCommentIcon}>
                                     <MoreHorizontalSingle />
                                 </div>
-                            </DropdownLegacy>
+                            </Dropdown>
                         )
                         : null}
                 </div>
@@ -165,7 +186,7 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                 : (
                     <div className={styles.threadCommentItemContent}>
                         {transformDocument2TextNodes(item.text).map((paragraph, i) => (
-                            <div key={i}>
+                            <div key={i} className="univer-break-words">
                                 {paragraph.map((item, i) => {
                                     switch (item.type) {
                                         case 'mention':
@@ -287,7 +308,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
 
     return (
         <div
-            className={cs(styles.threadComment, {
+            className={clsx(styles.threadComment, {
                 [styles.threadCommentActive]: !resolved && (showHighlight || isHover || prefix === 'cell'),
             })}
             onClick={onClick}

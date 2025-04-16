@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,14 @@
 
 import type { Workbook } from '@univerjs/core';
 import type { IColorScale, IConditionalFormattingRuleConfig } from '@univerjs/sheets-conditional-formatting';
+import type { IFormulaEditorRef } from '@univerjs/sheets-formula-ui';
 import type { IStyleEditorProps } from './type';
-
-import { IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
-import { InputNumber, Select } from '@univerjs/design';
+import { IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
+import { clsx, InputNumber, Select } from '@univerjs/design';
 import { CFRuleType, CFValueType, createDefaultValueByValueType } from '@univerjs/sheets-conditional-formatting';
 import { FormulaEditor } from '@univerjs/sheets-formula-ui';
-import { useSidebarClick } from '@univerjs/ui';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useDependency, useSidebarClick } from '@univerjs/ui';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { ColorPicker } from '../../color-picker';
 import { Preview } from '../../preview';
 import stylesBase from '../index.module.less';
@@ -39,26 +39,29 @@ const TextInput = (props: { id: string; type: CFValueType | 'none'; value: numbe
     const formulaInitValue = useMemo(() => {
         return String(value).startsWith('=') ? String(value) : '=';
     }, [value]);
+
     const config = useMemo(() => {
         if ([CFValueType.max, CFValueType.min, 'none'].includes(type as CFValueType)) {
             return { disabled: true };
         }
         if ([CFValueType.percent, CFValueType.percentile].includes(type as CFValueType)) {
             return {
-                min: 0, max: 100,
+                min: 0,
+                max: 100,
             };
         }
         return {
-            min: Number.MIN_SAFE_INTEGER, max: Number.MAX_SAFE_INTEGER,
+            min: Number.MIN_SAFE_INTEGER,
+            max: Number.MAX_SAFE_INTEGER,
         };
     }, [type]);
 
-    const formulaEditorActionsRef = useRef<Parameters<typeof FormulaEditor>[0]['actions']>({});
+    const formulaEditorRef = useRef<IFormulaEditorRef>(null);
     const [isFocusFormulaEditor, isFocusFormulaEditorSet] = useState(false);
 
     useSidebarClick((e: MouseEvent) => {
-        const handleOutClick = formulaEditorActionsRef.current?.handleOutClick;
-        handleOutClick && handleOutClick(e, () => isFocusFormulaEditorSet(false));
+        const isOutSide = formulaEditorRef.current?.isClickOutSide(e);
+        isOutSide && isFocusFormulaEditorSet(false);
     });
 
     if (type === CFValueType.formula) {
@@ -74,7 +77,7 @@ const TextInput = (props: { id: string; type: CFValueType | 'none'; value: numbe
                         onChange(formula);
                     }}
                     onFocus={() => isFocusFormulaEditorSet(true)}
-                    actions={formulaEditorActionsRef.current}
+                    ref={formulaEditorRef}
                 />
             </div>
         );
@@ -181,15 +184,7 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
         medianColor: string;
         maxColor: string;
     }) => {
-        const { minType,
-                medianType,
-                maxType,
-                minValue,
-                medianValue,
-                maxValue,
-                minColor,
-                medianColor,
-                maxColor } = option;
+        const { minType, medianType, maxType, minValue, medianValue, maxValue, minColor, medianColor, maxColor } = option;
         const list = [];
         list.push({ color: minColor, value: { type: minType, value: minValue } });
         medianType !== 'none' && list.push({ color: medianColor, value: { type: medianType, value: medianValue } });
@@ -223,17 +218,19 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
     return (
         <div>
             <div className={stylesBase.title}>{localeService.t('sheet.cf.panel.styleRule')}</div>
-            <div className={`
-              ${styles.cfPreviewWrap}
-            `}
+            <div
+                className={`
+                  ${styles.cfPreviewWrap}
+                `}
             >
                 <Preview rule={getResult({ minType, medianType, maxType, minValue, medianValue, maxValue, minColor, medianColor, maxColor }) as IConditionalFormattingRuleConfig} />
             </div>
             <div className={stylesBase.label}>{localeService.t('sheet.cf.valueType.min')}</div>
-            <div className={`
-              ${stylesBase.labelContainer}
-              ${stylesBase.mTSm}
-            `}
+            <div
+                className={clsx(`
+                  ${stylesBase.labelContainer}
+                  ${stylesBase.mTSm}
+                `, 'univer-box-border univer-h-7')}
             >
                 <Select
                     style={{ flexShrink: 0 }}
@@ -268,10 +265,11 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
                 />
             </div>
             <div className={stylesBase.label}>{localeService.t('sheet.cf.panel.medianValue')}</div>
-            <div className={`
-              ${stylesBase.labelContainer}
-              ${stylesBase.mTSm}
-            `}
+            <div
+                className={clsx(`
+                  ${stylesBase.labelContainer}
+                  ${stylesBase.mTSm}
+                `, 'univer-box-border univer-h-7')}
             >
                 <Select
                     style={{ flexShrink: 0 }}
@@ -310,10 +308,11 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
 
             </div>
             <div className={stylesBase.label}>{localeService.t('sheet.cf.valueType.max')}</div>
-            <div className={`
-              ${stylesBase.labelContainer}
-              ${stylesBase.mTSm}
-            `}
+            <div
+                className={clsx(`
+                  ${stylesBase.labelContainer}
+                  ${stylesBase.mTSm}
+                `, 'univer-box-border univer-h-7')}
             >
                 <Select
                     style={{ flexShrink: 0 }}

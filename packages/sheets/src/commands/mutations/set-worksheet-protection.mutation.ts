@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import { CommandType, type IMutation } from '@univerjs/core';
+import type { IMutation } from '@univerjs/core';
 import type { IWorksheetProtectionRule } from '../../services/permission/type';
+import { CommandType } from '@univerjs/core';
 import { WorksheetProtectionRuleModel } from '../../services/permission/worksheet-permission/worksheet-permission-rule.model';
 
 export interface ISetWorksheetProtectionParams {

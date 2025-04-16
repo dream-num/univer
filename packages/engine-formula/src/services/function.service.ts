@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,10 @@
  */
 
 import type { IDisposable, Nullable } from '@univerjs/core';
-import { createIdentifier, Disposable, toDisposable } from '@univerjs/core';
-
 import type { IFunctionInfo, IFunctionNames } from '../basics/function';
 import type { BaseFunction } from '../functions/base-function';
+import { createIdentifier, Disposable, toDisposable } from '@univerjs/core';
+import { FORMULA_AST_CACHE } from '../engine/utils/generate-ast-node';
 
 export interface IFunctionService {
     /**
@@ -53,6 +53,8 @@ export interface IFunctionService {
     hasDescription(functionToken: IFunctionNames): boolean;
 
     unregisterDescriptions(...functionTokens: IFunctionNames[]): void;
+
+    deleteFormulaAstCacheKey(...functionToken: IFunctionNames[]): void;
 }
 export const IFunctionService = createIdentifier<FunctionService>('univer.formula-function.service');
 
@@ -62,6 +64,7 @@ export class FunctionService extends Disposable implements IFunctionService {
     private _functionDescriptions: Map<IFunctionNames, IFunctionInfo> = new Map();
 
     override dispose(): void {
+        super.dispose();
         this._functionExecutors.clear();
         this._functionDescriptions.clear();
     }
@@ -123,5 +126,15 @@ export class FunctionService extends Disposable implements IFunctionService {
             const functionToken = functionTokens[i];
             this._functionDescriptions.delete(functionToken);
         }
+    }
+
+    deleteFormulaAstCacheKey(...functionToken: IFunctionNames[]) {
+        FORMULA_AST_CACHE.forEach((_, key) => {
+            functionToken.forEach((token) => {
+                if (key.includes(token as string)) {
+                    FORMULA_AST_CACHE.delete(key);
+                }
+            });
+        });
     }
 }

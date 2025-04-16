@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -447,6 +447,12 @@ export class HtmlToUSMService {
                 }
             } else if (node.nodeType === Node.COMMENT_NODE || node.nodeName === 'STYLE') {
                 continue;
+            } else if (node.nodeName.toLowerCase() === 'br') {
+                if (!doc.paragraphs) {
+                    doc.paragraphs = [];
+                }
+                doc.paragraphs.push({ startIndex: doc.dataStream.length });
+                doc.dataStream += '\r';
             } else if (node.nodeType === Node.ELEMENT_NODE) {
                 const currentNodeStyle = this._getStyle(node as HTMLElement, styleStr);
                 const parentStyles = parent ? styleCache.get(parent) : {};
@@ -475,7 +481,8 @@ export class HtmlToUSMService {
             const p = documentModel?.getSnapshot();
             const singleDataStream = `${newDocBody.dataStream}\r\n`;
             const documentData = {
-                ...p, ...{
+                ...p,
+                ...{
                     body: {
                         dataStream: singleDataStream,
                         textRuns: newDocBody.textRuns,
@@ -768,7 +775,8 @@ function setMergedCellStyle(
         rowIndex: number;
         colIndex: number;
         colSetValueIndex: number;
-    }) {
+    }
+) {
     const { rowSpan, colSpan, rowIndex, colSetValueIndex } = indexParams;
 
     for (let i = rowIndex; i < rowIndex + rowSpan; i++) {

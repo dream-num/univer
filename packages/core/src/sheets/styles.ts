@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,6 +90,7 @@ export class Styles {
         return this._styles;
     }
 
+    // TODO: this should be `deReuseStyle` to be more accurate.
     getStyleByCell(cell: Nullable<ICellDataForSheetInterceptor>): Nullable<IStyleData> {
         let style;
         if (cell && Tools.isObject(cell.s)) {

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,7 @@ const locale: typeof zhCN = {
         alignCenter: 'Căn giữa',
         alignRight: 'Căn phải',
         alignJustify: 'Căn đều hai bên',
+        horizontalLine: 'Horizontal line',
         headerFooter: 'Đầu trang và chân trang',
         checklist: 'Task list',
         documentFlavor: 'Modern Mode',
@@ -96,6 +97,12 @@ const locale: typeof zhCN = {
             multiSpace: 'Multi Space',
             fixedValue: 'Fixed Value(px)',
         },
+    },
+    rightClick: {
+        bulletList: 'Danh sách không thứ tự',
+        orderList: 'Danh sách có thứ tự',
+        checkList: 'Danh sách công việc',
+        insertBellow: 'Chèn dưới',
     },
 };
 

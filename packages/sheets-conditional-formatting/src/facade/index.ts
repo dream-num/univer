@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,9 @@
 import './f-range';
 import './f-workbook';
 import './f-worksheet';
+import './f-enum';
 
-export { FConditionalFormattingBuilder } from './conditional-formatting-builder';
+export { FConditionalFormattingBuilder } from './f-conditional-formatting-builder';
 export type { IFRangeConditionalFormattingMixin } from './f-range';
 export type { FWorkbookConditionalFormattingMixin } from './f-workbook';
 

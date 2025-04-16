@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,9 @@
  */
 
 import type { IAccessor, ICommand } from '@univerjs/core';
+import type { ISetGridlinesColorMutationParams } from '../mutations/set-gridlines-color.mutation';
 import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
-import { type ISetGridlinesColorMutationParams, SetGridlinesColorMutation } from '../mutations/set-gridlines-color.mutation';
+import { SetGridlinesColorMutation } from '../mutations/set-gridlines-color.mutation';
 import { getSheetCommandTarget } from './utils/target-util';
 
 export interface ISetGridlinesColorCommandParams {

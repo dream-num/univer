@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -115,6 +115,7 @@ export interface IDrawingParam extends IDrawingSearch {
     // The default value is BooleanNumber.FALSE. if it's true, Please use transforms.
     isMultiTransform?: BooleanNumber;
     groupId?: string;
+    allowTransform?: boolean;
 }
 
 // #endregion

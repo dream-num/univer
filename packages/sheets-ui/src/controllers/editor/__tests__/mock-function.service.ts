@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,8 @@
  */
 
 import type { IFunctionInfo, IFunctionNames } from '@univerjs/engine-formula';
-import { FunctionType } from '@univerjs/engine-formula';
 import { createIdentifier } from '@univerjs/core';
+import { FunctionType } from '@univerjs/engine-formula';
 
 export class MockFunctionService {
     getDescriptions(): Map<IFunctionNames, IFunctionInfo> {

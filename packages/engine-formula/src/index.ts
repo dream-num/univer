@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+export type { BaseAstNode } from './engine/ast-node/base-ast-node.js';
+export { generateExecuteAstNodeData } from './engine/utils/ast-node-tool';
+export { getObjectValue } from './functions/util';
 
 export type {
     IArrayFormulaRangeType,
@@ -140,8 +144,9 @@ export { FormulaDataModel } from './models/formula-data.model';
 export { initSheetFormulaData } from './models/formula-data.model';
 export type { IRangeChange } from './models/formula-data.model';
 export { UniverFormulaEnginePlugin } from './plugin';
-export { IActiveDirtyManagerService } from './services/active-dirty-manager.service';
-export { ActiveDirtyManagerService } from './services/active-dirty-manager.service';
+export { GlobalComputingStatusService } from './services/global-computing-status.service';
+export { ActiveDirtyManagerService, IActiveDirtyManagerService } from './services/active-dirty-manager.service';
+export { ISheetRowFilteredService, SheetRowFilteredService } from './services/sheet-row-filtered.service';
 export { CalculateFormulaService, ICalculateFormulaService } from './services/calculate-formula.service';
 export { FormulaCurrentConfigService, IFormulaCurrentConfigService, type IFormulaDirtyData } from './services/current-data.service';
 export { DefinedNamesService, type IDefinedNameMapItem, IDefinedNamesService, type IDefinedNamesServiceParam } from './services/defined-names.service';
@@ -167,3 +172,4 @@ export { ENGINE_FORMULA_CYCLE_REFERENCE_COUNT, ENGINE_FORMULA_PLUGIN_CONFIG_KEY,
 export { generateRandomDependencyTreeId } from './engine/dependency/formula-dependency';
 export { DependencyManagerBaseService } from './services/dependency-manager.service';
 export { LambdaValueObjectObject } from './engine/value-object/lambda-value-object';
+export { type IUnitRowData } from './basics/common';

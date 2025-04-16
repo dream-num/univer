@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,22 +15,23 @@
  */
 
 import type { IAccessor, ICellData, IMutationInfo, IObjectMatrixPrimitiveType, IRange, Nullable } from '@univerjs/core';
-import { Dimension, getArrayLength, IUniverInstanceService, ObjectMatrix, Tools } from '@univerjs/core';
-
 import type {
     IDeleteRangeMutationParams,
     IInsertRangeMutationParams,
 } from '../../basics/interfaces/mutation-interface';
+
+import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
+import { Dimension, getArrayLength, IUniverInstanceService, ObjectMatrix, Tools } from '@univerjs/core';
+import { generateNullCell } from '../../basics/utils';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import { getMoveRangeUndoRedoMutations } from '../commands/move-range.command';
 import { SetRangeValuesCommand } from '../commands/set-range-values.command';
+import { getSheetMutationTarget } from '../commands/utils/target-util';
 import {
-    type ISetRangeValuesMutationParams,
+
     SetRangeValuesMutation,
     SetRangeValuesUndoMutationFactory,
 } from '../mutations/set-range-values.mutation';
-import { getSheetMutationTarget } from '../commands/utils/target-util';
-import { generateNullCell } from '../../basics/utils';
 
 /**
  * Generate undo mutation of a `InsertRangeMutation`

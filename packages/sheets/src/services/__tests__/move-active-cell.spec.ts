@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
+import type { Worksheet } from '@univerjs/core';
 import type { ISelectionWithStyle } from '../../basics';
-import { Direction, type Worksheet } from '@univerjs/core';
+import { Direction } from '@univerjs/core';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { getNextPrimaryCell } from '../selections/move-active-cell-util';
 import { createTestBase } from './util';

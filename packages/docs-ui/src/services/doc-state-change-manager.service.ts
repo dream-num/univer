@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,9 @@
  */
 
 import type { JSONXActions, Nullable } from '@univerjs/core';
+import type { IDocStateChangeParams, IRichTextEditingMutationParams } from '@univerjs/docs';
 import { ICommandService, Inject, IUndoRedoService, IUniverInstanceService, JSONX, RedoCommandId, RxDisposable, UndoCommandId } from '@univerjs/core';
-import { DocStateEmitService, type IDocStateChangeParams, type IRichTextEditingMutationParams } from '@univerjs/docs';
+import { DocStateEmitService } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { BehaviorSubject, takeUntil } from 'rxjs';
 import { DocIMEInputManagerService } from './doc-ime-input-manager.service';

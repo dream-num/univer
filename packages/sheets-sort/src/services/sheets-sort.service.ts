@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 import type { IRange, Workbook } from '@univerjs/core';
 import type { ISheetRangeLocation } from '@univerjs/sheets';
+import type { ICellValueCompareFn } from '../commands/commands/sheets-sort.command';
 import type { ISortOption } from './interface';
 import {
     Disposable,
@@ -26,7 +27,7 @@ import {
 } from '@univerjs/core';
 import { FormulaDataModel } from '@univerjs/engine-formula';
 import { getSheetCommandTarget } from '@univerjs/sheets';
-import { type ICellValueCompareFn, SortRangeCommand } from '../commands/commands/sheets-sort.command';
+import { SortRangeCommand } from '../commands/commands/sheets-sort.command';
 import { isNullValue } from '../controllers/utils';
 
 export class SheetsSortService extends Disposable {

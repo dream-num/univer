@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -304,6 +304,20 @@ export default {
             text: { name: '文字列', detail: '取り出す文字を含む文字列を指定します。' },
             startNum: { name: '開始位置', detail: '文字列から取り出す先頭文字の位置を数値で指定します。' },
             numBytes: { name: 'バイト数', detail: '取り出す文字数をバイト数で指定します。' },
+        },
+    },
+    NUMBERSTRING: {
+        description: '数字を中国語の文字列に変換する',
+        abstract: '数字を中国語の文字列に変換する',
+        links: [
+            {
+                title: '指導',
+                url: 'https://www.wps.cn/learning/course/detail/id/340.html?chan=pc_kdocs_function',
+            },
+        ],
+        functionParameter: {
+            number: { name: '数値', detail: '中国語の文字列に変換される数値。' },
+            type: { name: 'タイプ', detail: '返される結果のタイプ。\n1. 中国語小文字 \n2. 中国語の文字を大文字にする \n3. 漢字の読み書き' },
         },
     },
     NUMBERVALUE: {

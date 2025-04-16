@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,6 +60,7 @@ import {
     isWhiteColor,
     LocaleService,
     ObjectMatrix,
+    Range,
     searchArray,
     SheetSkeleton,
     Tools,
@@ -157,7 +158,6 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
     private _handleBgMatrix = new ObjectMatrix<boolean>();
     private _handleBorderMatrix = new ObjectMatrix<boolean>();
     private _handleFontMatrix = new ObjectMatrix<boolean>();
-
     private _showGridlines: BooleanNumber = BooleanNumber.TRUE;
     private _gridlinesColor: string | undefined = undefined;
 
@@ -171,9 +171,6 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         @Inject(Injector) _injector: Injector
     ) {
         super(worksheet, _styles, _localeService, _contextService, _configService, _injector);
-    }
-
-    override initConfig() {
         this._updateLayout();
         this.disposeWithMe(
             this._contextService.subscribeContextValue$(RENDER_RAW_FORMULA_KEY).pipe(
@@ -192,7 +189,8 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         this.disposeWithMe(
             this._scene.onTransformChange$.subscribeEvent((param: ITransformChangeState) => {
                 this.setScale(param.value.scaleX || 1, param.value.scaleY);
-            }));
+            })
+        );
     }
 
     override _updateLayout() {
@@ -1130,15 +1128,14 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         return this.worksheet.getSpanModel().getMergedCellRangeForSkeleton(range.startRow, range.startColumn, range.endRow, range.endColumn);
     }
 
-    resetCache(): void {
+    override resetCache(): void {
         this._resetCache();
     }
 
     /**
      * Any changes to sheet model would reset cache.
      */
-    override _resetCache(): void {
-        super._resetCache();
+    _resetCache(): void {
         this._stylesCache = {
             background: {},
             backgroundPositions: new ObjectMatrix<ICellWithCoord>(),
@@ -1150,6 +1147,16 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         this._handleBgMatrix?.reset();
         this._handleBorderMatrix?.reset();
         this._overflowCache?.reset();
+    }
+
+    override resetRangeCache(ranges: IRange[]): void {
+        for (let i = 0; i < ranges.length; i++) {
+            const range = ranges[i];
+            Range.foreach(range, (row, col) => {
+                this._stylesCache.fontMatrix.realDeleteValue(row, col);
+            });
+        }
+        this.makeDirty(true);
     }
 
     _setBorderStylesCache(row: number, col: number, style: Nullable<IStyleData>, options: {
@@ -1303,8 +1310,8 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
 
         const cell = this.worksheet.getCell(row, col) || this.worksheet.getCellRaw(row, col);
         const cellStyle = this._styles.getStyleByCell(cell);
-        const columnStyle = this.worksheet.getColumnStyle(col) as IStyleData;
-        const rowStyle = this.worksheet.getRowStyle(row) as IStyleData;
+        const columnStyle = this.worksheet.getColumnStyle(col);
+        const rowStyle = this.worksheet.getRowStyle(row);
         const defaultStyle = this.worksheet.getDefaultCellStyleInternal();
 
         const style = this._isRowStylePrecedeColumnStyle

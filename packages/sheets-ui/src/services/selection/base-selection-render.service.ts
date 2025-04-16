@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,16 +25,24 @@ import type {
     IRange,
     IRangeWithCoord,
     IStyleSheet,
-    Nullable } from '@univerjs/core';
+    Nullable,
+} from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, IRenderModule, Scene, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
+import type { ISelectionStyle, ISelectionWithCoord, ISelectionWithStyle } from '@univerjs/sheets';
 import type { IShortcutService } from '@univerjs/ui';
 import type { Observable, Subscription } from 'rxjs';
 import type { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import {
-    convertCellToRange, createIdentifier, Disposable, InterceptorManager, RANGE_TYPE, ThemeService } from '@univerjs/core';
-import { ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
+    convertCellToRange,
+    createIdentifier,
+    Disposable,
+    InterceptorManager,
+    RANGE_TYPE,
+    ThemeService,
+} from '@univerjs/core';
 
-import { type ISelectionStyle, type ISelectionWithCoord, type ISelectionWithStyle, REF_SELECTIONS_ENABLED, SELECTIONS_ENABLED } from '@univerjs/sheets';
+import { ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
+import { REF_SELECTIONS_ENABLED, SELECTIONS_ENABLED } from '@univerjs/sheets';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { SHEET_COMPONENT_SELECTION_LAYER_INDEX } from '../../common/keys';
 import { genNormalSelectionStyle, RANGE_FILL_PERMISSION_CHECK, RANGE_MOVE_PERMISSION_CHECK } from './const';
@@ -517,10 +525,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
                 if (!startViewport || !endViewport || !viewportMain) {
                     return false;
                 }
-                const crossableViewports = [SHEET_VIEWPORT_KEY.VIEW_MAIN,
-                    SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT_TOP,
-                    SHEET_VIEWPORT_KEY.VIEW_MAIN_TOP,
-                    SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT] as string[];
+                const crossableViewports = [SHEET_VIEWPORT_KEY.VIEW_MAIN, SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT_TOP, SHEET_VIEWPORT_KEY.VIEW_MAIN_TOP, SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT] as string[];
                 return crossableViewports.includes(startViewport.viewportKey) && crossableViewports.includes(endViewport.viewportKey);
             };
             if (isCrossableViewports()) {

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,14 @@
  */
 
 import type { Injector, IWorkbookData, Univer, Workbook } from '@univerjs/core';
+import type { LexerNode } from '../lexer-node';
 import { LocaleType } from '@univerjs/core';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { IFormulaCurrentConfigService } from '../../../services/current-data.service';
 import { IDefinedNamesService } from '../../../services/defined-names.service';
 import { Lexer } from '../lexer';
-import type { LexerNode } from '../lexer-node';
 import { LexerTreeBuilder } from '../lexer-tree-builder';
-import { IFormulaCurrentConfigService } from '../../../services/current-data.service';
 import { createCommandTestBed } from './create-command-test-bed';
 
 const TEST_WORKBOOK_DATA: IWorkbookData = {

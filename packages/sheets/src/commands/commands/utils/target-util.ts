@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { type IUniverInstanceService, type Nullable, UniverInstanceType, type Workbook, type Worksheet } from '@univerjs/core';
+import type { IUniverInstanceService, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import { UniverInstanceType } from '@univerjs/core';
 
 export function getSheetCommandTargetWorkbook(univerInstanceService: IUniverInstanceService, params: { unitId?: string }): Nullable<{
     workbook: Workbook;

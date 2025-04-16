@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import React from 'react';
-
-import clsx from 'clsx';
+import type { CSSProperties, ReactNode } from 'react';
 import type { IRadioProps } from '../radio/Radio';
+import { Children, cloneElement, isValidElement } from 'react';
+import { clsx } from '../../helper/clsx';
 import styles from './index.module.less';
 
 export interface IRadioGroupProps {
-    children: React.ReactNode[];
+    children: ReactNode[];
 
     /**
      * The class name of the checkbox group
@@ -31,7 +31,7 @@ export interface IRadioGroupProps {
     /**
      * The style of the checkbox group
      */
-    style?: React.CSSProperties;
+    style?: CSSProperties;
 
     /**
      * Define which radio is selected
@@ -72,9 +72,9 @@ export function RadioGroup(props: IRadioGroupProps) {
 
     return (
         <div className={clsx(styles.radioGroup, _className)} style={style}>
-            {React.Children.map(children, (child, index) => {
-                if (React.isValidElement<IRadioProps>(child)) {
-                    return React.cloneElement(child, {
+            {Children.map(children, (child, index) => {
+                if (isValidElement<IRadioProps>(child)) {
+                    return cloneElement(child, {
                         key: index,
                         children: child.props.children,
                         value: child.props.value,

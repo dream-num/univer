@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 import type { Dependency } from '@univerjs/core';
 import type { IUniverUIConfig } from './controllers/config.schema';
-import { DependentOn, IConfigService, IContextService, ILocalStorageService, Inject, Injector, merge, mergeOverrideWithDependencies, Plugin } from '@univerjs/core';
+import { DependentOn, generateRandomId, IConfigService, IContextService, ILocalStorageService, Inject, Injector, merge, mergeOverrideWithDependencies, Plugin } from '@univerjs/core';
 
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { ComponentManager } from './common/component-manager';
@@ -77,10 +77,13 @@ export class UniverUIPlugin extends Plugin {
 
         // Manage the plugin configuration.
         const { menu, ...rest } = merge(
-            {},
+            {
+                popupRootId: `univer-popup-portal-${generateRandomId(6)}`,
+            },
             defaultPluginConfig,
             this._config
         );
+
         if (rest.disableAutoFocus) {
             this._contextService.setContextValue(DISABLE_AUTO_FOCUS_KEY, true);
         }

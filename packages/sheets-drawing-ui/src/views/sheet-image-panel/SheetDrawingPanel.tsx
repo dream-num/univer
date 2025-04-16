@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,9 @@
  */
 
 import type { IDrawingParam } from '@univerjs/core';
-import { useDependency } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { DrawingCommonPanel } from '@univerjs/drawing-ui';
+import { useDependency } from '@univerjs/ui';
 import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
 import { SheetDrawingAnchor } from './SheetDrawingAnchor';
@@ -45,4 +45,3 @@ export const SheetDrawingPanel = () => {
         </div>
     );
 };
-

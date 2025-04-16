@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,13 +23,14 @@ export const WrapperError = (props: {
 }) => {
     return (
         <div style={{ position: 'relative' }}>
-            <div style={{
-                position: 'absolute',
-                zIndex: 999,
-                bottom: '-13px',
-                fontSize: '10px',
-                color: 'red',
-            }}
+            <div
+                style={{
+                    position: 'absolute',
+                    zIndex: 999,
+                    bottom: '-13px',
+                    fontSize: '10px',
+                    color: 'red',
+                }}
             >
                 {props.errorText}
             </div>

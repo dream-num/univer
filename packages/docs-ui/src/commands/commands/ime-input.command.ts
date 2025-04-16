@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,10 @@
 
 import type { DocumentDataModel, ICommand, ICommandInfo } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
+import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import { BuildTextUtils, CommandType, ICommandService, IUniverInstanceService, JSONX, SHEET_EDITOR_UNITS, TextX, TextXActionType, UniverInstanceType } from '@univerjs/core';
 import { RichTextEditingMutation } from '@univerjs/docs';
-import { IRenderManagerService, type ITextRangeWithStyle } from '@univerjs/engine-render';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { getCustomDecorationAtPosition, getCustomRangeAtPosition, getTextRunAtPosition } from '../../basics/paragraph';
 import { DocIMEInputManagerService } from '../../services/doc-ime-input-manager.service';
 import { DocMenuStyleService } from '../../services/doc-menu-style.service';
@@ -92,7 +93,7 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
         const styleCache = docMenuStyleService.getStyleCache();
         const curCustomRange = getCustomRangeAtPosition(body.customRanges ?? [], startOffset + oldTextLen, SHEET_EDITOR_UNITS.includes(unitId));
         const curTextRun = getTextRunAtPosition(
-            body.textRuns ?? [],
+            body,
             isCompositionStart ? endOffset : startOffset + oldTextLen,
             defaultTextStyle,
             styleCache,

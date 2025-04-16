@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,10 @@
 import type { Dependency, IDisposable } from './common/di';
 import type { UnitModel, UnitType } from './common/unit';
 import type { LogLevel } from './services/log/log.service';
-import type { Plugin, PluginCtor } from './services/plugin/plugin';
 import type { DependencyOverride } from './services/plugin/plugin-override';
+import type { Plugin, PluginCtor } from './services/plugin/plugin.service';
 import type { IStyleSheet } from './services/theme/theme.service';
+import type { ILocales } from './shared';
 import type { IWorkbookData } from './sheets/typedef';
 import type { LocaleType } from './types/enum/locale-type';
 import type { IDocumentData, ISlideData } from './types/interfaces';
@@ -50,7 +51,7 @@ import { IResourceManagerService } from './services/resource-manager/type';
 import { ThemeService } from './services/theme/theme.service';
 import { IUndoRedoService, LocalUndoRedoService } from './services/undoredo/undoredo.service';
 import { UserManagerService } from './services/user-manager/user-manager.service';
-import { DisposableCollection, type ILocales, toDisposable } from './shared';
+import { DisposableCollection, toDisposable } from './shared';
 import { Workbook } from './sheets/workbook';
 import { SlideDataModel } from './slides/slide-model';
 
@@ -136,7 +137,7 @@ export class Univer implements IDisposable {
      * @deprecated use `createUnit` instead
      */
     createUniverSheet(data: Partial<IWorkbookData>): Workbook {
-        this._injector.get(ILogService).warn('[Univer]: Univer.createUniverSheet is deprecated, use createUnit instead');
+        this._injector.get(ILogService).warn('[Univer]', 'Univer.createUniverSheet is deprecated, use createUnit instead');
         return this._univerInstanceService.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, data);
     }
 
@@ -144,7 +145,7 @@ export class Univer implements IDisposable {
      * @deprecated use `createUnit` instead
      */
     createUniverDoc(data: Partial<IDocumentData>): DocumentDataModel {
-        this._injector.get(ILogService).warn('[Univer]: Univer.createUniverDoc is deprecated, use createUnit instead');
+        this._injector.get(ILogService).warn('[Univer]', 'Univer.createUniverDoc is deprecated, use createUnit instead');
         return this._univerInstanceService.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, data);
     }
 
@@ -152,7 +153,7 @@ export class Univer implements IDisposable {
      * @deprecated use `createUnit` instead
      */
     createUniverSlide(data: Partial<ISlideData>): SlideDataModel {
-        this._injector.get(ILogService).warn('[Univer]: Univer.createUniverSlide is deprecated, use createUnit instead');
+        this._injector.get(ILogService).warn('[Univer]', 'Univer.createUniverSlide is deprecated, use createUnit instead');
         return this._univerInstanceService.createUnit<ISlideData, SlideDataModel>(UniverInstanceType.UNIVER_SLIDE, data);
     }
 
@@ -165,7 +166,7 @@ export class Univer implements IDisposable {
         univerInstanceService.__setCreateHandler(
             (type: UnitType, data, ctor, options) => {
                 if (!this._startedTypes.has(type)) {
-                    this._pluginService.startPluginForType(type);
+                    this._pluginService.startPluginsForType(type);
                     this._startedTypes.add(type);
 
                     const model = injector.createInstance(ctor, data);

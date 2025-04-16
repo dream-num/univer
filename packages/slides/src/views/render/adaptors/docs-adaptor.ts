@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import type { EventState, Injector, IPageElement } from '@univerjs/core';
+import type { BaseObject, IDocumentSkeletonDrawing, IPageRenderConfig, IWheelEvent } from '@univerjs/engine-render';
 import { DocumentDataModel, Inject, LocaleService, PageElementType } from '@univerjs/core';
 import {
     Documents,
@@ -28,8 +30,6 @@ import {
     ScrollBar,
     Viewport,
 } from '@univerjs/engine-render';
-import type { EventState, Injector, IPageElement } from '@univerjs/core';
-import type { BaseObject, IDocumentSkeletonDrawing, IPageRenderConfig, IWheelEvent } from '@univerjs/engine-render';
 
 import { CanvasObjectProviderRegistry, ObjectAdaptor } from '../adaptor';
 

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,9 @@
  */
 
 import type { IMutationInfo, IRange, IStyleData } from '@univerjs/core';
+import type { Observable } from 'rxjs';
 import { createIdentifier, Disposable, ICommandService, ILogService, Inject, IUndoRedoService, ObjectMatrix, ThemeService } from '@univerjs/core';
 import { SetRangeValuesMutation, SheetsSelectionsService } from '@univerjs/sheets';
-import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 
 import { IMarkSelectionService } from '../mark-selection/mark-selection.service';

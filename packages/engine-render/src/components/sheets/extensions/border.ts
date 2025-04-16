@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,6 +66,8 @@ export class Border extends SheetExtension {
         }
         ctx.save();
 
+        // this would cause the dashed line ([1, 1]) style to be drawn incorrectly.(in zoom 100%)
+        // but without this, lines looks thicker than before.
         ctx.translateWithPrecisionRatio(FIX_ONE_PIXEL_BLUR_OFFSET, FIX_ONE_PIXEL_BLUR_OFFSET);
 
         const precisionScale = this._getScale(ctx.getScale());

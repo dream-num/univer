@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import { CellValueType, Direction, IUniverInstanceService, numfmt } from '@univerjs/core';
 import type { Workbook } from '@univerjs/core';
+import type { IAutoFillRule } from './type';
 
+import { CellValueType, Direction, IUniverInstanceService, numfmt } from '@univerjs/core';
 import {
     chineseToNumber,
     fillChnNumber,
@@ -34,7 +35,6 @@ import {
     matchExtendNumber,
 } from './tools';
 import { APPLY_TYPE, DATA_TYPE } from './type';
-import type { IAutoFillRule } from './type';
 
 export const dateRule: IAutoFillRule = {
     type: DATA_TYPE.DATE,

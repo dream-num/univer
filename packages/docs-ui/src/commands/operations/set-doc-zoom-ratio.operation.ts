@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { CommandType, IUniverInstanceService, Tools } from '@univerjs/core';
 import type { IAccessor, IOperation } from '@univerjs/core';
+import { CommandType, IUniverInstanceService, Tools } from '@univerjs/core';
 
 export interface ISetDocZoomRatioOperationParams {
     zoomRatio: number;

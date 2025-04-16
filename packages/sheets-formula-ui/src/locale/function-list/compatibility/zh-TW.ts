@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -341,8 +341,7 @@ export default {
         links: [{
             title: '教導',
             url: 'https://support.microsoft.com/zh-tw/office/norminv-%E5%87%BD%E6%95%B0-87981ab8-2de0-4cb0-b1aa-e21d4cb879b8',
-        },
-        ],
+        }],
         functionParameter: {
             probability: { name: '機率', detail: '對應到常態分佈的機率。' },
             mean: { name: '平均值', detail: '分佈的算術平均值。' },

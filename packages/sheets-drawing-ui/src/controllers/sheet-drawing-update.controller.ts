@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import type { ISheetLocationBase, WorkbookSelectionModel } from '@univerjs/sheet
 import type { ISheetDrawing, ISheetDrawingPosition } from '@univerjs/sheets-drawing';
 import type { IInsertDrawingCommandParams, ISetDrawingCommandParams } from '../commands/commands/interfaces';
 import type { ISetDrawingArrangeCommandParams } from '../commands/commands/set-drawing-arrange.command';
-import { BooleanNumber, BuildTextUtils, createDocumentModelWithStyle, Disposable, DrawingTypeEnum, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, Inject, Injector, LocaleService, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, WrapTextType } from '@univerjs/core';
+import { BooleanNumber, BuildTextUtils, createDocumentModelWithStyle, Disposable, DrawingTypeEnum, FOCUSING_COMMON_DRAWINGS, generateRandomId, ICommandService, IContextService, ImageSourceType, Inject, Injector, LocaleService, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, WrapTextType } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
 import { docDrawingPositionToTransform } from '@univerjs/docs-ui';
 import { DRAWING_IMAGE_ALLOW_IMAGE_LIST, DRAWING_IMAGE_ALLOW_SIZE, DRAWING_IMAGE_COUNT_LIMIT, DRAWING_IMAGE_HEIGHT_LIMIT, DRAWING_IMAGE_WIDTH_LIMIT, getImageSize, IDrawingManagerService, IImageIoService, ImageUploadStatusType, SetDrawingSelectedOperation } from '@univerjs/drawing';
@@ -154,6 +154,10 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
         return false;
     }
 
+    insertCellImageByFile(file: File, location?: ISheetLocationBase) {
+        return this._insertCellImage(file, location);
+    }
+
     async insertFloatImageByFile(file: File) {
         let imageParam: Nullable<IImageIoServiceParam>;
 
@@ -222,7 +226,7 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
     }
 
     // eslint-disable-next-line max-lines-per-function
-    private async _insertCellImage(file: File) {
+    private async _insertCellImage(file: File, location?: ISheetLocationBase) {
         let imageParam: Nullable<IImageIoServiceParam>;
         try {
             imageParam = await this._imageIoService.saveImage(file);
@@ -247,7 +251,7 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
         }
 
         if (imageParam == null) {
-            return;
+            return false;
         }
 
         const { imageId, imageSourceType, source, base64Cache } = imageParam;
@@ -321,15 +325,107 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
 
         if (jsonXActions) {
             docDataModel.apply(jsonXActions);
+
             return this._commandService.syncExecuteCommand(SetRangeValuesCommand.id, {
                 value: {
-                    [selection.primary.actualRow]: {
-                        [selection.primary.actualColumn]: {
+                    [location?.row ?? selection.primary.actualRow]: {
+                        [location?.col ?? selection.primary.actualColumn]: {
                             p: (docDataModel.getSnapshot()),
                             t: 1,
                         },
                     },
                 },
+                unitId: location?.unitId,
+                subUnitId: location?.subUnitId,
+            });
+        }
+
+        return false;
+    }
+
+    // eslint-disable-next-line max-lines-per-function
+    async insertCellImageByUrl(url: string, location?: ISheetLocationBase) {
+        const { width, height, image } = await getImageSize(url || '');
+        this._imageIoService.addImageSourceCache(url, ImageSourceType.URL, image);
+        const selection = this._workbookSelections.getCurrentLastSelection();
+        if (!selection) {
+            return false;
+        }
+        const docDataModel = createDocumentModelWithStyle('', {});
+
+        const imageSize = getDrawingSizeByCell(
+            this._injector,
+            {
+                unitId: this._context.unitId,
+                subUnitId: this._context.unit.getActiveSheet().getSheetId(),
+                row: selection.primary.actualRow,
+                col: selection.primary.actualColumn,
+            },
+            width,
+            height,
+            0
+        );
+        if (!imageSize) {
+            return false;
+        }
+        const docTransform = {
+            size: {
+                width: imageSize.width,
+                height: imageSize.height,
+            },
+            positionH: {
+                relativeFrom: ObjectRelativeFromH.PAGE,
+                posOffset: 0,
+            },
+            positionV: {
+                relativeFrom: ObjectRelativeFromV.PARAGRAPH,
+                posOffset: 0,
+            },
+            angle: 0,
+        };
+        const docDrawingParam = {
+            unitId: docDataModel.getUnitId(),
+            subUnitId: docDataModel.getUnitId(),
+            drawingId: generateRandomId(),
+            drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+            imageSourceType: ImageSourceType.URL,
+            source: url,
+            transform: docDrawingPositionToTransform(docTransform),
+            docTransform,
+            behindDoc: BooleanNumber.FALSE,
+            title: '',
+            description: '',
+            layoutType: PositionedObjectLayoutType.INLINE, // Insert inline drawing by default.
+            wrapText: WrapTextType.BOTH_SIDES,
+            distB: 0,
+            distL: 0,
+            distR: 0,
+            distT: 0,
+        };
+
+        const jsonXActions = BuildTextUtils.drawing.add({
+            documentDataModel: docDataModel,
+            drawings: [docDrawingParam],
+            selection: {
+                collapsed: true,
+                startOffset: 0,
+                endOffset: 0,
+            },
+        });
+
+        if (jsonXActions) {
+            docDataModel.apply(jsonXActions);
+            return this._commandService.syncExecuteCommand(SetRangeValuesCommand.id, {
+                value: {
+                    [location?.row ?? selection.primary.actualRow]: {
+                        [location?.col ?? selection.primary.actualColumn]: {
+                            p: (docDataModel.getSnapshot()),
+                            t: 1,
+                        },
+                    },
+                },
+                unitId: location?.unitId,
+                subUnitId: location?.subUnitId,
             });
         }
 

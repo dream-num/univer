@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 
 import type { dayjs } from '@univerjs/core';
-import type { NoUndefinedRangeValueType } from 'rc-picker/lib/PickerInput/RangePicker';
+import type { NoUndefinedRangeValueType, RangePickerProps } from 'rc-picker/lib/PickerInput/RangePicker';
 import { CalendarSingle, GuideSingle } from '@univerjs/icons';
 import { RangePicker } from 'rc-picker';
 import generateConfig from 'rc-picker/lib/generate/dayjs';
@@ -23,7 +23,7 @@ import React, { useContext } from 'react';
 import { ConfigContext } from '../config-provider/ConfigProvider';
 import styles from './index.module.less';
 
-export interface IDateRangePickerProps {
+export interface IDateRangePickerProps extends Omit<RangePickerProps<dayjs.Dayjs>, 'value' | 'onChange' | 'locale' | 'generateConfig' | 'prefixCls'> {
     /**
      * The value of the date picker.
      */
@@ -36,7 +36,7 @@ export interface IDateRangePickerProps {
 }
 
 export function DateRangePicker(props: IDateRangePickerProps) {
-    const { value, onChange } = props;
+    const { value, onChange, ...ext } = props;
 
     const { locale } = useContext(ConfigContext);
 
@@ -48,6 +48,7 @@ export function DateRangePicker(props: IDateRangePickerProps) {
 
     return (
         <RangePicker<dayjs.Dayjs>
+            {...ext}
             value={value}
             prefixCls={styles.dateRangePicker}
             generateConfig={generateConfig}

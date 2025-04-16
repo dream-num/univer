@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ export {
     SELECTION_CONTROL_BORDER_BUFFER_COLOR,
     SELECTION_CONTROL_BORDER_BUFFER_WIDTH,
 } from './basics/selection';
-export { createTopMatrixFromMatrix, createTopMatrixFromRanges, findAllRectangle, rangeMerge, RangeMergeUtil } from './basics/rangeMerge';
+export { createTopMatrixFromMatrix, createTopMatrixFromRanges, findAllRectangle, rangeMerge, RangeMergeUtil } from './basics/range-merge';
 export { type IUniverSheetsConfig } from './controllers/config.schema';
 export { MAX_CELL_PER_SHEET_KEY } from './controllers/config/config';
 export { BorderStyleManagerService, type IBorderInfo } from './services/border-style-manager.service';
@@ -95,15 +95,14 @@ export {
 } from './services/ref-range/util';
 export type { MutationsAffectRange } from './services/ref-range/util';
 export { InterceptCellContentPriority, INTERCEPTOR_POINT } from './services/sheet-interceptor/interceptor-const';
-export { AFTER_CELL_EDIT, AFTER_CELL_EDIT_ASYNC, BEFORE_CELL_EDIT, SheetInterceptorService } from './services/sheet-interceptor/sheet-interceptor.service';
+export { AFTER_CELL_EDIT, BEFORE_CELL_EDIT, SheetInterceptorService, VALIDATE_CELL } from './services/sheet-interceptor/sheet-interceptor.service';
 export type { ISheetLocation, ISheetLocationBase, ISheetRowLocation } from './services/sheet-interceptor/utils/interceptor';
 export { MERGE_CELL_INTERCEPTOR_CHECK, MergeCellController } from './controllers/merge-cell.controller';
 export { AddMergeRedoSelectionsOperationFactory, AddMergeUndoSelectionsOperationFactory } from './commands/utils/handle-merge-operation';
 
 export type { FormatType } from './services/numfmt/type';
 export { expandToContinuousRange } from './basics/expand-range';
-export { splitRangeText } from './basics/split-range-text';
-export type { SplitDelimiterEnum } from './basics/split-range-text';
+export { SplitDelimiterEnum, splitRangeText } from './basics/split-range-text';
 export { getNextPrimaryCell } from './services/selections/move-active-cell-util';
 export { checkCellValueType } from './basics/cell-type';
 
@@ -181,7 +180,7 @@ export { RangeProtectionPermissionManageCollaPoint } from './services/permission
 export { RangeProtectionPermissionDeleteProtectionPoint } from './services/permission/permission-point/range/delete-protection';
 export { baseProtectionActions } from './services/permission/range-permission/util';
 
-export { generateNullCell, generateNullCellValue } from './basics/utils';
+export { generateNullCell, generateNullCellValue, getVisibleRanges, rangeToDiscreteRange } from './basics/utils';
 export { getSheetCommandTarget, getSheetCommandTargetWorkbook, getSheetMutationTarget } from './commands/commands/utils/target-util';
 export { alignToMergedCellsBorders, getCellAtRowCol, isSingleCellSelection, setEndForRange } from './commands/commands/utils/selection-utils';
 export { getSelectionsService } from './commands/utils/selection-command-util';
@@ -208,6 +207,7 @@ export {
 } from './commands/commands/add-worksheet-merge.command';
 export { SetWorksheetRangeThemeStyleCommand } from './commands/commands/add-worksheet-range-theme.command';
 export { DeleteWorksheetRangeThemeStyleCommand } from './commands/commands/delete-worksheet-range-theme.command';
+export { AppendRowCommand, type IAppendRowCommandParams } from './commands/commands/append-row.command';
 export { ClearSelectionAllCommand } from './commands/commands/clear-selection-all.command';
 export { ClearSelectionContentCommand } from './commands/commands/clear-selection-content.command';
 export { ClearSelectionFormatCommand } from './commands/commands/clear-selection-format.command';
@@ -232,11 +232,16 @@ export {
     InsertColBeforeCommand,
     InsertColByRangeCommand,
     InsertColCommand,
+    InsertMultiColsLeftCommand,
+    InsertMultiColsRightCommand,
+    InsertMultiRowsAboveCommand,
+    InsertMultiRowsAfterCommand,
     InsertRowAfterCommand,
     InsertRowBeforeCommand,
     InsertRowByRangeCommand,
     InsertRowCommand,
 } from './commands/commands/insert-row-col.command';
+
 export { type IInsertSheetCommandParams, InsertSheetCommand } from './commands/commands/insert-sheet.command';
 export { getMoveRangeUndoRedoMutations, type IMoveRangeCommandParams, MoveRangeCommand } from './commands/commands/move-range.command';
 export {
@@ -439,12 +444,14 @@ export {
     SetWorksheetRowIsAutoHeightMutation,
 } from './commands/mutations/set-worksheet-row-height.mutation';
 
-export { ScrollToCellOperation } from './commands/operations/scroll-to-cell.operation';
-export { type ISetSelectionsOperationParams, SetSelectionsOperation } from './commands/operations/selection.operation';
+export { type IScrollToCellOperationParams, ScrollToCellOperation } from './commands/operations/scroll-to-cell.operation';
+
+export { type ISelectRangeCommandParams, type ISetSelectionsOperationParams, SelectRangeCommand, SetSelectionsOperation } from './commands/operations/selection.operation';
 export { type ISetWorksheetActiveOperationParams, SetWorksheetActiveOperation } from './commands/operations/set-worksheet-active.operation';
 export { type IToggleCellCheckboxCommandParams, ToggleCellCheckboxCommand } from './commands/commands/toggle-checkbox.command';
 export { SCOPE_WORKBOOK_VALUE_DEFINED_NAME } from './controllers/defined-name-data.controller';
 export type { ICellOverGridPosition, ISheetOverGridPosition } from './basics/cell-position';
 
 export { SheetSkeletonService } from './skeleton/skeleton.service';
+
 // #endregion

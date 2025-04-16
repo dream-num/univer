@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,13 @@
 
 import { describe, expect, it } from 'vitest';
 
+import { ErrorType } from '../../../../basics/error-type';
+import { stripErrorMargin } from '../../../../engine/utils/math-kit';
+import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
+import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
+import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { FUNCTION_NAMES_MATH } from '../../function-names';
 import { Sumxmy2 } from '../index';
-import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
-import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
-import { ErrorType } from '../../../../basics/error-type';
-import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
-import { stripErrorMargin } from '../../../../engine/utils/math-kit';
 
 describe('Test sumxmy2 function', () => {
     const testFunction = new Sumxmy2(FUNCTION_NAMES_MATH.SUMXMY2);

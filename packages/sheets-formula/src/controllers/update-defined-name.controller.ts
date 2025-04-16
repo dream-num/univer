@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 import type { IMutationInfo, Nullable, Workbook } from '@univerjs/core';
 import type { IDefinedNamesServiceParam, ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
+import type { IFormulaReferenceMoveParam } from './utils/ref-range-formula';
 import type { IUnitRangeWithOffset } from './utils/ref-range-move';
 import {
     Disposable,
@@ -25,7 +26,7 @@ import {
 } from '@univerjs/core';
 import { deserializeRangeWithSheetWithCache, ErrorType, generateStringWithSequence, IDefinedNamesService, LexerTreeBuilder, sequenceNodeType, serializeRangeToRefString, SetDefinedNameMutation } from '@univerjs/engine-formula';
 import { RemoveDefinedNameCommand, SetDefinedNameCommand, SheetInterceptorService } from '@univerjs/sheets';
-import { FormulaReferenceMoveType, type IFormulaReferenceMoveParam, updateRefOffset } from './utils/ref-range-formula';
+import { FormulaReferenceMoveType, updateRefOffset } from './utils/ref-range-formula';
 import { getNewRangeByMoveParam } from './utils/ref-range-move';
 import { getReferenceMoveParams } from './utils/ref-range-param';
 

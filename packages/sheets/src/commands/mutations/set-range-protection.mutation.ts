@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,9 @@
  */
 
 import type { IAccessor, IMutation, IMutationInfo } from '@univerjs/core';
-import { CommandType } from '@univerjs/core';
-
 import type { IRangeProtectionRule } from '../../model/range-protection-rule.model';
+
+import { CommandType } from '@univerjs/core';
 import { RangeProtectionRuleModel } from '../../model/range-protection-rule.model';
 
 export interface ISetRangeProtectionMutationParams {
@@ -47,7 +47,8 @@ export const FactorySetRangeProtectionMutation = (accessor: IAccessor, param: IS
     const result: IMutationInfo<ISetRangeProtectionMutationParams> = {
         id: SetRangeProtectionMutation.id,
         params: {
-            ...param, rule: oldRule,
+            ...param,
+            rule: oldRule,
         },
     };
     return result;

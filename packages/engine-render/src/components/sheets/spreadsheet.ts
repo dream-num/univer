@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -133,6 +133,7 @@ export class Spreadsheet extends SheetComponent {
                 checkOutOfViewBound: true,
                 viewportKey: viewportInfo.viewportKey,
                 viewBound: viewportInfo.cacheBound,
+                diffBounds: viewportInfo.diffBounds,
             } as IDrawInfo);
             this.addRenderFrameTimeMetricToScene(timeKey, Tools.now() - st, scene);
         }
@@ -278,7 +279,17 @@ export class Spreadsheet extends SheetComponent {
             // scrolling && no dirty
             this.addRenderTagToScene('scrolling', true);
             this.paintNewAreaForScrolling(viewportInfo, {
-                cacheCanvas, cacheCtx, mainCtx, topOrigin, leftOrigin, bufferEdgeX, bufferEdgeY, scaleX, scaleY, columnHeaderHeight, rowHeaderWidth,
+                cacheCanvas,
+                cacheCtx,
+                mainCtx,
+                topOrigin,
+                leftOrigin,
+                bufferEdgeX,
+                bufferEdgeY,
+                scaleX,
+                scaleY,
+                columnHeaderHeight,
+                rowHeaderWidth,
             });
         }
         // support for browser native zoom (only windows has this problem)

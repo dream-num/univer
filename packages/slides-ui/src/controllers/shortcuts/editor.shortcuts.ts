@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+import type { IShortcutItem } from '@univerjs/ui';
 import { DeleteLeftCommand } from '@univerjs/docs-ui';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { KeyCode, MetaKeys } from '@univerjs/ui';
-import type { IShortcutItem } from '@univerjs/ui';
 import { SetTextEditArrowOperation } from '../../commands/operations/text-edit.operation';
 import {
     whenEditorActivated,

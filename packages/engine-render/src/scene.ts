@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,11 +39,11 @@ export const MAIN_VIEW_PORT_KEY = 'viewMain';
 
 export interface ISceneInputControlOptions {
     enableDown: boolean;
-    enableUp: boolean ;
-    enableMove: boolean ;
-    enableWheel: boolean ;
-    enableEnter: boolean ;
-    enableLeave: boolean ;
+    enableUp: boolean;
+    enableMove: boolean;
+    enableWheel: boolean;
+    enableEnter: boolean;
+    enableLeave: boolean;
 }
 export class Scene extends Disposable {
     private _sceneKey: string = '';
@@ -82,6 +82,8 @@ export class Scene extends Disposable {
     onDragOver$ = new EventSubject<IDragEvent>();
     onDragLeave$ = new EventSubject<IDragEvent>();
     onDrop$ = new EventSubject<IDragEvent>();
+    onClick$ = new EventSubject<IPointerEvent | IMouseEvent>();
+    onSingleClick$ = new EventSubject<IPointerEvent | IMouseEvent>();
     onDblclick$ = new EventSubject<IPointerEvent | IMouseEvent>();
     onTripleClick$ = new EventSubject<IPointerEvent | IMouseEvent>();
     onMouseWheel$ = new EventSubject<IWheelEvent>();
@@ -939,7 +941,7 @@ export class Scene extends Disposable {
         this._transformer = null;
 
         this.onFileLoaded$.complete();
-
+        this.onClick$.complete();
         this.onPointerDown$.complete();
         this.onPointerMove$.complete();
         this.onPointerUp$.complete();
@@ -953,6 +955,7 @@ export class Scene extends Disposable {
         this.onDragLeave$.complete();
         this.onDrop$.complete();
 
+        this.onSingleClick$.complete();
         this.onDblclick$.complete();
         this.onTripleClick$.complete();
         this.onMouseWheel$.complete();
@@ -964,7 +967,7 @@ export class Scene extends Disposable {
     }
 
     /**
-     * Get the object under the pointer, if scene.event is disabled, the object is null.
+     * Get the object under the pointer, if scene.event is disabled, return null.
      * @param {Vector2} coord
      * @return {Nullable<BaseObject | Scene>} object under the pointer
      */
@@ -1069,12 +1072,23 @@ export class Scene extends Disposable {
         return true;
     }
 
-    triggerPointerMove(evt: IPointerEvent | IMouseEvent) {
+    triggerSingleClick(evt: IPointerEvent | IMouseEvent) {
         if (
-            !this.onPointerMove$.emitEvent(evt)?.stopPropagation &&
+            !this.onSingleClick$.emitEvent(evt)?.stopPropagation &&
             this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER
         ) {
-            (this._parent as SceneViewer)?.triggerPointerMove(evt);
+            (this._parent as SceneViewer)?.triggerSingleClick(evt);
+            return false;
+        }
+        return true;
+    }
+
+    triggerClick(evt: IPointerEvent | IMouseEvent) {
+        if (
+            !this.onClick$.emitEvent(evt)?.stopPropagation &&
+            this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER
+        ) {
+            (this._parent as SceneViewer)?.triggerClick(evt);
             return false;
         }
         return true;
@@ -1097,6 +1111,17 @@ export class Scene extends Disposable {
             this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER
         ) {
             (this._parent as SceneViewer)?.triggerTripleClick(evt);
+            return false;
+        }
+        return true;
+    }
+
+    triggerPointerMove(evt: IPointerEvent | IMouseEvent) {
+        if (
+            !this.onPointerMove$.emitEvent(evt)?.stopPropagation &&
+            this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER
+        ) {
+            (this._parent as SceneViewer)?.triggerPointerMove(evt);
             return false;
         }
         return true;
@@ -1239,11 +1264,27 @@ export class Scene extends Disposable {
      * Then only scene itself can response to pointer event, all objects under the scene would not.
      * see sceneInputManager@_onPointerMove
      */
+    // 禁用对象事件
     disableObjectsEvent() {
+        // 将_evented属性设置为false
         this._evented = false;
     }
 
     enableObjectsEvent() {
         this._evented = true;
+    }
+
+    _capturedObject: BaseObject | null = null;
+
+    get capturedObject() {
+        return this._capturedObject;
+    }
+
+    setCaptureObject(o: BaseObject) {
+        this._capturedObject = o;
+    }
+
+    releaseCapturedObject() {
+        this._capturedObject = null;
     }
 }

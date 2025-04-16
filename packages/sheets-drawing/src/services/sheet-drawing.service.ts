@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,10 @@
  */
 
 import type { IDrawingParam, IRotationSkewFlipTransform, Serializable } from '@univerjs/core';
+import type { IImageData, IUnitDrawingService } from '@univerjs/drawing';
 import type { ISheetOverGridPosition } from '@univerjs/sheets';
 import { createIdentifier } from '@univerjs/core';
-import { type IImageData, type IUnitDrawingService, UnitDrawingService } from '@univerjs/drawing';
+import { UnitDrawingService } from '@univerjs/drawing';
 
 export enum SheetDrawingAnchorType {
     /**

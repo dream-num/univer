@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { beforeEach, describe, expect, it } from 'vitest';
 import type { Workbook } from '@univerjs/core';
 import { createCoreTestBed } from '@univerjs/core/sheets/__tests__/create-core-test-bed.js';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { expandToContinuousRange } from '../expand-range';
 import { snapshot } from './expand.data';
 

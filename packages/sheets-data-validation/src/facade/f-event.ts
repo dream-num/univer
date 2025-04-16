@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import type { DataValidationStatus, IDataValidationRule, IDataValidationRuleBase, IDataValidationRuleOptions, IEventBase, IRange, ISheetDataValidationRule } from '@univerjs/core';
+import type { DataValidationStatus, IDataValidationRule, IDataValidationRuleBase, IDataValidationRuleOptions, IRange, ISheetDataValidationRule } from '@univerjs/core';
+import type { IEventBase } from '@univerjs/core/facade';
 import type { DataValidationChangeType, IRuleChange } from '@univerjs/data-validation';
 import type { FWorkbook, FWorksheet } from '@univerjs/sheets/facade';
 import type { FDataValidation } from './f-data-validation';
-import { FEventName } from '@univerjs/core';
+import { FEventName } from '@univerjs/core/facade';
 
 /**
  * Event interface triggered when a data validation rule is changed
@@ -181,94 +182,135 @@ interface IDataValidationEvent {
      * @see {@link ISheetDataValidationChangedEvent}
      * @example
      * ```ts
-     * univerAPI.on(univerAPI.Event.SheetDataValidationChanged, (event) => {
-     *     const { worksheet, workbook, changeType, oldRule, rule } = event;
-     *     console.log(event);
+     * const disposable = univerAPI.addEvent(univerAPI.Event.SheetDataValidationChanged, (params) => {
+     *   const { origin, worksheet, workbook, changeType, oldRule, rule } = params;
+     *   console.log(params);
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly SheetDataValidationChanged: 'SheetDataValidationChanged';
+
     /**
      * Event fired when a cell validator status is changed
      * @see {@link ISheetDataValidatorStatusChangedEvent}
      * @example
      * ```ts
-     * univerAPI.on(univerAPI.Event.SheetDataValidatorStatusChanged, (event) => {
-     *     const { worksheet, workbook, row, column, status, rule } = event;
-     *     console.log(event);
+     * const disposable = univerAPI.addEvent(univerAPI.Event.SheetDataValidatorStatusChanged, (params) => {
+     *   const { worksheet, workbook, row, column, status, rule } = params;
+     *   console.log(params);
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly SheetDataValidatorStatusChanged: 'SheetDataValidatorStatusChanged';
+
     /**
      * Event fired before a rule is added
      * @see {@link IBeforeSheetDataValidationAddEvent}
      * @example
      * ```ts
-     * univerAPI.on(univerAPI.Event.BeforeSheetDataValidationAdd, (event) => {
-     *      const { worksheet, workbook, rule } = event;
-     *     console.log(event);
+     * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeSheetDataValidationAdd, (params) => {
+     *   const { worksheet, workbook, rule } = params;
+     *   console.log(params);
+     *
+     *   // Cancel the data validation rule addition operation
+     *   params.cancel = true;
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly BeforeSheetDataValidationAdd: 'BeforeSheetDataValidationAdd';
+
     /**
      * Event fired before a rule is deleted
      * @see {@link IBeforeSheetDataValidationDeleteEvent}
      * @example
      * ```ts
-     * univerAPI.on(univerAPI.Event.BeforeSheetDataValidationDelete, (event) => {
-     *     const { worksheet, workbook, rule } = event;
-     *     console.log(event);
+     * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeSheetDataValidationDelete, (params) => {
+     *   const { worksheet, workbook, ruleId, rule } = params;
+     *   console.log(params);
+     *
+     *   // Cancel the data validation rule deletion operation
+     *   params.cancel = true;
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly BeforeSheetDataValidationDelete: 'BeforeSheetDataValidationDelete';
+
     /**
      * Event fired before all rules are deleted
      * @see {@link IBeforeSheetDataValidationDeleteAllEvent}
      * @example
      * ```ts
-     * univerAPI.on(univerAPI.Event.BeforeSheetDataValidationDeleteAll, (event) => {
-     *     const { worksheet, workbook, rules } = event;
-     *     console.log(event);
+     * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeSheetDataValidationDeleteAll, (params) => {
+     *   const { worksheet, workbook, rules } = params;
+     *   console.log(params);
+     *
+     *   // Cancel the data validation rule deletion operation
+     *   params.cancel = true;
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly BeforeSheetDataValidationDeleteAll: 'BeforeSheetDataValidationDeleteAll';
+
     /**
      * Event fired before the criteria of a rule are updated
      * @see {@link IBeforeSheetDataValidationCriteriaUpdateEvent}
      * @example
      * ```ts
-     * univerAPI.on(univerAPI.Event.BeforeSheetDataValidationCriteriaUpdate, (event) => {
-     *     const { worksheet, workbook, rule, newCriteria } = event;
-     *     console.log(event);
+     * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeSheetDataValidationCriteriaUpdate, (params) => {
+     *   const { worksheet, workbook, ruleId, rule, newCriteria } = params;
+     *   console.log(params);
+     *
+     *   // Cancel the data validation rule criteria update operation
+     *   params.cancel = true;
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly BeforeSheetDataValidationCriteriaUpdate: 'BeforeSheetDataValidationCriteriaUpdate';
+
     /**
      * Event fired before the range of a rule is updated
      * @see {@link IBeforeSheetDataValidationRangeUpdateEvent}
      * @example
      * ```ts
-     * univerAPI.on(univerAPI.Event.BeforeSheetDataValidationRangeUpdate, (event) => {
-     *     const { worksheet, workbook, rule, newRanges } = event;
-     *     console.log(event);
+     * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeSheetDataValidationRangeUpdate, (params) => {
+     *   const { worksheet, workbook, ruleId, rule, newRanges } = params;
+     *   console.log(params);
+     *
+     *   // Cancel the data validation rule range update operation
+     *   params.cancel = true;
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly BeforeSheetDataValidationRangeUpdate: 'BeforeSheetDataValidationRangeUpdate';
+
     /**
      * Event fired before the options of a rule are updated
      * @see {@link IBeforeSheetDataValidationOptionsUpdateEvent}
      * @example
      * ```ts
-     * univerAPI.on(univerAPI.Event.BeforeSheetDataValidationOptionsUpdate, (event) => {
-     *     const { worksheet, workbook, rule, newOptions } = event;
-     *     console.log(event);
+     * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeSheetDataValidationOptionsUpdate, (params) => {
+     *   const { worksheet, workbook, ruleId, rule, newOptions } = params;
+     *   console.log(params);
+     *
+     *   // Cancel the data validation rule options update operation
+     *   params.cancel = true;
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly BeforeSheetDataValidationOptionsUpdate: 'BeforeSheetDataValidationOptionsUpdate';
@@ -326,7 +368,7 @@ export interface IDataValidationEventConfig {
 }
 
 FEventName.extend(FDataValidationEvent);
-declare module '@univerjs/core' {
+declare module '@univerjs/core/facade' {
     // eslint-disable-next-line ts/naming-convention
     interface FEventName extends IDataValidationEvent {
     }

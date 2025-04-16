@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,12 @@
 
 import type { IFunctionInfo, IFunctionParam } from '@univerjs/engine-formula';
 import type { IHelpFunctionOperationParams } from '../../../services/prompt.service';
-import { IUniverInstanceService, LocaleService, useDependency, useInjector } from '@univerjs/core';
+import { IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { Popup } from '@univerjs/design';
 import { IEditorService } from '@univerjs/docs-ui';
 import { CloseSingle, DetailsSingle, MoreSingle } from '@univerjs/icons';
+import { ILayoutService, ISidebarService, useDependency, useInjector } from '@univerjs/ui';
 
-import { ILayoutService, ISidebarService } from '@univerjs/ui';
 import React, { useEffect, useState } from 'react';
 import { throttleTime } from 'rxjs';
 import { IFormulaPromptService } from '../../../services/prompt.service';
@@ -222,10 +222,11 @@ interface IParamsProps {
 
 const Params = (props: IParamsProps) => (
     <div className={styles.formulaHelpFunctionContentParams}>
-        <div className={`
-          ${styles.formulaHelpFunctionContentParamsTitle}
-          ${props.className}
-        `}
+        <div
+            className={`
+              ${styles.formulaHelpFunctionContentParamsTitle}
+              ${props.className}
+            `}
         >
             {props.title}
         </div>

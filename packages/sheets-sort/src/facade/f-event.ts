@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IEventBase, Injector } from '@univerjs/core';
+import type { ICommandInfo, Injector } from '@univerjs/core';
+import type { IEventBase } from '@univerjs/core/facade';
+import type { ISortRangeCommandParams } from '@univerjs/sheets-sort';
 import type { FRange, FWorkbook, FWorksheet } from '@univerjs/sheets/facade';
-import { FEventName, FUniver, ICommandService } from '@univerjs/core';
-import { type ISortRangeCommandParams, SortRangeCommand, SortType } from '@univerjs/sheets-sort';
+import { ICommandService } from '@univerjs/core';
+import { FEventName, FUniver } from '@univerjs/core/facade';
+import { SortRangeCommand, SortType } from '@univerjs/sheets-sort';
 import { FSheetEventName } from '@univerjs/sheets/facade';
 
 /**
@@ -26,37 +29,41 @@ import { FSheetEventName } from '@univerjs/sheets/facade';
 export interface IFSheetSortEventMixin {
     /**
      * This event will be emitted when a range on a worksheet is sorted.
-     * Type of the event is {@link ISheetRangeSortedParams}.
+     * @see {@link ISheetRangeSortParams}
      * @example
      * ```typescript
      * const callbackDisposable = univerAPI.addEvent(univerAPI.Event.SheetRangeSorted, (params) => {
-     *   const { workbook, worksheet, sortColumn } = params;
-     *   sortColumn.forEach((col) => {
-     *    console.log(col.column, col.ascending);
-     *  });
+     *   console.log(params);
+     *   const { workbook, worksheet, range, sortColumn } = params;
      * });
+     *
+     * // Remove the event listener, use `callbackDisposable.dispose()`
      * ```
      */
     SheetRangeSorted: 'SheetRangeSorted';
+
     /**
      * This event will be emitted before sorting a range on a worksheet.
-     * Type of the event is {@link ISheetRangeSortParams}.
+     * @see {@link ISheetRangeSortParams}
      * @example
      * ```typescript
      * const callbackDisposable = univerAPI.addEvent(univerAPI.Event.SheetBeforeRangeSort, (params) => {
-     *   const { workbook, worksheet, sortColumn } = params;
-     *   sortColumn.forEach((col) => {
-     *    console.log(col.column, col.ascending);
-     *   });
+     *   console.log(params);
+     *   const { workbook, worksheet, range, sortColumn } = params;
+     *
+     *   // Cancel the sorting operation.
+     *   params.cancel = true;
      * });
+     *
+     * // Remove the event listener, use `callbackDisposable.dispose()`
      * ```
      */
     SheetBeforeRangeSort: 'SheetBeforeRangeSort';
 }
 
-export class FSheetSortEventName extends FEventName implements IFSheetSortEventMixin {
-    override readonly SheetRangeSorted = 'SheetRangeSorted' as const;
-    override readonly SheetBeforeRangeSort = 'SheetBeforeRangeSort' as const;
+export class FSheetSortEventName implements IFSheetSortEventMixin {
+    get SheetRangeSorted(): 'SheetRangeSorted' { return 'SheetRangeSorted' as const; }
+    get SheetBeforeRangeSort(): 'SheetBeforeRangeSort' { return 'SheetBeforeRangeSort' as const; }
 }
 
 interface ISortColumn {
@@ -81,12 +88,6 @@ export interface ISheetRangeSortEventParamConfig {
 
 FEventName.extend(FSheetEventName);
 
-declare module '@univerjs/core' {
-    // eslint-disable-next-line ts/naming-convention
-    interface FEventName extends IFSheetSortEventMixin { }
-    interface IEventParamConfig extends ISheetRangeSortEventParamConfig { }
-}
-
 class FUniverSheetsSortEventMixin extends FUniver {
     /**
      * @ignore
@@ -94,21 +95,21 @@ class FUniverSheetsSortEventMixin extends FUniver {
     override _initialize(injector: Injector): void {
         const commandService = injector.get(ICommandService);
 
-        this.disposeWithMe(commandService.beforeCommandExecuted((commandInfo) => {
-            switch (commandInfo.id) {
-                case SortRangeCommand.id:
-                    this._beforeRangeSort(commandInfo as Readonly<ICommandInfo<ISortRangeCommandParams>>);
-                    break;
-            }
-        }));
+        this.registerEventHandler(
+            this.Event.SheetBeforeRangeSort,
+            () => commandService.beforeCommandExecuted((commandInfo) => {
+                if (commandInfo.id !== SortRangeCommand.id) return;
+                this._beforeRangeSort(commandInfo as Readonly<ICommandInfo<ISortRangeCommandParams>>);
+            })
+        );
 
-        this.disposeWithMe(commandService.onCommandExecuted((commandInfo) => {
-            switch (commandInfo.id) {
-                case SortRangeCommand.id:
-                    this._onRangeSorted(commandInfo as Readonly<ICommandInfo<ISortRangeCommandParams>>);
-                    break;
-            }
-        }));
+        this.registerEventHandler(
+            this.Event.SheetRangeSorted,
+            () => commandService.onCommandExecuted((commandInfo) => {
+                if (commandInfo.id !== SortRangeCommand.id) return;
+                this._onRangeSorted(commandInfo as Readonly<ICommandInfo<ISortRangeCommandParams>>);
+            })
+        );
     }
 
     private _beforeRangeSort(commandInfo: Readonly<ICommandInfo<ISortRangeCommandParams>>): void {
@@ -157,3 +158,10 @@ class FUniverSheetsSortEventMixin extends FUniver {
 }
 
 FUniver.extend(FUniverSheetsSortEventMixin);
+FEventName.extend(FSheetSortEventName);
+
+declare module '@univerjs/core/facade' {
+    // eslint-disable-next-line ts/naming-convention
+    interface FEventName extends IFSheetSortEventMixin { }
+    interface IEventParamConfig extends ISheetRangeSortEventParamConfig { }
+}

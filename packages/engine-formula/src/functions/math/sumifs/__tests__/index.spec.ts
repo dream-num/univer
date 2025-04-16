@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,12 @@
 
 import { describe, expect, it } from 'vitest';
 
+import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValue } from '../../../../engine/value-object/array-value-object';
+import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
+import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { FUNCTION_NAMES_MATH } from '../../function-names';
 import { Sumifs } from '../index';
-import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
-import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
-import { ErrorType } from '../../../../basics/error-type';
 
 describe('Test sumifs function', () => {
     const testFunction = new Sumifs(FUNCTION_NAMES_MATH.SUMIF);

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,9 @@ import { describe, expect, it } from 'vitest';
 
 import { ArrayValueObject } from '../../../../engine/value-object/array-value-object';
 
+import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { FUNCTION_NAMES_LOOKUP } from '../../function-names';
 import { Xmatch } from '../index';
-import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 
 const arrayValueObject1 = ArrayValueObject.create(/*ts*/ `{
     1, "First", 100, 89;

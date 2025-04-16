@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,13 +71,13 @@ export class DocInputController extends Disposable implements IRenderModule {
             const { segmentId } = activeRange;
 
             const docDataModel = this._context.unit;
-            const originBody = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody();
+            const originBody = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()!;
 
             // Insert content's style should follow the text style of the current position.
             const defaultTextStyle = this._docMenuStyleService.getDefaultStyle();
             const cacheStyle = this._docMenuStyleService.getStyleCache();
             const curCustomRange = getCustomRangeAtPosition(originBody?.customRanges ?? [], activeRange.endOffset, SHEET_EDITOR_UNITS.includes(unitId));
-            const curTextRun = getTextRunAtPosition(originBody?.textRuns ?? [], activeRange.endOffset, defaultTextStyle, cacheStyle, SHEET_EDITOR_UNITS.includes(unitId));
+            const curTextRun = getTextRunAtPosition(originBody, activeRange.endOffset, defaultTextStyle, cacheStyle, SHEET_EDITOR_UNITS.includes(unitId));
             const curCustomDecorations = getCustomDecorationAtPosition(originBody?.customDecorations ?? [], activeRange.endOffset);
 
             await this._commandService.executeCommand(InsertCommand.id, {

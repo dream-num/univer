@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-import { afterEach, beforeEach, describe, expect, it, vitest } from 'vitest';
-
 import type { Injector } from '@univerjs/core';
-import { HTTPService } from '../../http.service';
-import { createHTTPTestBed, type MockHTTPImplementation } from '../../__testing__/http-testing-utils';
-import { IHTTPImplementation } from '../../implementations/implementation';
-import { HTTPResponse } from '../../response';
+
+import type { MockHTTPImplementation } from '../../__testing__/http-testing-utils';
+import { afterEach, beforeEach, describe, expect, it, vitest } from 'vitest';
+import { createHTTPTestBed } from '../../__testing__/http-testing-utils';
 import { HTTPHeaders } from '../../headers';
-import { MergeInterceptorFactory } from '../merge-interceptor';
+import { HTTPService } from '../../http.service';
+import { IHTTPImplementation } from '../../implementations/implementation';
 import { __TEST_ONLY_RESET_REQUEST_UID_DO_NOT_USE_IN_PRODUCTION, HTTPRequest } from '../../request';
+import { HTTPResponse } from '../../response';
+import { MergeInterceptorFactory } from '../merge-interceptor';
 
 describe('test "HTTPMergeInterceptor"', () => {
     let httpService: HTTPService;

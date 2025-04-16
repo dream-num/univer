@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,11 @@
 
 import { describe, expect, it } from 'vitest';
 
+import { ErrorType } from '../../../../basics/error-type';
+import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
+import { StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { FUNCTION_NAMES_TEXT } from '../../function-names';
 import { Concat } from '../index';
-import { StringValueObject } from '../../../../engine/value-object/primitive-object';
-import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
-import { ErrorType } from '../../../../basics/error-type';
 
 describe('Test concat function', () => {
     const testFunction = new Concat(FUNCTION_NAMES_TEXT.CONCAT);

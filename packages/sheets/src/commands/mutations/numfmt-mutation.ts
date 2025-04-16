@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 import type { IAccessor, ICommand, IMutationInfo, IRange } from '@univerjs/core';
 import { cellToRange, CommandType, Range } from '@univerjs/core';
 
-import { rangeMerge } from '../../basics/rangeMerge';
+import { rangeMerge } from '../../basics/range-merge';
 import { createUniqueKey, groupByKey } from '../../basics/utils';
 import { INumfmtService } from '../../services/numfmt/type';
 

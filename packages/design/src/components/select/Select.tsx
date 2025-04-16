@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import { MoreDownSingle } from '@univerjs/icons';
-import clsx from 'clsx';
-import RcSelect from 'rc-select';
-
-import React, { useContext } from 'react';
 import type { LabelInValueType } from 'rc-select/lib/Select';
+import type { CSSProperties, JSXElementConstructor, ReactElement, ReactNode } from 'react';
+import { MoreDownSingle } from '@univerjs/icons';
+import RcSelect from 'rc-select';
+import { useContext } from 'react';
+import { clsx } from '../../helper/clsx';
 import { ConfigContext } from '../config-provider/ConfigProvider';
 import styles from './index.module.less';
 
 interface IOption {
-    label?: string | React.ReactNode;
+    label?: string | ReactNode;
     value?: string;
     options?: IOption[];
 }
@@ -46,7 +46,7 @@ export interface ISelectProps {
      */
     onChange: (value: string) => void;
 
-    style?: React.CSSProperties;
+    style?: CSSProperties;
 
     /**
      * Whether the borderless style is used
@@ -61,14 +61,14 @@ export interface ISelectProps {
     mode?: 'combobox' | 'multiple' | 'tags' | undefined;
 
     dropdownRender?: (
-        menu: React.ReactElement<any, string | React.JSXElementConstructor<any>>
-    ) => React.ReactElement<any, string | React.JSXElementConstructor<any>>;
+        menu: ReactElement<any, string | JSXElementConstructor<any>>
+    ) => ReactElement<any, string | JSXElementConstructor<any>>;
 
-    labelRender?: ((props: LabelInValueType) => React.ReactNode) | undefined;
+    labelRender?: ((props: LabelInValueType) => ReactNode) | undefined;
 
     open?: boolean;
 
-    dropdownStyle?: React.CSSProperties;
+    dropdownStyle?: CSSProperties;
 
     onDropdownVisibleChange?: (open: boolean) => void;
 
@@ -114,6 +114,7 @@ export function Select(props: ISelectProps) {
             labelRender={labelRender}
             open={open}
             dropdownStyle={dropdownStyle}
+            dropdownClassName="univer-theme"
             onDropdownVisibleChange={onDropdownVisibleChange}
             notFoundContent={locale?.Select.empty}
             disabled={disabled}

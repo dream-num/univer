@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,11 +57,13 @@ export function CellBorderSelectorMenuItemFactory(accessor: IAccessor): IMenuSel
         }),
         tooltip: 'toolbar.border.main',
         type: MenuItemType.BUTTON_SELECTOR,
+        slot: true,
         selections: [
             {
                 label: {
                     name: BORDER_PANEL_COMPONENT,
                     hoverable: false,
+                    selectable: false,
                 },
                 value$: borderStyleManagerService.borderInfo$,
             },

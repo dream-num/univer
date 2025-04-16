@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ const locale: typeof enUS = {
             'close-dialog': 'Fermer la boîte de dialogue Rechercher & Remplacer',
             'go-to-next-match': 'Aller à la correspondance suivante',
             'go-to-previous-match': 'Aller à la correspondance précédente',
+            'focus-selection': 'Focus sur la sélection',
         },
         dialog: {
             title: 'Rechercher',

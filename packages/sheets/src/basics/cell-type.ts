@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 import type { CellValue, ICellData, IStyleData, Nullable, Styles } from '@univerjs/core';
 import { CellValueType, isBooleanString, isRealNum } from '@univerjs/core';
-import { DEFAULT_TEXT_FORMAT } from '@univerjs/engine-numfmt';
+import { isTextFormat } from '@univerjs/engine-numfmt';
 
 /**
  * Get cell value type by style, new value and old value.
@@ -36,7 +36,7 @@ export function getCellType(styles: Styles, newVal: ICellData, oldVal: ICellData
         // For cells with forced strings, set the percentage format and still use forced strings
         // For cells with forced strings, update to the number and convert to ordinary numbers
         // For cells with forced strings and text formats, update to the number and still use forced strings
-        if (!isTextFormat(oldStyle) && newVal.v !== undefined) {
+        if (!isTextFormat(oldStyle?.n?.pattern) && newVal.v !== undefined) {
             if (isRealNum(newVal.v)) {
                 return CellValueType.NUMBER;
             } else if (isBooleanString(`${newVal.v}`)) {
@@ -49,7 +49,7 @@ export function getCellType(styles: Styles, newVal: ICellData, oldVal: ICellData
 
     // For cells with ordinary numbers, set the text format and convert the cell type to text
     if (hasNumberFormat(newStyle)) {
-        if (isTextFormat(newStyle)) {
+        if (isTextFormat(newStyle?.n?.pattern)) {
             return CellValueType.STRING;
         }
 
@@ -57,7 +57,7 @@ export function getCellType(styles: Styles, newVal: ICellData, oldVal: ICellData
     }
 
     // For cells with text format, the cell type is still text when numbers are written, because the ISNUMBER function detects FALSE
-    if (isTextFormat(oldStyle)) {
+    if (isTextFormat(oldStyle?.n?.pattern)) {
         return CellValueType.STRING;
     }
 
@@ -70,10 +70,6 @@ function checkCellValueTypeByValue(newVal: ICellData, oldVal: ICellData): Nullab
 
 function hasNumberFormat(style: Nullable<IStyleData>) {
     return !!style?.n?.pattern;
-}
-
-function isTextFormat(style: Nullable<IStyleData>) {
-    return style?.n?.pattern === DEFAULT_TEXT_FORMAT;
 }
 
 /**
@@ -119,7 +115,7 @@ export function getCellTypeByPattern(cell: ICellData, pattern: string) {
         return CellValueType.FORCE_STRING;
     }
 
-    if (pattern === DEFAULT_TEXT_FORMAT) {
+    if (isTextFormat(pattern)) {
         return CellValueType.STRING;
     }
 

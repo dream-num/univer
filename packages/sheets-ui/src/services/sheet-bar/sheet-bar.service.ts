@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import { createIdentifier, Disposable, toDisposable } from '@univerjs/core';
 import type { IDisposable } from '@univerjs/core';
 import type { Observable } from 'rxjs';
-import { Subject } from 'rxjs';
-
 import type { IScrollState } from '../../views/sheet-bar/sheet-bar-tabs/utils/slide-tab-bar';
+import { createIdentifier, Disposable, toDisposable } from '@univerjs/core';
+
+import { Subject } from 'rxjs';
 
 export interface ISheetBarMenuHandler {
     handleSheetBarMenu(): void;

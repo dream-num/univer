@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,11 @@
  */
 
 import type { IAccessor } from '@univerjs/core';
+import type { IMenuItem } from '@univerjs/ui';
 import { UniverInstanceType } from '@univerjs/core';
 import { RangeProtectionPermissionEditPoint, WorkbookEditablePermission, WorksheetEditPermission } from '@univerjs/sheets';
 import { getCurrentRangeDisable$ } from '@univerjs/sheets-ui';
-import { getMenuHiddenObservable, type IMenuItem, MenuItemType } from '@univerjs/ui';
+import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { InsertCellImageCommand, InsertFloatImageCommand } from '../../commands/commands/insert-image.command';
 
 export const IMAGE_UPLOAD_ICON = 'addition-and-subtraction-single';
@@ -49,5 +50,6 @@ export function UploadCellImageMenuFactory(_accessor: IAccessor): IMenuItem {
         id: InsertCellImageCommand.id,
         title: 'sheetImage.upload.cell',
         type: MenuItemType.BUTTON,
+        hidden$: getMenuHiddenObservable(_accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }

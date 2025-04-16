@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ import './global.css';
 
 export { UniverDocsDrawingUIPlugin } from './plugin';
 export { DOCS_IMAGE_MENU_ID } from './views/menu/image.menu';
-
+export { DocFloatDomController } from './controllers/doc-float-dom.controller';
 // #region - all commands
 
 export { DeleteDocDrawingsCommand } from './commands/commands/delete-doc-drawing.command';

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import type { IDocumentRenderConfig, IScale, Nullable } from '@univerjs/core';
+import type { IDocumentRenderConfig, IScale, ITableCellBorder, Nullable } from '@univerjs/core';
 
-import type { IDocumentSkeletonGlyph, IDocumentSkeletonLine, IDocumentSkeletonPage, IDocumentSkeletonTable } from '../../basics/i-document-skeleton-cached';
+import type { IDocumentSkeletonGlyph, IDocumentSkeletonLine, IDocumentSkeletonPage, IDocumentSkeletonRow, IDocumentSkeletonTable } from '../../basics/i-document-skeleton-cached';
 import type { Transform } from '../../basics/transform';
 import type { IBoundRectNoAngle, IViewportInfo } from '../../basics/vector2';
 import type { UniverRenderingContext } from '../../context';
 import type { Scene } from '../../scene';
-import type { ComponentExtension, IExtensionConfig } from '../extension';
+import type { ComponentExtension, IDrawInfo, IExtensionConfig } from '../extension';
 import type { IDocumentsConfig, IPageMarginLayout } from './doc-component';
 import type { DocumentSkeleton } from './layout/doc-skeleton';
 import { CellValueType, HorizontalAlign, VerticalAlign, WrapStrategy } from '@univerjs/core';
@@ -37,6 +37,12 @@ import { DocComponent } from './doc-component';
 import { DOCS_EXTENSION_TYPE } from './doc-extension';
 import { Liquid } from './liquid';
 import './extensions';
+
+const DEFAULT_BORDER_COLOR: ITableCellBorder = {
+    color: {
+        rgb: '#dee0e3',
+    },
+};
 
 export interface IPageRenderConfig {
     page: IDocumentSkeletonPage;
@@ -432,11 +438,17 @@ export class Documents extends DocComponent {
 
                                     for (const extension of glyphExtensionsExcludeBackground) {
                                         extension.extensionOffset = extensionOffset;
-                                        extension.draw(ctx, parentScale, glyph);
+                                        extension.draw(ctx, parentScale, glyph, [], {
+                                            viewBound: bounds?.viewBound,
+                                        } as IDrawInfo);
                                     }
                                 }
 
                                 this._drawLiquid.translateRestore();
+                            }
+
+                            if (line.borderBottom) {
+                                this._drawBorderBottom(ctx, page, line);
                             }
                             this._drawLiquid.translateRestore();
                         }
@@ -542,6 +554,36 @@ export class Documents extends DocComponent {
         }
     }
 
+    private _drawBorderBottom(
+        ctx: UniverRenderingContext,
+        page: IDocumentSkeletonPage,
+        line: IDocumentSkeletonLine,
+        left = 0,
+        top = 0
+    ) {
+        if (this._drawLiquid == null) {
+            return;
+        }
+        let { x, y } = this._drawLiquid;
+        const { pageWidth, marginLeft, marginRight, marginTop } = page;
+
+        x += marginLeft + (left ?? 0);
+        y -= line.marginTop;
+        y -= line.paddingTop;
+        y += marginTop + top + line.lineHeight + (line.borderBottom?.padding ?? 0);
+
+        ctx.save();
+        ctx.setLineWidthByPrecision(1);
+        ctx.strokeStyle = line.borderBottom?.color.rgb ?? '#CDD0D8';
+        drawLineByBorderType(ctx, BORDER_LTRB.BOTTOM, 0, {
+            startX: x,
+            startY: y,
+            endX: x + pageWidth - marginLeft - marginRight,
+            endY: y,
+        });
+        ctx.restore();
+    }
+
     // TODO: @JOCS, DRY!!!
     private _drawTableCell(
         ctx: UniverRenderingContext,
@@ -559,7 +601,7 @@ export class Documents extends DocComponent {
         if (this._drawLiquid == null) {
             return;
         }
-        this._drawTableCellBorders(ctx, page, cell);
+        this._drawTableCellBordersAndBg(ctx, page, cell);
         const { sections, marginLeft, marginTop } = cell;
 
         // eslint-disable-next-line no-param-reassign
@@ -704,6 +746,10 @@ export class Documents extends DocComponent {
                             this._drawLiquid.translateRestore();
                         }
 
+                        if (line.borderBottom) {
+                            this._drawBorderBottom(ctx, cell, line, page.marginLeft, page.marginTop);
+                        }
+
                         this._drawLiquid.translateRestore();
                     }
                 }
@@ -717,13 +763,25 @@ export class Documents extends DocComponent {
         ctx.restore();
     }
 
-    private _drawTableCellBorders(
+    private _drawTableCellBordersAndBg(
         ctx: UniverRenderingContext,
         page: IDocumentSkeletonPage,
         cell: IDocumentSkeletonPage
     ) {
         const { marginLeft, marginTop } = page;
         const { pageWidth, pageHeight } = cell;
+        const rowSke = cell.parent as IDocumentSkeletonRow;
+        const index = rowSke.cells.indexOf(cell);
+        const cellSource = rowSke.rowSource.tableCells[index];
+
+        const {
+            borderTop = DEFAULT_BORDER_COLOR,
+            borderBottom = DEFAULT_BORDER_COLOR,
+            borderLeft = DEFAULT_BORDER_COLOR,
+            borderRight = DEFAULT_BORDER_COLOR,
+            backgroundColor,
+        } = cellSource;
+
         if (this._drawLiquid == null) {
             return;
         }
@@ -732,33 +790,59 @@ export class Documents extends DocComponent {
         x += marginLeft;
         y += marginTop;
 
+        // Draw cell bg.
+        if (backgroundColor && backgroundColor.rgb) {
+            ctx.save();
+            ctx.fillStyle = backgroundColor.rgb;
+            ctx.fillRectByPrecision(x, y, pageWidth, pageHeight);
+            ctx.restore();
+        }
+
+        ctx.save();
+        ctx.setLineWidthByPrecision (1);
+
+        ctx.save();
+        ctx.strokeStyle = borderLeft.color.rgb ?? DEFAULT_BORDER_COLOR.color.rgb!;
         drawLineByBorderType(ctx, BORDER_LTRB.LEFT, 0, {
             startX: x,
             startY: y,
             endX: x + pageWidth,
             endY: y + pageHeight,
         });
+        ctx.restore();
 
+        ctx.save();
+        ctx.strokeStyle = borderTop.color.rgb ?? DEFAULT_BORDER_COLOR.color.rgb!;
         drawLineByBorderType(ctx, BORDER_LTRB.TOP, 0, {
             startX: x,
             startY: y,
             endX: x + pageWidth,
             endY: y + pageHeight,
         });
+        ctx.restore();
 
+        ctx.save();
+        ctx.strokeStyle = borderRight.color.rgb ?? DEFAULT_BORDER_COLOR.color.rgb!;
         drawLineByBorderType(ctx, BORDER_LTRB.RIGHT, 0, {
             startX: x,
             startY: y,
             endX: x + pageWidth,
             endY: y + pageHeight,
         });
+        ctx.restore();
 
+        ctx.save();
+        ctx.strokeStyle = borderBottom.color.rgb ?? DEFAULT_BORDER_COLOR.color.rgb!;
         drawLineByBorderType(ctx, BORDER_LTRB.BOTTOM, 0, {
             startX: x,
             startY: y,
             endX: x + pageWidth,
             endY: y + pageHeight,
         });
+        ctx.restore();
+
+        // restore setLineWidthByPrecision.
+        ctx.restore();
     }
 
     private _drawHeaderFooter(
@@ -923,6 +1007,10 @@ export class Documents extends DocComponent {
                             }
 
                             this._drawLiquid.translateRestore();
+                        }
+
+                        if (line.borderBottom) {
+                            this._drawBorderBottom(ctx, page, line, parentPage.marginLeft);
                         }
 
                         this._drawLiquid.translateRestore();

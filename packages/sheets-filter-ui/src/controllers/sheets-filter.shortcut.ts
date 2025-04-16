@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
+import type { IShortcutItem } from '@univerjs/ui';
 import { SmartToggleSheetsFilterCommand } from '@univerjs/sheets-filter';
 import { whenSheetEditorFocused } from '@univerjs/sheets-ui';
-import { type IShortcutItem, KeyCode, MetaKeys } from '@univerjs/ui';
+import { KeyCode, MetaKeys } from '@univerjs/ui';
 
 export const SmartToggleFilterShortcut: IShortcutItem = {
     id: SmartToggleSheetsFilterCommand.id,

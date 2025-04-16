@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -303,6 +303,20 @@ export default {
             text: { name: '文本', detail: '包含要提取字符的文本字符串。' },
             startNum: { name: '开始位置', detail: '文本中要提取的第一个字符的位置。' },
             numBytes: { name: '字节数', detail: '按字节指定要由 MIDB 提取的字符的数量。' },
+        },
+    },
+    NUMBERSTRING: {
+        description: '将数字转换为中文字符串',
+        abstract: '将数字转换为中文字符串',
+        links: [
+            {
+                title: '教学',
+                url: 'https://www.wps.cn/learning/course/detail/id/340.html?chan=pc_kdocs_function',
+            },
+        ],
+        functionParameter: {
+            number: { name: '数值', detail: '被转化为中文字符串的数值。' },
+            type: { name: '类型', detail: '返回结果的类型。\n1. 汉字小写 \n2. 汉字大写 \n3. 汉字读写' },
         },
     },
     NUMBERVALUE: {

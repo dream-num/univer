@@ -1,0 +1,39 @@
+name: 🔭 Dev Performance Report
+
+on:
+    push:
+        branches:
+            - dev
+
+jobs:
+    e2e-test:
+        runs-on: ubuntu-latest
+
+        env:
+            GH_TOKEN: ${{ github.token }}
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Set Env
+              run: |
+                  if [ "$GITHUB_EVENT_NAME" == "push" ] && [ "$GITHUB_REF" == "refs/heads/dev" ]; then
+                      echo "SHOULD_REPORT_TO_POSTHOG=true" >> $GITHUB_ENV
+                  elif [ "$GITHUB_EVENT_NAME" == "pull_request" ] && [ "$GITHUB_BASE_REF" == "dev" ]; then
+                      echo "SHOULD_REPORT_TO_POSTHOG=true" >> $GITHUB_ENV
+                  fi
+
+            - name: Setup Node.js
+              uses: ./.github/actions/setup-node
+
+            - name: Install Playwright Browsers
+              run: pnpm exec playwright install --with-deps chromium
+
+            - name: Build E2E Client
+              run: pnpm build:e2e
+
+            - name: Run Playwright Tests
+              env:
+                  POSTHOG_API_KEY: ${{ secrets.POSTHOG_API_KEY }}
+              run: pnpm exec playwright test

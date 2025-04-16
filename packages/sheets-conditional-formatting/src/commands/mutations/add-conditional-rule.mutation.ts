@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,12 @@
  */
 
 import type { IAccessor, IMutation } from '@univerjs/core';
+import type { IConditionFormattingRule } from '../../models/type';
+import type { IDeleteConditionalRuleMutationParams } from './delete-conditional-rule.mutation';
 import {
     CommandType,
 } from '@univerjs/core';
 import { ConditionalFormattingRuleModel } from '../../models/conditional-formatting-rule-model';
-import type { IConditionFormattingRule } from '../../models/type';
-import type { IDeleteConditionalRuleMutationParams } from './delete-conditional-rule.mutation';
 import { DeleteConditionalRuleMutation } from './delete-conditional-rule.mutation';
 
 export interface IAddConditionalRuleMutationParams {

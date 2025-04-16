@@ -530,6 +530,7 @@ export class EditingRenderController extends Disposable {
                 this._editorBridgeService.disableForceKeepVisible();
             }
             this._moveSelection(keycode, currentUnitId);
+            return;
         }
 
         // Reselect the current selections, when exist cell editor by press ESC.I

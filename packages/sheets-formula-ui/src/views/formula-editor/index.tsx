@@ -251,7 +251,7 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
 
     const { checkScrollBar } = useResize(editor, isSingle, autoScrollbar);
     useRefactorEffect(isFocus, Boolean(isSelecting && docFocusing), unitId, disableContextMenu);
-    useLeftAndRightArrow(isFocus && moveCursor, selectingMode, editor, onMoveInEditor);
+    useLeftAndRightArrow(Boolean(isFocus && isFocusing && moveCursor), selectingMode, editor, onMoveInEditor);
 
     const handleSelectionChange = useEvent((refString: string, offset: number, isEnd: boolean) => {
         if (!isFocusing) {

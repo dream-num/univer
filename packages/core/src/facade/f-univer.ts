@@ -63,10 +63,15 @@ export class FUniver extends Disposable {
          * Uses Proxy to intercept method calls and check if the method exists.
          */
         return new Proxy(instance, {
-            get(target, prop, receiver): FUniver {
-                const value = Reflect.get(target, prop, receiver);
-                if (typeof value !== 'undefined') {
-                    return value;
+            get(target, prop): FUniver {
+                if (prop in Object.prototype ||
+                    typeof prop === 'symbol' ||
+                    ['toString', 'valueOf', 'toJSON', 'constructor', 'hasOwnProperty', 'isPrototypeOf', 'propertyIsEnumerable', 'inspect', 'then', 'catch', 'finally'].includes(String(prop))) {
+                    return Reflect.get(target, prop);
+                }
+
+                if (prop in target) {
+                    return Reflect.get(target, prop);
                 } else {
                     throw new TypeError(
                         `[FUniver]: The method '${String(prop)}' does not exist on the FUniver instance. ` +

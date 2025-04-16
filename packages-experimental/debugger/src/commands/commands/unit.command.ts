@@ -34,6 +34,7 @@ export const DisposeUniverCommand: ICommand = {
         window.univer?.dispose();
         window.univer = undefined;
         window.univerAPI = undefined;
+
         return true;
     },
 };

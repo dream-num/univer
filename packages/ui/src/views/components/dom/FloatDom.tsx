@@ -105,6 +105,7 @@ export const FloatDomSingle = memo((props: { layer: IFloatDom; id: string }) => 
                 floatDomId={layer.id}
                 context={{
                     docDisabled,
+                    root: innerDomRef,
                 }}
             />
         )

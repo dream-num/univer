@@ -17,7 +17,7 @@
 import type { IRange } from '@univerjs/core';
 import type { IFloatDomData } from '@univerjs/sheets-drawing';
 import type { IPrintingFloatDomProps } from '../views/printing-float-dom';
-import { Disposable, Inject, Injector, Tools } from '@univerjs/core';
+import { Disposable, DrawingTypeEnum, Inject, Injector, PRINT_CHART_COMPONENT_KEY, Tools } from '@univerjs/core';
 import { render, unmount } from '@univerjs/design';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { DrawingRenderService } from '@univerjs/drawing-ui';
@@ -133,7 +133,7 @@ export class SheetDrawingPrintingController extends Disposable {
 
                                 return drawing && {
                                     ...drawing,
-                                    componentKey: this._componetManager.get(drawing.componentKey) as any,
+                                    componentKey: this._componetManager.get(drawing.drawingType === DrawingTypeEnum.DRAWING_CHART ? PRINT_CHART_COMPONENT_KEY : drawing.componentKey) as any,
                                 };
                             })
                             .filter(Boolean) as IFloatDomData[];

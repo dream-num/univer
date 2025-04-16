@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
-import { CascaderDropdown, type ICascaderDropdownProps } from './cascader-dropdown';
-import { ColorDropdown, type IColorDropdownProps } from './color-dropdown';
-import { DateDropdown, type IDateDropdownProps } from './date-dropdown';
-import { type IListDropdownProps, ListDropDown } from './list-dropdown';
+import type { ICascaderDropdownProps } from './cascader-dropdown';
+import type { IColorDropdownProps } from './color-dropdown';
+import type { IDateDropdownProps } from './date-dropdown';
+import type { IListDropdownProps } from './list-dropdown';
+import { CascaderDropdown } from './cascader-dropdown';
+import { ColorDropdown } from './color-dropdown';
+import { DateDropdown } from './date-dropdown';
+import { ListDropDown } from './list-dropdown';
 
 export type ICellDropdown = {
     type: 'datepicker';

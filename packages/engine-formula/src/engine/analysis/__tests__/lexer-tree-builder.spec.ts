@@ -131,7 +131,6 @@ describe('lexer nodeMaker test', () => {
             // eslint-disable-next-line no-console
             console.log(`Elapsed time: ${elapsed} ms`);
 
-            const expectedMaxTime = 3000; // 毫秒数 // CI may time out TODO: performance test
             expect(elapsed).toBeGreaterThan(0);
         });
 
@@ -730,6 +729,21 @@ describe('lexer nodeMaker test', () => {
 
             result = lexerTreeBuilder.moveFormulaRefOffset("=SUM( 'dv-test'!F26)", -1, 0, true);
             expect(result).toStrictEqual("=SUM( 'dv-test'!E26)");
+        });
+    });
+
+    describe('bad cases from users', () => {
+        it('univer-pro #4120', () => {
+            // The space before [workbook4] will lead to error.
+            const node = lexerTreeBuilder.treeBuilder("'[workbook1]Sheet 01'!A5* [workbook4]aaa!A5") as LexerNode;
+            expect(node.serialize()).toStrictEqual(
+                { token: 'R_1', st: -1, ed: -1, children: [
+                    "'[workbook1]Sheet 01'!A5",
+                    '[workbook4]aaa!A5', // FIXME: here is a redundant space,
+                    // because the current lexer cannot consume useless spaces at this moment.
+                    '*',
+                ] }
+            );
         });
     });
 });

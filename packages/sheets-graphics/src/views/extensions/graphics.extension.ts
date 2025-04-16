@@ -54,4 +54,12 @@ export class Graphics extends SheetExtension {
     override dispose(): void {
         this._graphicsRenderMap.clear();
     }
+
+    copy() {
+        const newGraphics = new Graphics();
+        this._graphicsRenderMap.forEach((renderer, key) => {
+            newGraphics.registerRenderer(key, renderer);
+        });
+        return newGraphics;
+    }
 }

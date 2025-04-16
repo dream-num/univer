@@ -15,7 +15,7 @@
  */
 
 import type { DisposableCollection, IRange, Worksheet } from '@univerjs/core';
-import type { Engine, Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
+import type { Engine, Scene, Spreadsheet, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import { createInterceptorKey, Disposable, InterceptorManager } from '@univerjs/core';
 
 interface ISheetPrintContext {
@@ -32,8 +32,12 @@ interface ISheetPrintContext {
     };
 }
 
+interface ISheetPrintComponentContext extends ISheetPrintContext {
+    spreadsheet: Spreadsheet;
+}
+
 const PRINTING_RANGE = createInterceptorKey<IRange, { unitId: string; subUnitId: string }>('PRINTING_RANGE');
-const PRINTING_COMPONENT_COLLECT = createInterceptorKey<undefined, ISheetPrintContext>('PRINTING_COMPONENT_COLLECT');
+const PRINTING_COMPONENT_COLLECT = createInterceptorKey<undefined, ISheetPrintComponentContext>('PRINTING_COMPONENT_COLLECT');
 const PRINTING_DOM_COLLECT = createInterceptorKey<DisposableCollection, ISheetPrintContext>('PRINTING_DOM_COLLECT');
 
 export class SheetPrintInterceptorService extends Disposable {

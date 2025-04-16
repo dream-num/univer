@@ -152,7 +152,7 @@
     "vsicons.presets.angular": false,
 
     // Disable the default formatter, use eslint instead
-    // "prettier.enable": true,
+    "prettier.enable": false,
     "search.followSymlinks": false,
     "search.exclude": {
         "**/node_modules": true,

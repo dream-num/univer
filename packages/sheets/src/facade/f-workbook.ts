@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { CommandListener, CustomData, ICommandInfo, IDisposable, IRange, IWorkbookData, LocaleType, Workbook } from '@univerjs/core';
+import type { CommandListener, CustomData, ICommandInfo, IDisposable, IRange, IWorkbookData, IWorksheetData, LocaleType, Workbook } from '@univerjs/core';
 import type { ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
-import type { IRangeThemeStyleJSON, ISetSelectionsOperationParams, ISheetCommandSharedParams } from '@univerjs/sheets';
+import type { IInsertSheetCommandParams, IRangeThemeStyleJSON, ISetSelectionsOperationParams, ISheetCommandSharedParams } from '@univerjs/sheets';
 import type { FontLine as _FontLine } from './f-range';
-import { ICommandService, ILogService, Inject, Injector, IPermissionService, IResourceLoaderService, IUniverInstanceService, LocaleService, mergeWorksheetSnapshotWithDefault, RANGE_TYPE, RedoCommand, toDisposable, UndoCommand, UniverInstanceType } from '@univerjs/core';
+import { ICommandService, ILogService, Inject, Injector, IPermissionService, IResourceLoaderService, IUniverInstanceService, LocaleService, mergeWorksheetSnapshotWithDefault, RANGE_TYPE, RedoCommand, toDisposable, Tools, UndoCommand, UniverInstanceType } from '@univerjs/core';
 import { FBaseInitialable } from '@univerjs/core/facade';
 import { IDefinedNamesService } from '@univerjs/engine-formula';
 import { CopySheetCommand, getPrimaryForRange, InsertSheetCommand, RangeThemeStyle, RegisterWorksheetRangeThemeStyleCommand, RemoveSheetCommand, SCOPE_WORKBOOK_VALUE_DEFINED_NAME, SetDefinedNameCommand, SetSelectionsOperation, SetWorksheetActiveOperation, SetWorksheetOrderCommand, SheetRangeThemeService, SheetsSelectionsService, UnregisterWorksheetRangeThemeStyleCommand, WorkbookEditablePermission } from '@univerjs/sheets';
@@ -179,32 +179,56 @@ export class FWorkbook extends FBaseInitialable {
      * Create a new worksheet and returns a handle to it.
      * @param {string} name Name of the new sheet
      * @param {number} rows How many rows would the new sheet have
-     * @param {number} column How many columns would the new sheet have
+     * @param {number} columns How many columns would the new sheet have
+     * @param {Pick<IInsertSheetCommandParams, 'index' | 'sheet'>} [options] The options for the new sheet
+     * @param {number} [options.index] The position index where the new sheet is to be inserted
+     * @param {Partial<IWorksheetData>} [options.sheet] The data configuration for the new sheet
      * @returns {FWorksheet} The new created sheet
      * @example
      * ```ts
-     * // The code below creates a new sheet
      * const fWorkbook = univerAPI.getActiveWorkbook();
+     *
+     * // Create a new sheet named 'MyNewSheet' with 10 rows and 10 columns
      * const newSheet = fWorkbook.create('MyNewSheet', 10, 10);
      * console.log(newSheet);
+     *
+     * // Create a new sheet named 'MyNewSheetWithData' with 10 rows and 10 columns and some data, and set it as the first sheet
+     * const sheetData = {
+     *   // ... Omit other properties
+     *   cellData: {
+     *     0: {
+     *       0: {
+     *         v: 'Hello Univer!',
+     *       }
+     *     }
+     *   },
+     *   // ... Omit other properties
+     * };
+     * const newSheetWithData = fWorkbook.create('MyNewSheetWithData', 10, 10, {
+     *   index: 0,
+     *   sheet: sheetData,
+     * });
+     * console.log(newSheetWithData);
      * ```
      */
-    create(name: string, rows: number, column: number): FWorksheet {
-        const newSheet = mergeWorksheetSnapshotWithDefault({});
-        newSheet.rowCount = rows;
-        newSheet.columnCount = column;
+    create(name: string, rows: number, columns: number, options?: Pick<IInsertSheetCommandParams, 'index' | 'sheet'>): FWorksheet {
+        const newSheet: Partial<IWorksheetData> = mergeWorksheetSnapshotWithDefault(Tools.deepClone(options?.sheet ?? {}));
         newSheet.name = name;
-        newSheet.id = name.toLowerCase().replace(/ /g, '-');
+        newSheet.rowCount = rows;
+        newSheet.columnCount = columns;
+        newSheet.id = options?.sheet?.id;
+
+        const newSheetIndex = options?.index ?? this._workbook.getSheets().length;
 
         this._commandService.syncExecuteCommand(InsertSheetCommand.id, {
             unitId: this.id,
-            index: this._workbook.getSheets().length,
+            index: newSheetIndex,
             sheet: newSheet,
         });
 
         this._commandService.syncExecuteCommand(SetWorksheetActiveOperation.id, {
             unitId: this.id,
-            subUnitId: this._workbook.getSheets()[this._workbook.getSheets().length - 1].getSheetId(),
+            subUnitId: this._workbook.getSheets()[newSheetIndex].getSheetId(),
         });
 
         const worksheet = this._workbook.getActiveSheet();
@@ -282,32 +306,59 @@ export class FWorkbook extends FBaseInitialable {
      * Inserts a new worksheet into the workbook.
      * Using a default sheet name. The new sheet becomes the active sheet
      * @param {string} [sheetName] The name of the new sheet
+     * @param {Pick<IInsertSheetCommandParams, 'index' | 'sheet'>} [options] The options for the new sheet
+     * @param {number} [options.index] The position index where the new sheet is to be inserted
+     * @param {Partial<IWorksheetData>} [options.sheet] The data configuration for the new sheet
      * @returns {FWorksheet} The new sheet
      * @example
      * ```ts
-     * // The code below inserts a new sheet into the workbook
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * fWorkbook.insertSheet();
      *
-     * // The code below inserts a new sheet into the workbook, using a custom name
-     * const fWorkbook = univerAPI.getActiveWorkbook();
-     * fWorkbook.insertSheet('MyNewSheet');
+     * // Create a new sheet with default configuration
+     * const newSheet = fWorkbook.insertSheet();
+     * console.log(newSheet);
+     *
+     * // Create a new sheet with custom name and default configuration
+     * const newSheetWithName = fWorkbook.insertSheet('MyNewSheet');
+     * console.log(newSheetWithName);
+     *
+     * // Create a new sheet with custom name and custom configuration
+     * const sheetData = {
+     *   // ... Omit other properties
+     *   cellData: {
+     *     0: {
+     *       0: {
+     *         v: 'Hello Univer!',
+     *       }
+     *     }
+     *   },
+     *   // ... Omit other properties
+     * };
+     * const newSheetWithData = fWorkbook.insertSheet('MyNewSheetWithData', {
+     *   index: 0,
+     *   sheet: sheetData,
+     * });
+     * console.log(newSheetWithData);
      * ```
      */
-    insertSheet(sheetName?: string): FWorksheet {
-        if (sheetName != null) {
-            this._commandService.syncExecuteCommand(InsertSheetCommand.id, { sheet: { name: sheetName } });
-        } else {
-            this._commandService.syncExecuteCommand(InsertSheetCommand.id);
-        }
+    insertSheet(sheetName?: string, options?: Pick<IInsertSheetCommandParams, 'index' | 'sheet'>): FWorksheet {
+        const newSheet: Partial<IWorksheetData> = mergeWorksheetSnapshotWithDefault(Tools.deepClone(options?.sheet ?? {}));
+        newSheet.name = sheetName;
+        newSheet.id = options?.sheet?.id;
 
-        const unitId = this.id;
-        const subUnitId = this._workbook.getSheets()[this._workbook.getSheets().length - 1].getSheetId();
+        const newSheetIndex = options?.index ?? this._workbook.getSheets().length;
+
+        this._commandService.syncExecuteCommand(InsertSheetCommand.id, {
+            unitId: this.id,
+            index: newSheetIndex,
+            sheet: newSheet,
+        });
 
         this._commandService.syncExecuteCommand(SetWorksheetActiveOperation.id, {
-            unitId,
-            subUnitId,
+            unitId: this.id,
+            subUnitId: this._workbook.getSheets()[newSheetIndex].getSheetId(),
         });
+
         const worksheet = this._workbook.getActiveSheet();
         if (!worksheet) {
             throw new Error('No active sheet found');

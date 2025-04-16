@@ -246,6 +246,8 @@ export function DataValidationDetail() {
         );
     };
 
+    const shouldHideFormula = !localRule.operator;
+
     return (
         <div className={styles.dataValidationDetail}>
             <FormLayout
@@ -308,7 +310,7 @@ export function DataValidationDetail() {
                     </FormLayout>
                 )
                 : null}
-            {FormulaInput
+            {FormulaInput && !shouldHideFormula
                 ? (
                     <FormLayout>
                         <FormulaInput

@@ -34,6 +34,7 @@ export interface IDataValidationDropdownParam {
     location: ISheetLocation;
     onHide?: () => void;
     trigger?: 'editor-bridge';
+    closeOnOutSide?: boolean;
 }
 
 export interface IDropdownComponentProps {
@@ -151,7 +152,7 @@ export class DataValidationDropdownManagerService extends Disposable {
     }
 
     // eslint-disable-next-line max-lines-per-function
-    showDropdown(param: IDataValidationDropdownParam, closeOnOutSide = true) {
+    showDropdown(param: IDataValidationDropdownParam) {
         const { location } = param;
         const { row, col, unitId, subUnitId, workbook, worksheet } = location;
         if (this._currentPopup) {
@@ -447,7 +448,7 @@ export class DataValidationDropdownManagerService extends Disposable {
                 throw new Error('[DataValidationDropdownManagerService]: unknown type!');
         }
 
-        popupDisposable = this._cellDropdownManagerService.showDropdown(dropdownParam, closeOnOutSide);
+        popupDisposable = this._cellDropdownManagerService.showDropdown(dropdownParam);
         if (!popupDisposable) {
             throw new Error('[DataValidationDropdownManagerService]: cannot show dropdown!');
         }

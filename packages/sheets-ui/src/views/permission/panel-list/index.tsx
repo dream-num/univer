@@ -342,7 +342,7 @@ export const SheetPermissionPanelList = () => {
                 <div className={styles.sheetPermissionPanelAddWrapper}>
                     <Button
                         className={styles.sheetPermissionPanelAddButton}
-                        type="primary"
+                        variant="primary"
                         onClick={() => {
                             const sidebarProps = {
                                 header: { title: `${localeService.t('permission.panel.title')}` },

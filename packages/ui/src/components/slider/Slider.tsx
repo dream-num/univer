@@ -164,7 +164,7 @@ export function Slider(props: ISliderProps) {
                 [styles.sliderDisabled]: disabled,
             })}
         >
-            <Button type="text" size="small" disabled={value <= min || disabled} onClick={() => handleStep(-10)}>
+            <Button variant="text" size="small" disabled={value <= min || disabled} onClick={() => handleStep(-10)}>
                 <ReduceSingle />
             </Button>
 
@@ -194,7 +194,7 @@ export function Slider(props: ISliderProps) {
                 </div>
             </div>
 
-            <Button type="text" size="small" disabled={value >= max || disabled} onClick={() => handleStep(10)}>
+            <Button variant="text" size="small" disabled={value >= max || disabled} onClick={() => handleStep(10)}>
                 <IncreaseSingle />
             </Button>
 

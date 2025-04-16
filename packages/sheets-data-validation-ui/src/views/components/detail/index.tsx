@@ -342,7 +342,7 @@ export function DataValidationDetail() {
                 <Button className={styles.dataValidationDetailButton} onClick={handleDelete}>
                     {localeService.t('dataValidation.panel.removeRule')}
                 </Button>
-                <Button className={styles.dataValidationDetailButton} type="primary" onClick={handleOk}>
+                <Button className={styles.dataValidationDetailButton} variant="primary" onClick={handleOk}>
                     {localeService.t('dataValidation.panel.done')}
                 </Button>
             </div>

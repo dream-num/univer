@@ -147,7 +147,7 @@ export function DateDropdown(props: IDropdownComponentProps) {
                 disabledDate={(current) => !numfmt.parseDate(current.format('YYYY-MM-DD'))}
             />
             <div className={styles.dvDateDropdownBtns}>
-                <Button size="small" type="primary" onClick={handleSave} disabled={!date.isValid()}>
+                <Button size="small" variant="primary" onClick={handleSave} disabled={!date.isValid()}>
                     {localeService.t('dataValidation.alert.ok')}
                 </Button>
             </div>

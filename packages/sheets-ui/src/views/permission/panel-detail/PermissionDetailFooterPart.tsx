@@ -61,7 +61,7 @@ export const PermissionDetailFooterPart = (props: IPermissionDetailFooterPartPro
     return (
         <div className={styles.sheetPermissionPanelFooter}>
             <Button
-                type="primary"
+                variant="primary"
                 onClick={async () => {
                     if (rangesErrMsg) return;
 

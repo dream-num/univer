@@ -195,7 +195,7 @@ export const DrawingGroup = (props: IDrawingGroupProps) => {
             </div>
             <div className={styles.imageCommonPanelRow}>
                 <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSpan2, styles.imageCommonPanelColumnCenter)}>
-                    <Button size="small" onClick={() => { onGroupBtnClick(); }} style={{ display: gridDisplay(groupBtnShow) }}>
+                    <Button style={{ display: gridDisplay(groupBtnShow) }} size="small" onClick={() => { onGroupBtnClick(); }}>
                         <span className={styles.imageCommonPanelInline}>
                             <GroupSingle />
                             {localeService.t('image-panel.group.group')}
@@ -203,7 +203,7 @@ export const DrawingGroup = (props: IDrawingGroupProps) => {
                     </Button>
                 </div>
                 <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSpan2, styles.imageCommonPanelColumnCenter)}>
-                    <Button size="small" onClick={() => { onUngroupBtnClick(); }} style={{ display: gridDisplay(ungroupBtnShow) }}>
+                    <Button style={{ display: gridDisplay(ungroupBtnShow) }} size="small" onClick={() => { onUngroupBtnClick(); }}>
                         <span className={styles.imageCommonPanelInline}>
                             <UngroupSingle />
                             {localeService.t('image-panel.group.unGroup')}

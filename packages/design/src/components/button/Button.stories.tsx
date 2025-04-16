@@ -33,10 +33,12 @@ export const ButtonType = {
     render() {
         return (
             <>
-                <Button>default button</Button>
-                <Button type="primary">primary button</Button>
-                <Button type="text">text button</Button>
-                <Button type="link">link button</Button>
+                <div>
+                    <Button>default button</Button>
+                    <Button variant="primary">primary button</Button>
+                    <Button variant="text">text button</Button>
+                    <Button variant="link">link button</Button>
+                </div>
             </>
         );
     },
@@ -46,26 +48,13 @@ export const ButtonSize = {
     render() {
         return (
             <>
-                <Button size="small">small button</Button>
-                <Button>medium button</Button>
-                <Button type="primary" size="large">
-                    large button
-                </Button>
-            </>
-        );
-    },
-};
-
-export const ButtonBlock = {
-    render() {
-        return (
-            <>
-                <Button size="small" block>
-                    small button
-                </Button>
-                <Button type="primary" block>
-                    primary button
-                </Button>
+                <div>
+                    <Button size="small">small button</Button>
+                    <Button>medium button</Button>
+                    <Button variant="primary" size="large">
+                        large button
+                    </Button>
+                </div>
             </>
         );
     },
@@ -75,13 +64,15 @@ export const ButtonDisabled = {
     render() {
         return (
             <>
-                <Button disabled>default button</Button>
-                <Button type="text" disabled>
-                    text button
-                </Button>
-                <Button type="primary" disabled>
-                    primary button
-                </Button>
+                <div>
+                    <Button disabled>default button</Button>
+                    <Button variant="text" disabled>
+                        text button
+                    </Button>
+                    <Button variant="primary" disabled>
+                        primary button
+                    </Button>
+                </div>
             </>
         );
     },

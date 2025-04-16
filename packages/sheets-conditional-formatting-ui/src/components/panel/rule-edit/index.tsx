@@ -259,7 +259,7 @@ export const RuleEdit = (props: IRuleEditProps) => {
                 `}
             >
                 <Button size="small" onClick={handleCancel}>{localeService.t('sheet.cf.panel.cancel')}</Button>
-                <Button className={styleBase.mLSm} size="small" type="primary" onClick={handleSubmit}>{localeService.t('sheet.cf.panel.submit')}</Button>
+                <Button className={styleBase.mLSm} size="small" variant="primary" onClick={handleSubmit}>{localeService.t('sheet.cf.panel.submit')}</Button>
             </div>
         </div>
     );

@@ -94,7 +94,7 @@ export function ScriptEditorPanel() {
                 <div ref={editorContainerRef} />
             </div>
             <div className="univer-mt-2.5">
-                <Button type="primary" size="small" onClick={startExecution}>
+                <Button variant="primary" size="small" onClick={startExecution}>
                     {localeService.t('script-panel.panel.execute')}
                 </Button>
             </div>

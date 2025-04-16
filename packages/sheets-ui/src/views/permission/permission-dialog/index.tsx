@@ -211,7 +211,7 @@ export const SheetPermissionDialog = () => {
                         {localeService.t('permission.button.cancel')}
                     </Button>
                     <Button
-                        type="primary"
+                        variant="primary"
                         onClick={() => {
                             handleChangeActionPermission();
                             dialogService.close(UNIVER_SHEET_PERMISSION_DIALOG_ID);

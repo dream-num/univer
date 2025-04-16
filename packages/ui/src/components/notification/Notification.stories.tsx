@@ -36,7 +36,7 @@ export const Playground = {
         <>
             <Notification />
             <Button
-                type="primary"
+                variant="primary"
                 onClick={() =>
                     notification.show({
                         type: 'success',
@@ -53,7 +53,7 @@ export const Playground = {
                 Notification Info
             </Button>
             <Button
-                type="primary"
+                variant="primary"
                 onClick={() =>
                     notification.show({
                         type: 'warning',
@@ -64,7 +64,7 @@ export const Playground = {
                 Notification Warning
             </Button>
             <Button
-                type="primary"
+                variant="primary"
                 onClick={() =>
                     notification.show({ type: 'error', title: 'Notification Error', content: 'Notification content' })}
             >

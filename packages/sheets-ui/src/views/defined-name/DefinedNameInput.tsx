@@ -284,7 +284,7 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
                 </Button>
                 <Button
                     style={{ marginLeft: 15 }}
-                    type="primary"
+                    variant="primary"
                     onClick={confirmChange}
                 >
                     {localeService.t('definedName.confirm')}

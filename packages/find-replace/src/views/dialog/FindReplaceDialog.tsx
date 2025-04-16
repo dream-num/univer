@@ -232,7 +232,7 @@ export const ReplaceDialog = forwardRef(function ReplaceDIalogImpl(_props, ref) 
                 </>
             </FormDualColumnLayout>
             <div className="univer-mt-6 univer-flex univer-justify-between">
-                <Button type="primary" onClick={onClickFindButton} disabled={findDisabled}>{localeService.t('find-replace.dialog.find')}</Button>
+                <Button variant="primary" onClick={onClickFindButton} disabled={findDisabled}>{localeService.t('find-replace.dialog.find')}</Button>
                 <span className="univer-inline-flex univer-gap-2">
                     <Button disabled={replaceDisabled} onClick={onClickReplaceButton}>{localeService.t('find-replace.dialog.replace')}</Button>
                     <Button disabled={replaceAllDisabled} onClick={onClickReplaceAllButton}>{localeService.t('find-replace.dialog.replace-all')}</Button>

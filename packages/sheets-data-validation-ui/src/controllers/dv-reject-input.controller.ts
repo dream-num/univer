@@ -74,7 +74,7 @@ export class DataValidationRejectInputController extends Disposable {
                             title: React.createElement(
                                 Button,
                                 {
-                                    type: 'primary',
+                                    variant: 'primary',
                                     onClick: () => this._dialogService.close('reject-input-dialog'),
                                 },
                                 this._localeService.t('dataValidation.alert.ok')
@@ -105,7 +105,7 @@ export class DataValidationRejectInputController extends Disposable {
                 title: React.createElement(
                     Button,
                     {
-                        type: 'primary',
+                        variant: 'primary',
                         onClick: () => this._dialogService.close('reject-input-dialog'),
                     },
                     this._localeService.t('dataValidation.alert.ok')

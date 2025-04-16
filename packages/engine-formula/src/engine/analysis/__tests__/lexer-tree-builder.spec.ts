@@ -739,8 +739,7 @@ describe('lexer nodeMaker test', () => {
             expect(node.serialize()).toStrictEqual(
                 { token: 'R_1', st: -1, ed: -1, children: [
                     "'[workbook1]Sheet 01'!A5",
-                    '[workbook4]aaa!A5', // FIXME: here is a redundant space,
-                    // because the current lexer cannot consume useless spaces at this moment.
+                    '[workbook4]aaa!A5',
                     '*',
                 ] }
             );

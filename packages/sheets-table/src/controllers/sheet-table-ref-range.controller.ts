@@ -349,7 +349,7 @@ export class SheetTableRefRangeController extends Disposable {
                             options: tableJson.options,
                         },
                     });
-                } else if (range.startColumn < tableRange.startColumn && range.endColumn >= tableRange.startColumn) {
+                } else if (range.startColumn <= tableRange.startColumn && range.endColumn >= tableRange.startColumn) {
                     const removeColumnCount = range.endColumn - tableRange.startColumn + 1;
                     redos.push({
                         id: SetSheetTableMutation.id,

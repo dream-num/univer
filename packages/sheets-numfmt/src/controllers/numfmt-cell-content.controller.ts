@@ -130,7 +130,7 @@ export class SheetsNumfmtCellContentController extends Disposable {
                     return next(cell);
                 }
 
-                const type = checkCellValueType(originCellValue.v);
+                const type = cell.t || checkCellValueType(originCellValue.v);
                 // just handle number
                 if (type !== CellValueType.NUMBER) {
                     return next(cell);

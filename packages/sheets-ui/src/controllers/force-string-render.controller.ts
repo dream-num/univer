@@ -57,7 +57,7 @@ export class ForceStringRenderController extends RxDisposable implements IRender
                             return next(cell);
                         }
 
-                        if (cell?.t === CellValueType.FORCE_STRING && isRealNum(cellRaw.v)) {
+                        if ((cell?.t === CellValueType.FORCE_STRING || cell?.t === CellValueType.STRING) && isRealNum(cellRaw.v)) {
                             return next({
                                 ...cell,
                                 markers: {

@@ -16,8 +16,9 @@
 
 import type { IPopup } from '@univerjs/ui';
 import type { IBaseDropdownProps } from '../type';
-import { dayjs, LocaleService, numfmt, useDependency } from '@univerjs/core';
+import { dayjs, LocaleService, numfmt } from '@univerjs/core';
 import { Button, DatePanel } from '@univerjs/design';
+import { useDependency } from '@univerjs/ui';
 import { useMemo, useState } from 'react';
 import styles from './index.module.less';
 

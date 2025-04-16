@@ -45,9 +45,6 @@ export const SheetTableSelector = (props: ITableSelectionInfo & {
                 initialValue={serializeRange(range)}
                 onChange={(_, text) => {
                     const originValue = serializeRange(range);
-                    if (originValue === text) {
-                        return;
-                    }
                     const newRange = deserializeRangeWithSheet(text).range;
                     const target = getSheetCommandTarget(univerInstanceService, { unitId, subUnitId });
                     if (!target) {
@@ -74,6 +71,16 @@ export const SheetTableSelector = (props: ITableSelectionInfo & {
 
                     if (hasOverlapWithOtherTable) {
                         setRangeError(localeService.t('sheets-table.tableRangeWithOtherTableError'));
+                        return;
+                    }
+                    const { startRow, endRow } = newRange;
+                    const isSingleRow = startRow === endRow;
+                    if (isSingleRow) {
+                        setRangeError(localeService.t('sheets-table.tableRangeSingleRowError'));
+                        return;
+                    }
+
+                    if (originValue === text) {
                         return;
                     }
 

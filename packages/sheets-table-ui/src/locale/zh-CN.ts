@@ -22,6 +22,7 @@ const locale = {
         updateRange: '更新表格范围',
         tableRangeWithMergeError: '表格范围不能与合并单元格重叠',
         tableRangeWithOtherTableError: '表格范围不能与其他表格重叠',
+        tableRangeSingleRowError: '表格范围不能是单独的一行',
         updateError: '不能将表格范围设置到和原先不重合且不在同一行的范围',
         tableStyle: '表格样式',
         defaultStyle: '默认样式',

@@ -22,6 +22,7 @@ const locale = {
         updateRange: 'Mettre à jour la plage du tableau',
         tableRangeWithMergeError: 'La plage du tableau ne peut pas chevaucher des cellules fusionnées',
         tableRangeWithOtherTableError: 'La plage du tableau ne peut pas chevaucher d\'autres tableaux',
+        tableRangeSingleRowError: 'La plage du tableau ne peut pas être une seule ligne',
         updateError: 'Impossible de définir la plage du tableau sur une zone qui ne chevauche pas l\'original et n\'est pas sur la même ligne',
         tableStyle: 'Style du tableau',
         defaultStyle: 'Style par défaut',

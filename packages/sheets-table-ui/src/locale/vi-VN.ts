@@ -22,6 +22,7 @@ const locale = {
         updateRange: 'Cập nhật phạm vi bảng',
         tableRangeWithMergeError: 'Phạm vi bảng không thể chồng lấp với các ô đã được hợp nhất',
         tableRangeWithOtherTableError: 'Phạm vi bảng không thể chồng lấp với các bảng khác',
+        tableRangeSingleRowError: 'Phạm vi bảng không thể là một hàng đơn lẻ',
         updateError: 'Không thể đặt phạm vi bảng vào khu vực không chồng lấp với bản gốc và không nằm trên cùng một hàng',
         tableStyle: 'Kiểu bảng',
         defaultStyle: 'Kiểu mặc định',

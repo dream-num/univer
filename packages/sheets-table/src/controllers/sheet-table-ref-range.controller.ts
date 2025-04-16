@@ -14,16 +14,20 @@
  * limitations under the License.
  */
 
-import type { IMutationInfo } from '@univerjs/core';
+/* eslint-disable max-lines-per-function */
+/* eslint-disable complexity */
+
+import type { IMutationInfo, Workbook } from '@univerjs/core';
 import type { IInsertColCommandParams, IInsertRowCommandParams, IInsertRowMutationParams, IRemoveRowColCommandParams } from '@univerjs/sheets';
 import type { ITableColumnJson } from '../types/type';
-import { Disposable, ICommandService, Inject, Injector, IUniverInstanceService, Rectangle } from '@univerjs/core';
+import { Disposable, ICommandService, Inject, Injector, IUniverInstanceService, LocaleService, Rectangle } from '@univerjs/core';
 import { getSheetCommandTarget, InsertColCommand, InsertColMutation, InsertRowCommand, InsertRowMutation, RefRangeService, RemoveColCommand, RemoveColMutation, RemoveRowCommand, RemoveRowMutation, SheetInterceptorService } from '@univerjs/sheets';
 import { AddSheetTableMutation } from '../commands/mutations/add-sheet-table.mutation';
 import { DeleteSheetTableMutation } from '../commands/mutations/delete-sheet-table.mutation';
 import { SetSheetTableMutation } from '../commands/mutations/set-sheet-table.mutation';
 import { TableManager } from '../model/table-manager';
 import { IRangeOperationTypeEnum, IRowColTypeEnum } from '../types/type';
+import { convertCellDataToString, getColumnName } from '../util';
 
 export class SheetTableRefRangeController extends Disposable {
     constructor(
@@ -32,7 +36,8 @@ export class SheetTableRefRangeController extends Disposable {
         @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(Injector) private _injector: Injector,
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
-        @Inject(TableManager) private _tableManager: TableManager
+        @Inject(TableManager) private _tableManager: TableManager,
+        @Inject(LocaleService) private _localeService: LocaleService
 
     ) {
         super();
@@ -177,7 +182,6 @@ export class SheetTableRefRangeController extends Disposable {
         return { undos, redos };
     }
 
-    // eslint-disable-next-line max-lines-per-function
     private _generateTableMutationWithRemoveRow(removeParams: IRemoveRowColCommandParams) {
         const undos: IMutationInfo[] = [];
         const redos: IMutationInfo[] = [];
@@ -195,7 +199,7 @@ export class SheetTableRefRangeController extends Disposable {
         }
         const { range } = removeParams;
         const removeRowCount = range.endRow - range.startRow + 1;
-        // eslint-disable-next-line max-lines-per-function
+
         allSubUnitTables.forEach((table) => {
             const tableRange = table.getRange();
             if (Rectangle.intersects(tableRange, range)) {
@@ -313,7 +317,7 @@ export class SheetTableRefRangeController extends Disposable {
         allSubUnitTables.forEach((table) => {
             const tableRange = table.getRange();
             if (Rectangle.intersects(tableRange, range)) {
-                if (range.startColumn <= tableRange.startColumn && range.endColumn >= tableRange.startColumn) {
+                if (range.startColumn <= tableRange.startColumn && range.endColumn >= tableRange.endColumn) {
                     preRedos.push({
                         id: DeleteSheetTableMutation.id,
                         params: {
@@ -323,6 +327,16 @@ export class SheetTableRefRangeController extends Disposable {
                         },
                     });
                     const tableJson = table.toJSON();
+                    const { startRow, startColumn, endColumn } = tableJson.range;
+                    const workbook = this._univerInstanceService.getUnit<Workbook>(unitId);
+                    const worksheet = workbook?.getSheetBySheetId(subUnitId);
+                    if (!worksheet) {
+                        return { undos, redos, preRedos, preUndos };
+                    }
+                    const header: string[] = [];
+                    for (let i = startColumn; i <= endColumn; i++) {
+                        header.push(convertCellDataToString(worksheet?.getCell(startRow, i)) || getColumnName(i - startColumn + 1, this._localeService.t('sheets-table.columnPrefix')));
+                    }
                     undos.push({
                         id: AddSheetTableMutation.id,
                         params: {
@@ -330,6 +344,7 @@ export class SheetTableRefRangeController extends Disposable {
                             subUnitId,
                             tableId: tableJson.id,
                             name: tableJson.name,
+                            header,
                             range: tableJson.range,
                             options: tableJson.options,
                         },
@@ -497,7 +512,7 @@ export class SheetTableRefRangeController extends Disposable {
                 const allTables = this._tableManager.getTablesBySubunitId(unitId, subUnitId);
                 allTables.forEach((table) => {
                     const tableRange = table.getRange();
-                    if (range.startColumn < tableRange.startColumn) {
+                    if (range.startColumn <= tableRange.startColumn) {
                         this._tableManager.updateTableRange(unitId, table.getId(), {
                             newRange: {
                                 ...tableRange,

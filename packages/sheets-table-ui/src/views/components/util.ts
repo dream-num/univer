@@ -351,6 +351,7 @@ export function getInitConditionInfo(tableFilter?: ITableFilterItem) {
         } else if (datePickerSet.has(compareType as TableDateCompareTypeEnum)) {
             return {
                 type: conditionType,
+                compare: compareType,
                 info: {
                     date: filterInfo.expectedValue,
                 },

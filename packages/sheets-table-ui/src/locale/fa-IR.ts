@@ -22,6 +22,7 @@ const locale = {
         updateRange: 'به‌روزرسانی محدوده جدول',
         tableRangeWithMergeError: 'محدوده جدول نمی‌تواند با سلول‌های ادغام‌شده همپوشانی داشته باشد',
         tableRangeWithOtherTableError: 'محدوده جدول نمی‌تواند با جداول دیگر همپوشانی داشته باشد',
+        tableRangeSingleRowError: 'محدوده جدول نمی‌تواند یک ردیف منفرد باشد',
         updateError: 'نمی‌توان محدوده جدول را به منطقه‌ای که با اصل همپوشانی ندارد و در یک ردیف نیست تنظیم کرد',
         tableStyle: 'سبک جدول',
         defaultStyle: 'سبک پیش‌فرض',

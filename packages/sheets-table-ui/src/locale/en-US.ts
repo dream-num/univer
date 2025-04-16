@@ -22,6 +22,7 @@ const locale = {
         updateRange: 'Update Table Range',
         tableRangeWithMergeError: 'Table range cannot overlap with merged cells',
         tableRangeWithOtherTableError: 'Table range cannot overlap with other tables',
+        tableRangeSingleRowError: 'Table range cannot be a single row',
         updateError: 'Cannot set table range to an area that does not overlap with the original and is not in the same row',
         tableStyle: 'Table Style',
         defaultStyle: 'Default Style',

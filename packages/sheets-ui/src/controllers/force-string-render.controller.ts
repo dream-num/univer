@@ -17,6 +17,7 @@
 import type { Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { CellValueType, Inject, InterceptorEffectEnum, isRealNum, RxDisposable } from '@univerjs/core';
+import { isTextFormat } from '@univerjs/engine-numfmt';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
@@ -57,7 +58,13 @@ export class ForceStringRenderController extends RxDisposable implements IRender
                             return next(cell);
                         }
 
-                        if (cell?.t === CellValueType.FORCE_STRING && isRealNum(cellRaw.v)) {
+                        if ((cell?.t === CellValueType.FORCE_STRING || cell?.t === CellValueType.STRING) && isRealNum(cellRaw.v)) {
+                            // If the cell is in text format, follow the logic of number format
+                            const cellStyle = pos.workbook.getStyles().get(cellRaw.s);
+                            if (isTextFormat(cellStyle?.n?.pattern)) {
+                                return next(cell);
+                            }
+
                             return next({
                                 ...cell,
                                 markers: {

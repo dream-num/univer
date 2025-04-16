@@ -230,6 +230,25 @@ test('diff set force string cell', async () => {
         activeWorkbook.startEditing();
         await window.univerAPI.getActiveDocument().appendText("'1");
         activeWorkbook.endEditing(true);
+
+        activeSheet.getRange('I1').setValue({
+            v: '001',
+            t: 1,
+            s: {
+                ff: 'Arial CE',
+                fs: 11,
+                bl: 1,
+                cl: {
+                    rgb: '#000080',
+                    th: 0,
+                },
+                n: {
+                    pattern: 'General',
+                },
+                ht: 1,
+                tb: 3,
+            },
+        });
     });
 
     const filename = generateSnapshotName('set-force-string-cell');

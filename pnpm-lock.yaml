@@ -2521,6 +2521,9 @@ importers:
       '@univerjs/engine-render':
         specifier: workspace:*
         version: link:../engine-render
+      '@univerjs/sheets-ui':
+        specifier: workspace:*
+        version: link:../sheets-ui
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
+import type { IDrawingParam } from '@univerjs/core';
 import type { IDrawingGroupUpdateParam } from '@univerjs/drawing';
-import { DrawingTypeEnum, type IDrawingParam } from '@univerjs/core';
+import { DrawingTypeEnum } from '@univerjs/core';
 import { getGroupState, transformObjectOutOfGroup } from '@univerjs/engine-render';
 
 export function ungroupToGroup(ungroupParams: IDrawingGroupUpdateParam[]) {
@@ -30,7 +31,9 @@ export function ungroupToGroup(ungroupParams: IDrawingGroupUpdateParam[]) {
             const transform = drawing.transform || { left: 0, top: 0 };
             const { unitId, subUnitId, drawingId } = drawing;
             return {
-                unitId, subUnitId, drawingId,
+                unitId,
+                subUnitId,
+                drawingId,
                 transform: {
                     ...transform,
                     left: transform.left! - groupTransform.left,
@@ -71,7 +74,9 @@ export function groupToUngroup(groupParams: IDrawingGroupUpdateParam[]) {
             const { unitId, subUnitId, drawingId } = object;
             const newTransform = transformObjectOutOfGroup(transform || {}, groupTransform, groupTransform.width || 0, groupTransform.height || 0);
             return {
-                unitId, subUnitId, drawingId,
+                unitId,
+                subUnitId,
+                drawingId,
                 transform: newTransform,
                 groupId: undefined,
             };

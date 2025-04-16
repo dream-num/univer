@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ import type zhCN from './zh-CN';
 const locale: typeof zhCN = {
     sheet: {
         numfmt: {
-            percent: 'Процент',
             title: 'Формат числа',
             numfmtType: 'Типы форматов',
             cancel: 'Отмена',
@@ -28,6 +27,8 @@ const locale: typeof zhCN = {
             accounting: 'Бухгалтерский',
             text: 'Текст',
             number: 'Число',
+            percent: 'Процент',
+            scientific: 'Экспоненциальный',
             currency: 'Валюта',
             date: 'Дата',
             time: 'Время',

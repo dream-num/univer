@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -303,6 +303,20 @@ export default {
             text: { name: 'text', detail: 'The text string containing the characters you want to extract.' },
             startNum: { name: 'start_num', detail: 'The position of the first character you want to extract in text.' },
             numBytes: { name: 'num_bytes', detail: 'Specifies the number of characters you want MIDB to extract, based on bytes.' },
+        },
+    },
+    NUMBERSTRING: {
+        description: 'Convert numbers to Chinese strings',
+        abstract: 'Convert numbers to Chinese strings',
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://www.wps.cn/learning/course/detail/id/340.html?chan=pc_kdocs_function',
+            },
+        ],
+        functionParameter: {
+            number: { name: 'number', detail: 'The value converted to a Chinese string.' },
+            type: { name: 'type', detail: 'The type of the returned result. \n1. Chinese lowercase \n2. Chinese uppercase \n3. Reading and Writing Chinese Characters' },
         },
     },
     NUMBERVALUE: {

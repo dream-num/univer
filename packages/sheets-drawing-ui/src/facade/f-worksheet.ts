@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,16 @@
  * limitations under the License.
  */
 
-import type { IDisposable, IFBlobSource, Nullable } from '@univerjs/core';
+import type { IDisposable, Nullable } from '@univerjs/core';
+import type { IFBlobSource } from '@univerjs/core/facade';
+import type { ISheetImage } from '@univerjs/sheets-drawing';
+import type { ICanvasFloatDom, IDOMAnchor } from '@univerjs/sheets-drawing-ui';
+import type { IFComponentKey } from '@univerjs/sheets-ui/facade';
 import type { FRange } from '@univerjs/sheets/facade';
 import { DrawingTypeEnum, ImageSourceType, toDisposable } from '@univerjs/core';
-import { ISheetDrawingService, type ISheetImage } from '@univerjs/sheets-drawing';
-import { type ICanvasFloatDom, type IDOMAnchor, InsertSheetDrawingCommand, RemoveSheetDrawingCommand, SetSheetDrawingCommand, SheetCanvasFloatDomManagerService } from '@univerjs/sheets-drawing-ui';
-import { type IFComponentKey, transformComponentKey } from '@univerjs/sheets-ui/facade';
+import { ISheetDrawingService } from '@univerjs/sheets-drawing';
+import { InsertSheetDrawingCommand, RemoveSheetDrawingCommand, SetSheetDrawingCommand, SheetCanvasFloatDomManagerService } from '@univerjs/sheets-drawing-ui';
+import { transformComponentKey } from '@univerjs/sheets-ui/facade';
 import { FWorksheet } from '@univerjs/sheets/facade';
 import { ComponentManager } from '@univerjs/ui';
 import { FOverGridImage, FOverGridImageBuilder } from './f-over-grid-image';
@@ -27,31 +31,53 @@ import { FOverGridImage, FOverGridImageBuilder } from './f-over-grid-image';
 // why omit this key? if componentKey is missing, then which component should be used?
 export interface IFICanvasFloatDom extends Omit<ICanvasFloatDom, 'componentKey' | 'unitId' | 'subUnitId'>, IFComponentKey {}
 
+/**
+ * @ignore
+ */
 export interface IFWorksheetLegacy {
     /**
      * Add a float dom to position.
-     * @param layer float dom config
-     * @param id float dom id, if not given will be auto generated
+     * @param {IFICanvasFloatDom} layer - The float dom layer configuration.
+     * @param {string} [id] - The float dom id, if not given will be auto generated.
      * @returns float dom id and dispose function
      * @example
-     * ```ts
-     let sheet = univerAPI.getActiveWorkbook().getActiveSheet();
-     sheet.addFloatDomToPosition({
-            allowTransform: false,
-            initPosition: {
-                startX: 200,
-                endX: 400,
-                startY: 200,
-                endY: 400,
-            },
-            componentKey: 'ImageDemo',
-            props: {
-                a: 1,
-            },
-            data: {
-                aa: '128',
-            },
-        });
+     * ```tsx
+     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     *
+     * // You should register components at an appropriate time (e.g., when Univer is loaded)
+     * // This is a React component. For Vue3 components, the third parameter should be `{ framework: 'vue3' }`
+     * univerAPI.registerComponent(
+     *   'myFloatDom',
+     *   ({ data }) => (
+     *     <div style={{ width: '100%', height: '100%', background: '#fff', border: '1px solid #ccc', boxSizing: 'border-box' }}>
+     *       popup content:
+     *       {' '}
+     *       {data?.label}
+     *     </div>
+     *   ),
+     * );
+     *
+     * // Add a floating DOM
+     * // If disposable is null, floating DOM addition failed
+     * const disposeable = fWorksheet.addFloatDomToPosition({
+     *   componentKey: 'myFloatDom',
+     *   initPosition: {
+     *     startX: 100,
+     *     endX: 300,
+     *     startY: 100,
+     *     endY: 200,
+     *   },
+     *
+     *   // Component data
+     *   data: {
+     *     label: 'hahah',
+     *   },
+     * });
+     *
+     * // Remove the floating DOM after 2 seconds
+     * setTimeout(() => {
+     *   disposeable?.dispose();
+     * }, 2000);
      * ```
      */
     addFloatDomToPosition(layer: IFICanvasFloatDom, id?: string): Nullable<{
@@ -61,104 +87,205 @@ export interface IFWorksheetLegacy {
 
     /**
      * Add dom over range to FloatDOM, And FloatDOM is registerComponent(BuiltInUIPart.CONTENT)
-     * @param layer
-     * @param id
+     * @param {FRange} range - The range to add the float dom.
+     * @param {Partial<IFICanvasFloatDom>} layer - The float dom layer configuration.
+     * @param {Partial<IDOMAnchor>} domLayout - The anchor configuration of the float dom.
+     * @param {string} [id] - The float dom id, if not given will be auto generated
+     * @returns float dom id and dispose function
      * @example
-     * ```ts
-     const sheet = univerAPI.getActiveWorkbook().getActiveSheet();
-     const range = sheet.getRange(0, 0, 3, 3);
-     univerAPI.getActiveWorkbook().setActiveRange(range);
-     const {id, dispose } = sheet.addFloatDomToRange(range, {
-            allowTransform: false,
-            componentKey: 'RangeLoading',
-            props: {
-                a: 1,
-            },
-            data: {
-                aa: '128',
-            },
-        }, {},
-        'loadingcover'
-    )
-    setTimeout(()=> {
-        dispose();
-    }, 2000)
-
-    // another example-------------------
-    {
-     const sheet = univerAPI.getActiveWorkbook().getActiveSheet();
-     const range = univerAPI.getActiveWorkbook().getActiveSheet().getActiveRange()
-     const {id, dispose } = sheet.addFloatDomToRange(range, {
-            allowTransform: false,
-            componentKey: 'FloatButton', // React comp key registered in ComponentManager
-            props: {
-                a: 1,
-            },
-            data: {
-                aa: '128',
-            },
-        }, {
-        width: 100,
-        height: 30,
-        marginX: '100%', // margin percent to range width, or pixel
-        marginY: '100%'
-    },
-    'AIButton') // dom id
-    }
-
+     * ```tsx
+     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     *
+     * // Register a range loading component
+     * const RangeLoading = () => {
+     *   const divStyle = {
+     *     width: '100%',
+     *     height: '100%',
+     *     backgroundColor: '#fff',
+     *     border: '1px solid #ccc',
+     *     boxSizing: 'border-box' as const,
+     *     display: 'flex',
+     *     justifyContent: 'center',
+     *     alignItems: 'center',
+     *     textAlign: 'center' as const,
+     *     transformOrigin: 'top left',
+     *   };
+     *
+     *   return (
+     *     <div style={divStyle}>
+     *       Loading...
+     *     </div>
+     *   );
+     * };
+     * univerAPI.registerComponent('RangeLoading', RangeLoading);
+     *
+     * // Add the range loading component covering the range A1:C3
+     * const fRange = fWorksheet.getRange('A1:C3');
+     * const disposeable = fWorksheet.addFloatDomToRange(fRange, { componentKey: 'RangeLoading' }, {}, 'myRangeLoading');
+     *
+     * // Remove the floating DOM after 2 seconds
+     * setTimeout(() => {
+     *   disposeable?.dispose();
+     * }, 2000);
+     *
+     * // another example-------------------
+     * // Register a float button component
+     * const FloatButton = () => {
+     *   const divStyle = {
+     *     width: '100px',
+     *     height: '30px',
+     *     backgroundColor: '#fff',
+     *     border: '1px solid #ccc',
+     *     boxSizing: 'border-box' as const,
+     *     display: 'flex',
+     *     justifyContent: 'center',
+     *     alignItems: 'center',
+     *     textAlign: 'center' as const,
+     *     cursor: 'pointer',
+     *   };
+     *
+     *   const clickHandler = () => {
+     *     console.warn('click');
+     *   };
+     *
+     *   return (
+     *     <div style={divStyle} onClick={clickHandler}>
+     *       FloatButton
+     *     </div>
+     *   );
+     * };
+     * univerAPI.registerComponent('FloatButton', FloatButton);
+     *
+     * // Add the float button to the range A5:C7, position is start from A5 cell, and width is 100px, height is 30px, margin is 100% of range width and height
+     * const fRange2 = fWorksheet.getRange('A5:C7');
+     * const disposeable2 = fWorksheet.addFloatDomToRange(
+     *   fRange2,
+     *   {
+     *     componentKey: 'FloatButton',
+     *   },
+     *   {
+     *     width: 100,
+     *     height: 30,
+     *     marginX: '100%', // margin percent to range width, or pixel
+     *     marginY: '100%'
+     *   },
+     *   'myFloatButton'
+     * );
      * ```
      */
-    addFloatDomToRange(range: FRange, layer: IFICanvasFloatDom, domLayout: IDOMAnchor, id?: string): Nullable<{
+    addFloatDomToRange(range: FRange, layer: Partial<IFICanvasFloatDom>, domLayout: Partial<IDOMAnchor>, id?: string): Nullable<{
         id: string;
         dispose: () => void;
     }>;
 
     /**
      * Add dom at column header, And FloatDOM is registerComponent(BuiltInUIPart.CONTENT)
-     * @param column
-     * @param layer
-     * @param domPos
-     * @param id
+     * @param {number} column - The column index to add the float dom.
+     * @param {Partial<IFICanvasFloatDom>} layer - The float dom layer configuration.
+     * @param {IDOMAnchor} domPos - The anchor configuration of the float dom.
+     * @param {string} [id] - The float dom id, if not given will be auto generated
+     * @returns float dom id and dispose function
      * @example
      * ```ts
-    {
-     const sheet = univerAPI.getActiveWorkbook().getActiveSheet();
-     const rs = sheet.addFloatDomToColumnHeader(3,
-            {
-                allowTransform: false,
-                componentKey: 'FloatButton', // React comp key registered in ComponentManager
-                props: {
-                    a: 1,
-                },
-            },
-            {width: 100, height: 40, marginX: 0, marginY: 0, horizonOffsetAlign: 'right'},
-            'ai-selector' // dom id
-        )
-    }
-     *```
+     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     *
+     * // Register a float button component
+     * const FloatButton = () => {
+     *   const divStyle = {
+     *     width: '100px',
+     *     height: '30px',
+     *     backgroundColor: '#fff',
+     *     border: '1px solid #ccc',
+     *     boxSizing: 'border-box' as const,
+     *     display: 'flex',
+     *     justifyContent: 'center',
+     *     alignItems: 'center',
+     *     textAlign: 'center' as const,
+     *     cursor: 'pointer',
+     *   };
+     *
+     *   const clickHandler = () => {
+     *     console.warn('click');
+     *   };
+     *
+     *   return (
+     *     <div style={divStyle} onClick={clickHandler}>
+     *       FloatButton
+     *     </div>
+     *   );
+     * };
+     * univerAPI.registerComponent('FloatButton', FloatButton);
+     *
+     * // Add the float button to the column D header, position is right align, width is 100px, height is 30px, margin is 0
+     * const disposeable = fWorksheet.addFloatDomToColumnHeader(
+     *   3,
+     *   {
+     *     componentKey: 'FloatButton',
+     *     allowTransform: false,
+     *   },
+     *   {
+     *     width: 100,
+     *     height: 30,
+     *     marginX: 0,
+     *     marginY: 0,
+     *     horizonOffsetAlign: 'right',
+     *   },
+     *   'myFloatButton'
+     * );
+     *
+     * // Remove the float button after 2 seconds
+     * setTimeout(() => {
+     *   disposeable?.dispose();
+     * }, 2000);
+     * ```
      */
-    addFloatDomToColumnHeader(column: number, layer: IFICanvasFloatDom, domPos: IDOMAnchor, id?: string): Nullable<{
+    addFloatDomToColumnHeader(column: number, layer: Partial<IFICanvasFloatDom>, domPos: IDOMAnchor, id?: string): Nullable<{
         id: string;
         dispose: () => void;
     }>;
 
     /**
      * Insert an image to the sheet
-     * @param url The image url
-     * @param column The column to insert the image
-     * @param row The row to insert the image
-     * @param offsetX The offset x of the image
-     * @param offsetY The offset y of the image
+     * @param {string} url - The image url
      * @returns true if the image is inserted successfully
      * @example
      * ```ts
-     * const activeSpreadsheet = univerAPI.getActiveWorkbook();
-     * const activeSheet = activeSpreadsheet.getActiveSheet();
-     * activeSheet.insertImage('https://avatars.githubusercontent.com/u/61444807?s=48&v=4', 5, 5, 0, 0);
+     * // Insert an image to the sheet, default position is A1
+     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * const result = await fWorksheet.insertImage('https://avatars.githubusercontent.com/u/61444807?s=48&v=4');
+     * console.log(result);
      * ```
      */
     insertImage(url: string): Promise<boolean>;
+    /**
+     * @param {string} url - The image url
+     * @param {number} column - The column index to insert the image
+     * @param {number} row - The row index to insert the image
+     * @returns True if the image is inserted successfully
+     * @example
+     * ```ts
+     * // Insert an image to the sheet, position is F6
+     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * const result = await fWorksheet.insertImage('https://avatars.githubusercontent.com/u/61444807?s=48&v=4', 5, 5);
+     * console.log(result);
+     * ```
+     */
     insertImage(url: string, column: number, row: number): Promise<boolean>;
+    /**
+     * @param {string} url - The image url
+     * @param {number} column - The column index to insert the image
+     * @param {number} row - The row index to insert the image
+     * @param {number} offsetX - The column offset, pixel unit
+     * @param {number} offsetY - The row offset, pixel unit
+     * @returns True if the image is inserted successfully
+     * @example
+     * ```ts
+     * // Insert an image to the sheet, position is F6, offset is 10px
+     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * const result = await fWorksheet.insertImage('https://avatars.githubusercontent.com/u/61444807?s=48&v=4', 5, 5, 10, 10);
+     * console.log(result);
+     * ```
+     */
     insertImage(url: string, column: number, row: number, offsetX: number, offsetY: number): Promise<boolean>;
     insertImage(url: IFBlobSource): Promise<boolean>;
     insertImage(url: IFBlobSource, column: number, row: number): Promise<boolean>;
@@ -167,75 +294,114 @@ export interface IFWorksheetLegacy {
 
     /**
      * Insert images to the sheet
-     * @param sheetImages The images to insert
-     * @returns true if the image is inserted successfully
+     * @param {ISheetImage[]} sheetImages - The images to insert
+     * @returns {FWorksheet} The FWorksheet instance for chaining
      * @example
      * ```ts
-     *  const activeSpreadsheet = univerAPI.getActiveWorkbook();
-     *  const activeSheet = activeSpreadsheet.getActiveSheet();
-     *  const imageBuilder = activeSheet.newOverGridImage();
-     *  const param = await imageBuilder.setSource('https://avatars.githubusercontent.com/u/61444807?s=48&v=4').setColumn(5).setRow(5).setWidth(500).setHeight(300).build();
-     *  activeSheet.insertImages([param]);
-     *  const image = activeSheet.getImageById(param.drawingId);
-     *  console.log(image);
-     *  setTimeout(async ()=>{
-     *   const builder = image.toBuilder();
-     *   const param = await builder.setHeight(50).setWidth(100).build();
-     *   activeSheet.updateImages([param]);
-     *  }, 4000);
+     * // create a new image builder and set image source.
+     * // then build `ISheetImage` and insert it into the sheet, position is start from F6 cell, width is 500px, height is 300px
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const image = await fWorksheet.newOverGridImage()
+     *   .setSource('https://avatars.githubusercontent.com/u/61444807?s=48&v=4', univerAPI.Enum.ImageSourceType.URL)
+     *   .setColumn(5)
+     *   .setRow(5)
+     *   .setWidth(500)
+     *   .setHeight(300)
+     *   .buildAsync();
+     * fWorksheet.insertImages([image]);
+     *
+     * // update the image width to 100px and height to 50px
+     * setTimeout(async () => {
+     *   const imageBuilder = fWorksheet.getImageById(image.drawingId).toBuilder();
+     *   const newImage = await imageBuilder.setWidth(100).setHeight(50).buildAsync();
+     *   fWorksheet.updateImages([newImage]);
+     * }, 4000);
+     * ```
      */
     insertImages(sheetImages: ISheetImage[]): FWorksheet;
 
     /**
-     * Get all images in current sheet.
-     * @returns FOverGridImage[]
+     * Get all images of the sheet.
+     * @returns {FOverGridImage[]} The FOverGridImage instances
      * @example
      * ```ts
-     * univerAPI.getActiveWorkbook().getActiveSheet().getImages();
+     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * const images = fWorksheet.getImages();
+     * images.forEach((image) => {
+     *   console.log(image, image.getId());
+     * });
      * ```
      */
     getImages(): FOverGridImage[];
 
     /**
      * Get image by drawing id
-     * @param id - The drawing id of the image
-     * @returns FOverGridImage | null
+     * @param {string} id - The drawing id of the image
+     * @returns {FOverGridImage | null} The FOverGridImage instance
      * @example
      * ```ts
-     * univerAPI.getActiveWorkbook().getActiveSheet().getImageById('xxxx');
+     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * const image = fWorksheet.getImageById('xxxx');
+     * console.log(image);
      * ```
      */
     getImageById(id: string): FOverGridImage | null;
 
+    /**
+     * Delete images from the sheet
+     * @param {FOverGridImage[]} sheetImages - The images to delete
+     * @returns {FWorksheet} The FWorksheet instance for chaining
+     * @example
+     * ```ts
+     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * const image = fWorksheet.getImages()[0];
+     *
+     * // Delete the first image of the sheet
+     * fWorksheet.deleteImages([image]);
+     * ```
+     */
     deleteImages(sheetImages: FOverGridImage[]): FWorksheet;
 
     /**
      * Update images to the sheet
-     * @param sheetImages The images to insert
-     * @returns true if the image is inserted successfully
+     * @param {ISheetImage[]} sheetImages - The images to update
+     * @returns {FWorksheet} The FWorksheet instance for chaining
      * @example
      * ```ts
-     *  const activeSpreadsheet = univerAPI.getActiveWorkbook();
-     *  const activeSheet = activeSpreadsheet.getActiveSheet();
-     *  const imageBuilder = activeSheet.newOverGridImage();
-     *  const param = await imageBuilder.setSource('https://avatars.githubusercontent.com/u/61444807?s=48&v=4').setColumn(5).setRow(5).setWidth(500).setHeight(300).build();
-     *  activeSheet.insertImages([param]);
-     *  const image = activeSheet.getImageById(param.drawingId);
-     *  console.log(image);
-     *  setTimeout(async ()=>{
-     *   const builder = image.toBuilder();
-     *   const param = await builder.setHeight(50).setWidth(100).build();
-     *   activeSheet.updateImages([param]);
-     *  }, 4000);
+     * // create a new image builder and set image source.
+     * // then build `ISheetImage` and insert it into the sheet, position is start from F6 cell, width is 500px, height is 300px
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const image = await fWorksheet.newOverGridImage()
+     *   .setSource('https://avatars.githubusercontent.com/u/61444807?s=48&v=4', univerAPI.Enum.ImageSourceType.URL)
+     *   .setColumn(5)
+     *   .setRow(5)
+     *   .setWidth(500)
+     *   .setHeight(300)
+     *   .buildAsync();
+     * fWorksheet.insertImages([image]);
+     *
+     * // update the image width to 100px and height to 50px after 4 seconds
+     * setTimeout(async () => {
+     *   const imageBuilder = fWorksheet.getImageById(image.drawingId).toBuilder();
+     *   const newImage = await imageBuilder.setWidth(100).setHeight(50).buildAsync();
+     *   fWorksheet.updateImages([newImage]);
+     * }, 4000);
+     * ```
      */
     updateImages(sheetImages: ISheetImage[]): FWorksheet;
 
     /**
-     * Get all images in current sheet.
-     * @returns FOverGridImage[]
+     * Get the current selected images.
+     * @returns {FOverGridImage[]} The FOverGridImage instances
      * @example
      * ```ts
-     * univerAPI.getActiveWorkbook().getActiveSheet().getImages();
+     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * const images = fWorksheet.getActiveImages();
+     * images.forEach((image) => {
+     *   console.log(image, image.getId());
+     * });
      * ```
      */
     getActiveImages(): FOverGridImage[];
@@ -243,30 +409,43 @@ export interface IFWorksheetLegacy {
     /**
      * Hook when a image is inserted.
      * @param {function(FOverGridImage[]: void)} callback - The callback function when a image is inserted.
+     * @deprecated use `univerAPI.addEvent(univerAPI.Event.OverGridImageInserted, (params) => {})` as instead
      */
     onImageInserted(callback: (images: FOverGridImage[]) => void): IDisposable;
 
     /**
      * Hook when a image is deleted.
      * @param {function(FOverGridImage[]: void)} callback - The callback function when a image is deleted.
+     * @deprecated use `univerAPI.addEvent(univerAPI.Event.OverGridImageRemoved, (params) => {})` as instead
      */
     onImageDeleted(callback: (images: FOverGridImage[]) => void): IDisposable;
 
     /**
      * Hook when a image is changed.
      * @param {function(FOverGridImage[]: void)} callback - The callback function when a image is changed.
+     * @deprecated use `univerAPI.addEvent(univerAPI.Event.OverGridImageChanged, (params) => {})` as instead
      */
     onImageChanged(callback: (images: FOverGridImage[]) => void): IDisposable;
 
-     /**
-      * Create a new over grid image builder.
-      * @returns {FOverGridImageBuilder} The builder
-      * @example
-      * ```ts
-      * // create a new over grid image builder.
-      * const builder = univerAPI.newOverGridImage();
-      * ```
-      */
+    /**
+     * Create a new over grid image builder.
+     * @returns {FOverGridImageBuilder} The FOverGridImageBuilder instance
+     * @example
+     * ```ts
+     * // create a new image builder and set image source.
+     * // then build `ISheetImage` and insert it into the sheet, position is start from F6 cell, width is 500px, height is 300px
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const image = await fWorksheet.newOverGridImage()
+     *   .setSource('https://avatars.githubusercontent.com/u/61444807?s=48&v=4', univerAPI.Enum.ImageSourceType.URL)
+     *   .setColumn(5)
+     *   .setRow(5)
+     *   .setWidth(500)
+     *   .setHeight(300)
+     *   .buildAsync();
+     * fWorksheet.insertImages([image]);
+     * ```
+     */
     newOverGridImage(): FOverGridImageBuilder;
 }
 
@@ -381,6 +560,7 @@ export class FWorksheetLegacy extends FWorksheet implements IFWorksheetLegacy {
         }
 
         const param = await imageBuilder.buildAsync();
+        // param.drawingId
 
         return this._commandService.syncExecuteCommand(InsertSheetDrawingCommand.id, { unitId: this._fWorkbook.getId(), drawings: [param] });
     }

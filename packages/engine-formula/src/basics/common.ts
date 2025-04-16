@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -175,6 +175,10 @@ export interface IUnitExcludedCell {
     [unitId: string]: Nullable<{ [sheetId: string]: ObjectMatrix<boolean> }>;
 }
 
+export interface IUnitRowData {
+    [unitId: string]: Nullable<{ [sheetId: string]: IObjectArrayPrimitiveType<Partial<IRowData>> }>;
+}
+
 export interface IFormulaDatasetConfig {
     formulaData: IFormulaData;
     arrayFormulaCellData: IArrayFormulaUnitCellType;
@@ -191,6 +195,7 @@ export interface IFormulaDatasetConfig {
     unitStylesData?: IUnitStylesData;
     unitSheetNameMap?: IUnitSheetNameMap;
     maxIteration?: number;
+    rowData?: IUnitRowData; // Include rows hidden by filters
 }
 
 export enum ConcatenateType {

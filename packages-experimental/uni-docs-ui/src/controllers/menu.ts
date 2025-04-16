@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
+import type { IAccessor } from '@univerjs/core';
+import type { IMenuButtonItem, IMenuItem } from '@univerjs/ui';
 import { BooleanNumber, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService, SetTextSelectionsOperation } from '@univerjs/docs';
 import { SetInlineFormatCommand } from '@univerjs/docs-ui';
 import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
-import { getHeaderFooterMenuHiddenObservable, getMenuHiddenObservable, type IMenuButtonItem, type IMenuItem, MenuItemType } from '@univerjs/ui';
-
+import { getHeaderFooterMenuHiddenObservable, getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { combineLatest, Observable } from 'rxjs';
-import type { IAccessor } from '@univerjs/core';
 
 export const DOC_ITALIC_MUTATION_ID = 'doc.command.uni-italic';
 export const DOC_BOLD_MUTATION_ID = 'doc.command.uni-bold';
@@ -266,15 +266,6 @@ function getInsertTableHiddenObservable(
                 subscriber.next(editArea === DocumentEditArea.HEADER || editArea === DocumentEditArea.FOOTER);
             });
         });
-
-        const currentRender = renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_DOC);
-        if (currentRender == null) {
-            return subscriber.next(true);
-        }
-
-        const viewModel = currentRender.with(DocSkeletonManagerService).getViewModel();
-
-        subscriber.next(viewModel.getEditArea() !== DocumentEditArea.BODY);
 
         return () => subscription.unsubscribe();
     });

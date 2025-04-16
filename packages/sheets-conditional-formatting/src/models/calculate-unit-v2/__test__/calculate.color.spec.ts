@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,8 +41,7 @@ describe('Test colorScale', () => {
                     value: {
                         type: CFValueType.min,
                     },
-                },
-                {
+                }, {
                     index: 1,
                     color: '#2e55ef',
                     value: {
@@ -109,24 +108,21 @@ describe('Test colorScale', () => {
                         type: CFValueType.num,
                         value: 1,
                     },
-                },
-                {
+                }, {
                     index: 1,
                     color: '#2e55ef',
                     value: {
                         type: CFValueType.num,
                         value: -5,
                     },
-                },
-                {
+                }, {
                     index: 2,
                     color: 'rgb(231, 37, 143)',
                     value: {
                         type: CFValueType.num,
                         value: 3,
                     },
-                },
-                ],
+                }],
             },
         };
         testBed.getConditionalFormattingRuleModel().addRule(testBed.unitId, testBed.subUnitId, params);

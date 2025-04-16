@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,12 @@ import type { Dependency } from '@univerjs/core';
 import type { IUniverSheetsConditionalFormattingConfig } from './controllers/config.schema';
 import { ICommandService, IConfigService, Inject, Injector, merge, Plugin, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { SHEET_CONDITIONAL_FORMATTING_PLUGIN } from './base/const';
+import { AddCfCommand } from './commands/commands/add-cf.command';
+import { ClearRangeCfCommand } from './commands/commands/clear-range-cf.command';
+import { ClearWorksheetCfCommand } from './commands/commands/clear-worksheet-cf.command';
+import { DeleteCfCommand } from './commands/commands/delete-cf.command';
+import { MoveCfCommand } from './commands/commands/move-cf.command';
+import { SetCfCommand } from './commands/commands/set-cf.command';
 import { AddConditionalRuleMutation } from './commands/mutations/add-conditional-rule.mutation';
 import { DeleteConditionalRuleMutation } from './commands/mutations/delete-conditional-rule.mutation';
 import { ConditionalFormattingFormulaMarkDirty } from './commands/mutations/formula-mark-dirty.mutation';
@@ -62,6 +68,12 @@ export class UniverSheetsConditionalFormattingPlugin extends Plugin {
         });
 
         [
+            AddCfCommand,
+            ClearRangeCfCommand,
+            ClearWorksheetCfCommand,
+            DeleteCfCommand,
+            MoveCfCommand,
+            SetCfCommand,
             AddConditionalRuleMutation,
             DeleteConditionalRuleMutation,
             SetConditionalRuleMutation,

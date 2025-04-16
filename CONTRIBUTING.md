@@ -33,7 +33,7 @@ To better assist you, we recommend:
 Univer requires Node.js >= 18.17.0. We recommend using nvm or fnm to switch between different versions of Node.js.
 
 ```shell
-git clone http://github.com/dream-num/univer
+git clone https://github.com/dream-num/univer
 cd univer
 
 # install package manager pnpm
@@ -64,7 +64,6 @@ The structure of the repository is as follows:
 ├── docs/ documentation
 ├── e2e/ e2e test cases
 ├── examples/ demos running on the web
-├── examples-node/ demos running on Node.js
 ├── mockdata/ mock data for development
 ├── packages/ Univer core and plugins
 ├── packages-experimental/ experimental plugins (not published on npm.com)
@@ -142,10 +141,6 @@ Before merging a pull request, please make sure the following requirements are m
 - Test coverage is not decreased.
 
 We provide preview deployments for pull requests. You can view the preview deployment by clicking the "Preview" link in the "View Deployment" section.
-
-### Documentation
-
-If you are adding a new feature, please make sure to update the documentation accordingly. Refer to our [documentation repository](https://github.com/dream-num/docs) for more guidance.
 
 ### Storybook
 
@@ -232,7 +227,6 @@ pnpm create @univerjs/cli init <project-name>
 
 # npm
 npm create @univerjs/cli init <project-name>
-
 ```
 
 ### How to Contribute to Facade API
@@ -243,6 +237,6 @@ Please refer to [How to Contribute to Facade API](./docs/CONTRIBUTING.md).
 
 If you are going to deprecate an API, please follow the steps below:
 
-1. Mark the API as deprecated in the JSDoc, and use `{@link }` to refer to the new API.
+1. Mark the API as deprecated in the JSDoc, and use `{@link}` to refer to the new API.
 2. In the implementation, call `deprecate` of `ILogService` to log a deprecation message.
 3. Remove the API in the next minor version. If the API is considered heavily used, you can remove it in the next major version, e.g. 1.0.0.

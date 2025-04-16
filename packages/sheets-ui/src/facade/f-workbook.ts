@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,13 @@ import type { IDisposable, Nullable } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, RenderManagerService } from '@univerjs/engine-render';
 import type { ICellPosWithEvent, IDragCellPosition, IEditorBridgeServiceVisibleParam, IHoverRichTextInfo, IHoverRichTextPosition, IScrollState, SheetSelectionRenderService } from '@univerjs/sheets-ui';
 
+import type { IDialogPartMethodOptions, ISidebarMethodOptions } from '@univerjs/ui';
 import type { ICellEventParam } from './f-event';
 import { awaitTime, ICommandService, ILogService, toDisposable } from '@univerjs/core';
 import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
 import { DragManagerService, HoverManagerService, ISheetSelectionRenderService, SetCellEditVisibleOperation, SheetScrollManagerService } from '@univerjs/sheets-ui';
 import { FWorkbook } from '@univerjs/sheets/facade';
-import { type IDialogPartMethodOptions, IDialogService, type ISidebarMethodOptions, ISidebarService, KeyCode } from '@univerjs/ui';
+import { IDialogService, ISidebarService, KeyCode } from '@univerjs/ui';
 import { filter } from 'rxjs';
 
 /**
@@ -32,57 +33,107 @@ import { filter } from 'rxjs';
 export interface IFWorkbookSheetsUIMixin {
     /**
      * Open a sidebar.
-     * @deprecated
-     * @param params the sidebar options
-     * @returns the disposable object
+     * @deprecated use `univerAPI.openSidebar` instead
+     * @param {ISidebarMethodOptions} params the sidebar options
+     * @returns {IDisposable} the disposable object
+     * @example
+     * ```ts
+     * univerAPI.openSidebar({
+     *   id: 'mock-sidebar-id',
+     *   width: 300,
+     *   header: {
+     *     label: 'Sidebar Header',
+     *   },
+     *   children: {
+     *     label: 'Sidebar Content',
+     *   },
+     *   footer: {
+     *     label: 'Sidebar Footer',
+     *   },
+     *   onClose: () => {
+     *     console.log('Sidebar closed')
+     *   },
+     * });
+     * ```
      */
     openSiderbar(params: ISidebarMethodOptions): IDisposable;
 
     /**
      * Open a dialog.
-     * @deprecated
-     * @param dialog the dialog options
-     * @returns the disposable object
+     * @deprecated use `univerAPI.openDialog` instead
+     * @param {IDialogPartMethodOptions} dialog the dialog options
+     * @returns {IDisposable} the disposable object
+     * @example
+     * ```ts
+     * import { Button } from '@univerjs/design';
+     *
+     * univerAPI.openDialog({
+     *   id: 'mock-dialog-id',
+     *   width: 500,
+     *   title: {
+     *     label: 'Dialog Title',
+     *   },
+     *   children: {
+     *     label: 'Dialog Content',
+     *   },
+     *   footer: {
+     *     title: (
+     *       <>
+     *         <Button onClick={() => { console.log('Cancel clicked') }}>Cancel</Button>
+     *         <Button variant="primary" onClick={() => { console.log('Confirm clicked') }} style={{marginLeft: '10px'}}>Confirm</Button>
+     *       </>
+     *     )
+     *   },
+     *   draggable: true,
+     *   mask: true,
+     *   maskClosable: true,
+     * });
+     * ```
      */
     openDialog(dialog: IDialogPartMethodOptions): IDisposable;
 
     /**
-     * @deprecated use `univerAPI.addEvent(univerAPI.Event.CellClick, () => {})` instead
+     * @deprecated use `univerAPI.addEvent(univerAPI.Event.CellClicked, (params) => {})` instead
      */
     onCellClick(callback: (cell: IHoverRichTextInfo) => void): IDisposable;
 
     /**
-     * @deprecated use `univerAPI.addEvent(univerAPI.Event.CellHover, () => {})` instead
+     * @deprecated use `univerAPI.addEvent(univerAPI.Event.CellHover, (params) => {})` instead
      */
     onCellHover(callback: (cell: IHoverRichTextPosition) => void): IDisposable;
 
     /**
-     * @deprecated use `univerAPI.addEvent(univerAPI.Event.CellPointerMove, () => {})` instead
+     * @deprecated use `univerAPI.addEvent(univerAPI.Event.CellPointerMove, (params) => {})` instead
      */
     onCellPointerMove(callback: (cell: ICellPosWithEvent, event: IPointerEvent | IMouseEvent) => void): IDisposable;
+
     /**
-     * @deprecated use `univerAPI.addEvent(univerAPI.Event.CellPointerDown, () => {})` instead
+     * @deprecated use `univerAPI.addEvent(univerAPI.Event.CellPointerDown, (params) => {})` instead
      */
     onCellPointerDown(callback: (cell: ICellPosWithEvent) => void): IDisposable;
+
     /**
-     * @deprecated use `univerAPI.addEvent(univerAPI.Event.CellPointerUp, () => {})` instead
+     * @deprecated use `univerAPI.addEvent(univerAPI.Event.CellPointerUp, (params) => {})` instead
      */
     onCellPointerUp(callback: (cell: ICellPosWithEvent) => void): IDisposable;
+
     /**
-     * @deprecated use `univerAPI.addEvent(univerAPI.Event.DragOver, () => {})` instead
+     * @deprecated use `univerAPI.addEvent(univerAPI.Event.DragOver, (params) => {})` instead
      */
     onDragOver(callback: (cell: IDragCellPosition) => void): IDisposable;
+
     /**
-     * @deprecated use `univerAPI.addEvent(univerAPI.Event.Drop, () => {})` instead
+     * @deprecated use `univerAPI.addEvent(univerAPI.Event.Drop, (params) => {})` instead
      */
     onDrop(callback: (cell: IDragCellPosition) => void): IDisposable;
 
     /**
-     * Start the editing process
-     * @returns A boolean value
+     * Start the editing process of the current active cell
+     * @returns {boolean} Whether the editing process is started successfully
      * @example
      * ```ts
-     * univerAPI.getActiveWorkbook().startEditing();
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * fWorkbook.startEditing();
      * ```
      */
     startEditing(): boolean;
@@ -94,58 +145,77 @@ export interface IFWorkbookSheetsUIMixin {
 
     /**
      * @async
-     * End the editing process
+     * End the editing process of the current active cell
      * @param {boolean} save - Whether to save the changes, default is true
-     * @returns {Promise<boolean>} A promise that resolves to a boolean value
+     * @returns {Promise<boolean>} Whether the editing process is ended successfully
      * @example
      * ```ts
-     * await univerAPI.getActiveWorkbook().endEditingAsync(false);
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * await fWorkbook.endEditingAsync(false);
      * ```
      */
     endEditingAsync(save?: boolean): Promise<boolean>;
-    /*
+
+    /**
      * Get scroll state of specified sheet.
+     * @param {string} sheetId - sheet id
      * @returns {IScrollState} scroll state
      * @example
      * ``` ts
-     * univerAPI.getActiveWorkbook().getScrollStateBySheetId($sheetId)
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // scroll to cell D10
+     * fWorksheet.scrollToCell(9, 3);
+     *
+     * // get scroll state
+     * const scrollState = fWorkbook.getScrollStateBySheetId(fWorksheet.getSheetId());
+     * const { offsetX, offsetY, sheetViewStartRow, sheetViewStartColumn } = scrollState;
+     * console.log(scrollState); // sheetViewStartRow: 9, sheetViewStartColumn: 3, offsetX: 0, offsetY: 0
      * ```
      */
     getScrollStateBySheetId(sheetId: string): Nullable<IScrollState>;
 
     /**
      * Disable selection. After disabled, there would be no response for selection.
-     * @returns {FWorkbook} FWorkbook instance
+     * @returns {FWorkbook} FWorkbook instance for chaining
      * @example
      * ```ts
-     * univerAPI.getActiveWorkbook().disableSelection();
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * fWorkbook.disableSelection();
      * ```
      */
     disableSelection(): FWorkbook;
 
     /**
      * Enable selection. After this you can select range.
+     * @returns {FWorkbook} FWorkbook instance for chaining
      * @example
      * ```ts
-     * univerAPI.getActiveWorkbook().enableSelection();
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * fWorkbook.enableSelection();
      * ```
      */
     enableSelection(): FWorkbook;
 
     /**
      * Set selection invisible, Unlike disableSelection, selection still works, you just can not see them.
+     * @returns {FWorkbook} FWorkbook instance for chaining
      * @example
      * ```ts
-     * univerAPI.getActiveWorkbook().transparentSelection();
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * fWorkbook.transparentSelection();
      * ```
      */
     transparentSelection(): FWorkbook;
 
     /**
      * Set selection visible.
+     * @returns {FWorkbook} FWorkbook instance for chaining
      * @example
      * ```ts
-     * univerAPI.getActiveWorkbook().showSelection();
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * fWorkbook.showSelection();
      * ```
      */
     showSelection(): FWorkbook;

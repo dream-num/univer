@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '../shared';
-import { Inject, Injector } from '@wendellhu/redi';
+import type { Nullable } from '@univerjs/core';
+import { Inject, Injector } from '@univerjs/core';
 import { FBase } from './f-base';
 
 export interface IFBlobSource {
@@ -47,12 +47,12 @@ export class FBlob extends FBase {
      * @returns a new blob by copying the current blob
      * @example
      * ```ts
-     * const blob = univerAPI.newBlob(blob);
+     * const blob = univerAPI.newBlob();
      * const newBlob = blob.copyBlob();
      * console.log(newBlob);
      * ```
      */
-    copyBlob() {
+    copyBlob(): FBlob {
         return this._injector.createInstance(FBlob, this._blob);
     }
 
@@ -62,11 +62,12 @@ export class FBlob extends FBase {
      * @returns a new blob by converting the current blob to the specified content type
      * @example
      * ```ts
-     * const blob = univerAPI.newBlob(blob);
-     * const newBlob = blob.getBlob();
+     * const blob = univerAPI.newBlob();
+     * const newBlob = blob.getAs('text/plain');
+     * console.log(newBlob);
      * ```
      */
-    getAs(contentType: string) {
+    getAs(contentType: string): FBlob {
         const newBlob = this.copyBlob();
         newBlob.setContentType(contentType);
         return newBlob;
@@ -77,9 +78,9 @@ export class FBlob extends FBase {
      * @returns
      * @example
      * ```ts
-     * const blob = univerAPI.newBlob(blob);
-     * const newBlob = blob.getDataAsString();
-     * console.log(newBlob);
+     * const blob = univerAPI.newBlob();
+     * const data = await blob.getDataAsString();
+     * console.log(data);
      * ```
      */
     getDataAsString(): Promise<string>;
@@ -89,9 +90,9 @@ export class FBlob extends FBase {
      * @returns the blob content as a string
      * @example
      * ```ts
-     * const blob = univerAPI.newBlob(blob);
-     * const newBlob = blob.getDataAsString('iso-8859-1');
-     * console.log(newBlob);
+     * const blob = univerAPI.newBlob();
+     * const data = await blob.getDataAsString('iso-8859-1');
+     * console.log(data);
      * ```
      */
     getDataAsString(charset?: string): Promise<string>;
@@ -118,9 +119,9 @@ export class FBlob extends FBase {
      * @returns the blob content as a byte array
      * @example
      * ```ts
-     * const blob = univerAPI.newBlob(blob);
-     * const newBlob = blob.getBytes();
-     * console.log(newBlob);
+     * const blob = univerAPI.newBlob();
+     * const bytes = await blob.getBytes();
+     * console.log(bytes);
      * ```
      */
     getBytes(): Promise<Uint8Array> {
@@ -181,12 +182,12 @@ export class FBlob extends FBase {
      * @returns the content type
      * @example
      * ```ts
-     * const blob = univerAPI.newBlob(blob);
-     * const newBlob = blob.getContentType();
-     * console.log(newBlob);
+     * const blob = univerAPI.newBlob();
+     * const contentType = blob.getContentType();
+     * console.log(contentType);
      * ```
      */
-    getContentType() {
+    getContentType(): string | undefined {
         return this._blob?.type;
     }
 
@@ -196,9 +197,8 @@ export class FBlob extends FBase {
      * @returns the blob object
      * @example
      * ```ts
-     * const blob = univerAPI.newBlob(blob);
-     * const newBlob = blob.setContentType('text/plain');
-     * console.log(newBlob);
+     * const blob = univerAPI.newBlob();
+     * blob.setContentType('text/plain');
      * ```
      */
     setContentType(contentType: string): FBlob {

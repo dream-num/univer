@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,10 @@
  */
 
 import type { IAccessor, IContextService, IMultiCommand } from '@univerjs/core';
-import { CommandType, EDITOR_ACTIVATED, FOCUSING_DOC } from '@univerjs/core';
+import { CommandType, DOC_RANGE_TYPE, EDITOR_ACTIVATED, FOCUSING_DOC, SliceBodyType } from '@univerjs/core';
 import { CopyCommand, CutCommand, IClipboardInterfaceService, PasteCommand } from '@univerjs/ui';
 import { IDocClipboardService } from '../../services/clipboard/clipboard.service';
+import { getCurrentParagraph } from './util';
 
 export function whenDocOrEditor(contextService: IContextService): boolean {
     return contextService.getContextValue(FOCUSING_DOC) || contextService.getContextValue(EDITOR_ACTIVATED);
@@ -45,6 +46,27 @@ export const DocCopyCommand: IMultiCommand = {
     },
 };
 
+export const DocCopyCurrentParagraphCommand = {
+    id: 'doc.command.copy-current-paragraph',
+    type: CommandType.COMMAND,
+    handler: async (accessor: IAccessor) => {
+        const docClipboardService = accessor.get(IDocClipboardService);
+        const paragraph = getCurrentParagraph(accessor);
+        if (!paragraph) {
+            return false;
+        }
+
+        return docClipboardService.copy(
+            SliceBodyType.copy,
+            [{
+                startOffset: paragraph.paragraphStart,
+                endOffset: paragraph.paragraphEnd + 1,
+                collapsed: false,
+            }]
+        );
+    },
+};
+
 export const DocCutCommand: IMultiCommand = {
     id: CutCommand.id,
     name: 'doc.command.cut',
@@ -55,6 +77,27 @@ export const DocCutCommand: IMultiCommand = {
     handler: async (accessor: IAccessor) => {
         const docClipboardService = accessor.get(IDocClipboardService);
         return docClipboardService.cut();
+    },
+};
+
+export const DocCutCurrentParagraphCommand = {
+    id: 'doc.command.cut-current-paragraph',
+    type: CommandType.COMMAND,
+    handler: async (accessor: IAccessor) => {
+        const docClipboardService = accessor.get(IDocClipboardService);
+        const paragraph = getCurrentParagraph(accessor);
+        if (!paragraph) {
+            return false;
+        }
+
+        return docClipboardService.cut(
+            [{
+                startOffset: paragraph.paragraphStart,
+                endOffset: paragraph.paragraphEnd + 1,
+                collapsed: false,
+                rangeType: DOC_RANGE_TYPE.TEXT,
+            }]
+        );
     },
 };
 

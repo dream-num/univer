@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ import type zhCN from './zh-CN';
 const locale: typeof zhCN = {
     sheet: {
         numfmt: {
-            percent: 'Phần trăm',
             title: 'Định dạng số',
             numfmtType: 'Loại định dạng',
             cancel: 'Hủy bỏ',
@@ -28,6 +27,8 @@ const locale: typeof zhCN = {
             accounting: 'Kế toán',
             text: 'Văn bản',
             number: 'Số',
+            percent: 'Phần trăm',
+            scientific: 'Chính xác',
             currency: 'Tiền tệ',
             date: 'Ngày',
             time: 'Thời gian',

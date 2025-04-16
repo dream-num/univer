@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 import type { Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { CellValueType, Inject, InterceptorEffectEnum, isRealNum, RxDisposable } from '@univerjs/core';
+import { isTextFormat } from '@univerjs/engine-numfmt';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
@@ -46,7 +47,7 @@ export class ForceStringRenderController extends RxDisposable implements IRender
                     priority: 10,
                     effect: InterceptorEffectEnum.Style,
                     handler: (cell, pos, next) => {
-                        const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+                        const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
                         if (!skeleton) {
                             return next(cell);
                         }
@@ -57,7 +58,13 @@ export class ForceStringRenderController extends RxDisposable implements IRender
                             return next(cell);
                         }
 
-                        if (cell?.t === CellValueType.FORCE_STRING && isRealNum(cellRaw.v)) {
+                        if ((cell?.t === CellValueType.FORCE_STRING || cell?.t === CellValueType.STRING) && isRealNum(cellRaw.v)) {
+                            // If the cell is in text format, follow the logic of number format
+                            const cellStyle = pos.workbook.getStyles().get(cellRaw.s);
+                            if (isTextFormat(cellStyle?.n?.pattern)) {
+                                return next(cell);
+                            }
+
                             return next({
                                 ...cell,
                                 markers: {

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,7 +85,6 @@ export class DebuggerController extends Disposable {
 
     private _initCustomComponents(): void {
         const componentManager = this._componentManager;
-        // this.disposeWithMe(componentManager.register(TEST_EDITOR_CONTAINER_COMPONENT, TestEditorContainer));
         this.disposeWithMe(componentManager.register('VueI18nIcon', VueI18nIcon, {
             framework: 'vue3',
         }));

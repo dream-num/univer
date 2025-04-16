@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,25 +15,28 @@
  */
 
 import type { IAbsoluteTransform, IKeyValue, Nullable } from '@univerjs/core';
-import type { IMouseEvent, IPointerEvent } from './basics/i-events';
+import type { Subscription } from 'rxjs';
 
+import type { BaseObject } from './base-object';
+import type { IMouseEvent, IPointerEvent } from './basics/i-events';
 import type { ITransformerConfig } from './basics/transformer-config';
 import type { IPoint } from './basics/vector2';
 import type { Scene } from './scene';
 import type { IRectProps } from './shape/rect';
+import type { IRegularPolygonProps } from './shape/regular-polygon';
 import { Disposable, MOVE_BUFFER_VALUE, requestImmediateMacroTask, toDisposable } from '@univerjs/core';
-import { Subject, type Subscription } from 'rxjs';
-import { type BaseObject, ObjectType } from './base-object';
+import { Subject } from 'rxjs';
+import { ObjectType } from './base-object';
 import { CURSOR_TYPE } from './basics/const';
-import { offsetRotationAxis } from './basics/offset-rotation-axis';
 
+import { offsetRotationAxis } from './basics/offset-rotation-axis';
 import { getCurrentScrollXY } from './basics/scroll-xy';
 import { degToRad, precisionTo, radToDeg } from './basics/tools';
 import { Vector2 } from './basics/vector2';
 import { Group } from './group';
 import { ScrollTimer } from './scroll-timer';
 import { Rect } from './shape/rect';
-import { type IRegularPolygonProps, RegularPolygon } from './shape/regular-polygon';
+import { RegularPolygon } from './shape/regular-polygon';
 
 enum TransformerManagerType {
     RESIZE_LT = '__SpreadsheetTransformerResizeLT__',
@@ -284,16 +287,39 @@ export class Transformer extends Disposable implements ITransformerConfig {
         this._createControl(applyObject);
     }
 
-    // eslint-disable-next-line complexity
+    // eslint-disable-next-line max-lines-per-function, complexity
     private _getConfig(applyObject: BaseObject) {
         const objectTransformerConfig = applyObject.transformerConfig;
         let {
-            isCropper, hoverEnabled, hoverEnterFunc, hoverLeaveFunc, resizeEnabled,
-            rotateEnabled, rotationSnaps, rotationSnapTolerance, rotateAnchorOffset, rotateSize, rotateCornerRadius,
-            borderEnabled, borderStroke, borderStrokeWidth, borderDash, borderSpacing,
-            anchorFill, anchorStroke, anchorStrokeWidth, anchorSize, anchorCornerRadius,
-            keepRatio, centeredScaling, enabledAnchors, flipEnabled, ignoreStroke,
-            boundBoxFunc, useSingleNodeRotation, shouldOverdrawWholeArea,
+            isCropper,
+            hoverEnabled,
+            hoverEnterFunc,
+            hoverLeaveFunc,
+            resizeEnabled,
+            rotateEnabled,
+            rotationSnaps,
+            rotationSnapTolerance,
+            rotateAnchorOffset,
+            rotateSize,
+            rotateCornerRadius,
+            borderEnabled,
+            borderStroke,
+            borderStrokeWidth,
+            borderDash,
+            borderSpacing,
+            anchorFill,
+            anchorStroke,
+            anchorStrokeWidth,
+            anchorSize,
+            anchorCornerRadius,
+            keepRatio,
+            centeredScaling,
+            enabledAnchors,
+            flipEnabled,
+            ignoreStroke,
+            boundBoxFunc,
+            useSingleNodeRotation,
+            shouldOverdrawWholeArea,
         } = this;
         if (objectTransformerConfig != null) {
             isCropper = objectTransformerConfig.isCropper ?? isCropper;
@@ -328,12 +354,35 @@ export class Transformer extends Disposable implements ITransformerConfig {
         }
 
         return {
-            isCropper, hoverEnabled, hoverEnterFunc, hoverLeaveFunc, resizeEnabled,
-            rotateEnabled, rotationSnaps, rotationSnapTolerance, rotateAnchorOffset, rotateSize, rotateCornerRadius,
-            borderEnabled, borderStroke, borderStrokeWidth, borderDash, borderSpacing,
-            anchorFill, anchorStroke, anchorStrokeWidth, anchorSize, anchorCornerRadius,
-            keepRatio, centeredScaling, enabledAnchors, flipEnabled, ignoreStroke,
-            boundBoxFunc, useSingleNodeRotation, shouldOverdrawWholeArea,
+            isCropper,
+            hoverEnabled,
+            hoverEnterFunc,
+            hoverLeaveFunc,
+            resizeEnabled,
+            rotateEnabled,
+            rotationSnaps,
+            rotationSnapTolerance,
+            rotateAnchorOffset,
+            rotateSize,
+            rotateCornerRadius,
+            borderEnabled,
+            borderStroke,
+            borderStrokeWidth,
+            borderDash,
+            borderSpacing,
+            anchorFill,
+            anchorStroke,
+            anchorStrokeWidth,
+            anchorSize,
+            anchorCornerRadius,
+            keepRatio,
+            centeredScaling,
+            enabledAnchors,
+            flipEnabled,
+            ignoreStroke,
+            boundBoxFunc,
+            useSingleNodeRotation,
+            shouldOverdrawWholeArea,
         };
     }
 
@@ -538,8 +587,13 @@ export class Transformer extends Disposable implements ITransformerConfig {
                 const moveObject = selectedObjects[i];
 
                 const boundary = this._checkMoveBoundary(
-                    moveObject, moveLeft, moveTop, ancestorLeft,
-                    ancestorTop, topSceneWidth, topSceneHeight
+                    moveObject,
+                    moveLeft,
+                    moveTop,
+                    ancestorLeft,
+                    ancestorTop,
+                    topSceneWidth,
+                    topSceneHeight
                 );
 
                 moveLeft = boundary.moveLeft;
@@ -1566,27 +1620,45 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
         if (borderEnabled && !isCropper) {
             const outline = new Rect(`${TransformerManagerType.OUTLINE}_${zIndex}`, {
-                zIndex: zIndex - 1, evented: false, strokeWidth: borderStrokeWidth, stroke: borderStroke,
+                zIndex: zIndex - 1,
+                evented: false,
+                strokeWidth: borderStrokeWidth,
+                stroke: borderStroke,
                 ...this._getOutlinePosition(width, height, borderSpacing, borderStrokeWidth),
             });
             groupElements.push(outline);
         }
         if (resizeEnabled && !isCropper) {
             const { left: lineLeft, top: lineTop } = this._getRotateAnchorPosition(
-                TransformerManagerType.ROTATE_LINE, height, width, applyObject
+                TransformerManagerType.ROTATE_LINE,
+                height,
+                width,
+                applyObject
             );
             if (rotateEnabled) {
                 const rotateLine = new Rect(`${TransformerManagerType.ROTATE_LINE}_${zIndex}`, {
-                    zIndex: zIndex - 1, evented: false, left: lineLeft, top: lineTop, height: rotateAnchorOffset, width: 1,
-                    strokeWidth: borderStrokeWidth, stroke: borderStroke,
+                    zIndex: zIndex - 1,
+                    evented: false,
+                    left: lineLeft,
+                    top: lineTop,
+                    height: rotateAnchorOffset,
+                    width: 1,
+                    strokeWidth: borderStrokeWidth,
+                    stroke: borderStroke,
                 });
 
                 const { left, top } = this._getRotateAnchorPosition(TransformerManagerType.ROTATE, height, width, applyObject);
 
                 const cursor = this._getRotateAnchorCursor(TransformerManagerType.ROTATE);
                 const rotate = new Rect(`${TransformerManagerType.ROTATE}_${zIndex}`, {
-                    zIndex: zIndex - 1, left, top, height: rotateSize, width: rotateSize,
-                    radius: rotateCornerRadius, strokeWidth: borderStrokeWidth * 2, stroke: borderStroke,
+                    zIndex: zIndex - 1,
+                    left,
+                    top,
+                    height: rotateSize,
+                    width: rotateSize,
+                    radius: rotateCornerRadius,
+                    strokeWidth: borderStrokeWidth * 2,
+                    stroke: borderStroke,
                 });
                 this._attachEventToRotate(rotate, applyObject);
                 this._attachHover(rotate, cursor, CURSOR_TYPE.DEFAULT);

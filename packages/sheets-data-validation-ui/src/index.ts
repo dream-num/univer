@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,5 +17,6 @@
 import './global.css';
 
 export { BaseSheetDataValidatorView } from './views/validator-views/sheet-validator-view';
+export type { IUniverSheetsDataValidationUIConfig } from './controllers/config.schema';
 export { UniverSheetsDataValidationUIPlugin } from './plugin';
 export { UniverSheetsDataValidationMobileUIPlugin } from './mobile-plugin';

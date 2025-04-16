@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ const locale: typeof zhCN = {
             'close-dialog': '關閉查找替換對話框',
             'go-to-next-match': '下一個匹配項',
             'go-to-previous-match': '下一個匹配項',
+            'focus-selection': '聚焦選區',
         },
         dialog: {
             title: '找',

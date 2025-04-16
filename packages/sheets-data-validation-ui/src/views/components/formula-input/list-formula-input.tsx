@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
+import type { IFormulaInputProps } from '@univerjs/data-validation';
 import type { ListValidator } from '@univerjs/sheets-data-validation';
-import { DataValidationType, isFormulaString, LocaleService, Tools, useDependency } from '@univerjs/core';
-import { DataValidationModel, DataValidatorRegistryService, type IFormulaInputProps } from '@univerjs/data-validation';
-import { DraggableList, FormLayout, Input, Radio, RadioGroup, Select } from '@univerjs/design';
+import type { IFormulaEditorRef } from '@univerjs/sheets-formula-ui';
+import type { CSSProperties } from 'react';
+import { DataValidationType, isFormulaString, LocaleService, Tools } from '@univerjs/core';
+import { DataValidationModel, DataValidatorRegistryService } from '@univerjs/data-validation';
+import { clsx, DraggableList, FormLayout, Input, Radio, RadioGroup, Select } from '@univerjs/design';
 import { DeleteSingle, IncreaseSingle, SequenceSingle } from '@univerjs/icons';
 import { DataValidationFormulaController, deserializeListOptions, serializeListOptions } from '@univerjs/sheets-data-validation';
 import { FormulaEditor } from '@univerjs/sheets-formula-ui';
-
-import { useEvent, useObservable, useSidebarClick } from '@univerjs/ui';
-import cs from 'clsx';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useDependency, useEvent, useObservable, useSidebarClick } from '@univerjs/ui';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { debounceTime } from 'rxjs';
 import { DROP_DOWN_DEFAULT_COLOR } from '../../../const';
 import styles from './index.module.less';
@@ -111,7 +112,7 @@ const ColorSelect = (props: IColorSelectProps) => {
     );
 };
 
-const Template = (props: { item: IDropdownItem; commonProps: any; style?: React.CSSProperties }) => {
+const Template = (props: { item: IDropdownItem; commonProps: any; style?: CSSProperties }) => {
     const { item, commonProps, style } = props;
     const { onItemChange, onItemDelete } = commonProps;
 
@@ -119,7 +120,7 @@ const Template = (props: { item: IDropdownItem; commonProps: any; style?: React.
         <div className={styles.dataValidationFormulaListItem} style={style}>
             {!item.isRef
                 ? (
-                    <div className={cs(styles.dataValidationFormulaListItemDrag, 'draggableHandle')}>
+                    <div className={clsx(styles.dataValidationFormulaListItemDrag, 'draggableHandle')}>
                         <SequenceSingle />
                     </div>
                 )
@@ -308,12 +309,12 @@ export function ListFormulaInput(props: IFormulaInputProps) {
         }
     });
 
-    const formulaEditorActionsRef = useRef<Parameters<typeof FormulaEditor>[0]['actions']>({});
+    const formulaEditorRef = useRef<IFormulaEditorRef>(null);
     const [isFocusFormulaEditor, isFocusFormulaEditorSet] = useState(false);
 
     useSidebarClick((e: MouseEvent) => {
-        const handleOutClick = formulaEditorActionsRef.current?.handleOutClick;
-        handleOutClick && handleOutClick(e, () => isFocusFormulaEditorSet(false));
+        const isOutSide = formulaEditorRef.current?.isClickOutSide(e);
+        isOutSide && isFocusFormulaEditorSet(false);
     });
 
     return (
@@ -351,8 +352,8 @@ export function ListFormulaInput(props: IFormulaInputProps) {
                             }}
                             errorText={(formula1Res || localError) || undefined}
                             onFocus={() => isFocusFormulaEditorSet(true)}
-                            actions={formulaEditorActionsRef.current}
                             isSupportAcrossSheet
+                            ref={formulaEditorRef}
                         />
                         <div ref={containerRef} style={{ marginTop: '12px' }}>
                             {refFinalList.map((item) => {

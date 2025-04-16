@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,8 @@ export interface IPopup<T = Record<string, unknown>> extends Omit<IRectPopupProp
     hiddenType?: 'hide' | 'destroy';
     hiddenRects$?: Observable<IBoundRectNoAngle[]>;
     extraProps?: T;
+    customActive?: boolean;
+    onActiveChange?: (active: boolean) => void;
 }
 
 export interface ICanvasPopupService {
@@ -83,16 +85,18 @@ export class CanvasPopupService extends Disposable implements ICanvasPopupServic
         const id = Tools.generateRandomId();
         this._popupMap.set(id, {
             ...item,
-            onPointerEnter: () => {
-                this._activePopupId = id;
-            },
-            onPointerLeave: () => {
-                if (this._activePopupId === id) {
-                    this._activePopupId = null;
+            onActiveChange: (active: boolean) => {
+                if (active) {
+                    this._activePopupId = id;
+                } else {
+                    if (this._activePopupId === id) {
+                        this._activePopupId = null;
+                    }
                 }
             },
         });
         this._update();
+
         return id;
     }
 

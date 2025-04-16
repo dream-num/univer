@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ export * from './basics/docs-view-key';
 export { hasParagraphInTable } from './basics/paragraph';
 export { docDrawingPositionToTransform, transformToDocDrawingPosition } from './basics/transform-position';
 export { type IKeyboardEventConfig, useKeyboardEvent, useResize } from './views/rich-text-editor/hooks';
-export { RichTextEditor } from './views/rich-text-editor';
+export { type IRichTextEditorProps, RichTextEditor } from './views/rich-text-editor';
 export { getCommandSkeleton, getRichTextEditPath } from './commands/util';
 // export { TextEditor } from './components/editor/TextEditor';
 // export { RangeSelector as DocRangeSelector } from './components/range-selector/RangeSelector';
@@ -33,6 +33,7 @@ export { DocUIController } from './controllers/doc-ui.controller';
 export { menuSchema as DocsUIMenuSchema } from './controllers/menu.schema';
 export { DocBackScrollRenderController } from './controllers/render-controllers/back-scroll.render-controller';
 export { DocRenderController } from './controllers/render-controllers/doc.render-controller';
+export type { IUniverDocsUIConfig } from './controllers/config.schema';
 export * from './docs-ui-plugin';
 export * from './services';
 export { IDocClipboardService } from './services/clipboard/clipboard.service';
@@ -43,7 +44,6 @@ export { DocStateChangeManagerService } from './services/doc-state-change-manage
 export { DocsRenderService } from './services/docs-render.service';
 export { Editor } from './services/editor/editor';
 export { EditorService, IEditorService } from './services/editor/editor-manager.service';
-export { type IRangeSelectorRange, IRangeSelectorService, RangeSelectorService } from './services/range-selector/range-selector.service';
 export { isInSameTableCell, isValidRectRange, NodePositionConvertToRectRange } from './services/selection/convert-rect-range';
 
 export { NodePositionConvertToCursor } from './services/selection/convert-text-range';
@@ -59,12 +59,12 @@ export { whenDocAndEditorFocused } from './shortcuts/utils';
 export { DOC_VERTICAL_PADDING } from './types/const/padding';
 
 // #region - all commands
-
+export { HorizontalLineCommand } from './commands/commands/doc-horizontal-line.command';
 export { AfterSpaceCommand, EnterCommand, type ITabCommandParams, TabCommand } from './commands/commands/auto-format.command';
 export { BreakLineCommand } from './commands/commands/break-line.command';
 export { generateParagraphs } from './commands/commands/break-line.command';
 export { DocCopyCommand, DocCutCommand, DocPasteCommand } from './commands/commands/clipboard.command';
-export { CutContentCommand, InnerPasteCommand } from './commands/commands/clipboard.inner.command';
+export { CutContentCommand, type IInnerPasteCommandParams, InnerPasteCommand } from './commands/commands/clipboard.inner.command';
 export type { IInnerCutCommandParams } from './commands/commands/clipboard.inner.command';
 export { getCustomBlockIdsInSelections, getCutActionsFromDocRanges } from './commands/commands/clipboard.inner.command';
 export {
@@ -80,7 +80,7 @@ export {
 export { DeleteCustomBlockCommand, DeleteLeftCommand, DeleteRightCommand, type IDeleteCustomBlockParams, MergeTwoParagraphCommand } from './commands/commands/doc-delete.command';
 export { getCursorWhenDelete } from './commands/commands/doc-delete.command';
 
-export { IMEInputCommand } from './commands/commands/ime-input.command';
+export { type IIMEInputCommandParams, IMEInputCommand } from './commands/commands/ime-input.command';
 export {
     ResetInlineFormatTextBackgroundColorCommand,
     SetInlineFormatBoldCommand,
@@ -95,7 +95,6 @@ export {
     SetInlineFormatTextColorCommand,
     SetInlineFormatUnderlineCommand,
 } from './commands/commands/inline-format.command';
-export { getParagraphsInRange, getParagraphsInRanges } from './commands/commands/list.command';
 export {
     BulletListCommand,
     ChangeListNestingLevelCommand,
@@ -115,11 +114,11 @@ export {
     AlignRightCommand,
 } from './commands/commands/paragraph-align.command';
 export { ReplaceTextRunsCommand } from './commands/commands/replace-content.command';
-export { CoverContentCommand, type IReplaceSelectionCommandParams, type IReplaceSnapshotCommandParams, ReplaceContentCommand, ReplaceSnapshotCommand } from './commands/commands/replace-content.command';
+export { CoverContentCommand, type IReplaceSelectionCommandParams, type IReplaceSnapshotCommandParams, ReplaceContentCommand, ReplaceSelectionCommand, ReplaceSnapshotCommand } from './commands/commands/replace-content.command';
 export { SetDocZoomRatioCommand } from './commands/commands/set-doc-zoom-ratio.command';
 export { CreateDocTableCommand, type ICreateDocTableCommandParams } from './commands/commands/table/doc-table-create.command';
 export { DocTableDeleteColumnsCommand, DocTableDeleteRowsCommand, DocTableDeleteTableCommand } from './commands/commands/table/doc-table-delete.command';
-
+export { type IInsertCustomRangeCommandParams, InsertCustomRangeCommand } from './commands/commands/insert-custom-range.command';
 export type {
     IDocTableDeleteColumnsCommandParams,
     IDocTableDeleteRowsCommandParams,
@@ -146,9 +145,9 @@ export type { IDocTableTabCommandParams } from './commands/commands/table/doc-ta
 export { DocTableTabCommand } from './commands/commands/table/doc-table-tab.command';
 export { genTableSource, getEmptyTableCell, getEmptyTableRow, getTableColumn } from './commands/commands/table/table';
 export { DocCreateTableOperation } from './commands/operations/doc-create-table.operation';
-export { MoveSelectionOperation } from './commands/operations/doc-cursor.operation';
+export { type IMoveCursorOperationParams, MoveSelectionOperation } from './commands/operations/doc-cursor.operation';
 export { MoveCursorOperation } from './commands/operations/doc-cursor.operation';
 export { DocSelectAllCommand } from './commands/commands/doc-select-all.command';
 export { type ISetDocZoomRatioOperationParams, SetDocZoomRatioOperation } from './commands/operations/set-doc-zoom-ratio.operation';
-
+export { SetParagraphNamedStyleCommand } from './commands/commands/set-heading.command';
 // #endregion

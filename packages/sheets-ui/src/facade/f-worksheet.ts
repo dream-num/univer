@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,8 @@ import type { IColumnsHeaderCfgParam, IRowsHeaderCfgParam, RenderComponentType, 
 import type { IScrollState, IViewportScrollState } from '@univerjs/sheets-ui';
 import { ICommandService, toDisposable } from '@univerjs/core';
 import { IRenderManagerService, SHEET_VIEWPORT_KEY, sheetContentViewportKeys } from '@univerjs/engine-render';
-import { ChangeZoomRatioCommand, SetColumnHeaderHeightCommand, SetRowHeaderWidthCommand, SetWorksheetColAutoWidthCommand, SHEET_VIEW_KEY, SheetScrollManagerService, SheetSkeletonManagerService, SheetsScrollRenderController } from '@univerjs/sheets-ui';
+import { SetWorksheetRowIsAutoHeightCommand } from '@univerjs/sheets';
+import { SetColumnHeaderHeightCommand, SetRowHeaderWidthCommand, SetWorksheetColAutoWidthCommand, SetZoomRatioCommand, SHEET_VIEW_KEY, SheetScrollManagerService, SheetSkeletonManagerService, SheetsScrollRenderController } from '@univerjs/sheets-ui';
 import { FWorksheet } from '@univerjs/sheets/facade';
 
 /**
@@ -29,25 +30,36 @@ import { FWorksheet } from '@univerjs/sheets/facade';
 export interface IFWorksheetSkeletonMixin {
     /**
      * Refresh the canvas.
-     */
-    refreshCanvas(): FWorksheet;
-    /**
-     * Set zoom ratio of the worksheet.
-     * @param {number} zoomRatio The zoom ratio to set.It should be in the range of 10 to 400.
-     * @returns True if the command was successful, false otherwise.
+     * @returns {FWorksheet} The FWorksheet instance for chaining.
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getActiveSheet();
-     * fWorksheet.zoom(200);
+     * fWorksheet.refreshCanvas();
+     * ```
+     */
+    refreshCanvas(): FWorksheet;
+
+    /**
+     * Set zoom ratio of the worksheet.
+     * @param {number} zoomRatio The zoom ratio to set.It should be in the range of 0.1 to 4.0.
+     * @returns {FWorksheet} The FWorksheet instance for chaining.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // Set zoom ratio to 200%
+     * fWorksheet.zoom(2);
      * const zoomRatio = fWorksheet.getZoom();
-     * console.log(zoomRatio); // 200
+     * console.log(zoomRatio); // 2
      * ```
      */
     zoom(zoomRatio: number): FWorksheet;
+
     /**
      * Get the zoom ratio of the worksheet.
-     * @returns The zoom ratio of the worksheet.
+     * @returns {number} The zoom ratio of the worksheet.
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
@@ -62,10 +74,12 @@ export interface IFWorksheetSkeletonMixin {
      * Return visible range, sum view range of 4 viewports.
      * @returns {IRange} - visible range
      * @example
-     * ``` ts
+     * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getActiveSheet();
      * const visibleRange = fWorksheet.getVisibleRange();
+     * console.log(visibleRange);
+     * console.log(fWorksheet.getRange(visibleRange).getA1Notation());
      * ```
      */
     getVisibleRange(): IRange;
@@ -75,10 +89,17 @@ export interface IFWorksheetSkeletonMixin {
      * Based on the limitations of viewport and the number of rows and columns, you can only scroll to the maximum scrollable range.
      * @param {number} row - Cell row index
      * @param {number} column - Cell column index
-     * @returns {FWorksheet} - Current worksheet
+     * @returns {FWorksheet} - The FWorksheet instance for chaining.
      * @example
-     * ``` ts
-     * univerAPI.getActiveWorkbook().getActiveSheet().scrollToCell(1, 1);
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // Scroll to cell D10
+     * const fRange = fWorksheet.getRange('D10');
+     * const row = fRange.getRow();
+     * const column = fRange.getColumn();
+     * fWorksheet.scrollToCell(row, column);
      * ```
      */
     scrollToCell(row: number, column: number): FWorksheet;
@@ -87,8 +108,20 @@ export interface IFWorksheetSkeletonMixin {
      * Get scroll state of current sheet.
      * @returns {IScrollState} curr scroll state
      * @example
-     * ``` ts
-     * univerAPI.getActiveWorkbook().getActiveSheet().getScrollState()
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // Scroll to cell D10
+     * const fRange = fWorksheet.getRange('D10');
+     * const row = fRange.getRow();
+     * const column = fRange.getColumn();
+     * fWorksheet.scrollToCell(row, column);
+     *
+     * // Get scroll state
+     * const scrollState = fWorksheet.getScrollState();
+     * const { offsetX, offsetY, sheetViewStartColumn, sheetViewStartRow } = scrollState;
+     * console.log(scrollState); // sheetViewStartRow: 9, sheetViewStartColumn: 3, offsetX: 0, offsetY: 0
      * ```
      */
     getScrollState(): IScrollState;
@@ -107,17 +140,64 @@ export interface IFWorksheetSkeletonMixin {
     getSkeleton(): Nullable<SpreadsheetSkeleton>;
 
     /**
-     * Set the given column width to fix-content.
-     * @param {number} columnPosition - Column position
-     * @param {number} numColumn - Number of columns
+     * Sets the width of the given column to fit its contents.
+     * @param {number} columnPosition - The position of the given column to resize. index starts at 0.
+     * @returns {FWorksheet} - The FWorksheet instance for chaining.
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getActiveSheet();
-     * fWorksheet.setColumnAutoWidth(0, 3);
+     *
+     * // Set the long text value in cell A1
+     * const fRange = fWorksheet.getRange('A1');
+     * fRange.setValue('Whenever it is a damp, drizzly November in my soul...');
+     *
+     * // Set the column A to a width which fits the text
+     * fWorksheet.autoResizeColumn(0);
      * ```
      */
+    autoResizeColumn(columnPosition: number): FWorksheet;
+
+    /**
+     * Sets the width of all columns starting at the given column position to fit their contents.
+     * @param {number} startColumn - The position of the first column to resize. index starts at 0.
+     * @param {number} numColumns - The number of columns to auto-resize.
+     * @returns {FWorksheet} - The FWorksheet instance for chaining.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // Set the A:C columns to a width that fits their text.
+     * fWorksheet.autoResizeColumns(0, 3);
+     * ```
+     */
+    autoResizeColumns(startColumn: number, numColumns: number): FWorksheet;
+
+    /**
+     * Sets the width of all columns starting at the given column position to fit their contents.
+     * @deprecated use `autoResizeColumns` instead
+     * @param {number} columnPosition - The position of the first column to resize. index starts at 0.
+     * @param {number} numColumn - The number of columns to auto-resize.
+     * @returns {FWorksheet} - The FWorksheet instance for chaining.
+     */
     setColumnAutoWidth(columnPosition: number, numColumn: number): FWorksheet;
+
+    /**
+     * Sets the height of all rows starting at the given row position to fit their contents.
+     * @param {number} startRow - The position of the first row to resize. index starts at 0.
+     * @param {number} numRows - The number of rows to auto-resize.
+     * @returns {FWorksheet} - The FWorksheet instance for chaining.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // Set the first 3 rows to a height that fits their text.
+     * fWorksheet.autoResizeRows(0, 3);
+     * ```
+     */
+    autoResizeRows(startRow: number, numRows: number): FWorksheet;
 
     /**
      * Customize the column header of the spreadsheet.
@@ -173,31 +253,34 @@ export interface IFWorksheetSkeletonMixin {
 
     /**
      * Set column height for column header.
-     * @param height
+     * @param {number} height - The height to set.
+     * @returns {FWorksheet} - The FWorksheet instance for chaining.
      * @example
      * ```ts
-        const sheet = univerAPI.getActiveWorkbook().getActiveSheet();
-        sheet.setColumnHeaderHeight(100);
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * fWorksheet.setColumnHeaderHeight(100);
      * ```
      */
     setColumnHeaderHeight(height: number): FWorksheet;
 
     /**
      * Set column height for column header.
-     * @param width
+     * @param {number} width - The width to set.
+     * @returns {FWorksheet} - The FWorksheet instance for chaining.
      * @example
      * ```ts
-        const sheet = univerAPI.getActiveWorkbook().getActiveSheet();
-        sheet.setRowHeaderWidth(100);
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * fWorksheet.setRowHeaderWidth(100);
      * ```
      */
     setRowHeaderWidth(width: number): FWorksheet;
 
     /**
-     * @deprecated use `univerAPI.addEvent(univerAPI.Event.Scroll, () => {})` instead
+     * @deprecated use `univerAPI.addEvent(univerAPI.Event.Scroll, (params) => {})` instead
      */
     onScroll(callback: (params: Nullable<IViewportScrollState>) => void): IDisposable;
-
 }
 
 export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSkeletonMixin {
@@ -225,10 +308,11 @@ export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSk
 
     override zoom(zoomRatio: number): FWorksheet {
         const commandService = this._injector.get(ICommandService);
-        commandService.syncExecuteCommand(ChangeZoomRatioCommand.id, {
+        const _zoomRatio = Math.min(Math.max(zoomRatio, 0.1), 4);
+        commandService.executeCommand(SetZoomRatioCommand.id, {
             unitId: this._workbook.getUnitId(),
             subUnitId: this._worksheet.getSheetId(),
-            zoomRatio,
+            zoomRatio: _zoomRatio,
         });
         return this;
     }
@@ -312,19 +396,48 @@ export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSk
         return service?.getWorksheetSkeleton(this._worksheet.getSheetId())?.skeleton;
     }
 
-    override setColumnAutoWidth(columnPosition: number, numColumn: number): FWorksheet {
+    override autoResizeColumn(columnPosition: number): FWorksheet {
+        return this.autoResizeColumns(columnPosition, 1);
+    }
+
+    override autoResizeColumns(startColumn: number, numColumns: number): FWorksheet {
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
         const ranges = [
             {
-                startColumn: columnPosition,
-                endColumn: columnPosition + numColumn - 1,
+                startColumn,
+                endColumn: startColumn + numColumns - 1,
                 startRow: 0,
                 endRow: this._worksheet.getRowCount() - 1,
             },
         ];
 
         this._commandService.syncExecuteCommand(SetWorksheetColAutoWidthCommand.id, {
+            unitId,
+            subUnitId,
+            ranges,
+        });
+
+        return this;
+    }
+
+    override setColumnAutoWidth(columnPosition: number, numColumn: number): FWorksheet {
+        return this.autoResizeColumns(columnPosition, numColumn);
+    }
+
+    override autoResizeRows(startRow: number, numRows: number): FWorksheet {
+        const unitId = this._workbook.getUnitId();
+        const subUnitId = this._worksheet.getSheetId();
+        const ranges = [
+            {
+                startRow,
+                endRow: startRow + numRows - 1,
+                startColumn: 0,
+                endColumn: this._worksheet.getColumnCount() - 1,
+            },
+        ];
+
+        this._commandService.syncExecuteCommand(SetWorksheetRowIsAutoHeightCommand.id, {
             unitId,
             subUnitId,
             ranges,

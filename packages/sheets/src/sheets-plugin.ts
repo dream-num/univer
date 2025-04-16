@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +46,7 @@ import { SheetRangeThemeService } from './services/range-theme-service';
 import { RefRangeService } from './services/ref-range/ref-range.service';
 import { SheetsSelectionsService } from './services/selections/selection.service';
 import { SheetInterceptorService } from './services/sheet-interceptor/sheet-interceptor.service';
+import { SheetSkeletonService } from './skeleton/skeleton.service';
 
 const PLUGIN_NAME = 'SHEET_PLUGIN';
 
@@ -95,6 +96,7 @@ export class UniverSheetsPlugin extends Plugin {
             [INumfmtService, { useClass: NumfmtService }],
             [SheetInterceptorService],
             [SheetRangeThemeService],
+            [SheetSkeletonService],
 
             // controllers
             [BasicWorksheetController],
@@ -146,6 +148,7 @@ export class UniverSheetsPlugin extends Plugin {
             [WorkbookPermissionService],
             [WorksheetPermissionService],
             [SheetPermissionViewModelController],
+            [SheetSkeletonService],
         ]);
     }
 

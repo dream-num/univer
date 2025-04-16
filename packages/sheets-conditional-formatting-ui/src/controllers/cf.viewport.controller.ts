@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,8 @@ export class ConditionalFormattingViewportController extends Disposable {
     constructor(
         @Inject(ConditionalFormattingViewModel) private _conditionalFormattingViewModel: ConditionalFormattingViewModel,
         @IUniverInstanceService private _univerInstanceService: IUniverInstanceService,
-        @IRenderManagerService private _renderManagerService: IRenderManagerService) {
+        @IRenderManagerService private _renderManagerService: IRenderManagerService
+    ) {
         super();
         this._init();
     }

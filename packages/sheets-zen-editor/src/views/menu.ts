@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,19 +15,24 @@
  */
 
 import type { IAccessor } from '@univerjs/core';
-
+import type { IMenuButtonItem } from '@univerjs/ui';
 import { RangeProtectionPermissionEditPoint, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetCellStylePermission, WorksheetSetCellValuePermission } from '@univerjs/sheets';
-import { getCurrentExclusiveRangeInterest$, getCurrentRangeDisable$ } from '@univerjs/sheets-ui';
-import { type IMenuButtonItem, MenuItemType } from '@univerjs/ui';
+import { getCurrentExclusiveRangeInterest$, getCurrentRangeDisable$, IEditorBridgeService } from '@univerjs/sheets-ui';
+import { MenuItemType } from '@univerjs/ui';
+import { map, switchMap } from 'rxjs';
 import { OpenZenEditorCommand } from '../commands/commands/zen-editor.command';
 
 export function ZenEditorMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    const editorBridgeService = accessor.get(IEditorBridgeService);
     return {
         id: OpenZenEditorCommand.id,
         type: MenuItemType.BUTTON,
         title: 'rightClick.zenEditor',
         icon: 'AmplifySingle',
         hidden$: getCurrentExclusiveRangeInterest$(accessor),
-        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetSetCellValuePermission, WorksheetSetCellStylePermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
+        disabled$: editorBridgeService.currentEditCell$.pipe(
+            switchMap((cell) => getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetSetCellValuePermission, WorksheetSetCellStylePermission], rangeTypes: [RangeProtectionPermissionEditPoint] })
+                .pipe(map((disabled) => disabled || (cell?.documentLayoutObject.documentModel?.getBody()?.customBlocks?.length ?? 0) > 0)))
+        ),
     };
 }

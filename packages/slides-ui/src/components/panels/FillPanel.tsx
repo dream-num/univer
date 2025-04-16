@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,10 @@
 import type { Nullable } from '@univerjs/core';
 
 import type { Rect } from '@univerjs/engine-render';
-import { ICommandService, LocaleService, useDependency } from '@univerjs/core';
-import { ColorPicker, DropdownLegacy } from '@univerjs/design';
+import { ICommandService, LocaleService } from '@univerjs/core';
+import { clsx, ColorPicker, Dropdown } from '@univerjs/design';
 import { MoreDownSingle, PaintBucket } from '@univerjs/icons';
-import clsx from 'clsx';
+import { useDependency } from '@univerjs/ui';
 
 import React from 'react';
 import { UpdateSlideElementOperation } from '../../commands/operations/update-element.operation';
@@ -92,17 +92,14 @@ export default function ArrangePanel(props: IProps) {
                 </div>
                 <div className={styles.imageCommonPanelRow}>
                     <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSpan2)}>
-                        <DropdownLegacy
-                            align={{
-                                offset: [0, 18],
-                            }}
+                        <Dropdown
                             overlay={(
-                                <section className={styles.slidePanelColorPicker}>
+                                <div className="univer-rounded-lg univer-p-4">
                                     <ColorPicker
                                         value="#fff"
                                         onChange={handleChangeColor}
                                     />
-                                </section>
+                                </div>
                             )}
                         >
                             <a className={styles.uiPluginSheetsBorderPanelButton}>
@@ -111,7 +108,7 @@ export default function ArrangePanel(props: IProps) {
                                     <MoreDownSingle />
                                 </span>
                             </a>
-                        </DropdownLegacy>
+                        </Dropdown>
                     </div>
                 </div>
             </div>

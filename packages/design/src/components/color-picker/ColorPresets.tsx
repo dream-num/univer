@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,10 +44,12 @@ export function ColorPresets({ hsv, onChange }: IColorPresetsProps) {
                             key={j}
                             type="button"
                             className={clsx(`
-                              univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border-none
-                              univer-bg-gray-300 univer-transition-shadow
+                              univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full
+                              univer-border univer-border-solid univer-border-transparent univer-bg-gray-300
+                              univer-transition-shadow
                             `, {
                                 'univer-ring-2 univer-ring-offset-2 univer-ring-offset-white dark:univer-ring-primary-600 dark:univer-ring-offset-gray-600': color.toUpperCase() === currentColor.toUpperCase(),
+                                '!univer-border-gray-200': i === 0 && j === 0,
                             })}
                             style={{ backgroundColor: color }}
                             onClick={() => handleSelectPreset(color)}

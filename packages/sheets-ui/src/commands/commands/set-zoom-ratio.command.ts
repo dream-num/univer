@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,7 +71,7 @@ export const ChangeZoomRatioCommand: ICommand<IChangeZoomRatioCommandParams> = {
 export const SetZoomRatioCommand: ICommand<ISetZoomRatioCommandParams> = {
     id: 'sheet.command.set-zoom-ratio',
     type: CommandType.COMMAND,
-    handler: async (accessor, params) => {
+    handler: (accessor, params) => {
         if (!params) {
             return false;
         }

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ const locale = {
             'close-dialog': '关闭查找替换对话框',
             'go-to-next-match': '下一个匹配项',
             'go-to-previous-match': '下一个匹配项',
+            'focus-selection': '聚焦选区',
         },
         dialog: {
             title: '查找',

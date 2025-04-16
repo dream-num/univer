@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,12 @@
 
 import type { IDrawingParam, Nullable } from '@univerjs/core';
 import type { IChangeObserverConfig, Scene } from '@univerjs/engine-render';
-import { debounce, LocaleService, useDependency } from '@univerjs/core';
-import { Checkbox, InputNumber } from '@univerjs/design';
+import { debounce, LocaleService } from '@univerjs/core';
+import { Checkbox, clsx, InputNumber } from '@univerjs/design';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import clsx from 'clsx';
-import React, { useEffect, useState } from 'react';
+import { useDependency } from '@univerjs/ui';
+import { useEffect, useState } from 'react';
 import { MIN_DRAWING_HEIGHT_LIMIT, MIN_DRAWING_WIDTH_LIMIT, RANGE_DRAWING_ROTATION_LIMIT } from '../../utils/config';
 import { getUpdateParams } from '../../utils/get-update-params';
 import styles from './index.module.less';
@@ -236,7 +236,6 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
         return () => {
             subscriptions.forEach((sub) => sub.unsubscribe());
         };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const handleWidthChange = debounce((val: number | null) => {
@@ -412,7 +411,7 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
                         </div>
                         <div className={clsx(styles.imageCommonPanelRow, styles.imageCommonPanelRowVertical)}>
                             <div className={styles.imageCommonPanelColumn}>
-                                <Checkbox checked={lockRatio} onChange={handleLockRatioChange}></Checkbox>
+                                <Checkbox checked={lockRatio} onChange={handleLockRatioChange} />
                             </div>
                         </div>
                     </label>

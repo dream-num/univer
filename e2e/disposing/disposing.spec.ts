@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ test('no error on constructing and disposing sheet unit', async ({ page }) => {
         errored = true;
     });
 
-    await page.goto('http://localhost:3000/sheets/', { waitUntil: 'networkidle' });
+    await page.goto('http://localhost:3000/sheets/');
     await page.evaluate(() => window.E2EControllerAPI.disposeCurrSheetUnit());
     await page.evaluate(() => window.E2EControllerAPI.loadDefaultSheet());
 

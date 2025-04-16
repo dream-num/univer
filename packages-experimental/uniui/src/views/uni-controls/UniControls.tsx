@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,10 @@
  */
 
 import type { IProjectNode } from '../../services/unit-grid/unit-grid.service';
-import { useDependency } from '@univerjs/core';
-import { DropdownLegacy, Tooltip } from '@univerjs/design';
+import { clsx, Dropdown, Tooltip } from '@univerjs/design';
 import { CheckMarkSingle, FullscreenSingle, IncreaseSingle, ZoomReduceSingle } from '@univerjs/icons';
-import { ISidebarService } from '@univerjs/ui';
-import {
-    useReactFlow,
-} from '@xyflow/react';
-import clsx from 'clsx';
+import { ISidebarService, useDependency } from '@univerjs/ui';
+import { useReactFlow } from '@xyflow/react';
 import React, { useCallback, useEffect, useLayoutEffect } from 'react';
 import { IUnitGridService } from '../../services/unit-grid/unit-grid.service';
 import { UniDiv } from '../uni-toolbar/UniFloatToolbar';
@@ -128,10 +124,9 @@ export const UniControls = ({ zoom, onItemClick }: { zoom: number; onItemClick?:
             <UniControlButton tooltips="Zoom in" onClick={onZoomInHandler}>
                 <IncreaseSingle />
             </UniControlButton>
-            <DropdownLegacy
-                placement="topLeft"
+            <Dropdown
                 overlay={(
-                    <div className={styles.sliderShortcuts}>
+                    <div className={clsx(styles.sliderShortcuts, 'univer-rounded-lg univer-p-4')}>
                         {shortcuts?.map((item) => (
                             <a
                                 key={item}
@@ -158,7 +153,7 @@ export const UniControls = ({ zoom, onItemClick }: { zoom: number; onItemClick?:
                     {zoomPercent}
                     %
                 </a>
-            </DropdownLegacy>
+            </Dropdown>
             <UniControlButton tooltips="Zoom out" onClick={onZoomOutHandler}>
                 <ZoomReduceSingle />
             </UniControlButton>

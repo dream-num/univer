@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,8 @@
  */
 
 import type { IMention, ITypeMentionList } from '@univerjs/core';
-import cs from 'clsx';
-import React, { useRef, useState } from 'react';
-import styles from './index.module.less';
+import { clsx } from '@univerjs/design';
+import { useRef, useState } from 'react';
 
 export interface IMentionListProps {
     mentions: ITypeMentionList[];
@@ -36,20 +35,41 @@ export const MentionList = (props: IMentionListProps) => {
     };
 
     return (
-        <div ref={ref} data-editorid={editorId} tabIndex={0} className={styles.docMentionPanel} onClick={onClick}>
+        <div
+            ref={ref}
+            data-editorid={editorId}
+            tabIndex={0}
+            className={`
+              univer-max-h-72 univer-w-72 univer-overflow-hidden univer-rounded-lg univer-border univer-border-solid
+              univer-border-gray-200 univer-bg-white univer-p-2 univer-shadow-md
+            `}
+            onClick={onClick}
+        >
             {mentions.map((typeMentions) => (
                 <div key={typeMentions.type}>
-                    <div className={styles.docMentionType}>{typeMentions.title}</div>
+                    <div className="univer-mb-2 univer-font-medium">{typeMentions.title}</div>
+
                     {typeMentions.mentions.map((mention) => (
                         <div
-                            data-editorid={editorId}
                             key={mention.objectId}
-                            className={cs(styles.docMention, { [styles.docMentionActive]: activeId === mention.objectId })}
+                            data-editorid={editorId}
+                            className={clsx(`
+                              univer-flex univer-cursor-pointer univer-items-center univer-rounded-md univer-p-2
+                            `, {
+                                'univer-bg-gray-50': activeId === mention.objectId,
+                            })}
                             onClick={() => handleSelect(mention)}
                             onMouseEnter={() => setActiveId(mention.objectId)}
                         >
-                            <img className={styles.docMentionIcon} src={mention.metadata?.icon as string} />
-                            <div className={styles.docMentionLabel}>{mention.label}</div>
+                            <img
+                                className={`
+                                  univer-pointer-events-none univer-mr-1.5 univer-size-6 univer-flex-[0_0_auto]
+                                  univer-rounded-md
+                                  hover:univer-bg-gray-50
+                                `}
+                                src={mention.metadata?.icon as string}
+                            />
+                            <div className="univer-pointer-events-none univer-flex-1 univer-truncate">{mention.label}</div>
                         </div>
                     ))}
                 </div>

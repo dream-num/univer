@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 
 import type { ICommand, IRange } from '@univerjs/core';
+import type { IAddConditionalRuleMutationParams, IConditionFormattingRule, IHighlightCell } from '@univerjs/sheets-conditional-formatting';
 import {
     CommandType,
     ICommandService,
@@ -22,7 +23,6 @@ import {
 } from '@univerjs/core';
 import { getSheetCommandTarget } from '@univerjs/sheets';
 import { AddConditionalRuleMutation, CFRuleType, CFSubRuleType, ConditionalFormattingRuleModel } from '@univerjs/sheets-conditional-formatting';
-import type { IAddConditionalRuleMutationParams, IConditionFormattingRule, IHighlightCell } from '@univerjs/sheets-conditional-formatting';
 
 interface IAddUniqueValuesConditionalRuleParams {
     ranges: IRange[];
@@ -47,7 +47,8 @@ export const AddUniqueValuesCfCommand: ICommand<IAddUniqueValuesConditionalRuleP
         const { unitId, subUnitId } = target;
         const cfId = conditionalFormattingRuleModel.createCfId(unitId, subUnitId);
         const rule: IConditionFormattingRule = {
-            ranges, cfId,
+            ranges,
+            cfId,
             stopIfTrue: !!stopIfTrue,
             rule: {
                 type: CFRuleType.highlightCell,

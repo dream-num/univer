@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IRange } from '@univerjs/core';
+import type { IDisposable, IRange } from '@univerjs/core';
 import type { UnitObject } from '@univerjs/protocol';
 import { Tools } from '@univerjs/core';
 
@@ -55,22 +55,25 @@ export interface IRuleChange {
 
 type IRuleChangeType = 'add' | 'set' | 'delete';
 
-export class RangeProtectionRuleModel {
+export class RangeProtectionRuleModel implements IDisposable {
     /**
-     *
      * Map<unitId, Map<subUnitId, Map<ruleId, IRangeProtectionRule>>>
      */
     private _model: IModel = new Map();
 
-    private _ruleChange = new Subject<IRuleChange>();
+    private readonly _ruleChange$ = new Subject<IRuleChange>();
+    readonly ruleChange$ = this._ruleChange$.asObservable();
 
-    ruleChange$ = this._ruleChange.asObservable();
+    private _ruleRefresh$ = new Subject<string>();
+    ruleRefresh$ = this._ruleRefresh$.asObservable();
 
-    private _ruleRefresh = new Subject<string>();
-    ruleRefresh$ = this._ruleRefresh.asObservable();
+    dispose(): void {
+        this._ruleChange$.complete();
+        this._ruleRefresh$.complete();
+    }
 
     ruleRefresh(id: string) {
-        this._ruleRefresh.next(id);
+        this._ruleRefresh$.next(id);
     }
 
     private _rangeRuleInitStateChange = new BehaviorSubject<boolean>(false);
@@ -87,14 +90,14 @@ export class RangeProtectionRuleModel {
     addRule(unitId: string, subUnitId: string, rule: IRangeProtectionRule) {
         const ruleMap = this._ensureRuleMap(unitId, subUnitId);
         ruleMap.set(rule.id, rule);
-        this._ruleChange.next({ unitId, subUnitId, rule, type: 'add' });
+        this._ruleChange$.next({ unitId, subUnitId, rule, type: 'add' });
     }
 
     deleteRule(unitId: string, subUnitId: string, id: string) {
         const rule = this._model.get(unitId)?.get(subUnitId)?.get(id);
         if (rule) {
             this._model.get(unitId)?.get(subUnitId)?.delete(id);
-            this._ruleChange.next({ unitId, subUnitId, rule, type: 'delete' });
+            this._ruleChange$.next({ unitId, subUnitId, rule, type: 'delete' });
         }
     }
 
@@ -102,7 +105,7 @@ export class RangeProtectionRuleModel {
         const oldRule = this.getRule(unitId, subUnitId, id);
         if (oldRule) {
             this._model.get(unitId)?.get(subUnitId)?.set(id, rule);
-            this._ruleChange.next({ unitId, subUnitId, oldRule, rule, type: 'set' });
+            this._ruleChange$.next({ unitId, subUnitId, oldRule, rule, type: 'set' });
         }
     }
 

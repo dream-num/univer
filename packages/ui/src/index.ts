@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ export {
 export { ShortcutPanelController } from './controllers/shortcut-display/shortcut-panel.controller';
 export { IUIController, type IWorkbenchOptions } from './controllers/ui/ui.controller';
 export { DesktopUIController } from './controllers/ui/ui-desktop.controller';
+export { SingleUnitUIController } from './controllers/ui/ui-shared.controller';
 export { UniverMobileUIPlugin } from './mobile-ui-plugin';
 export { DesktopBeforeCloseService, IBeforeCloseService } from './services/before-close/before-close.service';
 export { CopyCommand, CutCommand, PasteCommand, SheetPasteShortKeyCommandName } from './services/clipboard/clipboard.command';
@@ -109,19 +110,18 @@ export { KeyCode, MetaKeys } from './services/shortcut/keycode';
 export { type IShortcutItem, IShortcutService, ShortcutService } from './services/shortcut/shortcut.service';
 export { ShortcutPanelService } from './services/shortcut/shortcut-panel.service';
 export { DesktopSidebarService } from './services/sidebar/desktop-sidebar.service';
-export { useSidebarClick } from './services/sidebar/hooks/useSidebarClick';
+export { useSidebarClick } from './services/sidebar/hooks/use-sidebar-click';
 export { ILeftSidebarService, ISidebarService } from './services/sidebar/sidebar.service';
 export { DesktopZenZoneService } from './services/zen-zone/desktop-zen-zone.service';
 export { IZenZoneService } from './services/zen-zone/zen-zone.service';
-
+export { FloatDomSingle } from './views/components/dom/FloatDom';
 export { DISABLE_AUTO_FOCUS_KEY, UniverUIPlugin } from './ui-plugin';
 
 export { UNIVER_UI_PLUGIN_NAME } from './ui-plugin';
 export * from './utils';
 export { ComponentContainer, type IComponentContainerProps, useComponentsOfPart } from './views/components/ComponentContainer';
 export { ZenZone } from './views/components/zen-zone/ZenZone';
-export { builtInGlobalComponents } from './views/parts';
-
+export { Menu as DesktopMenu } from './components/menu/desktop/Menu';
 // #region - workbench components
 
 export { type IConfirmPartMethodOptions } from './views/components/confirm-part/interface';
@@ -135,8 +135,7 @@ export { ToolbarButton } from './views/components/ribbon/Button/ToolbarButton';
 export { useToolbarItemStatus } from './views/components/ribbon/hook';
 export { Ribbon } from './views/components/ribbon/Ribbon';
 export { ToolbarItem } from './views/components/ribbon/ToolbarItem';
-export { type ISidebarMethodOptions } from './views/components/sidebar/interface';
-export { Sidebar } from './views/components/sidebar/Sidebar';
+export { type ISidebarMethodOptions, Sidebar } from './views/components/sidebar/Sidebar';
 // #endregion
 
 // #region - all commands

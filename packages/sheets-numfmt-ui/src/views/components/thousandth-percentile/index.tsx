@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,10 @@
 
 import type { FC } from 'react';
 import type { IBusinessComponentProps } from '../interface';
-import { LocaleService, useDependency } from '@univerjs/core';
+import { LocaleService } from '@univerjs/core';
 import { InputNumber, SelectList } from '@univerjs/design';
 import { getDecimalFromPattern, getNumberFormatOptions, isPatternEqualWithoutDecimal, isPatternHasDecimal, setPatternDecimal } from '@univerjs/sheets-numfmt';
+import { useDependency } from '@univerjs/ui';
 import React, { useMemo, useState } from 'react';
 
 export const isThousandthPercentilePanel = (pattern: string) =>

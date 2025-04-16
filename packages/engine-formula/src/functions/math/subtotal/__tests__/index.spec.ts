@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -267,6 +267,14 @@ describe('Test subtotal', () => {
         it('FunctionNum is normal number, ref1 is array, ref2 is array includes error', () => {
             const result = calculate('=SUBTOTAL(9,A1:B2,C1:C2)');
             expect(result).toBe(ErrorType.NAME);
+        });
+
+        it('FunctionNum ia array', () => {
+            const result = calculate('=SUBTOTAL(A1:B2,A1:B2)');
+            expect(result).toStrictEqual([
+                [2.5, 4],
+                [4, 4],
+            ]);
         });
     });
 

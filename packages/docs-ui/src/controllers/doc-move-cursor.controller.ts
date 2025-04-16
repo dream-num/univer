@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -112,8 +112,15 @@ export class DocMoveCursorController extends Disposable {
         }
 
         const {
-            startOffset, endOffset, style, collapsed, direction: rangeDirection,
-            segmentId, startNodePosition, endNodePosition, segmentPage,
+            startOffset,
+            endOffset,
+            style,
+            collapsed,
+            direction: rangeDirection,
+            segmentId,
+            startNodePosition,
+            endNodePosition,
+            segmentPage,
         } = activeRange;
 
         if (allRanges.length > 1) {

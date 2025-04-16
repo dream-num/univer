@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ import type { IBaseDataValidationWidget } from '@univerjs/data-validation';
 import type { IMouseEvent, IPointerEvent, SpreadsheetSkeleton, UniverRenderingContext, UniverRenderingContext2D } from '@univerjs/engine-render';
 import type { ListValidator } from '@univerjs/sheets-data-validation';
 import type { IShowDataValidationDropdownParams } from '../../commands/operations/data-validation.operation';
-import { BooleanNumber, DataValidationRenderMode, DataValidationType, DEFAULT_EMPTY_DOCUMENT_VALUE, DEFAULT_STYLES, DocumentDataModel, HorizontalAlign, ICommandService, Inject, LocaleService, Tools, UniverInstanceType, VerticalAlign, WrapStrategy } from '@univerjs/core';
-import { CURSOR_TYPE, Documents, DocumentSkeleton, DocumentViewModel, getDocsSkeletonPageSize, IRenderManagerService, Rect } from '@univerjs/engine-render';
+import { BooleanNumber, DataValidationRenderMode, DataValidationType, DEFAULT_EMPTY_DOCUMENT_VALUE, DEFAULT_STYLES, DocumentDataModel, HorizontalAlign, ICommandService, Inject, IUniverInstanceService, LocaleService, Tools, UniverInstanceType, VerticalAlign, WrapStrategy } from '@univerjs/core';
+import { CURSOR_TYPE, Documents, DocumentSkeleton, DocumentViewModel, getCurrentTypeOfRenderer, getDocsSkeletonPageSize, IRenderManagerService, Rect } from '@univerjs/engine-render';
 import { getCellValueOrigin, SheetDataValidationModel } from '@univerjs/sheets-data-validation';
 import { ShowDataValidationDropdown } from '../../commands/operations/data-validation.operation';
 import { DROP_DOWN_DEFAULT_COLOR } from '../../const';
@@ -166,6 +166,7 @@ export class DropdownWidget implements IBaseDataValidationWidget {
     private _dropdownInfoMap: Map<string, Map<string, IDropdownInfo>> = new Map();
 
     constructor(
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(IRenderManagerService) private readonly _renderManagerService: IRenderManagerService,
@@ -521,10 +522,14 @@ export class DropdownWidget implements IBaseDataValidationWidget {
     };
 
     onPointerEnter(info: ICellRenderContext, evt: IPointerEvent | IMouseEvent) {
-        this._renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET)?.mainComponent?.setCursor(CURSOR_TYPE.POINTER);
+        getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET, this._univerInstanceService, this._renderManagerService)
+            ?.mainComponent
+            ?.setCursor(CURSOR_TYPE.POINTER);
     }
 
     onPointerLeave(info: ICellRenderContext, evt: IPointerEvent | IMouseEvent) {
-        this._renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET)?.mainComponent?.setCursor(CURSOR_TYPE.DEFAULT);
+        getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET, this._univerInstanceService, this._renderManagerService)
+            ?.mainComponent
+            ?.setCursor(CURSOR_TYPE.DEFAULT);
     }
 }

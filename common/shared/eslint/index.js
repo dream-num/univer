@@ -1,16 +1,19 @@
 const jsdoc = require('eslint-plugin-jsdoc');
 const eslintPluginReadableTailwind = require('eslint-plugin-readable-tailwind');
 const noExternalImportsInFacade = require('./plugins/no-external-imports-in-facade');
+const noFacadeImportsOutsideFacade = require('./plugins/no-facade-imports-outside-facade');
 const noSelfPackageImports = require('./plugins/no-self-package-imports');
 
 exports.baseRules = {
     curly: ['error', 'multi-line'],
+    'antfu/if-newline': 'off',
     'no-param-reassign': ['warn'],
     'eol-last': ['error', 'always'],
     'import/no-self-import': 'error',
     'ts/no-explicit-any': 'warn',
-    'style/no-multiple-empty-lines': ['error', { max: 1, maxEOF: 1 }],
+    'style/no-multiple-empty-lines': ['error', { max: 1, maxEOF: 0 }],
     'style/brace-style': ['warn', '1tbs', { allowSingleLine: true }],
+    'style/jsx-first-prop-new-line': ['warn', 'multiline'],
     'style/comma-dangle': ['error', {
         arrays: 'always-multiline',
         objects: 'always-multiline',
@@ -19,10 +22,33 @@ exports.baseRules = {
         enums: 'always-multiline',
         functions: 'never',
     }],
+    'unicorn/filename-case': [
+        'error',
+        {
+            cases: {
+                kebabCase: true,
+                pascalCase: true,
+            },
+            ignore: [
+                '^README-(\w+)?\\.md$',
+                '^[a-z]{2}-[A-Z]{2}\.ts$',
+                '^__tests__$',
+                '^FUNDING.yml$',
+                '^bug_report.yml$',
+                '^bug_report.zh-CN.yml$',
+                '^feature_request.yml$',
+                '^feature_request.zh-CN.yml$',
+            ],
+        },
+    ],
+    'style/jsx-self-closing-comp': ['error', {
+        component: true,
+        html: true,
+    }],
+    'react-refresh/only-export-components': 'off',
     'no-empty-function': 'off',
     'style/arrow-parens': ['error', 'always'],
     'ts/no-redeclare': 'off',
-    'antfu/if-newline': 'off',
     'style/spaced-comment': 'off',
     'tunicorn/number-literal-case': 'off',
     'style/indent-binary-ops': 'off',
@@ -35,6 +61,7 @@ exports.baseRules = {
     'perfectionist/sort-imports': 'warn',
     'perfectionist/sort-named-exports': 'warn',
     'antfu/consistent-chaining': 'warn',
+    'react-hooks/exhaustive-deps': 'off',
     'sort-imports': [
         'error',
         {
@@ -50,10 +77,25 @@ exports.baseRules = {
     'react/no-unstable-default-props': 'warn',
     'command/command': 'off',
     'jsdoc/tag-lines': 'off',
+    'import/consistent-type-specifier-style': 'warn',
+
+    'no-restricted-imports': [
+        'error',
+        {
+            paths: [
+                {
+                    name: 'clsx',
+                    message: 'Please use `import { clsx } from \'@univerjs/design\'` instead.',
+                },
+            ],
+        },
+    ],
 
     // IMPORTANT: To ensure compatibility, some features of React 19 will be disabled.
     'react/no-forward-ref': 'off',
     'react/no-context-provider': 'off',
+    'react-dom/no-render': 'off',
+    'react/no-use-context': 'off',
 
     // TODO: debatable rules
     'react/no-duplicate-key': 'warn',
@@ -69,7 +111,6 @@ exports.baseRules = {
     // TODO: just for compatibility with old code
     'unused-imports/no-unused-vars': 'warn',
     'style/jsx-closing-tag-location': 'warn',
-    // 'ts/ban-types': 'warn',
     'ts/no-restricted-types': 'warn',
     'ts/no-wrapper-object-types': 'warn',
     'ts/no-empty-object-type': 'warn',
@@ -78,9 +119,8 @@ exports.baseRules = {
     'unicorn/prefer-dom-node-text-content': 'warn',
     'unicorn/prefer-number-properties': 'warn',
     'no-prototype-builtins': 'warn',
-    'style/no-tabs': 'warn',
+    // 'style/no-tabs': 'warn',
     'style/quotes': ['warn', 'single', { avoidEscape: true }],
-
     'react/display-name': 'off',
     'react-hooks/rules-of-hooks': 'off',
     'eslint-comments/no-unlimited-disable': 'off',
@@ -88,7 +128,6 @@ exports.baseRules = {
     'ts/ban-ts-comment': 'off',
     'ts/no-duplicate-enum-values': 'off',
     'no-cond-assign': 'warn',
-    'antfu/consistent-list-newline': 'off',
     'ts/no-use-before-define': 'warn',
     'intunicorn/number-literal-case': 'off',
     'test/no-identical-title': 'warn',
@@ -122,6 +161,7 @@ exports.typescriptPreset = () => {
                 rules: {
                     'no-external-imports-in-facade': noExternalImportsInFacade,
                     'no-self-package-imports': noSelfPackageImports,
+                    'no-facade-imports-outside-facade': noFacadeImportsOutsideFacade,
                 },
             },
         },
@@ -162,6 +202,7 @@ exports.univerSourcePreset = () => {
         ],
         rules: {
             'univer/no-self-package-imports': 'error',
+            'univer/no-facade-imports-outside-facade': 'error',
         },
         languageOptions: {
             parser: require('@typescript-eslint/parser'),
@@ -173,7 +214,6 @@ exports.facadePreset = () => {
     return {
         files: ['**/src/facade/**/*.ts'],
         ignores: [
-            '**/core/src/**/*.ts',
             '**/__tests__/**/*',
             '**/*.spec.ts',
             '**/*.test.ts',

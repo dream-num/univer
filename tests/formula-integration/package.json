@@ -21,11 +21,11 @@
         "@univerjs/sheets-data-validation": "workspace:*",
         "@univerjs/sheets-formula": "workspace:*",
         "@univerjs/sheets-numfmt": "workspace:*",
-        "examples-node": "workspace:*"
+        "univer-examples": "workspace:*"
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
-        "typescript": "^5.7.3",
-        "vitest": "^2.1.8"
+        "typescript": "^5.8.3",
+        "vitest": "^3.1.1"
     }
 }

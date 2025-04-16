@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,21 @@
  * limitations under the License.
  */
 
-export function installShims() {
-    installRequestIdleCallback();
-}
-
 const glob = typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : window;
 
 function installRequestIdleCallback() {
     const TIME_WINDOW = 50;
 
+    const idleCallbacks = new Map<number, NodeJS.Timeout>();
+    let currentId = 0;
+
     if (typeof glob.requestIdleCallback !== 'function') {
         glob.requestIdleCallback = function shimRIC(callback: Function) {
             const start = Date.now();
-            return setTimeout(function rICCallback() {
+            const id = ++currentId;
+
+            const timeoutId = setTimeout(function rICCallback() {
+                idleCallbacks.delete(id);
                 const remaining = Math.max(0, TIME_WINDOW - (Date.now() - start));
                 callback({
                     didTimeout: remaining === 0,
@@ -34,13 +36,24 @@ function installRequestIdleCallback() {
                         return remaining;
                     },
                 });
-            }, 1) as unknown as number;
+            }, 1);
+
+            idleCallbacks.set(id, timeoutId);
+            return id;
         };
     }
 
     if (typeof glob.cancelIdleCallback !== 'function') {
         glob.cancelIdleCallback = function shimCancelRIC(id: number) {
-            clearTimeout(id);
+            const timeoutId = idleCallbacks.get(id);
+            if (timeoutId !== undefined) {
+                clearTimeout(timeoutId);
+                idleCallbacks.delete(id);
+            }
         };
     }
+}
+
+export function installShims() {
+    installRequestIdleCallback();
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -116,6 +116,19 @@ export function htmlIsFromExcel(html: string): boolean {
     ];
 
     return excelMarkers.some((marker) => marker.test(html));
+}
+
+export function htmlContainsImage(html: string): boolean {
+    if (!html) {
+        return false;
+    }
+
+    // test the image tag is base64 image
+    const base64ImageRegex = /<img[^>]*src\s*=\s*["']data:image\/[^;]+;base64,[^"']*["'][^>]*>/i; ;
+
+    const images = (html.match(base64ImageRegex) || []);
+
+    return images.length > 0;
 }
 
 export function mergeCellValues(...cellValues: IObjectMatrixPrimitiveType<Nullable<ICellData>>[]) {

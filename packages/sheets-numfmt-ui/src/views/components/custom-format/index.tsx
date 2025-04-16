@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,11 @@
  */
 
 import type { IBusinessComponentProps } from '../interface';
-import { ILocalStorageService, LocaleService, useDependency } from '@univerjs/core';
+import { ILocalStorageService, LocaleService } from '@univerjs/core';
 import { Input } from '@univerjs/design';
 import { CheckMarkSingle } from '@univerjs/icons';
 import { CURRENCYFORMAT, DATEFMTLISG, NUMBERFORMAT } from '@univerjs/sheets-numfmt';
+import { useDependency } from '@univerjs/ui';
 import React, { useEffect, useState } from 'react';
 import { UserHabitController } from '../../../controllers/user-habit.controller';
 import styles from './index.module.less';
@@ -71,7 +72,7 @@ export function CustomFormat(props: IBusinessComponentProps) {
     return (
         <div className={styles.customFormat}>
             <div className={styles.customFormatTitle}>{localeService.t('sheet.numfmt.customFormat')}</div>
-            <Input placeholder={localeService.t('sheet.numfmt.customFormat')} onBlur={handleBlur} value={pattern} onChange={patternSet} className={styles.customFormatInput}></Input>
+            <Input placeholder={localeService.t('sheet.numfmt.customFormat')} onBlur={handleBlur} value={pattern} onChange={patternSet} className={styles.customFormatInput} />
             <div className={styles.customFormatHistoryList}>
                 {options.map((p) => (
                     <div key={p} onClick={() => handleClick(p as string)} className={styles.customFormatHistoryListItem}>

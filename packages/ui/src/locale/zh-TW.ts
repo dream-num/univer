@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,20 @@
 import type zhCN from './zh-CN';
 
 const locale: typeof zhCN = {
+    toolbar: {
+        heading: {
+            normal: '正文',
+            title: '標題',
+            subTitle: '副標題',
+            1: '標題 1',
+            2: '標題 2',
+            3: '標題 3',
+            4: '標題 4',
+            5: '標題 5',
+            6: '標題 6',
+            tooltip: '設定標題',
+        },
+    },
     ribbon: {
         start: '開始',
         insert: '插入',
@@ -76,6 +90,9 @@ const locale: typeof zhCN = {
         cancel: '取消',
     },
     'global-shortcut': '全域快捷鍵',
+    'zoom-slider': {
+        resetTo: '恢復至',
+    },
 };
 
 export default locale;

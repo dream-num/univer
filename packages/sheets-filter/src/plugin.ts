@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,10 @@
 import type { Dependency } from '@univerjs/core';
 import type { IUniverSheetsFilterConfig } from './controllers/config.schema';
 
-import { IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
+import { IConfigService, Inject, Injector, merge, Plugin, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { defaultPluginConfig, SHEETS_FILTER_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { SheetsFilterController } from './controllers/sheets-filter.controller';
+import { SheetsFilterFormulaService } from './services/sheet-filter-formula.service';
 import { SHEET_FILTER_SNAPSHOT_ID, SheetsFilterService } from './services/sheet-filter.service';
 
 export class UniverSheetsFilterPlugin extends Plugin {
@@ -44,12 +45,16 @@ export class UniverSheetsFilterPlugin extends Plugin {
 
     override onStarting(): void {
         ([
+            [SheetsFilterFormulaService],
             [SheetsFilterService],
             [SheetsFilterController],
         ] as Dependency[]).forEach((d) => this._injector.add(d));
     }
 
     override onReady(): void {
-        this._injector.get(SheetsFilterController);
+        touchDependencies(this._injector, [
+            [SheetsFilterFormulaService],
+            [SheetsFilterController],
+        ]);
     }
 }

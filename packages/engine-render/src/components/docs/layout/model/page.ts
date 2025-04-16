@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import type { ILayoutContext } from '../tools';
 import { BooleanNumber, PageOrientType } from '@univerjs/core';
 import { BreakType, DocumentSkeletonPageType } from '../../../../basics/i-document-skeleton-cached';
 import { dealWithSection } from '../block/section';
-import { resetContext, updateBlockIndex } from '../tools';
+import { resetContext, updateBlockIndex, updateInlineDrawingCoordsAndBorder } from '../tools';
 import { createSkeletonSection } from './section';
 
 function getHeaderFooterMaxHeight(pageHeight: number) {
@@ -209,9 +209,16 @@ function _createSkeletonHeaderFooter(
     count = 0
 ): IDocumentSkeletonHeaderFooter {
     const {
-        lists, footerTreeMap, headerTreeMap, localeService, pageSize, drawings,
-        marginLeft = 0, marginRight = 0,
-        marginHeader = 0, marginFooter = 0,
+        lists,
+        footerTreeMap,
+        headerTreeMap,
+        localeService,
+        pageSize,
+        drawings,
+        marginLeft = 0,
+        marginRight = 0,
+        marginHeader = 0,
+        marginFooter = 0,
     } = sectionBreakConfig;
     const pageWidth = pageSize?.width || Number.POSITIVE_INFINITY;
     const pageHeight = pageSize?.height || Number.POSITIVE_INFINITY;
@@ -375,6 +382,8 @@ export function createSkeletonCellPages(
     }
 
     updateBlockIndex(pages, cellNode.startIndex);
+
+    updateInlineDrawingCoordsAndBorder(ctx, pages);
 
     return pages;
 }

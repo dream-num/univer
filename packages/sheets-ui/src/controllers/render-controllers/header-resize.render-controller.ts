@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,9 @@ import { CURSOR_TYPE, Rect, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine
 
 import {
     DeltaColumnWidthCommand,
-    DeltaRowHeightCommand, SetWorksheetRowIsAutoHeightCommand, SheetsSelectionsService,
+    DeltaRowHeightCommand,
+    SetWorksheetRowIsAutoHeightCommand,
+    SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { Subscription } from 'rxjs';
 import { SetWorksheetColAutoWidthCommand } from '../../commands/commands/set-worksheet-auto-col-width.command';
@@ -160,7 +162,7 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
         };
 
         const pointerMoveEvent = (evt: IPointerEvent | IMouseEvent, _state: EventState) => {
-            const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+            const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
             if (skeleton == null || this._rowResizeRect == null || this._columnResizeRect == null) {
                 return;
             }
@@ -307,7 +309,7 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
 
         this.disposeWithMe(
             eventBindingObject.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent) => {
-                const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+                const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
                 if (skeleton == null) return;
 
                 const scene = this._context.scene;
@@ -326,9 +328,9 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
 
                 this._startOffsetY = transformCoord.y;
 
-                const currentOffsetX = skeleton.getOffsetByPositionX(this._currentColumn);
-                const currentOffsetY = skeleton.getOffsetByPositionY(this._currentRow);
-                const cell = skeleton.getNoMergeCellPositionByIndex(this._currentRow, this._currentColumn);
+                const currentOffsetX = skeleton.getOffsetByColumn(this._currentColumn);
+                const currentOffsetY = skeleton.getOffsetByRow(this._currentRow);
+                const cell = skeleton.getNoMergeCellWithCoordByIndex(this._currentRow, this._currentColumn);
 
                 let isStartMove = false;
                 let moveChangeX = 0;
@@ -370,12 +372,6 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
                 const rowResizeRectY = this._rowResizeRect?.top || 0;
                 scene.addObject(this._resizeHelperShape, SHEET_COMPONENT_HEADER_LAYER_INDEX);
                 scene.disableObjectsEvent();
-
-                // TODO: do it in another way
-                // this._editorBridgeService.changeVisible({
-                //     visible: false,
-                //     eventType: DeviceInputEventType.PointerDown,
-                // });
 
                 this._scenePointerMoveSub = scene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
                     const relativeCoords = scene.getCoordRelativeToViewport(
@@ -488,7 +484,7 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
                 const scene = this._context.scene;
                 scene.resetCursor();
 
-                const sk = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+                const sk = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
                 if (!sk) return;
 
                 const startRow = 0;
@@ -523,7 +519,8 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
                         }
 
                         this._commandService.executeCommand<ISetWorksheetColIsAutoWidthCommandParams>(
-                            SetWorksheetColAutoWidthCommand.id, { ranges }
+                            SetWorksheetColAutoWidthCommand.id,
+                            { ranges }
                         );
                         this._columnResizeRect?.hide();
                         break;

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1252,33 +1252,28 @@ export class LexerTreeBuilder extends Disposable {
         }
     }
 
+    // NOTE@wzhudev: this method is over complex, need to refactor. Using recursive descend to parse the formula string
+    // without a standalone lexer phase
     // eslint-disable-next-line max-lines-per-function, complexity
     private _nodeMaker(formulaStringRaw: string, sequenceArray?: ISequenceArray[], matchCurrentNodeIndex?: number) {
         // Editor will add '\r\n' at the end of the formula string
-        let formulaString = formulaStringRaw.replace(/\r\n$/, '').replace(/\r/g, ' ').replace(/\n/g, ' ');
-
+        let formulaString = formulaStringRaw.replace(/\r\n$|\r|\n/g, ' ');
         if (formulaString.substring(0, 1) === operatorToken.EQUALS) {
             formulaString = formulaString.substring(1);
         }
 
-        // let isZeroAdded = false;
-        // if (formulaString.substring(0, 1) === operatorToken.MINUS) {
-        //     formulaString = `0${formulaString}`;
-        //     isZeroAdded = true;
-        // }
+        const formulaChars = formulaString.split('');
+        const charsCount = formulaChars.length;
 
-        const formulaStringArray = formulaString.split('');
-        const formulaStringArrayCount = formulaStringArray.length;
-
-        let cur = 0;
         this._resetTemp();
 
-        if (this._formulaErrorLastTokenCheck(formulaStringArray, formulaStringArrayCount - 1)) {
+        if (this._formulaErrorLastTokenCheck(formulaChars, charsCount - 1)) {
             this._formalErrorOccurred();
         }
 
-        while (cur < formulaStringArrayCount) {
-            const currentString = formulaStringArray[cur];
+        let cur = 0;
+        while (cur < charsCount) {
+            const currentString = formulaChars[cur];
 
             if (matchCurrentNodeIndex === cur) {
                 return [this._currentLexerNode, currentString];
@@ -1289,15 +1284,15 @@ export class LexerTreeBuilder extends Disposable {
                 this.isDoubleQuotationClose() &&
                 this.isBracesClose() &&
                 this.isSquareBracketClose() &&
-                this._checkIfErrorObject(cur, formulaStringArray)
+                this._checkIfErrorObject(cur, formulaChars)
             ) {
-                const errorType = this._findErrorObject(cur, formulaStringArray);
+                const errorType = this._findErrorObject(cur, formulaChars);
                 if (errorType == null) {
                     return ErrorType.VALUE;
                 }
                 this._pushNodeToChildren(errorType);
                 for (let i = 0; i < errorType.length; i++) {
-                    const curStr = formulaStringArray[cur];
+                    const curStr = formulaChars[cur];
                     this._pushSegment(curStr);
                     this._addSequenceArray(sequenceArray, curStr, cur);
                     cur++;
@@ -1320,10 +1315,10 @@ export class LexerTreeBuilder extends Disposable {
                     this._openBracket(bracketType.FUNCTION);
                     this._closeLambda();
 
-                    const nextCurrentString = formulaStringArray[cur + 1];
+                    const nextCurrentString = formulaChars[cur + 1];
                     if (nextCurrentString && nextCurrentString === matchToken.CLOSE_BRACKET) {
                         // when function has not parameter, return to parentNode , e.g. row()
-                        if (!this._setParentCurrentLexerNode() && cur !== formulaStringArrayCount - 1) {
+                        if (!this._setParentCurrentLexerNode() && cur !== charsCount - 1) {
                             return ErrorType.VALUE;
                         }
                         /**
@@ -1351,7 +1346,7 @@ export class LexerTreeBuilder extends Disposable {
                 this.isSingleQuotationClose() &&
                 this.isDoubleQuotationClose()
             ) {
-                if (this._formulaErrorLastTokenCheck(formulaStringArray, cur - 1)) {
+                if (this._formulaErrorLastTokenCheck(formulaChars, cur - 1)) {
                     this._formalErrorOccurred();
                 }
 
@@ -1362,17 +1357,17 @@ export class LexerTreeBuilder extends Disposable {
                     this._pushNodeToChildren(currentString);
                 } else if (currentBracket === bracketType.FUNCTION) {
                     // function close
-                    const nextCurrentString = formulaStringArray[cur + 1];
+                    const nextCurrentString = formulaChars[cur + 1];
                     if (nextCurrentString && nextCurrentString === matchToken.OPEN_BRACKET) {
                         // lambda handler, e.g. =lambda(x,y, x*y*x)(1,2)
-                        if (!this._setParentCurrentLexerNode() && cur !== formulaStringArrayCount - 1) {
+                        if (!this._setParentCurrentLexerNode() && cur !== charsCount - 1) {
                             return ErrorType.VALUE;
                         }
 
                         this._newAndPushCurrentLexerNode(DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER, cur, true);
                         this._openLambda();
                     } else {
-                        if (!this._setAncestorCurrentLexerNode() && cur !== formulaStringArrayCount - 1) {
+                        if (!this._setAncestorCurrentLexerNode() && cur !== charsCount - 1) {
                             return ErrorType.VALUE;
                         }
                     }
@@ -1434,7 +1429,7 @@ export class LexerTreeBuilder extends Disposable {
                 if (this.isDoubleQuotationClose()) {
                     this._openDoubleQuotation();
                 } else {
-                    const nextCurrentString = formulaStringArray[cur + 1];
+                    const nextCurrentString = formulaChars[cur + 1];
                     if (nextCurrentString && nextCurrentString === matchToken.DOUBLE_QUOTATION) {
                         cur++;
                     } else {
@@ -1454,7 +1449,7 @@ export class LexerTreeBuilder extends Disposable {
                         this._resetSegment();
                     }
                 } else {
-                    const nextCurrentString = formulaStringArray[cur + 1];
+                    const nextCurrentString = formulaChars[cur + 1];
                     if (nextCurrentString && nextCurrentString === matchToken.SINGLE_QUOTATION) {
                         // handle 'Sheet'1'!A1
 
@@ -1481,7 +1476,7 @@ export class LexerTreeBuilder extends Disposable {
                 this.isBracesClose() &&
                 this.isSquareBracketClose()
             ) {
-                if (this._formulaErrorLastTokenCheck(formulaStringArray, cur - 1)) {
+                if (this._formulaErrorLastTokenCheck(formulaChars, cur - 1)) {
                     this._formalErrorOccurred();
                 }
 
@@ -1496,7 +1491,7 @@ export class LexerTreeBuilder extends Disposable {
                     this._resetSegment();
                     if (
                         !this._setParentCurrentLexerNode() &&
-                        cur !== formulaStringArrayCount - 1 &&
+                        cur !== charsCount - 1 &&
                         currentBracket != null
                     ) {
                         return ErrorType.VALUE;
@@ -1628,7 +1623,7 @@ export class LexerTreeBuilder extends Disposable {
                 this._openColon(upLevel);
             } else if (
                 SUFFIX_TOKEN_SET.has(currentString) &&
-                this._checkSimilarErrorToken(currentString, cur, formulaStringArray) &&
+                this._checkSimilarErrorToken(currentString, cur, formulaChars) &&
                 this.isSingleQuotationClose() &&
                 this.isDoubleQuotationClose() &&
                 this.isSquareBracketClose() &&
@@ -1664,8 +1659,8 @@ export class LexerTreeBuilder extends Disposable {
 
                 if (currentString === operatorToken.MINUS && (trimSegment === '')) {
                     // negative number
-                    const prevString = this._findPreviousToken(formulaStringArray, cur - 1) || '';
-                    const nextString = this._findNextToken(formulaStringArray, cur + 1) || '';
+                    const prevString = this._findPreviousToken(formulaChars, cur - 1) || '';
+                    const nextString = this._findNextToken(formulaChars, cur + 1) || '';
                     if (this._unexpectedEndingTokenExcludeOperator(prevString) && this._isOperatorToken(nextString)) {
                         this._pushNodeToChildren('0');
                         this._pushNodeToChildren(operatorToken.MINUS);
@@ -1688,7 +1683,7 @@ export class LexerTreeBuilder extends Disposable {
                             continue;
                         }
                     }
-                } else if (this._segment.length > 0 && this._isScientificNotation(formulaStringArray, cur, currentString)) {
+                } else if (this._segment.length > 0 && this._isScientificNotation(formulaChars, cur, currentString)) {
                     this._pushSegment(currentString);
 
                     this._addSequenceArray(sequenceArray, currentString, cur);
@@ -1703,7 +1698,7 @@ export class LexerTreeBuilder extends Disposable {
                 }
 
                 if (currentString === operatorToken.LESS_THAN || currentString === operatorToken.GREATER_THAN) {
-                    const nextCurrentString = formulaStringArray[cur + 1];
+                    const nextCurrentString = formulaChars[cur + 1];
                     if (nextCurrentString && OPERATOR_TOKEN_SET.has(currentString + nextCurrentString)) {
                         this._pushNodeToChildren(trimSegment + currentString + nextCurrentString);
 
@@ -1721,7 +1716,10 @@ export class LexerTreeBuilder extends Disposable {
                 }
                 this._resetSegment();
             } else {
-                this._pushSegment(currentString);
+                // Do not push a space when the segment is empty, consuming useless spaces here.
+                if (this._segment !== '' || currentString !== ' ') {
+                    this._pushSegment(currentString);
+                }
             }
 
             this._addSequenceArray(sequenceArray, currentString, cur);

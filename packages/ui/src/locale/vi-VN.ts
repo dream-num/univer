@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,20 @@
 import type zhCN from './zh-CN';
 
 const locale: typeof zhCN = {
+    toolbar: {
+        heading: {
+            normal: 'Văn bản',
+            title: 'Tiêu đề',
+            subTitle: 'Tiêu đề phụ',
+            1: 'Tiêu đề 1',
+            2: 'Tiêu đề 2',
+            3: 'Tiêu đề 3',
+            4: 'Tiêu đề 4',
+            5: 'Tiêu đề 5',
+            6: 'Tiêu đề 6',
+            tooltip: 'Đặt tiêu đề',
+        },
+    },
     ribbon: {
         start: 'Bắt đầu',
         insert: 'Chèn',
@@ -76,6 +90,9 @@ const locale: typeof zhCN = {
         cancel: 'Hủy',
     },
     'global-shortcut': 'Phím tắt toàn cầu',
+    'zoom-slider': {
+        resetTo: 'Khôi phục đến',
+    },
 };
 
 export default locale;

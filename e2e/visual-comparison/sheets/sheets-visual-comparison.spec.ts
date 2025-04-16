@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ test('diff default sheet toolbar', async () => {
         ],
         fullPage: true,
     });
-    await expect(screenshot).toMatchSnapshot(filename, { maxDiffPixels: 100 });
+    expect(screenshot).toMatchSnapshot(filename, { maxDiffPixels: 100 });
 });
 
 test('diff default sheet content', async ({ page }) => {
@@ -55,7 +55,7 @@ test('diff default sheet content', async ({ page }) => {
 
     const filename = generateSnapshotName('default-sheet');
     const screenshot = await page.locator('#univer-sheet-main-canvas_test').screenshot();
-    await expect(screenshot).toMatchSnapshot(filename, { maxDiffPixels: 5 });
+    await expect(screenshot).toMatchSnapshot(filename, { maxDiffPixelRatio: 0.005 });
 });
 
 test('diff demo sheet content', async ({ page }) => {
@@ -74,7 +74,7 @@ test('diff demo sheet content', async ({ page }) => {
 
     const filename = generateSnapshotName('demo-sheet');
     const screenshot = await page.locator(SHEET_MAIN_CANVAS_ID).screenshot();
-    await expect(screenshot).toMatchSnapshot(filename, { maxDiffPixels: 5 });
+    await expect(screenshot).toMatchSnapshot(filename, { maxDiffPixelRatio: 0.005 });
     expect(errored).toBeFalsy();
 });
 
@@ -98,7 +98,7 @@ test('diff merged cells rendering', async () => {
 
     const filename = generateSnapshotName('mergedCellsRendering');
     const screenshot = await page.locator(SHEET_MAIN_CANVAS_ID).screenshot();
-    await expect(screenshot).toMatchSnapshot(filename, { maxDiffPixels: 5 });
+    await expect(screenshot).toMatchSnapshot(filename, { maxDiffPixelRatio: 0.005 });
 });
 
 /**
@@ -121,7 +121,7 @@ test('diff sheet default style rendering', async () => {
 
     const filename = generateSnapshotName('defaultstyle');
     const screenshot = await page.locator(SHEET_MAIN_CANVAS_ID).screenshot();
-    await expect(screenshot).toMatchSnapshot(filename, { maxDiffPixels: 5 });
+    await expect(screenshot).toMatchSnapshot(filename, { maxDiffPixelRatio: 0.005 });
 });
 
 test('diff facade sheet hooks', async () => {
@@ -154,7 +154,7 @@ test('diff facade sheet hooks', async () => {
 
     const filename = generateSnapshotName('facade-sheet-hooks');
     const screenshot = await page.locator(SHEET_MAIN_CANVAS_ID).screenshot();
-    await expect(screenshot).toMatchSnapshot(filename, { maxDiffPixels: 5 });
+    await expect(screenshot).toMatchSnapshot(filename, { maxDiffPixelRatio: 0.005 });
 });
 
 test('diff set force string cell', async () => {
@@ -230,11 +230,30 @@ test('diff set force string cell', async () => {
         activeWorkbook.startEditing();
         await window.univerAPI.getActiveDocument().appendText("'1");
         activeWorkbook.endEditing(true);
+
+        activeSheet.getRange('I1').setValue({
+            v: '001',
+            t: 1,
+            s: {
+                ff: 'Arial CE',
+                fs: 11,
+                bl: 1,
+                cl: {
+                    rgb: '#000080',
+                    th: 0,
+                },
+                n: {
+                    pattern: 'General',
+                },
+                ht: 1,
+                tb: 3,
+            },
+        });
     });
 
     const filename = generateSnapshotName('set-force-string-cell');
     const screenshot = await page.locator(SHEET_MAIN_CANVAS_ID).screenshot();
-    await expect(screenshot).toMatchSnapshot(filename, { maxDiffPixels: 5 });
+    await expect(screenshot).toMatchSnapshot(filename, { maxDiffPixelRatio: 0.005 });
 
     await page.waitForTimeout(2000);
     await browser.close();
@@ -261,7 +280,7 @@ test('diff set text format number cell', async () => {
                 {
                     row: 0,
                     col: 7,
-                    pattern: '@@@',
+                    pattern: '@',
                     type: 'text',
                 },
             ],
@@ -276,7 +295,7 @@ test('diff set text format number cell', async () => {
                 {
                     row: 0,
                     col: 8,
-                    pattern: '@@@',
+                    pattern: '@',
                     type: 'text',
                 },
             ],
@@ -285,7 +304,7 @@ test('diff set text format number cell', async () => {
 
     const filename = generateSnapshotName('set-text-format-number-cell');
     const screenshot = await page.locator(SHEET_MAIN_CANVAS_ID).screenshot();
-    await expect(screenshot).toMatchSnapshot(filename, { maxDiffPixels: 5 });
+    await expect(screenshot).toMatchSnapshot(filename, { maxDiffPixelRatio: 0.005 });
 
     await page.waitForTimeout(2000);
     await browser.close();

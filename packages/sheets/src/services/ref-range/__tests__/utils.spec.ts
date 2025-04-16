@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,17 @@
  * limitations under the License.
  */
 
-import type { IMutationInfo, IRange } from '@univerjs/core';
-import { beforeEach, describe, expect, it } from 'vitest';
+import type { ICommandInfo, IMutationInfo, IRange } from '@univerjs/core';
+import type { IRemoveSheetMutationParams } from '../../../basics';
 
+import type { IInsertColCommandParams, IInsertRowCommandParams } from '../../../commands/commands/insert-row-col.command';
+import type { IRemoveRowColCommandInterceptParams } from '../../../commands/commands/remove-row-col.command';
+import type { IMoveRowsMutationParams } from '../../../commands/mutations/move-rows-cols.mutation';
+import type { IRemoveRowColCommand } from '../type';
+import { Direction } from '@univerjs/core';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { MoveRowsMutation } from '../../../commands/mutations/move-rows-cols.mutation';
+import { RemoveSheetMutation } from '../../../commands/mutations/remove-sheet.mutation';
 import { EffectRefRangId } from '../type';
 import {
     adjustRangeOnMutation,
@@ -25,11 +33,13 @@ import {
     handleDeleteRangeMoveUp,
     handleDeleteRangeMoveUpCommon,
     handleInsertCol,
+    handleInsertColCommon,
     handleInsertRangeMoveDown,
     handleInsertRangeMoveDownCommon,
     handleInsertRangeMoveRight,
     handleInsertRangeMoveRightCommon,
     handleInsertRow,
+    handleInsertRowCommon,
     handleIRemoveCol,
     handleIRemoveRow,
     handleMoveRange,
@@ -39,10 +49,6 @@ import {
     handleRemoveRowCommon,
     runRefRangeMutations,
 } from '../util';
-import { RemoveSheetMutation } from '../../../commands/mutations/remove-sheet.mutation';
-import type { IRemoveSheetMutationParams } from '../../../basics';
-import type { IMoveRowsMutationParams } from '../../../commands/mutations/move-rows-cols.mutation';
-import { MoveRowsMutation } from '../../../commands/mutations/move-rows-cols.mutation';
 
 const countRange = ([a, b, c, d]: readonly [number, number, number, number]) => (a * 1000 + b * 100 + c * 10 + d);
 
@@ -471,7 +477,7 @@ describe('test ref-range move', () => {
             range = { startRow: 5, endRow: 10, startColumn: 4, endColumn: 7 };
         });
         it('the targetRange is in the range bottom without overlap', () => {
-            const targetRange = { startRow: 12, endRow: 13, startColumn: 5, endColumn: 6 };
+            const targetRange = { startRow: 12, endRow: 13, startColumn: 5, endColumn: 5 };
             const operators = handleInsertRangeMoveDown(
                 {
                     params: { range },
@@ -480,10 +486,10 @@ describe('test ref-range move', () => {
                 targetRange
             );
             const result = runRefRangeMutations(operators!, targetRange);
-            expect(result).toEqual({ startRow: 18, endRow: 19, startColumn: 5, endColumn: 6 });
+            expect(result).toEqual({ startRow: 18, endRow: 19, startColumn: 5, endColumn: 5 });
         });
         it('the targetRange is in the range bottom with overlap', () => {
-            const targetRange = { startRow: 10, endRow: 11, startColumn: 5, endColumn: 6 };
+            const targetRange = { startRow: 10, endRow: 11, startColumn: 5, endColumn: 5 };
             const operators = handleInsertRangeMoveDown(
                 {
                     params: { range },
@@ -492,7 +498,7 @@ describe('test ref-range move', () => {
                 targetRange
             );
             const result = runRefRangeMutations(operators!, targetRange);
-            expect(result).toEqual({ startRow: 16, endRow: 17, startColumn: 5, endColumn: 6 });
+            expect(result).toEqual({ startRow: 16, endRow: 17, startColumn: 5, endColumn: 5 });
         });
         it('the targetRange is overlap with range ', () => {
             const targetRange = { startRow: 12, endRow: 13, startColumn: 4, endColumn: 6 };
@@ -991,7 +997,22 @@ describe('test ref-range move', () => {
             const result = runRefRangeMutations(operators!, targetRange);
             expect(result).toEqual({ startRow: 0, endRow: 99, startColumn: 18, endColumn: 19 });
         });
+
+        it('the targetRange is on the range start', () => {
+            const targetRange = { startRow: 0, endRow: 99, startColumn: 5, endColumn: 6 };
+
+            const operators = handleInsertCol(
+                {
+                    id: EffectRefRangId.InsertColCommandId,
+                    params: { range, unitId: '', subUnitId: '', direction: '' as any },
+                },
+                targetRange
+            );
+            const result = runRefRangeMutations(operators!, targetRange);
+            expect(result).toEqual({ startRow: 0, endRow: 99, startColumn: 11, endColumn: 12 });
+        });
     });
+
     describe('handleInsertRow', () => {
         let range: IRange;
         beforeEach(() => {
@@ -1033,7 +1054,7 @@ describe('test ref-range move', () => {
             const result = runRefRangeMutations(operators!, targetRange);
             expect(result).toEqual({ startRow: 4, endRow: 17, endColumn: 99, startColumn: 0 });
         });
-        it('the targetRange is overlap with  range', () => {
+        it('the targetRange is overlap with range', () => {
             const targetRange = { startRow: 4, endRow: 6, endColumn: 99, startColumn: 0 };
             const operators = handleInsertRow(
                 {
@@ -1056,6 +1077,288 @@ describe('test ref-range move', () => {
             );
             const result = runRefRangeMutations(operators!, targetRange);
             expect(result).toEqual({ startRow: 18, endColumn: 99, startColumn: 0, endRow: 19 });
+        });
+
+        it('the targetRange is on the range start', () => {
+            const targetRange = { startRow: 5, endRow: 6, endColumn: 99, startColumn: 0 };
+            const operators = handleInsertRow(
+                {
+                    id: EffectRefRangId.InsertRowCommandId,
+                    params: { range, unitId: '', subUnitId: '', direction: '' as any },
+                },
+                targetRange
+            );
+            const result = runRefRangeMutations(operators!, targetRange);
+            expect(result).toEqual({ startRow: 11, endColumn: 99, startColumn: 0, endRow: 12 });
+        });
+
+        it('the targetRange is overlap range 2', () => {
+            const targetRange = { startRow: 4, endRow: 6, endColumn: 99, startColumn: 0 };
+            const operators = handleInsertRow(
+                {
+                    id: EffectRefRangId.InsertRowCommandId,
+                    params: { range, unitId: '', subUnitId: '', direction: '' as any },
+                },
+                targetRange
+            );
+            const result = runRefRangeMutations(operators!, targetRange);
+            expect(result).toEqual({ startRow: 4, endRow: 12, endColumn: 99, startColumn: 0 });
+        });
+    });
+    describe('handleInsertRowCommon', () => {
+        it('should shift range down when range is below insertion point', () => {
+            const info: ICommandInfo<IInsertRowCommandParams> = {
+                params: {
+                    range: { startRow: 5, endRow: 7, startColumn: 0, endColumn: 5 },
+                    unitId: '',
+                    subUnitId: '',
+                    direction: 0,
+                },
+                id: '',
+            };
+            const targetRange = { startRow: 10, endRow: 15, startColumn: 2, endColumn: 8 };
+
+            const result = handleInsertRowCommon(info, targetRange);
+
+            expect(result).toEqual([{
+                startRow: 13, // 10 + (7 - 5 + 1)
+                endRow: 18, // 15 + (7 - 5 + 1)
+                startColumn: 2,
+                endColumn: 8,
+            }]);
+        });
+
+        it('should not change range when range is above insertion point', () => {
+            const info: ICommandInfo<IInsertRowCommandParams> = {
+                params: {
+                    range: { startRow: 10, endRow: 12, startColumn: 0, endColumn: 5 },
+                    unitId: '',
+                    subUnitId: '',
+                    direction: 0,
+                },
+                id: '',
+            };
+            const targetRange = { startRow: 3, endRow: 8, startColumn: 2, endColumn: 8 };
+
+            const result = handleInsertRowCommon(info, targetRange);
+
+            expect(result).toEqual([targetRange]);
+        });
+
+        it('should expand range when insertion point is within the range', () => {
+            const info: ICommandInfo<IInsertRowCommandParams> = {
+                params: {
+                    range: { startRow: 7, endRow: 9, startColumn: 0, endColumn: 5 },
+                    unitId: '',
+                    subUnitId: '',
+                    direction: 0,
+                },
+                id: '',
+            };
+            const targetRange = { startRow: 5, endRow: 12, startColumn: 2, endColumn: 8 };
+
+            const result = handleInsertRowCommon(info, targetRange);
+
+            expect(result).toEqual([{
+                startRow: 5,
+                endRow: 15, // 12 + (9 - 7 + 1)
+                startColumn: 2,
+                endColumn: 8,
+            }]);
+        });
+
+        it('should handle insertion at the start of the range', () => {
+            const info: ICommandInfo<IInsertRowCommandParams> = {
+                params: {
+                    range: { startRow: 5, endRow: 7, startColumn: 0, endColumn: 5 },
+                    unitId: '',
+                    subUnitId: '',
+                    direction: 0,
+                },
+                id: '',
+            };
+            const targetRange = { startRow: 5, endRow: 10, startColumn: 2, endColumn: 8 };
+
+            const result = handleInsertRowCommon(info, targetRange);
+
+            expect(result).toEqual([{
+                startRow: 8,
+                endRow: 13, // 10 + (7 - 5 + 1)
+                startColumn: 2,
+                endColumn: 8,
+            }]);
+        });
+
+        it('should handle insertion at the end of the range', () => {
+            const info = {
+                params: {
+                    range: { startRow: 10, endRow: 12, startColumn: 0, endColumn: 5 },
+                    unitId: '',
+                    subUnitId: '',
+                    direction: 0,
+                },
+                id: '',
+            };
+            const targetRange = { startRow: 5, endRow: 10, startColumn: 2, endColumn: 8 };
+
+            const result = handleInsertRowCommon(info, targetRange);
+
+            expect(result).toEqual([{
+                startRow: 5,
+                endRow: 13, // 10 + (12 - 10 + 1)
+                startColumn: 2,
+                endColumn: 8,
+            }]);
+        });
+
+        it('should handle insertion of multiple rows', () => {
+            const info = {
+                params: {
+                    range: { startRow: 5, endRow: 10, startColumn: 0, endColumn: 5 },
+                    unitId: '',
+                    subUnitId: '',
+                    direction: 0,
+                },
+                id: '',
+            };
+            const targetRange = { startRow: 15, endRow: 20, startColumn: 2, endColumn: 8 };
+
+            const result = handleInsertRowCommon(info, targetRange);
+
+            expect(result).toEqual([{
+                startRow: 21, // 15 + (10 - 5 + 1)
+                endRow: 26, // 20 + (10 - 5 + 1)
+                startColumn: 2,
+                endColumn: 8,
+            }]);
+        });
+    });
+    describe('handleInsertColCommon', () => {
+        it('should shift range right when range is to the right of insertion point', () => {
+            const info: ICommandInfo<IInsertColCommandParams> = {
+                params: {
+                    range: { startRow: 0, endRow: 5, startColumn: 5, endColumn: 7 },
+                    unitId: '',
+                    subUnitId: '',
+                    direction: Direction.LEFT,
+                },
+                id: '',
+            };
+            const targetRange = { startRow: 2, endRow: 8, startColumn: 10, endColumn: 15 };
+
+            const result = handleInsertColCommon(info, targetRange);
+
+            expect(result).toEqual([{
+                startRow: 2,
+                endRow: 8,
+                startColumn: 13, // 10 + (7 - 5 + 1)
+                endColumn: 18, // 15 + (7 - 5 + 1)
+            }]);
+        });
+
+        it('should not change range when range is to the left of insertion point', () => {
+            const info: ICommandInfo<IInsertColCommandParams> = {
+                params: {
+                    range: { startRow: 0, endRow: 5, startColumn: 10, endColumn: 12 },
+                    unitId: '',
+                    subUnitId: '',
+                    direction: Direction.LEFT,
+                },
+                id: '',
+            };
+            const targetRange = { startRow: 2, endRow: 8, startColumn: 3, endColumn: 8 };
+
+            const result = handleInsertColCommon(info, targetRange);
+
+            expect(result).toEqual([targetRange]);
+        });
+
+        it('should expand range when insertion point is within the range', () => {
+            const info: ICommandInfo<IInsertColCommandParams> = {
+                params: {
+                    range: { startRow: 0, endRow: 5, startColumn: 7, endColumn: 9 },
+                    unitId: '',
+                    subUnitId: '',
+                    direction: Direction.LEFT,
+                },
+                id: '',
+            };
+            const targetRange = { startRow: 2, endRow: 8, startColumn: 5, endColumn: 12 };
+
+            const result = handleInsertColCommon(info, targetRange);
+
+            expect(result).toEqual([{
+                startRow: 2,
+                endRow: 8,
+                startColumn: 5,
+                endColumn: 15, // 12 + (9 - 7 + 1)
+            }]);
+        });
+
+        it('should handle insertion at the start of the range', () => {
+            const info: ICommandInfo<IInsertColCommandParams> = {
+                params: {
+                    range: { startRow: 0, endRow: 5, startColumn: 5, endColumn: 7 },
+                    unitId: '',
+                    subUnitId: '',
+                    direction: Direction.LEFT,
+                },
+                id: '',
+            };
+            const targetRange = { startRow: 2, endRow: 8, startColumn: 5, endColumn: 10 };
+
+            const result = handleInsertColCommon(info, targetRange);
+
+            expect(result).toEqual([{
+                startRow: 2,
+                endRow: 8,
+                startColumn: 8, // 5 + (7 - 5 + 1)
+                endColumn: 13, // 10 + (7 - 5 + 1)
+            }]);
+        });
+
+        it('should handle insertion at the end of the range', () => {
+            const info: ICommandInfo<IInsertColCommandParams> = {
+                params: {
+                    range: { startRow: 0, endRow: 5, startColumn: 10, endColumn: 12 },
+                    unitId: '',
+                    subUnitId: '',
+                    direction: Direction.LEFT,
+                },
+                id: '',
+            };
+            const targetRange = { startRow: 2, endRow: 8, startColumn: 5, endColumn: 10 };
+
+            const result = handleInsertColCommon(info, targetRange);
+
+            expect(result).toEqual([{
+                startRow: 2,
+                endRow: 8,
+                startColumn: 5,
+                endColumn: 13, // 10 + (12 - 10 + 1)
+            }]);
+        });
+
+        it('should handle insertion of multiple columns', () => {
+            const info: ICommandInfo<IInsertColCommandParams> = {
+                params: {
+                    range: { startRow: 0, endRow: 5, startColumn: 5, endColumn: 10 },
+                    unitId: '',
+                    subUnitId: '',
+                    direction: Direction.LEFT,
+                },
+                id: '',
+            };
+            const targetRange = { startRow: 2, endRow: 8, startColumn: 15, endColumn: 20 };
+
+            const result = handleInsertColCommon(info, targetRange);
+
+            expect(result).toEqual([{
+                startRow: 2,
+                endRow: 8,
+                startColumn: 21, // 15 + (10 - 5 + 1)
+                endColumn: 26, // 20 + (10 - 5 + 1)
+            }]);
         });
     });
     describe('handleMoveRange', () => {
@@ -1228,8 +1531,7 @@ describe('test ref-range move', () => {
                             endRow: 10,
                             startColumn: 8,
                             startRow: 6,
-                        },
-                        {
+                        }, {
                             endColumn: 7,
                             endRow: 10,
                             startColumn: 6,
@@ -1321,6 +1623,152 @@ describe('test ref-range move', () => {
             });
         });
     });
+    // eslint-disable-next-line test/no-identical-title
+    describe('handleIRemoveCol', () => {
+        it('should delete the target range when it is completely contained within the removed range', () => {
+            const param: IRemoveRowColCommand = {
+                id: EffectRefRangId.RemoveColCommandId,
+                params: {
+                    range: { startRow: 0, endRow: 10, startColumn: 3, endColumn: 8 },
+
+                },
+            };
+            const targetRange = { startRow: 2, endRow: 5, startColumn: 4, endColumn: 7 };
+
+            const operators = handleIRemoveCol(param, targetRange);
+            const result = runRefRangeMutations(operators, targetRange);
+
+            expect(result).toBeNull();
+        });
+
+        it('should shift the target range left when it is to the right of the removed range', () => {
+            const param: IRemoveRowColCommand = {
+                id: EffectRefRangId.RemoveColCommandId,
+                params: {
+                    range: { startRow: 0, endRow: 10, startColumn: 3, endColumn: 5 },
+
+                },
+            };
+            const targetRange = { startRow: 2, endRow: 5, startColumn: 8, endColumn: 12 };
+
+            const operators = handleIRemoveCol(param, targetRange);
+            const result = runRefRangeMutations(operators, targetRange);
+
+            expect(result).toEqual({
+                startRow: 2,
+                endRow: 5,
+                startColumn: 5, // 8 - (5 - 3 + 1)
+                endColumn: 9, // 12 - (5 - 3 + 1)
+            });
+        });
+
+        it('should not affect the target range when it is to the left of the removed range', () => {
+            const param: IRemoveRowColCommand = {
+                id: EffectRefRangId.RemoveColCommandId,
+                params: {
+                    range: { startRow: 0, endRow: 10, startColumn: 8, endColumn: 10 },
+
+                },
+            };
+            const targetRange = { startRow: 2, endRow: 5, startColumn: 3, endColumn: 6 };
+
+            const operators = handleIRemoveCol(param, targetRange);
+            const result = runRefRangeMutations(operators, targetRange);
+
+            expect(result).toEqual(targetRange);
+        });
+
+        it('should reduce the width of the target range when it overlaps with the right side of the removed range', () => {
+            const param: IRemoveRowColCommand = {
+                id: EffectRefRangId.RemoveColCommandId,
+                params: {
+                    range: { startRow: 0, endRow: 10, startColumn: 5, endColumn: 8 },
+
+                },
+            };
+            const targetRange = { startRow: 2, endRow: 5, startColumn: 3, endColumn: 10 };
+
+            const operators = handleIRemoveCol(param, targetRange);
+            const result = runRefRangeMutations(operators, targetRange);
+
+            expect(result).toEqual({
+                startRow: 2,
+                endRow: 5,
+                startColumn: 3,
+                endColumn: 6, // 10 - (8 - 5 + 1)
+            });
+        });
+
+        it('should reduce the width of the target range when it overlaps with the left side of the removed range', () => {
+            const param: IRemoveRowColCommand = {
+                id: EffectRefRangId.RemoveColCommandId,
+                params: {
+                    range: { startRow: 0, endRow: 10, startColumn: 3, endColumn: 6 },
+
+                },
+            };
+            const targetRange = { startRow: 2, endRow: 5, startColumn: 1, endColumn: 5 };
+
+            const operators = handleIRemoveCol(param, targetRange);
+            const result = runRefRangeMutations(operators, targetRange);
+
+            expect(result).toEqual({
+                startRow: 2,
+                endRow: 5,
+                startColumn: 1,
+                endColumn: 2, // 5 - (6 - 3 + 1)
+            });
+        });
+
+        it('should handle the case when the removed range starts at the same column as the target range', () => {
+            const param: IRemoveRowColCommand = {
+                id: EffectRefRangId.RemoveColCommandId,
+                params: {
+                    range: { startRow: 0, endRow: 10, startColumn: 3, endColumn: 5 },
+
+                },
+            };
+            const targetRange = { startRow: 2, endRow: 5, startColumn: 3, endColumn: 8 };
+
+            const operators = handleIRemoveCol(param, targetRange);
+            const result = runRefRangeMutations(operators, targetRange);
+
+            expect(result).toEqual({
+                startRow: 2,
+                endRow: 5,
+                startColumn: 3,
+                endColumn: 5, // 8 - (5 - 3 + 1)
+            });
+        });
+
+        it('should handle the case when the removed range ends at the same column as the target range', () => {
+            const param: IRemoveRowColCommand = {
+                id: EffectRefRangId.RemoveColCommandId,
+                params: {
+                    range: { startRow: 0, endRow: 10, startColumn: 3, endColumn: 8 },
+
+                },
+            };
+            const targetRange = { startRow: 2, endRow: 5, startColumn: 6, endColumn: 8 };
+
+            const operators = handleIRemoveCol(param, targetRange);
+            const result = runRefRangeMutations(operators, targetRange);
+
+            expect(result).toBeNull();
+        });
+
+        it('should return empty operators when range is not provided', () => {
+            const param: IRemoveRowColCommand = {
+                id: EffectRefRangId.RemoveColCommandId,
+                params: undefined,
+            };
+            const targetRange = { startRow: 2, endRow: 5, startColumn: 3, endColumn: 8 };
+
+            const operators = handleIRemoveCol(param, targetRange);
+
+            expect(operators).toEqual([]);
+        });
+    });
     describe('handleIRemoveRow', () => {
         let range: IRange;
         describe('the range contain targetRange', () => {
@@ -1398,75 +1846,182 @@ describe('test ref-range move', () => {
             });
         });
     });
-});
 
-describe('test different situations of adjustRangeOnMutation', () => {
-    it('should "RemoveSheetMutation" drop all range in the same worksheet', () => {
-        const range: IRange = { startRow: 0, endRow: 10, startColumn: 0, endColumn: 10 };
-        const mutation = { id: RemoveSheetMutation.id, params: {} as IRemoveSheetMutationParams };
-        const result = adjustRangeOnMutation(range, mutation);
-        expect(result).toBe(null);
+    describe('handleRemoveRowCommon', () => {
+        it('should remove rows from the target range when removing a single range', () => {
+            const param = {
+                range: { startRow: 5, endRow: 7, startColumn: 0, endColumn: 10 },
+                unitId: '',
+                subUnitId: '',
+            };
+            const targetRange = { startRow: 3, endRow: 10, startColumn: 2, endColumn: 8 };
+
+            const result = handleRemoveRowCommon(param, targetRange);
+
+            // The result should have the rows 5-7 removed from the original range
+            expect(result).toEqual([
+                { startRow: 3, endRow: 7, startColumn: 2, endColumn: 8 },
+            ]);
+        });
+
+        it('should remove rows from the target range when removing multiple ranges', () => {
+            const param = {
+                ranges: [
+                    { startRow: 3, endRow: 4, startColumn: 0, endColumn: 10 },
+                    { startRow: 8, endRow: 9, startColumn: 0, endColumn: 10 },
+                ],
+            } as IRemoveRowColCommandInterceptParams;
+            const targetRange = { startRow: 2, endRow: 12, startColumn: 2, endColumn: 8 };
+
+            const result = handleRemoveRowCommon(param, targetRange);
+
+            // The result should have rows 3-4 and 8-9 removed
+            expect(result).toEqual([
+                { startRow: 2, endRow: 8, startColumn: 2, endColumn: 8 },
+            ]);
+        });
+
+        it('should return empty array when all rows in the target range are removed', () => {
+            const param = {
+                range: { startRow: 5, endRow: 8, startColumn: 0, endColumn: 10 },
+                unitId: '',
+                subUnitId: '',
+            };
+            const targetRange = { startRow: 5, endRow: 8, startColumn: 2, endColumn: 8 };
+
+            const result = handleRemoveRowCommon(param, targetRange);
+
+            expect(result).toEqual([]);
+        });
+
+        it('should handle removing rows at the beginning of the target range', () => {
+            const param = {
+                range: { startRow: 3, endRow: 5, startColumn: 0, endColumn: 10 },
+                unitId: '',
+                subUnitId: '',
+            };
+            const targetRange = { startRow: 3, endRow: 10, startColumn: 2, endColumn: 8 };
+
+            const result = handleRemoveRowCommon(param, targetRange);
+
+            expect(result).toEqual([
+                { startRow: 3, endRow: 7, startColumn: 2, endColumn: 8 },
+            ]);
+        });
+
+        it('should handle removing rows at the end of the target range', () => {
+            const param = {
+                range: { startRow: 8, endRow: 10, startColumn: 0, endColumn: 10 },
+                unitId: '',
+                subUnitId: '',
+            };
+            const targetRange = { startRow: 3, endRow: 10, startColumn: 2, endColumn: 8 };
+
+            const result = handleRemoveRowCommon(param, targetRange);
+
+            expect(result).toEqual([
+                { startRow: 3, endRow: 7, startColumn: 2, endColumn: 8 },
+            ]);
+        });
+
+        it('should handle removing rows outside the target range', () => {
+            const param = {
+                range: { startRow: 15, endRow: 20, startColumn: 0, endColumn: 10 },
+                unitId: '',
+                subUnitId: '',
+            };
+            const targetRange = { startRow: 3, endRow: 10, startColumn: 2, endColumn: 8 };
+
+            const result = handleRemoveRowCommon(param, targetRange);
+
+            // The target range should remain unchanged
+            expect(result).toEqual([targetRange]);
+        });
+
+        it('should handle removing rows that partially overlap with the target range', () => {
+            const param = {
+                range: { startRow: 8, endRow: 15, startColumn: 0, endColumn: 10 },
+                unitId: '',
+                subUnitId: '',
+            };
+            const targetRange = { startRow: 5, endRow: 12, startColumn: 2, endColumn: 8 };
+
+            const result = handleRemoveRowCommon(param, targetRange);
+
+            expect(result).toEqual([
+                { startRow: 5, endRow: 7, startColumn: 2, endColumn: 8 },
+            ]);
+        });
     });
 
-    describe('test move row situations', () => {
-        it('should move when the range is contained', () => {
-            const range: IRange = { startRow: 1, endRow: 1, startColumn: 1, endColumn: 1 };
-            const mutation: IMutationInfo<IMoveRowsMutationParams> = {
-                id: MoveRowsMutation.id,
-                params: {
-                    unitId: '',
-                    subUnitId: '',
-                    sourceRange: { startRow: 0, endRow: 2, startColumn: 0, endColumn: 2 },
-                    targetRange: { startRow: 7, endRow: 9, startColumn: 0, endColumn: 2 },
-                },
-            };
+    describe('test different situations of adjustRangeOnMutation', () => {
+        it('should "RemoveSheetMutation" drop all range in the same worksheet', () => {
+            const range: IRange = { startRow: 0, endRow: 10, startColumn: 0, endColumn: 10 };
+            const mutation = { id: RemoveSheetMutation.id, params: {} as IRemoveSheetMutationParams };
             const result = adjustRangeOnMutation(range, mutation);
-            expect(result).toEqual({ startRow: 5, endRow: 5, startColumn: 1, endColumn: 1 });
+            expect(result).toBe(null);
         });
 
-        it('should expand when move inside', () => {
-            const range: IRange = { startRow: 5, endRow: 7, startColumn: 1, endColumn: 1 };
-            const mutation: IMutationInfo<IMoveRowsMutationParams> = {
-                id: MoveRowsMutation.id,
-                params: {
-                    unitId: '',
-                    subUnitId: '',
-                    sourceRange: { startRow: 0, endRow: 2, startColumn: 0, endColumn: 2 },
-                    targetRange: { startRow: 6, endRow: 8, startColumn: 0, endColumn: 2 },
-                },
-            };
-            const result = adjustRangeOnMutation(range, mutation);
-            expect(result).toEqual({ startRow: 2, endRow: 7, startColumn: 1, endColumn: 1 });
-        });
+        describe('test move row situations', () => {
+            it('should move when the range is contained', () => {
+                const range: IRange = { startRow: 1, endRow: 1, startColumn: 1, endColumn: 1 };
+                const mutation: IMutationInfo<IMoveRowsMutationParams> = {
+                    id: MoveRowsMutation.id,
+                    params: {
+                        unitId: '',
+                        subUnitId: '',
+                        sourceRange: { startRow: 0, endRow: 2, startColumn: 0, endColumn: 2 },
+                        targetRange: { startRow: 7, endRow: 9, startColumn: 0, endColumn: 2 },
+                    },
+                };
+                const result = adjustRangeOnMutation(range, mutation);
+                expect(result).toEqual({ startRow: 5, endRow: 5, startColumn: 1, endColumn: 1 });
+            });
 
-        it('should expand when move inside 222', () => {
-            const range: IRange = { startRow: 7, endRow: 9, startColumn: 1, endColumn: 1 };
-            const mutation: IMutationInfo<IMoveRowsMutationParams> = {
-                id: MoveRowsMutation.id,
-                params: {
-                    unitId: '',
-                    subUnitId: '',
-                    sourceRange: { startRow: 0, endRow: 2, startColumn: 0, endColumn: 2 },
-                    targetRange: { startRow: 6, endRow: 8, startColumn: 0, endColumn: 2 },
-                },
-            };
-            const result = adjustRangeOnMutation(range, mutation);
-            expect(result).toEqual({ startRow: 7, endRow: 9, startColumn: 1, endColumn: 1 });
-        });
+            it('should expand when move inside', () => {
+                const range: IRange = { startRow: 5, endRow: 7, startColumn: 1, endColumn: 1 };
+                const mutation: IMutationInfo<IMoveRowsMutationParams> = {
+                    id: MoveRowsMutation.id,
+                    params: {
+                        unitId: '',
+                        subUnitId: '',
+                        sourceRange: { startRow: 0, endRow: 2, startColumn: 0, endColumn: 2 },
+                        targetRange: { startRow: 6, endRow: 8, startColumn: 0, endColumn: 2 },
+                    },
+                };
+                const result = adjustRangeOnMutation(range, mutation);
+                expect(result).toEqual({ startRow: 2, endRow: 7, startColumn: 1, endColumn: 1 });
+            });
 
-        it('should be delete', () => {
-            const targetRange: IRange = { startRow: 5, endRow: 7, startColumn: 1, endColumn: 1 };
-            const resultRange = handleRemoveRowCommon({ range: { ...targetRange } }, targetRange);
-            expect(resultRange.length).toBe(0);
+            it('should expand when move inside 222', () => {
+                const range: IRange = { startRow: 7, endRow: 9, startColumn: 1, endColumn: 1 };
+                const mutation: IMutationInfo<IMoveRowsMutationParams> = {
+                    id: MoveRowsMutation.id,
+                    params: {
+                        unitId: '',
+                        subUnitId: '',
+                        sourceRange: { startRow: 0, endRow: 2, startColumn: 0, endColumn: 2 },
+                        targetRange: { startRow: 6, endRow: 8, startColumn: 0, endColumn: 2 },
+                    },
+                };
+                const result = adjustRangeOnMutation(range, mutation);
+                expect(result).toEqual({ startRow: 7, endRow: 9, startColumn: 1, endColumn: 1 });
+            });
 
-            const resultRange2 = handleRemoveRowCommon({ range: { ...targetRange } }, { ...targetRange, startRow: 4 });
-            expect(resultRange2).toEqual([{ startRow: 4, endRow: 4, startColumn: 1, endColumn: 1 }]);
-        });
+            it('should be delete', () => {
+                const targetRange: IRange = { startRow: 5, endRow: 7, startColumn: 1, endColumn: 1 };
+                const resultRange = handleRemoveRowCommon({ range: { ...targetRange } }, targetRange);
+                expect(resultRange.length).toBe(0);
 
-        it('should not be delete ', () => {
-            const targetRange: IRange = { startRow: 5, endRow: 7, startColumn: 1, endColumn: 1 };
-            const resultRange = handleRemoveRowCommon({ range: { ...targetRange }, ranges: [{ startRow: 5, endRow: 5, startColumn: 1, endColumn: 1 }, { startRow: 6, endRow: 6, startColumn: 1, endColumn: 1 }] }, targetRange);
-            expect(resultRange).toEqual([{ startRow: 5, endRow: 5, startColumn: 1, endColumn: 1 }]);
+                const resultRange2 = handleRemoveRowCommon({ range: { ...targetRange } }, { ...targetRange, startRow: 4 });
+                expect(resultRange2).toEqual([{ startRow: 4, endRow: 4, startColumn: 1, endColumn: 1 }]);
+            });
+
+            it('should not be delete ', () => {
+                const targetRange: IRange = { startRow: 5, endRow: 7, startColumn: 1, endColumn: 1 };
+                const resultRange = handleRemoveRowCommon({ range: { ...targetRange }, ranges: [{ startRow: 5, endRow: 5, startColumn: 1, endColumn: 1 }, { startRow: 6, endRow: 6, startColumn: 1, endColumn: 1 }] }, targetRange);
+                expect(resultRange).toEqual([{ startRow: 5, endRow: 5, startColumn: 1, endColumn: 1 }]);
+            });
         });
     });
 });

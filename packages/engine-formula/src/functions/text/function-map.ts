@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import { Lenb } from './lenb';
 import { Lower } from './lower';
 import { Mid } from './mid';
 import { Midb } from './midb';
+import { Numberstring } from './numberstring';
 import { Numbervalue } from './numbervalue';
 import { Proper } from './proper';
 import { Regexextract } from './regexextract';
@@ -84,6 +85,7 @@ export const functionText = [
     [Lower, FUNCTION_NAMES_TEXT.LOWER],
     [Mid, FUNCTION_NAMES_TEXT.MID],
     [Midb, FUNCTION_NAMES_TEXT.MIDB],
+    [Numberstring, FUNCTION_NAMES_TEXT.NUMBERSTRING],
     [Numbervalue, FUNCTION_NAMES_TEXT.NUMBERVALUE],
     [Regexextract, FUNCTION_NAMES_TEXT.REGEXEXTRACT],
     [Regexmatch, FUNCTION_NAMES_TEXT.REGEXMATCH],

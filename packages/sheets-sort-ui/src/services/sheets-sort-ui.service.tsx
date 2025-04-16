@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,6 @@ import {
 import { expandToContinuousRange, getPrimaryForRange, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { SheetsSortService, SortType } from '@univerjs/sheets-sort';
 import { IConfirmService } from '@univerjs/ui';
-import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { ExtendConfirm } from '../views/ExtendConfirm';
 
@@ -69,7 +68,8 @@ export class SheetsSortUIService extends Disposable {
         @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
         @Inject(SheetsSortService) private readonly _sheetsSortService: SheetsSortService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
-        @ICommandService private readonly _commandService: ICommandService) {
+        @ICommandService private readonly _commandService: ICommandService
+    ) {
         super();
     }
 
@@ -129,16 +129,15 @@ export class SheetsSortUIService extends Disposable {
 
         const colTranslator = colIndexTranslator(this._localeService);
 
-        return Array.from({ length: range.endColumn - range.startColumn + 1 },
-            (_, i) => {
-                const cellValue = worksheet.getCell(range.startRow, i + range.startColumn)?.v;
-                return {
-                    index: i + range.startColumn,
-                    label: hasTitle ?
-                        `${cellValue ?? colTranslator(i + range.startColumn)}` :
-                        colTranslator(i + range.startColumn),
-                };
-            });
+        return Array.from({ length: range.endColumn - range.startColumn + 1 }, (_, i) => {
+            const cellValue = worksheet.getCell(range.startRow, i + range.startColumn)?.v;
+            return {
+                index: i + range.startColumn,
+                label: hasTitle ?
+                    `${cellValue ?? colTranslator(i + range.startColumn)}` :
+                    colTranslator(i + range.startColumn),
+            };
+        });
     }
 
     setSelection(unitId: string, subUnitId: string, range: IRange) {
@@ -228,7 +227,7 @@ export class SheetsSortUIService extends Disposable {
         return true;
     }
 
-    private async _detectSortLocation(extend?: boolean): Promise<Nullable<ISheetSortLocation >> {
+    private async _detectSortLocation(extend?: boolean): Promise<Nullable<ISheetSortLocation>> {
         const workbook = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SHEET) as Workbook;
         const worksheet = workbook.getActiveSheet() as Worksheet;
         const unitId = workbook.getUnitId();

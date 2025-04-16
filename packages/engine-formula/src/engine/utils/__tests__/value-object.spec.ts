@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from 'vitest';
-
 import { cellToRange, CellValueType } from '@univerjs/core';
-import { convertTonNumber, isSingleValueObject, objectValueToCellValue } from '../value-object';
-import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../value-object/primitive-object';
-import { ErrorValueObject } from '../../value-object/base-value-object';
+
+import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../basics/error-type';
-import { ArrayValueObject } from '../../value-object/array-value-object';
 import { CellReferenceObject } from '../../reference-object/cell-reference-object';
-import { RowReferenceObject } from '../../reference-object/row-reference-object';
 import { ColumnReferenceObject } from '../../reference-object/column-reference-object';
 import { RangeReferenceObject } from '../../reference-object/range-reference-object';
+import { RowReferenceObject } from '../../reference-object/row-reference-object';
+import { ArrayValueObject } from '../../value-object/array-value-object';
+import { ErrorValueObject } from '../../value-object/base-value-object';
+import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../value-object/primitive-object';
+import { convertTonNumber, isSingleValueObject, objectValueToCellValue } from '../value-object';
 
 describe('Test object cover', () => {
     it('Function convertTonNumber', () => {
@@ -65,5 +65,6 @@ describe('Test object cover', () => {
         expect(objectValueToCellValue(NullValueObject.create())).toStrictEqual({ v: null });
         expect(objectValueToCellValue(null)).toStrictEqual({ v: null });
         expect(objectValueToCellValue(ErrorValueObject.create(ErrorType.VALUE))).toStrictEqual({ v: ErrorType.VALUE, t: CellValueType.STRING });
+        expect(objectValueToCellValue(StringValueObject.create('0').withCustomData({ test: 'abc' }))).toStrictEqual({ v: '0', t: CellValueType.STRING, custom: { test: 'abc' } });
     });
 });

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,8 @@
  */
 
 import { CheckMarkSingle } from '@univerjs/icons';
-import clsx from 'clsx';
-import React, { useContext, useMemo } from 'react';
+import { useContext, useMemo } from 'react';
+import { clsx } from '../../helper/clsx';
 
 import { ConfigContext } from '../config-provider/ConfigProvider';
 import styles from './index.module.less';
@@ -44,10 +44,20 @@ export interface ICascaderListProps {
      * The callback function that is triggered when the value is changed
      */
     onChange: (value: string[]) => void;
+
+    /**
+     * The class name of the content
+     */
+    contentClassName?: string;
+
+    /**
+     * The class name of the wrapper
+     */
+    wrapperClassName?: string;
 }
 
 export function CascaderList(props: ICascaderListProps) {
-    const { value, options = [], onChange } = props;
+    const { value, options = [], onChange, contentClassName, wrapperClassName } = props;
 
     const { locale } = useContext(ConfigContext);
 
@@ -84,11 +94,11 @@ export function CascaderList(props: ICascaderListProps) {
     }
 
     return (
-        <section className={styles.cascaderList}>
+        <section className={clsx(styles.cascaderList, wrapperClassName)}>
             {activeOptions.map((options, index) =>
                 options.length
                     ? (
-                        <ul key={index} className={styles.cascaderListBoard}>
+                        <ul key={index} className={clsx(styles.cascaderListBoard, contentClassName)}>
                             {options.map((option) => (
                                 <li
                                     key={option.value}

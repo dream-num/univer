@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ export class SheetCrossHairHighlightShape extends Shape<ISheetCrossHairHighlight
     }
 
     protected override _draw(ctx: CanvasRenderingContext2D): void {
-        const color = `rgba(${this._color!.r}, ${this._color!.g}, ${this._color!.b}, ${this._color!.a})`;
+        const color = `rgba(${this._color!.r}, ${this._color!.g}, ${this._color!.b}, ${this._color?.a ?? 0.5})`;
 
         Rect.drawWith(ctx as UniverRenderingContext, {
             width: this.width,

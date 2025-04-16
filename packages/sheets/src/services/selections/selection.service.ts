@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,10 @@ import { distinctUntilChanged, of, shareReplay, skip, switchMap, takeUntil } fro
 import { WorkbookSelectionModel } from './selection-data-model';
 import { SelectionMoveType } from './type';
 
+/**
+ * For normal selection.
+ * Ref selection is in RefSelectionService which extends this class.
+ */
 export class SheetsSelectionsService extends RxDisposable {
     private get _currentSelectionPos(): Nullable<ISelectionManagerSearchParam> {
         const workbook = this._instanceSrv.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);

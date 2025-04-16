@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,11 @@
  */
 
 import type { IDrawingParam } from '@univerjs/core';
-import { ICommandService, LocaleService, useDependency } from '@univerjs/core';
-import React, { useEffect, useRef, useState } from 'react';
+import { ICommandService, LocaleService } from '@univerjs/core';
+import { Button, clsx, Select } from '@univerjs/design';
 import { CreateCopySingle } from '@univerjs/icons';
-import { Button, Select } from '@univerjs/design';
-import clsx from 'clsx';
+import { useDependency } from '@univerjs/ui';
+import { useEffect, useRef, useState } from 'react';
 import { AutoImageCropOperation, CloseImageCropOperation, CropType } from '../../commands/operations/image-crop.operation';
 import styles from './index.module.less';
 
@@ -48,31 +48,40 @@ export const ImageCropper = (props: IImageCropperProps) => {
         {
             label: localeService.t('image-panel.crop.mode'),
             value: CropType.FREE,
-        }, {
+        },
+        {
             label: '1:1',
             value: CropType.R1_1,
-        }, {
+        },
+        {
             label: '16:9',
             value: CropType.R16_9,
-        }, {
+        },
+        {
             label: '9:16',
             value: CropType.R9_16,
-        }, {
+        },
+        {
             label: '5:4',
             value: CropType.R5_4,
-        }, {
+        },
+        {
             label: '4:5',
             value: CropType.R4_5,
-        }, {
+        },
+        {
             label: '4:3',
             value: CropType.R4_3,
-        }, {
+        },
+        {
             label: '3:4',
             value: CropType.R3_4,
-        }, {
+        },
+        {
             label: '3:2',
             value: CropType.R3_2,
-        }, {
+        },
+        {
             label: '2:3',
             value: CropType.R2_3,
         },

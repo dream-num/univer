@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import type { ICommandService } from '../services/command/command.service';
 import { merge, timer } from 'rxjs';
 import { debounceTime, filter, first } from 'rxjs/operators';
-import type { ICommandService } from '../services/command/command.service';
 import { CommandType } from '../services/command/command.service';
 import { fromCallback } from './rxjs';
 

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,23 +15,26 @@
  */
 
 import type { IDocDrawingBase } from '@univerjs/core';
+import type { IDocFloatDomData, IImageData, IUnitDrawingService } from '@univerjs/drawing';
 import { createIdentifier } from '@univerjs/core';
-import { type IImageData, type IUnitDrawingService, UnitDrawingService } from '@univerjs/drawing';
+import { UnitDrawingService } from '@univerjs/drawing';
 
-export interface IDocImage extends IImageData, IDocDrawingBase {}
+export interface IDocImage extends IImageData, IDocDrawingBase { }
 
 /**
  * test type
  */
-export interface IDocShape extends IDocDrawingBase {}
+export interface IDocShape extends IDocDrawingBase { }
 
-export type IDocDrawing = IDocImage | IDocShape;
+export interface IDocFloatDom extends IDocFloatDomData, IDocDrawingBase {}
+
+export type IDocDrawing = IDocImage | IDocFloatDom | IDocShape;
 
 type OptionalField<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 export type IDocUpdateDrawing = OptionalField<IDocDrawing, 'drawingType' | 'layoutType' | 'docTransform' | 'description' | 'title'>;
 
-export class DocDrawingService extends UnitDrawingService<IDocDrawing> {}
+export class DocDrawingService extends UnitDrawingService<IDocDrawing> { }
 
-export interface IDocDrawingService extends IUnitDrawingService<IDocDrawing> {}
+export interface IDocDrawingService extends IUnitDrawingService<IDocDrawing> { }
 
 export const IDocDrawingService = createIdentifier<IDocDrawingService>('univer.doc.plugin.doc-drawing.service');

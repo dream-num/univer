@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-import React, { useMemo } from 'react';
-import { useDependency, useObservable } from '@univerjs/core';
-import { clsx } from 'clsx';
-import type { IBaseMenuProps } from '../desktop/Menu';
 import type { IDisplayMenuItem, IMenuItem, IValueOption, MenuItemDefaultValueType } from '../../../services/menu/menu';
-import { MenuItemType } from '../../../services/menu/menu';
-
-import { CustomLabel } from '../../custom-label';
 import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
+import type { IBaseMenuProps } from '../desktop/Menu';
+import { clsx } from '@univerjs/design';
+import { useMemo } from 'react';
+import { MenuItemType } from '../../../services/menu/menu';
 import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
+import { useDependency, useObservable } from '../../../utils/di';
+import { CustomLabel } from '../../custom-label';
 import styles from './index.module.less';
 
 /**

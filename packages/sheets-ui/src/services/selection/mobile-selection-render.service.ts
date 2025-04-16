@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -148,7 +148,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
             spreadsheetRowHeader?.onPointerUp$.subscribeEvent((evt: IPointerEvent | IMouseEvent, _state: EventState) => {
                 if (this._normalSelectionDisabled()) return;
 
-                const skeleton = this._sheetSkeletonManagerService.getCurrent()!.skeleton;
+                const skeleton = this._sheetSkeletonManagerService.getCurrentParam()!.skeleton;
                 const { row } = getCoordByOffset(evt.offsetX, evt.offsetY, scene, skeleton);
                 const matchSelectionData = isThisRowSelected(this._workbookSelections.getCurrentSelections(), row);
                 if (matchSelectionData) return;
@@ -162,7 +162,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
             spreadsheetColumnHeader?.onPointerUp$.subscribeEvent((evt: IPointerEvent | IMouseEvent, _state: EventState) => {
                 if (this._normalSelectionDisabled()) return;
 
-                const skeleton = this._sheetSkeletonManagerService.getCurrent()!.skeleton;
+                const skeleton = this._sheetSkeletonManagerService.getCurrentParam()!.skeleton;
                 const { column } = getCoordByOffset(evt.offsetX, evt.offsetY, scene, skeleton);
                 const matchSelectionData = isThisColSelected(this._workbookSelections.getCurrentSelections(), column);
                 if (matchSelectionData) return;
@@ -179,7 +179,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
 
             this._reset(); // remove all other selections
 
-            const skeleton = this._sheetSkeletonManagerService.getCurrent()!.skeleton;
+            const skeleton = this._sheetSkeletonManagerService.getCurrentParam()!.skeleton;
             const selectionWithStyle = selectionDataForSelectAll(skeleton);
             this._addSelectionControlByModelData(selectionWithStyle);
             // pointerup --> create selection
@@ -707,7 +707,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
             if (activeControl == null) {
                 return;
             }
-            const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+            const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
             const sheetContentHeight = skeleton?.rowTotalHeight;
             const sheetContentWidth = skeleton?.columnTotalWidth;
             const rangeType = activeControl.rangeType;

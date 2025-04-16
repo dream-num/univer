@@ -1,7 +1,7 @@
 {
     "name": "@univerjs/debugger",
-    "version": "0.2.12",
-    "private": false,
+    "version": "0.6.6",
+    "private": true,
     "description": "",
     "author": "DreamNum <developer@univer.ai>",
     "license": "Apache-2.0",
@@ -20,7 +20,8 @@
     "keywords": [],
     "exports": {
         ".": "./src/index.ts",
-        "./*": "./src/*"
+        "./*": "./src/*",
+        "./locale/*": "./src/locale/*.ts"
     },
     "main": "./src/index.ts",
     "types": "./lib/types/index.d.ts",
@@ -39,6 +40,11 @@
                 "require": "./lib/cjs/*",
                 "types": "./lib/types/index.d.ts"
             },
+            "./locale/*": {
+                "import": "./lib/es/locale/*.js",
+                "require": "./lib/cjs/locale/*.js",
+                "types": "./lib/types/locale/*.d.ts"
+            },
             "./lib/*": "./lib/*"
         }
     },
@@ -53,34 +59,34 @@
         "build": "univer-cli build --skipUMD"
     },
     "peerDependencies": {
-        "react": ">=16.9.0 || >=17 || >=18 || >=19",
+        "react": "^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
+        "@univerjs/docs-drawing-ui": "workspace:*",
         "@univerjs/docs-ui": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons": "^0.2.14",
+        "@univerjs/icons": "^0.2.35",
         "@univerjs/mockdata": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-drawing-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@univerjs/watermark": "workspace:*",
-        "clsx": "^2.1.1"
+        "@univerjs/watermark": "workspace:*"
     },
     "optionalDependencies": {
         "vue": ">=3.0.0"
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
-        "postcss": "^8.4.49",
+        "postcss": "^8.5.3",
         "react": "18.3.1",
         "rxjs": "^7.8.1",
         "tailwindcss": "^3.4.17",
-        "typescript": "^5.7.3",
-        "vite": "^6.0.7",
-        "vitest": "^2.1.8",
-        "vue": "^3.5.12"
+        "typescript": "^5.8.3",
+        "vite": "^6.3.0",
+        "vitest": "^3.1.1",
+        "vue": "^3.5.13"
     }
 }

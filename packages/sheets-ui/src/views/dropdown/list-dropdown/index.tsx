@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,12 @@ import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { ISheetLocation } from '@univerjs/sheets';
 import type { IPopup } from '@univerjs/ui';
 import type { IBaseDropdownProps } from '../type';
-import { BuildTextUtils, ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
+import { BuildTextUtils, ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { Scrollbar } from '@univerjs/design';
 import { RichTextEditingMutation } from '@univerjs/docs';
 import { CheckMarkSingle } from '@univerjs/icons';
 import { RangeProtectionPermissionEditPoint, SheetPermissionCheckController, WorkbookEditablePermission, WorksheetEditPermission } from '@univerjs/sheets';
-import { RectPopup } from '@univerjs/ui';
+import { RectPopup, useDependency } from '@univerjs/ui';
 import React, { useEffect, useMemo, useState } from 'react';
 import { IEditorBridgeService } from '../../../services/editor-bridge.service';
 import styles from './index.module.less';

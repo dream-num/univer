@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,96 +14,77 @@
  * limitations under the License.
  */
 
-import clsx from 'clsx';
-import React from 'react';
+import type { VariantProps } from 'class-variance-authority';
+import type { ButtonHTMLAttributes } from 'react';
+import { Slot } from '@radix-ui/react-slot';
+import { cva } from 'class-variance-authority';
+import { forwardRef } from 'react';
+import { clsx } from '../../helper/clsx';
 
-import styles from './index.module.less';
-
-export type ButtonType = 'primary' | 'default' | 'text' | 'link';
-export type ButtonSize = 'small' | 'middle' | 'large';
-
-export interface IButtonProps {
-    children?: React.ReactNode;
-
-    /** Semantic DOM class */
-    className?: string;
-
-    /** Semantic DOM style */
-    style?: React.CSSProperties;
-
-    /**
-     * Set button type
-     * @default 'default'
-     */
-    type?: ButtonType;
-
-    /**
-     * Set the size of button
-     * @default 'middle'
-     */
-    size?: ButtonSize;
-
-    /**
-     * Option to fit button width to its parent width
-     * @default false
-     */
-    block?: boolean;
-
-    /** Set the original html `type` of button, see: [MDN](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/button#attr-type) */
-    htmlType?: 'submit' | 'reset' | 'button';
-
-    /**
-     * Disabled state of button
-     * @default false
-     */
-    disabled?: boolean;
-
-    /** Set the handler to handle `click` event */
-    onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
-
-    id?: string;
-}
-
-export function Button(props: IButtonProps) {
-    const {
-        children,
-        className,
-        style,
-        type = 'default',
-        size = 'middle',
-        block,
-        htmlType,
-        disabled = false,
-        onClick,
-
-        ...restProps
-    } = props;
-
-    const _className = clsx(
-        styles.button,
-        {
-            [styles.buttonPrimary]: type === 'primary',
-            [styles.buttonDefault]: type === 'default',
-            [styles.buttonText]: type === 'text',
-            [styles.buttonLink]: type === 'link',
-            [styles.buttonSmall]: size === 'small',
-            [styles.buttonMiddle]: size === 'middle',
-            [styles.buttonLarge]: size === 'large',
-            [styles.buttonBlock]: block,
+export const buttonVariants = cva(
+    `
+      univer-box-border univer-inline-flex univer-cursor-pointer univer-select-none univer-items-center
+      univer-justify-center univer-gap-2 univer-whitespace-nowrap univer-rounded-md univer-border univer-border-solid
+      univer-text-sm univer-font-medium univer-transition-colors
+      [&_svg]:univer-pointer-events-none [&_svg]:univer-size-4 [&_svg]:univer-shrink-0
+      disabled:univer-pointer-events-none disabled:univer-opacity-50
+    `,
+    {
+        variants: {
+            variant: {
+                default: `
+                  univer-border-gray-200 univer-bg-white univer-text-gray-700
+                  active:univer-bg-gray-200
+                  dark:univer-border-gray-600 dark:univer-bg-gray-700 dark:univer-text-white
+                  dark:hover:univer-bg-gray-600 dark:active:univer-bg-gray-500
+                  hover:univer-bg-gray-100
+                `,
+                primary: `
+                  univer-border-primary-600 univer-bg-primary-600 univer-text-white
+                  active:univer-bg-primary-700
+                  hover:univer-bg-primary-500
+                `,
+                text: `
+                  univer-border-transparent univer-bg-transparent univer-text-gray-900
+                  active:univer-bg-gray-200
+                  dark:univer-text-white dark:hover:univer-bg-gray-700 dark:active:univer-bg-gray-600
+                  hover:univer-bg-gray-100
+                `,
+                link: `
+                  univer-border-transparent univer-bg-transparent univer-text-primary-600 univer-underline-offset-4
+                  univer-underline-current
+                  active:univer-text-primary-700
+                  hover:univer-text-primary-500 hover:univer-underline
+                `,
+            },
+            size: {
+                small: 'univer-h-6 univer-rounded-md univer-px-1.5 univer-text-xs',
+                middle: 'univer-h-8 univer-rounded-lg univer-px-2 univer-text-sm',
+                large: 'univer-h-10 univer-rounded-lg univer-px-3 univer-text-sm',
+            },
         },
-        className
-    );
+        defaultVariants: {
+            variant: 'default',
+            size: 'middle',
+        },
+    }
+);
 
-    return (
-        <button
-            className={_className}
-            style={style}
-            type={htmlType}
-            onClick={onClick}
-            disabled={disabled}
-            {...restProps}
-        >
-            {children}
-        </button>
-    );
+export interface IButtonProps
+    extends ButtonHTMLAttributes<HTMLButtonElement>,
+    VariantProps<typeof buttonVariants> {
+    asChild?: boolean;
 }
+
+export const Button = forwardRef<HTMLButtonElement, IButtonProps>(
+    ({ className, variant, size, asChild = false, ...props }, ref) => {
+        const Comp = asChild ? Slot : 'button';
+        return (
+            <Comp
+                className={clsx(buttonVariants({ variant, size, className }))}
+                ref={ref}
+                {...props}
+            />
+        );
+    }
+);

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import { SheetInterceptorService } from '../services/sheet-interceptor/sheet-int
 import { RangeThemeStyle } from './range-theme-util';
 
 import { buildInThemes } from './range-themes/build-in-theme.factory';
-import { defaultRangeThemeStyle } from './range-themes/default';
+import { defaultRangeThemeStyle, defaultRangeThemeStyleJSONWithLastRowStyle } from './range-themes/default';
 
 export interface IRangeThemeRangeInfo {
     range: IRange;
@@ -59,6 +59,7 @@ export class SheetRangeThemeModel extends Disposable {
 
     private _initDefaultTheme() {
         this.registerDefaultRangeTheme(defaultRangeThemeStyle);
+        this.registerDefaultRangeTheme(defaultRangeThemeStyleJSONWithLastRowStyle);
         for (const theme of buildInThemes) {
             this.registerDefaultRangeTheme(theme);
         }
@@ -213,7 +214,7 @@ export class SheetRangeThemeModel extends Disposable {
     toJson(unitId: string) {
         // deserialize registered range theme style rule
         const ruleMap = this._ensureRangeThemeStyleRuleMap(unitId);
-          // deserialize custom range theme style
+        // deserialize custom range theme style
         const rangeThemeStyleMap = this._ensureRangeThemeStyleMap(unitId);
 
         if (rangeThemeStyleMap.size === 0 && ruleMap.size === 0) {
@@ -236,29 +237,27 @@ export class SheetRangeThemeModel extends Disposable {
         });
     }
 
-    fromJSON(json: ISheetRangeThemeModelJSON) {
-        const { rangeThemeStyleRuleMap, rangeThemeStyleMapJson } = json;
+    fromJSON(unitId: string, json: ISheetRangeThemeModelJSON) {
+        const { rangeThemeStyleRuleMap: rangeThemeStyleRuleMapJSON, rangeThemeStyleMapJson } = json;
 
-        this._rangeThemeStyleMap.clear();
-        this._rangeThemeStyleRuleMap.clear();
-        this._rTreeCollection.clear();
-        if (!rangeThemeStyleRuleMap || !rangeThemeStyleMapJson) {
-            return;
+        if (rangeThemeStyleRuleMapJSON) {
+            Object.keys(rangeThemeStyleRuleMapJSON).forEach((key) => {
+                const ruleMap = rangeThemeStyleRuleMapJSON[key];
+                const { themeName, rangeInfo } = ruleMap;
+                this.registerRangeThemeRule(themeName, rangeInfo);
+                const rTreeCollection = this._ensureRTreeCollection(rangeInfo.unitId);
+                rTreeCollection.insert({ unitId: key, sheetId: rangeInfo.subUnitId, range: rangeInfo.range, id: key });
+            });
         }
-        Object.keys(rangeThemeStyleRuleMap).forEach((key) => {
-            const ruleMap = rangeThemeStyleRuleMap[key];
-            const { themeName, rangeInfo } = ruleMap;
-            this.registerRangeThemeRule(themeName, rangeInfo);
-            const rTreeCollection = this._ensureRTreeCollection(rangeInfo.unitId);
-            rTreeCollection.insert({ unitId: key, sheetId: rangeInfo.subUnitId, range: rangeInfo.range, id: key });
-        });
 
-        Object.keys(rangeThemeStyleMapJson).forEach((key) => {
-            const styleMap = rangeThemeStyleMapJson[key];
-            const style = new RangeThemeStyle(styleMap.name);
-            style.fromJson(styleMap);
-            this._ensureRangeThemeStyleMap(key).set(style.getName(), style);
-        });
+        if (rangeThemeStyleMapJson) {
+            Object.keys(rangeThemeStyleMapJson).forEach((key) => {
+                const styleMap = rangeThemeStyleMapJson[key];
+                const style = new RangeThemeStyle(styleMap.name);
+                style.fromJson(styleMap);
+                this._ensureRangeThemeStyleMap(unitId).set(style.getName(), style);
+            });
+        }
     }
 
     deleteUnitId(unitId: string) {
@@ -285,8 +284,8 @@ export class SheetRangeThemeModel extends Disposable {
             },
             businesses: [UniverInstanceType.UNIVER_SHEET],
             pluginName: SHEET_RANGE_THEME_MODEL_PLUGIN,
-            onLoad: (_unitId, resources) => {
-                this.fromJSON(resources);
+            onLoad: (unitId, resources) => {
+                this.fromJSON(unitId, resources);
             },
             onUnLoad: (unitId) => {
                 this.deleteUnitId(unitId);

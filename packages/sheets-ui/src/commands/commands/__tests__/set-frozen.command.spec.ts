@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,11 @@
  */
 
 import type { IFreeze, Injector, IWorkbookData, Univer, Workbook } from '@univerjs/core';
+import type { IScrollStateWithSearchParam } from '../../../services/scroll-manager.service';
 import { ICommandService, IUniverInstanceService, RANGE_TYPE, UniverInstanceType } from '@univerjs/core';
 import { CancelFrozenCommand, SheetsSelectionsService } from '@univerjs/sheets';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { SheetScrollManagerService } from '../../../services/scroll-manager.service';
 import {
     SetColumnFrozenCommand,
@@ -34,7 +35,7 @@ describe('Test commands used for change selections', () => {
     let selectionManagerService: SheetsSelectionsService;
     let scrollManagerService: SheetScrollManagerService;
 
-    const currentInfo = {
+    const searchParam = {
         unitId: 'test',
         sheetId: 'sheet1',
     };
@@ -68,13 +69,15 @@ describe('Test commands used for change selections', () => {
     }
 
     const scrollTo = (startRow: number, startColumn: number, offsetX = 0, offsetY = 0) => {
-        scrollManagerService.setScrollInfoAndEmitEvent({
+        const scrollInfo = {
             sheetViewStartRow: startRow,
             sheetViewStartColumn: startColumn,
             offsetX,
             offsetY,
-            ...currentInfo,
-        });
+            ...searchParam,
+        };
+        scrollManagerService.emitRawScrollParam(scrollInfo);
+        scrollManagerService.setValidScrollState(scrollInfo);
     };
 
     const getFreeze = () => {
@@ -97,9 +100,15 @@ describe('Test commands used for change selections', () => {
         commandService = get(ICommandService);
         selectionManagerService = get(SheetsSelectionsService);
         scrollManagerService = get(SheetScrollManagerService);
-        scrollManagerService.setSearchParamAndRefresh({
-            ...currentInfo,
+        scrollManagerService.setSearchParam({
+            ...searchParam,
         });
+        const scrollState = scrollManagerService.getScrollStateByParam(searchParam);
+        const scrollStateWithSheetId: IScrollStateWithSearchParam = {
+            ...scrollState!,
+            ...searchParam,
+        };
+        scrollManagerService.emitRawScrollParam(scrollStateWithSheetId);
     }
 
     afterEach(disposeTestBed);

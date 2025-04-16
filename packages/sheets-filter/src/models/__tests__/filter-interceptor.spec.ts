@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,9 +43,16 @@ describe('Test "Filter Interceptor"', () => {
     describe('Test "insert Command"', () => {
         it('insert col command, in filter range', async () => {
             const insertColCommandParams = {
-                unitId: 'workbookId', subUnitId: 'worksheetId', range: {
-                    startColumn: 2, endColumn: 2, startRow: 0, endRow: 4, type: RANGE_TYPE.COLUMN,
-                }, direction: Direction.RIGHT,
+                unitId: 'workbookId',
+                subUnitId: 'worksheetId',
+                range: {
+                    startColumn: 2,
+                    endColumn: 2,
+                    startRow: 0,
+                    endRow: 4,
+                    type: RANGE_TYPE.COLUMN,
+                },
+                direction: Direction.RIGHT,
             } as IInsertColCommandParams;
             await commandService.executeCommand(InsertColCommand.id, insertColCommandParams);
             expect(sheetsFilterService.getFilterModel('workbookId', 'worksheetId')!.getRange()).toStrictEqual({ startColumn: 1, endColumn: 3, startRow: 1, endRow: 2 });
@@ -54,9 +61,16 @@ describe('Test "Filter Interceptor"', () => {
 
         it('insert col command, before filter range', async () => {
             const insertColCommandParams = {
-                unitId: 'workbookId', subUnitId: 'worksheetId', range: {
-                    startColumn: 0, endColumn: 0, startRow: 0, endRow: 4, type: RANGE_TYPE.COLUMN,
-                }, direction: Direction.RIGHT,
+                unitId: 'workbookId',
+                subUnitId: 'worksheetId',
+                range: {
+                    startColumn: 0,
+                    endColumn: 0,
+                    startRow: 0,
+                    endRow: 4,
+                    type: RANGE_TYPE.COLUMN,
+                },
+                direction: Direction.RIGHT,
             } as IInsertColCommandParams;
             await commandService.executeCommand(InsertColCommand.id, insertColCommandParams);
             expect(sheetsFilterService.getFilterModel('workbookId', 'worksheetId')!.getRange()).toStrictEqual({ startColumn: 2, endColumn: 3, startRow: 1, endRow: 2 });
@@ -65,9 +79,16 @@ describe('Test "Filter Interceptor"', () => {
 
         it('insert row command, in filter range', async () => {
             const insertRowCommandParams = {
-                unitId: 'workbookId', subUnitId: 'worksheetId', range: {
-                    startColumn: 0, endColumn: 3, startRow: 2, endRow: 2, type: RANGE_TYPE.ROW,
-                }, direction: Direction.DOWN,
+                unitId: 'workbookId',
+                subUnitId: 'worksheetId',
+                range: {
+                    startColumn: 0,
+                    endColumn: 3,
+                    startRow: 2,
+                    endRow: 2,
+                    type: RANGE_TYPE.ROW,
+                },
+                direction: Direction.DOWN,
             } as IInsertRowCommandParams;
             await commandService.executeCommand(InsertRowCommand.id, insertRowCommandParams);
             expect(sheetsFilterService.getFilterModel('workbookId', 'worksheetId')!.getRange()).toStrictEqual({ startColumn: 1, endColumn: 2, startRow: 1, endRow: 3 });
@@ -76,9 +97,16 @@ describe('Test "Filter Interceptor"', () => {
 
         it('insert row command, before filter range', async () => {
             const insertRowCommandParams = {
-                unitId: 'workbookId', subUnitId: 'worksheetId', range: {
-                    startColumn: 0, endColumn: 3, startRow: 0, endRow: 0, type: RANGE_TYPE.ROW,
-                }, direction: Direction.DOWN,
+                unitId: 'workbookId',
+                subUnitId: 'worksheetId',
+                range: {
+                    startColumn: 0,
+                    endColumn: 3,
+                    startRow: 0,
+                    endRow: 0,
+                    type: RANGE_TYPE.ROW,
+                },
+                direction: Direction.DOWN,
             } as IInsertRowCommandParams;
             await commandService.executeCommand(InsertRowCommand.id, insertRowCommandParams);
             expect(sheetsFilterService.getFilterModel('workbookId', 'worksheetId')!.getRange()).toStrictEqual({ startColumn: 1, endColumn: 2, startRow: 2, endRow: 3 });
@@ -89,9 +117,16 @@ describe('Test "Filter Interceptor"', () => {
     describe('Test "remove Command"', () => {
         it('remove col command, in filter range', async () => {
             const removeColCommandParams = {
-                unitId: 'workbookId', subUnitId: 'worksheetId', range: {
-                    startColumn: 1, endColumn: 1, startRow: 0, endRow: 4, type: RANGE_TYPE.COLUMN,
-                }, direction: Direction.RIGHT,
+                unitId: 'workbookId',
+                subUnitId: 'worksheetId',
+                range: {
+                    startColumn: 1,
+                    endColumn: 1,
+                    startRow: 0,
+                    endRow: 4,
+                    type: RANGE_TYPE.COLUMN,
+                },
+                direction: Direction.RIGHT,
             } as IRemoveRowColCommandParams;
             await commandService.executeCommand(RemoveColCommand.id, removeColCommandParams);
             expect(sheetsFilterService.getFilterModel('workbookId', 'worksheetId')!.getRange()).toStrictEqual({ startColumn: 1, endColumn: 1, startRow: 1, endRow: 2 });
@@ -99,9 +134,16 @@ describe('Test "Filter Interceptor"', () => {
         });
         it('remove col command, before filter range', async () => {
             const removeColCommandParams = {
-                unitId: 'workbookId', subUnitId: 'worksheetId', range: {
-                    startColumn: 0, endColumn: 0, startRow: 0, endRow: 4, type: RANGE_TYPE.COLUMN,
-                }, direction: Direction.RIGHT,
+                unitId: 'workbookId',
+                subUnitId: 'worksheetId',
+                range: {
+                    startColumn: 0,
+                    endColumn: 0,
+                    startRow: 0,
+                    endRow: 4,
+                    type: RANGE_TYPE.COLUMN,
+                },
+                direction: Direction.RIGHT,
             } as IRemoveRowColCommandParams;
             await commandService.executeCommand(RemoveColCommand.id, removeColCommandParams);
             expect(sheetsFilterService.getFilterModel('workbookId', 'worksheetId')!.getRange()).toStrictEqual({ startColumn: 0, endColumn: 1, startRow: 1, endRow: 2 });
@@ -110,9 +152,16 @@ describe('Test "Filter Interceptor"', () => {
 
         it('remove row command, in filter range', async () => {
             const removeRowCommandParams = {
-                unitId: 'workbookId', subUnitId: 'worksheetId', range: {
-                    startColumn: 0, endColumn: 3, startRow: 1, endRow: 1, type: RANGE_TYPE.ROW,
-                }, direction: Direction.DOWN,
+                unitId: 'workbookId',
+                subUnitId: 'worksheetId',
+                range: {
+                    startColumn: 0,
+                    endColumn: 3,
+                    startRow: 1,
+                    endRow: 1,
+                    type: RANGE_TYPE.ROW,
+                },
+                direction: Direction.DOWN,
             } as IRemoveRowColCommandParams;
             await commandService.executeCommand(RemoveRowCommand.id, removeRowCommandParams);
             expect(sheetsFilterService.getFilterModel('workbookId', 'worksheetId')).toBe(null);
@@ -120,9 +169,16 @@ describe('Test "Filter Interceptor"', () => {
 
         it('remove row command, before filter range', async () => {
             const removeRowCommandParams = {
-                unitId: 'workbookId', subUnitId: 'worksheetId', range: {
-                    startColumn: 0, endColumn: 3, startRow: 0, endRow: 0, type: RANGE_TYPE.ROW,
-                }, direction: Direction.DOWN,
+                unitId: 'workbookId',
+                subUnitId: 'worksheetId',
+                range: {
+                    startColumn: 0,
+                    endColumn: 3,
+                    startRow: 0,
+                    endRow: 0,
+                    type: RANGE_TYPE.ROW,
+                },
+                direction: Direction.DOWN,
             } as IRemoveRowColCommandParams;
             await commandService.executeCommand(RemoveRowCommand.id, removeRowCommandParams);
             expect(sheetsFilterService.getFilterModel('workbookId', 'worksheetId')!.getRange()).toStrictEqual({ startColumn: 1, endColumn: 2, startRow: 0, endRow: 1 });
@@ -133,9 +189,17 @@ describe('Test "Filter Interceptor"', () => {
     describe('Test "move Command"', () => {
         it('move col command, filter column move to left', async () => {
             const moveColCommandParams = {
-                unitId: 'workbookId', subUnitId: 'worksheetId', fromRange: {
-                    startColumn: 1, endColumn: 1, startRow: 0, endRow: 4, type: RANGE_TYPE.COLUMN,
-                }, toRange: { startColumn: 3, endColumn: 3, startRow: 0, endRow: 4, type: RANGE_TYPE.COLUMN }, direction: Direction.RIGHT,
+                unitId: 'workbookId',
+                subUnitId: 'worksheetId',
+                fromRange: {
+                    startColumn: 1,
+                    endColumn: 1,
+                    startRow: 0,
+                    endRow: 4,
+                    type: RANGE_TYPE.COLUMN,
+                },
+                toRange: { startColumn: 3, endColumn: 3, startRow: 0, endRow: 4, type: RANGE_TYPE.COLUMN },
+                direction: Direction.RIGHT,
             } as IMoveColsCommandParams;
             await commandService.executeCommand(SetSelectionsOperation.id, { unitId: 'workbookId', subUnitId: 'worksheetId', selections: [{ style: null, range: { startColumn: 1, endColumn: 1, startRow: 0, endRow: 4, rangeType: RANGE_TYPE.COLUMN }, primary: {} }] } as ISetSelectionsOperationParams);
             await commandService.executeCommand(MoveColsCommand.id, moveColCommandParams);
@@ -144,9 +208,17 @@ describe('Test "Filter Interceptor"', () => {
         });
         it('move col command, filter column move to right', async () => {
             const moveColCommandParams = {
-                unitId: 'workbookId', subUnitId: 'worksheetId', fromRange: {
-                    startColumn: 2, endColumn: 2, startRow: 0, endRow: 4, type: RANGE_TYPE.COLUMN,
-                }, toRange: { startColumn: 4, endColumn: 4, startRow: 0, endRow: 4, type: RANGE_TYPE.COLUMN }, direction: Direction.RIGHT,
+                unitId: 'workbookId',
+                subUnitId: 'worksheetId',
+                fromRange: {
+                    startColumn: 2,
+                    endColumn: 2,
+                    startRow: 0,
+                    endRow: 4,
+                    type: RANGE_TYPE.COLUMN,
+                },
+                toRange: { startColumn: 4, endColumn: 4, startRow: 0, endRow: 4, type: RANGE_TYPE.COLUMN },
+                direction: Direction.RIGHT,
             } as IMoveColsCommandParams;
             await commandService.executeCommand(SetSelectionsOperation.id, { unitId: 'workbookId', subUnitId: 'worksheetId', selections: [{ style: null, range: { startColumn: 2, endColumn: 2, startRow: 0, endRow: 4, rangeType: RANGE_TYPE.COLUMN }, primary: {} }] } as ISetSelectionsOperationParams);
             await commandService.executeCommand(MoveColsCommand.id, moveColCommandParams);
@@ -156,9 +228,17 @@ describe('Test "Filter Interceptor"', () => {
 
         it('move row command', async () => {
             const moveRowCommandParams = {
-                unitId: 'workbookId', subUnitId: 'worksheetId', fromRange: {
-                    startColumn: 0, endColumn: 3, startRow: 2, endRow: 2, type: RANGE_TYPE.ROW,
-                }, toRange: { startColumn: 0, endColumn: 3, startRow: 4, endRow: 4, type: RANGE_TYPE.ROW }, direction: Direction.RIGHT,
+                unitId: 'workbookId',
+                subUnitId: 'worksheetId',
+                fromRange: {
+                    startColumn: 0,
+                    endColumn: 3,
+                    startRow: 2,
+                    endRow: 2,
+                    type: RANGE_TYPE.ROW,
+                },
+                toRange: { startColumn: 0, endColumn: 3, startRow: 4, endRow: 4, type: RANGE_TYPE.ROW },
+                direction: Direction.RIGHT,
             } as IMoveRowsCommandParams;
             await commandService.executeCommand(SetSelectionsOperation.id, { unitId: 'workbookId', subUnitId: 'worksheetId', selections: [{ style: null, range: { startColumn: 0, endColumn: 3, startRow: 2, endRow: 2, rangeType: RANGE_TYPE.ROW }, primary: {} }] } as ISetSelectionsOperationParams);
             await commandService.executeCommand(MoveRowsCommand.id, moveRowCommandParams);
@@ -176,8 +256,7 @@ describe('Test "Filter Interceptor"', () => {
     });
 });
 
-function createFilterTestUniver(dependencies?: Dependency[], workbookData?: IWorkbookData
-) {
+function createFilterTestUniver(dependencies?: Dependency[], workbookData?: IWorkbookData) {
     const univer = new Univer();
     const injector = univer.__getInjector();
     const get = injector.get.bind(injector);

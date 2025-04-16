@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-import { IUniverInstanceService, LocaleService, useDependency } from '@univerjs/core';
+import { IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
-import React, { useEffect, useState } from 'react';
-
+import { useDependency } from '@univerjs/ui';
+import { useEffect, useState } from 'react';
 import { DocHeaderFooterOptions } from './DocHeaderFooterOptions';
-import styles from './index.module.less';
 
 export const DocHeaderFooterPanel = () => {
     const localeService = useDependency(LocaleService);
@@ -47,15 +46,13 @@ export const DocHeaderFooterPanel = () => {
         return () => {
             subscription.unsubscribe();
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (
-        <div className={styles.panel}>
+        <div className="univer-text-sm">
             {isEditHeaderFooter
                 ? <DocHeaderFooterOptions unitId={unitId} />
-                : <div className={styles.panelDisableText}>{localeService.t('headerFooter.disableText')}</div>}
+                : <div className="univer-text-gray-400">{localeService.t('headerFooter.disableText')}</div>}
         </div>
     );
 };
-

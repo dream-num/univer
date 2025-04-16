@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { cellToRange, type IRange } from '@univerjs/core';
+import type { IRange } from '@univerjs/core';
+import { cellToRange } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 
 import { generateNullCell, generateNullCellStyle, generateNullCellValue } from '../utils';
@@ -47,12 +48,7 @@ describe('Test utils', () => {
                 },
             },
             1: {
-                1: { v: null,
-                     p: null,
-                     f: null,
-                     si: null,
-                     custom: null,
-                },
+                1: { v: null, p: null, f: null, si: null, custom: null },
             },
         });
     });

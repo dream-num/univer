@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,19 +34,18 @@ export { DocumentViewModel } from './components/docs/view-model/document-view-mo
 export { DocumentEditArea } from './components/docs/view-model/document-view-model';
 export { parseDataStreamToTree } from './components/docs/view-model/document-view-model';
 export { getLastColumn } from './components/docs/layout/tools';
-export { DEFAULT_PADDING_DATA } from './components/sheets/sheet-skeleton';
+export { DEFAULT_PADDING_DATA } from './components/sheets/sheet.render-skeleton';
 export * from './context';
 export * from './custom';
 export * from './engine';
 export * from './group';
 export * from './layer';
 export { IRenderingEngine, UniverRenderEnginePlugin } from './plugin';
-export { IRenderManagerService, type RenderComponentType, RenderManagerService } from './render-manager/render-manager.service';
+export { getCurrentTypeOfRenderer, IRenderManagerService, type RenderComponentType, RenderManagerService, withCurrentTypeOfRenderer } from './render-manager/render-manager.service';
 export { type IRender, type IRenderContext, type IRenderModule, RenderUnit } from './render-manager/render-unit';
 export * from './scene';
 export { type IChangeObserverConfig } from './scene.transformer';
 export * from './scene-viewer';
 export * from './scroll-timer';
 export * from './shape';
-export { ThinEngine } from './thin-engine';
 export * from './viewport';

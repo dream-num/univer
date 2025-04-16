@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -150,14 +150,15 @@ export const calculateDocSkeletonRects = (docSkeleton: DocumentSkeleton, padding
                     left: drawings!.get(key)!.aLeft,
                     right: drawings!.get(key)!.aLeft + drawings!.get(key)!.height,
                 },
+                drawing: drawings.get(key)!,
             }))
             : [],
     };
 };
 
 export function calcPadding(cell: ICellWithCoord, font: IFontCacheItem, isNum: boolean) {
-    const height = font.documentSkeleton.getSkeletonData()?.pages[0].height ?? 0;
-    const width = font.documentSkeleton.getSkeletonData()?.pages[0].width ?? 0;
+    const height = font.documentSkeleton?.getSkeletonData()?.pages[0].height ?? 0;
+    const width = font.documentSkeleton?.getSkeletonData()?.pages[0].width ?? 0;
     const vt = font.verticalAlign;
     const ht = font.horizontalAlign;
 
@@ -212,7 +213,7 @@ export const getCustomRangePosition = (injector: Injector, unitId: string, subUn
     }
 
     const currentRender = renderManagerService.getRenderById(workbook.getUnitId());
-    const skeletonParam = currentRender?.with(SheetSkeletonManagerService).getWorksheetSkeleton(worksheet.getSheetId());
+    const skeletonParam = currentRender?.with(SheetSkeletonManagerService).getSkeletonParam(worksheet.getSheetId());
 
     const skeleton = skeletonParam?.skeleton;
 
@@ -282,7 +283,7 @@ export const getEditingCustomRangePosition = (injector: Injector, unitId: string
     }
 
     const docSkeleton = renderer.with(DocSkeletonManagerService).getSkeleton();
-    const sheetSkeleton = sheetRenderer.with(SheetSkeletonManagerService).getWorksheetSkeleton(sheetId)?.skeleton;
+    const sheetSkeleton = sheetRenderer.with(SheetSkeletonManagerService).getSkeletonParam(sheetId)?.skeleton;
 
     if (!docSkeleton || !sheetSkeleton) {
         return null;

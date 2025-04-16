@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,15 +15,14 @@
  */
 
 import type { IDisposable, Nullable } from '@univerjs/core';
-import { DisposableCollection, LocaleService, toDisposable, useDependency } from '@univerjs/core';
+import type { MutableRefObject } from 'react';
+import { DisposableCollection, LocaleService, toDisposable } from '@univerjs/core';
 import { Button, MessageType } from '@univerjs/design';
-import { IMessageService, IShortcutService } from '@univerjs/ui';
+import { IMessageService, IShortcutService, useDependency } from '@univerjs/ui';
 import { editor } from 'monaco-editor';
-import React, { useCallback, useEffect, useRef } from 'react';
-
+import { useCallback, useEffect, useRef } from 'react';
 import { ScriptEditorService } from '../../services/script-editor.service';
 import { IUniscriptExecutionService } from '../../services/script-execution.service';
-import styles from './index.module.less';
 
 export function ScriptEditorPanel() {
     const editorContentRef = useRef<HTMLDivElement | null>(null);
@@ -90,12 +89,12 @@ export function ScriptEditorPanel() {
     const startExecution = useExecution(monacoEditorRef);
 
     return (
-        <div className={styles.scriptEditorPanel}>
-            <div className={styles.scriptEditorContent} ref={editorContentRef}>
-                <div className={styles.scriptEditorContainer} ref={editorContainerRef} />
+        <div className="univer-h-full">
+            <div ref={editorContentRef} className="univer-h-[calc(100%-60px)] univer-w-full univer-overflow-hidden">
+                <div ref={editorContainerRef} />
             </div>
-            <div className={styles.scriptEditorActions}>
-                <Button type="primary" size="small" onClick={startExecution}>
+            <div className="univer-mt-2.5">
+                <Button variant="primary" size="small" onClick={startExecution}>
                     {localeService.t('script-panel.panel.execute')}
                 </Button>
             </div>
@@ -103,7 +102,7 @@ export function ScriptEditorPanel() {
     );
 }
 
-function useExecution(monacoEditorRef: React.MutableRefObject<Nullable<editor.IStandaloneCodeEditor>>) {
+function useExecution(monacoEditorRef: MutableRefObject<Nullable<editor.IStandaloneCodeEditor>>) {
     const scriptService = useDependency(IUniscriptExecutionService);
     const messageService = useDependency(IMessageService);
     const localeService = useDependency(LocaleService);

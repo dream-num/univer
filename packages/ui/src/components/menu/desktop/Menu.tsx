@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { MenuRef } from '@univerjs/design';
 import type {
     IDisplayMenuItem,
     IMenuButtonItem,
@@ -22,28 +23,30 @@ import type {
     IValueOption,
     MenuItemDefaultValueType,
 } from '../../../services/menu/menu';
-import { isRealNum, useDependency } from '@univerjs/core';
+import { isRealNum, LocaleService } from '@univerjs/core';
 import {
+    clsx,
     Menu as DesignMenu,
     MenuItem as DesignMenuItem,
     MenuItemGroup as DesignMenuItemGroup,
     SubMenu as DesignSubMenu,
 } from '@univerjs/design';
 import { CheckMarkSingle, MoreSingle } from '@univerjs/icons';
-import clsx from 'clsx';
-
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { combineLatest, isObservable, of } from 'rxjs';
 import { ILayoutService } from '../../../services/layout/layout.service';
 import { MenuItemType } from '../../../services/menu/menu';
 import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
+import { ContextMenuGroup } from '../../../services/menu/types';
+import { useDependency, useObservable } from '../../../utils/di';
 import { CustomLabel } from '../../custom-label/CustomLabel';
 import { useScrollYOverContainer } from '../../hooks/layout';
-import { useObservable } from '../../hooks/observable';
 import styles from './index.module.less';
+import { UITinyMenuGroup } from './tiny-menu-group';
 
 // TODO: @jikkai disabled and hidden are not working
 
+/** @deprecated */
 export interface IBaseMenuProps {
     parentKey?: string | number;
     menuType?: string;
@@ -56,17 +59,18 @@ export interface IBaseMenuProps {
      */
     overViewport?: 'scroll';
     onOptionSelect?: (option: IValueOption) => void;
+    style?: React.CSSProperties;
 }
 
+/** @deprecated */
 function MenuWrapper(props: IBaseMenuProps) {
     const { menuType, onOptionSelect } = props;
-
+    const localeService = useDependency(LocaleService);
     const menuManagerService = useDependency(IMenuManagerService);
 
     const menuItems = useMemo(() => menuType ? menuManagerService.getMenuByPositionKey(menuType) : [], [menuType, menuManagerService]);
 
     const [hiddenStates, setHiddenStates] = useState<Record<string, boolean>>({});
-
     const filteredMenuItems = useMemo(() => {
         return menuItems.filter((item) => {
             if (!item.children) return item;
@@ -112,24 +116,27 @@ function MenuWrapper(props: IBaseMenuProps) {
             />
         )
         : item.children?.length
-            ? (
-                <DesignMenuItemGroup key={item.key} eventKey={item.key}>
-                    {item.children.map((child) => (
-                        child.item && (
-                            <MenuItem
-                                key={child.key}
-                                menuItem={child.item}
-                                onClick={(object: Partial<IValueOption>) => {
-                                    onOptionSelect?.({ value: '', label: child.key, ...object });
-                                }}
-                            />
-                        )
-                    ))}
-                </DesignMenuItemGroup>
-            )
+            ? item.key === ContextMenuGroup.QUICK
+                ? <UITinyMenuGroup key={item.key} item={item} onOptionSelect={onOptionSelect} />
+                : (
+                    <DesignMenuItemGroup key={item.key} eventKey={item.key} title={item.title ? localeService.t(item.title) : undefined}>
+                        {item.children.map((child) => (
+                            child.item && (
+                                <MenuItem
+                                    key={child.key}
+                                    menuItem={child.item}
+                                    onClick={(object: Partial<IValueOption>) => {
+                                        onOptionSelect?.({ value: '', label: child.key, ...object });
+                                    }}
+                                />
+                            )
+                        ))}
+                    </DesignMenuItemGroup>
+                )
             : null);
 }
 
+/** @deprecated */
 function MenuOptionsWrapper(props: IBaseMenuProps) {
     const { options, value, onOptionSelect, parentKey } = props;
 
@@ -179,16 +186,23 @@ function MenuOptionsWrapper(props: IBaseMenuProps) {
     }) ?? null;
 }
 
+/** @deprecated */
 export const Menu = (props: IBaseMenuProps) => {
-    const { overViewport, ...restProps } = props;
+    const { overViewport, style, ...restProps } = props;
     const [menuEl, setMenuEl] = useState<HTMLDListElement>();
     const layoutService = useDependency(ILayoutService);
 
     useScrollYOverContainer(overViewport === 'scroll' ? menuEl : null, layoutService.rootContainerElement);
 
+    function handleSetMenuEl(ref: MenuRef | null) {
+        if (ref) {
+            setMenuEl(ref.list);
+        }
+    }
     return (
         <DesignMenu
-            ref={(ref) => ref?.list && setMenuEl(ref.list)}
+            style={style}
+            ref={handleSetMenuEl}
             selectable={false}
         >
             <MenuOptionsWrapper {...restProps} />
@@ -197,27 +211,30 @@ export const Menu = (props: IBaseMenuProps) => {
     );
 };
 
+/** @deprecated */
 interface IMenuItemProps {
     menuItem: IDisplayMenuItem<IMenuItem>;
     onClick: (object: Partial<IValueOption>) => void;
 }
 
+/** @deprecated */
 function MenuItem({ menuItem, onClick }: IMenuItemProps) {
     const menuManagerService = useDependency(IMenuManagerService);
-
     const disabled = useObservable<boolean>(menuItem.disabled$, false);
     const activated = useObservable<boolean>(menuItem.activated$, false);
     const hidden = useObservable(menuItem.hidden$, false);
     const value = useObservable<MenuItemDefaultValueType>(menuItem.value$);
-
     const item = menuItem as IDisplayMenuItem<IMenuSelectorItem>;
     const selectionsFromObservable = useObservable(isObservable(item.selections) ? item.selections : undefined);
     const [inputValue, setInputValue] = useState(value);
 
+    useEffect(() => {
+        setInputValue(value);
+    }, [value]);
+
     if (hidden) {
         return null;
     }
-
     /**
      * user input change value from CustomLabel
      * @param v
@@ -279,16 +296,18 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
                     )}
                     expandIcon={<MoreSingle className={styles.menuItemMoreIcon} />}
                 >
-                    {selections.length > 0 && (
-                        <MenuOptionsWrapper
-                            parentKey={item.id}
-                            menuType={item.id}
-                            options={selections}
-                            onOptionSelect={(v) => {
-                                onClick({ value: v.value, id: item.id, commandId: v.commandId });
-                            }}
-                        />
-                    )}
+                    <DesignMenuItemGroup>
+                        {selections.length > 0 && (
+                            <MenuOptionsWrapper
+                                parentKey={item.id}
+                                menuType={item.id}
+                                options={selections}
+                                onOptionSelect={(v) => {
+                                    onClick({ value: v.value, id: item.id, commandId: v.commandId });
+                                }}
+                            />
+                        )}
+                    </DesignMenuItemGroup>
                 </DesignSubMenu>
             );
         }
@@ -326,7 +345,9 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
                 )}
                 expandIcon={<MoreSingle className={styles.menuItemMoreIcon} />}
             >
-                {subMenuItems.length && <MenuWrapper menuType={item.id} parentKey={item.id} onOptionSelect={onClick} />}
+                <DesignMenuItemGroup>
+                    {subMenuItems.length && <MenuWrapper menuType={item.id} parentKey={item.id} onOptionSelect={onClick} />}
+                </DesignMenuItemGroup>
             </DesignSubMenu>
         );
     };

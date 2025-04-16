@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,9 @@
 import type { ICellData, IRange, Nullable } from '@univerjs/core';
 import type { IRuntimeUnitDataType, IUnitData, IUnitSheetNameMap, IUnitStylesData } from '../../basics/common';
 
+import type { BaseValueObject, IArrayValueObject } from '../value-object/base-value-object';
 import { CellValueType, moveRangeByOffset } from '@univerjs/core';
+import { isTextFormat } from '@univerjs/engine-numfmt';
 import { FormulaAstLRU } from '../../basics/cache-lru';
 import { ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
 import { isNullCellForFormula } from '../../basics/is-null-cell';
@@ -25,7 +27,7 @@ import { ObjectClassType } from '../../basics/object-class-type';
 import { getCellValue } from '../utils/cell';
 import { getRuntimeFeatureCell } from '../utils/get-runtime-feature-cell';
 import { ArrayValueObject, ValueObjectFactory } from '../value-object/array-value-object';
-import { type BaseValueObject, ErrorValueObject, type IArrayValueObject } from '../value-object/base-value-object';
+import { ErrorValueObject } from '../value-object/base-value-object';
 import {
     createBooleanValueObjectByRawValue,
     createNumberValueObjectByRawValue,
@@ -58,6 +60,8 @@ export class BaseReferenceObject extends ObjectClassType {
     private _unitData: IUnitData = {};
 
     private _unitStylesData: IUnitStylesData = {};
+
+    private _filteredOutRows: number[] = [];
 
     private _defaultUnitId: string = '';
 
@@ -303,6 +307,14 @@ export class BaseReferenceObject extends ObjectClassType {
         this._unitStylesData = unitStylesData;
     }
 
+    getFilteredOutRows() {
+        return this._filteredOutRows;
+    }
+
+    setFilteredOutRows(filteredOutRows: number[]) {
+        this._filteredOutRows = filteredOutRows;
+    }
+
     getRuntimeData() {
         return this._runtimeData;
     }
@@ -402,6 +414,11 @@ export class BaseReferenceObject extends ObjectClassType {
 
         if (cell.t === CellValueType.NUMBER) {
             const pattern = this._getPatternByCell(cell);
+
+            if (isTextFormat(pattern)) {
+                return StringValueObject.create(value.toString());
+            }
+
             return createNumberValueObjectByRawValue(value, pattern);
         }
         if (cell.t === CellValueType.STRING || cell.t === CellValueType.FORCE_STRING) {

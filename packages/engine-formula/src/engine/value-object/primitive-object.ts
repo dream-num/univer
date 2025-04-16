@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -630,6 +630,10 @@ export class NumberValueObject extends BaseValueObject {
     }
 
     override plusBy(value: string | number | boolean): BaseValueObject {
+        if (typeof value === 'string' && value.trim() === '') {
+            return ErrorValueObject.create(ErrorType.VALUE);
+        }
+
         const currentValue = +this.getValue();
         const _value = +value;
 
@@ -651,6 +655,10 @@ export class NumberValueObject extends BaseValueObject {
     }
 
     override minusBy(value: string | number | boolean): BaseValueObject {
+        if (typeof value === 'string' && value.trim() === '') {
+            return ErrorValueObject.create(ErrorType.VALUE);
+        }
+
         const currentValue = +this.getValue();
         const _value = +value;
 
@@ -672,6 +680,10 @@ export class NumberValueObject extends BaseValueObject {
     }
 
     override multiplyBy(value: string | number | boolean): BaseValueObject {
+        if (typeof value === 'string' && value.trim() === '') {
+            return ErrorValueObject.create(ErrorType.VALUE);
+        }
+
         const currentValue = +this.getValue();
         const _value = +value;
 
@@ -693,6 +705,10 @@ export class NumberValueObject extends BaseValueObject {
     }
 
     override dividedBy(value: string | number | boolean): BaseValueObject {
+        if (typeof value === 'string' && value.trim() === '') {
+            return ErrorValueObject.create(ErrorType.VALUE);
+        }
+
         const currentValue = +this.getValue();
         const _value = +value;
 

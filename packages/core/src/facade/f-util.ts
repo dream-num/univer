@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { numfmt, Rectangle, Tools } from '../shared';
+import type { INumfmt } from '@univerjs/core';
+import { numfmt, Rectangle, Tools } from '@univerjs/core';
 
 /**
  * @ignore
@@ -25,7 +26,7 @@ export class FUtil {
      */
     static _instance: FUtil | null;
 
-    static get() {
+    static get(): FUtil {
         if (this._instance) {
             return this._instance;
         }
@@ -56,22 +57,44 @@ export class FUtil {
 
     /**
      * Rectangle utils, including range operations likes merge, subtract, split
+     *
+     * @example
+     * ```ts
+     * const ranges = [
+     *   { startRow: 0, startColumn: 0, endRow: 1, endColumn: 1 },
+     *   { startRow: 1, startColumn: 1, endRow: 2, endColumn: 2 }
+     * ];
+     * const merged = univerAPI.Util.rectangle.mergeRanges(ranges);
+     * console.log(merged);
+     * ```
      */
-    get rectangle() {
+    get rectangle(): typeof Rectangle {
         return Rectangle;
     }
 
     /**
      * Number format utils, including parse and strigify about date, price, etc
+     *
+     * @example
+     * ```ts
+     * const text = univerAPI.Util.numfmt.format('#,##0.00', 1234.567);
+     * console.log(text);
+     * ```
      */
-    get numfmt() {
+    get numfmt(): INumfmt {
         return numfmt;
     }
 
     /**
      * common tools
+     *
+     * @example
+     * ```ts
+     * const key = univerAPI.Util.tools.generateRandomId(6);
+     * console.log(key);
+     * ```
      */
-    get tools() {
+    get tools(): typeof Tools {
         return Tools;
     }
 }

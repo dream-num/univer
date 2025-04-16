@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import type { IAccessor, Nullable, Workbook } from '@univerjs/core';
+import type { DocumentDataModel, IAccessor, Nullable } from '@univerjs/core';
 import type { IEditorBridgeServiceVisibleParam } from '@univerjs/sheets-ui';
 import type { IMenuItem, IShortcutItem } from '@univerjs/ui';
-import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_ZEN_EDITOR_UNIT_ID_KEY, FOCUSING_FX_BAR_EDITOR, IContextService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_ZEN_EDITOR_UNIT_ID_KEY, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { getSheetCommandTarget, RangeProtectionPermissionEditPoint, SheetsSelectionsService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetInsertHyperlinkPermission, WorksheetSetCellValuePermission } from '@univerjs/sheets';
+import { getSheetCommandTarget, RangeProtectionPermissionEditPoint, WorkbookEditablePermission, WorksheetEditPermission, WorksheetInsertHyperlinkPermission, WorksheetSetCellValuePermission } from '@univerjs/sheets';
 import { getCurrentRangeDisable$, IEditorBridgeService, whenSheetEditorFocused } from '@univerjs/sheets-ui';
 import { getMenuHiddenObservable, KeyCode, MenuItemType, MetaKeys } from '@univerjs/ui';
-import { combineLatest, distinctUntilChanged, filter, map, of, switchMap } from 'rxjs';
+import { combineLatest, map, of, switchMap } from 'rxjs';
 import { InsertHyperLinkOperation, InsertHyperLinkToolbarOperation } from '../commands/operations/popup.operations';
 import { DisableLinkType, getShouldDisableCellLink, shouldDisableAddLink } from '../utils';
 
@@ -56,54 +56,48 @@ const getEditingLinkDisable$ = (accessor: IAccessor, unitId = DOCS_ZEN_EDITOR_UN
 const getLinkDisable$ = (accessor: IAccessor) => {
     const disableRange$ = getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetSetCellValuePermission, WorksheetInsertHyperlinkPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }, true);
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const sheetSelectionService = accessor.get(SheetsSelectionsService);
     const editorBridgeService = accessor.has(IEditorBridgeService) ? accessor.get(IEditorBridgeService) : null;
 
-    const disableCell$ = univerInstanceService.focused$.pipe(
-        filter((focused) => Boolean(focused)),
-        map((focused) => univerInstanceService.getUnit<Workbook>(focused!, UniverInstanceType.UNIVER_SHEET)),
-        filter((unit) => Boolean(unit)),
-        switchMap((unit) => unit!.activeSheet$),
-        switchMap((sheet) => sheetSelectionService.selectionMoveEnd$.pipe(map((selections) => sheet && { selections, sheet }))),
-        map((sheetWithSelection) => {
-            if (!sheetWithSelection) {
-                return DisableLinkType.DISABLED_BY_CELL;
+    const disableCell$ = editorBridgeService?.currentEditCellState$.pipe(
+        map((state) => {
+            if (!state) {
+                return (DisableLinkType.DISABLED_BY_CELL);
             }
-            const { selections, sheet } = sheetWithSelection;
-            if (!selections.length) {
-                return DisableLinkType.DISABLED_BY_CELL;
+            const target = getSheetCommandTarget(univerInstanceService, { unitId: state.unitId, subUnitId: state.sheetId });
+            if (!target) {
+                return (DisableLinkType.DISABLED_BY_CELL);
             }
-            const row = selections[0].range.startRow;
-            const col = selections[0].range.startColumn;
 
-            return getShouldDisableCellLink(accessor, sheet, row, col);
+            return (getShouldDisableCellLink(accessor, target.worksheet, state.row, state.column));
         }),
         switchMap((disableCell) => {
             if (disableCell === DisableLinkType.DISABLED_BY_CELL) {
                 return of(true);
             }
 
-            const isEditing$ = (editorBridgeService ? editorBridgeService.visible$ : of<Nullable<IEditorBridgeServiceVisibleParam>>(null))
-                .pipe(map((visible) => visible?.visible ? DOCS_NORMAL_EDITOR_UNIT_ID_KEY : undefined));
-            const focusingFxBarEditor$ = accessor.get(IContextService).subscribeContextValue$(FOCUSING_FX_BAR_EDITOR);
-
-            return combineLatest([isEditing$, focusingFxBarEditor$]).pipe(
+            const isEditing$ = (editorBridgeService ? editorBridgeService.visible$ : of<Nullable<IEditorBridgeServiceVisibleParam>>(null));
+            return combineLatest([isEditing$, univerInstanceService.getCurrentTypeOfUnit$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC)]).pipe(
                 switchMap(
-                    ([editing, focusingFxBarEditor]) => {
-                        return editing ?
-                            focusingFxBarEditor
+                    ([editing, focusingDoc]) => {
+                        return editing?.visible ?
+                            focusingDoc?.getUnitId() === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY
                                 ? of(true)
-                                : getEditingLinkDisable$(accessor, editing)
-                            : of(disableCell === DisableLinkType.ALLOW_ON_EDITING);
+                                : getEditingLinkDisable$(accessor, DOCS_NORMAL_EDITOR_UNIT_ID_KEY)
+                            : of(disableCell !== DisableLinkType.ALLOWED);
                     }
                 )
             );
         })
-    );
+    ) ?? of(true);
 
-    return disableRange$.pipe(
-        distinctUntilChanged(),
-        switchMap((disableRange) => disableCell$.pipe(map((disableCell) => disableRange || disableCell)))
+    return disableCell$.pipe(
+        switchMap((disableCell) => {
+            if (disableCell) {
+                return of(true);
+            } else {
+                return disableRange$;
+            }
+        })
     );
 };
 

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ export interface IShortcutItem<P extends object = object> {
      *
      * @example { binding: KeyCode.ENTER | MetaKeys.ALT }
      */
-    binding: KeyCode | number;
+    binding?: KeyCode | number;
     /**
      * The binding of the shortcut for macOS. If the property is not specified, the default binding would be used.
      */
@@ -101,6 +101,12 @@ export interface IShortcutService {
     forceEscape(): IDisposable;
 
     /**
+     * Used by API to force disable all shortcut keys, which will not be restored by selection
+     * @returns {IDisposable} a disposable that could be used to cancel the force disabling.
+     */
+    forceDisable(): IDisposable;
+
+    /**
      * Dispatch a keyboard event to the shortcut service and check if there is a shortcut that matches the event.
      * @param e - the keyboard event to be dispatched.
      */
@@ -114,9 +120,9 @@ export interface IShortcutService {
     /**
      * Get the display string of the shortcut item.
      * @param shortcut - the shortcut item to get the display string.
-     * @returns {string} the display string of the shortcut. For example `Ctrl+Enter`.
+     * @returns {string | null} The display string of the shortcut. For example `Ctrl+Enter`.
      */
-    getShortcutDisplay(shortcut: IShortcutItem): string;
+    getShortcutDisplay(shortcut: IShortcutItem): string | null;
     /**
      * Get the display string of the shortcut of the command.
      * @param id the id of the command to get the shortcut display.
@@ -141,6 +147,8 @@ export class ShortcutService extends Disposable implements IShortcutService {
     readonly shortcutChanged$ = this._shortcutChanged$.asObservable();
 
     private _forceEscaped = false;
+
+    private _forceDisabled = false;
 
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
@@ -169,6 +177,8 @@ export class ShortcutService extends Disposable implements IShortcutService {
     registerShortcut(shortcut: IShortcutItem): IDisposable {
         // first map shortcut to a number, so it could be converted and fetched quickly
         const binding = this._getBindingFromItem(shortcut);
+        if (!binding) return toDisposable(() => {});
+
         const bindingSet = this._shortCutMapping.get(binding);
         if (bindingSet) {
             bindingSet.add(shortcut);
@@ -202,7 +212,6 @@ export class ShortcutService extends Disposable implements IShortcutService {
 
     getShortcutDisplayOfCommand(id: string): string | null {
         const set = this._commandIDMapping.get(id);
-        // if (!set || set.size > 1) {
         if (!set) {
             return null;
         }
@@ -215,8 +224,10 @@ export class ShortcutService extends Disposable implements IShortcutService {
         return null;
     }
 
-    getShortcutDisplay(shortcut: IShortcutItem): string {
+    getShortcutDisplay(shortcut: IShortcutItem): string | null {
         const binding = this._getBindingFromItem(shortcut);
+        if (!binding) return null;
+
         const ctrlKey = binding & MetaKeys.CTRL_COMMAND;
         const shiftKey = binding & MetaKeys.SHIFT;
         const altKey = binding & MetaKeys.ALT;
@@ -239,6 +250,13 @@ export class ShortcutService extends Disposable implements IShortcutService {
         return toDisposable(() => (this._forceEscaped = false));
     }
 
+    forceDisable(): IDisposable {
+        this._forceDisabled = true;
+        return toDisposable(() => {
+            this._forceDisabled = false;
+        });
+    }
+
     private _resolveKeyboardEvent(e: KeyboardEvent): void {
         const candidate = this.dispatch(e);
         if (candidate) {
@@ -251,8 +269,9 @@ export class ShortcutService extends Disposable implements IShortcutService {
         // Should get the container element of the Univer instance and see if
         // the event target is a descendant of the container element.
         // Also we should check through escape list and force catching list.
-        // if the target is not focused on the univer instance we should ignore the keyboard event
-        if (this._forceEscaped) return;
+        // if the target is not focused on the univer instance we should ignore the keyboard event.
+        // Maybe the user has forcibly disabled the shortcut keys, and the shortcut keys should not be processed at this time.
+        if (this._forceEscaped || this._forceDisabled) return;
 
         if (
             this._layoutService &&
@@ -277,7 +296,7 @@ export class ShortcutService extends Disposable implements IShortcutService {
         return candidateShortcut;
     }
 
-    private _getBindingFromItem(item: IShortcutItem): number {
+    private _getBindingFromItem(item: IShortcutItem): number | undefined {
         if (this._platformService.isMac && item.mac) {
             return item.mac;
         }

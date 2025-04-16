@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,12 @@
 
 import type { IRenderContext, IRenderModule, Spreadsheet } from '@univerjs/engine-render';
 import type { MenuConfig } from '@univerjs/ui';
-import { connectInjector, Disposable, IConfigService, Inject, Injector, IPermissionService, IUniverInstanceService } from '@univerjs/core';
+import type { IUniverSheetsUIConfig } from '../config.schema';
+import { Disposable, IConfigService, Inject, Injector, IPermissionService, IUniverInstanceService } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { CheckMarkSingle, DeleteSingle, LockSingle, ProtectSingle, WriteSingle } from '@univerjs/icons';
 import { RangeProtectionRuleModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
-import { ComponentManager, IUIPartsService } from '@univerjs/ui';
+import { ComponentManager, connectInjector, IUIPartsService } from '@univerjs/ui';
 import { merge, throttleTime } from 'rxjs';
 import { permissionCheckIconKey, permissionDeleteIconKey, permissionEditIconKey, permissionLockIconKey, permissionMenuIconKey, UNIVER_SHEET_PERMISSION_BACKGROUND, UNIVER_SHEET_PERMISSION_DIALOG, UNIVER_SHEET_PERMISSION_PANEL, UNIVER_SHEET_PERMISSION_USER_DIALOG, UNIVER_SHEET_PERMISSION_USER_PART } from '../../consts/permission';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
@@ -30,7 +31,7 @@ import { UNIVER_SHEET_PERMISSION_ALERT_DIALOG } from '../../views/permission/err
 import { RANGE_PROTECTION_CAN_NOT_VIEW_RENDER_EXTENSION_KEY, RANGE_PROTECTION_CAN_VIEW_RENDER_EXTENSION_KEY, RangeProtectionCanNotViewRenderExtension, RangeProtectionCanViewRenderExtension } from '../../views/permission/extensions/range-protection.render';
 import { worksheetProtectionKey, WorksheetProtectionRenderExtension } from '../../views/permission/extensions/worksheet-permission.render';
 import { PermissionDetailUserPart } from '../../views/permission/panel-detail/PermissionDetailUserPart';
-import { type IUniverSheetsUIConfig, SHEETS_UI_PLUGIN_CONFIG_KEY } from '../config.schema';
+import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../config.schema';
 
 export interface IUniverSheetsPermissionMenuConfig {
     menu: MenuConfig;
@@ -99,14 +100,14 @@ export class SheetPermissionRenderController extends Disposable implements IRend
         this._initRender();
         this._initSkeleton();
 
-        this._rangeProtectionRuleModel.ruleChange$.subscribe((info) => {
+        this.disposeWithMe(this._rangeProtectionRuleModel.ruleChange$.subscribe((info) => {
             if ((info.oldRule?.id && this._rangeProtectionCanViewRenderExtension.renderCache.has(info.oldRule.id)) || this._rangeProtectionCanViewRenderExtension.renderCache.has(info.rule.id)) {
                 this._rangeProtectionCanViewRenderExtension.clearCache();
             }
             if ((info.oldRule?.id && this._rangeProtectionCanNotViewRenderExtension.renderCache.has(info.oldRule.id)) || this._rangeProtectionCanNotViewRenderExtension.renderCache.has(info.rule.id)) {
                 this._rangeProtectionCanNotViewRenderExtension.clearCache();
             }
-        });
+        }));
     }
 
     private _initRender(): void {

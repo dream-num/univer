@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ export class Rect<T extends IRectProps = IRectProps> extends Shape<T> {
     override objectType = ObjectType.RECT;
 
     private _radius: number = 0;
+    private _opacity: number = 1;
 
     /**
      * For rendering, in many case object size is bigger than visual size for better user interaction.
@@ -65,8 +66,16 @@ export class Rect<T extends IRectProps = IRectProps> extends Shape<T> {
         return this._radius;
     }
 
+    get opacity() {
+        return this._opacity;
+    }
+
     setObjectType(type: ObjectType) {
         this.objectType = type;
+    }
+
+    setOpacity(opacity: number) {
+        this._opacity = opacity;
     }
 
     static override drawWith(ctx: UniverRenderingContext, props: IRectProps) {

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { FEnum } from '@univerjs/core';
-import { SheetSkeletonChangeType, SheetValueChangeType } from '@univerjs/sheets';
+import { FEnum } from '@univerjs/core/facade';
+import { SheetSkeletonChangeType, SheetValueChangeType, SplitDelimiterEnum } from '@univerjs/sheets';
 
 /**
  * @ignore
@@ -32,6 +32,11 @@ export interface IFSheetsEnum {
      * Includes operations like changing row/column dimensions, visibility, and grid properties.
      */
     SheetSkeletonChangeType: typeof SheetSkeletonChangeType;
+
+    /**
+     * Split delimiter types.
+     */
+    SplitDelimiterType: typeof SplitDelimiterEnum;
 }
 
 export class FSheetsEnum implements IFSheetsEnum {
@@ -42,10 +47,14 @@ export class FSheetsEnum implements IFSheetsEnum {
     get SheetSkeletonChangeType(): typeof SheetSkeletonChangeType {
         return SheetSkeletonChangeType;
     }
+
+    get SplitDelimiterType(): typeof SplitDelimiterEnum {
+        return SplitDelimiterEnum;
+    }
 }
 
 FEnum.extend(FSheetsEnum);
-declare module '@univerjs/core' {
+declare module '@univerjs/core/facade' {
     // eslint-disable-next-line ts/naming-convention
     export interface FEnum extends IFSheetsEnum {
     }

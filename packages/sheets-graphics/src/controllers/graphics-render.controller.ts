@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,8 @@
 
 import type { ISelectionCellWithMergeInfo } from '@univerjs/core';
 import type { IRenderContext, IRenderModule, Spreadsheet, SpreadsheetSkeleton, UniverRenderingContext } from '@univerjs/engine-render';
-import { Disposable } from '@univerjs/core';
+import { Disposable, Inject } from '@univerjs/core';
+import { SheetPrintInterceptorService } from '@univerjs/sheets-ui';
 import { UNIQUE_KEY } from '../common/const';
 import { Graphics } from '../views/extensions/graphics.extension';
 
@@ -24,10 +25,12 @@ export class SheetGraphicsRenderController extends Disposable implements IRender
     private _graphicsExtensionInstance: Graphics | null = null;
 
     constructor(
-        private readonly _context: IRenderContext
+        private readonly _context: IRenderContext,
+        @Inject(SheetPrintInterceptorService) private readonly _sheetPrintInterceptorService: SheetPrintInterceptorService
     ) {
         super();
         this._initRender();
+        this._initPrinting();
     }
 
     private _initRender() {
@@ -36,6 +39,21 @@ export class SheetGraphicsRenderController extends Disposable implements IRender
             this._graphicsExtensionInstance = new Graphics();
             spreadsheet.register(this._graphicsExtensionInstance);
         }
+    }
+
+    private _initPrinting() {
+        this.disposeWithMe(this._sheetPrintInterceptorService.interceptor.intercept(
+            this._sheetPrintInterceptorService.interceptor.getInterceptPoints().PRINTING_COMPONENT_COLLECT,
+            {
+                handler: (component, context, next) => {
+                    const { spreadsheet } = context;
+                    if (this._graphicsExtensionInstance) {
+                        spreadsheet.register(this._graphicsExtensionInstance.copy());
+                    }
+                    return next(component);
+                },
+            }
+        ));
     }
 
     registerRenderer(key: string, renderer: (ctx: UniverRenderingContext, skeleton: SpreadsheetSkeleton, coordInfo: ISelectionCellWithMergeInfo) => void) {

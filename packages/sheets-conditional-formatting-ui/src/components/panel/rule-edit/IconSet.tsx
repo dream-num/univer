@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,11 @@
 
 import type { Workbook } from '@univerjs/core';
 import type { IIconSet, IIconType } from '@univerjs/sheets-conditional-formatting';
-import type { IStyleEditorProps } from './type';
+import type { IFormulaEditorRef } from '@univerjs/sheets-formula-ui';
 
-import { get, IUniverInstanceService, LocaleService, set, Tools, UniverInstanceType, useDependency } from '@univerjs/core';
-import { Checkbox, DropdownLegacy, InputNumber, Select } from '@univerjs/design';
+import type { IStyleEditorProps } from './type';
+import { get, IUniverInstanceService, LocaleService, set, Tools, UniverInstanceType } from '@univerjs/core';
+import { Checkbox, clsx, Dropdown, InputNumber, Select } from '@univerjs/design';
 import { MoreDownSingle, SlashSingle } from '@univerjs/icons';
 
 import {
@@ -35,9 +36,9 @@ import {
     iconMap,
 } from '@univerjs/sheets-conditional-formatting';
 import { FormulaEditor } from '@univerjs/sheets-formula-ui';
-import { ILayoutService, useScrollYOverContainer, useSidebarClick } from '@univerjs/ui';
+import { ILayoutService, useDependency, useScrollYOverContainer, useSidebarClick } from '@univerjs/ui';
 
-import React, { forwardRef, useEffect, useMemo, useRef, useState } from 'react';
+import { forwardRef, useEffect, useMemo, useRef, useState } from 'react';
 
 import stylesBase from '../index.module.less';
 import styles from './index.module.less';
@@ -58,12 +59,12 @@ const TextInput = (props: { id: number; type: CFValueType; value: number | strin
         return '';
     }, [props.error]);
 
-    const formulaEditorActionsRef = useRef<Parameters<typeof FormulaEditor>[0]['actions']>({});
+    const formulaEditorRef = useRef<IFormulaEditorRef>(null);
     const [isFocusFormulaEditor, isFocusFormulaEditorSet] = useState(false);
 
     useSidebarClick((e: MouseEvent) => {
-        const handleOutClick = formulaEditorActionsRef.current?.handleOutClick;
-        handleOutClick && handleOutClick(e, () => isFocusFormulaEditorSet(false));
+        const isOutSide = formulaEditorRef.current?.isClickOutSide(e);
+        isOutSide && isFocusFormulaEditorSet(false);
     });
     return (
         <div className={styles.positionRelative}>
@@ -90,7 +91,7 @@ const TextInput = (props: { id: number; type: CFValueType; value: number | strin
                                 props.onChange(formula);
                             }}
                             onFocus={() => isFocusFormulaEditorSet(true)}
-                            actions={formulaEditorActionsRef.current}
+                            ref={formulaEditorRef}
                         />
                     </div>
                 )}
@@ -125,7 +126,7 @@ const IconGroupList = forwardRef<HTMLDivElement, IconGroupListProps>((props, ref
                                 return (
                                     <div className={styles.itemWrap} key={groupItem.name} onClick={() => { handleClick(groupItem.name); }}>
                                         <div className={styles.item}>
-                                            {groupItem.list.map((base64, index) => <img className={styles.icon} key={index} src={base64}></img>)}
+                                            {groupItem.list.map((base64, index) => <img className={styles.icon} key={index} src={base64} />)}
                                         </div>
                                     </div>
                                 );
@@ -173,8 +174,7 @@ const IconItemList = (props: { onClick: (iconType: IIconType, iconId: string) =>
                               ${styles.icon}
                             `}
                             src={item.base64}
-                        >
-                        </img>
+                        />
                     </div>
                 ))}
             </div>
@@ -191,8 +191,7 @@ const IconSetRuleEdit = (props: {
     const { onChange, configList, errorMap = {} } = props;
     const localeService = useDependency(LocaleService);
 
-    const options = [{ label: localeService.t(`sheet.cf.symbol.${CFNumberOperator.greaterThan}`), value: CFNumberOperator.greaterThan },
-        { label: localeService.t(`sheet.cf.symbol.${CFNumberOperator.greaterThanOrEqual}`), value: CFNumberOperator.greaterThanOrEqual }];
+    const options = [{ label: localeService.t(`sheet.cf.symbol.${CFNumberOperator.greaterThan}`), value: CFNumberOperator.greaterThan }, { label: localeService.t(`sheet.cf.symbol.${CFNumberOperator.greaterThanOrEqual}`), value: CFNumberOperator.greaterThanOrEqual }];
     const valueTypeOptions = [
         { label: localeService.t(`sheet.cf.valueType.${CFValueType.num}`), value: CFValueType.num },
         { label: localeService.t(`sheet.cf.valueType.${CFValueType.percent}`), value: CFValueType.percent },
@@ -236,22 +235,25 @@ const IconSetRuleEdit = (props: {
                       ${index ? stylesBase.mTXl : stylesBase.mTSm}
                     `}
                 >
-                    <div className={`
-                      ${stylesBase.label}
-                      ${styles.flex}
-                    `}
-                    >
-                        <div className={`
-                          ${styles.width45}
+                    <div
+                        className={`
+                          ${stylesBase.label}
+                          ${styles.flex}
                         `}
+                    >
+                        <div
+                            className={`
+                              ${styles.width45}
+                            `}
                         >
                             {localeService.t('sheet.cf.iconSet.icon')}
                             {index + 1}
                         </div>
 
-                        <div className={`
-                          ${styles.width45}
-                        `}
+                        <div
+                            className={`
+                              ${styles.width45}
+                            `}
                         >
                             <>
                                 {!isFirst && !isEnd && localeService.t('sheet.cf.iconSet.rule')}
@@ -271,22 +273,30 @@ const IconSetRuleEdit = (props: {
                         </div>
 
                     </div>
-                    <div className={`
-                      ${styles.flex}
-                      ${stylesBase.mTSm}
-                    `}
-                    >
-                        <div className={`
-                          ${styles.iconWrap}
-                          ${styles.width45}
+                    <div
+                        className={`
+                          ${styles.flex}
+                          ${stylesBase.mTSm}
                         `}
+                    >
+                        <div
+                            className={`
+                              ${styles.iconWrap}
+                              ${styles.width45}
+                            `}
                         >
-                            <DropdownLegacy overlay={<IconItemList onClick={handleIconClick} iconId={item.iconId} iconType={item.iconType} />}>
-                                <div className={styles.dropdownIcon}>
+                            <Dropdown
+                                overlay={(
+                                    <div className="univer-rounded-lg univer-p-4">
+                                        <IconItemList onClick={handleIconClick} iconId={item.iconId} iconType={item.iconType} />
+                                    </div>
+                                )}
+                            >
+                                <div className={clsx(styles.dropdownIcon, 'univer-box-border univer-h-7')}>
                                     {icon ? <img src={icon} className={styles.icon} /> : <SlashSingle className={styles.icon} />}
                                     <MoreDownSingle />
                                 </div>
-                            </DropdownLegacy>
+                            </Dropdown>
 
                         </div>
                         {!isEnd
@@ -325,29 +335,33 @@ const IconSetRuleEdit = (props: {
                     {!isEnd
                         ? (
                             <>
-                                <div className={`
-                                  ${stylesBase.mTSm}
-                                  ${stylesBase.label}
-                                  ${styles.flex}
-                                `}
-                                >
-                                    <div className={`
-                                      ${styles.width45}
+                                <div
+                                    className={`
+                                      ${stylesBase.mTSm}
+                                      ${stylesBase.label}
+                                      ${styles.flex}
                                     `}
+                                >
+                                    <div
+                                        className={`
+                                          ${styles.width45}
+                                        `}
                                     >
                                         {localeService.t('sheet.cf.iconSet.type')}
                                     </div>
-                                    <div className={`
-                                      ${styles.width45}
-                                    `}
+                                    <div
+                                        className={`
+                                          ${styles.width45}
+                                        `}
                                     >
                                         {localeService.t('sheet.cf.iconSet.value')}
                                     </div>
                                 </div>
-                                <div className={`
-                                  ${stylesBase.mTSm}
-                                  ${styles.flex}
-                                `}
+                                <div
+                                    className={`
+                                      ${stylesBase.mTSm}
+                                      ${styles.flex}
+                                    `}
                                 >
                                     <Select
                                         style={{ flexShrink: 0 }}
@@ -359,10 +373,11 @@ const IconSetRuleEdit = (props: {
                                         value={item.value.type}
                                         onChange={(v) => { handleValueTypeChange(v as CFNumberOperator, index); }}
                                     />
-                                    <div className={`
-                                      ${stylesBase.mL0}
-                                      ${styles.width45}
-                                    `}
+                                    <div
+                                        className={`
+                                          ${stylesBase.mL0}
+                                          ${styles.width45}
+                                        `}
                                     >
                                         <TextInput
                                             id={index}
@@ -546,42 +561,45 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
     return (
         <div className={styles.iconSet}>
             <div className={stylesBase.title}>{localeService.t('sheet.cf.panel.styleRule')}</div>
-            <div className={`
-              ${stylesBase.mTSm}
-            `}
+            <div
+                className={`
+                  ${stylesBase.mTSm}
+                `}
             >
-                <DropdownLegacy
-                    placement="bottomLeft"
+                <Dropdown
                     overlay={(
-                        <IconGroupList
-                            ref={(el) => {
-                                !iconGroupListEl && el && setIconGroupListEl(el);
-                            }}
-                            iconType={currentIconType}
-                            onClick={handleClickIconList}
-                        />
+                        <div className="univer-rounded-lg univer-p-4">
+                            <IconGroupList
+                                ref={(el) => {
+                                    !iconGroupListEl && el && setIconGroupListEl(el);
+                                }}
+                                iconType={currentIconType}
+                                onClick={handleClickIconList}
+                            />
+                        </div>
                     )}
                 >
-                    <div className={styles.dropdownIcon} style={{ width: 'unset' }}>
+                    <div className={clsx(styles.dropdownIcon, 'univer-box-border univer-h-7 univer-w-auto')}>
                         {previewIcon}
                         <MoreDownSingle />
                     </div>
-                    {/* <div>{previewIcon}</div> */}
-                </DropdownLegacy>
+                </Dropdown>
             </div>
-            <div className={`
-              ${stylesBase.mTSm}
-              ${styles.renderConfig}
-            `}
+            <div
+                className={`
+                  ${stylesBase.mTSm}
+                  ${styles.renderConfig}
+                `}
             >
                 <div className={styles.utilItem}>
                     <Checkbox onChange={reverseIcon} />
                     {localeService.t('sheet.cf.iconSet.reverseIconOrder')}
                 </div>
-                <div className={`
-                  ${styles.utilItem}
-                  ${stylesBase.mLXl}
-                `}
+                <div
+                    className={`
+                      ${styles.utilItem}
+                      ${stylesBase.mLXl}
+                    `}
                 >
                     <Checkbox checked={!isShowValue} onChange={(v) => { isShowValueSet(!v); }} />
                     {localeService.t('sheet.cf.iconSet.onlyShowIcon')}

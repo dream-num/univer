@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-sort",
-    "version": "0.5.5",
+    "version": "0.6.10-alpha.0",
     "private": false,
     "description": "A library for sorting data in Univer Sheet",
     "author": "DreamNum <developer@univer.ai>",
@@ -51,6 +51,11 @@
                 "require": "./lib/cjs/facade.js",
                 "types": "./lib/types/facade/index.d.ts"
             },
+            "./lib/facade": {
+                "import": "./lib/es/facade.js",
+                "require": "./lib/cjs/facade.js",
+                "types": "./lib/types/facade/index.d.ts"
+            },
             "./lib/*": "./lib/*"
         }
     },
@@ -74,8 +79,8 @@
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
-        "typescript": "^5.7.3",
-        "vite": "^6.0.7",
-        "vitest": "^2.1.8"
+        "typescript": "^5.8.3",
+        "vite": "^6.3.0",
+        "vitest": "^3.1.1"
     }
 }

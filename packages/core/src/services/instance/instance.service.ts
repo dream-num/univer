@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 import type { Observable } from 'rxjs';
 import type { IDisposable } from '../../common/di';
-
 import type { UnitModel, UnitType } from '../../common/unit';
 import type { Nullable } from '../../shared';
 import { BehaviorSubject, distinctUntilChanged, filter, map, Subject } from 'rxjs';
@@ -29,6 +28,7 @@ import { SlideDataModel } from '../../slides/slide-model';
 import { FOCUSING_DOC, FOCUSING_SHEET, FOCUSING_SLIDE, FOCUSING_UNIT } from '../context/context';
 import { IContextService } from '../context/context.service';
 
+// eslint-disable-next-line ts/no-explicit-any
 export type UnitCtor = new (...args: any[]) => UnitModel;
 
 export interface ICreateUnitOptions {
@@ -60,15 +60,23 @@ export interface IUniverInstanceService {
     /** Subscribe to curtain type of units' disposing. */
     getTypeOfUnitDisposed$<T extends UnitModel>(type: UnitType): Observable<T>;
 
-    /** An observable value that emits the id of the focused unit. */
+    /**
+     * An observable value that emits the id of the focused unit. A Univer app instance
+     * can only have 1 focused unit.
+     *
+     * You can use `getFocusedUnit` to get the currently focused unit, and
+     * `focusUnit` to focus a unit.
+     */
     focused$: Observable<Nullable<string>>;
     /** Focus a unit. */
     focusUnit(unitId: string | null): void;
+    /** Get the currently focused unit. */
     getFocusedUnit(): Nullable<UnitModel>;
 
+    /** @deprecated Use `getCurrentUnitOfType` instead. */
     getCurrentUnitForType<T extends UnitModel>(type: UnitType): Nullable<T>;
+    getCurrentUnitOfType<T extends UnitModel>(type: UnitType): Nullable<T>;
     setCurrentUnitForType(unitId: string): void;
-
     getCurrentTypeOfUnit$<T extends UnitModel>(type: UnitType): Observable<Nullable<T>>;
 
     /** Create a unit with snapshot info. */
@@ -146,6 +154,10 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
 
     getCurrentUnitForType<T extends UnitModel>(type: UnitType): Nullable<T> {
         return this._currentUnits.get(type) as Nullable<T>;
+    }
+
+    getCurrentUnitOfType<T extends UnitModel>(type: UnitType): Nullable<T> {
+        return this.getCurrentUnitForType(type);
     }
 
     setCurrentUnitForType(unitId: string): void {
@@ -288,15 +300,15 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
         const index = units.indexOf(unit);
         units.splice(index, 1);
 
-        this._tryRemoveCurrentUnitForType(unitId, type);
-        this._tryBlurUnitOnRemoval(unitId);
+        this._tryResetCurrentOnRemoval(unitId, type);
+        this._tryResetFocusOnRemoval(unitId);
 
         this._unitDisposed$.next(unit);
 
         return true;
     }
 
-    private _tryRemoveCurrentUnitForType(unitId: string, type: UnitType): void {
+    private _tryResetCurrentOnRemoval(unitId: string, type: UnitType): void {
         const current = this.getCurrentUnitForType(type);
         if (current?.getUnitId() === unitId) {
             this._currentUnits.set(type, null);
@@ -304,7 +316,7 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
         }
     }
 
-    private _tryBlurUnitOnRemoval(unitId: string): void {
+    private _tryResetFocusOnRemoval(unitId: string): void {
         if (this.focused?.getUnitId() === unitId) {
             this._focused$.next(null);
         }

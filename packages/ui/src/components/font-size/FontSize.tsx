@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
+import type { IFontSizeProps } from './interface';
 import { InputNumber } from '@univerjs/design';
 import React, { useMemo, useState } from 'react';
-
-import { useObservable } from '../hooks/observable';
-import styles from './index.module.less';
-import type { IFontSizeProps } from './interface';
+import { useObservable } from '../../utils/di';
 
 export const FontSize = (props: IFontSizeProps) => {
     const { value, min, max, onChange, disabled$ } = props;
@@ -43,9 +41,12 @@ export const FontSize = (props: IFontSizeProps) => {
     }
 
     return (
-        <div className={styles.uiPluginSheetsFontSize}>
+        <div className="univer-h-6 univer-w-7 univer-text-[13px]">
             <InputNumber
-                className={styles.uiPluginSheetsFontSizeInput}
+                className={`
+                  univer-block univer-h-6 univer-border-none univer-bg-transparent univer-leading-6
+                  [&_input]:univer-bg-transparent [&_input]:univer-text-[13px]
+                `}
                 value={_value}
                 controls={false}
                 min={min}

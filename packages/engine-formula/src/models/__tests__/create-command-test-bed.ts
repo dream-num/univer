@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import { CalculateFormulaService, ICalculateFormulaService } from '../../service
 import { FormulaCurrentConfigService, IFormulaCurrentConfigService } from '../../services/current-data.service';
 import { DefinedNamesService, IDefinedNamesService } from '../../services/defined-names.service';
 import { FormulaRuntimeService, IFormulaRuntimeService } from '../../services/runtime.service';
+import { ISheetRowFilteredService, SheetRowFilteredService } from '../../services/sheet-row-filtered.service';
 import { FormulaDataModel } from '../formula-data.model';
 
 const TEST_WORKBOOK_DATA: IWorkbookData = {
@@ -76,6 +77,7 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
             injector.add([IDefinedNamesService, { useClass: DefinedNamesService }]);
             injector.add([IFormulaRuntimeService, { useClass: FormulaRuntimeService }]);
             injector.add([IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }]);
+            injector.add([ISheetRowFilteredService, { useClass: SheetRowFilteredService }]);
 
             dependencies?.forEach((d) => injector.add(d));
         }

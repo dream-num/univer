@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import { IFormulaCurrentConfigService } from '../../services/current-data.servic
 import { IFunctionService } from '../../services/function.service';
 import { IFormulaRuntimeService } from '../../services/runtime.service';
 import { LexerNode } from '../analysis/lexer-node';
-import { prefixHandler } from '../utils/prefixHandler';
+import { prefixHandler } from '../utils/prefix-handler';
 import { getReferenceObjectFromCache, ReferenceObjectType } from '../utils/value-object';
 import { ErrorValueObject } from '../value-object/base-value-object';
 import { BaseAstNode } from './base-ast-node';
@@ -193,4 +193,3 @@ export class ReferenceNodeFactory extends BaseAstNodeFactory {
         return param.getParent()?.getParent()?.getToken().trim() === matchToken.COLON;
     }
 }
-

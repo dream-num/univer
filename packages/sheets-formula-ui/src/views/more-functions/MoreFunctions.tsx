@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,13 @@
  */
 
 import type { IFunctionInfo } from '@univerjs/engine-formula';
-import { DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, IUniverInstanceService, LocaleService, useDependency } from '@univerjs/core';
+import { DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, ICommandService, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { Button } from '@univerjs/design';
 import { IEditorService } from '@univerjs/docs-ui';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { getSheetCommandTarget } from '@univerjs/sheets';
-import { IEditorBridgeService, useActiveWorkbook } from '@univerjs/sheets-ui';
+import { IEditorBridgeService, SetCellEditVisibleOperation, useActiveWorkbook } from '@univerjs/sheets-ui';
+import { useDependency } from '@univerjs/ui';
 import React, { useState } from 'react';
 import styles from './index.module.less';
 import { InputParams } from './input-params/InputParams';
@@ -36,6 +37,7 @@ export function MoreFunctions() {
     const localeService = useDependency(LocaleService);
     const editorService = useDependency(IEditorService);
     const univerInstanceService = useDependency(IUniverInstanceService);
+    const commandService = useDependency(ICommandService);
 
     function handleClickNextPrev() {
         if (selectFunction) {
@@ -49,7 +51,7 @@ export function MoreFunctions() {
     function handleConfirm() {
         const sheetTarget = getSheetCommandTarget(univerInstanceService);
         if (!sheetTarget) return;
-        editorBridgeService.changeVisible({
+        commandService.executeCommand(SetCellEditVisibleOperation.id, {
             visible: true,
             unitId: sheetTarget.unitId,
             eventType: DeviceInputEventType.Dblclick,
@@ -68,7 +70,7 @@ export function MoreFunctions() {
             <div className={styles.formulaMoreFunctionsOperation}>
                 {/* TODO@Dushusir: open input params after range selector refactor */}
                 {inputParams && (
-                    <Button type="primary" size="small" onClick={handleClickNextPrev}>
+                    <Button variant="primary" size="small" onClick={handleClickNextPrev}>
                         {localeService.t('formula.moreFunctions.next')}
                     </Button>
                 )}
@@ -78,7 +80,7 @@ export function MoreFunctions() {
                     </Button>
                 )}
                 {selectFunction && !!workbook && (
-                    <Button type="primary" size="small" onClick={handleConfirm}>
+                    <Button variant="primary" size="small" onClick={handleConfirm}>
                         {localeService.t('formula.moreFunctions.confirm')}
                     </Button>
                 )}

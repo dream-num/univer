@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,11 @@ import type { Nullable } from '@univerjs/core';
 import type { IThreadComment } from '@univerjs/thread-comment';
 import type { Observable } from 'rxjs';
 import type { IThreadCommentTreeProps } from '../thread-comment-tree';
-import { ICommandService, LocaleService, UniverInstanceType, useDependency, UserManagerService } from '@univerjs/core';
+import { ICommandService, LocaleService, UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { Button, Select } from '@univerjs/design';
 import { IncreaseSingle } from '@univerjs/icons';
 import { ThreadCommentModel } from '@univerjs/thread-comment';
-import { useObservable } from '@univerjs/ui';
+import { useDependency, useObservable } from '@univerjs/ui';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { SetActiveCommentOperation } from '../../commands/operations/comment.operations';
 import { ThreadCommentPanelService } from '../../services/thread-comment-panel.service';
@@ -208,7 +208,8 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
                                 {
                                     value: 'current',
                                     label: localeService.t('threadCommentUI.filter.sheet.current'),
-                                }, {
+                                },
+                                {
                                     value: 'all',
                                     label: localeService.t('threadCommentUI.filter.sheet.all'),
                                 },
@@ -224,7 +225,8 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
                         {
                             value: 'all',
                             label: localeService.t('threadCommentUI.filter.status.all'),
-                        }, {
+                        },
+                        {
                             value: 'resolved',
                             label: localeService.t('threadCommentUI.filter.status.resolved'),
                         },
@@ -252,8 +254,8 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
                         {isFiltering
                             ? (
                                 <Button
+                                    variant="link"
                                     onClick={onReset}
-                                    type="link"
                                 >
                                     {localeService.t('threadCommentUI.panel.reset')}
                                 </Button>
@@ -262,7 +264,7 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
                                 <Button
                                     id="thread-comment-add"
                                     className={styles.threadCommentPanelAdd}
-                                    type="primary"
+                                    variant="primary"
                                     onClick={onAdd}
                                     disabled={disableAdd}
                                 >

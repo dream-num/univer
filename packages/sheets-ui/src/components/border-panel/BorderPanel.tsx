@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-import { BorderStyleTypes, useDependency } from '@univerjs/core';
-import { ColorPicker, DropdownLegacy, Menu, MenuItem } from '@univerjs/design';
+import type { IBorderInfo } from '@univerjs/sheets';
+import type { IBorderPanelProps } from './interface';
+import { BorderStyleTypes } from '@univerjs/core';
+import { clsx, ColorPicker, Dropdown, Separator } from '@univerjs/design';
 import { MoreDownSingle, PaintBucket } from '@univerjs/icons';
-import { BorderStyleManagerService, type IBorderInfo } from '@univerjs/sheets';
-import { ComponentManager } from '@univerjs/ui';
-import React from 'react';
-
+import { BorderStyleManagerService } from '@univerjs/sheets';
+import { ComponentManager, useDependency } from '@univerjs/ui';
 import { BorderLine } from './border-line/BorderLine';
-import styles from './index.module.less';
-import { BORDER_LINE_CHILDREN, type IBorderPanelProps } from './interface';
+import { BORDER_LINE_CHILDREN } from './interface';
 
 const BORDER_SIZE_CHILDREN = [
     {
@@ -88,84 +87,91 @@ export function BorderPanel(props: IBorderPanelProps) {
     function renderIcon(icon: string) {
         const Icon = componentManager.get(icon);
 
-        return Icon && <Icon extend={{ colorChannel1: 'rgb(var(--primary-color))' }} />;
-    }
-
-    function stopPropagation(e: React.MouseEvent) {
-        e.stopPropagation();
+        return Icon && <Icon extend={{ colorChannel1: '#2c53f1' }} />;
     }
 
     return (
-        <section className={styles.uiPluginSheetsBorderPanel}>
-            <div className={styles.uiPluginSheetsBorderPanelPosition}>
+        <section className="univer-box-border univer-grid univer-gap-2 univer-p-1.5">
+            <div className="univer-box-border univer-grid univer-grid-cols-5 univer-gap-2">
                 {BORDER_LINE_CHILDREN.map((item) => (
-                    <div
+                    <a
                         key={item.value}
-                        className={borderStyleManagerService.getBorderInfo().type === item.value
-                            ? (`
-                              ${styles.uiPluginSheetsBorderPanelPositionItemActive}
-                              ${styles.uiPluginSheetsBorderPanelPositionItem}
-                            `)
-                            : styles.uiPluginSheetsBorderPanelPositionItem}
+                        className={clsx(`
+                          univer-flex univer-size-6 univer-cursor-pointer univer-items-center univer-justify-center
+                          univer-justify-self-center univer-rounded
+                          hover:univer-bg-gray-100
+                        `, {
+                            'univer-bg-gray-200': borderStyleManagerService.getBorderInfo().type === item.value,
+                        })}
                         onClick={(e) => {
                             e.stopPropagation();
                             handleClick(item.value, 'type');
                         }}
                     >
                         {renderIcon(item.icon)}
-                    </div>
+                    </a>
                 ))}
             </div>
 
-            <div className={styles.uiPluginSheetsBorderPanelStyles}>
+            <Separator />
+
+            <div className="univer-flex univer-items-center univer-gap-2">
                 <div>
-                    <DropdownLegacy
-                        align={{
-                            offset: [0, 18],
-                        }}
+                    <Dropdown
                         overlay={(
-                            <section className={styles.uiPluginSheetsBorderPanelBoard} onClick={stopPropagation}>
+                            <div className="univer-rounded-lg univer-p-4">
                                 <ColorPicker onChange={(value) => handleClick(value, 'color')} />
-                            </section>
+                            </div>
                         )}
                     >
-                        <a className={styles.uiPluginSheetsBorderPanelButton} onClick={stopPropagation}>
+                        <button
+                            className={`
+                              univer-flex univer-cursor-pointer univer-items-center univer-gap-2 univer-rounded
+                              univer-border-none univer-bg-transparent univer-p-1
+                              hover:univer-bg-gray-100
+                            `}
+                            type="button"
+                        >
                             <PaintBucket extend={{ colorChannel1: value?.color ?? 'rgb(var(--primary-color))' }} />
-                            <span className={styles.uiPluginSheetsBorderPanelMoreIcon}>
-                                <MoreDownSingle />
-                            </span>
-                        </a>
-                    </DropdownLegacy>
+                            <MoreDownSingle className="univer-text-gray-400" />
+                        </button>
+                    </Dropdown>
                 </div>
 
                 <div>
-                    <DropdownLegacy
-                        align={{
-                            offset: [0, 18],
-                        }}
+                    <Dropdown
                         overlay={(
-                            <section onClick={stopPropagation}>
-                                <Menu>
+                            <section className="univer-rounded-lg univer-p-1.5">
+                                <ul className="univer-m-0 univer-grid univer-list-none univer-gap-1 univer-p-0">
                                     {BORDER_SIZE_CHILDREN.map((item) => (
-                                        <MenuItem
+                                        <li
                                             key={item.value}
-                                            eventKey={item.value.toString()}
+                                            className={`
+                                              univer-flex univer-cursor-pointer univer-items-center
+                                              univer-justify-center univer-rounded univer-px-1 univer-py-2
+                                              hover:univer-bg-gray-100
+                                            `}
                                             onClick={() => handleClick(item.value, 'style')}
                                         >
                                             <BorderLine type={item.value} />
-                                        </MenuItem>
+                                        </li>
                                     ))}
-                                </Menu>
+                                </ul>
                             </section>
                         )}
                     >
-                        <a className={styles.uiPluginSheetsBorderPanelButton} onClick={stopPropagation}>
+                        <button
+                            className={`
+                              univer-flex univer-cursor-pointer univer-items-center univer-gap-2 univer-rounded
+                              univer-border-none univer-bg-transparent univer-p-1
+                              hover:univer-bg-gray-100
+                            `}
+                            type="button"
+                        >
                             <BorderLine type={BorderStyleTypes.THIN} />
-                            <span className={styles.uiPluginSheetsBorderPanelMoreIcon}>
-                                <MoreDownSingle />
-                            </span>
-                        </a>
-                    </DropdownLegacy>
+                            <MoreDownSingle className="univer-text-gray-400" />
+                        </button>
+                    </Dropdown>
                 </div>
             </div>
         </section>

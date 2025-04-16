@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,15 +15,12 @@
  */
 
 import type { Meta } from '@storybook/react';
-import React from 'react';
 
-import { DropdownOverlay } from './DropdownOverlay';
-import { DropdownProvider } from './DropdownProvider';
-import { DropdownTrigger } from './DropdownTrigger';
+import { Dropdown } from './Dropdown';
 
-const meta: Meta<typeof DropdownProvider> = {
+const meta: Meta<typeof Dropdown> = {
     title: 'Components / Dropdown',
-    component: DropdownProvider,
+    component: Dropdown,
     parameters: {
         layout: 'centered',
     },
@@ -36,31 +33,35 @@ export const Playground = {
     render() {
         return (
             <div className="univer-relative">
-                <DropdownProvider>
-                    <DropdownTrigger>
-                        <a className="univer-cursor-pointer univer-border univer-rounded-lg univer-border-gray-200 univer-px-4 univer-py-2 univer-border-solid hover:univer-bg-gray-100 univer-transition-all">
-                            Click me
-                        </a>
-                    </DropdownTrigger>
-                    <DropdownOverlay>
+                <Dropdown
+                    overlay={(
                         <div className="univer-text-blue-500">
                             Hello Univer
-                            <DropdownProvider>
-                                <DropdownTrigger>
-                                    <a>Nested Dropdown</a>
-                                </DropdownTrigger>
-                                <DropdownOverlay>
+                            <Dropdown
+                                overlay={(
                                     <div className="univer-text-cyan-700">
                                         <div>Nested Content</div>
                                         <div>Nested Content</div>
                                         <div>Nested Content</div>
                                         <div>Nested Content</div>
                                     </div>
-                                </DropdownOverlay>
-                            </DropdownProvider>
+                                )}
+                            >
+                                <a>Nested Popover</a>
+                            </Dropdown>
                         </div>
-                    </DropdownOverlay>
-                </DropdownProvider>
+                    )}
+                >
+                    <a
+                        className={`
+                          univer-cursor-pointer univer-rounded-lg univer-border univer-border-solid
+                          univer-border-gray-200 univer-px-4 univer-py-2 univer-transition-all
+                          hover:univer-bg-gray-100
+                        `}
+                    >
+                        Click me
+                    </a>
+                </Dropdown>
             </div>
         );
     },

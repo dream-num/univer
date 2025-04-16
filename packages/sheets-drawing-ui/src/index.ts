@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ import './global.css';
 export { UniverSheetsDrawingUIPlugin } from './plugin';
 export { type ICanvasFloatDom, type IDOMAnchor, SheetCanvasFloatDomManagerService } from './services/canvas-float-dom-manager.service';
 export { SHEETS_IMAGE_MENU_ID } from './views/menu/image.menu';
-
+export { SheetDrawingUpdateController } from './controllers/sheet-drawing-update.controller';
 // #region - all commands
 
 export { DeleteDrawingsCommand } from './commands/commands/delete-drawings.command';

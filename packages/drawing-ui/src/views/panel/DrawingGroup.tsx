@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
+import type { IDrawingParam } from '@univerjs/core';
 import type { IDrawingGroupUpdateParam } from '@univerjs/drawing';
-import { DrawingTypeEnum, type IDrawingParam, LocaleService, Tools, useDependency } from '@univerjs/core';
-import { Button } from '@univerjs/design';
+import { DrawingTypeEnum, LocaleService, Tools } from '@univerjs/core';
+import { Button, clsx } from '@univerjs/design';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { getGroupState, IRenderManagerService, transformObjectOutOfGroup } from '@univerjs/engine-render';
 import { GroupSingle, UngroupSingle } from '@univerjs/icons';
-import clsx from 'clsx';
-import React, { useEffect, useState } from 'react';
+import { useDependency } from '@univerjs/ui';
+import { useEffect, useState } from 'react';
 import { getUpdateParams } from '../../utils/get-update-params';
 
 import styles from './index.module.less';
@@ -64,7 +65,9 @@ export const DrawingGroup = (props: IDrawingGroupProps) => {
             const transform = drawing.transform || { left: 0, top: 0 };
             const { unitId, subUnitId, drawingId } = drawing;
             return {
-                unitId, subUnitId, drawingId,
+                unitId,
+                subUnitId,
+                drawingId,
                 transform: {
                     ...transform,
                     left: transform.left! - groupTransform.left,
@@ -102,7 +105,9 @@ export const DrawingGroup = (props: IDrawingGroupProps) => {
             const { unitId, subUnitId, drawingId } = object;
             const newTransform = transformObjectOutOfGroup(transform || {}, groupTransform, groupTransform.width || 0, groupTransform.height || 0);
             return {
-                unitId, subUnitId, drawingId,
+                unitId,
+                subUnitId,
+                drawingId,
                 transform: {
                     ...transform,
                     ...newTransform,
@@ -190,7 +195,7 @@ export const DrawingGroup = (props: IDrawingGroupProps) => {
             </div>
             <div className={styles.imageCommonPanelRow}>
                 <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSpan2, styles.imageCommonPanelColumnCenter)}>
-                    <Button size="small" onClick={() => { onGroupBtnClick(); }} style={{ display: gridDisplay(groupBtnShow) }}>
+                    <Button style={{ display: gridDisplay(groupBtnShow) }} size="small" onClick={() => { onGroupBtnClick(); }}>
                         <span className={styles.imageCommonPanelInline}>
                             <GroupSingle />
                             {localeService.t('image-panel.group.group')}
@@ -198,7 +203,7 @@ export const DrawingGroup = (props: IDrawingGroupProps) => {
                     </Button>
                 </div>
                 <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSpan2, styles.imageCommonPanelColumnCenter)}>
-                    <Button size="small" onClick={() => { onUngroupBtnClick(); }} style={{ display: gridDisplay(ungroupBtnShow) }}>
+                    <Button style={{ display: gridDisplay(ungroupBtnShow) }} size="small" onClick={() => { onUngroupBtnClick(); }}>
                         <span className={styles.imageCommonPanelInline}>
                             <UngroupSingle />
                             {localeService.t('image-panel.group.unGroup')}

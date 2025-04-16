@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -305,7 +305,8 @@ export default {
     },
     WEEKDAY: {
         description: '將序號轉換為星期日期',
-        abstract: '將序號轉換為星期日期', links: [
+        abstract: '將序號轉換為星期日期',
+        links: [
             {
                 title: '教導',
                 url: 'https://support.microsoft.com/zh-tw/office/weekday-%E5%87%BD%E6%95%B0-60e44483-2ed1-439f-8bd0-e404c190949a',

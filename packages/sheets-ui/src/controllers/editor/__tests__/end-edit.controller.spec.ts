@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ import type { ICellData, IDocumentData, Univer, Workbook } from '@univerjs/core'
 import type { IFunctionService } from '@univerjs/engine-formula';
 import { CellValueType, IConfigService, IContextService, Injector, LocaleService, LocaleType, Tools } from '@univerjs/core';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
+import { DEFAULT_TEXT_FORMAT_EXCEL } from '@univerjs/engine-numfmt';
 import { SpreadsheetSkeleton } from '@univerjs/engine-render';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { normalizeString } from '../../utils/char-tools';
@@ -168,7 +169,7 @@ describe('Test EndEditController', () => {
             const cell: ICellData = {
                 s: {
                     n: {
-                        pattern: '@@@',
+                        pattern: DEFAULT_TEXT_FORMAT_EXCEL,
                     },
                 },
                 t: null,
@@ -184,7 +185,7 @@ describe('Test EndEditController', () => {
                 t: CellValueType.STRING,
                 s: {
                     n: {
-                        pattern: '@@@',
+                        pattern: DEFAULT_TEXT_FORMAT_EXCEL,
                     },
                 },
                 f: null,
@@ -200,7 +201,7 @@ describe('Test EndEditController', () => {
             const cell: ICellData = {
                 s: {
                     n: {
-                        pattern: '@@@',
+                        pattern: DEFAULT_TEXT_FORMAT_EXCEL,
                     },
                 },
                 t: null,
@@ -216,7 +217,7 @@ describe('Test EndEditController', () => {
                 t: CellValueType.STRING,
                 s: {
                     n: {
-                        pattern: '@@@',
+                        pattern: DEFAULT_TEXT_FORMAT_EXCEL,
                     },
                 },
                 f: null,
@@ -232,7 +233,7 @@ describe('Test EndEditController', () => {
             const cell: ICellData = {
                 s: {
                     n: {
-                        pattern: '@@@',
+                        pattern: DEFAULT_TEXT_FORMAT_EXCEL,
                     },
                 },
                 t: null,
@@ -248,7 +249,7 @@ describe('Test EndEditController', () => {
                 t: CellValueType.STRING,
                 s: {
                     n: {
-                        pattern: '@@@',
+                        pattern: DEFAULT_TEXT_FORMAT_EXCEL,
                     },
                 },
                 f: null,
@@ -264,7 +265,7 @@ describe('Test EndEditController', () => {
             const cell: ICellData = {
                 s: {
                     n: {
-                        pattern: '@@@',
+                        pattern: DEFAULT_TEXT_FORMAT_EXCEL,
                     },
                 },
                 t: 1,
@@ -320,7 +321,7 @@ describe('Test EndEditController', () => {
                 t: CellValueType.STRING,
                 s: {
                     n: {
-                        pattern: '@@@',
+                        pattern: DEFAULT_TEXT_FORMAT_EXCEL,
                     },
                 },
                 f: null,

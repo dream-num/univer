@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import { distinctUntilChanged, takeUntil } from 'rxjs';
 const SHEET_MAIN_CANVAS_ID = 'univer-sheet-main-canvas';
 
 /**
- * This controller is responsible for managing units of a specific kind (UnierSheet) to be rendered on the canvas.
+ * This controller is responsible for managing units of a specific kind (UniverSheet) to be rendered on the canvas.
  */
 export class SheetsRenderService extends RxDisposable {
     private _skeletonChangeMutations = new Set<string>();
@@ -77,7 +77,6 @@ export class SheetsRenderService extends RxDisposable {
             .subscribe((workbook) => this._createRenderer(workbook));
         this._instanceSrv.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET)
             .forEach((workbook) => this._createRenderer(workbook));
-
         this._instanceSrv.getTypeOfUnitDisposed$<Workbook>(UniverInstanceType.UNIVER_SHEET)
             .pipe(takeUntil(this.dispose$))
             .subscribe((workbook) => this._disposeRenderer(workbook));
@@ -91,10 +90,8 @@ export class SheetsRenderService extends RxDisposable {
                 renderer.engine.getCanvas().getContext().setId(`${SHEET_MAIN_CANVAS_ID}_${unitId}`);
             }
         });
-        this._renderManagerService.createRender(unitId);
 
-        // NOTE@wzhudev: maybe not in univer mode
-        this._renderManagerService.setCurrent(unitId);
+        this._renderManagerService.createRender(unitId);
     }
 
     private _disposeRenderer(workbook: Workbook): void {

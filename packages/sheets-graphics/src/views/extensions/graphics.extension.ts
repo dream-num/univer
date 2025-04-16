@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,5 +53,13 @@ export class Graphics extends SheetExtension {
 
     override dispose(): void {
         this._graphicsRenderMap.clear();
+    }
+
+    copy() {
+        const newGraphics = new Graphics();
+        this._graphicsRenderMap.forEach((renderer, key) => {
+            newGraphics.registerRenderer(key, renderer);
+        });
+        return newGraphics;
     }
 }

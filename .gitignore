@@ -1,6 +1,7 @@
 #ide
 *.DS_Store
 .idea
+.cursor
 # .vscode
 
 #npm
@@ -86,6 +87,7 @@ typings/
 # examples
 
 screenshot
+*.heapsnapshot
 
 univer-custom-build
 universheet-custom-build

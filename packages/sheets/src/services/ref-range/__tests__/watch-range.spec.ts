@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,18 +15,18 @@
  */
 
 import type { IMutationInfo, IRange } from '@univerjs/core';
-import { beforeEach, describe, expect, it } from 'vitest';
+import type { IRemoveColMutationParams, IRemoveRowsMutationParams } from '../../../basics';
 
+import type { IMoveRowsMutationParams } from '../../../commands/mutations/move-rows-cols.mutation';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { MoveRowsMutation } from '../../../commands/mutations/move-rows-cols.mutation';
+import { RemoveColMutation, RemoveRowMutation } from '../../../commands/mutations/remove-row-col.mutation';
 import { EffectRefRangId } from '../type';
 import {
     adjustRangeOnMutation,
     handleIRemoveRow,
     runRefRangeMutations,
 } from '../util';
-import type { IRemoveColMutationParams, IRemoveRowsMutationParams } from '../../../basics';
-import type { IMoveRowsMutationParams } from '../../../commands/mutations/move-rows-cols.mutation';
-import { MoveRowsMutation } from '../../../commands/mutations/move-rows-cols.mutation';
-import { RemoveColMutation, RemoveRowMutation } from '../../../commands/mutations/remove-row-col.mutation';
 
 describe('test ref-range move', () => {
     describe('handleMoveRows', () => {
@@ -48,7 +48,8 @@ describe('test ref-range move', () => {
                             targetRange: moveTargetRange,
                             unitId: '',
                             subUnitId: '',
-                        }, id: MoveRowsMutation.id,
+                        },
+                        id: MoveRowsMutation.id,
                     };
                 };
             });
@@ -193,7 +194,8 @@ describe('test ref-range move', () => {
                             targetRange: moveTargetRange,
                             unitId: '',
                             subUnitId: '',
-                        }, id: MoveRowsMutation.id,
+                        },
+                        id: MoveRowsMutation.id,
                     };
                 };
             });

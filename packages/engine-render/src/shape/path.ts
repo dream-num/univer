@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,9 @@
 import type { IKeyValue, Nullable } from '@univerjs/core';
 
 import type { IObjectFullState } from '../basics/interfaces';
-import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '../basics/interfaces';
 import type { UniverRenderingContext } from '../context';
 import type { IShapeProps } from './shape';
+import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '../basics/interfaces';
 import { Shape } from './shape';
 
 interface IPathDataArray {

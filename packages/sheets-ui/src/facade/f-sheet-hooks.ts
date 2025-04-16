@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import { FSheetHooks } from '@univerjs/sheets/facade';
 export interface IFSheetHooksUIMixin {
     /**
      * The onCellPointerMove event is fired when a pointer changes coordinates.
+     * @deprecated use `univerAPI.addEvent(univerAPI.Event.CellPointerMove, (params) => {})` instead
      * @param {function(Nullable<IHoverCellPosition>): void} callback - function that will be called when the event is fired
      * @returns {IDisposable} A disposable object that can be used to unsubscribe from the event
      * @example
@@ -38,6 +39,7 @@ export interface IFSheetHooksUIMixin {
 
     /**
      * The onCellPointerOver event is fired when a pointer is moved into a cell's hit test boundaries.
+     * @deprecated use `univerAPI.addEvent(univerAPI.Event.CellHover, (params) => {})` instead
      * @param {function(Nullable<IHoverCellPosition>): void} callback - function that will be called when the event is fired
      * @returns {IDisposable} A disposable object that can be used to unsubscribe from the event
      * @example
@@ -49,6 +51,7 @@ export interface IFSheetHooksUIMixin {
 
     /**
      * The onCellDragOver event is fired when an element or text selection is being dragged into a cell's hit test boundaries.
+     * @deprecated use `univerAPI.addEvent(univerAPI.Event.DragOver, (params) => {})` instead
      * @param {function (Nullable<IDragCellPosition>): void} callback Callback function that will be called when the event is fired
      * @returns {IDisposable} A disposable object that can be used to unsubscribe from the event
      * @example
@@ -60,6 +63,7 @@ export interface IFSheetHooksUIMixin {
 
     /**
      * The onCellDrop event is fired when an element or text selection is being dropped on the cell.
+     * @deprecated use `univerAPI.addEvent(univerAPI.Event.Drop, (params) => {})` instead
      * @param {function(Nullable<IDragCellPosition>): void} callback Callback function that will be called when the event is fired
      * @returns {IDisposable} A disposable object that can be used to unsubscribe from the event
      * @example
@@ -94,6 +98,7 @@ export interface IFSheetHooksUIMixin {
 
     /**
      * The onBeforeCellEdit event is fired before a cell is edited.
+     * @deprecated use `univerAPI.addEvent(univerAPI.Event.BeforeSheetEditStart, (params) => {})` instead
      * @param callback Callback function that will be called when the event is fired
      * @returns A disposable object that can be used to unsubscribe from the event
      * @example
@@ -105,6 +110,7 @@ export interface IFSheetHooksUIMixin {
 
     /**
      * The onAfterCellEdit event is fired after a cell is edited.
+     * @deprecated use `univerAPI.addEvent(univerAPI.Event.SheetEditEnded, (params) => {})` instead
      * @param callback Callback function that will be called when the event is fired
      * @returns A disposable object that can be used to unsubscribe from the event
      * @example

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,9 @@ export class SheetsDrawingLoadController extends Disposable {
         @IResourceManagerService private _resourceManagerService: IResourceManagerService
     ) {
         super();
+
         this._initSnapshot();
+
         this.disposeWithMe(this._commandService.registerCommand(SetDrawingApplyMutation));
     }
 
@@ -41,18 +43,22 @@ export class SheetsDrawingLoadController extends Disposable {
             if (map) {
                 return JSON.stringify(map);
             }
+
             return '';
         };
+
         const parseJson = (json: string): IDrawingSubunitMap<ISheetDrawing> => {
             if (!json) {
                 return {};
             }
+
             try {
                 return JSON.parse(json);
-            } catch (err) {
+            } catch {
                 return {};
             }
         };
+
         this.disposeWithMe(
             this._resourceManagerService.registerPluginResource<IDrawingSubunitMap<ISheetDrawing>>({
                 pluginName: SHEET_DRAWING_PLUGIN,

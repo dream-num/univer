@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,8 +69,7 @@ describe('Test datevalue function', () => {
 
         it('Serial number is array', () => {
             const serialNumber = ArrayValueObject.create({
-                calculateValueList: transformToValueObject([[1, ' ', 1.23, true, false, null],
-                    [0, '100', '2.34', 'test', -3, ErrorType.NAME]]),
+                calculateValueList: transformToValueObject([[1, ' ', 1.23, true, false, null], [0, '100', '2.34', 'test', -3, ErrorType.NAME]]),
                 rowCount: 2,
                 columnCount: 6,
                 unitId: '',
@@ -79,7 +78,21 @@ describe('Test datevalue function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(serialNumber);
-            expect(transformToValue(result.getArrayValue())).toStrictEqual([[ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE], [ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.NAME]]);
+            expect(transformToValue(result.getArrayValue())).toStrictEqual([[
+                ErrorType.VALUE,
+                ErrorType.VALUE,
+                ErrorType.VALUE,
+                ErrorType.VALUE,
+                ErrorType.VALUE,
+                ErrorType.VALUE,
+            ], [
+                ErrorType.VALUE,
+                ErrorType.VALUE,
+                ErrorType.VALUE,
+                ErrorType.VALUE,
+                ErrorType.VALUE,
+                ErrorType.NAME,
+            ]]);
         });
     });
 });

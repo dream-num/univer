@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { catchError, throwError } from 'rxjs';
 import type { HTTPInterceptorFn, HTTPInterceptorFnFactory } from '../interceptor';
+import { catchError, throwError } from 'rxjs';
 import { HTTPResponseError } from '../response';
 
 export interface IAuthInterceptorParams {
@@ -40,4 +40,3 @@ export const AuthInterceptorFactory: HTTPInterceptorFnFactory<[IAuthInterceptorP
 
     return authInterceptor;
 };
-

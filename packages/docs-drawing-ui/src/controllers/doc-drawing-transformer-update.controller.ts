@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,15 @@ import type { IDrawingDocTransform } from '../commands/commands/update-doc-drawi
 import {
     BooleanNumber,
     COLORS,
-    Disposable, ICommandService, IUniverInstanceService, ObjectRelativeFromH, ObjectRelativeFromV,
-    PositionedObjectLayoutType, throttle, toDisposable, Tools,
+    Disposable,
+    ICommandService,
+    IUniverInstanceService,
+    ObjectRelativeFromH,
+    ObjectRelativeFromV,
+    PositionedObjectLayoutType,
+    throttle,
+    toDisposable,
+    Tools,
 } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { DocSelectionRenderService, getAnchorBounding, getDocObject, getOneTextSelectionRange, NodePositionConvertToCursor, TEXT_RANGE_LAYER_INDEX } from '@univerjs/docs-ui';
@@ -123,7 +130,10 @@ export class DocDrawingTransformerController extends Disposable {
                         const drawingData = documentDataModel?.getSnapshot().drawings?.[drawing.drawingId];
 
                         if (drawingData?.layoutType === PositionedObjectLayoutType.INLINE) {
-                            (object as Image).setOpacity(0.2);
+                            try {
+                                (object as Image).setOpacity(0.2);
+                            } catch (e) {
+                            }
                         }
 
                         if (drawingData != null) {
@@ -195,7 +205,10 @@ export class DocDrawingTransformerController extends Disposable {
                         const drawingCache = this._transformerCache.get(drawing?.drawingId);
 
                         if (drawingCache?.drawing.layoutType === PositionedObjectLayoutType.INLINE) {
-                            (object as Image).setOpacity(1);
+                            try {
+                                (object as Image).setOpacity(1);
+                            } catch (e) {
+                            }
                         }
                     }
 
@@ -377,7 +390,8 @@ export class DocDrawingTransformerController extends Disposable {
         const activeViewport = scene.getViewports()[0];
         const {
             pageLayoutType = PageLayoutType.VERTICAL,
-            pageMarginLeft, pageMarginTop,
+            pageMarginLeft,
+            pageMarginTop,
         } = documentComponent.getOffsetConfig();
         let glyphAnchor: Nullable<IDocumentSkeletonGlyph> = null;
         let isBack = false;
@@ -395,14 +409,11 @@ export class DocDrawingTransformerController extends Disposable {
             return;
         }
 
-        const nodeInfo = skeleton?.findNodeByCoord(
-            coord, pageLayoutType, pageMarginLeft, pageMarginTop,
-            {
-                strict: false,
-                segmentId: docSelectionRenderService.getSegment(),
-                segmentPage: docSelectionRenderService.getSegmentPage(),
-            }
-        );
+        const nodeInfo = skeleton?.findNodeByCoord(coord, pageLayoutType, pageMarginLeft, pageMarginTop, {
+            strict: false,
+            segmentId: docSelectionRenderService.getSegment(),
+            segmentPage: docSelectionRenderService.getSegmentPage(),
+        });
         if (nodeInfo) {
             const { node, ratioX, segmentPage, segmentId: nodeSegmentId } = nodeInfo;
             isBack = ratioX < HALF;
@@ -835,7 +846,8 @@ export class DocDrawingTransformerController extends Disposable {
         const { mainComponent, scene } = currentRender;
         const documentComponent = mainComponent as Documents;
         const {
-            docsLeft, docsTop,
+            docsLeft,
+            docsTop,
         } = documentComponent.getOffsetConfig();
         const bounding = getAnchorBounding(pointsGroup);
         const { left: boundingLeft, top: boundingTop, height } = bounding;

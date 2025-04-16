@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -303,6 +303,20 @@ export default {
             text: { name: 'bản văn', detail: 'Chuỗi văn bản chứa các ký tự bạn muốn trích xuất.' },
             startNum: { name: 'vị trí bắt đầu', detail: 'Ví trí của ký tự thứ nhất mà bạn muốn trích xuất trong văn bản.' },
             numBytes: { name: 'số Byte', detail: 'Chỉ rõ số ký tự mà bạn muốn hàm MIDB trích xuất, dựa trên byte.' },
+        },
+    },
+    NUMBERSTRING: {
+        description: 'Chuyển đổi số sang chuỗi tiếng Trung',
+        abstract: 'Chuyển đổi số sang chuỗi tiếng Trung',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://www.wps.cn/learning/course/detail/id/340.html?chan=pc_kdocs_function',
+            },
+        ],
+        functionParameter: {
+            number: { name: 'số', detail: 'Giá trị được chuyển đổi thành chuỗi tiếng Trung.' },
+            type: { name: 'kiểu', detail: 'Kiểu kết quả trả về.\n1. chữ thường Trung Quốc \n2. Viết hoa chữ Hán \n3. Đọc và viết chữ Hán' },
         },
     },
     NUMBERVALUE: {

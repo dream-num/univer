@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -320,7 +320,8 @@ const re_weburl = new RegExp(
       '(?::\\d{2,5})?' +
       // resource path (optional)
       '(?:[/?#]\\S*)?' +
-    '$', 'i'
+    '$',
+    'i'
 );
 export function isLegalUrl(url: string) {
     // skip number 0.1

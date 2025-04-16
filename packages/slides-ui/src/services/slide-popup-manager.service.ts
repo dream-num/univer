@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
+import type { IDisposable } from '@univerjs/core';
+import type { BaseObject, IBoundRectNoAngle, IRender, Scene } from '@univerjs/engine-render';
+import type { IPopup } from '@univerjs/ui';
 import { Disposable, DisposableCollection, ICommandService, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService, pxToNum } from '@univerjs/engine-render';
 import { SLIDE_KEY } from '@univerjs/slides';
 import { ICanvasPopupService } from '@univerjs/ui';
 import { BehaviorSubject } from 'rxjs';
-import type { IDisposable } from '@univerjs/core';
-import type { BaseObject, IBoundRectNoAngle, IRender, Scene } from '@univerjs/engine-render';
-import type { IPopup } from '@univerjs/ui';
 
-export interface ISlideCanvasPopup extends Pick<IPopup,
-    'direction' | 'excludeOutside' | 'componentKey' | 'offset' | 'onClickOutside' | 'hideOnInvisible'
-> {
+export interface ISlideCanvasPopup extends Pick<IPopup, 'direction' | 'excludeOutside' | 'componentKey' | 'offset' | 'onClickOutside' | 'hideOnInvisible'> {
     mask?: boolean;
     extraProps?: Record<string, any>;
 }

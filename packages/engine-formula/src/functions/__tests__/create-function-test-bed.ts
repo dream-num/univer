@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,6 @@
 
 import type { Dependency, IWorkbookData, Workbook } from '@univerjs/core';
 import type { ISheetData } from '../../basics/common';
-
-import type { BaseReferenceObject, FunctionVariantType } from '../../engine/reference-object/base-reference-object';
-import type { ArrayValueObject } from '../../engine/value-object/array-value-object';
-import type { BaseValueObject, ErrorValueObject } from '../../engine/value-object/base-value-object';
-
 import {
     CellValueType,
     ILogService,
@@ -59,6 +54,7 @@ import { DefinedNamesService, IDefinedNamesService } from '../../services/define
 import { FunctionService, IFunctionService } from '../../services/function.service';
 import { IOtherFormulaManagerService, OtherFormulaManagerService } from '../../services/other-formula-manager.service';
 import { FormulaRuntimeService, IFormulaRuntimeService } from '../../services/runtime.service';
+import { ISheetRowFilteredService, SheetRowFilteredService } from '../../services/sheet-row-filtered.service';
 import { ISuperTableService, SuperTableService } from '../../services/super-table.service';
 
 const getTestWorkbookData = (): IWorkbookData => {
@@ -184,6 +180,7 @@ export function createFunctionTestBed(workbookData?: IWorkbookData, dependencies
             injector.add([IOtherFormulaManagerService, { useClass: OtherFormulaManagerService }]);
             injector.add([IDefinedNamesService, { useClass: DefinedNamesService }]);
             injector.add([ISuperTableService, { useClass: SuperTableService }]);
+            injector.add([ISheetRowFilteredService, { useClass: SheetRowFilteredService }]);
 
             injector.add([IFormulaDependencyGenerator, { useClass: FormulaDependencyGenerator }]);
             injector.add([Interpreter]);
@@ -239,17 +236,6 @@ export function createFunctionTestBed(workbookData?: IWorkbookData, dependencies
     };
 }
 
-export function getObjectValue(result: FunctionVariantType) {
-    if ((result as ErrorValueObject).isError()) {
-        return (result as ErrorValueObject).getValue();
-    } else if ((result as BaseReferenceObject).isReferenceObject()) {
-        return (result as BaseReferenceObject).toArrayValueObject().toValue();
-    } else if ((result as ArrayValueObject).isArray()) {
-        return (result as ArrayValueObject).toValue();
-    }
-    return (result as BaseValueObject).getValue();
-}
-
 export function stripArrayValue(array: (string | number | boolean | null)[][]) {
     return array.map((row) => row.map((cell) => {
         if (typeof cell === 'number') {
@@ -258,3 +244,5 @@ export function stripArrayValue(array: (string | number | boolean | null)[][]) {
         return cell;
     }));
 }
+
+export { getObjectValue } from '../util';

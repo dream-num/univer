@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 import type { Dependency, DependencyIdentifier, Injector } from '@wendellhu/redi';
 
 export * from '@wendellhu/redi';
-export * from '@wendellhu/redi/react-bindings';
+// export * from '@wendellhu/redi/react-bindings';
 
 /**
  * Register the dependencies to the injector.

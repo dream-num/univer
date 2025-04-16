@@ -135,6 +135,10 @@ Univer は多言語をサポートしており、以下の言語が利用可能�
 
 Univer has a rich ecosystem that includes a wide range of tools and resources to help you get started with Univer: -->
 
+## 🔒 セキュリティ
+
+Univer は、セキュアなコードベースを維持することを約束します。セキュリティのベストプラクティスに従い、依存関係を定期的に更新しています。詳細については、[セキュリティポリシー](./SECURITY.md)をご参照ください。
+
 ## 💬 コミュニティ
 
 [![][github-community-badge]][github-community-link] [![][discord-community-badge]][discord-community-link] [![][stackoverflow-community-badge]][stackoverflow-community-link]

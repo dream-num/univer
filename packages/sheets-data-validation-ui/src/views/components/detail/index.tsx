@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,15 @@
 
 import type { DataValidationOperator, DataValidationType, IDataValidationRuleBase, IDataValidationRuleOptions, IExecutionOptions, ISheetDataValidationRule, IUnitRange, Workbook } from '@univerjs/core';
 import type { IUpdateSheetDataValidationRangeCommandParams } from '@univerjs/sheets-data-validation';
-import { debounce, ICommandService, isUnitRangesEqual, IUniverInstanceService, LocaleService, RedoCommand, shallowEqual, UndoCommand, UniverInstanceType, useDependency } from '@univerjs/core';
+import type { IRangeSelectorInstance } from '@univerjs/sheets-formula-ui';
+import { debounce, ICommandService, isUnitRangesEqual, IUniverInstanceService, LocaleService, RedoCommand, shallowEqual, UndoCommand, UniverInstanceType } from '@univerjs/core';
 import { DataValidationModel, DataValidatorRegistryScope, DataValidatorRegistryService, getRuleOptions, getRuleSetting, TWO_FORMULA_OPERATOR_COUNT } from '@univerjs/data-validation';
 import { Button, Checkbox, FormLayout, Select } from '@univerjs/design';
 import { deserializeRangeWithSheet, serializeRange } from '@univerjs/engine-formula';
 import { SheetsSelectionsService } from '@univerjs/sheets';
 import { RemoveSheetDataValidationCommand, UpdateSheetDataValidationOptionsCommand, UpdateSheetDataValidationRangeCommand, UpdateSheetDataValidationSettingCommand } from '@univerjs/sheets-data-validation';
 import { RangeSelector } from '@univerjs/sheets-formula-ui';
-
-import { ComponentManager, useEvent, useObservable, useSidebarClick } from '@univerjs/ui';
+import { ComponentManager, useDependency, useEvent, useObservable } from '@univerjs/ui';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { DataValidationPanelService } from '../../../services/data-validation-panel.service';
 import { DataValidationOptions } from '../options';
@@ -33,9 +33,7 @@ import styles from './index.module.less';
 
 // debounce execute commands, for better redo-undo experience
 const debounceExecuteFactory = (commandService: ICommandService) => debounce(
-    async (id: string, params?: any, options?: IExecutionOptions | undefined,
-        callback?: (success: boolean) => void
-    ) => {
+    async (id: string, params?: any, options?: IExecutionOptions | undefined, callback?: (success: boolean) => void) => {
         const res = await commandService.executeCommand(id, params, options);
         callback?.(res);
     },
@@ -55,7 +53,6 @@ export function DataValidationDetail() {
     const ruleId = rule.uid;
     const validatorService = useDependency(DataValidatorRegistryService);
     const univerInstanceService = useDependency(IUniverInstanceService);
-
     const componentManager = useDependency(ComponentManager);
     const commandService = useDependency(ICommandService);
     const dataValidationModel = useDependency(DataValidationModel);
@@ -67,10 +64,8 @@ export function DataValidationDetail() {
     const [localRanges, setLocalRanges] = useState<IUnitRange[]>(() => localRule.ranges.map((i) => ({ unitId: '', sheetId: '', range: i })));
     const debounceExecute = useMemo(() => debounceExecuteFactory(commandService), [commandService]);
     const [isRangeError, setIsRangeError] = useState(false);
-
-    const rangeSelectorActionsRef = useRef<Parameters<typeof RangeSelector>[0]['actions']>({});
     const [isFocusRangeSelector, isFocusRangeSelectorSet] = useState(false);
-
+    const rangeSelectorInstance = useRef<IRangeSelectorInstance>(null);
     const sheetSelectionService = useDependency(SheetsSelectionsService);
 
     useEffect(() => {
@@ -106,6 +101,9 @@ export function DataValidationDetail() {
     const isTwoFormula = localRule.operator ? TWO_FORMULA_OPERATOR_COUNT.includes(localRule.operator) : false;
 
     const handleOk = () => {
+        if (rangeSelectorInstance.current?.editor?.isFocus()) {
+            handleUpdateRuleRanges(rangeSelectorInstance.current?.getValue());
+        }
         if (!localRule.ranges.length || isRangeError) {
             return;
         }
@@ -125,7 +123,8 @@ export function DataValidationDetail() {
                 return { ...unitRange, sheetId };
             }
             return {
-                ...unitRange, sheetId: '',
+                ...unitRange,
+                sheetId: '',
             };
         });
         if (isUnitRangesEqual(unitRanges, localRanges)) {
@@ -247,12 +246,6 @@ export function DataValidationDetail() {
         );
     };
 
-    useSidebarClick((e: MouseEvent) => {
-        const handleOutClick = rangeSelectorActionsRef.current?.handleOutClick;
-        handleOutClick && handleOutClick(e, () => isFocusRangeSelectorSet(false));
-    });
-    const shouldHideFormulaInput = operators.length && !localRule.operator;
-
     return (
         <div className={styles.dataValidationDetail}>
             <FormLayout
@@ -260,13 +253,21 @@ export function DataValidationDetail() {
                 error={(!localRule.ranges.length || isRangeError) ? localeService.t('dataValidation.panel.rangeError') : ''}
             >
                 <RangeSelector
+                    selectorRef={rangeSelectorInstance}
                     unitId={unitId}
                     subUnitId={subUnitId}
-                    initValue={rangeStr}
-                    onChange={handleUpdateRuleRanges}
-                    onFocus={() => isFocusRangeSelectorSet(true)}
-                    isFocus={isFocusRangeSelector}
-                    actions={rangeSelectorActionsRef.current}
+                    initialValue={rangeStr}
+                    onChange={(doc, str) => {
+                        if (!isFocusRangeSelector && rangeSelectorInstance.current?.verify()) {
+                            handleUpdateRuleRanges(str);
+                        }
+                    }}
+                    onFocusChange={(focusing, str) => {
+                        isFocusRangeSelectorSet(focusing);
+                        if (!focusing && str && rangeSelectorInstance.current?.verify()) {
+                            handleUpdateRuleRanges(str);
+                        }
+                    }}
                     onVerify={(isValid) => setIsRangeError(!isValid)}
                 />
             </FormLayout>
@@ -307,27 +308,29 @@ export function DataValidationDetail() {
                     </FormLayout>
                 )
                 : null}
-            {FormulaInput && !shouldHideFormulaInput
+            {FormulaInput
                 ? (
-                    <FormulaInput
-                        key={key + localRule.type}
-                        isTwoFormula={isTwoFormula}
-                        value={{
-                            formula1: localRule.formula1,
-                            formula2: localRule.formula2,
-                        }}
-                        onChange={(value: any) => {
-                            handleUpdateRuleSetting({
-                                ...baseRule,
-                                ...value,
-                            });
-                        }}
-                        showError={showError}
-                        validResult={validator.validatorFormula(localRule, unitId, subUnitId)}
-                        unitId={unitId}
-                        subUnitId={subUnitId}
-                        ruleId={ruleId}
-                    />
+                    <FormLayout>
+                        <FormulaInput
+                            key={key + localRule.type}
+                            isTwoFormula={isTwoFormula}
+                            value={{
+                                formula1: localRule.formula1,
+                                formula2: localRule.formula2,
+                            }}
+                            onChange={(value: any) => {
+                                handleUpdateRuleSetting({
+                                    ...baseRule,
+                                    ...value,
+                                });
+                            }}
+                            showError={showError}
+                            validResult={validator.validatorFormula(localRule, unitId, subUnitId)}
+                            unitId={unitId}
+                            subUnitId={subUnitId}
+                            ruleId={ruleId}
+                        />
+                    </FormLayout>
                 )
                 : null}
             <FormLayout>
@@ -346,7 +349,7 @@ export function DataValidationDetail() {
                 <Button className={styles.dataValidationDetailButton} onClick={handleDelete}>
                     {localeService.t('dataValidation.panel.removeRule')}
                 </Button>
-                <Button className={styles.dataValidationDetailButton} type="primary" onClick={handleOk}>
+                <Button className={styles.dataValidationDetailButton} variant="primary" onClick={handleOk}>
                     {localeService.t('dataValidation.panel.done')}
                 </Button>
             </div>

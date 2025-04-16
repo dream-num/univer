@@ -1,8 +1,0 @@
-{
-    "extends": "@univerjs-infra/shared/tsconfigs/base",
-    "compilerOptions": {
-        "allowArbitraryExtensions": true,
-        "outDir": "dist"
-    },
-    "include": ["src"]
-}

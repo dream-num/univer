@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,11 @@
 import fs from 'node:fs';
 
 const progress = [
-    ['progress0', '@univerjs/icons-svg/single/start-page/progress-0-single.svg', { black: '#7A7A7A', '#E5E5E5': '#7A7A7A' }],
-    ['progress25', '@univerjs/icons-svg/single/start-page/progress-25-single.svg', { black: '#7A7A7A', '#E5E5E5': '#7A7A7A' }],
-    ['progress50', '@univerjs/icons-svg/single/start-page/progress-50-single.svg', { black: '#7A7A7A', '#E5E5E5': '#7A7A7A' }],
-    ['progress75', '@univerjs/icons-svg/single/start-page/progress-75-single.svg', { black: '#7A7A7A', '#E5E5E5': '#7A7A7A' }],
-    ['progress100', '@univerjs/icons-svg/single/start-page/progress-100-single.svg', { black: '#7A7A7A', '#E5E5E5': '#7A7A7A' }],
+    ['progress0', '@univerjs/icons-svg/single/edit/progress-0-single.svg', { black: '#7A7A7A', '#E5E5E5': '#7A7A7A' }],
+    ['progress25', '@univerjs/icons-svg/single/edit/progress-25-single.svg', { black: '#7A7A7A', '#E5E5E5': '#7A7A7A' }],
+    ['progress50', '@univerjs/icons-svg/single/edit/progress-50-single.svg', { black: '#7A7A7A', '#E5E5E5': '#7A7A7A' }],
+    ['progress75', '@univerjs/icons-svg/single/edit/progress-75-single.svg', { black: '#7A7A7A', '#E5E5E5': '#7A7A7A' }],
+    ['progress100', '@univerjs/icons-svg/single/edit/progress-100-single.svg', { black: '#7A7A7A', '#E5E5E5': '#7A7A7A' }],
 
 ];
 const star = [
@@ -50,44 +50,44 @@ const feedback = [
     ['correct', '@univerjs/icons-svg/binary/start-page/correct.svg', { black: '#59D01E', '#E5E5E5': '#FFFFFF' }],
 ];
 const feedback2 = [
-    ['mistake2', '@univerjs/icons-svg/single/start-page/mistake-single.svg', { black: '#FE4B4B' }],
-    ['warn2', '@univerjs/icons-svg/single/start-page/warn-single.svg', { black: '#FFBD37' }],
-    ['correct2', '@univerjs/icons-svg/single/start-page/correct-single.svg', { black: '#59D01E' }],
+    ['mistake2', '@univerjs/icons-svg/single/edit/mistake-single.svg', { black: '#FE4B4B' }],
+    ['warn2', '@univerjs/icons-svg/single/edit/warn-single.svg', { black: '#FFBD37' }],
+    ['correct2', '@univerjs/icons-svg/single/edit/correct-single.svg', { black: '#59D01E' }],
 ];
 
 const arrow = [
-    ['down-red', '@univerjs/icons-svg/single/start-page/arrow-down-single.svg', { black: '#FE4B4B' }],
-    ['right-gold', '@univerjs/icons-svg/single/start-page/arrow-righe-single.svg', { black: '#FFBD37' }],
-    ['up-green', '@univerjs/icons-svg/single/start-page/arrow-up-single.svg', { black: '#59D01E' }],
-    ['rightAndDown-gold', '@univerjs/icons-svg/single/start-page/arrow-tilt-down-single.svg', { black: '#FFBD37' }],
-    ['rightAndUp-gold', '@univerjs/icons-svg/single/start-page/arrow-tilt-up-single.svg', { black: '#FFBD37' }],
+    ['down-red', '@univerjs/icons-svg/single/edit/arrow-down-single.svg', { black: '#FE4B4B' }],
+    ['right-gold', '@univerjs/icons-svg/single/edit/arrow-righe-single.svg', { black: '#FFBD37' }],
+    ['up-green', '@univerjs/icons-svg/single/edit/arrow-up-single.svg', { black: '#59D01E' }],
+    ['rightAndDown-gold', '@univerjs/icons-svg/single/edit/arrow-tilt-down-single.svg', { black: '#FFBD37' }],
+    ['rightAndUp-gold', '@univerjs/icons-svg/single/edit/arrow-tilt-up-single.svg', { black: '#FFBD37' }],
 
-    ['down-gray', '@univerjs/icons-svg/single/start-page/arrow-down-single.svg', { black: '#999999' }],
-    ['right-gray', '@univerjs/icons-svg/single/start-page/arrow-righe-single.svg', { black: '#999999' }],
-    ['up-gray', '@univerjs/icons-svg/single/start-page/arrow-up-single.svg', { black: '#999999' }],
-    ['rightAndDown-gray', '@univerjs/icons-svg/single/start-page/arrow-tilt-down-single.svg', { black: '#999999' }],
-    ['rightAndUp-gray', '@univerjs/icons-svg/single/start-page/arrow-tilt-up-single.svg', { black: '#999999' }],
+    ['down-gray', '@univerjs/icons-svg/single/edit/arrow-down-single.svg', { black: '#999999' }],
+    ['right-gray', '@univerjs/icons-svg/single/edit/arrow-righe-single.svg', { black: '#999999' }],
+    ['up-gray', '@univerjs/icons-svg/single/edit/arrow-up-single.svg', { black: '#999999' }],
+    ['rightAndDown-gray', '@univerjs/icons-svg/single/edit/arrow-tilt-down-single.svg', { black: '#999999' }],
+    ['rightAndUp-gray', '@univerjs/icons-svg/single/edit/arrow-tilt-up-single.svg', { black: '#999999' }],
 ];
 const flag = [
-    ['flag-green', '@univerjs/icons-svg/single/start-page/flag-single.svg', { black: '#59D01E' }],
-    ['flag-gold', '@univerjs/icons-svg/single/start-page/flag-single.svg', { black: '#FFBD37' }],
-    ['flag-red', '@univerjs/icons-svg/single/start-page/flag-single.svg', { black: '#FE4B4B' }],
+    ['flag-green', '@univerjs/icons-svg/single/edit/flag-single.svg', { black: '#59D01E' }],
+    ['flag-gold', '@univerjs/icons-svg/single/edit/flag-single.svg', { black: '#FFBD37' }],
+    ['flag-red', '@univerjs/icons-svg/single/edit/flag-single.svg', { black: '#FE4B4B' }],
 ];
 
 const shape = [
-    ['cross', '@univerjs/icons-svg/single/start-page/cross-single.svg', { black: '#FFBD37' }],
-    ['up', '@univerjs/icons-svg/single/start-page/up-single.svg', { black: '#59D01E' }],
-    ['down', '@univerjs/icons-svg/single/start-page/down-single.svg', { black: '#FE4B4B' }],
+    ['cross', '@univerjs/icons-svg/single/edit/cross-single.svg', { black: '#FFBD37' }],
+    ['up', '@univerjs/icons-svg/single/edit/up-single.svg', { black: '#59D01E' }],
+    ['down', '@univerjs/icons-svg/single/edit/down-single.svg', { black: '#FE4B4B' }],
 
-    ['rhomboid-red', '@univerjs/icons-svg/single/start-page/rhomboid-single.svg', { black: '#FE4B4B' }],
-    ['rhomboid-gold', '@univerjs/icons-svg/single/start-page/rhomboid-single.svg', { black: '#FFBD37' }],
-    ['roundness-greed', '@univerjs/icons-svg/single/start-page/roundness-single.svg', { black: '#59D01E' }],
-    ['roundness-gold', '@univerjs/icons-svg/single/start-page/roundness-single.svg', { black: '#FFBD37' }],
-    ['roundness-red', '@univerjs/icons-svg/single/start-page/roundness-single.svg', { black: '#FE4B4B' }],
-    ['roundness-pink', '@univerjs/icons-svg/single/start-page/roundness-single.svg', { black: '#FB9D9D' }],
-    ['roundness-gray', '@univerjs/icons-svg/single/start-page/roundness-single.svg', { black: '#999999' }],
-    ['roundness-black', '@univerjs/icons-svg/single/start-page/roundness-single.svg'],
-    ['triangle-gold', '@univerjs/icons-svg/single/start-page/triangle-single.svg', { black: '#FFBD37' }],
+    ['rhomboid-red', '@univerjs/icons-svg/single/edit/rhomboid-single.svg', { black: '#FE4B4B' }],
+    ['rhomboid-gold', '@univerjs/icons-svg/single/edit/rhomboid-single.svg', { black: '#FFBD37' }],
+    ['roundness-greed', '@univerjs/icons-svg/single/edit/roundness-single.svg', { black: '#59D01E' }],
+    ['roundness-gold', '@univerjs/icons-svg/single/edit/roundness-single.svg', { black: '#FFBD37' }],
+    ['roundness-red', '@univerjs/icons-svg/single/edit/roundness-single.svg', { black: '#FE4B4B' }],
+    ['roundness-pink', '@univerjs/icons-svg/single/edit/roundness-single.svg', { black: '#FB9D9D' }],
+    ['roundness-gray', '@univerjs/icons-svg/single/edit/roundness-single.svg', { black: '#999999' }],
+    ['roundness-black', '@univerjs/icons-svg/single/edit/roundness-single.svg'],
+    ['triangle-gold', '@univerjs/icons-svg/single/edit/triangle-single.svg', { black: '#FFBD37' }],
 
     ['indicate-greed', '@univerjs/icons-svg/binary/start-page/indicate.svg', { '#E5E5E5': '#59D01E' }],
     ['indicate-gold', '@univerjs/icons-svg/binary/start-page/indicate.svg', { '#E5E5E5': '#FFBD37' }],

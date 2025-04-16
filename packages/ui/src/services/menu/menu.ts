@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,9 +45,8 @@ interface IMenuItemBase<V> {
     description?: string;
     icon?: string | Observable<string>;
     tooltip?: string;
-
+    slot?: boolean;
     type: MenuItemType;
-
     /**
      * Custom label component id.
      */
@@ -56,6 +55,7 @@ interface IMenuItemBase<V> {
     | {
         name: string;
         hoverable?: boolean;
+        selectable?: boolean;
         props?: Record<string, any>;
     }; // custom component, send to CustomLabel label property
 
@@ -75,11 +75,13 @@ export interface IValueOption<T = undefined> {
     id?: string;
     value?: string | number;
     value$?: Observable<T>;
+    slot?: boolean;
     label?:
     | string
     | {
         name: string;
         hoverable?: boolean;
+        selectable?: boolean;
         props?: Record<string, string | number | Array<{ [x: string | number]: string }>>;
     }; // custom component, send to CustomLabel label property
     icon?: string;
@@ -127,10 +129,10 @@ export type IDisplayMenuItem<T extends IMenuItem> = T & {
     shortcut?: string;
 };
 
-export type MenuItemConfig<T extends MenuItemDefaultValueType = MenuItemDefaultValueType> = Partial<Omit<IMenuItem, 'id' | 'subId' | 'value$' | 'hidden$' | 'disabled$' | 'activated$' | 'icon$'> & {
+export type MenuItemConfig = Partial<Omit<IMenuItem, 'id' | 'subId' | 'value$' | 'hidden$' | 'disabled$' | 'activated$' | 'icon$'> & {
     hidden?: boolean;
     disabled?: boolean;
     activated?: boolean;
 }>;
-export type MenuConfig<T extends MenuItemDefaultValueType = MenuItemDefaultValueType> = Record<string, MenuItemConfig<T>>;
-export type IMenuItemFactory = (accessor: IAccessor, menuConfig?: MenuConfig<MenuItemDefaultValueType>) => IMenuItem;
+export type MenuConfig = Record<string, MenuItemConfig>;
+export type IMenuItemFactory = (accessor: IAccessor, menuConfig?: MenuConfig) => IMenuItem;

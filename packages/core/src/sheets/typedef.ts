@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,12 @@
 
 import type { IResources } from '../services/resource-manager/type';
 import type { IObjectArrayPrimitiveType, IObjectMatrixPrimitiveType, Nullable } from '../shared';
+import type { BooleanNumber } from '../types/enum';
 import type { LocaleType } from '../types/enum/locale-type';
 import type { IDocumentData } from '../types/interfaces';
 import type { ICellCustomRender } from '../types/interfaces/i-cell-custom-render';
 import type { IStyleData } from '../types/interfaces/i-style-data';
-import { type BooleanNumber, CellValueType } from '../types/enum';
+import { CellValueType } from '../types/enum';
 
 /**
  * Snapshot of a workbook.
@@ -378,12 +379,12 @@ export interface IFreeze {
      */
     ySplit: number;
     /**
-     * scrollable start row
+     * scrollable start row(viewMain start row)
      */
     startRow: number;
 
     /**
-     * scrollable start column
+     * scrollable start column(viewMain start column)
      */
     startColumn: number;
 }
@@ -570,7 +571,7 @@ export interface IRangeCellData {
 export type IRangeType = IRange | IRangeStringData | IRangeArrayData | IRangeCellData;
 
 /**
- * Whether to clear only the contents.	Whether to clear only the format; note that clearing format also clears data validation rules.
+ * Whether to clear only the contents. Whether to clear only the format; note that clearing format also clears data validation rules.
  */
 export interface IOptionData {
     /**

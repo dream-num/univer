@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,13 @@
 
 import type { ICommandInfo, IDrawingParam, Nullable } from '@univerjs/core';
 import type { IDocDrawing } from '@univerjs/docs-drawing';
-import { BooleanNumber, ICommandService, IUniverInstanceService, LocaleService, PositionedObjectLayoutType, useDependency, WrapTextType } from '@univerjs/core';
-import { InputNumber, Radio, RadioGroup } from '@univerjs/design';
+import { BooleanNumber, ICommandService, IUniverInstanceService, LocaleService, PositionedObjectLayoutType, WrapTextType } from '@univerjs/core';
+import { clsx, InputNumber, Radio, RadioGroup } from '@univerjs/design';
 import { RichTextEditingMutation } from '@univerjs/docs';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import clsx from 'clsx';
-import React, { useEffect, useState } from 'react';
+import { useDependency } from '@univerjs/ui';
+import { useEffect, useState } from 'react';
 import { TextWrappingStyle, UpdateDocDrawingDistanceCommand, UpdateDocDrawingWrappingStyleCommand, UpdateDocDrawingWrapTextCommand } from '../../commands/commands/update-doc-drawing.command';
 import styles from './index.module.less';
 
@@ -173,7 +173,10 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
         }
 
         const {
-            distT = 0, distL = 0, distB = 0, distR = 0,
+            distT = 0,
+            distL = 0,
+            distB = 0,
+            distR = 0,
             layoutType = PositionedObjectLayoutType.INLINE,
             behindDoc = BooleanNumber.FALSE,
             wrapText = WrapTextType.BOTH_SIDES,
@@ -257,7 +260,6 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
             subscription.unsubscribe();
             mutationListener.dispose();
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (

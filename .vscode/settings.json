@@ -30,6 +30,7 @@
         "COUNTA",
         "CRDT",
         "customd",
+        "dashedrect",
         "Datas",
         "DATEFMTLISG",
         "demi",
@@ -100,12 +101,14 @@
         "pnmp",
         "Polyton",
         "ponyfill",
+        "Posthog",
         "prst",
         "PWDEBUG",
         "Quan",
         "rbush",
         "redi",
         "rowheader",
+        "scrolltrack",
         "shrinkability",
         "Sider",
         "strechability",
@@ -143,6 +146,7 @@
         "XMATCH",
         "XSSI",
         "ybzky",
+        "yuhong",
         "yuhongz"
     ],
     "vsicons.presets.angular": false,
@@ -150,6 +154,12 @@
     // Disable the default formatter, use eslint instead
     "prettier.enable": false,
     "search.followSymlinks": false,
+    "search.exclude": {
+        "**/node_modules": true,
+        "**/bower_components": true,
+        "**/*.code-search": true,
+        "**/lib": true
+    },
 
     // Auto fix
     "editor.formatOnSave": false,

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,6 +51,7 @@ const locale: typeof zhCN = {
         alignCenter: 'Align Center',
         alignRight: 'Align Right',
         alignJustify: 'Justify',
+        horizontalLine: 'Horizontal line',
         headerFooter: 'Header & Footer',
     },
     table: {
@@ -96,6 +97,12 @@ const locale: typeof zhCN = {
             multiSpace: 'Multi Space',
             fixedValue: 'Fixed Value(px)',
         },
+    },
+    rightClick: {
+        bulletList: 'Bullet list',
+        orderList: 'Ordered list',
+        checkList: 'Task list',
+        insertBellow: 'Insert below',
     },
 };
 

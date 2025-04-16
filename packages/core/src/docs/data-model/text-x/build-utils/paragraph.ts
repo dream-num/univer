@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-import type { ICustomTable, IParagraph } from '../../../../types/interfaces';
+import type { ITextRange } from '../../../../sheets/typedef';
+import type { ICustomTable, IParagraph, IParagraphStyle, ITextStyle } from '../../../../types/interfaces';
 import type { DocumentDataModel } from '../../document-data-model';
 import { MemoryCursor } from '../../../../common/memory-cursor';
 import { Tools, UpdateDocsAttributeType } from '../../../../shared';
 import { PRESET_LIST_TYPE, PresetListType } from '../../preset-list-type';
 import { TextXActionType } from '../action-types';
 import { TextX } from '../text-x';
+import { getParagraphsInRanges } from './selection';
 
 export interface ISwitchParagraphBulletParams {
     paragraphs: IParagraph[];
@@ -241,7 +243,7 @@ export function hasParagraphInTable(paragraph: IParagraph, tables: ICustomTable[
 }
 
 export const changeParagraphBulletNestLevel = (params: IChangeParagraphBulletNestLevelParams) => {
-    const { paragraphs: currentParagraphs, segmentId, document: docDataModel, type } = params;
+    const { paragraphs: currentParagraphs, document: docDataModel, type } = params;
     const memoryCursor = new MemoryCursor();
 
     memoryCursor.reset();
@@ -306,3 +308,97 @@ export const changeParagraphBulletNestLevel = (params: IChangeParagraphBulletNes
     return textX;
 };
 
+export interface ISetParagraphStyleParams {
+    textRanges: readonly ITextRange[];
+    segmentId?: string;
+    document: DocumentDataModel;
+    style: IParagraphStyle;
+    paragraphTextRun?: ITextStyle;
+    cursor?: number;
+    deleteLen?: number;
+    textX?: TextX;
+}
+
+// eslint-disable-next-line max-lines-per-function
+export const setParagraphStyle = (params: ISetParagraphStyleParams) => {
+    const {
+        textRanges,
+        segmentId,
+        document: docDataModel,
+        style,
+        paragraphTextRun,
+        cursor,
+        deleteLen,
+        textX: _textX,
+    } = params;
+    const segment = docDataModel.getSelfOrHeaderFooterModel(segmentId);
+    const paragraphs = segment.getBody()?.paragraphs ?? [];
+    const dataStream = segment.getBody()?.dataStream ?? '';
+    const currentParagraphs = getParagraphsInRanges(textRanges, paragraphs, dataStream);
+    const memoryCursor = new MemoryCursor();
+    if (cursor) {
+        memoryCursor.moveCursorTo(cursor);
+    }
+    const textX = _textX ?? new TextX();
+    currentParagraphs.sort((a, b) => a.startIndex - b.startIndex);
+    const start = Math.max(0, currentParagraphs[0].paragraphStart - 1);
+
+    if (start > memoryCursor.cursor) {
+        textX.push({
+            t: TextXActionType.RETAIN,
+            len: start - memoryCursor.cursor,
+        });
+        memoryCursor.moveCursorTo(start);
+    }
+
+    if (deleteLen) {
+        textX.push({
+            t: TextXActionType.DELETE,
+            len: deleteLen,
+        });
+    }
+
+    for (const paragraph of currentParagraphs) {
+        const { startIndex, paragraphStyle = {} } = paragraph;
+        const len = startIndex - memoryCursor.cursor;
+        textX.push({
+            t: TextXActionType.RETAIN,
+            len,
+            ...paragraphTextRun
+                ? {
+                    body: {
+                        dataStream: '',
+                        textRuns: [{
+                            ts: paragraphTextRun,
+                            st: 0,
+                            ed: len,
+                        }],
+                    },
+                    coverType: UpdateDocsAttributeType.REPLACE,
+                }
+                : null,
+        });
+
+        textX.push({
+            t: TextXActionType.RETAIN,
+            len: 1,
+            body: {
+                dataStream: '',
+                paragraphs: [
+                    {
+                        startIndex: 0,
+                        paragraphStyle: {
+                            ...paragraphStyle,
+                            ...style,
+                        },
+                    },
+                ],
+            },
+            coverType: UpdateDocsAttributeType.REPLACE,
+        });
+
+        memoryCursor.moveCursorTo(startIndex + 1);
+    }
+
+    return textX;
+};

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,13 @@ const defaultRangeThemeStyleJSON: Omit<IRangeThemeStyleJSON, 'name'> = {
             rgb: 'rgb(217,225,242)',
         },
     },
+
+};
+
+export const defaultRangeThemeStyle = new RangeThemeStyle('default', defaultRangeThemeStyleJSON);
+
+export const defaultRangeThemeStyleJSONWithLastRowStyle = new RangeThemeStyle('default-last-row', {
+    ...defaultRangeThemeStyleJSON,
     lastRowStyle: {
         bd: {
             t: {
@@ -47,6 +54,4 @@ const defaultRangeThemeStyleJSON: Omit<IRangeThemeStyleJSON, 'name'> = {
         ht: HorizontalAlign.CENTER,
         bl: BooleanNumber.TRUE,
     },
-};
-export const defaultRangeThemeStyle = new RangeThemeStyle('default', defaultRangeThemeStyleJSON);
-
+});

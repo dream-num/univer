@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,13 +21,14 @@ import type {
     Workbook,
 } from '@univerjs/core';
 import type { ISetNumfmtMutationParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
+import type { IUniverSheetsNumfmtConfig } from './config.schema';
 import {
     CellValueType,
     Disposable,
     ICommandService,
+    IConfigService,
     Inject,
     InterceptorEffectEnum,
-    isRealNum,
     IUniverInstanceService,
     LocaleService,
     LocaleType,
@@ -36,11 +37,18 @@ import {
     ThemeService,
     UniverInstanceType,
 } from '@univerjs/core';
-import { DEFAULT_TEXT_FORMAT } from '@univerjs/engine-numfmt';
-import { InterceptCellContentPriority, INTERCEPTOR_POINT, INumfmtService, SetNumfmtMutation, SetRangeValuesMutation, SheetInterceptorService } from '@univerjs/sheets';
+import { isTextFormat } from '@univerjs/engine-numfmt';
+import { checkCellValueType, InterceptCellContentPriority, INTERCEPTOR_POINT, INumfmtService, SetNumfmtMutation, SetRangeValuesMutation, SheetInterceptorService } from '@univerjs/sheets';
 import { BehaviorSubject, merge, of, skip, switchMap } from 'rxjs';
 import { getPatternPreviewIgnoreGeneral } from '../utils/pattern';
+import { SHEETS_NUMFMT_PLUGIN_CONFIG_KEY } from './config.schema';
 
+const TEXT_FORMAT_MARK = {
+    tl: {
+        size: 6,
+        color: '#409f11',
+    },
+};
 export class SheetsNumfmtCellContentController extends Disposable {
     private _local$ = new BehaviorSubject<INumfmtLocalTag>('en');
     public local$ = this._local$.asObservable();
@@ -50,8 +58,8 @@ export class SheetsNumfmtCellContentController extends Disposable {
         @Inject(ThemeService) private _themeService: ThemeService,
         @Inject(ICommandService) private _commandService: ICommandService,
         @Inject(INumfmtService) private _numfmtService: INumfmtService,
-        @Inject(LocaleService) private _localeService: LocaleService
-
+        @Inject(LocaleService) private _localeService: LocaleService,
+        @IConfigService private readonly _configService: IConfigService
     ) {
         super();
         this._initInterceptorCellContent();
@@ -90,13 +98,6 @@ export class SheetsNumfmtCellContentController extends Disposable {
 
     // eslint-disable-next-line max-lines-per-function
     private _initInterceptorCellContent() {
-        const TEXT_FORMAT_MARK = {
-            tl: {
-                size: 6,
-                color: '#409f11',
-            },
-        };
-
         const renderCache = new ObjectMatrix<{ result: ICellData; parameters: string | number }>();
 
         this.disposeWithMe(merge(this._local$, this._localeService.currentLocale$).subscribe(() => {
@@ -129,20 +130,30 @@ export class SheetsNumfmtCellContentController extends Disposable {
                     return next(cell);
                 }
 
+                const type = cell.t || checkCellValueType(originCellValue.v);
+                // just handle number
+                if (type !== CellValueType.NUMBER) {
+                    return next(cell);
+                }
+
                 // Add error marker to text format number
-                if (numfmtValue.pattern === DEFAULT_TEXT_FORMAT && originCellValue.v && isRealNum(originCellValue.v)) {
+                if (isTextFormat(numfmtValue.pattern)) {
+                    // If the user has disabled the text format mark, do not show it
+                    if (this._configService.getConfig<IUniverSheetsNumfmtConfig>(SHEETS_NUMFMT_PLUGIN_CONFIG_KEY)?.disableTextFormatMark) {
+                        return next({
+                            ...cell,
+                            t: CellValueType.STRING,
+                        });
+                    }
+
                     return next({
                         ...cell,
+                        t: CellValueType.STRING,
                         markers: {
                             ...cell?.markers,
                             ...TEXT_FORMAT_MARK,
                         },
                     });
-                }
-
-                // just handle number
-                if (originCellValue.t !== CellValueType.NUMBER || originCellValue.v == null || Number.isNaN(originCellValue.v)) {
-                    return next(cell);
                 }
 
                 let numfmtRes: string = '';
@@ -157,7 +168,7 @@ export class SheetsNumfmtCellContentController extends Disposable {
                     return next(cell);
                 }
 
-                const res: ICellDataForSheetInterceptor = { v: numfmtRes };
+                const res: ICellDataForSheetInterceptor = { v: numfmtRes, t: CellValueType.NUMBER };
                 if (info.color) {
                     const color = this._themeService.getCurrentTheme()[`${info.color}500`];
 

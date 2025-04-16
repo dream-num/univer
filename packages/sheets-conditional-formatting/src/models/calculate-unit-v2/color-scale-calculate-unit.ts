@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,8 @@ export class ColorScaleCalculateUnit extends BaseCalculateUnit<IConfigItem[], st
                 value: getValueByType(config.value, matrix, {
                     ...context,
                     cfId: rule.cfId,
-                }), color: new ColorKit(config.color),
+                }),
+                color: new ColorKit(config.color),
             };
         });
         const isAllFinished = !_configList.some((item) => isObject(item.value) ? item.value.status !== FormulaResultStatus.SUCCESS : false);

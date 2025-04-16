@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,14 @@
 
 import type { ICellData, IDisposable, IObjectMatrixPrimitiveType, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import type { IFindComplete, IFindMatch, IFindMoveParams, IFindQuery, IFindReplaceProvider, IReplaceAllResult } from '@univerjs/find-replace';
-import type { ISelectionWithStyle, ISetRangeValuesCommandParams, ISetSelectionsOperationParams, ISetWorksheetActivateCommandParams, ISheetCommandSharedParams, WorkbookSelectionModel } from '@univerjs/sheets';
+import type { ISelectionWithStyle, ISelectRangeCommandParams, ISetRangeValuesCommandParams, ISetSelectionsOperationParams, ISetWorksheetActivateCommandParams, ISheetCommandSharedParams, WorkbookSelectionModel } from '@univerjs/sheets';
 import type { IScrollToCellCommandParams } from '@univerjs/sheets-ui';
 import type { ISheetReplaceCommandParams, ISheetReplacement } from '../commands/commands/sheet-replace.command';
 import type { ISheetFindReplaceHighlightShapeProps } from '../views/shapes/find-replace-highlight.shape';
 import { ColorKit, CommandType, Disposable, EDITOR_ACTIVATED, fromCallback, groupBy, ICommandService, IContextService, Inject, Injector, IUniverInstanceService, ObjectMatrix, replaceInDocumentBody, rotate, ThemeService, Tools, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService, RENDER_RAW_FORMULA_KEY } from '@univerjs/engine-render';
 import { FindBy, FindDirection, FindModel, FindReplaceController, FindScope, IFindReplaceService } from '@univerjs/find-replace';
-import { SetRangeValuesCommand, SetSelectionsOperation, SetWorksheetActivateCommand, SetWorksheetActiveOperation, SheetsSelectionsService } from '@univerjs/sheets';
+import { SelectRangeCommand, SetRangeValuesCommand, SetSelectionsOperation, SetWorksheetActivateCommand, SetWorksheetActiveOperation, SheetsSelectionsService } from '@univerjs/sheets';
 
 import { getCoordByCell, getSheetObject, ScrollToCellCommand, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { debounceTime, filter, merge, skip, Subject, throttleTime } from 'rxjs';
@@ -162,6 +162,18 @@ export class SheetFindModel extends FindModel {
                 this.findInActiveWorksheet(query);
                 break;
         }
+    }
+
+    override focusSelection(): void {
+        const currentMatch = this.currentMatch;
+        if (!currentMatch) return;
+
+        this._commandService.executeCommand(SelectRangeCommand.id, {
+            unitId: currentMatch.unitId,
+            subUnit: currentMatch.range.subUnitId,
+            range: currentMatch.range.range,
+
+        } as ISelectRangeCommandParams);
     }
 
     private _toggleDisplayRawFormula(force: boolean): void {
@@ -418,13 +430,12 @@ export class SheetFindModel extends FindModel {
         const sortFn = findDirection === FindDirection.ROW ? isBehindPositionWithRowPriority : isBehindPositionWithColumnPriority;
         const dedupeSet = new Set<string>();
         const finds = selections
-            .map((selection) => this._findInRange(worksheet, query, selection.range, unitId,
-                (row, col) => {
-                    const key = `${row}-${col}`;
-                    if (dedupeSet.has(key)) return true;
-                    dedupeSet.add(key);
-                    return false;
-                }).results)
+            .map((selection) => this._findInRange(worksheet, query, selection.range, unitId, (row, col) => {
+                const key = `${row}-${col}`;
+                if (dedupeSet.has(key)) return true;
+                dedupeSet.add(key);
+                return false;
+            }).results)
             .flat()
             .sort((a, b) => sortFn(a.range.range, b.range.range) ? -1 : 1);
 
@@ -535,10 +546,7 @@ export class SheetFindModel extends FindModel {
     private _focusMatch(match: ISheetCellMatch): void {
         const subUnitId = match.range.subUnitId;
         if (subUnitId !== this._workbook.getActiveSheet()?.getSheetId()) {
-            this._commandService.executeCommand(SetWorksheetActivateCommand.id,
-                { unitId: this._workbook.getUnitId(), subUnitId } as ISetWorksheetActivateCommandParams,
-                { fromFindReplace: true }
-            );
+            this._commandService.executeCommand(SetWorksheetActivateCommand.id, { unitId: this._workbook.getUnitId(), subUnitId } as ISetWorksheetActivateCommandParams, { fromFindReplace: true });
         }
 
         this._commandService.executeCommand(

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,9 +39,8 @@ interface IBuildExecuterOptions {
 async function buildESM(sharedConfig: InlineConfig, options: IBuildExecuterOptions) {
     const { pkg, entry } = options;
 
-    return Promise.all(Object.keys(entry).map((key) => {
+    await Promise.all(Object.keys(entry).map((key) => {
         const basicConfig: InlineConfig = {
-            esbuild: {},
             build: {
                 emptyOutDir: false,
                 outDir: 'lib',
@@ -60,13 +59,6 @@ async function buildESM(sharedConfig: InlineConfig, options: IBuildExecuterOptio
             },
         };
 
-        if (pkg.name.startsWith('@univerjs/')) {
-            basicConfig.esbuild = {
-                minifyIdentifiers: false,
-                keepNames: true,
-            };
-        }
-
         const config: InlineConfig = mergeConfig(sharedConfig, basicConfig);
 
         if (key === 'index') {
@@ -83,6 +75,12 @@ async function buildESM(sharedConfig: InlineConfig, options: IBuildExecuterOptio
 
         return viteBuild(config);
     }));
+
+    const __dirname = process.cwd();
+    const libDir = path.resolve(__dirname, 'lib');
+    const esmDir = path.resolve(__dirname, 'lib/es');
+
+    fs.copySync(esmDir, libDir);
 }
 
 async function buildCJS(sharedConfig: InlineConfig, options: IBuildExecuterOptions) {
@@ -209,10 +207,6 @@ export async function build(options?: IBuildOptions) {
         configFile: false,
         build: {
             target: 'chrome70',
-        },
-        esbuild: {
-            minifyIdentifiers: false,
-            keepNames: true,
         },
         resolve: {
             conditions: nodeFirst ? ['node', 'default'] : undefined,

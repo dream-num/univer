@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { Injector } from '@wendellhu/redi';
-import { Disposable } from '../shared';
+import type { Injector } from '@univerjs/core';
+import { Disposable } from '@univerjs/core';
 
 /**
  * `FBase` is a base class for all facade classes.
@@ -80,7 +80,7 @@ export class FBaseInitialable extends Disposable {
     /**
      * @ignore
      */
-    _initialize(injector: Injector) { }
+    _initialize(injector: Injector): void { }
 
     /**
      * @ignore

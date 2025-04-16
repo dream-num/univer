@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+import type { IShortcutItem } from '@univerjs/ui';
 import { BreakLineCommand, DeleteLeftCommand } from '@univerjs/docs-ui';
+
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { KeyCode, MetaKeys } from '@univerjs/ui';
-
-import type { IShortcutItem } from '@univerjs/ui';
 import {
     SetCellEditVisibleArrowOperation,
     SetCellEditVisibleOperation,
@@ -123,6 +123,17 @@ export const EditorCursorEscShortcut: IShortcutItem = {
     },
 };
 
+export const EditorCursorCtrlEnterShortcut: IShortcutItem = {
+    id: SetCellEditVisibleOperation.id,
+    binding: KeyCode.ENTER | MetaKeys.CTRL_COMMAND,
+    preconditions: (contextService) => whenEditorDidNotInputFormulaActivated(contextService),
+    staticParameters: {
+        visible: false,
+        eventType: DeviceInputEventType.Keyboard,
+        keycode: KeyCode.ENTER | MetaKeys.CTRL_COMMAND,
+    },
+};
+
 export const EditorBreakLineShortcut: IShortcutItem = {
     id: BreakLineCommand.id,
     description: 'shortcut.sheet.break-line',
@@ -142,8 +153,7 @@ export const EditorDeleteLeftShortcutInActive: IShortcutItem = {
     id: SetCellEditVisibleOperation.id,
     description: 'shortcut.sheet.delete-and-start-editing',
     group: '4_sheet-edit',
-    preconditions: (contextService) =>
-        whenSheetEditorFocused(contextService) && !whenFormulaEditorFocused(contextService),
+    preconditions: (contextService) => whenSheetEditorFocused(contextService) && !whenFormulaEditorFocused(contextService),
     binding: KeyCode.BACKSPACE,
     staticParameters: {
         visible: true,

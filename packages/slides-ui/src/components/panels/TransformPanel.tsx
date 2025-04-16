@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-import React, { useEffect, useState } from 'react';
-
 import type { Nullable } from '@univerjs/core';
-import { ICommandService, LocaleService, useDependency } from '@univerjs/core';
-import clsx from 'clsx';
-import { InputNumber } from '@univerjs/design';
 import type { BaseObject, IChangeObserverConfig, Image, Rect, RichText } from '@univerjs/engine-render';
+import { ICommandService, LocaleService } from '@univerjs/core';
+import { clsx, InputNumber } from '@univerjs/design';
+import { useDependency } from '@univerjs/ui';
+import { useEffect, useState } from 'react';
 import { UpdateSlideElementOperation } from '../../commands/operations/update-element.operation';
 import { CanvasView } from '../../controllers/canvas-view';
 import styles from './index.module.less';
@@ -194,7 +193,6 @@ export default function TransformPanel(props: IProps) {
             changeStartSub.unsubscribe();
             // focusSub.unsubscribe();
         };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     function handleWidthChange(val: number | null) {

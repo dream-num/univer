@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -243,12 +243,13 @@ export class SheetDataValidationModel extends Disposable {
                     rule
                 ).then((status) => {
                     const realStatus = status ? DataValidationStatus.VALID : DataValidationStatus.INVALID;
+                    const now = cache.getValue(row, col);
                     if (realStatus === DataValidationStatus.VALID) {
                         cache.realDeleteValue(row, col);
                     } else {
                         cache.setValue(row, col, realStatus);
                     }
-                    const now = cache.getValue(row, col);
+
                     onCompete(realStatus, current !== now);
                 });
                 return DataValidationStatus.VALIDATING;

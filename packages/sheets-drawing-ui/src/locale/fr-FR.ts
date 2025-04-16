@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,6 +57,11 @@ const locale: typeof enUS = {
             'drawing-move-right': 'Déplacer le dessin vers la droite',
             'drawing-delete': 'Supprimer le dessin',
         },
+    },
+    'cell-image': {
+        pasteTitle: 'Coller comme image de cellule',
+        pasteContent: 'Coller une image de cellule écrasera le contenu existant de la cellule, continuer le collage',
+        pasteError: 'Le copier-coller d\'image de cellule n\'est pas pris en charge dans cette unité',
     },
 };
 

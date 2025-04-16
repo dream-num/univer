@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import { MessageType } from '@univerjs/design';
 import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService, SetDrawingSelectedOperation } from '@univerjs/drawing';
 import { CURSOR_TYPE, degToRad, Image, IRenderManagerService, precisionTo, Vector2 } from '@univerjs/engine-render';
 import { IMessageService } from '@univerjs/ui';
-import { filter, switchMap } from 'rxjs';
+import { of, switchMap } from 'rxjs';
 import { AutoImageCropOperation, CloseImageCropOperation, CropType, OpenImageCropOperation } from '../commands/operations/image-crop.operation';
 import { ImageCropperObject } from '../views/crop/image-cropper-object';
 
@@ -321,7 +321,10 @@ export class ImageCropperController extends Disposable {
                         ...drawingParam,
                         transform: {
                             ...drawingParam.transform,
-                            left, top, height, width,
+                            left,
+                            top,
+                            height,
+                            width,
                         },
                         srcRect: srcRect.srcRectAngle,
                     }] as IImageData[]);
@@ -334,14 +337,14 @@ export class ImageCropperController extends Disposable {
                 imageCropperObject?.dispose();
             })
         );
-        const sheetUnit = this._univerInstanceService
+
+        const sheetUnit$ = this._univerInstanceService
             .getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET)
             .pipe(
-                filter((workbook) => Boolean(workbook)),
-                switchMap((workbook) => workbook!.activeSheet$)
+                switchMap((workbook) => workbook ? workbook.activeSheet$ : of(null))
             );
 
-        this.disposeWithMe(sheetUnit.subscribe(() => {
+        this.disposeWithMe(sheetUnit$.subscribe(() => {
             this._commandService.syncExecuteCommand(CloseImageCropOperation.id);
         }));
     }

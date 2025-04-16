@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,13 @@
 
 import type { Workbook } from '@univerjs/core';
 import type { IAverageHighlightCell, IConditionalFormattingRuleConfig, IHighlightCell, IRankHighlightCell } from '@univerjs/sheets-conditional-formatting';
+import type { IFormulaEditorRef } from '@univerjs/sheets-formula-ui';
 import type { IStyleEditorProps } from './type';
-import { IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
+import { IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { CFRuleType, CFSubRuleType } from '@univerjs/sheets-conditional-formatting';
 import { FormulaEditor } from '@univerjs/sheets-formula-ui';
-import { useSidebarClick } from '@univerjs/ui';
-import React, { useEffect, useRef, useState } from 'react';
+import { useDependency, useSidebarClick } from '@univerjs/ui';
+import { useEffect, useRef, useState } from 'react';
 import { ConditionalStyleEditor } from '../../conditional-style-editor';
 import { Preview } from '../../preview';
 import stylesBase from '../index.module.less';
@@ -38,7 +39,7 @@ export const FormulaStyleEditor = (props: IStyleEditorProps) => {
 
     const divEleRef = useRef<HTMLDivElement>(null);
     const [isFocusFormulaEditor, isFocusFormulaEditorSet] = useState(false);
-    const formulaEditorActionsRef = useRef<Parameters<typeof FormulaEditor>[0]['actions']>({});
+    const formulaEditorRef = useRef<IFormulaEditorRef>(null);
     const [style, styleSet] = useState<IHighlightCell['style']>({});
     const [formula, formulaSet] = useState(() => {
         if (rule?.subType === CFSubRuleType.formula) {
@@ -89,22 +90,24 @@ export const FormulaStyleEditor = (props: IStyleEditorProps) => {
     };
 
     useSidebarClick((e: MouseEvent) => {
-        const handleOutClick = formulaEditorActionsRef.current?.handleOutClick;
-        handleOutClick && handleOutClick(e, () => isFocusFormulaEditorSet(false));
+        const isOutSide = formulaEditorRef.current?.isClickOutSide(e);
+        isOutSide && isFocusFormulaEditorSet(false);
     });
 
     return (
         <div ref={divEleRef}>
-            <div className={`
-              ${stylesBase.title}
-              ${stylesBase.mTBase}
-            `}
+            <div
+                className={`
+                  ${stylesBase.title}
+                  ${stylesBase.mTBase}
+                `}
             >
                 {localeService.t('sheet.cf.panel.styleRule')}
             </div>
-            <div className={`
-              ${stylesBase.mTSm}
-            `}
+            <div
+                className={`
+                  ${stylesBase.mTSm}
+                `}
             >
 
                 <FormulaEditor
@@ -121,19 +124,19 @@ export const FormulaStyleEditor = (props: IStyleEditorProps) => {
                     }}
                     errorText={formulaError}
                     onFocus={() => { isFocusFormulaEditorSet(true); }}
-                    actions={formulaEditorActionsRef.current}
                     isFocus={isFocusFormulaEditor}
                     initValue={formula as any}
                     unitId={workbook.getUnitId()}
                     subUnitId={worksheet?.getSheetId()}
-                >
-                </FormulaEditor>
+                    ref={formulaEditorRef}
+                />
 
             </div>
 
-            <div className={`
-              ${styles.cfPreviewWrap}
-            `}
+            <div
+                className={`
+                  ${styles.cfPreviewWrap}
+                `}
             >
                 <Preview rule={getResult({ style, formula }) as IConditionalFormattingRuleConfig} />
             </div>

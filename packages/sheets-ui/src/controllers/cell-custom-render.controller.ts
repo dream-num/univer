@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -119,7 +119,7 @@ export class CellCustomRenderController extends Disposable implements IRenderMod
 
                     const info: ICellRenderContext = {
                         data: cellData,
-                        style: skeleton.getsStyles().getStyleByCell(cellData),
+                        style: skeleton.getStyles().getStyleByCell(cellData),
                         primaryWithCoord: skeleton.getCellWithCoordByIndex(cellIndex.actualRow, cellIndex.actualCol),
                         unitId,
                         subUnitId,
@@ -197,7 +197,7 @@ export class CellCustomRenderController extends Disposable implements IRenderMod
         };
 
         this.disposeWithMe(this._sheetSkeletonManagerService.currentSkeleton$.subscribe(handleSkeletonChange));
-        handleSkeletonChange(this._sheetSkeletonManagerService.getCurrent());
+        handleSkeletonChange(this._sheetSkeletonManagerService.getCurrentParam());
         this.disposeWithMe(disposableCollection);
     }
 }

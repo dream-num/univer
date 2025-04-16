@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,10 @@
  */
 
 import type { ICommandInfo } from '@univerjs/core';
-import type { IAddCfCommandParams } from '../commands/commands/add-cf.command';
+import type { IAddCfCommandParams } from '@univerjs/sheets-conditional-formatting';
 import { Disposable, ICommandService, Inject, LocaleService } from '@univerjs/core';
 import { RangeProtectionPermissionEditPoint, SheetPermissionCheckController, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetCellStylePermission } from '@univerjs/sheets';
-import { AddCfCommand } from '../commands/commands/add-cf.command';
+import { AddCfCommand } from '@univerjs/sheets-conditional-formatting';
 
 export class ConditionalFormattingPermissionController extends Disposable {
     constructor(

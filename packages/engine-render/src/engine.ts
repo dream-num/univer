@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
+import type { IDisposable, Nullable } from '@univerjs/core';
 
+import type { CURSOR_TYPE } from './basics/const';
 import type { IEvent, IKeyboardEvent, IPointerEvent } from './basics/i-events';
 import type { ITimeMetric, ITransformChangeState } from './basics/interfaces';
 import type { IBasicFrameInfo } from './basics/performance-monitor';
 import type { Scene } from './scene';
 import { Disposable, EventSubject, toDisposable, Tools } from '@univerjs/core';
 import { Observable, shareReplay, Subject } from 'rxjs';
-import { type CURSOR_TYPE, RENDER_CLASS_TYPE } from './basics/const';
+import { RENDER_CLASS_TYPE } from './basics/const';
 import { DeviceType, PointerInput } from './basics/i-events';
 import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from './basics/interfaces';
 import { PerformanceMonitor } from './basics/performance-monitor';
@@ -106,6 +107,10 @@ export class Engine extends Disposable {
     private _deltaTime = 0;
 
     private _performanceMonitor: PerformanceMonitor;
+
+    private _pointerClickEvent!: (evt: Event) => void;
+
+    private _pointerDblClickEvent!: (evt: Event) => void;
 
     private _pointerMoveEvent!: (evt: Event) => void;
 
@@ -234,7 +239,7 @@ export class Engine extends Disposable {
     }
 
     addScene(sceneInstance: Scene): Scene {
-        const sceneKey = (sceneInstance as any).sceneKey;
+        const sceneKey = sceneInstance.sceneKey;
         if (this.hasScene(sceneKey)) {
             console.warn('Scenes has same key, it will be covered');
         }
@@ -298,19 +303,49 @@ export class Engine extends Disposable {
         return this.getCanvas().getPixelRatio();
     }
 
-    setContainer(elem: HTMLElement, resize = true) {
-        if (this._container === elem) {
+    private _resizeListenerDisposable: IDisposable | undefined;
+
+    /**
+     * Mount the canvas to the element so it would be rendered on UI.
+     * @param {HTMLElement} element - The element the canvas will mount on.
+     * @param {true} [resize] If should perform resize when mounted and observe resize event.
+     */
+    mount(element: HTMLElement, resize = true): void {
+        this.setContainer(element, resize);
+    }
+
+    /**
+     * Unmount the canvas without disposing it so it can be mounted again.
+     */
+    unmount(): void {
+        this._clearResizeListener();
+
+        if (!this._container) {
+            throw new Error('[Engine]: cannot unmount when container is not set!');
+        }
+
+        this._container.removeChild(this.getCanvasElement());
+        this._container = null;
+    }
+
+    /**
+     * Mount the canvas to the element so it would be rendered on UI.
+     * @deprecated Please use `mount` instead.
+     * @param {HTMLElement} element - The element the canvas will mount on.
+     * @param {true} [resize] If should perform resize when mounted and observe resize event.
+     */
+    setContainer(element: HTMLElement, resize = true) {
+        if (this._container === element) {
             return;
         }
 
-        this._container = elem;
+        this._container = element;
         this._container.appendChild(this.getCanvasElement());
+
+        this._clearResizeListener();
 
         if (resize) {
             this.resize();
-
-            this._resizeObserver?.unobserve(this._container as HTMLElement);
-            this._resizeObserver = null;
 
             let timer: number | undefined;
             this._resizeObserver = new ResizeObserver(() => {
@@ -323,11 +358,16 @@ export class Engine extends Disposable {
             });
             this._resizeObserver.observe(this._container);
 
-            this.disposeWithMe(() => {
-                this._resizeObserver?.unobserve(this._container as HTMLElement);
+            this._resizeListenerDisposable = toDisposable(() => {
+                this._resizeObserver!.unobserve(this._container as HTMLElement);
                 if (timer !== undefined) window.cancelIdleCallback(timer);
             });
         }
+    }
+
+    private _clearResizeListener(): void {
+        this._resizeListenerDisposable?.dispose();
+        this._resizeListenerDisposable = undefined;
     }
 
     resize() {
@@ -379,12 +419,14 @@ export class Engine extends Disposable {
         const scenes = { ...this.getScenes() };
         const sceneKeys = Object.keys(scenes);
         sceneKeys.forEach((key) => {
-            (scenes[key] as any).dispose();
+            (scenes[key] as IDisposable).dispose();
         });
         this._scenes = {};
 
         const eventPrefix = getPointerPrefix();
         const canvasEle = this.getCanvasElement();
+        canvasEle.removeEventListener('click', this._pointerClickEvent);
+        canvasEle.removeEventListener('dblclick', this._pointerDblClickEvent);
         canvasEle.removeEventListener(`${eventPrefix}leave`, this._pointerLeaveEvent);
         canvasEle.removeEventListener(`${eventPrefix}enter`, this._pointerEnterEvent);
         canvasEle.removeEventListener(`${eventPrefix}move`, this._pointerMoveEvent);
@@ -402,13 +444,16 @@ export class Engine extends Disposable {
         this._renderFrameTasks = [];
         this._performanceMonitor.dispose();
         this.getCanvas().dispose();
-        this.onTransformChange$.complete();
+
+        this._resizeObserver?.disconnect();
 
         this.onTransformChange$.complete();
         this._beginFrame$.complete();
         this._endFrame$.complete();
+        this.renderFrameTags$.complete();
+        this.renderFrameTimeMetric$.complete();
 
-        this._resizeObserver?.disconnect();
+        this._clearResizeListener();
         this._container = null;
     }
 
@@ -582,6 +627,20 @@ export class Engine extends Disposable {
     // eslint-disable-next-line max-lines-per-function
     private _handlePointerAction() {
         const eventPrefix = getPointerPrefix();
+
+        this._pointerClickEvent = (e: Event) => {
+            const deviceType = this._getPointerType(e);
+            const deviceEvent = e as IPointerEvent;
+            deviceEvent.deviceType = deviceType;
+            this.onInputChanged$.emitEvent(deviceEvent);
+        };
+
+        this._pointerDblClickEvent = (e: Event) => {
+            const deviceType = this._getPointerType(e);
+            const deviceEvent = e as IPointerEvent;
+            deviceEvent.deviceType = deviceType;
+            this.onInputChanged$.emitEvent(deviceEvent);
+        };
 
         this._pointerMoveEvent = (e: Event) => {
             const evt = e as PointerEvent | MouseEvent;
@@ -827,6 +886,8 @@ export class Engine extends Disposable {
         };
 
         const canvasEle = this.getCanvasElement();
+        canvasEle.addEventListener('click', this._pointerClickEvent);
+        canvasEle.addEventListener('dblclick', this._pointerDblClickEvent);
         canvasEle.addEventListener(`${eventPrefix}enter`, this._pointerEnterEvent);
         canvasEle.addEventListener(`${eventPrefix}leave`, this._pointerLeaveEvent);
         canvasEle.addEventListener(`${eventPrefix}move`, this._pointerMoveEvent);

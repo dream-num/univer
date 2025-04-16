@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,11 @@
 
 import type { ICommandInfo, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import type { ISetFormulaCalculationNotificationMutation } from '@univerjs/engine-formula';
-import type { IAfterRender$Info, IBasicFrameInfo, IExtendFrameInfo, IRenderContext, IRenderModule, ISummaryFrameInfo, ITimeMetric, IViewportInfos, Scene } from '@univerjs/engine-render';
-import { CommandType, ICommandService, Inject, Optional, Rectangle, RxDisposable } from '@univerjs/core';
+import type { IAfterRender$Info, IBasicFrameInfo, IExtendFrameInfo, IRenderContext, IRenderModule, IScrollBarProps, ISummaryFrameInfo, ISummaryMetric, ITimeMetric, IViewportInfos, Scene } from '@univerjs/engine-render';
+import type { IUniverSheetsUIConfig } from '../config.schema';
+import { CommandType, ICommandService, IConfigService, Inject, Optional, Rectangle, RxDisposable } from '@univerjs/core';
 import { SetFormulaCalculationNotificationMutation } from '@univerjs/engine-formula';
+
 import {
     Rect,
     ScrollBar,
@@ -29,7 +31,6 @@ import {
     SpreadsheetRowHeader,
     Viewport,
 } from '@univerjs/engine-render';
-
 import { COMMAND_LISTENER_SKELETON_CHANGE, COMMAND_LISTENER_VALUE_CHANGE, MoveRangeMutation, SetRangeValuesMutation } from '@univerjs/sheets';
 import { ITelemetryService } from '@univerjs/telemetry';
 import { Subject, withLatestFrom } from 'rxjs';
@@ -40,25 +41,36 @@ import {
 } from '../../common/keys';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import { SheetsRenderService } from '../../services/sheets-render.service';
-import { FREEZE_COLUMN_HEADER_NAME, FREEZE_ROW_HEADER_NAME } from './freeze.render-controller';
+import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../config.schema';
 
 interface ISetWorksheetMutationParams {
     unitId: string;
     subUnitId: string;
 }
 
+export interface ITelemetryData {
+    unitId: string;
+    sheetId: string;
+    FPS: ISummaryMetric;
+    frameTime: ISummaryMetric;
+    elapsedTimeToStart: number;
+}
+
 const FRAME_STACK_THRESHOLD = 60;
 
 export class SheetRenderController extends RxDisposable implements IRenderModule {
+    private _renderMetric$: Subject<ITelemetryData> = new Subject();
+    renderMetric$ = this._renderMetric$.asObservable();
     constructor(
         private readonly _context: IRenderContext<Workbook>,
+        @Inject(IConfigService) private readonly _configService: IConfigService,
+
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @Inject(SheetsRenderService) private readonly _sheetRenderService: SheetsRenderService,
         @ICommandService private readonly _commandService: ICommandService,
         @Optional(ITelemetryService) private readonly _telemetryService?: ITelemetryService
     ) {
         super();
-
         this._addNewRender();
         this._initRenderMetricSubscriber();
     }
@@ -78,8 +90,16 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
         const sheetId = worksheet.getSheetId();
         this._sheetSkeletonManagerService.setCurrent({ sheetId });
 
-        // TODO: we should attach the context object to the RenderContext object on scene.canvas.
-        engine.runRenderLoop(() => scene.render());
+        const frameFn = () => scene.render();
+        this.disposeWithMe(this._context.activated$.subscribe((activated) => {
+            if (activated) {
+                // TODO: we should attach the context object to the RenderContext object on scene.canvas.
+                engine.runRenderLoop(frameFn);
+            } else {
+                // Stop the render loop when the render unit is deactivated.
+                engine.stopRenderLoop(frameFn);
+            }
+        }));
     }
 
     private _renderFrameTimeMetric: Nullable<Record<string, number[]>> = null;
@@ -87,8 +107,6 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
 
     private _afterRenderMetric$: Subject<IAfterRender$Info> = new Subject<IAfterRender$Info>();
     private _initRenderMetricSubscriber() {
-        if (!this._telemetryService) return;
-
         const { engine } = this._context;
 
         engine.beginFrame$.subscribe(() => {
@@ -132,13 +150,17 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
                 ...sceneRenderDetail.tags,
             });
             if (frameInfoList.length > FRAME_STACK_THRESHOLD) {
-                this._renderMetricCapture(frameInfoList);
+                this._captureRenderMetric(frameInfoList);
                 frameInfoList.length = 0;
             }
         });
     }
 
-    private _renderMetricCapture(frameInfoList: IExtendFrameInfo[]) {
+    /**
+     * Send render metric to telemetry service
+     * @param frameInfoList
+     */
+    private _captureRenderMetric(frameInfoList: IExtendFrameInfo[]) {
         const filteredFrameInfo = frameInfoList;//.filter((info) => info.scrolling);
         if (filteredFrameInfo.length === 0) return;
 
@@ -199,8 +221,10 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
         const elapsedTimeToStart = filteredFrameInfo[filteredFrameInfo.length - 1].elapsedTime;
         const sheetId = this._context.unit.getActiveSheet().getSheetId();
         const unitId = this._context.unit.getUnitId();
-        const telemetryData = { sheetId, unitId, elapsedTimeToStart, ...summaryFrameStats };
-        this._telemetryService!.capture('sheet_render_cost', telemetryData);
+        const telemetryData: ITelemetryData = { sheetId, unitId, elapsedTimeToStart, ...summaryFrameStats };
+        this._renderMetric$.next(telemetryData);
+
+        this._telemetryService?.capture('sheet_render_cost', telemetryData);
     }
 
     private _addComponent(workbook: Workbook) {
@@ -278,7 +302,7 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
             left: 0,
             top: columnHeader.height,
             bottom: 0,
-            width: rowHeader.width,
+            width: rowHeader.width + 1,
             isWheelPreventDefaultX: true,
         });
         const viewColumnLeft = new Viewport(SHEET_VIEWPORT_KEY.VIEW_COLUMN_LEFT, scene, {
@@ -288,7 +312,7 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
         const viewColumnRight = new Viewport(SHEET_VIEWPORT_KEY.VIEW_COLUMN_RIGHT, scene, {
             left: rowHeader.width,
             top: 0,
-            height: columnHeader.height,
+            height: columnHeader.height + 1,
             right: 0,
             isWheelPreventDefaultX: true,
         });
@@ -330,7 +354,9 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
         const { rowHeader, columnHeader } = worksheet.getConfig();
         const { viewMain } = this._initViewports(scene, rowHeader, columnHeader);
 
-        const _scrollBar = new ScrollBar(viewMain);
+        const sheetsUIConfig = this._configService.getConfig(SHEETS_UI_PLUGIN_CONFIG_KEY) as Partial<IUniverSheetsUIConfig>;
+        const scrollConfig: IScrollBarProps | undefined = sheetsUIConfig?.scrollConfig;
+        const _scrollBar = new ScrollBar(viewMain, scrollConfig);
 
         scene.attachControl();
         return viewMain;
@@ -360,18 +386,19 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
                 height: columnHeaderHeight,
             });
 
-            const rowFreezeHeaderRect = this._context.scene.getObject(FREEZE_ROW_HEADER_NAME);
-            if (rowFreezeHeaderRect) {
-                rowFreezeHeaderRect.transformByState({
-                    top: columnHeaderHeight - rowFreezeHeaderRect.height,
-                });
-            }
-            const colFreezeHeaderRect = this._context.scene.getObject(FREEZE_COLUMN_HEADER_NAME);
-            if (colFreezeHeaderRect) {
-                colFreezeHeaderRect.transformByState({
-                    height: columnHeaderHeight,
-                });
-            }
+            // no need to update freezelineRect, freeze render controller has handled.
+            // const rowFreezeHeaderRect = this._context.scene.getObject(FREEZE_ROW_HEADER_NAME);
+            // if (rowFreezeHeaderRect) {
+            //     rowFreezeHeaderRect.transformByState({
+            //         top: columnHeaderHeight - rowFreezeHeaderRect.height,
+            //     });
+            // }
+            // const colFreezeHeaderRect = this._context.scene.getObject(FREEZE_COLUMN_HEADER_NAME);
+            // if (colFreezeHeaderRect) {
+            //     colFreezeHeaderRect.transformByState({
+            //         height: columnHeaderHeight,
+            //     });
+            // }
         }));
     }
 
@@ -404,6 +431,8 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
                     commandId,
                 }, true);
 
+                // TODO @lumixraku
+                // This is insane !!! Tons changes would call sk.setCurrent.
                 this._sheetSkeletonManagerService.setCurrent({
                     sheetId: worksheetId,
                     commandId,
@@ -502,7 +531,7 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
     }
 
     private _rangeToBounds(ranges: IRange[]) {
-        const skeleton = this._sheetSkeletonManagerService.getCurrent()!.skeleton;
+        const skeleton = this._sheetSkeletonManagerService.getCurrentParam()!.skeleton;
         const { rowHeightAccumulation, columnWidthAccumulation, rowHeaderWidth, columnHeaderHeight } = skeleton;
 
         const dirtyBounds: IViewportInfos[] = [];

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,44 @@
  */
 
 import type { IDocumentData } from '@univerjs/core';
-import { BooleanNumber, DocumentFlavor } from '@univerjs/core';
+import { BooleanNumber, DashStyleType, DocumentFlavor, DrawingTypeEnum, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, WrapTextType } from '@univerjs/core';
 import { ptToPixel } from '@univerjs/engine-render';
 
 export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
     id: 'd',
     tableSource: {},
-    drawings: {},
-    drawingsOrder: [],
+    drawings: {
+        shapeTest1: {
+            unitId: 'd',
+            subUnitId: 'd',
+            drawingType: DrawingTypeEnum.DRAWING_DOM,
+            drawingId: 'shapeTest1',
+            title: 'test shape',
+            description: 'test shape',
+            docTransform: {
+                size: {
+                    width: 670,
+                    height: 300,
+                },
+                positionH: {
+                    relativeFrom: ObjectRelativeFromH.PAGE,
+                    posOffset: 0,
+                },
+                positionV: {
+                    relativeFrom: ObjectRelativeFromV.PARAGRAPH,
+                    posOffset: 10,
+                },
+                angle: 0,
+                // imageProperties: {
+                //     contentUrl: 'https://cnbabylon.com/assets/img/agents.png',
+                // },
+            },
+            layoutType: PositionedObjectLayoutType.WRAP_SQUARE,
+            behindDoc: BooleanNumber.FALSE,
+            wrapText: WrapTextType.BOTH_SIDES,
+        },
+    },
+    drawingsOrder: ['shapeTest1'],
     headers: {},
     footers: {},
     body: {
@@ -69,18 +99,6 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                     bl: BooleanNumber.TRUE,
                 },
             },
-            {
-                st: 14,
-                ed: 3064,
-                ts: {
-                    fs: 12,
-                    ff: 'Microsoft YaHei',
-                    cl: {
-                        rgb: 'rgb(30, 30, 30)',
-                    },
-                    bl: BooleanNumber.FALSE,
-                },
-            },
         ],
         paragraphs: [
             {
@@ -105,6 +123,14 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                     spaceAbove: { v: 10 },
                     lineSpacing: 2,
                     spaceBelow: { v: 0 },
+                    borderBottom: {
+                        color: {
+                            rgb: '#CDD0D8',
+                        },
+                        width: 2,
+                        dashStyle: DashStyleType.SOLID,
+                        padding: 5,
+                    },
                 },
             },
             {
@@ -599,7 +625,13 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 // contentDirection: textDirection!,
             },
         ],
-        customBlocks: [],
+        customBlocks: [
+        //     {
+        //     startIndex: 14,
+        //     blockType: BlockType.CUSTOM,
+        //     blockId: 'shapeTest1',
+        // }
+        ],
         tables: [],
     },
     documentStyle: {
@@ -607,7 +639,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
             width: ptToPixel(595),
             height: ptToPixel(842),
         },
-        documentFlavor: DocumentFlavor.TRADITIONAL,
+        documentFlavor: DocumentFlavor.MODERN,
         marginTop: ptToPixel(50),
         marginBottom: ptToPixel(50),
         marginRight: ptToPixel(50),

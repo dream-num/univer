@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -189,7 +189,7 @@ export class SheetsDataValidationRenderController extends RxDisposable {
                             interceptorAutoHeight: () => {
                                 const skeleton = this._renderManagerService.getRenderById(unitId)
                                     ?.with(SheetSkeletonManagerService)
-                                    .getWorksheetSkeleton(subUnitId)
+                                    .getSkeletonParam(subUnitId)
                                     ?.skeleton;
                                 if (!skeleton) {
                                     return undefined;
@@ -198,7 +198,7 @@ export class SheetsDataValidationRenderController extends RxDisposable {
 
                                 const info: ICellRenderContext = {
                                     data: cell,
-                                    style: skeleton.getsStyles().getStyleByCell(cell),
+                                    style: skeleton.getStyles().getStyleByCell(cell),
                                     primaryWithCoord: skeleton.getCellWithCoordByIndex(mergeCell?.startRow ?? row, mergeCell?.startColumn ?? col),
                                     unitId,
                                     subUnitId,
@@ -212,7 +212,7 @@ export class SheetsDataValidationRenderController extends RxDisposable {
                             interceptorAutoWidth: () => {
                                 const skeleton = this._renderManagerService.getRenderById(unitId)
                                     ?.with(SheetSkeletonManagerService)
-                                    .getWorksheetSkeleton(subUnitId)
+                                    .getSkeletonParam(subUnitId)
                                     ?.skeleton;
                                 if (!skeleton) {
                                     return undefined;
@@ -221,7 +221,7 @@ export class SheetsDataValidationRenderController extends RxDisposable {
 
                                 const info: ICellRenderContext = {
                                     data: cell,
-                                    style: skeleton.getsStyles().getStyleByCell(cell),
+                                    style: skeleton.getStyles().getStyleByCell(cell),
                                     primaryWithCoord: skeleton.getCellWithCoordByIndex(mergeCell?.startRow ?? row, mergeCell?.startColumn ?? col),
                                     unitId,
                                     subUnitId,
@@ -339,7 +339,7 @@ export class SheetsDataValidationMobileRenderController extends RxDisposable {
                             interceptorAutoHeight: () => {
                                 const skeleton = this._renderManagerService.getRenderById(unitId)
                                     ?.with(SheetSkeletonManagerService)
-                                    .getWorksheetSkeleton(subUnitId)
+                                    .getSkeletonParam(subUnitId)
                                     ?.skeleton;
                                 if (!skeleton) {
                                     return undefined;
@@ -348,7 +348,7 @@ export class SheetsDataValidationMobileRenderController extends RxDisposable {
 
                                 const info: ICellRenderContext = {
                                     data: cell,
-                                    style: skeleton.getsStyles().getStyleByCell(cell),
+                                    style: skeleton.getStyles().getStyleByCell(cell),
                                     primaryWithCoord: skeleton.getCellWithCoordByIndex(mergeCell?.startRow ?? row, mergeCell?.startColumn ?? col),
                                     unitId,
                                     subUnitId,

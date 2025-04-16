@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,9 @@ import type { IFreeze, Injector, IRange, IRangeWithCoord, Nullable, ThemeService
 import type { IMouseEvent, IPointerEvent, Scene, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
 import type { Subscription } from 'rxjs';
-
 import type { SelectionControl } from './selection-control';
-import { ColorKit, Quantity, UniverInstanceType } from '@univerjs/core';
-
-import { CURSOR_TYPE, IRenderManagerService, Rect, ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
+import { ColorKit, IUniverInstanceService, Quantity, UniverInstanceType } from '@univerjs/core';
+import { CURSOR_TYPE, IRenderManagerService, Rect, ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2, withCurrentTypeOfRenderer } from '@univerjs/engine-render';
 import { SELECTION_CONTROL_BORDER_BUFFER_WIDTH } from '@univerjs/sheets';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import { ISheetSelectionRenderService } from './base-selection-render.service';
@@ -67,6 +65,8 @@ export class SelectionShapeExtension {
 
     private _scenePointerUpSub: Nullable<Subscription>;
 
+    private _disabled: boolean = false;
+
     /**
      * The shadow selection under cursor when move whole selection control(for moving normal selection)
      */
@@ -96,6 +96,7 @@ export class SelectionShapeExtension {
     private readonly _themeService: ThemeService;
     private readonly _injector: Injector;
     private _selectionHooks: Record<string, () => void>;
+
     constructor(
         private _control: SelectionControl,
         options: ISelectionShapeExtensionOption
@@ -126,10 +127,18 @@ export class SelectionShapeExtension {
         this._helperSelection?.dispose();
     }
 
+    setDisabled(disabled: boolean) {
+        this._disabled = disabled;
+    }
+
     private _getFreeze() {
-        const renderManagerService = this._injector.get(IRenderManagerService);
-        const freeze = renderManagerService.withCurrentTypeOfUnit(UniverInstanceType.UNIVER_SHEET, SheetSkeletonManagerService)
-            ?.getCurrent()
+        const freeze = withCurrentTypeOfRenderer(
+            UniverInstanceType.UNIVER_SHEET,
+            SheetSkeletonManagerService,
+            this._injector.get(IUniverInstanceService),
+            this._injector.get(IRenderManagerService)
+        )
+            ?.getCurrentParam()
             ?.skeleton
             .getWorksheetConfig()
             .freeze;
@@ -243,8 +252,8 @@ export class SelectionShapeExtension {
             style: null,
         };
         const selectionWithCoord = attachSelectionWithCoord(selection, this._skeleton);
-        const startCell = this._skeleton.getNoMergeCellPositionByIndex(startRow, startColumn);
-        const endCell = this._skeleton.getNoMergeCellPositionByIndex(endRow, endColumn);
+        const startCell = this._skeleton.getNoMergeCellWithCoordByIndex(startRow, startColumn);
+        const endCell = this._skeleton.getNoMergeCellWithCoordByIndex(endRow, endColumn);
         const startY = startCell?.startY || 0;
         const endY = endCell?.endY || 0;
         const startX = startCell?.startX || 0;
@@ -345,6 +354,9 @@ export class SelectionShapeExtension {
         scene.disableObjectsEvent();
 
         this._scenePointerMoveSub = scene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
+            if (this._disabled) {
+                return;
+            }
             const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
 
             const permissionCheck = this._injector.get(ISheetSelectionRenderService, Quantity.OPTIONAL)
@@ -713,8 +725,8 @@ export class SelectionShapeExtension {
             isLighten = rulerValue.isLighten;
         }
 
-        const startCell = this._skeleton.getNoMergeCellPositionByIndex(startRow, startColumn);
-        const endCell = this._skeleton.getNoMergeCellPositionByIndex(endRow, endColumn);
+        const startCell = this._skeleton.getNoMergeCellWithCoordByIndex(startRow, startColumn);
+        const endCell = this._skeleton.getNoMergeCellWithCoordByIndex(endRow, endColumn);
 
         const startY = startCell?.startY || 0;
         const endY = endCell?.endY || 0;

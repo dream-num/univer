@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,20 @@
 import type enUS from './en-US';
 
 const locale: typeof enUS = {
+    toolbar: {
+        heading: {
+            normal: 'Normal',
+            title: 'Titre',
+            subTitle: 'Sous-titre',
+            1: 'Titre 1',
+            2: 'Titre 2',
+            3: 'Titre 3',
+            4: 'Titre 4',
+            5: 'Titre 5',
+            6: 'Titre 6',
+            tooltip: 'Définir un titre',
+        },
+    },
     ribbon: {
         start: 'Démarrer',
         insert: 'Insérer',
@@ -76,6 +90,9 @@ const locale: typeof enUS = {
         cancel: 'Annuler',
     },
     'global-shortcut': 'Raccourci global',
+    'zoom-slider': {
+        resetTo: 'Réinitialiser à',
+    },
 };
 
 export default locale;

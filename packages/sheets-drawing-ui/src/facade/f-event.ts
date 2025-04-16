@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import type { IDrawingSearch, IEventBase } from '@univerjs/core';
+import type { IDrawingSearch } from '@univerjs/core';
+import type { IEventBase } from '@univerjs/core/facade';
 import type { ISheetImage } from '@univerjs/sheets-drawing';
 import type { FWorkbook } from '@univerjs/sheets/facade';
 import type { FOverGridImage } from './f-over-grid-image';
-import { FEventName } from '@univerjs/core';
+import { FEventName } from '@univerjs/core/facade';
 
 /**
  * @ignore
@@ -26,120 +27,136 @@ import { FEventName } from '@univerjs/core';
 interface IFDrawingEventNameMixin {
     /**
      * Triggered before floating image insertion.
-     * Type of the event parameter is {@link IBeforeOverGridImageInsertParam}
+     * @see {@link IBeforeOverGridImageInsertParam}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.BeforeOverGridImageInsert, (param) => {
-     *    const { workbook, insertImageParams } = param;
-     *    // do something
-     *    console.log(workbook, insertImageParams);
-     *    // Cancel the insertion operation
-     *    param.cancel = true;
+     * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeOverGridImageInsert, (params) => {
+     *   console.log(params);
+     *   // do something
+     *   const { workbook, insertImageParams } = params;
+     *   // Cancel the insertion operation
+     *   params.cancel = true;
      * })
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly BeforeOverGridImageInsert: 'BeforeOverGridImageInsert';
 
     /**
      * Triggered after floating image insertion.
-     * Type of the event parameter is {@link IOverGridImageInsertedParam}
+     * @see {@link IOverGridImageInsertedParam}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.OverGridImageInserted, (param) => {
-     *   const { workbook, images } = param;
-     *  // do something
-     *  console.log(workbook, images);
+     * const disposable = univerAPI.addEvent(univerAPI.Event.OverGridImageInserted, (params) => {
+     *   console.log(params);
+     *   // do something
+     *   const { workbook, images } = params;
      * })
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly OverGridImageInserted: 'OverGridImageInserted';
 
     /**
      * Triggered before floating image removal.
-     * Type of the event parameter is {@link IBeforeOverGridImageRemoveParam}
+     * @see {@link IBeforeOverGridImageRemoveParam}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.BeforeOverGridImageRemove, (param) => {
-     *  const { workbook, images } = param;
-     * // do something
-     * console.log(workbook, images);
-     * // Cancel the removal operation
-     * param.cancel = true;
+     * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeOverGridImageRemove, (params) => {
+     *   console.log(params);
+     *   // do something
+     *   const { workbook, images } = params;
+     *   // Cancel the removal operation
+     *   params.cancel = true;
      * })
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly BeforeOverGridImageRemove: 'BeforeOverGridImageRemove';
 
     /**
      * Triggered after floating image removal.
-     * Type of the event parameter is {@link IOverGridImageRemovedParam}
+     * @see {@link IOverGridImageRemovedParam}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.OverGridImageRemoved, (param) => {
-     * const { workbook, removeImageParams } = param;
-     * // do something
-     * console.log(workbook, removeImageParams);
+     * const disposable = univerAPI.addEvent(univerAPI.Event.OverGridImageRemoved, (params) => {
+     *   console.log(params);
+     *   // do something
+     *   const { workbook, removeImageParams } = params;
      * })
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly OverGridImageRemoved: 'OverGridImageRemoved';
 
     /**
      * Triggered before floating image change.
-     * Type of the event parameter is {@link IBeforeOverGridImageChangeParam}
+     * @see {@link IBeforeOverGridImageChangeParam}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.BeforeOverGridImageChange, (param) => {
-     *   const { workbook, images } = param;
+     * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeOverGridImageChange, (params) => {
+     *   console.log(params);
      *   // do something
-     *   console.log(workbook, images);
+     *   const { workbook, images } = params;
      *   // Cancel the image change
-     *   param.cancel = true;
+     *   params.cancel = true;
      * })
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly BeforeOverGridImageChange: 'BeforeOverGridImageChange';
 
     /**
      * Triggered after floating image change.
-     * Type of the event parameter is {@link IOverGridImageChangedParam}
+     * @see {@link IOverGridImageChangedParam}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.OverGridImageChanged, (param) => {
-     * const { workbook, images } = param;
-     * // do something
-     * console.log(workbook, images);
+     * const disposable = univerAPI.addEvent(univerAPI.Event.OverGridImageChanged, (params) => {
+     *   console.log(params);
+     *   // do something
+     *   const { workbook, images } = params;
      * })
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly OverGridImageChanged: 'OverGridImageChanged';
 
     /**
      * Triggered before floating image selection.
-     * Type of the event parameter is {@link IBeforeOverGridImageSelectParam}
+     * @see {@link IBeforeOverGridImageSelectParam}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.BeforeOverGridImageSelect, (param) => {
-     *   const { workbook, selectedImages, oldSelectedImages } = param;
+     * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeOverGridImageSelect, (params) => {
+     *   console.log(params);
      *   // do something
-     *   console.log(workbook, selectedImages, oldSelectedImages);
-     *   // cancel the event
-     *   param.cancel = true;
+     *   const { workbook, selectedImages, oldSelectedImages } = params;
+     *   // cancel the selection operation
+     *   params.cancel = true;
      * })
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly BeforeOverGridImageSelect: 'BeforeOverGridImageSelect';
 
     /**
      * Triggered after floating image selection.
-     * Type of the event parameter is {@link IOverGridImageSelectedParam}
+     * @see {@link IOverGridImageSelectedParam}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.OverGridImageSelected, (param) => {
-     * const { workbook, selectedImages } = param;
-     * // do something
-     * console.log(workbook, selectedImages);
+     * const disposable = univerAPI.addEvent(univerAPI.Event.OverGridImageSelected, (params) => {
+     *   console.log(params);
+     *   // do something
+     *   const { workbook, selectedImages } = params;
      * })
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly OverGridImageSelected: 'OverGridImageSelected';
@@ -305,7 +322,7 @@ interface IFSheetsUIEventParamConfig {
 }
 
 FEventName.extend(FDrawingEventNameMixin);
-declare module '@univerjs/core' {
+declare module '@univerjs/core/facade' {
     // eslint-disable-next-line ts/naming-convention
     interface FEventName extends IFDrawingEventNameMixin { }
     interface IEventParamConfig extends IFSheetsUIEventParamConfig { }

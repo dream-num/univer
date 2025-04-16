@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -153,12 +153,14 @@ describe('test "mergeSetRangeValues"', () => {
             { id: 'whatever', params: {} },
             { id: SetRangeValuesMutation.id, params: { unitId: '1', subUnitId: '2', cellValue: { 1: { 2: { v: 'value' } } } } },
             { id: SetRangeValuesMutation.id, params: { unitId: '1', subUnitId: '3', cellValue: { 1: { 2: { v: 'value' } } } } },
-            { id: 'whatever', params: {} }];
+            { id: 'whatever', params: {} },
+        ];
         expect(mergeSetRangeValues(mutations)).toStrictEqual([
             { id: 'whatever', params: {} },
             { id: SetRangeValuesMutation.id, params: { unitId: '1', subUnitId: '2', cellValue: { 1: { 2: { v: 'value' } } } } },
             { id: SetRangeValuesMutation.id, params: { unitId: '1', subUnitId: '3', cellValue: { 1: { 2: { v: 'value' } } } } },
-            { id: 'whatever', params: {} }]);
+            { id: 'whatever', params: {} },
+        ]);
     });
     it('part of setRangeValues mutations are applied in same worksheet, will merge these part', () => {
         const mutations: IMutationInfo[] = [
@@ -166,12 +168,14 @@ describe('test "mergeSetRangeValues"', () => {
             { id: SetRangeValuesMutation.id, params: { unitId: '1', subUnitId: '2', cellValue: { 1: { 2: { v: 'value' } } } } },
             { id: SetRangeValuesMutation.id, params: { unitId: '1', subUnitId: '2', cellValue: { 1: { 3: { v: 'value' } } } } },
             { id: SetRangeValuesMutation.id, params: { unitId: '1', subUnitId: '3', cellValue: { 1: { 2: { v: 'value' } } } } },
-            { id: 'whatever', params: {} }];
+            { id: 'whatever', params: {} },
+        ];
         expect(mergeSetRangeValues(mutations as IMutationInfo[])).toStrictEqual([
             { id: 'whatever', params: {} },
             { id: SetRangeValuesMutation.id, params: { unitId: '1', subUnitId: '2', cellValue: { 1: { 2: { v: 'value' }, 3: { v: 'value' } } } } },
             { id: SetRangeValuesMutation.id, params: { unitId: '1', subUnitId: '3', cellValue: { 1: { 2: { v: 'value' } } } } },
-            { id: 'whatever', params: {} }]);
+            { id: 'whatever', params: {} },
+        ]);
     });
 
     it('If some setRangeValues appear discontinuously, they will be merged separately.', () => {

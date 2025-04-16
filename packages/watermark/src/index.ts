@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,5 @@
  */
 
 export { UniverWatermarkPlugin } from './plugin';
-export { UNIVER_WATERMARK_STORAGE_KEY, WATERMARK_IMAGE_ALLOW_IMAGE_LIST, WatermarkImageBaseConfig, WatermarkTextBaseConfig, WatermarkUserInfoBaseConfig } from './common/const';
-export type { IImageWatermarkConfig, ITextWatermarkConfig } from './common/type';
-export { IWatermarkTypeEnum } from './common/type';
+export { WATERMARK_IMAGE_ALLOW_IMAGE_LIST, WatermarkImageBaseConfig, WatermarkTextBaseConfig, WatermarkUserInfoBaseConfig } from './common/const';
 export { WatermarkService } from './services/watermark.service';
-export type { IWatermarkConfig, IWatermarkConfigWithType } from './common/type';
-

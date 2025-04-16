@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,19 +18,20 @@
 /* eslint-disable complexity */
 
 import type { ICellDataForSheetInterceptor, ICellWithCoord, IDocDrawingBase, ImageSourceType, IRange, IScale, Nullable, ObjectMatrix } from '@univerjs/core';
+import type { IBoundRectNoAngle, IViewportInfo } from '../../../basics';
 import type { UniverRenderingContext } from '../../../context';
 import type { Documents } from '../../docs/document';
 import type { IDrawInfo } from '../../extension';
 import type { IFontCacheItem } from '../interfaces';
 import type { SheetComponent } from '../sheet-component';
-import type { SpreadsheetSkeleton } from '../sheet-skeleton';
+import type { SpreadsheetSkeleton } from '../sheet.render-skeleton';
 import { HorizontalAlign, Range, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import { FIX_ONE_PIXEL_BLUR_OFFSET } from '../../../basics';
 import { VERTICAL_ROTATE_ANGLE } from '../../../basics/text-rotation';
 import { clampRange, inViewRanges } from '../../../basics/tools';
 import { SpreadsheetExtensionRegistry } from '../../extension';
 import { EXPAND_SIZE_FOR_RENDER_OVERFLOW, FONT_EXTENSION_Z_INDEX } from '../constants';
-import { getDocsSkeletonPageSize } from '../sheet-skeleton';
+import { getDocsSkeletonPageSize } from '../sheet.render-skeleton';
 import { SheetExtension } from './sheet-extension';
 
 const UNIQUE_KEY = 'DefaultFontExtension';
@@ -45,22 +46,35 @@ function rotatedBoundingBox(width: number, height: number, angleDegrees: number)
 interface IRenderFontContext {
     ctx: UniverRenderingContext;
     scale: number;
-    rowHeightAccumulation: number[];
+    // rowHeightAccumulation: number[];
     columnTotalWidth: number;
-    columnWidthAccumulation: number[];
+    // columnWidthAccumulation: number[];
     rowTotalHeight: number;
     viewRanges: IRange[];
     checkOutOfViewBound: boolean;
     diffRanges: IRange[];
     spreadsheetSkeleton: SpreadsheetSkeleton;
     overflowRectangle: Nullable<IRange>;
-    cellData: {
-        fontCache?: Nullable<IFontCacheItem>;
-        cellDataInterceptor?: Nullable<ICellDataForSheetInterceptor>;
-    };
+    /**
+     * includes documentSkeleton & cellData
+     */
+    fontCache?: Nullable<IFontCacheItem>;
+
+    /**
+     * cell rect startY(with merge info)
+     */
     startY: number;
+    /**
+     * cell rect endY (with merge info)
+     */
     endY: number;
+    /**
+     * cell rect startX(with merge info)
+     */
     startX: number;
+    /**
+     * cell rect endX (with merge info)
+     */
     endX: number;
     cellInfo: ICellWithCoord;
 }
@@ -102,15 +116,14 @@ export class Font extends SheetExtension {
         const renderFontContext = {
             ctx,
             scale,
-            rowHeightAccumulation,
+            // rowHeightAccumulation,
             columnTotalWidth,
-            columnWidthAccumulation,
+            // columnWidthAccumulation,
             rowTotalHeight,
             viewRanges,
             checkOutOfViewBound: checkOutOfViewBound || true,
             diffRanges,
             spreadsheetSkeleton,
-            cellData: {},
         } as IRenderFontContext;
         ctx.save();
 
@@ -187,10 +200,14 @@ export class Font extends SheetExtension {
 
         const fontCache = fontMatrix.getValue(row, col);
         if (!fontCache) return true;
+        if (!fontCache.documentSkeleton) return true;
+        renderFontCtx.fontCache = fontCache;
 
         //#region overflow
-        // If the cell is overflowing, but the overflowRectangle has not been set,
-        // then overflowRectangle is set to undefined.
+        // e.g. cell(12, 5)'s textwrap value is overflow(which is default), and text ends at column 9,
+        // the overflowRange would be startRow: 12, startColumn: 5, endRow: 12, endColumn: 9
+        // and if column 9 is not empty, then the overflowRang e endColumn would be 8
+        // and if column 7 is not empty, the endColumn would be 6
         const overflowRange = spreadsheetSkeleton.overflowCache.getValue(row, col);
 
         // If it's neither an overflow nor within the current range,
@@ -208,9 +225,11 @@ export class Font extends SheetExtension {
         const visibleCol = spreadsheetSkeleton.worksheet.getColVisible(col);
         if (!visibleRow || !visibleCol) return true;
 
+        // Since we cannot predict when fontRenderExtension?.isSkip might change,
+        // we must check it every time and retrieve cell data directly from the worksheet,
+        // not from the cache to ensure accuracy.
         const cellData = spreadsheetSkeleton.worksheet.getCell(row, col) as ICellDataForSheetInterceptor || {};
-        renderFontCtx.cellData.cellDataInterceptor = cellData;
-        if (cellData.fontRenderExtension?.isSkip) {
+        if (cellData?.fontRenderExtension?.isSkip) {
             return true;
         }
 
@@ -219,20 +238,20 @@ export class Font extends SheetExtension {
 
         //#region text overflow
         renderFontCtx.overflowRectangle = overflowRange;
-        renderFontCtx.cellData = { fontCache };
-        this._setFontRenderBounds(renderFontCtx, row, col);
+        this._clipByRenderBounds(renderFontCtx, row, col);
         //#endregion
 
         ctx.translate(renderFontCtx.startX + FIX_ONE_PIXEL_BLUR_OFFSET, renderFontCtx.startY + FIX_ONE_PIXEL_BLUR_OFFSET);
-        this._renderDocuments(ctx, fontCache, renderFontCtx.startX, renderFontCtx.startY, renderFontCtx.endX, renderFontCtx.endY, row, col, spreadsheetSkeleton.overflowCache);
+        this._renderDocuments(ctx, row, col, renderFontCtx, spreadsheetSkeleton.overflowCache);
 
         ctx.closePath();
         ctx.restore();
+
         const documentDataModel = fontCache.documentSkeleton.getViewModel().getDataModel();
         if (documentDataModel.getDrawingsOrder()?.length) {
             ctx.save();
             ctx.beginPath();
-            this._setFontRenderBounds(renderFontCtx, row, col, 1);
+            this._clipByRenderBounds(renderFontCtx, row, col, 1);
             this._renderImages(ctx, fontCache, renderFontCtx.startX, renderFontCtx.startY, renderFontCtx.endX, renderFontCtx.endY);
             ctx.closePath();
             ctx.restore();
@@ -243,7 +262,6 @@ export class Font extends SheetExtension {
         renderFontCtx.endX = 0;
         renderFontCtx.endY = 0;
         renderFontCtx.overflowRectangle = null;
-        renderFontCtx.cellData = { fontCache: null };
         return false;
     };
 
@@ -325,13 +343,13 @@ export class Font extends SheetExtension {
      * @param col
      * @param fontCache
      */
-    private _setFontRenderBounds(renderFontContext: IRenderFontContext, row: number, col: number, padding = 0) {
-        const { ctx, scale, overflowRectangle, rowHeightAccumulation, columnWidthAccumulation, cellData } = renderFontContext;
+    private _clipByRenderBounds(renderFontContext: IRenderFontContext, row: number, col: number, padding = 0) {
+        const { ctx, scale, overflowRectangle, fontCache } = renderFontContext;
         let { startX, endX, startY, endY } = renderFontContext;
 
         // https://github.com/dream-num/univer-pro/issues/334
         // When horizontal alignment is not set, the default alignment for rotation angles varies to accommodate overflow scenarios.
-        const { horizontalAlign, vertexAngle = 0, centerAngle = 0 } = cellData?.fontCache ?? {};
+        const { horizontalAlign = 0, vertexAngle = 0, centerAngle = 0 } = fontCache as IFontCacheItem;
         let horizontalAlignOverFlow = horizontalAlign;
         if (horizontalAlign === HorizontalAlign.UNSPECIFIED) {
             if (centerAngle === VERTICAL_ROTATE_ANGLE && vertexAngle === VERTICAL_ROTATE_ANGLE) {
@@ -340,10 +358,9 @@ export class Font extends SheetExtension {
                 horizontalAlignOverFlow = HorizontalAlign.RIGHT;
             }
         }
-        const cellDataInterceptor = renderFontContext.spreadsheetSkeleton.worksheet.getCell(row, col) as ICellDataForSheetInterceptor || {};
-        // const cellDataInterceptor = cellData.cellDataInterceptor;
-        const rightOffset = cellDataInterceptor?.fontRenderExtension?.rightOffset ?? 0;
-        const leftOffset = cellDataInterceptor?.fontRenderExtension?.leftOffset ?? 0;
+        // const cellDataInterceptor = renderFontContext.spreadsheetSkeleton.worksheet.getCell(row, col) as ICellDataForSheetInterceptor || {};
+        const rightOffset = fontCache?.cellData?.fontRenderExtension?.rightOffset ?? 0;
+        const leftOffset = fontCache?.cellData?.fontRenderExtension?.leftOffset ?? 0;
         let isOverflow = true;
 
         if (vertexAngle === 0) {
@@ -362,6 +379,8 @@ export class Font extends SheetExtension {
          */
         if (overflowRectangle && isOverflow) {
             const { startColumn, startRow, endColumn, endRow } = overflowRectangle;
+            const { spreadsheetSkeleton } = renderFontContext;
+            const { rowHeightAccumulation, columnWidthAccumulation } = spreadsheetSkeleton;
             if (startColumn === endColumn && startColumn === col) {
                 ctx.rectByPrecision(
                     startX + 1 / scale,
@@ -422,14 +441,9 @@ export class Font extends SheetExtension {
 
     private _renderDocuments(
         ctx: UniverRenderingContext,
-        // docsConfig.documentSkeleton.getSkeletonData().pages[0].sections[0].columns[0].lines[0].divides[0].glyphGroup[0].fontStyle
-        docsConfig: IFontCacheItem,
-        startX: number,
-        startY: number,
-        endX: number,
-        endY: number,
         row: number,
         col: number,
+        renderFontCtx: IRenderFontContext,
         overflowCache: ObjectMatrix<IRange>
     ) {
         const documents = this.getDocuments() as Documents;
@@ -437,15 +451,20 @@ export class Font extends SheetExtension {
         if (documents == null) {
             throw new Error('documents is null');
         }
+        const { fontCache } = renderFontCtx;
+        if (!fontCache) return;
 
-        const { documentSkeleton, vertexAngle = 0, wrapStrategy } = docsConfig;
-        const cellHeight = endY - startY;
-        const cellWidth = endX - startX;
+        const { documentSkeleton, vertexAngle = 0, wrapStrategy } = fontCache;
+        if (!documentSkeleton) return;
+
         const documentDataModel = documentSkeleton.getViewModel().getDataModel();
+        let { startX, startY, endX, endY } = renderFontCtx;
+        const cellWidth = endX - startX;
+        const cellHeight = endY - startY;
 
         // WRAP means next line
         if (wrapStrategy === WrapStrategy.WRAP && vertexAngle === 0) {
-            documentDataModel.updateDocumentDataPageSize(cellWidth);
+            documentDataModel.updateDocumentDataPageSize(endX - startX);
             documentSkeleton.calculate();
         } else {
             documentDataModel.updateDocumentDataPageSize(Number.POSITIVE_INFINITY);
@@ -454,9 +473,8 @@ export class Font extends SheetExtension {
         // Use fix https://github.com/dream-num/univer/issues/927, Set the actual width of the content to the page width of the document,
         // so that the divide will be aligned when the skeleton is calculated.
         const overflowRectangle = overflowCache.getValue(row, col);
-
-        const isOverflow = !(wrapStrategy === WrapStrategy.WRAP && !overflowRectangle && vertexAngle === 0);
-        if (isOverflow) {
+        const isOverflow = !(wrapStrategy === WrapStrategy.WRAP && vertexAngle === 0);
+        if (isOverflow && overflowRectangle) {
             const contentSize = getDocsSkeletonPageSize(documentSkeleton);
 
             const documentStyle = documentDataModel.getSnapshot().documentStyle;
@@ -470,11 +488,33 @@ export class Font extends SheetExtension {
                     .updateDocumentDataPageSize(width + marginLeft + marginRight);
                 documentSkeleton.calculate();
             }
+            const endColumn = overflowRectangle.endColumn;
+            const startColumn = overflowRectangle.startColumn;
+            const startRow = overflowRectangle.startRow;
+            const endRow = overflowRectangle.endRow;
+            const endCell = renderFontCtx.spreadsheetSkeleton.getCellWithCoordByIndex(endRow, endColumn);
+            endX = endCell.endX;
+            endY = endCell.endY;
+
+            const startCell = renderFontCtx.spreadsheetSkeleton.getCellWithCoordByIndex(startRow, startColumn);
+            startX = startCell.startX;
+            startY = startCell.startY;
         }
 
+        const viewBoundRightBottom = {
+            right: endX - startX,
+            bottom: endY - startY,
+        };
         documentSkeleton.makeDirty(false);
         documents.resize(cellWidth, cellHeight);
-        documents.changeSkeleton(documentSkeleton).render(ctx);
+        documents.changeSkeleton(documentSkeleton).render(ctx, {
+            viewBound: {
+                left: 0,
+                top: 0,
+                right: viewBoundRightBottom.right,
+                bottom: viewBoundRightBottom.bottom,
+            } as IBoundRectNoAngle,
+        } as Partial<IViewportInfo>);
     }
 
     private _clipRectangleForOverflow(

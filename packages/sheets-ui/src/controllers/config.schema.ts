@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 
 import type { DependencyOverride } from '@univerjs/core';
+import type { IScrollBarProps } from '@univerjs/engine-render';
 import type { MenuConfig } from '@univerjs/ui';
 
 export const SHEETS_UI_PLUGIN_CONFIG_KEY = 'sheets-ui.config';
@@ -26,18 +27,29 @@ export interface IUniverSheetsUIConfig {
     disableAutoFocus?: true;
     override?: DependencyOverride;
     customComponents?: Set<string>;
+    /**
+     * The maximum count of rows triggering auto height. This is used to avoid performance issue.
+     * @default 1000
+     */
+    maxAutoHeightCount?: number;
 
     /**
      * Whether to show the formula bar.
      */
     formulaBar?: boolean;
 
+    statusBarStatistic?: boolean;
+
     clipboardConfig?: {
         hidePasteOptions?: boolean;
     };
+
+    scrollConfig?: IScrollBarProps;
+
 }
 
 export const defaultPluginConfig: IUniverSheetsUIConfig = {
     formulaBar: true,
+    statusBarStatistic: true,
+    maxAutoHeightCount: 1000,
 };
-

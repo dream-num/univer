@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ export class SheetsDataValidationReRenderController extends Disposable implement
                 sheetIds.add(value.subUnitId);
             });
             sheetIds.forEach((sheetId) => {
-                this._sheetSkeletonManagerService.getWorksheetSkeleton(sheetId)?.skeleton.makeDirty(true);
+                this._sheetSkeletonManagerService.getSkeletonParam(sheetId)?.skeleton.makeDirty(true);
             });
             this._context.mainComponent?.makeForceDirty();
         };

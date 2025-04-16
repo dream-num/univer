@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,13 @@
 
 import type { ISrcRect, Nullable, PresetGeometryType } from '@univerjs/core';
 
-import type { UniverRenderingContext } from '../context';
 import type { IObjectFullState, ITransformChangeState, IViewportInfo } from '../basics';
+import type { UniverRenderingContext } from '../context';
+import type { Scene } from '../scene';
+import type { IShapeProps } from './shape';
+import { ObjectType } from '../base-object';
 import { RENDER_CLASS_TYPE, Vector2 } from '../basics';
 import { offsetRotationAxis } from '../basics/offset-rotation-axis';
-import type { Scene } from '../scene';
-import { ObjectType } from '../base-object';
-import type { IShapeProps } from './shape';
 import { Shape } from './shape';
 
 export interface IImageProps extends IShapeProps {

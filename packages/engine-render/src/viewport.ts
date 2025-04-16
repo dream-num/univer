@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import type { IWheelEvent } from './basics/i-events';
 import type { IBoundRectNoAngle, IViewportInfo } from './basics/vector2';
 import type { UniverRenderingContext } from './context';
 import type { Scene } from './scene';
-import type { BaseScrollBar } from './shape/base-scroll-bar';
+import type { ScrollBar } from './shape/scroll-bar';
 import { EventSubject, Tools } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { RENDER_CLASS_TYPE } from './basics/const';
@@ -116,8 +116,8 @@ export class Viewport {
      * scrollX means scroll x value for scrollbar in viewMain
      * use getBarScroll to get scrolling value(scrollX, scrollY) for scrollbar
      */
-    scrollX: number = 0;
-    scrollY: number = 0;
+    _scrollX: number = 0;
+    _scrollY: number = 0;
     private _preScrollX: number = 0;
     private _preScrollY: number = 0;
 
@@ -178,7 +178,7 @@ export class Viewport {
 
     private _scene!: Scene;
 
-    private _scrollBar?: Nullable<BaseScrollBar>;
+    private _scrollBar?: Nullable<ScrollBar>;
 
     private _isWheelPreventDefaultX: boolean = false;
     private _isWheelPreventDefaultY: boolean = false;
@@ -206,7 +206,7 @@ export class Viewport {
     /**
      * bound of visible area
      */
-    private _viewBound: IBoundRectNoAngle;
+    private _viewBound: IBoundRectNoAngle = { top: 0, left: 0, bottom: 0, right: 0 };
     private _preViewBound: IBoundRectNoAngle;
 
     /**
@@ -344,6 +344,8 @@ export class Viewport {
 
     set viewportScrollX(val: number) {
         this._viewportScrollX = val;
+        // const { x } = this.transViewportScroll2ScrollValue(this._viewportScrollX, this._viewportScrollY);
+        // this.scrollX = x;
     }
 
     get viewportScrollX() {
@@ -356,6 +358,22 @@ export class Viewport {
 
     get viewportScrollY() {
         return this._viewportScrollY;
+    }
+
+    set scrollX(val: number) {
+        this._scrollX = val;
+    }
+
+    set scrollY(val: number) {
+        this._scrollY = val;
+    }
+
+    get scrollX() {
+        return this._scrollX;
+    }
+
+    get scrollY() {
+        return this._scrollY;
     }
 
     set top(num: number) {
@@ -425,6 +443,9 @@ export class Viewport {
         this._active = false;
     }
 
+    /**
+     * canvas resize & freeze change would invoke this method
+     */
     resetCanvasSizeAndUpdateScroll() {
         this._resizeCacheCanvas();
         this._updateScrollByViewportScrollValue();
@@ -440,7 +461,7 @@ export class Viewport {
         } as IViewportReSizeParam);
     }
 
-    setScrollBar(instance: BaseScrollBar) {
+    setScrollBar(instance: ScrollBar) {
         this._scrollBar = instance;
         this._updateScrollByViewportScrollValue();
     }

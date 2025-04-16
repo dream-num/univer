@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,8 @@ import type { EffectRefRangeParams, IAddWorksheetMergeMutationParams, ICopySheet
 import type { ISetSheetsFilterCriteriaMutationParams, ISetSheetsFilterRangeMutationParams } from '../commands/mutations/sheets-filter.mutation';
 import type { FilterColumn } from '../models/filter-model';
 
-import { Disposable, DisposableCollection, ICommandService, Inject, IUniverInstanceService, moveMatrixArray, Rectangle } from '@univerjs/core';
+import { Disposable, DisposableCollection, ICommandService, Inject, IUniverInstanceService, moveMatrixArray, Optional, Rectangle } from '@univerjs/core';
+import { DataSyncPrimaryController } from '@univerjs/rpc';
 import { CopySheetCommand, EffectRefRangId, expandToContinuousRange, getSheetCommandTarget, InsertColCommand, InsertRowCommand, InsertRowMutation, INTERCEPTOR_POINT, MoveRangeCommand, MoveRowsCommand, RefRangeService, RemoveColCommand, RemoveRowCommand, RemoveRowMutation, RemoveSheetCommand, SetRangeValuesMutation, SetWorksheetActiveOperation, SheetInterceptorService } from '@univerjs/sheets';
 import { ReCalcSheetsFilterMutation, RemoveSheetsFilterMutation, SetSheetsFilterCriteriaMutation, SetSheetsFilterRangeMutation } from '../commands/mutations/sheets-filter.mutation';
 import { SheetsFilterService } from '../services/sheet-filter.service';
@@ -32,7 +33,8 @@ export class SheetsFilterController extends Disposable {
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
         @Inject(SheetsFilterService) private readonly _sheetsFilterService: SheetsFilterService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @Inject(RefRangeService) private readonly _refRangeService: RefRangeService
+        @Inject(RefRangeService) private readonly _refRangeService: RefRangeService,
+        @Optional(DataSyncPrimaryController) private readonly _dataSyncPrimaryController: DataSyncPrimaryController
     ) {
         super();
 
@@ -49,13 +51,17 @@ export class SheetsFilterController extends Disposable {
             SetSheetsFilterRangeMutation,
             ReCalcSheetsFilterMutation,
             RemoveSheetsFilterMutation,
-        ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
+        ].forEach((command) => {
+            this.disposeWithMe(this._commandService.registerCommand(command));
+            this._dataSyncPrimaryController?.registerSyncingMutations(command);
+        });
     }
 
     private _initInterceptors(): void {
         this.disposeWithMe(this._sheetInterceptorService.interceptCommand({
             getMutations: (command) => this._getUpdateFilter(command),
         }));
+
         this.disposeWithMe(this._commandService.onCommandExecuted((commandInfo) => {
             if (commandInfo.id === SetWorksheetActiveOperation.id) {
                 const params = commandInfo.params as ISetWorksheetActiveOperationParams;
@@ -150,9 +156,11 @@ export class SheetsFilterController extends Disposable {
                 if (!unitId || !subUnitId || !targetSubUnitId) {
                     return this._handleNull();
                 }
+
                 return this._handleCopySheetCommand(unitId, subUnitId, targetSubUnitId);
             }
         }
+
         return {
             redos: [],
             undos: [],
@@ -199,7 +207,7 @@ export class SheetsFilterController extends Disposable {
         const filterColumn = filterModel.getAllFilterColumns();
         const effected = filterColumn.filter((column) => column[0] >= anchor);
         if (effected.length !== 0) {
-            const { newRange, oldRange } = this.moveCriteria(unitId, subUnitId, effected, count);
+            const { newRange, oldRange } = this._moveCriteria(unitId, subUnitId, effected, count);
             redos.push(...newRange.redos, ...oldRange.redos);
             undos.push(...newRange.undos, ...oldRange.undos);
         }
@@ -239,7 +247,8 @@ export class SheetsFilterController extends Disposable {
         redos.push({ id: SetSheetsFilterRangeMutation.id, params: setFilterRangeParams });
         undos.push({ id: SetSheetsFilterRangeMutation.id, params: undoSetFilterRangeMutationParams });
         return {
-            redos: mergeSetFilterCriteria(redos), undos: mergeSetFilterCriteria(undos),
+            redos: mergeSetFilterCriteria(redos),
+            undos: mergeSetFilterCriteria(undos),
         };
     }
 
@@ -281,7 +290,7 @@ export class SheetsFilterController extends Disposable {
 
         let newRangeCriteria: { undos: IMutationInfo[]; redos: IMutationInfo[] } = { undos: [], redos: [] };
         if (shifted.length > 0) {
-            const { oldRange, newRange } = this.moveCriteria(unitId, subUnitId, shifted, -removeCount);
+            const { oldRange, newRange } = this._moveCriteria(unitId, subUnitId, shifted, -removeCount);
             newRangeCriteria = newRange;
             redos.push(...oldRange.redos);
             undos.unshift(...oldRange.undos);
@@ -333,13 +342,15 @@ export class SheetsFilterController extends Disposable {
             return {
                 undos: [{ id: SetSheetsFilterRangeMutation.id, params: { range: filterRange, unitId, subUnitId } }],
                 redos: [{
-                    id: SetSheetsFilterRangeMutation.id, params: {
+                    id: SetSheetsFilterRangeMutation.id,
+                    params: {
                         range: {
                             ...filterRange,
                             startRow: startRow - (removeEndRow - removeStartRow + 1),
                             endRow: endRow - (removeEndRow - removeStartRow + 1),
                         },
-                        unitId, subUnitId,
+                        unitId,
+                        subUnitId,
                     },
                 }],
             };
@@ -688,12 +699,14 @@ export class SheetsFilterController extends Disposable {
             handler: (filtered, rowLocation) => {
                 if (filtered) return true;
                 return this._sheetsFilterService.getFilterModel(
-                    rowLocation.unitId, rowLocation.subUnitId)?.isRowFiltered(rowLocation.row) ?? false;
+                    rowLocation.unitId,
+                    rowLocation.subUnitId
+                )?.isRowFiltered(rowLocation.row) ?? false;
             },
         }));
     }
 
-    private moveCriteria(unitId: string, subUnitId: string, target: [number, FilterColumn][], step: number) {
+    private _moveCriteria(unitId: string, subUnitId: string, target: [number, FilterColumn][], step: number) {
         const defaultSetCriteriaMutationParams: ISetSheetsFilterCriteriaMutationParams = {
             unitId,
             subUnitId,

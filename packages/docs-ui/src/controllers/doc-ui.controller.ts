@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 import type { IUniverDocsUIConfig } from './config.schema';
 import {
-    connectInjector,
     Disposable,
     ICommandService,
     IConfigService,
@@ -27,8 +26,8 @@ import {
 } from '@univerjs/core';
 
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { TodoList } from '@univerjs/icons';
-import { BuiltInUIPart, ComponentManager, ILayoutService, IMenuManagerService, IShortcutService, IUIPartsService } from '@univerjs/ui';
+import { CutSingle, DeleteSingle, TodoList } from '@univerjs/icons';
+import { BuiltInUIPart, ComponentManager, connectInjector, ILayoutService, IMenuManagerService, IShortcutService, IUIPartsService } from '@univerjs/ui';
 import { CoreHeaderFooterCommand, OpenHeaderFooterPanelCommand } from '../commands/commands/doc-header-footer.command';
 import { SidebarDocHeaderFooterPanelOperation } from '../commands/operations/doc-header-footer-panel.operation';
 import { COLOR_PICKER_COMPONENT, ColorPicker } from '../components/color-picker';
@@ -40,6 +39,7 @@ import {
 } from '../components/font-family';
 import { FONT_SIZE_COMPONENT, FontSize } from '../components/font-size';
 import { BULLET_LIST_TYPE_COMPONENT, BulletListTypePicker, ORDER_LIST_TYPE_COMPONENT, OrderListTypePicker } from '../components/list-type-picker';
+import { ParagraphMenu } from '../components/paragraph-menu';
 import { DocSelectionRenderService } from '../services/selection/doc-selection-render.service';
 import { TabShortCut } from '../shortcuts/format.shortcut';
 import {
@@ -57,6 +57,7 @@ import {
     UnderlineShortCut,
 } from '../shortcuts/toolbar.shortcut';
 import { DocFooter } from '../views/doc-footer';
+import { DocSideMenu } from '../views/side-menu';
 import { DOCS_UI_PLUGIN_CONFIG_KEY } from './config.schema';
 import { menuSchema } from './menu.schema';
 
@@ -85,16 +86,20 @@ export class DocUIController extends Disposable {
         this.disposeWithMe(componentManager.register(FONT_SIZE_COMPONENT, FontSize));
         this.disposeWithMe(componentManager.register(BULLET_LIST_TYPE_COMPONENT, BulletListTypePicker));
         this.disposeWithMe(componentManager.register(ORDER_LIST_TYPE_COMPONENT, OrderListTypePicker));
-
         this.disposeWithMe(componentManager.register('TodoList', TodoList));
+        this.disposeWithMe(componentManager.register('doc.paragraph.menu', ParagraphMenu));
+        this.disposeWithMe(componentManager.register('CutSingle', CutSingle));
+        this.disposeWithMe(componentManager.register('DeleteSingle', DeleteSingle));
     }
 
-    // TODO: @zhangwei, why add workbook to docs-ui?
     private _initUiParts() {
-        const workbook = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SHEET);
         const config = this._configService.getConfig<IUniverDocsUIConfig>(DOCS_UI_PLUGIN_CONFIG_KEY);
-        if (config?.layout?.docContainerConfig?.footer && !workbook) {
+        if (config?.layout?.docContainerConfig?.footer) {
             this.disposeWithMe(this._uiPartsService.registerComponent(BuiltInUIPart.FOOTER, () => connectInjector(DocFooter, this._injector)));
+        }
+
+        if (config?.layout?.docContainerConfig?.sideMenu ?? true) {
+            this.disposeWithMe(this._uiPartsService.registerComponent(BuiltInUIPart.CONTENT, () => connectInjector(DocSideMenu, this._injector)));
         }
     }
 

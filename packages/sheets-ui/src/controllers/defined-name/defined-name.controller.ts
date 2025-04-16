@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,7 +67,10 @@ export class SheetsDefinedNameController extends Disposable {
 
             this._selectionManagerService.setSelections(selections);
 
-            this._cmdSrv.executeCommand(ScrollToCellOperation.id, selections[0].range);
+            this._cmdSrv.executeCommand(ScrollToCellOperation.id, {
+                unitId,
+                range: selections[0].range,
+            });
         }));
     }
 

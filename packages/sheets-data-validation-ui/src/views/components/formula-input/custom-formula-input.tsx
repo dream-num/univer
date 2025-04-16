@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,19 +15,20 @@
  */
 
 import type { IFormulaInputProps } from '@univerjs/data-validation';
+import type { IFormulaEditorRef } from '@univerjs/sheets-formula-ui';
 import { FormulaEditor } from '@univerjs/sheets-formula-ui';
 import { useSidebarClick } from '@univerjs/ui';
-import React, { useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 
 export function CustomFormulaInput(props: IFormulaInputProps) {
     const { unitId, subUnitId, value, onChange, showError, validResult } = props;
     const formula1Res = showError ? validResult?.formula1 : undefined;
-    const formulaEditorActionsRef = useRef<Parameters<typeof FormulaEditor>[0]['actions']>({});
+    const formulaEditorRef = useRef<IFormulaEditorRef>(null);
     const [isFocusFormulaEditor, isFocusFormulaEditorSet] = useState(false);
 
     useSidebarClick((e: MouseEvent) => {
-        const handleOutClick = formulaEditorActionsRef.current?.handleOutClick;
-        handleOutClick && handleOutClick(e, () => isFocusFormulaEditorSet(false));
+        const isOutSide = formulaEditorRef.current?.isClickOutSide(e);
+        isOutSide && isFocusFormulaEditorSet(false);
     });
 
     return (
@@ -49,8 +50,8 @@ export function CustomFormulaInput(props: IFormulaInputProps) {
             }}
             errorText={formula1Res}
             onFocus={() => isFocusFormulaEditorSet(true)}
-            actions={formulaEditorActionsRef.current}
             isSupportAcrossSheet
+            ref={formulaEditorRef}
         />
     );
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,8 @@
  */
 
 import type { IPosition, Serializable } from '@univerjs/core';
-import { BehaviorSubject, type Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 export interface IFloatDomLayout extends IPosition {
     rotate: number;
@@ -25,6 +26,7 @@ export interface IFloatDomLayout extends IPosition {
         left: boolean;
         top: boolean;
     };
+    opacity?: number;
 }
 
 export interface IFloatDom {

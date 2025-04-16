@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -124,16 +124,28 @@ export class ListSourceModel extends SourceModelBase {
         }
 
         if (node.isDate === true) {
+            const formatter = node.formatter || 'yyyy-m-d am/pm h:mm';
             return {
                 v: transformDate(data),
                 s: {
                     n: {
-                        pattern: 'yyyy-m-d am/pm h:mm',
+                        pattern: formatter,
                     },
                 },
                 t: CellValueType.NUMBER,
             };
         } else {
+            if (node.formatter) {
+                return {
+                    v: data,
+                    s: {
+                        n: {
+                            pattern: node.formatter,
+                        },
+                    },
+                };
+            }
+
             return {
                 t: typeof data === 'number' ? CellValueType.NUMBER : CellValueType.STRING,
                 v: data,
@@ -177,16 +189,27 @@ export class ObjectSourceModel extends SourceModelBase {
             }
         }
         if (node.isDate === true) {
+            const formatter = node.formatter || 'yyyy-m-d am/pm h:mm';
             return {
                 v: transformDate(data),
                 s: {
                     n: {
-                        pattern: 'yyyy-m-d am/pm h:mm',
+                        pattern: formatter,
                     },
                 },
                 t: CellValueType.NUMBER,
             };
         } else {
+            if (node.formatter) {
+                return {
+                    v: data,
+                    s: {
+                        n: {
+                            pattern: node.formatter,
+                        },
+                    },
+                };
+            }
             return {
                 v: data,
                 t: typeof data === 'number' ? CellValueType.NUMBER : CellValueType.STRING,

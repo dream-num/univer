@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 import type { Meta } from '@storybook/react';
 import { Button } from '@univerjs/design';
-import React from 'react';
 
 import { Notification, notification } from './Notification';
 
@@ -37,7 +36,7 @@ export const Playground = {
         <>
             <Notification />
             <Button
-                type="primary"
+                variant="primary"
                 onClick={() =>
                     notification.show({
                         type: 'success',
@@ -54,7 +53,7 @@ export const Playground = {
                 Notification Info
             </Button>
             <Button
-                type="primary"
+                variant="primary"
                 onClick={() =>
                     notification.show({
                         type: 'warning',
@@ -65,7 +64,7 @@ export const Playground = {
                 Notification Warning
             </Button>
             <Button
-                type="primary"
+                variant="primary"
                 onClick={() =>
                     notification.show({ type: 'error', title: 'Notification Error', content: 'Notification content' })}
             >

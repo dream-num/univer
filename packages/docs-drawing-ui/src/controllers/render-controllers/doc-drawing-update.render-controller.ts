@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ import type { IDocDrawing } from '@univerjs/docs-drawing';
 import type { IImageIoServiceParam } from '@univerjs/drawing';
 import type { Documents, Image, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import type { IInsertDrawingCommandParams } from '../../commands/commands/interfaces';
+import type { ISetDrawingArrangeCommandParams } from '../../commands/commands/set-drawing-arrange.command';
 import { BooleanNumber, Disposable, DrawingTypeEnum, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, Inject, LocaleService, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, WrapTextType } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
 import { DocSelectionManagerService, DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
@@ -31,7 +32,7 @@ import { ILocalFileService, IMessageService } from '@univerjs/ui';
 import { debounceTime } from 'rxjs';
 import { GroupDocDrawingCommand } from '../../commands/commands/group-doc-drawing.command';
 import { InsertDocDrawingCommand } from '../../commands/commands/insert-doc-drawing.command';
-import { type ISetDrawingArrangeCommandParams, SetDocDrawingArrangeCommand } from '../../commands/commands/set-drawing-arrange.command';
+import { SetDocDrawingArrangeCommand } from '../../commands/commands/set-drawing-arrange.command';
 import { UngroupDocDrawingCommand } from '../../commands/commands/ungroup-doc-drawing.command';
 import { DocRefreshDrawingsService } from '../../services/doc-refresh-drawings.service';
 
@@ -188,7 +189,8 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
     }
 
     private _getImagePosition(
-        imageWidth: number, imageHeight: number
+        imageWidth: number,
+        imageHeight: number
     ): Nullable<IDocDrawingPosition> {
         const activeTextRange = this._docSelectionRenderService.getActiveTextRange();
         // TODO: NO need to get the cursor position, because the insert image is inline.
@@ -349,13 +351,22 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
             if (drawingShapes.length) {
                 for (const shape of drawingShapes) {
                     scene.detachTransformerFrom(shape);
-                    (shape as Image).setOpacity(0.5);
+                    try {
+                        (shape as Image).setOpacity(0.5);
+                    } catch (e) {
+                    }
                     if (
                         (isEditBody && drawing.isMultiTransform !== BooleanNumber.TRUE)
                         || (!isEditBody && drawing.isMultiTransform === BooleanNumber.TRUE)
                     ) {
-                        scene.attachTransformerTo(shape);
-                        (shape as Image).setOpacity(1);
+                        if (drawing.allowTransform !== false) {
+                            scene.attachTransformerTo(shape);
+                        }
+
+                        try {
+                            (shape as Image).setOpacity(1);
+                        } catch (e) {
+                        }
                     }
                 }
             }

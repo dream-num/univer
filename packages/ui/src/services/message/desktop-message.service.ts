@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,9 @@
 
 import type { IMessageProps } from '@univerjs/design';
 import type { IMessageService } from './message.service';
-import { connectInjector, Disposable, Inject, Injector } from '@univerjs/core';
+import { Disposable, Inject, Injector } from '@univerjs/core';
 import { message, Messager, removeMessage } from '@univerjs/design';
-
+import { connectInjector } from '../../utils/di';
 import { BuiltInUIPart, IUIPartsService } from '../parts/parts.service';
 
 export class DesktopMessageService extends Disposable implements IMessageService {

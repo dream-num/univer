@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,6 @@
  */
 
 import { hashAlgorithm, LRUMap } from '@univerjs/core';
-
-// export const CACHE_FORMULA_AST = new LRUMap<string, AstRootNode>(100000);
 
 export class FormulaAstLRU<T> {
     private _cache: LRUMap<string, T>;
@@ -37,6 +35,14 @@ export class FormulaAstLRU<T> {
 
     clear() {
         this._cache.clear();
+    }
+
+    delete(formulaString: string) {
+        this._cache.delete(this._hash(formulaString));
+    }
+
+    forEach(callbackfn: (value: T, key: string, map: LRUMap<string, T>) => void, thisArg?: any) {
+        this._cache.forEach(callbackfn, thisArg);
     }
 
     private _hash(formulaString: string) {

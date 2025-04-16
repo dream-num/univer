@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -308,6 +308,20 @@ export default {
         functionParameter: {
             number1: { name: 'nombre1', detail: 'premier' },
             number2: { name: 'nombre2', detail: 'second' },
+        },
+    },
+    NUMBERSTRING: {
+        description: 'Convertir des nombres en chaînes chinoises',
+        abstract: 'Convertir des nombres en chaînes chinoises',
+        links: [
+            {
+                title: 'guide',
+                url: 'https://www.wps.cn/learning/course/detail/id/340.html?chan=pc_kdocs_function',
+            },
+        ],
+        functionParameter: {
+            number: { name: 'numérique', detail: 'La valeur numérique convertie en chaîne chinoise.' },
+            type: { name: 'type', detail: 'Le type du résultat renvoyé. \n1. Minuscules chinoises \n2. Mettre les caractères chinois en majuscules \n3. Lire et écrire des caractères chinois' },
         },
     },
     NUMBERVALUE: {

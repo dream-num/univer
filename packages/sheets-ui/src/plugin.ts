@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,10 +43,12 @@ import { HoverRenderController } from './controllers/hover-render.controller';
 import { MarkSelectionRenderController } from './controllers/mark-selection.controller';
 import { MoveRangeRenderController } from './controllers/move-range.controller';
 import { SheetPermissionCheckUIController } from './controllers/permission/sheet-permission-check-ui.controller';
+import { SheetPermissionInitUIController } from './controllers/permission/sheet-permission-init-ui.controller';
 import { SheetPermissionInterceptorCanvasRenderController } from './controllers/permission/sheet-permission-interceptor-canvas-render.controller';
 import { SheetPermissionInterceptorClipboardController } from './controllers/permission/sheet-permission-interceptor-clipboard.controller';
 import { SheetPermissionInterceptorFormulaRenderController } from './controllers/permission/sheet-permission-interceptor-formula-render.controller';
 import { SheetPermissionRenderController, SheetPermissionRenderManagerController, WorksheetProtectionRenderController } from './controllers/permission/sheet-permission-render.controller';
+import { ClipboardRenderController } from './controllers/render-controllers/clipboard.render-controller';
 import { SheetContextMenuRenderController } from './controllers/render-controllers/contextmenu.render-controller';
 import { EditorBridgeRenderController } from './controllers/render-controllers/editor-bridge.render-controller';
 import { FormatPainterRenderController } from './controllers/render-controllers/format-painter.render-controller';
@@ -57,6 +59,7 @@ import { HeaderResizeRenderController } from './controllers/render-controllers/h
 import { HeaderUnhideRenderController } from './controllers/render-controllers/header-unhide.render-controller';
 import { SheetsScrollRenderController } from './controllers/render-controllers/scroll.render-controller';
 import { SheetRenderController } from './controllers/render-controllers/sheet.render-controller';
+import { SheetSkeletonRenderController } from './controllers/render-controllers/skeleton.render-controller';
 import { SheetsZoomRenderController } from './controllers/render-controllers/zoom.render-controller';
 import { SheetUIController } from './controllers/sheet-ui.controller';
 import { StatusBarController } from './controllers/status-bar.controller';
@@ -114,6 +117,7 @@ export class UniverSheetsUIPlugin extends Plugin {
         if (menu) {
             this._configService.setConfig('menu', menu, { merge: true });
         }
+
         this._configService.setConfig(SHEETS_UI_PLUGIN_CONFIG_KEY, rest);
     }
 
@@ -137,6 +141,7 @@ export class UniverSheetsUIPlugin extends Plugin {
             [CellAlertManagerService],
             [SelectAllService],
             [SheetCellDropdownManagerService],
+            [SheetCellEditorResizeService],
 
             // controllers
             [ActiveWorksheetController],
@@ -151,18 +156,16 @@ export class UniverSheetsUIPlugin extends Plugin {
             [SheetsDefinedNameController],
             [EditorDataSyncController],
             [SheetCheckboxController],
+            [EditingRenderController],
 
             // permission
             [SheetPermissionPanelModel],
+            [SheetPermissionInitUIController],
             [SheetPermissionUserManagerService],
             [SheetPermissionInterceptorClipboardController],
             [SheetPermissionCheckUIController],
             [SheetPermissionRenderManagerController],
         ] as Dependency[], this._config.override));
-
-        touchDependencies(this._injector, [
-            [SheetPermissionPanelModel],
-        ]);
     }
 
     override onReady(): void {
@@ -181,6 +184,7 @@ export class UniverSheetsUIPlugin extends Plugin {
             [SheetsRenderService],
             [ActiveWorksheetController],
             [SheetPermissionCheckUIController],
+            [SheetPermissionInitUIController],
         ]);
     }
 
@@ -189,6 +193,7 @@ export class UniverSheetsUIPlugin extends Plugin {
 
         touchDependencies(this._injector, [
             [SheetPermissionRenderManagerController],
+            [SheetPermissionPanelModel],
             [SheetClipboardController],
             [FormulaEditorController],
             [SheetsDefinedNameController],
@@ -197,6 +202,7 @@ export class UniverSheetsUIPlugin extends Plugin {
             [AutoWidthController],
             [EditorDataSyncController],
             [SheetCheckboxController],
+            [EditingRenderController],
         ]);
     }
 
@@ -211,6 +217,7 @@ export class UniverSheetsUIPlugin extends Plugin {
     private _registerRenderBasics(): void {
         ([
             [SheetSkeletonManagerService],
+            [SheetSkeletonRenderController],
             [SheetRenderController],
             [ISheetSelectionRenderService, { useClass: SheetSelectionRenderService }],
         ] as Dependency[]).forEach((m) => {
@@ -230,9 +237,9 @@ export class UniverSheetsUIPlugin extends Plugin {
             [SheetsScrollRenderController],
             [HeaderFreezeRenderController],
             [SheetsZoomRenderController],
-            [SheetCellEditorResizeService],
 
             [FormatPainterRenderController],
+            [ClipboardRenderController],
             [CellAlertRenderController],
             [ForceStringAlertRenderController],
             [MarkSelectionRenderController],
@@ -245,7 +252,6 @@ export class UniverSheetsUIPlugin extends Plugin {
 
             // editor
             [EditorBridgeRenderController],
-            [EditingRenderController],
 
             // permission
             [SheetPermissionInterceptorCanvasRenderController],

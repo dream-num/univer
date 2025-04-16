@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -307,7 +307,6 @@ export interface IReplaceSelectionCommandParams {
     textRanges?: ITextRangeWithStyle[];
 }
 
-// TODO: implement
 export const ReplaceSelectionCommand: ICommand<IReplaceSelectionCommandParams> = {
     id: 'doc.command.replace-selection',
     type: CommandType.COMMAND,
@@ -315,6 +314,7 @@ export const ReplaceSelectionCommand: ICommand<IReplaceSelectionCommandParams> =
         if (!params) {
             return false;
         }
+        const commandService = accessor.get(ICommandService);
         const { unitId, body: insertBody, textRanges } = params;
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const docDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId);
@@ -344,8 +344,7 @@ export const ReplaceSelectionCommand: ICommand<IReplaceSelectionCommandParams> =
         // delete
         textX.push(...BuildTextUtils.selection.delete([selection], body, 0, insertBody));
         doMutation.params.actions = jsonX.editOp(textX.serialize());
-
-        return true;
+        return commandService.syncExecuteCommand(doMutation.id, doMutation.params);
     },
 };
 

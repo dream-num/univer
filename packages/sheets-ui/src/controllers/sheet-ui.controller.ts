@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,9 @@
  */
 
 import type { IUniverSheetsUIConfig } from './config.schema';
-import { connectInjector, Disposable, ICommandService, IConfigService, Inject, Injector, UniverInstanceType } from '@univerjs/core';
+import { Disposable, ICommandService, IConfigService, Inject, Injector, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { getCurrentTypeOfRenderer, IRenderManagerService } from '@univerjs/engine-render';
 
 import { HideGridlines } from '@univerjs/icons';
 import {
@@ -28,7 +28,7 @@ import {
     SetStrikeThroughCommand,
     SetUnderlineCommand,
 } from '@univerjs/sheets';
-import { BuiltInUIPart, ComponentManager, ILayoutService, IMenuManagerService, IShortcutService, IUIPartsService } from '@univerjs/ui';
+import { BuiltInUIPart, ComponentManager, connectInjector, ILayoutService, IMenuManagerService, IShortcutService, IUIPartsService } from '@univerjs/ui';
 import {
     AddWorksheetMergeAllCommand,
     AddWorksheetMergeCommand,
@@ -112,6 +112,7 @@ import { SHEETS_UI_PLUGIN_CONFIG_KEY } from './config.schema';
 import { menuSchema } from './menu.schema';
 import {
     EditorBreakLineShortcut,
+    EditorCursorCtrlEnterShortcut,
     EditorCursorEnterShortcut,
     EditorCursorEscShortcut,
     EditorCursorTabShortcut,
@@ -151,7 +152,7 @@ import {
     SetStrikeThroughShortcutItem,
     SetUnderlineShortcutItem,
 } from './shortcuts/style.shortcut';
-import { ClearSelectionValueShortcutItem } from './shortcuts/value.shortcut';
+import { ClearSelectionValueShortcutItem, ClearSelectionValueShortcutItemMac } from './shortcuts/value.shortcut';
 import {
     PreventDefaultResetZoomShortcutItem,
     PreventDefaultZoomInShortcutItem,
@@ -329,6 +330,7 @@ export class SheetUIController extends Disposable {
 
             // cell content editing shortcuts
             ClearSelectionValueShortcutItem,
+            ClearSelectionValueShortcutItemMac,
             ...generateArrowSelectionShortCutItem(),
             EditorCursorEnterShortcut,
             StartEditWithF2Shortcut,
@@ -337,6 +339,7 @@ export class SheetUIController extends Disposable {
             EditorDeleteLeftShortcut,
             EditorDeleteLeftShortcutInActive,
             EditorCursorEscShortcut,
+            EditorCursorCtrlEnterShortcut,
 
             // operation shortcuts
             SetRowHiddenShortcutItem,
@@ -363,8 +366,8 @@ export class SheetUIController extends Disposable {
             this._layoutService.registerFocusHandler(UniverInstanceType.UNIVER_SHEET, (_unitId: string) => {
                 // DEBT: `_unitId` is not used hence we cannot support Univer mode now
                 const renderManagerService = this._injector.get(IRenderManagerService);
-
-                const currentEditorRender = renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_DOC);
+                const instanceService = this._injector.get(IUniverInstanceService);
+                const currentEditorRender = getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_DOC, instanceService, renderManagerService);
                 const docSelectionRenderService = currentEditorRender?.with(DocSelectionRenderService);
 
                 docSelectionRenderService?.focus();

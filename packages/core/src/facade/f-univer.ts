@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,31 +14,28 @@
  * limitations under the License.
  */
 
-import type { IDisposable } from '../common/di';
-import type { DocumentDataModel } from '../docs';
-import type { CommandListener, IExecutionOptions } from '../services/command/command.service';
-import type { LifecycleStages } from '../services/lifecycle/lifecycle';
-import type { IDocumentData, IParagraphStyle, ITextDecoration, ITextStyle } from '../types/interfaces';
+import type { CommandListener, DocumentDataModel, IDisposable, IDocumentData, IExecutionOptions, IParagraphStyle, ITextDecoration, ITextStyle, LifecycleStages } from '@univerjs/core';
+import type { Subscription } from 'rxjs';
 import type { ICommandEvent, IEventParamConfig } from './f-event';
-import { Inject, Injector } from '../common/di';
-import { CanceledError } from '../common/error';
-import { Registry } from '../common/registry';
-import { UniverInstanceType } from '../common/unit';
-import { ParagraphStyleBuilder, ParagraphStyleValue, RichTextBuilder, RichTextValue, TextDecorationBuilder, TextStyleBuilder, TextStyleValue } from '../docs/data-model/rich-text-builder';
-import { ICommandService } from '../services/command/command.service';
-import { IUniverInstanceService } from '../services/instance/instance.service';
-import { LifecycleService } from '../services/lifecycle/lifecycle.service';
-import { RedoCommand, UndoCommand } from '../services/undoredo/undoredo.service';
-import { ColorBuilder, toDisposable } from '../shared';
-import { Univer } from '../univer';
-import { FBaseInitialable } from './f-base';
+import { CanceledError, ColorBuilder, Disposable, ICommandService, Inject, Injector, IUniverInstanceService, LifecycleService, ParagraphStyleBuilder, ParagraphStyleValue, RedoCommand, RichTextBuilder, RichTextValue, TextDecorationBuilder, TextStyleBuilder, TextStyleValue, toDisposable, UndoCommand, Univer, UniverInstanceType } from '@univerjs/core';
 import { FBlob } from './f-blob';
 import { FDoc } from './f-doc';
 import { FEnum } from './f-enum';
 import { FEventName } from './f-event';
+import { FEventRegistry } from './f-event-registry';
 import { FHooks } from './f-hooks';
 import { FUserManager } from './f-usermanager';
 import { FUtil } from './f-util';
+
+/**
+ * @ignore
+ */
+const InitializerSymbol = Symbol('initializers');
+
+/**
+ * @ignore
+ */
+type Initializers = Array<(injector: Injector) => void>;
 
 /**
  * The root Facade API object to interact with Univer. Please use `newAPI` static method
@@ -46,151 +43,258 @@ import { FUtil } from './f-util';
  *
  * @hideconstructor
  */
-export class FUniver extends FBaseInitialable {
+export class FUniver extends Disposable {
     /**
      * Create an FUniver instance, if the injector is not provided, it will create a new Univer instance.
      * @static
      * @param {Univer | Injector} wrapped - The Univer instance or injector instance.
      * @returns {FUniver} - The FUniver instance.
+     *
+     * @example
+     * ```ts
+     * const univerAPI = FUniver.newAPI(univer);
+     * ```
      */
     static newAPI(wrapped: Univer | Injector): FUniver {
         const injector = wrapped instanceof Univer ? wrapped.__getInjector() : wrapped;
-        return injector.createInstance(FUniver);
+        const instance = injector.createInstance(FUniver);
+
+        /**
+         * Uses Proxy to intercept method calls and check if the method exists.
+         */
+        return new Proxy(instance, {
+            get(target, prop): FUniver {
+                if (prop in Object.prototype ||
+                    typeof prop === 'symbol' ||
+                    ['toString', 'valueOf', 'toJSON', 'constructor', 'hasOwnProperty', 'isPrototypeOf', 'propertyIsEnumerable', 'inspect', 'then', 'catch', 'finally'].includes(String(prop))) {
+                    return Reflect.get(target, prop);
+                }
+
+                if (prop in target) {
+                    return Reflect.get(target, prop);
+                } else {
+                    throw new TypeError(
+                        `[FUniver]: The method '${String(prop)}' does not exist on the FUniver instance. ` +
+                        'This may occur if you haven\'t imported the required facade package or if you\'re calling an incorrect method. ' +
+                        'Please verify the method name and ensure all necessary modules are imported.'
+                    );
+                }
+            },
+        });
     }
 
-    protected _eventRegistry: Map<string, Registry<(param: any) => void>> = new Map();
+    declare private [InitializerSymbol]: Initializers | undefined;
 
-    protected _ensureEventRegistry(event: string) {
-        if (!this._eventRegistry.has(event)) {
-            this._eventRegistry.set(event, new Registry());
-        }
+    /**
+     * @ignore
+     */
+    _initialize(injector: Injector): void { }
 
-        return this._eventRegistry.get(event)!;
+    /**
+     * @ignore
+     */
+    static extend(source: any): void {
+        Object.getOwnPropertyNames(source.prototype).forEach((name) => {
+            if (name === '_initialize') {
+                let initializers = this.prototype[InitializerSymbol];
+                if (!initializers) {
+                    initializers = [];
+                    this.prototype[InitializerSymbol] = initializers;
+                }
+
+                initializers.push(source.prototype._initialize);
+            } else if (name !== 'constructor') {
+                // @ts-ignore
+                this.prototype[name] = source.prototype[name];
+            }
+        });
+
+        Object.getOwnPropertyNames(source).forEach((name) => {
+            if (name !== 'prototype' && name !== 'name' && name !== 'length') {
+                // @ts-ignore
+                this[name] = source[name];
+            }
+        });
     }
+
+    protected _eventRegistry = new FEventRegistry();
+
+    protected registerEventHandler = (event: string, handler: () => IDisposable | Subscription): IDisposable => {
+        return this._eventRegistry.registerEventHandler(event, handler);
+    };
 
     constructor(
-        @Inject(Injector) protected override readonly _injector: Injector,
+        @Inject(Injector) protected readonly _injector: Injector,
         @ICommandService protected readonly _commandService: ICommandService,
         @IUniverInstanceService protected readonly _univerInstanceService: IUniverInstanceService,
         @Inject(LifecycleService) protected readonly _lifecycleService: LifecycleService
     ) {
-        super(_injector);
+        super();
 
-        this.disposeWithMe(
-            this._lifecycleService.lifecycle$.subscribe((stage) => {
-                this.fireEvent(this.Event.LifeCycleChanged, { stage });
-            })
-        );
-
-        this.disposeWithMe(
-            this._commandService.beforeCommandExecuted((commandInfo) => {
-                if (
-                    !this._eventRegistry.get(this.Event.BeforeRedo) &&
-                    !this._eventRegistry.get(this.Event.BeforeUndo) &&
-                    !this._eventRegistry.get(this.Event.BeforeCommandExecute)
-                ) {
-                    return;
-                }
-                const { id, type: propType, params } = commandInfo;
-                const type = propType!;
-                const eventParams: ICommandEvent = { id, type, params };
-                switch (commandInfo.id) {
-                    case RedoCommand.id:
-                        this.fireEvent(this.Event.BeforeRedo, eventParams);
-                        break;
-                    case UndoCommand.id:
-                        this.fireEvent(this.Event.BeforeUndo, eventParams);
-                        break;
-                    default:
-                        this.fireEvent(this.Event.BeforeCommandExecute, eventParams);
-                        break;
-                }
-
-                if (eventParams.cancel) {
-                    throw new CanceledError();
-                }
-            })
-        );
-
-        this.disposeWithMe(
-            this._commandService.onCommandExecuted((commandInfo) => {
-                if (
-                    !this._eventRegistry.get(this.Event.Redo) &&
-                    !this._eventRegistry.get(this.Event.Undo) &&
-                    !this._eventRegistry.get(this.Event.CommandExecuted)
-                ) {
-                    return;
-                }
-                const { id, type: propType, params } = commandInfo;
-                const type = propType!;
-                const eventParams: ICommandEvent = { id, type, params };
-                switch (commandInfo.id) {
-                    case RedoCommand.id:
-                        this.fireEvent(this.Event.Redo, eventParams);
-                        break;
-                    case UndoCommand.id:
-                        this.fireEvent(this.Event.Undo, eventParams);
-                        break;
-                    default:
-                        this.fireEvent(this.Event.CommandExecuted, eventParams);
-                        break;
-                }
-            })
+        this.registerEventHandler(
+            this.Event.LifeCycleChanged,
+            () =>
+                toDisposable(
+                    this._lifecycleService.lifecycle$.subscribe((stage) => {
+                        this.fireEvent(this.Event.LifeCycleChanged, { stage });
+                    })
+                )
         );
 
         this._initUnitEvent(this._injector);
+        this._initBeforeCommandEvent(this._injector);
+        this._initCommandEvent(this._injector);
         this._injector.onDispose(() => {
             this.dispose();
         });
+
+        const initializers = Object.getPrototypeOf(this)[InitializerSymbol];
+        if (initializers) {
+            const self = this;
+            initializers.forEach(function (fn: (_injector: Injector) => void) {
+                fn.apply(self, [_injector]);
+            });
+        }
+    }
+
+    private _initCommandEvent(injector: Injector): void {
+        const commandService = injector.get(ICommandService);
+        this.registerEventHandler(
+            this.Event.Redo,
+            () => commandService.onCommandExecuted((commandInfo) => {
+                const { id, type: propType, params } = commandInfo;
+                if (commandInfo.id === RedoCommand.id) {
+                    const type = propType!;
+                    const eventParams: ICommandEvent = { id, type, params };
+                    this.fireEvent(this.Event.Redo, eventParams);
+                }
+            })
+        );
+
+        this.registerEventHandler(
+            this.Event.Undo,
+            () => commandService.onCommandExecuted((commandInfo) => {
+                const { id, type: propType, params } = commandInfo;
+                if (commandInfo.id === UndoCommand.id) {
+                    const type = propType!;
+                    const eventParams: ICommandEvent = { id, type, params };
+                    this.fireEvent(this.Event.Undo, eventParams);
+                }
+            })
+        );
+
+        this.registerEventHandler(
+            this.Event.CommandExecuted,
+            () => commandService.onCommandExecuted((commandInfo, options) => {
+                const { id, type: propType, params } = commandInfo;
+                if (commandInfo.id !== RedoCommand.id && commandInfo.id !== UndoCommand.id) {
+                    const type = propType!;
+                    const eventParams: ICommandEvent = { id, type, params, options };
+                    this.fireEvent(this.Event.CommandExecuted, eventParams);
+                }
+            })
+        );
+    }
+
+    private _initBeforeCommandEvent(injector: Injector): void {
+        const commandService = injector.get(ICommandService);
+
+        this.registerEventHandler(
+            this.Event.BeforeRedo,
+            () => commandService.beforeCommandExecuted((commandInfo) => {
+                const { id, type: propType, params } = commandInfo;
+                if (commandInfo.id === RedoCommand.id) {
+                    const type = propType!;
+                    const eventParams: ICommandEvent = { id, type, params };
+                    this.fireEvent(this.Event.BeforeRedo, eventParams);
+
+                    if (eventParams.cancel) {
+                        throw new CanceledError();
+                    }
+                }
+            })
+        );
+
+        this.registerEventHandler(
+            this.Event.BeforeUndo,
+            () => commandService.beforeCommandExecuted((commandInfo) => {
+                const { id, type: propType, params } = commandInfo;
+                if (commandInfo.id === UndoCommand.id) {
+                    const type = propType!;
+                    const eventParams: ICommandEvent = { id, type, params };
+                    this.fireEvent(this.Event.BeforeUndo, eventParams);
+
+                    if (eventParams.cancel) {
+                        throw new CanceledError();
+                    }
+                }
+            })
+        );
+
+        this.registerEventHandler(
+            this.Event.BeforeCommandExecute,
+            () => commandService.beforeCommandExecuted((commandInfo, options) => {
+                const { id, type: propType, params } = commandInfo;
+                if (commandInfo.id !== RedoCommand.id && commandInfo.id !== UndoCommand.id) {
+                    const type = propType!;
+                    const eventParams: ICommandEvent = { id, type, params, options };
+                    this.fireEvent(this.Event.BeforeCommandExecute, eventParams);
+
+                    if (eventParams.cancel) {
+                        throw new CanceledError();
+                    }
+                }
+            })
+        );
     }
 
     private _initUnitEvent(injector: Injector): void {
         const univerInstanceService = injector.get(IUniverInstanceService);
-        this.disposeWithMe(
-            univerInstanceService.unitDisposed$.subscribe((unit) => {
-                if (!this._eventRegistry.get(this.Event.DocDisposed)) return;
 
+        this.registerEventHandler(
+            this.Event.DocDisposed,
+            () => univerInstanceService.unitDisposed$.subscribe((unit) => {
                 if (unit.type === UniverInstanceType.UNIVER_DOC) {
-                    this.fireEvent(this.Event.DocDisposed,
-                        {
-                            unitId: unit.getUnitId(),
-                            unitType: unit.type,
-                            snapshot: unit.getSnapshot() as IDocumentData,
-
-                        }
-                    );
+                    this.fireEvent(this.Event.DocDisposed, {
+                        unitId: unit.getUnitId(),
+                        unitType: unit.type,
+                        snapshot: unit.getSnapshot() as IDocumentData,
+                    });
                 }
             })
         );
 
-        this.disposeWithMe(
-            univerInstanceService.unitAdded$.subscribe((unit) => {
-                if (!this._eventRegistry.get(this.Event.DocCreated)) return;
-
+        this.registerEventHandler(
+            this.Event.DocCreated,
+            () => univerInstanceService.unitAdded$.subscribe((unit) => {
                 if (unit.type === UniverInstanceType.UNIVER_DOC) {
                     const doc = unit as DocumentDataModel;
                     const docUnit = injector.createInstance(FDoc, doc);
-                    this.fireEvent(this.Event.DocCreated,
-                        {
-                            unitId: unit.getUnitId(),
-                            type: unit.type,
-                            doc: docUnit,
-                            unit: docUnit,
-                        }
-                    );
+                    this.fireEvent(this.Event.DocCreated, {
+                        unitId: unit.getUnitId(),
+                        type: unit.type,
+                        doc: docUnit,
+                        unit: docUnit,
+                    });
                 }
             })
         );
-    }
-
-    protected _eventListend(key: string) {
-        return this._eventRegistry.get(key);
     }
 
     /**
      * Dispose the UniverSheet by the `unitId`. The UniverSheet would be unload from the application.
      * @param unitId The unit id of the UniverSheet.
      * @returns Whether the Univer instance is disposed successfully.
+     *
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const unitId = fWorkbook?.getId();
+     *
+     * if (unitId) {
+     *   univerAPI.disposeUnit(unitId);
+     * }
+     * ```
      */
     disposeUnit(unitId: string): boolean {
         return this._univerInstanceService.disposeUnit(unitId);
@@ -199,6 +303,12 @@ export class FUniver extends FBaseInitialable {
     /**
      * Get the current lifecycle stage.
      * @returns {LifecycleStages} - The current lifecycle stage.
+     *
+     * @example
+     * ```ts
+     * const stage = univerAPI.getCurrentLifecycleStage();
+     * console.log(stage);
+     * ```
      */
     getCurrentLifecycleStage(): LifecycleStages {
         const lifecycleService = this._injector.get(LifecycleService);
@@ -208,6 +318,11 @@ export class FUniver extends FBaseInitialable {
     /**
      * Undo an editing on the currently focused document.
      * @returns {Promise<boolean>} undo result
+     *
+     * @example
+     * ```ts
+     * await univerAPI.undo();
+     * ```
      */
     undo(): Promise<boolean> {
         return this._commandService.executeCommand(UndoCommand.id);
@@ -216,6 +331,11 @@ export class FUniver extends FBaseInitialable {
     /**
      * Redo an editing on the currently focused document.
      * @returns {Promise<boolean>} redo result
+     *
+     * @example
+     * ```ts
+     * await univerAPI.redo();
+     * ```
      */
     redo(): Promise<boolean> {
         return this._commandService.executeCommand(RedoCommand.id);
@@ -223,7 +343,7 @@ export class FUniver extends FBaseInitialable {
 
     /**
      * Register a callback that will be triggered before invoking a command.
-     * @deprecated use `addEvent(univerAPI.event.BeforeCommandExecute, () => {})` instead.
+     * @deprecated use `univerAPI.addEvent(univerAPI.Event.BeforeCommandExecute, (event) => {})` instead.
      * @param {CommandListener} callback The callback.
      * @returns {IDisposable} The disposable instance.
      */
@@ -235,7 +355,7 @@ export class FUniver extends FBaseInitialable {
 
     /**
      * Register a callback that will be triggered when a command is invoked.
-     * @deprecated use `addEvent(univerAPI.event.CommandExecuted, () => {})` instead.
+     * @deprecated use `univerAPI.addEvent(univerAPI.Event.CommandExecuted, (event) => {})` instead.
      * @param {CommandListener} callback The callback.
      * @returns {IDisposable} The disposable instance.
      */
@@ -251,6 +371,14 @@ export class FUniver extends FBaseInitialable {
      * @param params Parameters of this execution.
      * @param options Options of this execution.
      * @returns The result of the execution. It is a boolean value by default which indicates the command is executed.
+     *
+     * @example
+     * ```ts
+     * univerAPI.executeCommand('sheet.command.set-range-values', {
+     *   value: { v: "Hello, Univer!" },
+     *   range: { startRow: 0, startColumn: 0, endRow: 0, endColumn: 0 }
+     * });
+     * ```
      */
     executeCommand<P extends object = object, R = boolean>(
         id: string,
@@ -266,6 +394,14 @@ export class FUniver extends FBaseInitialable {
      * @param params Parameters of this execution.
      * @param options Options of this execution.
      * @returns The result of the execution. It is a boolean value by default which indicates the command is executed.
+     *
+     * @example
+     * ```ts
+     * univerAPI.syncExecuteCommand('sheet.command.set-range-values', {
+     *   value: { v: "Hello, Univer!" },
+     *   range: { startRow: 0, startColumn: 0, endRow: 0, endColumn: 0 }
+     * });
+     * ```
      */
     syncExecuteCommand<P extends object = object, R = boolean>(
         id: string,
@@ -284,15 +420,15 @@ export class FUniver extends FBaseInitialable {
         return this._injector.createInstance(FHooks);
     }
 
-    get Enum() {
+    get Enum(): FEnum {
         return FEnum.get();
     }
 
-    get Event() {
+    get Event(): FEventName {
         return FEventName.get();
     }
 
-    get Util() {
+    get Util(): FUtil {
         return FUtil.get();
     }
 
@@ -303,14 +439,18 @@ export class FUniver extends FBaseInitialable {
      * @returns {Disposable} The Disposable instance, for remove the listener
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.event.UnitCreated, (params) => {
-     *   console.log('unit created', params);
+     * // Add life cycle changed event listener
+     * const disposable = univerAPI.addEvent(univerAPI.Event.LifeCycleChanged, (params) => {
+     *   const { stage } = params;
+     *   console.log('life cycle changed', params);
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
-    addEvent<T extends keyof IEventParamConfig>(event: T, callback: (params: IEventParamConfig[T]) => void) {
-        this._ensureEventRegistry(event).add(callback);
-        return toDisposable(() => this._ensureEventRegistry(event).delete(callback));
+    addEvent<T extends keyof IEventParamConfig>(event: T, callback: (params: IEventParamConfig[T]) => void): IDisposable {
+        if (!event || !callback) throw new Error('Cannot add empty event');
+        return this._eventRegistry.addEvent(event, callback);
     }
 
     /**
@@ -320,25 +460,11 @@ export class FUniver extends FBaseInitialable {
      * @returns {boolean} should cancel
      * @example
      * ```ts
-     * this.fireEvent(univerAPI.event.UnitCreated, params);
+     * this.fireEvent(univerAPI.Event.LifeCycleChanged, params);
      * ```
      */
-    protected fireEvent<T extends keyof IEventParamConfig>(event: T, params: IEventParamConfig[T]) {
-        this._eventRegistry.get(event)?.getData().forEach((callback) => {
-            callback(params);
-        });
-
-        return params.cancel;
-    }
-
-    /**
-     * Get the callback map corresponding to the event
-     * @param {keyof IEventParamConfig} event
-     * @returns {number} The number of callbacks
-     */
-    protected hasEventCallback(event: keyof IEventParamConfig): boolean {
-        const eventCallbackLens = this._eventRegistry.get(event)?.getData().length ?? 0;
-        return eventCallbackLens > 0;
+    protected fireEvent<T extends keyof IEventParamConfig>(event: T, params: IEventParamConfig[T]): boolean | undefined {
+        return this._eventRegistry.fireEvent(event, params);
     }
 
     getUserManager(): FUserManager {
@@ -375,7 +501,9 @@ export class FUniver extends FBaseInitialable {
      * @returns {RichTextBuilder} The new rich text instance
      * @example
      * ```ts
-     * const richText = univerAPI.newRichText();
+     * const richText = univerAPI.newRichText({ body: { dataStream: 'Hello World\r\n' } });
+     * const range = univerAPI.getActiveWorkbook().getActiveSheet().getRange('A1');
+     * range.setRichTextValueForCell(richText);
      * ```
      */
     newRichText(data?: IDocumentData): RichTextBuilder {
@@ -388,7 +516,9 @@ export class FUniver extends FBaseInitialable {
      * @returns {RichTextValue} The new rich text value instance
      * @example
      * ```ts
-     * const richTextValue = univerAPI.newRichTextValue();
+     * const richTextValue = univerAPI.newRichTextValue({ body: { dataStream: 'Hello World\r\n' } });
+     * const range = univerAPI.getActiveWorkbook().getActiveSheet().getRange('A1');
+     * range.setRichTextValueForCell(richTextValue);
      * ```
      */
     newRichTextValue(data: IDocumentData): RichTextValue {
@@ -401,7 +531,11 @@ export class FUniver extends FBaseInitialable {
      * @returns {ParagraphStyleBuilder} The new paragraph style instance
      * @example
      * ```ts
-     * const paragraphStyle = univerAPI.newParagraphStyle();
+     * const richText = univerAPI.newRichText({ body: { dataStream: 'Hello World\r\n' } });
+     * const paragraphStyle = univerAPI.newParagraphStyle({ textStyle: { ff: 'Arial', fs: 12, it: univerAPI.Enum.BooleanNumber.TRUE, bl: univerAPI.Enum.BooleanNumber.TRUE } });
+     * richText.insertParagraph(paragraphStyle);
+     * const range = univerAPI.getActiveWorkbook().getActiveSheet().getRange('A1');
+     * range.setRichTextValueForCell(richText);
      * ```
      */
     newParagraphStyle(style?: IParagraphStyle): ParagraphStyleBuilder {

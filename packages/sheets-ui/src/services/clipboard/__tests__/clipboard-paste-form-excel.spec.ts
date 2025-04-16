@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
+import type { ICellData, Injector, IStyleData, Nullable, Univer } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, LocaleType, RANGE_TYPE } from '@univerjs/core';
+import { DEFAULT_TEXT_FORMAT_EXCEL } from '@univerjs/engine-numfmt';
 import {
     AddWorksheetMergeMutation,
     MoveRangeMutation,
@@ -25,13 +27,12 @@ import {
     SetWorksheetRowHeightMutation,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import type { ICellData, Injector, IStyleData, Nullable, Univer } from '@univerjs/core';
 
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { SheetSkeletonManagerService } from '../../sheet-skeleton-manager.service';
 import { ISheetClipboardService } from '../clipboard.service';
 import { clipboardTestBed } from './clipboard-test-bed';
-import { excelSample } from './constant';
+import { excelSample, excelSample2 } from './constant';
 
 describe('Test clipboard', () => {
     let univer: Univer;
@@ -65,6 +66,20 @@ describe('Test clipboard', () => {
                         0: {
                             0: {
                                 v: 1,
+                            },
+                            10: { // K1
+                                s: {
+                                    bg: {
+                                        rgb: '#274fee',
+                                    },
+                                },
+                            },
+                            11: { // L1
+                                s: {
+                                    n: {
+                                        pattern: DEFAULT_TEXT_FORMAT_EXCEL,
+                                    },
+                                },
                             },
                         },
                     },
@@ -205,14 +220,21 @@ describe('Test clipboard', () => {
             expect(richTextStyle?.body?.paragraphs).toStrictEqual([{ startIndex: 6 }]);
             expect(richTextStyle?.body?.textRuns).toStrictEqual([
                 {
-                    st: 1, ed: 4, ts: {
+                    st: 1,
+                    ed: 4,
+                    ts: {
                         cl:
                             { rgb: 'rgb(218,233,248)' },
-                        ff: '等线', fs: 28, it: 1, bl: 1,
+                        ff: '等线',
+                        fs: 28,
+                        it: 1,
+                        bl: 1,
                     },
                 },
                 {
-                    ed: 6, st: 4, ts: { fs: 12, ff: '等线', cl: { rgb: 'rgb(0,0,0)' } },
+                    ed: 6,
+                    st: 4,
+                    ts: { fs: 12, ff: '等线', cl: { rgb: 'rgb(0,0,0)' } },
                 },
             ]);
         });
@@ -233,6 +255,74 @@ describe('Test clipboard', () => {
             expect(res).toBeTruthy();
             const cellValue = getValues(1, 1, 1, 1)?.[0]?.[0];
             expect(cellValue?.f).toEqual('=SUM(A1');
+        });
+
+        it('test paste to range K1:L1, K1 has style, L1 has text format', async () => {
+            const worksheet = get(IUniverInstanceService).getUniverSheetInstance('test')?.getSheetBySheetId('sheet1');
+            if (!worksheet) return false;
+
+            // set selection to K1:L1
+            const selectionManager = get(SheetsSelectionsService);
+            selectionManager.addSelections([
+                {
+                    range: {
+                        startRow: 0,
+                        startColumn: 10,
+                        endRow: 0,
+                        endColumn: 11,
+                        rangeType: RANGE_TYPE.NORMAL,
+                    },
+                    primary: null,
+                    style: null,
+                },
+            ]);
+
+            // paste data, excelSample2 value is 000123456
+            const res = await sheetClipboardService.legacyPaste(excelSample2);
+            expect(res).toBeTruthy();
+
+            // check the values
+            const K1CellValue = getValues(0, 10, 0, 10)?.[0]?.[0];
+            const L1CellValue = getValues(0, 11, 0, 11)?.[0]?.[0];
+            expect(K1CellValue?.v).toStrictEqual(123456);
+            expect(L1CellValue?.v).toStrictEqual('000123456');
+
+            // check the styles
+            const K1CellStyle = getStyles(0, 10, 0, 10)?.[0]?.[0];
+            const L1CellStyle = getStyles(0, 11, 0, 11)?.[0]?.[0];
+            expect(K1CellStyle).toStrictEqual({
+                ff: '等线',
+                fs: 11,
+                it: 0,
+                bl: 0,
+                ul: { s: 0, cl: { rgb: 'rgb(0,0,0)' } },
+                st: { s: 0, cl: { rgb: 'rgb(0,0,0)' } },
+                ol: { s: 0, cl: { rgb: 'rgb(0,0,0)' } },
+                tr: { a: 0, v: 0 },
+                td: 0,
+                cl: { rgb: 'rgb(0,0,0)' },
+                ht: 0,
+                vt: 2,
+                tb: 1,
+                pd: { t: 0, b: 2, l: 2, r: 2 },
+            });
+            expect(L1CellStyle).toStrictEqual({
+                n: { pattern: DEFAULT_TEXT_FORMAT_EXCEL },
+                ff: '等线',
+                fs: 11,
+                it: 0,
+                bl: 0,
+                ul: { s: 0, cl: { rgb: 'rgb(0,0,0)' } },
+                st: { s: 0, cl: { rgb: 'rgb(0,0,0)' } },
+                ol: { s: 0, cl: { rgb: 'rgb(0,0,0)' } },
+                tr: { a: 0, v: 0 },
+                td: 0,
+                cl: { rgb: 'rgb(0,0,0)' },
+                ht: 0,
+                vt: 2,
+                tb: 1,
+                pd: { t: 0, b: 2, l: 2, r: 2 },
+            });
         });
     });
 });

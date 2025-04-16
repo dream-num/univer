@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -99,6 +99,11 @@ export interface IInputNumberProps {
      * @param e
      */
     onPressEnter?: InputNumberProps['onPressEnter'];
+
+    /**
+     * The classNames of the input
+     */
+    classNames?: InputNumberProps['classNames'];
 }
 
 export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>((props, ref) => {
@@ -117,6 +122,7 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>((prop
         onPressEnter,
         onBlur,
         onFocus,
+        classNames,
     } = props;
 
     function handleChange(value: number | null) {
@@ -130,6 +136,7 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>((prop
             ref={ref}
             prefixCls={styles.inputNumber}
             className={className}
+            classNames={classNames}
             value={value}
             max={max}
             min={min}

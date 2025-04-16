@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,7 +87,7 @@ export interface ISlideEditorBridgeService {
     // interceptor: InterceptorManager<{
     //     BEFORE_CELL_EDIT: typeof BEFORE_CELL_EDIT;
     //     AFTER_CELL_EDIT: typeof AFTER_CELL_EDIT;
-    //     AFTER_CELL_EDIT_ASYNC: typeof AFTER_CELL_EDIT_ASYNC;
+    //     VALIDATE_CELL: typeof VALIDATE_CELL;
     // }>;
     dispose(): void;
     // refreshEditCellState(): void;

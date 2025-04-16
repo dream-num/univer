@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 
 import type { IAccessor } from '@univerjs/core';
 import type { IMenuSelectorItem } from '@univerjs/ui';
-import { ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
-import { DEFAULT_TEXT_FORMAT } from '@univerjs/engine-numfmt';
+import { fromCallback, ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
+import { DEFAULT_TEXT_FORMAT_EXCEL, isDefaultFormat } from '@univerjs/engine-numfmt';
 import {
     RangeProtectionPermissionEditPoint,
     RemoveNumfmtMutation,
@@ -30,7 +30,7 @@ import {
 import { AddDecimalCommand, countryCurrencyMap, isPatternEqualWithoutDecimal, MenuCurrencyService, SetCurrencyCommand, SetPercentCommand, SubtractDecimalCommand } from '@univerjs/sheets-numfmt';
 import { deriveStateFromActiveSheet$, getCurrentRangeDisable$ } from '@univerjs/sheets-ui';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
-import { merge, Observable } from 'rxjs';
+import { filter, merge, Observable } from 'rxjs';
 import { OpenNumfmtPanelOperator } from '../commands/operations/open.numfmt.panel.operation';
 import { MORE_NUMFMT_TYPE_KEY, OPTIONS_KEY } from '../views/components/more-numfmt-type/MoreNumfmtType';
 
@@ -41,12 +41,20 @@ export const MENU_OPTIONS: Array<{ label: string; pattern: string | null } | '|'
     },
     {
         label: 'sheet.numfmt.text',
-        pattern: DEFAULT_TEXT_FORMAT,
+        pattern: DEFAULT_TEXT_FORMAT_EXCEL,
     },
     '|',
     {
         label: 'sheet.numfmt.number',
         pattern: '0',
+    },
+    {
+        label: 'sheet.numfmt.percent',
+        pattern: '0.00%',
+    },
+    {
+        label: 'sheet.numfmt.scientific',
+        pattern: '0.00E+00',
     },
     '|',
     {
@@ -162,56 +170,62 @@ export const FactoryOtherMenuItem = (accessor: IAccessor): IMenuSelectorItem => 
     const localeService = accessor.get(LocaleService);
 
     const selectionManagerService = accessor.get(SheetsSelectionsService);
-    const value$ = deriveStateFromActiveSheet$(univerInstanceService, '', ({ workbook, worksheet }) => new Observable((subscribe) =>
-        merge(
-            selectionManagerService.selectionMoveEnd$,
-            new Observable<null>((commandSubscribe) => {
-                const commandList = [RemoveNumfmtMutation.id, SetNumfmtMutation.id];
-                const disposable = commandService.onCommandExecuted((commandInfo) => {
-                    if (commandList.includes(commandInfo.id)) {
-                        commandSubscribe.next(null);
+    const commandList = [RemoveNumfmtMutation.id, SetNumfmtMutation.id];
+    const value$ = deriveStateFromActiveSheet$(
+        univerInstanceService,
+        '',
+        ({ workbook, worksheet }) => new Observable((subscribe) =>
+            merge(
+                selectionManagerService.selectionMoveEnd$,
+                fromCallback(commandService.onCommandExecuted.bind(commandService)).pipe(
+                    filter(([commandInfo]) => commandList.includes(commandInfo.id))
+                )
+            ).subscribe(() => {
+                const selections = selectionManagerService.getCurrentSelections();
+                if (selections && selections[0]) {
+                    const range = selections[0].range;
+                    const row = range.startRow;
+                    const col = range.startColumn;
+                    const numfmtValue = workbook.getStyles().get(worksheet.getCell(row, col)?.s)?.n;
+                    const pattern = numfmtValue?.pattern;
+
+                    // Adapts the 'General' obtained during import, or the 'General' set manually
+                    let value: string = localeService.t('sheet.numfmt.general');
+
+                    if (isDefaultFormat(pattern)) {
+                        subscribe.next(value);
+                        return;
                     }
-                });
-                return () => disposable.dispose();
-            })
-        ).subscribe(() => {
-            const selections = selectionManagerService.getCurrentSelections();
-            if (selections && selections[0]) {
-                const range = selections[0].range;
-                const row = range.startRow;
-                const col = range.startColumn;
 
-                const numfmtValue = workbook.getStyles().get(worksheet.getCell(row, col)?.s)?.n;
-
-                const pattern = numfmtValue?.pattern;
-                let value: string = localeService.t('sheet.numfmt.general');
-
-                if (pattern) {
-                    const item = MENU_OPTIONS.filter((item) => typeof item === 'object' && item.pattern).find(
-                        (item) => isPatternEqualWithoutDecimal(pattern, (item as { pattern: string }).pattern)
-                    );
-                    if (item && typeof item === 'object' && item.pattern) {
-                        value = localeService.t(item.label);
-                    } else {
-                        value = localeService.t('sheet.numfmt.moreFmt');
+                    if (pattern) {
+                        const item = MENU_OPTIONS.filter((item) => typeof item === 'object' && item.pattern).find(
+                            (item) => isPatternEqualWithoutDecimal(pattern, (item as { pattern: string }).pattern)
+                        );
+                        if (item && typeof item === 'object' && item.pattern) {
+                            value = localeService.t(item.label);
+                        } else {
+                            value = localeService.t('sheet.numfmt.moreFmt');
+                        }
                     }
+
+                    subscribe.next(value);
                 }
-
-                subscribe.next(value);
-            }
-        })
-    ));
+            })
+        )
+    );
 
     return {
         label: MORE_NUMFMT_TYPE_KEY,
         id: OpenNumfmtPanelOperator.id,
         tooltip: 'sheet.numfmt.title',
         type: MenuItemType.SELECTOR,
+        slot: true,
         selections: [
             {
                 label: {
                     name: OPTIONS_KEY,
                     hoverable: false,
+                    selectable: false,
                 },
             },
         ],

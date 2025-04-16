@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,26 +19,14 @@ import type { RenderManagerService } from '@univerjs/engine-render';
 import type { ISetRangeValuesMutationParams, ISetWorksheetRowAutoHeightMutationParams } from '@univerjs/sheets';
 import type { Observable } from 'rxjs';
 import type { IAutoFillLocation, IAutoFillRule, ISheetAutoFillHook } from './type';
-import { createIdentifier, Direction,
-    Disposable,
-    ICommandService,
-    Inject,
-    Injector,
-    IUndoRedoService,
-    IUniverInstanceService,
-    ObjectMatrix,
-    RANGE_TYPE,
-    Rectangle,
-    toDisposable,
-    UniverInstanceType,
-} from '@univerjs/core';
+import { createIdentifier, Direction, Disposable, ICommandService, Inject, Injector, IUndoRedoService, IUniverInstanceService, ObjectMatrix, RANGE_TYPE, Rectangle, toDisposable, UniverInstanceType } from '@univerjs/core';
 
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { SetRangeValuesMutation, SetSelectionsOperation, SetWorksheetRowAutoHeightMutation, SetWorksheetRowAutoHeightMutationFactory, SheetsSelectionsService } from '@univerjs/sheets';
+import { rangeToDiscreteRange, SetRangeValuesMutation, SetSelectionsOperation, SetWorksheetRowAutoHeightMutation, SetWorksheetRowAutoHeightMutationFactory, SheetsSelectionsService } from '@univerjs/sheets';
 import { BehaviorSubject } from 'rxjs';
 import { AutoClearContentCommand } from '../../commands/commands/auto-fill.command';
 import { AFFECT_LAYOUT_STYLES } from '../../controllers/auto-height.controller';
-import { discreteRangeToRange, rangeToDiscreteRange } from '../../controllers/utils/range-tools';
+import { discreteRangeToRange } from '../../controllers/utils/range-tools';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import {
     chnNumberRule,
@@ -391,10 +379,7 @@ export class AutoFillService extends Disposable implements IAutoFillService {
     // eslint-disable-next-line max-lines-per-function
     fillData(applyType: APPLY_TYPE) {
         this.applyType = applyType;
-        const { source, target,
-                unitId = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId(),
-                subUnitId = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()?.getSheetId(),
-        } = this.autoFillLocation || {};
+        const { source, target, unitId = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId(), subUnitId = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()?.getSheetId() } = this.autoFillLocation || {};
 
         if (!source || !target || !unitId || !subUnitId) {
             return false;
@@ -482,7 +467,7 @@ export class AutoFillService extends Disposable implements IAutoFillService {
 
     private _getAutoHeightUndoRedos(unitId: string, subUnitId: string, ranges: IRange[]) {
         const sheetSkeletonService = this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService);
-        const skeleton = sheetSkeletonService?.getCurrent()?.skeleton;
+        const skeleton = sheetSkeletonService?.getCurrentParam()?.skeleton;
         if (!skeleton) return { redos: [], undos: [] };
 
         const rowsAutoHeightInfo = skeleton.calculateAutoHeightInRange(ranges);

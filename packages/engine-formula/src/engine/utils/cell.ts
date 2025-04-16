@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { BuildTextUtils } from '@univerjs/core';
 import type { ICellData, Nullable } from '@univerjs/core';
+import { BuildTextUtils } from '@univerjs/core';
 
 export function getCellValue(cell: Nullable<ICellData>) {
     if (cell === null) {
@@ -35,5 +35,5 @@ export function getCellValue(cell: Nullable<ICellData>) {
         return newDataStream;
     }
 
-    return cell?.v || 0;
+    return cell?.v ?? 0;
 }

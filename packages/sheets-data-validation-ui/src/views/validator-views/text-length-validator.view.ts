@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,4 +22,3 @@ export class TextLengthValidatorView extends BaseSheetDataValidatorView {
     override id = DataValidationType.TEXT_LENGTH;
     override formulaInput: string = BASE_FORMULA_INPUT_NAME;
 }
-

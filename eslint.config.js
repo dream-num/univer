@@ -29,7 +29,8 @@ export default antfu(
         ignores: [
             'mockdata/**/*.json',
         ],
-    }, {
+    },
+    {
         files: ['**/*.ts', '**/*.tsx'],
         ignores: [
             'packages/engine-render/src/components/docs/**/*.ts',
@@ -46,9 +47,10 @@ export default antfu(
             complexity: ['warn', { max: 20 }],
             'max-lines-per-function': ['warn', 80],
         },
-    }, {
+    },
+    {
         files: ['**/*.ts', '**/*.tsx'],
-        ignores: ['**/*.d.ts', '**/vite.config.ts', '**/vitest.config.ts', 'playwright.config.ts'],
+        ignores: ['**/*.d.ts', '**/vite.config.ts', '**/vitest.config.ts', '**/vitest.workspace.ts', 'playwright.config.ts'],
         plugins: {
             header,
             barrel,
@@ -60,7 +62,7 @@ export default antfu(
                 'block',
                 [
                     '*',
-                    ' * Copyright 2023-present DreamNum Inc.',
+                    ' * Copyright 2023-present DreamNum Co., Ltd.',
                     ' *',
                     ' * Licensed under the Apache License, Version 2.0 (the "License");',
                     ' * you may not use this file except in compliance with the License.',
@@ -78,8 +80,9 @@ export default antfu(
                 2,
             ],
         },
-    }, {
-    // Not penetrating for source files
+    },
+    {
+        // Not penetrating for source files
         files: ['**/*.ts', '**/*.tsx'],
         plugins: {
             penetrating,
@@ -92,7 +95,8 @@ export default antfu(
         rules: {
             'penetrating/no-penetrating-import': 2,
         },
-    }, {
+    },
+    {
         files: ['**/*/src/index.ts'],
         rules: {
             'perfectionist/sort-exports': 'off',

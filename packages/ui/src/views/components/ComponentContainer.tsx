@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,10 @@
 import type { Injector } from '@univerjs/core';
 import type { ComponentType } from 'react';
 import type { ComponentRenderer } from '../../services/parts/parts.service';
-import { useDependency } from '@univerjs/core';
 import React, { useMemo, useRef } from 'react';
 import { debounceTime, filter, map, startWith } from 'rxjs';
-import { useObservable } from '../../components/hooks/observable';
 import { IUIPartsService } from '../../services/parts/parts.service';
+import { useDependency, useObservable } from '../../utils/di';
 
 export interface IComponentContainerProps {
     components?: Set<ComponentType>;

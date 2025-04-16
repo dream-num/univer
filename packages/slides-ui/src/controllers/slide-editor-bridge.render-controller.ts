@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,15 +15,15 @@
  */
 
 import type { IDisposable, Nullable, SlideDataModel, UnitModel } from '@univerjs/core';
-import { DisposableCollection, ICommandService, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
-
 import type { BaseObject, IRenderContext, IRenderModule, RichText, Scene, Slide } from '@univerjs/engine-render';
+
+import type { ISetEditorInfo } from '../services/slide-editor-bridge.service';
+import type { ISlideRichTextProps } from '../type';
+import { DisposableCollection, ICommandService, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import { DeviceInputEventType, ObjectType } from '@univerjs/engine-render';
 import { Subject } from 'rxjs';
 import { UpdateSlideElementOperation } from '../commands/operations/update-element.operation';
-import type { ISetEditorInfo } from '../services/slide-editor-bridge.service';
 import { ISlideEditorBridgeService } from '../services/slide-editor-bridge.service';
-import type { ISlideRichTextProps } from '../type';
 
 // interface ICanvasOffset {
 //     left: number;

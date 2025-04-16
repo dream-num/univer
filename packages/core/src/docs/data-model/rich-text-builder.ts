@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1730,10 +1730,10 @@ export class RichTextBuilder extends RichTextValue {
      * @example
      * ```ts
      * const richText = RichTextValue.create({ body: { dataStream: 'Hello World\r\n' } });
-     * const newRichText = richText.insertText(0, 'World');
+     * const newRichText = richText.insertText('World');
      * ```
      */
-    insertText(start: string, style?: TextStyleBuilder | ITextStyle): RichTextBuilder;
+    insertText(text: string, style?: TextStyleBuilder | ITextStyle): RichTextBuilder;
     /**
      * Inserts text into the rich text builder at the specified start position
      * @param start The start position of the text to insert
@@ -2012,8 +2012,7 @@ export class RichTextBuilder extends RichTextValue {
     }
 
     /**
-     * Inserts a new paragraph at the specified start position
-     * @param {number} start The start position of the paragraph to insert
+     * Inserts a new paragraph to the end
      * @param {ParagraphStyleBuilder} paragraphStyle The style of the paragraph to insert
      * @returns {RichTextBuilder} The current RichTextBuilder instance
      * @example

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,8 @@ import { IConfigService, Inject, Injector, merge, Plugin } from '@univerjs/core'
 import {
     defaultPluginMainThreadConfig,
     defaultPluginWorkerThreadConfig,
-    PLUGIN_CONFIG_KEY_MAIN_THREAD, PLUGIN_CONFIG_KEY_WORKER_THREAD,
+    PLUGIN_CONFIG_KEY_MAIN_THREAD,
+    PLUGIN_CONFIG_KEY_WORKER_THREAD,
 } from './controllers/config.schema';
 import { DataSyncPrimaryController } from './controllers/data-sync/data-sync-primary.controller';
 import { DataSyncReplicaController } from './controllers/data-sync/data-sync-replica.controller';

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-import type { IEventBase, Injector } from '@univerjs/core';
+import type { Injector } from '@univerjs/core';
+import type { IEventBase } from '@univerjs/core/facade';
 import type { ISetCrosshairHighlightColorOperationParams } from '@univerjs/sheets-crosshair-highlight';
 import type { FWorkbook, FWorksheet } from '@univerjs/sheets/facade';
-import { FUniver, ICommandService } from '@univerjs/core';
-import { CROSSHAIR_HIGHLIGHT_COLORS, DisableCrosshairHighlightOperation, EnableCrosshairHighlightOperation, SetCrosshairHighlightColorOperation, SheetsCrosshairHighlightService } from '@univerjs/sheets-crosshair-highlight';
+import { ICommandService } from '@univerjs/core';
+import { FEventName, FUniver } from '@univerjs/core/facade';
+import { CROSSHAIR_HIGHLIGHT_COLORS, DisableCrosshairHighlightOperation, EnableCrosshairHighlightOperation, SetCrosshairHighlightColorOperation, SheetsCrosshairHighlightService, ToggleCrosshairHighlightOperation } from '@univerjs/sheets-crosshair-highlight';
 
 /**
  * @ignore
@@ -26,25 +28,30 @@ import { CROSSHAIR_HIGHLIGHT_COLORS, DisableCrosshairHighlightOperation, EnableC
 export interface IFSheetCrosshairHighlightEventMixin {
     /**
      * Triggered when the crosshair highlight is enabled or disabled.
+     * @see {@link ICrosshairHighlightEnabledChangedEvent}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.CrosshairHighlightEnabledChanged, (event) => {
-     *     const enabled = event.enabled;
-     *     const workbook = event.workbook;
-     *     const worksheet = event.worksheet;
+     * const disposable = univerAPI.addEvent(univerAPI.Event.CrosshairHighlightEnabledChanged, (params) => {
+     *   const { enabled, workbook, worksheet } = params;
+     *   console.log(params);
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly CrosshairHighlightEnabledChanged: 'CrosshairHighlightEnabledChanged';
+
     /**
      * Triggered when the crosshair highlight color is changed.
+     * @see {@link ICrosshairHighlightColorChangedEvent}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.Event.CrosshairHighlightColorChanged, (event) => {
-     *     const color = event.color;
-     *     const workbook = event.workbook;
-     *     const worksheet = event.worksheet;
+     * const disposable = univerAPI.addEvent(univerAPI.Event.CrosshairHighlightColorChanged, (params) => {
+     *   const { color, workbook, worksheet } = params;
+     *   console.log(params);
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly CrosshairHighlightColorChanged: 'CrosshairHighlightColorChanged';
@@ -107,42 +114,44 @@ export interface ISheetCrosshairHighlightEventConfigs {
 export interface IFUniverCrosshairHighlightMixin {
     /**
      * Enable or disable crosshair highlight.
-     * @param {boolean} enabled if crosshair highlight should be enabled
-     * @returns {FUniver} the FUniver instance
+     * @param {boolean} enabled - Whether to enable the crosshair highlight
+     * @returns {FUniver} The FUniver instance for chaining
      * @example
      * ```ts
-     * univer.setCrosshairHighlightEnabled(true);
+     * univerAPI.setCrosshairHighlightEnabled(true);
      * ```
      */
     setCrosshairHighlightEnabled(enabled: boolean): FUniver;
 
     /**
      * Set the color of the crosshair highlight.
-     * @param {string} color the color of the crosshair highlight
-     * @returns {FUniver} the FUniver instance
+     * @param {string} color - The color of the crosshair highlight, if the color not has alpha channel, the alpha channel will be set to 0.5
+     * @returns {FUniver} The FUniver instance for chaining
      * @example
      * ```ts
-     * univer.setCrosshairHighlightColor('#FF0000');
+     * univerAPI.setCrosshairHighlightColor('#FF0000');
+     * // or
+     * univerAPI.setCrosshairHighlightColor('rgba(232, 11, 11, 0.2)');
      * ```
      */
     setCrosshairHighlightColor(color: string): FUniver;
 
     /**
      * Get whether the crosshair highlight is enabled.
-     * @returns {boolean} whether the crosshair highlight is enabled
+     * @returns {boolean} Whether the crosshair highlight is enabled
      * @example
      * ```ts
-     * const enabled = univer.getCrosshairHighlightEnabled();
+     * console.log(univerAPI.getCrosshairHighlightEnabled());
      * ```
      */
     getCrosshairHighlightEnabled(): boolean;
 
     /**
      * Get the color of the crosshair highlight.
-     * @returns {string} the color of the crosshair highlight
+     * @returns {string} The color of the crosshair highlight
      * @example
      * ```ts
-     * const color = univer.getCrosshairHighlightColor();
+     * console.log(univerAPI.getCrosshairHighlightColor());
      * ```
      */
     getCrosshairHighlightColor(): string;
@@ -163,27 +172,37 @@ export class FUniverCrosshairHighlightMixin extends FUniver implements IFUniverC
     override _initialize(injector: Injector): void {
         const commandService = injector.get(ICommandService);
 
-        this.disposeWithMe(commandService.onCommandExecuted((commandInfo) => {
-            if (commandInfo.id === EnableCrosshairHighlightOperation.id || commandInfo.id === DisableCrosshairHighlightOperation.id) {
-                const activeSheet = this.getActiveSheet();
-                if (!activeSheet) return;
-                if (!this._eventListend(this.Event.CrosshairHighlightEnabledChanged)) return;
-                this.fireEvent(this.Event.CrosshairHighlightEnabledChanged, {
-                    enabled: this.getCrosshairHighlightEnabled(),
-                    ...activeSheet,
-                });
-            }
+        this.registerEventHandler(
+            this.Event.CrosshairHighlightEnabledChanged,
+            () => commandService.onCommandExecuted((commandInfo) => {
+                if (
+                    commandInfo.id === EnableCrosshairHighlightOperation.id ||
+                    commandInfo.id === DisableCrosshairHighlightOperation.id ||
+                    commandInfo.id === ToggleCrosshairHighlightOperation.id
+                ) {
+                    const activeSheet = this.getActiveSheet();
+                    if (!activeSheet) return;
+                    this.fireEvent(this.Event.CrosshairHighlightEnabledChanged, {
+                        enabled: this.getCrosshairHighlightEnabled(),
+                        ...activeSheet,
+                    });
+                }
+            })
+        );
 
-            if (commandInfo.id === SetCrosshairHighlightColorOperation.id) {
-                const activeSheet = this.getActiveSheet();
-                if (!activeSheet) return;
-                if (!this._eventListend(this.Event.CrosshairHighlightColorChanged)) return;
-                this.fireEvent(this.Event.CrosshairHighlightColorChanged, {
-                    color: this.getCrosshairHighlightColor(),
-                    ...activeSheet,
-                });
-            }
-        }));
+        this.registerEventHandler(
+            this.Event.CrosshairHighlightColorChanged,
+            () => commandService.onCommandExecuted((commandInfo) => {
+                if (commandInfo.id === SetCrosshairHighlightColorOperation.id) {
+                    const activeSheet = this.getActiveSheet();
+                    if (!activeSheet) return;
+                    this.fireEvent(this.Event.CrosshairHighlightColorChanged, {
+                        color: this.getCrosshairHighlightColor(),
+                        ...activeSheet,
+                    });
+                }
+            })
+        );
     }
 
     override setCrosshairHighlightEnabled(enabled: boolean): FUniver {
@@ -218,8 +237,10 @@ export class FUniverCrosshairHighlightMixin extends FUniver implements IFUniverC
     }
 }
 
+FEventName.extend(FSheetCrosshairHighlightEventMixin);
 FUniver.extend(FUniverCrosshairHighlightMixin);
-declare module '@univerjs/core' {
+
+declare module '@univerjs/core/facade' {
     // eslint-disable-next-line ts/naming-convention
     interface FUniver extends IFUniverCrosshairHighlightMixin {}
 

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,13 @@
 import type { Nullable } from '@univerjs/core';
 import type { RefObject } from 'react';
 import type { Observable } from 'rxjs';
-import { useEvent } from 'rc-util';
+import type { IUniverUIConfig } from '../../../controllers/config.schema';
+import { IConfigService } from '@univerjs/core';
+import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { createContext, useContext, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import styles from './index.module.less';
+import { useEvent } from '../../../components/hooks/event';
+import { UI_PLUGIN_CONFIG_KEY } from '../../../controllers/config.schema';
 
 interface IAbsolutePosition {
     left: number;
@@ -39,7 +42,7 @@ export interface IRectPopupProps {
      */
     anchorRect$: Observable<IAbsolutePosition>;
     excludeRects?: RefObject<Nullable<IAbsolutePosition[]>>;
-    direction?: 'vertical' | 'horizontal' | 'top' | 'right' | 'left' | 'bottom' | 'bottom-center' | 'top-center';
+    direction?: 'vertical' | 'horizontal' | 'top' | 'right' | 'left' | 'right-center' | 'left-center' | 'bottom' | 'bottom-center' | 'top-center';
 
     hidden?: boolean;
     // #region closing behavior
@@ -47,11 +50,16 @@ export interface IRectPopupProps {
     excludeOutside?: HTMLElement[];
     onContextMenu?: () => void;
 
-    onPointerEnter?: (e: React.PointerEvent<HTMLElement>) => void;
-    onPointerLeave?: (e: React.PointerEvent<HTMLElement>) => void;
+    onPointerEnter?: (e: React.MouseEvent<HTMLElement>) => void;
+    onPointerLeave?: (e: React.MouseEvent<HTMLElement>) => void;
     onClick?: (e: React.MouseEvent<HTMLElement>) => void;
     // #endregion
     portal?: boolean;
+
+    mask?: boolean;
+    zIndex?: number;
+    maskZIndex?: number;
+    onMaskClick?: () => void;
 }
 
 export interface IPopupLayoutInfo extends Pick<IRectPopupProps, 'direction'> {
@@ -78,17 +86,22 @@ function calcPopupPosition(layout: IPopupLayoutInfo): { top: number; left: numbe
             : { top: Math.min(endY, containerHeight - height - PUSHING_MINIMUM_GAP) };
 
         let horizontalStyle;
+
+        const minLeft = PUSHING_MINIMUM_GAP;
+        const maxLeft = containerWidth - width - PUSHING_MINIMUM_GAP;
+
         if (direction.includes('center')) {
             const rectWidth = endX - startX;
             const offsetX = (rectWidth - width) / 2;
-            horizontalStyle = {
-                left: startX + offsetX,
-            };
+
+            horizontalStyle = (Math.max(startX + offsetX, PUSHING_MINIMUM_GAP) + width) > containerWidth
+                ? { left: Math.max(Math.min(maxLeft, endX - width - offsetX), minLeft) }
+                : { left: Math.max(minLeft, Math.min(startX + offsetX, maxLeft)) };
         } else {
             // If the popup element exceed the visible area. We should "push" it back.
             horizontalStyle = (startX + width) > containerWidth
-                ? { left: Math.max(endX - width, PUSHING_MINIMUM_GAP) } // on left
-                : { left: Math.min(startX, containerWidth - width - PUSHING_MINIMUM_GAP) }; // on right
+                ? { left: Math.max(endX - width, minLeft) } // on left
+                : { left: Math.min(startX, maxLeft) }; // on right
         }
 
         return { ...verticalStyle, ...horizontalStyle };
@@ -97,20 +110,49 @@ function calcPopupPosition(layout: IPopupLayoutInfo): { top: number; left: numbe
     // In x-axis
     const { left: startX, top: startY, right: endX, bottom: endY } = position;
     // const horizontalStyle = ((endX + width) > containerWidth || direction === 'left')
-    const horizontalStyle = direction === 'left'
+    const horizontalStyle = direction.includes('left')
         ? { left: Math.max(startX - width, PUSHING_MINIMUM_GAP) } // on left
         : { left: Math.min(endX, containerWidth - width - PUSHING_MINIMUM_GAP) }; // on right
+    let verticalStyle;
+    const minTop = PUSHING_MINIMUM_GAP;
+    const maxTop = containerHeight - height - PUSHING_MINIMUM_GAP;
 
-    // If the popup element exceed the visible area. We should "push" it back.
-    const verticalStyle = ((startY + height) > containerHeight)
-        ? { top: Math.max(endY - height, PUSHING_MINIMUM_GAP) } // on top
-        : { top: Math.min(startY, containerHeight - height - PUSHING_MINIMUM_GAP) }; // on bottom
+    if (direction.includes('center')) {
+        const rectHeight = endY - startY;
+        const offsetY = (rectHeight - height) / 2;
+
+        verticalStyle = (Math.max(startY + offsetY, PUSHING_MINIMUM_GAP) + height) > containerHeight
+            ? { top: Math.max(Math.min(maxTop, endY - height - offsetY), minTop) }
+            : { top: Math.max(minTop, Math.min(startY + offsetY, maxTop)) };
+    } else {
+        // If the popup element exceed the visible area. We should "push" it back.
+        verticalStyle = ((startY + height) > containerHeight)
+            ? { top: Math.max(endY - height, PUSHING_MINIMUM_GAP) } // on top
+            : { top: Math.min(startY, containerHeight - height - PUSHING_MINIMUM_GAP) }; // on bottom
+    }
 
     return { ...verticalStyle, ...horizontalStyle };
 };
 
 function RectPopup(props: IRectPopupProps) {
-    const { portal, children, anchorRect$, direction = 'vertical', onClickOutside, excludeOutside, excludeRects, onPointerEnter, onPointerLeave, onClick, hidden, onContextMenu } = props;
+    const {
+        mask,
+        portal,
+        children,
+        anchorRect$,
+        direction = 'vertical',
+        onClickOutside,
+        excludeOutside,
+        excludeRects,
+        onPointerEnter,
+        onPointerLeave,
+        onClick,
+        hidden,
+        onContextMenu,
+        zIndex = 1020,
+        maskZIndex = 100,
+        onMaskClick,
+    } = props;
     const nodeRef = useRef<HTMLElement>(null);
     const clickOtherFn = useEvent(onClickOutside ?? (() => { /* empty */ }));
     const contextMenuFn = useEvent(onContextMenu ?? (() => { /* empty */ }));
@@ -119,38 +161,59 @@ function RectPopup(props: IRectPopupProps) {
         left: -9999,
     });
     const excludeRectsRef = excludeRects;
+    const configService = useDependency(IConfigService);
     const anchorRectRef = useRef<IAbsolutePosition | undefined>(undefined);
+    const uiConfig = configService.getConfig(UI_PLUGIN_CONFIG_KEY) as IUniverUIConfig;
+    const popupRootId = uiConfig?.popupRootId ?? 'univer-popup-portal';
+
+    function updatePosition(position: IAbsolutePosition) {
+        requestAnimationFrame(() => {
+            if (!nodeRef.current) return;
+
+            const { clientWidth, clientHeight } = nodeRef.current;
+            const innerWidth = window.innerWidth;
+            const innerHeight = window.innerHeight;
+
+            positionRef.current = calcPopupPosition(
+                {
+                    position,
+                    width: clientWidth,
+                    height: clientHeight,
+                    containerWidth: innerWidth,
+                    containerHeight: innerHeight,
+                    direction,
+                }
+            );
+
+            nodeRef.current.style.top = `${positionRef.current.top}px`;
+            nodeRef.current.style.left = `${positionRef.current.left}px`;
+        });
+    }
+
+    useEffect(() => {
+        let observer: ResizeObserver | null;
+        if (nodeRef.current) {
+            observer = new ResizeObserver(() => {
+                if (!anchorRectRef.current) return;
+                updatePosition(anchorRectRef.current);
+            });
+
+            observer.observe(nodeRef.current);
+        }
+
+        return () => {
+            observer?.disconnect();
+        };
+    }, [nodeRef.current]);
 
     useEffect(() => {
         const anchorRectSub = anchorRect$.subscribe((anchorRect) => {
             anchorRectRef.current = anchorRect;
-            requestAnimationFrame(() => {
-                if (!nodeRef.current) return;
-
-                const { clientWidth, clientHeight } = nodeRef.current;
-                const innerWidth = window.innerWidth;
-                const innerHeight = window.innerHeight;
-
-                positionRef.current = calcPopupPosition(
-                    {
-                        position: anchorRect,
-                        width: clientWidth,
-                        height: clientHeight,
-                        containerWidth: innerWidth,
-                        containerHeight: innerHeight,
-                        direction,
-                    }
-                );
-                nodeRef.current.style.top = `${positionRef.current.top}px`;
-                nodeRef.current.style.left = `${positionRef.current.left}px`;
-            });
+            updatePosition(anchorRect);
         });
 
         return () => anchorRectSub.unsubscribe();
-    },
-
-    [anchorRect$, direction]
-    );
+    }, [anchorRect$, direction]);
 
     useEffect(() => {
         const handleClickOther = (e: MouseEvent) => {
@@ -198,22 +261,33 @@ function RectPopup(props: IRectPopupProps) {
     }, [contextMenuFn]);
 
     const ele = (
-        <section
-            onPointerEnter={onPointerEnter}
-            onPointerLeave={onPointerLeave}
-            ref={nodeRef}
-            style={{ ...positionRef.current, ...hidden ? { display: 'none' } : null }}
-            className={styles.popupFixed}
-            onPointerDown={(e) => e.stopPropagation()}
-            onClick={onClick}
-        >
-            <RectPopupContext.Provider value={anchorRectRef}>
-                {children}
-            </RectPopupContext.Provider>
-        </section>
+        <>
+            {mask && (
+                <div
+                    className="univer-fixed univer-bottom-0 univer-left-0 univer-right-0 univer-top-0 univer-z-[100]"
+                    style={{ zIndex: maskZIndex }}
+                    onClick={onMaskClick}
+                />
+            )}
+            <section
+                ref={nodeRef}
+                className={`
+                  univer-pointer-events-auto univer-fixed univer-left-[-9999px] univer-top-[-9999px] univer-z-[1020]
+                `}
+                style={{ ...positionRef.current, ...hidden ? { display: 'none' } : null, zIndex }}
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={onClick}
+                onPointerEnter={onPointerEnter}
+                onPointerLeave={onPointerLeave}
+            >
+                <RectPopupContext.Provider value={anchorRectRef}>
+                    {children}
+                </RectPopupContext.Provider>
+            </section>
+        </>
     );
 
-    return !portal ? ele : createPortal(ele, document.getElementById('univer-popup-portal')!);
+    return !portal ? ele : document.getElementById(popupRootId) ? createPortal(ele, document.getElementById(popupRootId)!) : null;
 }
 
 RectPopup.calcPopupPosition = calcPopupPosition;

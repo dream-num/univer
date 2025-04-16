@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/uniscript",
-    "version": "0.5.5",
+    "version": "0.6.10-alpha.0",
     "private": false,
     "description": "UI component library for building exceptional Univer.",
     "author": "DreamNum <developer@univer.ai>",
@@ -64,7 +64,8 @@
         "build": "univer-cli build"
     },
     "peerDependencies": {
-        "react": ">=16.9.0 || >=17 || >=18 || >=19",
+        "monaco-editor": ">=0.50.0",
+        "react": "^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
@@ -77,13 +78,12 @@
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
-        "less": "^4.2.1",
-        "postcss": "^8.4.49",
+        "postcss": "^8.5.3",
         "react": "18.3.1",
         "rxjs": "^7.8.1",
         "tailwindcss": "^3.4.17",
-        "typescript": "^5.7.3",
-        "vite": "^6.0.7",
-        "vitest": "^2.1.8"
+        "typescript": "^5.8.3",
+        "vite": "^6.3.0",
+        "vitest": "^3.1.1"
     }
 }

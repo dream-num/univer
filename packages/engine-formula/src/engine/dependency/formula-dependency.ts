@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -344,6 +344,11 @@ export class FormulaDependencyGenerator extends Disposable {
 
         for (let i = 0, len = treeList.length; i < len; i++) {
             const tree = treeList[i];
+
+            // After entering the pivot table, no calculation is required if there is no formula
+            if (!tree.formula) {
+                continue;
+            }
 
             const node = this._getTreeNode(tree);
             tree.isDirty = this._includeTree(tree, node);

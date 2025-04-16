@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,11 @@
 
 import type { IFreeze, IRange, IWorksheetData, Nullable, Workbook } from '@univerjs/core';
 import type { IMouseEvent, IPoint, IPointerEvent, IRenderContext, IRenderModule, IScrollObserverParam } from '@univerjs/engine-render';
+import type { IScrollToCellOperationParams } from '@univerjs/sheets';
 import type { IExpandSelectionCommandParams } from '../../../commands/commands/set-selection.command';
 import type { IScrollState, IScrollStateSearchParam, IViewportScrollState } from '../../../services/scroll-manager.service';
-import type { ISheetSkeletonManagerParam } from '../../../services/sheet-skeleton-manager.service';
 
+import type { ISheetSkeletonManagerParam } from '../../../services/sheet-skeleton-manager.service';
 import {
     Direction,
     Disposable,
@@ -90,7 +91,7 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
                 if (SHEET_NAVIGATION_COMMANDS.includes(command.id)) {
                     this._scrollToSelection();
                 } else if (command.id === ScrollToCellOperation.id) {
-                    const param = command.params as IRange;
+                    const param = (command.params as IScrollToCellOperationParams).range;
                     this.scrollToRange(param);
                 } else if (command.id === ExpandSelectionCommand.id) {
                     const param = command.params as IExpandSelectionCommandParams;
@@ -150,7 +151,7 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
     }
 
     private _getFreeze(): Nullable<IFreeze> {
-        const snapshot: IWorksheetData | undefined = this._sheetSkeletonManagerService.getCurrent()?.skeleton.getWorksheetConfig();
+        const snapshot: IWorksheetData | undefined = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton.getWorksheetConfig();
         if (snapshot == null) {
             return;
         }
@@ -181,7 +182,7 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
                         return;
                     }
 
-                    const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+                    const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
                     if (!skeleton) return;
 
                     // data source: scroll-manager.service.ts@_scrollInfo
@@ -208,7 +209,7 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
         this.disposeWithMe(
             viewportMain.onScrollAfter$.subscribeEvent((scrollAfterParam: IScrollObserverParam) => {
                 if (!scrollAfterParam) return;
-                const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+                const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
                 if (skeleton == null) return;
                 const sheetObject = this._getSheetObject();
                 if (skeleton == null || sheetObject == null) return;
@@ -216,19 +217,23 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
                 const { viewportScrollX, viewportScrollY, scrollX, scrollY } = scrollAfterParam;
 
                 // according to the actual scroll position, the most suitable row, column and offset combination is recalculated.
-                const { row, column, rowOffset, columnOffset } = skeleton.getDecomposedOffset(
+                const { row, column, rowOffset, columnOffset } = skeleton.getOffsetRelativeToRowCol(
                     viewportScrollX,
                     viewportScrollY
                 );
 
-                const scrollInfo = {
+                const scrollInfo: IViewportScrollState = {
                     sheetViewStartRow: row,
                     sheetViewStartColumn: column,
                     offsetX: columnOffset,
                     offsetY: rowOffset,
+                    viewportScrollX,
+                    viewportScrollY,
+                    scrollX,
+                    scrollY,
                 };
                 // lastestScrollInfo derived from viewportScrollX, viewportScrollY from onScrollAfter$
-                this._scrollManagerService.setScrollStateToCurrSheet(scrollInfo);
+                this._scrollManagerService.setValidScrollStateToCurrSheet(scrollInfo);
                 this._scrollManagerService.validViewportScrollInfo$.next({
                     ...scrollInfo,
                     scrollX,
@@ -245,7 +250,7 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
         //#region scroll by bar
         this.disposeWithMe(
             viewportMain.onScrollByBar$.subscribeEvent((param) => {
-                const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+                const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
                 if (skeleton == null || param.isTrigger === false) {
                     return;
                 }
@@ -258,7 +263,7 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
 
                 const freeze = this._getFreeze();
 
-                const { row, column, rowOffset, columnOffset } = skeleton.getDecomposedOffset(
+                const { row, column, rowOffset, columnOffset } = skeleton.getOffsetRelativeToRowCol(
                     viewportScrollX,
                     viewportScrollY
                 );
@@ -298,7 +303,8 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
                     }
                     this._updateSceneSize(param as unknown as ISheetSkeletonManagerParam);
                 }
-            })));
+            })
+        ));
     }
 
     /**
@@ -422,7 +428,7 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
         if (!worksheet) return;
 
         const zoomRatio = worksheet.getZoomRatio() || 1;
-        scene?.setScaleValue(zoomRatio, zoomRatio);
+        scene?.setScaleValueOnly(zoomRatio, zoomRatio);
         scene?.transformByState({
             width: rowHeaderWidthAndMarginLeft + columnTotalWidth,
             height: columnHeaderHeightAndMarginTop + rowTotalHeight,
@@ -493,7 +499,7 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
             return;
         }
 
-        const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+        const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
         if (skeleton == null) {
             return;
         }
@@ -503,7 +509,7 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
 
     // eslint-disable-next-line max-lines-per-function, complexity
     private _scrollToCell(row: number, column: number): boolean {
-        const { rowHeightAccumulation, columnWidthAccumulation } = this._sheetSkeletonManagerService.getCurrent()?.skeleton ?? {};
+        const { rowHeightAccumulation, columnWidthAccumulation } = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton ?? {};
 
         if (rowHeightAccumulation == null || columnWidthAccumulation == null) return false;
 
@@ -513,7 +519,7 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
         const viewport = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
         if (viewport == null) return false;
 
-        const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+        const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
         if (skeleton == null) return false;
 
         const worksheet = this._context.unit.getActiveSheet();

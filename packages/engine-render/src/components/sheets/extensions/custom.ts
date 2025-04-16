@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 import type { IRange, IScale } from '@univerjs/core';
 import type { UniverRenderingContext } from '../../../context';
-import type { SpreadsheetSkeleton } from '../sheet-skeleton';
+import type { SpreadsheetSkeleton } from '../sheet.render-skeleton';
 import { Range, sortRules } from '@univerjs/core';
 import { SpreadsheetExtensionRegistry } from '../../extension';
 import { SheetExtension } from './sheet-extension';
@@ -83,7 +83,7 @@ export class Custom extends SheetExtension {
 
             const renderInfo = {
                 data: cellData,
-                style: skeleton.getsStyles().getStyleByCell(cellData),
+                style: skeleton.getStyles().getStyleByCell(cellData),
                 primaryWithCoord,
                 subUnitId,
                 row,

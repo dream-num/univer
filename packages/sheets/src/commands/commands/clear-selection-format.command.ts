@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import {
     sequenceExecute,
     UniverInstanceType,
 } from '@univerjs/core';
-import { generateNullCellStyle } from '../../basics/utils';
+import { generateNullCellStyle, getVisibleRanges } from '../../basics/utils';
 import { SheetsSelectionsService } from '../../services/selections/selection.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
@@ -63,6 +63,7 @@ export const ClearSelectionFormatCommand: ICommand = {
         if (!ranges?.length) {
             return false;
         }
+        const visibleRanges = getVisibleRanges(ranges, accessor, unitId, subUnitId);
 
         const sequenceExecuteList: IMutationInfo[] = [];
         const sequenceExecuteUndoList: IMutationInfo[] = [];
@@ -71,7 +72,7 @@ export const ClearSelectionFormatCommand: ICommand = {
         const clearMutationParams: ISetRangeValuesMutationParams = {
             subUnitId,
             unitId,
-            cellValue: generateNullCellStyle(ranges),
+            cellValue: generateNullCellStyle(visibleRanges),
         };
         const undoClearMutationParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
             accessor,

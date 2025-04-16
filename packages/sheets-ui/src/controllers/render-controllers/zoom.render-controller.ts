@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,6 +55,7 @@ export class SheetsZoomRenderController extends Disposable implements IRenderMod
         const scene = this._getSheetObject().scene;
 
         this.disposeWithMe(
+            // hold ctrl & mousewheel ---> zoom
             scene.onMouseWheel$.subscribeEvent((e: IWheelEvent) => {
                 if (!e.ctrlKey || !this._contextService.getContextValue(FOCUSING_SHEET)) {
                     return;
@@ -95,7 +96,7 @@ export class SheetsZoomRenderController extends Disposable implements IRenderMod
 
     private _zoom: number;
     private _initSkeletonListener() {
-        this.disposeWithMe(this._sheetSkeletonManagerService.currentSkeletonBefore$.subscribe((param) => {
+        this.disposeWithMe(this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param) => {
             if (param == null) {
                 return;
             }
@@ -113,12 +114,13 @@ export class SheetsZoomRenderController extends Disposable implements IRenderMod
     }
 
     /**
-     * Zoom scene, resize viewport and then setScrollInfo
+     * Triggered when zoom and switch sheet.
      * @param zoomRatio
      */
     private _updateViewZoom(zoomRatio: number) {
         const sheetObject = this._getSheetObject();
         sheetObject?.scene.scale(zoomRatio, zoomRatio);
+        // sheetObject?.scene.transformByState({ scaleX: zoomRatio, scaleY: zoomRatio });
         sheetObject?.spreadsheet.makeForceDirty();
     }
 

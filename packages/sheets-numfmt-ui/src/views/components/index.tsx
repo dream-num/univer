@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,14 @@
 import type { ISelectProps } from '@univerjs/design';
 import type { FC } from 'react';
 import type { IBusinessComponentProps } from './interface';
-import { LocaleService, useDependency } from '@univerjs/core';
+import { LocaleService } from '@univerjs/core';
 import { Button, Select } from '@univerjs/design';
 import { getCurrencyType } from '@univerjs/sheets-numfmt';
+import { useDependency } from '@univerjs/ui';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { UserHabitCurrencyContext } from '../../controllers/user-habit.controller';
-import { useCurrencyOptions } from '../hooks/useCurrencyOptions';
-import { useNextTick } from '../hooks/useNextTick';
+import { useCurrencyOptions } from '../hooks/use-currency-options';
+import { useNextTick } from '../hooks/use-next-tick';
 import { AccountingPanel, isAccountingPanel } from './accounting';
 import { CurrencyPanel, isCurrencyPanel } from './currency';
 import { CustomFormat } from './custom-format';
@@ -32,7 +33,7 @@ import { DatePanel, isDatePanel } from './date';
 import { GeneralPanel, isGeneralPanel } from './general';
 
 import { isThousandthPercentilePanel, ThousandthPercentilePanel } from './thousandth-percentile';
-// TODO@Gggpound: fix this
+// TODO: @Gggpound: fix this
 // FIXME: DO NOT USE GLOBAL STYLES
 import './index.less';
 
@@ -131,7 +132,7 @@ export const SheetNumfmtPanel: FC<ISheetNumfmtPanelProps> = (props) => {
                 <Button size="small" onClick={handleCancel} className="m-r-12">
                     {t('sheet.numfmt.cancel')}
                 </Button>
-                <Button type="primary" size="small" onClick={handleConfirm}>
+                <Button variant="primary" size="small" onClick={handleConfirm}>
                     {t('sheet.numfmt.confirm')}
                 </Button>
             </div>

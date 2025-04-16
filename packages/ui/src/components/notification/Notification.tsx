@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 
-/* eslint-disable react-refresh/only-export-components */
-
-import { ConfigContext } from '@univerjs/design';
-import { CloseSingle, ErrorSingle, SuccessSingle, WarningSingle } from '@univerjs/icons';
-import clsx from 'clsx';
-import { useNotification } from 'rc-notification';
 import type { Placement } from 'rc-notification/es/interface';
-import React, { useContext, useEffect, useRef } from 'react';
+import { clsx, ConfigContext } from '@univerjs/design';
+import { CloseSingle, ErrorSingle, SuccessSingle, WarningSingle } from '@univerjs/icons';
+import { useNotification } from 'rc-notification';
+import { useContext, useEffect, useRef } from 'react';
 import { Subject } from 'rxjs';
 
 import styles from './index.module.less';

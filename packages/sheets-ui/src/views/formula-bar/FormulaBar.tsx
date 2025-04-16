@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,17 @@
 
 import type { Workbook } from '@univerjs/core';
 import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
-import { DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, FOCUSING_FX_BAR_EDITOR, ICommandService, IContextService, IPermissionService, IUniverInstanceService, UniverInstanceType, useDependency, useObservable } from '@univerjs/core';
+import { DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, FOCUSING_FX_BAR_EDITOR, ICommandService, IContextService, IPermissionService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { clsx } from '@univerjs/design';
 import { IEditorService } from '@univerjs/docs-ui';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { CheckMarkSingle, CloseSingle, DropdownSingle, FxSingle } from '@univerjs/icons';
 import { RangeProtectionCache, RangeProtectionRuleModel, SheetsSelectionsService, UnitAction, WorksheetEditPermission, WorksheetProtectionRuleModel, WorksheetViewPermission } from '@univerjs/sheets';
-import { ComponentContainer, ComponentManager, KeyCode, useComponentsOfPart } from '@univerjs/ui';
-import clsx from 'clsx';
+import { ComponentContainer, ComponentManager, KeyCode, useComponentsOfPart, useDependency, useObservable } from '@univerjs/ui';
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { EMPTY, merge, of, switchMap } from 'rxjs';
 import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
 import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY } from '../../common/keys';
-import { useActiveWorkbook } from '../../components/hook';
 import { SheetsUIPart } from '../../consts/ui-name';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { IFormulaEditorManagerService } from '../../services/editor/formula-editor-manager.service';
@@ -40,10 +39,15 @@ enum ArrowDirection {
     Up,
 }
 
-export function FormulaBar() {
+interface IProps {
+    className?: string;
+    disableDefinedName?: boolean;
+}
+
+export function FormulaBar(props: IProps) {
+    const { className, disableDefinedName } = props;
     const [iconStyle, setIconStyle] = useState<string>(styles.formulaGrey);
     const [arrowDirection, setArrowDirection] = useState<ArrowDirection>(ArrowDirection.Down);
-
     const formulaEditorManagerService = useDependency(IFormulaEditorManagerService);
     const editorBridgeService = useDependency(IEditorBridgeService);
     const worksheetProtectionRuleModel = useDependency(WorksheetProtectionRuleModel);
@@ -52,17 +56,16 @@ export function FormulaBar() {
     const selectionManager = useDependency(SheetsSelectionsService);
     const permissionService = useDependency(IPermissionService);
     const rangeProtectionCache = useDependency(RangeProtectionCache);
-
+    const commandService = useDependency(ICommandService);
     const [disableInfo, setDisableInfo] = useState<{ editDisable: boolean; viewDisable: boolean }>({
         editDisable: false,
         viewDisable: false,
     });
     const [imageDisable, setImageDisable] = useState<boolean>(false);
-    const currentWorkbook = useActiveWorkbook();
     const componentManager = useDependency(ComponentManager);
     const workbook = useObservable(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET), undefined, undefined, [])!;
     const isRefSelecting = useRef<0 | 1 | 2>(0);
-    const editState = editorBridgeService.getEditLocation();
+    const editState = useObservable(editorBridgeService.currentEditCellState$);
     const keyCodeConfig = useKeyEventConfig(isRefSelecting, editState?.unitId ?? '');
     const FormulaEditor = componentManager.get(EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY);
     const formulaAuxUIParts = useComponentsOfPart(SheetsUIPart.FORMULA_AUX);
@@ -154,12 +157,14 @@ export function FormulaBar() {
     }, [editorBridgeService.currentEditCellState$]);
 
     useEffect(() => {
-        if (ref.current) {
-            const handleResize = () => {
-                const editorRect = ref.current!.getBoundingClientRect();
-                formulaEditorManagerService.setPosition(editorRect);
-            };
+        const handleResize = () => {
+            if (!ref.current) return;
 
+            const editorRect = ref.current.getBoundingClientRect();
+            formulaEditorManagerService.setPosition(editorRect);
+        };
+
+        if (ref.current) {
             handleResize();
             const a = new ResizeObserver(handleResize);
 
@@ -181,11 +186,11 @@ export function FormulaBar() {
     function handleCloseBtnClick() {
         const visibleState = editorBridgeService.isVisible();
         if (visibleState.visible) {
-            editorBridgeService.changeVisible({
+            commandService.executeCommand(SetCellEditVisibleOperation.id, {
                 visible: false,
                 eventType: DeviceInputEventType.Keyboard,
                 keycode: KeyCode.ESC,
-                unitId: currentWorkbook?.getUnitId() ?? '',
+                unitId: editState!.unitId,
             });
         }
     }
@@ -194,10 +199,10 @@ export function FormulaBar() {
     function handleConfirmBtnClick() {
         const visibleState = editorBridgeService.isVisible();
         if (visibleState.visible) {
-            editorBridgeService.changeVisible({
+            commandService.executeCommand(SetCellEditVisibleOperation.id, {
                 visible: false,
                 eventType: DeviceInputEventType.PointerDown,
-                unitId: currentWorkbook?.getUnitId() ?? '',
+                unitId: editState!.unitId,
             });
         }
     }
@@ -210,8 +215,6 @@ export function FormulaBar() {
     const { viewDisable, editDisable } = disableInfo;
     const disabled = editDisable || imageDisable;
     const shouldSkipFocus = useRef(false);
-    const commandService = useDependency(ICommandService);
-    const unitId = currentWorkbook?.getUnitId() ?? '';
 
     const handlePointerDown = () => {
         try {
@@ -223,7 +226,7 @@ export function FormulaBar() {
                     {
                         visible: true,
                         eventType: DeviceInputEventType.PointerDown,
-                        unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+                        unitId: editState!.unitId,
                     } as IEditorBridgeServiceVisibleParam
                 );
                 // undoRedoService.clearUndoRedo(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
@@ -246,16 +249,19 @@ export function FormulaBar() {
         shouldSkipFocus.current = false;
     };
 
+    const isCellImage = (editState?.documentLayoutObject.documentModel?.getDrawingsOrder()?.length ?? 0) > 0;
+    const hideEditor = isCellImage || viewDisable;
+
     return (
         <div
-            className={styles.formulaBox}
+            className={clsx(styles.formulaBox, className)}
             style={{
                 height: ArrowDirection.Down === arrowDirection ? '28px' : '82px',
                 pointerEvents: editDisable ? 'none' : 'auto',
             }}
         >
             <div className={styles.nameRanges}>
-                <DefinedName disable={editDisable} />
+                <DefinedName disable={disableDefinedName ?? editDisable} />
             </div>
 
             <div className={styles.formulaBar}>
@@ -287,6 +293,7 @@ export function FormulaBar() {
                         onPointerDown={handlePointerDown}
                         onPointerUp={handlePointerUp}
                         ref={ref}
+                        style={{ pointerEvents: hideEditor ? 'none' : 'auto' }}
                     >
                         {FormulaEditor && (
                             <FormulaEditor
@@ -314,6 +321,7 @@ export function FormulaBar() {
                                 disableContextMenu={false}
                             />
                         )}
+                        {hideEditor ? <div className={styles.formulaInputMask} /> : null}
                     </div>
                     <div className={clsx(styles.arrowContainer, { [styles.arrowContainerDisable]: editDisable })} onClick={handleArrowClick}>
                         {arrowDirection === ArrowDirection.Down
@@ -327,7 +335,7 @@ export function FormulaBar() {
                 </div>
             </div>
 
-            <ComponentContainer key="formula-aux" components={formulaAuxUIParts}></ComponentContainer>
+            <ComponentContainer key="formula-aux" components={formulaAuxUIParts} />
         </div>
     );
 }

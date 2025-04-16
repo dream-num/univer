@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,8 @@
 
 import type {
     IDisposable,
-    Nullable } from '@univerjs/core';
+    Nullable,
+} from '@univerjs/core';
 import {
     ICommandService,
     Inject,
@@ -26,17 +27,13 @@ import {
     RxDisposable,
     toDisposable,
 } from '@univerjs/core';
-import { SearchSingle16 } from '@univerjs/icons';
-import { ComponentManager,
-    IDialogService,
-    ILayoutService,
-    IMenuManagerService,
-    IShortcutService,
-} from '@univerjs/ui';
+import { SearchSingle } from '@univerjs/icons';
+import { ComponentManager, IDialogService, ILayoutService, IMenuManagerService, IShortcutService } from '@univerjs/ui';
 import { takeUntil } from 'rxjs';
 
 import { ReplaceAllMatchesCommand, ReplaceCurrentMatchCommand } from '../commands/commands/replace.command';
 import {
+    FocusSelectionOperation,
     GoToNextMatchOperation,
     GoToPreviousMatchOperation,
     OpenFindDialogOperation,
@@ -45,6 +42,7 @@ import {
 import { IFindReplaceService } from '../services/find-replace.service';
 import { FindReplaceDialog } from '../views/dialog/FindReplaceDialog';
 import {
+    FocusSelectionShortcutItem,
     GoToNextFindMatchShortcutItem,
     GoToPreviousFindMatchShortcutItem,
     MacOpenFindDialogShortcutItem,
@@ -94,6 +92,7 @@ export class FindReplaceController extends RxDisposable {
             GoToPreviousMatchOperation,
             ReplaceAllMatchesCommand,
             ReplaceCurrentMatchCommand,
+            FocusSelectionOperation,
         ].forEach((c) => {
             this.disposeWithMe(this._commandService.registerCommand(c));
         });
@@ -106,12 +105,13 @@ export class FindReplaceController extends RxDisposable {
             MacOpenFindDialogShortcutItem,
             GoToPreviousFindMatchShortcutItem,
             GoToNextFindMatchShortcutItem,
+            FocusSelectionShortcutItem,
         ].forEach((s) => this.disposeWithMe(this._shortcutService.registerShortcut(s)));
     }
 
     private _initUI(): void {
         this.disposeWithMe(this._componentManager.register('FindReplaceDialog', FindReplaceDialog));
-        this.disposeWithMe(this._componentManager.register('SearchIcon', SearchSingle16));
+        this.disposeWithMe(this._componentManager.register('SearchIcon', SearchSingle));
 
         this._menuManagerService.mergeMenu(menuSchema);
 

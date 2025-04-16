@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,15 @@
  */
 
 import type { IObjectArrayPrimitiveType, IRowData, Nullable } from '@univerjs/core';
+import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { BooleanNumber } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
-import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
-import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
-import { BaseFunction } from '../../base-function';
 import { createNewArray } from '../../../engine/utils/array-object';
+import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
-import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
+import { BaseFunction } from '../../base-function';
 
 enum FunctionNum {
     AVERAGE = 1,
@@ -59,26 +60,15 @@ export class Subtotal extends BaseFunction {
 
     override needsReferenceObject = true;
 
+    override needsFilteredOutRows = true;
+
     override calculate(functionNum: FunctionVariantType, ...refs: FunctionVariantType[]) {
         if (functionNum.isError()) {
             return functionNum;
         }
 
         if (functionNum.isReferenceObject()) {
-            const result: BaseValueObject[][] = [];
-
-            (functionNum as BaseReferenceObject).iterator((valueObject, rowIndex, columnIndex) => {
-                if (result[rowIndex] == null) {
-                    result[rowIndex] = [];
-                }
-
-                result[rowIndex][columnIndex] = this._handleSingleObject(
-                    valueObject,
-                    ...refs
-                );
-            });
-
-            return createNewArray(result, result.length, result[0].length);
+            return (functionNum as BaseReferenceObject).toArrayValueObject().mapValue((valueObject) => this._handleSingleObject(valueObject, ...refs));
         }
 
         return this._handleSingleObject(functionNum as BaseValueObject, ...refs);
@@ -204,9 +194,15 @@ export class Subtotal extends BaseFunction {
                 return ErrorValueObject.create(ErrorType.VALUE);
             }
 
+            const filteredOutRows = (variant as BaseReferenceObject).getFilteredOutRows();
             const rowData = (variant as BaseReferenceObject).getRowData();
 
             (variant as BaseReferenceObject).iterator((valueObject, rowIndex) => {
+                // Filtered rows are always excluded.
+                if (filteredOutRows.includes(rowIndex)) {
+                    return true; // continue
+                }
+
                 if (ignoreHidden && this._isRowHidden(rowData, rowIndex)) {
                     return true;
                 }
@@ -229,9 +225,15 @@ export class Subtotal extends BaseFunction {
                 return ErrorValueObject.create(ErrorType.VALUE);
             }
 
+            const filteredOutRows = (variant as BaseReferenceObject).getFilteredOutRows();
             const rowData = (variant as BaseReferenceObject).getRowData();
 
             (variant as BaseReferenceObject).iterator((valueObject, rowIndex) => {
+                // Filtered rows are always excluded.
+                if (filteredOutRows.includes(rowIndex)) {
+                    return true; // continue
+                }
+
                 if (ignoreHidden && this._isRowHidden(rowData, rowIndex)) {
                     return true;
                 }
@@ -377,11 +379,17 @@ export class Subtotal extends BaseFunction {
                 return ErrorValueObject.create(ErrorType.VALUE);
             }
 
+            const filteredOutRows = (variant as BaseReferenceObject).getFilteredOutRows();
             const rowData = (variant as BaseReferenceObject).getRowData();
 
             let errorValue: Nullable<BaseValueObject>;
 
             (variant as BaseReferenceObject).iterator((valueObject, rowIndex) => {
+                // Filtered rows are always excluded.
+                if (filteredOutRows.includes(rowIndex)) {
+                    return true; // continue
+                }
+
                 if (ignoreHidden && this._isRowHidden(rowData, rowIndex)) {
                     return true; // continue
                 }
@@ -407,8 +415,7 @@ export class Subtotal extends BaseFunction {
         return createNewArray(flattenValues, 1, flattenValues[0].length);
     }
 
-    private _isRowHidden(rowData: IObjectArrayPrimitiveType<Partial<IRowData>>, rowIndex: number
-    ) {
+    private _isRowHidden(rowData: IObjectArrayPrimitiveType<Partial<IRowData>>, rowIndex: number) {
         const row = rowData[rowIndex];
         if (!row) {
             return false;

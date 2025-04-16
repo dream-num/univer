@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDisposable, INeedCheckDisposable, ITextRangeParam } from '@univerjs/core';
+import type { INeedCheckDisposable, ITextRangeParam } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { BaseObject, Documents, IBoundRectNoAngle, IRender, Scene } from '@univerjs/engine-render';
 import type { IPopup } from '@univerjs/ui';
@@ -84,7 +84,7 @@ export function transformOffset2Bound(offsetX: number, offsetY: number, scene: S
     };
 }
 
-export interface IDocCanvasPopup extends Pick<IPopup, 'direction' | 'excludeOutside' | 'componentKey' | 'offset' | 'onClickOutside' | 'hideOnInvisible'> {
+export interface IDocCanvasPopup extends Omit<IPopup, 'anchorRect$' | 'children' | 'unitId' | 'subUnitId' | 'canvasElement'> {
     mask?: boolean;
     extraProps?: Record<string, any>;
     multipleDirection?: IPopup['direction'];
@@ -94,7 +94,8 @@ export const calcDocRangePositions = (range: ITextRangeParam, currentRender: IRe
     const { scene, mainComponent, engine } = currentRender;
     const skeleton = currentRender.with(DocSkeletonManagerService).getSkeleton();
     const startPosition = skeleton.findNodePositionByCharIndex(range.startOffset, true, range.segmentId, range.segmentPage);
-    const endPosition = skeleton.findNodePositionByCharIndex(range.endOffset, true, range.segmentId, range.segmentPage);
+    const endIndex = range.collapsed ? range.startOffset : range.endOffset - 1;
+    const endPosition = skeleton.findNodePositionByCharIndex(endIndex, true, range.segmentId, range.segmentPage);
     const document = mainComponent as Documents;
 
     if (!endPosition || !startPosition) {
@@ -133,20 +134,10 @@ export class DocCanvasPopManagerService extends Disposable {
         super();
     }
 
-    private _createObjectPositionObserver(
-        targetObject: BaseObject,
-        currentRender: IRender
-    ) {
+    private _createRectPositionObserver(rect: IBoundRectNoAngle | (() => IBoundRectNoAngle), currentRender: IRender) {
         const calc = () => {
             const { scene, engine } = currentRender;
-            const { left, top, width, height } = targetObject;
-
-            const bound: IBoundRectNoAngle = {
-                left,
-                right: left + width,
-                top,
-                bottom: top + height,
-            };
+            const bound: IBoundRectNoAngle = typeof rect === 'function' ? rect() : rect;
             const canvasElement = engine.getCanvasElement();
             const canvasClientRect = canvasElement.getBoundingClientRect();
             const widthOfCanvas = pxToNum(canvasElement.style.width); // declared width
@@ -191,6 +182,24 @@ export class DocCanvasPopManagerService extends Disposable {
         };
     }
 
+    private _createObjectPositionObserver(
+        targetObject: BaseObject,
+        currentRender: IRender
+    ) {
+        const getBound = () => {
+            const { left, top, width, height } = targetObject;
+            const bound: IBoundRectNoAngle = {
+                left,
+                right: left + width,
+                top,
+                bottom: top + height,
+            };
+            return bound;
+        };
+
+        return this._createRectPositionObserver(getBound, currentRender);
+    }
+
     private _createRangePositionObserver(range: ITextRangeParam, currentRender: IRender) {
         const positions = calcDocRangePositions(range, currentRender) ?? [];
         const positions$ = new BehaviorSubject(positions);
@@ -225,6 +234,32 @@ export class DocCanvasPopManagerService extends Disposable {
         };
     }
 
+    attachPopupToRect(rect: IBoundRectNoAngle, popup: IDocCanvasPopup, unitId: string): INeedCheckDisposable {
+        const currentRender = this._renderManagerService.getRenderById(unitId);
+        if (!currentRender) {
+            throw new Error(`Current render not found, unitId: ${unitId}`);
+        }
+
+        const { position, position$, disposable } = this._createRectPositionObserver(rect, currentRender);
+        const id = this._globalPopupManagerService.addPopup({
+            ...popup,
+            unitId,
+            subUnitId: 'default',
+            anchorRect: position,
+            anchorRect$: position$,
+            canvasElement: currentRender.engine.getCanvasElement(),
+        });
+
+        return {
+            dispose: () => {
+                this._globalPopupManagerService.removePopup(id);
+                position$.complete();
+                disposable.dispose();
+            },
+            canDispose: () => this._globalPopupManagerService.activePopupId !== id,
+        };
+    }
+
     // #region attach to object
     /**
      * attach a popup to canvas object
@@ -232,7 +267,7 @@ export class DocCanvasPopManagerService extends Disposable {
      * @param popup popup item
      * @returns disposable
      */
-    attachPopupToObject(targetObject: BaseObject, popup: IDocCanvasPopup, unitId: string): IDisposable {
+    attachPopupToObject(targetObject: BaseObject, popup: IDocCanvasPopup, unitId: string): INeedCheckDisposable {
         const currentRender = this._renderManagerService.getRenderById(unitId);
         if (!currentRender) {
             throw new Error(`Current render not found, unitId: ${unitId}`);
@@ -254,6 +289,7 @@ export class DocCanvasPopManagerService extends Disposable {
                 position$.complete();
                 disposable.dispose();
             },
+            canDispose: () => this._globalPopupManagerService.activePopupId !== id,
         };
     }
 
@@ -279,6 +315,7 @@ export class DocCanvasPopManagerService extends Disposable {
 
         const { positions: bounds, positions$: bounds$, disposable } = this._createRangePositionObserver(range, currentRender);
         const position$ = bounds$.pipe(map((bounds) => direction.includes('top') ? bounds[0] : bounds[bounds.length - 1]));
+
         const id = this._globalPopupManagerService.addPopup({
             ...popup,
             unitId,
@@ -287,10 +324,11 @@ export class DocCanvasPopManagerService extends Disposable {
             anchorRect$: position$,
             excludeRects: bounds,
             excludeRects$: bounds$,
-            direction:
-                (direction.includes('top') || direction.includes('bottom')) ?
-                    bounds.length > 1 ? multipleDirection : direction
-                    : 'bottom',
+            direction: (['top', 'bottom', 'horizontal'].some((i) => direction.includes(i)))
+                ? bounds.length > 1
+                    ? multipleDirection ?? direction
+                    : direction
+                : direction,
             canvasElement: currentRender.engine.getCanvasElement(),
         });
 

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,25 +17,82 @@
 import type { MenuItemGroupProps, MenuItemProps, MenuProps, MenuRef, SubMenuProps } from 'rc-menu';
 import RcMenu, { MenuItem as RcMenuItem, MenuItemGroup as RcMenuItemGroup, SubMenu as RcSubMenu } from 'rc-menu';
 import React, { useContext } from 'react';
-
+import { clsx } from '../../helper/clsx';
 import { ConfigContext } from '../config-provider/ConfigProvider';
+import { Tooltip } from '../tooltip';
 import styles from './index.module.less';
 
-export const Menu = React.forwardRef<MenuRef, MenuProps>((props, ref) => {
+export const Menu = React.forwardRef<MenuRef, MenuProps & { wrapperClass?: string }>((props, ref) => {
     const { mountContainer } = useContext(ConfigContext);
-    return mountContainer && React.cloneElement(<RcMenu ref={ref} prefixCls={styles.menu} getPopupContainer={() => mountContainer} />, {
-        ...props,
-    });
+    return mountContainer && (
+        <RcMenu
+            ref={ref}
+            prefixCls={clsx(styles.menu, props.className)}
+            getPopupContainer={() => mountContainer}
+            {...props}
+            className={props.wrapperClass}
+        />
+    );
 });
 
 export function MenuItem(props: MenuItemProps) {
-    return React.cloneElement(<RcMenuItem />, { ...props });
+    return <RcMenuItem {...props} />;
 }
 
 export function SubMenu(props: SubMenuProps) {
-    return React.cloneElement(<RcSubMenu />, { ...props });
+    return <RcSubMenu {...props} />;
 }
 
 export function MenuItemGroup(props: MenuItemGroupProps) {
-    return React.cloneElement(<RcMenuItemGroup />, { ...props });
+    return <RcMenuItemGroup {...props} />;
+}
+
+export interface ITinyMenuItem {
+    onClick: () => void;
+    className: string;
+    Icon: React.ComponentType<{ className?: string }>;
+    key: string;
+    active?: boolean;
+    tooltip?: string;
+}
+
+export interface ITinyMenuGroupProps {
+    items: ITinyMenuItem[];
+}
+
+export function TinyMenuGroup({ items }: ITinyMenuGroupProps) {
+    return (
+        <div
+            className={`
+              univer-flex univer-flex-wrap univer-gap-2.5 univer-menu-item-group univer-p-1 univer-pl-0 univer-pr-0
+            `}
+        >
+            {items.map((item) => {
+                const ele = (
+                    <div
+                        key={item.key}
+                        onClick={() => item.onClick()}
+                        className={`
+                          univer-flex univer-h-6 univer-w-6 univer-cursor-pointer univer-items-center
+                          univer-justify-center univer-rounded-md
+                          hover:univer-bg-[#EEEFF1]
+                          ${item.active ? 'univer-bg-[#EEEFF1]' : ''}
+                          ${item.className}
+                        `}
+                    >
+                        <item.Icon className="univer-h-4 univer-w-4 univer-text-[#181C2A]" />
+                    </div>
+                );
+                return item.tooltip
+                    ? (
+                        <Tooltip key={item.key} title={item.tooltip}>
+                            {ele}
+                        </Tooltip>
+                    )
+                    : (
+                        ele
+                    );
+            })}
+        </div>
+    );
 }

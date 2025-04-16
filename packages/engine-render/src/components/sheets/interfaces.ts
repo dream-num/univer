@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,10 @@
 import type {
     BorderStyleTypes,
     HorizontalAlign,
+    ICellDataForSheetInterceptor,
     ICellWithCoord,
-    IFontRenderExtension,
     ImageCacheMap,
+    Nullable,
     ObjectMatrix,
     VerticalAlign,
     WrapStrategy,
@@ -42,18 +43,13 @@ export interface BorderCacheItem {
 
 export interface IFontCacheItem {
     documentSkeleton: DocumentSkeleton;
-    // marginTop?: number;
-    // marginBottom?: number;
-    // marginRight?: number;
-    // marginLeft?: number;
     vertexAngle?: number; // Text rotation offset based on the top-left corner.
     centerAngle?: number; // Text rotation based on the center point.
     verticalAlign: VerticalAlign;
     horizontalAlign: HorizontalAlign;
     wrapStrategy: WrapStrategy;
-    // content?: string;
     imageCacheMap: ImageCacheMap;
-    fontRenderExtension?: IFontRenderExtension;
+    cellData: Nullable<ICellDataForSheetInterceptor>;
 }
 
 type colorString = string;
@@ -61,6 +57,9 @@ export interface IStylesCache {
     background?: Record<colorString, ObjectMatrix<string>>;
     backgroundPositions?: ObjectMatrix<ICellWithCoord>;
     font?: Record<string, ObjectMatrix<IFontCacheItem>>;
+    /**
+     * Get value from getCell in skeleton and this value is used in font extension
+     */
     fontMatrix: ObjectMatrix<IFontCacheItem>;
     border?: ObjectMatrix<BorderCache>;
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, Viewpor
 import type { ISelectionWithCoord, ISelectionWithStyle, ISetSelectionsOperationParams, WorkbookSelectionModel } from '@univerjs/sheets';
 import type { ISheetObjectParam } from '../../controllers/utils/component-tools';
 import type { SelectionControl } from './selection-control';
-import { ICommandService, IContextService, ILogService, Inject, Injector, RANGE_TYPE, ThemeService, toDisposable } from '@univerjs/core';
+import { ICommandService, IContextService, ILogService, Inject, Injector, RANGE_TYPE, Rectangle, ThemeService, toDisposable } from '@univerjs/core';
 import { ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 import { convertSelectionDataToRange, REF_SELECTIONS_ENABLED, SelectionMoveType, SELECTIONS_ENABLED, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { IShortcutService } from '@univerjs/ui';
@@ -92,7 +92,7 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
                 if (this.isSelectionDisabled()) return;
                 if (this.inRefSelectionMode()) return;
 
-                const skeleton = this._sheetSkeletonManagerService.getCurrent()!.skeleton;
+                const skeleton = this._sheetSkeletonManagerService.getCurrentParam()!.skeleton;
                 const { row } = getCoordByOffset(evt.offsetX, evt.offsetY, scene, skeleton);
                 const matchSelectionData = isThisRowSelected(this._workbookSelections.getCurrentSelections(), row);
                 if (matchSelectionData) return;
@@ -108,8 +108,11 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
             if (this.isSelectionDisabled()) return;
             if (this.inRefSelectionMode()) return;
 
-            const skeleton = this._sheetSkeletonManagerService.getCurrent()!.skeleton;
+            const skeleton = this._sheetSkeletonManagerService.getCurrentParam()!.skeleton;
             const { column } = getCoordByOffset(evt.offsetX, evt.offsetY, scene, skeleton);
+
+            // We should take if this is col selection into consideration.
+
             const matchSelectionData = isThisColSelected(this._workbookSelections.getCurrentSelections(), column);
             if (matchSelectionData) return;
 
@@ -126,7 +129,7 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
 
             this._reset(); // remove all other selections
 
-            const skeleton = this._sheetSkeletonManagerService.getCurrent()!.skeleton;
+            const skeleton = this._sheetSkeletonManagerService.getCurrentParam()!.skeleton;
             const selectionWithStyle = selectionDataForSelectAll(skeleton);
             this._addSelectionControlByModelData(selectionWithStyle);
             this.refreshSelectionMoveEnd();
@@ -386,16 +389,12 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
         const cursorRangeWidthCoord: IRangeWithCoord = { ...selectionCellWithCoord.rangeWithCoord, rangeType };
         const curControls = this.getSelectionControls();
         for (const control of curControls) {
-            // right click
-            if (evt.button === 2 && control.model.isInclude(cursorRangeWidthCoord)) {
+            // If right click on a selection, we should not create a new selection control.
+            // Instead, the context menu will popup.
+            if (evt.button === 2 && Rectangle.contains(control.model, cursorRangeWidthCoord)) {
                 activeSelectionControl = control;
                 return;
             }
-            // Click to an existing selection, then what?
-            // if (control.model.isEqual(cursorCellRangeWithRangeType)) {
-            //     activeSelectionControl = control;
-            //     break;
-            // }
         }
 
         this._checkClearPreviousControls(evt);

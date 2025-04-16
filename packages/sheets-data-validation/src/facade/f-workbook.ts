@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { DataValidationStatus, IDisposable, IExecutionOptions, Nullable, ObjectMatrix } from '@univerjs/core';
 import type { IRuleChange } from '@univerjs/data-validation';
 import type {
     IAddSheetDataValidationCommandParams,
@@ -24,7 +25,7 @@ import type {
     IUpdateSheetDataValidationSettingCommandParams,
     IValidStatusChange,
 } from '@univerjs/sheets-data-validation';
-import { type DataValidationStatus, type IDisposable, type IExecutionOptions, type Nullable, type ObjectMatrix, toDisposable } from '@univerjs/core';
+import { toDisposable } from '@univerjs/core';
 
 import {
     AddSheetDataValidationCommand,
@@ -48,10 +49,12 @@ export interface IFWorkbookDataValidationMixin {
      * @returns A promise that resolves to a matrix of validator status.
      * @example
      * ```ts
-     * univerAPI.getActiveWorkbook().getValidatorStatus().then((status) => { console.log(status) })
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const status = await fWorkbook.getValidatorStatus();
+     * console.log(status);
      * ```
      */
-    getValidatorStatus(this: FWorkbook): Promise<Record<string, ObjectMatrix<Nullable<DataValidationStatus>>>>;
+    getValidatorStatus(): Promise<Record<string, ObjectMatrix<Nullable<DataValidationStatus>>>>;
 
     /**
      * @deprecated Use `univerAPI.addEvent(univerAPI.Event.SheetDataValidationChanged, (event) => { ... })` instead
@@ -90,6 +93,7 @@ export interface IFWorkbookDataValidationMixin {
         this: FWorkbook,
         callback: (params: IUpdateSheetDataValidationRangeCommandParams, options: IExecutionOptions | undefined) => void | false
     ): IDisposable;
+
     /**
      * @deprecated Use `univerAPI.addEvent(univerAPI.Event.BeforeSheetDataValidationOptionsUpdate, (event) => { ... })` instead
      */

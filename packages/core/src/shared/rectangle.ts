@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
+import type { BBox } from 'rbush';
+import type { IRange, IRectLTRB } from '../sheets/typedef';
 import type { Nullable } from './types';
-import { AbsoluteRefType, type IRange, type IRectLTRB, RANGE_TYPE } from '../sheets/typedef';
+import RBush from 'rbush';
+import { AbsoluteRefType, RANGE_TYPE } from '../sheets/typedef';
 import { mergeRanges, multiSubtractSingleRange, splitIntoGrid } from './range';
 
 /**
@@ -164,6 +167,30 @@ export class Rectangle {
         const y = Math.abs(currentStartRow - currentEndRow) + Math.abs(incomingStartRow - incomingEndRow);
 
         return zx <= x && zy <= y;
+    }
+
+    /**
+     * Checks if any of the ranges in the target array intersect with any of the ranges in the source array.
+     * Attention! Please make sure there is no NaN in the ranges.
+     * @param src
+     * @param target
+     * @example
+     * ```typescript
+     * const ranges1 = [
+     *   { startRow: 0, startColumn: 0, endRow: 2, endColumn: 2 },
+     *   { startRow: 3, startColumn: 3, endRow: 5, endColumn: 5 }
+     * ];
+     * const ranges2 = [
+     *   { startRow: 1, startColumn: 1, endRow: 4, endColumn: 4 },
+     *   { startRow: 6, startColumn: 6, endRow: 8, endColumn: 8 }
+     * ];
+     * const doIntersect = Rectangle.doAnyRangesIntersect(ranges1, ranges2); // true
+     * ```
+     */
+    static doAnyRangesIntersect(src: IRange[], target: IRange[]): boolean {
+        const rbush = new RBush<BBox>();
+        rbush.load(src.map((r) => ({ minX: r.startColumn, minY: r.startRow, maxX: r.endColumn, maxY: r.endRow })));
+        return target.some((r) => rbush.search({ minX: r.startColumn, minY: r.startRow, maxX: r.endColumn, maxY: r.endRow }).length > 0);
     }
 
     /**
@@ -612,18 +639,18 @@ export class Rectangle {
      * ```
      */
     static getIntersectionBetweenTwoRect(rect1: IRectLTRB, rect2: IRectLTRB) {
-        // 计算两个矩形的交集部分的坐标
+        // Calculating the coordinates of the intersection part of the two rectangles
         const left = Math.max(rect1.left, rect2.left);
         const right = Math.min(rect1.right, rect2.right);
         const top = Math.max(rect1.top, rect2.top);
         const bottom = Math.min(rect1.bottom, rect2.bottom);
 
-        // 如果交集部分的宽度或高度小于等于 0，说明两个矩形不相交
+        // If the width or height of the intersection part is less than or equal to 0, it means that the two rectangles do not intersect
         if (right <= left || bottom <= top) {
             return null;
         }
 
-        // 返回交集部分的矩形
+        // Return the rectangle of the intersection part
         return {
             left,
             right,

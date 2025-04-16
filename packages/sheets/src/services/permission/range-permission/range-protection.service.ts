@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,7 +70,8 @@ export class RangeProtectionService extends Disposable {
                         break;
                     }
                 }
-            }));
+            })
+        );
     }
 
     private _initSnapshot() {
@@ -91,7 +92,8 @@ export class RangeProtectionService extends Disposable {
         };
         this.disposeWithMe(
             this._resourceManagerService.registerPluginResource({
-                toJson, parseJson,
+                toJson,
+                parseJson,
                 pluginName: PLUGIN_NAME,
                 businesses: [UniverType.UNIVER_SHEET],
                 onLoad: (unitId, resources) => {
@@ -132,4 +134,3 @@ export class RangeProtectionService extends Disposable {
         );
     }
 }
-

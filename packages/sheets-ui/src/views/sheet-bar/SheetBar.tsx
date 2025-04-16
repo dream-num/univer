@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,12 @@
  */
 
 import type { IScrollState } from './sheet-bar-tabs/utils/slide-tab-bar';
-import { ICommandService, IPermissionService, useDependency } from '@univerjs/core';
+import { ICommandService, IPermissionService } from '@univerjs/core';
+import { clsx } from '@univerjs/design';
 import { IncreaseSingle, MoreSingle } from '@univerjs/icons';
 import { InsertSheetCommand, WorkbookCreateSheetPermission, WorkbookEditablePermission } from '@univerjs/sheets';
 
-import { useObservable } from '@univerjs/ui';
+import { useDependency, useObservable } from '@univerjs/ui';
 import React, { useEffect, useState } from 'react';
 import { useActiveWorkbook } from '../../components/hook';
 import { ISheetBarService } from '../../services/sheet-bar/sheet-bar.service';
@@ -77,7 +78,7 @@ export const SheetBar = () => {
     };
 
     return (
-        <div className={styles.sheetBar}>
+        <div className={clsx(styles.sheetBar, 'univer-relative univer-flex univer-h-full univer-flex-1')}>
             <div className={styles.sheetBarOptions}>
                 {/* Add sheet button */}
                 <SheetBarButton onClick={addSheet} disabled={!(workbookCreateSheetPermission?.value && workbookEditablePermission?.value)}>
@@ -92,10 +93,11 @@ export const SheetBar = () => {
 
             {/* Scroll arrows */}
             {(!leftScrollState || !rightScrollState) && (
-                <div className={`
-                  ${styles.sheetBarOptions}
-                  ${styles.sheetBarOptionsDivider}
-                `}
+                <div
+                    className={`
+                      ${styles.sheetBarOptions}
+                      ${styles.sheetBarOptionsDivider}
+                    `}
                 >
                     <SheetBarButton disabled={leftScrollState} onClick={handleScrollLeft}>
                         <MoreSingle style={{ transform: 'rotateZ(180deg)' }} />

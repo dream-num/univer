@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,22 +14,17 @@
  * limitations under the License.
  */
 
-import { useDependency } from '@univerjs/core';
-import clsx from 'clsx';
-import React, { useEffect, useMemo, useState } from 'react';
+import { clsx } from '@univerjs/design';
+import { useEffect, useMemo, useState } from 'react';
 import { ComponentManager } from '../../../common/component-manager';
-import { useObservable } from '../../../components/hooks/observable';
 import { IGlobalZoneService } from '../../../services/global-zone/global-zone.service';
-
-import styles from './index.module.less';
+import { useDependency, useObservable } from '../../../utils/di';
 
 export function GlobalZone() {
     const globalZoneService = useDependency(IGlobalZoneService);
     const [visible, setVisible] = useState(false);
     const componentKey = useObservable(globalZoneService.componentKey$, globalZoneService.componentKey);
     const componentManager = useDependency(ComponentManager);
-
-    const _className = clsx(styles.globalZone, styles.globalZoneOpen);
 
     const Component = useMemo(() => {
         const Component = componentManager.get(componentKey ?? '');
@@ -52,5 +47,17 @@ export function GlobalZone() {
         return null;
     }
 
-    return <section className={_className}>{Component && <Component />}</section>;
+    return (
+        <section
+            className={clsx(
+                'univer-absolute univer-bg-gray-100',
+                {
+                    'univer-hidden': !visible,
+                    'univer-inset-0 univer-z-[100] univer-block univer-size-full': visible,
+                }
+            )}
+        >
+            {Component && <Component />}
+        </section>
+    );
 }

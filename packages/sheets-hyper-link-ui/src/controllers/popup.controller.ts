@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -122,7 +122,7 @@ export class SheetsHyperLinkPopupController extends Disposable {
                 }
 
                 const skeleton = renderer?.with(SheetSkeletonManagerService)
-                    .getWorksheetSkeleton(subUnitId)
+                    .getSkeletonParam(subUnitId)
                     ?.skeleton;
 
                 const currentCol = col;
@@ -210,7 +210,7 @@ export class SheetsHyperLinkPopupController extends Disposable {
                         const rect = customRange.rects[customRange.rects.length - 1];
                         const skeleton = this._renderManagerService.getRenderById(unitId)
                             ?.with(SheetSkeletonManagerService)
-                            .getWorksheetSkeleton(sheetId)
+                            .getSkeletonParam(sheetId)
                             ?.skeleton;
                         if (!skeleton || !rect) {
                             return;

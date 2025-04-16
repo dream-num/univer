@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -127,7 +127,7 @@ export function getCoordByOffset(
 
     const { row, column } = moveActualSelection;
 
-    const startCell = skeleton.getNoMergeCellPositionByIndex(row, column);
+    const startCell = skeleton.getNoMergeCellWithCoordByIndex(row, column);
 
     const { startX, startY, endX, endY } = startCell;
 

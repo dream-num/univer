@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,7 +74,7 @@ interface ISheetLocationForEditor extends ISheetLocation {
 
 export const BEFORE_CELL_EDIT = createInterceptorKey<ICellDataForSheetInterceptor, ISheetLocationForEditor>('BEFORE_CELL_EDIT');
 export const AFTER_CELL_EDIT = createInterceptorKey<ICellDataForSheetInterceptor, ISheetLocationForEditor>('AFTER_CELL_EDIT');
-export const AFTER_CELL_EDIT_ASYNC = createInterceptorKey<Promise<Nullable<ICellDataForSheetInterceptor>>, ISheetLocationForEditor>('AFTER_CELL_EDIT_ASYNC');
+export const VALIDATE_CELL = createInterceptorKey<Promise<boolean>, ISheetLocation>('VALIDATE_CELL');
 
 /**
  * This class expose methods for sheet features to inject code to sheet underlying logic.
@@ -96,7 +96,7 @@ export class SheetInterceptorService extends Disposable {
     readonly writeCellInterceptor = new InterceptorManager({
         BEFORE_CELL_EDIT,
         AFTER_CELL_EDIT,
-        AFTER_CELL_EDIT_ASYNC,
+        VALIDATE_CELL,
     });
 
     /** @ignore */
@@ -139,7 +139,7 @@ export class SheetInterceptorService extends Disposable {
             handler: (_value) => _value,
         }));
 
-        this.disposeWithMe(this.writeCellInterceptor.intercept(AFTER_CELL_EDIT_ASYNC, {
+        this.disposeWithMe(this.writeCellInterceptor.intercept(VALIDATE_CELL, {
             priority: -1,
             handler: (_value) => _value,
         }));
@@ -277,7 +277,7 @@ export class SheetInterceptorService extends Disposable {
 
     // #region intercept on writing cell
 
-    async onWriteCell(workbook: Workbook, worksheet: Worksheet, row: number, col: number, cellData: ICellData) {
+    onWriteCell(workbook: Workbook, worksheet: Worksheet, row: number, col: number, cellData: ICellData) {
         const context = {
             subUnitId: worksheet.getSheetId(),
             unitId: workbook.getUnitId(),
@@ -288,12 +288,23 @@ export class SheetInterceptorService extends Disposable {
             origin: Tools.deepClone(cellData),
         };
 
-        const cell = this.writeCellInterceptor.fetchThroughInterceptors(AFTER_CELL_EDIT)(cellData, context);
-        const finalCell = await this.writeCellInterceptor.fetchThroughInterceptors(AFTER_CELL_EDIT_ASYNC)(Promise.resolve(cell), context);
-        return finalCell;
+        return this.writeCellInterceptor.fetchThroughInterceptors(AFTER_CELL_EDIT)(cellData, context);
     }
 
     // #endregion
+
+    onValidateCell(workbook: Workbook, worksheet: Worksheet, row: number, col: number) {
+        const context: ISheetLocation = {
+            subUnitId: worksheet.getSheetId(),
+            unitId: workbook.getUnitId(),
+            workbook: workbook!,
+            worksheet,
+            row,
+            col,
+        };
+
+        return this.writeCellInterceptor.fetchThroughInterceptors(VALIDATE_CELL)(Promise.resolve(true), context);
+    }
 
     intercept<T extends IInterceptor<any, any>>(name: T, interceptor: T): IDisposable {
         const key = name as unknown as string;
@@ -305,11 +316,11 @@ export class SheetInterceptorService extends Disposable {
         interceptors.push(interceptor);
         const sortedInterceptors = interceptors.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
 
+        this._interceptorsDirty = true;
+
         if (key === INTERCEPTOR_POINT.CELL_CONTENT as unknown as string) {
-            this._interceptorsByName.set(
-                `${key}-${(InterceptorEffectEnum.Style | InterceptorEffectEnum.Value)}`,
-                sortedInterceptors
-            );
+            const JOINED_EFFECT = InterceptorEffectEnum.Style | InterceptorEffectEnum.Value;
+            this._interceptorsByName.set(`${key}-${JOINED_EFFECT}`, sortedInterceptors);
 
             const BOTH_EFFECT = InterceptorEffectEnum.Style | InterceptorEffectEnum.Value;
             this._interceptorsByName.set(
@@ -320,15 +331,17 @@ export class SheetInterceptorService extends Disposable {
                 `${key}-${(InterceptorEffectEnum.Value)}`,
                 (sortedInterceptors as ICellInterceptor<unknown, unknown>[]).filter((i) => ((i.effect || BOTH_EFFECT) & InterceptorEffectEnum.Value) > 0)
             );
-        } else {
-            this._interceptorsByName.set(
-                key,
-                sortedInterceptors
-            );
-        }
 
-        this._interceptorsDirty = true;
-        return this.disposeWithMe(toDisposable(() => remove(this._interceptorsByName.get(key)!, interceptor)));
+            return this.disposeWithMe(toDisposable(() => {
+                remove(this._interceptorsByName.get(key)!, interceptor);
+                remove(this._interceptorsByName.get(`${key}-${JOINED_EFFECT}`)!, interceptor);
+                remove(this._interceptorsByName.get(`${key}-${(InterceptorEffectEnum.Style)}`)!, interceptor);
+                remove(this._interceptorsByName.get(`${key}-${(InterceptorEffectEnum.Value)}`)!, interceptor);
+            }));
+        } else {
+            this._interceptorsByName.set(key, sortedInterceptors);
+            return this.disposeWithMe(toDisposable(() => remove(this._interceptorsByName.get(key)!, interceptor)));
+        }
     }
 
     fetchThroughInterceptors<T, C>(
@@ -385,7 +398,8 @@ export class SheetInterceptorService extends Disposable {
                                 worksheet,
                                 workbook,
                                 rawData,
-                            });
+                            }
+                        );
                     },
                 }));
 

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,17 +15,16 @@
  */
 
 import type { IDrawingParam } from '@univerjs/core';
-import { ICommandService, LocaleService, useDependency } from '@univerjs/core';
-import React, { useState } from 'react';
-import { Select } from '@univerjs/design';
-import clsx from 'clsx';
+import { ICommandService, LocaleService } from '@univerjs/core';
+import { clsx, Select } from '@univerjs/design';
+import { useDependency } from '@univerjs/ui';
+import { useState } from 'react';
 import { AlignType, SetDrawingAlignOperation } from '../../commands/operations/drawing-align.operation';
 import styles from './index.module.less';
 
 export interface IDrawingAlignProps {
     drawings: IDrawingParam[];
     alignShow: boolean;
-
 }
 
 export const DrawingAlign = (props: IDrawingAlignProps) => {
@@ -45,10 +44,12 @@ export const DrawingAlign = (props: IDrawingAlignProps) => {
                 {
                     label: localeService.t('image-panel.align.left'),
                     value: AlignType.left,
-                }, {
+                },
+                {
                     label: localeService.t('image-panel.align.center'),
                     value: AlignType.center,
-                }, {
+                },
+                {
                     label: localeService.t('image-panel.align.right'),
                     value: AlignType.right,
                 },
@@ -59,20 +60,24 @@ export const DrawingAlign = (props: IDrawingAlignProps) => {
                 {
                     label: localeService.t('image-panel.align.top'),
                     value: AlignType.top,
-                }, {
+                },
+                {
                     label: localeService.t('image-panel.align.middle'),
                     value: AlignType.middle,
-                }, {
+                },
+                {
                     label: localeService.t('image-panel.align.bottom'),
                     value: AlignType.bottom,
                 },
             ],
-        }, {
+        },
+        {
             options: [
                 {
                     label: localeService.t('image-panel.align.horizon'),
                     value: AlignType.horizon,
-                }, {
+                },
+                {
                     label: localeService.t('image-panel.align.vertical'),
                     value: AlignType.vertical,
                 },

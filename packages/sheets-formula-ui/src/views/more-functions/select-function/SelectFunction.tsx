@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,12 @@
 import type { IFunctionInfo, IFunctionParam } from '@univerjs/engine-formula';
 import type { ISearchItem } from '@univerjs/sheets-formula';
 import type { ISidebarMethodOptions } from '@univerjs/ui';
-import { LocaleService, useDependency, useObservable } from '@univerjs/core';
+import { LocaleService } from '@univerjs/core';
 import { Input, Select } from '@univerjs/design';
 import { FunctionType } from '@univerjs/engine-formula';
 import { CheckMarkSingle } from '@univerjs/icons';
 import { IDescriptionService } from '@univerjs/sheets-formula';
-import { ISidebarService } from '@univerjs/ui';
+import { ISidebarService, useDependency, useObservable } from '@univerjs/ui';
 import React, { useEffect, useState } from 'react';
 import { getFunctionTypeValues } from '../../../services/utils';
 import { FunctionHelp } from '../function-help/FunctionHelp';
@@ -156,7 +156,7 @@ export function SelectFunction(props: ISelectFunctionProps) {
                     onKeyDown={handleSelectListKeyDown}
                     value={searchText}
                     onChange={handleSearchInputChange}
-                    size="large"
+                    size="small"
                     allowClear
                 />
             </div>
@@ -200,9 +200,9 @@ export function SelectFunction(props: ISelectFunctionProps) {
                     />
 
                     {functionInfo.functionParameter &&
-                        functionInfo.functionParameter.map((item: IFunctionParam, i: number) => (
+                        functionInfo.functionParameter.map((item: IFunctionParam) => (
                             <FunctionParams
-                                key={i}
+                                key={item.name}
                                 title={item.name}
                                 value={`${item.require ? required : optional} ${item.detail}`}
                             />

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 
 import type { ICellData, Nullable } from '@univerjs/core';
-import type { AutoFillService, IAutoFillRule, ICopyDataInTypeIndexInfo, ICopyDataPiece } from '@univerjs/sheets-ui';
+import type { AutoFillService, IAutoFillLocation, IAutoFillRule, ICopyDataInTypeIndexInfo, ICopyDataPiece } from '@univerjs/sheets-ui';
 import {
     Direction,
     Disposable,
@@ -49,9 +49,9 @@ export class FormulaAutoFillController extends Disposable {
                 return false;
             },
             applyFunctions: {
-                [APPLY_TYPE.COPY]: (dataWithIndex, len, direction, copyDataPiece) => {
+                [APPLY_TYPE.COPY]: (dataWithIndex, len, direction, copyDataPiece, location) => {
                     const { data, index } = dataWithIndex;
-                    return this._fillCopyFormula(data, len, direction, index, copyDataPiece);
+                    return this._fillCopyFormula(data, len, direction, index, copyDataPiece, location as IAutoFillLocation);
                 },
             },
         };
@@ -63,19 +63,21 @@ export class FormulaAutoFillController extends Disposable {
         len: number,
         direction: Direction,
         index: ICopyDataInTypeIndexInfo,
-        copyDataPiece: ICopyDataPiece
+        copyDataPiece: ICopyDataPiece,
+        location: IAutoFillLocation
     ) {
         const step = getDataLength(copyDataPiece);
         const applyData = [];
         const formulaIdMap = new Map<number, string>();
 
         for (let i = 1; i <= len; i++) {
-            const index = (i - 1) % data.length;
-            const d = Tools.deepClone(data[index]);
+            const dataIndex = (i - 1) % data.length;
+            const sourceIndex = index[dataIndex];
+            const d = Tools.deepClone(data[dataIndex]);
 
             if (d) {
-                const originalFormula = data[index]?.f || '';
-                const originalFormulaId = data[index]?.si || '';
+                const originalFormula = data[dataIndex]?.f || '';
+                const originalFormulaId = data[dataIndex]?.si || '';
 
                 const checkFormula = isFormulaString(originalFormula);
                 const checkFormulaId = isFormulaId(originalFormulaId);
@@ -90,13 +92,13 @@ export class FormulaAutoFillController extends Disposable {
                     applyData.push(d);
                 } else if (checkFormula) {
                     // The first position setting formula and formulaId
-                    let formulaId = formulaIdMap.get(index);
+                    let formulaId = formulaIdMap.get(dataIndex);
 
                     if (!formulaId) {
                         formulaId = Tools.generateRandomId(6);
-                        formulaIdMap.set(index, formulaId);
+                        formulaIdMap.set(dataIndex, formulaId);
 
-                        const { offsetX, offsetY } = directionToOffset(step, len, direction);
+                        const { offsetX, offsetY } = directionToOffset(step, len, direction, location, sourceIndex);
                         const shiftedFormula = this._lexerTreeBuilder.moveFormulaRefOffset(
                             originalFormula,
                             offsetX,
@@ -126,19 +128,28 @@ export class FormulaAutoFillController extends Disposable {
     }
 }
 
-function directionToOffset(step: number, len: number, direction: Direction) {
+function directionToOffset(step: number, len: number, direction: Direction, location: IAutoFillLocation, sourceIndex: number) {
+    const { source, target } = location;
+    const { rows: targetRows } = target;
+    const { rows: sourceRows } = source;
+
     let offsetX = 0;
     let offsetY = 0;
 
     switch (direction) {
         case Direction.UP:
-            offsetY = -step * len; // The formula fills upwards, and the cell containing f and si must be at the top.
+            // The formula fills upwards, and the cell containing f and si must be at the top.
+            // This happens when the step row is hidden, find the relative row that is not hidden.
+            // For example, a hidden row caused by a sheets-filter.
+            offsetY = targetRows[sourceIndex] - sourceRows[sourceIndex];
             break;
         case Direction.RIGHT:
             offsetX = step;
             break;
         case Direction.DOWN:
-            offsetY = step;
+            // This happens when the step row is hidden, find the relative row that is not hidden.
+            // For example, a hidden row caused by a sheets-filter.
+            offsetY = targetRows[sourceIndex] - sourceRows[sourceIndex];
             break;
         case Direction.LEFT:
             offsetX = -step * len; // The formula fills leftwards, and the cell containing f and si must be at the left.

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,6 +55,11 @@ const locale = {
             'drawing-move-right': '右移绘图',
             'drawing-delete': '删除绘图',
         },
+    },
+    'cell-image': {
+        pasteTitle: '粘贴为单元格图片',
+        pasteContent: '粘贴单元格图片将覆盖单元格中的现有内容，继续粘贴',
+        pasteError: '此单元中不支持单元格图片复制粘贴',
     },
 };
 

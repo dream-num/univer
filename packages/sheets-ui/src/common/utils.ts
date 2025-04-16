@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,7 +90,7 @@ export function getClearContentMutationParamsForRanges(
 
 export function getClearContentMutationParamForRange(worksheet: Worksheet, range: IRange): ObjectMatrix<Nullable<ICellData>> {
     const { startRow, startColumn, endColumn, endRow } = range;
-    const cellMatrix = worksheet.getMatrixWithMergedCells(startRow, startColumn, endRow, endColumn, CellModeEnum.Intercepted);
+    const cellMatrix = worksheet.getMatrixWithMergedCells(startRow, startColumn, endRow, endColumn, CellModeEnum.Raw);
     const redoMatrix = new ObjectMatrix<Nullable<ICellData>>();
     let leftTopCellValue: Nullable<ICellData> = null;
     cellMatrix.forValue((row, col, cellData) => {
@@ -188,9 +188,9 @@ export function transformPosition2Offset(x: number, y: number, scene: Scene, ske
     const freeze = worksheet.getFreeze();
     const { startColumn, startRow, xSplit, ySplit } = freeze;
     // freeze start
-    const startSheetView = skeleton.getNoMergeCellPositionByIndexWithNoHeader(startRow - ySplit, startColumn - xSplit);
+    const startSheetView = skeleton.getNoMergeCellWithCoordByIndex(startRow - ySplit, startColumn - xSplit, false);
     // freeze end
-    const endSheetView = skeleton.getNoMergeCellPositionByIndexWithNoHeader(startRow, startColumn);
+    const endSheetView = skeleton.getNoMergeCellWithCoordByIndex(startRow, startColumn, false);
     const { rowHeaderWidth, columnHeaderHeight } = skeleton;
     const freezeWidth = endSheetView.startX - startSheetView.startX;
     const freezeHeight = endSheetView.startY - startSheetView.startY;
@@ -301,10 +301,10 @@ export function getHoverCellPosition(currentRender: IRender, workbook: Workbook,
     };
 
     const position: IPosition = {
-        startX: (skeleton.getOffsetByPositionX(anchorCell.startColumn - 1) - scrollXY.x) * scaleX,
-        endX: (skeleton.getOffsetByPositionX(anchorCell.endColumn) - scrollXY.x) * scaleX,
-        startY: (skeleton.getOffsetByPositionY(anchorCell.startRow - 1) - scrollXY.y) * scaleY,
-        endY: (skeleton.getOffsetByPositionY(anchorCell.endRow) - scrollXY.y) * scaleY,
+        startX: (skeleton.getOffsetByColumn(anchorCell.startColumn - 1) - scrollXY.x) * scaleX,
+        endX: (skeleton.getOffsetByColumn(anchorCell.endColumn) - scrollXY.x) * scaleX,
+        startY: (skeleton.getOffsetByRow(anchorCell.startRow - 1) - scrollXY.y) * scaleY,
+        endY: (skeleton.getOffsetByRow(anchorCell.endRow) - scrollXY.y) * scaleY,
     };
 
     return {

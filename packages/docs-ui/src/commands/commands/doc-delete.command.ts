@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ import type { DocumentDataModel, ICommand, IMutationInfo, IParagraph, ITextRange
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IRectRangeWithStyle, ITextRangeWithStyle } from '@univerjs/engine-render';
 import {
+    BlockType,
+    BuildTextUtils,
     CommandType,
     DataStreamTreeTokenType,
     ICommandService,
@@ -37,6 +39,7 @@ import { DeleteDirection } from '../../types/delete-direction';
 import { getCommandSkeleton, getRichTextEditPath } from '../util';
 import { CutContentCommand } from './clipboard.inner.command';
 import { DeleteCommand, UpdateCommand } from './core-editing.command';
+import { getCurrentParagraph } from './util';
 
 export interface IDeleteCustomBlockParams {
     direction: DeleteDirection;
@@ -133,9 +136,7 @@ interface IMergeTwoParagraphParams {
 }
 
 export const MergeTwoParagraphCommand: ICommand<IMergeTwoParagraphParams> = {
-
     id: 'doc.command.merge-two-paragraph',
-
     type: CommandType.COMMAND,
     // eslint-disable-next-line max-lines-per-function
     handler: async (accessor, params: IMergeTwoParagraphParams) => {
@@ -158,6 +159,7 @@ export const MergeTwoParagraphCommand: ICommand<IMergeTwoParagraphParams> = {
             return false;
         }
 
+        const dataStream = originBody.dataStream;
         const actualRange = activeRange;
         const unitId = docDataModel.getUnitId();
 
@@ -224,6 +226,99 @@ export const MergeTwoParagraphCommand: ICommand<IMergeTwoParagraphParams> = {
                 len: nextParagraph.startIndex - curParagraph.startIndex - 1,
             });
         }
+        const tokens = Object.values(DataStreamTreeTokenType) as string[];
+        const lastToken = dataStream[curParagraph.startIndex - 1];
+        if ((lastToken && !tokens.includes(lastToken)) || lastToken === ' ') {
+            textX.push({
+                t: TextXActionType.RETAIN,
+                len: 1,
+                coverType: UpdateDocsAttributeType.REPLACE,
+                body: {
+                    dataStream: '',
+                    paragraphs: [
+                        {
+                            ...Tools.deepClone(curParagraph),
+                            startIndex: 0,
+                        },
+                    ],
+                },
+            });
+        }
+
+        const path = getRichTextEditPath(docDataModel, segmentId);
+        doMutation.params.actions = jsonX.editOp(textX.serialize(), path);
+
+        const result = commandService.syncExecuteCommand<
+            IRichTextEditingMutationParams,
+            IRichTextEditingMutationParams
+        >(doMutation.id, doMutation.params);
+
+        return Boolean(result);
+    },
+};
+
+export const RemoveHorizontalLineCommand: ICommand = {
+    id: 'doc.command.remove-horizontal-line',
+    type: CommandType.COMMAND,
+    // eslint-disable-next-line max-lines-per-function
+    handler: async (accessor) => {
+        const docSelectionManagerService = accessor.get(DocSelectionManagerService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const commandService = accessor.get(ICommandService);
+
+        const activeRange = docSelectionManagerService.getActiveTextRange();
+        const ranges = docSelectionManagerService.getTextRanges();
+
+        if (activeRange == null || ranges == null) {
+            return false;
+        }
+        const { segmentId, style } = activeRange;
+        const docDataModel = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+        const originBody = docDataModel?.getSelfOrHeaderFooterModel(segmentId).getBody();
+        if (docDataModel == null || originBody == null) {
+            return false;
+        }
+
+        const actualRange = activeRange;
+        const unitId = docDataModel.getUnitId();
+
+        const { startOffset, collapsed } = actualRange;
+        if (!collapsed) {
+            return false;
+        }
+
+        const paragraph = originBody.paragraphs?.find((p) => p.startIndex === startOffset - 1);
+
+        if (paragraph == null) {
+            return false;
+        }
+
+        const textRanges = [
+            {
+                startOffset,
+                endOffset: startOffset,
+                style,
+            },
+        ] as ITextRangeWithStyle[];
+
+        const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
+            id: RichTextEditingMutation.id,
+            params: {
+                unitId,
+                actions: [],
+                textRanges,
+            },
+        };
+
+        const textX = new TextX();
+        const jsonX = JSONX.getInstance();
+
+        if (paragraph.startIndex > 0) {
+            textX.push({
+                t: TextXActionType.RETAIN,
+                len: paragraph.startIndex,
+            });
+        }
 
         textX.push({
             t: TextXActionType.RETAIN,
@@ -233,7 +328,13 @@ export const MergeTwoParagraphCommand: ICommand<IMergeTwoParagraphParams> = {
                 dataStream: '',
                 paragraphs: [
                     {
-                        ...Tools.deepClone(curParagraph),
+                        ...Tools.deepClone({
+                            ...paragraph,
+                            paragraphStyle: {
+                                ...paragraph.paragraphStyle,
+                                borderBottom: undefined,
+                            },
+                        }),
                         startIndex: 0,
                     },
                 ],
@@ -441,10 +542,16 @@ export const DeleteLeftCommand: ICommand = {
                     return true;
                 }
                 if (preGlyph.content === '\r') {
-                    result = await commandService.executeCommand(MergeTwoParagraphCommand.id, {
-                        direction: DeleteDirection.LEFT,
-                        range: actualRange,
-                    });
+                    const paragraph = body.paragraphs?.find((p) => p.startIndex === startOffset - 1);
+
+                    if (paragraph?.paragraphStyle?.borderBottom) {
+                        result = await commandService.executeCommand(RemoveHorizontalLineCommand.id);
+                    } else {
+                        result = await commandService.executeCommand(MergeTwoParagraphCommand.id, {
+                            direction: DeleteDirection.LEFT,
+                            range: actualRange,
+                        });
+                    }
                 } else if (preGlyph.streamType === '\b') {
                     const drawing = docDataModel.getSnapshot().drawings?.[preGlyph.drawingId ?? ''];
 
@@ -452,9 +559,11 @@ export const DeleteLeftCommand: ICommand = {
                         return true;
                     }
 
-                    const isInlineDrawing = drawing.layoutType === PositionedObjectLayoutType.INLINE;
+                    const customBlock = docDataModel.getBody()?.customBlocks?.find((block) => block.blockId === preGlyph.drawingId);
 
-                    if (isInlineDrawing) {
+                    const isInlineDrawingOrCustom = drawing.layoutType === PositionedObjectLayoutType.INLINE || customBlock?.blockType === BlockType.CUSTOM;
+
+                    if (isInlineDrawingOrCustom) {
                         const unitId = docDataModel.getUnitId();
                         result = await commandService.executeCommand(DeleteCustomBlockCommand.id, {
                             direction: DeleteDirection.LEFT,
@@ -464,6 +573,7 @@ export const DeleteLeftCommand: ICommand = {
                         });
                     } else {
                         const prePreGlyph = skeleton.findNodeByCharIndex(startOffset - 2);
+
                         if (prePreGlyph == null) {
                             return true;
                         }
@@ -691,3 +801,51 @@ function getTextRangesWhenDelete(activeRange: ITextRangeWithStyle, ranges: reado
 
     return textRanges;
 }
+
+export const DeleteCurrentParagraphCommand: ICommand = {
+    id: 'doc.command.delete-current-paragraph',
+    type: CommandType.COMMAND,
+    handler: async (accessor) => {
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const commandService = accessor.get(ICommandService);
+        const docDataModel = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+        if (!docDataModel) {
+            return false;
+        }
+
+        const dataStream = docDataModel.getBody()?.dataStream ?? '';
+        const paragraph = getCurrentParagraph(accessor);
+
+        if (!paragraph) {
+            return false;
+        }
+
+        const actions = BuildTextUtils.selection.delete(
+            [{
+                startOffset: paragraph.paragraphStart,
+                endOffset: dataStream[paragraph.paragraphEnd + 1] === '\n'
+                    ? paragraph.paragraphEnd
+                    : paragraph.paragraphEnd + 1,
+                collapsed: false,
+            }],
+            docDataModel.getBody()!,
+            0,
+            undefined,
+            true
+        );
+
+        const path = getRichTextEditPath(docDataModel);
+
+        const params: IRichTextEditingMutationParams = {
+            unitId: docDataModel.getUnitId(),
+            actions: JSONX.getInstance().editOp(actions, path),
+            textRanges: [{
+                startOffset: paragraph.paragraphStart,
+                endOffset: paragraph.paragraphStart,
+                collapsed: true,
+            }],
+        };
+
+        return commandService.syncExecuteCommand(RichTextEditingMutation.id, params);
+    },
+};

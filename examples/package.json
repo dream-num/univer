@@ -4,6 +4,9 @@
     "description": "Univer vanilla ts demo project",
     "author": "DreamNum <developer@univer.ai>",
     "license": "Apache-2.0",
+    "exports": {
+        "./*": "./src/*"
+    },
     "scripts": {
         "prepare": "tsx ./scripts/generate-locales.ts && tsx ./scripts/generate-html.ts",
         "build:demo": "tsx ./esbuild.config.ts",
@@ -24,6 +27,7 @@
         "@univerjs/docs-drawing-ui": "workspace:*",
         "@univerjs/docs-hyper-link-ui": "workspace:*",
         "@univerjs/docs-mention-ui": "workspace:*",
+        "@univerjs/docs-quick-insert-ui": "workspace:*",
         "@univerjs/docs-thread-comment-ui": "workspace:*",
         "@univerjs/docs-ui": "workspace:*",
         "@univerjs/drawing": "workspace:*",
@@ -31,8 +35,11 @@
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/find-replace": "workspace:*",
+        "@univerjs/icons": "0.2.35",
         "@univerjs/mockdata": "workspace:*",
+        "@univerjs/network": "workspace:*",
         "@univerjs/rpc": "workspace:*",
+        "@univerjs/rpc-node": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-conditional-formatting": "workspace:*",
         "@univerjs/sheets-conditional-formatting-ui": "workspace:*",
@@ -71,27 +78,28 @@
         "@univerjs/uniui": "workspace:*",
         "@univerjs/watermark": "workspace:*",
         "monaco-editor": "0.52.2",
-        "react": "19.0.0",
-        "react-dom": "19.0.0",
+        "react": "19.1.0",
+        "react-dom": "19.1.0",
         "react-mosaic-component": "^6.1.1"
     },
     "devDependencies": {
         "@types/fs-extra": "^11.0.4",
         "@univerjs-infra/shared": "workspace:*",
         "cross-env": "^7.0.3",
-        "detect-port": "^1.6.1",
-        "esbuild": "^0.24.2",
+        "detect-port": "^2.1.0",
+        "esbuild": "^0.25.2",
+        "esbuild-plugin-alias": "^0.2.1",
         "esbuild-plugin-clean": "^1.0.1",
         "esbuild-plugin-copy": "^2.1.1",
         "esbuild-plugin-vue3": "^0.4.2",
         "esbuild-style-plugin": "^1.6.3",
         "fast-glob": "^3.3.3",
-        "fs-extra": "^11.2.0",
-        "less": "^4.2.1",
+        "fs-extra": "^11.3.0",
+        "less": "^4.3.0",
         "minimist": "^1.2.8",
-        "postcss": "^8.4.49",
+        "postcss": "^8.5.3",
         "tailwindcss": "^3.4.17",
         "tailwindcss-animate": "^1.0.7",
-        "typescript": "^5.7.3"
+        "typescript": "^5.8.3"
     }
 }

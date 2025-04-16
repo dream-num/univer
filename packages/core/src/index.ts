@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,8 @@
 import { installShims } from './common/shims';
 
 installShims();
-
+export { getPlainText } from './docs/data-model/text-x/build-utils/parse';
+export type { INumfmt } from './shared/types/numfmt.type';
 export { debounce, get, merge, mergeWith, set } from 'lodash-es';
 export { textDiff } from './shared/text-diff';
 export { dedupe, groupBy, makeArray, remove, rotate } from './common/array';
@@ -33,13 +34,6 @@ export { AsyncInterceptorManager, composeInterceptors, createAsyncInterceptorKey
 export type { Serializable } from './common/json';
 export { MemoryCursor } from './common/memory-cursor';
 export { mixinClass } from './common/mixin';
-export { FBase, FBaseInitialable } from './facade/f-base';
-export { FUniver } from './facade/f-univer';
-export { FHooks } from './facade/f-hooks';
-export { FBlob, type IFBlobSource } from './facade/f-blob';
-export { FEventName, type IEventBase, type IEventParamConfig } from './facade/f-event';
-export { FEnum } from './facade/f-enum';
-export { FUtil } from './facade/f-util';
 export { isNumeric, isSafeNumeric } from './common/number';
 export { Registry, RegistryAsMap } from './common/registry';
 export { requestImmediateMacroTask } from './common/request-immediate-macro-task';
@@ -105,8 +99,7 @@ export { ConfigService } from './services/config/config.service';
 export * from './services/context/context';
 export { ContextService, IContextService } from './services/context/context.service';
 export { ErrorService, type IError } from './services/error/error.service';
-export { IUniverInstanceService } from './services/instance/instance.service';
-export { UniverInstanceService } from './services/instance/instance.service';
+export { type ICreateUnitOptions, IUniverInstanceService, UniverInstanceService } from './services/instance/instance.service';
 export { LifecycleStages } from './services/lifecycle/lifecycle';
 export { LifecycleService } from './services/lifecycle/lifecycle.service';
 export { ILocalStorageService } from './services/local-storage/local-storage.service';
@@ -123,9 +116,8 @@ export type { IPermissionParam } from './services/permission/type';
 
 export type { IPermissionPoint } from './services/permission/type';
 export type { IPermissionTypes, RangePermissionPointConstructor, WorkbookPermissionPointConstructor, WorkSheetPermissionPointConstructor } from './services/permission/type';
-export { Plugin } from './services/plugin/plugin';
-export type { PluginCtor } from './services/plugin/plugin';
-export { DependentOn, PluginService } from './services/plugin/plugin.service';
+export type { PluginCtor } from './services/plugin/plugin.service.ts';
+export { DependentOn, Plugin, PluginService } from './services/plugin/plugin.service';
 export { type DependencyOverride, mergeOverrideWithDependencies } from './services/plugin/plugin-override';
 export { IResourceLoaderService } from './services/resource-loader/type';
 export { ResourceManagerService } from './services/resource-manager/resource-manager.service';
@@ -154,7 +146,7 @@ export { isBlackColor, isWhiteColor } from './shared/color/color-kit';
 export { cellToRange } from './shared/common';
 export { getIntersectRange } from './shared/range';
 export { nameCharacterCheck } from './shared/name';
-export { afterTime, bufferDebounceTime, fromCallback, takeAfter } from './shared/rxjs';
+export { afterTime, bufferDebounceTime, convertObservableToBehaviorSubject, fromCallback, takeAfter } from './shared/rxjs';
 export { awaitTime, delayAnimationFrame } from './shared/timer';
 export { Range } from './sheets/range';
 export {
@@ -194,6 +186,7 @@ export { DataValidationOperator } from './types/enum/data-validation-operator';
 export { DataValidationRenderMode } from './types/enum/data-validation-render-mode';
 export { DataValidationStatus } from './types/enum/data-validation-status';
 export { DataValidationType } from './types/enum/data-validation-type';
+export { getCellCoordByIndexSimple, getCellPositionByIndexSimple, getCellWithCoordByIndexCore, SheetSkeleton } from './sheets/sheet-skeleton';
 export * from './types/interfaces';
 export type { ICellCustomRender, ICellRenderContext } from './types/interfaces/i-cell-custom-render';
 export type { IDataValidationRule, IDataValidationRuleBase, IDataValidationRuleInfo, IDataValidationRuleOptions, ISheetDataValidationRule } from './types/interfaces/i-data-validation';
@@ -201,3 +194,7 @@ export { type BBox, type IRTreeItem, RBush, RTree } from './shared/r-tree';
 
 export { type IUniverConfig, Univer } from './univer';
 export { isNodeEnv } from './shared/tools';
+export { Skeleton } from './skeleton';
+export type { IGetRowColByPosOptions } from './sheets/sheet-skeleton';
+export type { IPosition } from './sheets/typedef.ts';
+export * from './sheets/sheet-skeleton';

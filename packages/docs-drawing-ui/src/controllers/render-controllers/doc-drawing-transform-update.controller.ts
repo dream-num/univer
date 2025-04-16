@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -166,7 +166,11 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
 
                 if (headerPage) {
                     this._calculateDrawingPosition(
-                        unitId, headerPage, docsLeft, docsTop, updateDrawingMap,
+                        unitId,
+                        headerPage,
+                        docsLeft,
+                        docsTop,
+                        updateDrawingMap,
                         headerPage.marginTop,
                         page.marginLeft
                     );
@@ -178,7 +182,11 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
 
                 if (footerPage) {
                     this._calculateDrawingPosition(
-                        unitId, footerPage, docsLeft, docsTop, updateDrawingMap,
+                        unitId,
+                        footerPage,
+                        docsLeft,
+                        docsTop,
+                        updateDrawingMap,
                         page.pageHeight - page.marginBottom + footerPage.marginTop,
                         page.marginLeft
                     );
@@ -298,14 +306,15 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
             this._drawingManagerService.initializeNotification(this._context.unitId);
         };
 
-        if (this._lifecycleService.stage === LifecycleStages.Steady) {
-            // wait for render unit ready
-            // TODO@weird94 need refactor later
-            setTimeout(() => {
+        if (this._lifecycleService.stage >= LifecycleStages.Rendered) {
+            if (this._docSkeletonManagerService.getSkeleton()) {
                 init();
-            }, 1000);
+            } else {
+                // wait render-unit ready
+                setTimeout(init, 500);
+            }
         } else {
-            this._lifecycleService.lifecycle$.pipe(filter((stage) => stage === LifecycleStages.Steady)).subscribe(init);
+            this._lifecycleService.lifecycle$.pipe(filter((stage) => stage === LifecycleStages.Rendered)).subscribe(init);
         }
     }
 }

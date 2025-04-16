@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import { LocaleService, useDependency } from '@univerjs/core';
-import React from 'react';
+import { LocaleService } from '@univerjs/core';
 import { Button } from '@univerjs/design';
-import { IDialogService } from '@univerjs/ui';
+import { IDialogService, useDependency } from '@univerjs/ui';
 import styles from './index.module.less';
 import { UNIVER_SHEET_PERMISSION_ALERT_DIALOG_ID } from './interface';
 
@@ -30,7 +29,7 @@ export const AlertDialog = ({ errorMsg }: { errorMsg: string }) => {
             <p>{errorMsg || localeService.t('permission.dialog.alertContent')}</p>
             <div className={styles.sheetPermissionAlertDialogButton}>
                 <Button
-                    type="primary"
+                    variant="primary"
                     onClick={() => {
                         dialogService.close(UNIVER_SHEET_PERMISSION_ALERT_DIALOG_ID);
                     }}

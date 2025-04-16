@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -125,9 +125,16 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
 
         this._addComponent();
 
-        engine.runRenderLoop(() => {
-            scene.render();
-        });
+        const frameFn = () => scene.render();
+        this.disposeWithMe(this._context.activated$.subscribe((activated) => {
+            if (activated) {
+                // TODO: we should attach the context object to the RenderContext object on scene.canvas.
+                engine.runRenderLoop(frameFn);
+            } else {
+                // Stop the render loop when the render unit is deactivated.
+                engine.stopRenderLoop(frameFn);
+            }
+        }));
 
         // Attach scroll event after main viewport created.
         this._docSelectionRenderService.__attachScrollEvent();

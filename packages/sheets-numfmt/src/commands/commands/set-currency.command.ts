@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,8 @@ import type { IAccessor, ICommand } from '@univerjs/core';
 import type { ISetNumfmtCommandParams } from './set-numfmt.command';
 import { CommandType, ICommandService, Range } from '@univerjs/core';
 import { SheetsSelectionsService } from '@univerjs/sheets';
-import { countryCurrencyMap } from '../../base/const/CURRENCY-SYMBOLS';
-import { CURRENCYFORMAT } from '../../base/const/FORMATDETAIL';
+import { countryCurrencyMap } from '../../base/const/currency-symbols';
+import { CURRENCYFORMAT } from '../../base/const/formatdetail';
 import { MenuCurrencyService } from '../../service/menu.currency.service';
 import { SetNumfmtCommand } from './set-numfmt.command';
 

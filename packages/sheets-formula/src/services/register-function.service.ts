@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -207,6 +207,8 @@ export class RegisterFunctionService extends Disposable implements IRegisterFunc
         instance.calculateCustom = func;
         this._functionService.registerExecutors(instance);
         disposables.add(toDisposable(() => this._functionService.unregisterExecutors(name)));
+        disposables.add(toDisposable(() => this._functionService.unregisterDescriptions(name)));
+        disposables.add(toDisposable(() => this._functionService.deleteFormulaAstCacheKey(name)));
 
         // Handle remote registration if available
         if (this._remoteRegisterFunctionService) {

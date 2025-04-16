@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,8 @@
  */
 
 import type { IAllowedRequest, IAllowedResponse, IBatchAllowedResponse, ICreateCollaboratorRequest, ICreateRequest, ICreateResponse, IDeleteCollaboratorRequest, IListCollaboratorRequest, IListCollaboratorResponse, IListPermPointRequest, IListPermPointResponse, IListRolesRequest, IListRolesResponse, IPutCollaboratorsRequest, IUpdateCollaboratorRequest, IUpdatePermPointRequest } from '@univerjs/protocol';
-import { createIdentifier } from '../../common/di';
 import type { ILogContext } from '../log/context';
+import { createIdentifier } from '../../common/di';
 
 // FIXME: should not import ILogContext here
 
@@ -35,4 +35,3 @@ export interface IAuthzIoService {
 }
 
 export const IAuthzIoService = createIdentifier<IAuthzIoService>('IAuthzIoIoService');
-

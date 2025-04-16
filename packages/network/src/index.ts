@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export { UniverNetworkPlugin } from './plugin';
+export { type IUniverNetworkPluginConfig, UniverNetworkPlugin } from './plugin';
 export { HTTPHeaders } from './services/http/headers';
 export { HTTPService } from './services/http/http.service';
 export { IHTTPImplementation } from './services/http/implementations/implementation';

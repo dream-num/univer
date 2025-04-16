@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -111,12 +111,16 @@ export class SheetsFilterRenderController extends RxDisposable implements IRende
         const { scene } = this._context;
         const { rowHeaderWidth, columnHeaderHeight } = skeleton;
         const filterRangeShape = this._filterRangeShape = new SelectionControl(
-            scene, DEFAULT_Z_INDEX, this._themeService, {
+            scene,
+            DEFAULT_Z_INDEX,
+            this._themeService,
+            {
                 rowHeaderWidth,
                 columnHeaderHeight,
                 enableAutoFill: false,
                 highlightHeader: false,
-            });
+            }
+        );
         const selectionWithStyle = {
             range,
             primary: null,

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,6 @@ import {
     LocaleType,
     LocalUndoRedoService,
     PermissionService,
-    RediContext,
     ResourceManagerService,
     ThemeService,
     UniverInstanceService,
@@ -44,7 +43,7 @@ import {
 import { ConfigProvider, defaultTheme, greenTheme, themeInstance } from '@univerjs/design';
 import enUS from '@univerjs/design/locale/en-US';
 import zhCN from '@univerjs/design/locale/zh-CN';
-import { DesktopLocalStorageService } from '@univerjs/ui';
+import { DesktopLocalStorageService, RediContext } from '@univerjs/ui';
 import React, { useMemo } from 'react';
 
 import './global.css';

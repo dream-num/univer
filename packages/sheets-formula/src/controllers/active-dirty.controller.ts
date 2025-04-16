@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 import type { ICellData, ICommandInfo, IObjectMatrixPrimitiveType, IRange, IUnitRange, Nullable } from '@univerjs/core';
 import type { IDirtyUnitSheetDefinedNameMap, IDirtyUnitSheetNameMap, ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
 import type {
-    IDeleteRangeMutationParams,
     IInsertColMutationParams,
     IInsertRowMutationParams,
     IInsertSheetMutationParams,
@@ -29,9 +28,10 @@ import type {
     IRemoveSheetMutationParams,
     IReorderRangeMutationParams,
     ISetRangeValuesMutationParams,
+    ISetRowHiddenMutationParams,
+    ISetRowVisibleMutationParams,
 } from '@univerjs/sheets';
 import {
-    Dimension,
     Disposable,
     Inject,
     IUniverInstanceService,
@@ -50,6 +50,8 @@ import {
     RemoveSheetMutation,
     ReorderRangeMutation,
     SetRangeValuesMutation,
+    SetRowHiddenMutation,
+    SetRowVisibleMutation,
     SetStyleCommand,
 } from '@univerjs/sheets';
 
@@ -90,6 +92,8 @@ export class ActiveDirtyController extends Disposable {
         this._initialMove();
 
         this._initialRowAndColumn();
+
+        this._initialHideRow();
 
         this._initialSheet();
 
@@ -219,6 +223,37 @@ export class ActiveDirtyController extends Disposable {
         });
     }
 
+    private _initialHideRow() {
+        this._activeDirtyManagerService.register(SetRowHiddenMutation.id, {
+            commandId: SetRowHiddenMutation.id,
+            getDirtyData: (command: ICommandInfo) => {
+                const params = command.params as ISetRowHiddenMutationParams;
+                return {
+                    dirtyRanges: this._getHideRowMutation(params),
+                    clearDependencyTreeCache: {
+                        [params.unitId]: {
+                            [params.subUnitId]: '1',
+                        },
+                    },
+                };
+            },
+        });
+        this._activeDirtyManagerService.register(SetRowVisibleMutation.id, {
+            commandId: SetRowVisibleMutation.id,
+            getDirtyData: (command: ICommandInfo) => {
+                const params = command.params as ISetRowVisibleMutationParams;
+                return {
+                    dirtyRanges: this._getHideRowMutation(params),
+                    clearDependencyTreeCache: {
+                        [params.unitId]: {
+                            [params.subUnitId]: '1',
+                        },
+                    },
+                };
+            },
+        });
+    }
+
     private _initialSheet() {
         this._activeDirtyManagerService.register(RemoveSheetMutation.id, {
             commandId: RemoveSheetMutation.id,
@@ -335,52 +370,6 @@ export class ActiveDirtyController extends Disposable {
         return dirtyRanges;
     }
 
-    private _getDeleteRangeMutationDirtyRange(params: IDeleteRangeMutationParams) {
-        const { subUnitId: sheetId, unitId, range, shiftDimension } = params;
-
-        const dirtyRanges: IUnitRange[] = [];
-
-        const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
-
-        const worksheet = workbook?.getSheetBySheetId(sheetId);
-
-        const lastEndRow = worksheet?.getLastRowWithContent() || 0;
-
-        const lastEndColumn = worksheet?.getLastColumnWithContent() || 0;
-
-        const matrix = new ObjectMatrix<Nullable<ICellData>>();
-
-        let newMatrix: Nullable<ObjectMatrix<Nullable<ICellData>>> = null;
-        const { startRow, startColumn, endRow, endColumn } = range;
-        if (shiftDimension === Dimension.ROWS) {
-            newMatrix = this._rangeToMatrix({
-                startRow,
-                startColumn,
-                endRow: lastEndRow,
-                endColumn,
-            });
-        } else if (shiftDimension === Dimension.COLUMNS) {
-            newMatrix = this._rangeToMatrix({
-                startRow,
-                startColumn,
-                endRow,
-                endColumn: lastEndColumn,
-            });
-        }
-
-        if (newMatrix != null) {
-            matrix.merge(newMatrix);
-        }
-
-        const matrixData = matrix.getData();
-
-        dirtyRanges.push(...this._getDirtyRangesByCellValue(unitId, sheetId, matrixData));
-
-        dirtyRanges.push(...this._getDirtyRangesForArrayFormula(unitId, sheetId, matrixData));
-
-        return dirtyRanges;
-    }
-
     private _getRemoveRowOrColumnMutation(params: IRemoveRowsMutationParams, isRow: boolean = true) {
         const { subUnitId: sheetId, unitId, range } = params;
 
@@ -394,20 +383,18 @@ export class ActiveDirtyController extends Disposable {
 
         const columnCount = worksheet?.getColumnCount() || 0;
 
-        const matrix = new ObjectMatrix<Nullable<ICellData>>();
-
-        let newMatrix: Nullable<ObjectMatrix<Nullable<ICellData>>> = null;
+        let matrix: Nullable<ObjectMatrix<Nullable<ICellData>>> = null;
         const { startRow, endRow, startColumn, endColumn } = range;
 
         if (isRow === true) {
-            newMatrix = this._rangeToMatrix({
+            matrix = this._rangeToMatrix({
                 startRow,
                 startColumn: 0,
                 endRow,
                 endColumn: columnCount - 1,
             });
         } else {
-            newMatrix = this._rangeToMatrix({
+            matrix = this._rangeToMatrix({
                 startRow: 0,
                 startColumn,
                 endRow: rowCount,
@@ -415,15 +402,25 @@ export class ActiveDirtyController extends Disposable {
             });
         }
 
-        if (newMatrix != null) {
-            matrix.merge(newMatrix);
-        }
-
         const matrixData = matrix.getData();
 
         dirtyRanges.push(...this._getDirtyRangesByCellValue(unitId, sheetId, matrixData));
 
         dirtyRanges.push(...this._getDirtyRangesForArrayFormula(unitId, sheetId, matrixData));
+
+        return dirtyRanges;
+    }
+
+    private _getHideRowMutation(params: ISetRowHiddenMutationParams) {
+        const { subUnitId, unitId, ranges } = params;
+
+        const dirtyRanges: IUnitRange[] = [];
+
+        // covert ranges to dirtyRanges
+        ranges.forEach((range) => {
+            const matrix = this._rangeToMatrix(range).getMatrix();
+            dirtyRanges.push(...this._getDirtyRangesByCellValue(unitId, subUnitId, matrix));
+        });
 
         return dirtyRanges;
     }

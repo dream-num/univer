@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,7 +78,7 @@ export class DragManagerService extends Disposable {
         const currentRender = this._renderManagerService.getRenderById(workbook.getUnitId());
         if (!currentRender) return;
 
-        const skeletonParam = currentRender.with(SheetSkeletonManagerService).getCurrent();
+        const skeletonParam = currentRender.with(SheetSkeletonManagerService).getCurrentParam();
         const scrollManagerService = currentRender.with(SheetScrollManagerService);
         const scrollInfo = scrollManagerService.getCurrentScrollState();
 

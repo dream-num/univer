@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { Injector, IWorkbookData, Workbook } from '@univerjs/core';
 import { ILogService, IUniverInstanceService, LocaleType, LogLevel, Univer, UniverInstanceType } from '@univerjs/core';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { FilterColumn, generateFilterFn } from '../filter-model';
 import { CustomFilterOperator } from '../types';
@@ -26,7 +26,8 @@ describe('Test filter model and related utils', () => {
         it('should AND work', () => {
             // equivalent to "between"
             const fn = generateFilterFn({
-                colId: 0, customFilters: {
+                colId: 0,
+                customFilters: {
                     and: 1,
                     customFilters: [
                         { operator: CustomFilterOperator.LESS_THAN_OR_EQUAL, val: 456 },
@@ -45,7 +46,8 @@ describe('Test filter model and related utils', () => {
         it('should OR work', () => {
             // equivalent to "notBetween"
             const fn = generateFilterFn({
-                colId: 0, customFilters: {
+                colId: 0,
+                customFilters: {
                     customFilters: [
                         { operator: CustomFilterOperator.LESS_THAN, val: 123 },
                         { operator: CustomFilterOperator.GREATER_THAN, val: 456 },

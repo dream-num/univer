@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 import type { IFreeze, IRange, IWorksheetData, Nullable, Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule, IScrollObserverParam, IWheelEvent } from '@univerjs/engine-render';
-import type { ISetSelectionsOperationParams, SheetsSelectionsService } from '@univerjs/sheets';
+import type { IScrollToCellOperationParams, ISetSelectionsOperationParams, SheetsSelectionsService } from '@univerjs/sheets';
 import type { IScrollCommandParams } from '../../commands/commands/set-scroll.command';
 import type { IExpandSelectionCommandParams } from '../../commands/commands/set-selection.command';
 import type { IScrollState, IScrollStateSearchParam, IViewportScrollState } from '../../services/scroll-manager.service';
@@ -30,7 +30,8 @@ import {
     IContextService,
     Inject,
     Injector,
-    RANGE_TYPE, toDisposable,
+    RANGE_TYPE,
+    toDisposable,
     Tools,
 } from '@univerjs/core';
 import { IRenderManagerService, RENDER_CLASS_TYPE, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
@@ -80,7 +81,6 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
 
                 let offsetX = 0;
                 let offsetY = 0;
-                const isLimitedStore = viewMain.limitedScroll();
 
                 // what????
                 // const scrollNum = Math.abs(evt.deltaX);
@@ -97,6 +97,9 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
                 }
                 this._commandService.executeCommand(SetScrollRelativeCommand.id, { offsetX, offsetY });
                 this._context.scene.makeDirty(true);
+
+                // add offset on scroll position to check whether scrolling is reaching limit
+                const isLimitedStore = viewMain.limitedScroll(viewMain.scrollX + offsetX, viewMain.scrollY + offsetY);
 
                 // if viewport still have space to scroll, prevent default event. (DO NOT move canvas element)
                 // if scrolling is reaching limit, let scrolling event do the default behavior.
@@ -126,7 +129,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         this.disposeWithMe(
             toDisposable(
                 this._scrollManagerService.rawScrollInfo$.subscribe((rawScrollInfo: Nullable<IScrollState>) => {
-                    const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+                    const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
                     if (!skeleton) return;
 
                     if (rawScrollInfo == null) {
@@ -159,7 +162,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         this.disposeWithMe(
             // set scrollInfo, the event is triggered in viewport@_scrollToScrollbarPos
             viewportMain.onScrollAfter$.subscribeEvent((scrollAfterParam: IScrollObserverParam) => {
-                const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+                const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
                 if (skeleton == null || scrollAfterParam.isTrigger === false) {
                     return;
                 }
@@ -173,18 +176,22 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
                 const { viewportScrollX, viewportScrollY, scrollX, scrollY } = scrollAfterParam;
 
                 // according to the actual scroll position, the most suitable row, column and offset combination is recalculated.
-                const { row, column, rowOffset, columnOffset } = skeleton.getDecomposedOffset(
+                const { row, column, rowOffset, columnOffset } = skeleton.getOffsetRelativeToRowCol(
                     viewportScrollX,
                     viewportScrollY
                 );
 
-                const scrollInfo = {
+                const scrollInfo: IViewportScrollState = {
                     sheetViewStartRow: row,
                     sheetViewStartColumn: column,
                     offsetX: columnOffset,
                     offsetY: rowOffset,
+                    viewportScrollX,
+                    viewportScrollY,
+                    scrollX,
+                    scrollY,
                 };
-                this._scrollManagerService.setScrollStateToCurrSheet(scrollInfo);
+                this._scrollManagerService.setValidScrollStateToCurrSheet(scrollInfo);
                 //#endregion
 
                 this._scrollManagerService.validViewportScrollInfo$.next({
@@ -194,7 +201,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
                     scrollX,
                     scrollY,
                 });
-                // snapshot is diff by diff people!
+                // snapshot is diff by diff users!
                 // this._scrollManagerService.setScrollInfoToSnapshot({ ...lastestScrollInfo, viewportScrollX, viewportScrollY });
             })
         );
@@ -204,7 +211,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         this.disposeWithMe(
             // get scrollByBar event from viewport and exec ScrollCommand.id.
             viewportMain.onScrollByBar$.subscribeEvent((param) => {
-                const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+                const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
                 if (skeleton == null || param.isTrigger === false) {
                     return;
                 }
@@ -215,7 +222,9 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
                 }
                 const { viewportScrollX = 0, viewportScrollY = 0 } = param;
 
-                const { row, column, rowOffset, columnOffset } = skeleton.getDecomposedOffset(
+                const freeze = this._getFreeze();
+
+                const { row, column, rowOffset, columnOffset } = skeleton.getOffsetRelativeToRowCol(
                     viewportScrollX,
                     viewportScrollY
                 );
@@ -243,21 +252,41 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
                 this._scrollManagerService.setSearchParam(scrollParam);
                 const sheetObject = this._getSheetObject();
                 if (!sheetObject) return;
-                const scene = sheetObject.scene;
-                const viewportMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
                 const currScrollInfo = this._scrollManagerService.getScrollStateByParam(scrollParam);
                 const { viewportScrollX, viewportScrollY } = this._scrollManagerService.calcViewportScrollFromRowColOffset(currScrollInfo as unknown as Nullable<IViewportScrollState>);
-                if (viewportMain) {
-                    if (currScrollInfo) {
-                        viewportMain.viewportScrollX = viewportScrollX;
-                        viewportMain.viewportScrollY = viewportScrollY;
-                    } else {
-                        viewportMain.viewportScrollX = 0;
-                        viewportMain.viewportScrollY = 0;
-                    }
-                    this._updateSceneSize(param as unknown as ISheetSkeletonManagerParam);
+
+                if (currScrollInfo) {
+                    this._updateViewportScroll(viewportScrollX, viewportScrollY);
                 }
-            })));
+            })
+        ));
+    }
+
+    _updateViewportScroll(viewportScrollX: number = 0, viewportScrollY: number = 0) {
+        const sheetObject = this._getSheetObject();
+        if (!sheetObject) return;
+        const scene = sheetObject.scene;
+        const viewportMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
+        const viewColRight = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_COLUMN_RIGHT);
+        const viewRowBottom = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_ROW_BOTTOM);
+        const viewportMainLeft = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT);
+        const viewportMainTop = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN_TOP);
+        if (viewportMain) {
+            viewportMain.viewportScrollX = viewportScrollX;
+            viewportMain.viewportScrollY = viewportScrollY;
+        }
+        if (viewRowBottom) {
+            viewRowBottom.viewportScrollY = viewportScrollY;
+        }
+        if (viewColRight) {
+            viewColRight.viewportScrollX = viewportScrollX;
+        }
+        if (viewportMainLeft) {
+            viewportMainLeft.viewportScrollY = viewportScrollY;
+        }
+        if (viewportMainTop) {
+            viewportMainTop.viewportScrollX = viewportScrollX;
+        }
     }
 
     scrollToRange(range: IRange, forceTop?: boolean, forceLeft?: boolean): boolean {
@@ -305,16 +334,35 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
 
     private _initCommandListener(): void {
         this.disposeWithMe(this._commandService.onCommandExecuted((command) => {
-            if (SHEET_NAVIGATION_COMMANDS.includes(command.id)) {
-                this._scrollToSelection();
-            } else if (command.id === ScrollToCellOperation.id) {
-                const param = command.params as IRange;
-                this.scrollToRange(param);
-            } else if (command.id === ExpandSelectionCommand.id) {
-                const param = command.params as IExpandSelectionCommandParams;
-                this._scrollToSelectionForExpand(param);
-            } else if (command.id === SetSelectionsOperation.id && (command.params as ISetSelectionsOperationParams).reveal) {
-                this._scrollToSelection();
+            switch (command.id) {
+                case SetSelectionsOperation.id:
+                    {
+                        const p = command.params as ISetSelectionsOperationParams;
+                        if (p.unitId === this._context.unitId && p.reveal) {
+                            this._scrollToSelection();
+                        }
+                    }
+                    break;
+
+                case ScrollToCellOperation.id:
+                    {
+                        const p = command.params as IScrollToCellOperationParams;
+                        if (p.unitId === this._context.unitId) {
+                            const rangeParam = p.range;
+                            this.scrollToRange(rangeParam);
+                        }
+                    }
+                    break;
+
+                case ExpandSelectionCommand.id:
+                    {
+                        const expandParam = command.params as IExpandSelectionCommandParams;
+                        this._scrollToSelectionForExpand(expandParam);
+                    }
+                    break;
+
+                default:
+                    break;
             }
         }));
     }
@@ -369,7 +417,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
     }
 
     private _getFreeze(): Nullable<IFreeze> {
-        const snapshot: IWorksheetData | undefined = this._sheetSkeletonManagerService.getCurrent()?.skeleton.getWorksheetConfig();
+        const snapshot: IWorksheetData | undefined = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton.getWorksheetConfig();
         if (snapshot == null) {
             return;
         }
@@ -396,8 +444,9 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         const worksheet = workbook.getActiveSheet();
         if (!worksheet) return;
 
-        const zoomRatio = worksheet.getZoomRatio() || 1;
-        scene?.setScaleValue(zoomRatio, zoomRatio);
+        // @TODO lumixraku why handle zoom in scroll.render-controller ???
+        // const zoomRatio = worksheet.getZoomRatio() || 1;
+        // scene?.setScaleValueOnly(zoomRatio, zoomRatio);
         scene?.transformByState({
             width: rowHeaderWidthAndMarginLeft + columnTotalWidth,
             height: columnHeaderHeightAndMarginTop + rowTotalHeight,
@@ -451,6 +500,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         const { startRow, startColumn, actualRow, actualColumn } = selection.primary ?? selection.range;
         const selectionStartRow = targetIsActualRowAndColumn ? actualRow ?? startRow : startRow;
         const selectionStartColumn = targetIsActualRowAndColumn ? actualColumn ?? startColumn : startColumn;
+
         this._scrollToCell(selectionStartRow, selectionStartColumn);
     }
 
@@ -469,7 +519,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
             return;
         }
 
-        const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+        const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
         if (skeleton == null) {
             return;
         }
@@ -481,7 +531,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
     // For arrow key to active cell cause scrolling.
     // eslint-disable-next-line max-lines-per-function, complexity
     private _scrollToCell(row: number, column: number, forceTop = false, forceLeft = false) {
-        const { rowHeightAccumulation, columnWidthAccumulation } = this._sheetSkeletonManagerService.getCurrent()?.skeleton ?? {};
+        const { rowHeightAccumulation, columnWidthAccumulation } = this._sheetSkeletonManagerService.getCurrentSkeleton() ?? {};
 
         if (rowHeightAccumulation == null || columnWidthAccumulation == null) return false;
 
@@ -491,7 +541,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         const viewport = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
         if (viewport == null) return false;
 
-        const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+        const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
         if (skeleton == null) return false;
 
         const worksheet = this._context.unit.getActiveSheet();
@@ -516,7 +566,6 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
             endRow: viewMainEndRow,
             endColumn: viewMainEndColumn,
         } = bounds;
-        const visibleRangeOfViewMain = skeleton.getVisibleRangeByViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
 
         // why undefined?
         let startSheetViewRow: number | undefined;

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -190,7 +190,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
         this._zoomRefresh();
     }
 
-    // eslint-disable-next-line max-lines-per-function
+    // eslint-disable-next-line max-lines-per-function, complexity
     private _createFreeze(
         freezeDirectionType: FREEZE_DIRECTION_TYPE = FREEZE_DIRECTION_TYPE.ROW,
         freezeConfig?: IFreeze
@@ -198,7 +198,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
         const config = freezeConfig ?? this._getFreeze();
         if (config == null) return null;
 
-        const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+        const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
 
         const { startRow: freezeRow, startColumn: freezeColumn } = config;
         const position = this._getPositionByIndex(freezeRow, freezeColumn);
@@ -212,11 +212,11 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
         const { startX, startY } = position;
         const { rowTotalHeight, columnTotalWidth, rowHeaderWidthAndMarginLeft, columnHeaderHeightAndMarginTop } = skeleton;
 
-        const shapeWidth = canvasMaxWidth > columnTotalWidth + rowHeaderWidthAndMarginLeft
+        const contentWidth = canvasMaxWidth > columnTotalWidth + rowHeaderWidthAndMarginLeft
             ? canvasMaxWidth
             : columnTotalWidth + columnHeaderHeightAndMarginTop;
 
-        const shapeHeight = canvasMaxHeight > rowTotalHeight + columnHeaderHeightAndMarginTop
+        const contentHeight = canvasMaxHeight > rowTotalHeight + columnHeaderHeightAndMarginTop
             ? canvasMaxHeight
             : rowTotalHeight + columnHeaderHeightAndMarginTop;
 
@@ -227,18 +227,22 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
 
         const scale = Math.max(scene.scaleX, scene.scaleY);
 
-        let FREEZE_SIZE = FREEZE_SIZE_NORMAL / (scale < 1 ? 1 : scale);
+        let freezeSize = FREEZE_SIZE_NORMAL / Math.max(1, scale);
 
         if (freezeDirectionType === FREEZE_DIRECTION_TYPE.ROW) {
             if (freezeRow === -1 || freezeRow === 0) {
-                FREEZE_SIZE = FREEZE_SIZE * 2;
+                freezeSize = freezeSize * 2;
             }
 
-            const FREEZE_OFFSET = FREEZE_SIZE;
+            const freezeOffset = freezeSize;
 
             this._rowFreezeHeaderRect = new Rect(FREEZE_ROW_HEADER_NAME, {
-                fill: this._freezeNormalHeaderColor, width: rowHeaderWidthAndMarginLeft,
-                height: FREEZE_SIZE, left: 0, top: startY - FREEZE_OFFSET, zIndex: 3,
+                fill: this._freezeNormalHeaderColor,
+                width: rowHeaderWidthAndMarginLeft,
+                height: freezeSize,
+                left: 0,
+                top: startY - freezeOffset,
+                zIndex: 3,
             });
 
             let fill = this._freezeNormalHeaderColor;
@@ -248,24 +252,28 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
 
             this._rowFreezeMainRect = new Rect(FREEZE_ROW_MAIN_NAME, {
                 fill,
-                width: shapeWidth * 2 / scale,
-                height: FREEZE_SIZE,
+                width: contentWidth * 2 / scale,
+                height: freezeSize,
                 left: rowHeaderWidthAndMarginLeft,
-                top: startY - FREEZE_OFFSET,
+                top: startY - freezeOffset,
                 zIndex: 3,
             });
 
             scene.addObjects([this._rowFreezeHeaderRect, this._rowFreezeMainRect], SHEET_COMPONENT_HEADER_LAYER_INDEX);
         } else {
             if (freezeColumn === -1 || freezeColumn === 0) {
-                FREEZE_SIZE = FREEZE_SIZE * 2;
+                freezeSize = freezeSize * 2;
             }
 
-            const FREEZE_OFFSET = FREEZE_SIZE;
+            const FREEZE_OFFSET = freezeSize;
 
             this._columnFreezeHeaderRect = new Rect(FREEZE_COLUMN_HEADER_NAME, {
-                fill: this._freezeNormalHeaderColor, width: FREEZE_SIZE, height: columnHeaderHeightAndMarginTop,
-                left: startX - FREEZE_OFFSET, top: 0, zIndex: 3,
+                fill: this._freezeNormalHeaderColor,
+                width: freezeSize,
+                height: columnHeaderHeightAndMarginTop,
+                left: startX - FREEZE_OFFSET,
+                top: 0,
+                zIndex: 3,
             });
 
             let fill = this._freezeNormalHeaderColor;
@@ -275,8 +283,8 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
 
             this._columnFreezeMainRect = new Rect(FREEZE_COLUMN_MAIN_NAME, {
                 fill,
-                width: FREEZE_SIZE,
-                height: shapeHeight * 2 / scale,
+                width: freezeSize,
+                height: contentHeight * 2 / scale,
                 left: startX - FREEZE_OFFSET,
                 top: columnHeaderHeightAndMarginTop,
                 zIndex: 3,
@@ -401,7 +409,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
             return;
         }
 
-        const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+        const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
         if (skeleton == null) {
             return;
         }
@@ -472,7 +480,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
         freezeObjectMainRect: Rect,
         freezeDirectionType: FREEZE_DIRECTION_TYPE = FREEZE_DIRECTION_TYPE.ROW
     ) {
-        const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+        const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
         if (skeleton == null) {
             return;
         }
@@ -797,7 +805,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
         xSplit: number = 0,
         resetScroll = ResetScrollType.ALL
     ) {
-        const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+        const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
         if (skeleton == null) {
             return;
         }
@@ -824,7 +832,9 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
         viewColumnRight.resizeWhenFreezeChange({
             left: rowHeaderWidthAndMarginLeft,
             top: 0,
-            height: columnHeaderHeightAndMarginTop,
+            // ctx.clip by the size of viewport, and selection header border is slightly below column header
+            // I think it's a bad design, Should not clip for selection rendering in viewport,
+            height: columnHeaderHeightAndMarginTop + 1,
             right: 0,
         });
 
@@ -832,13 +842,13 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
             left: 0,
             top: columnHeaderHeightAndMarginTop,
             bottom: 0,
-            width: rowHeaderWidthAndMarginLeft,
+            width: rowHeaderWidthAndMarginLeft + 1,
         });
 
         viewLeftTop.resizeWhenFreezeChange({
             left: 0,
             top: 0,
-            width: rowHeaderWidthAndMarginLeft,
+            width: rowHeaderWidthAndMarginLeft + 1,
             height: columnHeaderHeightAndMarginTop,
         });
 
@@ -857,9 +867,9 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
         }
 
         // freeze start
-        const startSheetView = skeleton.getNoMergeCellPositionByIndexWithNoHeader(row - ySplit, column - xSplit);
+        const startSheetView = skeleton.getNoMergeCellWithCoordByIndex(row - ySplit, column - xSplit, false);
         // freeze end
-        const endSheetView = skeleton.getNoMergeCellPositionByIndexWithNoHeader(row, column);
+        const endSheetView = skeleton.getNoMergeCellWithCoordByIndex(row, column, false);
 
         viewMainLeftTop.disable();
         viewMainTop.disable();
@@ -882,6 +892,36 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
                 right: 0,
             });
             viewMain.resetPadding();
+            viewMainLeft.resizeWhenFreezeChange({
+                left: rowHeaderWidthAndMarginLeft,
+                top: columnHeaderHeightAndMarginTop,
+                bottom: 0,
+                width: 0,
+            });
+            viewMainTop.resizeWhenFreezeChange({
+                left: rowHeaderWidthAndMarginLeft,
+                top: columnHeaderHeightAndMarginTop,
+                height: 0,
+                right: 0,
+            });
+            viewMainLeftTop.resizeWhenFreezeChange({
+                left: rowHeaderWidthAndMarginLeft,
+                top: columnHeaderHeightAndMarginTop,
+                width: 0,
+                height: 0,
+            });
+            viewRowTop.resizeWhenFreezeChange({
+                left: 0,
+                top: columnHeaderHeightAndMarginTop,
+                width: rowHeaderWidthAndMarginLeft + 1,
+                height: 0,
+            });
+            viewColumnLeft.resizeWhenFreezeChange({
+                left: 0,
+                top: 0,
+                height: columnHeaderHeightAndMarginTop + 1,
+                width: 0,
+            });
         } else if (isTopView === true && isLeftView === false) {
             // freeze row
             const topGap = endSheetView.startY - startSheetView.startY;
@@ -920,7 +960,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
             viewRowTop.resizeWhenFreezeChange({
                 left: 0,
                 top: columnHeaderHeightAndMarginTop,
-                width: rowHeaderWidthAndMarginLeft,
+                width: rowHeaderWidthAndMarginLeft + 1,
                 height: topGap,
             });
             viewRowTop
@@ -931,7 +971,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
                 left: 0,
                 top: columnHeaderHeightAndMarginTop + topGap,
                 bottom: 0,
-                width: rowHeaderWidthAndMarginLeft,
+                width: rowHeaderWidthAndMarginLeft + 1,
             });
 
             viewMainTop.enable();
@@ -976,7 +1016,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
                 left: rowHeaderWidthAndMarginLeft,
                 top: 0,
                 width: leftGap,
-                height: columnHeaderHeightAndMarginTop,
+                height: columnHeaderHeightAndMarginTop + 1,
             });
             viewColumnLeft
                 .updateScrollVal({
@@ -985,7 +1025,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
             viewColumnRight.resizeWhenFreezeChange({
                 left: rowHeaderWidthAndMarginLeft + leftGap,
                 top: 0,
-                height: columnHeaderHeightAndMarginTop,
+                height: columnHeaderHeightAndMarginTop + 1,
                 right: 0,
             });
 
@@ -1064,7 +1104,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
             viewRowTop.resizeWhenFreezeChange({
                 left: 0,
                 top: columnHeaderHeightAndMarginTop,
-                width: rowHeaderWidthAndMarginLeft,
+                width: rowHeaderWidthAndMarginLeft + 1,
                 height: topGap,
             });
 
@@ -1077,14 +1117,14 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
                 left: 0,
                 top: columnHeaderHeightAndMarginTop + topGap,
                 bottom: 0,
-                width: rowHeaderWidthAndMarginLeft,
+                width: rowHeaderWidthAndMarginLeft + 1,
             });
 
             viewColumnLeft.resizeWhenFreezeChange({
                 left: rowHeaderWidthAndMarginLeft,
                 top: 0,
                 width: leftGap,
-                height: columnHeaderHeightAndMarginTop,
+                height: columnHeaderHeightAndMarginTop + 1,
             });
 
             viewColumnLeft
@@ -1095,7 +1135,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
             viewColumnRight.resizeWhenFreezeChange({
                 left: rowHeaderWidthAndMarginLeft + leftGap,
                 top: 0,
-                height: columnHeaderHeightAndMarginTop,
+                height: columnHeaderHeightAndMarginTop + 1,
                 right: 0,
             });
 
@@ -1521,13 +1561,13 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
             return;
         }
         const { scene } = sheetObject;
-        scene.onTransformChange$.subscribeEvent((state) => {
-            if (state.type !== TRANSFORM_CHANGE_OBSERVABLE_TYPE.scale) {
+
+        this.disposeWithMe(scene.onTransformChange$.subscribeEvent((state) => {
+            if (![TRANSFORM_CHANGE_OBSERVABLE_TYPE.scale, TRANSFORM_CHANGE_OBSERVABLE_TYPE.all].includes(state.type)) {
                 return;
             }
-
             this._refreshCurrent();
-        });
+        }));
     }
 
     private _clearObserverEvent() {
@@ -1574,8 +1614,8 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
             return;
         }
 
-        const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
-        const position = skeleton?.getNoMergeCellPositionByIndex(row, column);
+        const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
+        const position = skeleton?.getNoMergeCellWithCoordByIndex(row, column);
         if (skeleton == null) {
             return;
         }
@@ -1595,7 +1635,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
 
     private _getFreeze() {
         const config: IWorksheetData | undefined = this._sheetSkeletonManagerService
-            .getCurrent()
+            .getCurrentParam()
             ?.skeleton
             .getWorksheetConfig();
 

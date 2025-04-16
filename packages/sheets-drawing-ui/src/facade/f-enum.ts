@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { DrawingTypeEnum, FEnum, ImageSourceType } from '@univerjs/core';
+import { DrawingTypeEnum, ImageSourceType } from '@univerjs/core';
+import { FEnum } from '@univerjs/core/facade';
 import { SheetDrawingAnchorType } from '@univerjs/sheets-drawing';
 
 /**
@@ -40,7 +41,7 @@ export class FDrawingEnumMixin extends FEnum implements IFDrawingEnumMixin {
 }
 
 FEnum.extend(FDrawingEnumMixin);
-declare module '@univerjs/core' {
+declare module '@univerjs/core/facade' {
     // eslint-disable-next-line ts/naming-convention
     interface FEnum extends IFDrawingEnumMixin { }
 }

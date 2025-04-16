@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-present DreamNum Inc.
+ * Copyright 2023-present DreamNum Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,13 @@
 
 import type { ICustomRange, Nullable, Workbook } from '@univerjs/core';
 import type { IHyperLinkPopup } from '../../services/popup.service';
-import { DOCS_ZEN_EDITOR_UNIT_ID_KEY, ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
-import { MessageType, Tooltip } from '@univerjs/design';
+import { DOCS_ZEN_EDITOR_UNIT_ID_KEY, ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
+import { clsx, MessageType, Tooltip } from '@univerjs/design';
 import { AllBorderSingle, CopySingle, LinkSingle, UnlinkSingle, WriteSingle, Xlsx } from '@univerjs/icons';
 import { CancelHyperLinkCommand, CancelRichHyperLinkCommand, SheetHyperLinkType, SheetsHyperLinkParserService } from '@univerjs/sheets-hyper-link';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
-import { IMessageService, IZenZoneService } from '@univerjs/ui';
-import cs from 'clsx';
-import React, { useEffect, useState } from 'react';
+import { IMessageService, IZenZoneService, useDependency } from '@univerjs/ui';
+import { useEffect, useState } from 'react';
 import { OpenHyperLinkEditPanelOperation } from '../../commands/operations/popup.operations';
 import { SheetsHyperLinkPopupService } from '../../services/popup.service';
 import { SheetsHyperLinkResolverService } from '../../services/resolver.service';
@@ -69,7 +68,7 @@ export const CellLinkPopupPure = (props: ICellLinkPopupPureProps) => {
     return (
         <div className={styles.cellLink} onClick={() => popupService.hideCurrentPopup()}>
             <div
-                className={cs(styles.cellLinkContent, { [styles.cellLinkContentError]: isError })}
+                className={clsx(styles.cellLinkContent, { [styles.cellLinkContentError]: isError })}
                 onClick={() => {
                     if (zenZoneService.visible) {
                         return;
@@ -92,7 +91,7 @@ export const CellLinkPopupPure = (props: ICellLinkPopupPureProps) => {
             <div className={styles.cellLinkOperations}>
                 {copyPermission && (
                     <div
-                        className={cs(styles.cellLinkOperation, { [styles.cellLinkOperationError]: isError })}
+                        className={clsx(styles.cellLinkOperation, { [styles.cellLinkOperationError]: isError })}
                         onClick={() => {
                             if (isError) {
                                 return;

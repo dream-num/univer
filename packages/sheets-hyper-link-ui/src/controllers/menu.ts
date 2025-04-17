@@ -54,7 +54,6 @@ const getEditingLinkDisable$ = (accessor: IAccessor, unitId = DOCS_ZEN_EDITOR_UN
 };
 
 const getLinkDisable$ = (accessor: IAccessor) => {
-    const disableRange$ = getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetSetCellValuePermission, WorksheetInsertHyperlinkPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }, true);
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const editorBridgeService = accessor.has(IEditorBridgeService) ? accessor.get(IEditorBridgeService) : null;
 
@@ -95,7 +94,7 @@ const getLinkDisable$ = (accessor: IAccessor) => {
             if (disableCell) {
                 return of(true);
             } else {
-                return disableRange$;
+                return getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetSetCellValuePermission, WorksheetInsertHyperlinkPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }, true);
             }
         })
     );

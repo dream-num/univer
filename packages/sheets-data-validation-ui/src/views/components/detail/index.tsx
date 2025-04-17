@@ -45,6 +45,7 @@ function getSheetIdByName(univerInstanceService: IUniverInstanceService, unitId:
     }
     return univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getSheetBySheetName(name)?.getSheetId() || '';
 }
+
 export function DataValidationDetail() {
     const [key, setKey] = useState(0);
     const dataValidationPanelService = useDependency(DataValidationPanelService);
@@ -246,7 +247,7 @@ export function DataValidationDetail() {
         );
     };
 
-    const shouldHideFormula = !localRule.operator;
+    const shouldHideFormula = operators.length && !localRule.operator;
 
     return (
         <div className={styles.dataValidationDetail}>

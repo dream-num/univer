@@ -33,11 +33,14 @@ export interface IInputProps extends Pick<InputProps, 'onFocus' | 'onBlur'> {
     onClick?: (e: React.MouseEvent<HTMLInputElement>) => void;
     onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
     onChange?: (value: string) => void;
+    inputClass?: string;
+    inputStyle?: React.CSSProperties;
 }
 
 export const Input = ({
     autoFocus = false,
     className,
+    inputClass,
     style,
     type = 'text',
     placeholder,
@@ -50,6 +53,7 @@ export const Input = ({
     onChange,
     onFocus,
     onBlur,
+    inputStyle,
     ...props
 }: IInputProps) => {
     const sizeClasses = {
@@ -91,7 +95,8 @@ export const Input = ({
                     `,
                     disabled && 'univer-cursor-not-allowed univer-bg-gray-50',
                     allowClear && 'univer-pr-8',
-                    sizeClasses[size]
+                    sizeClasses[size],
+                    inputClass
                 )}
                 placeholder={placeholder}
                 value={value}
@@ -102,6 +107,7 @@ export const Input = ({
                 onChange={handleChange}
                 onFocus={onFocus}
                 onBlur={onBlur}
+                style={inputStyle}
                 {...props}
             />
             {allowClear && value && !disabled && (

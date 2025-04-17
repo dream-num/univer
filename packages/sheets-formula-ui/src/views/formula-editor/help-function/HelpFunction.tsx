@@ -20,7 +20,7 @@ import { LocaleService } from '@univerjs/core';
 import { CloseSingle, MoreSingle } from '@univerjs/icons';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
 
-import { RectPopup, useDependency, useEvent } from '@univerjs/ui';
+import { RectPopup, useDependency, useEvent, useObservable } from '@univerjs/ui';
 import React, { useMemo, useState } from 'react';
 import { generateParam } from '../../../services/utils';
 import { useEditorPosition } from '../hooks/use-editor-position';
@@ -94,7 +94,7 @@ export function HelpFunction(props: IHelpFunctionProps) {
     const { functionInfo, paramIndex, reset } = useFormulaDescribe(isFocus, formulaText, editor);
     const visible = useMemo(() => !!functionInfo && paramIndex >= 0, [functionInfo, paramIndex]);
     const editorBridgeService = useDependency(IEditorBridgeService);
-    const [hidden, _setHidden] = useState(!editorBridgeService.helpFunctionVisible);
+    const hidden = !useObservable(editorBridgeService.helpFunctionVisible$);
     const [contentVisible, setContentVisible] = useState(true);
     const localeService = useDependency(LocaleService);
     const required = localeService.t('formula.prompt.required');
@@ -106,8 +106,7 @@ export function HelpFunction(props: IHelpFunctionProps) {
     }
 
     const setHidden = useEvent((v: boolean) => {
-        _setHidden(v);
-        editorBridgeService.helpFunctionVisible = v;
+        editorBridgeService.helpFunctionVisible$.next(!v);
     });
 
     const onClose = () => {

@@ -33,9 +33,12 @@ export function useEditorPosition(editorId: string, ready: boolean, deps?: any[]
         }
         const position = doc.getBoundingClientRect();
         const { marginTop = 0, marginBottom = 0 } = doc.getDocumentData().documentStyle;
+        const skeleton = doc.getSkeleton();
+        if (!skeleton) return;
+        const height = skeleton.getSkeletonData()?.pages[0].height;
         let { left, top, right, bottom } = position;
         top = top + marginTop;
-        bottom = bottom - marginBottom;
+        bottom = height ? top + height : bottom - marginBottom;
 
         const current = position$.getValue();
         if (current.left === left && current.top === top && current.right === right && current.bottom === bottom) {

@@ -21,7 +21,7 @@ import type { FWorkbook } from './f-workbook';
 import { BooleanNumber, Direction, ICommandService, ILogService, Inject, Injector, ObjectMatrix, RANGE_TYPE, WrapStrategy } from '@univerjs/core';
 import { FBaseInitialable } from '@univerjs/core/facade';
 import { deserializeRangeWithSheet } from '@univerjs/engine-formula';
-import { AppendRowCommand, CancelFrozenCommand, ClearSelectionAllCommand, ClearSelectionContentCommand, ClearSelectionFormatCommand, copyRangeStyles, InsertColByRangeCommand, InsertRowByRangeCommand, MoveColsCommand, MoveRowsCommand, RemoveColByRangeCommand, RemoveRowByRangeCommand, SetColDataCommand, SetColHiddenCommand, SetColWidthCommand, SetFrozenCommand, SetGridlinesColorCommand, SetRangeValuesMutation, SetRowDataCommand, SetRowHeightCommand, SetRowHiddenCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetTabColorCommand, SetTextWrapCommand, SetWorksheetDefaultStyleMutation, SetWorksheetHideCommand, SetWorksheetNameCommand, SetWorksheetRowIsAutoHeightCommand, SetWorksheetRowIsAutoHeightMutation, SetWorksheetShowCommand, SheetsSelectionsService, ToggleGridlinesCommand } from '@univerjs/sheets';
+import { AppendRowCommand, CancelFrozenCommand, ClearSelectionAllCommand, ClearSelectionContentCommand, ClearSelectionFormatCommand, copyRangeStyles, InsertColByRangeCommand, InsertRowByRangeCommand, MoveColsCommand, MoveRowsCommand, RemoveColByRangeCommand, RemoveRowByRangeCommand, SetColDataCommand, SetColHiddenCommand, SetColWidthCommand, SetFrozenCommand, SetGridlinesColorCommand, SetRangeValuesMutation, SetRowDataCommand, SetRowHeightCommand, SetRowHiddenCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetTabColorCommand, SetTextWrapCommand, SetWorksheetColumnCountCommand, SetWorksheetDefaultStyleMutation, SetWorksheetHideCommand, SetWorksheetNameCommand, SetWorksheetRowCountCommand, SetWorksheetRowIsAutoHeightCommand, SetWorksheetRowIsAutoHeightMutation, SetWorksheetShowCommand, SheetsSelectionsService, ToggleGridlinesCommand } from '@univerjs/sheets';
 import { FDefinedNameBuilder } from './f-defined-name';
 import { FRange } from './f-range';
 import { FSelection } from './f-selection';
@@ -2506,6 +2506,50 @@ export class FWorksheet extends FBaseInitialable {
             insertColumnNums: rowContents.length > maxColumns ? rowContents.length - maxColumns : 0,
             maxRows,
             maxColumns,
+        });
+        return this;
+    }
+
+    /**
+     * Sets the number of rows in the worksheet.
+     * @param {number} rowCount - The number of rows to set.
+     * @returns {FWorksheet} Returns the current worksheet instance for method chaining.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorkSheet = fWorkbook.getActiveSheet();
+     *
+     * // Set the number of rows in the worksheet to 40
+     * fWorkSheet.setRowCount(40);
+     * ```
+     */
+    setRowCount(rowCount: number): FWorksheet {
+        this._commandService.syncExecuteCommand(SetWorksheetRowCountCommand.id, {
+            unitId: this._workbook.getUnitId(),
+            subUnitId: this._worksheet.getSheetId(),
+            rowCount,
+        });
+        return this;
+    }
+
+    /**
+     * Sets the number of columns in the worksheet.
+     * @param {number} columnCount - The number of columns to set.
+     * @returns {FWorksheet} Returns the current worksheet instance for method chaining.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorkSheet = fWorkbook.getActiveSheet();
+     *
+     * // Set the number of columns in the worksheet to 10
+     * fWorkSheet.setColumnCount(10);
+     * ```
+     */
+    setColumnCount(columnCount: number): FWorksheet {
+        this._commandService.syncExecuteCommand(SetWorksheetColumnCountCommand.id, {
+            unitId: this._workbook.getUnitId(),
+            subUnitId: this._worksheet.getSheetId(),
+            columnCount,
         });
         return this;
     }

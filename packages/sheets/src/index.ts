@@ -454,4 +454,9 @@ export type { ICellOverGridPosition, ISheetOverGridPosition } from './basics/cel
 
 export { SheetSkeletonService } from './skeleton/skeleton.service';
 
+export { SetWorksheetRowCountCommand } from './commands/commands/set-worksheet-row-count.command';
+export { SetWorksheetColumnCountCommand } from './commands/commands/set-worksheet-column-count.command';
+export { type ISetWorksheetRowCountMutationParams, SetWorksheetRowCountMutation } from './commands/mutations/set-worksheet-row-count.mutation';
+export { type ISetWorksheetColumnCountMutationParams, SetWorksheetColumnCountMutation } from './commands/mutations/set-worksheet-column-count.mutation';
+
 // #endregion

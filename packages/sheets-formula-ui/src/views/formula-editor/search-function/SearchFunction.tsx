@@ -23,7 +23,6 @@ import React, { forwardRef, useEffect, useMemo, useRef, useState } from 'react';
 import { useEditorPosition } from '../hooks/use-editor-position';
 import { useFormulaSearch } from '../hooks/use-formula-search';
 import { useStateRef } from '../hooks/use-state-ref';
-import styles from './index.module.less';
 
 interface ISearchFunctionProps {
     isFocus: boolean;
@@ -145,7 +144,7 @@ function SearchFunctionFactory(props: ISearchFunctionProps, ref: any) {
 
     function scrollToVisible(liIndex: number) {
         // Get the <li> element
-        const liElement = ulRef.current?.querySelectorAll(`.${styles.formulaSearchFunctionItem}`)[
+        const liElement = ulRef.current?.querySelectorAll('.univer-formula-search-function-item')[
             liIndex
         ] as HTMLLIElement;
 
@@ -195,7 +194,13 @@ function SearchFunctionFactory(props: ISearchFunctionProps, ref: any) {
     return searchList.length > 0 && visible && (
         <RectPopup portal anchorRect$={position$} direction="vertical">
             <ul
-                className={styles.formulaSearchFunction}
+                className={`
+                  univer-m-0 univer-box-border univer-max-h-[400px] univer-w-[250px] univer-list-none
+                  univer-overflow-y-auto univer-rounded-[var(--border-radius-lg)] univer-border univer-border-solid
+                  univer-border-[rgb(var(--border-color))] univer-bg-[rgb(var(--bg-color-secondary))]
+                  univer-p-[var(--padding-sm)] univer-leading-[20px] univer-shadow-[var(--box-shadow-base)]
+                  univer-outline-none
+                `}
                 ref={(v) => {
                     ulRef.current = v!;
                     if (ref) {
@@ -206,12 +211,14 @@ function SearchFunctionFactory(props: ISearchFunctionProps, ref: any) {
                 {searchList.map((item, index) => (
                     <li
                         key={item.name}
-                        className={active === index
-                            ? `
-                              ${styles.formulaSearchFunctionItem}
-                              ${styles.formulaSearchFunctionItemActive}
-                            `
-                            : styles.formulaSearchFunctionItem}
+                        className={`
+                          univer-box-border univer-cursor-pointer univer-rounded-[var(--border-radius-base)]
+                          univer-p-[var(--padding-xs)_var(--padding-sm)] univer-text-[rgb(var(--text-color))]
+                          univer-transition-[background_0.2s] univer-formula-search-function-item
+                          ${active === index
+                        ? 'univer-bg-[rgb(var(--bg-color-hover))]'
+                        : ''}
+                        `}
                         onMouseEnter={() => handleLiMouseEnter(index)}
                         onMouseLeave={handleLiMouseLeave}
                         onMouseMove={debounceResetMouseState}
@@ -222,11 +229,15 @@ function SearchFunctionFactory(props: ISearchFunctionProps, ref: any) {
                             }
                         }}
                     >
-                        <span className={styles.formulaSearchFunctionItemName}>
-                            <span className={styles.formulaSearchFunctionItemNameLight}>{item.name.substring(0, searchText.length)}</span>
+                        <span className="univer-text-xs">
+                            <span className="univer-text-[rgb(var(--error-color))]">{item.name.substring(0, searchText.length)}</span>
                             <span>{item.name.slice(searchText.length)}</span>
                         </span>
-                        <span className={styles.formulaSearchFunctionItemDesc}>{item.desc}</span>
+                        <span
+                            className="univer-block univer-text-xs univer-text-[rgb(var(--grey-500))]"
+                        >
+                            {item.desc}
+                        </span>
                     </li>
                 ))}
             </ul>

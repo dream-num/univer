@@ -34,6 +34,8 @@ interface IAbsolutePosition {
 
 const RectPopupContext = createContext<RefObject<IAbsolutePosition | undefined>>({ current: undefined });
 
+export type RectPopupDirection = 'vertical' | 'horizontal' | 'top' | 'right' | 'left' | 'right-center' | 'right-bottom' | 'right-top' | 'left-center' | 'left-bottom' | 'left-top' | 'bottom' | 'bottom-center' | 'top-center' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'vertical-left' | 'vertical-right' | 'horizontal-top' | 'horizontal-bottom';
+
 export interface IRectPopupProps {
     children?: React.ReactNode;
 
@@ -42,7 +44,7 @@ export interface IRectPopupProps {
      */
     anchorRect$: Observable<IAbsolutePosition>;
     excludeRects?: RefObject<Nullable<IAbsolutePosition[]>>;
-    direction?: 'vertical' | 'horizontal' | 'top' | 'right' | 'left' | 'right-center' | 'right-bottom' | 'right-top' | 'left-center' | 'left-bottom' | 'left-top' | 'bottom' | 'bottom-center' | 'top-center';
+    direction?: RectPopupDirection;
     hidden?: boolean;
     // #region closing behavior
     onClickOutside?: (e: MouseEvent) => void;
@@ -96,6 +98,10 @@ function calcPopupPosition(layout: IPopupLayoutInfo): { top: number; left: numbe
             horizontalStyle = (Math.max(startX + offsetX, PUSHING_MINIMUM_GAP) + width) > containerWidth
                 ? { left: Math.max(Math.min(maxLeft, endX - width - offsetX), minLeft) }
                 : { left: Math.max(minLeft, Math.min(startX + offsetX, maxLeft)) };
+        } else if (direction.includes('left')) {
+            horizontalStyle = { left: Math.max(endX - width, minLeft) };
+        } else if (direction.includes('right')) {
+            horizontalStyle = { left: Math.min(startX, maxLeft) };
         } else {
             // If the popup element exceed the visible area. We should "push" it back.
             horizontalStyle = (startX + width) > containerWidth

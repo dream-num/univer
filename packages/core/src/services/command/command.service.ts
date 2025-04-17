@@ -182,7 +182,7 @@ export type CommandListener = (commandInfo: Readonly<ICommandInfo>, options?: IE
 /**
  * The identifier of the command service.
  */
-export const ICommandService = createIdentifier<ICommandService>('anywhere.command-service');
+export const ICommandService = createIdentifier<ICommandService>('univer.core.command-service');
 /**
  * The service to register and execute commands.
  */
@@ -198,6 +198,11 @@ export interface ICommandService {
      * @param command The command to register.
      */
     registerCommand(command: ICommand<object, unknown>): IDisposable;
+    /**
+     * Unregister a command from the command service.
+     * @param commandId The id of the command to unregister.
+     */
+    unregisterCommand(commandId: string): void;
     /**
      * Register a command as a multi command.
      * @param command The command to register as a multi command.
@@ -248,9 +253,13 @@ class CommandRegistry {
         this._commandTypes.set(command.id, command.type);
 
         return toDisposable(() => {
-            this._commands.delete(command.id);
-            this._commandTypes.delete(command.id);
+            this.unregisterCommand(command.id);
         });
+    }
+
+    unregisterCommand(commandId: string): void {
+        this._commands.delete(commandId);
+        this._commandTypes.delete(commandId);
     }
 
     hasCommand(id: string): boolean {
@@ -297,7 +306,7 @@ export class CommandService extends Disposable implements ICommandService {
         super();
 
         this._commandRegistry = new CommandRegistry();
-        this._registerCommand(NilCommand);
+        this.registerCommand(NilCommand);
     }
 
     override dispose(): void {
@@ -312,7 +321,12 @@ export class CommandService extends Disposable implements ICommandService {
     }
 
     registerCommand(command: ICommand): IDisposable {
-        return this._registerCommand(command);
+        return this._commandRegistry.registerCommand(command);
+    }
+
+    unregisterCommand(commandId: string): void {
+        this._commandRegistry.unregisterCommand(commandId);
+        this._multiCommandDisposables.get(commandId)?.dispose();
     }
 
     registerMultipleCommand(command: ICommand): IDisposable {
@@ -436,18 +450,15 @@ export class CommandService extends Disposable implements ICommandService {
         return toDisposable(() => remove(this._commandExecutionStack, stackItem));
     }
 
-    private _registerCommand(command: ICommand): IDisposable {
-        return this._commandRegistry.registerCommand(command);
-    }
-
     private _registerMultiCommand(command: ICommand): IDisposable {
         // compose a multi command and register it
         const registry = this._commandRegistry.getCommand(command.id);
         let multiCommand: MultiCommand;
 
         if (!registry) {
-            const disposableCollection = new DisposableCollection();
             multiCommand = new MultiCommand(command.id);
+
+            const disposableCollection = new DisposableCollection();
             disposableCollection.add(this._commandRegistry.registerCommand(multiCommand));
             disposableCollection.add(
                 toDisposable(() => {

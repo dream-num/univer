@@ -95,6 +95,7 @@ export { FormatPainterStatus, IFormatPainterService } from './services/format-pa
 export type { IFormatPainterBeforeApplyHookParams, IFormatPainterHook } from './services/format-painter/format-painter.service';
 export { SELECTION_SHAPE_DEPTH } from './services/selection/const';
 export { type IBaseSheetBarProps } from './views/sheet-bar/sheet-bar-tabs/SheetBarItem';
+export { type IDropdownParam, ISheetCellDropdownManagerService, SheetCellDropdownManagerService } from './services/cell-dropdown-manager.service';
 export { FormulaBar } from './views/formula-bar/FormulaBar';
 
 // #region - all commands

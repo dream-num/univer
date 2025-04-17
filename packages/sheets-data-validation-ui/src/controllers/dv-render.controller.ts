@@ -86,7 +86,7 @@ export class SheetsDataValidationRenderController extends RxDisposable {
                 }
                 const validator = this._dataValidatorRegistryService.getValidatorItem(rule.type);
 
-                if (!validator?.dropdown) {
+                if (!validator?.dropdownType) {
                     return;
                 }
 
@@ -115,11 +115,9 @@ export class SheetsDataValidationRenderController extends RxDisposable {
                             workbook,
                             worksheet,
                         },
-                        componentKey: validator.dropdown,
-                        onHide: () => { /* empty */ },
                         trigger: 'editor-bridge',
-                    },
-                    false
+                        closeOnOutSide: false,
+                    }
                 );
             }
         }));

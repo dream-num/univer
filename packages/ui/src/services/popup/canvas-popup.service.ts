@@ -21,7 +21,7 @@ import type { IRectPopupProps } from '../../views/components/popup/RectPopup';
 import { createIdentifier, Disposable, Tools } from '@univerjs/core';
 import { BehaviorSubject } from 'rxjs';
 
-export interface IPopup extends Omit<IRectPopupProps, 'children' | 'hidden' | 'excludeRects' | 'anchorRect$'> {
+export interface IPopup<T = Record<string, unknown>> extends Omit<IRectPopupProps, 'children' | 'hidden' | 'excludeRects' | 'anchorRect$'> {
     anchorRect$: Observable<IBoundRectNoAngle>;
     anchorRect?: IBoundRectNoAngle;
     excludeRects$?: Observable<IBoundRectNoAngle[]>;
@@ -36,6 +36,7 @@ export interface IPopup extends Omit<IRectPopupProps, 'children' | 'hidden' | 'e
     hideOnInvisible?: boolean;
     hiddenType?: 'hide' | 'destroy';
     hiddenRects$?: Observable<IBoundRectNoAngle[]>;
+    extraProps?: T;
     customActive?: boolean;
     onActiveChange?: (active: boolean) => void;
 }

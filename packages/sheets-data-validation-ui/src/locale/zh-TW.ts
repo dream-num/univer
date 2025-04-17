@@ -64,6 +64,7 @@ const locale: typeof zhCN = {
             equal: '等於',
             notEqual: '不等於',
             notBetween: '未介於',
+            legal: '是合法類型',
         },
         ruleName: {
             between: '介於 {FORMULA1} 和 {FORMULA2} 之間',
@@ -74,6 +75,7 @@ const locale: typeof zhCN = {
             equal: '等於 {FORMULA1}',
             notEqual: '不等於 {FORMULA1}',
             notBetween: '在 {FORMULA1} 和 {FORMULA2} 範圍之外',
+            legal: '是一個合法的 {TYPE}',
         },
         errorMsg: {
             between: '值必須介於 {FORMULA1} 和 {FORMULA2} 之間',
@@ -84,6 +86,7 @@ const locale: typeof zhCN = {
             equal: '值必須等於 {FORMULA1}',
             notEqual: '值必須不等於 {FORMULA1}',
             notBetween: '值必須在 {FORMULA1} 和 {FORMULA2} 範圍之外',
+            legal: '值必須是一個合法的 {TYPE}',
         },
         any: {
             title: '任意值',
@@ -100,6 +103,7 @@ const locale: typeof zhCN = {
                 equal: '等於',
                 notEqual: '不等於',
                 notBetween: '未介於',
+                legal: '是合法日期',
             },
             ruleName: {
                 between: '介於 {FORMULA1} 和 {FORMULA2} 之間',
@@ -110,6 +114,7 @@ const locale: typeof zhCN = {
                 equal: '等於 {FORMULA1}',
                 notEqual: '不等於 {FORMULA1}',
                 notBetween: '在 {FORMULA1} 和 {FORMULA2} 範圍之外',
+                legal: '是一個合法的日期',
             },
             errorMsg: {
                 between: '日期必須介於 {FORMULA1} 和 {FORMULA2} 之間',
@@ -120,6 +125,7 @@ const locale: typeof zhCN = {
                 equal: '日期必須等於 {FORMULA1}',
                 notEqual: '日期必須不等於 {FORMULA1}',
                 notBetween: '日期必須在 {FORMULA1} 和 {FORMULA2} 範圍之外',
+                legal: '值必須是一個合法的日期',
             },
         },
         list: {
@@ -127,14 +133,12 @@ const locale: typeof zhCN = {
             name: '值必須是列表中的值',
             error: '輸入必須在指定的範圍內',
             emptyError: '請輸入一個值',
-            // strPlaceholder: '請輸入選項，選項間透過「回車換行」或「英文逗號(,)」隔開',
-            // refPlaceholder: '引用儲存格內容作為選項,如:\'Sheet1\'!A100',
             add: '新增選項',
             dropdown: '單選',
             options: '選項來源',
             customOptions: '自訂',
             refOptions: '引用資料',
-            formulaError: '列表來源必須是劃定分界後的資料列表,或是對單一行或一列的引用。 ',
+            formulaError: '列表來源必須是劃定分界後的資料列表,或是對單一行或一列的引用。',
             edit: '編輯',
         },
         listMultiple: {

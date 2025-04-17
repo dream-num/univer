@@ -16,11 +16,11 @@
 
 import type { ICellWithCoord, IDisposable, ISelectionCell, Nullable } from '@univerjs/core';
 import type { ISelectionStyle, ISheetLocation } from '@univerjs/sheets';
-import type { ICanvasPopup, ICellAlert } from '@univerjs/sheets-ui';
+import type { ICanvasPopup, ICellAlert, IDropdownParam } from '@univerjs/sheets-ui';
 import type { ComponentType } from '@univerjs/ui';
 import { DisposableCollection, generateRandomId, ILogService, toDisposable } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { CellAlertManagerService, IMarkSelectionService, ISheetClipboardService, SheetCanvasPopManagerService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { CellAlertManagerService, IMarkSelectionService, ISheetCellDropdownManagerService, ISheetClipboardService, SheetCanvasPopManagerService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { FRange } from '@univerjs/sheets/facade';
 import { ComponentManager } from '@univerjs/ui';
 
@@ -211,6 +211,20 @@ interface IFRangeSheetsUIMixin {
      * ```
      */
     highlight(style?: Nullable<Partial<ISelectionStyle>>, primary?: Nullable<ISelectionCell>): IDisposable;
+
+    /**
+     * Show a dropdown at the current range.
+     * @param {IDropdownParam} param - The parameters for the dropdown.
+     * @returns {IDisposable} The disposable object to hide the dropdown.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('C3:E5');
+     * fRange.showDropdown({ type: 'list', props: { options: [{ label: 'Option 1', value: 'option1' }, { label: 'Option 2', value: 'option2' }] } });
+     * ```
+     */
+    showDropdown(param: IDropdownParam): IDisposable;
 }
 
 class FRangeSheetsUIMixin extends FRange implements IFRangeSheetsUIMixin {
@@ -335,6 +349,11 @@ class FRangeSheetsUIMixin extends FRange implements IFRangeSheetsUIMixin {
         return toDisposable(() => {
             markSelectionService.removeShape(id);
         });
+    }
+
+    override showDropdown(param: IDropdownParam): IDisposable {
+        const cellDropdownManagerService = this._injector.get(ISheetCellDropdownManagerService);
+        return cellDropdownManagerService.showDropdown(param);
     }
 }
 

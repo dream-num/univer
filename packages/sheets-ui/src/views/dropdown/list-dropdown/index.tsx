@@ -16,27 +16,26 @@
 
 import type { DocumentDataModel } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import type { ISetRangeValuesCommandParams, ISheetLocation } from '@univerjs/sheets';
-import type { ListMultipleValidator } from '@univerjs/sheets-data-validation';
-import type { IEditorBridgeServiceVisibleParam } from '@univerjs/sheets-ui';
-import type { IUniverSheetsDataValidationUIConfig } from '../../../controllers/config.schema';
-import type { IDropdownComponentProps } from '../../../services/dropdown-manager.service';
-import { BuildTextUtils, DataValidationRenderMode, DataValidationType, ICommandService, IConfigService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
-import { DataValidationModel } from '@univerjs/data-validation';
+import type { ISheetLocation } from '@univerjs/sheets';
+import type { IPopup } from '@univerjs/ui';
+import type { IBaseDropdownProps } from '../type';
+import { BuildTextUtils, ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { Scrollbar } from '@univerjs/design';
 import { RichTextEditingMutation } from '@univerjs/docs';
-import { DeviceInputEventType } from '@univerjs/engine-render';
 import { CheckMarkSingle } from '@univerjs/icons';
-import { RangeProtectionPermissionEditPoint, SetRangeValuesCommand, SheetPermissionCheckController, WorkbookEditablePermission, WorksheetEditPermission } from '@univerjs/sheets';
-import { deserializeListOptions, getDataValidationCellValue, serializeListOptions, SheetDataValidationModel } from '@univerjs/sheets-data-validation';
-import { IEditorBridgeService, SetCellEditVisibleOperation } from '@univerjs/sheets-ui';
-import { KeyCode, RectPopup, useDependency, useObservable } from '@univerjs/ui';
+import { RangeProtectionPermissionEditPoint, SheetPermissionCheckController, WorkbookEditablePermission, WorksheetEditPermission } from '@univerjs/sheets';
+import { RectPopup, useDependency } from '@univerjs/ui';
 import React, { useEffect, useMemo, useState } from 'react';
-import { debounceTime } from 'rxjs';
-import { OpenValidationPanelOperation } from '../../../commands/operations/data-validation.operation';
-import { DROP_DOWN_DEFAULT_COLOR } from '../../../const';
-import { SHEETS_DATA_VALIDATION_UI_PLUGIN_CONFIG_KEY } from '../../../controllers/config.schema';
+import { IEditorBridgeService } from '../../../services/editor-bridge.service';
 import styles from './index.module.less';
+
+function serializeListOptions(options: string[]) {
+    return options.filter(Boolean).join(',');
+}
+
+function deserializeListOptions(optionsStr: string) {
+    return optionsStr.split(',').filter(Boolean);
+}
 
 interface ISelectListProps {
     value: string[];
@@ -48,16 +47,15 @@ interface ISelectListProps {
     style?: React.CSSProperties;
     filter?: string;
     location: ISheetLocation;
+    showEdit?: boolean;
 }
 
 const SelectList = (props: ISelectListProps) => {
-    const { value, onChange, multiple, options, title, onEdit, style, filter, location } = props;
+    const { value, onChange, multiple, options, title, onEdit, style, filter, location, showEdit: showEditOnDropdown } = props;
     const localeService = useDependency(LocaleService);
-    const configService = useDependency(IConfigService);
     const lowerFilter = filter?.toLowerCase();
     const { row, col, unitId, subUnitId } = location;
     const filteredOptions = options.filter((item) => lowerFilter ? item.label.toLowerCase().includes(lowerFilter) : true);
-    const showEditOnDropdown = configService.getConfig<IUniverSheetsDataValidationUIConfig>(SHEETS_DATA_VALIDATION_UI_PLUGIN_CONFIG_KEY)?.showEditOnDropdown ?? true;
     const sheetPermissionCheckController = useDependency(SheetPermissionCheckController);
     const hasPermission = useMemo(() => sheetPermissionCheckController.permissionCheckWithRanges(
         {
@@ -100,7 +98,7 @@ const SelectList = (props: ISelectListProps) => {
                             const index = item.label.toLocaleLowerCase().indexOf(lowerFilter!);
                             return (
                                 <div key={i} className={styles.dvListDropdownItemContainer} onClick={handleClick}>
-                                    <div className={styles.dvListDropdownItem} style={{ background: item.color || DROP_DOWN_DEFAULT_COLOR }}>
+                                    <div className={styles.dvListDropdownItem} style={{ background: item.color }}>
                                         {lowerFilter && item.label.toLowerCase().includes(lowerFilter)
                                             ? (
                                                 <>
@@ -134,19 +132,24 @@ const SelectList = (props: ISelectListProps) => {
     );
 };
 
-export function ListDropDown(props: IDropdownComponentProps) {
-    const { location, hideFn } = props;
-    const { worksheet, row, col, unitId, subUnitId } = location;
-    const dataValidationModel = useDependency(DataValidationModel);
+export interface IListDropdownProps {
+    multiple?: boolean;
+    onEdit?: () => void;
+    onChange?: (value: string[]) => boolean | Promise<boolean>;
+    options: { label: string; value: string; color?: string }[];
+    defaultValue?: string;
+}
+
+export function ListDropDown(props: { popup: IPopup<IListDropdownProps & IBaseDropdownProps> }) {
+    const { popup: { extraProps } } = props;
+    const { location, hideFn, onChange, onEdit, options, defaultValue, multiple } = extraProps!;
+    const { worksheet } = location;
     const [editingText, setEditingText] = useState('');
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
-    const [localValue, setLocalValue] = useState('');
+    const [localValue, setLocalValue] = useState(defaultValue);
     const editorBridgeService = useDependency(IEditorBridgeService);
     const instanceService = useDependency(IUniverInstanceService);
-    const ruleChange$ = useMemo(() => dataValidationModel.ruleChange$.pipe(debounceTime(16)), []);
-    const sheetsDataValidationModel = useDependency(SheetDataValidationModel);
-    useObservable(ruleChange$);
     const anchorRect = RectPopup.useContext();
     const cellWidth = (anchorRect.current?.right ?? 0) - (anchorRect.current?.left ?? 0);
 
@@ -171,93 +174,26 @@ export function ListDropDown(props: IDropdownComponentProps) {
         return null;
     }
 
-    const rule = sheetsDataValidationModel.getRuleByLocation(unitId, subUnitId, row, col);
-    if (!rule) {
-        return null;
-    }
-    const validator = sheetsDataValidationModel.getValidator(rule.type) as ListMultipleValidator | undefined;
-    if (!validator) {
-        return null;
-    }
-
-    const cellData = worksheet.getCell(row, col);
-
-    const showColor = rule?.renderMode === DataValidationRenderMode.CUSTOM || rule?.renderMode === undefined;
-
-    if (!cellData || !rule || !validator || validator.id.indexOf(DataValidationType.LIST) !== 0) {
-        return;
-    }
-
-    const multiple = rule.type === DataValidationType.LIST_MULTIPLE;
-    const list = validator.getListWithColor(rule, unitId, subUnitId);
-    const cellStr = localValue || getDataValidationCellValue(worksheet.getCellRaw(row, col));
-    const value = deserializeListOptions(cellStr);
-
-    const handleEdit = () => {
-        commandService.executeCommand(OpenValidationPanelOperation.id, {
-            ruleId: rule.uid,
-        });
-        hideFn();
-    };
-
-    const options = list.map((item) => ({
-        label: item.label,
-        value: item.label,
-        color: (showColor || item.color) ? item.color : 'transparent',
-    }));
-
     return (
         <SelectList
             style={{ minWidth: cellWidth, maxWidth: Math.max(cellWidth, 200) }}
             title={multiple ? localeService.t('dataValidation.listMultiple.dropdown') : localeService.t('dataValidation.list.dropdown')}
-            value={value}
+            value={deserializeListOptions(localValue ?? '')}
             multiple={multiple}
             onChange={async (newValue) => {
                 const str = serializeListOptions(newValue);
-                const params: ISetRangeValuesCommandParams = {
-                    unitId,
-                    subUnitId,
-                    range: {
-                        startColumn: col,
-                        endColumn: col,
-                        startRow: row,
-                        endRow: row,
-                    },
-                    value: {
-                        v: str,
-                        p: null,
-                        f: null,
-                        si: null,
-                    },
-                };
-
-                if (editorBridgeService.isVisible()) {
-                    commandService.executeCommand(SetCellEditVisibleOperation.id, {
-                        visible: false,
-                        eventType: DeviceInputEventType.Keyboard,
-                        unitId,
-                        keycode: KeyCode.ESC,
-                    });
-                }
                 setLocalValue(str);
-                if (!multiple) {
+                const success = await onChange?.(newValue);
+                if (!(success === false)) {
                     hideFn();
                 }
-
-                if (editorBridgeService.isVisible().visible) {
-                    await commandService.executeCommand(SetCellEditVisibleOperation.id, {
-                        visible: false,
-                        eventType: DeviceInputEventType.Keyboard,
-                        unitId,
-                        keycode: KeyCode.ESC,
-                    } as IEditorBridgeServiceVisibleParam);
-                }
-                commandService.executeCommand(SetRangeValuesCommand.id, params);
             }}
             options={options}
-            onEdit={handleEdit}
+            onEdit={onEdit}
             filter={editingText}
             location={location}
         />
     );
 }
+
+ListDropDown.componentKey = 'sheets.dropdown.list';

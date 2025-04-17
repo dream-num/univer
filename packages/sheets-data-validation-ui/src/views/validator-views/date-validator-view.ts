@@ -15,7 +15,7 @@
  */
 
 import { DataValidationType } from '@univerjs/core';
-import { DATE_DROPDOWN_KEY } from '../components';
+import { DataValidatorDropdownType } from '@univerjs/data-validation';
 import { BASE_FORMULA_INPUT_NAME } from '../components/formula-input/formula-input';
 import { DateShowTimeOption } from '../components/show-time';
 import { BaseSheetDataValidatorView } from './sheet-validator-view';
@@ -24,5 +24,5 @@ export class DateValidatorView extends BaseSheetDataValidatorView {
     override id = DataValidationType.DATE;
     override formulaInput: string = BASE_FORMULA_INPUT_NAME;
     override optionsInput = DateShowTimeOption.componentKey;
-    override dropdown = DATE_DROPDOWN_KEY;
+    override dropdownType = DataValidatorDropdownType.DATE;
 }

@@ -107,6 +107,7 @@ export function DataValidationDetail() {
         if (!localRule.ranges.length || isRangeError) {
             return;
         }
+
         if (validator.validatorFormula(localRule, unitId, subUnitId).success) {
             dataValidationPanelService.setActiveRule(null);
         } else {
@@ -245,6 +246,8 @@ export function DataValidationDetail() {
         );
     };
 
+    const shouldHideFormula = !localRule.operator;
+
     return (
         <div className={styles.dataValidationDetail}>
             <FormLayout
@@ -272,7 +275,7 @@ export function DataValidationDetail() {
             </FormLayout>
             <FormLayout label={localeService.t('dataValidation.panel.type')}>
                 <Select
-                    options={validators?.map((validator) => ({
+                    options={validators?.sort((a, b) => a.order - b.order)?.map((validator) => ({
                         label: localeService.t(validator.title),
                         value: validator.id,
                     }))}
@@ -285,10 +288,16 @@ export function DataValidationDetail() {
                 ? (
                     <FormLayout label={localeService.t('dataValidation.panel.operator')}>
                         <Select
-                            options={operators.map((op, i) => ({
-                                value: `${op}`,
-                                label: operatorNames[i],
-                            }))}
+                            options={[
+                                {
+                                    value: '',
+                                    label: localeService.t('dataValidation.operators.legal'),
+                                },
+                                ...operators.map((op, i) => ({
+                                    value: `${op}`,
+                                    label: operatorNames[i],
+                                })),
+                            ]}
                             value={`${localRule.operator}`}
                             onChange={(operator) => {
                                 handleUpdateRuleSetting({
@@ -301,7 +310,7 @@ export function DataValidationDetail() {
                     </FormLayout>
                 )
                 : null}
-            {FormulaInput
+            {FormulaInput && !shouldHideFormula
                 ? (
                     <FormLayout>
                         <FormulaInput

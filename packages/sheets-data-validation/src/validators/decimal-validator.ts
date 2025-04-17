@@ -45,6 +45,7 @@ export class DecimalValidator extends BaseDataValidator {
     id: string = DataValidationType.DECIMAL;
     private readonly _lexerTreeBuilder = this.injector.get(LexerTreeBuilder);
     title: string = 'dataValidation.decimal.title';
+    order = 20;
 
     operators: DataValidationOperator[] = [
         DataValidationOperator.BETWEEN,
@@ -105,7 +106,7 @@ export class DecimalValidator extends BaseDataValidator {
         const operator = rule.operator;
         if (!operator) {
             return {
-                success: false,
+                success: true,
             };
         }
         const formula1Success = Tools.isDefine(rule.formula1) && this._isFormulaOrNumber(rule.formula1);
@@ -128,7 +129,7 @@ export class DecimalValidator extends BaseDataValidator {
 
     override generateRuleErrorMessage(rule: IDataValidationRuleBase, position: ISheetLocationBase) {
         if (!rule.operator) {
-            return this.titleStr;
+            return this.localeService.t(OperatorErrorTitleMap.NONE).replace('{TYPE}', this.titleStr);
         }
 
         const { transformedFormula1, transformedFormula2 } = getTransformedFormula(this._lexerTreeBuilder, rule as ISheetDataValidationRule, position);

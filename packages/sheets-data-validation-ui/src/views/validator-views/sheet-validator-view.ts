@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IBaseDataValidationWidget } from '@univerjs/data-validation';
+import type { DataValidatorDropdownType, IBaseDataValidationWidget } from '@univerjs/data-validation';
 import { Inject, Injector, type Nullable } from '@univerjs/core';
 import { LIST_FORMULA_INPUT_NAME } from '../components/formula-input';
 
@@ -23,7 +23,7 @@ import { LIST_FORMULA_INPUT_NAME } from '../components/formula-input';
  */
 export abstract class BaseSheetDataValidatorView {
     canvasRender: Nullable<IBaseDataValidationWidget> = null;
-    dropdown: string | undefined = undefined;
+    dropdownType: DataValidatorDropdownType | undefined = undefined;
     optionsInput: string | undefined = undefined;
 
     abstract id: string;

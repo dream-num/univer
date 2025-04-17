@@ -621,6 +621,7 @@ export class DependencyManagerService extends DependencyManagerBaseService imple
                     id: treeId,
                 });
             }
+
             this._dependencyRTreeCache.bulkRemove(searchRanges);
         }
     }

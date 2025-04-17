@@ -25,6 +25,7 @@ export { dedupe, groupBy, makeArray, remove, rotate } from './common/array';
 export { isBooleanString } from './common/boolean';
 export * from './common/const';
 export * from './common/di';
+export * from './common/async';
 export { shallowEqual } from './common/equal';
 export { ParagraphStyleBuilder, ParagraphStyleValue, RichTextBuilder, RichTextValue, TextDecorationBuilder, TextStyleBuilder, TextStyleValue } from './docs/data-model/rich-text-builder';
 export { CanceledError, CustomCommandExecutionError } from './common/error';

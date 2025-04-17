@@ -388,7 +388,6 @@ export class FormulaDependencyGenerator extends Disposable {
         }
 
         await this._calculateListByFunctionRefNode(treeList);
-
         return treeList;
     }
 
@@ -1239,6 +1238,7 @@ export class FormulaDependencyGenerator extends Disposable {
      * @param treeList
      */
     protected _calculateRunList(treeList: IFormulaDependencyTree[]) {
+        const originalLength = treeList.length;
         const stack = treeList;
         const formulaRunList = [];
         const cacheStack: IFormulaDependencyTree[] = [];

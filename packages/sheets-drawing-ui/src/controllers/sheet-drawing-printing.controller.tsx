@@ -54,7 +54,10 @@ export class SheetDrawingPrintingController extends Disposable {
                         const subUnitData = unitData?.[subUnitId];
                         if (subUnitData) {
                             subUnitData.order.forEach((id) => {
-                                this._drawingRenderService.renderDrawing(subUnitData.data[id], scene);
+                                const drawing = subUnitData.data[id];
+                                if (drawing.drawingType !== DrawingTypeEnum.DRAWING_CHART && drawing.drawingType !== DrawingTypeEnum.DRAWING_DOM) {
+                                    this._drawingRenderService.renderDrawing(drawing, scene);
+                                }
                             });
                         }
 
@@ -127,28 +130,40 @@ export class SheetDrawingPrintingController extends Disposable {
                 {
                     handler: (disposableCollection, pos, next) => {
                         const { unitId, subUnitId } = pos;
-                        const floatDomInfos = this._canvasFloatDomManagerService.getFloatDomsBySubUnitId(unitId, subUnitId)
-                            .map((i) => {
-                                const drawing = this._drawingManagerService.getDrawingByParam({ drawingId: i.id, unitId, subUnitId }) as IFloatDomData;
+                        const unitData = this._drawingManagerService.getDrawingDataForUnit(unitId);
+                        const subUnitData = unitData?.[subUnitId];
+                        if (subUnitData) {
+                            const floatDomInfos = subUnitData.order.map((id) => {
+                                const drawing = subUnitData.data[id];
+                                if (drawing.drawingType === DrawingTypeEnum.DRAWING_CHART) {
+                                    return {
+                                        ...drawing,
+                                        componentKey: this._componetManager.get(PRINT_CHART_COMPONENT_KEY) as any,
+                                    };
+                                }
 
-                                return drawing && {
-                                    ...drawing,
-                                    componentKey: this._componetManager.get(drawing.drawingType === DrawingTypeEnum.DRAWING_CHART ? PRINT_CHART_COMPONENT_KEY : drawing.componentKey) as any,
-                                };
-                            })
-                            .filter(Boolean) as IFloatDomData[];
-                        const PrintingFloatDomInjector = connectInjector(PrintingFloatDom, this._injector) as React.ComponentType<IPrintingFloatDomProps>;
+                                if (drawing.drawingType === DrawingTypeEnum.DRAWING_DOM) {
+                                    return {
+                                        ...drawing,
+                                        componentKey: this._componetManager.get((drawing as IFloatDomData).componentKey) as any,
+                                    };
+                                }
 
-                        render(
-                            <PrintingFloatDomInjector floatDomInfos={floatDomInfos} scene={pos.scene} skeleton={pos.skeleton} worksheet={pos.worksheet} />,
-                            pos.root
-                        );
+                                return null;
+                            }).filter(Boolean) as IFloatDomData[];
+                            const PrintingFloatDomInjector = connectInjector(PrintingFloatDom, this._injector) as React.ComponentType<IPrintingFloatDomProps>;
 
-                        disposableCollection?.add(() => {
-                            unmount(pos.root);
-                        });
+                            render(
+                                <PrintingFloatDomInjector floatDomInfos={floatDomInfos} scene={pos.scene} skeleton={pos.skeleton} worksheet={pos.worksheet} />,
+                                pos.root
+                            );
 
-                        return next(disposableCollection);
+                            disposableCollection?.add(() => {
+                                unmount(pos.root);
+                            });
+
+                            return next(disposableCollection);
+                        }
                     },
                 }
             )

@@ -21,7 +21,7 @@ import { Input } from '../input/Input';
 
 export interface IInputNumberProps
     extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value' | 'defaultValue'> {
-    value?: number;
+    value?: number | null;
     defaultValue?: number;
     min?: number;
     max?: number;
@@ -35,6 +35,7 @@ export interface IInputNumberProps
     controlsClassName?: string;
     onChange?: (value: number | null) => void;
     onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+    onPressEnter?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
 }
 
 export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
@@ -55,6 +56,7 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
             disabled,
             onChange,
             onKeyDown,
+            onPressEnter,
         },
         ref
     ) => {
@@ -270,6 +272,8 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
             } else if (e.key === 'ArrowDown') {
                 e.preventDefault();
                 handleStep(false);
+            } else if (e.key === 'Enter') {
+                onPressEnter?.(e);
             }
         }
 

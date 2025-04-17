@@ -40,6 +40,19 @@ export function dedupe<T>(arr: T[]): T[] {
     return result;
 }
 
+export function dedupeBy<T>(arr: T[], keyFn: (v: T) => string): T[] {
+    const deduplicated = new Set<string>();
+    const result: T[] = [];
+    for (const element of arr) {
+        const key = keyFn(element);
+        if (!deduplicated.has(key)) {
+            deduplicated.add(key);
+            result.push(element);
+        }
+    }
+    return result;
+}
+
 export function findLast<T>(arr: T[], callback: (item: T, index: number) => boolean): T | null {
     for (let i = arr.length - 1; i > -1; i--) {
         const item = arr[i];

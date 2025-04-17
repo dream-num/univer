@@ -46,16 +46,6 @@ const locale = {
         exceedMaxCount: '图片只能一次上传{0}张',
         invalidImage: '无效图片',
     },
-    'sheet-drawing-view': '绘图',
-    shortcut: {
-        sheet: {
-            'drawing-move-down': '下移绘图',
-            'drawing-move-up': '上移绘图',
-            'drawing-move-left': '左移绘图',
-            'drawing-move-right': '右移绘图',
-            'drawing-delete': '删除绘图',
-        },
-    },
     'cell-image': {
         pasteTitle: '粘贴为单元格图片',
         pasteContent: '粘贴单元格图片将覆盖单元格中的现有内容，继续粘贴',

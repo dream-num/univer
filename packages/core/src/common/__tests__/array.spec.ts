@@ -15,9 +15,9 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { rotate } from '../array';
+import { dedupeBy, rotate } from '../array';
 
-describe('Test array util function', () => {
+describe('test array utils', () => {
     it('should "rotate" function work correctly', () => {
         const raw = [1, 2, 3, 4, 5];
 
@@ -29,5 +29,27 @@ describe('Test array util function', () => {
         expect(rotate(raw, 4)).toEqual([5, 1, 2, 3, 4]);
         expect(rotate(raw, 5)).toEqual([1, 2, 3, 4, 5]);
         expect(rotate(raw, 6)).toEqual([2, 3, 4, 5, 1]);
+    });
+
+    it('should "dedupeBy" function work correctly', () => {
+        const raw = [
+            { id: '1', name: 'a' },
+            { id: '2', name: 'b' },
+            { id: '3', name: 'c' },
+            { id: '1', name: 'd' },
+        ];
+
+        expect(raw.length).toBe(4);
+        expect(raw[0].name).toBe('a');
+        expect(raw[1].name).toBe('b');
+        expect(raw[2].name).toBe('c');
+        expect(raw[3].name).toBe('d');
+
+        const deduped = dedupeBy(raw, (item) => item.id);
+        expect(deduped.length).toBe(3);
+        expect(deduped[0].name).toBe('a');
+        expect(deduped[1].name).toBe('b');
+        expect(deduped[2].name).toBe('c');
+        expect(deduped[0].id).toBe('1');
     });
 });

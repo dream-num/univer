@@ -143,17 +143,12 @@ function SearchFunctionFactory(props: ISearchFunctionProps, ref: any) {
     }, [searchList]);
 
     function scrollToVisible(liIndex: number) {
-        // Get the <li> element
-        const liElement = ulRef.current?.querySelectorAll('.univer-formula-search-function-item')[
-            liIndex
-        ] as HTMLLIElement;
-
-        if (!liElement) return;
-
-        // Get the <ul> element
-        const ulElement = liElement.parentNode as HTMLUListElement;
-
+        // Get the <li> element directly from children
+        const ulElement = ulRef.current;
         if (!ulElement) return;
+
+        const liElement = ulElement.children[liIndex] as HTMLLIElement;
+        if (!liElement) return;
 
         // Get the height of the <ul> element
         const ulRect = ulElement.getBoundingClientRect();
@@ -196,10 +191,8 @@ function SearchFunctionFactory(props: ISearchFunctionProps, ref: any) {
             <ul
                 className={`
                   univer-m-0 univer-box-border univer-max-h-[400px] univer-w-[250px] univer-list-none
-                  univer-overflow-y-auto univer-rounded-[var(--border-radius-lg)] univer-border univer-border-solid
-                  univer-border-[rgb(var(--border-color))] univer-bg-[rgb(var(--bg-color-secondary))]
-                  univer-p-[var(--padding-sm)] univer-leading-[20px] univer-shadow-[var(--box-shadow-base)]
-                  univer-outline-none
+                  univer-overflow-y-auto univer-rounded-lg univer-border univer-border-solid univer-border-gray-200
+                  univer-bg-white univer-p-2 univer-leading-5 univer-shadow-md univer-outline-none
                 `}
                 ref={(v) => {
                     ulRef.current = v!;
@@ -212,11 +205,10 @@ function SearchFunctionFactory(props: ISearchFunctionProps, ref: any) {
                     <li
                         key={item.name}
                         className={`
-                          univer-box-border univer-cursor-pointer univer-rounded-[var(--border-radius-base)]
-                          univer-p-[var(--padding-xs)_var(--padding-sm)] univer-text-[rgb(var(--text-color))]
-                          univer-transition-[background_0.2s] univer-formula-search-function-item
+                          univer-box-border univer-cursor-pointer univer-rounded univer-px-2 univer-py-1
+                          univer-text-gray-900 univer-transition-colors
                           ${active === index
-                        ? 'univer-bg-[rgb(var(--bg-color-hover))]'
+                        ? 'univer-bg-gray-200'
                         : ''}
                         `}
                         onMouseEnter={() => handleLiMouseEnter(index)}
@@ -230,11 +222,11 @@ function SearchFunctionFactory(props: ISearchFunctionProps, ref: any) {
                         }}
                     >
                         <span className="univer-text-xs">
-                            <span className="univer-text-[rgb(var(--error-color))]">{item.name.substring(0, searchText.length)}</span>
+                            <span className="univer-text-red-500">{item.name.substring(0, searchText.length)}</span>
                             <span>{item.name.slice(searchText.length)}</span>
                         </span>
                         <span
-                            className="univer-block univer-text-xs univer-text-[rgb(var(--grey-500))]"
+                            className="univer-block univer-text-xs univer-text-gray-400"
                         >
                             {item.desc}
                         </span>

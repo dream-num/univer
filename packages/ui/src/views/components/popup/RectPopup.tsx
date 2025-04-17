@@ -34,7 +34,31 @@ interface IAbsolutePosition {
 
 const RectPopupContext = createContext<RefObject<IAbsolutePosition | undefined>>({ current: undefined });
 
-export type RectPopupDirection = 'vertical' | 'horizontal' | 'top' | 'right' | 'left' | 'right-center' | 'right-bottom' | 'right-top' | 'left-center' | 'left-bottom' | 'left-top' | 'bottom' | 'bottom-center' | 'top-center' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'vertical-left' | 'vertical-right' | 'horizontal-top' | 'horizontal-bottom';
+export type RectPopupDirection =
+    | 'vertical'
+    | 'horizontal'
+    | 'top'
+    | 'right'
+    | 'left'
+    | 'bottom'
+    | 'right-center'
+    | 'right-bottom'
+    | 'right-top'
+    | 'left-center'
+    | 'left-bottom'
+    | 'left-top'
+    | 'top-center'
+    | 'top-left'
+    | 'top-right'
+    | 'bottom-center'
+    | 'bottom-left'
+    | 'bottom-right'
+    | 'vertical-left'
+    | 'vertical-right'
+    | 'vertical-center'
+    | 'horizontal-top'
+    | 'horizontal-bottom'
+    | 'horizontal-center';
 
 export interface IRectPopupProps {
     children?: React.ReactNode;

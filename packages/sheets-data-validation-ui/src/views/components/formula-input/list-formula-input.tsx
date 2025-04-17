@@ -319,7 +319,7 @@ export function ListFormulaInput(props: IFormulaInputProps) {
 
     return (
         <>
-            <FormLayout style={{ marginBottom: 8 }} label={localeService.t('dataValidation.list.options')}>
+            <FormLayout label={localeService.t('dataValidation.list.options')}>
                 <RadioGroup
                     value={isFormulaStr}
                     onChange={(v) => {

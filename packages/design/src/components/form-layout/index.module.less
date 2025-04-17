@@ -1,12 +1,7 @@
 .form-layout {
     display: flex;
     flex-direction: column;
-
-    .form-layout-inner {
-        .form-layout-content {
-            margin-bottom: 0;
-        }
-    }
+    margin-bottom: var(--margin-sm);
 
     &-label {
         font-size: var(--font-size-sm);
@@ -24,8 +19,6 @@
     }
 
     &-content {
-        margin-bottom: var(--margin-sm);
-
         .input-affix-wrapper {
             width: 100%;
         }
@@ -36,6 +29,10 @@
 
         .range-selector {
             width: 100% !important;
+        }
+
+        :last-child {
+            margin-bottom: 0;
         }
     }
 

@@ -126,6 +126,7 @@ export const EditorCursorEscShortcut: IShortcutItem = {
 export const EditorCursorCtrlEnterShortcut: IShortcutItem = {
     id: SetCellEditVisibleOperation.id,
     binding: KeyCode.ENTER | MetaKeys.CTRL_COMMAND,
+    mac: KeyCode.ENTER | MetaKeys.MAC_CTRL,
     preconditions: (contextService) => whenEditorDidNotInputFormulaActivated(contextService),
     staticParameters: {
         visible: false,

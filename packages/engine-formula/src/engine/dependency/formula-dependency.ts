@@ -388,7 +388,6 @@ export class FormulaDependencyGenerator extends Disposable {
         }
 
         await this._calculateListByFunctionRefNode(treeList);
-
         return treeList;
     }
 

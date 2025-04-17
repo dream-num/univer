@@ -56,12 +56,9 @@ export class CalculateController extends Disposable {
                 if (command.id === SetFormulaCalculationStopMutation.id) {
                     this._calculateFormulaService.stopFormulaExecution();
                 } else if (command.id === SetFormulaCalculationStartMutation.id) {
-                    const params = command.params as ISetFormulaCalculationStartMutation;
-
-                    this._calculate(params);
+                    this._calculate(command.params as ISetFormulaCalculationStartMutation);
                 } else if (command.id === SetArrayFormulaDataMutation.id) {
                     const params = command.params as ISetArrayFormulaDataMutationParams;
-
                     if (params == null) {
                         return;
                     }
@@ -81,9 +78,7 @@ export class CalculateController extends Disposable {
         const { forceCalculation: forceCalculate = false, dirtyRanges = [], dirtyNameMap = {}, dirtyDefinedNameMap = {}, dirtyUnitFeatureMap = {}, dirtyUnitOtherFormulaMap = {}, clearDependencyTreeCache = {}, maxIteration = DEFAULT_CYCLE_REFERENCE_COUNT, rowData } = formulaDirtyData;
 
         const formulaData = this._formulaDataModel.getFormulaData();
-
         const arrayFormulaCellData = this._formulaDataModel.getArrayFormulaCellData();
-
         // array formula range is used to check whether the newly added array formula conflicts with the existing array formula
         const arrayFormulaRange = this._formulaDataModel.getArrayFormulaRange();
 

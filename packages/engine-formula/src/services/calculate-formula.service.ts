@@ -29,6 +29,7 @@ import type { LexerNode } from '../engine/analysis/lexer-node';
 import type { FunctionVariantType } from '../engine/reference-object/base-reference-object';
 import type { IAllRuntimeData, IExecutionInProgressParams } from './runtime.service';
 import {
+    AsyncLock,
     createIdentifier,
     Disposable,
     IConfigService,
@@ -58,30 +59,25 @@ export const CYCLE_REFERENCE_COUNT = 'cycleReferenceCount';
 export const EVERY_N_FUNCTION_EXECUTION_PAUSE = 100;
 
 export interface ICalculateFormulaService {
-    executionInProgressListener$: Observable<IExecutionInProgressParams>;
-    executionCompleteListener$: Observable<IAllRuntimeData>;
-
+    readonly executionInProgressListener$: Observable<IExecutionInProgressParams>;
+    readonly executionCompleteListener$: Observable<IAllRuntimeData>;
     setRuntimeFeatureCellData(featureId: string, featureData: IRuntimeUnitDataType): void;
-
     setRuntimeFeatureRange(featureId: string, featureRange: IFeatureDirtyRangeType): void;
-
     execute(formulaDatasetConfig: IFormulaDatasetConfig): Promise<void>;
-
     stopFormulaExecution(): void;
-
     calculate(formulaString: string, transformSuffix?: boolean): void;
 }
 
 export const ICalculateFormulaService = createIdentifier<ICalculateFormulaService>('engine-formula.calculate-formula.service');
 
-export class CalculateFormulaService extends Disposable {
+export class CalculateFormulaService extends Disposable implements ICalculateFormulaService {
     protected readonly _executionInProgressListener$ = new Subject<IExecutionInProgressParams>();
-
     readonly executionInProgressListener$ = this._executionInProgressListener$.asObservable();
 
     protected readonly _executionCompleteListener$ = new Subject<IAllRuntimeData>();
-
     readonly executionCompleteListener$ = this._executionCompleteListener$.asObservable();
+
+    private _executeLock = new AsyncLock();
 
     constructor(
         @IConfigService protected readonly _configService: IConfigService,
@@ -138,30 +134,28 @@ export class CalculateFormulaService extends Disposable {
 
         const cycleReferenceCount = (formulaDatasetConfig.maxIteration || DEFAULT_CYCLE_REFERENCE_COUNT) as number;
 
-        for (let i = 0; i < cycleReferenceCount; i++) {
-            this._runtimeService.setFormulaCycleIndex(i);
-            await this._execute();
+        this._executeLock.acquire('FORMULA_EXECUTION_LOCK', async () => {
+            for (let i = 0; i < cycleReferenceCount; i++) {
+                this._runtimeService.setFormulaCycleIndex(i);
+                await this._executeStep();
 
-            FORMULA_REF_TO_ARRAY_CACHE.clear();
+                FORMULA_REF_TO_ARRAY_CACHE.clear();
 
-            const isCycleDependency = this._runtimeService.isCycleDependency();
-            if (!isCycleDependency) {
-                break;
+                const isCycleDependency = this._runtimeService.isCycleDependency();
+                if (!isCycleDependency) {
+                    break;
+                }
             }
-        }
 
-        this._runtimeService.setFormulaExecuteStage(FormulaExecuteStageType.CALCULATION_COMPLETED);
-
-        this._executionInProgressListener$.next(this._runtimeService.getRuntimeState());
-
-        this._executionCompleteListener$.next(this._runtimeService.getAllRuntimeData());
-
-        CELL_INVERTED_INDEX_CACHE.clear();
-
-        this._runtimeService.reset();
+            this._runtimeService.setFormulaExecuteStage(FormulaExecuteStageType.CALCULATION_COMPLETED);
+            this._executionInProgressListener$.next(this._runtimeService.getRuntimeState());
+            this._executionCompleteListener$.next(this._runtimeService.getAllRuntimeData());
+            CELL_INVERTED_INDEX_CACHE.clear();
+            this._runtimeService.reset();
+        });
     }
 
-    private async _execute() {
+    private async _executeStep() {
         const executeState = await this._apply();
 
         if (executeState == null) {
@@ -287,9 +281,9 @@ export class CalculateFormulaService extends Disposable {
 
             // Execute the await every 100 iterations
             if (i % intervalCount === 0) {
-            /**
-             * For every functions, execute a setTimeout to wait for external command input.
-             */
+                /**
+                 * For every functions, execute a setTimeout to wait for external command input.
+                 */
                 await new Promise((resolve) => {
                     const calCancelTask = requestImmediateMacroTask(resolve);
                     pendingTasks.push(calCancelTask);

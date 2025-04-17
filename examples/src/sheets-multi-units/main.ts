@@ -23,7 +23,6 @@ import { UniverDocsMentionUIPlugin } from '@univerjs/docs-mention-ui';
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
-import { UniverRPCMainThreadPlugin } from '@univerjs/rpc';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverSheetsConditionalFormattingPlugin } from '@univerjs/sheets-conditional-formatting';
 import { UniverSheetsDataValidationPlugin } from '@univerjs/sheets-data-validation';
@@ -93,9 +92,6 @@ const univer = new Univer({
     logLevel: LogLevel.VERBOSE,
 });
 
-const worker = new Worker(new URL('./worker.js', import.meta.url), { type: 'module' });
-univer.registerPlugin(UniverRPCMainThreadPlugin, { workerURL: worker });
-
 univer.registerPlugin(UniverDocsPlugin);
 univer.registerPlugin(UniverRenderEnginePlugin);
 univer.registerPlugin(UniverUIPlugin, { container: 'app' });
@@ -103,13 +99,13 @@ univer.registerPlugin(UniverDocsUIPlugin);
 univer.registerPlugin(UniverDocsDrawingUIPlugin);
 univer.registerPlugin(UniverDocsMentionUIPlugin);
 
-univer.registerPlugin(UniverSheetsPlugin, { notExecuteFormula: false });
+univer.registerPlugin(UniverSheetsPlugin);
 univer.registerPlugin(UniverSheetsUIPlugin);
 univer.registerPlugin(UniverSheetsNumfmtPlugin);
 univer.registerPlugin(UniverSheetsZenEditorPlugin);
-univer.registerPlugin(UniverFormulaEnginePlugin, { notExecuteFormula: false });
+univer.registerPlugin(UniverFormulaEnginePlugin);
 univer.registerPlugin(UniverSheetsNumfmtUIPlugin);
-univer.registerPlugin(UniverSheetsFormulaPlugin, { notExecuteFormula: false });
+univer.registerPlugin(UniverSheetsFormulaPlugin);
 univer.registerPlugin(UniverSheetsFormulaUIPlugin);
 univer.registerPlugin(UniverSheetsDataValidationPlugin);
 univer.registerPlugin(UniverSheetsConditionalFormattingPlugin);
@@ -124,8 +120,6 @@ univer.registerPlugin(UniverSheetsBindingSourcePlugin);
 const injector = univer.__getInjector();
 const userManagerService = injector.get(UserManagerService);
 userManagerService.setCurrentUser(mockUser);
-
-    // create univer sheet instances
 
 setTimeout(() => {
     import('./lazy').then((lazy) => {
@@ -142,63 +136,14 @@ setTimeout(() => {
 }, LOAD_VERY_LAZY_PLUGINS_TIMEOUT);
 
 univer.onDispose(() => {
-    worker.terminate();
     window.univer = undefined;
     window.univerAPI = undefined;
-    window.switchWorkbook = undefined;
 });
 
 window.univer = univer;
 window.univerAPI = FUniver.newAPI(univer);
-window.switchWorkbook = (workbookId: string) => window.univerAPI?.setCurrent(workbookId);
+
 const univerAPI = window.univerAPI;
-
-// window.univerAPI.createWorkbook({
-//     id: 'workbook1',
-//     sheetOrder: ['sheet-01'],
-//     sheets: {
-//         'sheet-01': {
-//             id: 'sheet-01',
-//             name: 'Sheet 01',
-//             rowCount: 10,
-//             columnCount: 5,
-//             cellData: {
-//                 0: { 0: { f: "='[workbook1]Sheet 01'!C1*'[workbook2]Sheet 01'!B2" }, 2: { v: 3 } },
-//             },
-//         },
-//     },
-// });
-
-// window.univerAPI.createWorkbook(
-//     {
-//         id: 'workbook2',
-//         sheetOrder: ['sheet-01'],
-//         sheets: {
-//             'sheet-01': {
-//                 id: 'sheet-01',
-//                 name: 'Sheet 01',
-//                 rowCount: 10,
-//                 columnCount: 5,
-//                 cellData: {
-//                     0: {
-//                         0: { v: 1 },
-//                         1: { v: 2 },
-//                     },
-//                     1: {
-//                         0: { v: 3 },
-//                         1: { v: 1 },
-//                     },
-//                     2: {
-//                         0: { f: "='[workbook1]Sheet 01'!C1*'[workbook2]Sheet 01'!B2" },
-//                     },
-//                 },
-//             },
-//         },
-//     },
-//     {
-//         makeCurrent: false,
-//     }
-// );
 
 univerAPI.createWorkbook({
     id: 'workbook1',
@@ -235,6 +180,7 @@ univerAPI.createWorkbook({
         },
     },
 });
+
 univerAPI.createWorkbook(
     {
         id: 'workbook2',
@@ -358,11 +304,11 @@ univerAPI.createWorkbook({
         },
     },
 });
+
 declare global {
     // eslint-disable-next-line ts/naming-convention
     interface Window {
         univer?: Univer;
         univerAPI?: ReturnType<typeof FUniver.newAPI>;
-        switchWorkbook?: (workbookId: string) => void;
     }
 }

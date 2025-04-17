@@ -89,7 +89,6 @@ export class UpdateFormulaController extends Disposable {
     }
 
     private _commandExecutedListener() {
-        // First we need to
         this.disposeWithMe(this._sheetInterceptorService.interceptCommand({
             getMutations: (command) => this._getUpdateFormula(command),
         }));

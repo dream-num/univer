@@ -24,7 +24,7 @@ import { DeviceInputEventType } from '@univerjs/engine-render';
 import { SetRangeValuesCommand, SheetsSelectionsService } from '@univerjs/sheets';
 import { getCellValueOrigin, getDataValidationCellValue, serializeListOptions, SheetDataValidationModel } from '@univerjs/sheets-data-validation';
 import { getPatternType } from '@univerjs/sheets-numfmt';
-import { IEditorBridgeService, SetCellEditVisibleOperation, SheetCellDropdownManagerService } from '@univerjs/sheets-ui';
+import { IEditorBridgeService, ISheetCellDropdownManagerService, SetCellEditVisibleOperation } from '@univerjs/sheets-ui';
 import { IZenZoneService, KeyCode } from '@univerjs/ui';
 import { Subject } from 'rxjs';
 import { OpenValidationPanelOperation } from '../commands/operations/data-validation.operation';
@@ -94,7 +94,7 @@ export class DataValidationDropdownManagerService extends Disposable {
         @IZenZoneService private readonly _zenZoneService: IZenZoneService,
         @Inject(SheetDataValidationModel) private readonly _dataValidationModel: SheetDataValidationModel,
         @Inject(SheetsSelectionsService) private readonly _sheetsSelectionsService: SheetsSelectionsService,
-        @Inject(SheetCellDropdownManagerService) private readonly _cellDropdownManagerService: SheetCellDropdownManagerService,
+        @Inject(ISheetCellDropdownManagerService) private readonly _cellDropdownManagerService: ISheetCellDropdownManagerService,
         @Inject(SheetDataValidationModel) private readonly _sheetDataValidationModel: SheetDataValidationModel,
         @ICommandService private readonly _commandService: ICommandService,
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,

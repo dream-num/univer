@@ -20,7 +20,7 @@ import type { ICanvasPopup, ICellAlert, IDropdownParam } from '@univerjs/sheets-
 import type { ComponentType } from '@univerjs/ui';
 import { DisposableCollection, generateRandomId, ILogService, toDisposable } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { CellAlertManagerService, IMarkSelectionService, ISheetClipboardService, SheetCanvasPopManagerService, SheetCellDropdownManagerService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { CellAlertManagerService, IMarkSelectionService, ISheetCellDropdownManagerService, ISheetClipboardService, SheetCanvasPopManagerService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { FRange } from '@univerjs/sheets/facade';
 import { ComponentManager } from '@univerjs/ui';
 
@@ -352,7 +352,7 @@ class FRangeSheetsUIMixin extends FRange implements IFRangeSheetsUIMixin {
     }
 
     override showDropdown(param: IDropdownParam): IDisposable {
-        const cellDropdownManagerService = this._injector.get(SheetCellDropdownManagerService);
+        const cellDropdownManagerService = this._injector.get(ISheetCellDropdownManagerService);
         return cellDropdownManagerService.showDropdown(param);
     }
 }

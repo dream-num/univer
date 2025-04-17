@@ -52,7 +52,7 @@ import { StatusBarController } from './controllers/status-bar.controller';
 import { AutoFillService, IAutoFillService } from './services/auto-fill/auto-fill.service';
 import { SheetCanvasPopManagerService } from './services/canvas-pop-manager.service';
 import { CellAlertManagerService } from './services/cell-alert-manager.service';
-import { SheetCellDropdownManagerService } from './services/cell-dropdown-manager.service';
+import { ISheetCellDropdownManagerService, SheetCellDropdownManagerService } from './services/cell-dropdown-manager.service';
 import { ISheetClipboardService, SheetClipboardService } from './services/clipboard/clipboard.service';
 import { DragManagerService } from './services/drag-manager.service';
 import { EditorBridgeService, IEditorBridgeService } from './services/editor-bridge.service';
@@ -107,7 +107,7 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
                 [SheetCanvasPopManagerService],
                 [CellAlertManagerService],
                 [SelectAllService],
-                [SheetCellDropdownManagerService],
+                [ISheetCellDropdownManagerService, { useClass: SheetCellDropdownManagerService }],
 
                 [ActiveWorksheetController],
                 [AutoHeightController],

@@ -58,7 +58,7 @@ export interface IFormulaEditorProps {
     className?: string;
     editorId?: string;
     moveCursor?: boolean;
-    onFormulaSelectingChange?: (isSelecting: FormulaSelectingType) => void;
+    onFormulaSelectingChange?: (isSelecting: FormulaSelectingType, isFocusing: boolean) => void;
     keyboradEventConfig?: IKeyboardEventConfig;
     onMoveInEditor?: (keyCode: KeyCode, metaKey?: MetaKeys) => void;
     resetSelectionOnBlur?: boolean;
@@ -203,7 +203,7 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
     const resetSelection = useResetSelection(isFocus, unitId, subUnitId);
 
     useEffect(() => {
-        onFormulaSelectingChange(isSelecting);
+        onFormulaSelectingChange(isSelecting, docSelectionRenderService?.isFocusing ?? true);
     }, [onFormulaSelectingChange, isSelecting]);
 
     useKeyboardEvent(isFocus, keyboradEventConfig, editor);

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { LocaleService } from '@univerjs/core';
-import React, { useCallback, useEffect } from 'react';
+import { dedupeBy, LocaleService } from '@univerjs/core';
 
+import React, { useCallback, useEffect } from 'react';
 import { IShortcutService } from '../../../services/shortcut/shortcut.service';
 import { useDependency, useObservable } from '../../../utils/di';
 
@@ -59,6 +59,7 @@ export function ShortcutPanel() {
             if (!shortcutGroups.has(group)) {
                 shortcutGroups.set(group, []);
             }
+
             shortcutGroups.get(group)!.push(shortcutItem);
         }
 
@@ -69,11 +70,12 @@ export function ShortcutPanel() {
                 return {
                     sequence: +groupSequence,
                     name: localeService.t(groupName),
-                    items,
+                    items: dedupeBy(items, (item) => item.title + item.shortcut),
                 };
             })
             .sort((a, b) => a.sequence - b.sequence);
 
+        // eslint-disable-next-line react-hooks-extra/no-direct-set-state-in-use-effect
         setShortcutItems(toRender);
     }, [shortcutService, localeService, currentLocale]);
 

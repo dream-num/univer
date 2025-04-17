@@ -69,6 +69,14 @@ const locale: typeof enUS = {
         },
         null: 'Aucune sélection d\'objet',
     },
+    'drawing-view': 'Dessin',
+    shortcut: {
+        'drawing-move-down': 'Déplacer le dessin vers le bas',
+        'drawing-move-up': 'Déplacer le dessin vers le haut',
+        'drawing-move-left': 'Déplacer le dessin vers la gauche',
+        'drawing-move-right': 'Déplacer le dessin vers la droite',
+        'drawing-delete': 'Supprimer le dessin',
+    },
 };
 
 export default locale;

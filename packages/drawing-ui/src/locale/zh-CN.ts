@@ -67,6 +67,14 @@ const locale = {
         },
         null: '未选中任何对象',
     },
+    'drawing-view': '绘图',
+    shortcut: {
+        'drawing-move-down': '下移绘图',
+        'drawing-move-up': '上移绘图',
+        'drawing-move-left': '左移绘图',
+        'drawing-move-right': '右移绘图',
+        'drawing-delete': '删除绘图',
+    },
 };
 
 export default locale;

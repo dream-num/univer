@@ -21,7 +21,7 @@ export { getPlainText } from './docs/data-model/text-x/build-utils/parse';
 export type { INumfmt } from './shared/types/numfmt.type';
 export { debounce, get, merge, mergeWith, set } from 'lodash-es';
 export { textDiff } from './shared/text-diff';
-export { dedupe, groupBy, makeArray, remove, rotate } from './common/array';
+export { dedupe, dedupeBy, groupBy, makeArray, remove, rotate } from './common/array';
 export { isBooleanString } from './common/boolean';
 export * from './common/const';
 export * from './common/di';

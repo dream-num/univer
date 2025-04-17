@@ -16,10 +16,11 @@
 
 import type { IContextService } from '@univerjs/core';
 import type { IShortcutItem } from '@univerjs/ui';
+import type { IMoveDrawingsCommandParams } from '../../commands/commands/move-drawings.command';
 import { Direction, EDITOR_ACTIVATED, FOCUSING_COMMON_DRAWINGS, FOCUSING_FX_BAR_EDITOR, FOCUSING_PANEL_EDITOR } from '@univerjs/core';
 import { KeyCode } from '@univerjs/ui';
 import { DeleteDrawingsCommand } from '../../commands/commands/delete-drawings.command';
-import { type IMoveDrawingsCommandParams, MoveDrawingsCommand } from '../../commands/commands/move-drawings.command';
+import { MoveDrawingsCommand } from '../../commands/commands/move-drawings.command';
 
 export function whenSheetDrawingFocused(contextService: IContextService): boolean {
     return (
@@ -32,8 +33,8 @@ export function whenSheetDrawingFocused(contextService: IContextService): boolea
 
 export const MoveDrawingDownShortcutItem: IShortcutItem<IMoveDrawingsCommandParams> = {
     id: MoveDrawingsCommand.id,
-    description: 'shortcut.sheet.drawing-move-down',
-    group: '4_sheet-drawing-view',
+    description: 'shortcut.drawing-move-down',
+    group: '4_drawing-view',
     binding: KeyCode.ARROW_DOWN,
     priority: 100,
     preconditions: whenSheetDrawingFocused,
@@ -44,8 +45,8 @@ export const MoveDrawingDownShortcutItem: IShortcutItem<IMoveDrawingsCommandPara
 
 export const MoveDrawingUpShortcutItem: IShortcutItem<IMoveDrawingsCommandParams> = {
     id: MoveDrawingsCommand.id,
-    description: 'shortcut.sheet.drawing-move-up',
-    group: '4_sheet-drawing-view',
+    description: 'shortcut.drawing-move-up',
+    group: '4_drawing-view',
     binding: KeyCode.ARROW_UP,
     priority: 100,
     preconditions: whenSheetDrawingFocused,
@@ -56,8 +57,8 @@ export const MoveDrawingUpShortcutItem: IShortcutItem<IMoveDrawingsCommandParams
 
 export const MoveDrawingLeftShortcutItem: IShortcutItem<IMoveDrawingsCommandParams> = {
     id: MoveDrawingsCommand.id,
-    description: 'shortcut.sheet.drawing-move-left',
-    group: '4_sheet-drawing-view',
+    description: 'shortcut.drawing-move-left',
+    group: '4_drawing-view',
     binding: KeyCode.ARROW_LEFT,
     priority: 100,
     preconditions: whenSheetDrawingFocused,
@@ -68,8 +69,8 @@ export const MoveDrawingLeftShortcutItem: IShortcutItem<IMoveDrawingsCommandPara
 
 export const MoveDrawingRightShortcutItem: IShortcutItem<IMoveDrawingsCommandParams> = {
     id: MoveDrawingsCommand.id,
-    description: 'shortcut.sheet.drawing-move-right',
-    group: '4_sheet-drawing-view',
+    description: 'shortcut.drawing-move-right',
+    group: '4_drawing-view',
     binding: KeyCode.ARROW_RIGHT,
     priority: 100,
     preconditions: whenSheetDrawingFocused,
@@ -79,8 +80,8 @@ export const MoveDrawingRightShortcutItem: IShortcutItem<IMoveDrawingsCommandPar
 };
 export const DeleteDrawingsShortcutItem: IShortcutItem = {
     id: DeleteDrawingsCommand.id,
-    description: 'shortcut.sheet.drawing-delete',
-    group: '4_sheet-drawing-view',
+    description: 'shortcut.drawing-delete',
+    group: '4_drawing-view',
     // when focusing on any other input tag do not trigger this shortcut
     preconditions: whenSheetDrawingFocused,
     binding: KeyCode.DELETE,

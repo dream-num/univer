@@ -560,7 +560,7 @@ export class EditingRenderController extends Disposable {
             : false;
 
         if (snapshot && !(isEmpty && isCellImage)) {
-            const res = await this._submitEdit(snapshot, keycode === (MetaKeys.CTRL_COMMAND | KeyCode.ENTER));
+            const res = await this._submitEdit(snapshot, keycode === (MetaKeys.CTRL_COMMAND | KeyCode.ENTER) || keycode === (MetaKeys.MAC_CTRL | KeyCode.ENTER));
             if (res === false) return; // if the submit was rejected, don't move selection
         }
 

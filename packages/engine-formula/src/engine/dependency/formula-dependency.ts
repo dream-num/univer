@@ -1292,11 +1292,6 @@ export class FormulaDependencyGenerator extends Disposable {
             }
         }
 
-        if (formulaRunList.length !== originalLength) {
-            console.error('length', formulaRunList.length, originalLength);
-            throw new Error('Length missmatched!');
-        }
-
         return formulaRunList;
     }
 }

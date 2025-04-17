@@ -25,7 +25,7 @@ import { RemoveSheetMutation, setEndForRange, SetWorksheetActiveOperation, Sheet
 import { AddCfCommand, CFRuleType, CFSubRuleType, ConditionalFormattingRuleModel, SetCfCommand } from '@univerjs/sheets-conditional-formatting';
 import { RangeSelector } from '@univerjs/sheets-formula-ui';
 import { useDependency } from '@univerjs/ui';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import styleBase from '../index.module.less';
 import { ColorScaleStyleEditor } from './ColorScale';
 import { DataBarStyleEditor } from './DataBar';
@@ -249,17 +249,28 @@ export const RuleEdit = (props: IRuleEditProps) => {
             </div>
             <div className={styleBase.title}>{localeService.t('sheet.cf.panel.styleType')}</div>
             <div className={styleBase.mTBase}>
-                <Select className={styles.width100} value={ruleType} options={options} onChange={(e) => ruleTypeSet(e)} />
+                <Select
+                    className={styles.width100}
+                    value={ruleType}
+                    options={options}
+                    onChange={(e) => ruleTypeSet(e)}
+                />
             </div>
-            <StyleEditor interceptorManager={interceptorManager} rule={props.rule?.rule as any} onChange={onStyleChange} />
+            <StyleEditor
+                interceptorManager={interceptorManager}
+                rule={props.rule?.rule as any}
+                onChange={onStyleChange}
+            />
             <div
                 className={`
                   ${styleBase.mTBase}
                   ${styles.btnList}
                 `}
             >
-                <Button size="small" onClick={handleCancel}>{localeService.t('sheet.cf.panel.cancel')}</Button>
-                <Button className={styleBase.mLSm} size="small" variant="primary" onClick={handleSubmit}>{localeService.t('sheet.cf.panel.submit')}</Button>
+                <Button onClick={handleCancel}>{localeService.t('sheet.cf.panel.cancel')}</Button>
+                <Button className={styleBase.mLSm} variant="primary" onClick={handleSubmit}>
+                    {localeService.t('sheet.cf.panel.submit')}
+                </Button>
             </div>
         </div>
     );

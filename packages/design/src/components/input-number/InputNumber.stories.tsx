@@ -33,8 +33,10 @@ export const InputNumberBasic = {
     render() {
         return (
             <>
-                <InputNumber />
-                <InputNumber precision={0} />
+                <div>
+                    <InputNumber />
+                    <InputNumber precision={0} />
+                </div>
             </>
         );
     },
@@ -42,12 +44,24 @@ export const InputNumberBasic = {
 
 export const InputNumberDisabled = {
     render() {
-        return <InputNumber disabled />;
+        return (
+            <>
+                <div>
+                    <InputNumber disabled />
+                </div>
+            </>
+        );
     },
 };
 
 export const InputNumberHideControls = {
     render() {
-        return <InputNumber controls={false} />;
+        return (
+            <>
+                <div>
+                    <InputNumber controls={false} />
+                </div>
+            </>
+        );
     },
 };

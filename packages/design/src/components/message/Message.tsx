@@ -38,10 +38,17 @@ export interface IMessageProps {
 
 const iconMap = {
     [MessageType.Success]: <SuccessSingle className="univer-text-green-500" />,
-    [MessageType.Info]: <InfoSingle className="univer-text-indigo-600 dark:univer-text-primary-500" />,
+    [MessageType.Info]: (
+        <InfoSingle
+            className={`
+              univer-text-indigo-600
+              dark:univer-text-primary-500
+            `}
+        />
+    ),
     [MessageType.Warning]: <WarningSingle className="univer-text-yellow-400" />,
     [MessageType.Error]: <ErrorSingle className="univer-text-red-500" />,
-    [MessageType.Loading]: <Loading className="univer-text-yellow-400 univer-animate-spin" />,
+    [MessageType.Loading]: <Loading className="univer-animate-spin univer-text-yellow-400" />,
 };
 
 const Message = ({ content, type = MessageType.Info }: IMessageProps) => {

@@ -14,20 +14,43 @@
  * limitations under the License.
  */
 
+import type { VariantProps } from 'class-variance-authority';
 import { CloseSingle } from '@univerjs/icons';
-import React from 'react';
+import { cva } from 'class-variance-authority';
+import { forwardRef } from 'react';
 import { clsx } from '../../helper/clsx';
 
 type InputProps = React.InputHTMLAttributes<HTMLInputElement>;
 
-export interface IInputProps extends Pick<InputProps, 'onFocus' | 'onBlur'> {
+export const inputVariants = cva(
+    `
+      univer-box-border univer-w-full univer-rounded-md univer-border univer-border-solid univer-border-gray-200
+      univer-bg-white univer-transition-colors univer-duration-200
+      focus:univer-border-primary-500 focus:univer-outline-none focus:univer-ring-2 focus:univer-ring-primary-500/20
+      placeholder:univer-text-gray-400
+    `,
+    {
+        variants: {
+            size: {
+                small: 'univer-h-8 univer-px-2 univer-text-sm',
+                middle: 'univer-h-10 univer-px-3 univer-text-base',
+                large: 'univer-h-12 univer-px-4 univer-text-lg',
+            },
+        },
+        defaultVariants: {
+            size: 'small',
+        },
+    }
+);
+
+export interface IInputProps extends Pick<InputProps, 'onFocus' | 'onBlur'>,
+    VariantProps<typeof inputVariants> {
     autoFocus?: boolean;
     className?: string;
     style?: React.CSSProperties;
-    type?: 'text' | 'password';
+    type?: HTMLInputElement['type'];
     placeholder?: string;
     value?: string;
-    size?: 'small' | 'middle' | 'large';
     allowClear?: boolean;
     disabled?: boolean;
     onClick?: (e: React.MouseEvent<HTMLInputElement>) => void;
@@ -35,90 +58,77 @@ export interface IInputProps extends Pick<InputProps, 'onFocus' | 'onBlur'> {
     onChange?: (value: string) => void;
 }
 
-export const Input = ({
-    autoFocus = false,
-    className,
-    style,
-    type = 'text',
-    placeholder,
-    value,
-    size = 'small',
-    allowClear = false,
-    disabled = false,
-    onClick,
-    onKeyDown,
-    onChange,
-    onFocus,
-    onBlur,
-    ...props
-}: IInputProps) => {
-    const sizeClasses = {
-        small: 'univer-h-8 univer-text-sm univer-px-2',
-        middle: 'univer-h-10 univer-text-base univer-px-3',
-        large: 'univer-h-12 univer-text-lg univer-px-4',
-    };
+export const Input = forwardRef<HTMLInputElement, IInputProps>(
+    ({
+        autoFocus = false,
+        className,
+        style,
+        type = 'text',
+        placeholder,
+        value,
+        size = 'small',
+        allowClear = false,
+        disabled = false,
+        onClick,
+        onKeyDown,
+        onChange,
+        onFocus,
+        onBlur,
+        ...props
+    }, ref) => {
+        const handleClear = (e: React.MouseEvent) => {
+            e.stopPropagation();
+            onChange?.('');
+        };
 
-    const handleClear = (e: React.MouseEvent) => {
-        e.stopPropagation();
-        onChange?.('');
-    };
+        const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+            onChange?.(e.target.value);
+        };
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        onChange?.(e.target.value);
-    };
-
-    return (
-        <div
-            className={clsx(
-                'univer-relative univer-inline-flex univer-w-full univer-items-center univer-rounded-md',
-                disabled && 'univer-cursor-not-allowed univer-opacity-50',
-                className
-            )}
-            style={style}
-        >
-            <input
-                type={type}
+        return (
+            <div
                 className={clsx(
-                    `
-                      univer-box-border univer-w-full univer-rounded-md univer-border univer-border-solid
-                      univer-border-gray-300 univer-bg-white
-                    `,
-                    'univer-transition-colors univer-duration-200',
-                    'placeholder:univer-text-gray-400',
-                    `
-                      focus:univer-border-blue-500 focus:univer-outline-none focus:univer-ring-2
-                      focus:univer-ring-blue-500/20
-                    `,
-                    disabled && 'univer-cursor-not-allowed univer-bg-gray-50',
-                    allowClear && 'univer-pr-8',
-                    sizeClasses[size]
+                    'univer-relative univer-inline-flex univer-w-full univer-items-center univer-rounded-md',
+                    disabled && 'univer-cursor-not-allowed univer-opacity-50',
+                    className
                 )}
-                placeholder={placeholder}
-                value={value}
-                disabled={disabled}
-                autoFocus={autoFocus}
-                onClick={onClick}
-                onKeyDown={onKeyDown}
-                onChange={handleChange}
-                onFocus={onFocus}
-                onBlur={onBlur}
-                {...props}
-            />
-            {allowClear && value && !disabled && (
-                <button
-                    type="button"
-                    onClick={handleClear}
-                    className={`
-                      univer-absolute univer-right-2 univer-flex univer-items-center univer-rounded-full
-                      univer-border-none univer-bg-transparent univer-p-1 univer-text-gray-400 univer-transition-colors
-                      univer-duration-200
-                      focus:univer-outline-none
-                      hover:univer-text-gray-500
-                    `}
-                >
-                    <CloseSingle className="univer-size-4" />
-                </button>
-            )}
-        </div>
-    );
-};
+                style={style}
+            >
+                <input
+                    ref={ref}
+                    type={type}
+                    className={clsx(
+                        inputVariants({ size }),
+                        disabled && 'univer-cursor-not-allowed univer-bg-gray-50',
+                        allowClear && 'univer-pr-8'
+                    )}
+                    placeholder={placeholder}
+                    value={value}
+                    disabled={disabled}
+                    autoFocus={autoFocus}
+                    onClick={onClick}
+                    onKeyDown={onKeyDown}
+                    onChange={handleChange}
+                    onFocus={onFocus}
+                    onBlur={onBlur}
+                    {...props}
+                />
+                {allowClear && value && !disabled && (
+                    <button
+                        type="button"
+                        onClick={handleClear}
+                        className={`
+                          univer-absolute univer-right-2 univer-flex univer-items-center univer-rounded-full
+                          univer-border-none univer-bg-transparent univer-p-1 univer-text-gray-400
+                          univer-transition-colors univer-duration-200
+                          focus:univer-outline-none
+                          hover:univer-text-gray-500
+                        `}
+                    >
+                        <CloseSingle className="univer-size-4" />
+                    </button>
+                )}
+            </div>
+        );
+    }
+);

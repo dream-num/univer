@@ -98,7 +98,7 @@ export default function ArrangePanel(props: IProps) {
             </div>
             <div className={styles.imageCommonPanelRow}>
                 <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSpan2)}>
-                    <Button size="small" onClick={() => { onArrangeBtnClick(ArrangeTypeEnum.forward); }}>
+                    <Button onClick={() => { onArrangeBtnClick(ArrangeTypeEnum.forward); }}>
                         <span className={styles.imageCommonPanelInline}>
                             <MoveUpSingle />
                             {localeService.t('image-panel.arrange.forward')}
@@ -107,7 +107,7 @@ export default function ArrangePanel(props: IProps) {
                     </Button>
                 </div>
                 <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSpan2)}>
-                    <Button size="small" onClick={() => { onArrangeBtnClick(ArrangeTypeEnum.backward); }}>
+                    <Button onClick={() => { onArrangeBtnClick(ArrangeTypeEnum.backward); }}>
                         <span className={styles.imageCommonPanelInline}>
                             <MoveDownSingle />
                             {localeService.t('image-panel.arrange.backward')}
@@ -118,7 +118,7 @@ export default function ArrangePanel(props: IProps) {
             </div>
             <div className={styles.imageCommonPanelRow}>
                 <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSpan2)}>
-                    <Button size="small" onClick={() => { onArrangeBtnClick(ArrangeTypeEnum.front); }}>
+                    <Button onClick={() => { onArrangeBtnClick(ArrangeTypeEnum.front); }}>
                         <span className={styles.imageCommonPanelInline}>
                             <TopmostSingle />
                             {localeService.t('image-panel.arrange.front')}
@@ -127,7 +127,7 @@ export default function ArrangePanel(props: IProps) {
                     </Button>
                 </div>
                 <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSpan2)}>
-                    <Button size="small" onClick={() => { onArrangeBtnClick(ArrangeTypeEnum.back); }}>
+                    <Button onClick={() => { onArrangeBtnClick(ArrangeTypeEnum.back); }}>
                         <span className={styles.imageCommonPanelInline}>
                             <BottomSingle />
                             {localeService.t('image-panel.arrange.back')}

@@ -623,9 +623,6 @@ export class DependencyManagerService extends DependencyManagerBaseService imple
             }
 
             this._dependencyRTreeCache.bulkRemove(searchRanges);
-
-            // NOTE: is this a correct fix?
-            this._allTreeMap.delete(treeId);
         }
     }
 

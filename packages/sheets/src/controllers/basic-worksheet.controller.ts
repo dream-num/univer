@@ -17,7 +17,6 @@
 import type { IDisposable, IMutation, IStyleData } from '@univerjs/core';
 import { Disposable, ICommandService, IConfigService, Optional } from '@univerjs/core';
 import { DataSyncPrimaryController } from '@univerjs/rpc';
-
 import { AddRangeProtectionCommand } from '../commands/commands/add-range-protection.command';
 import { AddWorksheetProtectionCommand } from '../commands/commands/add-worksheet-protection.command';
 import { SetWorksheetRangeThemeStyleCommand } from '../commands/commands/add-worksheet-range-theme.command';
@@ -96,12 +95,14 @@ import { SetTabColorCommand } from '../commands/commands/set-tab-color.command';
 import { SetWorkbookNameCommand } from '../commands/commands/set-workbook-name.command';
 import { SetWorksheetActivateCommand } from '../commands/commands/set-worksheet-activate.command';
 import { DeltaColumnWidthCommand, SetColWidthCommand } from '../commands/commands/set-worksheet-col-width.command';
+import { SetWorksheetColumnCountCommand } from '../commands/commands/set-worksheet-column-count.command';
 import { SetWorksheetDefaultStyleCommand } from '../commands/commands/set-worksheet-default-style.command';
 import { SetWorksheetHideCommand } from '../commands/commands/set-worksheet-hide.command';
 import { SetWorksheetNameCommand } from '../commands/commands/set-worksheet-name.command';
 import { SetWorksheetOrderCommand } from '../commands/commands/set-worksheet-order.command';
 import { SetWorksheetPermissionPointsCommand } from '../commands/commands/set-worksheet-permission-points.command';
 import { SetWorksheetProtectionCommand } from '../commands/commands/set-worksheet-protection.command';
+import { SetWorksheetRowCountCommand } from '../commands/commands/set-worksheet-row-count.command';
 import {
     DeltaRowHeightCommand,
     SetRowHeightCommand,
@@ -120,11 +121,9 @@ import { DeleteRangeProtectionMutation } from '../commands/mutations/delete-rang
 import { DeleteWorksheetProtectionMutation } from '../commands/mutations/delete-worksheet-protection.mutation';
 import { DeleteWorksheetRangeThemeStyleMutation } from '../commands/mutations/delete-worksheet-range-theme.mutation';
 import { EmptyMutation } from '../commands/mutations/empty.mutation';
-
 import { InsertColMutation, InsertRowMutation } from '../commands/mutations/insert-row-col.mutation';
 import { InsertSheetMutation } from '../commands/mutations/insert-sheet.mutation';
 import { MoveRangeMutation } from '../commands/mutations/move-range.mutation';
-
 import { MoveColsMutation, MoveRowsMutation } from '../commands/mutations/move-rows-cols.mutation';
 import { RemoveNumfmtMutation, SetNumfmtMutation } from '../commands/mutations/numfmt-mutation';
 import { RegisterWorksheetRangeThemeStyleMutation } from '../commands/mutations/register-range-theme.mutation';
@@ -143,12 +142,14 @@ import { SetRowHiddenMutation, SetRowVisibleMutation } from '../commands/mutatio
 import { SetTabColorMutation } from '../commands/mutations/set-tab-color.mutation';
 import { SetWorkbookNameMutation } from '../commands/mutations/set-workbook-name.mutation';
 import { SetWorksheetColWidthMutation } from '../commands/mutations/set-worksheet-col-width.mutation';
+import { SetWorksheetColumnCountMutation } from '../commands/mutations/set-worksheet-column-count.mutation';
 import { SetWorksheetDefaultStyleMutation } from '../commands/mutations/set-worksheet-default-style.mutation';
 import { SetWorksheetHideMutation } from '../commands/mutations/set-worksheet-hide.mutation';
 import { SetWorksheetNameMutation } from '../commands/mutations/set-worksheet-name.mutation';
 import { SetWorksheetOrderMutation } from '../commands/mutations/set-worksheet-order.mutation';
 import { SetWorksheetPermissionPointsMutation } from '../commands/mutations/set-worksheet-permission-points.mutation';
 import { SetWorksheetProtectionMutation } from '../commands/mutations/set-worksheet-protection.mutation';
+import { SetWorksheetRowCountMutation } from '../commands/mutations/set-worksheet-row-count.mutation';
 import {
     SetWorksheetRowAutoHeightMutation,
     SetWorksheetRowHeightMutation,
@@ -293,6 +294,11 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
                 SetWorksheetRowIsAutoHeightMutation,
                 SetWorksheetColWidthMutation,
                 // SetWorksheetColIsAutoWidthCommand,
+
+                SetWorksheetRowCountCommand,
+                SetWorksheetRowCountMutation,
+                SetWorksheetColumnCountCommand,
+                SetWorksheetColumnCountMutation,
 
                 SelectRangeCommand,
                 SetSelectionsOperation,

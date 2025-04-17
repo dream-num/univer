@@ -320,6 +320,7 @@ export function getSubComponentType(type: TableConditionTypeEnum, compare?: Tabl
     return ConditionSubComponentEnum.None;
 }
 
+// eslint-disable-next-line complexity
 export function getInitConditionInfo(tableFilter?: ITableFilterItem) {
     if (!tableFilter || tableFilter.filterType !== 'condition') {
         return {
@@ -340,13 +341,23 @@ export function getInitConditionInfo(tableFilter?: ITableFilterItem) {
                     dateRange: filterInfo.expectedValue,
                 },
             };
-        } else if (compareType === TableDateCompareTypeEnum.Quarter || compareType === TableDateCompareTypeEnum.Month) {
+        } else if (compareType === TableDateCompareTypeEnum.Today
+            || compareType === TableDateCompareTypeEnum.Yesterday
+            || compareType === TableDateCompareTypeEnum.Tomorrow
+            || compareType === TableDateCompareTypeEnum.ThisWeek
+            || compareType === TableDateCompareTypeEnum.LastWeek
+            || compareType === TableDateCompareTypeEnum.NextWeek
+            || compareType === TableDateCompareTypeEnum.ThisMonth
+            || compareType === TableDateCompareTypeEnum.LastMonth
+            || compareType === TableDateCompareTypeEnum.NextMonth
+            || compareType === TableDateCompareTypeEnum.ThisYear
+            || compareType === TableDateCompareTypeEnum.LastYear
+            || compareType === TableDateCompareTypeEnum.NextYear
+        ) {
             return {
                 type: conditionType,
                 compare: compareType,
-                info: {
-                    dateSelect: filterInfo.expectedValue,
-                },
+                info: {},
             };
         } else if (datePickerSet.has(compareType as TableDateCompareTypeEnum)) {
             return {

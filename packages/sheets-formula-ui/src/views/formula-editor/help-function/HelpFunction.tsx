@@ -25,7 +25,7 @@ import React, { useMemo, useState } from 'react';
 import { generateParam } from '../../../services/utils';
 import { useEditorPosition } from '../hooks/use-editor-position';
 import { useFormulaDescribe } from '../hooks/use-formula-describe';
-import { HelpHiddenTip } from './help-hidden';
+import { HelpHiddenTip } from './help-hidden-tip';
 import styles from './index.module.less';
 
 interface IParamsProps {

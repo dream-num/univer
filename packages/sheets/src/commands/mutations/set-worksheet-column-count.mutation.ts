@@ -33,11 +33,10 @@ export const SetWorksheetColumnCountMutationFactory = (
         throw new Error('[SetWorksheetColumnCountMutationFactory]: worksheet is null error!');
     }
 
-    const { worksheet } = target;
     return {
         unitId: params.unitId,
-        subUnitId: worksheet.getSheetId(),
-        columnCount: worksheet.getColumnCount(),
+        subUnitId: params.subUnitId,
+        columnCount: target.worksheet.getColumnCount(),
     };
 };
 
@@ -45,21 +44,11 @@ export const SetWorksheetColumnCountMutation: IMutation<ISetWorksheetColumnCount
     id: 'sheet.mutation.set-worksheet-column-count',
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
-        const { unitId, subUnitId, columnCount } = params;
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const target = getSheetMutationTarget(univerInstanceService, params);
+        if (!target) return false;
 
-        const workbook = accessor.get(IUniverInstanceService).getUniverSheetInstance(unitId);
-
-        if (!workbook) {
-            return false;
-        }
-
-        const worksheet = workbook.getSheetBySheetId(subUnitId);
-
-        if (!worksheet) {
-            return false;
-        }
-
-        worksheet.setColumnCount(columnCount);
+        target.worksheet.setColumnCount(params.columnCount);
 
         return true;
     },

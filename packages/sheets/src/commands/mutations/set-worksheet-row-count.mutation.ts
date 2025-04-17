@@ -33,11 +33,10 @@ export const SetWorksheetRowCountMutationFactory = (
         throw new Error('[SetWorksheetRowCountMutationFactory]: worksheet is null error!');
     }
 
-    const { worksheet } = target;
     return {
         unitId: params.unitId,
-        subUnitId: worksheet.getSheetId(),
-        rowCount: worksheet.getRowCount(),
+        subUnitId: params.subUnitId,
+        rowCount: target.worksheet.getRowCount(),
     };
 };
 
@@ -45,21 +44,11 @@ export const SetWorksheetRowCountMutation: IMutation<ISetWorksheetRowCountMutati
     id: 'sheet.mutation.set-worksheet-row-count',
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
-        const { unitId, subUnitId, rowCount } = params;
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const target = getSheetMutationTarget(univerInstanceService, params);
+        if (!target) return false;
 
-        const workbook = accessor.get(IUniverInstanceService).getUniverSheetInstance(unitId);
-
-        if (!workbook) {
-            return false;
-        }
-
-        const worksheet = workbook.getSheetBySheetId(subUnitId);
-
-        if (!worksheet) {
-            return false;
-        }
-
-        worksheet.setRowCount(rowCount);
+        target.worksheet.setRowCount(params.rowCount);
 
         return true;
     },

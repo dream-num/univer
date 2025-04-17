@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICommand, Workbook } from '@univerjs/core';
+import type { IAccessor, ICommand } from '@univerjs/core';
 import type { ISetWorksheetColumnCountMutationParams } from '../mutations/set-worksheet-column-count.mutation';
 import {
     CommandType,
     ICommandService,
     IUndoRedoService,
     IUniverInstanceService,
-    UniverInstanceType,
 } from '@univerjs/core';
 import { SetWorksheetColumnCountMutation, SetWorksheetColumnCountMutationFactory } from '../mutations/set-worksheet-column-count.mutation';
 import { getSheetCommandTarget } from './utils/target-util';
@@ -37,14 +36,8 @@ export const SetWorksheetColumnCountCommand: ICommand = {
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService));
+        const target = getSheetCommandTarget(univerInstanceService, params);
         if (!target) return false;
-
-        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
-        if (!workbook) return false;
-
-        const worksheet = workbook.getSheetBySheetId(subUnitId);
-        if (!worksheet) return false;
 
         const redoMutationParams: ISetWorksheetColumnCountMutationParams = {
             unitId,

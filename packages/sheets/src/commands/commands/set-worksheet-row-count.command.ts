@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICommand, Workbook } from '@univerjs/core';
+import type { IAccessor, ICommand } from '@univerjs/core';
 import type { ISetWorksheetRowCountMutationParams } from '../mutations/set-worksheet-row-count.mutation';
 import {
     CommandType,
     ICommandService,
     IUndoRedoService,
     IUniverInstanceService,
-    UniverInstanceType,
 } from '@univerjs/core';
 import { SetWorksheetRowCountMutation, SetWorksheetRowCountMutationFactory } from '../mutations/set-worksheet-row-count.mutation';
 import { getSheetCommandTarget } from './utils/target-util';
@@ -37,14 +36,8 @@ export const SetWorksheetRowCountCommand: ICommand = {
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService));
+        const target = getSheetCommandTarget(univerInstanceService, params);
         if (!target) return false;
-
-        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
-        if (!workbook) return false;
-
-        const worksheet = workbook.getSheetBySheetId(subUnitId);
-        if (!worksheet) return false;
 
         const redoMutationParams: ISetWorksheetRowCountMutationParams = {
             unitId,

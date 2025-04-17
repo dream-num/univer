@@ -42,11 +42,3 @@ export const ShiftClearSelectionValueShortcutItem: IShortcutItem = {
     binding: MetaKeys.SHIFT + KeyCode.DELETE,
     mac: MetaKeys.SHIFT + KeyCode.BACKSPACE,
 };
-
-export const AltClearSelectionValueShortcutItem: IShortcutItem = {
-    id: ClearSelectionContentCommand.id,
-    // when focusing on any other input tag do not trigger this shortcut
-    preconditions: (contextService) => whenSheetEditorFocused(contextService),
-    binding: MetaKeys.ALT + KeyCode.DELETE,
-    mac: MetaKeys.ALT + KeyCode.BACKSPACE,
-};

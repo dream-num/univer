@@ -32,7 +32,11 @@ export function useEditorPosition(editorId: string, ready: boolean, deps?: any[]
             return;
         }
         const position = doc.getBoundingClientRect();
-        const { left, top, right, bottom } = position;
+        const { marginTop = 0, marginBottom = 0 } = doc.getDocumentData().documentStyle;
+        let { left, top, right, bottom } = position;
+        top = top + marginTop;
+        bottom = bottom - marginBottom;
+
         const current = position$.getValue();
         if (current.left === left && current.top === top && current.right === right && current.bottom === bottom) {
             return;
@@ -46,7 +50,6 @@ export function useEditorPosition(editorId: string, ready: boolean, deps?: any[]
             return;
         }
         updatePosition();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [editorId, editorService, univerInstanceService.unitAdded$, updatePosition, ready, ...(deps ?? [])]);
 
     useResizeScrollObserver(updatePosition);

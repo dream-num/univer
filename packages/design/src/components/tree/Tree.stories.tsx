@@ -105,7 +105,7 @@ const data = [
 ];
 export const TreeBasic = {
     render() {
-        const [valueGroup, valueGroupSet] = useState<string[]>([]);
+        const [valueGroup] = useState<string[]>([]);
 
         function handleSelected(node: ITreeNodeProps) {
             // eslint-disable-next-line no-console

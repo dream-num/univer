@@ -20,7 +20,7 @@ import { LocaleService } from '@univerjs/core';
 import { InputNumber, Select } from '@univerjs/design';
 import { getCurrencyType, getDecimalFromPattern, setPatternDecimal } from '@univerjs/sheets-numfmt';
 import { useDependency } from '@univerjs/ui';
-import React, { useContext, useMemo, useState } from 'react';
+import { useContext, useMemo, useState } from 'react';
 import { UserHabitCurrencyContext } from '../../../controllers/user-habit.controller';
 
 export const isAccountingPanel = (pattern: string) => {
@@ -31,7 +31,7 @@ export const isAccountingPanel = (pattern: string) => {
 export const AccountingPanel: FC<IBusinessComponentProps> = (props) => {
     const { defaultPattern, action, onChange } = props;
 
-    const [decimal, decimalSet] = useState(() => getDecimalFromPattern(defaultPattern || '', 2));
+    const [decimal, setDecimal] = useState(() => getDecimalFromPattern(defaultPattern || '', 2));
     const userHabitCurrency = useContext(UserHabitCurrencyContext);
     const [suffix, suffixSet] = useState(() => getCurrencyType(defaultPattern) || userHabitCurrency[0]);
     const options = useMemo(() => userHabitCurrency.map((key) => ({ label: key, value: key })), []);
@@ -41,14 +41,14 @@ export const AccountingPanel: FC<IBusinessComponentProps> = (props) => {
 
     action.current = () => setPatternDecimal(`_("${suffix}"* #,##0${decimal > 0 ? '.0' : ''}_)`, decimal);
 
-    const onSelect = (v: string) => {
+    const handleSelect = (v: string) => {
         suffixSet(v);
         onChange(setPatternDecimal(`_("${v}"* #,##0${decimal > 0 ? '.0' : ''}_)`, decimal));
     };
 
-    const onDecimalChange = (v: number | null) => {
+    const handleDecimalChange = (v: number | null) => {
         const decimal = v || 0;
-        decimalSet(decimal);
+        setDecimal(decimal);
         onChange(setPatternDecimal(`_("${suffix}"* #,##0${decimal > 0 ? '.0' : ''}_)`, decimal));
     };
 
@@ -59,14 +59,25 @@ export const AccountingPanel: FC<IBusinessComponentProps> = (props) => {
                     <div className="label">{t('sheet.numfmt.decimalLength')}</div>
 
                     <div className="m-t-8 w-120">
-                        <InputNumber value={decimal} max={20} min={0} onChange={onDecimalChange} />
+                        <InputNumber
+                            value={decimal}
+                            step={1}
+                            precision={0}
+                            max={20}
+                            min={0}
+                            onChange={handleDecimalChange}
+                        />
                     </div>
                 </div>
                 <div className="option">
                     <div className="label">{t('sheet.numfmt.currencyType')}</div>
 
                     <div className="m-t-8 w-140">
-                        <Select onChange={onSelect} options={options} value={suffix} />
+                        <Select
+                            options={options}
+                            value={suffix}
+                            onChange={handleSelect}
+                        />
                     </div>
                 </div>
             </div>

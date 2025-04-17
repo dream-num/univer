@@ -185,7 +185,7 @@ export function RangeSelectorDialog(props: IRangeSelectorDialogProps) {
                 ))}
                 {ranges.length < maxRangeCount && (
                     <div>
-                        <Button variant="link" size="small" onClick={handleRangeAdd}>
+                        <Button variant="link" onClick={handleRangeAdd}>
                             <IncreaseSingle />
                             <span>{localeService.t('rangeSelector.addAnotherRange')}</span>
                         </Button>

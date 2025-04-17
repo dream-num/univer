@@ -67,9 +67,9 @@ function RecordPanelImpl() {
             </div>
             <div className={styles.actionRecorderPanelTitle}>{titleText}</div>
             <div className={styles.actionRecorderPanelActions}>
-                <Button size="small" onClick={recording ? stopRecording : closePanel}>{ recording ? 'Cancel' : 'Close' }</Button>
-                <Button variant="primary" size="small" onClick={recording ? completeRecording : () => startRecording()}>{ recording ? 'Save' : 'Start' }</Button>
-                { !recording && <Button variant="primary" size="small" onClick={() => startRecording(true)}>Start(N)</Button>}
+                <Button onClick={recording ? stopRecording : closePanel}>{ recording ? 'Cancel' : 'Close' }</Button>
+                <Button variant="primary" onClick={recording ? completeRecording : () => startRecording()}>{ recording ? 'Save' : 'Start' }</Button>
+                { !recording && <Button variant="primary" onClick={() => startRecording(true)}>Start(N)</Button>}
             </div>
         </div>
     );

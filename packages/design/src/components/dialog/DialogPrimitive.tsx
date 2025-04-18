@@ -60,7 +60,7 @@ const DialogContent = forwardRef<
                 ref={ref}
                 className={clsx(
                     `
-                      univer-fixed univer-left-1/2 univer-top-1/2 univer-z-[1080] univer-box-border univer-grid
+                      univer-fixed univer-left-1/2 univer-top-1/2 univer-z-50 univer-box-border univer-grid
                       univer-w-full univer-max-w-lg -univer-translate-x-1/2 -univer-translate-y-1/2 univer-gap-4
                       univer-border univer-border-solid univer-border-gray-200 univer-bg-white univer-px-6 univer-py-4
                       univer-text-gray-500 univer-shadow-md univer-duration-200

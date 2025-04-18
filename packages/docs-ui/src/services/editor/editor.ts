@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommandService, IDocumentData, IDocumentStyle, IPosition, IUndoRedoService, IUniverInstanceService, Nullable } from '@univerjs/core';
+import type { DocumentDataModel, ICommandService, IDocumentData, IDocumentStyle, Injector, IPosition, IUndoRedoService, IUniverInstanceService, Nullable } from '@univerjs/core';
 import type { DocSelectionManagerService } from '@univerjs/docs';
 import type { IDocSelectionInnerParam, IRender, ISuccinctDocRangeParam, ITextRangeWithStyle } from '@univerjs/engine-render';
 import type { Observable } from 'rxjs';
 import type { IEditorInputConfig } from '../selection/doc-selection-render.service';
 import { Disposable, isInternalEditorID, UniverInstanceType } from '@univerjs/core';
+import { DocSkeletonManagerService } from '@univerjs/docs';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { KeyCode } from '@univerjs/ui';
 import { merge, Subject } from 'rxjs';
 import { filter } from 'rxjs/operators';
@@ -138,7 +140,8 @@ export class Editor extends Disposable implements IEditor {
         private _univerInstanceService: IUniverInstanceService,
         private _docSelectionManagerService: DocSelectionManagerService,
         private _commandService: ICommandService,
-        private _undoRedoService: IUndoRedoService
+        private _undoRedoService: IUndoRedoService,
+        private _injector: Injector
     ) {
         super();
 
@@ -243,19 +246,6 @@ export class Editor extends Disposable implements IEditor {
         // Step 2: Focus this input element.
         const docSelectionRenderService = this._param.render.with(DocSelectionRenderService);
         docSelectionRenderService.focus();
-
-        // Step 3: Sets the selection of the last selection, and if not, to the beginning of the document.
-        // const lastSelectionInfo = this._docSelectionManagerService.getDocRanges({
-        //     unitId: editorUnitId,
-        //     subUnitId: editorUnitId,
-        // });
-
-        // if (lastSelectionInfo) {
-        //     this._docSelectionManagerService.replaceDocRanges(lastSelectionInfo, {
-        //         unitId: editorUnitId,
-        //         subUnitId: editorUnitId,
-        //     }, false);
-        // }
     }
 
     /**
@@ -410,6 +400,11 @@ export class Editor extends Disposable implements IEditor {
 
     isVisible() {
         return this._param.visible;
+    }
+
+    getSkeleton() {
+        const skeleton = this._injector.get(IRenderManagerService).getRenderById(this._getEditorId())?.with(DocSkeletonManagerService).getSkeleton();
+        return skeleton;
     }
 
     isSheetEditor() {

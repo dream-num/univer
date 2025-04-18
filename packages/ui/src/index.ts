@@ -22,7 +22,7 @@ export { mergeMenuConfigs } from './common/menu-merge-configs';
 export * from './components';
 export { t } from './components/hooks/locale';
 export * from './components/hooks';
-export { RectPopup } from './views/components/popup/RectPopup';
+export { RectPopup, type RectPopupDirection } from './views/components/popup/RectPopup';
 export { Menu as UIMenu } from './components/menu/desktop/Menu';
 export { type INotificationOptions, type NotificationType } from './components/notification/Notification';
 export { ProgressBar } from './components/progress-bar/ProgressBar';

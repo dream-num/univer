@@ -34,6 +34,32 @@ interface IAbsolutePosition {
 
 const RectPopupContext = createContext<RefObject<IAbsolutePosition | undefined>>({ current: undefined });
 
+export type RectPopupDirection =
+    | 'left'
+    | 'left-center'
+    | 'left-bottom'
+    | 'left-top'
+    | 'right'
+    | 'right-center'
+    | 'right-bottom'
+    | 'right-top'
+    | 'top'
+    | 'top-center'
+    | 'top-left'
+    | 'top-right'
+    | 'bottom'
+    | 'bottom-center'
+    | 'bottom-left'
+    | 'bottom-right'
+    | 'vertical'
+    | 'vertical-left'
+    | 'vertical-right'
+    | 'vertical-center'
+    | 'horizontal'
+    | 'horizontal-top'
+    | 'horizontal-bottom'
+    | 'horizontal-center';
+
 export interface IRectPopupProps {
     children?: React.ReactNode;
 
@@ -42,8 +68,7 @@ export interface IRectPopupProps {
      */
     anchorRect$: Observable<IAbsolutePosition>;
     excludeRects?: RefObject<Nullable<IAbsolutePosition[]>>;
-    direction?: 'vertical' | 'horizontal' | 'top' | 'right' | 'left' | 'right-center' | 'left-center' | 'bottom' | 'bottom-center' | 'top-center';
-
+    direction?: RectPopupDirection;
     hidden?: boolean;
     // #region closing behavior
     onClickOutside?: (e: MouseEvent) => void;
@@ -77,7 +102,7 @@ function calcPopupPosition(layout: IPopupLayoutInfo): { top: number; left: numbe
     const { position, width, height, containerHeight, containerWidth, direction = 'vertical' } = layout;
 
     // In y-axis
-    if (direction === 'vertical' || direction.includes('top') || direction.includes('bottom')) {
+    if (direction === 'vertical' || direction.indexOf('top') === 0 || direction.indexOf('bottom') === 0) {
         const { left: startX, top: startY, right: endX, bottom: endY } = position;
         const verticalStyle = (direction === 'vertical' && endY > containerHeight - height - PUSHING_MINIMUM_GAP) || direction.indexOf('top') > -1
             // top
@@ -97,6 +122,10 @@ function calcPopupPosition(layout: IPopupLayoutInfo): { top: number; left: numbe
             horizontalStyle = (Math.max(startX + offsetX, PUSHING_MINIMUM_GAP) + width) > containerWidth
                 ? { left: Math.max(Math.min(maxLeft, endX - width - offsetX), minLeft) }
                 : { left: Math.max(minLeft, Math.min(startX + offsetX, maxLeft)) };
+        } else if (direction.includes('left')) {
+            horizontalStyle = { left: Math.max(endX - width, minLeft) };
+        } else if (direction.includes('right')) {
+            horizontalStyle = { left: Math.min(startX, maxLeft) };
         } else {
             // If the popup element exceed the visible area. We should "push" it back.
             horizontalStyle = (startX + width) > containerWidth
@@ -113,6 +142,7 @@ function calcPopupPosition(layout: IPopupLayoutInfo): { top: number; left: numbe
     const horizontalStyle = direction.includes('left')
         ? { left: Math.max(startX - width, PUSHING_MINIMUM_GAP) } // on left
         : { left: Math.min(endX, containerWidth - width - PUSHING_MINIMUM_GAP) }; // on right
+
     let verticalStyle;
     const minTop = PUSHING_MINIMUM_GAP;
     const maxTop = containerHeight - height - PUSHING_MINIMUM_GAP;
@@ -124,6 +154,14 @@ function calcPopupPosition(layout: IPopupLayoutInfo): { top: number; left: numbe
         verticalStyle = (Math.max(startY + offsetY, PUSHING_MINIMUM_GAP) + height) > containerHeight
             ? { top: Math.max(Math.min(maxTop, endY - height - offsetY), minTop) }
             : { top: Math.max(minTop, Math.min(startY + offsetY, maxTop)) };
+    } else if (direction.includes('top')) {
+        verticalStyle = {
+            top: Math.min(startY, containerHeight - height - PUSHING_MINIMUM_GAP),
+        };
+    } else if (direction.includes('bottom')) {
+        verticalStyle = {
+            top: Math.max(endY - height, PUSHING_MINIMUM_GAP),
+        };
     } else {
         // If the popup element exceed the visible area. We should "push" it back.
         verticalStyle = ((startY + height) > containerHeight)

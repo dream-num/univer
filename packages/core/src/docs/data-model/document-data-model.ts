@@ -15,19 +15,13 @@
  */
 
 import type { Nullable } from '../../shared';
-import type {
-    IDocumentBody,
-    IDocumentData,
-    IDocumentRenderConfig,
-    IDocumentStyle,
-    IDrawings,
-    IListData,
-} from '../../types/interfaces/i-document-data';
+import type { IDocumentBody, IDocumentData, IDocumentRenderConfig, IDocumentStyle, IDrawings, IListData } from '../../types/interfaces/i-document-data';
 import type { IPaddingData } from '../../types/interfaces/i-style-data';
 import type { JSONXActions } from './json-x/json-x';
 import { BehaviorSubject } from 'rxjs';
 import { UnitModel, UniverInstanceType } from '../../common/unit';
 import { Tools } from '../../shared/tools';
+
 import { getEmptySnapshot } from './empty-snapshot';
 import { JSONX } from './json-x/json-x';
 import { PRESET_LIST_TYPE } from './preset-list-type';

@@ -56,6 +56,8 @@ export interface IInputProps extends Pick<InputProps, 'onFocus' | 'onBlur'>,
     onClick?: (e: React.MouseEvent<HTMLInputElement>) => void;
     onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
     onChange?: (value: string) => void;
+    inputClass?: string;
+    inputStyle?: React.CSSProperties;
 }
 
 export const Input = forwardRef<HTMLInputElement, IInputProps>(
@@ -74,6 +76,8 @@ export const Input = forwardRef<HTMLInputElement, IInputProps>(
         onChange,
         onFocus,
         onBlur,
+        inputClass,
+        inputStyle,
         ...props
     }, ref) => {
         const handleClear = (e: React.MouseEvent) => {
@@ -100,7 +104,8 @@ export const Input = forwardRef<HTMLInputElement, IInputProps>(
                     className={clsx(
                         inputVariants({ size }),
                         disabled && 'univer-cursor-not-allowed univer-bg-gray-50',
-                        allowClear && 'univer-pr-8'
+                        allowClear && 'univer-pr-8',
+                        inputClass
                     )}
                     placeholder={placeholder}
                     value={value}
@@ -111,6 +116,7 @@ export const Input = forwardRef<HTMLInputElement, IInputProps>(
                     onChange={handleChange}
                     onFocus={onFocus}
                     onBlur={onBlur}
+                    style={inputStyle}
                     {...props}
                 />
                 {allowClear && value && !disabled && (

@@ -31,6 +31,8 @@ export const useFocus = (editor?: Editor) => {
                 const body = editor.getDocumentData().body?.dataStream ?? '\r\n';
                 const offset = Math.max(body.length - 2, 0);
                 editor.setSelectionRanges([{ startOffset: offset, endOffset: offset }]);
+            } else {
+                editor.setSelectionRanges(selections);
             }
         };
     });

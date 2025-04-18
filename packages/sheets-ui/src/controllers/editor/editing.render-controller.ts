@@ -490,6 +490,18 @@ export class EditingRenderController extends Disposable {
         this._renderManagerService.getRenderById(unitId)?.scene.resetCursor();
     }
 
+    private _refreshCurrentSelections(sheetId: string) {
+        const selections = this._workbookSelections.getSelectionsOfWorksheet(sheetId);
+        if (selections) {
+            this._contextService.setContextValue(REF_SELECTIONS_ENABLED, false);
+            this._commandService.syncExecuteCommand(SetSelectionsOperation.id, {
+                unitId: this._editingUnit,
+                subUnitId: sheetId,
+                selections,
+            });
+        }
+    }
+
     private async _handleEditorInvisible(param: IEditorBridgeServiceVisibleParam) {
         const editCellState = this._editorBridgeService.getEditCellState();
         const documentDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
@@ -529,7 +541,7 @@ export class EditingRenderController extends Disposable {
             if (this._editorBridgeService.isForceKeepVisible()) {
                 this._editorBridgeService.disableForceKeepVisible();
             }
-            this._moveSelection(keycode, currentUnitId);
+            this._moveSelection(keycode, currentUnitId, worksheetId);
             return;
         }
 
@@ -538,17 +550,7 @@ export class EditingRenderController extends Disposable {
             if (this._editorBridgeService.isForceKeepVisible()) {
                 this._editorBridgeService.disableForceKeepVisible();
             }
-
-            const selections = this._workbookSelections.getCurrentSelections();
-            if (selections) {
-                this._contextService.setContextValue(REF_SELECTIONS_ENABLED, false);
-                this._commandService.syncExecuteCommand(SetSelectionsOperation.id, {
-                    unitId: workbookId,
-                    subUnitId: sheetId,
-                    selections,
-                });
-            }
-
+            this._refreshCurrentSelections(sheetId);
             return;
         }
 
@@ -563,7 +565,7 @@ export class EditingRenderController extends Disposable {
         }
 
         // moveSelection need to put behind of SetRangeValuesCommand, fix https://github.com/dream-num/univer/issues/1155
-        this._moveSelection(keycode, currentUnitId);
+        this._moveSelection(keycode, currentUnitId, worksheetId);
     }
 
     private _getEditorObject() {
@@ -670,8 +672,9 @@ export class EditingRenderController extends Disposable {
         this._undoRedoService.clearUndoRedo(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
     }
 
-    private _moveSelection(keycode: KeyCode | undefined, currentUnitId: string) {
+    private _moveSelection(keycode: KeyCode | undefined, currentUnitId: string, worksheetId: string) {
         if (keycode == null || !MOVE_SELECTION_KEYCODE_LIST.includes(keycode)) {
+            this._refreshCurrentSelections(worksheetId);
             return;
         }
 

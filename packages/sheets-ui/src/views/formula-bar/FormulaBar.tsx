@@ -309,8 +309,9 @@ export function FormulaBar(props: IProps) {
                                 resetSelectionOnBlur={false}
                                 isSingle={false}
                                 keyboradEventConfig={keyCodeConfig}
-                                onFormulaSelectingChange={(isSelecting: 0 | 1 | 2) => {
+                                onFormulaSelectingChange={(isSelecting: 0 | 1 | 2, isFocusing: boolean) => {
                                     isRefSelecting.current = isSelecting;
+                                    if (!isFocusing) return;
                                     if (isSelecting) {
                                         editorBridgeService.enableForceKeepVisible();
                                     } else {

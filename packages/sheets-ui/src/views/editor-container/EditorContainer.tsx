@@ -161,8 +161,9 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
                     resetSelectionOnBlur={false}
                     isSingle={false}
                     autoScrollbar={false}
-                    onFormulaSelectingChange={(isSelecting: 0 | 1 | 2) => {
+                    onFormulaSelectingChange={(isSelecting: 0 | 1 | 2, isFocusing: boolean) => {
                         isRefSelecting.current = isSelecting;
+                        if (!isFocusing) return;
                         if (isSelecting) {
                             editorBridgeService.enableForceKeepVisible();
                         } else {

@@ -137,6 +137,7 @@ const Template = (props: { item: IDropdownItem; commonProps: any; style?: CSSPro
                 onChange={(label) => {
                     onItemChange(item.id, label, item.color);
                 }}
+                inputStyle={{ height: 28 }}
             />
             {item.isRef
                 ? null
@@ -152,7 +153,6 @@ const Template = (props: { item: IDropdownItem; commonProps: any; style?: CSSPro
 export function ListFormulaInput(props: IFormulaInputProps) {
     const { value, onChange: _onChange = () => { /* empty */ }, unitId, subUnitId, validResult, showError, ruleId } = props;
     const { formula1 = '', formula2 = '' } = value || {};
-    const containerRef = useRef<HTMLDivElement>(null);
     const [isFormulaStr, setIsFormulaStr] = useState(() => isFormulaString(formula1) ? '1' : '0');
     const [formulaStr, setFormulaStr] = useState(isFormulaStr === '1' ? formula1 : '=');
     const [formulaStrCopy, setFormulaStrCopy] = useState(isFormulaStr === '1' ? formula1 : '=');
@@ -355,20 +355,29 @@ export function ListFormulaInput(props: IFormulaInputProps) {
                             isSupportAcrossSheet
                             ref={formulaEditorRef}
                         />
-                        <div ref={containerRef} style={{ marginTop: '12px' }}>
-                            {refFinalList.map((item) => {
-                                return <Template key={item.id} item={item} commonProps={{ onItemChange: handleRefItemChange }} style={{ marginBottom: 12 }} />;
-                            })}
-                        </div>
+                        {refFinalList.length > 0 && (
+                            <div style={{ marginTop: '12px' }}>
+                                {refFinalList.map((item) => {
+                                    return (
+                                        <Template
+                                            key={item.id}
+                                            item={item}
+                                            commonProps={{ onItemChange: handleRefItemChange }}
+                                            style={{ marginBottom: 12 }}
+                                        />
+                                    );
+                                })}
+                            </div>
+                        )}
                     </>
                 )
                 : (
                     <FormLayout error={formula1Res}>
-                        <div ref={containerRef} style={{ marginTop: '-12px' }}>
+                        <div style={{ marginTop: '-12px' }}>
                             <DraggableList
                                 list={strList}
                                 onListChange={setStrList}
-                                rowHeight={32}
+                                rowHeight={28}
                                 margin={[0, 12]}
                                 draggableHandle=".draggableHandle"
                                 itemRender={(item) => (

@@ -106,13 +106,13 @@ export interface IEditorBridgeService {
     disableForceKeepVisible(): void;
     isForceKeepVisible(): boolean;
     getCurrentEditorId(): Nullable<string>;
+    helpFunctionVisible$: BehaviorSubject<boolean>;
 }
 
 export class EditorBridgeService extends Disposable implements IEditorBridgeService, IDisposable {
     private _editorUnitId: string = DOCS_NORMAL_EDITOR_UNIT_ID_KEY;
     private _editorIsDirty: boolean = false;
 
-    private _isDisabled: boolean = false;
     private _visibleParams: IEditorBridgeServiceVisibleParam = {
         visible: false,
         eventType: DeviceInputEventType.Dblclick,
@@ -122,6 +122,8 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
     private _currentEditCell: Nullable<ICurrentEditCellParam> = null;
     private _currentEditCellState: Nullable<ICellEditorState> = null;
     private _currentEditCellLayout: Nullable<ICellEditorLayout> = null;
+
+    helpFunctionVisible$ = new BehaviorSubject(true);
 
     // TODO: @weird94 this should split into to subjects, documentDataModel & position
     private readonly _currentEditCellState$ = new BehaviorSubject<Nullable<ICellEditorState>>(null);

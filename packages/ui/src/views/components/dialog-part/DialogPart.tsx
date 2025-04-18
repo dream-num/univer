@@ -17,7 +17,7 @@
 import type { IDialogProps } from '@univerjs/design';
 import type { IDialogPartMethodOptions } from './interface';
 import { Dialog } from '@univerjs/design';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { CustomLabel } from '../../../components/custom-label/CustomLabel';
 import { IDialogService } from '../../../services/dialog/dialog.service';
 import { useDependency } from '../../../utils/di';
@@ -52,5 +52,7 @@ export function DialogPart() {
         return dialogProps;
     });
 
-    return <>{attrs?.map((options) => <Dialog key={options.id} {...options} />)}</>;
+    return attrs?.map((options) => (
+        <Dialog key={options.id} {...options} />
+    ));
 }

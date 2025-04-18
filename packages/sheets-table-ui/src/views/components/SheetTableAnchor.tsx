@@ -50,6 +50,7 @@ export const SheetTableAnchor = () => {
     const configService = useDependency(IConfigService);
     const tableConfig = configService.getConfig<IUniverSheetsTableUIConfig>(SHEETS_TABLE_UI_PLUGIN_CONFIG_KEY);
     const anchorHeight = tableConfig?.anchorHeight ?? 24;
+    const anchorBackgroundColor = tableConfig?.anchorBackgroundColor ?? 'rgb(53,91,183)';
 
     const updateOpenState = (tableId: string, isOpen: boolean) => {
         setOpenStates((prev) => ({
@@ -113,7 +114,7 @@ export const SheetTableAnchor = () => {
                 const table = tableManager.getTableById(unitId, item.tableId);
                 if (!table) return null;
                 const rangeTheme = rangeThemeModel.getRangeThemeStyle(unitId, table.getTableStyleId());
-                const headerBgColor = rangeTheme?.getHeaderRowStyle()?.bg?.rgb ?? 'rgb(53,91,183)';
+                const headerBgColor = rangeTheme?.getHeaderRowStyle()?.bg?.rgb ?? anchorBackgroundColor;
                 const headerCl = rangeTheme?.getHeaderRowStyle()?.cl?.rgb ?? 'rgb(255, 255, 255)';
                 const headerTextColor = headerCl;
                 const tableRange = table.getRange();

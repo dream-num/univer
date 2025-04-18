@@ -99,54 +99,57 @@ export function SheetTableItemsFilterPanel(props: ISheetTableItemsFilterPanelPro
             <Input autoFocus value={searchText} placeholder={localeService.t('sheets-filter.panel.search-placeholder')} onChange={onSearchValueChange} />
             <div
                 className={`
-                  univer-mt-2 univer-box-border univer-flex univer-flex-grow univer-flex-col univer-overflow-hidden
-                  univer-rounded-md univer-border univer-border-solid univer-border-gray-200 univer-py-1.5 univer-pl-2
+                  univer-mt-2 univer-box-border univer-flex univer-h-[180px] univer-max-h-[180px] univer-flex-grow
+                  univer-flex-col univer-overflow-hidden univer-rounded-md univer-border univer-border-solid
+                  univer-border-gray-200 univer-py-1.5 univer-pl-2
                 `}
             >
                 <div
-                    className="univer-h-[180px] univer-max-h-[180px] univer-overflow-y-hidden univer-py-1 univer-pl-2"
+                    className="univer-h-40 univer-overflow-y-hidden univer-py-1 univer-pl-2"
                 >
                     <Scrollbar>
-                        <div
-                            className="univer-flex univer-items-center univer-px-2 univer-py-1"
-                        >
-                            <Checkbox
-                                indeterminate={indeterminate}
-                                disabled={items.length === 0}
-                                checked={allChecked}
-                                onChange={onCheckAllToggled}
-                            />
+                        <div className="univer-h-40">
                             <div
-                                className={`
-                                  univer-ml-1 univer-flex univer-h-5 univer-flex-1 univer-items-center univer-text-sm
-                                `}
+                                className="univer-flex univer-items-center univer-px-2 univer-py-1"
                             >
-                                <span className="univer-inline-block univer-truncate">{`${localeService.t('sheets-filter.panel.select-all')}`}</span>
-                                <span className="univer-ml univer-text-gray-400">{`(${allChecked ? allItemsCount : checkedCount}/${allItemsCount})`}</span>
-                            </div>
-                        </div>
-                        {items.map((item) => {
-                            return (
+                                <Checkbox
+                                    indeterminate={indeterminate}
+                                    disabled={items.length === 0}
+                                    checked={allChecked}
+                                    onChange={onCheckAllToggled}
+                                />
                                 <div
-                                    key={item.key}
-                                    className="univer-flex univer-items-center univer-px-2 univer-py-1"
+                                    className={`
+                                      univer-ml-1 univer-flex univer-h-5 univer-flex-1 univer-items-center
+                                      univer-text-sm
+                                    `}
                                 >
-                                    <Checkbox checked={allChecked || checkedItemSet.has(item.title)} onChange={() => { onCheckItemToggled(item.title); }} />
-                                    <div
-                                        className={`
-                                          univer-ml-1 univer-flex univer-h-5 univer-flex-1 univer-items-start
-                                          univer-text-sm
-                                        `}
-                                    >
-
-                                        <span className="univer-inline-block univer-truncate">{item.title}</span>
-                                        <span className="univer-ml-1 univer-text-gray-400">{`(${itemsCountMap.get(item.title) || 0})`}</span>
-                                    </div>
+                                    <span className="univer-inline-block univer-truncate">{`${localeService.t('sheets-filter.panel.select-all')}`}</span>
+                                    <span className="univer-ml univer-text-gray-400">{`(${allChecked ? allItemsCount : checkedCount}/${allItemsCount})`}</span>
                                 </div>
-                            );
-                        })}
-                    </Scrollbar>
+                            </div>
+                            {items.map((item) => {
+                                return (
+                                    <div
+                                        key={item.key}
+                                        className="univer-flex univer-items-center univer-px-2 univer-py-1"
+                                    >
+                                        <Checkbox checked={allChecked || checkedItemSet.has(item.title)} onChange={() => { onCheckItemToggled(item.title); }} />
+                                        <div
+                                            className={`
+                                              univer-ml-1 univer-flex univer-h-5 univer-flex-1 univer-items-start
+                                              univer-text-sm
+                                            `}
+                                        >
 
+                                            <span className="univer-inline-block univer-truncate">{item.title}</span>
+                                            <span className="univer-ml-1 univer-text-gray-400">{`(${itemsCountMap.get(item.title) || 0})`}</span>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </Scrollbar>
                 </div>
 
             </div>

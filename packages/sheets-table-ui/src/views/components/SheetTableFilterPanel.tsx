@@ -142,14 +142,14 @@ export function SheetTableFilterPanel() {
         <div
             className={`
               univer-box-border univer-flex univer-w-[312px] univer-flex-col univer-rounded-[10px] univer-bg-white
-              univer-p-[16px] univer-shadow-lg
+              univer-p-4 univer-shadow-lg
             `}
         >
             <div className="univer-mb-3 univer-flex">
                 <div
                     className={`
                       univer-flex univer-w-[140px] univer-flex-1 univer-cursor-default univer-items-center
-                      univer-justify-center univer-gap-[4px] univer-rounded-l-md univer-border univer-border-solid
+                      univer-justify-center univer-gap-1 univer-rounded-l-md univer-border univer-border-solid
                       univer-border-gray-200 univer-py-1.5 univer-text-[13px] univer-font-normal
                       hover:univer-cursor-pointer hover:univer-bg-gray-100
                       ${isAsc
@@ -164,7 +164,7 @@ export function SheetTableFilterPanel() {
                 <div
                     className={`
                       univer-flex univer-w-[140px] univer-flex-1 univer-cursor-default univer-items-center
-                      univer-justify-center univer-gap-[4px] univer-rounded-r-md univer-border univer-border-solid
+                      univer-justify-center univer-gap-1 univer-rounded-r-md univer-border univer-border-solid
                       univer-border-gray-200 univer-py-1.5 univer-text-[13px] univer-font-normal
                       hover:univer-cursor-pointer hover:univer-bg-gray-100
                       ${isDesc
@@ -185,8 +185,8 @@ export function SheetTableFilterPanel() {
                     onChange={(value) => setFilterBy(value as FilterByEnum)}
                 />
             </div>
-            <div className="univer-table-filter-panel-body univer-z-10">
-                <div className="univer-table-filter-panel-body-content univer-mt-3 univer-h-60">
+            <div className="univer-table-filter-panel-body univer-z-10 univer-h-60">
+                <div className="univer-table-filter-panel-body-content univer-mt-3">
                     {filterBy === FilterByEnum.Items
                         ? (
                             <SheetTableItemsFilterPanel
@@ -219,16 +219,15 @@ export function SheetTableFilterPanel() {
                 `}
             >
                 <Button
-                    type="link"
                     disabled={tableFilter === undefined}
                     onClick={onClearFilter}
                 >
                     {localeService.t('sheets-filter.panel.clear-filter')}
                 </Button>
-                <span>
-                    <Button type="default" onClick={onCancel}>{localeService.t('sheets-filter.panel.cancel')}</Button>
-                    <Button className="univer-ml-2" type="primary" onClick={onApply}>{localeService.t('sheets-filter.panel.confirm')}</Button>
-                </span>
+                <div>
+                    <Button className="univer-mr-2" onClick={onCancel}>{localeService.t('sheets-filter.panel.cancel')}</Button>
+                    <Button variant="primary" onClick={onApply}>{localeService.t('sheets-filter.panel.confirm')}</Button>
+                </div>
             </div>
         </div>
     );

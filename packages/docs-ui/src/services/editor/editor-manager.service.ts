@@ -28,11 +28,11 @@ import { Editor } from './editor';
  * Not these elements will be considered as editor blur.
  */
 const editorFocusInElements = [
-    'univer-editor',
-    'univer-range-selector',
-    'univer-range-selector-editor',
-    'univer-render-canvas',
-    'univer-text-editor-container-placeholder',
+    'editor',
+    'render-canvas',
+    // 'univer-range-selector',
+    // 'univer-range-selector-editor',
+    // 'univer-text-editor-container-placeholder',
 ];
 
 export interface IEditorSetValueParam {
@@ -103,7 +103,7 @@ export class EditorService extends Disposable implements IEditorService, IDispos
     }
 
     private _blurSheetEditor(target: HTMLElement) {
-        if (editorFocusInElements.some((item) => target.classList.contains(item))) {
+        if (editorFocusInElements.some((item) => target.dataset.uComp === item)) {
             return;
         }
 

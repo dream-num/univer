@@ -132,7 +132,7 @@ export function DesktopWorkbench(props: IUniverWorkbenchProps) {
               * all focusin event merged from its descendants. The DesktopLayoutService would listen to focusin events
               * bubbled to this element and refocus the input element.
               */}
-            <div className={styles.workbenchLayout} tabIndex={-1} onBlur={(e) => e.stopPropagation()}>
+            <div data-u-comp="workbench-layout" className={styles.workbenchLayout} tabIndex={-1} onBlur={(e) => e.stopPropagation()}>
                 {/* user header */}
                 <div className={styles.workbenchCustomHeader}>
                     <ComponentContainer key="custom-header" components={customHeaderComponents} />

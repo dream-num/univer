@@ -22,13 +22,13 @@ type FocusHandlerFn = (unitId: string) => void;
 
 export const FOCUSING_UNIVER = 'FOCUSING_UNIVER';
 const givingBackFocusElements = [
-    'univer-app-layout',
-    'univer-toolbar-btn',
-    'univer-menu-item',
-    'univer-button',
-    'univer-sheet-bar-btn',
-    'univer-render-canvas',
-    'univer-workbench-layout',
+    'app-layout',
+    // 'univer-toolbar-btn',
+    // 'univer-menu-item',
+    'button',
+    'sheet-bar-append-button',
+    'render-canvas',
+    'workbench-layout',
 ];
 
 export interface ILayoutService {
@@ -164,7 +164,7 @@ export class DesktopLayoutService extends Disposable implements ILayoutService {
             fromEvent(window, 'focusin').subscribe((event) => {
                 const target = event.target as HTMLElement;
 
-                if (this._rootContainerElement?.contains(target) && givingBackFocusElements.some((item) => target.classList.contains(item))) {
+                if (this._rootContainerElement?.contains(target) && givingBackFocusElements.some((item) => target.dataset.uComp === item)) {
                     queueMicrotask(() => this.focus());
                     return;
                 }
@@ -187,5 +187,5 @@ export class DesktopLayoutService extends Disposable implements ILayoutService {
 }
 
 function getFocusingUniverEditorStatus(): boolean {
-    return !!document.activeElement?.classList.contains('univer-editor');
+    return (document.activeElement as HTMLElement)?.dataset.uComp === 'editor';
 }

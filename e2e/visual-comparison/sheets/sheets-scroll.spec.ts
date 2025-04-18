@@ -37,9 +37,6 @@ test('cells rendering after scrolling', async () => {
 
     await page.evaluate(async () => {
         const dispatchWheelEvent = (deltaX: number, deltaY: number, element: HTMLElement, interval: number = 30, lastFor: number = 1000) => {
-            // const canvasElements = document.querySelectorAll('canvas.univer-render-canvas') as unknown as HTMLElement[];
-            // const filteredCanvasElements = Array.from(canvasElements).filter((canvas) => canvas.offsetHeight > 500);
-
             const dispatchSimulateWheelEvent = (element) => {
                 const event = new WheelEvent('wheel', {
                     bubbles: true,
@@ -69,7 +66,7 @@ test('cells rendering after scrolling', async () => {
                 }, lastFor);
             });
         };
-        const canvasElements = document.querySelectorAll('canvas.univer-render-canvas') as unknown as HTMLElement[];
+        const canvasElements = document.querySelectorAll('canvas[data-u-comp=render-canvas]') as unknown as HTMLElement[];
         const filteredCanvasElements = Array.from(canvasElements).filter((canvas) => canvas.offsetHeight > 500);
         const element = filteredCanvasElements[0];
         await dispatchWheelEvent(0, 100, element);

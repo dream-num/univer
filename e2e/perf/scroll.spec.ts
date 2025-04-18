@@ -54,7 +54,7 @@ async function measureFPS(page: Page, testDuration = 5, deltaX: number, deltaY: 
         let intervalID;
         // dispatch wheel event
         const dispatchWheelEvent = () => {
-            const canvasElements = document.querySelectorAll('canvas.univer-render-canvas') as unknown as HTMLElement[];
+            const canvasElements = document.querySelectorAll('canvas[data-u-comp=render-canvas]') as unknown as HTMLElement[];
             const filteredCanvasElements = Array.from(canvasElements).filter((canvas) => canvas.offsetHeight > 500);
 
             const interval = 30;

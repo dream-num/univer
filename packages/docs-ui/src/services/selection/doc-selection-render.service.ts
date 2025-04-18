@@ -712,7 +712,8 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
 
         this._input.contentEditable = 'true';
 
-        this._input.classList.add('univer-editor');
+        // TODO: to be removed
+        this._input.dataset.uComp = 'editor';
         this._input.id = `__editor_${this._context.unitId}`;
         this._input.style.cssText = `
             position: absolute;

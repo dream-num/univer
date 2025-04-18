@@ -39,8 +39,8 @@ export function RenderSheetFooter() {
     if (!workbook || !showFooter) return null;
 
     const footerMenus = menuManagerService.getMenuByPositionKey(ContextMenuPosition.FOOTER_MENU);
-    const { sheetBar = true, statusBar = true, menus = true, zoomSlider = true } = config?.footer || {};
-    if (!sheetBar && !statusBar && !menus && !zoomSlider) return null;
+    const { sheetBar = true, statisticBar = true, menus = true, zoomSlider = true } = config?.footer || {};
+    if (!sheetBar && !statisticBar && !menus && !zoomSlider) return null;
 
     return (
         <section
@@ -55,7 +55,7 @@ export function RenderSheetFooter() {
             data-range-selector
         >
             {sheetBar && <SheetBar />}
-            {statusBar && <StatusBar />}
+            {statisticBar && <StatusBar />}
             {menus && footerMenus.length && (
                 <div className="univer-mr-2 univer-flex univer-gap-2">
                     {footerMenus.map((item) => item.children?.map((child) => (

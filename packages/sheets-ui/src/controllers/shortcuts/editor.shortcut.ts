@@ -150,6 +150,13 @@ export const EditorDeleteLeftShortcut: IShortcutItem = {
     binding: KeyCode.BACKSPACE,
 };
 
+export const ShiftEditorDeleteLeftShortcut: IShortcutItem = {
+    id: DeleteLeftCommand.id,
+    preconditions: (contextService) =>
+        whenEditorActivated(contextService) || whenFormulaEditorFocused(contextService),
+    binding: KeyCode.BACKSPACE | MetaKeys.SHIFT,
+};
+
 export const EditorDeleteLeftShortcutInActive: IShortcutItem = {
     id: SetCellEditVisibleOperation.id,
     description: 'shortcut.sheet.delete-and-start-editing',

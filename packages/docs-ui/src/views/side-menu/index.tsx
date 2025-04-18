@@ -17,8 +17,9 @@
 import type { DocumentDataModel, IParagraph } from '@univerjs/core';
 import type { ISideMenuItem } from '@univerjs/design';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
+import type { IUniverDocsUIConfig } from '../../controllers/config.schema';
 import type { IMutiPageParagraphBound } from '../../services/doc-event-manager.service';
-import { debounce, fromEventSubject, getPlainText, ICommandService, isInternalEditorID, IUniverInstanceService, NamedStyleType, UniverInstanceType } from '@univerjs/core';
+import { debounce, fromEventSubject, getPlainText, ICommandService, IConfigService, isInternalEditorID, IUniverInstanceService, NamedStyleType, UniverInstanceType } from '@univerjs/core';
 import { SideMenu } from '@univerjs/design';
 import { RichTextEditingMutation } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -26,6 +27,7 @@ import { useDependency, useEvent, useObservable } from '@univerjs/ui';
 import { useEffect, useMemo, useState } from 'react';
 import { of, throttleTime } from 'rxjs';
 import { VIEWPORT_KEY } from '../../basics/docs-view-key';
+import { DOCS_UI_PLUGIN_CONFIG_KEY } from '../../controllers/config.schema';
 import { DocEventManagerService } from '../../services/doc-event-manager.service';
 
 const transformNamedStyleTypeToLevel = (type: NamedStyleType) => {
@@ -77,6 +79,17 @@ function findActiveHeading(boundMap: Map<number, IMutiPageParagraphBound> | unde
 const TITLE_ID = '__title';
 
 export function DocSideMenu() {
+    const configService = useDependency(IConfigService);
+    const config = configService.getConfig<IUniverDocsUIConfig>(DOCS_UI_PLUGIN_CONFIG_KEY);
+
+    if (config?.layout?.docContainerConfig?.sideMenu ?? true) {
+        return <DocSideMenuContent />;
+    }
+
+    return null;
+}
+
+function DocSideMenuContent() {
     const commandService = useDependency(ICommandService);
     const instanceService = useDependency(IUniverInstanceService);
     const currentDoc = useObservable(useMemo(() => instanceService.getCurrentTypeOfUnit$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC), []));

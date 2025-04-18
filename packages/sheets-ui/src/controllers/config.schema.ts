@@ -38,6 +38,36 @@ export interface IUniverSheetsUIConfig {
      */
     formulaBar?: boolean;
 
+    /**
+     * The config of the footer.
+     * @default {}
+     */
+    footer?: false | {
+        /**
+         * Sheet bar is the manager of sub sheets, including add/switch/delete sub sheets.
+         * @default true
+         */
+        sheetBar?: boolean;
+        /**
+         * statistic bar including statistic info current selections, such as count, sum, average, etc.
+         * @default true
+         */
+        statisticBar?: boolean;
+        /**
+         * Including the menus in the footer. such as highlight, gridlines, etc.
+         * @default true
+         */
+        menus?: boolean;
+        /**
+         * Zoom slider is the zoom slider in the footer.
+         * @default true
+         */
+        zoomSlider?: boolean;
+    };
+
+    /**
+     * @deprecated Use `footer.statisticBar` instead.
+     */
     statusBarStatistic?: boolean;
 
     clipboardConfig?: {

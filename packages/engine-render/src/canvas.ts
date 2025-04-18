@@ -15,6 +15,7 @@
  */
 
 import type { Nullable } from '@univerjs/core';
+import type { ICanvasColorService } from './services/canvas-color.service';
 import { getDevicePixelRatio } from './basics/draw';
 import { createCanvasElement } from './basics/tools';
 import { UniverPrintingContext, UniverRenderingContext } from './context';
@@ -36,11 +37,12 @@ export enum CanvasRenderMode {
 }
 
 interface ICanvasProps {
+    colorService?: ICanvasColorService;
+    id?: string;
     width?: number;
     height?: number;
     pixelRatio?: number;
     mode?: CanvasRenderMode;
-    id?: string;
 }
 
 /**
@@ -62,8 +64,8 @@ export class Canvas {
     private _width = 0;
     private _height = 0;
 
-    constructor(props?: ICanvasProps) {
-        props = props || {};
+    constructor(_props?: ICanvasProps) {
+        const props = _props || {};
 
         this._canvasEle = createCanvasElement();
         // set inline styles
@@ -78,13 +80,12 @@ export class Canvas {
 
         this._canvasEle.dataset.uComp = 'render-canvas';
 
-        // support focus
+        // focusable
         this._canvasEle.tabIndex = 1;
         this._canvasEle.style.touchAction = 'none';
         this._canvasEle.style.outline = '0';
 
         const context = this._canvasEle.getContext('2d');
-
         if (context == null) {
             throw new Error('context is not support');
         }
@@ -92,7 +93,9 @@ export class Canvas {
         if (props.mode === CanvasRenderMode.Printing) {
             this._context = new UniverPrintingContext(context);
         } else {
-            this._context = new UniverRenderingContext(context);
+            this._context = new UniverRenderingContext(context, {
+                canvasColorService: props.colorService,
+            });
         }
 
         this.setSize(props.width, props.height, props.pixelRatio);

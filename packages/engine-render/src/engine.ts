@@ -30,6 +30,7 @@ import { PerformanceMonitor } from './basics/performance-monitor';
 import { getPointerPrefix, getSizeForDom, IsSafari, requestNewFrame } from './basics/tools';
 import { Canvas, CanvasRenderMode } from './canvas';
 import { observeClientRect } from './floating/util';
+import { ICanvasColorService } from './services/canvas-color.service';
 
 export interface IEngineOption {
     elementWidth: number;
@@ -43,6 +44,7 @@ export class Engine extends Disposable {
 
     private readonly _beginFrame$ = new Subject<number>();
     readonly beginFrame$ = this._beginFrame$.asObservable();
+
     private readonly _endFrame$ = new Subject<IBasicFrameInfo>();
     readonly endFrame$ = this._endFrame$.asObservable();
 
@@ -52,9 +54,8 @@ export class Engine extends Disposable {
     /**
      * Pass event to scene.input-manager
      */
-    onInputChanged$ = new EventSubject<IEvent>();
-
-    onTransformChange$ = new EventSubject<ITransformChangeState>();
+    readonly onInputChanged$ = new EventSubject<IEvent>();
+    readonly onTransformChange$ = new EventSubject<ITransformChangeState>();
 
     private _scenes: { [sceneKey: string]: Scene } = {};
 
@@ -83,18 +84,11 @@ export class Engine extends Disposable {
     }
 
     private _container: Nullable<HTMLElement>;
-
     private _canvas: Nullable<Canvas>;
-
     private _renderingQueueLaunched = false;
-
     private _renderFrameTasks = new Array<() => void>();
-
     private _requestNewFrameHandler: number = -1;
 
-    /**
-     * frameCount
-     */
     private _frameId: number = -1;
 
     private _usingSafari: boolean = IsSafari();
@@ -103,37 +97,23 @@ export class Engine extends Disposable {
 
     // FPS
     private _fps = 60;
-
     private _deltaTime = 0;
-
     private _performanceMonitor: PerformanceMonitor;
 
     private _pointerClickEvent!: (evt: Event) => void;
-
     private _pointerDblClickEvent!: (evt: Event) => void;
-
     private _pointerMoveEvent!: (evt: Event) => void;
-
     private _pointerDownEvent!: (evt: Event) => void;
-
     private _pointerUpEvent!: (evt: Event) => void;
-
     private _pointerOutEvent!: (evt: Event) => void;
-
     private _pointerCancelEvent!: (evt: Event) => void;
-
     private _pointerBlurEvent!: (evt: Event) => void;
-
     private _pointerWheelEvent!: (evt: Event) => void;
-
     private _pointerEnterEvent!: (evt: Event) => void;
-
     private _pointerLeaveEvent!: (evt: Event) => void;
 
     private _dragEnterEvent!: (evt: Event) => void;
-
     private _dragLeaveEvent!: (evt: Event) => void;
-
     private _dragOverEvent!: (evt: Event) => void;
 
     private _dropEvent!: (evt: Event) => void;
@@ -152,55 +132,6 @@ export class Engine extends Disposable {
     private _previousHeight = -1000;
 
     private _unitId: string = ''; // unitId
-
-    constructor();
-    constructor(unitId: string, options?: IEngineOption);
-    constructor(elemW: number, elemH: number, dpr?: number, renderMode?: CanvasRenderMode);
-    constructor(...args: any[]) {
-        super();
-        let elemWidth = 1;
-        let elemHeight = 1;
-        let pixelRatio = 1;
-        let renderMode = CanvasRenderMode.Rendering;
-
-        if (args[0] && typeof args[0] === 'string') {
-            this._unitId = args[0];
-            const options = args[1] ?? {
-                elemWidth: 1,
-                elemHeight: 1,
-                pixelRatio: 1,
-                renderMode: CanvasRenderMode.Rendering,
-            };
-            elemWidth = options.elementWidth;
-            elemHeight = options.elementHeight;
-            pixelRatio = options.pixelRatio ?? 1;
-            renderMode = options.renderMode ?? CanvasRenderMode.Rendering;
-        } else {
-            elemWidth = args[0] ?? 1;
-            elemHeight = args[1] ?? 1;
-            pixelRatio = args[2] ?? 1;
-            renderMode = args[3] ?? CanvasRenderMode.Rendering;
-        }
-
-        this._canvas = new Canvas({
-            mode: renderMode,
-            width: elemWidth,
-            height: elemHeight,
-            pixelRatio,
-        });
-        this._init();
-        this._handleKeyboardAction();
-        this._handlePointerAction();
-        this._handleDragAction();
-
-        if (renderMode !== CanvasRenderMode.Printing) {
-            this._matchMediaHandler();
-        }
-    }
-
-    _init() {
-        this._performanceMonitor = new PerformanceMonitor();
-    }
 
     get unitId(): string {
         return this._unitId;
@@ -224,6 +155,41 @@ export class Engine extends Disposable {
 
     get activeScene() {
         return this._activeScene;
+    }
+
+    constructor(
+        unitId?: string,
+        _options?: IEngineOption,
+        @ICanvasColorService readonly canvasColorService?: ICanvasColorService
+    ) {
+        super();
+
+        this._unitId = unitId ?? '';
+
+        const options = Object.assign({}, {
+            elementHeight: 1,
+            elementWidth: 1,
+            renderMode: CanvasRenderMode.Rendering,
+            dpr: 1,
+        }, _options);
+
+        this._canvas = new Canvas({
+            mode: options.renderMode,
+            width: options.elementWidth,
+            height: options.elementHeight,
+            pixelRatio: options.dpr,
+            colorService: this.canvasColorService,
+        });
+
+        this._performanceMonitor = new PerformanceMonitor();
+
+        this._handleKeyboardAction();
+        this._handlePointerAction();
+        this._handleDragAction();
+
+        if (options.renderMode !== CanvasRenderMode.Printing) {
+            this._matchMediaHandler();
+        }
     }
 
     getScenes() {

@@ -25,13 +25,15 @@ export interface IStyleSheet {
 }
 
 export class ThemeService extends Disposable {
-    private _darkMode: boolean;
     private readonly _darkMode$ = new BehaviorSubject<boolean>(false);
     readonly darkMode$: Observable<boolean> = this._darkMode$.asObservable();
 
     private _currentTheme: Nullable<IStyleSheet>;
     private readonly _currentTheme$ = new BehaviorSubject<IStyleSheet>({});
     readonly currentTheme$: Observable<IStyleSheet> = this._currentTheme$.asObservable();
+
+    private _darkMode: boolean = true;
+    get darkMode(): boolean { return this._darkMode; }
 
     constructor() {
         super();

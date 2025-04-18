@@ -239,7 +239,7 @@ export class Viewport {
         this._active = Tools.isDefine(props?.active) ? props?.active : true;
 
         this.setViewportSize(props);
-        this.initCacheCanvas(props);
+        this.initCacheCanvas(props, scene);
 
         this._isWheelPreventDefaultX = props?.isWheelPreventDefaultX || false;
         this._isWheelPreventDefaultY = props?.isWheelPreventDefaultY || false;
@@ -253,10 +253,10 @@ export class Viewport {
         this.markForceDirty(true);
     }
 
-    initCacheCanvas(props?: IViewProps) {
+    initCacheCanvas(props: IViewProps | undefined, scene: Scene) {
         this._allowCache = props?.allowCache || false;
         if (this._allowCache) {
-            this._cacheCanvas = new UniverCanvas();
+            this._cacheCanvas = new UniverCanvas({ colorService: scene.getEngine()?.canvasColorService });
             this.bufferEdgeX = props?.bufferEdgeX || 0;
             this.bufferEdgeY = props?.bufferEdgeY || 0;
         }
@@ -822,16 +822,6 @@ export class Viewport {
         }
 
         const sceneTrans = this._scene.transform.clone();
-
-        // const m = sceneTrans.getMatrix();
-
-        // const scaleFromX = this._isRelativeX ? (m[0] < 1 ? m[0] : 1) : 1;
-
-        // const scaleFromY = this._isRelativeY ? (m[3] < 1 ? m[3] : 1) : 1;
-
-        // const scaleToX = this._isRelativeX ? 1 : m[0] < 1 ? m[0] : 1;
-
-        // const scaleToY = this._isRelativeY ? 1 : m[3] < 1 ? m[3] : 1;
 
         let width = this._width;
         let height = this._height;

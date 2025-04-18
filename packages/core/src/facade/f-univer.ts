@@ -490,6 +490,7 @@ export class FUniver extends Disposable {
      * ```ts
      * const color = univerAPI.newColor();
      * ```
+     * @deprecated
      */
     newColor(): ColorBuilder {
         return new ColorBuilder();

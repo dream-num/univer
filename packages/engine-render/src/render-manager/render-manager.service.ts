@@ -106,8 +106,8 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
     private readonly _renderDependencies = new Map<UnitType, Dependency[]>();
 
     constructor(
-        @Inject(Injector) private readonly _injector: Injector,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
+        @Inject(Injector) protected readonly _injector: Injector,
+        @IUniverInstanceService protected readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();
     }
@@ -184,7 +184,7 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
      * @returns renderUnit:IRender
      */
     createRender(unitId: string): IRender {
-        const renderer = this._createRender(unitId, new Engine(unitId));
+        const renderer = this._createRender(unitId, this._injector.createInstance(Engine, unitId));
         this._renderCreated$.next(renderer);
         return renderer;
     }

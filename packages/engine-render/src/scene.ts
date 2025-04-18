@@ -45,6 +45,7 @@ export interface ISceneInputControlOptions {
     enableEnter: boolean;
     enableLeave: boolean;
 }
+
 export class Scene extends Disposable {
     private _sceneKey: string = '';
     /**
@@ -485,7 +486,10 @@ export class Scene extends Disposable {
                 return layer;
             }
         }
-        return this._createDefaultLayer(zIndex);
+
+        const defaultLayer = new Layer(this, [], zIndex);
+        this.addLayer(defaultLayer);
+        return defaultLayer;
     }
 
     findLayerByZIndex(zIndex: number = 1): Nullable<Layer> {
@@ -1231,12 +1235,6 @@ export class Scene extends Disposable {
             return false;
         }
         return true;
-    }
-
-    private _createDefaultLayer(zIndex: number = 1) {
-        const defaultLayer = new Layer(this, [], zIndex);
-        this.addLayer(defaultLayer);
-        return defaultLayer;
     }
 
     /**

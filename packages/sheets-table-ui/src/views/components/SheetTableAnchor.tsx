@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { cellToRange, ICommandService, Injector, IUniverInstanceService, LocaleService, Rectangle } from '@univerjs/core';
+import type { IUniverSheetsTableUIConfig } from '../../controllers/config.schema';
+import { cellToRange, ICommandService, IConfigService, Injector, IUniverInstanceService, LocaleService, Rectangle } from '@univerjs/core';
 import { Dropdown, Input } from '@univerjs/design';
 import { DeleteSingle, GridOutlineSingle, MoreDownSingle, PaintBucket, RenameSingle } from '@univerjs/icons';
 import { getSheetCommandTarget, SheetRangeThemeModel, SheetsSelectionsService } from '@univerjs/sheets';
@@ -23,6 +24,7 @@ import { ISidebarService, useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
 import { openRangeSelector } from '../../commands/operations/open-table-selector.operation';
 import { SHEET_TABLE_THEME_PANEL, SHEET_TABLE_THEME_PANEL_ID } from '../../const';
+import { SHEETS_TABLE_UI_PLUGIN_CONFIG_KEY } from '../../controllers/config.schema';
 import { SheetTableAnchorController } from '../../controllers/sheet-table-anchor.controller';
 import { SheetTableThemeUIController } from '../../controllers/sheet-table-theme-ui.controller';
 
@@ -45,6 +47,9 @@ export const SheetTableAnchor = () => {
     const selections = useObservable(sheetsSelectionService.selectionChanged$, [{ range: cellToRange(0, 0), primary: null }]);
 
     const [, setRefresh] = useState(Math.random());
+    const configService = useDependency(IConfigService);
+    const tableConfig = configService.getConfig<IUniverSheetsTableUIConfig>(SHEETS_TABLE_UI_PLUGIN_CONFIG_KEY);
+    const anchorHeight = tableConfig?.anchorHeight ?? 24;
 
     const updateOpenState = (tableId: string, isOpen: boolean) => {
         setOpenStates((prev) => ({
@@ -127,9 +132,14 @@ export const SheetTableAnchor = () => {
                     <div
                         key={item.tableId}
                         className={`
-                          univer-absolute univer-box-border univer-flex univer-h-[24px] univer-cursor-pointer
-                          univer-items-center univer-rounded-xl univer-border univer-border-solid univer-border-gray-500
-                          univer-pl-2 univer-pr-2 univer-shadow-xs
+                          univer-absolute univer-box-border univer-flex
+                          ${anchorHeight
+                        ? `
+                          univer-h-[${anchorHeight}px]
+                        `
+                        : 'univer-h-[24px]'}
+                          univer-cursor-pointer univer-items-center univer-rounded-xl univer-border univer-border-solid
+                          univer-border-gray-500 univer-pl-2 univer-pr-2 univer-shadow-xs
                         `}
                         style={{
                             left: item.x,

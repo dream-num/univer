@@ -155,7 +155,7 @@ export const SheetTableAnchor = () => {
                                 ? (
                                     <Input
                                         className="univer-h-[18px] univer-min-w-16 univer-rounded-none"
-                                        inputClassName="univer-h-[18px] univer-w-[80px]"
+                                        inputClass="univer-h-[18px] univer-w-[80px]"
                                         value={inputValue}
                                         onChange={(v) => setInputValue(v)}
                                         onBlur={() => handleChangeTableName(item.tableId, inputValue)}

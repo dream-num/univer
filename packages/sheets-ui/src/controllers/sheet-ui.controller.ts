@@ -119,6 +119,7 @@ import {
     EditorDeleteLeftShortcut,
     EditorDeleteLeftShortcutInActive,
     generateArrowSelectionShortCutItem,
+    ShiftEditorDeleteLeftShortcut,
     StartEditWithF2Shortcut,
 } from './shortcuts/editor.shortcut';
 import { SetColHiddenShortcutItem, SetRowHiddenShortcutItem } from './shortcuts/operation.shortcut';
@@ -341,6 +342,7 @@ export class SheetUIController extends Disposable {
             EditorDeleteLeftShortcutInActive,
             EditorCursorEscShortcut,
             EditorCursorCtrlEnterShortcut,
+            ShiftEditorDeleteLeftShortcut,
 
             // operation shortcuts
             SetRowHiddenShortcutItem,

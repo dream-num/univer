@@ -31,7 +31,7 @@ import { DocSelectionManagerService, DocSkeletonManagerService, DocStateEmitServ
 import { DocIMEInputManagerService, DocsRenderService, DocStateChangeManagerService } from '@univerjs/docs-ui';
 import enUS from '@univerjs/docs-ui/locale/en-US';
 import zhCN from '@univerjs/docs-ui/locale/zh-CN';
-import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
+import { DumbCanvasColorService, ICanvasColorService, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 
 function getTestDocumentDataDemo(): IDocumentData {
     return {
@@ -80,6 +80,7 @@ export function createTestBed(documentConfig?: IDocumentData, dependencies?: Dep
             injector.add([DocStateEmitService]);
             injector.add([DocStateChangeManagerService]);
             injector.add([DocsRenderService]);
+            injector.add([ICanvasColorService, { useClass: DumbCanvasColorService }]);
 
             dependencies?.forEach((d) => injector.add(d));
 

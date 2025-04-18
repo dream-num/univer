@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-import type { Workbook } from '@univerjs/core';
+import type { Disposable, Inject, Injector, IPermissionService, IUniverInstanceService, Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import { Disposable, Inject, Injector, IPermissionService, IUniverInstanceService } from '@univerjs/core';
 import { convertTransformToOffsetX, convertTransformToOffsetY, IRenderManagerService, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
-import { WorkbookEditablePermission } from '@univerjs/sheets';
+import { WorkbookEditablePermission, WorkbookPermissionService } from '@univerjs/sheets';
 import { TableManager } from '@univerjs/sheets-table';
 import { getSheetObject, SheetScrollManagerService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { BuiltInUIPart, connectInjector, IUIPartsService } from '@univerjs/ui';
-import { BehaviorSubject, debounceTime, merge } from 'rxjs';
+import { BehaviorSubject, debounceTime, filter, merge } from 'rxjs';
 import { SheetTableAnchor } from '../views/components/SheetTableAnchor';
 
 export interface ITableAnchorPosition {
@@ -47,6 +46,7 @@ export class SheetTableAnchorController extends Disposable implements IRenderMod
         @IUIPartsService protected readonly _uiPartsService: IUIPartsService,
         @Inject(TableManager) private readonly _tableManager: TableManager,
         @Inject(SheetScrollManagerService) private readonly _scrollManagerService: SheetScrollManagerService,
+        @Inject(WorkbookPermissionService) private readonly _workbookPermissionService: WorkbookPermissionService,
         @Inject(IPermissionService) private readonly _permissionService: IPermissionService
     ) {
         super();
@@ -71,7 +71,8 @@ export class SheetTableAnchorController extends Disposable implements IRenderMod
                 this._tableManager.tableNameChanged$,
                 this._tableManager.tableRangeChanged$,
                 this._tableManager.tableThemeChanged$,
-                this._permissionService.permissionPointUpdate$.pipe(debounceTime(100))
+                this._workbookPermissionService.unitPermissionInitStateChange$.pipe(filter((v) => v)),
+                this._permissionService.permissionPointUpdate$.pipe(debounceTime(300))
             ).subscribe(() => {
                 const workbook = this._context.unit;
                 const worksheet = workbook.getActiveSheet();

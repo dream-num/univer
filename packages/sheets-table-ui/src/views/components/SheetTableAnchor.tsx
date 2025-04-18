@@ -18,7 +18,7 @@ import type { IUniverSheetsTableUIConfig } from '../../controllers/config.schema
 import { cellToRange, ICommandService, IConfigService, Injector, IUniverInstanceService, LocaleService, Rectangle } from '@univerjs/core';
 import { Dropdown, Input } from '@univerjs/design';
 import { DeleteSingle, GridOutlineSingle, MoreDownSingle, PaintBucket, RenameSingle } from '@univerjs/icons';
-import { getSheetCommandTarget, SheetRangeThemeModel, SheetsSelectionsService } from '@univerjs/sheets';
+import { getSheetCommandTarget, SheetRangeThemeModel, SheetsSelectionsService, WorkbookPermissionService } from '@univerjs/sheets';
 import { DeleteSheetTableCommand, SetSheetTableCommand, TableManager } from '@univerjs/sheets-table';
 import { ISidebarService, useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
@@ -38,6 +38,8 @@ export const SheetTableAnchor = () => {
     const anchorPosition = useObservable(sheetTableAnchor.anchorPosition$);
     const commandService = useDependency(ICommandService);
     const univerInstanceService = useDependency(IUniverInstanceService);
+    const workbookPermissionService = useDependency(WorkbookPermissionService);
+    const workbookPermissionInitState = useObservable(workbookPermissionService.unitPermissionInitStateChange$, false);
     const tableManager = useDependency(TableManager);
     const rangeThemeModel = useDependency(SheetRangeThemeModel);
     const sheetTableThemeUIController = useDependency(SheetTableThemeUIController);
@@ -103,6 +105,10 @@ export const SheetTableAnchor = () => {
             },
         });
     };
+
+    if (!workbookPermissionInitState) {
+        return null;
+    }
 
     return (
         <div

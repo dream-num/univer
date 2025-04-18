@@ -16,12 +16,13 @@
 
 import type { Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import { Disposable, Inject, Injector, IUniverInstanceService } from '@univerjs/core';
+import { Disposable, Inject, Injector, IPermissionService, IUniverInstanceService } from '@univerjs/core';
 import { convertTransformToOffsetX, convertTransformToOffsetY, IRenderManagerService, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
+import { WorkbookEditablePermission } from '@univerjs/sheets';
 import { TableManager } from '@univerjs/sheets-table';
 import { getSheetObject, SheetScrollManagerService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { BuiltInUIPart, connectInjector, IUIPartsService } from '@univerjs/ui';
-import { BehaviorSubject, merge } from 'rxjs';
+import { BehaviorSubject, debounceTime, merge } from 'rxjs';
 import { SheetTableAnchor } from '../views/components/SheetTableAnchor';
 
 export interface ITableAnchorPosition {
@@ -45,7 +46,8 @@ export class SheetTableAnchorController extends Disposable implements IRenderMod
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IUIPartsService protected readonly _uiPartsService: IUIPartsService,
         @Inject(TableManager) private readonly _tableManager: TableManager,
-        @Inject(SheetScrollManagerService) private readonly _scrollManagerService: SheetScrollManagerService
+        @Inject(SheetScrollManagerService) private readonly _scrollManagerService: SheetScrollManagerService,
+        @Inject(IPermissionService) private readonly _permissionService: IPermissionService
     ) {
         super();
         this._initUI();
@@ -68,7 +70,8 @@ export class SheetTableAnchorController extends Disposable implements IRenderMod
                 this._tableManager.tableDelete$,
                 this._tableManager.tableNameChanged$,
                 this._tableManager.tableRangeChanged$,
-                this._tableManager.tableThemeChanged$
+                this._tableManager.tableThemeChanged$,
+                this._permissionService.permissionPointUpdate$.pipe(debounceTime(100))
             ).subscribe(() => {
                 const workbook = this._context.unit;
                 const worksheet = workbook.getActiveSheet();
@@ -78,6 +81,12 @@ export class SheetTableAnchorController extends Disposable implements IRenderMod
                 });
                 const renderUnit = this._renderManagerService.getRenderById(this._context.unitId);
                 if (!renderUnit) {
+                    this._anchorPosition$.next([]);
+                    return;
+                }
+
+                const workbookEditPermission = this._permissionService.getPermissionPoint(new WorkbookEditablePermission(workbook.getUnitId()).id)?.value;
+                if (!workbookEditPermission) {
                     this._anchorPosition$.next([]);
                     return;
                 }

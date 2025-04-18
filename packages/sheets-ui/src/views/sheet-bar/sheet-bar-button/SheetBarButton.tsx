@@ -54,8 +54,9 @@ export function SheetBarButton(props: IBaseSheetBarButtonProps) {
 
     return (
         <button
-            type="button"
+            data-u-comp="sheet-bar-append-button"
             className={styles.sheetBarBtn}
+            type="button"
             style={style}
             disabled={disabled}
             onClick={handleClick}

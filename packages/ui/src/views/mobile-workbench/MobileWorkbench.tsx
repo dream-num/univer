@@ -57,7 +57,6 @@ export function MobileWorkbench(props: IUniverAppProps) {
         if (!themeService.getCurrentTheme()) {
             themeService.setTheme(defaultTheme);
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {
@@ -100,7 +99,7 @@ export function MobileWorkbench(props: IUniverAppProps) {
               * all focusin event merged from its descendants. The DesktopLayoutService would listen to focusin events
               * bubbled to this element and refocus the input element.
               */}
-            <div className={styles.appLayout} tabIndex={-1} onBlur={(e) => e.stopPropagation()}>
+            <div data-u-comp="app-layout" className={styles.appLayout} tabIndex={-1} onBlur={(e) => e.stopPropagation()}>
                 {/* header */}
                 {header && (
                     <header className={styles.appContainerHeader} />

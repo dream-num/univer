@@ -95,7 +95,6 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
         if (!themeService.getCurrentTheme()) {
             themeService.setTheme(defaultTheme);
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {
@@ -115,7 +114,7 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
             }
         }
     }, [commandService]);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
     const resizeUnits = useCallback(debounce(() => {
         renderManagerService.getRenderAll().forEach((renderer) => renderer.engine.resize());
     }, 400), [renderManagerService]); // TODO: this is not
@@ -190,7 +189,7 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
               * bubbled to this element and refocus the input element.
               */}
             <ReactFlowProvider>
-                <div className={styles.workbenchLayout} tabIndex={-1} onBlur={(e) => e.stopPropagation()}>
+                <div data-u-comp="workbench-layout" className={styles.workbenchLayout} tabIndex={-1} onBlur={(e) => e.stopPropagation()}>
 
                     <div className={styles.flowLayer}>
                         <section
@@ -227,7 +226,7 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
                                 onPointerDown={(event) => {
                                     if (event.target instanceof HTMLElement
                                         && (
-                                            event.target.classList.contains('univer-render-canvas')
+                                            event.target.dataset.uComp === 'render-canvas'
                                             || event.target.classList.contains('react-flow__resize-control'))
                                     ) {
                                         return;

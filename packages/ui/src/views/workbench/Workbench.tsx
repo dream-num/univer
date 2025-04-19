@@ -24,7 +24,7 @@ import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { UI_PLUGIN_CONFIG_KEY } from '../../controllers/config.schema';
 import { BuiltInUIPart } from '../../services/parts/parts.service';
-import { useDependency } from '../../utils/di';
+import { useDependency, useObservable } from '../../utils/di';
 import { ComponentContainer, useComponentsOfPart } from '../components/ComponentContainer';
 import { DesktopContextMenu } from '../components/context-menu/ContextMenu';
 import { GlobalZone } from '../components/global-zone/GlobalZone';
@@ -39,6 +39,12 @@ export interface IUniverWorkbenchProps extends IWorkbenchOptions {
 }
 
 export function DesktopWorkbench(props: IUniverWorkbenchProps) {
+    const configService = useDependency(IConfigService);
+    const uiConfig = useObservable(useMemo(() => configService.subscribeConfigValue$(UI_PLUGIN_CONFIG_KEY), [configService])) as IUniverUIConfig;
+    return <DesktopWorkbenchContent {...props} {...uiConfig} />;
+}
+
+export function DesktopWorkbenchContent(props: IUniverWorkbenchProps) {
     const {
         header = true,
         toolbar = true,

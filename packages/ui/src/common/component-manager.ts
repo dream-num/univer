@@ -54,6 +54,7 @@ import {
     DownBorder,
     EuroSingle,
     ExportSingle,
+    EyeOutlineSingle,
     FolderSingle,
     FontColor,
     FontSizeIncreaseSingle,
@@ -257,6 +258,7 @@ export class ComponentManager {
             EuroSingle,
             RoubleSingle,
             DollarSingle,
+            EyeOutlineSingle,
         };
 
         for (const k in iconList) {

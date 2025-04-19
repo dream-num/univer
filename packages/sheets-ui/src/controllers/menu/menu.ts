@@ -1107,6 +1107,7 @@ export function ShowRowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: SetSelectedRowsVisibleCommand.id,
         type: MenuItemType.BUTTON,
+        icon: 'EyeOutlineSingle',
         title: 'rightClick.showHideRow',
         hidden$: deriveStateFromActiveSheet$(univerInstanceService, true, ({ worksheet }) => new Observable((subscriber) => {
             function hasHiddenRowsInSelections(): boolean {
@@ -1141,6 +1142,7 @@ export function ShowColMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: SetSelectedColsVisibleCommand.id,
         type: MenuItemType.BUTTON,
+        icon: 'EyeOutlineSingle',
         title: 'rightClick.showHideColumn',
         hidden$: deriveStateFromActiveSheet$(univerInstanceService, true, ({ worksheet }) => new Observable((subscriber) => {
             function hasHiddenColsInSelections(): boolean {

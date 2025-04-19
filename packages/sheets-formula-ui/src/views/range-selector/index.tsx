@@ -155,6 +155,8 @@ export function RangeSelectorDialog(props: IRangeSelectorDialogProps) {
             open={visible}
             title={localeService.t('rangeSelector.title')}
             draggable
+            mask={false}
+            maskClosable={false}
             footer={(
                 <footer>
                     <Button onClick={onClose}>{localeService.t('rangeSelector.cancel')}</Button>

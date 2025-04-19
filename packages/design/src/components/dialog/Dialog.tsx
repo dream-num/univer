@@ -130,7 +130,19 @@ function useDraggable(
         enabled?: boolean;
     } = {}
 ) {
-    const { defaultPosition = { x: 0, y: 0 }, enabled = false } = options;
+    const getCenteredPosition = useCallback(() => {
+        const { innerWidth, innerHeight } = window;
+
+        const defaultWidth = 0;
+        const defaultHeight = 0;
+
+        return {
+            x: Math.max(0, (innerWidth - defaultWidth) / 2),
+            y: Math.max(0, (innerHeight - defaultHeight) / 2),
+        };
+    }, []);
+
+    const { defaultPosition = getCenteredPosition(), enabled = false } = options;
 
     const [position, setPosition] = useState(defaultPosition);
     const [isDragging, setIsDragging] = useState(false);
@@ -138,19 +150,31 @@ function useDraggable(
     const elementRef = useRef<HTMLElement | null>(null);
     const startPosRef = useRef({ x: 0, y: 0 });
     const startClientRef = useRef({ x: 0, y: 0 });
+    const initializedRef = useRef(false);
 
-    // 计算边界
+    useEffect(() => {
+        if (!elementRef.current || initializedRef.current || options.defaultPosition) return;
+
+        const { width, height } = elementRef.current.getBoundingClientRect();
+        const { innerWidth, innerHeight } = window;
+
+        const centeredX = Math.max(0, (innerWidth - width) / 2);
+        const centeredY = Math.max(0, (innerHeight - height) / 2);
+
+        setPosition({ x: centeredX, y: centeredY });
+        startPosRef.current = { x: centeredX, y: centeredY };
+        initializedRef.current = true;
+    }, [options.defaultPosition]);
+
     const calculateBounds = useCallback((clientX: number, clientY: number) => {
         if (!elementRef.current) return { x: clientX, y: clientY };
 
         const rect = elementRef.current.getBoundingClientRect();
         const { clientWidth, clientHeight } = document.documentElement;
 
-        // 计算新位置
         let newX = startPosRef.current.x + (clientX - startClientRef.current.x);
         let newY = startPosRef.current.y + (clientY - startClientRef.current.y);
 
-        // 应用边界约束
         if (newX < 0) newX = 0;
         if (newY < 0) newY = 0;
         if (newX + rect.width > clientWidth) newX = clientWidth - rect.width;
@@ -205,6 +229,18 @@ function useDraggable(
         elementRef,
         setElementRef: (el: HTMLElement | null) => {
             elementRef.current = el;
+
+            if (el && !initializedRef.current && !options.defaultPosition) {
+                const { width, height } = el.getBoundingClientRect();
+                const { innerWidth, innerHeight } = window;
+
+                const centeredX = Math.max(0, (innerWidth - width) / 2);
+                const centeredY = Math.max(0, (innerHeight - height) / 2);
+
+                setPosition({ x: centeredX, y: centeredY });
+                startPosRef.current = { x: centeredX, y: centeredY };
+                initializedRef.current = true;
+            }
         },
         handleMouseDown: startDrag,
     };
@@ -222,7 +258,6 @@ export function Dialog(props: IDialogProps) {
         defaultPosition,
         destroyOnClose = false,
         footer: propFooter,
-        // onClose,
         mask = true,
         keyboard = true,
         dialogStyles,

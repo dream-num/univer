@@ -21,6 +21,7 @@ import {
     InsertColAfterCommand,
     InsertColBeforeCommand,
     InsertMultiColsLeftCommand,
+    InsertMultiColsRightCommand,
     InsertMultiRowsAboveCommand,
     InsertMultiRowsAfterCommand,
     InsertRowAfterCommand,
@@ -404,7 +405,7 @@ export function InsertMultiColsRightHeaderMenuItemFactory(accessor: IAccessor): 
     const commandService = accessor.get(ICommandService);
     const defaultValue = 1;
     return {
-        id: InsertMultiRowsAboveCommand.id,
+        id: InsertMultiColsRightCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'RightInsertColumn',
         label: {

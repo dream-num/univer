@@ -21,6 +21,7 @@ export const configSymbol = Symbol(SHEETS_TABLE_UI_PLUGIN_CONFIG_KEY);
 export interface IUniverSheetsTableUIConfig {
     anchorHeight?: number;
     anchorBackgroundColor?: string;
+    hideAnchor?: boolean;
 }
 
 export const defaultPluginConfig: IUniverSheetsTableUIConfig = {

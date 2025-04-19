@@ -185,7 +185,7 @@ export function SheetTableFilterPanel() {
 
                 </div>
             )}
-            <div>
+            <div className="univer-w-full">
                 <Segmented
                     value={filterBy}
                     items={filterByItems}

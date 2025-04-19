@@ -22,6 +22,7 @@ import { DocumentFlavor, IConfigService, IUniverInstanceService, LocaleService, 
 import { clsx, ConfigContext, ConfigProvider, defaultTheme, themeInstance } from '@univerjs/design';
 import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { useConfigValue } from '../../components/hooks';
 import { UI_PLUGIN_CONFIG_KEY } from '../../controllers/config.schema';
 import { BuiltInUIPart } from '../../services/parts/parts.service';
 import { useDependency } from '../../utils/di';
@@ -39,6 +40,11 @@ export interface IUniverWorkbenchProps extends IWorkbenchOptions {
 }
 
 export function DesktopWorkbench(props: IUniverWorkbenchProps) {
+    const uiConfig = useConfigValue<IUniverUIConfig>(UI_PLUGIN_CONFIG_KEY);
+    return <DesktopWorkbenchContent {...props} {...uiConfig} />;
+}
+
+export function DesktopWorkbenchContent(props: IUniverWorkbenchProps) {
     const {
         header = true,
         toolbar = true,

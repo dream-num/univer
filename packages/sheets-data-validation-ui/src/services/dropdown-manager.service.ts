@@ -18,7 +18,8 @@ import type { CellValue, IDisposable, Nullable, Workbook } from '@univerjs/core'
 import type { ISetRangeValuesCommandParams, ISheetLocation } from '@univerjs/sheets';
 import type { ListValidator } from '@univerjs/sheets-data-validation';
 import type { IDropdownParam, IEditorBridgeServiceVisibleParam } from '@univerjs/sheets-ui';
-import { CellValueType, DataValidationErrorStyle, DataValidationRenderMode, dayjs, Disposable, DisposableCollection, ICommandService, Inject, Injector, IUniverInstanceService, numfmt, UniverInstanceType } from '@univerjs/core';
+import type { IUniverSheetsDataValidationUIConfig } from '../controllers/config.schema';
+import { CellValueType, DataValidationErrorStyle, DataValidationRenderMode, dayjs, Disposable, DisposableCollection, ICommandService, IConfigService, Inject, Injector, IUniverInstanceService, numfmt, UniverInstanceType } from '@univerjs/core';
 import { DataValidatorDropdownType, DataValidatorRegistryService } from '@univerjs/data-validation';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { SetRangeValuesCommand, SheetsSelectionsService } from '@univerjs/sheets';
@@ -28,6 +29,7 @@ import { IEditorBridgeService, ISheetCellDropdownManagerService, SetCellEditVisi
 import { IZenZoneService, KeyCode } from '@univerjs/ui';
 import { Subject } from 'rxjs';
 import { OpenValidationPanelOperation } from '../commands/operations/data-validation.operation';
+import { SHEETS_DATA_VALIDATION_UI_PLUGIN_CONFIG_KEY } from '../controllers/config.schema';
 import { DataValidationRejectInputController } from '../controllers/dv-reject-input.controller';
 
 export interface IDataValidationDropdownParam {
@@ -98,7 +100,8 @@ export class DataValidationDropdownManagerService extends Disposable {
         @Inject(SheetDataValidationModel) private readonly _sheetDataValidationModel: SheetDataValidationModel,
         @ICommandService private readonly _commandService: ICommandService,
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
-        @Inject(Injector) private readonly _injector: Injector
+        @Inject(Injector) private readonly _injector: Injector,
+        @IConfigService private readonly _configService: IConfigService
     ) {
         super();
         this._init();
@@ -149,7 +152,7 @@ export class DataValidationDropdownManagerService extends Disposable {
         }));
     }
 
-    // eslint-disable-next-line max-lines-per-function
+    // eslint-disable-next-line max-lines-per-function, complexity
     showDropdown(param: IDataValidationDropdownParam) {
         const { location } = param;
         const { row, col, unitId, subUnitId, workbook, worksheet } = location;
@@ -355,6 +358,7 @@ export class DataValidationDropdownManagerService extends Disposable {
                         onEdit: handleEdit,
                         defaultValue: cellStr,
                         multiple,
+                        showEdit: this._configService.getConfig<IUniverSheetsDataValidationUIConfig>(SHEETS_DATA_VALIDATION_UI_PLUGIN_CONFIG_KEY)?.showEditOnDropdown ?? true,
                     },
                 };
                 break;

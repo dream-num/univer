@@ -138,11 +138,12 @@ export interface IListDropdownProps {
     onChange?: (value: string[]) => boolean | Promise<boolean>;
     options: { label: string; value: string; color?: string }[];
     defaultValue?: string;
+    showEdit?: boolean;
 }
 
 export function ListDropDown(props: { popup: IPopup<IListDropdownProps & IBaseDropdownProps> }) {
     const { popup: { extraProps } } = props;
-    const { location, hideFn, onChange, onEdit, options, defaultValue, multiple } = extraProps!;
+    const { location, hideFn, onChange, onEdit, options, defaultValue, multiple, showEdit } = extraProps!;
     const { worksheet } = location;
     const [editingText, setEditingText] = useState('');
     const commandService = useDependency(ICommandService);
@@ -192,6 +193,7 @@ export function ListDropDown(props: { popup: IPopup<IListDropdownProps & IBaseDr
             onEdit={onEdit}
             filter={editingText}
             location={location}
+            showEdit={showEdit}
         />
     );
 }

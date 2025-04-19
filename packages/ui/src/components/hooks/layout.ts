@@ -15,8 +15,10 @@
  */
 
 import type { Nullable } from '@univerjs/core';
+import { IConfigService } from '@univerjs/core';
 import { isBrowser, resizeObserverCtor } from '@univerjs/design';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
+import { useDependency, useObservable } from '../../utils/di';
 import { useEvent } from './event';
 
 /**
@@ -69,4 +71,12 @@ export function useScrollYOverContainer(element: Nullable<HTMLElement>, containe
             resizeObserver.unobserve(element);
         };
     }, [element, container]);
+}
+
+export function useConfigValue<T>(configKey: string) {
+    const configService = useDependency(IConfigService);
+    return useObservable(
+        useMemo(() => configService.subscribeConfigValue$<T>(configKey), [configService]),
+        configService.getConfig<T>(configKey)
+    );
 }

@@ -36,7 +36,7 @@ const DialogOverlay = forwardRef<
         ref={ref}
         className={clsx(
             `
-              univer-fixed univer-inset-0 univer-z-50 univer-bg-black/80
+              univer-fixed univer-inset-0 univer-z-[1050] univer-bg-black/80
               data-[state=closed]:univer-animate-out data-[state=closed]:univer-fade-out-0
               data-[state=open]:univer-animate-in data-[state=open]:univer-fade-in-0
             `,
@@ -47,57 +47,55 @@ const DialogOverlay = forwardRef<
 ));
 DialogOverlay.displayName = Overlay.displayName;
 
+interface IDialogContentProps {
+    closable?: boolean;
+    onClickClose?: () => void;
+}
 const DialogContent = forwardRef<
     ElementRef<typeof Content>,
-    ComponentPropsWithoutRef<typeof Content> & {
-        closable?: boolean;
-    }
->(({ className, children, closable = true, ...props }, ref) => {
-    return (
-        <DialogPortal>
-            <DialogOverlay />
-            <Content
-                ref={ref}
-                className={clsx(
-                    `
-                      univer-fixed univer-left-1/2 univer-top-1/2 univer-z-50 univer-box-border univer-grid
-                      univer-w-full univer-max-w-lg -univer-translate-x-1/2 -univer-translate-y-1/2 univer-gap-4
-                      univer-border univer-border-solid univer-border-gray-200 univer-bg-white univer-px-6 univer-py-4
-                      univer-text-gray-500 univer-shadow-md univer-duration-200
-                      dark:univer-border-gray-600 dark:univer-bg-gray-700 dark:univer-text-gray-400
-                      data-[state=closed]:univer-animate-out data-[state=closed]:univer-fade-out-0
-                      data-[state=closed]:univer-zoom-out-95 data-[state=closed]:univer-slide-out-to-left-1/2
-                      data-[state=closed]:univer-slide-out-to-top-[48%]
-                      data-[state=open]:univer-animate-in data-[state=open]:univer-fade-in-0
-                      data-[state=open]:univer-zoom-in-95 data-[state=open]:univer-slide-in-from-left-1/2
-                      data-[state=open]:univer-slide-in-from-top-[48%]
-                      sm:univer-rounded-lg
-                    `,
-                    className
-                )}
-                {...props}
-            >
-                {children}
-                {closable && (
-                    <Close
-                        className={`
-                          univer-absolute univer-right-4 univer-top-4 univer-rounded-sm univer-opacity-70
-                          univer-ring-offset-background univer-cursor-pointer univer-border-none univer-bg-transparent
-                          univer-p-1 univer-transition-opacity
-                          disabled:univer-pointer-events-none
-                          focus:univer-outline-none focus:univer-ring-2 focus:univer-ring-offset-2
-                          focus:univer-ring-ring
-                          hover:univer-opacity-100
-                        `}
-                    >
-                        <CloseSingle className="univer-size-4 univer-text-gray-400" />
-                        <span className="univer-sr-only">Close</span>
-                    </Close>
-                )}
-            </Content>
-        </DialogPortal>
-    );
-});
+    ComponentPropsWithoutRef<typeof Content> & IDialogContentProps
+>(({ className, children, closable = true, onClickClose, ...props }, ref) => (
+    <DialogPortal>
+        <DialogOverlay />
+        <Content
+            ref={ref}
+            className={clsx(
+                `
+                  univer-fixed univer-left-1/2 univer-top-1/2 univer-z-[1050] univer-box-border univer-grid
+                  univer-w-full univer-max-w-lg -univer-translate-x-1/2 -univer-translate-y-1/2 univer-gap-4
+                  univer-border univer-border-solid univer-border-gray-200 univer-bg-white univer-px-6 univer-py-4
+                  univer-text-gray-500 univer-shadow-md univer-duration-200
+                  dark:univer-border-gray-600 dark:univer-bg-gray-700 dark:univer-text-gray-400
+                  data-[state=closed]:univer-animate-out data-[state=closed]:univer-fade-out-0
+                  data-[state=closed]:univer-zoom-out-95 data-[state=closed]:univer-slide-out-to-left-1/2
+                  data-[state=closed]:univer-slide-out-to-top-[48%]
+                  data-[state=open]:univer-animate-in data-[state=open]:univer-fade-in-0
+                  data-[state=open]:univer-zoom-in-95 data-[state=open]:univer-slide-in-from-left-1/2
+                  data-[state=open]:univer-slide-in-from-top-[48%]
+                  sm:univer-rounded-lg
+                `,
+                className
+            )}
+            {...props}
+        >
+            {children}
+            {closable && (
+                <Close
+                    className={`
+                      univer-absolute univer-right-4 univer-top-4 univer-size-6 univer-cursor-pointer univer-rounded-sm
+                      univer-border-none univer-bg-transparent univer-p-0 univer-transition-opacity
+                      disabled:univer-pointer-events-none
+                      hover:univer-opacity-100
+                    `}
+                    onClick={onClickClose}
+                >
+                    <CloseSingle className="univer-size-4 univer-text-gray-400" />
+                    <span className="univer-sr-only">Close</span>
+                </Close>
+            )}
+        </Content>
+    </DialogPortal>
+));
 DialogContent.displayName = Content.displayName;
 
 const DialogHeader = ({
@@ -107,7 +105,7 @@ const DialogHeader = ({
     <div
         className={clsx(
             `
-              univer-flex univer-flex-col univer-space-y-1.5 univer-pb-4 univer-text-center
+              univer-flex univer-flex-col univer-space-y-1.5 univer-text-center
               sm:univer-text-left
             `,
             className

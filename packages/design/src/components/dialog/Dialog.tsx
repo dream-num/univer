@@ -16,12 +16,11 @@
 
 import type { ModalStyles } from 'rc-dialog/lib/IDialogPropTypes';
 import type { CSSProperties, MouseEvent as ReactMouseEvent, ReactNode } from 'react';
-import { CloseSingle } from '@univerjs/icons';
 import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { clsx } from '../../helper/clsx';
 import { Button } from '../button';
 import { ConfigContext } from '../config-provider/ConfigProvider';
-import { Dialog as Dialog2, DialogContent, DialogDescription, DialogHeader, DialogTitle } from './DialogPrimitive';
+import { DialogContent, DialogDescription, DialogFooter, DialogHeader, Dialog as DialogProvider, DialogTitle } from './DialogPrimitive';
 
 export interface IDialogProps {
     children: ReactNode;
@@ -35,7 +34,7 @@ export interface IDialogProps {
      * Whether the dialog is visible.
      * @default false
      */
-    visible?: boolean;
+    open?: boolean;
 
     /**
      * The width of the dialog.
@@ -54,11 +53,6 @@ export interface IDialogProps {
      * @default false
      */
     draggable?: boolean;
-
-    /**
-     * The close icon of the dialog.
-     */
-    closeIcon?: ReactNode;
 
     /**
      * The default position of the dialog.
@@ -81,11 +75,6 @@ export interface IDialogProps {
      * The footer of the dialog.
      */
     footer?: ReactNode;
-
-    /**
-     * Callback when the dialog is closed.
-     */
-    onClose?: () => void;
 
     /**
      *  Whether the dialog should show a mask.
@@ -118,6 +107,16 @@ export interface IDialogProps {
      */
     keyboard?: boolean;
 
+    /**
+     * The callback function when the open state changes.
+     */
+    onOpenChange?: (open: boolean) => void;
+
+    /**
+     * The callback function when the dialog is closed.
+     */
+    onClose?: () => void;
+
     showOk?: boolean;
     showCancel?: boolean;
 
@@ -125,7 +124,6 @@ export interface IDialogProps {
     onCancel?: () => void;
 }
 
-// 自定义拖拽钩子
 function useDraggable(
     options: {
         defaultPosition?: { x: number; y: number };
@@ -161,11 +159,9 @@ function useDraggable(
         return { x: newX, y: newY };
     }, []);
 
-    // 开始拖拽
     const startDrag = useCallback((e: ReactMouseEvent<HTMLElement> | MouseEvent) => {
         if (!enabled) return;
 
-        // 阻止默认行为和冒泡
         e.preventDefault();
         e.stopPropagation();
 
@@ -173,11 +169,9 @@ function useDraggable(
         startClientRef.current = { x: e.clientX, y: e.clientY };
         setIsDragging(true);
 
-        // 在拖拽过程中添加选择样式
         document.body.style.userSelect = 'none';
     }, [enabled, position]);
 
-    // 拖拽过程
     const onDrag = useCallback((e: MouseEvent) => {
         if (!isDragging) return;
 
@@ -188,13 +182,11 @@ function useDraggable(
         setPosition(newPosition);
     }, [isDragging, calculateBounds]);
 
-    // 结束拖拽
     const endDrag = useCallback(() => {
         setIsDragging(false);
         document.body.style.userSelect = '';
     }, []);
 
-    // 绑定全局事件
     useEffect(() => {
         if (enabled) {
             document.addEventListener('mousemove', onDrag);
@@ -223,22 +215,23 @@ export function Dialog(props: IDialogProps) {
         className,
         children,
         style,
-        visible = false,
+        open = false,
         title,
         width,
         draggable = false,
-        closeIcon = <CloseSingle />,
         defaultPosition,
         destroyOnClose = false,
         footer: propFooter,
-        onClose,
-        mask = false,
+        // onClose,
+        mask = true,
         keyboard = true,
         dialogStyles,
         closable = true,
-        maskClosable,
+        maskClosable = true,
         showOk,
         showCancel,
+        onOpenChange,
+        onClose,
         onOk,
         onCancel,
     } = props;
@@ -247,12 +240,11 @@ export function Dialog(props: IDialogProps) {
 
     const { position, isDragging, setElementRef, handleMouseDown } = useDraggable({ defaultPosition, enabled: draggable });
 
-    // 准备页脚内容
     const footer = propFooter ?? (showOk || showCancel
         ? (
             <div className="univer-flex univer-justify-end univer-gap-2">
                 {showCancel && (
-                    <Button onClick={onCancel ?? onClose}>
+                    <Button onClick={onCancel}>
                         {locale?.Confirm?.cancel ?? 'Cancel'}
                     </Button>
                 )}
@@ -271,10 +263,27 @@ export function Dialog(props: IDialogProps) {
         }
     }, [draggable, setElementRef]);
 
+    const handleOpenChange = useCallback((isOpen: boolean) => {
+        if (!maskClosable && !isOpen) {
+            return;
+        }
+
+        onOpenChange?.(isOpen);
+
+        if (!isOpen) {
+            onClose?.();
+        }
+    }, [onClose, onOpenChange]);
+
+    function handleClickClose() {
+        onOpenChange?.(false);
+        onClose?.();
+    }
+
     return (
-        <Dialog2
-            open={visible}
-            // onOpenChange={onClose}
+        <DialogProvider
+            open={open}
+            onOpenChange={handleOpenChange}
             modal={mask !== false}
         >
             <DialogContent
@@ -299,6 +308,7 @@ export function Dialog(props: IDialogProps) {
                         : {}),
                 }}
                 closable={closable}
+                onClickClose={handleClickClose}
             >
                 <DialogHeader
                     data-drag-handle={draggable ? 'true' : undefined}
@@ -317,11 +327,11 @@ export function Dialog(props: IDialogProps) {
                 {children}
 
                 {footer && (
-                    <div className="univer-p-4 univer-pt-2">
+                    <DialogFooter>
                         {footer}
-                    </div>
+                    </DialogFooter>
                 )}
             </DialogContent>
-        </Dialog2>
+        </DialogProvider>
     );
 }

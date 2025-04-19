@@ -40,6 +40,7 @@ export class DesktopDialogService extends Disposable implements IDialogService {
     override dispose(): void {
         super.dispose();
 
+        this._dialogOptions = [];
         this._dialogOptions$.complete();
     }
 
@@ -47,12 +48,12 @@ export class DesktopDialogService extends Disposable implements IDialogService {
         if (this._dialogOptions.find((item) => item.id === option.id)) {
             this._dialogOptions = this._dialogOptions.map((item) => ({
                 ...(item.id === option.id ? option : item),
-                visible: item.id === option.id ? true : item.visible,
+                open: item.id === option.id ? true : item.open,
             }));
         } else {
             this._dialogOptions.push({
                 ...option,
-                visible: true,
+                open: true,
             });
         }
 
@@ -67,7 +68,7 @@ export class DesktopDialogService extends Disposable implements IDialogService {
     close(id: string) {
         this._dialogOptions = this._dialogOptions.map((item) => ({
             ...item,
-            visible: item.id === id ? false : item.visible,
+            open: item.id === id ? false : item.open,
         }));
 
         this._dialogOptions$.next([...this._dialogOptions]);
@@ -77,7 +78,7 @@ export class DesktopDialogService extends Disposable implements IDialogService {
         const expectIdSet = new Set(expectIds);
         this._dialogOptions = this._dialogOptions.map((item) => ({
             ...item,
-            visible: expectIdSet.has(item.id) ? item.visible : false,
+            open: expectIdSet.has(item.id) ? item.open : false,
         }));
         this._dialogOptions$.next([...this._dialogOptions]);
     }

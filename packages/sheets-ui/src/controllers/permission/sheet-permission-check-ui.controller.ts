@@ -71,14 +71,20 @@ export class SheetPermissionCheckUIController extends Disposable {
     private _haveNotPermissionHandle(errorMsg: string) {
         const dialogProps = {
             id: UNIVER_SHEET_PERMISSION_ALERT_DIALOG_ID,
-            title: { title: '' },
+            title: { title: 'permission.dialog.alert' },
             children: {
                 label: UNIVER_SHEET_PERMISSION_ALERT_DIALOG,
                 errorMsg,
             },
             width: 320,
             destroyOnClose: true,
-            onClose: () => this._dialogService.close(UNIVER_SHEET_PERMISSION_ALERT_DIALOG_ID),
+            showOk: true,
+            onClose: () => {
+                this._dialogService.close(UNIVER_SHEET_PERMISSION_ALERT_DIALOG_ID);
+            },
+            onOk: () => {
+                this._dialogService.close(UNIVER_SHEET_PERMISSION_ALERT_DIALOG_ID);
+            },
             className: 'sheet-permission-user-dialog',
         };
         if (this._permissionService.getShowComponents()) {

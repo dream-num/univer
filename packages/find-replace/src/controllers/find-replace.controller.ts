@@ -131,6 +131,8 @@ export class FindReplaceController extends RxDisposable {
             title: { title: this._localeService.t('find-replace.dialog.title') },
             children: { label: 'FindReplaceDialog' },
             destroyOnClose: true,
+            mask: false,
+            maskClosable: false,
             defaultPosition: getFindReplaceDialogDefaultPosition(),
             preservePositionOnDestroy: true,
             onClose: () => this.closePanel(),

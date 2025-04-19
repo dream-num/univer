@@ -21,7 +21,7 @@ import { ICommandService, LocaleService, RichTextBuilder } from '@univerjs/core'
 import { Button, Dialog, Input, Tooltip } from '@univerjs/design';
 import { IEditorService, RichTextEditor } from '@univerjs/docs-ui';
 import { deserializeRangeWithSheet, LexerTreeBuilder, matchToken, sequenceNodeType, serializeRange, serializeRangeWithSheet } from '@univerjs/engine-formula';
-import { CloseSingle, DeleteSingle, IncreaseSingle, SelectRangeSingle } from '@univerjs/icons';
+import { DeleteSingle, IncreaseSingle, SelectRangeSingle } from '@univerjs/icons';
 import { SetSelectionsOperation } from '@univerjs/sheets';
 import { useDependency, useEvent } from '@univerjs/ui';
 import { useEffect, useRef, useState } from 'react';
@@ -68,7 +68,17 @@ export interface IRangeSelectorDialogProps {
 }
 
 export function RangeSelectorDialog(props: IRangeSelectorDialogProps) {
-    const { visible, initialValue, unitId, subUnitId, maxRangeCount = Infinity, supportAcrossSheet, onConfirm, onClose, onShowBySelection } = props;
+    const {
+        visible,
+        initialValue,
+        unitId,
+        subUnitId,
+        maxRangeCount = Infinity,
+        supportAcrossSheet,
+        onConfirm,
+        onClose,
+        onShowBySelection,
+    } = props;
     const localeService = useDependency(LocaleService);
     const lexerTreeBuilder = useDependency(LexerTreeBuilder);
     const [ranges, setRanges] = useState<string[]>([]);
@@ -142,10 +152,9 @@ export function RangeSelectorDialog(props: IRangeSelectorDialogProps) {
     return (
         <Dialog
             width="328px"
-            visible={visible}
+            open={visible}
             title={localeService.t('rangeSelector.title')}
             draggable
-            closeIcon={<CloseSingle />}
             footer={(
                 <footer>
                     <Button onClick={onClose}>{localeService.t('rangeSelector.cancel')}</Button>

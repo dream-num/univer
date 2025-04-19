@@ -15,28 +15,16 @@
  */
 
 import { LocaleService } from '@univerjs/core';
-import { Button } from '@univerjs/design';
-import { IDialogService, useDependency } from '@univerjs/ui';
-import styles from './index.module.less';
-import { UNIVER_SHEET_PERMISSION_ALERT_DIALOG_ID } from './interface';
+import { useDependency } from '@univerjs/ui';
 
 export const AlertDialog = ({ errorMsg }: { errorMsg: string }) => {
     const localeService = useDependency(LocaleService);
-    const dialogService = useDependency(IDialogService);
+
     return (
-        <div className={styles.sheetPermissionAlertDialog}>
-            <h1 className={styles.sheetPermissionAlertDialogTitle}>{localeService.t('permission.dialog.alert')}</h1>
-            <p>{errorMsg || localeService.t('permission.dialog.alertContent')}</p>
-            <div className={styles.sheetPermissionAlertDialogButton}>
-                <Button
-                    variant="primary"
-                    onClick={() => {
-                        dialogService.close(UNIVER_SHEET_PERMISSION_ALERT_DIALOG_ID);
-                    }}
-                >
-                    {localeService.t('permission.button.confirm')}
-                </Button>
-            </div>
+        <div>
+            <p className="univer-m-0">
+                {errorMsg || localeService.t('permission.dialog.alertContent')}
+            </p>
         </div>
     );
 };

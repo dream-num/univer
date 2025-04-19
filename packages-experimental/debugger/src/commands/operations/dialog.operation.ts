@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import type { IAccessor, ICommand } from '@univerjs/core';
 import { CommandType } from '@univerjs/core';
 import { IDialogService } from '@univerjs/ui';
-import type { IAccessor, ICommand } from '@univerjs/core';
 
 export interface IUIComponentCommandParams {
     value: string;
@@ -39,7 +39,12 @@ export const DialogOperation: ICommand = {
                 preservePositionOnDestroy: true,
                 width: 350,
                 onClose() {
-                    dialogService.close('draggable');
+                    // dialogService.close('draggable');
+                },
+                onOpenChange(open: boolean) {
+                    if (!open) {
+                        dialogService.close('draggable');
+                    }
                 },
             });
         } else {
@@ -50,7 +55,12 @@ export const DialogOperation: ICommand = {
                 title: { title: 'Dialog Title' },
                 draggable: false,
                 onClose() {
-                    dialogService.close('dialog1');
+                    // dialogService.close('dialog1');
+                },
+                onOpenChange(open: boolean) {
+                    if (!open) {
+                        dialogService.close('dialog1');
+                    }
                 },
             });
         }

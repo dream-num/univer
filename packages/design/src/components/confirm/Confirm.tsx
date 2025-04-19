@@ -20,7 +20,6 @@ import React, { useContext } from 'react';
 import { Button } from '../button/Button';
 import { ConfigContext } from '../config-provider/ConfigProvider';
 import { Dialog } from '../dialog/Dialog';
-import styles from './index.module.less';
 
 export interface IConfirmProps {
     children: React.ReactNode;
@@ -67,7 +66,7 @@ function Footer(props: { locale: ILocale['design']; cancelText?: string; confirm
     const { locale, cancelText, confirmText, onClose, onConfirm } = props;
 
     return (
-        <footer className={styles.confirmFooter}>
+        <footer className="univer-flex univer-items-center univer-justify-end univer-gap-2">
             <Button onClick={onClose}>{cancelText ?? locale?.Confirm.cancel}</Button>
             <Button variant="primary" onClick={onConfirm}>
                 {confirmText ?? locale?.Confirm.confirm}
@@ -83,7 +82,7 @@ export function Confirm(props: IConfirmProps) {
 
     return (
         <Dialog
-            visible={visible}
+            open={visible}
             title={title}
             footer={(
                 <Footer

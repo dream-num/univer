@@ -220,7 +220,6 @@ export class DrawingRenderService {
         const dialog = this._dialogService.open({
             width: Math.max(adjustSize.width, 200),
             id: dialogId,
-            style: { margin: '0', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' },
             children: {
                 label: {
                     name: COMPONENT_IMAGE_VIEWER,
@@ -232,7 +231,7 @@ export class DrawingRenderService {
                 },
             },
             destroyOnClose: true,
-            draggable: false,
+            closable: false,
             onClose: () => {
                 this._dialogService.close(dialogId);
                 dialog.dispose();

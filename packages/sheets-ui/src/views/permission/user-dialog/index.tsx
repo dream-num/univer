@@ -49,11 +49,11 @@ export const SheetPermissionUserDialog = () => {
     };
 
     return (
-        <div className={styles.sheetPermissionUserDialogWrapper}>
+        <div>
             <div className={styles.sheetPermissionUserDialogSearch}>
                 <Input
+                    className="univer-w-full"
                     placeholder={localeService.t('permission.dialog.search')}
-                    className={styles.sheetPermissionUserDialogSearchInput}
                     value={inputValue}
                     onChange={(v) => setInputValue(v)}
                 />
@@ -64,7 +64,11 @@ export const SheetPermissionUserDialog = () => {
                         <>
                             {searchUserList?.map((item) => {
                                 return (
-                                    <div key={item.subject?.userID} className={styles.sheetPermissionUserItem} onClick={() => handleChangeUser(item)}>
+                                    <div
+                                        key={item.subject?.userID}
+                                        className={styles.sheetPermissionUserItem}
+                                        onClick={() => handleChangeUser(item)}
+                                    >
                                         <Avatar src={item.subject?.avatar} size={24} />
                                         <div className={styles.sheetPermissionUserItemName}>{item.subject?.name}</div>
                                         {selectUserInfo?.findIndex((v) => v.subject?.userID === item.subject?.userID) !== -1 && (<div><CheckMarkSingle /></div>)}
@@ -75,16 +79,24 @@ export const SheetPermissionUserDialog = () => {
                     )
                     : (
                         <div className={styles.sheetPermissionUserListEmpty}>
-                            <img width={240} height={120} src={UserEmptyBase64} alt="" />
-                            <p className={styles.sheetPermissionUserListEmptyText}>{localeService.t('permission.dialog.userEmpty')}</p>
+                            <img
+                                className="univer-w-full"
+                                src={UserEmptyBase64}
+                                alt="empty list"
+                                draggable={false}
+                            />
+                            <p className="univer-text-[13px] univer-text-gray-400">
+                                {localeService.t('permission.dialog.userEmpty')}
+                            </p>
                         </div>
                     )}
             </div>
             <div className={styles.sheetPermissionSplit} />
-            <div className={styles.sheetPermissionUserDialogFooter}>
-
-                <Button className={styles.sheetPermissionUserDialogButton} onClick={() => dialogService.close(UNIVER_SHEET_PERMISSION_USER_DIALOG_ID)}>
-
+            <div className="univer-flex univer-items-center univer-justify-end univer-gap-1 univer-py-1">
+                <Button
+                    className={styles.sheetPermissionUserDialogButton}
+                    onClick={() => dialogService.close(UNIVER_SHEET_PERMISSION_USER_DIALOG_ID)}
+                >
                     {localeService.t('permission.button.cancel')}
                 </Button>
                 <Button

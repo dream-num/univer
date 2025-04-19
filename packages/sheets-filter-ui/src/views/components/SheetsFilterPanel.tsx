@@ -97,7 +97,7 @@ export function FilterPanel() {
                 <Button variant="link" onClick={onClearCriteria} disabled={clearFilterDisabled}>
                     {localeService.t('sheets-filter.panel.clear-filter')}
                 </Button>
-                <span className={styles.sheetsFilterPanelFooterPrimaryButtons}>
+                <span className="univer-space-x-2">
                     <Button variant="default" onClick={onCancel}>
                         {localeService.t('sheets-filter.panel.cancel')}
                     </Button>

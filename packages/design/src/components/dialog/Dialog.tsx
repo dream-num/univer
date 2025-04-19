@@ -311,6 +311,9 @@ export function Dialog(props: IDialogProps) {
                 onClickClose={handleClickClose}
             >
                 <DialogHeader
+                    className={clsx({
+                        '!univer-hidden': !title,
+                    })}
                     data-drag-handle={draggable ? 'true' : undefined}
                     style={{
                         cursor: draggable ? 'grab' : undefined,
@@ -321,7 +324,7 @@ export function Dialog(props: IDialogProps) {
                     onMouseDown={draggable ? handleMouseDown : undefined}
                 >
                     <DialogTitle>{title}</DialogTitle>
-                    <DialogDescription />
+                    <DialogDescription className="univer-hidden" />
                 </DialogHeader>
 
                 {children}

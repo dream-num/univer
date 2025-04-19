@@ -185,15 +185,15 @@ export function SheetTableFilterPanel() {
 
                 </div>
             )}
-            <div className="univer-table-filter-panel-header">
+            <div>
                 <Segmented
                     value={filterBy}
                     items={filterByItems}
                     onChange={(value) => setFilterBy(value as FilterByEnum)}
                 />
             </div>
-            <div className="univer-table-filter-panel-body univer-z-10 univer-h-60">
-                <div className="univer-table-filter-panel-body-content univer-mt-3">
+            <div className="univer-z-10 univer-h-60 univer-w-[280px]">
+                <div className="univer-mt-3 univer-h-full univer-w-full">
                     {filterBy === FilterByEnum.Items
                         ? (
                             <SheetTableItemsFilterPanel

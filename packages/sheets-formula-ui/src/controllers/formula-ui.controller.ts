@@ -19,7 +19,7 @@ import { Disposable, ICommandService, Inject, Injector, UniverInstanceType } fro
 import { IRenderManagerService } from '@univerjs/engine-render';
 
 import { SheetsUIPart } from '@univerjs/sheets-ui';
-import { BuiltInUIPart, ComponentManager, connectInjector, IMenuManagerService, IShortcutService, IUIPartsService } from '@univerjs/ui';
+import { ComponentManager, connectInjector, IMenuManagerService, IShortcutService, IUIPartsService } from '@univerjs/ui';
 import { SheetOnlyPasteFormulaCommand } from '../commands/commands/formula-clipboard.command';
 import { SelectEditorFormulaOperation } from '../commands/operations/editor-formula.operation';
 import { HelpFunctionOperation } from '../commands/operations/help-function.operation';
@@ -28,7 +28,6 @@ import { MoreFunctionsOperation } from '../commands/operations/more-functions.op
 import { ReferenceAbsoluteOperation } from '../commands/operations/reference-absolute.operation';
 import { SearchFunctionOperation } from '../commands/operations/search-function.operation';
 import { FormulaProgressBar } from '../views/formula-progress/FormulaProgress';
-import { RenderFormulaPromptContent } from '../views/FormulaPromptContainer';
 import { MORE_FUNCTIONS_COMPONENT } from '../views/more-functions/interface';
 import { MoreFunctions } from '../views/more-functions/MoreFunctions';
 import { FormulaEditorShowController } from './formula-editor-show.controller';
@@ -95,7 +94,6 @@ export class FormulaUIController extends Disposable {
     }
 
     private _registerComponents(): void {
-        this.disposeWithMe(this._uiPartsService.registerComponent(BuiltInUIPart.CONTENT, () => connectInjector(RenderFormulaPromptContent, this._injector)));
         this.disposeWithMe(this._uiPartsService.registerComponent(SheetsUIPart.FORMULA_AUX, () => connectInjector(FormulaProgressBar, this._injector)));
 
         this._componentManager.register(MORE_FUNCTIONS_COMPONENT, MoreFunctions);

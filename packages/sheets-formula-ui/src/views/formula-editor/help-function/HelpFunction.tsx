@@ -25,7 +25,6 @@ import { generateParam } from '../../../services/utils';
 import { useEditorPosition } from '../hooks/use-editor-position';
 import { useFormulaDescribe } from '../hooks/use-formula-describe';
 import { HelpHiddenTip } from './HelpHiddenTip';
-import styles from './index.module.less';
 
 interface IParamsProps {
     className?: string;
@@ -34,16 +33,22 @@ interface IParamsProps {
 }
 
 const Params = ({ className, title, value }: IParamsProps) => (
-    <div className={styles.formulaHelpFunctionContentParams}>
+    <div className="univer-my-2">
         <div
             className={`
-              ${styles.formulaHelpFunctionContentParamsTitle}
+              univer-mb-2 univer-text-sm univer-font-medium univer-text-gray-900
               ${className}
             `}
         >
             {title}
         </div>
-        <div className={styles.formulaHelpFunctionContentParamsDetail}>{value}</div>
+        <div
+            className={`
+              univer-whitespace-pre-wrap univer-break-words univer-text-xs univer-font-normal univer-text-gray-500
+            `}
+        >
+            {value}
+        </div>
     </div>
 );
 
@@ -57,16 +62,16 @@ interface IHelpProps {
 const Help = (props: IHelpProps) => {
     const { prefix, value, active, onClick } = props;
     return (
-        <div className={styles.formulaHelpParam}>
-            <span className={styles.formulaHelpParamPrefix}>
+        <div className="univer-z-1">
+            <span className="univer-z-1">
                 {prefix}
                 (
             </span>
             {value &&
                 value.map((item: IFunctionParam, i: number) => (
-                    <span key={item.name} className={styles.formulaHelpParamItem}>
+                    <span key={item.name} className="univer-z-1">
                         <span
-                            className={active === i ? styles.formulaHelpFunctionActive : styles.formulaHelpParamActive}
+                            className={active === i ? 'univer-text-primary-500' : 'univer-z-1'}
                             onClick={() => onClick(i)}
                         >
                             {generateParam(item)}
@@ -122,24 +127,48 @@ export function HelpFunction(props: IHelpFunctionProps) {
             )
             : (
                 <RectPopup key="show" portal onClickOutside={() => reset()} anchorRect$={position$} direction="vertical">
-                    <div className={styles.formulaHelpFunction}>
-                        <div className={styles.formulaHelpFunctionTitle}>
+                    <div
+                        className={`
+                          univer-m-0 univer-box-border univer-w-[250px] univer-select-none univer-list-none
+                          univer-rounded-lg univer-border univer-border-solid univer-border-gray-200 univer-bg-white
+                          univer-leading-5 univer-shadow-md univer-outline-none
+                        `}
+                    >
+                        <div
+                            className={`
+                              univer-box-border univer-flex univer-items-center univer-justify-between univer-border-x-0
+                              univer-border-b univer-border-t-0 univer-border-solid univer-border-gray-200 univer-px-4
+                              univer-py-3 univer-text-xs univer-font-medium univer-text-gray-900 univer-wrap-anywhere
+                            `}
+                        >
                             <Help
                                 prefix={functionInfo.functionName}
                                 value={functionInfo.functionParameter}
                                 active={paramIndex}
                                 onClick={handleSwitchActive}
                             />
-                            <div className={styles.formulaHelpFunctionTitleIcons}>
+                            <div className="univer-flex">
                                 <div
-                                    className={styles.formulaHelpFunctionTitleIcon}
+                                    className={`
+                                      univer-ml-2 univer-flex univer-h-6 univer-w-6 univer-cursor-pointer
+                                      univer-items-center univer-justify-center univer-rounded univer-border-0
+                                      univer-bg-transparent univer-p-0 univer-text-xs univer-text-gray-500
+                                      univer-outline-none univer-transition-colors
+                                      hover:univer-bg-gray-200
+                                    `}
                                     style={{ transform: contentVisible ? 'rotateZ(-90deg)' : 'rotateZ(90deg)' }}
                                     onClick={() => setContentVisible(!contentVisible)}
                                 >
                                     <MoreSingle />
                                 </div>
                                 <div
-                                    className={styles.formulaHelpFunctionTitleIcon}
+                                    className={`
+                                      univer-ml-2 univer-flex univer-h-6 univer-w-6 univer-cursor-pointer
+                                      univer-items-center univer-justify-center univer-rounded univer-border-0
+                                      univer-bg-transparent univer-p-0 univer-text-xs univer-text-gray-600
+                                      univer-outline-none univer-transition-colors
+                                      hover:univer-bg-gray-300
+                                    `}
                                     onClick={onClose}
                                 >
                                     <CloseSingle />
@@ -147,13 +176,16 @@ export function HelpFunction(props: IHelpFunctionProps) {
                             </div>
                         </div>
                         <div
-                            className={styles.formulaHelpFunctionContent}
+                            className={`
+                              univer-box-border univer-max-h-[350px] univer-overflow-y-auto univer-px-4 univer-pb-3
+                              univer-pt-0
+                            `}
                             style={{
                                 height: contentVisible ? 'unset' : 0,
                                 padding: contentVisible ? 'revert-layer' : 0,
                             }}
                         >
-                            <div className={styles.formulaHelpFunctionContentInner}>
+                            <div className="univer-mt-3">
                                 <Params
                                     title={localeService.t('formula.prompt.helpExample')}
                                     value={`${functionInfo.functionName}(${functionInfo.functionParameter
@@ -169,7 +201,7 @@ export function HelpFunction(props: IHelpFunctionProps) {
                                     functionInfo.functionParameter.map((item: IFunctionParam, i: number) => (
                                         <Params
                                             key={i}
-                                            className={paramIndex === i ? styles.formulaHelpFunctionActive : ''}
+                                            className={paramIndex === i ? 'univer-text-primary-500' : ''}
                                             title={item.name}
                                             value={`${item.require ? required : optional} ${item.detail}`}
                                         />

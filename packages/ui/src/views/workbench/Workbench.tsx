@@ -40,7 +40,10 @@ export interface IUniverWorkbenchProps extends IWorkbenchOptions {
 
 export function DesktopWorkbench(props: IUniverWorkbenchProps) {
     const configService = useDependency(IConfigService);
-    const uiConfig = useObservable(useMemo(() => configService.subscribeConfigValue$(UI_PLUGIN_CONFIG_KEY), [configService])) as IUniverUIConfig;
+    const uiConfig = useObservable(
+        useMemo(() => configService.subscribeConfigValue$(UI_PLUGIN_CONFIG_KEY), [configService]),
+        configService.getConfig(UI_PLUGIN_CONFIG_KEY)!
+    ) as IUniverUIConfig;
     return <DesktopWorkbenchContent {...props} {...uiConfig} />;
 }
 

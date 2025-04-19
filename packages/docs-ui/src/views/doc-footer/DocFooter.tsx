@@ -16,15 +16,14 @@
 
 import type { Workbook } from '@univerjs/core';
 import type { IUniverDocsUIConfig } from '../../controllers/config.schema';
-import { IConfigService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { useDependency, useObservable } from '@univerjs/ui';
+import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { useConfigValue, useDependency, useObservable } from '@univerjs/ui';
 import { DOCS_UI_PLUGIN_CONFIG_KEY } from '../../controllers/config.schema';
 import { CountBar } from '../count-bar';
 
 export function DocFooter() {
     const univerInstanceService = useDependency(IUniverInstanceService);
-    const configService = useDependency(IConfigService);
-    const config = configService.getConfig<IUniverDocsUIConfig>(DOCS_UI_PLUGIN_CONFIG_KEY);
+    const config = useConfigValue<IUniverDocsUIConfig>(DOCS_UI_PLUGIN_CONFIG_KEY);
     const workbook = useObservable(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET), undefined, undefined, []);
     const isShow = config?.layout?.docContainerConfig?.footer ?? true;
 

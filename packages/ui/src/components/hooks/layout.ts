@@ -15,9 +15,9 @@
  */
 
 import type { Nullable } from '@univerjs/core';
+import { IConfigService } from '@univerjs/core';
 import { isBrowser, resizeObserverCtor } from '@univerjs/design';
 import { useEffect, useMemo } from 'react';
-import { IConfigService } from '../../../../core/lib/types';
 import { useDependency, useObservable } from '../../utils/di';
 import { useEvent } from './event';
 

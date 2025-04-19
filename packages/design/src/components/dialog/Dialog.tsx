@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { ModalStyles } from 'rc-dialog/lib/IDialogPropTypes';
 import type { CSSProperties, MouseEvent as ReactMouseEvent, ReactNode } from 'react';
 import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { clsx } from '../../helper/clsx';
@@ -85,11 +84,6 @@ export interface IDialogProps {
      * additional className for dialog
      */
     className?: string;
-
-    /**
-     * The style of the customize.
-     */
-    dialogStyles?: ModalStyles;
 
     /**
      * whether show close button
@@ -260,7 +254,6 @@ export function Dialog(props: IDialogProps) {
         footer: propFooter,
         mask = true,
         keyboard = true,
-        dialogStyles,
         closable = true,
         maskClosable = true,
         showOk,
@@ -329,7 +322,6 @@ export function Dialog(props: IDialogProps) {
                 style={{
                     ...style,
                     width: width ? (typeof width === 'number' ? `${width}px` : width) : undefined,
-                    ...dialogStyles?.content,
                     ...(draggable
                         ? {
                             position: 'absolute',
@@ -354,7 +346,6 @@ export function Dialog(props: IDialogProps) {
                         cursor: draggable ? 'grab' : undefined,
                         userSelect: draggable ? 'none' : undefined,
                         touchAction: draggable ? 'none' : undefined,
-                        ...dialogStyles?.header,
                     }}
                     onMouseDown={draggable ? handleMouseDown : undefined}
                 >

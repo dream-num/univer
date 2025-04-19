@@ -138,7 +138,11 @@ function createNewInstance() {
 
     // If we are running in e2e platform, we should immediately register the debugger plugin.
     if (IS_E2E) {
-        univer.registerPlugin(UniverDebuggerPlugin);
+        univer.registerPlugin(UniverDebuggerPlugin, {
+            performanceMonitor: {
+                enabled: false,
+            },
+        });
     }
 
     const injector = univer.__getInjector();

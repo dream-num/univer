@@ -14,30 +14,26 @@
  * limitations under the License.
  */
 
-import type { ModalStyles } from 'rc-dialog/lib/IDialogPropTypes';
-import type { DraggableData, DraggableEvent, DraggableEventHandler } from 'react-draggable';
-import { CloseSingle } from '@univerjs/icons';
-import RcDialog from 'rc-dialog';
-import React, { useContext, useRef, useState } from 'react';
-
-import Draggable from 'react-draggable';
+import type { CSSProperties, MouseEvent as ReactMouseEvent, ReactNode } from 'react';
+import { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { clsx } from '../../helper/clsx';
 import { Button } from '../button';
 import { ConfigContext } from '../config-provider/ConfigProvider';
-import styles from './index.module.less';
+import { DialogContent, DialogDescription, DialogFooter, DialogHeader, Dialog as DialogProvider, DialogTitle } from './DialogPrimitive';
 
 export interface IDialogProps {
-    children: React.ReactNode;
+    children: ReactNode;
 
     /**
      * The style of the dialog.
      */
-    style?: React.CSSProperties;
+    style?: CSSProperties;
 
     /**
      * Whether the dialog is visible.
      * @default false
      */
-    visible?: boolean;
+    open?: boolean;
 
     /**
      * The width of the dialog.
@@ -47,7 +43,7 @@ export interface IDialogProps {
     /**
      * The title of the dialog.
      */
-    title?: React.ReactNode;
+    title?: ReactNode;
 
     /**
      * Whether the dialog can be dragged. If a dialog is draggable, the backdrop would be hidden and
@@ -56,11 +52,6 @@ export interface IDialogProps {
      * @default false
      */
     draggable?: boolean;
-
-    /**
-     * The close icon of the dialog.
-     */
-    closeIcon?: React.ReactNode;
 
     /**
      * The default position of the dialog.
@@ -82,12 +73,7 @@ export interface IDialogProps {
     /**
      * The footer of the dialog.
      */
-    footer?: React.ReactNode;
-
-    /**
-     * Callback when the dialog is closed.
-     */
-    onClose?: () => void;
+    footer?: ReactNode;
 
     /**
      *  Whether the dialog should show a mask.
@@ -98,11 +84,6 @@ export interface IDialogProps {
      * additional className for dialog
      */
     className?: string;
-
-    /**
-     * The style of the customize.
-     */
-    dialogStyles?: ModalStyles;
 
     /**
      * whether show close button
@@ -120,6 +101,16 @@ export interface IDialogProps {
      */
     keyboard?: boolean;
 
+    /**
+     * The callback function when the open state changes.
+     */
+    onOpenChange?: (open: boolean) => void;
+
+    /**
+     * The callback function when the dialog is closed.
+     */
+    onClose?: () => void;
+
     showOk?: boolean;
     showCancel?: boolean;
 
@@ -127,143 +118,249 @@ export interface IDialogProps {
     onCancel?: () => void;
 }
 
+function useDraggable(
+    options: {
+        defaultPosition?: { x: number; y: number };
+        enabled?: boolean;
+    } = {}
+) {
+    const getCenteredPosition = useCallback(() => {
+        const { innerWidth, innerHeight } = window;
+
+        const defaultWidth = 0;
+        const defaultHeight = 0;
+
+        return {
+            x: Math.max(0, (innerWidth - defaultWidth) / 2),
+            y: Math.max(0, (innerHeight - defaultHeight) / 2),
+        };
+    }, []);
+
+    const { defaultPosition = getCenteredPosition(), enabled = false } = options;
+
+    const [position, setPosition] = useState(defaultPosition);
+    const [isDragging, setIsDragging] = useState(false);
+
+    const elementRef = useRef<HTMLElement | null>(null);
+    const startPosRef = useRef({ x: 0, y: 0 });
+    const startClientRef = useRef({ x: 0, y: 0 });
+    const initializedRef = useRef(false);
+
+    useEffect(() => {
+        if (!elementRef.current || initializedRef.current || options.defaultPosition) return;
+
+        const { width, height } = elementRef.current.getBoundingClientRect();
+        const { innerWidth, innerHeight } = window;
+
+        const centeredX = Math.max(0, (innerWidth - width) / 2);
+        const centeredY = Math.max(0, (innerHeight - height) / 2);
+
+        setPosition({ x: centeredX, y: centeredY });
+        startPosRef.current = { x: centeredX, y: centeredY };
+        initializedRef.current = true;
+    }, [options.defaultPosition]);
+
+    const calculateBounds = useCallback((clientX: number, clientY: number) => {
+        if (!elementRef.current) return { x: clientX, y: clientY };
+
+        const rect = elementRef.current.getBoundingClientRect();
+        const { clientWidth, clientHeight } = document.documentElement;
+
+        let newX = startPosRef.current.x + (clientX - startClientRef.current.x);
+        let newY = startPosRef.current.y + (clientY - startClientRef.current.y);
+
+        if (newX < 0) newX = 0;
+        if (newY < 0) newY = 0;
+        if (newX + rect.width > clientWidth) newX = clientWidth - rect.width;
+        if (newY + rect.height > clientHeight) newY = clientHeight - rect.height;
+
+        return { x: newX, y: newY };
+    }, []);
+
+    const startDrag = useCallback((e: ReactMouseEvent<HTMLElement> | MouseEvent) => {
+        if (!enabled) return;
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        startPosRef.current = { ...position };
+        startClientRef.current = { x: e.clientX, y: e.clientY };
+        setIsDragging(true);
+
+        document.body.style.userSelect = 'none';
+    }, [enabled, position]);
+
+    const onDrag = useCallback((e: MouseEvent) => {
+        if (!isDragging) return;
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        const newPosition = calculateBounds(e.clientX, e.clientY);
+        setPosition(newPosition);
+    }, [isDragging, calculateBounds]);
+
+    const endDrag = useCallback(() => {
+        setIsDragging(false);
+        document.body.style.userSelect = '';
+    }, []);
+
+    useEffect(() => {
+        if (enabled) {
+            document.addEventListener('mousemove', onDrag);
+            document.addEventListener('mouseup', endDrag);
+
+            return () => {
+                document.removeEventListener('mousemove', onDrag);
+                document.removeEventListener('mouseup', endDrag);
+            };
+        }
+    }, [enabled, onDrag, endDrag]);
+
+    return {
+        position,
+        isDragging,
+        elementRef,
+        setElementRef: (el: HTMLElement | null) => {
+            elementRef.current = el;
+
+            if (el && !initializedRef.current && !options.defaultPosition) {
+                const { width, height } = el.getBoundingClientRect();
+                const { innerWidth, innerHeight } = window;
+
+                const centeredX = Math.max(0, (innerWidth - width) / 2);
+                const centeredY = Math.max(0, (innerHeight - height) / 2);
+
+                setPosition({ x: centeredX, y: centeredY });
+                startPosRef.current = { x: centeredX, y: centeredY };
+                initializedRef.current = true;
+            }
+        },
+        handleMouseDown: startDrag,
+    };
+}
+
 export function Dialog(props: IDialogProps) {
     const {
         className,
         children,
         style,
-        visible = false,
+        open = false,
         title,
         width,
         draggable = false,
-        closeIcon = <CloseSingle />,
         defaultPosition,
         destroyOnClose = false,
-        preservePositionOnDestroy = false,
         footer: propFooter,
-        onClose,
-        mask,
+        mask = true,
         keyboard = true,
-        dialogStyles,
-        closable,
-        maskClosable,
+        closable = true,
+        maskClosable = true,
         showOk,
         showCancel,
+        onOpenChange,
+        onClose,
         onOk,
         onCancel,
     } = props;
+
     const { locale } = useContext(ConfigContext);
-    const [dragDisabled, setDragDisabled] = useState(false);
-    const [positionOffset, setPositionOffset] = useState<{ x: number; y: number } | null>(null);
 
-    const { mountContainer } = useContext(ConfigContext);
-    const TitleIfDraggable = draggable
-        ? (
-            <div
-                className={styles.dialogTitleContent}
-                style={{
-                    width: '100%',
-                    cursor: 'pointer',
-                    ...dialogStyles?.header,
-                }}
-                onMouseOver={() => {
-                    if (dragDisabled) {
-                        setDragDisabled(false);
-                    }
-                }}
-                onMouseOut={() => {
-                    setDragDisabled(true);
-                }}
-                onFocus={() => {
-                    // empty
-                }}
-                onBlur={() => {
-                    // empty
-                }}
-            >
-                {title}
-            </div>
-        )
-        : (
-            <div className={styles.dialogTitleContent}>{title}</div>
-        );
+    const { position, isDragging, setElementRef, handleMouseDown } = useDraggable({ defaultPosition, enabled: draggable });
 
-    const footer = propFooter ?? (showCancel || showOk
+    const footer = propFooter ?? (showOk || showCancel
         ? (
-            <div>
-                <Button className="univer-mr-2" onClick={onCancel ?? onClose}>{locale?.Confirm?.cancel ?? 'Cancel'}</Button>
-                <Button variant="primary" onClick={onOk}>{locale?.Confirm?.confirm ?? 'Ok'}</Button>
+            <div className="univer-flex univer-justify-end univer-gap-2">
+                {showCancel && (
+                    <Button onClick={onCancel}>
+                        {locale?.Confirm?.cancel ?? 'Cancel'}
+                    </Button>
+                )}
+                {showOk && (
+                    <Button variant="primary" onClick={onOk}>
+                        {locale?.Confirm?.confirm ?? 'OK'}
+                    </Button>
+                )}
             </div>
         )
         : null);
 
-    const modalRender = (modal: React.ReactNode) => {
-        const [bounds, setBounds] = useState({ left: 0, top: 0, bottom: 0, right: 0 });
-        const draggleRef = useRef<HTMLDivElement>(null!);
+    const handleContentRef = useCallback((node: HTMLDivElement | null) => {
+        if (node && draggable) {
+            setElementRef(node);
+        }
+    }, [draggable, setElementRef]);
 
-        function handleStop(_event: MouseEvent, data: DraggableData) {
-            if (preservePositionOnDestroy) {
-                setPositionOffset({ x: data.x, y: data.y });
-            }
+    const handleOpenChange = useCallback((isOpen: boolean) => {
+        if (!maskClosable && !isOpen) {
+            return;
         }
 
-        const position = positionOffset || defaultPosition || { x: 0, y: 0 };
+        onOpenChange?.(isOpen);
 
-        const onStart = (_event: DraggableEvent, uiData: DraggableData) => {
-            const { clientWidth, clientHeight } = window.document.documentElement;
-            const targetRect = draggleRef.current?.getBoundingClientRect();
-            if (!targetRect) {
-                return;
-            }
+        if (!isOpen) {
+            onClose?.();
+        }
+    }, [onClose, onOpenChange]);
 
-            setBounds({
-                left: -targetRect.left + uiData.x,
-                right: clientWidth - (targetRect.right - uiData.x),
-                top: -targetRect.top + uiData.y,
-                bottom: clientHeight - (targetRect.bottom - uiData.y),
-            });
-        };
+    function handleClickClose() {
+        onOpenChange?.(false);
+        onClose?.();
+    }
 
-        return draggable
-            ? (
-                <Draggable
-                    disabled={dragDisabled}
-                    defaultPosition={position}
-                    bounds={bounds}
-                    nodeRef={draggleRef}
-                    onStart={(event, uiData) => onStart(event, uiData)}
-                    onStop={handleStop as DraggableEventHandler}
-                >
-                    <div ref={draggleRef}>{modal}</div>
-                </Draggable>
-            )
-            : modal;
-    };
-
-    const needMask = mask ?? !draggable;
-
-    return mountContainer && (
-        <RcDialog
-            className={className}
-            width={width}
-            prefixCls={styles.dialog}
-            rootClassName={!needMask ? styles.dialogRootDraggable : styles.dialogRoot}
-            getContainer={() => mountContainer}
-            visible={visible}
-            title={TitleIfDraggable}
-            modalRender={modalRender}
-            closeIcon={closeIcon}
-            destroyOnClose={destroyOnClose}
-            footer={footer}
-            mask={needMask}
-            style={style}
-            onClose={onClose}
-            styles={dialogStyles}
-            closable={closable}
-            maskClosable={maskClosable}
-            keyboard={keyboard}
+    return (
+        <DialogProvider
+            open={open}
+            onOpenChange={handleOpenChange}
+            modal={mask !== false}
         >
-            {children}
-        </RcDialog>
+            <DialogContent
+                ref={handleContentRef}
+                className={clsx(className, {
+                    '!univer-animate-none': draggable,
+                })}
+                style={{
+                    ...style,
+                    width: width ? (typeof width === 'number' ? `${width}px` : width) : undefined,
+                    ...(draggable
+                        ? {
+                            position: 'absolute',
+                            margin: 0,
+                            left: 0,
+                            top: 0,
+                            transform: `translate(${position.x}px, ${position.y}px)`,
+                            transition: isDragging ? 'none' : undefined,
+                            cursor: isDragging ? 'grabbing' : undefined,
+                        }
+                        : {}),
+                }}
+                closable={closable}
+                onClickClose={handleClickClose}
+            >
+                <DialogHeader
+                    className={clsx({
+                        '!univer-hidden': !title,
+                    })}
+                    data-drag-handle={draggable ? 'true' : undefined}
+                    style={{
+                        cursor: draggable ? 'grab' : undefined,
+                        userSelect: draggable ? 'none' : undefined,
+                        touchAction: draggable ? 'none' : undefined,
+                    }}
+                    onMouseDown={draggable ? handleMouseDown : undefined}
+                >
+                    <DialogTitle>{title}</DialogTitle>
+                    <DialogDescription className="univer-hidden" />
+                </DialogHeader>
+
+                {children}
+
+                {footer && (
+                    <DialogFooter>
+                        {footer}
+                    </DialogFooter>
+                )}
+            </DialogContent>
+        </DialogProvider>
     );
 }

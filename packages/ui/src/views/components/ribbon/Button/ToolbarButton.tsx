@@ -92,10 +92,11 @@ export function ToolbarButton(props: IBaseToolbarButtonProps) {
               univer-outline-none univer-transition-colors univer-animate-in univer-fade-in
               [&:disabled]:univer-cursor-not-allowed [&:disabled]:univer-text-gray-200
               [&:disabled]:hover:univer-bg-transparent
+              dark:univer-text-white dark:hover:univer-bg-gray-700
               hover:univer-bg-gray-100
             `, {
                 'univer-p-4': noIcon,
-                '!univer-bg-gray-200': active,
+                'univer-bg-gray-200 dark:univer-bg-gray-500': active,
                 'univer-text-gray-100': disabled,
             })}
             style={style}

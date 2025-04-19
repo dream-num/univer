@@ -48,6 +48,7 @@ function PopoverContent({
                       univer-rounded-md univer-border univer-border-solid univer-border-gray-200 univer-bg-white
                       univer-text-gray-900 univer-shadow-md univer-outline-hidden univer-scrollbar-thin
                       univer-scrollbar-track-gray-50 univer-scrollbar-thumb-gray-300
+                      dark:univer-bg-gray-900
                       data-[side=bottom]:univer-slide-in-from-top-2
                       data-[side=left]:univer-slide-in-from-right-2
                       data-[side=right]:univer-slide-in-from-left-2

@@ -29,8 +29,12 @@ export const ImageViewer: React.FC<IImageViewerProps> = (props: IImageViewerProp
     }
 
     return (
-        <div>
-            <img src={src} alt="Univer Image Viewer" style={{ width: '100%', height: '100%', position: 'relative' }} />
+        <div className="univer-py-2">
+            <img
+                className="univer-relative univer-block univer-size-full"
+                src={src}
+                alt="Univer Image Viewer"
+            />
         </div>
     );
 };

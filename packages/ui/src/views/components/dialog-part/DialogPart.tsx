@@ -17,7 +17,7 @@
 import type { IDialogProps } from '@univerjs/design';
 import type { IDialogPartMethodOptions } from './interface';
 import { Dialog } from '@univerjs/design';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { CustomLabel } from '../../../components/custom-label/CustomLabel';
 import { IDialogService } from '../../../services/dialog/dialog.service';
 import { useDependency } from '../../../utils/di';
@@ -34,13 +34,13 @@ export function DialogPart() {
         });
 
         return () => subscription.unsubscribe();
-    }, [dialogService]);
+    }, []);
 
-    const attrs = dialogOptions.map((options) => {
-        const { children, title, closeIcon, footer, ...restProps } = options;
+    const attrs = useMemo(() => dialogOptions.map((options) => {
+        const { children, title, footer, ...restProps } = options;
 
         const dialogProps = restProps as IDialogProps & { id: string };
-        for (const key of ['children', 'title', 'closeIcon', 'footer']) {
+        for (const key of ['children', 'title', 'footer']) {
             const k = key as keyof IDialogPartMethodOptions;
             const props = options[k] as any;
 
@@ -50,7 +50,9 @@ export function DialogPart() {
         }
 
         return dialogProps;
-    });
+    }), [dialogOptions]);
 
-    return <>{attrs?.map((options) => <Dialog key={options.id} {...options} />)}</>;
+    return attrs?.map((options) => (
+        <Dialog key={options.id} {...options} />
+    ));
 }

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { Dependency } from '@univerjs/core';
 import type { IUniverDebuggerConfig } from './controllers/config.schema';
 import { IConfigService, Inject, Injector, merge, Plugin, registerDependencies, touchDependencies } from '@univerjs/core';
 import { DEBUGGER_PLUGIN_CONFIG_KEY, defaultPluginConfig } from './controllers/config.schema';
@@ -49,14 +50,17 @@ export class UniverDebuggerPlugin extends Plugin {
     }
 
     override onStarting(): void {
-        registerDependencies(this._injector, [
-            [PerformanceMonitorController],
+        const dependencies: Dependency[] = [
             [DarkModeController],
             [DebuggerController],
             [MultiUnitsController],
             [E2EController],
             [UniverWatermarkMenuController],
-        ]);
+        ];
+        if (this._config.performanceMonitor?.enabled !== false) {
+            dependencies.push([PerformanceMonitorController]);
+        }
+        registerDependencies(this._injector, dependencies);
 
         touchDependencies(this._injector, [
             [E2EController],

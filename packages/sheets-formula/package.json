@@ -87,7 +87,7 @@
         "@univerjs/docs": "workspace:*",
         "rxjs": "^7.8.1",
         "typescript": "^5.8.3",
-        "vite": "^6.3.0",
+        "vite": "^6.3.2",
         "vitest": "^3.1.1"
     }
 }

@@ -55,7 +55,7 @@ const FIND_REPLACE_DIALOG_ID = 'DESKTOP_FIND_REPLACE_DIALOG';
 
 const FIND_REPLACE_PANEL_WIDTH = 350;
 const FIND_REPLACE_PANEL_RIGHT_PADDING = 20;
-const FIND_REPLACE_PANEL_TOP_PADDING = -90;
+const FIND_REPLACE_PANEL_TOP_PADDING = 64;
 
 export class FindReplaceController extends RxDisposable {
     constructor(
@@ -131,6 +131,8 @@ export class FindReplaceController extends RxDisposable {
             title: { title: this._localeService.t('find-replace.dialog.title') },
             children: { label: 'FindReplaceDialog' },
             destroyOnClose: true,
+            mask: false,
+            maskClosable: false,
             defaultPosition: getFindReplaceDialogDefaultPosition(),
             preservePositionOnDestroy: true,
             onClose: () => this.closePanel(),
@@ -161,7 +163,7 @@ export class FindReplaceController extends RxDisposable {
 
 function getFindReplaceDialogDefaultPosition(): { x: number; y: number } {
     const { innerWidth } = window;
-    const x = (innerWidth - FIND_REPLACE_PANEL_WIDTH) / 2 - FIND_REPLACE_PANEL_RIGHT_PADDING;
+    const x = (innerWidth - FIND_REPLACE_PANEL_WIDTH) - FIND_REPLACE_PANEL_RIGHT_PADDING;
     const y = FIND_REPLACE_PANEL_TOP_PADDING;
 
     return { x, y };

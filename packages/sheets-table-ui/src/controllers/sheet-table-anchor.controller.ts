@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import type { Disposable, Inject, Injector, IPermissionService, IUniverInstanceService, Workbook } from '@univerjs/core';
+import type { Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import { Disposable, Inject, Injector, IPermissionService, IUniverInstanceService } from '@univerjs/core';
 import { convertTransformToOffsetX, convertTransformToOffsetY, IRenderManagerService, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 import { WorkbookEditablePermission, WorkbookPermissionService } from '@univerjs/sheets';
 import { TableManager } from '@univerjs/sheets-table';

@@ -17,9 +17,10 @@
 import type { ISortRangeCommandParams } from '@univerjs/sheets-sort';
 import type { ITableConditionFilterItem, ITableManualFilterItem } from '@univerjs/sheets-table';
 import type { IConditionInfo } from './type';
-import { ICommandService, LocaleService } from '@univerjs/core';
+import { ICommandService, IPermissionService, LocaleService } from '@univerjs/core';
 import { Button, Segmented } from '@univerjs/design';
 import { AscendingSingle, DescendingSingle } from '@univerjs/icons';
+import { WorkbookEditablePermission } from '@univerjs/sheets';
 import { SortRangeCommand, SortType } from '@univerjs/sheets-sort';
 import { SheetsTableSortStateEnum, TableColumnFilterTypeEnum, TableDateCompareTypeEnum, TableManager } from '@univerjs/sheets-table';
 import { useDependency } from '@univerjs/ui';
@@ -37,6 +38,7 @@ export function SheetTableFilterPanel() {
     const tableUiService = useDependency(SheetsTableUiService);
     const tableManager = useDependency(TableManager);
     const commandService = useDependency(ICommandService);
+    const permissionService = useDependency(IPermissionService);
     const sheetsTableComponentController = useDependency(SheetsTableComponentController);
 
     const tableFilterPanelInfo = sheetsTableComponentController.getCurrentTableFilterInfo()!;
@@ -138,6 +140,9 @@ export function SheetTableFilterPanel() {
         closeDialog();
     };
 
+    const workbookEditableId = new WorkbookEditablePermission(unitId).id;
+    const editable = permissionService.getPermissionPoint(workbookEditableId)?.value;
+
     return (
         <div
             className={`
@@ -145,39 +150,41 @@ export function SheetTableFilterPanel() {
               univer-p-4 univer-shadow-lg
             `}
         >
-            <div className="univer-mb-3 univer-flex">
-                <div
-                    className={`
-                      univer-flex univer-w-[140px] univer-flex-1 univer-cursor-default univer-items-center
-                      univer-justify-center univer-gap-1 univer-rounded-l-md univer-border univer-border-solid
-                      univer-border-gray-200 univer-py-1.5 univer-text-[13px] univer-font-normal
-                      hover:univer-cursor-pointer hover:univer-bg-gray-100
-                      ${isAsc
-            ? 'univer-bg-gray-100'
-            : ''}
-                    `}
-                    onClick={() => applySort(true)}
-                >
-                    <AscendingSingle className="univer-text-base univer-text-color-[#1e222b] univer-mr-1" />
-                    {localeService.t('sheets-sort.general.sort-asc')}
-                </div>
-                <div
-                    className={`
-                      univer-flex univer-w-[140px] univer-flex-1 univer-cursor-default univer-items-center
-                      univer-justify-center univer-gap-1 univer-rounded-r-md univer-border univer-border-solid
-                      univer-border-gray-200 univer-py-1.5 univer-text-[13px] univer-font-normal
-                      hover:univer-cursor-pointer hover:univer-bg-gray-100
-                      ${isDesc
-            ? 'univer-bg-gray-100'
-            : ''}
-                    `}
-                    onClick={() => applySort(false)}
-                >
-                    <DescendingSingle className="univer-text-base univer-text-color-[#1e222b] univer-mr-1" />
-                    {localeService.t('sheets-sort.general.sort-desc')}
-                </div>
+            {editable && (
+                <div className="univer-mb-3 univer-flex">
+                    <div
+                        className={`
+                          univer-flex univer-w-[140px] univer-flex-1 univer-cursor-default univer-items-center
+                          univer-justify-center univer-gap-1 univer-rounded-l-md univer-border univer-border-solid
+                          univer-border-gray-200 univer-py-1.5 univer-text-[13px] univer-font-normal
+                          hover:univer-cursor-pointer hover:univer-bg-gray-100
+                          ${isAsc
+                    ? 'univer-bg-gray-100'
+                    : ''}
+                        `}
+                        onClick={() => applySort(true)}
+                    >
+                        <AscendingSingle className="univer-text-base univer-text-color-[#1e222b] univer-mr-1" />
+                        {localeService.t('sheets-sort.general.sort-asc')}
+                    </div>
+                    <div
+                        className={`
+                          univer-flex univer-w-[140px] univer-flex-1 univer-cursor-default univer-items-center
+                          univer-justify-center univer-gap-1 univer-rounded-r-md univer-border univer-border-solid
+                          univer-border-gray-200 univer-py-1.5 univer-text-[13px] univer-font-normal
+                          hover:univer-cursor-pointer hover:univer-bg-gray-100
+                          ${isDesc
+                    ? 'univer-bg-gray-100'
+                    : ''}
+                        `}
+                        onClick={() => applySort(false)}
+                    >
+                        <DescendingSingle className="univer-text-base univer-text-color-[#1e222b] univer-mr-1" />
+                        {localeService.t('sheets-sort.general.sort-desc')}
+                    </div>
 
-            </div>
+                </div>
+            )}
             <div className="univer-table-filter-panel-header">
                 <Segmented
                     value={filterBy}

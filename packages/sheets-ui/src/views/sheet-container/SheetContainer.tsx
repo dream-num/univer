@@ -16,8 +16,8 @@
 
 import type { Workbook } from '@univerjs/core';
 import type { IUniverSheetsUIConfig } from '../../controllers/config.schema';
-import { IConfigService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { ContextMenuPosition, IMenuManagerService, ToolbarItem, useDependency, useObservable } from '@univerjs/ui';
+import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { ContextMenuPosition, IMenuManagerService, ToolbarItem, useConfigValue, useDependency, useObservable } from '@univerjs/ui';
 import { useMemo } from 'react';
 import { useActiveWorkbook } from '../../components/hook';
 import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../controllers/config.schema';
@@ -31,8 +31,7 @@ import { StatusBar } from '../status-bar/StatusBar';
 export const SHEET_FOOTER_BAR_HEIGHT = 36;
 
 export function RenderSheetFooter() {
-    const configService = useDependency(IConfigService);
-    const config = configService.getConfig<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY);
+    const config = useConfigValue<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY);
     const menuManagerService = useDependency(IMenuManagerService);
     const showFooter = config?.footer ?? true;
     const workbook = useActiveWorkbook();
@@ -74,8 +73,7 @@ export function RenderSheetFooter() {
 }
 
 export function RenderSheetHeader() {
-    const configService = useDependency(IConfigService);
-    const config = configService.getConfig<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY);
+    const config = useConfigValue<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY);
     const hasWorkbook = useHasWorkbook();
     if (!hasWorkbook) return null;
 

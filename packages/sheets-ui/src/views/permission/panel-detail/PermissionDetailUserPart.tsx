@@ -27,7 +27,7 @@ import { SheetPermissionUserManagerService } from '../../../services/permission/
 import { UserEmptyBase64 } from '../user-dialog/constant';
 import styles from './index.module.less';
 
-interface IPermissionDetailUserPartProps {
+export interface IPermissionDetailUserPartProps {
     editState: EditStateEnum;
     onEditStateChange: (v: EditStateEnum) => void;
     viewState: ViewStateEnum;

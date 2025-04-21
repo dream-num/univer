@@ -3,7 +3,7 @@
     "type": "module",
     "version": "0.6.10",
     "private": true,
-    "packageManager": "pnpm@10.6.1",
+    "packageManager": "pnpm@10.8.0",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",
     "license": "Apache-2.0",
     "funding": {
@@ -40,7 +40,6 @@
         "serve:e2e": "serve ./examples/local",
         "test:e2e": "playwright test",
         "lint": "eslint .",
-        "lint:fix": "eslint . --fix",
         "storybook:dev": "pnpm --filter @univerjs/storybook dev:storybook",
         "storybook:build": "pnpm --filter @univerjs/storybook build:storybook",
         "release": "release-it"
@@ -60,7 +59,7 @@
         "@types/react-dom": "^19.1.2",
         "@univerjs-infra/shared": "workspace:*",
         "@univerjs/design": "workspace:*",
-        "@vitejs/plugin-react": "^4.4.0",
+        "@vitejs/plugin-react": "^4.4.1",
         "eslint": "9.25.0",
         "eslint-plugin-format": "^1.0.1",
         "eslint-plugin-header": "^3.1.1",

@@ -236,7 +236,7 @@ export class ShortcutService extends Disposable implements IShortcutService {
         const body = KeyCodeToChar[binding & 0xFF] ?? '<->';
 
         if (this._platformService.isMac) {
-            return `${ctrlKey ? '⌘' : ''}${shiftKey ? '⇧' : ''}${altKey ? '⌥' : ''}${macCtrl ? '⌃' : ''}${body}`;
+            return `${ctrlKey ? '⌘+' : ''}${shiftKey ? '⇧+' : ''}${altKey ? '⌥+' : ''}${macCtrl ? '⌃+' : ''}${body}`;
         }
         return `${ctrlKey ? 'Ctrl+' : ''}${shiftKey ? 'Shift+' : ''}${altKey ? 'Alt+' : ''}${body}`;
     }

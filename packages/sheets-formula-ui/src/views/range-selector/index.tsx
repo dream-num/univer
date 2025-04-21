@@ -18,7 +18,7 @@ import type { IUnitRangeName, Nullable } from '@univerjs/core';
 import type { Editor, IRichTextEditorProps } from '@univerjs/docs-ui';
 import type { ISelectionWithStyle, ISetSelectionsOperationParams } from '@univerjs/sheets';
 import { ICommandService, LocaleService, RichTextBuilder } from '@univerjs/core';
-import { Button, Dialog, Input, Tooltip } from '@univerjs/design';
+import { Button, clsx, Dialog, Input, Tooltip } from '@univerjs/design';
 import { IEditorService, RichTextEditor } from '@univerjs/docs-ui';
 import { deserializeRangeWithSheet, LexerTreeBuilder, matchToken, sequenceNodeType, serializeRange, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { DeleteSingle, IncreaseSingle, SelectRangeSingle } from '@univerjs/icons';
@@ -180,7 +180,7 @@ export function RangeSelectorDialog(props: IRangeSelectorDialogProps) {
             )}
             onClose={onClose}
         >
-            <div ref={scrollbarRef} className={styles.sheetRangeSelectorDialog}>
+            <div ref={scrollbarRef} className={clsx(styles.sheetRangeSelectorDialog, '-univer-mx-6 univer-px-6')}>
                 {ranges.map((text, index) => (
                     <div key={index} className={styles.sheetRangeSelectorDialogItem}>
                         <Input

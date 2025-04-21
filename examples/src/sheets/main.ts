@@ -108,7 +108,9 @@ function createNewInstance() {
 
     univer.registerPlugin(UniverDocsPlugin);
     univer.registerPlugin(UniverRenderEnginePlugin);
-    univer.registerPlugin(UniverUIPlugin, { container: 'app' });
+    univer.registerPlugin(UniverUIPlugin, {
+        container: 'app',
+    });
     univer.registerPlugin(UniverDocsUIPlugin);
     univer.registerPlugin(UniverDocsDrawingUIPlugin);
     univer.registerPlugin(UniverDocsMentionUIPlugin);

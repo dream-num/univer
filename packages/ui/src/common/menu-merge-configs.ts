@@ -20,9 +20,6 @@ import { BehaviorSubject, Observable, switchMap } from 'rxjs';
 export function mergeMenuConfigs<T = MenuConfig>(baseConfig: T, additionalConfig: MenuItemConfig | null): T {
     if (!additionalConfig || !baseConfig) return baseConfig;
 
-    // Destructure additionalConfig with default values
-    const { hidden, disabled, activated } = additionalConfig;
-
     // Update properties directly if they exist in additionalConfig
     const properties: (keyof MenuItemConfig)[] = ['type', 'icon', 'title', 'tooltip'];
     properties.forEach((prop) => {

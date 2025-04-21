@@ -94,7 +94,7 @@ export interface IUniverSheetsUIConfig {
         /**
          * The framework of the component. Must be passed correctly.
          */
-        framework?: 'react' | 'vue3';
+        framework: 'react' | 'vue3';
     };
 
 }

@@ -56,7 +56,14 @@ export { type IUniverSheetsConfig } from './controllers/config.schema';
 export { MAX_CELL_PER_SHEET_KEY } from './controllers/config/config';
 export { BorderStyleManagerService, type IBorderInfo } from './services/border-style-manager.service';
 export { SheetRangeThemeService } from './services/range-theme-service';
+export { SheetRangeThemeModel } from './model/range-theme-model';
 export type { IRangeThemeStyleJSON } from './model/range-theme-util';
+export { AddRangeThemeMutation } from './commands/mutations/add-range-theme.mutation';
+export type { IAddRangeThemeMutationParams } from './commands/mutations/add-range-theme.mutation';
+export { SetRangeThemeMutation } from './commands/mutations/set-range-theme.mutation';
+export type { ISetRangeThemeMutationParams } from './commands/mutations/set-range-theme.mutation';
+export { RemoveRangeThemeMutation } from './commands/mutations/remove-range-theme.mutation';
+export type { IRemoveRangeThemeMutationParams } from './commands/mutations/remove-range-theme.mutation';
 export * from './services/permission/permission-point';
 export { WorksheetPermissionService } from './services/permission/worksheet-permission/worksheet-permission.service';
 export { WorkbookPermissionService } from './services/permission/workbook-permission/workbook-permission.service';
@@ -191,6 +198,7 @@ export { handleInsertRangeMutation } from './commands/utils/handle-range-mutatio
 export { type ISheetCommandSharedParams } from './commands/utils/interface';
 export { copyRangeStyles } from './commands/commands/utils/selection-utils';
 export { RangeThemeStyle } from './model/range-theme-util';
+export type { IRangeThemeStyleItem } from './model/range-theme-util';
 
 // #region - all commands
 

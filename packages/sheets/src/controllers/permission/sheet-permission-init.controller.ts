@@ -157,7 +157,7 @@ export class SheetPermissionInitController extends Disposable {
         if (!unitId) {
             return;
         }
-        this._authzIoService.allowed({
+        return this._authzIoService.allowed({
             objectID: unitId,
             objectType: UnitObject.Workbook,
             unitID: unitId,

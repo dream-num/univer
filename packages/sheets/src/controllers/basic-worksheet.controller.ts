@@ -162,6 +162,9 @@ import { SelectRangeCommand, SetSelectionsOperation } from '../commands/operatio
 import { SetWorksheetActiveOperation } from '../commands/operations/set-worksheet-active.operation';
 import { ONLY_REGISTER_FORMULA_RELATED_MUTATIONS_KEY } from './config';
 import { MAX_CELL_PER_SHEET_DEFAULT, MAX_CELL_PER_SHEET_KEY } from './config/config';
+import { SetRangeThemeMutation } from '../commands/mutations/set-range-theme.mutation';
+import { RemoveRangeThemeMutation } from '../commands/mutations/remove-range-theme.mutation';
+import { AddRangeThemeMutation } from '../commands/mutations/add-range-theme.mutation';
 
 export interface IStyleTypeValue<T> {
     type: keyof IStyleData;
@@ -345,6 +348,10 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
                 RegisterWorksheetRangeThemeStyleCommand,
                 SetWorksheetRangeThemeStyleCommand,
                 DeleteWorksheetRangeThemeStyleCommand,
+
+                AddRangeThemeMutation,
+                SetRangeThemeMutation,
+                RemoveRangeThemeMutation,
 
             ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
         }

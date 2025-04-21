@@ -28,10 +28,10 @@ import {
     AddWorksheetMergeVerticalCommand,
 } from '../../commands/commands/add-worksheet-merge.command';
 import { getSheetSelectionsDisabled$ } from '../utils/selections-tools';
-import { getCurrentRangeDisable$ } from './menu-util';
+import { getCurrentRangeDisable$, getObservableWithExclusiveRange$ } from './menu-util';
 
 export function CellMergeMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
-    const editDisabled$ = getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetSetCellValuePermission, WorksheetSetCellStylePermission], rangeTypes: [RangeProtectionPermissionEditPoint] });
+    const editDisabled$ = getObservableWithExclusiveRange$(accessor, getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetSetCellValuePermission, WorksheetSetCellStylePermission], rangeTypes: [RangeProtectionPermissionEditPoint] }));
     const selectionsHasCross$ = getSheetSelectionsDisabled$(accessor);
 
     return {

@@ -17,10 +17,11 @@
 import type { ICellDataForSheetInterceptor, IRange, Nullable } from '@univerjs/core';
 import type { IRangeThemeStyleItem, IRangeThemeStyleJSON } from './range-theme-util';
 import { Disposable, generateRandomId, Inject, InterceptorEffectEnum, IResourceManagerService, RTree, UniverInstanceType } from '@univerjs/core';
+import { Subject } from 'rxjs';
 import { INTERCEPTOR_POINT, RangeThemeInterceptorId } from '../services/sheet-interceptor/interceptor-const';
 import { SheetInterceptorService } from '../services/sheet-interceptor/sheet-interceptor.service';
-import { RangeThemeStyle } from './range-theme-util';
 
+import { RangeThemeStyle } from './range-theme-util';
 import { buildInThemes } from './range-themes/build-in-theme.factory';
 import { defaultRangeThemeStyle, defaultRangeThemeStyleJSONWithLastRowStyle } from './range-themes/default';
 
@@ -47,6 +48,10 @@ export class SheetRangeThemeModel extends Disposable {
     private _rangeThemeStyleRuleMap: Map<string, Map<string, IRangeThemeStyleRule>> = new Map();
     private _rTreeCollection: Map<string, RTree> = new Map();
     private _defaultRangeThemeMap: Map<string, RangeThemeStyle> = new Map();
+
+    private _rangeThemeMapChanged$ = new Subject<{ type: 'add' | 'remove'; styleName: string }>();
+    public rangeThemeMapChange$ = this._rangeThemeMapChanged$.asObservable();
+
     constructor(
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
         @Inject(IResourceManagerService) private _resourceManagerService: IResourceManagerService
@@ -90,6 +95,10 @@ export class SheetRangeThemeModel extends Disposable {
         return this._defaultRangeThemeMap.get(name)!;
     }
 
+    public getCustomRangeThemeStyle(unitId: string, name: string): RangeThemeStyle | undefined {
+        return this._ensureRangeThemeStyleMap(unitId).get(name);
+    }
+
     /**
      * Register range theme styles
      * @param {string} themeName
@@ -122,18 +131,25 @@ export class SheetRangeThemeModel extends Disposable {
         const { unitId, subUnitId, range } = rangeInfo;
         const rTreeCollection = this._ensureRTreeCollection(unitId);
         const themes = Array.from(rTreeCollection.bulkSearch([{ unitId, sheetId: subUnitId, range }]));
-        if (themes[0]) {
-            const themeRuleMap = this._ensureRangeThemeStyleRuleMap(unitId);
-            const themeRule = themeRuleMap.get(themes[0] as string);
+        const themeRuleMap = this._ensureRangeThemeStyleRuleMap(unitId);
+        for (let i = 0; i < themes.length; i++) {
+            const themeRule = themeRuleMap.get(themes[i] as string);
             if (themeRule && themeRule.themeName === themeName) {
-                themeRuleMap.delete(themes[0] as string);
-                rTreeCollection.remove({ unitId, sheetId: subUnitId, range, id: themes[0] as string });
+                themeRuleMap.delete(themes[i] as string);
+                rTreeCollection.remove({ unitId, sheetId: subUnitId, range, id: themes[i] as string });
+                break;
             }
         }
     }
 
     registerDefaultRangeTheme(rangeThemeStyle: RangeThemeStyle): void {
         this._defaultRangeThemeMap.set(rangeThemeStyle.getName(), rangeThemeStyle);
+        this._rangeThemeMapChanged$.next({ type: 'add', styleName: rangeThemeStyle.getName() });
+    }
+
+    unRegisterDefaultRangeTheme(themeName: string): void {
+        this._defaultRangeThemeMap.delete(themeName);
+        this._rangeThemeMapChanged$.next({ type: 'remove', styleName: themeName });
     }
 
     getRegisteredRangeThemes(): string[] {
@@ -147,6 +163,7 @@ export class SheetRangeThemeModel extends Disposable {
      */
     registerRangeThemeStyle(unitId: string, rangeThemeStyle: RangeThemeStyle): void {
         this._ensureRangeThemeStyleMap(unitId).set(rangeThemeStyle.getName(), rangeThemeStyle);
+        this._rangeThemeMapChanged$.next({ type: 'add', styleName: rangeThemeStyle.getName() });
     }
 
     /**
@@ -156,14 +173,16 @@ export class SheetRangeThemeModel extends Disposable {
      */
     unregisterRangeThemeStyle(unitId: string, name: string): void {
         this._ensureRangeThemeStyleMap(unitId).delete(name);
+        this._rangeThemeMapChanged$.next({ type: 'remove', styleName: name });
     }
 
     /**
      * Gets all custom register themes
+     * @param {string} unitId Which unit to register the range theme style.
      * @return {string[]} The array of all custom registered themes.
      */
-    getALLRegisteredTheme(): string[] {
-        return Array.from(this._rangeThemeStyleMap.keys());
+    getALLRegisteredTheme(unitId: string): string[] {
+        return Array.from(this._ensureRangeThemeStyleMap(unitId).keys());
     }
 
     getRangeThemeStyle(unitId: string, name: string): RangeThemeStyle {
@@ -185,7 +204,9 @@ export class SheetRangeThemeModel extends Disposable {
                 const offsetRow = row - rangeInfo.range.startRow;
                 const offsetCol = col - rangeInfo.range.startColumn;
                 const theme = this.getRangeThemeStyle(unitId, themeName);
-                return theme.getStyle(offsetRow, offsetCol, row === rangeInfo.range.endRow, col === rangeInfo.range.endColumn);
+                if (theme) {
+                    return theme.getStyle(offsetRow, offsetCol, row === rangeInfo.range.endRow, col === rangeInfo.range.endColumn);
+                }
             }
         }
         return undefined;
@@ -240,15 +261,17 @@ export class SheetRangeThemeModel extends Disposable {
     fromJSON(unitId: string, json: ISheetRangeThemeModelJSON) {
         const { rangeThemeStyleRuleMap: rangeThemeStyleRuleMapJSON, rangeThemeStyleMapJson } = json;
 
-        if (rangeThemeStyleRuleMapJSON) {
-            Object.keys(rangeThemeStyleRuleMapJSON).forEach((key) => {
-                const ruleMap = rangeThemeStyleRuleMapJSON[key];
-                const { themeName, rangeInfo } = ruleMap;
+        Object.keys(rangeThemeStyleRuleMapJSON).forEach((key) => {
+            const ruleMap = rangeThemeStyleRuleMapJSON[key];
+            const { themeName, rangeInfo } = ruleMap;
+            // TODO Due to design issues, we will skip table-related theme registration.
+            // Here the table needs to have its own rangeTheme to be independent
+            if (!themeName.startsWith('table')) {
                 this.registerRangeThemeRule(themeName, rangeInfo);
                 const rTreeCollection = this._ensureRTreeCollection(rangeInfo.unitId);
                 rTreeCollection.insert({ unitId: key, sheetId: rangeInfo.subUnitId, range: rangeInfo.range, id: key });
-            });
-        }
+            }
+        });
 
         if (rangeThemeStyleMapJson) {
             Object.keys(rangeThemeStyleMapJson).forEach((key) => {

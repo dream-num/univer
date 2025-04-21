@@ -41,10 +41,11 @@ export class SheetRangeThemeService extends Disposable {
 
     /**
      * Get custom register themes name list
+     * @param {string} unitId Which unit to register the range theme style.
      * @returns {string[]} The list of custom register themes name.
      */
-    getALLRegisterThemes(): string[] {
-        return this._sheetRangeThemeModel.getALLRegisteredTheme();
+    getALLRegisterThemes(unitId: string): string[] {
+        return this._sheetRangeThemeModel.getALLRegisteredTheme(unitId);
     }
 
     /**

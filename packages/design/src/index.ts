@@ -55,4 +55,3 @@ export { DropdownMenu, type IDropdownProps } from './components/dropdown-menu';
 export { Separator } from './components/separator';
 export { DateRangePicker } from './components/date-range-picker';
 export { type IKBDProps, KBD } from './components/kbd';
-export * from './components/side-menu';

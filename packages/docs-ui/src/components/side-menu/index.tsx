@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import { clsx } from '@univerjs/design';
 import { CatalogueSingle, LeftSingle } from '@univerjs/icons';
 import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef } from 'react';
-import { clsx } from '../../helper/clsx';
 
 export interface ISideMenuItem {
     text: string;

@@ -54,6 +54,11 @@ export const InputSize = {
 
 export const InputDisabled = {
     render() {
-        return <Input disabled />;
+        return (
+            <>
+                <Input disabled />
+                <Input value="disabled content" disabled />
+            </>
+        );
     },
 };

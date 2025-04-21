@@ -26,6 +26,7 @@ export const inputVariants = cva(
     `
       univer-box-border univer-w-full univer-rounded-md univer-border univer-border-solid univer-border-gray-200
       univer-bg-white univer-transition-colors univer-duration-200
+      dark:univer-bg-gray-700 dark:univer-border-gray-600 dark:univer-text-white
       focus:univer-border-primary-500 focus:univer-outline-none focus:univer-ring-2 focus:univer-ring-primary-500/20
       placeholder:univer-text-gray-400
     `,
@@ -93,7 +94,7 @@ export const Input = forwardRef<HTMLInputElement, IInputProps>(
             <div
                 className={clsx(
                     'univer-relative univer-inline-flex univer-w-full univer-items-center univer-rounded-md',
-                    disabled && 'univer-cursor-not-allowed univer-opacity-50',
+                    disabled && 'univer-cursor-not-allowed',
                     className
                 )}
                 style={style}
@@ -103,7 +104,10 @@ export const Input = forwardRef<HTMLInputElement, IInputProps>(
                     type={type}
                     className={clsx(
                         inputVariants({ size }),
-                        disabled && 'univer-cursor-not-allowed univer-bg-gray-50',
+                        disabled && `
+                          univer-cursor-not-allowed univer-text-gray-400 univer-bg-gray-50
+                          dark:univer-text-gray-500
+                        `,
                         allowClear && 'univer-pr-8',
                         inputClass
                     )}

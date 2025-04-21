@@ -2866,8 +2866,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.2.21
-        version: 0.2.35(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+        specifier: ^0.3.2
+        version: 0.3.2(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -5661,12 +5661,6 @@ packages:
 
   '@univerjs/icons-svg@0.3.2':
     resolution: {integrity: sha512-MCEcqWvsqjBOQsDPql9l4se4cH1DrZYrUH5tAOjCUYPeZsE/ylZp0khm6su3U+1gyPSUYkbR52IwdIg2QF6TRw==}
-
-  '@univerjs/icons@0.2.35':
-    resolution: {integrity: sha512-FEY22AUd0KwL1NpHL4hS0STJC0Mw2sWzCUlI0PC2Nyq104KR3CfsGhSsuhPgHmz2yov9GoEospVqadMO9QPuaA==, tarball: https://registry.npmjs.org/@univerjs/icons/-/icons-0.2.35.tgz}
-    peerDependencies:
-      react: '19'
-      react-dom: '19'
 
   '@univerjs/icons@0.3.2':
     resolution: {integrity: sha512-QngW2B7xj1FAEmHkgNKL8cKdq9nCUPlAA1C50ZZn3FlYwvX3d+miP7AcRXT5wJIiNO1G1Q6KLVDg9ehXpNeAjw==}
@@ -10465,7 +10459,7 @@ packages:
     resolution: {integrity: sha512-uBHU3L3czsIyYXKX88fdrGovxdSCoTGDRZ6SYXtSRxLZUzHg5P/66Ht6uoUlHu9EZod+inXhKo3qQgwXUT/y1w==}
 
   source-map@0.6.1:
-    resolution: {integrity: sha512-UjgapumWlbMhkBgzT7Ykc5YXUT46F0iKu8SGXq0bcwP5dz/h0Plj6enJqjz1Zbq2l5WaqYnrVbwWOWMyF3F47g==}
+    resolution: {integrity: sha512-UjgapumWlbMhkBgzT7Ykc5YXUT46F0iKu8SGXq0bcwP5dz/h0Plj6enJqjz1Zbq2l5WaqYnrVbwWOWMyF3F47g==, tarball: https://registry.npmjs.org/source-map/-/source-map-0.6.1.tgz}
     engines: {node: '>=0.10.0'}
 
   spdx-correct@3.2.0:
@@ -13815,11 +13809,6 @@ snapshots:
       eslint-visitor-keys: 4.2.0
 
   '@univerjs/icons-svg@0.3.2': {}
-
-  '@univerjs/icons@0.2.35(react-dom@19.0.0(react@19.0.0))(react@19.0.0)':
-    dependencies:
-      react: 19.0.0
-      react-dom: 19.0.0(react@19.0.0)
 
   '@univerjs/icons@0.3.2(react-dom@19.0.0(react@19.0.0))(react@19.0.0)':
     dependencies:

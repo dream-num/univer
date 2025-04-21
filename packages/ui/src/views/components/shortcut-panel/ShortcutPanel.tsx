@@ -112,7 +112,6 @@ export function ShortcutPanel() {
                                 `}
                             >
                                 <span className="univer-line-clamp-1">{item.title}</span>
-                                {/* <span className="univer-text-gray-500">{item.shortcut}</span> */}
                                 {item.shortcut && <KBD keyboard={item.shortcut} />}
                             </li>
                         ))}

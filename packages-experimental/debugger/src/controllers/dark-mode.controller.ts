@@ -14,28 +14,18 @@
  * limitations under the License.
  */
 
-import { ILocalStorageService, Inject, RxDisposable } from '@univerjs/core';
+import { ILocalStorageService, Inject, RxDisposable, ThemeService } from '@univerjs/core';
 
 export class DarkModeController extends RxDisposable {
     constructor(
-        @Inject(ILocalStorageService) private _localStorageService: ILocalStorageService
+        @Inject(ILocalStorageService) private _localStorageService: ILocalStorageService,
+        @Inject(ThemeService) private _themeService: ThemeService
     ) {
         super();
 
         this._localStorageService.getItem('local.darkMode').then((darkMode) => {
             if (darkMode === 'dark') {
-                document.documentElement.classList.add('univer-dark');
-            }
-
-            if (darkMode === 'system') {
-                const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-                darkModeMediaQuery.addEventListener('change', (e) => {
-                    if (e.matches) {
-                        document.documentElement.classList.add('univer-dark');
-                    } else {
-                        document.documentElement.classList.remove('univer-dark');
-                    }
-                });
+                _themeService.setDarkMode(true);
             }
         });
     }

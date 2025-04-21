@@ -116,9 +116,9 @@ export const SheetTableSelector = (props: ITableSelectionInfo & {
             )}
 
             <div className="univer-mt-4 univer-flex univer-justify-end">
-                <Button type="default" onClick={onCancel}>{localeService.t('sheets-table.cancel')}</Button>
+                <Button onClick={onCancel}>{localeService.t('sheets-table.cancel')}</Button>
                 <Button
-                    type="primary"
+                    variant="primary"
                     onClick={() => {
                         if (rangeError) {
                             return;

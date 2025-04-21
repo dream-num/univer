@@ -29,8 +29,8 @@ export interface IEmbedSortBtnProps {
     onClose: () => void;
 }
 
-export default function EmbedSortBtn(props: any) {
-    const { range, colIndex, onClose } = props as IEmbedSortBtnProps;
+export default function EmbedSortBtn(props: IEmbedSortBtnProps) {
+    const { range, colIndex, onClose } = props;
 
     const sheetsSortUIService = useDependency(SheetsSortUIService);
     const univerInstanceService = useDependency(IUniverInstanceService);
@@ -44,11 +44,18 @@ export default function EmbedSortBtn(props: any) {
         } else {
             console.warn(`Cannot find the target to sort. unitId: ${unitId}, subUnitId: ${subUnitId}, range: ${range}, colIndex: ${colIndex}`);
         }
+
         onClose();
     }, [range, colIndex, sheetsSortUIService, univerInstanceService, onClose]);
 
     return (
-        <div className={styles.embedSortBtnContainer}>
+        <div
+            data-univer-comp-embed-sort-btn-container
+            className={`
+              univer-mb-3 univer-flex univer-w-full univer-items-center univer-justify-center univer-py-[6px]
+              univer-text-sm
+            `}
+        >
             <div
                 className={`
                   ${styles.embedSortBtn}

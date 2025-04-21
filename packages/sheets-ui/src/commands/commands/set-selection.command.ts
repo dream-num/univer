@@ -18,7 +18,7 @@ import type { ICommand, IMutationInfo, IRange } from '@univerjs/core';
 import type {
     ISetSelectionsOperationParams,
 } from '@univerjs/sheets';
-import { cellToRange, CommandType, Direction, ICommandService, IUniverInstanceService, RANGE_TYPE, Rectangle, sequence, sequenceExecute, Tools } from '@univerjs/core';
+import { CommandType, Direction, ICommandService, IUniverInstanceService, RANGE_TYPE, Rectangle, sequenceExecute, Tools } from '@univerjs/core';
 
 import { IRenderManagerService } from '@univerjs/engine-render';
 import {
@@ -388,6 +388,7 @@ export interface ISelectAllCommandParams {
 export const SelectAllCommand: ICommand<ISelectAllCommandParams> = {
     id: 'sheet.command.select-all',
     type: CommandType.COMMAND,
+    // eslint-disable-next-line max-lines-per-function
     handler: async (accessor, params = { expandToGapFirst: true, loop: false }) => {
         const target = getSheetCommandTarget(accessor.get(IUniverInstanceService));
         if (!target) return false;
@@ -449,7 +450,8 @@ export const SelectAllCommand: ICommand<ISelectAllCommandParams> = {
         const redos: IMutationInfo[] = [];
 
         redos.push({
-            id: SetSelectionsOperation.id, params: {
+            id: SetSelectionsOperation.id,
+            params: {
                 unitId,
                 subUnitId,
                 reveal: true,
@@ -459,14 +461,14 @@ export const SelectAllCommand: ICommand<ISelectAllCommandParams> = {
                         primary, // this remains unchanged
                     },
                 ],
-            }
+            },
         });
 
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
         const interceptor = sheetInterceptorService.onCommandExecute({
             id: SelectAllCommand.id,
-            params: { range }
-        })
+            params: { range },
+        });
 
         if (interceptor.redos.length) {
             redos.push(...interceptor.redos);
@@ -475,6 +477,6 @@ export const SelectAllCommand: ICommand<ISelectAllCommandParams> = {
         const commandService = accessor.get(ICommandService);
         sequenceExecute(redos, commandService);
 
-        return true
+        return true;
     },
 };

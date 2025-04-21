@@ -16,7 +16,8 @@
 
 import { dedupeBy, LocaleService } from '@univerjs/core';
 
-import React, { useCallback, useEffect } from 'react';
+import { KBD } from '@univerjs/design';
+import { useCallback, useEffect, useState } from 'react';
 import { IShortcutService } from '../../../services/shortcut/shortcut.service';
 import { useDependency, useObservable } from '../../../utils/di';
 
@@ -39,7 +40,7 @@ export function ShortcutPanel() {
     const localeService = useDependency(LocaleService);
     const currentLocale = useObservable(localeService.currentLocale$);
 
-    const [shortcutItems, setShortcutItems] = React.useState<IShortcutGroup[]>([]);
+    const [shortcutItems, setShortcutItems] = useState<IShortcutGroup[]>([]);
 
     const updateShortcuts = useCallback(() => {
         const shortcutGroups = new Map<string, IRenderShortcutItem[]>();
@@ -67,6 +68,7 @@ export function ShortcutPanel() {
             .map(([name, items]) => {
                 const groupSequence = name.split('_')[0];
                 const groupName = name.slice(groupSequence.length + 1);
+
                 return {
                     sequence: +groupSequence,
                     name: localeService.t(groupName),
@@ -110,7 +112,8 @@ export function ShortcutPanel() {
                                 `}
                             >
                                 <span className="univer-line-clamp-1">{item.title}</span>
-                                <span className="univer-text-gray-500">{item.shortcut}</span>
+                                {/* <span className="univer-text-gray-500">{item.shortcut}</span> */}
+                                {item.shortcut && <KBD keyboard={item.shortcut} />}
                             </li>
                         ))}
                     </ul>

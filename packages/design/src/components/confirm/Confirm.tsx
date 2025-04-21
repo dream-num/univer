@@ -84,6 +84,7 @@ export function Confirm(props: IConfirmProps) {
         <Dialog
             open={visible}
             title={title}
+            maskClosable={false}
             footer={(
                 <Footer
                     locale={locale!}

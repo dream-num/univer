@@ -14,12 +14,29 @@
  * limitations under the License.
  */
 
-import type { IConfirmProps } from '@univerjs/design';
+import type { Meta } from '@storybook/react';
 
-import type { ICustomLabelProps } from '../../../components/custom-label/CustomLabel';
+import { KBD } from './Kbd';
 
-export type IConfirmPartMethodOptions = {
-    id: string;
-    children?: ICustomLabelProps | string;
-    title?: ICustomLabelProps;
-} & Omit<IConfirmProps, 'children' | 'title'>;
+const meta: Meta<typeof KBD> = {
+    title: 'Components / KBD',
+    component: KBD,
+    parameters: {
+        layout: 'centered',
+    },
+    tags: ['autodocs'],
+};
+
+export default meta;
+
+export const KBDBasic = {
+    render() {
+        return (
+            <>
+                <KBD keyboard="SHIFT" />
+                <KBD keyboard="⌥ + B" />
+                <KBD keyboard="⌘ + ⌥ + B" />
+            </>
+        );
+    },
+};

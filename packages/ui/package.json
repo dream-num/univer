@@ -92,7 +92,7 @@
         "vue": ">=3.0.0"
     },
     "devDependencies": {
-        "@testing-library/react": "^16.2.0",
+        "@testing-library/react": "^16.3.0",
         "@univerjs-infra/shared": "workspace:*",
         "less": "^4.3.0",
         "postcss": "^8.5.3",

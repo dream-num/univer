@@ -17,6 +17,7 @@
 import type { ISetRangeThemeMutationParams } from '@univerjs/sheets';
 import { Disposable, ICommandService, Inject } from '@univerjs/core';
 import { SetRangeThemeMutation } from '@univerjs/sheets';
+import { SHEET_TABLE_CUSTOM_THEME_PREFIX } from '@univerjs/sheets-table';
 import { Subject } from 'rxjs';
 
 export class SheetTableThemeUIController extends Disposable {
@@ -36,7 +37,7 @@ export class SheetTableThemeUIController extends Disposable {
                 if (command.id === SetRangeThemeMutation.id) {
                     const params = command.params as ISetRangeThemeMutationParams;
                     const { styleName } = params;
-                    if (styleName.startsWith('table-custom')) {
+                    if (styleName.startsWith(SHEET_TABLE_CUSTOM_THEME_PREFIX)) {
                         this._refreshTable.next(Math.random());
                     }
                 }

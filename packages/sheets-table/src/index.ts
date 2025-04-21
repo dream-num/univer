@@ -44,3 +44,4 @@ export { AddTableThemeCommand } from './commands/commands/add-table-theme.comman
 export { RemoveTableThemeCommand } from './commands/commands/remove-table-theme.command';
 export { SheetTableInsertColCommand, SheetTableInsertRowCommand, SheetTableRemoveColCommand, SheetTableRemoveRowCommand } from './commands/commands/sheet-table-row-col.command';
 export { customEmptyThemeWithBorderStyle, processStyleWithBorderStyle } from './controllers/table-theme.factory';
+export { SHEET_TABLE_CUSTOM_THEME_PREFIX } from './const';

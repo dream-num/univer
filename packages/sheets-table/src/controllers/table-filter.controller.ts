@@ -22,9 +22,8 @@ import { getSheetCommandTarget, INTERCEPTOR_POINT, SheetInterceptorService } fro
 import { BehaviorSubject, filter, switchMap } from 'rxjs';
 import { TableManager } from '../model/table-manager';
 
-const EMPTY = () => new Set<number>();
 export class TableFilterController extends Disposable {
-    private readonly _tableFilteredOutRows$ = new BehaviorSubject<Readonly<Set<number>>>(EMPTY());
+    private readonly _tableFilteredOutRows$ = new BehaviorSubject<Readonly<Set<number>>>(new Set());
     readonly tableFilteredOutRows$ = this._tableFilteredOutRows$.asObservable();
 
     private _subscription: Subscription | null = null;

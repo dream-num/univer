@@ -1,11 +1,5 @@
 # @univerjs/sheets-table
 
-[![npm version](https://img.shields.io/npm/v/@univerjs/sheets-table)](https://npmjs.org/packages/@univerjs/sheets-table)
-[![license](https://img.shields.io/npm/l/@univerjs/sheets-table)](https://img.shields.io/npm/l/@univerjs/sheets-table)
-
-
-
-
 ### Installation
 
 ```shell
@@ -19,3 +13,9 @@ import { UniverSheetTablePlugin } from '@univerjs/sheets-table';
 
 univer.registerPlugin(UniverSheetTablePlugin);
 ```
+
+<!-- Links -->
+[npm-version-shield]: https://img.shields.io/npm/v/@univerjs/sheets-table?style=flat-square
+[npm-version-link]: https://npmjs.com/package/@univerjs/sheets-table
+[npm-license-shield]: https://img.shields.io/npm/l/@univerjs/sheets-table?style=flat-square
+[npm-downloads-shield]: https://img.shields.io/npm/dm/@univerjs/sheets-table?style=flat-square

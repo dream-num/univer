@@ -17,6 +17,7 @@
 import type { ICommand } from '@univerjs/core';
 import { CommandType, ICommandService, IUndoRedoService, sequenceExecute } from '@univerjs/core';
 import { AddRangeThemeMutation, RemoveRangeThemeMutation, SheetRangeThemeModel } from '@univerjs/sheets';
+import { SHEET_TABLE_CUSTOM_THEME_PREFIX } from '../../const';
 import { TableManager } from '../../model/table-manager';
 import { SetSheetTableMutation } from '../mutations/set-sheet-table.mutation';
 
@@ -46,7 +47,7 @@ export const RemoveTableThemeCommand: ICommand<IRemoveTableThemeCommandParams> =
         const undos = [];
 
         const defaultRangeThemes = rangeThemeModel.getRegisteredRangeThemes().filter((item) => item?.startsWith('table-default'));
-        const customRangeThemes = rangeThemeModel.getRegisteredRangeThemes().filter((item) => item?.startsWith('table-custom'));
+        const customRangeThemes = rangeThemeModel.getRegisteredRangeThemes().filter((item) => item?.startsWith(SHEET_TABLE_CUSTOM_THEME_PREFIX));
 
         let shouldBeSelectedTheme = customRangeThemes.find((item) => item !== themeName);
         if (!shouldBeSelectedTheme) {

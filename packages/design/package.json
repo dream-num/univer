@@ -102,6 +102,6 @@
         "tailwindcss-animate": "^1.0.7",
         "typescript": "^5.8.3",
         "vite": "^6.3.2",
-        "vitest": "^3.1.1"
+        "vitest": "^3.1.2"
     }
 }

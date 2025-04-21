@@ -20,8 +20,9 @@ import type { IUniverSheetsUIConfig } from './controllers/config.schema';
 import { DependentOn, IConfigService, Inject, Injector, IUniverInstanceService, merge, mergeOverrideWithDependencies, Plugin, registerDependencies, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { IRefSelectionsService, RefSelectionsService, UniverSheetsPlugin } from '@univerjs/sheets';
-import { UI_PLUGIN_CONFIG_KEY } from '@univerjs/ui';
+import { ComponentManager, UI_PLUGIN_CONFIG_KEY } from '@univerjs/ui';
 import { filter } from 'rxjs/operators';
+import { UNIVER_SHEET_PERMISSION_BACKGROUND, UNIVER_SHEET_PERMISSION_USER_PART } from './consts/permission';
 import { ActiveWorksheetController } from './controllers/active-worksheet/active-worksheet.controller';
 import { AutoFillController } from './controllers/auto-fill.controller';
 import { AutoHeightController } from './controllers/auto-height.controller';
@@ -103,7 +104,8 @@ export class UniverSheetsUIPlugin extends Plugin {
         @Inject(Injector) override readonly _injector: Injector,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IConfigService private readonly _configService: IConfigService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        @Inject(ComponentManager) private readonly _componentManager: ComponentManager
     ) {
         super();
 
@@ -114,11 +116,27 @@ export class UniverSheetsUIPlugin extends Plugin {
             this._config
         );
 
+        const { customComponents = new Set() } = rest;
+        if (rest.protectedRangeShadow === false) {
+            customComponents.add(UNIVER_SHEET_PERMISSION_BACKGROUND);
+        }
+
+        if (rest.protectedRangeUserSelector) {
+            customComponents.add(UNIVER_SHEET_PERMISSION_USER_PART);
+            this._componentManager.register(
+                UNIVER_SHEET_PERMISSION_USER_PART,
+                rest.protectedRangeUserSelector.component,
+                {
+                    framework: rest.protectedRangeUserSelector.framework,
+                }
+            );
+        }
+
         if (menu) {
             this._configService.setConfig('menu', menu, { merge: true });
         }
 
-        this._configService.setConfig(SHEETS_UI_PLUGIN_CONFIG_KEY, rest);
+        this._configService.setConfig(SHEETS_UI_PLUGIN_CONFIG_KEY, { ...rest, customComponents });
     }
 
     override onStarting(): void {

@@ -16,7 +16,8 @@
 
 import type { DependencyOverride } from '@univerjs/core';
 import type { IScrollBarProps } from '@univerjs/engine-render';
-import type { MenuConfig } from '@univerjs/ui';
+import type { ComponentType, MenuConfig } from '@univerjs/ui';
+import type { IPermissionDetailUserPartProps } from '../views/permission/panel-detail/PermissionDetailUserPart';
 
 export const SHEETS_UI_PLUGIN_CONFIG_KEY = 'sheets-ui.config';
 
@@ -75,6 +76,26 @@ export interface IUniverSheetsUIConfig {
     };
 
     scrollConfig?: IScrollBarProps;
+
+    /**
+     * Whether to show the protected range shadow.
+     * @default true
+     */
+    protectedRangeShadow?: boolean;
+
+    /**
+     * The custom component of the protected range user selector.
+     */
+    protectedRangeUserSelector?: {
+        /**
+         * custom component, should implement the `IPermissionDetailUserPartProps` interface.
+         */
+        component: ComponentType<IPermissionDetailUserPartProps>;
+        /**
+         * The framework of the component. Must be passed correctly.
+         */
+        framework?: 'react' | 'vue3';
+    };
 
 }
 

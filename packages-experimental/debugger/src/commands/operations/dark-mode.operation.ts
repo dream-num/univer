@@ -15,10 +15,10 @@
  */
 
 import type { IAccessor, ICommand } from '@univerjs/core';
-import { CommandType, ILocalStorageService } from '@univerjs/core';
+import { CommandType, ILocalStorageService, ThemeService } from '@univerjs/core';
 
 export interface IDarkModeCommandParams {
-    value?: 'dark' | 'light' | 'auto';
+    value?: 'dark' | 'light';
 }
 
 export const DarkModeOperation: ICommand = {
@@ -26,8 +26,9 @@ export const DarkModeOperation: ICommand = {
     type: CommandType.COMMAND,
     handler: async (accessor: IAccessor, params: IDarkModeCommandParams) => {
         const localStorageService = accessor.get(ILocalStorageService);
+        const themeService = accessor.get(ThemeService);
+        themeService.setDarkMode(params.value === 'dark');
         localStorageService.setItem('local.darkMode', params.value);
-        window.location.reload();
 
         return true;
     },

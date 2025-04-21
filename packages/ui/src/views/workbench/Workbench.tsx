@@ -96,6 +96,17 @@ export function DesktopWorkbenchContent(props: IUniverWorkbenchProps) {
         }
     }, []);
 
+    const [darkMode, setDarkMode] = useState<boolean>(false);
+    useEffect(() => {
+        const sub = themeService.darkMode$.subscribe((darkMode) => {
+            setDarkMode(darkMode);
+        });
+
+        return () => {
+            sub.unsubscribe();
+        };
+    }, []);
+
     useEffect(() => {
         if (contentRef.current) {
             onRendered?.(contentRef.current);
@@ -138,7 +149,14 @@ export function DesktopWorkbenchContent(props: IUniverWorkbenchProps) {
               * all focusin event merged from its descendants. The DesktopLayoutService would listen to focusin events
               * bubbled to this element and refocus the input element.
               */}
-            <div data-u-comp="workbench-layout" className={styles.workbenchLayout} tabIndex={-1} onBlur={(e) => e.stopPropagation()}>
+            <div
+                data-u-comp="workbench-layout"
+                className={clsx(styles.workbenchLayout, {
+                    'univer-dark': darkMode,
+                })}
+                tabIndex={-1}
+                onBlur={(e) => e.stopPropagation()}
+            >
                 {/* user header */}
                 <div className={styles.workbenchCustomHeader}>
                     <ComponentContainer key="custom-header" components={customHeaderComponents} />

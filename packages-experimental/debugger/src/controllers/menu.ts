@@ -80,10 +80,6 @@ export function DarkModeMenuItemFactory(): IMenuSelectorItem {
         type: MenuItemType.SELECTOR,
         selections: [
             {
-                label: 'System',
-                value: 'auto',
-            },
-            {
                 label: 'Light',
                 value: 'light',
             },

@@ -25,15 +25,21 @@ export interface IStyleSheet {
 }
 
 export class ThemeService extends Disposable {
-    private _currentTheme: Nullable<IStyleSheet>;
+    private _darkMode: boolean;
+    private readonly _darkMode$ = new BehaviorSubject<boolean>(false);
+    readonly darkMode$: Observable<boolean> = this._darkMode$.asObservable();
 
+    private _currentTheme: Nullable<IStyleSheet>;
     private readonly _currentTheme$ = new BehaviorSubject<IStyleSheet>({});
     readonly currentTheme$: Observable<IStyleSheet> = this._currentTheme$.asObservable();
 
     constructor() {
         super();
 
-        this.disposeWithMe(toDisposable(() => this._currentTheme$.complete()));
+        this.disposeWithMe(toDisposable(() => {
+            this._currentTheme$.complete();
+            this._darkMode$.complete();
+        }));
     }
 
     getCurrentTheme(): IStyleSheet {
@@ -47,5 +53,10 @@ export class ThemeService extends Disposable {
     setTheme(theme: IStyleSheet): void {
         this._currentTheme = theme;
         this._currentTheme$.next(theme);
+    }
+
+    setDarkMode(darkMode: boolean): void {
+        this._darkMode = darkMode;
+        this._darkMode$.next(darkMode);
     }
 }

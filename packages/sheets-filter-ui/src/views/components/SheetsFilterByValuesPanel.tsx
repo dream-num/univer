@@ -20,7 +20,6 @@ import { Checkbox, Input, Tree } from '@univerjs/design';
 import { useDependency, useObservable } from '@univerjs/ui';
 import React, { useCallback } from 'react';
 import { statisticFilterByValueItems } from '../../models/utils';
-import styles from './index.module.less';
 
 /**
  * Filter by values.
@@ -62,7 +61,10 @@ export function FilterByValue(props: { model: ByValuesModel }) {
     }
 
     return (
-        <div className={styles.sheetsFilterPanelValuesContainer}>
+        <div
+            data-univer-comp-sheets-filter-panel-values-container
+            className="univer-flex univer-h-full univer-flex-col"
+        >
             <Input
                 autoFocus
                 value={searchText}
@@ -70,29 +72,52 @@ export function FilterByValue(props: { model: ByValuesModel }) {
                 onChange={onSearchValueChange}
             />
             <div
+                data-univer-comp-sheets-filter-panel
                 className={`
                   univer-mt-2 univer-box-border univer-flex univer-flex-grow univer-flex-col univer-overflow-hidden
                   univer-rounded-md univer-border univer-border-solid univer-border-gray-200 univer-px-2 univer-py-2.5
                 `}
             >
-                {/* The on-top select all button */}
-                <div className={styles.sheetsFilterPanelValuesItem}>
-                    <div className={styles.sheetsFilterPanelValuesItemInner}>
+                {/* The on-top "Select All" button */}
+                <div
+                    data-univer-comp-sheets-filter-panel-values-item
+                    className="univer-box-border univer-h-8 univer-w-full univer-py-[2px]"
+                >
+                    <div
+                        data-univer-comp-sheets-filter-panel-values-item-inner
+                        className={`
+                          univer-box-border univer-flex univer-h-7 univer-items-center univer-rounded-md univer-pb-0
+                          univer-pl-[20px] univer-pr-[2px] univer-pt-0 univer-text-[13px]
+                        `}
+                    >
                         <Checkbox
                             indeterminate={indeterminate}
                             disabled={items.length === 0}
                             checked={allChecked}
                             onChange={onCheckAllToggled}
                         />
-                        <span className={styles.sheetsFilterPanelValuesItemText}>
+                        <span
+                            data-univer-comp-sheets-filter-panel-values-item-text
+                            className={`
+                              univer-mx-1 univer-inline-block univer-flex-shrink univer-overflow-hidden
+                              univer-text-ellipsis univer-whitespace-nowrap univer-text-gray-950
+                              dark:univer-text-white
+                            `}
+                        >
                             {`${localeService.t('sheets-filter.panel.select-all')}`}
                         </span>
-                        <span className={styles.sheetsFilterPanelValuesItemCount}>
+                        <span
+                            data-univer-comp-sheets-filter-panel-values-item-count
+                            className={`
+                              univer-text-gray-400
+                              dark:univer-text-grey-500
+                            `}
+                        >
                             {`(${stat.checked}/${stat.checked + stat.unchecked})`}
                         </span>
                     </div>
                 </div>
-                <div className={styles.sheetsFilterPanelValuesVirtual}>
+                <div data-univer-comp-sheets-filter-panel-values-virtual className="univer-flex-grow">
                     <Tree
                         data={items}
                         defaultExpandAll={false}
@@ -107,6 +132,8 @@ export function FilterByValue(props: { model: ByValuesModel }) {
                           univer-pr-2 univer-border-box univer-max-w-[245px] univer-rounded-md
                           [&:hover_a]:univer-inline-block
                           hover:univer-bg-gray-50 univer-h-full
+                          univer-text-gray-950
+                          dark:univer-text-white
                         `}
                         attachRender={(item) => (
                             <div
@@ -115,7 +142,15 @@ export function FilterByValue(props: { model: ByValuesModel }) {
                                   univer-items-center univer-justify-between univer-text-[13px] univer-text-primary-500
                                 `}
                             >
-                                <span className={styles.sheetsFilterPanelValuesItemCount}>{`(${item.count})`}</span>
+                                <span
+                                    data-univer-comp-sheets-filter-panel-values-item-count
+                                    className={`
+                                      univer-text-gray-400
+                                      dark:univer-text-grey-500
+                                    `}
+                                >
+                                    {`(${item.count})`}
+                                </span>
                                 <a
                                     className={`
                                       univer-box-border univer-hidden univer-h-4 univer-whitespace-nowrap univer-px-1.5

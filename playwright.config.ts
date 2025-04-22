@@ -4,7 +4,7 @@ import { defineConfig, devices } from '@playwright/test';
 /**
  * If you are running tests in CI, you can use the `CI` environment variable to adjust the configuration.
  */
-const isCI = !!process.env.CI;
+const IS_CI = !!process.env.CI;
 const HEADLESS = !!process.env.HEADLESS;
 
 /**
@@ -22,12 +22,12 @@ export default defineConfig({
     /* Run tests in files in parallel */
     fullyParallel: true,
     /* Fail the build on CI if you accidentally left test.only in the source code. */
-    forbidOnly: !!process.env.CI,
+    forbidOnly: IS_CI,
     timeout: 30_000,
     /* No retry */
     retries: 0,
     /* Opt out of parallel tests on CI. */
-    workers: process.env.CI ? 1 : undefined,
+    workers: IS_CI ? 1 : undefined,
     /* Reporter to use. See https://playwright.dev/docs/test-reporters */
     reporter: [
         ['json', { outputFile: 'playwright-report.json' }],
@@ -46,7 +46,7 @@ export default defineConfig({
     projects: [
         {
             name: 'chromium',
-            use: { ...devices['Desktop Chrome'], headless: isCI || HEADLESS },
+            use: { ...devices['Desktop Chrome'], headless: IS_CI || HEADLESS },
         },
 
         // {
@@ -83,7 +83,7 @@ export default defineConfig({
     webServer: {
         command: 'pnpm serve:e2e',
         url: 'http://localhost:3000',
-        reuseExistingServer: !isCI,
+        reuseExistingServer: !IS_CI,
         timeout: 10_000,
         stdout: 'ignore',
         stderr: 'pipe',

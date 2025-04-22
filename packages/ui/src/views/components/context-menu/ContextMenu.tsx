@@ -16,8 +16,8 @@
 
 import type { IMouseEvent } from '@univerjs/engine-render';
 import { ICommandService } from '@univerjs/core';
-import { Popup } from '@univerjs/design';
-import React, { useEffect, useRef, useState } from 'react';
+import { DropdownMenuContent, DropdownMenuPrimitive, DropdownMenuTrigger, Popup } from '@univerjs/design';
+import { useEffect, useRef, useState } from 'react';
 import { Menu } from '../../../components/menu/desktop/Menu';
 
 import { IContextMenuService } from '../../../services/contextmenu/contextmenu.service';
@@ -75,6 +75,37 @@ export function DesktopContextMenu() {
     function handleClose() {
         setVisible(false);
     }
+
+    return (
+        <DropdownMenuPrimitive modal={false} open={visible} onOpenChange={setVisible}>
+            <DropdownMenuTrigger className="univer-absolute univer-left-0 univer-top-0 univer-hidden" />
+            <DropdownMenuContent
+                className="!univer-animate-none"
+                alignOffset={offset[0]}
+                sideOffset={offset[1]}
+            >
+                <div>
+                    {menuType && (
+                        <Menu
+                            menuType={menuType}
+                            onOptionSelect={(params) => {
+                                const { label: id, commandId, value } = params;
+
+                                if (commandService) {
+                                    commandService.executeCommand(commandId ?? id as string, { value });
+                                }
+
+                                const layoutService = injector.get(ILayoutService);
+                                layoutService.focus();
+
+                                setVisible(false);
+                            }}
+                        />
+                    )}
+                </div>
+            </DropdownMenuContent>
+        </DropdownMenuPrimitive>
+    );
 
     return (
         <Popup visible={visible} offset={offset}>

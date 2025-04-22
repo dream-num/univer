@@ -25,7 +25,6 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from './DropdownMenuPrimitive';
-// import { DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuPortal, DropdownMenuPrimitive, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger } from './DropdownMenuPrimitive';
 
 type DropdownMenu = {
     type: 'item';
@@ -44,7 +43,7 @@ type DropdownMenu = {
     onSelect?: (item: string) => void;
 };
 
-export interface IDropdownProps {
+export interface IDropdownMenuProps extends ComponentProps<typeof DropdownMenuContent> {
     children: ReactNode;
     items: DropdownMenu[];
     disabled?: boolean;
@@ -52,7 +51,7 @@ export interface IDropdownProps {
     onOpenChange?: (open: boolean) => void;
 }
 
-export function DropdownMenu(props: IDropdownProps & ComponentProps<typeof DropdownMenuContent>) {
+export function DropdownMenu(props: IDropdownMenuProps) {
     const {
         children,
         items,

@@ -69,6 +69,8 @@ export function DesktopWorkbenchContent(props: IUniverWorkbenchProps) {
     const leftSidebarComponents = useComponentsOfPart(BuiltInUIPart.LEFT_SIDEBAR);
     const globalComponents = useComponentsOfPart(BuiltInUIPart.GLOBAL);
     const toolbarComponents = useComponentsOfPart(BuiltInUIPart.TOOLBAR);
+
+    // FIXME@weird94: do not write type-specific code in the type-independent modules
     const [docSnapShot, setDocSnapShot] = useState<Nullable<IDocumentData>>(null);
     const popupRootId = uiConfig?.popupRootId ?? 'univer-popup-portal';
 

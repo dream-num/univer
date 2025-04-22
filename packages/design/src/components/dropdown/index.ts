@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export { Dropdown } from './Dropdown';
+export { Dropdown, type IDropdownProps } from './Dropdown';

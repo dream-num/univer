@@ -36,6 +36,7 @@ export interface ISheetNumfmtPanelProps {
     value: { defaultValue: number; defaultPattern: string; row: number; col: number };
     onChange: (config: { type: 'change' | 'cancel' | 'confirm'; value: string }) => void;
 }
+
 export const SheetNumfmtPanel: FC<ISheetNumfmtPanelProps> = (props) => {
     const { defaultValue, defaultPattern, row, col } = props.value;
     const localeService = useDependency(LocaleService);
@@ -79,9 +80,9 @@ export const SheetNumfmtPanel: FC<ISheetNumfmtPanelProps> = (props) => {
         nextTick(() => props.onChange({ type: 'change', value: getCurrentPattern.current() || '' }));
     };
 
-    const handleChange = (v: string) => {
+    const handleChange = useCallback((v: string) => {
         props.onChange({ type: 'change', value: v });
-    };
+    }, []);
 
     const handleConfirm = () => {
         const pattern = getCurrentPattern.current() || '';
@@ -91,6 +92,7 @@ export const SheetNumfmtPanel: FC<ISheetNumfmtPanelProps> = (props) => {
         }
         props.onChange({ type: 'confirm', value: pattern });
     };
+
     const handleCancel = () => {
         props.onChange({ type: 'cancel', value: '' });
     };

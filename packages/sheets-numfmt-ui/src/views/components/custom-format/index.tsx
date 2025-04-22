@@ -22,7 +22,6 @@ import { CURRENCYFORMAT, DATEFMTLISG, NUMBERFORMAT } from '@univerjs/sheets-numf
 import { useDependency } from '@univerjs/ui';
 import React, { useEffect, useState } from 'react';
 import { UserHabitController } from '../../../controllers/user-habit.controller';
-import styles from './index.module.less';
 
 const key = 'customFormat';
 const historyPatternKey = 'numfmt_custom_pattern';
@@ -70,13 +69,31 @@ export function CustomFormat(props: IBusinessComponentProps) {
     };
 
     return (
-        <div className={styles.customFormat}>
-            <div className={styles.customFormatTitle}>{localeService.t('sheet.numfmt.customFormat')}</div>
-            <Input placeholder={localeService.t('sheet.numfmt.customFormat')} onBlur={handleBlur} value={pattern} onChange={patternSet} className={styles.customFormatInput} />
-            <div className={styles.customFormatHistoryList}>
+        <div>
+            <div className="univer-mt-4 univer-text-sm univer-text-gray-400">{localeService.t('sheet.numfmt.customFormat')}</div>
+            <Input
+                placeholder={localeService.t('sheet.numfmt.customFormat')}
+                onBlur={handleBlur}
+                value={pattern}
+                onChange={patternSet}
+                className="univer-mt-2 univer-w-full"
+            />
+            <div
+                className={`
+                  univer-mt-2 univer-max-h-[400px] univer-overflow-auto univer-rounded-lg univer-border
+                  univer-border-solid univer-border-gray-200 univer-p-2
+                `}
+            >
                 {options.map((p) => (
-                    <div key={p} onClick={() => handleClick(p as string)} className={styles.customFormatHistoryListItem}>
-                        <div className={styles.customFormatHistoryListItemIconWrap}>
+                    <div
+                        key={p}
+                        onClick={() => handleClick(p as string)}
+                        className={`
+                          univer-flex univer-cursor-pointer univer-items-center univer-gap-1.5 univer-py-1.5
+                          univer-text-sm
+                        `}
+                    >
+                        <div className="univer-flex univer-w-4 univer-items-center univer-text-primary-600">
                             {pattern === p && <CheckMarkSingle />}
                         </div>
                         <div>
@@ -85,7 +102,7 @@ export function CustomFormat(props: IBusinessComponentProps) {
                     </div>
                 ))}
             </div>
-            <div className={styles.customFormatDes}>
+            <div className="univer-mt-3 univer-text-sm univer-text-gray-600">
                 {localeService.t('sheet.numfmt.customFormatDes')}
             </div>
         </div>

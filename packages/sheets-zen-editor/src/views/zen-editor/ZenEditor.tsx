@@ -23,7 +23,6 @@ import { useDependency } from '@univerjs/ui';
 import { useEffect, useRef } from 'react';
 import { CancelZenEditCommand, ConfirmZenEditCommand } from '../../commands/commands/zen-editor.command';
 import { IZenEditorManagerService } from '../../services/zen-editor.service';
-import styles from './index.module.less';
 
 const COMPONENT_PREFIX = 'ZEN_EDITOR_PLUGIN_';
 
@@ -111,24 +110,37 @@ export function ZenEditor() {
         commandService.executeCommand(ConfirmZenEditCommand.id);
     }
 
+    const containerClassName = 'univer-flex univer-w-7 univer-cursor-pointer univer-items-center univer-justify-center univer-transition-colors';
+
     return (
-        <div className={styles.zenEditor}>
-            <div className={styles.zenEditorIconWrapper}>
+        <div className="univer-absolute univer-inset-0 univer-size-full univer-bg-white">
+            <div
+                className={`
+                  univer-absolute univer-right-6 univer-top-2 univer-z-10 univer-flex univer-items-center
+                  univer-justify-center
+                `}
+            >
                 <span
-                    className={clsx(styles.zenEditorIconContainer, styles.zenEditorIconError)}
+                    className={clsx(containerClassName, `
+                      univer-text-red-500
+                      hover:univer-text-red-600
+                    `)}
                     onClick={handleCloseBtnClick}
                 >
-                    <CloseSingle style={{ fontSize: '22px' }} />
+                    <CloseSingle className="univer-size-5" />
                 </span>
 
                 <span
-                    className={clsx(styles.zenEditorIconContainer, styles.zenEditorIconSuccess)}
+                    className={clsx(containerClassName, `
+                      univer-text-green-500
+                      hover:univer-text-green-600
+                    `)}
                     onClick={handleConfirmBtnClick}
                 >
-                    <CheckMarkSingle style={{ fontSize: '22px' }} />
+                    <CheckMarkSingle className="univer-size-5" />
                 </span>
             </div>
-            <div className={styles.zenEditorCanvasContainer} ref={editorRef} />
+            <div ref={editorRef} className="univer-absolute univer-inset-0 univer-size-full" />
         </div>
     );
 }

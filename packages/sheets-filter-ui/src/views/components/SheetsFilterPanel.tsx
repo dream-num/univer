@@ -70,7 +70,7 @@ export function FilterPanel() {
 
     return (
         <div
-            data-univer-comp-sheets-filter-panel
+            data-u-comp-sheets-filter-panel
             className={`
               univer-box-border univer-flex univer-h-[432px] univer-w-[312px] univer-flex-col univer-overflow-hidden
               univer-rounded-lg univer-bg-white univer-p-4 univer-shadow-lg
@@ -82,7 +82,7 @@ export function FilterPanel() {
                 sharedProps={{ range, colIndex, onClose: onCancel }}
             />
             <div
-                data-univer-comp-sheets-filter-panel-header
+                data-u-comp-sheets-filter-panel-header
                 className="univer-mb-1 univer-flex-shrink-0 univer-flex-grow-0"
             >
                 <Segmented
@@ -94,7 +94,7 @@ export function FilterPanel() {
             {filterByModel
                 ? (
                     <div
-                        data-univer-comp-sheets-filter-panel-content
+                        data-u-comp-sheets-filter-panel-content
                         className="univer-flex-shrink univer-flex-grow univer-overflow-hidden univer-pt-2"
                     >
                         {filterBy === FilterBy.VALUES
@@ -106,7 +106,7 @@ export function FilterPanel() {
                     <div style={{ flex: 1 }} />
                 )}
             <div
-                data-univer-comp-sheets-filter-panel-footer
+                data-u-comp-sheets-filter-panel-footer
                 className={`
                   univer-mt-4 univer-inline-flex univer-flex-shrink-0 univer-flex-grow-0 univer-flex-nowrap
                   univer-justify-between univer-overflow-hidden

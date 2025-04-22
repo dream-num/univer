@@ -132,6 +132,10 @@ class DocumentDataModelSimple extends UnitModel<IDocumentData, UniverInstanceTyp
         }
     }
 
+    getDocumentStyle() {
+        return this.snapshot.documentStyle;
+    }
+
     updateDocumentStyle(config: IDocumentStyle) {
         if (this.snapshot.documentStyle == null) {
             this.snapshot.documentStyle = config;

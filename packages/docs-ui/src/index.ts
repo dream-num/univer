@@ -45,7 +45,7 @@ export { DocsRenderService } from './services/docs-render.service';
 export { Editor } from './services/editor/editor';
 export { EditorService, IEditorService } from './services/editor/editor-manager.service';
 export { isInSameTableCell, isValidRectRange, NodePositionConvertToRectRange } from './services/selection/convert-rect-range';
-
+export { DocPrintInterceptorService, type IDocPrintComponentContext, type IDocPrintContext } from './services/doc-print-interceptor-service';
 export { NodePositionConvertToCursor } from './services/selection/convert-text-range';
 export { getOneTextSelectionRange } from './services/selection/convert-text-range';
 export type { IEditorInputConfig } from './services/selection/doc-selection-render.service';

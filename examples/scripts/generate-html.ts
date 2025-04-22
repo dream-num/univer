@@ -21,9 +21,9 @@ import fs from 'fs-extra';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // eslint-disable-next-line node/prefer-global/process
-export const isCI = !!process.env.CI;
+export const IS_CI = !!process.env.CI;
 
-const ESBUILD_SCRIPT = isCI
+const ESBUILD_SCRIPT = IS_CI
     ? '' :
     `
         <script>

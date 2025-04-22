@@ -15,9 +15,10 @@
  */
 
 import type { IDisposable } from '@univerjs/core';
+import type { Observable } from 'rxjs';
 import type { ComponentType } from '../../common/component-manager';
 import { createIdentifier, Disposable, toDisposable } from '@univerjs/core';
-import { type Observable, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 
 export type ComponentRenderer = () => ComponentType;
 type ComponentPartKey = BuiltInUIPart | string;
@@ -76,7 +77,7 @@ export class UIPartsService extends Disposable implements IUIPartsService {
         return this._uiVisible.get(part) ?? true;
     }
 
-    registerComponent(part: ComponentPartKey, componentFactory: () => React.ComponentType): IDisposable {
+    registerComponent<T>(part: ComponentPartKey, componentFactory: () => React.ComponentType<T>): IDisposable {
         const componentType = componentFactory();
         const components = (
             this._componentsByPart.get(part)

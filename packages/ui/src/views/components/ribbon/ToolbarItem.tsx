@@ -240,12 +240,16 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
     }
 
     return !hidden && (
-        <TooltipWrapper
-            ref={ref}
-            title={tooltipTitle}
-            placement="bottom"
-        >
-            {renderItem()}
-        </TooltipWrapper>
+        tooltipTitle
+            ? (
+                <TooltipWrapper
+                    ref={ref}
+                    title={tooltipTitle}
+                    placement="bottom"
+                >
+                    {renderItem()}
+                </TooltipWrapper>
+            )
+            : renderItem()
     );
 });

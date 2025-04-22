@@ -32,7 +32,7 @@ import { deriveStateFromActiveSheet$, getCurrentRangeDisable$ } from '@univerjs/
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { filter, merge, Observable } from 'rxjs';
 import { OpenNumfmtPanelOperator } from '../commands/operations/open.numfmt.panel.operation';
-import { MORE_NUMFMT_TYPE_KEY, OPTIONS_KEY } from '../views/components/more-numfmt-type/MoreNumfmtType';
+import { MORE_NUMFMT_TYPE_KEY, OPTIONS_KEY } from '../views/components/MoreNumfmtType';
 
 export const MENU_OPTIONS: Array<{ label: string; pattern: string | null } | '|'> = [
     {

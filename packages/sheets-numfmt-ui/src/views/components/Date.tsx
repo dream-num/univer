@@ -15,7 +15,7 @@
  */
 
 import type { FC } from 'react';
-import type { IBusinessComponentProps } from '../interface';
+import type { IBusinessComponentProps } from './interface';
 import { LocaleService, numfmt } from '@univerjs/core';
 import { SelectList } from '@univerjs/design';
 import { getDateFormatOptions } from '@univerjs/sheets-numfmt';

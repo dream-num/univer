@@ -20,8 +20,8 @@ import { Separator } from '@univerjs/design';
 import { SheetsSelectionsService } from '@univerjs/sheets';
 import { getPatternPreview, getPatternType, SetNumfmtCommand, SheetsNumfmtCellContentController } from '@univerjs/sheets-numfmt';
 import { ILayoutService, useDependency } from '@univerjs/ui';
-import { OpenNumfmtPanelOperator } from '../../../commands/operations/open.numfmt.panel.operation';
-import { MENU_OPTIONS } from '../../../controllers/menu';
+import { OpenNumfmtPanelOperator } from '../../commands/operations/open.numfmt.panel.operation';
+import { MENU_OPTIONS } from '../../controllers/menu';
 
 export const MORE_NUMFMT_TYPE_KEY = 'sheet.numfmt.moreNumfmtType';
 export const OPTIONS_KEY = 'sheet.numfmt.moreNumfmtType.options';

@@ -25,12 +25,12 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { UserHabitCurrencyContext } from '../../controllers/user-habit.controller';
 import { useCurrencyOptions } from '../hooks/use-currency-options';
 import { useNextTick } from '../hooks/use-next-tick';
-import { AccountingPanel, isAccountingPanel } from './accounting';
-import { CurrencyPanel, isCurrencyPanel } from './currency';
-import { CustomFormat } from './custom-format';
-import { DatePanel, isDatePanel } from './date';
-import { GeneralPanel, isGeneralPanel } from './general';
-import { isThousandthPercentilePanel, ThousandthPercentilePanel } from './thousandth-percentile';
+import { AccountingPanel, isAccountingPanel } from './Accounting';
+import { CurrencyPanel, isCurrencyPanel } from './Currency';
+import { CustomFormat } from './CustomFormat';
+import { DatePanel, isDatePanel } from './Date';
+import { GeneralPanel, isGeneralPanel } from './General';
+import { isThousandthPercentilePanel, ThousandthPercentilePanel } from './ThousandthPercentile';
 
 export interface ISheetNumfmtPanelProps {
     value: { defaultValue: number; defaultPattern: string; row: number; col: number };

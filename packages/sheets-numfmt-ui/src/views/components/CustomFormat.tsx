@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import type { IBusinessComponentProps } from '../interface';
+import type { IBusinessComponentProps } from './interface';
 import { ILocalStorageService, LocaleService } from '@univerjs/core';
 import { Input } from '@univerjs/design';
 import { CheckMarkSingle } from '@univerjs/icons';
 import { CURRENCYFORMAT, DATEFMTLISG, NUMBERFORMAT } from '@univerjs/sheets-numfmt';
 import { useDependency } from '@univerjs/ui';
 import React, { useEffect, useState } from 'react';
-import { UserHabitController } from '../../../controllers/user-habit.controller';
+import { UserHabitController } from '../../controllers/user-habit.controller';
 
 const key = 'customFormat';
 const historyPatternKey = 'numfmt_custom_pattern';

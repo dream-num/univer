@@ -24,13 +24,13 @@ export interface ISetWorksheetRowCountMutationParams {
     rowCount: number;
 }
 
-export const SetWorksheetRowCountMutationFactory = (
+export const SetWorksheetRowCountUndoMutationFactory = (
     accessor: IAccessor,
     params: ISetWorksheetRowCountMutationParams
 ): ISetWorksheetRowCountMutationParams => {
     const target = getSheetMutationTarget(accessor.get(IUniverInstanceService), params);
     if (!target) {
-        throw new Error('[SetWorksheetRowCountMutationFactory]: worksheet is null error!');
+        throw new Error('[SetWorksheetRowCountUndoMutationFactory]: worksheet is null error!');
     }
 
     return {

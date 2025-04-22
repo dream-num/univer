@@ -35,7 +35,7 @@ const meta: Meta = {
 
 export default meta;
 
-export const Test: StoryObj<ISheetNumfmtPanelProps> = {
+export const NumfmtPanel: StoryObj<ISheetNumfmtPanelProps> = {
     render() {
         const { injector } = useContext(RediContext);
 

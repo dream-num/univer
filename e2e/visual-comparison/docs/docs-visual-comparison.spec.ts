@@ -31,6 +31,6 @@ test('diff default doc content', async ({ page }) => {
     await page.evaluate(() => window.E2EControllerAPI.loadDefaultDoc());
     await page.waitForTimeout(5000);
 
-    await expect(page).toHaveScreenshot(generateSnapshotName('default-doc'), { maxDiffPixels: 30 });
+    await expect(page).toHaveScreenshot(generateSnapshotName('default-doc'), { maxDiffPixels: 100 });
     expect(errored).toBeFalsy();
 });

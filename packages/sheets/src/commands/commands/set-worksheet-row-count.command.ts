@@ -22,7 +22,7 @@ import {
     IUndoRedoService,
     IUniverInstanceService,
 } from '@univerjs/core';
-import { SetWorksheetRowCountMutation, SetWorksheetRowCountMutationFactory } from '../mutations/set-worksheet-row-count.mutation';
+import { SetWorksheetRowCountMutation, SetWorksheetRowCountUndoMutationFactory } from '../mutations/set-worksheet-row-count.mutation';
 import { getSheetCommandTarget } from './utils/target-util';
 
 export const SetWorksheetRowCountCommand: ICommand = {
@@ -45,7 +45,7 @@ export const SetWorksheetRowCountCommand: ICommand = {
             rowCount,
         };
 
-        const undoMutationParams = SetWorksheetRowCountMutationFactory(accessor, redoMutationParams);
+        const undoMutationParams = SetWorksheetRowCountUndoMutationFactory(accessor, redoMutationParams);
 
         const result = commandService.syncExecuteCommand(SetWorksheetRowCountMutation.id, redoMutationParams);
 

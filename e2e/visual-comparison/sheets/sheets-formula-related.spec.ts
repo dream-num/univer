@@ -131,7 +131,7 @@ test('diff formula related', async () => {
 
     const filename1 = generateSnapshotName('formula-hide-row-current-worksheet');
     const screenshot1 = await page.locator(SHEET_MAIN_CANVAS_ID).screenshot();
-    await expect(screenshot1).toMatchSnapshot(filename1, { maxDiffPixelRatio: 150 });
+    await expect(screenshot1).toMatchSnapshot(filename1, { maxDiffPixels: 150 });
 
     // restore the hidden row
     await page.evaluate(async () => {

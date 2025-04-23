@@ -23,9 +23,10 @@ import { UniverDrawingUIPlugin } from '@univerjs/drawing-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { UniverUIPlugin } from '@univerjs/ui';
 import { defaultPluginConfig, DOCS_DRAWING_UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
-import { DocDrawingAddRemoveController } from './controllers/doc-drawing-notification.controller';
-import { DocDrawingTransformerController } from './controllers/doc-drawing-transformer-update.controller';
 import { DocDrawingUIController } from './controllers/doc-drawing.controller';
+import { DocDrawingAddRemoveController } from './controllers/doc-drawing-notification.controller';
+import { DocDrawingPrintingController } from './controllers/doc-drawing-printing.controller';
+import { DocDrawingTransformerController } from './controllers/doc-drawing-transformer-update.controller';
 import { DocFloatDomController } from './controllers/doc-float-dom.controller';
 import { DocDrawingPopupMenuController } from './controllers/drawing-popup-menu.controller';
 import { DocDrawingTransformUpdateController } from './controllers/render-controllers/doc-drawing-transform-update.controller';
@@ -64,6 +65,7 @@ export class UniverDocsDrawingUIPlugin extends Plugin {
             [DocDrawingAddRemoveController],
             [DocRefreshDrawingsService],
             [DocFloatDomController],
+            [DocDrawingPrintingController],
         ];
 
         dependencies.forEach((dependency) => this._injector.add(dependency));
@@ -78,6 +80,7 @@ export class UniverDocsDrawingUIPlugin extends Plugin {
         this._injector.get(DocDrawingAddRemoveController);
         this._injector.get(DocDrawingUIController);
         this._injector.get(DocDrawingTransformerController);
+        this._injector.get(DocDrawingPrintingController);
     }
 
     override onRendered(): void {

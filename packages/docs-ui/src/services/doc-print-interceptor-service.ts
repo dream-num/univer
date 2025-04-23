@@ -26,12 +26,15 @@ export interface IDocPrintContext {
     skeleton: DocumentSkeleton;
 }
 
+export interface IDocPrintDomtContext extends IDocPrintContext {
+    offset: { x: number; y: number };
+}
 export interface IDocPrintComponentContext extends IDocPrintContext {
     documents: Documents;
 }
 
 const PRINTING_COMPONENT_COLLECT = createInterceptorKey<undefined, IDocPrintComponentContext>('PRINTING_COMPONENT_COLLECT');
-const PRINTING_DOM_COLLECT = createInterceptorKey<DisposableCollection, IDocPrintContext>('PRINTING_DOM_COLLECT');
+const PRINTING_DOM_COLLECT = createInterceptorKey<DisposableCollection, IDocPrintDomtContext>('PRINTING_DOM_COLLECT');
 
 export class DocPrintInterceptorService extends Disposable {
     readonly interceptor = new InterceptorManager({

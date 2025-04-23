@@ -18,7 +18,7 @@ import type { DocumentDataModel, IDisposable, IDrawingSearch, Nullable } from '@
 import type { IDocFloatDom } from '@univerjs/docs-drawing';
 import type { ISetDocZoomRatioOperationParams } from '@univerjs/docs-ui';
 import type { IDocFloatDomDataBase } from '@univerjs/drawing';
-import type { IRender, Rect } from '@univerjs/engine-render';
+import type { IBoundRectNoAngle, IRender, Rect, Scene } from '@univerjs/engine-render';
 import type { IFloatDomLayout } from '@univerjs/ui';
 import type { IInsertDrawingCommandParams } from '../commands/commands/interfaces';
 import { Disposable, DisposableCollection, DrawingTypeEnum, fromEventSubject, generateRandomId, ICommandService, Inject, IUniverInstanceService, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, toDisposable, UniverInstanceType } from '@univerjs/core';
@@ -31,13 +31,16 @@ import { CanvasFloatDomService } from '@univerjs/ui';
 import { BehaviorSubject, map, of, switchMap } from 'rxjs';
 import { InsertDocDrawingCommand } from '../commands/commands/insert-doc-drawing.command';
 
-function calcDocFloatDomPosition(
-    object: Rect,
-    renderUnit: IRender
+export function calcDocFloatDomPositionByRect(
+    rect: IBoundRectNoAngle,
+    scene: Scene,
+    opacity = 1,
+    angle = 0
 ): IFloatDomLayout {
-    const { top, left, width, height, angle, opacity } = object;
-    // const
-    const scene = renderUnit.scene;
+    const { top, left, bottom, right } = rect;
+    const width = right - left;
+    const height = bottom - top;
+
     const viewMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN)!;
     const { viewportScrollX, viewportScrollY } = viewMain;
     const { scaleX, scaleY } = scene.getAncestorScale();
@@ -56,6 +59,14 @@ function calcDocFloatDomPosition(
         },
         opacity: opacity ?? 1,
     };
+}
+
+function calcDocFloatDomPosition(
+    object: Rect,
+    renderUnit: IRender
+): IFloatDomLayout {
+    const { top, left, width, height, angle, opacity } = object;
+    return calcDocFloatDomPositionByRect({ top, left, bottom: top + height, right: left + width }, renderUnit.scene, opacity, angle);
 }
 
 interface ICanvasFloatDomInfo {

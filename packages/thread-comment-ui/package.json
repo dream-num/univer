@@ -69,7 +69,7 @@
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/docs-ui": "workspace:*",
-        "@univerjs/icons": "^0.3.2",
+        "@univerjs/icons": "^0.3.21",
         "@univerjs/thread-comment": "workspace:*",
         "@univerjs/ui": "workspace:*"
     },

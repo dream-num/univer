@@ -27,7 +27,7 @@ export const buttonVariants = cva(
       univer-justify-center univer-gap-2 univer-whitespace-nowrap univer-rounded-md univer-border univer-border-solid
       univer-text-sm univer-font-medium univer-transition-colors
       [&_svg]:univer-pointer-events-none [&_svg]:univer-size-4 [&_svg]:univer-shrink-0
-      disabled:univer-pointer-events-none disabled:univer-opacity-50
+      disabled:univer-pointer-events-none disabled:univer-cursor-not-allowed disabled:univer-opacity-50
     `,
     {
         variants: {

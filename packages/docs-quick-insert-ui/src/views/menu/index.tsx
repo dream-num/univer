@@ -62,6 +62,7 @@ export const QuickInsertButton = ({ className = '' }: IQuickInsertButtonProps) =
             startOffset: p.startIndex,
             endOffset: p.startIndex,
         }]);
+        docQuickInsertPopupService.setInputOffset({ start: p.startIndex - 1, end: p.startIndex - 1 });
         docQuickInsertPopupService.showPopup({
             popup,
             index: p.startIndex - 1,

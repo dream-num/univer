@@ -22,7 +22,6 @@ import { IUniverInstanceService } from '@univerjs/core';
 import { ComponentContainer, IMenuManagerService, ToolbarItem, useComponentsOfPart, useDependency, useObservable } from '@univerjs/ui';
 import React, { useEffect, useImperativeHandle, useState } from 'react';
 import { DELETE_MENU_ID, DOWNLOAD_MENU_ID, LOCK_MENU_ID, PRINT_MENU_ID, SHARE_MENU_ID, UNI_MENU_POSITIONS, ZEN_MENU_ID } from '../../controllers/menu';
-import styles from './index.module.less';
 
 export interface IFloatingToolbarRef {
     update: () => void;
@@ -86,18 +85,24 @@ export const UniFloatingToolbar = React.forwardRef<IFloatingToolbarRef, { node: 
 
     return (
         <div
-            className={styles.uniFloatingToolbar}
+            className={`
+              univer-flex univer-items-center univer-gap-2 univer-rounded-md univer-bg-white univer-text-sm
+              univer-text-primary-600
+              dark:univer-bg-gray-900
+            `}
             ref={setFloating}
             style={{ position: strategy, top: y ?? 0, left: x ?? 0 }}
         >
-            <div className={styles.uniToolbar}>
+            <div
+                className="univer-inline-flex univer-flex-shrink-0 univer-items-center univer-gap-2 univer-p-2"
+            >
                 <ComponentContainer
                     key="name"
                     components={toolbarNameComponents}
                     fallback={<UnitName unitId={node.unitId} />}
                 />
                 <UniDiv />
-                <div className={styles.toolbarGroup}>
+                <div className="univer-flex">
                     {uniVisibleItems.map((subItem) => <ToolbarItem key={subItem.id} {...subItem} />)}
                 </div>
             </div>
@@ -106,7 +111,7 @@ export const UniFloatingToolbar = React.forwardRef<IFloatingToolbarRef, { node: 
 });
 
 export function UniDiv() {
-    return <div className={styles.uniDiv} />;
+    return <div className="univer-h-6 univer-w-[1px] univer-bg-gray-100" />;
 }
 
 export function UnitName({ unitId }: { unitId: string }) {
@@ -114,7 +119,12 @@ export function UnitName({ unitId }: { unitId: string }) {
     const unit = instanceService.getUnit(unitId);
     const name = useObservable(unit?.name$);
     return (
-        <div className={styles.unitName}>
+        <div
+            className={`
+              univer-flex univer-h-6 univer-items-center univer-gap-1 univer-rounded-md univer-bg-white univer-px-1
+              univer-py-0 univer-text-sm univer-text-gray-900
+            `}
+        >
             {name}
         </div>
     );

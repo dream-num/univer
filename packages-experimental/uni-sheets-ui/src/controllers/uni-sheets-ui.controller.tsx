@@ -56,7 +56,6 @@ export class UniSheetsUIController extends SheetUIController {
         const uiController = this._uiPartsService;
         const injector = this._injector;
 
-        // this.disposeWithMe(uiController.registerComponent(BuiltInUIPart.HEADER, () => connectInjector(RenderSheetHeader, injector)));
         this.disposeWithMe(uiController.registerComponent(UniUIPart.OUTLINE, () => connectInjector(RenderOutline, injector)));
         this.disposeWithMe(uiController.registerComponent(BuiltInUIPart.CONTENT, () => connectInjector(RenderSheetContent, injector)));
     }
@@ -91,6 +90,7 @@ function RenderOutline() {
     const univerInstanceService = useDependency(IUniverInstanceService);
     const focused = useObservable(univerInstanceService.focused$);
     const workbook = useObservable(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET), null, false, []);
+
     if (!workbook || focused !== workbook?.getUnitId()) return null;
 
     return (

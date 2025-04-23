@@ -22,7 +22,6 @@ import { IMenuManagerService, ToolbarItem, useDependency, useObservable } from '
 import React, { useEffect, useState } from 'react';
 import { UNI_MENU_POSITIONS } from '../../controllers/menu';
 import { UniToolbarService } from '../../services/toolbar/uni-toolbar-service';
-import styles from './index.module.less';
 import { UniFormulaBar } from './UniFormulaBar';
 
 export interface IToolbarProps {
@@ -71,9 +70,15 @@ export function UniToolbar() {
     }, [isMenuChange]);
 
     return (
-        <div className={styles.uniToolbar}>
+        <div
+            className={`
+              univer-flex univer-p-2 univer-items-center univer-gap-2 univer-rounded-lg univer-border
+              univer-border-gray-300 univer-overflow-hidden univer-shadow-lg univer-select-none univer-relative
+              univer-box-border univer-text-sm univer-bg-white
+            `}
+        >
             {hasWorkbooks && <UniFormulaBar />}
-            <div className={styles.toolbarGroup}>
+            <div className="univer-flex univer-gap-1 univer-items-center univer-shrink-0">
                 {uniVisibleItems.map((subItem) => subItem && <ToolbarItem key={subItem.id} {...subItem} />)}
             </div>
         </div>

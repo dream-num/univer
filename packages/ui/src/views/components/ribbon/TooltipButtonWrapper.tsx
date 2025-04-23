@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDropdownProps, ITooltipProps } from '@univerjs/design';
+import type { IDropdownMenuProps, IDropdownProps, ITooltipProps } from '@univerjs/design';
 import type { ReactNode } from 'react';
 import type { IMenuItem, IValueOption } from '../../../services/menu/menu';
 import { clsx, Dropdown, DropdownMenu, Tooltip } from '@univerjs/design';
@@ -219,7 +219,7 @@ export function DropdownMenuWrapper({
 
     // options menu
     if (options?.length) {
-        const items: IDropdownProps['items'] = options.map((option) => ({
+        const items: IDropdownMenuProps['items'] = options.map((option) => ({
             type: 'item',
             className: clsx({
                 'focus:univer-bg-white': typeof option.label !== 'string' && option.label?.hoverable === false,
@@ -285,7 +285,7 @@ export function DropdownMenuWrapper({
             </DropdownMenu>
         );
     } else {
-        const items: IDropdownProps['items'] = [];
+        const items: IDropdownMenuProps['items'] = [];
 
         for (const menuItem of filteredMenuItems) {
             if (menuItem.item) {

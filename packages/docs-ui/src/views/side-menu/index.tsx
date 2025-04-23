@@ -137,7 +137,7 @@ function DocSideMenuContent() {
                 isTitle: p.paragraphStyle?.namedStyleType === NamedStyleType.TITLE,
             };
         })
-        .filter(Boolean) as ISideMenuItem[];
+        .filter((item) => item?.text) as ISideMenuItem[];
 
     const handleScroll = useEvent((params) => {
         const scrollTop = params.viewportScrollY;

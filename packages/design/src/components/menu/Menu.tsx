@@ -24,13 +24,14 @@ import styles from './index.module.less';
 
 export const Menu = React.forwardRef<MenuRef, MenuProps & { wrapperClass?: string }>((props, ref) => {
     const { mountContainer } = useContext(ConfigContext);
+    const { wrapperClass, ...rest } = props;
     return mountContainer && (
         <RcMenu
             ref={ref}
             prefixCls={clsx(styles.menu, props.className)}
             getPopupContainer={() => mountContainer}
-            {...props}
-            className={props.wrapperClass}
+            {...rest}
+            className={wrapperClass}
         />
     );
 });

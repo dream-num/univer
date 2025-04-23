@@ -24,8 +24,6 @@ import { useDependency, useObservable } from '@univerjs/ui';
 import React, { useCallback, useMemo } from 'react';
 import { FilterConditionItems } from '../../models/conditions';
 
-import styles from './index.module.less';
-
 /**
  * Filter by conditions.
  */
@@ -75,17 +73,29 @@ export function FilterByCondition(props: { model: ByConditionsModel }) {
     }
 
     return (
-        <div className={styles.sheetsFilterPanelConditionsContainer}>
+        <div
+            data-univer-comp-sheets-filter-panel-conditions-container
+            className="univer-flex univer-h-full univer-flex-col"
+        >
             {/* primary condition */}
             {(condition && formParams) && (
                 <>
                     <Select value={condition.operator} options={primaryOptions} onChange={onPrimaryConditionChange} />
                     {FilterConditionItems.getItemByOperator(condition.operator).numOfParameters !== 0
                         ? (
-                            <div className={styles.sheetsFilterPanelConditionsContainerInner}>
+                            <div
+                                data-univer-comp-sheets-filter-panel-conditions-container-inner
+                                className={`
+                                  univer-flex-grow univer-overflow-hidden univer-rounded-md univer-border
+                                  univer-border-gray-200 univer-p-2
+                                `}
+                            >
                                 {condition.numOfParameters >= 1 && renderSecondaryCondition(formParams.operator1!, formParams.val1 ?? '', 'operator1')}
                                 {condition.numOfParameters >= 2 && renderSecondaryCondition(formParams.operator2!, formParams.val2 ?? '', 'operator2')}
-                                <div className={styles.sheetsFilterPanelConditionsDesc}>
+                                <div
+                                    data-univer-comp-sheets-filter-panel-conditions-desc
+                                    className="univer-mt-[-6px] univer-text-xs univer-text-gray-500"
+                                >
                                     {localeService.t('sheets-filter.panel.?')}
                                     <br />
                                     {localeService.t('sheets-filter.panel.*')}
@@ -140,9 +150,7 @@ function usePrimaryOptions(localeService: LocaleService): ISelectProps['options'
                 { label: localeService.t(FilterConditionItems.CUSTOM.label), value: FilterConditionItems.CUSTOM.operator },
             ],
         },
-    ] as ISelectProps['options'],
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    [locale, localeService]);
+    ] as ISelectProps['options'], [locale, localeService]);
 }
 
 function useSecondaryOptions(localeService: LocaleService): ISelectProps['options'] {
@@ -150,7 +158,5 @@ function useSecondaryOptions(localeService: LocaleService): ISelectProps['option
 
     return useMemo(() => FilterConditionItems.ALL_CONDITIONS
         .filter((c) => c.numOfParameters !== 2)
-        .map((c) => ({ label: localeService.t(c.label), value: c.operator })) as ISelectProps['options'],
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    [locale, localeService]);
+        .map((c) => ({ label: localeService.t(c.label), value: c.operator })) as ISelectProps['options'], [locale, localeService]);
 }

@@ -72,7 +72,7 @@
         "@univerjs/docs-hyper-link": "workspace:*",
         "@univerjs/docs-ui": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons": "^0.3.2",
+        "@univerjs/icons": "^0.3.21",
         "@univerjs/ui": "workspace:*"
     },
     "devDependencies": {

@@ -790,8 +790,6 @@ describe('Test auto fill rules in controller', () => {
                 bg: {
                     rgb: '#eee',
                 },
-                ht: null,
-                vt: null,
             });
 
             // undo redo
@@ -802,8 +800,6 @@ describe('Test auto fill rules in controller', () => {
                 bg: {
                     rgb: '#eee',
                 },
-                ht: null,
-                vt: null,
             });
 
             // redo
@@ -814,8 +810,6 @@ describe('Test auto fill rules in controller', () => {
                 bg: {
                     rgb: '#eee',
                 },
-                ht: null,
-                vt: null,
             });
         });
     });

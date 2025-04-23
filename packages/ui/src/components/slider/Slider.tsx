@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDropdownProps } from '@univerjs/design';
+import type { IDropdownMenuProps } from '@univerjs/design';
 import { LocaleService } from '@univerjs/core';
 import { Button, clsx, DropdownMenu, Tooltip } from '@univerjs/design';
 import { IncreaseSingle, ReduceSingle } from '@univerjs/icons';
@@ -151,7 +151,7 @@ export function Slider(props: ISliderProps) {
         onChange && onChange(value);
     }
 
-    const items: IDropdownProps['items'] = [{
+    const items: IDropdownMenuProps['items'] = [{
         type: 'radio',
         value: value.toString(),
         options: shortcuts.map((item) => ({ value: item.toString(), label: `${item}%` })),

@@ -22,7 +22,7 @@ import {
     IUndoRedoService,
     IUniverInstanceService,
 } from '@univerjs/core';
-import { SetWorksheetColumnCountMutation, SetWorksheetColumnCountMutationFactory } from '../mutations/set-worksheet-column-count.mutation';
+import { SetWorksheetColumnCountMutation, SetWorksheetColumnCountUndoMutationFactory } from '../mutations/set-worksheet-column-count.mutation';
 import { getSheetCommandTarget } from './utils/target-util';
 
 export const SetWorksheetColumnCountCommand: ICommand = {
@@ -45,7 +45,7 @@ export const SetWorksheetColumnCountCommand: ICommand = {
             columnCount,
         };
 
-        const undoMutationParams = SetWorksheetColumnCountMutationFactory(accessor, redoMutationParams);
+        const undoMutationParams = SetWorksheetColumnCountUndoMutationFactory(accessor, redoMutationParams);
 
         const result = commandService.syncExecuteCommand(SetWorksheetColumnCountMutation.id, redoMutationParams);
 

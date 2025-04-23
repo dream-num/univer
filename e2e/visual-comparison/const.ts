@@ -15,8 +15,8 @@
  */
 
 // eslint-disable-next-line node/prefer-global/process
-export const isCI = !!process.env.CI;
+export const IS_CI = !!process.env.CI;
 
 export function generateSnapshotName(name: string): string {
-    return isCI ? `${name}.ci.png` : `${name}.png`;
+    return IS_CI ? `${name}.ci.png` : `${name}.png`;
 }

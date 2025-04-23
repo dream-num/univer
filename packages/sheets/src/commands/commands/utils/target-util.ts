@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { type IUniverInstanceService, type Nullable, UniverInstanceType, type Workbook, type Worksheet } from '@univerjs/core';
+import type { IUniverInstanceService, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import { UniverInstanceType } from '@univerjs/core';
 
 export function getSheetCommandTargetWorkbook(univerInstanceService: IUniverInstanceService, params: { unitId?: string }): Nullable<{
     workbook: Workbook;
@@ -22,8 +23,8 @@ export function getSheetCommandTargetWorkbook(univerInstanceService: IUniverInst
 }> {
     const { unitId } = params;
     const workbook = unitId
-        ? univerInstanceService.getUniverSheetInstance(unitId)
-        : univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        ? univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET)
+        : univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
 
     if (!workbook) return null;
 
@@ -54,8 +55,8 @@ export function getSheetCommandTarget(univerInstanceService: IUniverInstanceServ
     const { unitId, subUnitId } = params;
 
     const workbook = unitId
-        ? univerInstanceService.getUniverSheetInstance(unitId)
-        : univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        ? univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET)
+        : univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
     if (!workbook) return null;
 
     const worksheet = subUnitId ? workbook.getSheetBySheetId(subUnitId) : workbook.getActiveSheet(true);
@@ -74,7 +75,7 @@ export function getSheetCommandTarget(univerInstanceService: IUniverInstanceServ
 export function getSheetMutationTarget(univerInstanceService: IUniverInstanceService, params: { unitId: string; subUnitId: string }): Nullable<Pick<IResult, 'workbook' | 'worksheet'>> {
     const { unitId, subUnitId } = params;
 
-    const workbook = univerInstanceService.getUniverSheetInstance(unitId);
+    const workbook = univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
     if (!workbook) return null;
 
     const worksheet = workbook.getSheetBySheetId(subUnitId);

@@ -28,3 +28,4 @@ export { FWorkbook } from './f-workbook';
 // eslint-disable-next-line perfectionist/sort-exports
 export type * from './f-univer';
 export { FWorksheet } from './f-worksheet';
+export { covertCellValues } from './utils';

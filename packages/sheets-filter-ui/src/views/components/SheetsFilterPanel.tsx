@@ -24,7 +24,6 @@ import { useCallback, useMemo } from 'react';
 import { of } from 'rxjs';
 import { ChangeFilterByOperation, CloseFilterPanelOperation } from '../../commands/operations/sheets-filter.operation';
 import { FilterBy, SheetsFilterPanelService } from '../../services/sheets-filter-panel.service';
-import styles from './index.module.less';
 import { FilterByCondition } from './SheetsFilterByConditionsPanel';
 import { FilterByValue } from './SheetsFilterByValuesPanel';
 
@@ -70,12 +69,22 @@ export function FilterPanel() {
     const FilterPanelEmbedPointPart = useComponentsOfPart(SheetsUIPart.FILTER_PANEL_EMBED_POINT);
 
     return (
-        <div className={styles.sheetsFilterPanel}>
+        <div
+            data-u-comp-sheets-filter-panel
+            className={`
+              univer-box-border univer-flex univer-h-[432px] univer-w-[312px] univer-flex-col univer-overflow-hidden
+              univer-rounded-lg univer-bg-white univer-p-4 univer-shadow-lg
+              dark:univer-bg-black
+            `}
+        >
             <ComponentContainer
                 components={FilterPanelEmbedPointPart}
                 sharedProps={{ range, colIndex, onClose: onCancel }}
             />
-            <div className={styles.sheetsFilterPanelHeader}>
+            <div
+                data-u-comp-sheets-filter-panel-header
+                className="univer-mb-1 univer-flex-shrink-0 univer-flex-grow-0"
+            >
                 <Segmented
                     value={filterBy}
                     items={items}
@@ -84,7 +93,10 @@ export function FilterPanel() {
             </div>
             {filterByModel
                 ? (
-                    <div className={styles.sheetsFilterPanelContent}>
+                    <div
+                        data-u-comp-sheets-filter-panel-content
+                        className="univer-flex-shrink univer-flex-grow univer-overflow-hidden univer-pt-2"
+                    >
                         {filterBy === FilterBy.VALUES
                             ? <FilterByValue model={filterByModel as ByValuesModel} />
                             : <FilterByCondition model={filterByModel as ByConditionsModel} />}
@@ -93,7 +105,13 @@ export function FilterPanel() {
                 : (
                     <div style={{ flex: 1 }} />
                 )}
-            <div className={styles.sheetsFilterPanelFooter}>
+            <div
+                data-u-comp-sheets-filter-panel-footer
+                className={`
+                  univer-mt-4 univer-inline-flex univer-flex-shrink-0 univer-flex-grow-0 univer-flex-nowrap
+                  univer-justify-between univer-overflow-hidden
+                `}
+            >
                 <Button variant="link" onClick={onClearCriteria} disabled={clearFilterDisabled}>
                     {localeService.t('sheets-filter.panel.clear-filter')}
                 </Button>

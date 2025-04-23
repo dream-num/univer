@@ -15,7 +15,7 @@
  */
 
 import type { ICommandInfo, Workbook } from '@univerjs/core';
-import type { IDropdownProps } from '@univerjs/design';
+import type { IDropdownMenuProps } from '@univerjs/design';
 import { BooleanNumber, DisposableCollection, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { clsx, DropdownMenu } from '@univerjs/design';
 import { CheckMarkSingle, ConvertSingle, EyelashSingle } from '@univerjs/icons';
@@ -126,7 +126,7 @@ export function SheetBarMenu() {
         return () => disposables.dispose();
     }, [setupStatusUpdate, sheetBarService, statusInit, workbook]);
 
-    const items: IDropdownProps['items'] = useMemo(() => menu.map((item) => ({
+    const items: IDropdownMenuProps['items'] = useMemo(() => menu.map((item) => ({
         type: 'item',
         children: (
             <div className="univer-relative univer-box-border univer-pl-6">

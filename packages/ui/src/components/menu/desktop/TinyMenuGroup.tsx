@@ -17,13 +17,11 @@
 import type { IValueOption } from '../../../services/menu/menu';
 import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
 import { convertObservableToBehaviorSubject, LocaleService } from '@univerjs/core';
-import {
-    TinyMenuGroup as DesignTinyMenuGroup,
-} from '@univerjs/design';
-import { useDependency } from '@wendellhu/redi/react-bindings';
+import { TinyMenuGroup as DesignTinyMenuGroup } from '@univerjs/design';
 import { useEffect, useState } from 'react';
 import { combineLatest, of } from 'rxjs';
 import { ComponentManager } from '../../../common';
+import { useDependency } from '../../../utils/di';
 
 interface IUITinyMenuGroupProps {
     item: IMenuSchema;

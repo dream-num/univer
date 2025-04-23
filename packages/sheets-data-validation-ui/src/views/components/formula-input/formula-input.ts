@@ -15,8 +15,8 @@
  */
 
 import type { FormulaInputType } from '@univerjs/data-validation';
-import { BaseFormulaInput } from './base-formula-input';
-import { ListFormulaInput } from './list-formula-input';
+import { BaseFormulaInput } from './BaseFormulaInput';
+import { ListFormulaInput } from './ListFormulaInput';
 
 export const BASE_FORMULA_INPUT_NAME = 'data-validation.formula-input';
 export const LIST_FORMULA_INPUT_NAME = 'data-validation.list-formula-input';

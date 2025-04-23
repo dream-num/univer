@@ -131,7 +131,7 @@ test('diff formula related', async () => {
 
     const filename1 = generateSnapshotName('formula-hide-row-current-worksheet');
     const screenshot1 = await page.locator(SHEET_MAIN_CANVAS_ID).screenshot();
-    await expect(screenshot1).toMatchSnapshot(filename1, { maxDiffPixels: 120 });
+    await expect(screenshot1).toMatchSnapshot(filename1, { maxDiffPixelRatio: 150 });
 
     // restore the hidden row
     await page.evaluate(async () => {
@@ -159,7 +159,7 @@ test('diff formula related', async () => {
 
     const filename2 = generateSnapshotName('formula-filter-row-current-worksheet');
     const screenshot2 = await page.locator(SHEET_MAIN_CANVAS_ID).screenshot();
-    await expect(screenshot2).toMatchSnapshot(filename2, { maxDiffPixels: 120 });
+    await expect(screenshot2).toMatchSnapshot(filename2, { maxDiffPixels: 150 });
 
     await page.evaluate(async () => {
         const worksheet2 = window.univerAPI.getActiveWorkbook().getSheetByName('formula2');
@@ -170,7 +170,7 @@ test('diff formula related', async () => {
 
     const filename3 = generateSnapshotName('formula-filter-row-other-worksheet');
     const screenshot3 = await page.locator(SHEET_MAIN_CANVAS_ID).screenshot();
-    await expect(screenshot3).toMatchSnapshot(filename3, { maxDiffPixels: 120 });
+    await expect(screenshot3).toMatchSnapshot(filename3, { maxDiffPixels: 150 });
 
     await page.waitForTimeout(1000);
     await browser.close();

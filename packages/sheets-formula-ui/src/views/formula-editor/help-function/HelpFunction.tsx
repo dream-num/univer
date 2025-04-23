@@ -19,13 +19,12 @@ import type { IFunctionParam } from '@univerjs/engine-formula';
 import { LocaleService } from '@univerjs/core';
 import { CloseSingle, MoreSingle } from '@univerjs/icons';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
-
 import { RectPopup, useDependency, useEvent, useObservable } from '@univerjs/ui';
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { generateParam } from '../../../services/utils';
 import { useEditorPosition } from '../hooks/use-editor-position';
 import { useFormulaDescribe } from '../hooks/use-formula-describe';
-import { HelpHiddenTip } from './help-hidden-tip';
+import { HelpHiddenTip } from './HelpHiddenTip';
 import styles from './index.module.less';
 
 interface IParamsProps {

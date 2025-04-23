@@ -22,6 +22,7 @@ import { ConfigContext } from '../config-provider/ConfigProvider';
 import { Tooltip } from '../tooltip';
 import styles from './index.module.less';
 
+/** @deprecated */
 export const Menu = React.forwardRef<MenuRef, MenuProps & { wrapperClass?: string }>((props, ref) => {
     const { mountContainer } = useContext(ConfigContext);
     return mountContainer && (
@@ -35,14 +36,17 @@ export const Menu = React.forwardRef<MenuRef, MenuProps & { wrapperClass?: strin
     );
 });
 
+/** @deprecated */
 export function MenuItem(props: MenuItemProps) {
     return <RcMenuItem {...props} />;
 }
 
+/** @deprecated */
 export function SubMenu(props: SubMenuProps) {
     return <RcSubMenu {...props} />;
 }
 
+/** @deprecated */
 export function MenuItemGroup(props: MenuItemGroupProps) {
     return <RcMenuItemGroup {...props} />;
 }

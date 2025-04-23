@@ -30,16 +30,12 @@ import { OpenWatermarkPanelOperation } from '../commands/operations/open-waterma
 import { SaveSnapshotOptions } from '../commands/operations/save-snapshot.operations';
 import { SetEditable } from '../commands/operations/set.editable.operation';
 import { SidebarOperation } from '../commands/operations/sidebar.operation';
-
 import { ThemeOperation } from '../commands/operations/theme.operation';
-
-import { AIButton, FloatButton } from '../components/float-button';
+import { AIButton, FloatButton } from '../components/FloatButton';
 import { ImageDemo } from '../components/Image';
-import { RangeLoading } from '../components/range-loading';
+import { RangeLoading } from '../components/RangeLoading';
 // @ts-ignore
 import VueI18nIcon from '../components/VueI18nIcon.vue';
-// import { TEST_EDITOR_CONTAINER_COMPONENT } from '../views/test-editor/component-name';
-// import { TestEditorContainer } from '../views/test-editor/TestTextEditor';
 import { RecordController } from './local-save/record.controller';
 import { menuSchema } from './menu.schema';
 

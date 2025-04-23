@@ -42,9 +42,7 @@ import { useDependency, useObservable } from '../../../utils/di';
 import { CustomLabel } from '../../custom-label/CustomLabel';
 import { useScrollYOverContainer } from '../../hooks/layout';
 import styles from './index.module.less';
-import { UITinyMenuGroup } from './tiny-menu-group';
-
-// TODO: @jikkai disabled and hidden are not working
+import { UITinyMenuGroup } from './TinyMenuGroup';
 
 /** @deprecated */
 export interface IBaseMenuProps {

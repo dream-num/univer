@@ -18,8 +18,8 @@ import type { IDropdownMenuProps } from '@univerjs/design';
 import { LocaleService } from '@univerjs/core';
 import { Button, clsx, DropdownMenu, Tooltip } from '@univerjs/design';
 import { IncreaseSingle, ReduceSingle } from '@univerjs/icons';
-import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useMemo, useRef, useState } from 'react';
+import { useDependency } from '../../utils/di';
 import styles from './index.module.less';
 
 export interface ISliderProps {

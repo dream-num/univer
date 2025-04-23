@@ -44,6 +44,11 @@ export const buttonVariants = cva(
                   active:univer-bg-primary-700
                   hover:univer-bg-primary-500
                 `,
+                danger: `
+                  univer-border-red-500 univer-bg-red-500 univer-text-white
+                  active:univer-border-red-600 active:univer-bg-red-600
+                  hover:univer-border-red-400 hover:univer-bg-red-400
+                `,
                 text: `
                   univer-border-transparent univer-bg-transparent univer-text-gray-900
                   active:univer-bg-gray-200

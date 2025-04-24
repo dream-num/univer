@@ -42,6 +42,7 @@ import { DeleteCommand, InsertCommand, UpdateCommand } from './commands/commands
 import { DeleteCurrentParagraphCommand, DeleteCustomBlockCommand, DeleteLeftCommand, DeleteRightCommand, MergeTwoParagraphCommand, RemoveHorizontalLineCommand } from './commands/commands/doc-delete.command';
 import { CloseHeaderFooterCommand } from './commands/commands/doc-header-footer.command';
 import { HorizontalLineCommand, InsertHorizontalLineBellowCommand } from './commands/commands/doc-horizontal-line.command';
+import { DocPageSetupCommand } from './commands/commands/doc-page-setup.command';
 import { DocParagraphSettingCommand } from './commands/commands/doc-paragraph-setting.command';
 import { DocSelectAllCommand } from './commands/commands/doc-select-all.command';
 import { IMEInputCommand } from './commands/commands/ime-input.command';
@@ -101,7 +102,6 @@ import { DocParagraphSettingController } from './controllers/doc-paragraph-setti
 import { DocTableController } from './controllers/doc-table.controller';
 import { DocUIController } from './controllers/doc-ui.controller';
 import { DocBackScrollRenderController } from './controllers/render-controllers/back-scroll.render-controller';
-import { DocRenderController } from './controllers/render-controllers/doc.render-controller';
 import { DocChecklistRenderController } from './controllers/render-controllers/doc-checklist.render-controller';
 import { DocClipboardController } from './controllers/render-controllers/doc-clipboard.controller';
 import { DocContextMenuRenderController } from './controllers/render-controllers/doc-contextmenu.render-controller';
@@ -110,6 +110,7 @@ import { DocIMEInputController } from './controllers/render-controllers/doc-ime-
 import { DocInputController } from './controllers/render-controllers/doc-input.controller';
 import { DocResizeRenderController } from './controllers/render-controllers/doc-resize.render-controller';
 import { DocSelectionRenderController } from './controllers/render-controllers/doc-selection-render.controller';
+import { DocRenderController } from './controllers/render-controllers/doc.render-controller';
 import { DocZoomRenderController } from './controllers/render-controllers/zoom.render-controller';
 import { DocClipboardService, IDocClipboardService } from './services/clipboard/clipboard.service';
 import { DocAutoFormatService } from './services/doc-auto-format.service';
@@ -284,6 +285,7 @@ export class UniverDocsUIPlugin extends Plugin {
             InsertOrderListBellowCommand,
             InsertCheckListBellowCommand,
             InsertHorizontalLineBellowCommand,
+            DocPageSetupCommand,
         ].forEach((e) => {
             this.disposeWithMe(this._commandService.registerCommand(e));
         });

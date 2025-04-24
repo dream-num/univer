@@ -18,7 +18,7 @@ import type { IUnitRangeName, Nullable } from '@univerjs/core';
 import type { Editor, IRichTextEditorProps } from '@univerjs/docs-ui';
 import type { ISelectionWithStyle, ISetSelectionsOperationParams } from '@univerjs/sheets';
 import { ICommandService, LocaleService, RichTextBuilder } from '@univerjs/core';
-import { Button, clsx, Dialog, Input, Tooltip } from '@univerjs/design';
+import { Button, Dialog, Input, Tooltip } from '@univerjs/design';
 import { IEditorService, RichTextEditor } from '@univerjs/docs-ui';
 import { deserializeRangeWithSheet, LexerTreeBuilder, matchToken, sequenceNodeType, serializeRange, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { DeleteSingle, IncreaseSingle, SelectRangeSingle } from '@univerjs/icons';
@@ -28,7 +28,6 @@ import { useEffect, useRef, useState } from 'react';
 import { useStateRef } from '../formula-editor/hooks/use-state-ref';
 import { useRangesHighlight } from './hooks/use-ranges-highlight';
 import { useRangeSelectorSelectionChange } from './hooks/use-selection-change';
-import styles from './index.module.less';
 import { verifyRange } from './util';
 import { rangePreProcess } from './utils/range-pre-process';
 
@@ -180,9 +179,18 @@ export function RangeSelectorDialog(props: IRangeSelectorDialogProps) {
             )}
             onClose={onClose}
         >
-            <div ref={scrollbarRef} className={clsx(styles.sheetRangeSelectorDialog, '-univer-mx-6 univer-px-6')}>
+            <div
+                ref={scrollbarRef}
+                className={`
+                  -univer-mx-6 univer-max-h-60 univer-overflow-y-auto univer-px-6 univer-scrollbar-thin
+                  univer-scrollbar-track-transparent univer-scrollbar-thumb-[#73737366]
+                `}
+            >
                 {ranges.map((text, index) => (
-                    <div key={index} className={styles.sheetRangeSelectorDialogItem}>
+                    <div
+                        key={index}
+                        className="univer-mb-2 univer-flex univer-items-center univer-justify-start univer-gap-4"
+                    >
                         <Input
                             className="univer-w-full"
                             placeholder={localeService.t('rangeSelector.placeHolder')}
@@ -191,7 +199,12 @@ export function RangeSelectorDialog(props: IRangeSelectorDialogProps) {
                             onChange={(value) => handleRangeInput(index, value)}
                             style={{ borderColor: focusIndex === index ? 'rgb(var(--primary-color))' : undefined }}
                         />
-                        {ranges.length > 1 && <DeleteSingle className={styles.sheetRangeSelectorDialogItemDelete} onClick={() => handleRangeRemove(index)} />}
+                        {ranges.length > 1 && (
+                            <DeleteSingle
+                                className="univer-cursor-pointer"
+                                onClick={() => handleRangeRemove(index)}
+                            />
+                        )}
                     </div>
                 ))}
                 {ranges.length < maxRangeCount && (
@@ -320,7 +333,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
                         }}
                         icon={(
                             <Tooltip title={localeService.t('rangeSelector.buttonTooltip')} placement="bottom">
-                                <SelectRangeSingle className={styles.sheetRangeSelectorIcon} onClick={handleOpenModal} />
+                                <SelectRangeSingle className="univer-cursor-pointer" onClick={handleOpenModal} />
                             </Tooltip>
                         )}
                     />

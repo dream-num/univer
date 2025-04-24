@@ -104,6 +104,19 @@ const locale: typeof zhCN = {
         checkList: 'لیست وظیفه',
         insertBellow: 'درج در پایین',
     },
+    'page-settings': {
+        'paper-size': 'اندازه کاغذ',
+        orientation: 'جهت',
+        portrait: 'عمودی',
+        landscape: 'افقی',
+        'custom-paper-size': 'اندازه کاغذ سفارشی',
+        top: 'بالا',
+        bottom: 'پایین',
+        left: 'چپ',
+        right: 'راست',
+        cancel: 'لغو',
+        confirm: 'تایید',
+    },
 };
 
 export default locale;

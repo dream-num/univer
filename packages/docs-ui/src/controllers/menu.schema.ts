@@ -20,8 +20,8 @@ import { DocCopyCommand, DocCopyCurrentParagraphCommand, DocCutCommand, DocCutCu
 import { DeleteCurrentParagraphCommand, DeleteLeftCommand } from '../commands/commands/doc-delete.command';
 import { OpenHeaderFooterPanelCommand } from '../commands/commands/doc-header-footer.command';
 import { HorizontalLineCommand, InsertHorizontalLineBellowCommand } from '../commands/commands/doc-horizontal-line.command';
-import { ResetInlineFormatTextBackgroundColorCommand, SetInlineFormatBoldCommand, SetInlineFormatFontFamilyCommand, SetInlineFormatFontSizeCommand, SetInlineFormatItalicCommand, SetInlineFormatStrikethroughCommand, SetInlineFormatSubscriptCommand, SetInlineFormatSuperscriptCommand, SetInlineFormatTextBackgroundColorCommand, SetInlineFormatTextColorCommand, SetInlineFormatUnderlineCommand } from '../commands/commands/inline-format.command';
 
+import { ResetInlineFormatTextBackgroundColorCommand, SetInlineFormatBoldCommand, SetInlineFormatFontFamilyCommand, SetInlineFormatFontSizeCommand, SetInlineFormatItalicCommand, SetInlineFormatStrikethroughCommand, SetInlineFormatSubscriptCommand, SetInlineFormatSuperscriptCommand, SetInlineFormatTextBackgroundColorCommand, SetInlineFormatTextColorCommand, SetInlineFormatUnderlineCommand } from '../commands/commands/inline-format.command';
 import { BulletListCommand, CheckListCommand, InsertBulletListBellowCommand, InsertCheckListBellowCommand, InsertOrderListBellowCommand, OrderListCommand } from '../commands/commands/list.command';
 import { AlignCenterCommand, AlignJustifyCommand, AlignLeftCommand, AlignRightCommand } from '../commands/commands/paragraph-align.command';
 import { H1HeadingCommand, H2HeadingCommand, H3HeadingCommand, H4HeadingCommand, H5HeadingCommand, NormalTextHeadingCommand, SetParagraphNamedStyleCommand } from '../commands/commands/set-heading.command';
@@ -30,6 +30,7 @@ import { DocTableDeleteColumnsCommand, DocTableDeleteRowsCommand, DocTableDelete
 import { DocTableInsertColumnLeftCommand, DocTableInsertColumnRightCommand, DocTableInsertRowAboveCommand, DocTableInsertRowBellowCommand } from '../commands/commands/table/doc-table-insert.command';
 import { DocCreateTableOperation } from '../commands/operations/doc-create-table.operation';
 import { DocParagraphSettingPanelOperation } from '../commands/operations/doc-paragraph-setting-panel.operation';
+import { DocOpenPageSettingCommand } from '../commands/operations/open-page-setting.operation';
 import {
     CopyMenuFactory,
     CutMenuFactory,
@@ -66,6 +67,7 @@ import {
     InsertTableMenuFactory,
     ItalicMenuItemFactory,
     OrderListMenuItemFactory,
+    PageSettingMenuItemFactory,
     ResetBackgroundColorMenuItemFactory,
     StrikeThroughMenuItemFactory,
     SubscriptMenuItemFactory,
@@ -176,6 +178,10 @@ export const menuSchema: MenuSchemaType = {
         [SwitchDocModeCommand.id]: {
             order: 11,
             menuItemFactory: DocSwitchModeMenuItemFactory,
+        },
+        [DocOpenPageSettingCommand.id]: {
+            order: 12,
+            menuItemFactory: PageSettingMenuItemFactory,
         },
     },
     [ContextMenuPosition.MAIN_AREA]: {

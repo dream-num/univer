@@ -104,6 +104,19 @@ const locale: typeof zhCN = {
         checkList: '任務列表',
         insertBellow: '在下方插入',
     },
+    'page-settings': {
+        'paper-size': '紙張大小',
+        orientation: '方向',
+        portrait: '縱向',
+        landscape: '橫向',
+        'custom-paper-size': '自定義紙張大小',
+        top: '上',
+        bottom: '下',
+        left: '左',
+        right: '右',
+        cancel: '取消',
+        confirm: '確認',
+    },
 };
 
 export default locale;

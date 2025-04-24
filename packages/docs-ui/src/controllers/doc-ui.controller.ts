@@ -56,6 +56,7 @@ import {
     UnderlineShortCut,
 } from '../shortcuts/toolbar.shortcut';
 import { DocFooter } from '../views/doc-footer';
+import { PAGE_SETTING_COMPONENT_ID, PageSettings } from '../views/page-settings';
 import { DocSideMenu } from '../views/side-menu';
 import { menuSchema } from './menu.schema';
 
@@ -88,6 +89,8 @@ export class DocUIController extends Disposable {
         this.disposeWithMe(componentManager.register('doc.paragraph.menu', ParagraphMenu));
         this.disposeWithMe(componentManager.register('CutSingle', CutSingle));
         this.disposeWithMe(componentManager.register('DeleteSingle', DeleteSingle));
+        this.disposeWithMe(componentManager.register(PAGE_SETTING_COMPONENT_ID, PageSettings));
+        this.disposeWithMe(componentManager.register('DocumentSettingSingle', CutSingle));
     }
 
     private _initUiParts() {

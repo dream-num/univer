@@ -60,6 +60,7 @@ import { AlignCenterCommand, AlignJustifyCommand, AlignLeftCommand, AlignOperati
 import { SetParagraphNamedStyleCommand } from '../../commands/commands/set-heading.command';
 import { SwitchDocModeCommand } from '../../commands/commands/switch-doc-mode.command';
 import { DocCreateTableOperation } from '../../commands/operations/doc-create-table.operation';
+import { DocOpenPageSettingCommand } from '../../commands/operations/open-page-setting.operation';
 import { getCommandSkeleton } from '../../commands/util';
 import { COLOR_PICKER_COMPONENT } from '../../components/color-picker';
 import { FONT_FAMILY_COMPONENT, FONT_FAMILY_ITEM_COMPONENT } from '../../components/font-family';
@@ -1095,4 +1096,14 @@ export function getParagraphStyleAtCursor(accessor: IAccessor) {
     }
 
     return null;
+}
+
+export function PageSettingMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    return {
+        id: DocOpenPageSettingCommand.id,
+        type: MenuItemType.BUTTON,
+        icon: 'DocumentSettingSingle',
+        tooltip: 'toolbar.pageSetup',
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+    };
 }

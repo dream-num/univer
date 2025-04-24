@@ -16,10 +16,17 @@
 
 import type { ILocale } from '../../locale/interface';
 
-import React, { useContext } from 'react';
+import React, { useContext, useRef } from 'react';
 import { Button } from '../button/Button';
 import { ConfigContext } from '../config-provider/ConfigProvider';
 import { Dialog } from '../dialog/Dialog';
+
+export interface IConfirmChildrenProps {
+    hooks: {
+        beforeConfirm?: () => Record<string, any>;
+        beforeClose?: () => Record<string, any>;
+    };
+}
 
 export interface IConfirmProps {
     children: React.ReactNode;
@@ -48,12 +55,12 @@ export interface IConfirmProps {
     /**
      * Callback when the Confirm is closed.
      */
-    onClose?: () => void;
+    onClose?: (result?: Record<string, any>) => void;
 
     /**
      * Callback when the Confirm is confirmed.
      */
-    onConfirm?: () => void;
+    onConfirm?: (result?: Record<string, any>) => void;
 
     /**
      * The width of the Confirm.
@@ -79,6 +86,15 @@ export function Confirm(props: IConfirmProps) {
     const { children, visible = false, title, cancelText, confirmText, width, onClose, onConfirm } = props;
 
     const { locale } = useContext(ConfigContext);
+    const hooks = useRef<IConfirmChildrenProps['hooks']>({});
+
+    const childrenWithHooks = React.Children.map(children, (child) => {
+        if (React.isValidElement(child)) {
+            return React.cloneElement(child, { hooks: hooks.current });
+        }
+
+        return child;
+    });
 
     return (
         <Dialog
@@ -90,14 +106,38 @@ export function Confirm(props: IConfirmProps) {
                     locale={locale!}
                     cancelText={cancelText}
                     confirmText={confirmText}
-                    onClose={onClose}
-                    onConfirm={onConfirm}
+                    onClose={() => {
+                        const beforeClose = hooks.current.beforeClose;
+                        if (beforeClose) {
+                            const result = beforeClose();
+                            if (result.cancel) {
+                                return;
+                            }
+                            onClose?.(result);
+                            return;
+                        }
+
+                        onClose?.();
+                    }}
+                    onConfirm={() => {
+                        const beforeConfirm = hooks.current.beforeConfirm;
+                        if (beforeConfirm) {
+                            const result = beforeConfirm();
+                            if (result.cancel) {
+                                return;
+                            }
+                            onConfirm?.(result);
+                            return;
+                        }
+
+                        onConfirm?.();
+                    }}
                 />
             )}
             onClose={onClose}
             width={width}
         >
-            {children}
+            {childrenWithHooks}
         </Dialog>
     );
 }

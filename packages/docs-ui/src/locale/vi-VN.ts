@@ -104,6 +104,19 @@ const locale: typeof zhCN = {
         checkList: 'Danh sách công việc',
         insertBellow: 'Chèn dưới',
     },
+    'page-settings': {
+        'paper-size': 'Kích thước giấy',
+        orientation: 'Hướng',
+        portrait: 'Dọc',
+        landscape: 'Ngang',
+        'custom-paper-size': 'Kích thước giấy tùy chỉnh',
+        top: 'Trên',
+        bottom: 'Dưới',
+        left: 'Trái',
+        right: 'Phải',
+        cancel: 'Hủy',
+        confirm: 'Xác nhận',
+    },
 };
 
 export default locale;

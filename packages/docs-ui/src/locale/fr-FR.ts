@@ -104,6 +104,19 @@ const locale: typeof enUS = {
         checkList: 'Liste de tâches',
         insertBellow: 'Insérer dans le bas',
     },
+    'page-settings': {
+        'paper-size': 'Format du papier',
+        orientation: 'Orientation',
+        portrait: 'Portrait',
+        landscape: 'Paysage',
+        'custom-paper-size': 'Format de papier personnalisé',
+        top: 'Haut',
+        bottom: 'Bas',
+        left: 'Gauche',
+        right: 'Droite',
+        cancel: 'Annuler',
+        confirm: 'Confirmer',
+    },
 };
 
 export default locale;

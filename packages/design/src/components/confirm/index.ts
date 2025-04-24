@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export { Confirm, type IConfirmProps } from './Confirm';
+export { Confirm, type IConfirmChildrenProps, type IConfirmProps } from './Confirm';

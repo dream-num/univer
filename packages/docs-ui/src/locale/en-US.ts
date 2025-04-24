@@ -104,6 +104,19 @@ const locale: typeof zhCN = {
         checkList: 'Task list',
         insertBellow: 'Insert below',
     },
+    'page-settings': {
+        'paper-size': 'Paper size',
+        orientation: 'Orientation',
+        portrait: 'Portrait',
+        landscape: 'Landscape',
+        'custom-paper-size': 'Custom Paper size',
+        top: 'Top',
+        bottom: 'Bottom',
+        left: 'Left',
+        right: 'Right',
+        cancel: 'Cancel',
+        confirm: 'Confirm',
+    },
 };
 
 export default locale;

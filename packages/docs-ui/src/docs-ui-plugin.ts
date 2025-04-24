@@ -92,6 +92,7 @@ import {
 import { DocTableTabCommand } from './commands/commands/table/doc-table-tab.command';
 import { MoveCursorOperation, MoveSelectionOperation } from './commands/operations/doc-cursor.operation';
 import { DocParagraphSettingPanelOperation } from './commands/operations/doc-paragraph-setting-panel.operation';
+import { DocOpenPageSettingCommand } from './commands/operations/open-page-setting.operation';
 import { SetDocZoomRatioOperation } from './commands/operations/set-doc-zoom-ratio.operation';
 import { AppUIController } from './controllers';
 import { defaultPluginConfig, DOCS_UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
@@ -286,6 +287,7 @@ export class UniverDocsUIPlugin extends Plugin {
             InsertCheckListBellowCommand,
             InsertHorizontalLineBellowCommand,
             DocPageSetupCommand,
+            DocOpenPageSettingCommand,
         ].forEach((e) => {
             this.disposeWithMe(this._commandService.registerCommand(e));
         });

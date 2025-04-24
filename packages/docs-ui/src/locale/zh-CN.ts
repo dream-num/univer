@@ -102,6 +102,19 @@ const locale = {
         checkList: '任务列表',
         insertBellow: '在下方插入',
     },
+    'page-settings': {
+        'paper-size': '纸张大小',
+        orientation: '方向',
+        portrait: '纵向',
+        landscape: '横向',
+        'custom-paper-size': '自定义纸张大小',
+        top: '上',
+        bottom: '下',
+        left: '左',
+        right: '右',
+        cancel: '取消',
+        confirm: '确认',
+    },
 };
 
 export default locale;

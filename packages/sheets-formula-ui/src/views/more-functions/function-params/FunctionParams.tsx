@@ -16,8 +16,6 @@
 
 import React from 'react';
 
-import styles from './index.module.less';
-
 interface IParamsProps {
     className?: string;
     title?: string | React.ReactElement;
@@ -27,15 +25,18 @@ interface IParamsProps {
 export function FunctionParams(props: IParamsProps) {
     const { className, value, title } = props;
     return (
-        <div className={styles.formulaFunctionParams}>
-            <div className={`
-              ${styles.formulaFunctionParamsTitle}
-              ${className}
-            `}
+        <div className="univer-mb-2 univer-text-xs">
+            <div
+                className={`
+                  univer-mb-2 univer-font-medium univer-text-gray-500
+                  ${className}
+                `}
             >
                 {title}
             </div>
-            <div className={styles.formulaFunctionParamsDetail}>{value}</div>
+            <div className="univer-font-normal univer-text-gray-900">
+                {value}
+            </div>
         </div>
     );
 }

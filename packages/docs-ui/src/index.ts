@@ -150,4 +150,5 @@ export { MoveCursorOperation } from './commands/operations/doc-cursor.operation'
 export { DocSelectAllCommand } from './commands/commands/doc-select-all.command';
 export { type ISetDocZoomRatioOperationParams, SetDocZoomRatioOperation } from './commands/operations/set-doc-zoom-ratio.operation';
 export { SetParagraphNamedStyleCommand } from './commands/commands/set-heading.command';
+export { convertBodyToHtml } from './services/clipboard/udm-to-html/convertor';
 // #endregion

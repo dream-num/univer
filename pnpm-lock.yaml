@@ -1040,8 +1040,8 @@ importers:
         specifier: 0.1.45
         version: 0.1.45(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
       '@wendellhu/redi':
-        specifier: 0.17.1
-        version: 0.17.1
+        specifier: 0.18.0
+        version: 0.18.0
       async-lock:
         specifier: ^1.4.1
         version: 1.4.1
@@ -5941,6 +5941,9 @@ packages:
 
   '@wendellhu/redi@0.17.1':
     resolution: {integrity: sha512-wKEa1+kJi2KdRWerX6wxCqOdcyVfRSqopp9/BrWxEom5JXElUWNepgMB0Kvg0r+93BNTj0IgyNN7+bIGg11l+g==}
+
+  '@wendellhu/redi@0.18.0':
+    resolution: {integrity: sha512-xYpa1d2BPZ/NO9URpS1h+l310mKYaMUQbFMZ4YYguq6M0fLWGR7ZYclnQEE4zpfl8ys5wprx5wro06Sfqnkb/A==}
 
   '@xtuc/ieee754@1.2.0':
     resolution: {integrity: sha512-DX8nKgqcGwsc0eJSqYt5lwP4DH5FlHnmuWWBRy7X0NcaGR0ZtuyeESgMwTYVEtxmsNGY+qit4QYT/MIYTOTPeA==}
@@ -14184,6 +14187,8 @@ snapshots:
       '@xtuc/long': 4.2.2
 
   '@wendellhu/redi@0.17.1': {}
+
+  '@wendellhu/redi@0.18.0': {}
 
   '@xtuc/ieee754@1.2.0': {}
 

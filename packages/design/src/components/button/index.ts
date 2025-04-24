@@ -15,3 +15,4 @@
  */
 
 export { Button, type IButtonProps } from './Button';
+export { ButtonGroup, type IButtonGroupProps } from './ButtonGroup';

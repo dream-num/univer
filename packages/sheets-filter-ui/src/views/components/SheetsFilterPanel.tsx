@@ -72,8 +72,8 @@ export function FilterPanel() {
         <div
             data-u-comp-sheets-filter-panel
             className={`
-              univer-box-border univer-flex univer-h-[432px] univer-w-[312px] univer-flex-col univer-overflow-hidden
-              univer-rounded-lg univer-bg-white univer-p-4 univer-shadow-lg
+              univer-box-border univer-flex univer-h-[432px] univer-w-[312px] univer-flex-col univer-rounded-lg
+              univer-bg-white univer-p-4 univer-shadow-lg
               dark:univer-bg-black
             `}
         >
@@ -95,7 +95,7 @@ export function FilterPanel() {
                 ? (
                     <div
                         data-u-comp-sheets-filter-panel-content
-                        className="univer-flex-shrink univer-flex-grow univer-overflow-hidden univer-pt-2"
+                        className="univer-flex-shrink univer-flex-grow univer-pt-2"
                     >
                         {filterBy === FilterBy.VALUES
                             ? <FilterByValue model={filterByModel as ByValuesModel} />

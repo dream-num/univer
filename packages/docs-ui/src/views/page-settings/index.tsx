@@ -16,7 +16,7 @@
 
 import type { DocumentDataModel, ISize, PaperType } from '@univerjs/core';
 import type { IConfirmChildrenProps } from '@univerjs/design';
-import { IUniverInstanceService, LocaleService, PAGE_SIZE, PageOrientType, UniverInstanceType } from '@univerjs/core';
+import { IUniverInstanceService, LocaleService, PAGE_SIZE, PageOrientType, PAPER_TYPES, UniverInstanceType } from '@univerjs/core';
 import { InputNumber, Radio, Select } from '@univerjs/design';
 import { useDependency } from '@univerjs/ui';
 import React, { useEffect, useState } from 'react';
@@ -98,7 +98,7 @@ export function PageSettings(props: IConfirmChildrenProps) {
     };
 
     return (
-        <div className="univer-flex univer-flex-col univer-gap-4">
+        <div className="univer-theme univer-flex univer-flex-col univer-gap-4">
             <div className="univer-flex univer-flex-col univer-gap-2">
                 <label className="univer-text-sm univer-font-medium univer-text-[#0E111E]">
                     {localeService.t('page-settings.paper-size')}
@@ -106,11 +106,10 @@ export function PageSettings(props: IConfirmChildrenProps) {
                 <Select
                     value={settings.paperSize}
                     onChange={handlePaperSizeChange}
-                    options={[
-                        { label: 'A4', value: 'A4' },
-                        { label: 'A3', value: 'A3' },
-                        { label: 'Letter', value: 'Letter' },
-                    ]}
+                    options={PAPER_TYPES.map((p) => ({
+                        label: localeService.t(`page-settings.page-size.${p.toLocaleLowerCase()}`),
+                        value: p,
+                    }))}
                 />
             </div>
 

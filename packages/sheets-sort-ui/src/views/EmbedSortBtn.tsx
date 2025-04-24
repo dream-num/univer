@@ -21,7 +21,6 @@ import { getSheetCommandTarget } from '@univerjs/sheets';
 import { useDependency } from '@univerjs/ui';
 import React, { useCallback } from 'react';
 import { SheetsSortUIService } from '../services/sheets-sort-ui.service';
-import styles from './index.module.less';
 
 export interface IEmbedSortBtnProps {
     range: IRange;
@@ -58,22 +57,26 @@ export default function EmbedSortBtn(props: IEmbedSortBtnProps) {
         >
             <div
                 className={`
-                  ${styles.embedSortBtn}
-                  ${styles.embedSortBtnAsc}
+                  univer-flex univer-w-[140px] univer-cursor-default univer-items-center univer-justify-center
+                  univer-gap-1 univer-rounded-l-[6px] univer-border univer-border-solid univer-border-gray-100
+                  univer-px-0 univer-py-[6px] univer-text-[13px] univer-font-normal
+                  hover:univer-bg-gray-100
                 `}
                 onClick={() => apply(true)}
             >
-                <AscendingSingle className={styles.embedSortBtnIcon} />
+                <AscendingSingle className="univer-mr-1 univer-text-base univer-text-[#1e222b]" />
                 {localeService.t('sheets-sort.general.sort-asc')}
             </div>
             <div
                 className={`
-                  ${styles.embedSortBtn}
-                  ${styles.embedSortBtnDesc}
+                  univer-ml-[-1px] univer-flex univer-w-[140px] univer-cursor-default univer-items-center
+                  univer-justify-center univer-gap-1 univer-rounded-r-[6px] univer-border univer-border-solid
+                  univer-border-gray-100 univer-px-0 univer-py-[6px] univer-text-[13px] univer-font-normal
+                  hover:univer-bg-gray-100
                 `}
                 onClick={() => apply(false)}
             >
-                <DescendingSingle className={styles.embedSortBtnIcon} />
+                <DescendingSingle className="univer-mr-1 univer-text-base univer-text-[#1e222b]" />
                 {localeService.t('sheets-sort.general.sort-desc')}
             </div>
         </div>

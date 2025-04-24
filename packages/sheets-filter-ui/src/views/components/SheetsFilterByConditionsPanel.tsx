@@ -62,7 +62,7 @@ export function FilterByCondition(props: { model: ByConditionsModel }) {
                         <Radio value="OR">{localeService.t('sheets-filter.panel.or')}</Radio>
                     </RadioGroup>
                 )}
-                <Select value={operator} options={secondaryOptions} onChange={(operator) => onFormParamsChange({ [name]: operator as FilterOperator })} />
+                <Select className="univer-mb-2 univer-w-full" value={operator} options={secondaryOptions} onChange={(operator) => onFormParamsChange({ [name]: operator as FilterOperator })} />
                 {shouldRenderInput && (
                     <div>
                         <Input value={val} placeholder={placeholder} onChange={(value) => onFormParamsChange({ [name === 'operator1' ? 'val1' : 'val2']: value })} />
@@ -86,15 +86,15 @@ export function FilterByCondition(props: { model: ByConditionsModel }) {
                             <div
                                 data-univer-comp-sheets-filter-panel-conditions-container-inner
                                 className={`
-                                  univer-flex-grow univer-overflow-hidden univer-rounded-md univer-border
-                                  univer-border-gray-200 univer-p-2
+                                  univer-mt-2 univer-flex-grow univer-overflow-hidden univer-rounded-md univer-border
+                                  univer-border-solid univer-border-gray-200 univer-p-2
                                 `}
                             >
                                 {condition.numOfParameters >= 1 && renderSecondaryCondition(formParams.operator1!, formParams.val1 ?? '', 'operator1')}
                                 {condition.numOfParameters >= 2 && renderSecondaryCondition(formParams.operator2!, formParams.val2 ?? '', 'operator2')}
                                 <div
                                     data-univer-comp-sheets-filter-panel-conditions-desc
-                                    className="univer-mt-[-6px] univer-text-xs univer-text-gray-500"
+                                    className="univer-mt-[6px] univer-text-xs univer-text-gray-500"
                                 >
                                     {localeService.t('sheets-filter.panel.?')}
                                     <br />

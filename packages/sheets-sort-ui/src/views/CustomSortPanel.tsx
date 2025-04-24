@@ -16,15 +16,14 @@
 
 import type { IRange, Nullable } from '@univerjs/core';
 import type { IOrderRule } from '@univerjs/sheets-sort';
+import type { ICustomSortState } from '../services/sheets-sort-ui.service';
 import { LocaleService, LocaleType, throttle } from '@univerjs/core';
-import { Button, Checkbox, clsx, DraggableList, Dropdown, Radio, RadioGroup } from '@univerjs/design';
+import { Button, Checkbox, DraggableList, Dropdown, Radio, RadioGroup } from '@univerjs/design';
 import { CheckMarkSingle, DeleteEmptySingle, IncreaseSingle, MoreDownSingle, SequenceSingle } from '@univerjs/icons';
 import { SheetsSortService, SortType } from '@univerjs/sheets-sort';
-import { useDependency } from '@univerjs/ui';
+import { useDependency, useObservable } from '@univerjs/ui';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { SheetsSortUIService } from '../services/sheets-sort-ui.service';
-
-import styles from './index.module.less';
 
 export interface ICustomSortPanelProps {
     range: IRange;
@@ -33,18 +32,25 @@ export interface ICustomSortPanelProps {
 
 export function CustomSortPanel() {
     const sheetsSortUIService = useDependency(SheetsSortUIService);
+    const state = useObservable(sheetsSortUIService.customSortState$);
+
+    if (!state || !state.location) {
+        return null;
+    }
+
+    return <CustomSortPanelImpl state={state} />;
+}
+
+function CustomSortPanelImpl({ state }: { state: ICustomSortState }) {
     const sheetsSortService = useDependency(SheetsSortService);
     const localeService = useDependency(LocaleService);
+    const sheetsSortUIService = useDependency(SheetsSortUIService);
 
     const [hasTitle, setHasTitle] = useState(false);
     const [scrollPosition, setScrollPosition] = useState(0);
     const listEndRef = useRef<HTMLDivElement>(null);
 
-    const state = sheetsSortUIService.customSortState();
-    if (!state || !state.location) {
-        return null;
-    }
-    const { range, unitId, subUnitId } = state.location;
+    const { range, unitId, subUnitId } = state.location!;
 
     const titles = sheetsSortUIService.getTitles(hasTitle);
 
@@ -104,36 +110,42 @@ export function CustomSortPanel() {
     const dragList = list.map((item) => ({ ...item, id: `${item.colIndex}` }));
 
     return (
-        <div className={styles.customSortPanelContainer}>
-            <div className={styles.customSortPanelContent} onMouseDown={(e) => { e.stopPropagation(); }}>
-                <div className={styles.customSortPanelExt}>
-                    <div className={styles.firstRowCheck}>
-                        <Checkbox checked={hasTitle} onChange={(value) => setTitle(!!value)}>
-                            {localeService.t('sheets-sort.dialog.first-row-check')}
-                        </Checkbox>
-                    </div>
+        <div>
+            <div onMouseDown={(e) => { e.stopPropagation(); }}>
+                <div className="univer-flex univer-items-center univer-justify-between">
+                    <Checkbox checked={hasTitle} onChange={(value) => setTitle(!!value)}>
+                        {localeService.t('sheets-sort.dialog.first-row-check')}
+                    </Checkbox>
                     {canNew
                         ? (
-                            <div className={styles.addCondition} onClick={newItem}>
+                            <div
+                                className={`
+                                  univer-flex univer-cursor-pointer univer-select-none univer-items-center
+                                  univer-text-base
+                                `}
+                                onClick={newItem}
+                            >
                                 <IncreaseSingle />
-                                <span className={styles.addConditionText}>{localeService.t('sheets-sort.dialog.add-condition')}</span>
+                                <span className="univer-ml-1.5">{localeService.t('sheets-sort.dialog.add-condition')}</span>
                             </div>
                         )
                         : (
                             <div
                                 className={`
-                                  ${styles.addCondition}
-                                  ${styles.addConditionDisable}
+                                  univer-flex univer-cursor-pointer univer-select-none univer-items-center
+                                  univer-text-base univer-text-blue-500
+                                  disabled:univer-cursor-not-allowed disabled:univer-divide-opacity-30
+                                  disabled:univer-text-gray-800
                                 `}
                             >
                                 <IncreaseSingle />
-                                <span className={styles.addConditionText}>{localeService.t('sheets-sort.dialog.add-condition')}</span>
+                                <span className="univer-ml-1.5 univer-text-xs">{localeService.t('sheets-sort.dialog.add-condition')}</span>
                             </div>
                         )}
 
                 </div>
                 <div
-                    className={styles.conditionList}
+                    className="univer-max-h-[310px] univer-overflow-y-auto univer-overflow-x-hidden"
                     onScroll={(e) => {
                         const position = e.currentTarget.scrollTop;
                         setScrollPosition(position);
@@ -144,7 +156,7 @@ export function CustomSortPanel() {
                         list={dragList}
                         onListChange={setList}
                         idKey="id"
-                        draggableHandle={`.${styles.customSortPanelItemHandler}`}
+                        draggableHandle="[data-u-comp-sort-panel-item-handler]"
                         itemRender={(item) => (
                             <SortOptionItem
                                 titles={titles}
@@ -159,15 +171,15 @@ export function CustomSortPanel() {
                     />
                 </div>
             </div>
-            <div className={styles.customSortPanelFooter}>
+            <div className="univer-mt-5 univer-flex univer-justify-end">
                 <Button
-                    className={styles.customSortPanelFooterBtn}
+                    className="univer-ml-3"
                     onClick={() => cancel()}
                 >
                     {localeService.t('sheets-sort.dialog.cancel')}
                 </Button>
                 <Button
-                    className={styles.customSortPanelFooterBtn}
+                    className="univer-ml-3"
                     variant="primary"
                     onClick={() => apply(list, hasTitle)}
                 >
@@ -211,28 +223,52 @@ export function SortOptionItem(props: ISortOptionItemProps) {
     const showDelete = list.length > 1;
     const itemLabel = titles.find((title) => title.index === item.colIndex)?.label;
 
-    const radioClass = localeService.getCurrentLocale() === LocaleType.ZH_CN ? styles.customSortPanelItemOrderRadioCn : styles.customSortPanelItemOrderRadio;
+    const radioClass = localeService.getCurrentLocale() === LocaleType.ZH_CN ? 'univer-flex univer-px-5' : 'univer-flex univer-px-2.5';
     return (
-        <div className={styles.customSortPanelItem}>
-            <div className={styles.customSortPanelItemHead}>
-                <div className={styles.customSortPanelItemHandler}>
+        <div className="univer-flex univer-items-center">
+            <div className="univer-flex univer-items-center">
+                <div
+                    data-u-comp-sort-panel-item-handler
+                    className={`
+                      univer-flex univer-cursor-pointer univer-items-center univer-justify-center univer-text-base
+                      univer-text-gray-700
+                    `}
+                >
                     <SequenceSingle />
                 </div>
-                <div className={styles.customSortPanelItemColumn}>
+                <div>
+                    {/* TODO@wzhudev: change it to the Select component later. */}
                     <Dropdown
                         align="start"
                         overlay={(
-                            <ul className={clsx(styles.customSortColMenu, 'univer-theme')}>
+                            <ul
+                                className={`
+                                  univer-my-0 univer-box-border univer-grid univer-max-h-[310px] univer-items-center
+                                  univer-gap-1 univer-overflow-y-auto univer-overflow-x-hidden univer-rounded-lg
+                                  univer-p-1 univer-theme univer-border univer-bg-white univer-text-base
+                                  univer-shadow-lg
+                                `}
+                            >
                                 {availableMenu.map((menuItem) => (
                                     <li
                                         key={menuItem.index}
                                         onClick={() => handleChangeColIndex(menuItem)}
-                                        className={styles.customSortColMenuItem}
+                                        className={`
+                                          univer-relative univer-box-border univer-flex univer-h-7 univer-cursor-pointer
+                                          univer-list-none univer-items-center univer-justify-between univer-rounded
+                                          univer-px-2 univer-text-sm univer-transition-all
+                                          hover:univer-bg-slate-100
+                                        `}
                                     >
-                                        <span className={styles.customSortColMenuItemDesc}>
+                                        <span
+                                            className={`
+                                              univer-max-w-[220px] univer-overflow-hidden univer-text-ellipsis
+                                              univer-whitespace-nowrap
+                                            `}
+                                        >
                                             {menuItem.label}
                                         </span>
-                                        <span className={styles.customSortColMenuItemCheck}>
+                                        <span>
                                             {menuItem.index === item.colIndex && (
                                                 <CheckMarkSingle />
                                             )}
@@ -244,14 +280,27 @@ export function SortOptionItem(props: ISortOptionItemProps) {
                         open={visible}
                         onOpenChange={onVisibleChange}
                     >
-                        <div className={styles.customSortPanelItemColumnInput}>
-                            <span className={styles.customSortPanelItemColumnInputText}>{itemLabel}</span>
-                            <MoreDownSingle className={styles.customSortPanelItemColumnInputDropdown} />
+                        <div
+                            className={`
+                              univer-ml-2 univer-flex univer-w-[236px] univer-items-center univer-justify-between
+                              univer-overflow-hidden univer-rounded-md univer-border univer-border-gray-200
+                              univer-px-2.5 univer-py-1.5 univer-text-sm univer-text-gray-900
+                            `}
+                        >
+                            <span
+                                className={`
+                                  univer-max-w-[220px] univer-overflow-hidden univer-text-ellipsis
+                                  univer-whitespace-nowrap
+                                `}
+                            >
+                                {itemLabel}
+                            </span>
+                            <MoreDownSingle className="univer-size-4 univer-text-gray-600" />
                         </div>
                     </Dropdown>
                 </div>
             </div>
-            <div className={styles.customSortPanelItemOrder}>
+            <div>
                 <RadioGroup
                     className={radioClass}
                     value={item.type}
@@ -263,8 +312,8 @@ export function SortOptionItem(props: ISortOptionItemProps) {
                     <Radio value={SortType.DESC}>{localeService.t('sheets-sort.general.sort-desc')}</Radio>
                 </RadioGroup>
             </div>
-            <div className={styles.customSortPanelItemRemove}>
-                { showDelete && <DeleteEmptySingle onClick={() => onChange(null, currentIndex)} />}
+            <div className="univer-absolute univer-right-0 univer-cursor-pointer univer-text-sm univer-s-[14px]">
+                {showDelete && <DeleteEmptySingle onClick={() => onChange(null, currentIndex)} />}
             </div>
         </div>
     );

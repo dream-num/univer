@@ -133,7 +133,7 @@ function CustomSortPanelImpl({ state }: { state: ICustomSortState }) {
                             <div
                                 className={`
                                   univer-flex univer-cursor-pointer univer-select-none univer-items-center
-                                  univer-text-base univer-text-blue-500
+                                  univer-text-base univer-text-primary-500
                                   disabled:univer-cursor-not-allowed disabled:univer-divide-opacity-30
                                   disabled:univer-text-gray-800
                                 `}
@@ -156,7 +156,7 @@ function CustomSortPanelImpl({ state }: { state: ICustomSortState }) {
                         list={dragList}
                         onListChange={setList}
                         idKey="id"
-                        draggableHandle="[data-u-comp-sort-panel-item-handler]"
+                        draggableHandle='[data-u-comp="sort-panel-item-handler"]'
                         itemRender={(item) => (
                             <SortOptionItem
                                 titles={titles}
@@ -228,7 +228,7 @@ export function SortOptionItem(props: ISortOptionItemProps) {
         <div className="univer-flex univer-items-center">
             <div className="univer-flex univer-items-center">
                 <div
-                    data-u-comp-sort-panel-item-handler
+                    data-u-comp="sort-panel-item-handler"
                     className={`
                       univer-flex univer-cursor-pointer univer-items-center univer-justify-center univer-text-base
                       univer-text-gray-700
@@ -257,14 +257,11 @@ export function SortOptionItem(props: ISortOptionItemProps) {
                                           univer-relative univer-box-border univer-flex univer-h-7 univer-cursor-pointer
                                           univer-list-none univer-items-center univer-justify-between univer-rounded
                                           univer-px-2 univer-text-sm univer-transition-all
-                                          hover:univer-bg-slate-100
+                                          hover:univer-bg-gray-100
                                         `}
                                     >
                                         <span
-                                            className={`
-                                              univer-max-w-[220px] univer-overflow-hidden univer-text-ellipsis
-                                              univer-whitespace-nowrap
-                                            `}
+                                            className="univer-max-w-[220px] univer-truncate"
                                         >
                                             {menuItem.label}
                                         </span>

@@ -40,7 +40,6 @@ import { useSheetSelectionChange } from './hooks/use-sheet-selection-change';
 import { useStateRef } from './hooks/use-state-ref';
 import { useSwitchSheet } from './hooks/use-switch-sheet';
 import { useVerify } from './hooks/use-verify';
-import styles from './index.module.less';
 import { SearchFunction } from './search-function/SearchFunction';
 import { getFormulaText } from './utils/get-formula-text';
 
@@ -312,21 +311,33 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
     };
 
     return (
-        <div style={style} className={clsx(styles.sheetEmbeddingFormulaEditor, className)}>
+        <div style={style} className={className}>
             <div
-                className={clsx(styles.sheetEmbeddingFormulaEditorWrap, {
-                    [styles.sheetEmbeddingFormulaEditorActive]: isFocus,
-                    [styles.sheetEmbeddingFormulaEditorError]: isError,
-                })}
+                className={clsx(
+                    `
+                      univer-relative univer-box-border univer-flex univer-h-full univer-w-full univer-items-center
+                      univer-justify-around univer-gap-2 univer-rounded-none univer-border-none univer-p-0
+                    `,
+                    {
+                        'univer-border-primary-500': isFocus,
+                        'univer-border-red-500': isError,
+                    }
+                )}
                 ref={sheetEmbeddingRef}
             >
                 <div
-                    className={styles.sheetEmbeddingFormulaEditorText}
+                    className="univer-relative univer-h-full univer-w-full"
                     ref={formulaEditorContainerRef}
                     onMouseUp={handleMouseUp}
                 />
             </div>
-            {errorText !== undefined ? <div className={styles.sheetEmbeddingFormulaEditorErrorWrap}>{errorText}</div> : null}
+            {errorText !== undefined
+                ? (
+                    <div className="univer-my-1 univer-text-xs univer-text-red-500">
+                        {errorText}
+                    </div>
+                )
+                : null}
             {editor
                 ? (
                     <HelpFunction

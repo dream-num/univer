@@ -47,7 +47,6 @@ import type { IUniverSheetsUIConfig } from '../config.schema';
 
 import {
     BooleanNumber,
-    convertBodyToHtml,
     DEFAULT_WORKSHEET_COLUMN_WIDTH,
     DEFAULT_WORKSHEET_COLUMN_WIDTH_KEY,
     DEFAULT_WORKSHEET_ROW_HEIGHT,
@@ -69,7 +68,7 @@ import {
 } from '@univerjs/core';
 
 import { MessageType } from '@univerjs/design';
-import { DocSelectionRenderService } from '@univerjs/docs-ui';
+import { convertBodyToHtml, DocSelectionRenderService } from '@univerjs/docs-ui';
 
 import { IRenderManagerService, withCurrentTypeOfRenderer } from '@univerjs/engine-render';
 import {
@@ -245,7 +244,7 @@ export class SheetClipboardController extends RxDisposable {
             onCopyCellContent(row: number, col: number): string {
                 const cell = currentSheet!.getCell(row, col);
                 if (cell?.p?.body?.paragraphs || cell?.p?.body?.textRuns) {
-                    return convertBodyToHtml(cell.p.body);
+                    return convertBodyToHtml(cell.p);
                 }
                 const content = cell ? extractPureTextFromCell(cell) : '';
                 return content;

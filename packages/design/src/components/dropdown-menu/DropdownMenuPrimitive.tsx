@@ -148,6 +148,7 @@ function DropdownMenuSubContent({
 
 function DropdownMenuContent({
     className,
+    alignOffset = 0,
     sideOffset = 4,
     ...props
 }: ComponentProps<typeof Content>) {
@@ -173,9 +174,8 @@ function DropdownMenuContent({
                     `,
                     className
                 )}
-                style={{
-                    transform: `translate(${props.alignOffset ?? 0}px, ${sideOffset}px)`,
-                }}
+                alignOffset={alignOffset}
+                sideOffset={sideOffset}
                 {...props}
             />
         </Portal>

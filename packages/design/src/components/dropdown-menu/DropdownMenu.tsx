@@ -19,10 +19,14 @@ import { useState } from 'react';
 import {
     DropdownMenuContent,
     DropdownMenuItem,
+    DropdownMenuPortal,
     DropdownMenuPrimitive,
     DropdownMenuRadioGroup,
     DropdownMenuRadioItem,
     DropdownMenuSeparator,
+    DropdownMenuSub,
+    DropdownMenuSubContent,
+    DropdownMenuSubTrigger,
     DropdownMenuTrigger,
 } from './DropdownMenuPrimitive';
 
@@ -30,6 +34,13 @@ type DropdownMenu = {
     type: 'item';
     className?: string;
     children: ReactNode;
+    disabled?: boolean;
+    onSelect?: (item: DropdownMenu) => void;
+} | {
+    type: 'subItem';
+    className?: string;
+    children: ReactNode;
+    options?: DropdownMenu[];
     disabled?: boolean;
     onSelect?: (item: DropdownMenu) => void;
 } | {
@@ -113,6 +124,19 @@ export function DropdownMenu(props: IDropdownMenuProps) {
                 >
                     {item.children}
                 </DropdownMenuItem>
+            );
+        } else if (type === 'subItem') {
+            return (
+                <DropdownMenuSub key={index}>
+                    <DropdownMenuSubTrigger>{item.children}</DropdownMenuSubTrigger>
+                    <DropdownMenuPortal>
+                        <DropdownMenuSubContent>
+                            {item.options?.map((subItem, subIndex) => (
+                                renderMenuItem(subItem, subIndex)
+                            ))}
+                        </DropdownMenuSubContent>
+                    </DropdownMenuPortal>
+                </DropdownMenuSub>
             );
         }
     }

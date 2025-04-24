@@ -23,7 +23,6 @@ import { getSheetCommandTarget } from '@univerjs/sheets';
 import { IEditorBridgeService, SetCellEditVisibleOperation, useActiveWorkbook } from '@univerjs/sheets-ui';
 import { useDependency } from '@univerjs/ui';
 import React, { useState } from 'react';
-import styles from './index.module.less';
 import { InputParams } from './input-params/InputParams';
 import { SelectFunction } from './select-function/SelectFunction';
 
@@ -64,23 +63,33 @@ export function MoreFunctions() {
     }
 
     return (
-        <div className={styles.formulaMoreFunctions}>
+        <div className="univer-flex univer-h-full univer-flex-col univer-justify-between univer-leading-5">
             {selectFunction && <SelectFunction onChange={setFunctionInfo} />}
             {inputParams && <InputParams functionInfo={functionInfo} onChange={() => {}} />}
-            <div className={styles.formulaMoreFunctionsOperation}>
+            <div
+                className="univer-flex univer-justify-end"
+            >
                 {/* TODO@Dushusir: open input params after range selector refactor */}
                 {inputParams && (
-                    <Button variant="primary" onClick={handleClickNextPrev}>
+                    <Button
+                        variant="primary"
+                        onClick={handleClickNextPrev}
+                        className="univer-mb-5 univer-ml-4 univer-mr-0 univer-mt-0"
+                    >
                         {localeService.t('formula.moreFunctions.next')}
                     </Button>
                 )}
                 {inputParams && (
-                    <Button onClick={handleClickNextPrev}>
+                    <Button onClick={handleClickNextPrev} className="univer-mb-5 univer-ml-4 univer-mr-0 univer-mt-0">
                         {localeService.t('formula.moreFunctions.prev')}
                     </Button>
                 )}
                 {selectFunction && !!workbook && (
-                    <Button variant="primary" onClick={handleConfirm}>
+                    <Button
+                        variant="primary"
+                        onClick={handleConfirm}
+                        className="univer-mb-5 univer-ml-4 univer-mr-0 univer-mt-0"
+                    >
                         {localeService.t('formula.moreFunctions.confirm')}
                     </Button>
                 )}

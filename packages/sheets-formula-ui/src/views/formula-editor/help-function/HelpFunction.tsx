@@ -62,16 +62,16 @@ interface IHelpProps {
 const Help = (props: IHelpProps) => {
     const { prefix, value, active, onClick } = props;
     return (
-        <div className="univer-z-1">
-            <span className="univer-z-1">
+        <div>
+            <span>
                 {prefix}
                 (
             </span>
             {value &&
                 value.map((item: IFunctionParam, i: number) => (
-                    <span key={item.name} className="univer-z-1">
+                    <span key={item.name}>
                         <span
-                            className={active === i ? 'univer-text-primary-500' : 'univer-z-1'}
+                            className={active === i ? 'univer-text-primary-500' : ''}
                             onClick={() => onClick(i)}
                         >
                             {generateParam(item)}

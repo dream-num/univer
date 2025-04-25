@@ -14,23 +14,16 @@
  * limitations under the License.
  */
 
-import type { Nullable, Workbook } from '@univerjs/core';
+import type { Workbook } from '@univerjs/core';
 import {
-    BooleanNumber,
-    DEFAULT_EMPTY_DOCUMENT_VALUE,
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
-    DocumentFlavor,
     FOCUSING_FX_BAR_EDITOR,
-    HorizontalAlign,
     ICommandService,
     IContextService,
     IPermissionService,
     IUniverInstanceService,
     Rectangle,
-    ThemeService,
     UniverInstanceType,
-    VerticalAlign,
-    WrapStrategy,
 } from '@univerjs/core';
 import { Button, clsx } from '@univerjs/design';
 import { DeviceInputEventType } from '@univerjs/engine-render';
@@ -44,9 +37,9 @@ import {
     WorksheetProtectionRuleModel,
     WorksheetSetCellValuePermission,
 } from '@univerjs/sheets';
-import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY, IEditorBridgeService, IFormulaEditorManagerService, SetCellEditVisibleOperation, useActiveWorkbook } from '@univerjs/sheets-ui';
+import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY, IEditorBridgeService, IFormulaEditorManagerService, SetCellEditVisibleOperation, useActiveWorkbook, useKeyEventConfig } from '@univerjs/sheets-ui';
 import { ComponentManager, KeyCode, useDependency, useObservable } from '@univerjs/ui';
-import React, { useCallback, useLayoutEffect, useState } from 'react';
+import React, { useCallback, useLayoutEffect, useRef, useState } from 'react';
 import { EMPTY, merge, switchMap } from 'rxjs';
 
 export const UniFormulaBar = () => {
@@ -85,16 +78,16 @@ export const UniFormulaBar = () => {
                     Write formula
                 </span>
             </div>
-            {visible && (
-                <div
-                    className={`
-                      univer-absolute univer-left-0 univer-top-0 univer-z-10 univer-h-full univer-w-full univer-bg-white
-                      dark:univer-bg-dark
-                    `}
-                >
-                    <FormulaBar />
-                </div>
-            )}
+            <div
+                className={clsx(`
+                  univer-absolute univer-left-0 univer-top-0 univer-z-10 univer-h-full univer-w-full univer-bg-white
+                  dark:univer-bg-dark
+                `, {
+                    'univer-hidden': !visible,
+                })}
+            >
+                <FormulaBar />
+            </div>
         </>
     );
 };
@@ -104,7 +97,6 @@ export const UniFormulaBar = () => {
 export function FormulaBar() {
     const formulaEditorManagerService = useDependency(IFormulaEditorManagerService);
     const editorBridgeService = useDependency(IEditorBridgeService);
-    const themeService = useDependency(ThemeService);
     const componentManager = useDependency(ComponentManager);
     const commandService = useDependency(ICommandService);
     const selectionManager = useDependency(SheetsSelectionsService);
@@ -113,12 +105,14 @@ export function FormulaBar() {
     const permissionService = useDependency(IPermissionService);
     const contextService = useDependency(IContextService);
 
-    const progressBarColor = themeService.getCurrentTheme().primaryColor;
     const [disable, setDisable] = useState<boolean>(false);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const FormulaEditor = componentManager.get(EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY);
     const currentWorkbook = useActiveWorkbook();
     const isFocusFxBar = contextService.getContextValue(FOCUSING_FX_BAR_EDITOR);
+    const editState = useObservable(editorBridgeService.currentEditCellState$);
+    const isRefSelecting = useRef<0 | 1 | 2>(0);
+    const keyCodeConfig = useKeyEventConfig(isRefSelecting, editState?.unitId ?? '');
 
     function getPermissionIds(unitId: string, subUnitId: string): string[] {
         return [
@@ -170,49 +164,6 @@ export function FormulaBar() {
         };
     }, []);
 
-    const INITIAL_SNAPSHOT = {
-        id: DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
-        body: {
-            dataStream: `${DEFAULT_EMPTY_DOCUMENT_VALUE}`,
-            textRuns: [],
-            paragraphs: [
-                {
-                    startIndex: 0,
-                },
-            ],
-        },
-        documentStyle: {
-            pageSize: {
-                width: Number.POSITIVE_INFINITY,
-                height: Number.POSITIVE_INFINITY,
-            },
-            documentFlavor: DocumentFlavor.UNSPECIFIED,
-            marginTop: 5,
-            marginBottom: 5,
-            marginRight: 0,
-            marginLeft: 0,
-            paragraphLineGapDefault: 0,
-            renderConfig: {
-                horizontalAlign: HorizontalAlign.UNSPECIFIED,
-                verticalAlign: VerticalAlign.TOP,
-                centerAngle: 0,
-                vertexAngle: 0,
-                wrapStrategy: WrapStrategy.WRAP,
-                isRenderStyle: BooleanNumber.FALSE,
-            },
-        },
-    };
-
-    function resizeCallBack(editor: Nullable<HTMLDivElement>) {
-        if (editor == null) {
-            return;
-        }
-
-        const editorRect = editor.getBoundingClientRect();
-
-        formulaEditorManagerService.setPosition(editorRect);
-    }
-
     // Handle click the "×" button.
     function handleCloseBtnClick() {
         const visibleState = editorBridgeService.isVisible();
@@ -238,35 +189,13 @@ export function FormulaBar() {
         }
     }
 
-    function handlerFxBtnClick() {
-        formulaEditorManagerService.handleFxBtnClick(true);
-    }
-
     return (
         <div
             className={`
-              univer-relative univer-box-border univer-flex univer-items-center unvier-gap-2 univer-h-full univer-p-2
+              univer-box-border univer-flex univer-h-full univer-w-full univer-items-center univer-gap-2 univer-p-2
             `}
         >
-            <FormulaEditor
-                disableSelectionOnClick
-                editorId={DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY}
-                initValue=""
-                onChange={() => {}}
-                isFocus={isFocusFxBar}
-                unitId={}
-            />
-            {/* <TextEditor
-                id={DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY}
-                isSheetEditor
-                resizeCallBack={resizeCallBack}
-                cancelDefaultResizeListener
-                onContextMenu={(e) => e.preventDefault()}
-                className={clsx(styles.uniFormulaInput, styles.formulaContent)}
-                snapshot={INITIAL_SNAPSHOT}
-                isSingle
-            /> */}
-            <div className={clsx('univer-flex univer-px-1.5', { 'univer-cursor-not-allowed univer-text-gray-200': disable })}>
+            <div className={clsx('univer-flex univer-univer-grow-0 univer-shrink-0 univer-px-1.5', { 'univer-cursor-not-allowed univer-text-gray-200': disable })}>
                 <Button size="small" variant="text" className="univer-text-red-600" onClick={handleCloseBtnClick}>
                     <CloseSingle />
                 </Button>
@@ -274,6 +203,35 @@ export function FormulaBar() {
                     <CheckMarkSingle />
                 </Button>
             </div>
+            {FormulaEditor && (
+                <FormulaEditor
+                    className="univer-h-full univer-shrink univer-grow"
+                    disableSelectionOnClick
+                    editorId={DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY}
+                    initValue=""
+                    onChange={() => { }}
+                    isFocus={isFocusFxBar}
+                    unitId={editState?.unitId}
+                    subUnitId={editState?.sheetId}
+                    autofocus={false}
+                    isSupportAcrossSheet
+                    resetSelectionOnBlur={false}
+                    isSingle={false}
+                    keyboardEventConfig={keyCodeConfig}
+                    onFormulaSelectingChange={(isSelecting: 0 | 1 | 2, isFocusing: boolean) => {
+                        isRefSelecting.current = isSelecting;
+                        if (!isFocusing) return;
+                        if (isSelecting) {
+                            editorBridgeService.enableForceKeepVisible();
+                        } else {
+                            editorBridgeService.disableForceKeepVisible();
+                        }
+                    }}
+                    autoScrollbar={false}
+                    disableContextMenu={false}
+                />
+            )}
+
         </div>
     );
 }

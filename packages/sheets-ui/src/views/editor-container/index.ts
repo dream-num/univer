@@ -15,3 +15,4 @@
  */
 
 export * from './EditorContainer';
+export { useKeyEventConfig } from './hooks';

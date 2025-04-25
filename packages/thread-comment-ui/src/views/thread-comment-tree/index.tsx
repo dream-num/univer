@@ -16,12 +16,13 @@
 
 import type { IUser, UniverInstanceType } from '@univerjs/core';
 import type { IAddCommentCommandParams, IThreadComment, IUpdateCommentCommandParams } from '@univerjs/thread-comment';
+import type { IUniverUIConfig } from '@univerjs/ui';
 import type { IThreadCommentEditorInstance } from '../thread-comment-editor';
 import { generateRandomId, ICommandService, LocaleService, UserManagerService } from '@univerjs/core';
 import { clsx, Dropdown, Tooltip } from '@univerjs/design';
 import { DeleteSingle, MoreHorizontalSingle, ReplyToCommentSingle, ResolvedSingle, SolveSingle } from '@univerjs/icons';
 import { AddCommentCommand, DeleteCommentCommand, DeleteCommentTreeCommand, getDT, ResolveCommentCommand, ThreadCommentModel, UpdateCommentCommand } from '@univerjs/thread-comment';
-import { useDependency, useObservable } from '@univerjs/ui';
+import { UI_PLUGIN_CONFIG_KEY, useConfigValue, useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { debounceTime } from 'rxjs';
 import { SetActiveCommentOperation } from '../../commands/operations/comment.operations';
@@ -77,6 +78,8 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
     const isCommentBySelf = currentUser?.userID === item.personId;
     const isMock = item.id === MOCK_ID;
     const [showReply, setShowReply] = useState(false);
+    const uiConfig = useConfigValue<IUniverUIConfig>(UI_PLUGIN_CONFIG_KEY);
+    const avatarFallback = uiConfig?.avatarFallback;
 
     const handleDeleteItem = () => {
         if (onDeleteComment?.(item) === false) {
@@ -98,77 +101,90 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
 
     return (
         <div className="univer-relative univer-mb-3 univer-pl-[30px]" onMouseLeave={() => setShowReply(false)} onMouseEnter={() => setShowReply(true)}>
-            <img className="univer-absolute univer-left-0 univer-top-0 univer-h-6 univer-w-6 univer-rounded-full" src={user?.avatar} />
-            <div className="univer-mb-1 univer-flex univer-h-6 univer-items-center univer-justify-between">
-                <div className="univer-text-sm univer-font-medium univer-leading-5">
-                    {user?.name || ' '}
-                </div>
-                <div>
-                    {(isMock || resolved)
-                        ? null
-                        : (
-                            showReply
+            <div
+                className={`
+                  univer-absolute univer-left-0 univer-top-0 univer-h-6 univer-w-6 univer-rounded-full univer-bg-cover
+                  univer-bg-center univer-bg-no-repeat
+                `}
+                style={{
+                    backgroundImage: `url(${user?.avatar || avatarFallback})`,
+                }}
+            />
+            {user
+                ? (
+                    <div className="univer-mb-1 univer-flex univer-h-6 univer-items-center univer-justify-between">
+                        <div className="univer-text-sm univer-font-medium univer-leading-5">
+                            {user?.name || ' '}
+                        </div>
+                        <div>
+                            {(isMock || resolved)
+                                ? null
+                                : (
+                                    showReply && user
+                                        ? (
+                                            <div
+                                                className={`
+                                                  univer-ml-1 univer-inline-flex univer-h-6 univer-w-6
+                                                  univer-cursor-pointer univer-items-center univer-justify-center
+                                                  univer-rounded-[3px] univer-text-base
+                                                  hover:univer-bg-gray-50
+                                                `}
+                                                onClick={() => onReply(user)}
+                                            >
+                                                <ReplyToCommentSingle />
+                                            </div>
+                                        )
+                                        : null
+                                )}
+                            {isCommentBySelf && !isMock && !resolved
                                 ? (
-                                    <div
-                                        className={`
-                                          univer-ml-1 univer-inline-flex univer-h-6 univer-w-6 univer-cursor-pointer
-                                          univer-items-center univer-justify-center univer-rounded-[3px]
-                                          univer-text-base
-                                          hover:univer-bg-gray-50
-                                        `}
-                                        onClick={() => onReply(user)}
+                                    <Dropdown
+                                        overlay={(
+                                            <div className="univer-rounded-lg univer-p-4 univer-theme">
+                                                <ul
+                                                    className={`
+                                                      univer-m-0 univer-grid univer-list-none univer-gap-2 univer-p-0
+                                                      univer-text-sm
+                                                      [&_a]:univer-cursor-pointer [&_a]:univer-rounded [&_a]:univer-p-1
+                                                    `}
+                                                >
+                                                    <li>
+                                                        <a
+                                                            className="hover:univer-bg-gray-200"
+                                                            onClick={() => onEditingChange?.(true)}
+                                                        >
+                                                            {localeService.t('threadCommentUI.item.edit')}
+                                                        </a>
+                                                    </li>
+                                                    <li>
+                                                        <a
+                                                            className="hover:univer-bg-gray-200"
+                                                            onClick={handleDeleteItem}
+                                                        >
+                                                            {localeService.t('threadCommentUI.item.delete')}
+                                                        </a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        )}
                                     >
-                                        <ReplyToCommentSingle />
-                                    </div>
-                                )
-                                : null
-                        )}
-                    {isCommentBySelf && !isMock && !resolved
-                        ? (
-                            <Dropdown
-                                overlay={(
-                                    <div className="univer-rounded-lg univer-p-4 univer-theme">
-                                        <ul
+                                        <div
                                             className={`
-                                              univer-m-0 univer-grid univer-list-none univer-gap-2 univer-p-0
-                                              univer-text-sm
-                                              [&_a]:univer-cursor-pointer [&_a]:univer-rounded [&_a]:univer-p-1
+                                              univer-ml-1 univer-inline-flex univer-h-6 univer-w-6 univer-cursor-pointer
+                                              univer-items-center univer-justify-center univer-rounded-[3px]
+                                              univer-text-base
+                                              hover:univer-bg-gray-50
                                             `}
                                         >
-                                            <li>
-                                                <a
-                                                    className="hover:univer-bg-gray-200"
-                                                    onClick={() => onEditingChange?.(true)}
-                                                >
-                                                    {localeService.t('threadCommentUI.item.edit')}
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a
-                                                    className="hover:univer-bg-gray-200"
-                                                    onClick={handleDeleteItem}
-                                                >
-                                                    {localeService.t('threadCommentUI.item.delete')}
-                                                </a>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                )}
-                            >
-                                <div
-                                    className={`
-                                      univer-ml-1 univer-inline-flex univer-h-6 univer-w-6 univer-cursor-pointer
-                                      univer-items-center univer-justify-center univer-rounded-[3px] univer-text-base
-                                      hover:univer-bg-gray-50
-                                    `}
-                                >
-                                    <MoreHorizontalSingle />
-                                </div>
-                            </Dropdown>
-                        )
-                        : null}
-                </div>
-            </div>
+                                            <MoreHorizontalSingle />
+                                        </div>
+                                    </Dropdown>
+                                )
+                                : null}
+                        </div>
+                    </div>
+                )
+                : null}
             <div className="univer-mb-1 univer-text-xs univer-leading-[1.5] univer-text-gray-600">{item.dT}</div>
             {editing
                 ? (

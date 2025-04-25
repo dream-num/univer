@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
+import type { IDocumentBody } from '@univerjs/core';
 import type { IThreadCommentMention } from '@univerjs/thread-comment';
-import { CustomRangeType, getBodySlice, type IDocumentBody } from '@univerjs/core';
+import { CustomRangeType, getBodySlice } from '@univerjs/core';
 
 export type TextNode = {
     type: 'text';
@@ -86,6 +87,7 @@ export const transformTextNodes2Document = (nodes: TextNode[]): IDocumentBody =>
                     startIndex: start,
                     endIndex: end,
                     properties: {},
+                    wholeEntity: true,
                 });
                 break;
             }
@@ -95,7 +97,7 @@ export const transformTextNodes2Document = (nodes: TextNode[]): IDocumentBody =>
         }
     });
 
-    str += '\n\r';
+    str += '\r\n';
 
     return {
         textRuns: [],

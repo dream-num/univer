@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { IDocumentBody, IDocumentData } from '@univerjs/core';
+import type { IDocumentBody, IDocumentData, IUser } from '@univerjs/core';
 import type { Editor, IKeyboardEventConfig } from '@univerjs/docs-ui';
 import type { IThreadComment } from '@univerjs/thread-comment';
 import { BuildTextUtils, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, ICommandService, LocaleService, Tools, UniverInstanceType } from '@univerjs/core';
-import { Button } from '@univerjs/design';
+import { Button, clsx } from '@univerjs/design';
 import { BreakLineCommand, IEditorService, RichTextEditor } from '@univerjs/docs-ui';
 import { KeyCode, useDependency } from '@univerjs/ui';
 import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
@@ -82,8 +82,16 @@ export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThr
 
     useImperativeHandle(ref, () => ({
         reply(text) {
-            editor.current?.focus();
-            editor.current?.setDocumentData(getSnapshot(text));
+            if (!editor.current) {
+                return;
+            }
+            editorService.focus(editor.current!.getEditorId() ?? '');
+            const documentData = getSnapshot(text);
+            editor.current?.setDocumentData(documentData, [{
+                startOffset: documentData.body!.dataStream.length - 2,
+                endOffset: documentData.body!.dataStream.length - 2,
+                collapsed: true,
+            }]);
         },
     }));
 
@@ -123,7 +131,7 @@ export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThr
             />
             {editing
                 ? (
-                    <div className={styles.threadCommentEditorButtons}>
+                    <div className="univer-mt-3 univer-flex univer-flex-row univer-justify-end">
                         <Button
                             style={{ marginRight: 12 }}
                             onClick={() => {
@@ -148,3 +156,15 @@ export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThr
         </div>
     );
 });
+
+export const ThreadCommentSuggestion = ({ active, user }: { active: boolean; user: IUser }) => (
+    <div
+        className={clsx(
+            'univer-flex univer-items-center univer-text-sm univer-text-black',
+            { 'univer-bg-grey-50': active }
+        )}
+    >
+        <img className="univer-mr-[6px] univer-h-6 univer-w-6 univer-rounded-full" src={user.avatar} />
+        <span>{user.name}</span>
+    </div>
+);

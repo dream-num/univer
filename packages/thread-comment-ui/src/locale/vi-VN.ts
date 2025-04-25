@@ -24,6 +24,7 @@ const enUS: typeof zhCN = {
             filterEmpty: 'Không có kết quả phù hợp',
             reset: 'Đặt lại',
             addComment: 'Thêm bình luận',
+            solved: 'Đã giải quyết',
         },
         editor: {
             placeholder: 'Phản hồi',

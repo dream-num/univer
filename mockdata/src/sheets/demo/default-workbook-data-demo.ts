@@ -24118,14 +24118,14 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
         {
             name: 'SHEET_UNIVER_THREAD_COMMENT_PLUGIN',
             data: JSON.stringify({
-                'sheet-0011': [{ text: { textRuns: [], paragraphs: [{ startIndex: 3, paragraphStyle: {} }], sectionBreaks: [{ startIndex: 4 }], dataStream: '123\\n\\r', customRanges: [] }, dT: '2024/05/17 21:16', id: 'jwV0QtHwUbhG3o--iy1qa', ref: 'H9', personId: 'Owner_qxVnhPbQ', unitId: 'workbook-01', subUnitId: 'sheet-0011' }],
+                'sheet-0011': [{ text: { textRuns: [], paragraphs: [{ startIndex: 3, paragraphStyle: {} }], sectionBreaks: [{ startIndex: 4 }], dataStream: '123\r\n', customRanges: [] }, dT: '2024/05/17 21:16', id: 'jwV0QtHwUbhG3o--iy1qa', ref: 'H9', personId: 'Owner_qxVnhPbQ', unitId: 'workbook-01', subUnitId: 'sheet-0011' }],
                 'dv-test': [
                     {
                         text: {
                             textRuns: [],
                             paragraphs: [{ startIndex: 3, paragraphStyle: {} }],
                             sectionBreaks: [{ startIndex: 4 }],
-                            dataStream: '1\\n\\r',
+                            dataStream: '1\r\n',
                             customRanges: [],
                         },
                         dT: '2024/05/17 21:16',
@@ -24140,7 +24140,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                             textRuns: [],
                             paragraphs: [{ startIndex: 3, paragraphStyle: {} }],
                             sectionBreaks: [{ startIndex: 4 }],
-                            dataStream: '1\\n\\r',
+                            dataStream: '1\r\n',
                             customRanges: [],
                         },
                         dT: '2024/05/17 21:16',
@@ -24155,7 +24155,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                             textRuns: [],
                             paragraphs: [{ startIndex: 3, paragraphStyle: {} }],
                             sectionBreaks: [{ startIndex: 4 }],
-                            dataStream: '2\\n\\r',
+                            dataStream: '2\r\n',
                             customRanges: [],
                         },
                         dT: '2024/05/17 21:16',
@@ -24170,7 +24170,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                             textRuns: [],
                             paragraphs: [{ startIndex: 3, paragraphStyle: {} }],
                             sectionBreaks: [{ startIndex: 4 }],
-                            dataStream: '3\\n\\r',
+                            dataStream: '3\r\n',
                             customRanges: [],
                         },
                         dT: '2024/05/17 21:16',
@@ -24185,7 +24185,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                             textRuns: [],
                             paragraphs: [{ startIndex: 3, paragraphStyle: {} }],
                             sectionBreaks: [{ startIndex: 4 }],
-                            dataStream: '4\\n\\r',
+                            dataStream: '4\r\n',
                             customRanges: [],
                         },
                         dT: '2024/05/17 21:16',

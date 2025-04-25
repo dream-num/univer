@@ -23,8 +23,6 @@ import { ActivateSlidePageOperation, AppendSlideOperation, SetSlidePageThumbOper
 import { useDependency, useObservable } from '@univerjs/ui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import styles from './index.module.less';
-
 /**
  * This components works as the root component of the left Sidebar of Slide.
  */
@@ -66,7 +64,6 @@ export function UniSlideSideBar() {
         return () => {
             subscriber?.unsubscribe();
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {
@@ -100,23 +97,45 @@ export function UniSlideSideBar() {
     }, [commandService, currentSlide]);
 
     return (
-        <div className={styles.uniSlideBar} ref={slideBarRef}>
-            <div className={styles.uniSlideBarContent} style={{ height: `${barHeight}px` }}>
+        <div className="univer-flex univer-h-full univer-select-none univer-flex-col" ref={slideBarRef}>
+            <div className="univer-overflow-y-auto univer-scrollbar-thin" style={{ height: `${barHeight}px` }}>
                 {slideList.map((item, index) => (
                     <div
                         key={item.id}
-                        className={clsx(styles.uniSlideBarItem, {
-                            [styles.uniSlideBarItemActive]: item.id === activatePageId,
-                        })}
+                        className={clsx(`
+                          univer-relative univer-my-4 univer-box-border univer-flex univer-w-[160px]
+                          univer-overflow-hidden univer-rounded-lg univer-border univer-border-solid
+                          univer-border-gray-200
+                          hover:univer-border-primary-500
+                        `, item.id === activatePageId && 'univer-border-primary-500')}
                         onClick={() => activatePage(item.id)}
                     >
-                        <span>{index + 1}</span>
-                        <div ref={divRefs[index]} className={styles.uniSlideBarBox} />
+                        <span
+                            className={`
+                              univer-absolute univer-bottom-1 univer-left-1 univer-z-10 univer-inline-flex univer-size-5
+                              univer-items-center univer-justify-center univer-overflow-hidden univer-rounded
+                              univer-text-xs univer-text-white
+                            `}
+                        >
+                            {index + 1}
+                        </span>
+                        <div ref={divRefs[index]} className="univer-relative univer-h-[90px] univer-w-[160px]" />
                     </div>
                 ))}
             </div>
-            <button type="button" className={styles.newSlideButton} onClick={handleAppendSlide}>
-                <IncreaseSingle className={styles.newSlideButtonIcon} />
+            <button
+                type="button"
+                className={`
+                  univer-relative univer-mt-4 univer-flex univer-h-8 univer-cursor-pointer univer-items-center
+                  univer-justify-center univer-rounded-lg univer-border-0 univer-bg-transparent univer-px-1
+                  univer-text-primary-500
+                  before:absolute before:left-0 before:top-0 before:h-[1px] before:content-['']
+                  before:univer-bg-gray-200
+                  hover:univer-bg-gray-100
+                `}
+                onClick={handleAppendSlide}
+            >
+                <IncreaseSingle className="univer-mr-1 univer-size-4" />
                 <span>{localeService.t('slide.append')}</span>
             </button>
         </div>

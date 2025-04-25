@@ -5,7 +5,7 @@
 
 ## Introduction
 
-> TODO: Introduction
+This package provides a UI controller in replacement of the `@univerjs/docs-ui` package.
 
 ## Usage
 

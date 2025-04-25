@@ -465,13 +465,19 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                                     return;
                                 }
                                 requestAnimationFrame(() => {
-                                    editorRef.current?.reply(transformTextNodes2Document([{
-                                        type: 'mention',
-                                        content: {
-                                            id: user.userID,
-                                            label: `@${user.name}`,
+                                    editorRef.current?.reply(transformTextNodes2Document([
+                                        {
+                                            type: 'mention',
+                                            content: {
+                                                id: user.userID,
+                                                label: `@${user.name}`,
+                                            },
                                         },
-                                    }]));
+                                        {
+                                            type: 'text',
+                                            content: ' ',
+                                        },
+                                    ]));
                                 });
                             }}
                             onAddComment={onAddComment}

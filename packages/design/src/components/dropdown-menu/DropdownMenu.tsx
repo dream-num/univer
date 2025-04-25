@@ -130,7 +130,7 @@ export function DropdownMenu(props: IDropdownMenuProps) {
                 <DropdownMenuSub key={index}>
                     <DropdownMenuSubTrigger>{item.children}</DropdownMenuSubTrigger>
                     <DropdownMenuPortal>
-                        <DropdownMenuSubContent>
+                        <DropdownMenuSubContent sideOffset={12}>
                             {item.options?.map((subItem, subIndex) => (
                                 renderMenuItem(subItem, subIndex)
                             ))}
@@ -146,7 +146,7 @@ export function DropdownMenu(props: IDropdownMenuProps) {
             <DropdownMenuTrigger asChild>
                 {children}
             </DropdownMenuTrigger>
-            <DropdownMenuContent {...restProps}>
+            <DropdownMenuContent {...restProps} onContextMenu={(e) => e.preventDefault()}>
                 {items.map((item, index) => renderMenuItem(item, index))}
             </DropdownMenuContent>
         </DropdownMenuPrimitive>

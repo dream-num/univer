@@ -53,6 +53,7 @@ const locale: typeof zhCN = {
         headerFooter: '頁眉頁腳',
         checklist: '任務列表',
         documentFlavor: '现代模式',
+        pageSetup: '頁面設置',
     },
     table: {
         insert: 'Insert',

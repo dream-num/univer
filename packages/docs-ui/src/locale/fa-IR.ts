@@ -53,6 +53,7 @@ const locale: typeof zhCN = {
         alignJustify: 'توجیه',
         horizontalLine: 'Horizontal line',
         headerFooter: 'هدر و فوتر',
+        pageSetup: 'تنظیمات صفحه',
     },
     table: {
         insert: 'درج',

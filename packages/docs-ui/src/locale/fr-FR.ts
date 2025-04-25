@@ -53,6 +53,7 @@ const locale: typeof enUS = {
         alignJustify: 'Justifier',
         horizontalLine: 'Horizontal line',
         headerFooter: 'En-tête et pied de page',
+        pageSetup: 'Paramètres de page',
     },
     table: {
         insert: 'Insérer',

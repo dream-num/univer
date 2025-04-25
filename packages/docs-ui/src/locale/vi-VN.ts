@@ -53,6 +53,7 @@ const locale: typeof zhCN = {
         headerFooter: 'Đầu trang và chân trang',
         checklist: 'Task list',
         documentFlavor: 'Modern Mode',
+        pageSetup: 'Cài đặt trang',
     },
     table: {
         insert: 'Insert',

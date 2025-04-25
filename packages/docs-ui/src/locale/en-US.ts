@@ -53,6 +53,7 @@ const locale: typeof zhCN = {
         alignJustify: 'Justify',
         horizontalLine: 'Horizontal line',
         headerFooter: 'Header & Footer',
+        pageSetup: 'Page Setup',
     },
     table: {
         insert: 'Insert',

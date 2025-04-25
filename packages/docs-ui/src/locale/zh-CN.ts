@@ -51,6 +51,7 @@ const locale = {
         alignJustify: '两端对齐',
         horizontalLine: '水平分割线',
         headerFooter: '页眉页脚',
+        pageSetup: '页面设置',
     },
     table: {
         insert: '插入',

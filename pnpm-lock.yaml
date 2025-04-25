@@ -187,8 +187,8 @@ importers:
         specifier: ^0.3.22
         version: 0.3.22(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       '@univerjs/icons-svg':
-        specifier: ^0.3.21
-        version: 0.3.21
+        specifier: ^0.3.22
+        version: 0.3.22
       '@univerjs/protocol':
         specifier: 0.1.45
         version: 0.1.45(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
@@ -3320,8 +3320,8 @@ importers:
         specifier: ^0.3.22
         version: 0.3.22(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       '@wendellhu/redi':
-        specifier: 0.18.0
-        version: 0.18.0
+        specifier: 0.17.1
+        version: 0.17.1
       localforage:
         specifier: ^1.10.0
         version: 1.10.0
@@ -4552,7 +4552,7 @@ packages:
     engines: {node: '>=12'}
 
   '@protobufjs/aspromise@1.1.2':
-    resolution: {integrity: sha512-j+gKExEuLmKwvz3OgROXtrJ2UG2x8Ch2YZUxahh+s1F2HZ+wAceUNLkvy6zKCPVRkU++ZWQrdxsUeQXmcg4uoQ==}
+    resolution: {integrity: sha1-m4sMxmPWaafY9vXQiToU00jzD78=}
 
   '@protobufjs/base64@1.1.2':
     resolution: {integrity: sha512-AZkcAA5vnN/v4PDqKyMR5lx7hZttPDgClv83E//FMNhR2TMcLUhfRUBHCmSl0oi9zMgDDqRUJkSxO3wm85+XLg==}
@@ -4561,7 +4561,7 @@ packages:
     resolution: {integrity: sha512-YyFaikqM5sH0ziFZCN3xDC7zeGaB/d0IUb9CATugHWbd1FRFwWwt4ld4OYMPWu5a3Xe01mGAULCdqhMlPl29Jg==}
 
   '@protobufjs/eventemitter@1.1.0':
-    resolution: {integrity: sha1-NVy8mLr61ZePntCV85diHx0Ga3A=}
+    resolution: {integrity: sha512-j9ednRT81vYJ9OfVuXG6ERSTdEL1xVsNgqpkxMsbIabzSo3goCjDIveeGv5d03om39ML71RdmrGNjG5SReBP/Q==}
 
   '@protobufjs/fetch@1.1.0':
     resolution: {integrity: sha512-lljVXpqXebpsijW71PZaCYeIcE5on1w5DlQy5WH6GLbFryLUrBD4932W/E2BSpfRJWseIL4v/KPgBFxDOIdKpQ==}
@@ -5665,14 +5665,11 @@ packages:
   '@univerjs/icons-svg@0.3.21':
     resolution: {integrity: sha512-X+T8C6+GSdUQyUs5ziON1+64ktWJClqsGm7TSNbTMfFoKzetZO55SIO1U60L7awNa+ADUxuOiuu9FIe4rHTJug==}
 
+  '@univerjs/icons-svg@0.3.22':
+    resolution: {integrity: sha512-jVLFpjAIj+LureEEmovOKpPNLN7/z4fUPY7aOOZ+qpiEXjhMpUKX5S+7REGOeG5LHRL4pQpB9tb4GRUb7PTZ8A==}
+
   '@univerjs/icons@0.3.22':
     resolution: {integrity: sha512-DBc3Mq7S1S/2bIy6wzF1zJu78Bt82Zx6VWbgww7o+d7VU+kwUoRfEoiFuwymz9DwL9MVeKdAbdsamKLiFv32hQ==}
-    peerDependencies:
-      react: '19'
-      react-dom: '19'
-
-  '@univerjs/icons@0.3.21':
-    resolution: {integrity: sha512-inZOW3kezEZb2t6vhMpov2nw/Kjjjo7nh/1tGjSzkAzWiEuP0jArMv8XnpUaNkIK59kwylAtsiPgS/cvQAUTnw==}
     peerDependencies:
       react: '19'
       react-dom: '19'
@@ -5938,6 +5935,9 @@ packages:
 
   '@webassemblyjs/wast-printer@1.14.1':
     resolution: {integrity: sha512-kPSSXE6De1XOR820C90RIo2ogvZG+c3KiHzqUoO/F34Y2shGzesfqv7o57xrxovZJH/MetF5UjroJ/R/3isoiw==}
+
+  '@wendellhu/redi@0.17.1':
+    resolution: {integrity: sha512-wKEa1+kJi2KdRWerX6wxCqOdcyVfRSqopp9/BrWxEom5JXElUWNepgMB0Kvg0r+93BNTj0IgyNN7+bIGg11l+g==}
 
   '@wendellhu/redi@0.18.0':
     resolution: {integrity: sha512-xYpa1d2BPZ/NO9URpS1h+l310mKYaMUQbFMZ4YYguq6M0fLWGR7ZYclnQEE4zpfl8ys5wprx5wro06Sfqnkb/A==}
@@ -13835,12 +13835,9 @@ snapshots:
 
   '@univerjs/icons-svg@0.3.21': {}
 
-  '@univerjs/icons@0.3.22(react-dom@19.0.0(react@19.0.0))(react@19.0.0)':
-    dependencies:
-      react: 19.0.0
-      react-dom: 19.0.0(react@19.0.0)
+  '@univerjs/icons-svg@0.3.22': {}
 
-  '@univerjs/icons@0.3.21(react-dom@19.0.0(react@19.0.0))(react@19.0.0)':
+  '@univerjs/icons@0.3.22(react-dom@19.0.0(react@19.0.0))(react@19.0.0)':
     dependencies:
       react: 19.0.0
       react-dom: 19.0.0(react@19.0.0)
@@ -14182,6 +14179,8 @@ snapshots:
     dependencies:
       '@webassemblyjs/ast': 1.14.1
       '@xtuc/long': 4.2.2
+
+  '@wendellhu/redi@0.17.1': {}
 
   '@wendellhu/redi@0.18.0': {}
 

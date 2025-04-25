@@ -106,6 +106,7 @@ const locale: typeof zhCN = {
         insertBellow: '在下方插入',
     },
     'page-settings': {
+        'document-setting': '文檔設置',
         'page-size': {
             main: '紙張大小',
             a4: 'A4',

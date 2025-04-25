@@ -106,6 +106,7 @@ const locale: typeof enUS = {
         insertBellow: 'Insérer dans le bas',
     },
     'page-settings': {
+        'document-setting': 'Paramètres du document',
         'paper-size': 'Format du papier',
         'page-size': {
             main: 'Format du papier',

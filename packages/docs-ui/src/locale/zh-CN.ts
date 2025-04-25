@@ -104,6 +104,7 @@ const locale = {
         insertBellow: '在下方插入',
     },
     'page-settings': {
+        'document-setting': '文档设置',
         'page-size': {
             main: '纸张大小',
             a4: 'A4',

@@ -16,7 +16,7 @@
 
 import type { ICommand, PaperType } from '@univerjs/core';
 import type { IDocPageSetupCommandParams } from '../commands/doc-page-setup.command';
-import { CommandType, ICommandService, PAGE_SIZE } from '@univerjs/core';
+import { CommandType, ICommandService, LocaleService, PAGE_SIZE } from '@univerjs/core';
 import { IConfirmService } from '@univerjs/ui';
 import { PAGE_SETTING_COMPONENT_ID } from '../../views/page-settings';
 import { DocPageSetupCommand } from '../commands/doc-page-setup.command';
@@ -27,10 +27,11 @@ export const DocOpenPageSettingCommand: ICommand = {
     handler: (accessor) => {
         const confirmService = accessor.get(IConfirmService);
         const commandService = accessor.get(ICommandService);
+        const localeService = accessor.get(LocaleService);
         const disposable = confirmService.open({
             id: PAGE_SETTING_COMPONENT_ID,
             title: {
-                label: 'Document Setting',
+                label: localeService.t('page-settings.document-setting'),
             },
             children: {
                 label: PAGE_SETTING_COMPONENT_ID,

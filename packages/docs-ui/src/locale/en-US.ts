@@ -106,6 +106,7 @@ const locale: typeof zhCN = {
         insertBellow: 'Insert below',
     },
     'page-settings': {
+        'document-setting': 'Document Setting',
         'paper-size': 'Paper size',
         'page-size': {
             main: 'Paper size',

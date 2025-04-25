@@ -106,6 +106,7 @@ const locale: typeof zhCN = {
         insertBellow: 'Chèn dưới',
     },
     'page-settings': {
+        'document-setting': 'Cài đặt tài liệu',
         'paper-size': 'Kích thước giấy',
         'page-size': {
             main: 'Kích thước giấy',

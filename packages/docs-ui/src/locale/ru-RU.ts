@@ -106,6 +106,7 @@ const locale: typeof zhCN = {
         insertBellow: 'Вставить ниже',
     },
     'page-settings': {
+        'document-setting': 'Настройки документа',
         'page-size': {
             main: 'Размер бумаги',
             a4: 'A4',

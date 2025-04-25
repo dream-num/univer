@@ -106,6 +106,7 @@ const locale: typeof zhCN = {
         insertBellow: 'درج در پایین',
     },
     'page-settings': {
+        'document-setting': 'تنظیمات سند',
         'page-size': {
             main: 'اندازه کاغذ',
             a4: 'A4',

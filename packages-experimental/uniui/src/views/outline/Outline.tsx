@@ -24,9 +24,7 @@ export enum UniUIPart {
 export function Outline() {
     const outlineComponent = useComponentsOfPart(UniUIPart.OUTLINE);
     return (
-        <div>
-            <ComponentContainer key="outline" components={outlineComponent} />
-        </div>
+        <ComponentContainer key="outline" components={outlineComponent} />
     );
 }
 

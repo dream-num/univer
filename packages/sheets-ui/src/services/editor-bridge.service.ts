@@ -16,7 +16,6 @@
 
 import type { IDisposable, IPosition, ISelectionCell, Nullable, Workbook } from '@univerjs/core';
 import type { Engine, IDocumentLayoutObject, Scene } from '@univerjs/engine-render';
-import type { SheetsSelectionsService } from '@univerjs/sheets';
 import type { KeyCode } from '@univerjs/ui';
 import type { Observable } from 'rxjs';
 import {
@@ -36,7 +35,7 @@ import {
 } from '@univerjs/core';
 import { getCanvasOffsetByEngine, IEditorService } from '@univerjs/docs-ui';
 import { convertTextRotation, convertTransformToOffsetX, convertTransformToOffsetY, DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
-import { BEFORE_CELL_EDIT, IRefSelectionsService, SheetInterceptorService } from '@univerjs/sheets';
+import { BEFORE_CELL_EDIT, SheetInterceptorService } from '@univerjs/sheets';
 import { BehaviorSubject, map, switchMap } from 'rxjs';
 import { ISheetSelectionRenderService } from './selection/base-selection-render.service';
 import { attachPrimaryWithCoord } from './selection/util';
@@ -151,7 +150,6 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
         @Inject(ThemeService) private readonly _themeService: ThemeService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IEditorService private readonly _editorService: IEditorService,
-        @IRefSelectionsService private readonly _refSelectionsService: SheetsSelectionsService,
         @IContextService private readonly _contextService: IContextService
     ) {
         super();
@@ -201,7 +199,7 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
         if (!skeleton) return;
         if (!this._currentEditCellState) return;
 
-        const { primary, unitId, sheetId, scene, engine } = currentEditCell;
+        const { primary, scene, engine } = currentEditCell;
         const primaryWithCoord = attachPrimaryWithCoord(skeleton, primary);
         if (primaryWithCoord == null) {
             return;

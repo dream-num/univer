@@ -15,7 +15,7 @@
  */
 
 import type { IProjectNode } from '../../services/unit-grid/unit-grid.service';
-import { clsx, Dropdown, Tooltip } from '@univerjs/design';
+import { Button, clsx, Dropdown, Tooltip } from '@univerjs/design';
 import { CheckMarkSingle, FullscreenSingle, IncreaseSingle, ZoomReduceSingle } from '@univerjs/icons';
 import { ISidebarService, useDependency } from '@univerjs/ui';
 import { useReactFlow } from '@xyflow/react';
@@ -27,17 +27,14 @@ export const UniControlButton = (props: { tooltips: string; children?: React.Rea
     const { children, onClick, style, tooltips } = props;
     return (
         <Tooltip title={tooltips}>
-            <div
-                className={`
-                  univer-box-border univer-flex univer-h-8 univer-w-8 univer-items-center univer-justify-center
-                  univer-rounded-lg univer-p-1.5
-                  hover:univer-bg-gray-800
-                `}
+            <Button
+                variant="text"
+                className="univer-p-1.5"
                 onClick={onClick}
                 style={style}
             >
                 {children}
-            </div>
+            </Button>
         </Tooltip>
 
     );

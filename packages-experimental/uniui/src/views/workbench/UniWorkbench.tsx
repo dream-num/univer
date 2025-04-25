@@ -189,8 +189,12 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
               * bubbled to this element and refocus the input element.
               */}
             <ReactFlowProvider>
-                <div data-u-comp="workbench-layout" className={styles.workbenchLayout} tabIndex={-1} onBlur={(e) => e.stopPropagation()}>
-
+                <div
+                    data-u-comp="workbench-layout"
+                    className="univer-relative univer-flex univer-h-full univer-min-h-0 univer-flex-col"
+                    tabIndex={-1}
+                    onBlur={(e) => e.stopPropagation()}
+                >
                     <div className={styles.flowLayer}>
                         <section
                             className={styles.workbenchContainerCanvasContainer}

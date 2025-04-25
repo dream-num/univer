@@ -1,2 +1,8 @@
 @tailwind components;
 @tailwind utilities;
+
+@layer utilities {
+    .scrollbar-gutter-auto {
+        scrollbar-gutter: auto;
+    }
+}

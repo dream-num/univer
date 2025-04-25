@@ -24,7 +24,6 @@ import { useDependency, useObservable } from '@univerjs/ui';
 import React, { useEffect, useState } from 'react';
 import { DataValidationPanelService } from '../../../services/data-validation-panel.service';
 import { DataValidationItem } from '../item';
-import styles from './index.module.less';
 
 export function DataValidationList(props: { workbook: Workbook }) {
     const sheetDataValidationModel = useDependency(SheetDataValidationModel);
@@ -97,7 +96,7 @@ export function DataValidationList(props: { workbook: Workbook }) {
     const hasDisableRule = rulesByPermissionCheck?.some((rule) => rule.disable);
 
     return (
-        <div className={styles.dataValidationList}>
+        <div className="univer-pb-4">
             {rulesByPermissionCheck?.map((rule) => (
                 <DataValidationItem
                     unitId={unitId}
@@ -115,15 +114,16 @@ export function DataValidationList(props: { workbook: Workbook }) {
                     disable={rule.disable ?? false}
                 />
             ))}
-            <div className={styles.dataValidationListButtons}>
+            <div className="univer-mt-4 univer-flex univer-flex-row univer-justify-end univer-gap-2">
+
                 {(rules.length && !hasDisableRule)
                     ? (
-                        <Button className={styles.dataValidationListButton} onClick={handleRemoveAll}>
+                        <Button onClick={handleRemoveAll}>
                             {localeService.t('dataValidation.panel.removeAll')}
                         </Button>
                     )
                     : null}
-                <Button className={styles.dataValidationListButton} variant="primary" onClick={handleAddRule}>
+                <Button variant="primary" onClick={handleAddRule}>
                     {localeService.t('dataValidation.panel.add')}
                 </Button>
             </div>

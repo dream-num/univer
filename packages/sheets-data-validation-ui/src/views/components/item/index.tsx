@@ -17,13 +17,13 @@
 import type { ISheetDataValidationRule } from '@univerjs/core';
 import { ColorKit, ICommandService, ThemeService } from '@univerjs/core';
 import { DataValidatorRegistryService } from '@univerjs/data-validation';
+import { clsx } from '@univerjs/design';
 import { serializeRange } from '@univerjs/engine-formula';
 import { DeleteSingle } from '@univerjs/icons';
 import { RemoveSheetDataValidationCommand } from '@univerjs/sheets-data-validation';
 import { IMarkSelectionService } from '@univerjs/sheets-ui';
 import { useDependency, useObservable } from '@univerjs/ui';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import styles from './index.module.less';
 
 export interface IDataValidationDetailProps {
     rule: ISheetDataValidationRule;
@@ -72,7 +72,17 @@ export const DataValidationItem = (props: IDataValidationDetailProps) => {
 
     return (
         <div
-            className={styles.dataValidationItemContainer}
+            className={clsx(
+                `
+                  univer-rounded-md univer-bg-secondary univer-relative univer--ml-2 univer--mr-2 univer-box-border
+                  univer-flex univer-w-[287px] univer-cursor-pointer univer-flex-col univer-justify-between
+                  univer-overflow-hidden univer-rounded-lg univer-p-2 univer-pr-9
+                `,
+                {
+                    'hover:univer-bg-gray-50': !disable,
+                    'univer-opacity-50': disable,
+                }
+            )}
             onClick={onClick}
             onMouseEnter={() => {
                 if (disable) return;
@@ -91,15 +101,31 @@ export const DataValidationItem = (props: IDataValidationDetailProps) => {
                 ids.current = undefined;
             }}
         >
-            <div className={styles.dataValidationItemTitle}>
+            <div
+                className={`
+                  univer-overflow-hidden univer-text-ellipsis univer-text-sm univer-font-medium univer-leading-[22px]
+                  univer-text-black
+                `}
+            >
                 {validator?.generateRuleName(rule)}
             </div>
-            <div className={styles.dataValidationItemContent}>
+            <div
+                className={`
+                  univer-text-secondary univer-overflow-hidden univer-text-ellipsis univer-text-xs univer-leading-[18px]
+                `}
+            >
                 {rule.ranges.map((range) => serializeRange(range)).join(',')}
             </div>
             {isHover
                 ? (
-                    <div className={styles.dataValidationItemIcon} onClick={handleDelete}>
+                    <div
+                        className={`
+                          univer-absolute univer-right-2 univer-top-[19px] univer-flex univer-h-5 univer-w-5
+                          univer-items-center univer-justify-center univer-rounded
+                          hover:univer-bg-grey-200
+                        `}
+                        onClick={handleDelete}
+                    >
                         <DeleteSingle />
                     </div>
                 )

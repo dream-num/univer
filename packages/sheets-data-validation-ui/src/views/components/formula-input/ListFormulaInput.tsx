@@ -28,7 +28,6 @@ import { useDependency, useEvent, useObservable, useSidebarClick } from '@univer
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { debounceTime } from 'rxjs';
 import { DROP_DOWN_DEFAULT_COLOR } from '../../../const';
-import styles from './index.module.less';
 
 const DEFAULT_COLOR_PRESET = [
     '#FFFFFF',
@@ -80,18 +79,26 @@ const ColorSelect = (props: IColorSelectProps) => {
             onDropdownVisibleChange={setOpen}
             dropdownStyle={{ width: 112 }}
             style={{ width: 96, cursor: 'pointer' }}
-            className={styles.dataValidationFormulaColorSelect}
+            className="univer-ml-1 univer-mr-2 univer-w-[92px]"
             value={value}
             onChange={onChange}
             labelRender={(item) => (
                 <div
-                    className={styles.dataValidationFormulaColorItem}
+                    className={`
+                      univer-rounded univer-border univer-border-grey-400 univer-box-border univer-h-4 univer-w-4
+                      univer-text-base
+                    `}
                     style={{ background: item.value, marginTop: 5 }}
                 />
             )}
             dropdownRender={() => {
                 return (
-                    <div className={styles.dataValidationFormulaColorSelectPanel}>
+                    <div
+                        className={`
+                          univer-box-border univer-flex univer-w-28 univer-flex-row univer-flex-wrap
+                          univer-justify-between univer-p-3 univer-pl-3
+                        `}
+                    >
                         {DEFAULT_COLOR_PRESET.map(
                             (color) => (
                                 <div
@@ -99,7 +106,11 @@ const ColorSelect = (props: IColorSelectProps) => {
                                         onChange(color);
                                         setOpen(false);
                                     }}
-                                    className={styles.dataValidationFormulaColorItem}
+                                    className={`
+                                      univer-mb-2 univer-mr-2 univer-box-border univer-box-border univer-h-4
+                                      univer-cursor-pointer univer-rounded univer-border univer-border-grey-400
+                                      univer-w-4 univer-text-base
+                                    `}
                                     style={{ background: color }}
                                     key={color}
                                 />
@@ -117,10 +128,10 @@ const Template = (props: { item: IDropdownItem; commonProps: any; style?: CSSPro
     const { onItemChange, onItemDelete } = commonProps;
 
     return (
-        <div className={styles.dataValidationFormulaListItem} style={style}>
+        <div className="univer-flex univer-items-center univer-pb-0.5" style={style}>
             {!item.isRef
                 ? (
-                    <div className={clsx(styles.dataValidationFormulaListItemDrag, 'draggableHandle')}>
+                    <div className={clsx('univer-cursor-move', 'draggableHandle')}>
                         <SequenceSingle />
                     </div>
                 )
@@ -142,7 +153,12 @@ const Template = (props: { item: IDropdownItem; commonProps: any; style?: CSSPro
             {item.isRef
                 ? null
                 : (
-                    <div className={styles.dataValidationFormulaListItemIcon}>
+                    <div
+                        className={`
+                          univer-ml-1 univer-cursor-pointer univer-rounded univer-text-base
+                          hover:univer-bg-grey-200
+                        `}
+                    >
                         <DeleteSingle onClick={() => onItemDelete(item.id)} />
                     </div>
                 )}
@@ -392,8 +408,16 @@ export function ListFormulaInput(props: IFormulaInputProps) {
                                 )}
                                 idKey="id"
                             />
-                            <a className={styles.dataValidationFormulaListAdd} onClick={handleAdd}>
-                                <IncreaseSingle />
+                            <a
+                                className={`
+                                  univer-flex univer-w-fit univer-cursor-pointer univer-flex-row univer-items-center
+                                  univer-rounded univer-p-1 univer-px-2 univer-text-sm univer-font-normal
+                                  univer-text-[#274fee]
+                                  hover:univer-bg-[rgba(39,79,238,0.05)]
+                                `}
+                                onClick={handleAdd}
+                            >
+                                <IncreaseSingle className="univer-mr-1" />
                                 {localeService.t('dataValidation.list.add')}
                             </a>
                         </div>

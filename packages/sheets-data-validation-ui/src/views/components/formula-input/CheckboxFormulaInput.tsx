@@ -19,7 +19,6 @@ import { LocaleService } from '@univerjs/core';
 import { Checkbox, FormLayout, Input } from '@univerjs/design';
 import { useDependency } from '@univerjs/ui';
 import React, { useState } from 'react';
-import styles from './index.module.less';
 
 export function CheckboxFormulaInput(props: IFormulaInputProps) {
     const { value, onChange, showError, validResult } = props;
@@ -54,7 +53,7 @@ export function CheckboxFormulaInput(props: IFormulaInputProps) {
                 ? (
                     <FormLayout label={localeService.t('dataValidation.checkbox.checked')} error={formula1Res}>
                         <Input
-                            className={styles.dataValidationFormula}
+                            className="univer-w-full"
                             placeholder={localeService.t('dataValidation.panel.valuePlaceholder')}
                             value={value?.formula1}
                             onChange={(newValue) => {
@@ -71,7 +70,7 @@ export function CheckboxFormulaInput(props: IFormulaInputProps) {
                 ? (
                     <FormLayout label={localeService.t('dataValidation.checkbox.unchecked')} error={formula2Res}>
                         <Input
-                            className={styles.dataValidationFormula}
+                            className="univer-w-full"
                             placeholder={localeService.t('dataValidation.panel.valuePlaceholder')}
                             value={value?.formula2}
                             onChange={(newValue) => {

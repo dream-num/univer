@@ -160,7 +160,8 @@ export const FloatDom = ({ unitId }: { unitId?: string }) => {
     const instanceService = useDependency(IUniverInstanceService);
     const domLayerService = useDependency(CanvasFloatDomService);
     const layers = useObservable(domLayerService.domLayers$);
-    const currentUnitId = unitId || instanceService.getFocusedUnit()?.getUnitId();
+    const focusUnit = useObservable(instanceService.focused$);
+    const currentUnitId = unitId || focusUnit;
 
     return layers?.filter((layer) => layer[1].unitId === currentUnitId)?.map((layer) => (
         <FloatDomSingle

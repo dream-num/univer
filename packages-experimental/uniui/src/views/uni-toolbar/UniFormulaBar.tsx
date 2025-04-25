@@ -15,13 +15,37 @@
  */
 
 import type { Nullable, Workbook } from '@univerjs/core';
-import { BooleanNumber, DEFAULT_EMPTY_DOCUMENT_VALUE, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DocumentFlavor, HorizontalAlign, ICommandService, IPermissionService, IUniverInstanceService, Rectangle, ThemeService, UniverInstanceType, VerticalAlign, WrapStrategy } from '@univerjs/core';
-import { clsx } from '@univerjs/design';
+import {
+    BooleanNumber,
+    DEFAULT_EMPTY_DOCUMENT_VALUE,
+    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+    DocumentFlavor,
+    FOCUSING_FX_BAR_EDITOR,
+    HorizontalAlign,
+    ICommandService,
+    IContextService,
+    IPermissionService,
+    IUniverInstanceService,
+    Rectangle,
+    ThemeService,
+    UniverInstanceType,
+    VerticalAlign,
+    WrapStrategy,
+} from '@univerjs/core';
+import { Button, clsx } from '@univerjs/design';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { CheckMarkSingle, CloseSingle, FxSingle } from '@univerjs/icons';
-import { RangeProtectionPermissionEditPoint, RangeProtectionRuleModel, SheetsSelectionsService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetProtectionRuleModel, WorksheetSetCellValuePermission } from '@univerjs/sheets';
-import { IEditorBridgeService, IFormulaEditorManagerService, SetCellEditVisibleOperation, useActiveWorkbook } from '@univerjs/sheets-ui';
-import { KeyCode, useDependency, useObservable } from '@univerjs/ui';
+import {
+    RangeProtectionPermissionEditPoint,
+    RangeProtectionRuleModel,
+    SheetsSelectionsService,
+    WorkbookEditablePermission,
+    WorksheetEditPermission,
+    WorksheetProtectionRuleModel,
+    WorksheetSetCellValuePermission,
+} from '@univerjs/sheets';
+import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY, IEditorBridgeService, IFormulaEditorManagerService, SetCellEditVisibleOperation, useActiveWorkbook } from '@univerjs/sheets-ui';
+import { ComponentManager, KeyCode, useDependency, useObservable } from '@univerjs/ui';
 import React, { useCallback, useLayoutEffect, useState } from 'react';
 import { EMPTY, merge, switchMap } from 'rxjs';
 
@@ -48,8 +72,9 @@ export const UniFormulaBar = () => {
         <>
             <div
                 className={clsx(`
-                  univer-flex univer-items-center univer-gap-2 univer-rounded-md univer-px-3 univer-py-1.5
-                  univer-text-sm univer-text-primary-600
+                  univer-flex univer-cursor-pointer univer-items-center univer-gap-2 univer-rounded-md
+                  univer-border-primary-400 univer-bg-primary-300 univer-px-3 univer-py-1.5 univer-text-sm
+                  univer-text-primary-600
                 `, {
                     'univer-opacity-30': !focusedId,
                 })}
@@ -64,6 +89,7 @@ export const UniFormulaBar = () => {
                 <div
                     className={`
                       univer-absolute univer-left-0 univer-top-0 univer-z-10 univer-h-full univer-w-full univer-bg-white
+                      dark:univer-bg-dark
                     `}
                 >
                     <FormulaBar />
@@ -79,15 +105,20 @@ export function FormulaBar() {
     const formulaEditorManagerService = useDependency(IFormulaEditorManagerService);
     const editorBridgeService = useDependency(IEditorBridgeService);
     const themeService = useDependency(ThemeService);
-    const progressBarColor = themeService.getCurrentTheme().primaryColor;
+    const componentManager = useDependency(ComponentManager);
     const commandService = useDependency(ICommandService);
-    const [disable, setDisable] = useState<boolean>(false);
-    const univerInstanceService = useDependency(IUniverInstanceService);
     const selectionManager = useDependency(SheetsSelectionsService);
     const worksheetProtectionRuleModel = useDependency(WorksheetProtectionRuleModel);
     const rangeProtectionRuleModel = useDependency(RangeProtectionRuleModel);
     const permissionService = useDependency(IPermissionService);
+    const contextService = useDependency(IContextService);
+
+    const progressBarColor = themeService.getCurrentTheme().primaryColor;
+    const [disable, setDisable] = useState<boolean>(false);
+    const univerInstanceService = useDependency(IUniverInstanceService);
+    const FormulaEditor = componentManager.get(EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY);
     const currentWorkbook = useActiveWorkbook();
+    const isFocusFxBar = contextService.getContextValue(FOCUSING_FX_BAR_EDITOR);
 
     function getPermissionIds(unitId: string, subUnitId: string): string[] {
         return [
@@ -217,6 +248,14 @@ export function FormulaBar() {
               univer-relative univer-box-border univer-flex univer-items-center unvier-gap-2 univer-h-full univer-p-2
             `}
         >
+            <FormulaEditor
+                disableSelectionOnClick
+                editorId={DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY}
+                initValue=""
+                onChange={() => {}}
+                isFocus={isFocusFxBar}
+                unitId={}
+            />
             {/* <TextEditor
                 id={DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY}
                 isSheetEditor
@@ -227,26 +266,13 @@ export function FormulaBar() {
                 snapshot={INITIAL_SNAPSHOT}
                 isSingle
             /> */}
-            <div className={clsx('univer-py-1.5', { 'univer-cursor-not-allowed univer-text-gray-200': disable })}>
-                <span
-                    className={`
-                      univer-flex univer-items-center univer-justify-center univer-rounded univer-p-1 univer-text-lg
-                      univer-text-red-600
-                    `}
-                    onClick={handleCloseBtnClick}
-                >
+            <div className={clsx('univer-flex univer-px-1.5', { 'univer-cursor-not-allowed univer-text-gray-200': disable })}>
+                <Button size="small" variant="text" className="univer-text-red-600" onClick={handleCloseBtnClick}>
                     <CloseSingle />
-                </span>
-
-                <span
-                    className={`
-                      univer-flex univer-items-center univer-justify-center univer-rounded univer-p-1 univer-text-lg
-                      univer-text-green-600
-                    `}
-                    onClick={handleConfirmBtnClick}
-                >
+                </Button>
+                <Button size="small" variant="text" className="univer-text-green-600" onClick={handleConfirmBtnClick}>
                     <CheckMarkSingle />
-                </span>
+                </Button>
             </div>
         </div>
     );

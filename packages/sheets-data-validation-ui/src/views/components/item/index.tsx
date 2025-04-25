@@ -122,7 +122,7 @@ export const DataValidationItem = (props: IDataValidationDetailProps) => {
                         className={`
                           univer-absolute univer-right-2 univer-top-[19px] univer-flex univer-h-5 univer-w-5
                           univer-items-center univer-justify-center univer-rounded
-                          hover:univer-bg-grey-200
+                          hover:univer-bg-gray-200
                         `}
                         onClick={handleDelete}
                     >

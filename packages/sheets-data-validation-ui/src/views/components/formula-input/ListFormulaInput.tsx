@@ -85,7 +85,7 @@ const ColorSelect = (props: IColorSelectProps) => {
             labelRender={(item) => (
                 <div
                     className={`
-                      univer-rounded univer-border univer-border-grey-400 univer-box-border univer-h-4 univer-w-4
+                      univer-box-border univer-h-4 univer-w-4 univer-rounded univer-border univer-border-gray-400
                       univer-text-base
                     `}
                     style={{ background: item.value, marginTop: 5 }}
@@ -107,9 +107,9 @@ const ColorSelect = (props: IColorSelectProps) => {
                                         setOpen(false);
                                     }}
                                     className={`
-                                      univer-mb-2 univer-mr-2 univer-box-border univer-box-border univer-h-4
-                                      univer-cursor-pointer univer-rounded univer-border univer-border-grey-400
-                                      univer-w-4 univer-text-base
+                                      univer-mb-2 univer-mr-2 univer-box-border univer-box-border univer-h-4 univer-w-4
+                                      univer-cursor-pointer univer-rounded univer-border univer-border-gray-400
+                                      univer-text-base
                                     `}
                                     style={{ background: color }}
                                     key={color}
@@ -156,7 +156,7 @@ const Template = (props: { item: IDropdownItem; commonProps: any; style?: CSSPro
                     <div
                         className={`
                           univer-ml-1 univer-cursor-pointer univer-rounded univer-text-base
-                          hover:univer-bg-grey-200
+                          hover:univer-bg-gray-200
                         `}
                     >
                         <DeleteSingle onClick={() => onItemDelete(item.id)} />

@@ -41,7 +41,7 @@ export const BaseFormulaInput = (props: IFormulaInputProps) => {
                         }}
                     />
                 </FormLayout>
-                <div className="univer--mt-2 univer-mb-1 univer-text-sm univer-text-grey-400">
+                <div className="univer--mt-2 univer-mb-1 univer-text-sm univer-text-gray-400">
                     {localeService.t('dataValidation.panel.formulaAnd')}
                 </div>
                 <FormLayout error={formula2Res}>

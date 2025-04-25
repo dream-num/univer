@@ -24,6 +24,7 @@ const enUS: typeof zhCN = {
             filterEmpty: 'Aucun résultat correspondant',
             reset: 'Réinitialiser le filtre',
             addComment: 'Ajouter un commentaire',
+            solved: 'Résolu',
         },
         editor: {
             placeholder: 'Répondre ou ajouter d\'autres avec @',

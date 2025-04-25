@@ -114,7 +114,7 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                                           univer-ml-1 univer-inline-flex univer-h-6 univer-w-6 univer-cursor-pointer
                                           univer-items-center univer-justify-center univer-rounded-[3px]
                                           univer-text-base
-                                          hover:univer-bg-[rgba(var(--grey-50))]
+                                          hover:univer-bg-gray-50
                                         `}
                                         onClick={() => onReply(user)}
                                     >
@@ -159,7 +159,7 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                                     className={`
                                       univer-ml-1 univer-inline-flex univer-h-6 univer-w-6 univer-cursor-pointer
                                       univer-items-center univer-justify-center univer-rounded-[3px] univer-text-base
-                                      hover:univer-bg-[rgba(var(--grey-50))]
+                                      hover:univer-bg-gray-50
                                     `}
                                 >
                                     <MoreHorizontalSingle />
@@ -169,7 +169,7 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                         : null}
                 </div>
             </div>
-            <div className="univer-mb-1 univer-text-xs univer-leading-[1.5] univer-text-[rgba(var(--grey-600))]">{item.dT}</div>
+            <div className="univer-mb-1 univer-text-xs univer-leading-[1.5] univer-text-gray-600">{item.dT}</div>
             {editing
                 ? (
                     <ThreadCommentEditor
@@ -386,7 +386,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                                     `
                                       univer-ml-1 univer-inline-flex univer-h-6 univer-w-6 univer-cursor-pointer
                                       univer-items-center univer-justify-center univer-rounded-[3px] univer-text-base
-                                      hover:univer-bg-grey-50
+                                      hover:univer-bg-gray-50
                                     `,
                                     {
                                         'univer-text-green-500': resolved,
@@ -402,7 +402,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                                           univer-ml-1 univer-inline-flex univer-h-6 univer-w-6 univer-cursor-pointer
                                           univer-items-center univer-justify-center univer-rounded-[3px]
                                           univer-text-base
-                                          hover:univer-bg-grey-50
+                                          hover:univer-bg-gray-50
                                         `}
                                         onClick={handleDeleteRoot}
                                     >
@@ -417,7 +417,6 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
             <div
                 className={`
                   univer-max-h-[300px] univer-overflow-y-auto univer-overflow-x-hidden
-                  [scrollbar-color:rgba(var(--scrollbar-color),0.7)_transparent]
                   [scrollbar-gutter:auto]
                   [scrollbar-width:thin]
                 `}

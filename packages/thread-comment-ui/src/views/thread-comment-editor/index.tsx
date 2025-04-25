@@ -161,7 +161,7 @@ export const ThreadCommentSuggestion = ({ active, user }: { active: boolean; use
     <div
         className={clsx(
             'univer-flex univer-items-center univer-text-sm univer-text-black',
-            { 'univer-bg-grey-50': active }
+            { 'univer-bg-gray-50': active }
         )}
     >
         <img className="univer-mr-[6px] univer-h-6 univer-w-6 univer-rounded-full" src={user.avatar} />

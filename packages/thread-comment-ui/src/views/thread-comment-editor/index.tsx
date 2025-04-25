@@ -164,7 +164,7 @@ export const ThreadCommentSuggestion = ({ active, user }: { active: boolean; use
             { 'univer-bg-gray-50': active }
         )}
     >
-        <img className="univer-mr-[6px] univer-h-6 univer-w-6 univer-rounded-full" src={user.avatar} />
+        <img draggable={false} className="univer-mr-[6px] univer-h-6 univer-w-6 univer-rounded-full" src={user.avatar} />
         <span>{user.name}</span>
     </div>
 );

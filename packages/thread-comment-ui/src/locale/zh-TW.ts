@@ -24,6 +24,7 @@ const enUS: typeof zhCN = {
             filterEmpty: '沒有符合的結果',
             reset: '重置',
             addComment: '新增評論',
+            solved: '已解決',
         },
         editor: {
             placeholder: '回覆',

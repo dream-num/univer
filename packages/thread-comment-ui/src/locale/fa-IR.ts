@@ -24,6 +24,7 @@ const locale: typeof zhCN = {
             filterEmpty: 'نتیجه ای یافت نشد',
             reset: 'بازنشانی فیلتر',
             addComment: 'افزودن نظر',
+            solved: 'حل شده',
         },
         editor: {
             placeholder: 'پاسخ یا اضافه کردن دیگران با @',

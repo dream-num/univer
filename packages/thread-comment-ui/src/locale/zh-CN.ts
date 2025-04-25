@@ -22,6 +22,7 @@ export default {
             filterEmpty: '没有匹配的结果',
             reset: '重置',
             addComment: '添加评论',
+            solved: '已解决',
         },
         editor: {
             placeholder: '回复',

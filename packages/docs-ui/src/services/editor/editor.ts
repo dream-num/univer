@@ -313,10 +313,8 @@ export class Editor extends Disposable implements IEditor {
 
     // Set the new document data.
     setDocumentData(data: IDocumentData, textRanges: Nullable<ITextRangeWithStyle[]>) {
-        const { id } = data;
-
         this._commandService.syncExecuteCommand(ReplaceSnapshotCommand.id, {
-            unitId: id,
+            unitId: this.getEditorId(),
             snapshot: data,
             textRanges,
         });

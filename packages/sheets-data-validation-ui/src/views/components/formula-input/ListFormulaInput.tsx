@@ -85,7 +85,7 @@ const ColorSelect = (props: IColorSelectProps) => {
             labelRender={(item) => (
                 <div
                     className={`
-                      univer-box-border univer-h-4 univer-w-4 univer-rounded univer-border univer-border-gray-400
+                      univer-box-border univer-h-4 univer-w-4 univer-rounded univer-border univer-border-gray-200
                       univer-text-base
                     `}
                     style={{ background: item.value, marginTop: 5 }}
@@ -108,7 +108,7 @@ const ColorSelect = (props: IColorSelectProps) => {
                                     }}
                                     className={`
                                       univer-mb-2 univer-mr-2 univer-box-border univer-box-border univer-h-4 univer-w-4
-                                      univer-cursor-pointer univer-rounded univer-border univer-border-gray-400
+                                      univer-cursor-pointer univer-rounded univer-border univer-border-gray-200
                                       univer-text-base
                                     `}
                                     style={{ background: color }}
@@ -411,9 +411,8 @@ export function ListFormulaInput(props: IFormulaInputProps) {
                             <a
                                 className={`
                                   univer-flex univer-w-fit univer-cursor-pointer univer-flex-row univer-items-center
-                                  univer-rounded univer-p-1 univer-px-2 univer-text-sm univer-font-normal
-                                  univer-text-[#274fee]
-                                  hover:univer-bg-[rgba(39,79,238,0.05)]
+                                  univer-rounded univer-p-1 univer-px-2 univer-text-sm univer-text-blue-600
+                                  hover:univer-bg-primary-600/5
                                 `}
                                 onClick={handleAdd}
                             >

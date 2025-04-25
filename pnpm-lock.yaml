@@ -993,9 +993,6 @@ importers:
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../../packages/sheets
-      '@univerjs/sheets-formula-ui':
-        specifier: workspace:*
-        version: link:../../packages/sheets-formula-ui
       '@univerjs/sheets-ui':
         specifier: workspace:*
         version: link:../../packages/sheets-ui

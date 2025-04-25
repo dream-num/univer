@@ -67,7 +67,6 @@
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/icons": "^0.3.21",
         "@univerjs/sheets": "workspace:*",
-        "@univerjs/sheets-formula-ui": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
         "@xyflow/react": "^12.5.5"

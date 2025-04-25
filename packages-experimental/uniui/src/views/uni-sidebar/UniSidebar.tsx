@@ -103,9 +103,9 @@ export function UniSidebar(props: IUniSidebarProps) {
     return (
         <aside
             className={clsx(`
-              univer-fixed univer-bottom-3 univer-z-20 univer-box-border univer-translate-x-0 univer-overflow-hidden
-              univer-rounded-lg univer-border univer-border-solid univer-border-gray-200 univer-shadow-lg
-              univer-transition-all
+              univer-pointer-events-auto univer-fixed univer-bottom-3 univer-z-20 univer-box-border univer-translate-x-0
+              univer-overflow-hidden univer-rounded-lg univer-border univer-border-solid univer-border-gray-200
+              univer-shadow-lg univer-transition-all
             `, position === 'left' && 'univer-left-3 univer-top-12 univer-w-[180px]', position === 'left' && options?.visible && `
               univer-translate-x-0
             `, position === 'left' && options?.visible === false && '-univer-translate-x-4', position === 'right' && `

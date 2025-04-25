@@ -30,6 +30,7 @@ import { ThreadCommentEditor } from '../thread-comment-editor';
 import { transformDocument2TextNodes, transformTextNodes2Document } from '../thread-comment-editor/util';
 
 export interface IThreadCommentTreeProps {
+    full?: boolean;
     id?: string;
     unitId: string;
     subUnitId: string;
@@ -258,6 +259,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
         onResolve,
         type,
         style,
+        full,
     } = props;
     const threadCommentModel = useDependency(ThreadCommentModel);
     const [isHover, setIsHover] = useState(false);
@@ -341,9 +343,10 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
         <div
             className={clsx(
                 `
-                  univer-relative univer-box-border univer-w-[278px] univer-rounded-lg univer-border univer-border-solid
+                  univer-relative univer-box-border univer-rounded-lg univer-border univer-border-solid
                   univer-border-gray-200 univer-bg-white univer-p-4
                 `,
+                full ? 'univer-w-full' : 'univer-w-[278px]',
                 {
                     'univer-shadow': !resolved && (showHighlight || isHover || prefix === 'cell'),
                 }

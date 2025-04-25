@@ -23,7 +23,6 @@ import React, { forwardRef, useEffect, useMemo, useRef, useState } from 'react';
 import { useEditorPosition } from '../hooks/use-editor-position';
 import { useFormulaSearch } from '../hooks/use-formula-search';
 import { useStateRef } from '../hooks/use-state-ref';
-import styles from './index.module.less';
 
 interface ISearchFunctionProps {
     isFocus: boolean;
@@ -144,17 +143,12 @@ function SearchFunctionFactory(props: ISearchFunctionProps, ref: any) {
     }, [searchList]);
 
     function scrollToVisible(liIndex: number) {
-        // Get the <li> element
-        const liElement = ulRef.current?.querySelectorAll(`.${styles.formulaSearchFunctionItem}`)[
-            liIndex
-        ] as HTMLLIElement;
-
-        if (!liElement) return;
-
-        // Get the <ul> element
-        const ulElement = liElement.parentNode as HTMLUListElement;
-
+        // Get the <li> element directly from children
+        const ulElement = ulRef.current;
         if (!ulElement) return;
+
+        const liElement = ulElement.children[liIndex] as HTMLLIElement;
+        if (!liElement) return;
 
         // Get the height of the <ul> element
         const ulRect = ulElement.getBoundingClientRect();
@@ -195,7 +189,11 @@ function SearchFunctionFactory(props: ISearchFunctionProps, ref: any) {
     return searchList.length > 0 && visible && (
         <RectPopup portal anchorRect$={position$} direction="vertical">
             <ul
-                className={styles.formulaSearchFunction}
+                className={`
+                  univer-m-0 univer-box-border univer-max-h-[400px] univer-w-[250px] univer-list-none
+                  univer-overflow-y-auto univer-rounded-lg univer-border univer-border-solid univer-border-gray-200
+                  univer-bg-white univer-p-2 univer-leading-5 univer-shadow-md univer-outline-none
+                `}
                 ref={(v) => {
                     ulRef.current = v!;
                     if (ref) {
@@ -206,12 +204,13 @@ function SearchFunctionFactory(props: ISearchFunctionProps, ref: any) {
                 {searchList.map((item, index) => (
                     <li
                         key={item.name}
-                        className={active === index
-                            ? `
-                              ${styles.formulaSearchFunctionItem}
-                              ${styles.formulaSearchFunctionItemActive}
-                            `
-                            : styles.formulaSearchFunctionItem}
+                        className={`
+                          univer-box-border univer-cursor-pointer univer-rounded univer-px-2 univer-py-1
+                          univer-text-gray-900 univer-transition-colors
+                          ${active === index
+                        ? 'univer-bg-gray-200'
+                        : ''}
+                        `}
                         onMouseEnter={() => handleLiMouseEnter(index)}
                         onMouseLeave={handleLiMouseLeave}
                         onMouseMove={debounceResetMouseState}
@@ -222,11 +221,15 @@ function SearchFunctionFactory(props: ISearchFunctionProps, ref: any) {
                             }
                         }}
                     >
-                        <span className={styles.formulaSearchFunctionItemName}>
-                            <span className={styles.formulaSearchFunctionItemNameLight}>{item.name.substring(0, searchText.length)}</span>
+                        <span className="univer-text-xs">
+                            <span className="univer-text-red-500">{item.name.substring(0, searchText.length)}</span>
                             <span>{item.name.slice(searchText.length)}</span>
                         </span>
-                        <span className={styles.formulaSearchFunctionItemDesc}>{item.desc}</span>
+                        <span
+                            className="univer-block univer-text-xs univer-text-gray-400"
+                        >
+                            {item.desc}
+                        </span>
                     </li>
                 ))}
             </ul>

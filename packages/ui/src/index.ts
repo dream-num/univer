@@ -57,7 +57,7 @@ export {
     imageMimeTypeSet,
     PLAIN_TEXT_CLIPBOARD_MIME_TYPE,
 } from './services/clipboard/clipboard-interface.service';
-export { IConfirmService } from './services/confirm/confirm.service';
+export { IConfirmService, TestConfirmService } from './services/confirm/confirm.service';
 export { DesktopConfirmService } from './services/confirm/desktop-confirm.service';
 export {
     ContextMenuService,

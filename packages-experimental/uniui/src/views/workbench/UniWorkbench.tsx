@@ -55,7 +55,7 @@ import { DEFAULT_ZOOM, MAX_ZOOM, MIN_ZOOM, UniControlItem, UniControls } from '.
 import { LeftSidebar, RightSidebar } from '../uni-sidebar/UniSidebar';
 import { UniFloatingToolbar } from '../uni-toolbar/UniFloatToolbar';
 import { UniToolbar } from '../uni-toolbar/UniToolbar';
-import styles from './workbench.module.less';
+
 import '@xyflow/react/dist/style.css';
 // Refer to packages/ui/src/views/workbench/Workbench.tsx
 
@@ -189,11 +189,15 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
               * bubbled to this element and refocus the input element.
               */}
             <ReactFlowProvider>
-                <div data-u-comp="workbench-layout" className={styles.workbenchLayout} tabIndex={-1} onBlur={(e) => e.stopPropagation()}>
-
-                    <div className={styles.flowLayer}>
+                <div
+                    data-u-comp="workbench-layout"
+                    className="univer-relative univer-flex univer-h-full univer-min-h-0 univer-flex-col"
+                    tabIndex={-1}
+                    onBlur={(e) => e.stopPropagation()}
+                >
+                    <div className="univer-absolute univer-left-0 univer-top-0 univer-h-full univer-w-full">
                         <section
-                            className={styles.workbenchContainerCanvasContainer}
+                            className="univer-relative univer-flex univer-h-full univer-w-full"
                             ref={contentRef}
                             data-range-selector
                             onContextMenu={(e) => e.preventDefault()}
@@ -243,11 +247,22 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
                             <ComponentContainer key="content" components={contentComponents} />
                         </section>
                     </div>
-                    <div className={styles.floatLayer}>
+                    <div
+                        className={`
+                          univer-pointer-events-none univer-absolute univer-left-0 univer-top-0 univer-h-full
+                          univer-w-full
+                          [&>*]:univer-pointer-events-auto
+                        `}
+                    >
                         {/* header */}
                         {header && (
-                            <div className={styles.workbenchContainerHeader}>
-                                <div className={styles.workbenchToolbarWrapper}>
+                            <div
+                                className={`
+                                  univer-relative univer-z-10 univer-flex univer-w-full univer-items-center
+                                  univer-justify-center univer-pt-3
+                                `}
+                            >
+                                <div className="univer-pointer-events-auto univer-max-w-[calc(100%-650px)]">
                                     <UniToolbar />
                                     <ComponentContainer key="header" components={headerComponents} />
                                 </div>
@@ -298,18 +313,23 @@ function UnitNode({ data }: IUnitNodeProps) {
     }, [disableChangingUnitFocusing, focused, unitId, commandService]);
 
     return (
-        <div className={styles.uniNodeContainer} onPointerDownCapture={focus}>
+        <div className="univer-relative univer-flex univer-h-full univer-w-full" onPointerDownCapture={focus}>
             <NodeResizer isVisible={focused} minWidth={180} minHeight={100} />
             <UnitRenderer
                 key={data.unitId}
                 {...data}
             />
 
-            <div className={styles.uniNodeDragHandle}>
+            <div
+                className={`
+                  univer-absolute -univer-left-8 univer-flex univer-h-[18px] univer-w-[18px] univer-items-center
+                  univer-justify-center univer-rounded univer-p-1 univer-shadow-sm
+                `}
+            >
                 <MenuSingle />
             </div>
 
-            <div className={styles.uniNodeTitle}>
+            <div className="univer-absolute -univer-top-6 univer-left-0 univer-text-sm univer-text-gray-600">
                 {title}
             </div>
             <ComponentContainer key="unit" components={unitComponents} sharedProps={{ unitId }} />
@@ -342,8 +362,11 @@ function UnitRenderer(props: IUnitRendererProps) {
 
     return (
         <div
-            className={clsx(styles.workbenchContainerCanvas, {
-                [styles.workbenchContainerCanvasFocused]: focused,
+            className={clsx(`
+              univer-relative univer-flex-1 univer-overflow-hidden univer-rounded-lg univer-borer univer-border-solid
+              univer-border-transparent
+            `, {
+                'univer-border-primary-500': focused,
             })}
             ref={mountRef}
             // We bind these focusing events on capture phrase so the

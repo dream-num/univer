@@ -20,6 +20,19 @@ import fs from 'fs-extra';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+// eslint-disable-next-line node/prefer-global/process
+export const IS_CI = !!process.env.CI;
+
+const ESBUILD_SCRIPT = IS_CI
+    ? '' :
+    `
+        <script>
+            new EventSource('/esbuild').addEventListener('change', () => {
+                console.info('reload--');
+                location.reload();
+            });
+        </script>`;
+
 const indexTemplate = `<!doctype html>
 <html lang="en">
     <head>
@@ -35,14 +48,7 @@ const indexTemplate = `<!doctype html>
                 height: 100%;
                 margin: 0;
             }
-        </style>
-
-        <script>
-            new EventSource('/esbuild').addEventListener('change', () => {
-                console.info('reload--');
-                location.reload();
-            });
-        </script>
+        </style>${ESBUILD_SCRIPT}
     </head>
 
     <body style="overflow: hidden">

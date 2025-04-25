@@ -25,7 +25,7 @@ export const QuickInsertPlaceholder = () => {
         <div
             className={`
               univer-flex univer-h-full univer-items-center univer-justify-center univer-rounded-lg univer-bg-white
-              univer-px-12 univer-py-6 univer-text-gray-400
+              univer-px-12 univer-py-6 univer-text-gray-400 univer-shadow-lg
             `}
         >
             <span>{localeService.t('docQuickInsert.placeholder')}</span>

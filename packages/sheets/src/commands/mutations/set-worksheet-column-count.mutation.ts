@@ -24,13 +24,13 @@ export interface ISetWorksheetColumnCountMutationParams {
     columnCount: number;
 }
 
-export const SetWorksheetColumnCountMutationFactory = (
+export const SetWorksheetColumnCountUndoMutationFactory = (
     accessor: IAccessor,
     params: ISetWorksheetColumnCountMutationParams
 ): ISetWorksheetColumnCountMutationParams => {
     const target = getSheetMutationTarget(accessor.get(IUniverInstanceService), params);
     if (!target) {
-        throw new Error('[SetWorksheetColumnCountMutationFactory]: worksheet is null error!');
+        throw new Error('[SetWorksheetColumnCountUndoMutationFactory]: worksheet is null error!');
     }
 
     return {

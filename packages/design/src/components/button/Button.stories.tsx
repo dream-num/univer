@@ -15,7 +15,6 @@
  */
 
 import type { Meta } from '@storybook/react';
-
 import { Button } from './Button';
 
 const meta: Meta<typeof Button> = {
@@ -36,6 +35,7 @@ export const ButtonType = {
                 <div>
                     <Button>default button</Button>
                     <Button variant="primary">primary button</Button>
+                    <Button variant="danger">danger button</Button>
                     <Button variant="text">text button</Button>
                     <Button variant="link">link button</Button>
                 </div>

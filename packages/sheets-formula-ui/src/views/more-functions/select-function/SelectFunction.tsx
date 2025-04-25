@@ -27,7 +27,6 @@ import React, { useEffect, useState } from 'react';
 import { getFunctionTypeValues } from '../../../services/utils';
 import { FunctionHelp } from '../function-help/FunctionHelp';
 import { FunctionParams } from '../function-params/FunctionParams';
-import styles from './index.module.less';
 
 export interface ISelectFunctionProps {
     onChange: (functionInfo: IFunctionInfo) => void;
@@ -86,7 +85,7 @@ export function SelectFunction(props: ISelectFunctionProps) {
         return parts.map((part: string, index: number) => {
             if (part.match(regex)) {
                 return (
-                    <span key={index} className={styles.formulaSelectFunctionResultItemNameLight}>
+                    <span key={index} className="univer-text-red-500">
                         {part}
                     </span>
                 );
@@ -148,7 +147,7 @@ export function SelectFunction(props: ISelectFunctionProps) {
 
     return (
         <div>
-            <div className={styles.formulaSelectFunctionSelect}>
+            <div className="univer-flex univer-items-center univer-justify-between univer-gap-[10%]">
                 <Select value={typeSelected} options={options} onChange={handleSelectChange} />
 
                 <Input
@@ -161,30 +160,46 @@ export function SelectFunction(props: ISelectFunctionProps) {
                 />
             </div>
 
-            <ul className={styles.formulaSelectFunctionResult} onKeyDown={handleSelectListKeyDown} tabIndex={-1}>
+            <ul
+                className={`
+                  univer-mx-0 univer-mb-0 univer-mt-2 univer-box-border univer-max-h-[364px] univer-w-full
+                  univer-select-none univer-list-none univer-overflow-y-auto univer-rounded univer-border
+                  univer-border-solid univer-border-gray-200 univer-p-3 univer-outline-none
+                `}
+                onKeyDown={handleSelectListKeyDown}
+                tabIndex={-1}
+            >
                 {selectList.map(({ name }, index) => (
                     <li
                         key={index}
                         className={active === index
                             ? `
-                              ${styles.formulaSelectFunctionResultItem}
-                              ${styles.formulaSelectFunctionResultItemActive}
+                              univer-relative univer-box-border univer-cursor-pointer univer-rounded univer-bg-gray-200
+                              univer-px-7 univer-py-1 univer-text-[13px] univer-text-gray-900 univer-transition-colors
                             `
-                            : styles.formulaSelectFunctionResultItem}
+                            : `
+                              univer-relative univer-box-border univer-cursor-pointer univer-rounded univer-px-7
+                              univer-py-1 univer-text-[13px] univer-text-gray-900 univer-transition-colors
+                            `}
                         onMouseEnter={() => handleLiMouseEnter(index)}
                         onMouseLeave={handleLiMouseLeave}
                         onClick={() => setCurrentFunctionInfo(index)}
                     >
                         {nameSelected === index && (
-                            <CheckMarkSingle className={styles.formulaSelectFunctionResultItemSelected} />
+                            <CheckMarkSingle
+                                className={`
+                                  univer-absolute univer-left-1.5 univer-top-1/2 univer-inline-flex
+                                  univer--translate-y-1/2 univer-text-base univer-text-green-500
+                                `}
+                            />
                         )}
-                        <span className={styles.formulaSelectFunctionResultItemName}>{highlightSearchText(name)}</span>
+                        <span className="univer-block">{highlightSearchText(name)}</span>
                     </li>
                 ))}
             </ul>
 
             {functionInfo && (
-                <div className={styles.formulaSelectFunctionContent}>
+                <div className="univer-mx-0 univer-my-2 univer-max-h-[307px] univer-overflow-y-auto">
                     <FunctionParams title={functionInfo.functionName} value={functionInfo.description} />
 
                     <FunctionParams

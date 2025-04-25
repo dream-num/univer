@@ -15,10 +15,10 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import { Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
-import { DumbUniFormulaService, IUniFormulaService } from './services/uni-formula.service';
+import { Inject, Injector, Plugin, registerDependencies, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { UNI_FORMULA_PLUGIN_NAME } from './const';
 import { UniFormulaController } from './controller/uni-formula.controller';
+import { DumbUniFormulaService, IUniFormulaService } from './services/uni-formula.service';
 
 export class UniverDocUniFormulaPlugin extends Plugin {
     static override pluginName: string = UNI_FORMULA_PLUGIN_NAME;
@@ -34,12 +34,12 @@ export class UniverDocUniFormulaPlugin extends Plugin {
     }
 
     override onStarting(): void {
-        this._injector.add([UniFormulaController]);
-        this._injector.get(UniFormulaController);
-
+        const dependencies: Dependency[] = [[UniFormulaController]];
         if (this._config?.playDumb) {
-            this._injector.add([IUniFormulaService, { useClass: DumbUniFormulaService }] as Dependency);
-            this._injector.get(IUniFormulaService);
+            dependencies.push([IUniFormulaService, { useClass: DumbUniFormulaService }]);
         }
+
+        registerDependencies(this._injector, dependencies);
+        touchDependencies(this._injector, dependencies.map((d) => [d[0]]));
     }
 }

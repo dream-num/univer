@@ -16,8 +16,7 @@
 
 import type { Meta } from '@storybook/react';
 import type { ISideMenuItem } from './index';
-
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { SideMenu } from './index';
 
 const meta: Meta<typeof SideMenu> = {

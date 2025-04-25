@@ -17,7 +17,7 @@
 import './global.css';
 
 export { Avatar, type IAvatarProps } from './components/avatar';
-export { Button, type IButtonProps } from './components/button';
+export { Button, ButtonGroup, type IButtonGroupProps, type IButtonProps } from './components/button';
 export { CascaderList, type ICascaderListProps, type ICascaderOption } from './components/cascader-list';
 export { Checkbox, type ICheckboxProps } from './components/checkbox';
 export { CheckboxGroup, type ICheckboxGroupProps } from './components/checkbox-group';
@@ -27,7 +27,7 @@ export { Confirm, type IConfirmChildrenProps, type IConfirmProps } from './compo
 export { DatePanel, DatePicker, type IDatePanelProps, type IDatePickerProps } from './components/date-picker';
 export { Dialog, type IDialogProps } from './components/dialog';
 export { DropdownLegacy, type IDropdownLegacyProps } from './components/dropdown-legacy';
-export { Dropdown } from './components/dropdown';
+export { Dropdown, type IDropdownProps } from './components/dropdown';
 export { FormDualColumnLayout, FormLayout, type IFormDualColumnLayoutProps, type IFormLayoutProps } from './components/form-layout';
 export { type IInputProps, Input } from './components/input';
 export { type IInputNumberProps, InputNumber } from './components/input-number';
@@ -51,7 +51,7 @@ export { clsx } from './helper/clsx';
 export { resizeObserverCtor } from './helper/resize-observer';
 export { render, unmount } from './helper/react-dom';
 export { isBrowser } from './helper/is-browser';
-export { DropdownMenu, type IDropdownProps } from './components/dropdown-menu';
+export { DropdownMenu, type IDropdownMenuProps } from './components/dropdown-menu';
 export { Separator } from './components/separator';
 export { DateRangePicker } from './components/date-range-picker';
 export { type IKBDProps, KBD } from './components/kbd';

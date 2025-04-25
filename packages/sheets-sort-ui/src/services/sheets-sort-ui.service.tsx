@@ -61,6 +61,7 @@ const SORT_ERROR_MESSAGE = {
 export class SheetsSortUIService extends Disposable {
     private readonly _customSortState$ = new BehaviorSubject<Nullable<ICustomSortState>>(null);
     readonly customSortState$ = this._customSortState$.asObservable();
+
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IConfirmService private readonly _confirmService: IConfirmService,

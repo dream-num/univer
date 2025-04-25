@@ -79,7 +79,7 @@ export function transformStyle(oldStyle: Nullable<IStyleData>, newStyle: Nullabl
     if (!newStyle || !Object.keys(newStyle).length) {
         return oldStyle;
     }
-    const backupStyle: Record<string, any> = oldStyle || {};
+    const backupStyle: Record<string, any> = Tools.deepClone(oldStyle ?? {});
 
     for (const k in newStyle) {
         if (k === 'bd') {

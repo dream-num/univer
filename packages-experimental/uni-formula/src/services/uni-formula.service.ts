@@ -35,21 +35,17 @@ export interface IUniFormulaService {
     updateSlideFormulaResults(unitId: string, pageId: string, elementId: string, formulaId: string, v: IDocFormulaCache): boolean;
 
     // #region doc
-
     hasDocFormula(unitId: string, formulaId: string): boolean;
     getDocFormula(unitId: string, rangeId: string): Nullable<IDocFormulaReference>;
     registerDocFormula(unitId: string, rangeId: string, f: string, v: ICellData['v'], t: ICellData['t']): IDisposable;
     unregisterDocFormula(unitId: string, rangeId: string): void;
-
     // #endregion
 
     // #region slide
-
     hasSlideFormula(unitId: string, pageId: string, elementId: string, formulaId: string): boolean;
     getSlideFormula(unitId: string, pageId: string, elementId: string, formulaId: string): Nullable<ISlideFormulaReference>;
     registerSlideFormula(unitId: string, pageId: string, elementId: string, f: string, v: ICellData['v'], t: ICellData['t']): IDisposable;
     unregisterSlideFormula(unitId: string, pageId: string, elementId: string, formulaId: string): void;
-
     // #endregion
 }
 

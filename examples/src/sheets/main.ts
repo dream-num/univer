@@ -19,8 +19,6 @@ import { FUniver } from '@univerjs/core/facade';
 import { UniverDebuggerPlugin } from '@univerjs/debugger';
 import { defaultTheme } from '@univerjs/design';
 import { UniverDocsPlugin } from '@univerjs/docs';
-import { UniverDocsDrawingUIPlugin } from '@univerjs/docs-drawing-ui';
-import { UniverDocsMentionUIPlugin } from '@univerjs/docs-mention-ui';
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
@@ -32,24 +30,21 @@ import { UniverSheetsConditionalFormattingPlugin } from '@univerjs/sheets-condit
 import { UniverSheetsDataValidationPlugin } from '@univerjs/sheets-data-validation';
 import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
 import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
-import { UniverSheetsFormulaUIPlugin } from '@univerjs/sheets-formula-ui';
 import { UniverSheetsHyperLinkPlugin } from '@univerjs/sheets-hyper-link';
 import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
-import { UniverSheetsNumfmtUIPlugin } from '@univerjs/sheets-numfmt-ui';
 import { UniverSheetsSortPlugin } from '@univerjs/sheets-sort';
 import { UniverSheetsBindingSourcePlugin } from '@univerjs/sheets-source-binding';
 import { UniverSheetTablePlugin } from '@univerjs/sheets-table';
-import { UniverSheetTableUIPlugin } from '@univerjs/sheets-table-ui';
 import { UniverSheetsThreadCommentPlugin } from '@univerjs/sheets-thread-comment';
-import { UniverSheetsThreadCommentUIPlugin } from '@univerjs/sheets-thread-comment-ui';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 import { UniverSheetsZenEditorPlugin } from '@univerjs/sheets-zen-editor';
-import { UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
 import { UniverUIPlugin } from '@univerjs/ui';
 
 import { enUS, faIR, frFR, ruRU, viVN, zhCN, zhTW } from '../locales';
 
 import { UniverSheetsCustomMenuPlugin } from './custom-menu';
+import ImportCSVButtonPlugin from './custom-plugin/import-csv-button';
+
 import '@univerjs/sheets/facade';
 import '@univerjs/ui/facade';
 import '@univerjs/docs-ui/facade';
@@ -115,8 +110,6 @@ function createNewInstance() {
         container: 'app',
     });
     univer.registerPlugin(UniverDocsUIPlugin);
-    univer.registerPlugin(UniverDocsDrawingUIPlugin);
-    univer.registerPlugin(UniverDocsMentionUIPlugin);
 
     univer.registerPlugin(UniverSheetsPlugin, { notExecuteFormula: true });
     univer.registerPlugin(UniverSheetsUIPlugin);
@@ -126,23 +119,20 @@ function createNewInstance() {
     });
     univer.registerPlugin(UniverSheetsZenEditorPlugin);
     univer.registerPlugin(UniverFormulaEnginePlugin, { notExecuteFormula: true });
-    univer.registerPlugin(UniverSheetsNumfmtUIPlugin);
     univer.registerPlugin(UniverSheetsFormulaPlugin, { notExecuteFormula: true });
-    univer.registerPlugin(UniverSheetsFormulaUIPlugin);
     univer.registerPlugin(UniverSheetsDataValidationPlugin);
     univer.registerPlugin(UniverSheetsConditionalFormattingPlugin);
     univer.registerPlugin(UniverSheetsFilterPlugin);
     univer.registerPlugin(UniverSheetsSortPlugin);
     univer.registerPlugin(UniverSheetsHyperLinkPlugin);
-    univer.registerPlugin(UniverThreadCommentUIPlugin);
     univer.registerPlugin(UniverSheetsThreadCommentPlugin);
-    univer.registerPlugin(UniverSheetsThreadCommentUIPlugin);
     univer.registerPlugin(UniverSheetsBindingSourcePlugin);
     univer.registerPlugin(UniverSheetsCustomMenuPlugin);
 
     univer.registerPlugin(UniverSheetTablePlugin);
-    univer.registerPlugin(UniverSheetTableUIPlugin);
     univer.registerPlugin(UniverNetworkPlugin);
+
+    univer.registerPlugin(ImportCSVButtonPlugin);
 
     // If we are running in e2e platform, we should immediately register the debugger plugin.
     if (IS_E2E) {

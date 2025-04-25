@@ -94,11 +94,11 @@ export class SheetPermissionRenderController extends Disposable implements IRend
         super();
 
         const config = this._configService.getConfig<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY);
+        this._initSkeleton();
         if (config?.customComponents?.has(UNIVER_SHEET_PERMISSION_BACKGROUND)) {
             return;
         }
         this._initRender();
-        this._initSkeleton();
 
         this.disposeWithMe(this._rangeProtectionRuleModel.ruleChange$.subscribe((info) => {
             if ((info.oldRule?.id && this._rangeProtectionCanViewRenderExtension.renderCache.has(info.oldRule.id)) || this._rangeProtectionCanViewRenderExtension.renderCache.has(info.rule.id)) {
@@ -149,12 +149,12 @@ export class WorksheetProtectionRenderController extends Disposable implements I
         super();
 
         const config = this._configService.getConfig<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY);
+        this._initSkeleton();
         if (config?.customComponents?.has(UNIVER_SHEET_PERMISSION_BACKGROUND)) {
             return;
         }
 
         this._initRender();
-        this._initSkeleton();
     }
 
     private _initRender() {

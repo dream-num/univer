@@ -16,12 +16,12 @@
 
 import type { IRange } from '@univerjs/core';
 import { IUniverInstanceService, LocaleService } from '@univerjs/core';
+import { Button, ButtonGroup } from '@univerjs/design';
 import { AscendingSingle, DescendingSingle } from '@univerjs/icons';
 import { getSheetCommandTarget } from '@univerjs/sheets';
 import { useDependency } from '@univerjs/ui';
 import React, { useCallback } from 'react';
 import { SheetsSortUIService } from '../services/sheets-sort-ui.service';
-import styles from './index.module.less';
 
 export interface IEmbedSortBtnProps {
     range: IRange;
@@ -42,40 +42,22 @@ export default function EmbedSortBtn(props: IEmbedSortBtnProps) {
             const noTitleRange = { ...range, startRow: range.startRow + 1 };
             sheetsSortUIService.triggerSortDirectly(asc, false, { unitId, subUnitId, range: noTitleRange, colIndex });
         } else {
-            console.warn(`Cannot find the target to sort. unitId: ${unitId}, subUnitId: ${subUnitId}, range: ${range}, colIndex: ${colIndex}`);
+            throw new Error(`Cannot find the target to sort. unitId: ${unitId}, subUnitId: ${subUnitId}, range: ${range}, colIndex: ${colIndex}`);
         }
 
         onClose();
     }, [range, colIndex, sheetsSortUIService, univerInstanceService, onClose]);
 
     return (
-        <div
-            data-univer-comp-embed-sort-btn-container
-            className={`
-              univer-mb-3 univer-flex univer-w-full univer-items-center univer-justify-center univer-py-[6px]
-              univer-text-sm
-            `}
-        >
-            <div
-                className={`
-                  ${styles.embedSortBtn}
-                  ${styles.embedSortBtnAsc}
-                `}
-                onClick={() => apply(true)}
-            >
-                <AscendingSingle className={styles.embedSortBtnIcon} />
+        <ButtonGroup className="univer-mb-3 univer-w-full">
+            <Button className="univer-w-1/2" onClick={() => apply(true)}>
+                <AscendingSingle className="univer-mr-1" />
                 {localeService.t('sheets-sort.general.sort-asc')}
-            </div>
-            <div
-                className={`
-                  ${styles.embedSortBtn}
-                  ${styles.embedSortBtnDesc}
-                `}
-                onClick={() => apply(false)}
-            >
-                <DescendingSingle className={styles.embedSortBtnIcon} />
+            </Button>
+            <Button className="univer-w-1/2" onClick={() => apply(false)}>
+                <DescendingSingle className="univer-mr-1" />
                 {localeService.t('sheets-sort.general.sort-desc')}
-            </div>
-        </div>
+            </Button>
+        </ButtonGroup>
     );
 }

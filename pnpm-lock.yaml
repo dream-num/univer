@@ -187,8 +187,8 @@ importers:
         specifier: ^0.3.22
         version: 0.3.22(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       '@univerjs/icons-svg':
-        specifier: ^0.3.2
-        version: 0.3.2
+        specifier: ^0.3.21
+        version: 0.3.21
       '@univerjs/protocol':
         specifier: 0.1.45
         version: 0.1.45(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
@@ -1040,8 +1040,8 @@ importers:
         specifier: 0.1.45
         version: 0.1.45(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
       '@wendellhu/redi':
-        specifier: 0.17.1
-        version: 0.17.1
+        specifier: 0.18.0
+        version: 0.18.0
       async-lock:
         specifier: ^1.4.1
         version: 1.4.1
@@ -1962,8 +1962,8 @@ importers:
         specifier: workspace:*
         version: link:../../common/shared
       '@univerjs/icons-svg':
-        specifier: ^0.3.2
-        version: 0.3.2
+        specifier: ^0.3.21
+        version: 0.3.21
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -3320,8 +3320,8 @@ importers:
         specifier: ^0.3.22
         version: 0.3.22(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       '@wendellhu/redi':
-        specifier: 0.17.1
-        version: 0.17.1
+        specifier: 0.18.0
+        version: 0.18.0
       localforage:
         specifier: ^1.10.0
         version: 1.10.0
@@ -5662,11 +5662,17 @@ packages:
     resolution: {integrity: sha512-aEhgas7aJ6vZnNFC7K4/vMGDGyOiqWcYZPpIWrTKuTAlsvDNKy2GFDqh9smL+iq069ZvR0YzEeq0B8NJlLzjFA==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@univerjs/icons-svg@0.3.2':
-    resolution: {integrity: sha512-MCEcqWvsqjBOQsDPql9l4se4cH1DrZYrUH5tAOjCUYPeZsE/ylZp0khm6su3U+1gyPSUYkbR52IwdIg2QF6TRw==}
+  '@univerjs/icons-svg@0.3.21':
+    resolution: {integrity: sha512-X+T8C6+GSdUQyUs5ziON1+64ktWJClqsGm7TSNbTMfFoKzetZO55SIO1U60L7awNa+ADUxuOiuu9FIe4rHTJug==}
 
   '@univerjs/icons@0.3.22':
     resolution: {integrity: sha512-DBc3Mq7S1S/2bIy6wzF1zJu78Bt82Zx6VWbgww7o+d7VU+kwUoRfEoiFuwymz9DwL9MVeKdAbdsamKLiFv32hQ==}
+    peerDependencies:
+      react: '19'
+      react-dom: '19'
+
+  '@univerjs/icons@0.3.21':
+    resolution: {integrity: sha512-inZOW3kezEZb2t6vhMpov2nw/Kjjjo7nh/1tGjSzkAzWiEuP0jArMv8XnpUaNkIK59kwylAtsiPgS/cvQAUTnw==}
     peerDependencies:
       react: '19'
       react-dom: '19'
@@ -5933,8 +5939,8 @@ packages:
   '@webassemblyjs/wast-printer@1.14.1':
     resolution: {integrity: sha512-kPSSXE6De1XOR820C90RIo2ogvZG+c3KiHzqUoO/F34Y2shGzesfqv7o57xrxovZJH/MetF5UjroJ/R/3isoiw==}
 
-  '@wendellhu/redi@0.17.1':
-    resolution: {integrity: sha512-wKEa1+kJi2KdRWerX6wxCqOdcyVfRSqopp9/BrWxEom5JXElUWNepgMB0Kvg0r+93BNTj0IgyNN7+bIGg11l+g==}
+  '@wendellhu/redi@0.18.0':
+    resolution: {integrity: sha512-xYpa1d2BPZ/NO9URpS1h+l310mKYaMUQbFMZ4YYguq6M0fLWGR7ZYclnQEE4zpfl8ys5wprx5wro06Sfqnkb/A==}
 
   '@xtuc/ieee754@1.2.0':
     resolution: {integrity: sha512-DX8nKgqcGwsc0eJSqYt5lwP4DH5FlHnmuWWBRy7X0NcaGR0ZtuyeESgMwTYVEtxmsNGY+qit4QYT/MIYTOTPeA==}
@@ -13827,9 +13833,14 @@ snapshots:
       '@typescript-eslint/types': 8.30.1
       eslint-visitor-keys: 4.2.0
 
-  '@univerjs/icons-svg@0.3.2': {}
+  '@univerjs/icons-svg@0.3.21': {}
 
   '@univerjs/icons@0.3.22(react-dom@19.0.0(react@19.0.0))(react@19.0.0)':
+    dependencies:
+      react: 19.0.0
+      react-dom: 19.0.0(react@19.0.0)
+
+  '@univerjs/icons@0.3.21(react-dom@19.0.0(react@19.0.0))(react@19.0.0)':
     dependencies:
       react: 19.0.0
       react-dom: 19.0.0(react@19.0.0)
@@ -14172,7 +14183,7 @@ snapshots:
       '@webassemblyjs/ast': 1.14.1
       '@xtuc/long': 4.2.2
 
-  '@wendellhu/redi@0.17.1': {}
+  '@wendellhu/redi@0.18.0': {}
 
   '@xtuc/ieee754@1.2.0': {}
 

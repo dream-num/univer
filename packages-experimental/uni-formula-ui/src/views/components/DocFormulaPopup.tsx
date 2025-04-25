@@ -16,16 +16,24 @@
 
 import type { IDocumentData, Nullable } from '@univerjs/core';
 import type { IUniFormulaPopupInfo } from '../../services/formula-popup.service';
-import { BooleanNumber, createInternalEditorID, DEFAULT_EMPTY_DOCUMENT_VALUE, DocumentFlavor, HorizontalAlign, ICommandService, LocaleService, VerticalAlign, WrapStrategy } from '@univerjs/core';
-import { clsx } from '@univerjs/design';
-// import { TextEditor } from '@univerjs/docs-ui';
+
+import {
+    BooleanNumber,
+    createInternalEditorID,
+    DEFAULT_EMPTY_DOCUMENT_VALUE,
+    DocumentFlavor,
+    HorizontalAlign,
+    ICommandService,
+    LocaleService,
+    VerticalAlign,
+    WrapStrategy,
+} from '@univerjs/core';
 import { CheckMarkSingle, CloseSingle } from '@univerjs/icons';
 import { useDependency, useObservable } from '@univerjs/ui';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { CloseFormulaPopupOperation, ConfirmFormulaPopupCommand } from '../../commands/operations/operation';
 import { DOC_FORMULA_POPUP_KEY, UniFormulaPopupService } from '../../services/formula-popup.service';
-import styles from './index.module.less';
 
 export const UNI_FORMULA_EDITOR_ID = createInternalEditorID('UNI_FORMULA');
 
@@ -122,7 +130,17 @@ function DocFormula(props: { popupInfo: IUniFormulaPopupInfo }) {
     }, [handleEscKey]);
 
     return (
-        <div className={styles.docUiFormulaPopup} onMouseEnter={() => onHovered(true)} onMouseLeave={() => onHovered(false)}>
+        <div
+            className={`
+              univer-box-border univer-flex univer-h-12 univer-w-[482px] univer-items-center univer-gap-x-2
+              univer-overflow-hidden univer-rounded-lg univer-border univer-border-solid univer-border-gray-200
+              univer-bg-white univer-p-2 univer-shadow-lg
+              dark:univer-bg-gray-900
+            `}
+            onMouseEnter={() => onHovered(true)}
+            onMouseLeave={() => onHovered(false)}
+        >
+            {/* TODO@wzhudev: fix DocFormulaFloat */}
             {/* <TextEditor
                 id={UNI_FORMULA_EDITOR_ID}
                 className={clsx(styles.docUiFormulaPopupEditor, focused && styles.docUiFormulaPopupEditorActivated)}
@@ -139,16 +157,15 @@ function DocFormula(props: { popupInfo: IUniFormulaPopupInfo }) {
                 }}
                 onBlur={() => setFocused(false)}
             /> */}
-            <div className={clsx(styles.formulaIcon, { [styles.formulaIconDisable]: !formulaString })}>
+            <div className="univer-flex">
                 <span
-                    className={clsx(styles.iconContainer, styles.iconContainerError)}
+                    className="univer-flex univer-items-center univer-gap-2 univer-rounded-lg univer-p-1"
                     onClick={onCancel}
                 >
                     <CloseSingle />
                 </span>
-
                 <span
-                    className={clsx(styles.iconContainer, styles.iconContainerSuccess)}
+                    className="univer-flex univer-items-center univer-gap-2 univer-rounded-lg univer-p-1"
                     onClick={onConfirm}
                 >
                     <CheckMarkSingle />

@@ -22,27 +22,32 @@ import { ConfigContext } from '../config-provider/ConfigProvider';
 import { Tooltip } from '../tooltip';
 import styles from './index.module.less';
 
+/** @deprecated */
 export const Menu = React.forwardRef<MenuRef, MenuProps & { wrapperClass?: string }>((props, ref) => {
     const { mountContainer } = useContext(ConfigContext);
+    const { wrapperClass, ...rest } = props;
     return mountContainer && (
         <RcMenu
             ref={ref}
             prefixCls={clsx(styles.menu, props.className)}
             getPopupContainer={() => mountContainer}
-            {...props}
-            className={props.wrapperClass}
+            {...rest}
+            className={wrapperClass}
         />
     );
 });
 
+/** @deprecated */
 export function MenuItem(props: MenuItemProps) {
     return <RcMenuItem {...props} />;
 }
 
+/** @deprecated */
 export function SubMenu(props: SubMenuProps) {
     return <RcSubMenu {...props} />;
 }
 
+/** @deprecated */
 export function MenuItemGroup(props: MenuItemGroupProps) {
     return <RcMenuItemGroup {...props} />;
 }

@@ -47,6 +47,7 @@ export interface IFormulaEditorProps {
     unitId: string;
     subUnitId: string;
     initValue: `=${string}`;
+    autofocus?: boolean;
     onChange: (text: string) => void;
     errorText?: string | ReactNode;
     onVerify?: (res: boolean, result: string) => void;
@@ -58,7 +59,7 @@ export interface IFormulaEditorProps {
     editorId?: string;
     moveCursor?: boolean;
     onFormulaSelectingChange?: (isSelecting: FormulaSelectingType, isFocusing: boolean) => void;
-    keyboradEventConfig?: IKeyboardEventConfig;
+    keyboardEventConfig?: IKeyboardEventConfig;
     onMoveInEditor?: (keyCode: KeyCode, metaKey?: MetaKeys) => void;
     resetSelectionOnBlur?: boolean;
     isSingle?: boolean;
@@ -93,12 +94,13 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
         editorId: propEditorId,
         moveCursor = true,
         onFormulaSelectingChange: propOnFormulaSelectingChange,
-        keyboradEventConfig,
+        keyboardEventConfig,
         onMoveInEditor,
         resetSelectionOnBlur = true,
         autoScrollbar = true,
         isSingle = true,
         disableSelectionOnClick = false,
+        autofocus = true,
         disableContextMenu,
         style,
     } = props;
@@ -205,13 +207,13 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
         onFormulaSelectingChange(isSelecting, docSelectionRenderService?.isFocusing ?? true);
     }, [onFormulaSelectingChange, isSelecting]);
 
-    useKeyboardEvent(isFocus, keyboradEventConfig, editor);
+    useKeyboardEvent(isFocus, keyboardEventConfig, editor);
 
     useLayoutEffect(() => {
         let dispose: IDisposable;
         if (formulaEditorContainerRef.current) {
             dispose = editorService.register({
-                autofocus: true,
+                autofocus,
                 editorUnitId: editorId,
                 initialSnapshot: {
                     id: editorId,

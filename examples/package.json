@@ -35,7 +35,7 @@
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/find-replace": "workspace:*",
-        "@univerjs/icons": "0.3.2",
+        "@univerjs/icons": "0.3.22",
         "@univerjs/mockdata": "workspace:*",
         "@univerjs/network": "workspace:*",
         "@univerjs/rpc": "workspace:*",
@@ -80,8 +80,8 @@
         "@univerjs/uniui": "workspace:*",
         "@univerjs/watermark": "workspace:*",
         "monaco-editor": "0.52.2",
-        "react": "19.1.0",
-        "react-dom": "19.1.0",
+        "react": "^19.1.0",
+        "react-dom": "^19.1.0",
         "react-mosaic-component": "^6.1.1"
     },
     "devDependencies": {

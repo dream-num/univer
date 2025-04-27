@@ -39,8 +39,13 @@ export function Ribbon(props: IRibbonProps) {
     const menuManagerService = useDependency(IMenuManagerService);
     const localeService = useDependency(LocaleService);
 
-    const toolbarRef = useRef<HTMLDivElement>(null);
-    const toolbarItemRefs = useRef<Record<string, { el: HTMLSpanElement; key: string; groupOrder: number; order: number }>>({});
+    const fakeToolbarRef = useRef<HTMLDivElement>(null);
+    const toolbarItemRefs = useRef<Record<string, {
+        el: HTMLSpanElement;
+        key: string;
+        groupOrder: number;
+        order: number;
+    }>>({});
 
     const [ribbon, setRibbon] = useState<IMenuSchema[]>([]);
     const [activatedTab, setActivatedTab] = useState<string>(RibbonPosition.START);
@@ -90,11 +95,17 @@ export function Ribbon(props: IRibbonProps) {
             if (item.children) {
                 const visibleChildren = item.children.filter((child) => !collapsedIds.includes(child.key));
                 if (visibleChildren.length > 0) {
-                    visibleGroups.push({ ...item, children: visibleChildren });
+                    visibleGroups.push({
+                        ...item,
+                        children: visibleChildren,
+                    });
                 }
 
                 if (visibleChildren.length < item.children.length) {
-                    hiddenGroups.push({ ...item, children: item.children.filter((child) => collapsedIds.includes(child.key)) });
+                    hiddenGroups.push({
+                        ...item,
+                        children: item.children.filter((child) => collapsedIds.includes(child.key)),
+                    });
                 }
             }
         }
@@ -118,6 +129,7 @@ export function Ribbon(props: IRibbonProps) {
                 }
                 return a.groupOrder - b.groupOrder;
             });
+
             const newCollapsedIds: string[] = [];
             let totalWidth = 0;
 
@@ -130,7 +142,8 @@ export function Ribbon(props: IRibbonProps) {
                 if (!el) continue;
 
                 totalWidth += el?.getBoundingClientRect().width + 8;
-                if (totalWidth > toolbarWidth - 32 - 8 * (allGroups.length - 1)) {
+
+                if (totalWidth > toolbarWidth - 32 - gapWidth) {
                     newCollapsedIds.push(key);
                 }
             }
@@ -140,8 +153,8 @@ export function Ribbon(props: IRibbonProps) {
             }
         });
 
-        if (toolbarRef.current) {
-            observer.observe(toolbarRef.current);
+        if (fakeToolbarRef.current) {
+            observer.observe(fakeToolbarRef.current);
         }
 
         return () => {
@@ -195,7 +208,8 @@ export function Ribbon(props: IRibbonProps) {
                                 className={clsx(`
                                   univer-box-border univer-cursor-pointer univer-rounded univer-px-2 univer-py-0.5
                                   univer-text-sm univer-text-gray-700 univer-transition-colors
-                                  hover:univer-bg-gray-300
+                                  dark:univer-text-white dark:hover:univer-bg-gray-700
+                                  hover:univer-bg-gray-100
                                 `, {
                                     'univer-bg-primary-500 univer-text-white hover:!univer-bg-primary-500': group.key === activatedTab,
                                 })}
@@ -213,7 +227,7 @@ export function Ribbon(props: IRibbonProps) {
                               univer-gap-2
                               [&>*]:univer-inline-flex [&>*]:univer-h-6 [&>*]:univer-items-center [&>*]:univer-rounded
                               [&>*]:univer-px-1 [&>*]:univer-transition-colors
-                              hover:[&>*]:univer-bg-gray-300
+                              hover:[&>*]:univer-bg-gray-100
                             `}
                         >
                             <ComponentContainer components={headerMenuComponents} />
@@ -234,7 +248,8 @@ export function Ribbon(props: IRibbonProps) {
                 <div
                     className={clsx(`
                       univer-mx-auto univer-box-border univer-flex univer-h-full univer-flex-1 univer-items-center
-                      univer-justify-center univer-gap-1 univer-overflow-hidden univer-px-4
+                      univer-justify-center univer-gap-1 univer-overflow-hidden univer-bg-gray-50 univer-px-4
+                      dark:univer-bg-gray-900
                     `, {
                         'univer-duration-300 univer-animate-in univer-fade-in': changingActiveTab,
                     })}
@@ -255,7 +270,7 @@ export function Ribbon(props: IRibbonProps) {
 
                     {/* overflow menu items */}
                     {collapsedIds.length > 0 && (
-                        <>
+                        <div className="univer-px-2">
                             <TooltipWrapper title={localeService.t('ribbon.more')} placement="bottom">
                                 <DropdownWrapper
                                     align="end"
@@ -290,7 +305,7 @@ export function Ribbon(props: IRibbonProps) {
                                     </ToolbarButton>
                                 </DropdownWrapper>
                             </TooltipWrapper>
-                        </>
+                        </div>
                     )}
                 </div>
             </section>
@@ -298,7 +313,7 @@ export function Ribbon(props: IRibbonProps) {
             {/* fake toolbar for calculating overflow width */}
             <div
                 aria-hidden
-                ref={toolbarRef}
+                ref={fakeToolbarRef}
                 className={`
                   univer-invisible univer-absolute univer-left-0 univer-right-0 univer-top-[-99999px] univer-mx-auto
                   univer-box-border univer-flex univer-h-full univer-flex-1 univer-items-center univer-justify-center

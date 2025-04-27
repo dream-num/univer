@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-table",
-    "version": "0.6.6",
+    "version": "0.6.10",
     "private": false,
     "description": "A library for connect and bind data from other sources to Univer Sheets",
     "author": "DreamNum <developer@univer.ai>",
@@ -80,8 +80,8 @@
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
         "rxjs": "^7.8.1",
-        "typescript": "^5.8.2",
-        "vite": "^6.2.1",
-        "vitest": "^3.0.8"
+        "typescript": "^5.8.3",
+        "vite": "^6.3.3",
+        "vitest": "^3.1.2"
     }
 }

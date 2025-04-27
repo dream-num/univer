@@ -40,6 +40,8 @@ export class DesktopNotificationService extends Disposable implements INotificat
     }
 
     protected _initUIPart(): void {
-        this.disposeWithMe(this._uiPartsService.registerComponent(BuiltInUIPart.GLOBAL, () => connectInjector(Notification, this._injector)));
+        this.disposeWithMe(
+            this._uiPartsService.registerComponent(BuiltInUIPart.GLOBAL, () => connectInjector(Notification, this._injector))
+        );
     }
 }

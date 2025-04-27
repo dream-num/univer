@@ -23,7 +23,6 @@ import { MenuItemType } from '../../../services/menu/menu';
 import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
 import { useDependency, useObservable } from '../../../utils/di';
 import { CustomLabel } from '../../custom-label';
-import styles from './index.module.less';
 
 /**
  * The mobile context menu wrapper.
@@ -55,7 +54,10 @@ export function MobileMenu(props: IBaseMenuProps) {
 
     return (
         <div
-            className={styles.mobileMenuContainer}
+            className={`
+              univer-box-border univer-grid univer-min-w-8 univer-max-w-52 univer-gap-1 univer-rounded
+              univer-bg-gray-900 univer-px-2 univer-py-1
+            `}
             style={{
                 gridTemplateColumns: `repeat(${Math.min(2, flattedMenuItems.length)}, 48px)`,
             }}
@@ -85,19 +87,22 @@ function MobileMenuItem(props: IMobileMenuItemProps) {
     }
 
     const disabled = useObservable<boolean>(menuItem.disabled$, false);
-    const activated = useObservable<boolean>(menuItem.activated$, false);
-    const hidden = useObservable(menuItem.hidden$, false);
+    // const activated = useObservable<boolean>(menuItem.activated$, false);
+    // const hidden = useObservable(menuItem.hidden$, false);
     const value = useObservable<MenuItemDefaultValueType>(menuItem.value$);
-
-    const className = clsx(styles.mobileMenuItem, {
-        [styles.mobileMenuItemActivated]: activated,
-        [styles.mobileMenuItemHidden]: hidden,
-    });
 
     return (
         <button
             type="button"
-            className={className}
+            className={clsx(`
+              univer-flex univer-w-12 univer-flex-col univer-items-center univer-justify-center univer-border-none
+              univer-bg-transparent univer-text-white
+              [&>span]:univer-mt-0.5 [&>span]:univer-w-full [&>span]:univer-truncate [&>span]:univer-text-[13px]
+              [&>svg]:univer-size-[18px] [&>svg]:univer-text-lg
+            `, {
+                // '': activated,
+                // '': hidden,
+            })}
             key={id}
             disabled={disabled}
             onClick={() => onClick({ id })}

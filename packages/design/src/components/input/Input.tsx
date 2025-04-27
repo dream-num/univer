@@ -17,7 +17,7 @@
 import type { VariantProps } from 'class-variance-authority';
 import { CloseSingle } from '@univerjs/icons';
 import { cva } from 'class-variance-authority';
-import { forwardRef } from 'react';
+import React, { forwardRef, useEffect, useMemo, useRef, useState } from 'react';
 import { clsx } from '../../helper/clsx';
 
 type InputProps = React.InputHTMLAttributes<HTMLInputElement>;
@@ -26,7 +26,7 @@ export const inputVariants = cva(
     `
       univer-box-border univer-w-full univer-rounded-md univer-border univer-border-solid univer-border-gray-200
       univer-bg-white univer-transition-colors univer-duration-200
-      dark:univer-bg-gray-700 dark:univer-border-gray-600 dark:univer-text-white
+      dark:univer-border-gray-600 dark:univer-bg-gray-700 dark:univer-text-white
       focus:univer-border-primary-500 focus:univer-outline-none focus:univer-ring-2 focus:univer-ring-primary-500/20
       placeholder:univer-text-gray-400
     `,
@@ -59,6 +59,7 @@ export interface IInputProps extends Pick<InputProps, 'onFocus' | 'onBlur'>,
     onChange?: (value: string) => void;
     inputClass?: string;
     inputStyle?: React.CSSProperties;
+    slot?: React.ReactNode;
 }
 
 export const Input = forwardRef<HTMLInputElement, IInputProps>(
@@ -77,6 +78,7 @@ export const Input = forwardRef<HTMLInputElement, IInputProps>(
         onChange,
         onFocus,
         onBlur,
+        slot,
         inputClass,
         inputStyle,
         ...props
@@ -89,6 +91,30 @@ export const Input = forwardRef<HTMLInputElement, IInputProps>(
         const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
             onChange?.(e.target.value);
         };
+
+        const hasSlotContent = useMemo(() => {
+            return (allowClear && value && !disabled) || slot;
+        }, [allowClear, disabled, slot, value]);
+
+        const [paddingRight, setPaddingRight] = useState(0);
+        const slotRef = useRef<HTMLDivElement>(null);
+
+        useEffect(() => {
+            let observer: MutationObserver | null = null;
+            if (slot && slotRef.current) {
+                observer = new MutationObserver(() => {
+                    if (slotRef.current) {
+                        setPaddingRight(slotRef.current.offsetWidth + 4 * 2);
+                    }
+                });
+
+                observer.observe(slotRef.current, { childList: true, subtree: true });
+                // eslint-disable-next-line react-hooks-extra/no-direct-set-state-in-use-effect
+                setPaddingRight(slotRef.current.offsetWidth + 4 * 2);
+            }
+
+            return () => observer?.disconnect();
+        }, [slotRef.current]);
 
         return (
             <div
@@ -105,10 +131,10 @@ export const Input = forwardRef<HTMLInputElement, IInputProps>(
                     className={clsx(
                         inputVariants({ size }),
                         disabled && `
-                          univer-cursor-not-allowed univer-text-gray-400 univer-bg-gray-50
+                          univer-cursor-not-allowed univer-bg-gray-50 univer-text-gray-400
                           dark:univer-text-gray-500
                         `,
-                        allowClear && 'univer-pr-8',
+                        (allowClear && !slot) && 'univer-pr-8',
                         inputClass
                     )}
                     placeholder={placeholder}
@@ -120,23 +146,34 @@ export const Input = forwardRef<HTMLInputElement, IInputProps>(
                     onChange={handleChange}
                     onFocus={onFocus}
                     onBlur={onBlur}
-                    style={inputStyle}
+                    style={{ ...inputStyle, paddingRight }}
                     {...props}
                 />
-                {allowClear && value && !disabled && (
-                    <button
-                        type="button"
-                        onClick={handleClear}
+                {hasSlotContent && (
+                    <div
                         className={`
-                          univer-absolute univer-right-2 univer-flex univer-items-center univer-rounded-full
-                          univer-border-none univer-bg-transparent univer-p-1 univer-text-gray-400
-                          univer-transition-colors univer-duration-200
-                          focus:univer-outline-none
-                          hover:univer-text-gray-500
+                          univer-absolute univer-right-2 univer-flex univer-items-center univer-gap-1
+                          univer-rounded-full
                         `}
+                        ref={slotRef}
                     >
-                        <CloseSingle className="univer-size-4" />
-                    </button>
+                        {slot}
+                        {allowClear && value && !disabled && (
+                            <button
+                                type="button"
+                                onClick={handleClear}
+                                className={`
+                                  univer-flex univer-cursor-pointer univer-rounded-full univer-border-none
+                                  univer-bg-transparent univer-p-1 univer-text-gray-400 univer-transition-colors
+                                  univer-duration-200
+                                  focus:univer-outline-none
+                                  hover:univer-text-gray-500
+                                `}
+                            >
+                                <CloseSingle className="univer-size-4" />
+                            </button>
+                        )}
+                    </div>
                 )}
             </div>
         );

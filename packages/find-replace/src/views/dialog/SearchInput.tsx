@@ -40,29 +40,31 @@ export function SearchInput(props: ISearchInputProps) {
     return (
         <div className="univer-relative univer-flex univer-items-center univer-gap-2" onDrag={(e) => e.stopPropagation()}>
             <Input
+                data-u-comp="search-input"
                 autoFocus
                 placeholder={localeService.t('find-replace.dialog.find-placeholder')}
                 value={findString}
                 onChange={(value) => onChange?.(value)}
+                slot={(
+                    <Pager
+                        loop
+                        text={text}
+                        value={matchesPosition}
+                        total={matchesCount}
+                        onChange={(newIndex) => {
+                            if (matchesPosition === matchesCount && newIndex === 1) {
+                                findReplaceService.moveToNextMatch();
+                            } else if (matchesPosition === 1 && newIndex === matchesCount) {
+                                findReplaceService.moveToPreviousMatch();
+                            } else if (newIndex < matchesPosition) {
+                                findReplaceService.moveToPreviousMatch();
+                            } else {
+                                findReplaceService.moveToNextMatch();
+                            }
+                        }}
+                    />
+                )}
                 {...rest}
-            />
-
-            <Pager
-                loop
-                text={text}
-                value={matchesPosition}
-                total={matchesCount}
-                onChange={(newIndex) => {
-                    if (matchesPosition === matchesCount && newIndex === 1) {
-                        findReplaceService.moveToNextMatch();
-                    } else if (matchesPosition === 1 && newIndex === matchesCount) {
-                        findReplaceService.moveToPreviousMatch();
-                    } else if (newIndex < matchesPosition) {
-                        findReplaceService.moveToPreviousMatch();
-                    } else {
-                        findReplaceService.moveToNextMatch();
-                    }
-                }}
             />
         </div>
     );

@@ -52,7 +52,7 @@ export class SheetsZoomRenderController extends Disposable implements IRenderMod
     }
 
     private _initZoomEventListener() {
-        const scene = this._getSheetObject().scene;
+        const scene = getSheetObject(this._context.unit, this._context)!.scene;
 
         this.disposeWithMe(
             // hold ctrl & mousewheel ---> zoom
@@ -109,7 +109,6 @@ export class SheetsZoomRenderController extends Disposable implements IRenderMod
             if (this._zoom !== zoomRatio) {
                 this._updateViewZoom(zoomRatio);
             }
-            this._zoom = zoomRatio;
         }));
     }
 
@@ -118,13 +117,10 @@ export class SheetsZoomRenderController extends Disposable implements IRenderMod
      * @param zoomRatio
      */
     private _updateViewZoom(zoomRatio: number) {
-        const sheetObject = this._getSheetObject();
-        sheetObject?.scene.scale(zoomRatio, zoomRatio);
-        // sheetObject?.scene.transformByState({ scaleX: zoomRatio, scaleY: zoomRatio });
-        sheetObject?.spreadsheet.makeForceDirty();
-    }
+        this._zoom = zoomRatio;
 
-    private _getSheetObject() {
-        return getSheetObject(this._context.unit, this._context)!;
+        const sheetObject = getSheetObject(this._context.unit, this._context)!;
+        sheetObject?.scene.scale(zoomRatio, zoomRatio);
+        sheetObject?.spreadsheet.makeForceDirty();
     }
 }

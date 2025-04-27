@@ -24,7 +24,7 @@ export { t } from './components/hooks/locale';
 export * from './components/hooks';
 export { RectPopup, type RectPopupDirection } from './views/components/popup/RectPopup';
 export { Menu as UIMenu } from './components/menu/desktop/Menu';
-export { type INotificationOptions, type NotificationType } from './components/notification/Notification';
+export { type INotificationOptions } from './components/notification/Notification';
 export { ProgressBar } from './components/progress-bar/ProgressBar';
 export { UNI_DISABLE_CHANGING_FOCUS_KEY } from './const';
 export { type IUniverUIConfig, UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';

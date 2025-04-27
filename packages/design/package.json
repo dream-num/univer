@@ -86,6 +86,7 @@
         "rc-virtual-list": "^3.16.1",
         "react-grid-layout": "^1.5.1",
         "react-transition-group": "^4.4.5",
+        "sonner": "^2.0.3",
         "tailwind-merge": "^3.2.0"
     },
     "devDependencies": {

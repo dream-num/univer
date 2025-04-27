@@ -17,7 +17,7 @@
 import type { DocumentDataModel, ISize, PaperType } from '@univerjs/core';
 import type { IConfirmChildrenProps } from '@univerjs/design';
 import { IUniverInstanceService, LocaleService, PAGE_SIZE, PageOrientType, PAPER_TYPES, UniverInstanceType } from '@univerjs/core';
-import { InputNumber, Radio, Select } from '@univerjs/design';
+import { InputNumber, Select } from '@univerjs/design';
 import { useDependency } from '@univerjs/ui';
 import React, { useEffect, useState } from 'react';
 
@@ -113,7 +113,7 @@ export function PageSettings(props: IConfirmChildrenProps) {
                 />
             </div>
 
-            <div className="univer-flex univer-flex-col univer-gap-2">
+            {/* <div className="univer-flex univer-flex-col univer-gap-2">
                 <label className="univer-text-sm univer-font-medium univer-text-[#0E111E]">
                     {localeService.t('page-settings.orientation')}
                 </label>
@@ -131,7 +131,7 @@ export function PageSettings(props: IConfirmChildrenProps) {
                         {localeService.t('page-settings.landscape')}
                     </Radio>
                 </div>
-            </div>
+            </div> */}
 
             <div className="univer-flex univer-flex-col univer-gap-2">
                 <label className="univer-text-sm univer-font-medium univer-text-[#0E111E]">

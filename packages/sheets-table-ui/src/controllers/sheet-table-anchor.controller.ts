@@ -84,7 +84,6 @@ export class SheetTableAnchorController extends Disposable implements IRenderMod
 
     private _initTableAnchor() {
         this.disposeWithMe(
-            // TODO combine
             merge(
                 this._context.unit.activeSheet$,
                 this._sheetSkeletonManagerService.currentSkeleton$,

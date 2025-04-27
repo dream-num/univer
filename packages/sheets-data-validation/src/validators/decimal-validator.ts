@@ -28,15 +28,6 @@ import { FORMULA1, FORMULA2 } from './const';
 import { getTransformedFormula } from './util';
 
 export function getCellValueNumber(cellValue: CellValue) {
-    let str = cellValue;
-    if (typeof cellValue === 'string') {
-        if (cellValue.startsWith('¥') || cellValue.startsWith('$')) {
-            str = cellValue.slice(1);
-        }
-
-        return +str;
-    }
-
     return +cellValue;
 }
 

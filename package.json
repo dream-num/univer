@@ -88,10 +88,10 @@
         ]
     },
     "resolutions": {
-        "@types/react": "^19.1.2",
-        "@types/react-dom": "^19.1.2",
-        "react": "19.1.0",
-        "react-dom": "19.1.0"
+        "@types/react": "19",
+        "@types/react-dom": "19",
+        "react": "19",
+        "react-dom": "19"
     },
     "lint-staged": {
         "*": "eslint --fix"

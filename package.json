@@ -73,8 +73,8 @@
         "husky": "^9.1.7",
         "lint-staged": "^15.5.1",
         "posthog-node": "^4.14.0",
-        "react": "^19.1.0",
-        "react-dom": "^19.1.0",
+        "react": "19.1.0",
+        "react-dom": "19.1.0",
         "release-it": "^17.11.0",
         "serve": "^14.2.4",
         "tsx": "^4.19.3",
@@ -88,10 +88,10 @@
         ]
     },
     "resolutions": {
-        "@types/react": "19",
-        "@types/react-dom": "19",
-        "react": "19",
-        "react-dom": "19"
+        "@types/react": "^19.1.2",
+        "@types/react-dom": "^19.1.2",
+        "react": "19.1.0",
+        "react-dom": "19.1.0"
     },
     "lint-staged": {
         "*": "eslint --fix"

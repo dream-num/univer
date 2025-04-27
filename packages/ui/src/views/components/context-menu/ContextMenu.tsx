@@ -33,11 +33,9 @@ function MenuItemButton(props: { menuItem: IMenuSchema; setVisible: (visible: bo
     const commandService = useDependency(ICommandService);
     const layoutService = useDependency(ILayoutService);
 
-    const { title, hidden$, commandId, disabled$, value$, icon, label, id } = menuItem.item!;
+    const { title, commandId, value$, icon, label, id } = menuItem.item!;
     const value = (menuItem.item as any)?.value;
 
-    const hidden = useObservable(hidden$);
-    const disabled = useObservable(disabled$);
     const observableValue = useObservable(value$);
 
     const [realValue, setRealValue] = useState<any>(observableValue ?? value);
@@ -125,7 +123,22 @@ export function DesktopContextMenu() {
                 for (const menuItem of group?.children) {
                     if (!menuItem.item) continue;
 
-                    const { title, icon, label, type, id } = menuItem.item;
+                    const { type, title, hidden$, disabled$, icon, label, id } = menuItem.item;
+
+                    let hidden = false;
+                    let disabled = false;
+                    if (hidden$) {
+                        hidden$.subscribe((v) => {
+                            hidden = v;
+                        }).unsubscribe();
+                    }
+                    if (disabled$) {
+                        disabled$.subscribe((v) => {
+                            disabled = v;
+                        }).unsubscribe();
+                    }
+
+                    if (hidden) continue;
 
                     if (type === MenuItemType.BUTTON) {
                         dropdownMenu.push({
@@ -133,6 +146,7 @@ export function DesktopContextMenu() {
                             children: (
                                 <MenuItemButton menuItem={menuItem} setVisible={setVisible} />
                             ),
+                            disabled,
                         });
                     } else if (type === MenuItemType.SUBITEMS) {
                         const subMenu = menuManagerService.getMenuByPositionKey(id);
@@ -152,15 +166,36 @@ export function DesktopContextMenu() {
                                     />
                                 </div>
                             ),
+                            disabled,
                             options: subMenu.map((item) => {
+                                if (!item.item) return null;
+
+                                const { hidden$, disabled$ } = item.item;
+
+                                let hidden = false;
+                                let disabled = false;
+
+                                if (hidden$) {
+                                    hidden$.subscribe((v) => {
+                                        hidden = v;
+                                    }).unsubscribe();
+                                }
+                                if (disabled$) {
+                                    disabled$.subscribe((v) => {
+                                        disabled = v;
+                                    }).unsubscribe();
+                                }
+
+                                if (hidden) return null;
+
                                 return {
                                     type: 'item',
                                     children: (
                                         <MenuItemButton menuItem={item} setVisible={setVisible} />
                                     ),
-
-                                };
-                            }),
+                                    disabled,
+                                } as IDropdownMenuProps['items'][number];
+                            }).filter((item) => item !== null),
                         });
                     }
                 }

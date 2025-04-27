@@ -84,8 +84,9 @@
         "@univerjs/design": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/icons": "^0.3.22",
-        "@wendellhu/redi": "0.18.0",
-        "localforage": "^1.10.0"
+        "@wendellhu/redi": "0.18.1",
+        "localforage": "^1.10.0",
+        "rc-notification": "^5.6.2"
     },
     "optionalDependencies": {
         "vue": ">=3.0.0"

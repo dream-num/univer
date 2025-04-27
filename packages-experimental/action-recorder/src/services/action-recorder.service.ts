@@ -119,8 +119,6 @@ export class ActionRecorderService extends Disposable {
     completeRecording(): void {
         const commands = this._recorded.slice();
         this._localFileService.downloadFile(new Blob([JSON.stringify(commands, null, 2)]), 'recorded-commands.json');
-
-        this._logService.error('Recorded commands:', commands);
         this.stopRecording();
     }
 }

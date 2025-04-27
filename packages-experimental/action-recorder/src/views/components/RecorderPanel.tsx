@@ -15,7 +15,7 @@
  */
 
 import { ICommandService } from '@univerjs/core';
-import { Button } from '@univerjs/design';
+import { Button, clsx } from '@univerjs/design';
 import { RecordSingle } from '@univerjs/icons';
 import { useDependency, useObservable } from '@univerjs/ui';
 import { useCallback } from 'react';
@@ -26,8 +26,8 @@ import { ActionRecorderService } from '../../services/action-recorder.service';
 export function RecorderPanel() {
     const s = useDependency(ActionRecorderService);
     const opened = useObservable(s.panelOpened$);
-
     if (!opened) return null;
+
     return <RecordPanelImpl />;
 }
 
@@ -62,29 +62,23 @@ function RecordPanelImpl() {
     return (
         <div
             className={`
-              univer-fixed univer-bottom-20 univer-left-1/2 univer-z-[1000] univer-flex univer-h-16 univer-w-[512px]
-              -univer-translate-x-1/2 univer-items-center univer-rounded-lg univer-bg-white univer-px-5 univer-shadow-lg
+              univer-fixed univer-bottom-[80px] univer-left-1/2 univer-z-[1000] univer-flex univer-h-16 univer-w-[512px]
+              -univer-translate-x-1/2 univer-items-center univer-rounded-xl univer-bg-white univer-px-4 univer-shadow-lg
             `}
         >
-            <div className="univer-mr-2 univer-size-5 univer-shrink-0 univer-grow-0 univer-text-xl">
+            <div
+                className={clsx(
+                    'univer-mr-2 univer-size-6 univer-flex-shrink-0 univer-flex-grow-0 univer-text-2xl',
+                    recording && '[&>svg>g>path:first-of-type]:animate-recording'
+                )}
+            >
                 <RecordSingle />
             </div>
-            <div className="univer-flex-1 univer-text-[13px]">{titleText}</div>
-            <div className="univer-flex univer-w-64 univer-shrink-0 univer-grow-0 univer-justify-between">
-                <Button
-                    className="univer-w-20"
-                    onClick={recording ? stopRecording : closePanel}
-                >
-                    { recording ? 'Cancel' : 'Close' }
-                </Button>
-                <Button
-                    className="univer-w-20"
-                    variant="primary"
-                    onClick={recording ? completeRecording : () => startRecording()}
-                >
-                    { recording ? 'Save' : 'Start' }
-                </Button>
-                { !recording && <Button variant="primary" onClick={() => startRecording(true)}>Start(N)</Button>}
+            <div className="univer-flex-1 univer-text-sm univer-font-medium">{titleText}</div>
+            <div className="univer-flex univer-gap-1 univer-flex-0 univer-w-[260px] univer-justify-between">
+                <Button className="univer-w-20" onClick={recording ? stopRecording : closePanel}>{ recording ? 'Cancel' : 'Close' }</Button>
+                <Button className="univer-w-20" variant="primary" onClick={recording ? completeRecording : () => startRecording()}>{ recording ? 'Save' : 'Start' }</Button>
+                { !recording && <Button className="univer-w-20" variant="primary" onClick={() => startRecording(true)}>Start(N)</Button>}
             </div>
         </div>
     );

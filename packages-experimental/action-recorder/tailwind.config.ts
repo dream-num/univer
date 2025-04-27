@@ -22,6 +22,19 @@ const config: Config = {
     content: [
         './src/**/*.{js,ts,jsx,tsx}',
     ],
+    theme: {
+        extend: {
+            keyframes: {
+                recording: {
+                    '0%, 100%': { color: 'rgb(var(--text-color))' },
+                    '40%, 60%': { color: 'red' },
+                },
+            },
+            animation: {
+                recording: 'recording 2s infinite',
+            },
+        },
+    },
 };
 
 export default config;

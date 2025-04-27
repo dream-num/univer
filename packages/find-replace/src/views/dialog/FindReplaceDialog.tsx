@@ -38,7 +38,7 @@ function useFindInputFocus(findReplaceService: IFindReplaceService, ref: Forward
     }, []);
 
     const selectHasFocus = useCallback(() => {
-        const allInputs = document.querySelectorAll('.univer-find-replace-dialog-container .univer-select-selection-search-input');
+        const allInputs = document.querySelectorAll('[data-u-comp="find-replace-dialog"] [data-u-comp="search-input"]');
         return Array.from(allInputs).some((input) => input === document.activeElement);
     }, []);
 
@@ -95,7 +95,7 @@ export const FindDialog = forwardRef(function FindDialogImpl(_props, ref) {
     );
 });
 
-export const ReplaceDialog = forwardRef(function ReplaceDIalogImpl(_props, ref) {
+export const ReplaceDialog = forwardRef(function ReplaceDialogImpl(_props, ref) {
     const findReplaceService = useDependency(IFindReplaceService);
     const localeService = useDependency(LocaleService);
     const commandService = useDependency(ICommandService);
@@ -297,7 +297,7 @@ export function FindReplaceDialog() {
     }, [setDialogContainerFocus, setDialogInputFocus]);
 
     return (
-        <div ref={dialogContainerRef}>
+        <div ref={dialogContainerRef} data-u-comp="find-replace-dialog">
             {!state.replaceRevealed ? <FindDialog ref={focusRef} /> : <ReplaceDialog ref={focusRef} />}
         </div>
     );

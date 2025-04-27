@@ -28,11 +28,7 @@ interface IPatternPreview {
 export const getPatternPreview = (pattern: string, value: number, locale: INumfmtLocalTag = 'en'): IPatternPreview => {
     const info = numfmt.getInfo(pattern);
     const negInfo = info._partitions[1];
-    if (Number.isNaN(value)) {
-        return {
-            result: '',
-        };
-    }
+
     const result = numfmt.format(pattern, value, { locale, throws: false });
     if (value < 0) {
         return {
@@ -46,12 +42,6 @@ export const getPatternPreview = (pattern: string, value: number, locale: INumfm
 };
 
 export const getPatternPreviewIgnoreGeneral = (pattern: string, value: number, locale?: INumfmtLocalTag): IPatternPreview => {
-    if (Number.isNaN(value)) {
-        return {
-            result: '',
-        };
-    }
-
     if (pattern === 'General') {
         return {
             result: String(stripErrorMargin(value)), // In Excel, the default General format also needs to handle numeric precision.

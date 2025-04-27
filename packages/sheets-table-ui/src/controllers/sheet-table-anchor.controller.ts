@@ -16,11 +16,11 @@
 
 import type { Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import { Disposable, Inject, Injector, IPermissionService, IUniverInstanceService } from '@univerjs/core';
+import { Disposable, ICommandService, Inject, Injector, IPermissionService, IUniverInstanceService } from '@univerjs/core';
 import { convertTransformToOffsetX, convertTransformToOffsetY, IRenderManagerService, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 import { WorkbookEditablePermission, WorkbookPermissionService } from '@univerjs/sheets';
 import { TableManager } from '@univerjs/sheets-table';
-import { getSheetObject, SheetScrollManagerService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { getSheetObject, SetScrollOperation, SetZoomRatioOperation, SheetScrollManagerService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { BuiltInUIPart, connectInjector, IUIPartsService } from '@univerjs/ui';
 import { BehaviorSubject, debounceTime, filter, merge } from 'rxjs';
 import { SheetTableAnchor } from '../views/components/SheetTableAnchor';
@@ -33,7 +33,8 @@ export interface ITableAnchorPosition {
 }
 
 export class SheetTableAnchorController extends Disposable implements IRenderModule {
-    private _selectedTable: boolean = false;
+    private _anchorVisible$: BehaviorSubject<boolean> = new BehaviorSubject(true);
+    private _timer: NodeJS.Timeout;
 
     private _anchorPosition$: BehaviorSubject<ITableAnchorPosition[]> = new BehaviorSubject<ITableAnchorPosition[]>([]);
     public anchorPosition$ = this._anchorPosition$.asObservable();
@@ -43,6 +44,7 @@ export class SheetTableAnchorController extends Disposable implements IRenderMod
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
+        @ICommandService private readonly _commandService: ICommandService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IUIPartsService protected readonly _uiPartsService: IUIPartsService,
         @Inject(TableManager) private readonly _tableManager: TableManager,
@@ -52,6 +54,7 @@ export class SheetTableAnchorController extends Disposable implements IRenderMod
     ) {
         super();
         this._initUI();
+        this._initListener();
         this._initTableAnchor();
     }
 
@@ -61,8 +64,27 @@ export class SheetTableAnchorController extends Disposable implements IRenderMod
         );
     }
 
+    private _initListener() {
+        this.disposeWithMe(
+            this._commandService.onCommandExecuted((command) => {
+                if (command.id === SetZoomRatioOperation.id || command.id === SetScrollOperation.id) {
+                    this._anchorVisible$.next(false);
+
+                    if (this._timer) {
+                        clearTimeout(this._timer);
+                    }
+
+                    this._timer = setTimeout(() => {
+                        this._anchorVisible$.next(true);
+                    }, 300);
+                }
+            })
+        );
+    }
+
     private _initTableAnchor() {
         this.disposeWithMe(
+            // TODO combine
             merge(
                 this._context.unit.activeSheet$,
                 this._sheetSkeletonManagerService.currentSkeleton$,
@@ -73,8 +95,14 @@ export class SheetTableAnchorController extends Disposable implements IRenderMod
                 this._tableManager.tableRangeChanged$,
                 this._tableManager.tableThemeChanged$,
                 this._workbookPermissionService.unitPermissionInitStateChange$.pipe(filter((v) => v)),
-                this._permissionService.permissionPointUpdate$.pipe(debounceTime(300))
+                this._permissionService.permissionPointUpdate$.pipe(debounceTime(300)),
+                this._anchorVisible$
             ).subscribe(() => {
+                const isVisible = this._anchorVisible$.getValue();
+                if (!isVisible) {
+                    this._anchorPosition$.next([]);
+                    return;
+                }
                 const workbook = this._context.unit;
                 const worksheet = workbook.getActiveSheet();
                 const subUnitId = worksheet?.getSheetId();

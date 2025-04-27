@@ -104,7 +104,7 @@ export const SheetTableSelector = (props: ITableSelectionInfo & {
                         }
                     }
 
-                    setSelectedRange(range);
+                    setSelectedRange(newRange);
                     setRangeError('');
                 }}
                 supportAcrossSheet={false}

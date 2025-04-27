@@ -46,6 +46,12 @@ export const getPatternPreview = (pattern: string, value: number, locale: INumfm
 };
 
 export const getPatternPreviewIgnoreGeneral = (pattern: string, value: number, locale?: INumfmtLocalTag): IPatternPreview => {
+    if (Number.isNaN(value)) {
+        return {
+            result: '',
+        };
+    }
+
     if (pattern === 'General') {
         return {
             result: String(stripErrorMargin(value)), // In Excel, the default General format also needs to handle numeric precision.

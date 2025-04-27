@@ -106,6 +106,8 @@ export class SheetsNumfmtCellContentController extends Disposable {
 
         this.disposeWithMe(this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
             effect: InterceptorEffectEnum.Value | InterceptorEffectEnum.Style,
+
+            // eslint-disable-next-line complexity
             handler: (cell, location, next) => {
                 const unitId = location.unitId;
                 const sheetId = location.subUnitId;
@@ -161,7 +163,9 @@ export class SheetsNumfmtCellContentController extends Disposable {
                 if (cache && cache.parameters === `${originCellValue.v}_${numfmtValue.pattern}`) {
                     return next({ ...cell, ...cache.result });
                 }
-
+                if (originCellValue.v === undefined || originCellValue.v === null) {
+                    return next(cell);
+                }
                 const info = getPatternPreviewIgnoreGeneral(numfmtValue.pattern, Number(originCellValue.v), this.local);
                 numfmtRes = info.result;
                 if (!numfmtRes) {

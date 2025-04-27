@@ -15,7 +15,7 @@
  */
 
 import type { IDataValidationRule, IDocumentData, IWorkbookData } from '@univerjs/core';
-import { BooleanNumber, DataValidationErrorStyle, DataValidationOperator, DataValidationType, LocaleType } from '@univerjs/core';
+import { BooleanNumber, CellValueType, DataValidationErrorStyle, DataValidationOperator, DataValidationType, LocaleType } from '@univerjs/core';
 import { DATA_VALIDATION_PLUGIN_NAME } from '@univerjs/sheets-data-validation';
 import { PAGE5_RICHTEXT_1 } from '../../slides/rich-text/page5-richtext1';
 
@@ -13991,6 +13991,11 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                         s: '1',
                         v: 'A Schedule of Items',
                     },
+                    1: {
+                        v: undefined,
+                        t: CellValueType.NUMBER,
+                        s: { n: { pattern: '#,##0.00' } },
+                    },
                     10: {
                         v: 10,
                     },
@@ -14593,8 +14598,9 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
             cellData: {
                 5: {
                     1: {
-                        v: '1',
-                        t: 2,
+                        v: undefined,
+                        t: CellValueType.NUMBER,
+                        s: { n: { pattern: '#,##0.00' } },
                     },
                     2: {
                         v: '12',

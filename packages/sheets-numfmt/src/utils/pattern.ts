@@ -28,6 +28,7 @@ interface IPatternPreview {
 export const getPatternPreview = (pattern: string, value: number, locale: INumfmtLocalTag = 'en'): IPatternPreview => {
     const info = numfmt.getInfo(pattern);
     const negInfo = info._partitions[1];
+
     const result = numfmt.format(pattern, value, { locale, throws: false });
     if (value < 0) {
         return {

@@ -163,14 +163,14 @@ export const Input = forwardRef<HTMLInputElement, IInputProps>(
                                 type="button"
                                 onClick={handleClear}
                                 className={`
-                                  univer-flex univer-cursor-pointer univer-rounded-full univer-border-none
+                                  univer-flex univer-size-4 univer-cursor-pointer univer-rounded-full univer-border-none
                                   univer-bg-transparent univer-p-1 univer-text-gray-400 univer-transition-colors
                                   univer-duration-200
                                   focus:univer-outline-none
                                   hover:univer-text-gray-500
                                 `}
                             >
-                                <CloseSingle className="univer-size-4" />
+                                <CloseSingle className="univer-size-3" />
                             </button>
                         )}
                     </div>

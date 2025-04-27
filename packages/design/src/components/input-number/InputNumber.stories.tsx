@@ -36,6 +36,7 @@ export const InputNumberBasic = {
                 <div>
                     <InputNumber />
                     <InputNumber precision={0} />
+                    <InputNumber allowEmpty />
                 </div>
             </>
         );

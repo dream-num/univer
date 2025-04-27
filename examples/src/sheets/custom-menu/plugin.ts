@@ -27,6 +27,7 @@ export class UniverSheetsCustomMenuPlugin extends Plugin {
     static override pluginName = SHEET_CUSTOM_MENU_PLUGIN;
 
     constructor(
+        _config = {},
         @Inject(Injector) protected readonly _injector: Injector,
         @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {

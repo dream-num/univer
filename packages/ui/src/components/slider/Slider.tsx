@@ -20,7 +20,6 @@ import { Button, clsx, DropdownMenu, Tooltip } from '@univerjs/design';
 import { IncreaseSingle, ReduceSingle } from '@univerjs/icons';
 import React, { useMemo, useRef, useState } from 'react';
 import { useDependency } from '../../utils/di';
-import styles from './index.module.less';
 
 export interface ISliderProps {
     /** The value of slider. When range is false, use number, otherwise, use [number, number] */
@@ -56,6 +55,8 @@ export interface ISliderProps {
     /** (value) => void */
     onChange?: (value: number) => void;
 }
+
+const SLIDER_WIDTH = 116;
 
 /**
  * Slider Component
@@ -97,7 +98,7 @@ export function Slider(props: ISliderProps) {
         }
     }, [min, max, resetPoint, value]);
 
-    function handleMouseDown(e: React.MouseEvent<HTMLDivElement>) {
+    function handleMouseDown(e: React.MouseEvent<HTMLButtonElement>) {
         if (disabled) return;
         e.preventDefault();
 
@@ -112,11 +113,11 @@ export function Slider(props: ISliderProps) {
 
                 if (offsetX <= 0) {
                     offsetX = 0;
-                } else if (offsetX >= +styles.sliderWidth) {
-                    offsetX = +styles.sliderWidth;
+                } else if (offsetX >= SLIDER_WIDTH) {
+                    offsetX = SLIDER_WIDTH;
                 }
 
-                const ratio = offsetX / +styles.sliderWidth;
+                const ratio = offsetX / SLIDER_WIDTH;
 
                 let result = 0;
                 if (ratio <= 0.5) {
@@ -160,16 +161,27 @@ export function Slider(props: ISliderProps) {
 
     return (
         <div
-            className={clsx(styles.slider, {
-                [styles.sliderDisabled]: disabled,
+            className={clsx('univer-flex univer-select-none univer-items-center univer-gap-1', {
+                'univer-cursor-not-allowed': disabled,
             })}
         >
-            <Button variant="text" disabled={value <= min || disabled} onClick={() => handleStep(-10)}>
+            <Button
+                className="univer-size-6 univer-p-0"
+                size="small"
+                variant="text"
+                disabled={value <= min || disabled}
+                onClick={() => handleStep(-10)}
+            >
                 <ReduceSingle />
             </Button>
 
-            <div className={styles.sliderRail}>
-                <div ref={sliderInnerRailRef} role="track" className={styles.sliderInnerRail}>
+            <div
+                className="univer-relative univer-h-0.5 univer-rounded-2xl univer-bg-gray-400 univer-px-1.5"
+                style={{
+                    width: `${SLIDER_WIDTH}px`,
+                }}
+            >
+                <div ref={sliderInnerRailRef} role="track" className="univer-relative univer-h-0.5">
                     <Tooltip title={`${localeService.t('zoom-slider.resetTo')} ${resetPoint}%`} placement="top" asChild>
                         <a
                             key="reset-button"
@@ -183,9 +195,16 @@ export function Slider(props: ISliderProps) {
                         />
                     </Tooltip>
 
-                    <div
-                        className={styles.sliderHandle}
+                    <button
+                        className={clsx(`
+                          univer-absolute univer-top-[calc(50%-6px)] univer-size-3 -univer-translate-x-1/2
+                          univer-rounded-full univer-border-none univer-bg-white univer-shadow univer-transition-colors
+                        `, {
+                            'univer-cursor-pointer hover:univer-gray-200': !disabled,
+                            'univer-cursor-not-allowed': disabled,
+                        })}
                         role="handle"
+                        type="button"
                         style={{
                             left: `${offset}%`,
                         }}
@@ -194,7 +213,13 @@ export function Slider(props: ISliderProps) {
                 </div>
             </div>
 
-            <Button variant="text" disabled={value >= max || disabled} onClick={() => handleStep(10)}>
+            <Button
+                className="univer-size-6 univer-p-0"
+                size="small"
+                variant="text"
+                disabled={value >= max || disabled}
+                onClick={() => handleStep(10)}
+            >
                 <IncreaseSingle />
             </Button>
 

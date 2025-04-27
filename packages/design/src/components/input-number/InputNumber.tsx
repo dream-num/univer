@@ -36,6 +36,7 @@ export interface IInputNumberProps
     onChange?: (value: number | null) => void;
     onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
     onPressEnter?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+    allowEmpty?: boolean;
 }
 
 export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
@@ -57,6 +58,9 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
             onChange,
             onKeyDown,
             onPressEnter,
+            onFocus,
+            onBlur,
+            allowEmpty = false,
         },
         ref
     ) => {
@@ -89,7 +93,7 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
             }
         }, [value]);
 
-        // 当内部值变化时,如果是有效值则更新lastValidValue
+        // When the internal value changes, if it's a valid value, update lastValidValue
         useEffect(() => {
             if (internalValue !== null) {
                 lastValidValueRef.current = internalValue;
@@ -187,24 +191,37 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
         function handleInputChange(value: string) {
             setInputValue(value);
 
+            if (allowEmpty && value === '') {
+                setInternalValue(null);
+                onChange?.(null);
+                return;
+            }
+
             const parsedValue = parseValue(value);
             setInternalValue(parsedValue);
 
-            if (onChange) {
-                onChange(parsedValue);
-            }
+            onChange?.(parsedValue);
         }
 
-        function handleBlur() {
-            // If the input is empty or invalid, restore the last valid value
+        function handleBlur(e: React.FocusEvent<HTMLInputElement>) {
+            // If allowEmpty is true and input is empty, do not restore the last valid value
             if (internalValue === null) {
-                const valueToRestore = lastValidValueRef.current;
-                setInternalValue(valueToRestore);
-                setInputValue(formatValue(valueToRestore));
+                if (inputValue === '' && allowEmpty) {
+                    // Keep the input empty
+                    if (onChange) {
+                        onChange(null);
+                    }
+                } else {
+                    // If the input is not empty, restore the last valid value
+                    const valueToRestore = lastValidValueRef.current;
+                    setInternalValue(valueToRestore);
+                    setInputValue(formatValue(valueToRestore));
 
-                if (onChange) {
-                    onChange(valueToRestore);
+                    if (onChange) {
+                        onChange(valueToRestore);
+                    }
                 }
+                onBlur?.(e);
                 return;
             }
 
@@ -223,21 +240,32 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
                 setInternalValue(valueInRange);
                 setInputValue(formatValue(valueInRange));
 
-                if (onChange) {
-                    onChange(valueInRange);
-                }
+                onChange?.(valueInRange);
             } else {
                 // Just ensure the display is formatted correctly
                 setInputValue(formatValue(internalValue));
             }
+
+            onBlur?.(e);
         }
 
         function handleStep(isUp: boolean) {
             if (disabled) return;
 
             const stepValue = isUp ? step : -step;
+
             // When internalValue is null, use 0 as the base value or the last valid value
-            const currentValue = internalValue !== null ? internalValue : (lastValidValueRef.current !== null ? lastValidValueRef.current : 0);
+            let currentValue: number;
+
+            if (internalValue !== null) {
+                currentValue = internalValue;
+            } else if (lastValidValueRef.current !== null) {
+                currentValue = lastValidValueRef.current;
+            } else {
+                // If there's no valid previous value, start from 0 or the minimum value
+                currentValue = (min > 0) ? min : 0;
+            }
+
             let newValue = currentValue + stepValue;
 
             // Apply min/max constraints
@@ -247,17 +275,13 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
             if (min !== undefined && newValue < min) {
                 newValue = min;
             }
-
             // If we've hit a limit, don't change the value
             if (newValue === currentValue) return;
-
             setInternalValue(newValue);
             lastValidValueRef.current = newValue;
             setInputValue(formatValue(newValue));
 
-            if (onChange) {
-                onChange(newValue);
-            }
+            onChange?.(newValue);
         }
 
         // Handle key down events for arrow keys
@@ -282,9 +306,7 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
 
             handleStep(isUp);
 
-            if (inputRef.current) {
-                inputRef.current.focus();
-            }
+            inputRef.current?.focus();
         }
 
         return (

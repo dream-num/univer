@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
+import type { KeyboardEvent } from 'react';
 import type { IMenuItemInputProps } from './interface';
 import { LocaleService } from '@univerjs/core';
 import { InputNumber } from '@univerjs/design';
 import { IContextMenuService, useDependency } from '@univerjs/ui';
-
-import React, { useEffect, useState } from 'react';
-import styles from './index.module.less';
+import { useEffect, useState } from 'react';
 
 export const MenuItemInput = (props: IMenuItemInputProps) => {
     const { prefix, suffix, value, onChange, min = Number.MIN_SAFE_INTEGER, max = Number.MAX_SAFE_INTEGER } = props;
@@ -30,8 +29,11 @@ export const MenuItemInput = (props: IMenuItemInputProps) => {
     const [inputValue, setInputValue] = useState<string>(); // Initialized to an empty string
 
     const handleChange = (value: number | null) => {
+        if (!value) {
+            setInputValue(min.toString());
+            return;
+        }
         setInputValue(value?.toString());
-        onChange(value?.toString() ?? '');
     };
 
     useEffect(() => {
@@ -44,26 +46,31 @@ export const MenuItemInput = (props: IMenuItemInputProps) => {
         setInputValue(value);
     }, [value]);
 
-    function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    function handleKeyDown(e: KeyboardEvent<HTMLInputElement>) {
         if (e.key === 'Backspace') {
             e.stopPropagation();
+        }
+        if (e.key === 'Enter') {
+            e.stopPropagation();
+            if (inputValue) {
+                onChange(inputValue);
+            }
         }
     }
 
     return (
-        <div className={styles.sheetsUiContextMenuInput}>
+        <div className="univer-inline-flex univer-items-center univer-gap-1">
             {localeService.t(prefix)}
-            <span className={styles.sheetsUiContextMenuInputContainer} onClick={(e) => e.stopPropagation()}>
+            <div className="univer-w-16" onClick={(e) => e.stopPropagation()}>
                 <InputNumber
-                    className={styles.sheetsUiContextMenuInputNumber}
                     value={Number(inputValue)}
                     precision={0}
-                    onKeyDown={handleKeyDown}
-                    onChange={handleChange}
                     min={min}
                     max={max}
+                    onKeyDown={handleKeyDown}
+                    onChange={handleChange}
                 />
-            </span>
+            </div>
             {localeService.t(suffix)}
         </div>
     );

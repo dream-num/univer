@@ -100,24 +100,27 @@ export function UniSidebar(props: IUniSidebarProps) {
         sidebarService.sidebarOptions$.next(options);
         options?.onClose?.();
     }
+
+    const visible = options?.visible ?? false;
     return (
         <aside
             className={clsx(`
-              univer-pointer-events-auto univer-fixed univer-bottom-3 univer-z-20 univer-box-border univer-translate-x-0
+              univer-pointer-events-auto univer-fixed univer-bottom-3 univer-top-12 univer-z-20 univer-box-border
               univer-overflow-hidden univer-rounded-lg univer-border univer-border-solid univer-border-gray-200
               univer-shadow-lg univer-transition-all
-            `, position === 'left' && 'univer-left-3 univer-top-12 univer-w-[180px]', position === 'left' && options?.visible && `
-              univer-translate-x-0
-            `, position === 'left' && options?.visible === false && '-univer-translate-x-4', position === 'right' && `
-              univer-min-w-[280px] univer-max-w[400px] univer-right-3 univer-translate-x-4
-            `, options?.visible && 'univer-translate-x-0')}
+            `, {
+                'univer-left-3 univer-w-[180px]': position === 'left',
+                'univer-right-3 univer-min-w-[280px] univer-max-w-[400px]': position === 'right',
+                'univer-translate-x-[calc(-100%-12px)]': position === 'left' && !visible,
+                'univer-translate-x-[calc(100%+12px)]': position === 'right' && !visible,
+            })}
             style={{ width }}
         >
             <section
                 className={`
-                  univer-m-auto univer-box-border univer-grid univer-h-0 univer-min-h-full univer-w-full
-                  univer-overflow-hidden univer-overflow-y-auto univer-grid-rows-auto univer-bg-white
-                  univer-scrollbar-thin univer-scrollbar-gutter-auto univer-scrollbar-track-slate-700
+                  univer-m-auto univer-box-border univer-flex univer-h-0 univer-min-h-full univer-w-full univer-flex-col
+                  univer-overflow-hidden univer-overflow-y-auto univer-bg-white univer-scrollbar-thin
+                  univer-scrollbar-gutter-auto univer-scrollbar-track-slate-700
                 `}
                 ref={scrollRef}
             >
@@ -125,8 +128,8 @@ export function UniSidebar(props: IUniSidebarProps) {
                     <header
                         className={`
                           univer-sticky univer-top-0 univer-z-10 univer-box-border univer-flex univer-h-[44px]
-                          univer-content-between univer-items-center univer-bg-black univer-p-4 univer-pb-0
-                          univer-text-lg univer-font-medium
+                          univer-flex-shrink-0 univer-flex-grow-0 univer-content-between univer-items-center
+                          univer-justify-between univer-p-4 univer-pb-0 univer-text-lg univer-font-medium
                         `}
                     >
                         {options?.header}
@@ -138,10 +141,7 @@ export function UniSidebar(props: IUniSidebarProps) {
                 )}
 
                 <section
-                    className={`
-                      univer-box-border univer-p-2
-                      *:univer-h-full
-                    `}
+                    className="univer-box-border univer-flex-grow univer-p-2"
                 >
                     {options?.children}
                 </section>

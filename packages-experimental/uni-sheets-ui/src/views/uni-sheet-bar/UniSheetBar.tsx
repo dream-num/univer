@@ -17,7 +17,7 @@
 import type { ICommandInfo } from '@univerjs/core';
 import type { IBaseSheetBarProps } from '@univerjs/sheets-ui';
 import { ICommandService } from '@univerjs/core';
-import { Tooltip } from '@univerjs/design';
+import { clsx, Tooltip } from '@univerjs/design';
 import { IncreaseSingle } from '@univerjs/icons';
 import { InsertSheetCommand, InsertSheetMutation, RemoveSheetMutation, SetTabColorMutation, SetWorksheetActiveOperation, SetWorksheetHideMutation, SetWorksheetNameMutation, SetWorksheetOrderMutation } from '@univerjs/sheets';
 import { useActiveWorkbook } from '@univerjs/sheets-ui';
@@ -27,17 +27,9 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 export function UniSheetBar() {
     const [sheetList, setSheetList] = useState<IBaseSheetBarProps[]>([]);
     const [activeKey, setActiveKey] = useState('');
-    const [barHeight, setBarHeight] = useState(0);
     const workbook = useActiveWorkbook()!;
     const commandService = useDependency(ICommandService);
     const sheetBarRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        const sheetBar = sheetBarRef.current;
-        if (sheetBar) {
-            setBarHeight(sheetBar.clientHeight - 38);
-        }
-    }, []);
 
     const updateSheetItems = useCallback(() => {
         const currentSubUnitId = workbook.getActiveSheet()?.getSheetId() || '';
@@ -102,15 +94,16 @@ export function UniSheetBar() {
 
     return (
         <div className="univer-flex univer-h-full univer-select-none univer-flex-col univer-justify-between" ref={sheetBarRef}>
-            <div className="univer-overflow-y-auto univer-scrollbar-thin" style={{ height: `${barHeight}px` }}>
+            <div className="univer-overflow-y-auto univer-scrollbar-thin">
                 <div className="univer-flex univer-flex-col univer-gap-1 univer-text-sm univer-font-medium">
                     {sheetList.map((item, index) => (
                         <div
                             key={index}
-                            className={`
-                              "univer-flex univer-h-8 univer-items-center univer-px-1 univer-py-0 univer-rounded-lg"
-                              ${activeKey === item.sheetId ? 'univer-text-teal-500' : ''}
-                            `}
+                            className={clsx(`
+                              univer-flex univer-h-8 univer-cursor-pointer univer-items-center univer-rounded-lg
+                              univer-px-1 univer-py-0
+                              hover:univer-bg-gray-100
+                            `, activeKey === item.sheetId ? 'univer-text-primary-500' : '')}
                             onClick={() => handleSheetActiveChange(item.sheetId)}
                         >
                             <Tooltip showIfEllipsis title={item.label} placement="right">

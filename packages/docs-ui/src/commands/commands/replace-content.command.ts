@@ -38,7 +38,6 @@ export const ReplaceSnapshotCommand: ICommand<IReplaceSnapshotCommandParams> = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
-
         const docDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
         const prevSnapshot = docDataModel?.getSelfOrHeaderFooterModel(segmentId).getSnapshot();
 

@@ -15,7 +15,7 @@
  */
 
 import type { IDataValidationRule, IDocumentData, IWorkbookData } from '@univerjs/core';
-import { BooleanNumber, DataValidationErrorStyle, DataValidationOperator, DataValidationType, LocaleType } from '@univerjs/core';
+import { BooleanNumber, CellValueType, DataValidationErrorStyle, DataValidationOperator, DataValidationType, LocaleType } from '@univerjs/core';
 import { DATA_VALIDATION_PLUGIN_NAME } from '@univerjs/sheets-data-validation';
 import { PAGE5_RICHTEXT_1 } from '../../slides/rich-text/page5-richtext1';
 
@@ -13991,6 +13991,11 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                         s: '1',
                         v: 'A Schedule of Items',
                     },
+                    1: {
+                        v: undefined,
+                        t: CellValueType.NUMBER,
+                        s: { n: { pattern: '#,##0.00' } },
+                    },
                     10: {
                         v: 10,
                     },
@@ -14593,8 +14598,9 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
             cellData: {
                 5: {
                     1: {
-                        v: '1',
-                        t: 2,
+                        v: undefined,
+                        t: CellValueType.NUMBER,
+                        s: { n: { pattern: '#,##0.00' } },
                     },
                     2: {
                         v: '12',
@@ -24118,20 +24124,20 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
         {
             name: 'SHEET_UNIVER_THREAD_COMMENT_PLUGIN',
             data: JSON.stringify({
-                'sheet-0011': [{ text: { textRuns: [], paragraphs: [{ startIndex: 3, paragraphStyle: {} }], sectionBreaks: [{ startIndex: 4 }], dataStream: '123\\n\\r', customRanges: [] }, dT: '2024/05/17 21:16', id: 'jwV0QtHwUbhG3o--iy1qa', ref: 'H9', personId: 'mockId', unitId: 'workbook-01', subUnitId: 'sheet-0011' }],
+                'sheet-0011': [{ text: { textRuns: [], paragraphs: [{ startIndex: 3, paragraphStyle: {} }], sectionBreaks: [{ startIndex: 4 }], dataStream: '123\r\n', customRanges: [] }, dT: '2024/05/17 21:16', id: 'jwV0QtHwUbhG3o--iy1qa', ref: 'H9', personId: 'Owner_qxVnhPbQ', unitId: 'workbook-01', subUnitId: 'sheet-0011' }],
                 'dv-test': [
                     {
                         text: {
                             textRuns: [],
                             paragraphs: [{ startIndex: 3, paragraphStyle: {} }],
                             sectionBreaks: [{ startIndex: 4 }],
-                            dataStream: '1\\n\\r',
+                            dataStream: '1\r\n',
                             customRanges: [],
                         },
                         dT: '2024/05/17 21:16',
                         id: '12',
                         ref: 'C6',
-                        personId: 'mockId',
+                        personId: '123',
                         unitId: 'workbook-01',
                         subUnitId: 'dv-test',
                     },
@@ -24140,13 +24146,13 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                             textRuns: [],
                             paragraphs: [{ startIndex: 3, paragraphStyle: {} }],
                             sectionBreaks: [{ startIndex: 4 }],
-                            dataStream: '1\\n\\r',
+                            dataStream: '1\r\n',
                             customRanges: [],
                         },
                         dT: '2024/05/17 21:16',
                         id: '1',
                         ref: 'B6',
-                        personId: 'mockId',
+                        personId: 'Owner_qxVnhPbQ',
                         unitId: 'workbook-01',
                         subUnitId: 'dv-test',
                     },
@@ -24155,13 +24161,13 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                             textRuns: [],
                             paragraphs: [{ startIndex: 3, paragraphStyle: {} }],
                             sectionBreaks: [{ startIndex: 4 }],
-                            dataStream: '2\\n\\r',
+                            dataStream: '2\r\n',
                             customRanges: [],
                         },
                         dT: '2024/05/17 21:16',
                         id: '2',
                         ref: 'B7',
-                        personId: 'mockId',
+                        personId: 'Owner_qxVnhPbQ',
                         unitId: 'workbook-01',
                         subUnitId: 'dv-test',
                     },
@@ -24170,13 +24176,13 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                             textRuns: [],
                             paragraphs: [{ startIndex: 3, paragraphStyle: {} }],
                             sectionBreaks: [{ startIndex: 4 }],
-                            dataStream: '3\\n\\r',
+                            dataStream: '3\r\n',
                             customRanges: [],
                         },
                         dT: '2024/05/17 21:16',
                         id: '3',
                         ref: 'B8',
-                        personId: 'mockId',
+                        personId: 'Owner_qxVnhPbQ',
                         unitId: 'workbook-01',
                         subUnitId: 'dv-test',
                     },
@@ -24185,13 +24191,13 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                             textRuns: [],
                             paragraphs: [{ startIndex: 3, paragraphStyle: {} }],
                             sectionBreaks: [{ startIndex: 4 }],
-                            dataStream: '4\\n\\r',
+                            dataStream: '4\r\n',
                             customRanges: [],
                         },
                         dT: '2024/05/17 21:16',
                         id: '4',
                         ref: 'B9',
-                        personId: 'mockId',
+                        personId: 'Owner_qxVnhPbQ',
                         unitId: 'workbook-01',
                         subUnitId: 'dv-test',
                     },

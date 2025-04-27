@@ -24,6 +24,7 @@ const enUS: typeof zhCN = {
             filterEmpty: 'No match result',
             reset: 'Reset Filter',
             addComment: 'Add Comment',
+            solved: 'Solved',
         },
         editor: {
             placeholder: 'Reply or add others with @',

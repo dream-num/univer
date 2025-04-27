@@ -804,9 +804,6 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../../packages/core
-      '@univerjs/design':
-        specifier: workspace:*
-        version: link:../../packages/design
       '@univerjs/docs':
         specifier: workspace:*
         version: link:../../packages/docs

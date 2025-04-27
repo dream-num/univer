@@ -155,7 +155,7 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
                     isFocus={visible?.visible}
                     unitId={editState?.unitId}
                     subUnitId={editState?.sheetId}
-                    keyboradEventConfig={keyCodeConfig}
+                    keyboardEventConfig={keyCodeConfig}
                     onMoveInEditor={onMoveInEditor}
                     isSupportAcrossSheet
                     resetSelectionOnBlur={false}

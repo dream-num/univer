@@ -308,7 +308,7 @@ export function FormulaBar(props: IProps) {
                                 isSupportAcrossSheet
                                 resetSelectionOnBlur={false}
                                 isSingle={false}
-                                keyboradEventConfig={keyCodeConfig}
+                                keyboardEventConfig={keyCodeConfig}
                                 onFormulaSelectingChange={(isSelecting: 0 | 1 | 2, isFocusing: boolean) => {
                                     isRefSelecting.current = isSelecting;
                                     if (!isFocusing) return;

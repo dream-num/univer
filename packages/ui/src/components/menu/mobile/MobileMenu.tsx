@@ -87,8 +87,8 @@ function MobileMenuItem(props: IMobileMenuItemProps) {
     }
 
     const disabled = useObservable<boolean>(menuItem.disabled$, false);
-    const activated = useObservable<boolean>(menuItem.activated$, false);
-    const hidden = useObservable(menuItem.hidden$, false);
+    // const activated = useObservable<boolean>(menuItem.activated$, false);
+    // const hidden = useObservable(menuItem.hidden$, false);
     const value = useObservable<MenuItemDefaultValueType>(menuItem.value$);
 
     return (
@@ -100,8 +100,8 @@ function MobileMenuItem(props: IMobileMenuItemProps) {
               [&>span]:univer-mt-0.5 [&>span]:univer-w-full [&>span]:univer-truncate [&>span]:univer-text-[13px]
               [&>svg]:univer-size-[18px] [&>svg]:univer-text-lg
             `, {
-                '': activated,
-                '': hidden,
+                // '': activated,
+                // '': hidden,
             })}
             key={id}
             disabled={disabled}

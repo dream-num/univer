@@ -411,7 +411,7 @@ export function ListFormulaInput(props: IFormulaInputProps) {
                             <a
                                 className={`
                                   univer-flex univer-w-fit univer-cursor-pointer univer-flex-row univer-items-center
-                                  univer-rounded univer-p-1 univer-px-2 univer-text-sm univer-text-blue-600
+                                  univer-rounded univer-p-1 univer-px-2 univer-text-sm univer-text-primary
                                   hover:univer-bg-primary-600/5
                                 `}
                                 onClick={handleAdd}

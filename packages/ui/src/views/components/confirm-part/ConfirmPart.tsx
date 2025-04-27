@@ -15,13 +15,54 @@
  */
 
 import type { IConfirmProps } from '@univerjs/design';
-import type { IConfirmPartMethodOptions } from './interface';
+import type { IConfirmChildrenProps, IConfirmPartMethodOptions, IContextConfirmProps } from './interface';
 import { Confirm } from '@univerjs/design';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { CustomLabel } from '../../../components/custom-label/CustomLabel';
 import { IConfirmService } from '../../../services/confirm/confirm.service';
 import { useDependency } from '../../../utils/di';
+
+const ContextConfirm = (props: IContextConfirmProps) => {
+    const { children, onClose, onConfirm } = props;
+
+    const [hooks] = useState<IConfirmChildrenProps['hooks']>({});
+
+    // eslint-disable-next-line react/no-clone-element
+    const childrenWithHooks = React.cloneElement(children, { hooks });
+
+    return (
+        <Confirm
+            children={childrenWithHooks}
+            onClose={() => {
+                const beforeClose = hooks.beforeClose;
+                if (beforeClose) {
+                    const result = beforeClose();
+                    if (result.cancel) {
+                        return;
+                    }
+                    onClose?.(result);
+                    return;
+                }
+
+                onClose?.();
+            }}
+            onConfirm={() => {
+                const beforeConfirm = hooks.beforeConfirm;
+                if (beforeConfirm) {
+                    const result = beforeConfirm();
+                    if (result.cancel) {
+                        return;
+                    }
+                    onConfirm?.(result);
+                    return;
+                }
+
+                onConfirm?.();
+            }}
+        />
+    );
+};
 
 export function ConfirmPart() {
     const confirmService = useDependency(IConfirmService);
@@ -54,5 +95,5 @@ export function ConfirmPart() {
         return confirmProps;
     });
 
-    return props?.map((options, index) => <Confirm key={index} {...options} />);
+    return props?.map((options, index) => <ContextConfirm key={index} {...options} children={options.children! as React.ReactElement<IConfirmChildrenProps>} />);
 }

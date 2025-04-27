@@ -37,6 +37,7 @@ export {
     SharedController,
     UndoShortcutItem,
 } from './controllers/shared-shortcut.controller';
+export type { IConfirmChildrenProps } from './views/components/confirm-part/interface';
 export { ShortcutPanelController } from './controllers/shortcut-display/shortcut-panel.controller';
 export { IUIController, type IWorkbenchOptions } from './controllers/ui/ui.controller';
 export { DesktopUIController } from './controllers/ui/ui-desktop.controller';

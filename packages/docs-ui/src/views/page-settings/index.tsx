@@ -15,7 +15,7 @@
  */
 
 import type { DocumentDataModel, ISize, PaperType } from '@univerjs/core';
-import type { IConfirmChildrenProps } from '@univerjs/design';
+import type { IConfirmChildrenProps } from '@univerjs/ui';
 import { IUniverInstanceService, LocaleService, PAGE_SIZE, PageOrientType, PAPER_TYPES, UniverInstanceType } from '@univerjs/core';
 import { InputNumber, Select } from '@univerjs/design';
 import { useDependency } from '@univerjs/ui';

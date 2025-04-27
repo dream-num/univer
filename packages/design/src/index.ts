@@ -23,7 +23,7 @@ export { Checkbox, type ICheckboxProps } from './components/checkbox';
 export { CheckboxGroup, type ICheckboxGroupProps } from './components/checkbox-group';
 export { ColorPicker, type IColorPickerProps } from './components/color-picker';
 export { ConfigContext, ConfigProvider, type IConfigProviderProps } from './components/config-provider';
-export { Confirm, type IConfirmChildrenProps, type IConfirmProps } from './components/confirm';
+export { Confirm, type IConfirmProps } from './components/confirm';
 export { DatePanel, DatePicker, type IDatePanelProps, type IDatePickerProps } from './components/date-picker';
 export { Dialog, type IDialogProps } from './components/dialog';
 export { DropdownLegacy, type IDropdownLegacyProps } from './components/dropdown-legacy';

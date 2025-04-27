@@ -37,6 +37,7 @@ export {
     SharedController,
     UndoShortcutItem,
 } from './controllers/shared-shortcut.controller';
+export type { IConfirmChildrenProps } from './views/components/confirm-part/interface';
 export { ShortcutPanelController } from './controllers/shortcut-display/shortcut-panel.controller';
 export { IUIController, type IWorkbenchOptions } from './controllers/ui/ui.controller';
 export { DesktopUIController } from './controllers/ui/ui-desktop.controller';
@@ -111,6 +112,7 @@ export { ILeftSidebarService, ISidebarService } from './services/sidebar/sidebar
 export { DesktopZenZoneService } from './services/zen-zone/desktop-zen-zone.service';
 export { IZenZoneService } from './services/zen-zone/zen-zone.service';
 export { FloatDomSingle } from './views/components/dom/FloatDom';
+export { PrintFloatDomSingle } from './views/components/dom/print';
 export { DISABLE_AUTO_FOCUS_KEY, UniverUIPlugin } from './ui-plugin';
 
 export { UNIVER_UI_PLUGIN_NAME } from './ui-plugin';

@@ -1081,4 +1081,31 @@ export enum PageOrientType {
     LANDSCAPE,
 }
 
+export enum PaperType {
+    Letter = 'Letter',
+    Tabloid = 'Tabloid',
+    Legal = 'Legal',
+    Statement = 'Statement',
+    Executive = 'Executive',
+    Folio = 'Folio',
+    A3 = 'A3',
+    A4 = 'A4',
+    A5 = 'A5',
+    B4 = 'B4',
+    B5 = 'B5',
+}
+
+export const PAPER_TYPES: PaperType[] = [
+    PaperType.A3,
+    PaperType.A4,
+    PaperType.A5,
+    PaperType.B4,
+    PaperType.B5,
+    PaperType.Letter,
+    PaperType.Tabloid,
+    PaperType.Legal,
+    PaperType.Statement,
+    PaperType.Executive,
+    PaperType.Folio,
+];
 // #region - tech dept

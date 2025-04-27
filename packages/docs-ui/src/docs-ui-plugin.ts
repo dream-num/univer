@@ -42,6 +42,7 @@ import { DeleteCommand, InsertCommand, UpdateCommand } from './commands/commands
 import { DeleteCurrentParagraphCommand, DeleteCustomBlockCommand, DeleteLeftCommand, DeleteRightCommand, MergeTwoParagraphCommand, RemoveHorizontalLineCommand } from './commands/commands/doc-delete.command';
 import { CloseHeaderFooterCommand } from './commands/commands/doc-header-footer.command';
 import { HorizontalLineCommand, InsertHorizontalLineBellowCommand } from './commands/commands/doc-horizontal-line.command';
+import { DocPageSetupCommand } from './commands/commands/doc-page-setup.command';
 import { DocParagraphSettingCommand } from './commands/commands/doc-paragraph-setting.command';
 import { DocSelectAllCommand } from './commands/commands/doc-select-all.command';
 import { IMEInputCommand } from './commands/commands/ime-input.command';
@@ -91,6 +92,7 @@ import {
 import { DocTableTabCommand } from './commands/commands/table/doc-table-tab.command';
 import { MoveCursorOperation, MoveSelectionOperation } from './commands/operations/doc-cursor.operation';
 import { DocParagraphSettingPanelOperation } from './commands/operations/doc-paragraph-setting-panel.operation';
+import { DocOpenPageSettingCommand } from './commands/operations/open-page-setting.operation';
 import { SetDocZoomRatioOperation } from './commands/operations/set-doc-zoom-ratio.operation';
 import { AppUIController } from './controllers';
 import { defaultPluginConfig, DOCS_UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
@@ -119,6 +121,7 @@ import { DocMenuStyleService } from './services/doc-menu-style.service';
 import { DocPageLayoutService } from './services/doc-page-layout.service';
 import { DocParagraphMenuService } from './services/doc-paragraph-menu.service';
 import { DocCanvasPopManagerService } from './services/doc-popup-manager.service';
+import { DocPrintInterceptorService } from './services/doc-print-interceptor-service';
 import { DocStateChangeManagerService } from './services/doc-state-change-manager.service';
 import { DocsRenderService } from './services/docs-render.service';
 import { EditorService, IEditorService } from './services/editor/editor-manager.service';
@@ -283,6 +286,8 @@ export class UniverDocsUIPlugin extends Plugin {
             InsertOrderListBellowCommand,
             InsertCheckListBellowCommand,
             InsertHorizontalLineBellowCommand,
+            DocPageSetupCommand,
+            DocOpenPageSettingCommand,
         ].forEach((e) => {
             this.disposeWithMe(this._commandService.registerCommand(e));
         });
@@ -312,6 +317,7 @@ export class UniverDocsUIPlugin extends Plugin {
 
     private _initDependencies(injector: Injector) {
         const dependencies = mergeOverrideWithDependencies([
+            [DocPrintInterceptorService],
             [DocClipboardController],
             [DocEditorBridgeController],
             [DocUIController],

@@ -25,7 +25,7 @@ import {
 } from '@univerjs/core';
 
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { CutSingle, DeleteSingle, TodoList } from '@univerjs/icons';
+import { CutSingle, DeleteSingle, DocSettingSingle, TodoList } from '@univerjs/icons';
 import { BuiltInUIPart, ComponentManager, connectInjector, ILayoutService, IMenuManagerService, IShortcutService, IUIPartsService } from '@univerjs/ui';
 import { CoreHeaderFooterCommand, OpenHeaderFooterPanelCommand } from '../commands/commands/doc-header-footer.command';
 import { SidebarDocHeaderFooterPanelOperation } from '../commands/operations/doc-header-footer-panel.operation';
@@ -56,6 +56,7 @@ import {
     UnderlineShortCut,
 } from '../shortcuts/toolbar.shortcut';
 import { DocFooter } from '../views/doc-footer';
+import { PAGE_SETTING_COMPONENT_ID, PageSettings } from '../views/page-settings';
 import { DocSideMenu } from '../views/side-menu';
 import { menuSchema } from './menu.schema';
 
@@ -88,6 +89,8 @@ export class DocUIController extends Disposable {
         this.disposeWithMe(componentManager.register('doc.paragraph.menu', ParagraphMenu));
         this.disposeWithMe(componentManager.register('CutSingle', CutSingle));
         this.disposeWithMe(componentManager.register('DeleteSingle', DeleteSingle));
+        this.disposeWithMe(componentManager.register(PAGE_SETTING_COMPONENT_ID, PageSettings));
+        this.disposeWithMe(componentManager.register('DocumentSettingSingle', DocSettingSingle));
     }
 
     private _initUiParts() {

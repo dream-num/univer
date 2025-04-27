@@ -14,52 +14,37 @@
  * limitations under the License.
  */
 
-import type { Worksheet } from '@univerjs/core';
-import type { Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
-import type { IFloatDomData } from '@univerjs/sheets-drawing';
+import type { IDocFloatDom } from '@univerjs/docs-drawing';
+import type { DocumentSkeleton, Scene } from '@univerjs/engine-render';
 import type { IFloatDom, IFloatDomLayout } from '@univerjs/ui';
 import { PrintFloatDomSingle } from '@univerjs/ui';
 import { useMemo } from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { transformBound2DOMBound } from '../../services/canvas-float-dom-manager.service';
+import { calcDocFloatDomPositionByRect } from '../../controllers/doc-float-dom.controller';
 
 export interface IPrintingFloatDomProps {
-    floatDomInfos: IFloatDomData[];
+    floatDomInfos: IDocFloatDom[];
     scene: Scene;
-    skeleton: SpreadsheetSkeleton;
-    worksheet: Worksheet;
+    skeleton: DocumentSkeleton;
+    unitId: string;
+    offset: { x: number; y: number };
 };
 
-export const PrintingFloatDom = (props: IPrintingFloatDomProps) => {
-    const { floatDomInfos, scene, skeleton, worksheet } = props;
+export const DocPrintingFloatDom = (props: IPrintingFloatDomProps) => {
+    const { floatDomInfos, scene, offset } = props;
     const floatDomParams = useMemo(() => floatDomInfos.map((info) => {
-        const { width, height, angle, left, top } = info.transform!;
-        const offsetBound = transformBound2DOMBound(
+        const { width, height, left, top } = info.transform!;
+        const offsetBound = calcDocFloatDomPositionByRect(
             {
-                left: left ?? 0,
-                right: (left ?? 0) + (width ?? 0),
-                top: top ?? 0,
-                bottom: (top ?? 0) + (height ?? 0),
+                left: left ?? 0 - offset.x,
+                right: (left ?? 0) + (width ?? 0) - offset.x,
+                top: top ?? 0 - offset.y,
+                bottom: (top ?? 0) + (height ?? 0) - offset.y,
             },
-            scene,
-            skeleton,
-            worksheet,
-            undefined,
-            true
+            scene
         );
-        const { scaleX, scaleY } = scene.getAncestorScale();
 
-        const domPos: IFloatDomLayout = {
-            startX: offsetBound.left,
-            endX: offsetBound.right,
-            startY: offsetBound.top,
-            endY: offsetBound.bottom,
-            rotate: angle!,
-            width: width! * scaleX,
-            height: height! * scaleY,
-            absolute: offsetBound.absolute,
-        };
-
+        const domPos: IFloatDomLayout = offsetBound;
         const floatDom: IFloatDom & { position: IFloatDomLayout } = {
             position$: new BehaviorSubject<IFloatDomLayout>(domPos),
             position: domPos,
@@ -73,7 +58,7 @@ export const PrintingFloatDom = (props: IPrintingFloatDomProps) => {
         };
 
         return [info.drawingId, floatDom] as const;
-    }), [floatDomInfos, scene, skeleton, worksheet]);
+    }), [floatDomInfos, scene, offset]);
 
     return (
         <div style={{ position: 'absolute', top: 0, left: 0 }}>

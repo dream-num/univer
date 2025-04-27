@@ -16,4 +16,5 @@
 
 export * from './const';
 export * from './extension-names';
+export * from './page-size';
 export * from './theme-color-map';

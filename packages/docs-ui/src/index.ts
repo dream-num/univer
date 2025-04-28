@@ -59,6 +59,7 @@ export { whenDocAndEditorFocused } from './shortcuts/utils';
 export { DOC_VERTICAL_PADDING } from './types/const/padding';
 
 // #region - all commands
+export { SwitchDocModeCommand } from './commands/commands/switch-doc-mode.command.js';
 export { HorizontalLineCommand } from './commands/commands/doc-horizontal-line.command';
 export { AfterSpaceCommand, EnterCommand, type ITabCommandParams, TabCommand } from './commands/commands/auto-format.command';
 export { BreakLineCommand } from './commands/commands/break-line.command';

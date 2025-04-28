@@ -17,7 +17,6 @@
 import type { Dependency, DependencyIdentifier, Injector } from '@wendellhu/redi';
 
 export * from '@wendellhu/redi';
-// export * from '@wendellhu/redi/react-bindings';
 
 /**
  * Register the dependencies to the injector.

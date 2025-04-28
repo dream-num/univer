@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { awaitTime, Disposable, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { awaitTime, Disposable, ICommandService, Inject, IUniverInstanceService, ThemeService, UniverInstanceType } from '@univerjs/core';
 
 import { DEFAULT_WORKBOOK_DATA_DEMO, DEFAULT_WORKBOOK_DATA_DEMO_DEFAULT_STYLE } from '@univerjs/mockdata';
 import { DisposeUniverCommand } from '../../commands/commands/unit.command';
@@ -33,6 +33,7 @@ export interface IE2EControllerAPI {
     loadMergeCellSheet(loadTimeout?: number): Promise<void>;
     loadDefaultStyleSheet(loadTimeout?: number): Promise<void>;
     loadDefaultDoc(loadTimeout?: number,): Promise<void>;
+    setDarkMode(darkMode: boolean): void;
     disposeUniver(): Promise<void>;
     disposeCurrSheetUnit(disposeTimeout?: number): Promise<void>;
 }
@@ -50,7 +51,8 @@ declare global {
 export class E2EController extends Disposable {
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @ICommandService private readonly _commandService: ICommandService
+        @ICommandService private readonly _commandService: ICommandService,
+        @Inject(ThemeService) private readonly _themeService: ThemeService
     ) {
         super();
 
@@ -70,9 +72,14 @@ export class E2EController extends Disposable {
             loadMergeCellSheet: () => this._loadMergeCellSheet(2000),
             loadDefaultStyleSheet: (loadTimeout) => this._loadDefaultStyleSheet(loadTimeout),
             disposeCurrSheetUnit: (disposeTimeout?: number) => this._disposeDefaultSheetUnit(disposeTimeout),
+            setDarkMode: (darkMode) => this._setDarkMode(darkMode),
             loadDefaultDoc: (loadTimeout) => this._loadDefaultDoc(loadTimeout),
             disposeUniver: () => this._disposeUniver(),
         };
+    }
+
+    private _setDarkMode(darkMode: boolean): void {
+        this._themeService.setDarkMode(darkMode);
     }
 
     private async _loadAndRelease(releaseId: number, loadingTimeout: number = AWAIT_LOADING_TIMEOUT, disposingTimeout: number = AWAIT_DISPOSING_TIMEOUT): Promise<void> {

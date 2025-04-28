@@ -1,5 +1,5 @@
 // The type definition is copied from:
-// examples/src/plugins/debugger/controllers/e2e/e2e-memory.controller.ts
+// packages-experimental/debugger/src/controllers/e2e/e2e.controller.ts
 export interface IE2EControllerAPI {
     loadAndRelease(id: number, loadTimeout?: number, disposeTimeout?: number): Promise<void>;
     loadDefaultSheet(loadTimeout?: number): Promise<void>;
@@ -7,6 +7,7 @@ export interface IE2EControllerAPI {
     loadDemoSheet(loadTimeout?: number): Promise<void>;
     loadMergeCellSheet(loadTimeout?: number): Promise<void>;
     loadDefaultStyleSheet(loadTimeout?: number): Promise<void>;
+    setDarkMode(darkMode: boolean): void;
     disposeUniver(): Promise<void>;
     disposeCurrSheetUnit(disposeTimeout?: number): Promise<void>;
 }

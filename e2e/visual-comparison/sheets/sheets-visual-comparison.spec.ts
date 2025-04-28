@@ -46,6 +46,35 @@ test('diff default sheet toolbar', async () => {
     expect(screenshot).toMatchSnapshot(filename, { maxDiffPixels: 100 });
 });
 
+test('diff sheet dark mode', async () => {
+    const browser = await chromium.launch({
+        headless: isCI, // Set to false to see the browser window
+    });
+    const context = await browser.newContext({
+        viewport: { width: 1280, height: 720 },
+        deviceScaleFactor: 2, // Set your desired DPR
+    });
+    const page = await context.newPage();
+    await page.goto('http://localhost:3000/sheets/');
+    await page.waitForTimeout(2000);
+
+    await page.evaluate(() => window.E2EControllerAPI.loadDefaultSheet());
+    await page.waitForTimeout(1000);
+
+    await page.evaluate(() => window.E2EControllerAPI.setDarkMode(true));
+    await page.waitForTimeout(1000);
+
+    const filename = generateSnapshotName('dark-mode');
+    const screenshot = await page.screenshot({
+        mask: [
+            page.locator('.univer-headerbar'),
+            page.locator('.univer-defined-name'),
+        ],
+        fullPage: true,
+    });
+    expect(screenshot).toMatchSnapshot(filename, { maxDiffPixels: 100 });
+});
+
 test('diff default sheet content', async ({ page }) => {
     await page.goto('http://localhost:3000/sheets/');
     await page.waitForTimeout(2000);

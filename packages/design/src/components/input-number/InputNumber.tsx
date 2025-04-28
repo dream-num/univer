@@ -318,6 +318,7 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
                         value={inputValue}
                         disabled={disabled}
                         onChange={handleInputChange}
+                        onFocus={onFocus}
                         onBlur={handleBlur}
                         onKeyDown={handleKeyDown}
                     />

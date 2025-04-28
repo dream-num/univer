@@ -54,7 +54,7 @@
         "@release-it/conventional-changelog": "^9.0.4",
         "@storybook/react": "8.6.12",
         "@types/fs-extra": "^11.0.4",
-        "@types/node": "^22.15.2",
+        "@types/node": "^22.15.3",
         "@types/react": "^19.1.2",
         "@types/react-dom": "^19.1.2",
         "@univerjs-infra/shared": "workspace:*",

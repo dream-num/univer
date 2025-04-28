@@ -23,6 +23,7 @@ import type {
     ReactFlowInstance,
     Viewport,
 } from '@xyflow/react';
+import type { IProjectNode } from '../../services/unit-grid/unit-grid.service';
 import type { IFloatingToolbarRef } from '../uni-toolbar/UniFloatToolbar';
 import { debounce, ICommandService, IContextService, IUniverInstanceService, LocaleService, ThemeService } from '@univerjs/core';
 import { clsx, ConfigContext, ConfigProvider, defaultTheme, themeInstance } from '@univerjs/design';
@@ -148,7 +149,7 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
         customNode: UnitNode,
     };
 
-    const unitGrid = useObservable(unitGridService.unitGrid$, undefined, true);
+    const unitGrid = useObservable<IProjectNode[]>(unitGridService.unitGrid$, undefined, true);
     const gridNodes = useMemo(() => unitGrid.map((item) => ({
         id: item.id,
         type: 'customNode',
@@ -302,7 +303,7 @@ function UnitNode({ data }: IUnitNodeProps) {
     const disableChangingUnitFocusing = useObservable(
         () => contextService.subscribeContextValue$(UNI_DISABLE_CHANGING_FOCUS_KEY),
         false,
-        false,
+        true,
         []
     );
 

@@ -52,7 +52,7 @@ export function SheetBarMenu() {
     const commandService = useDependency(ICommandService);
     const sheetBarService = useDependency(ISheetBarService);
     const worksheetProtectionRuleModel = useDependency(WorksheetProtectionRuleModel);
-    const workbook = useObservable(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET), null, false, []);
+    const workbook = useObservable(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET), null, true, []);
 
     const handleClick = (item: ISheetBarMenuItem) => {
         const { sheetId } = item;

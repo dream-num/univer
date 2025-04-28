@@ -22,7 +22,7 @@ import { useMemo } from 'react';
 export function useUnitTitle(unitId: string): string | undefined {
     const instanceService = useDependency(IUniverInstanceService);
     const unit = useMemo(() => instanceService.getUnit(unitId), [unitId, instanceService]);
-    const title = useObservable<string>(unit?.name$, '', false, [unit]);
+    const title = useObservable<string>(unit?.name$, '', true, [unit]);
     return title;
 }
 

@@ -43,7 +43,7 @@ export function useWorkbooks(): Workbook[] {
             map(() => univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET)),
             startWith(univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET))
         );
-    }, [], undefined, [univerInstanceService]);
+    }, [], true, [univerInstanceService]);
 }
 
 export function useSheetSkeleton() {

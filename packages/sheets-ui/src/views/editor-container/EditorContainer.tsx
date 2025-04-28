@@ -58,7 +58,7 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
     const disableAutoFocus = useObservable(
         () => contextService.subscribeContextValue$(DISABLE_AUTO_FOCUS_KEY),
         false,
-        undefined,
+        true,
         [contextService, DISABLE_AUTO_FOCUS_KEY]
     );
     const FormulaEditor = componentManager.get(EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY);

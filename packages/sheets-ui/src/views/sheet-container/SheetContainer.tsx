@@ -101,7 +101,7 @@ export function RenderSheetContent() {
 
 function useHasWorkbook(): boolean {
     const univerInstanceService = useDependency(IUniverInstanceService);
-    const workbook = useObservable(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET), null, false, []);
+    const workbook = useObservable(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET), null, true, []);
     const hasWorkbook = !!workbook;
     return useMemo(
         () => univerInstanceService.getAllUnitsForType(UniverInstanceType.UNIVER_SHEET).length > 0,

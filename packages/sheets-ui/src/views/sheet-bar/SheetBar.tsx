@@ -22,6 +22,7 @@ import { InsertSheetCommand, WorkbookCreateSheetPermission, WorkbookEditablePerm
 
 import { useDependency, useObservable } from '@univerjs/ui';
 import React, { useEffect, useState } from 'react';
+import { of } from 'rxjs';
 import { useActiveWorkbook } from '../../components/hook';
 import { ISheetBarService } from '../../services/sheet-bar/sheet-bar.service';
 import styles from './index.module.less';
@@ -42,8 +43,8 @@ export const SheetBar = () => {
     const workbook = useActiveWorkbook()!;
     const unitId = workbook.getUnitId();
 
-    const workbookEditablePermission = useObservable(permissionService.getPermissionPoint$(new WorkbookEditablePermission(unitId)?.id));
-    const workbookCreateSheetPermission = useObservable(permissionService.getPermissionPoint$(new WorkbookCreateSheetPermission(unitId)?.id));
+    const workbookEditablePermission = useObservable(permissionService.getPermissionPoint$(new WorkbookEditablePermission(unitId).id) ?? of(null));
+    const workbookCreateSheetPermission = useObservable(permissionService.getPermissionPoint$(new WorkbookCreateSheetPermission(unitId).id) ?? of(null));
 
     useEffect(() => {
         const subscription = sheetBarService.scroll$.subscribe((state: IScrollState) => {

@@ -30,9 +30,9 @@ const ContextConfirm = (props: IContextConfirmProps) => {
 
     // eslint-disable-next-line react/no-clone-element
     const childrenWithHooks = React.cloneElement(children, { hooks });
-
     return (
         <Confirm
+            {...props}
             children={childrenWithHooks}
             onClose={() => {
                 const beforeClose = hooks.beforeClose;

@@ -59,7 +59,6 @@ export interface ISheetShape extends IDrawingParam, ISheetDrawingBase {
 
 export interface IFloatDomData extends IDrawingParam {
     componentKey: string;
-    printingComponentKey?: string;
     data?: Serializable;
     allowTransform?: boolean;
 }

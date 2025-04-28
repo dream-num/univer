@@ -37,6 +37,8 @@ const PRINTING_COMPONENT_COLLECT = createInterceptorKey<undefined, IDocPrintComp
 const PRINTING_DOM_COLLECT = createInterceptorKey<DisposableCollection, IDocPrintDomtContext>('PRINTING_DOM_COLLECT');
 
 export class DocPrintInterceptorService extends Disposable {
+    private _printComponentMap: Map<string, string> = new Map();
+
     readonly interceptor = new InterceptorManager({
         PRINTING_COMPONENT_COLLECT,
         PRINTING_DOM_COLLECT,
@@ -54,5 +56,13 @@ export class DocPrintInterceptorService extends Disposable {
             priority: -1,
             handler: (_value) => _value,
         }));
+    }
+
+    registerPrintComponent(componentKey: string, printingComponentKey: string) {
+        this._printComponentMap.set(componentKey, printingComponentKey);
+    }
+
+    getPrintComponent(componentKey: string) {
+        return this._printComponentMap.get(componentKey);
     }
 }

@@ -522,7 +522,7 @@ function getRedoFormulaData(rangeList: IRangeChange[], oldFormulaMatrix: ObjectM
         // Use the formula result value to update the data to ensure accuracy, otherwise the new formula cannot be inferred from #REF
         const newValue = formulaDataItemToCellData(newFormula);
 
-        if (!redoFormulaData.getValue(oldStartRow, oldStartColumn)) {
+        if (!redoFormulaData.getValue(oldStartRow, oldStartColumn)) { // The current position may have been set to a new value, so it cannot be cleared at this time
             redoFormulaData.setValue(oldStartRow, oldStartColumn, { f: null, si: null });
         }
 
@@ -555,7 +555,7 @@ function getUndoFormulaData(rangeList: IRangeChange[], oldFormulaMatrix: ObjectM
 
         if (newCell) {
             const { startRow: newStartRow, startColumn: newStartColumn } = newCell;
-            if (!undoFormulaData.getValue(newStartRow, newStartColumn)) {
+            if (!undoFormulaData.getValue(newStartRow, newStartColumn)) { // The current position may be set to an old value and cannot be cleared at this time
                 undoFormulaData.setValue(newStartRow, newStartColumn, { f: null, si: null });
             }
         }

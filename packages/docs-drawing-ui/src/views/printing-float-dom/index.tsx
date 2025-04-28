@@ -35,15 +35,15 @@ export const DocPrintingFloatDom = (props: IPrintingFloatDomProps) => {
     const { floatDomInfos, scene, offset, bound } = props;
     const width = bound.right - bound.left;
     const height = bound.bottom - bound.top;
-    
+
     const floatDomParams = useMemo(() =>
         floatDomInfos.map((info) => {
             const { width = 0, height = 0, left = 0, top = 0 } = info.transform!;
             const offsetBound = calcDocFloatDomPositionByRect(
                 {
-                    left: left,
+                    left,
                     right: left + width,
-                    top: top,
+                    top,
                     bottom: top + height,
                 },
                 scene

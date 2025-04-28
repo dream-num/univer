@@ -18,7 +18,6 @@ import type { IFormulaInputProps } from '@univerjs/data-validation';
 import { LocaleService } from '@univerjs/core';
 import { FormLayout, Input } from '@univerjs/design';
 import { useDependency } from '@univerjs/ui';
-import styles from './index.module.less';
 
 export const BaseFormulaInput = (props: IFormulaInputProps) => {
     const { isTwoFormula = false, value, onChange, showError, validResult } = props;
@@ -31,7 +30,7 @@ export const BaseFormulaInput = (props: IFormulaInputProps) => {
             <>
                 <FormLayout error={formula1Res}>
                     <Input
-                        className={styles.dataValidationFormula}
+                        className="univer-w-full"
                         placeholder={localeService.t('dataValidation.panel.formulaPlaceholder')}
                         value={value?.formula1}
                         onChange={(newValue) => {
@@ -42,12 +41,12 @@ export const BaseFormulaInput = (props: IFormulaInputProps) => {
                         }}
                     />
                 </FormLayout>
-                <div className={styles.dataValidationFormulaAnd}>
+                <div className="-univer-mt-2 univer-mb-1 univer-text-sm univer-text-gray-400">
                     {localeService.t('dataValidation.panel.formulaAnd')}
                 </div>
                 <FormLayout error={formula2Res}>
                     <Input
-                        className={styles.dataValidationFormula}
+                        className="univer-w-full"
                         placeholder={localeService.t('dataValidation.panel.formulaPlaceholder')}
                         value={value?.formula2}
                         onChange={(newValue) => {
@@ -65,7 +64,7 @@ export const BaseFormulaInput = (props: IFormulaInputProps) => {
     return (
         <FormLayout error={formula1Res}>
             <Input
-                className={styles.dataValidationFormula}
+                className="univer-w-full"
                 placeholder={localeService.t('dataValidation.panel.formulaPlaceholder')}
                 value={value?.formula1}
                 onChange={(newValue) => {

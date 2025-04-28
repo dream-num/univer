@@ -20,7 +20,6 @@ import { Checkbox, FormLayout, Input, Radio, RadioGroup } from '@univerjs/design
 import { MoreDownSingle, MoreUpSingle } from '@univerjs/icons';
 import { ComponentManager, useDependency } from '@univerjs/ui';
 import React, { useState } from 'react';
-import styles from './index.module.less';
 
 export interface IDataValidationOptionsParams {
     value: IDataValidationRuleOptions;
@@ -38,9 +37,20 @@ export function DataValidationOptions(props: IDataValidationOptionsParams) {
 
     return (
         <>
-            <div className={styles.dataValidationOptionsButton} onClick={() => setShow(!show)}>
+            <div
+                className={`
+                  univer-mb-3 univer-flex univer-cursor-pointer univer-items-center univer-text-sm univer-text-black
+                `}
+                onClick={() => setShow(!show)}
+            >
                 {localeService.t('dataValidation.panel.options')}
-                {show ? <MoreUpSingle className={styles.dataValidationOptionsButtonIcon} /> : <MoreDownSingle className={styles.dataValidationOptionsButtonIcon} />}
+                {show
+                    ? (
+                        <MoreUpSingle className="univer-ml-1 univer-text-[8px]" />
+                    )
+                    : (
+                        <MoreDownSingle className="univer-ml-1 univer-text-[8px]" />
+                    )}
             </div>
             {show && (
                 <>

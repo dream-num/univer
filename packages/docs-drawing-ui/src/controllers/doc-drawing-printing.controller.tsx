@@ -102,6 +102,7 @@ export class DocDrawingPrintingController extends Disposable {
                                     scene={pos.scene}
                                     skeleton={pos.skeleton}
                                     offset={pos.offset}
+                                    bound={pos.bound}
                                 />,
                                 pos.root
                             );

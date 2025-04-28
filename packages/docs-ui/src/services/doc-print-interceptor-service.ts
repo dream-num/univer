@@ -15,7 +15,7 @@
  */
 
 import type { DisposableCollection } from '@univerjs/core';
-import type { Documents, DocumentSkeleton, Engine, Scene } from '@univerjs/engine-render';
+import type { Documents, DocumentSkeleton, Engine, IBoundRectNoAngle, Scene } from '@univerjs/engine-render';
 import { createInterceptorKey, Disposable, InterceptorManager } from '@univerjs/core';
 
 export interface IDocPrintContext {
@@ -28,6 +28,7 @@ export interface IDocPrintContext {
 
 export interface IDocPrintDomtContext extends IDocPrintContext {
     offset: { x: number; y: number };
+    bound: IBoundRectNoAngle;
 }
 export interface IDocPrintComponentContext extends IDocPrintContext {
     documents: Documents;

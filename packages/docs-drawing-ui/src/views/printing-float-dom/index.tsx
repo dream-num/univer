@@ -55,6 +55,7 @@ export const DocPrintingFloatDom = (props: IPrintingFloatDomProps) => {
             onPointerUp: () => { },
             onWheel: () => { },
             unitId: info.unitId,
+            data: info.data,
         };
 
         return [info.drawingId, floatDom] as const;

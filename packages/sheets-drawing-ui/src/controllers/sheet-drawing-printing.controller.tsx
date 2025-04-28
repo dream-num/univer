@@ -17,7 +17,7 @@
 import type { IRange } from '@univerjs/core';
 import type { IFloatDomData } from '@univerjs/sheets-drawing';
 import type { IPrintingFloatDomProps } from '../views/printing-float-dom';
-import { Disposable, DrawingTypeEnum, Inject, Injector, PRINT_CHART_COMPONENT_KEY, Tools } from '@univerjs/core';
+import { Disposable, DrawingTypeEnum, Inject, Injector, Tools } from '@univerjs/core';
 import { render, unmount } from '@univerjs/design';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { DrawingRenderService } from '@univerjs/drawing-ui';
@@ -134,18 +134,11 @@ export class SheetDrawingPrintingController extends Disposable {
                         const subUnitData = unitData?.[subUnitId];
                         if (subUnitData) {
                             const floatDomInfos = subUnitData.order.map((id) => {
-                                const drawing = subUnitData.data[id];
-                                if (drawing.drawingType === DrawingTypeEnum.DRAWING_CHART) {
+                                const drawing = subUnitData.data[id] as IFloatDomData;
+                                if (drawing.drawingType === DrawingTypeEnum.DRAWING_DOM || drawing.drawingType === DrawingTypeEnum.DRAWING_CHART) {
                                     return {
                                         ...drawing,
-                                        componentKey: this._componetManager.get(PRINT_CHART_COMPONENT_KEY) as any,
-                                    };
-                                }
-
-                                if (drawing.drawingType === DrawingTypeEnum.DRAWING_DOM) {
-                                    return {
-                                        ...drawing,
-                                        componentKey: this._componetManager.get((drawing as IFloatDomData).componentKey) as any,
+                                        componentKey: this._componetManager.get(drawing.printingComponentKey || drawing.componentKey) as any,
                                     };
                                 }
 

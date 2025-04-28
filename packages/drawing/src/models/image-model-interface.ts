@@ -32,6 +32,7 @@ export interface IImageData extends IDrawingParam {
 
 export interface IDocFloatDomDataBase {
     componentKey: string;
+    printingComponentKey?: string;
     data?: Serializable;
     allowTransform?: boolean;
 }

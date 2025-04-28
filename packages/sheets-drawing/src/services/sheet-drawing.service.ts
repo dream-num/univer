@@ -15,9 +15,10 @@
  */
 
 import type { IDrawingParam, IRotationSkewFlipTransform, Serializable } from '@univerjs/core';
+import type { IImageData, IUnitDrawingService } from '@univerjs/drawing';
 import type { ISheetOverGridPosition } from '@univerjs/sheets';
 import { createIdentifier } from '@univerjs/core';
-import { type IImageData, type IUnitDrawingService, UnitDrawingService } from '@univerjs/drawing';
+import { UnitDrawingService } from '@univerjs/drawing';
 
 export enum SheetDrawingAnchorType {
     /**
@@ -58,6 +59,7 @@ export interface ISheetShape extends IDrawingParam, ISheetDrawingBase {
 
 export interface IFloatDomData extends IDrawingParam {
     componentKey: string;
+    printingComponentKey?: string;
     data?: Serializable;
     allowTransform?: boolean;
 }

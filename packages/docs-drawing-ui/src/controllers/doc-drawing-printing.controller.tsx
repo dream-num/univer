@@ -16,7 +16,7 @@
 
 import type { IDocFloatDom } from '@univerjs/docs-drawing';
 import type { IPrintingFloatDomProps } from '../views/printing-float-dom';
-import { Disposable, DrawingTypeEnum, Inject, Injector, PRINT_CHART_COMPONENT_KEY } from '@univerjs/core';
+import { Disposable, DrawingTypeEnum, Inject, Injector } from '@univerjs/core';
 import { render, unmount } from '@univerjs/design';
 import { DocPrintInterceptorService } from '@univerjs/docs-ui';
 import { IDrawingManagerService } from '@univerjs/drawing';
@@ -74,18 +74,11 @@ export class DocDrawingPrintingController extends Disposable {
                         const subUnitData = unitData?.[unitId];
                         if (subUnitData) {
                             const floatDomInfos = subUnitData.order.map((id) => {
-                                const drawing = subUnitData.data[id];
-                                if (drawing.drawingType === DrawingTypeEnum.DRAWING_CHART) {
+                                const drawing = subUnitData.data[id] as IDocFloatDom;
+                                if (drawing.drawingType === DrawingTypeEnum.DRAWING_DOM || drawing.drawingType === DrawingTypeEnum.DRAWING_CHART) {
                                     return {
                                         ...drawing,
-                                        componentKey: this._componetManager.get(PRINT_CHART_COMPONENT_KEY) as any,
-                                    };
-                                }
-
-                                if (drawing.drawingType === DrawingTypeEnum.DRAWING_DOM) {
-                                    return {
-                                        ...drawing,
-                                        componentKey: this._componetManager.get((drawing as IDocFloatDom).componentKey) as any,
+                                        componentKey: this._componetManager.get(drawing.printingComponentKey || drawing.componentKey) as any,
                                     };
                                 }
 

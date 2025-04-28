@@ -33,6 +33,7 @@ const ContextConfirm = (props: IContextConfirmProps) => {
 
     return (
         <Confirm
+            {...props}
             children={childrenWithHooks}
             onClose={() => {
                 const beforeClose = hooks.beforeClose;

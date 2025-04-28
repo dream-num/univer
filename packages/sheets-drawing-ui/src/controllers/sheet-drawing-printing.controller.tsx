@@ -134,7 +134,7 @@ export class SheetDrawingPrintingController extends Disposable {
                         const subUnitData = unitData?.[subUnitId];
                         if (subUnitData) {
                             const floatDomInfos = subUnitData.order.map((id) => {
-                                const drawing = subUnitData.data[id];
+                                const drawing = subUnitData.data[id] as IFloatDomData;
                                 if (drawing.drawingType === DrawingTypeEnum.DRAWING_CHART) {
                                     return {
                                         ...drawing,
@@ -145,7 +145,7 @@ export class SheetDrawingPrintingController extends Disposable {
                                 if (drawing.drawingType === DrawingTypeEnum.DRAWING_DOM) {
                                     return {
                                         ...drawing,
-                                        componentKey: this._componetManager.get((drawing as IFloatDomData).componentKey) as any,
+                                        componentKey: this._componetManager.get(drawing.printingComponentKey || drawing.componentKey) as any,
                                     };
                                 }
 

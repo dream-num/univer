@@ -113,7 +113,7 @@ export function Sidebar() {
     }
     return (
         <section
-            className={clsx('univer-relative univer-h-full univer-text-gray-800', {
+            className={clsx('univer-relative univer-h-full', {
                 'univer-w-96 univer-translate-x-0': options?.visible,
                 'univer-w-0 univer-translate-x-full': !options?.visible,
             })}
@@ -125,6 +125,7 @@ export function Sidebar() {
                   univer-overflow-y-auto univer-border-0 univer-border-b univer-border-l univer-border-solid
                   univer-border-gray-200 univer-bg-white univer-scrollbar-thin univer-scrollbar-track-gray-50
                   univer-scrollbar-thumb-gray-300
+                  dark:univer-bg-black dark:univer-scrollbar-track-gray-900 dark:univer-scrollbar-thumb-gray-700
                 `}
                 ref={scrollRef}
             >
@@ -132,6 +133,8 @@ export function Sidebar() {
                     className={`
                       univer-sticky univer-top-0 univer-z-10 univer-box-border univer-flex univer-items-center
                       univer-justify-between univer-bg-white univer-p-4 univer-pb-2 univer-text-base univer-font-medium
+                      univer-text-gray-800
+                      dark:univer-bg-black dark:univer-text-white
                     `}
                 >
                     {options?.header}

@@ -143,9 +143,10 @@ export class SheetDrawingPrintingController extends Disposable {
                                 }
 
                                 if (drawing.drawingType === DrawingTypeEnum.DRAWING_DOM) {
+                                    const printingComponentKey = this._sheetPrintInterceptorService.getPrintComponent(drawing.componentKey);
                                     return {
                                         ...drawing,
-                                        componentKey: this._componetManager.get(drawing.printingComponentKey || drawing.componentKey) as any,
+                                        componentKey: this._componetManager.get(printingComponentKey || drawing.componentKey) as any,
                                     };
                                 }
 

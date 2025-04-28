@@ -348,11 +348,61 @@ const TEST_WORKBOOK_DATA_DEMO = (): IWorkbookData => ({
             },
             name: 'Sheet4',
         },
-
+        sheet5: {
+            id: 'sheet5',
+            cellData: {
+                0: {
+                    0: {
+                        v: 1,
+                        t: 2,
+                    },
+                    1: {
+                        f: '=A1',
+                        v: 1,
+                        t: 2,
+                    },
+                },
+                1: {
+                    0: {
+                        v: 2,
+                        t: 2,
+                    },
+                    1: {
+                        f: '=A2',
+                        si: 'W8Hdfc',
+                        v: 2,
+                        t: 2,
+                    },
+                },
+                2: {
+                    0: {
+                        v: 3,
+                        t: 2,
+                    },
+                    1: {
+                        si: 'W8Hdfc',
+                        v: 3,
+                        t: 2,
+                    },
+                },
+                3: {
+                    0: {
+                        v: 4,
+                        t: 2,
+                    },
+                    1: {
+                        si: 'W8Hdfc',
+                        v: 4,
+                        t: 2,
+                    },
+                },
+            },
+            name: 'Sheet5',
+        },
     },
     locale: LocaleType.ZH_CN,
     name: '',
-    sheetOrder: ['sheet1', 'sheet2', 'sheet3', 'sheet4'],
+    sheetOrder: ['sheet1', 'sheet2', 'sheet3', 'sheet4', 'sheet5'],
     styles: {},
     resources: [
         {
@@ -556,6 +606,45 @@ describe('Test update formula ', () => {
             expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
             const valuesRedo = getValues(18, 1, 20, 2);
             expect(valuesRedo).toStrictEqual([[null, { f: '=SUM(A19)', t: 2, v: 1 }], [null, { f: '=SUM(A20)', si: 'id1', t: 2, v: 2 }], [null, { si: 'id1', t: 2, v: 3 }]]);
+        });
+
+        it('Move range, update reference, release si', async () => {
+            const workbook = get(IUniverInstanceService).getUnit<Workbook>('test');
+            const sheetId = 'sheet5';
+            const sheet5 = workbook?.getSheetBySheetId(sheetId);
+            if (!sheet5) {
+                throw new Error(`${sheetId}not found`);
+            }
+            workbook?.setActiveSheet(sheet5);
+
+            const params: IMoveRangeCommandParams = {
+                fromRange: {
+                    startRow: 0,
+                    startColumn: 1,
+                    endRow: 3,
+                    endColumn: 1,
+                    rangeType: 0,
+                },
+                toRange: {
+                    startRow: 2,
+                    startColumn: 1,
+                    endRow: 5,
+                    endColumn: 1,
+                    rangeType: 0,
+                },
+            };
+
+            expect(await commandService.executeCommand(MoveRangeCommand.id, params)).toBeTruthy();
+            const values = getValues(0, 1, 5, 1, sheetId);
+            expect(values).toStrictEqual([[null], [null], [{ f: '=A1', t: 2, v: 1 }], [{ f: '=A2', si: 'W8Hdfc', t: 2, v: 2 }], [{ si: 'W8Hdfc', t: 2, v: 3 }], [{ si: 'W8Hdfc', t: 2, v: 4 }]]);
+
+            expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+            const valuesUndo = getValues(0, 1, 5, 1, sheetId);
+            expect(valuesUndo).toStrictEqual([[{ f: '=A1', t: 2, v: 1 }], [{ f: '=A2', si: 'W8Hdfc', t: 2, v: 2 }], [{ si: 'W8Hdfc', t: 2, v: 3 }], [{ si: 'W8Hdfc', t: 2, v: 4 }], [null], [null]]);
+
+            expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+            const valuesRedo = getValues(0, 1, 5, 1, sheetId);
+            expect(valuesRedo).toStrictEqual([[null], [null], [{ f: '=A1', t: 2, v: 1 }], [{ f: '=A2', si: 'W8Hdfc', t: 2, v: 2 }], [{ si: 'W8Hdfc', t: 2, v: 3 }], [{ si: 'W8Hdfc', t: 2, v: 4 }]]);
         });
 
         it('Move rows, update reference', async () => {

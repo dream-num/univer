@@ -18,7 +18,7 @@ import type { ITableFilterItem } from '@univerjs/sheets-table';
 import { LocaleService } from '@univerjs/core';
 import { Checkbox, Input, Scrollbar } from '@univerjs/design';
 import { useDependency } from '@univerjs/ui';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { SheetsTableUiService } from '../../services/sheets-table-ui-service';
 
 interface ISheetTableItemsFilterPanelProps {
@@ -54,13 +54,21 @@ export function SheetTableItemsFilterPanel(props: ISheetTableItemsFilterPanelPro
     const indeterminate = !allChecked && checkedItemSet.size > 0;
     const [searchText, setSearchText] = useState('');
 
+    const displayItems = useMemo(() => {
+        return searchText
+            ? items.filter((item: { title: string }) => {
+                return String(item.title).toLowerCase().includes(searchText.toLowerCase());
+            })
+            : items;
+    }, [searchText, items]);
+
     const onCheckAllToggled = useCallback(() => {
         if (allChecked) {
             checkedItemSet.clear();
             setCheckedItemSet(new Set(checkedItemSet));
             setAllChecked(false);
         } else {
-            items.forEach((item) => {
+            displayItems.forEach((item) => {
                 checkedItemSet.add(item.title);
             });
             setCheckedItemSet(new Set(checkedItemSet));
@@ -69,6 +77,18 @@ export function SheetTableItemsFilterPanel(props: ISheetTableItemsFilterPanelPro
     }, [allChecked]);
 
     const onSearchValueChange = useCallback((str: string) => {
+        if (str === '') {
+            setAllChecked(true);
+            items.forEach((item) => {
+                checkedItemSet.add(item.title);
+            });
+            setCheckedCount(allItemsCount);
+        } else {
+            checkedItemSet.clear();
+            setAllChecked(false);
+            setCheckedCount(0);
+        }
+        setSearchText(str);
     }, []);
 
     const onCheckItemToggled = (key: string) => {
@@ -125,10 +145,10 @@ export function SheetTableItemsFilterPanel(props: ISheetTableItemsFilterPanelPro
                                     `}
                                 >
                                     <span className="univer-inline-block univer-truncate">{`${localeService.t('sheets-filter.panel.select-all')}`}</span>
-                                    <span className="univer-ml univer-text-gray-400">{`(${allChecked ? allItemsCount : checkedCount}/${allItemsCount})`}</span>
+                                    <span className="univer-ml univer-text-gray-400">{`(${checkedCount}/${searchText ? displayItems.length : allItemsCount})`}</span>
                                 </div>
                             </div>
-                            {items.map((item) => {
+                            {displayItems.map((item) => {
                                 return (
                                     <div
                                         key={item.key}

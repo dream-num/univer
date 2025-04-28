@@ -52,7 +52,7 @@ exports[`ColorPicker > should render correctly 1`] = `
             "
     >
       <a
-        aria-controls="radix-:r0:"
+        aria-controls="radix-«r0»"
         aria-expanded="false"
         aria-haspopup="dialog"
         class="
@@ -432,7 +432,7 @@ exports[`ColorPicker > should render with showAlpha 1`] = `
             "
     >
       <a
-        aria-controls="radix-:r2:"
+        aria-controls="radix-«r2»"
         aria-expanded="false"
         aria-haspopup="dialog"
         class="
@@ -809,7 +809,7 @@ exports[`ColorPicker > should render with value 1`] = `
             "
     >
       <a
-        aria-controls="radix-:r1:"
+        aria-controls="radix-«r1»"
         aria-expanded="false"
         aria-haspopup="dialog"
         class="

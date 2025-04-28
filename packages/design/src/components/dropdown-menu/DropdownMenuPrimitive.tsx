@@ -148,6 +148,7 @@ function DropdownMenuSubContent({
 
 function DropdownMenuContent({
     className,
+    alignOffset = 0,
     sideOffset = 4,
     ...props
 }: ComponentProps<typeof Content>) {
@@ -155,7 +156,6 @@ function DropdownMenuContent({
         <Portal>
             <Content
                 data-slot="dropdown-menu-content"
-                sideOffset={sideOffset}
                 className={clsx(
                     `
                       univer-z-[1080] univer-box-border univer-max-h-[var(--radix-popper-available-height)]
@@ -174,6 +174,8 @@ function DropdownMenuContent({
                     `,
                     className
                 )}
+                alignOffset={alignOffset}
+                sideOffset={sideOffset}
                 {...props}
             />
         </Portal>

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { CommandType, ThemeService } from '@univerjs/core';
 import type { IAccessor, ICommand, IStyleSheet } from '@univerjs/core';
+import { CommandType, ThemeService } from '@univerjs/core';
 
 export interface IThemeCommandParams {
     value?: IStyleSheet;

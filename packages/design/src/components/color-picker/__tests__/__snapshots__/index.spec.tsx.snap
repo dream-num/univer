@@ -89,7 +89,7 @@ exports[`ColorPicker > should render correctly 1`] = `
         <input
           class="
                   univer-w-full univer-px-2 !univer-pl-4 univer-uppercase
-                  focus:univer-border-blue-500 focus:univer-outline-none
+                  focus:univer-border-primary-500 focus:univer-outline-none
                 "
           maxlength="6"
           spellcheck="false"
@@ -469,7 +469,7 @@ exports[`ColorPicker > should render with showAlpha 1`] = `
         <input
           class="
                   univer-w-full univer-px-2 !univer-pl-4 univer-uppercase
-                  focus:univer-border-blue-500 focus:univer-outline-none
+                  focus:univer-border-primary-500 focus:univer-outline-none
                 "
           maxlength="6"
           spellcheck="false"
@@ -846,7 +846,7 @@ exports[`ColorPicker > should render with value 1`] = `
         <input
           class="
                   univer-w-full univer-px-2 !univer-pl-4 univer-uppercase
-                  focus:univer-border-blue-500 focus:univer-outline-none
+                  focus:univer-border-primary-500 focus:univer-outline-none
                 "
           maxlength="6"
           spellcheck="false"

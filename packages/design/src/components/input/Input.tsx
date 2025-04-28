@@ -27,7 +27,7 @@ export const inputVariants = cva(
       univer-box-border univer-w-full univer-rounded-md univer-border univer-border-solid univer-border-gray-200
       univer-bg-white univer-transition-colors univer-duration-200
       dark:univer-border-gray-600 dark:univer-bg-gray-700 dark:univer-text-white
-      focus:univer-border-primary-500 focus:univer-outline-none focus:univer-ring-2 focus:univer-ring-primary-500/20
+      focus:univer-border-primary-600 focus:univer-outline-none focus:univer-ring-2 focus:univer-ring-primary-600/20
       placeholder:univer-text-gray-400
     `,
     {

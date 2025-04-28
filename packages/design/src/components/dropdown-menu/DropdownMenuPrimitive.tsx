@@ -214,36 +214,45 @@ function DropdownMenuItem({
 function DropdownMenuCheckboxItem({
     className,
     children,
+    hideIndicator,
     checked,
     ...props
-}: ComponentProps<typeof CheckboxItem>) {
+}: ComponentProps<typeof CheckboxItem> & { hideIndicator?: boolean }) {
     return (
         <CheckboxItem
             data-slot="dropdown-menu-checkbox-item"
             className={clsx(
                 `
                   univer-relative univer-flex univer-cursor-default univer-select-none univer-items-center
-                  univer-rounded univer-py-1.5 univer-pl-8 univer-pr-2 univer-text-[13px] univer-outline-none
+                  univer-rounded univer-py-1.5 univer-pr-2 univer-text-[13px] univer-outline-none
                   univer-transition-colors
                   dark:focus:univer-bg-gray-600
                   data-[disabled]:univer-pointer-events-none data-[disabled]:univer-opacity-50
                   focus:univer-bg-gray-100
                 `,
+                {
+                    'univer-pl-8': !hideIndicator,
+                    'univer-pl-2': hideIndicator,
+                },
                 className
             )}
             checked={checked}
             {...props}
         >
-            <span
-                className={`
-                  univer-absolute univer-left-2 univer-flex univer-h-3.5 univer-w-3.5 univer-items-center
-                  univer-justify-center
-                `}
-            >
-                <ItemIndicator>
-                    <CheckMarkSingle className="univer-block univer-size-4 univer-fill-current univer-text-primary-600" />
-                </ItemIndicator>
-            </span>
+            {!hideIndicator && (
+                <span
+                    className={`
+                      univer-absolute univer-left-2 univer-flex univer-h-3.5 univer-w-3.5 univer-items-center
+                      univer-justify-center
+                    `}
+                >
+                    <ItemIndicator>
+                        <CheckMarkSingle
+                            className="univer-block univer-size-4 univer-fill-current univer-text-primary-600"
+                        />
+                    </ItemIndicator>
+                </span>
+            )}
             {children}
         </CheckboxItem>
     );
@@ -252,34 +261,44 @@ function DropdownMenuCheckboxItem({
 function DropdownMenuRadioItem({
     className,
     children,
+    hideIndicator,
     ...props
-}: ComponentProps<typeof RadioItem>) {
+}: ComponentProps<typeof RadioItem> & { hideIndicator?: boolean }) {
     return (
         <RadioItem
             data-slot="dropdown-menu-radio-item"
             className={clsx(
                 `
                   univer-relative univer-flex univer-cursor-default univer-select-none univer-items-center
-                  univer-rounded univer-py-1.5 univer-pl-8 univer-pr-2 univer-text-[13px] univer-outline-none
+                  univer-rounded univer-py-1.5 univer-pr-2 univer-text-[13px] univer-outline-none
                   univer-transition-colors
                   dark:focus:univer-bg-gray-600
                   data-[disabled]:univer-pointer-events-none data-[disabled]:univer-opacity-50
                   focus:univer-bg-gray-100
                 `,
+                {
+                    'univer-pl-8': !hideIndicator,
+                    'univer-pl-2': hideIndicator,
+                },
                 className
             )}
             {...props}
         >
-            <span
-                className={`
-                  univer-absolute univer-left-2 univer-flex univer-h-3.5 univer-w-3.5 univer-items-center
-                  univer-justify-center
-                `}
-            >
-                <ItemIndicator>
-                    <CheckMarkSingle className="univer-block univer-size-4 univer-fill-current univer-text-primary-600" />
-                </ItemIndicator>
-            </span>
+            {!hideIndicator && (
+                <span
+                    className={`
+                      univer-absolute univer-left-2 univer-flex univer-h-3.5 univer-w-3.5 univer-items-center
+                      univer-justify-center
+                    `}
+                >
+
+                    <ItemIndicator>
+                        <CheckMarkSingle
+                            className="univer-block univer-size-4 univer-fill-current univer-text-primary-600"
+                        />
+                    </ItemIndicator>
+                </span>
+            )}
             {children}
         </RadioItem>
     );

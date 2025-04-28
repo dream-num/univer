@@ -21,9 +21,8 @@ import { BuildTextUtils, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, ICommandService, Locale
 import { Button, clsx } from '@univerjs/design';
 import { BreakLineCommand, IEditorService, RichTextEditor } from '@univerjs/docs-ui';
 import { KeyCode, useDependency } from '@univerjs/ui';
-import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { SetActiveCommentOperation } from '../../commands/operations/comment.operations';
-import styles from './index.module.less';
 
 export interface IThreadCommentEditorProps {
     id?: string;
@@ -112,11 +111,11 @@ export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThr
     };
 
     return (
-        <div className={styles.threadCommentEditor} onClick={(e) => e.preventDefault()}>
+        <div onClick={(e) => e.preventDefault()}>
             <RichTextEditor
+                className="univer-w-full"
                 editorRef={editor}
                 autoFocus={autoFocus}
-                style={{ width: '100%' }}
                 keyboardEventConfig={keyboardEventConfig}
                 placeholder={localeService.t('threadCommentUI.editor.placeholder')}
                 initialValue={comment?.text && getSnapshot(comment.text)}
@@ -160,11 +159,15 @@ export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThr
 export const ThreadCommentSuggestion = ({ active, user }: { active: boolean; user: IUser }) => (
     <div
         className={clsx(
-            'univer-flex univer-items-center univer-text-sm univer-text-black',
+            'univer-flex univer-items-center univer-text-sm univer-text-gray-900',
             { 'univer-bg-gray-50': active }
         )}
     >
-        <img draggable={false} className="univer-mr-[6px] univer-h-6 univer-w-6 univer-rounded-full" src={user.avatar} />
+        <img
+            className="univer-mr-1.5 univer-h-6 univer-w-6 univer-rounded-full"
+            src={user.avatar}
+            draggable={false}
+        />
         <span>{user.name}</span>
     </div>
 );

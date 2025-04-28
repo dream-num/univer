@@ -21,21 +21,16 @@ import { LocaleService } from '@univerjs/core';
 import { Button, Select } from '@univerjs/design';
 import { getCurrencyType } from '@univerjs/sheets-numfmt';
 import { useDependency } from '@univerjs/ui';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { UserHabitCurrencyContext } from '../../controllers/user-habit.controller';
 import { useCurrencyOptions } from '../hooks/use-currency-options';
 import { useNextTick } from '../hooks/use-next-tick';
 import { AccountingPanel, isAccountingPanel } from './accounting';
 import { CurrencyPanel, isCurrencyPanel } from './currency';
 import { CustomFormat } from './custom-format';
-
 import { DatePanel, isDatePanel } from './date';
 import { GeneralPanel, isGeneralPanel } from './general';
-
 import { isThousandthPercentilePanel, ThousandthPercentilePanel } from './thousandth-percentile';
-// TODO: @Gggpound: fix this
-// FIXME: DO NOT USE GLOBAL STYLES
-import './index.less';
 
 export interface ISheetNumfmtPanelProps {
     value: { defaultValue: number; defaultPattern: string; row: number; col: number };
@@ -59,9 +54,9 @@ export const SheetNumfmtPanel: FC<ISheetNumfmtPanelProps> = (props) => {
             ].map((item) => ({ ...item, label: t(item.label) })),
         []
     );
-    const [type, typeSet] = useState(findDefaultType);
-    const [key, keySet] = useState(() => `${row}_${col}`);
-    const { mark, userHabitCurrency } = useCurrencyOptions(() => keySet(`${row}_${col}_userCurrency'`));
+    const [type, setType] = useState(findDefaultType);
+    const [key, setKey] = useState(() => `${row}_${col}`);
+    const { mark, userHabitCurrency } = useCurrencyOptions(() => setKey(`${row}_${col}_userCurrency'`));
 
     const BusinessComponent = useMemo(() => typeOptions.find((item) => item.label === type)?.component, [type]);
 
@@ -79,7 +74,7 @@ export const SheetNumfmtPanel: FC<ISheetNumfmtPanelProps> = (props) => {
     }));
 
     const handleSelect: ISelectProps['onChange'] = (value) => {
-        typeSet(value);
+        setType(value);
         // after the BusinessComponent render.
         nextTick(() => props.onChange({ type: 'change', value: getCurrentPattern.current() || '' }));
     };
@@ -108,16 +103,20 @@ export const SheetNumfmtPanel: FC<ISheetNumfmtPanelProps> = (props) => {
     };
 
     useEffect(() => {
-        typeSet(findDefaultType());
-        keySet(`${row}_${col}`);
+        setType(findDefaultType());
+        setKey(`${row}_${col}`);
     }, [row, col]);
 
     return (
-        <div className="numfmt-panel p-b-20">
+        <div
+            className={`
+              univer-flex univer-h-full univer-flex-col univer-justify-between univer-overflow-y-auto univer-pb-5
+            `}
+        >
             <div>
-                <div className="label m-t-14">{t('sheet.numfmt.numfmtType')}</div>
-                <div className="m-t-8">
-                    <Select onChange={handleSelect} options={selectOptions} value={type} style={{ width: '100%' }} />
+                <div className="univer-mt-3.5 univer-text-sm univer-text-gray-400">{t('sheet.numfmt.numfmtType')}</div>
+                <div className="univer-mt-2">
+                    <Select className="univer-w-full" value={type} options={selectOptions} onChange={handleSelect} />
                 </div>
                 <div>
                     {BusinessComponent && (
@@ -128,8 +127,8 @@ export const SheetNumfmtPanel: FC<ISheetNumfmtPanelProps> = (props) => {
                 </div>
             </div>
 
-            <div className="btn-list m-t-14 m-b-20">
-                <Button onClick={handleCancel} className="m-r-12">
+            <div className="univer-mb-5 univer-mt-3.5 univer-flex univer-justify-end">
+                <Button onClick={handleCancel} className="univer-mr-3">
                     {t('sheet.numfmt.cancel')}
                 </Button>
                 <Button variant="primary" onClick={handleConfirm}>

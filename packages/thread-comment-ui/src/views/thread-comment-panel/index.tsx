@@ -23,7 +23,7 @@ import { Button, Select } from '@univerjs/design';
 import { IncreaseSingle } from '@univerjs/icons';
 import { ThreadCommentModel } from '@univerjs/thread-comment';
 import { useDependency, useObservable } from '@univerjs/ui';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { SetActiveCommentOperation } from '../../commands/operations/comment.operations';
 import { ThreadCommentPanelService } from '../../services/thread-comment-panel.service';
 import { ThreadCommentTree } from '../thread-comment-tree';
@@ -203,7 +203,6 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
                         <Select
                             borderless
                             value={unit}
-                            onChange={(e) => setUnit(e)}
                             options={[
                                 {
                                     value: 'current',
@@ -214,13 +213,13 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
                                     label: localeService.t('threadCommentUI.filter.sheet.all'),
                                 },
                             ]}
+                            onChange={setUnit}
                         />
                     )
                     : null}
                 <Select
                     borderless
                     value={status}
-                    onChange={(e) => setStatus(e)}
                     options={[
                         {
                             value: 'all',
@@ -239,6 +238,7 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
                             label: localeService.t('threadCommentUI.filter.status.concernMe'),
                         },
                     ]}
+                    onChange={setStatus}
                 />
             </div>
             {renderComments.length === 0
@@ -262,7 +262,7 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
                                 ? (
                                     <div className="univer-mt-2 univer-flex univer-flex-row">
                                         <Button onClick={onAdd}>
-                                            <IncreaseSingle className="univer-mr-[6px]" />
+                                            <IncreaseSingle className="univer-mr-1.5" />
                                             {localeService.t('threadCommentUI.panel.add')}
                                         </Button>
                                     </div>

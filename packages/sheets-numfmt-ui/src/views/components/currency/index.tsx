@@ -20,11 +20,8 @@ import { LocaleService } from '@univerjs/core';
 import { InputNumber, Select, SelectList } from '@univerjs/design';
 import { getCurrencyFormatOptions, getCurrencyType, getDecimalFromPattern, isPatternEqualWithoutDecimal, setPatternDecimal } from '@univerjs/sheets-numfmt';
 import { useDependency } from '@univerjs/ui';
-import React, { useContext, useMemo, useState } from 'react';
+import { useContext, useMemo, useState } from 'react';
 import { UserHabitCurrencyContext } from '../../../controllers/user-habit.controller';
-
-// FIXME: DO NOT USE GLOBAL STYLES
-import './index.less';
 
 export const isCurrencyPanel = (pattern: string) => {
     const type = getCurrencyType(pattern);
@@ -75,29 +72,38 @@ export const CurrencyPanel: FC<IBusinessComponentProps> = (props) => {
 
     return (
         <div>
-            <div className="m-t-16 options">
+            <div className="univer-mt-4 univer-flex univer-justify-between">
                 <div className="option">
-                    <div className="label">{t('sheet.numfmt.decimalLength')}</div>
-                    <div className="m-t-8 w-120">
-                        <InputNumber value={decimal} max={20} min={0} onChange={onDecimalChange} />
+                    <div className="univer-text-sm univer-text-gray-400">{t('sheet.numfmt.decimalLength')}</div>
+                    <div className="univer-mt-2 univer-w-32">
+                        <InputNumber
+                            value={decimal}
+                            max={20}
+                            min={0}
+                            onChange={onDecimalChange}
+                        />
                     </div>
                 </div>
                 <div className="option">
-                    <div className="label">{t('sheet.numfmt.currencyType')}</div>
-                    <div className="m-t-8 w-140">
-                        <Select onChange={onSelect} options={options} value={suffix} />
+                    <div className="univer-text-sm univer-text-gray-400">{t('sheet.numfmt.currencyType')}</div>
+                    <div className="univer-mt-2 univer-w-36">
+                        <Select
+                            value={suffix}
+                            options={options}
+                            onChange={onSelect}
+                        />
                     </div>
                 </div>
             </div>
-            <div className="m-t-16 label">
+            <div className="univer-mt-4 label">
                 {t('sheet.numfmt.negType')}
             </div>
 
-            <div className="m-t-8">
-                <SelectList onChange={onChange} options={negativeOptions} value={pattern} />
+            <div className="univer-mt-2">
+                <SelectList value={pattern} options={negativeOptions} onChange={onChange} />
             </div>
 
-            <div className="describe m-t-14">{t('sheet.numfmt.currencyDes')}</div>
+            <div className="univer-mt-4 univer-text-sm univer-text-gray-400">{t('sheet.numfmt.currencyDes')}</div>
         </div>
     );
 };

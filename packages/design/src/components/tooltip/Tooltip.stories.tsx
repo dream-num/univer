@@ -64,7 +64,7 @@ export const Playground = {
 
                 <div>
                     <Tooltip title="Just a tooltip">
-                        <a className="rounded bg-blue-500 px-4 py-2 text-white">
+                        <a className="univer-rounded univer-bg-primary-500 univer-px-4 univer-py-2 univer-text-white">
                             Hover me
                         </a>
                     </Tooltip>

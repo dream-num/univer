@@ -128,15 +128,15 @@ export const PermissionDetailUserPart = (props: IPermissionDetailUserPartProps) 
                                         <Select
                                             className={styles.sheetPermissionDesignPersonPanelContentItemSelect}
                                             value="edit"
+                                            options={[
+                                                { label: `${localeService.t('permission.panel.canEdit')}`, value: 'edit' },
+                                                { label: `${localeService.t('permission.panel.delete')}`, value: 'delete' },
+                                            ]}
                                             onChange={(v) => {
                                                 if (v === 'delete') {
                                                     sheetPermissionUserManagerService.setSelectUserList(selectUserList.filter((i) => i.subject?.userID !== item.subject?.userID));
                                                 }
                                             }}
-                                            options={[
-                                                { label: `${localeService.t('permission.panel.canEdit')}`, value: 'edit' },
-                                                { label: `${localeService.t('permission.panel.delete')}`, value: 'delete' },
-                                            ]}
                                         />
                                     </div>
                                 );

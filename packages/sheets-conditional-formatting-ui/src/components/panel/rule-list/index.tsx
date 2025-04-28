@@ -332,10 +332,10 @@ export const RuleList = (props: IRuleListProps) => {
                         />
                     ).map((ele, index) => <span key={index}>{ele}</span>)}
                 </div>
-                <div className={styles.btnList}>
+                <div className="univer-flex univer-justify-end">
                     <Tooltip title={localeService.t('sheet.cf.panel.createRule')} placement="bottom">
                         <div
-                            className={styles.icon}
+                            className="univer-size-5"
                             onClick={handleCreate}
                         >
                             <IncreaseSingle />
@@ -345,7 +345,7 @@ export const RuleList = (props: IRuleListProps) => {
                         ? (
                             <Tooltip title={localeService.t('sheet.cf.panel.clear')} placement="bottom">
                                 <div
-                                    className={clsx(styles.gap, styles.icon)}
+                                    className={clsx(styles.gap, 'univer-size-5')}
                                     onClick={handleClear}
                                 >
                                     <DeleteSingle />
@@ -403,7 +403,7 @@ export const RuleList = (props: IRuleListProps) => {
                                                     {rule.ranges.map((range) => serializeRange(range)).join(',')}
                                                 </div>
                                             </div>
-                                            <div className={styles.preview}>
+                                            <div>
                                                 <Preview rule={rule.rule} />
                                             </div>
                                             <div

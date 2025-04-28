@@ -17,12 +17,10 @@
 import type { Workbook } from '@univerjs/core';
 import type { IIconSet, IIconType } from '@univerjs/sheets-conditional-formatting';
 import type { IFormulaEditorRef } from '@univerjs/sheets-formula-ui';
-
 import type { IStyleEditorProps } from './type';
 import { get, IUniverInstanceService, LocaleService, set, Tools, UniverInstanceType } from '@univerjs/core';
 import { Checkbox, clsx, Dropdown, InputNumber, Select } from '@univerjs/design';
 import { MoreDownSingle, SlashSingle } from '@univerjs/icons';
-
 import {
     CFNumberOperator,
     CFRuleType,
@@ -37,9 +35,7 @@ import {
 } from '@univerjs/sheets-conditional-formatting';
 import { FormulaEditor } from '@univerjs/sheets-formula-ui';
 import { ILayoutService, useDependency, useScrollYOverContainer, useSidebarClick } from '@univerjs/ui';
-
 import { forwardRef, useEffect, useMemo, useRef, useState } from 'react';
-
 import stylesBase from '../index.module.less';
 import styles from './index.module.less';
 
@@ -80,7 +76,7 @@ const TextInput = (props: { id: number; type: CFValueType; value: number | strin
                     </>
                 )
                 : (
-                    <div style={{ width: '100%' }}>
+                    <div className="univer-w-full">
                         <FormulaEditor
                             initValue={String(props.value) as any}
                             unitId={unitId}
@@ -126,7 +122,13 @@ const IconGroupList = forwardRef<HTMLDivElement, IconGroupListProps>((props, ref
                                 return (
                                     <div className={styles.itemWrap} key={groupItem.name} onClick={() => { handleClick(groupItem.name); }}>
                                         <div className={styles.item}>
-                                            {groupItem.list.map((base64, index) => <img className={styles.icon} key={index} src={base64} />)}
+                                            {groupItem.list.map((base64, index) => (
+                                                <img
+                                                    key={index}
+                                                    className="univer-size-5"
+                                                    src={base64}
+                                                />
+                                            ))}
                                         </div>
                                     </div>
                                 );
@@ -162,17 +164,15 @@ const IconItemList = (props: { onClick: (iconType: IIconType, iconId: string) =>
     return (
         <div className={styles.iconItemListWrap}>
             <div className={styles.none} onClick={() => handleClick({ iconType: EMPTY_ICON_TYPE as any, iconId: '', base64: '' })}>
-                <SlashSingle className={styles.icon} />
+                <SlashSingle className="univer-size-5" />
                 <span>无单元格图标</span>
             </div>
             <div className={styles.iconItemList}>
                 {list.map((item) => (
                     <div key={`${item.iconType}_${item.iconId}`} className={styles.item}>
                         <img
+                            className="univer-size-5"
                             onClick={() => handleClick(item)}
-                            className={`
-                              ${styles.icon}
-                            `}
                             src={item.base64}
                         />
                     </div>
@@ -231,30 +231,22 @@ const IconSetRuleEdit = (props: {
             return (
                 <div
                     key={index}
-                    className={`
-                      ${index ? stylesBase.mTXl : stylesBase.mTSm}
-                    `}
+                    className={index ? 'univer-mt-6' : 'univer-mt-3'}
                 >
                     <div
                         className={`
                           ${stylesBase.label}
-                          ${styles.flex}
+                          univer-flex univer-items-center univer-justify-between
                         `}
                     >
                         <div
-                            className={`
-                              ${styles.width45}
-                            `}
+                            className="univer-w-[45%]"
                         >
                             {localeService.t('sheet.cf.iconSet.icon')}
                             {index + 1}
                         </div>
 
-                        <div
-                            className={`
-                              ${styles.width45}
-                            `}
-                        >
+                        <div className="univer-w-[45%]">
                             <>
                                 {!isFirst && !isEnd && localeService.t('sheet.cf.iconSet.rule')}
                                 {!isFirst && !isEnd && (
@@ -269,22 +261,10 @@ const IconSetRuleEdit = (props: {
                                 )}
 
                             </>
-
                         </div>
-
                     </div>
-                    <div
-                        className={`
-                          ${styles.flex}
-                          ${stylesBase.mTSm}
-                        `}
-                    >
-                        <div
-                            className={`
-                              ${styles.iconWrap}
-                              ${styles.width45}
-                            `}
-                        >
+                    <div className="univer-mt-3 univer-flex univer-items-center univer-justify-between univer-gap-4">
+                        <div className="univer-flex univer-items-center">
                             <Dropdown
                                 overlay={(
                                     <div className="univer-rounded-lg univer-p-4">
@@ -297,16 +277,10 @@ const IconSetRuleEdit = (props: {
                                     <MoreDownSingle />
                                 </div>
                             </Dropdown>
-
                         </div>
                         {!isEnd
                             ? (
                                 <Select
-                                    className={`
-                                      ${stylesBase.mL0}
-                                      ${styles.width45}
-                                      ${stylesBase.mR0}
-                                    `}
                                     options={options}
                                     value={item.operator}
                                     onChange={(v) => { handleOperatorChange(v as CFNumberOperator, index); }}
@@ -315,19 +289,17 @@ const IconSetRuleEdit = (props: {
                             : (
                                 <div
                                     className={`
-                                      ${styles.width45}
+                                      univer-w-[45%]
                                       ${stylesBase.label}
                                     `}
                                     style={{ marginTop: 0 }}
                                 >
                                     {localeService.t('sheet.cf.iconSet.rule')}
                                     <span className={styles.stress}>
-                                        (
                                         {localeService.t('sheet.cf.iconSet.when')}
                                         {localeService.t(`sheet.cf.symbol.${getOppositeOperator(preItem.operator)}`)}
                                         {lessThanText}
                                         {isEnd ? '' : ` ${localeService.t('sheet.cf.iconSet.and')} `}
-                                        )
                                     </span>
                                 </div>
                             )}
@@ -337,62 +309,46 @@ const IconSetRuleEdit = (props: {
                             <>
                                 <div
                                     className={`
-                                      ${stylesBase.mTSm}
+                                      univer-mt-3
                                       ${stylesBase.label}
-                                      ${styles.flex}
+                                      univer-flex univer-items-center univer-justify-between univer-gap-4
                                     `}
                                 >
-                                    <div
-                                        className={`
-                                          ${styles.width45}
-                                        `}
-                                    >
+                                    <div>
                                         {localeService.t('sheet.cf.iconSet.type')}
                                     </div>
-                                    <div
-                                        className={`
-                                          ${styles.width45}
-                                        `}
-                                    >
+                                    <div>
                                         {localeService.t('sheet.cf.iconSet.value')}
                                     </div>
                                 </div>
                                 <div
                                     className={`
-                                      ${stylesBase.mTSm}
-                                      ${styles.flex}
+                                      univer-mt-3 univer-flex univer-items-center univer-justify-between univer-gap-4
                                     `}
                                 >
                                     <Select
-                                        style={{ flexShrink: 0 }}
-                                        className={`
-                                          ${styles.width45}
-                                          ${stylesBase.mL0}
-                                        `}
+                                        className="univer-flex-shrink-0"
                                         options={valueTypeOptions}
                                         value={item.value.type}
-                                        onChange={(v) => { handleValueTypeChange(v as CFNumberOperator, index); }}
+                                        onChange={(v) => {
+                                            handleValueTypeChange(v as CFNumberOperator, index);
+                                        }}
                                     />
-                                    <div
-                                        className={`
-                                          ${stylesBase.mL0}
-                                          ${styles.width45}
-                                        `}
-                                    >
+                                    <div>
                                         <TextInput
                                             id={index}
                                             type={item.value.type}
                                             error={error}
                                             value={item.value.value || ''}
-                                            onChange={(v) => handleValueValueChange(v, index)}
+                                            onChange={(v) => {
+                                                handleValueValueChange(v, index);
+                                            }}
                                         />
                                     </div>
-
                                 </div>
                             </>
                         )
                         : <div />}
-
                 </div>
             );
         });
@@ -448,16 +404,16 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
             return getIcon(item.iconType, item.iconId);
         });
         return (
-            <div className={styles.iconWrap}>
+            <div className="univer-flex univer-items-center">
                 {list.map((icon, index) => (icon
                     ? (
                         <img
-                            className={styles.icon}
+                            className="univer-size-5"
                             key={index}
                             src={icon}
                         />
                     )
-                    : <SlashSingle className={styles.icon} key={index} />))}
+                    : <SlashSingle className="univer-size-5" key={index} />))}
             </div>
         );
     }, [configList]);
@@ -562,9 +518,7 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
         <div className={styles.iconSet}>
             <div className={stylesBase.title}>{localeService.t('sheet.cf.panel.styleRule')}</div>
             <div
-                className={`
-                  ${stylesBase.mTSm}
-                `}
+                className="univer-mt-3"
             >
                 <Dropdown
                     overlay={(
@@ -587,7 +541,7 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
             </div>
             <div
                 className={`
-                  ${stylesBase.mTSm}
+                  univer-mt-3
                   ${styles.renderConfig}
                 `}
             >
@@ -598,7 +552,7 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
                 <div
                     className={`
                       ${styles.utilItem}
-                      ${stylesBase.mLXl}
+                      univer-ml-6
                     `}
                 >
                     <Checkbox checked={!isShowValue} onChange={(v) => { isShowValueSet(!v); }} />

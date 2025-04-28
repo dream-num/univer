@@ -20,7 +20,7 @@ import { LocaleService, numfmt } from '@univerjs/core';
 import { SelectList } from '@univerjs/design';
 import { getDateFormatOptions } from '@univerjs/sheets-numfmt';
 import { useDependency } from '@univerjs/ui';
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 
 export const isDatePanel = (pattern: string) => {
     const info = numfmt.getInfo(pattern);
@@ -57,11 +57,13 @@ export const DatePanel: FC<IBusinessComponentProps> = (props) => {
 
     return (
         <div>
-            <div className="m-t-16 label">{t('sheet.numfmt.dateType')}</div>
-            <div className="m-t-8">
+            <div className="univer-mt-4 univer-text-sm univer-text-gray-400">{t('sheet.numfmt.dateType')}</div>
+            <div className="univer-mt-2">
                 <SelectList value={suffix} options={options} onChange={onChange} />
             </div>
-            <div className="describe m-t-14">{t('sheet.numfmt.dateDes')}</div>
+            <div className="univer-mt-3.5 univer-text-[13px]/5 univer-text-gray-600">
+                {t('sheet.numfmt.dateDes')}
+            </div>
         </div>
     );
 };

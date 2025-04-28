@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-import type { LabelInValueType } from 'rc-select/lib/Select';
-import type { CSSProperties, JSXElementConstructor, ReactElement, ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import type { IDropdownMenuProps } from '../dropdown-menu/DropdownMenu';
 import { MoreDownSingle } from '@univerjs/icons';
-import RcSelect from 'rc-select';
-import { useContext } from 'react';
+import { useMemo, useState } from 'react';
 import { clsx } from '../../helper/clsx';
-import { ConfigContext } from '../config-provider/ConfigProvider';
-import styles from './index.module.less';
+import { DropdownMenu } from '../dropdown-menu/DropdownMenu';
 
 interface IOption {
     label?: string | ReactNode;
@@ -30,10 +28,24 @@ interface IOption {
 }
 
 export interface ISelectProps {
+    className?: string;
+
     /**
      * The value of select
      */
     value: string;
+
+    /**
+     * select mode
+     * @default 'combobox'
+     */
+    mode?: 'combobox' | 'multiple';
+
+    /**
+     * Whether the select is disabled
+     * @default false
+     */
+    disabled?: boolean;
 
     /**
      * The options of select
@@ -42,82 +54,92 @@ export interface ISelectProps {
     options?: IOption[];
 
     /**
-     * The callback function that is triggered when the value is changed
-     */
-    onChange: (value: string) => void;
-
-    style?: CSSProperties;
-
-    /**
-     * Whether the borderless style is used
+     * The style of select
      * @default false
      */
     borderless?: boolean;
 
-    className?: string;
     /**
-     * select mode
+     * The callback function that is triggered when the value is changed
      */
-    mode?: 'combobox' | 'multiple' | 'tags' | undefined;
-
-    dropdownRender?: (
-        menu: ReactElement<any, string | JSXElementConstructor<any>>
-    ) => ReactElement<any, string | JSXElementConstructor<any>>;
-
-    labelRender?: ((props: LabelInValueType) => ReactNode) | undefined;
-
-    open?: boolean;
-
-    dropdownStyle?: CSSProperties;
-
-    onDropdownVisibleChange?: (open: boolean) => void;
-
-    disabled?: boolean;
+    onChange: (value: string) => void;
 }
 
 export function Select(props: ISelectProps) {
     const {
-        value,
-        options = [],
-        onChange,
-        style,
         className,
+        value,
         mode,
+        disabled = false,
+        options = [],
         borderless = false,
-        dropdownRender,
-        labelRender,
-        open,
-        dropdownStyle,
-        onDropdownVisibleChange,
-        disabled,
+        onChange,
     } = props;
 
-    const { mountContainer, locale } = useContext(ConfigContext);
+    const [open, setOpen] = useState(false);
 
-    const _className = clsx(className, {
-        [styles.selectBorderless]: borderless,
-    });
+    function handleOpenChange(open: boolean) {
+        setOpen(open);
+    }
 
-    return mountContainer && (
-        <RcSelect
-            mode={mode}
-            prefixCls={styles.select}
-            getPopupContainer={() => mountContainer}
-            options={options}
-            value={value}
-            menuItemSelectedIcon={null}
-            suffixIcon={<MoreDownSingle />}
-            onChange={onChange}
-            style={style}
-            className={_className}
-            dropdownRender={dropdownRender}
-            labelRender={labelRender}
+    const items: IDropdownMenuProps['items'] = useMemo(() => {
+        return [{
+            type: 'radio',
+            value,
+            hideIndicator: true,
+            options: options.map((option) => ({
+                label: option.label,
+                value: option.value!,
+                disabled: false,
+            })),
+            onSelect: (item) => {
+                onChange(item);
+            },
+        }];
+    }, [options]);
+
+    const displayValue = useMemo(() => {
+        const selectedOption = options.find((option) => option.value === value);
+        return selectedOption ? selectedOption.label : '';
+    }, [options, value]);
+
+    return (
+        <DropdownMenu
+            className="univer-w-[var(--radix-popper-anchor-width)] univer-min-w-36"
+            align="start"
             open={open}
-            dropdownStyle={dropdownStyle}
-            dropdownClassName="univer-theme"
-            onDropdownVisibleChange={onDropdownVisibleChange}
-            notFoundContent={locale?.Select.empty}
+            items={items}
             disabled={disabled}
-        />
+            onOpenChange={handleOpenChange}
+        >
+            <div
+                className={clsx(`
+                  univer-box-border univer-inline-flex univer-h-8 univer-min-w-36 univer-cursor-pointer
+                  univer-items-center univer-justify-between univer-gap-2 univer-rounded-lg univer-border
+                  univer-border-solid univer-border-gray-200 univer-bg-white univer-px-2.5 univer-transition-colors
+                  univer-duration-200
+                  dark:univer-border-gray-600 dark:univer-bg-gray-700 dark:univer-text-white
+                  hover:univer-border-primary-600
+                `, {
+                    'univer-border-primary-600 univer-outline-none univer-ring-2 univer-ring-primary-600/20': open && !borderless,
+                    'univer-border-transparent univer-bg-transparent hover:univer-border-transparent': borderless,
+                }, className)}
+            >
+                <span
+                    className={`
+                      univer-truncate univer-text-sm univer-text-gray-500
+                      dark:univer-text-white
+                    `}
+                >
+                    {displayValue}
+                </span>
+                <MoreDownSingle
+                    className={`
+                      univer-flex-shrink-0
+                      dark:univer-text-white
+                    `}
+                />
+            </div>
+        </DropdownMenu>
     );
 }

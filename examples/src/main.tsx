@@ -97,7 +97,7 @@ function Examples() {
                     <a
                         key={demo.title}
                         className={`
-                          univer-rounded-lg univer-bg-blue-500 univer-px-6 univer-py-2.5 univer-font-medium
+                          univer-rounded-lg univer-bg-primary-500 univer-px-6 univer-py-2.5 univer-font-medium
                           univer-text-white univer-no-underline univer-shadow-sm univer-transition-all
                           univer-duration-300 univer-ease-in-out
                           hover:univer-scale-105 hover:univer-bg-emerald-500

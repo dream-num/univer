@@ -276,11 +276,11 @@ export function DataValidationDetail() {
                 <Select
                     className="univer-w-full"
                     value={localRule.type}
-                    onChange={handleChangeType}
                     options={validators?.sort((a, b) => a.order - b.order)?.map((validator) => ({
                         label: localeService.t(validator.title),
                         value: validator.id,
                     }))}
+                    onChange={handleChangeType}
                 />
             </FormLayout>
             {operators?.length
@@ -289,12 +289,6 @@ export function DataValidationDetail() {
                         <Select
                             className="univer-w-full"
                             value={`${localRule.operator}`}
-                            onChange={(operator) => {
-                                handleUpdateRuleSetting({
-                                    ...baseRule,
-                                    operator: operator as DataValidationOperator,
-                                });
-                            }}
                             options={[
                                 {
                                     value: '',
@@ -305,6 +299,12 @@ export function DataValidationDetail() {
                                     label: operatorNames[i],
                                 })),
                             ]}
+                            onChange={(operator) => {
+                                handleUpdateRuleSetting({
+                                    ...baseRule,
+                                    operator: operator as DataValidationOperator,
+                                });
+                            }}
                         />
                     </FormLayout>
                 )

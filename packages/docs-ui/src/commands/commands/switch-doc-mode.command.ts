@@ -29,7 +29,7 @@ export const SwitchDocModeCommand: ICommand<ISwitchDocModeCommandParams> = {
     type: CommandType.COMMAND,
 
     // eslint-disable-next-line max-lines-per-function, complexity
-    handler: async (accessor) => {
+    handler: (accessor) => {
         const commandService = accessor.get(ICommandService);
         const renderManagerService = accessor.get(IRenderManagerService);
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);

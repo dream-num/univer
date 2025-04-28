@@ -1472,7 +1472,18 @@ export class ArrayValueObject extends BaseValueObject {
 
         for (let c = 0; c < columnCount; c++) {
             const value = valueList[c];
-            this._batchOperatorValue(value, c, result, batchOperatorType, operator, isCaseSensitive);
+            this._batchOperatorValue(
+                value,
+                c,
+                result,
+                batchOperatorType,
+                operator,
+                isCaseSensitive,
+                // ArrayValueObject are compared with ArrayValueObject, and the cell in which the ArrayValueObject are located are the same.
+                // ArrayValueObject are compared with other BaseValueObject.
+                // In both cases, the cell result value is not yet determined and should not be stored in the CELL_INVERTED_INDEX_CACHE.
+                !(valueObject.isArray() && ((valueObject as ArrayValueObject).getCurrentRow() !== this.getCurrentRow() || (valueObject as ArrayValueObject).getCurrentColumn() !== this.getCurrentColumn()))
+            );
         }
 
         const newArray = this._createNewArray(result, rowCount, columnCount);
@@ -1489,7 +1500,8 @@ export class ArrayValueObject extends BaseValueObject {
         result: BaseValueObject[][],
         batchOperatorType: BatchOperatorType,
         operator?: compareToken,
-        isCaseSensitive?: boolean
+        isCaseSensitive?: boolean,
+        cellResultIsNotYetDetermined?: boolean
     ) {
         const rowCount = this._rowCount;
 
@@ -1624,8 +1636,14 @@ export class ArrayValueObject extends BaseValueObject {
                 startRow,
                 startColumn,
                 operator,
-                isCaseSensitive
+                isCaseSensitive,
+                cellResultIsNotYetDetermined
             );
+        }
+
+        // The cell result is not yet determined, so it is not necessary to store it in the CELL_INVERTED_INDEX_CACHE.
+        if (cellResultIsNotYetDetermined) {
+            return;
         }
 
         CELL_INVERTED_INDEX_CACHE.setContinueBuildingCache(
@@ -1649,7 +1667,8 @@ export class ArrayValueObject extends BaseValueObject {
         startRow: number,
         startColumn: number,
         operator?: compareToken,
-        isCaseSensitive?: boolean
+        isCaseSensitive?: boolean,
+        cellResultIsNotYetDetermined?: boolean
     ) {
         const currentValue = this.getValueOrDefault(r, column);
 
@@ -1718,6 +1737,11 @@ export class ArrayValueObject extends BaseValueObject {
          * Inverted indexing enhances matching performance.
          */
         if (currentValue == null) {
+            return;
+        }
+
+        // The cell result is not yet determined, so it is not necessary to store it in the CELL_INVERTED_INDEX_CACHE.
+        if (cellResultIsNotYetDetermined) {
             return;
         }
 

@@ -57,8 +57,8 @@ export const ThousandthPercentilePanel: FC<IBusinessComponentProps> = (props) =>
 
     return (
         <div>
-            <div className="m-t-16 label">{localeService.t('sheet.numfmt.decimalLength')}</div>
-            <div className="m-t-8">
+            <div className="univer-mt-4 univer-text-sm univer-text-gray-400">{localeService.t('sheet.numfmt.decimalLength')}</div>
+            <div className="univer-mt-2">
                 <InputNumber
                     disabled={isInputDisable}
                     value={decimal}
@@ -67,14 +67,16 @@ export const ThousandthPercentilePanel: FC<IBusinessComponentProps> = (props) =>
                     onChange={handleDecimalChange}
                 />
             </div>
-            <div className="m-t-16 label">
+            <div className="univer-mt-4 univer-text-sm univer-text-gray-400">
                 {' '}
                 {localeService.t('sheet.numfmt.negType')}
             </div>
-            <div className="m-t-8">
+            <div className="univer-mt-2">
                 <SelectList onChange={handleClick} options={options} value={suffix} />
             </div>
-            <div className="describe m-t-14">{localeService.t('sheet.numfmt.thousandthPercentileDes')}</div>
+            <div className="univer-mt-3.5 univer-text-[13px]/5 univer-text-gray-600">
+                {localeService.t('sheet.numfmt.thousandthPercentileDes')}
+            </div>
         </div>
     );
 };

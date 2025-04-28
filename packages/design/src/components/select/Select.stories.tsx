@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-import React, { useState } from 'react';
 import type { Meta } from '@storybook/react';
-
-import { Select } from './Select';
 import type { ISelectProps } from './Select';
+import { useState } from 'react';
+import { Select } from './Select';
 
 const meta: Meta<typeof Select> = {
     title: 'Components / Select',
@@ -45,7 +44,12 @@ export const SelectBasic = {
             setValue(value as string);
         }
 
-        return <Select value={value} options={options} onChange={handleChange} />;
+        return (
+            <>
+                <Select value={value} options={options} onChange={handleChange} />
+                <Select disabled value={value} options={options} onChange={handleChange} />
+            </>
+        );
     },
 };
 
@@ -77,7 +81,14 @@ export const SelectBorderless = {
             setValue(value as string);
         }
 
-        return <Select value={value} options={options} onChange={handleChange} borderless />;
+        return (
+            <Select
+                value={value}
+                options={options}
+                onChange={handleChange}
+                borderless
+            />
+        );
     },
 };
 

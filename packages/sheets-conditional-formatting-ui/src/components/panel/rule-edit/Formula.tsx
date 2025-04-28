@@ -99,17 +99,12 @@ export const FormulaStyleEditor = (props: IStyleEditorProps) => {
             <div
                 className={`
                   ${stylesBase.title}
-                  ${stylesBase.mTBase}
+                  univer-mt-4
                 `}
             >
                 {localeService.t('sheet.cf.panel.styleRule')}
             </div>
-            <div
-                className={`
-                  ${stylesBase.mTSm}
-                `}
-            >
-
+            <div className="univer-mt-3">
                 <FormulaEditor
                     onChange={(formula) => {
                         formulaSet(formula);
@@ -142,9 +137,7 @@ export const FormulaStyleEditor = (props: IStyleEditorProps) => {
             </div>
             <ConditionalStyleEditor
                 style={rule?.style}
-                className={`
-                  ${stylesBase.mTSm}
-                `}
+                className="univer-mt-3"
                 onChange={(v) => {
                     styleSet(v);
                     _onChange({ style: v, formula });

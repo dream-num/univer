@@ -35,7 +35,7 @@ export const Playground = {
             <div className="univer-relative">
                 <Dropdown
                     overlay={(
-                        <div className="univer-text-blue-500">
+                        <div className="univer-text-primary-500">
                             Hello Univer
                             <Dropdown
                                 overlay={(

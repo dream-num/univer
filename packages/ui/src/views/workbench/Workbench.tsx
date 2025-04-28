@@ -79,6 +79,12 @@ export function DesktopWorkbenchContent(props: IUniverWorkbenchProps) {
     useEffect(() => {
         const sub = themeService.darkMode$.subscribe((darkMode) => {
             setDarkMode(darkMode);
+
+            if (darkMode) {
+                document.documentElement.classList.add('univer-dark');
+            } else {
+                document.documentElement.classList.remove('univer-dark');
+            }
         });
 
         return () => {

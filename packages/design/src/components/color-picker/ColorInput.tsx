@@ -74,7 +74,7 @@ function HexInput({ hsv, onChange }: IInputProps) {
             <input
                 className={`
                   univer-w-full univer-px-2 !univer-pl-4 univer-uppercase
-                  focus:univer-border-blue-500 focus:univer-outline-none
+                  focus:univer-border-primary-500 focus:univer-outline-none
                 `}
                 value={inputValue}
                 onChange={handleChange}

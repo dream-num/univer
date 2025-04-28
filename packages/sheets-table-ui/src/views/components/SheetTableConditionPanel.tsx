@@ -17,7 +17,7 @@
 import type { ITableFilterItem } from '@univerjs/sheets-table';
 import type { IConditionCompareTypeEnum, IConditionExpect, IConditionInfo, ITableConditionTypeEnumWithoutLogic } from './type';
 import { dayjs, Injector, LocaleService } from '@univerjs/core';
-import { CascaderList, DatePicker, DateRangePicker, Input, InputNumber, Select } from '@univerjs/design';
+import { CascaderList, DatePicker, DateRangePicker, Input, InputNumber, LegacySelect, Select } from '@univerjs/design';
 import { TableConditionTypeEnum, TableDateCompareTypeEnum, TableStringCompareTypeEnum } from '@univerjs/sheets-table';
 import { useDependency } from '@univerjs/ui';
 import { useState } from 'react';
@@ -90,8 +90,8 @@ export const SheetTableConditionPanel = (props: IConditionFilterProps) => {
 
     return (
         <div>
-            <Select
-                className="univer-h-8 univer-w-full"
+            <LegacySelect
+                key={version}
                 dropdownRender={() => (
                     <CascaderList
                         value={[conditionInfo.type, conditionInfo.compare!]}
@@ -102,8 +102,7 @@ export const SheetTableConditionPanel = (props: IConditionFilterProps) => {
                     />
                 )}
                 value={selectType}
-                onChange={() => { }}
-                key={version}
+                onChange={() => {}}
             />
 
             <div className="univer-mt-3 univer-w-full">
@@ -171,7 +170,7 @@ export const SheetTableConditionPanel = (props: IConditionFilterProps) => {
                 {subComponentType === ConditionSubComponentEnum.Inputs && (
                     <div className="univer-flex univer-items-center univer-gap-2">
                         <InputNumber
-                            className="univer-h-7 univer-w-full"
+                            className="univer-w-full"
                             value={conditionInfo.info.numberRange?.[0]}
                             onChange={(v) => {
                                 if (v !== null) {
@@ -182,7 +181,7 @@ export const SheetTableConditionPanel = (props: IConditionFilterProps) => {
                         />
                         <span> - </span>
                         <InputNumber
-                            className="univer-h-7 univer-w-full"
+                            className="univer-w-full"
                             value={conditionInfo.info.numberRange?.[1]}
                             controls={false}
                             onChange={(v) => {
@@ -195,10 +194,10 @@ export const SheetTableConditionPanel = (props: IConditionFilterProps) => {
                 )}
                 {!!(subComponentType === ConditionSubComponentEnum.Select) && (
                     <Select
+                        className="univer-w-full"
                         value={conditionInfo.info.dateSelect ?? conditionDateOptions[0].value}
                         options={conditionDateOptions}
                         onChange={(v) => handleConditionInfo({ dateSelect: v })}
-                        className="univer-w-full"
                     />
                 )}
             </div>

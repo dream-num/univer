@@ -116,14 +116,9 @@ const HighlightCellInput = (props: {
                     onChange(value);
                 };
                 return (
-                    <div
-                        className={`
-                          ${stylesBase.mTSm}
-                        `}
-                    >
+                    <div className="univer-mt-3">
                         <WrapperError errorText={textError}>
                             <Input
-                                className={styles.width100}
                                 value={inputTextValue}
                                 onChange={(v) => {
                                     textErrorSet('');
@@ -144,13 +139,15 @@ const HighlightCellInput = (props: {
                     numberErrorSet('');
                 };
                 return (
-                    <div
-                        className={`
-                          ${stylesBase.mTSm}
-                        `}
-                    >
+                    <div className="univer-mt-3">
                         <WrapperError errorText={numberError}>
-                            <InputNumber min={Number.MIN_SAFE_INTEGER} max={Number.MAX_SAFE_INTEGER} className={styles.width100} value={inputNumberValue} onChange={_onChange} />
+                            <InputNumber
+                                className="univer-w-full"
+                                min={Number.MIN_SAFE_INTEGER}
+                                max={Number.MAX_SAFE_INTEGER}
+                                value={inputNumberValue}
+                                onChange={_onChange}
+                            />
                         </WrapperError>
                     </div>
                 );
@@ -171,7 +168,7 @@ const HighlightCellInput = (props: {
                 return (
                     <div
                         className={`
-                          ${stylesBase.mTSm}
+                          univer-mt-3
                           ${stylesBase.labelContainer}
                         `}
                     >
@@ -180,11 +177,9 @@ const HighlightCellInput = (props: {
                         </WrapperError>
                         <WrapperError errorText={numberMaxError}>
                             <InputNumber
+                                className="univer-ml-3"
                                 min={Number.MIN_SAFE_INTEGER}
                                 max={Number.MAX_SAFE_INTEGER}
-                                className={`
-                                  ${stylesBase.mLSm}
-                                `}
                                 value={inputNumberMax}
                                 onChange={onChangeMax}
                             />
@@ -381,31 +376,27 @@ export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, ITextHigh
             <div
                 className={`
                   ${stylesBase.title}
-                  ${stylesBase.mTBase}
+                  univer-mt-4
                 `}
             >
                 {localeService.t('sheet.cf.panel.styleRule')}
             </div>
-            <Select
-                className={`
-                  ${stylesBase.mTSm}
-                  ${styles.width100}
-                `}
-                onChange={onTypeChange}
-                value={subType}
-                options={typeOptions}
-            />
-            {operatorOptions?.length && (
+            <div className="univer-flex univer-justify-between univer-gap-4">
                 <Select
-                    className={`
-                      ${stylesBase.mTSm}
-                      ${styles.width100}
-                    `}
-                    onChange={onOperatorChange}
-                    value={operator || ''}
-                    options={operatorOptions}
+                    className="univer-mt-3 univer-w-full"
+                    onChange={onTypeChange}
+                    value={subType}
+                    options={typeOptions}
                 />
-            )}
+                {operatorOptions?.length && (
+                    <Select
+                        className="univer-mt-3 univer-w-full"
+                        onChange={onOperatorChange}
+                        value={operator || ''}
+                        options={operatorOptions}
+                    />
+                )}
+            </div>
             <HighlightCellInput key={inputRenderKey} value={value} interceptorManager={interceptorManager} type={subType} operator={operator} rule={rule} onChange={onInputChange} />
             <div
                 className={`
@@ -416,9 +407,7 @@ export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, ITextHigh
             </div>
             <ConditionalStyleEditor
                 style={rule?.style}
-                className={`
-                  ${stylesBase.mLXxs}
-                `}
+                className="univer-ml-1"
                 onChange={(v) => {
                     styleSet(v);
                     onChange(getResult({ style: v }));

@@ -20,7 +20,7 @@ import type { IFormulaEditorRef } from '@univerjs/sheets-formula-ui';
 import type { CSSProperties } from 'react';
 import { DataValidationType, isFormulaString, LocaleService, Tools } from '@univerjs/core';
 import { DataValidationModel, DataValidatorRegistryService } from '@univerjs/data-validation';
-import { clsx, DraggableList, FormLayout, Input, Radio, RadioGroup, Select } from '@univerjs/design';
+import { clsx, DraggableList, FormLayout, Input, LegacySelect, Radio, RadioGroup } from '@univerjs/design';
 import { DeleteSingle, IncreaseSingle, SequenceSingle } from '@univerjs/icons';
 import { DataValidationFormulaController, deserializeListOptions, serializeListOptions } from '@univerjs/sheets-data-validation';
 import { FormulaEditor } from '@univerjs/sheets-formula-ui';
@@ -73,7 +73,7 @@ const ColorSelect = (props: IColorSelectProps) => {
     const { value, onChange, disabled } = props;
     const [open, setOpen] = useState(false);
     return (
-        <Select
+        <LegacySelect
             disabled={disabled}
             open={open}
             onDropdownVisibleChange={setOpen}

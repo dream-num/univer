@@ -66,7 +66,7 @@ export const DocLinkPopup = () => {
                 <div
                     className={`
                       univer-mr-2 univer-flex univer-size-5 univer-flex-[0_0_auto] univer-items-center
-                      univer-justify-center univer-text-base univer-text-black
+                      univer-justify-center univer-text-base univer-text-gray-900
                     `}
                 >
                     <LinkSingle />

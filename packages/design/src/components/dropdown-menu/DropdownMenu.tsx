@@ -39,6 +39,7 @@ type DropdownMenu = {
     type?: 'radio';
     className?: string;
     value: string;
+    hideIndicator?: boolean;
     options: { value: string; label: ReactNode; disabled?: boolean }[];
     onSelect?: (item: string) => void;
 };
@@ -95,6 +96,7 @@ export function DropdownMenu(props: IDropdownMenuProps) {
                             key={option.value}
                             value={option.value}
                             disabled={option.disabled}
+                            hideIndicator={item.hideIndicator}
                         >
                             {option.label}
                         </DropdownMenuRadioItem>

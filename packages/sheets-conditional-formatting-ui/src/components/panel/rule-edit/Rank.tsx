@@ -145,16 +145,13 @@ export const RankStyleEditor = (props: IStyleEditorProps) => {
             <div
                 className={`
                   ${stylesBase.title}
-                  ${stylesBase.mTBase}
+                  univer-mt-4
                 `}
             >
                 {localeService.t('sheet.cf.panel.styleRule')}
             </div>
             <Select
-                className={`
-                  ${styles.width100}
-                  ${stylesBase.mTSm}
-                `}
+                className="univer-mt-3 univer-w-full"
                 value={type}
                 options={options}
                 onChange={(v) => {
@@ -166,7 +163,7 @@ export const RankStyleEditor = (props: IStyleEditorProps) => {
                 <div
                     className={`
                       ${stylesBase.labelContainer}
-                      ${stylesBase.mTSm}
+                      univer-mt-3
                     `}
                 >
                     <InputNumber
@@ -181,7 +178,7 @@ export const RankStyleEditor = (props: IStyleEditorProps) => {
                     />
                     <div
                         className={`
-                          ${stylesBase.mLSm}
+                          univer-ml-3
                           ${stylesBase.labelContainer}
                           ${styles.text}
                         `}
@@ -207,9 +204,7 @@ export const RankStyleEditor = (props: IStyleEditorProps) => {
             </div>
             <ConditionalStyleEditor
                 style={rule?.style}
-                className={`
-                  ${stylesBase.mTSm}
-                `}
+                className="univer-mt-3"
                 onChange={(v) => {
                     styleSet(v);
                     _onChange({ type, isPercent, value, style: v });

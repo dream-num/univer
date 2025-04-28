@@ -229,11 +229,11 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
             <div
                 className={clsx(`
                   ${stylesBase.labelContainer}
-                  ${stylesBase.mTSm}
-                `, 'univer-box-border univer-h-7')}
+                  univer-mt-3
+                `, 'univer-box-border univer-h-8')}
             >
                 <Select
-                    style={{ flexShrink: 0 }}
+                    className="univer-flex-shrink-0"
                     options={minOptions}
                     value={minType}
                     onChange={(v) => {
@@ -245,9 +245,7 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
                 />
                 <TextInput
                     id="min"
-                    className={`
-                      ${stylesBase.mLXxs}
-                    `}
+                    className="univer-ml-1"
                     value={minValue}
                     type={minType}
                     onChange={(v) => {
@@ -256,7 +254,7 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
                     }}
                 />
                 <ColorPicker
-                    className={stylesBase.mLXxs}
+                    className="univer-ml-1"
                     color={minColor}
                     onChange={(v) => {
                         minColorSet(v);
@@ -268,11 +266,11 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
             <div
                 className={clsx(`
                   ${stylesBase.labelContainer}
-                  ${stylesBase.mTSm}
-                `, 'univer-box-border univer-h-7')}
+                  univer-mt-3
+                `, 'univer-box-border univer-h-8')}
             >
                 <Select
-                    style={{ flexShrink: 0 }}
+                    className="univer-flex-shrink-0"
                     options={medianOptions}
                     value={medianType}
                     onChange={(v) => {
@@ -285,9 +283,7 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
 
                 <TextInput
                     id="median"
-                    className={`
-                      ${stylesBase.mLXxs}
-                    `}
+                    className="univer-ml-1"
                     value={medianValue}
                     type={medianType}
                     onChange={(v) => {
@@ -297,7 +293,7 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
                 />
                 {medianType !== 'none' && (
                     <ColorPicker
-                        className={stylesBase.mLXxs}
+                        className="univer-ml-1"
                         color={medianColor}
                         onChange={(v) => {
                             medianColorSet(v);
@@ -311,11 +307,11 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
             <div
                 className={clsx(`
                   ${stylesBase.labelContainer}
-                  ${stylesBase.mTSm}
-                `, 'univer-box-border univer-h-7')}
+                  univer-mt-3 univer-box-border univer-h-8
+                `)}
             >
                 <Select
-                    style={{ flexShrink: 0 }}
+                    className="univer-flex-shrink-0"
                     options={maxOptions}
                     value={maxType}
                     onChange={(v) => {
@@ -327,9 +323,7 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
                 />
                 <TextInput
                     id="max"
-                    className={`
-                      ${stylesBase.mLXxs}
-                    `}
+                    className="univer-ml-1"
                     value={maxValue}
                     type={maxType}
                     onChange={(v) => {
@@ -338,7 +332,7 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
                     }}
                 />
                 <ColorPicker
-                    className={stylesBase.mLXxs}
+                    className="univer-ml-1"
                     color={maxColor}
                     onChange={(v) => {
                         maxColorSet(v);

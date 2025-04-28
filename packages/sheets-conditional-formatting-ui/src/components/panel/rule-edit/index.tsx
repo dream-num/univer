@@ -233,11 +233,7 @@ export const RuleEdit = (props: IRuleEditProps) => {
     return (
         <div className={styles.cfRuleStyleEditor}>
             <div className={styleBase.title}>{localeService.t('sheet.cf.panel.range')}</div>
-            <div
-                className={`
-                  ${styleBase.mTBase}
-                `}
-            >
+            <div className="univer-mt-4">
                 <RangeSelector
                     unitId={unitId}
                     subUnitId={subUnitId}
@@ -248,27 +244,20 @@ export const RuleEdit = (props: IRuleEditProps) => {
                 {errorText && <div className={styles.cfErrorText}>{errorText}</div>}
             </div>
             <div className={styleBase.title}>{localeService.t('sheet.cf.panel.styleType')}</div>
-            <div className={styleBase.mTBase}>
-                <Select
-                    className={styles.width100}
-                    value={ruleType}
-                    options={options}
-                    onChange={(e) => ruleTypeSet(e)}
-                />
-            </div>
+            <Select
+                className="univer-mt-4 univer-w-full"
+                value={ruleType}
+                options={options}
+                onChange={(e) => ruleTypeSet(e)}
+            />
             <StyleEditor
                 interceptorManager={interceptorManager}
                 rule={props.rule?.rule as any}
                 onChange={onStyleChange}
             />
-            <div
-                className={`
-                  ${styleBase.mTBase}
-                  ${styles.btnList}
-                `}
-            >
+            <div className="univer-mt-4 univer-flex univer-justify-end">
                 <Button onClick={handleCancel}>{localeService.t('sheet.cf.panel.cancel')}</Button>
-                <Button className={styleBase.mLSm} variant="primary" onClick={handleSubmit}>
+                <Button className="univer-ml-3" variant="primary" onClick={handleSubmit}>
                     {localeService.t('sheet.cf.panel.submit')}
                 </Button>
             </div>

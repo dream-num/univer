@@ -54,11 +54,11 @@ export const AccountingPanel: FC<IBusinessComponentProps> = (props) => {
 
     return (
         <div>
-            <div className="m-t-16 options">
+            <div className="univer-mt-4 univer-flex univer-justify-between">
                 <div className="option">
-                    <div className="label">{t('sheet.numfmt.decimalLength')}</div>
+                    <div className="univer-text-sm univer-text-gray-400">{t('sheet.numfmt.decimalLength')}</div>
 
-                    <div className="m-t-8 w-120">
+                    <div className="univer-mt-2 univer-w-32">
                         <InputNumber
                             value={decimal}
                             step={1}
@@ -70,9 +70,9 @@ export const AccountingPanel: FC<IBusinessComponentProps> = (props) => {
                     </div>
                 </div>
                 <div className="option">
-                    <div className="label">{t('sheet.numfmt.currencyType')}</div>
+                    <div className="univer-text-sm univer-text-gray-400">{t('sheet.numfmt.currencyType')}</div>
 
-                    <div className="m-t-8 w-140">
+                    <div className="univer-mt-2 univer-w-36">
                         <Select
                             options={options}
                             value={suffix}
@@ -82,7 +82,7 @@ export const AccountingPanel: FC<IBusinessComponentProps> = (props) => {
                 </div>
             </div>
 
-            <div className="describe m-t-14">{t('sheet.numfmt.accountingDes')}</div>
+            <div className="univer-mt-4 univer-text-sm univer-text-gray-400">{t('sheet.numfmt.accountingDes')}</div>
         </div>
     );
 };

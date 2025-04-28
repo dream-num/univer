@@ -20,7 +20,6 @@ import type { IFormulaEditorRef } from '@univerjs/sheets-formula-ui';
 import type { IStyleEditorProps } from './type';
 import { IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { Checkbox, InputNumber, Radio, RadioGroup, Select } from '@univerjs/design';
-
 import { CFRuleType, CFValueType, createDefaultValueByValueType, defaultDataBarNativeColor, defaultDataBarPositiveColor } from '@univerjs/sheets-conditional-formatting';
 import { FormulaEditor } from '@univerjs/sheets-formula-ui';
 import { useDependency, useSidebarClick } from '@univerjs/ui';
@@ -117,14 +116,14 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
     const commonOptions = [createOptionItem(CFValueType.num, localeService), createOptionItem(CFValueType.percent, localeService), createOptionItem(CFValueType.percentile, localeService), createOptionItem(CFValueType.formula, localeService)];
     const minOptions = [createOptionItem(CFValueType.min, localeService), ...commonOptions];
     const maxOptions = [createOptionItem(CFValueType.max, localeService), ...commonOptions];
-    const [minValueType, minValueTypeSet] = useState<CFValueType>(() => {
+    const [minValueType, setMinValueType] = useState<CFValueType>(() => {
         const defaultV = minOptions[0].value as CFValueType;
         if (!rule) {
             return defaultV;
         }
         return rule.config?.min.type || defaultV;
     });
-    const [maxValueType, maxValueTypeSet] = useState<CFValueType>(() => {
+    const [maxValueType, setMaxValueType] = useState<CFValueType>(() => {
         const defaultV = maxOptions[0].value as CFValueType;
         if (!rule) {
             return defaultV;
@@ -142,7 +141,7 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
         }
         return value.value || defaultV;
     });
-    const [maxValue, maxValueSet] = useState(() => {
+    const [maxValue, setMaxValue] = useState(() => {
         const defaultV = 100;
         if (!rule) {
             return defaultV;
@@ -154,7 +153,7 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
         return value.value === undefined ? defaultV : value.value;
     });
 
-    const [isShowValue, isShowValueSet] = useState(() => {
+    const [isShowValue, setIsShowValue] = useState(() => {
         const defaultV = true;
         if (!rule) {
             return defaultV;
@@ -242,8 +241,7 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
 
                 <div
                     className={`
-                      ${stylesBase.mTSm}
-                      ${stylesBase.mLXxs}
+                      univer-ml-1 univer-mt-3
                       ${stylesBase.labelContainer}
                     `}
                 >
@@ -264,13 +262,13 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                     <div
                         className={`
                           ${styles.utilItem}
-                          ${stylesBase.mLXl}
+                          univer-ml-6
                         `}
                     >
                         <Checkbox
                             checked={!isShowValue}
                             onChange={(v) => {
-                                isShowValueSet(!v);
+                                setIsShowValue(!v);
                                 _handleChange({ isGradient: v as string, minValue, minValueType, maxValue, maxValueType, positiveColor, nativeColor, isShowValue: !v });
                             }}
                         />
@@ -283,8 +281,7 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                 <div
                     className={`
                       ${stylesBase.labelContainer}
-                      ${stylesBase.mTSm}
-                      ${stylesBase.mLXxs}
+                      univer-ml-1 univer-mt-3
                     `}
                 >
                     <div
@@ -307,7 +304,7 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                     <div
                         className={`
                           ${stylesBase.labelContainer}
-                          ${stylesBase.mLSm}
+                          univer-ml-3
                         `}
                     >
                         <div
@@ -327,18 +324,13 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
             </div>
             <div>
                 <div className={stylesBase.label}>{localeService.t('sheet.cf.valueType.min')}</div>
-                <div
-                    className={`
-                      ${stylesBase.mTSm}
-                      ${stylesBase.labelContainer}
-                    `}
-                >
+                <div className="univer-mt-3 univer-flex univer-items-center">
                     <Select
-                        style={{ width: '50%', flexShrink: 0 }}
+                        className="univer-w-1/2 univer-flex-shrink-0"
                         options={minOptions}
                         value={minValueType}
                         onChange={(v) => {
-                            minValueTypeSet(v as CFValueType);
+                            setMinValueType(v as CFValueType);
                             const value = createDefaultValueByValueType(v as CFValueType, 10);
                             minValueSet(value);
                             _handleChange({ isGradient, minValue: value, minValueType: v as CFValueType, maxValue, maxValueType, positiveColor, nativeColor, isShowValue });
@@ -349,7 +341,7 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                         disabled={!isShowInput(minValueType)}
                         id="min"
                         type={minValueType}
-                        className={stylesBase.mLSm}
+                        className="univer-ml-3"
                         value={minValue}
                         onChange={(v) => {
                             minValueSet(v || 0);
@@ -358,31 +350,26 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                     />
                 </div>
                 <div className={stylesBase.label}>{localeService.t('sheet.cf.valueType.max')}</div>
-                <div
-                    className={`
-                      ${stylesBase.mTSm}
-                      ${stylesBase.labelContainer}
-                    `}
-                >
+                <div className="univer-mt-3 univer-flex univer-items-center">
                     <Select
-                        style={{ width: '50%', flexShrink: 0 }}
+                        className="univer-w-1/2 univer-flex-shrink-0"
                         options={maxOptions}
                         value={maxValueType}
                         onChange={(v) => {
-                            maxValueTypeSet(v as CFValueType);
+                            setMaxValueType(v as CFValueType);
                             const value = createDefaultValueByValueType(v as CFValueType, 90);
-                            maxValueSet(value);
+                            setMaxValue(value);
                             _handleChange({ isGradient, minValue, minValueType, maxValue: value, maxValueType: v as CFValueType, positiveColor, nativeColor, isShowValue });
                         }}
                     />
                     <InputText
+                        className="univer-ml-3"
                         disabled={!isShowInput(maxValueType)}
                         id="max"
                         type={maxValueType}
-                        className={stylesBase.mLSm}
                         value={maxValue}
                         onChange={(v) => {
-                            maxValueSet(v || 0);
+                            setMaxValue(v || 0);
                             _handleChange({ isGradient, minValue, minValueType, maxValue: v || 0, maxValueType, positiveColor, nativeColor, isShowValue });
                         }}
                     />

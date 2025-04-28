@@ -204,17 +204,6 @@
     }
 
     &-input {
-        display: flex;
-        align-items: center;
-        justify-content: left;
-        border-bottom: 1px solid rgb(var(--border-color));
-        padding-bottom: 5px;
-
-        & > div {
-            // check docs-ui/src/components/editor/index.module.less .text-editor-validation-error
-            margin-top: 16px;
-        }
-
         // univer-defined-name-input
         &-formula-selector-text-wrap {
             margin-top: 16px;
@@ -231,18 +220,6 @@
             width: 95%;
             height: 30px;
             user-select: none;
-        }
-
-        &-validation {
-            display: flex;
-            align-items: center;
-            justify-content: left;
-            color: rgb(var(--error-color));
-            font-size: var(--font-size-xs);
-
-            & > span {
-                margin-right: 2px;
-            }
         }
 
         &-disable {

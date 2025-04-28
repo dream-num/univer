@@ -127,7 +127,7 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                                                 className={`
                                                   univer-ml-1 univer-inline-flex univer-h-6 univer-w-6
                                                   univer-cursor-pointer univer-items-center univer-justify-center
-                                                  univer-rounded-[3px] univer-text-base
+                                                  univer-rounded-sm univer-text-base
                                                   hover:univer-bg-gray-50
                                                 `}
                                                 onClick={() => onReply(user)}
@@ -215,14 +215,14 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                     />
                 )
                 : (
-                    <div className="univer-text-[13px] univer-leading-5 univer-text-black">
+                    <div className="univer-text-[13px] univer-leading-5 univer-text-gray-900">
                         {transformDocument2TextNodes(item.text).map((paragraph, i) => (
                             <div key={i} className="univer-break-words">
                                 {paragraph.map((item, i) => {
                                     switch (item.type) {
                                         case 'mention':
                                             return (
-                                                <a className="univer-text-blue-600" key={i}>
+                                                <a className="univer-text-primary-600" key={i}>
                                                     {item.content.label}
                                                     {' '}
                                                 </a>
@@ -367,8 +367,8 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                 ? (
                     <div
                         className={`
-                          univer-absolute univer-left-0 univer-right-0 univer-top-0 univer-h-[6px]
-                          univer-rounded-t-[6px] univer-bg-yellow-400
+                          univer-absolute univer-left-0 univer-right-0 univer-top-0 univer-h-1.5 univer-rounded-t-md
+                          univer-bg-yellow-400
                         `}
                     />
                 )
@@ -382,8 +382,8 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                 <div className="univer-flex univer-flex-1 univer-flex-row univer-items-center univer-overflow-hidden">
                     <div
                         className={`
-                          univer-mr-2 univer-h-[14px] univer-w-[3px] univer-flex-shrink-0 univer-flex-grow-0
-                          univer-rounded-[1.5px] univer-bg-yellow-400
+                          univer-mr-2 univer-h-3.5 univer-w-[3px] univer-flex-shrink-0 univer-flex-grow-0
+                          univer-rounded-sm univer-bg-yellow-400
                         `}
                     />
                     <Tooltip showIfEllipsis title={title}>
@@ -434,12 +434,8 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                     : null}
             </div>
             <div
-                className={`
-                  univer-max-h-[300px] univer-overflow-y-auto univer-overflow-x-hidden
-                  [scrollbar-gutter:auto]
-                  [scrollbar-width:thin]
-                `}
                 ref={scroller}
+                className="univer-max-h-[300px] univer-overflow-y-auto univer-overflow-x-hidden"
             >
                 {renderComments.map(
                     (item) => (

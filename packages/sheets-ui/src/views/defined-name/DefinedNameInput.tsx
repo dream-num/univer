@@ -18,7 +18,7 @@ import type { Nullable, Workbook } from '@univerjs/core';
 import type { IDefinedNamesServiceParam } from '@univerjs/engine-formula';
 import type { IRangeSelectorProps } from '../../basics/editor/range';
 import { AbsoluteRefType, IUniverInstanceService, LocaleService, Tools, UniverInstanceType } from '@univerjs/core';
-import { Button, Input, Radio, RadioGroup, Select } from '@univerjs/design';
+import { Button, clsx, Input, Radio, RadioGroup, Select } from '@univerjs/design';
 import { IDefinedNamesService, IFunctionService, isReferenceStrings, isReferenceStringWithEffectiveColumn, LexerTreeBuilder, operatorToken } from '@univerjs/engine-formula';
 import { hasCJKText } from '@univerjs/engine-render';
 import { ErrorSingle } from '@univerjs/icons';
@@ -26,7 +26,6 @@ import { SCOPE_WORKBOOK_VALUE_DEFINED_NAME } from '@univerjs/sheets';
 import { ComponentManager, useDependency, useSidebarClick } from '@univerjs/ui';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY, RANGE_SELECTOR_COMPONENT_KEY } from '../../common/keys';
-import styles from './index.module.less';
 
 export interface IDefinedNameInputProps extends Omit<IDefinedNamesServiceParam, 'id'> {
     inputId: string;
@@ -36,10 +35,6 @@ export interface IDefinedNameInputProps extends Omit<IDefinedNamesServiceParam, 
     cancel?: () => void;
     id?: string;
 }
-
-const widthStyle: React.CSSProperties = {
-    width: '100%',
-};
 
 export const DefinedNameInput = (props: IDefinedNameInputProps) => {
     const {
@@ -210,10 +205,18 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
     });
 
     return (
-        <div className={styles.definedNameInput} style={{ display: state ? 'block' : 'none' }}>
+        <div
+            className={clsx(`
+              univer-flex univer-flex-col univer-items-center univer-border-0 univer-border-b univer-border-solid
+              univer-border-gray-200 univer-pb-1
+              [&>div]:univer-mt-4 [&>div]:univer-w-full
+            `, {
+                'univer-hidden': !state,
+            })}
+        >
             <div>
                 <Input
-                    style={widthStyle}
+                    className="univer-w-full"
                     placeholder={localeService.t('definedName.inputNamePlaceholder')}
                     value={nameValue}
                     allowClear
@@ -258,18 +261,28 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
                     />
                 ))}
             <div>
-                <Select style={widthStyle} value={localSheetIdValue} options={options} onChange={setLocalSheetIdValue} />
+                <Select
+                    className="univer-w-full"
+                    value={localSheetIdValue}
+                    options={options}
+                    onChange={setLocalSheetIdValue}
+                />
             </div>
             <div>
                 <Input
-                    style={widthStyle}
+                    className="univer-w-full"
                     placeholder={localeService.t('definedName.inputCommentPlaceholder')}
                     value={commentValue}
                     onChange={setCommentValue}
                 />
             </div>
-            <div style={{ display: validString.length === 0 ? 'none' : 'flex' }} className={styles.definedNameInputValidation}>
-                <span>
+            <div
+                className={clsx('univer-items-center univer-text-[13px] univer-text-red-500', {
+                    'univer-hidden': validString.length === 0,
+                    'univer-flex': validString.length !== 0,
+                })}
+            >
+                <span className="univer-mr-0.5">
                     {validString}
                 </span>
                 <ErrorSingle />
@@ -277,7 +290,7 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
             <div>
                 <Button
                     onClick={() => {
-                        cancel && cancel();
+                        cancel?.();
                     }}
                 >
                     {localeService.t('definedName.cancel')}

@@ -121,10 +121,11 @@ export class SheetsNotePopupService extends Disposable {
         this._lastPopup = disposableCollection;
     }
 
-    hidePopup() {
+    hidePopup(force?: boolean) {
         if (!this._activePopup) {
             return;
         }
+        if (!force && !this._activePopup.temp) return;
         if (this._lastPopup) {
             this._lastPopup.dispose();
         }

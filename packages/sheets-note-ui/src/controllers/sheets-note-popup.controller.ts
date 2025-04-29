@@ -73,10 +73,9 @@ export class SheetsNotePopupController extends Disposable {
                 subUnitId,
                 row,
                 col,
-                temp: true,
             });
         } else {
-            this._sheetsNotePopupService.hidePopup();
+            this._sheetsNotePopupService.hidePopup(true);
         }
     }
 
@@ -99,7 +98,7 @@ export class SheetsNotePopupController extends Disposable {
         this.disposeWithMe(
             this._editorBridgeService.visible$.subscribe((visible) => {
                 if (visible.visible) {
-                    this._sheetsNotePopupService.hidePopup();
+                    this._sheetsNotePopupService.hidePopup(true);
                 }
             })
         );

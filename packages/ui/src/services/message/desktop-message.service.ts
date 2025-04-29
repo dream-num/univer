@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
+import type { IDisposable } from '@univerjs/core';
 import type { IMessageProps } from '@univerjs/design';
 import type { IMessageService } from './message.service';
-import { Disposable, Inject, Injector } from '@univerjs/core';
+import { Disposable, Inject, Injector, toDisposable } from '@univerjs/core';
 import { message, Messager, removeMessage } from '@univerjs/design';
 import { connectInjector } from '../../utils/di';
 import { BuiltInUIPart, IUIPartsService } from '../parts/parts.service';
@@ -41,7 +42,13 @@ export class DesktopMessageService extends Disposable implements IMessageService
         removeMessage();
     }
 
-    show(options: IMessageProps) {
-        message(options);
+    show(options: IMessageProps): IDisposable {
+        let op = options;
+        if (typeof options.id === 'undefined') {
+            op = Object.assign({}, options, { id: `message-${Date.now()}` });
+        }
+
+        message(op);
+        return toDisposable(() => removeMessage(op.id));
     }
 }

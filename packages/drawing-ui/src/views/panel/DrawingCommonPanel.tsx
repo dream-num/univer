@@ -128,9 +128,9 @@ export const DrawingCommonPanel = (props: IDrawingCommonPanelProps) => {
             clearControlSub.unsubscribe();
             focusSub.unsubscribe();
         };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    // TODO@siam-ese: use the new Form component to refactor this dialog panel.
     return (
         <>
             <div style={{ display: nullShow === true ? 'block' : 'none', height: '100%' }}>

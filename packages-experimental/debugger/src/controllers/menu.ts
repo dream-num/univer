@@ -171,7 +171,7 @@ export function ConfirmMenuItemFactory(): IMenuSelectorItem {
     };
 }
 
-export function MessageMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
+export function MessageMenuItemFactory(): IMenuSelectorItem {
     return {
         id: MessageOperation.id,
         title: 'Message',
@@ -181,6 +181,10 @@ export function MessageMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
             {
                 label: 'Open message',
                 value: '',
+            },
+            {
+                label: 'Open loading message',
+                value: 'loading',
             },
         ],
     };

@@ -15,31 +15,33 @@
  */
 
 import type { IDisposable, Nullable, Workbook } from '@univerjs/core';
+import type { ImageIoService } from '@univerjs/drawing';
 import type { BaseObject, Scene } from '@univerjs/engine-render';
 import type { ISheetFloatDom } from '@univerjs/sheets-drawing';
-import { DrawingTypeEnum, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, Inject, Injector, IUniverInstanceService, RxDisposable, toDisposable, UniverInstanceType } from '@univerjs/core';
+import { DrawingTypeEnum, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, IImageIoService, Inject, Injector, IUniverInstanceService, LocaleService, RxDisposable, UniverInstanceType } from '@univerjs/core';
+import { MessageType } from '@univerjs/design';
 import { IDrawingManagerService, SetDrawingSelectedOperation } from '@univerjs/drawing';
 import { COMPONENT_IMAGE_POPUP_MENU, ImageCropperObject, ImageResetSizeOperation, OpenImageCropOperation } from '@univerjs/drawing-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
-import { BuiltInUIPart, connectInjector, IUIPartsService } from '@univerjs/ui';
-
+import { IMessageService } from '@univerjs/ui';
 import { takeUntil } from 'rxjs';
 import { RemoveSheetDrawingCommand } from '../commands/commands/remove-sheet-drawing.command';
 import { EditSheetDrawingOperation } from '../commands/operations/edit-sheet-drawing.operation';
-import { UploadLoading } from '../views/upload-loading/UploadLoading';
 
 export class DrawingPopupMenuController extends RxDisposable {
     private _initImagePopupMenu = new Set<string>();
 
     constructor(
         @Inject(Injector) private _injector: Injector,
+        @Inject(LocaleService) private readonly _localeService: LocaleService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
         @Inject(SheetCanvasPopManagerService) private readonly _canvasPopManagerService: SheetCanvasPopManagerService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        @IMessageService private readonly _messageService: IMessageService,
         @IContextService private readonly _contextService: IContextService,
-        @Inject(IUIPartsService) private readonly _uiPartsService: IUIPartsService,
+        @IImageIoService private readonly _ioService: ImageIoService,
         @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
@@ -52,10 +54,31 @@ export class DrawingPopupMenuController extends RxDisposable {
         this._univerInstanceService.getTypeOfUnitDisposed$<Workbook>(UniverInstanceType.UNIVER_SHEET).pipe(takeUntil(this.dispose$)).subscribe((workbook) => this._dispose(workbook));
         this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET).forEach((workbook) => this._create(workbook));
 
-        this._uiPartsService.registerComponent(BuiltInUIPart.CONTENT, () => connectInjector(UploadLoading, this._injector));
+        this._setupLoadingStatus();
+    }
+
+    private _setupLoadingStatus() {
+        const MESSAGE_ID = 'image-upload-loading';
+
+        let messageDisposable: IDisposable | undefined;
+        this.disposeWithMe(this._ioService.change$.subscribe((status) => {
+            if (status > 0 && !messageDisposable) {
+                messageDisposable = this._messageService.show({
+                    id: MESSAGE_ID,
+                    type: MessageType.Loading,
+                    content: `${this._localeService.t('uploadLoading.loading')}: ${status}`,
+                    duration: 0,
+                });
+            } else if (status === 0) {
+                messageDisposable?.dispose();
+                messageDisposable = undefined;
+            }
+        }));
     }
 
     private _dispose(workbook: Workbook) {
+        super.dispose();
+
         const unitId = workbook.getUnitId();
         this._renderManagerService.removeRender(unitId);
     }
@@ -93,52 +116,50 @@ export class DrawingPopupMenuController extends RxDisposable {
         if (!transformer) {
             return;
         }
+
         let singletonPopupDisposer: IDisposable;
-        this.disposeWithMe(
-            toDisposable(
-                transformer.createControl$.subscribe(() => {
-                    this._contextService.setContextValue(FOCUSING_COMMON_DRAWINGS, true);
+        this.disposeWithMe(transformer.createControl$.subscribe(() => {
+            this._contextService.setContextValue(FOCUSING_COMMON_DRAWINGS, true);
 
-                    if (this._hasCropObject(scene)) {
-                        return;
-                    }
+            if (this._hasCropObject(scene)) {
+                return;
+            }
 
-                    const selectedObjects = transformer.getSelectedObjectMap();
-                    if (selectedObjects.size > 1) {
-                        singletonPopupDisposer?.dispose();
-                        return;
-                    }
+            const selectedObjects = transformer.getSelectedObjectMap();
+            if (selectedObjects.size > 1) {
+                singletonPopupDisposer?.dispose();
+                return;
+            }
 
-                    const object = selectedObjects.values().next().value as Nullable<BaseObject>;
-                    if (!object) {
-                        return;
-                    }
+            const object = selectedObjects.values().next().value as Nullable<BaseObject>;
+            if (!object) {
+                return;
+            }
 
-                    const oKey = object.oKey;
-                    const drawingParam = this._drawingManagerService.getDrawingOKey(oKey);
-                    if (!drawingParam) {
-                        return;
-                    }
+            const oKey = object.oKey;
+            const drawingParam = this._drawingManagerService.getDrawingOKey(oKey);
+            if (!drawingParam) {
+                return;
+            }
 
-                    const { unitId, subUnitId, drawingId, drawingType } = drawingParam;
+            const { unitId, subUnitId, drawingId, drawingType } = drawingParam;
                     // drawingParam should be  ICanvasFloatDom, use for disable popup dialog
-                    const data = (drawingParam as ISheetFloatDom).data as Record<string, boolean>;
-                    if (data && data.disablePopup) {
-                        return;
-                    }
+            const data = (drawingParam as ISheetFloatDom).data as Record<string, boolean>;
+            if (data && data.disablePopup) {
+                return;
+            }
 
-                    singletonPopupDisposer?.dispose();
-                    const menus = this._canvasPopManagerService.getFeatureMenu(unitId, subUnitId, drawingId, drawingType);
-                    singletonPopupDisposer = this.disposeWithMe(this._canvasPopManagerService.attachPopupToObject(object, {
-                        componentKey: COMPONENT_IMAGE_POPUP_MENU,
-                        direction: 'horizontal',
-                        offset: [2, 0],
-                        extraProps: {
-                            menuItems: menus || this._getImageMenuItems(unitId, subUnitId, drawingId, drawingType),
-                        },
-                    }));
-                })
-            )
+            singletonPopupDisposer?.dispose();
+            const menus = this._canvasPopManagerService.getFeatureMenu(unitId, subUnitId, drawingId, drawingType);
+            singletonPopupDisposer = this.disposeWithMe(this._canvasPopManagerService.attachPopupToObject(object, {
+                componentKey: COMPONENT_IMAGE_POPUP_MENU,
+                direction: 'horizontal',
+                offset: [2, 0],
+                extraProps: {
+                    menuItems: menus || this._getImageMenuItems(unitId, subUnitId, drawingId, drawingType),
+                },
+            }));
+        })
         );
         this.disposeWithMe(
             transformer.clearControl$.subscribe(() => {

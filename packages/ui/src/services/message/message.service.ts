@@ -22,4 +22,6 @@ export const IMessageService = createIdentifier<IMessageService>('ui.message.ser
 
 export interface IMessageService {
     show(options: IMessageProps): IDisposable;
+    remove(id: string): void;
+    removeAll(): void;
 }

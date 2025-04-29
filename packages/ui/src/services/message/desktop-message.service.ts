@@ -51,4 +51,12 @@ export class DesktopMessageService extends Disposable implements IMessageService
         message(op);
         return toDisposable(() => removeMessage(op.id));
     }
+
+    remove(id: string): void {
+        removeMessage(id);
+    }
+
+    removeAll(): void {
+        removeMessage();
+    }
 }

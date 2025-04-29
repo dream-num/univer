@@ -47,10 +47,6 @@ export class SheetsNoteAttachmentController extends Disposable {
             {
                 componentKey: SHEET_NOTE_COMPONENT,
                 direction: 'horizontal',
-                excludeOutside: [
-                    ...Array.from(document.querySelectorAll('.univer-note')),
-                    document.getElementById('note-add'),
-                ].filter(Boolean) as HTMLElement[],
                 extraProps: {
                     location: {
                         unitId,

@@ -95,10 +95,6 @@ export class SheetsNotePopupService extends Disposable {
                     this.hidePopup();
                 },
                 direction: 'horizontal',
-                excludeOutside: [
-                    ...Array.from(document.querySelectorAll('.univer-note')),
-                    document.getElementById('note-add'),
-                ].filter(Boolean) as HTMLElement[],
                 extraProps: {
                     location,
                 },

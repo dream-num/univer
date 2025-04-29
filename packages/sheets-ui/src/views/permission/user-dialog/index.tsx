@@ -65,11 +65,11 @@ export const SheetPermissionUserDialog = () => {
                                 return (
                                     <div
                                         key={item.subject?.userID}
-                                        className="univer-my-1 univer-flex univer-items-center univer-rounded-md"
+                                        className="univer-my-2 univer-flex univer-items-center univer-rounded-md hover:univer-bg-gray-50"
                                         onClick={() => handleChangeUser(item)}
                                     >
                                         <Avatar src={item.subject?.avatar} size={24} />
-                                        <div className="univer-ml-1.5">{item.subject?.name}</div>
+                                        <div className="univer-ml-1.5 univer-flex-1">{item.subject?.name}</div>
                                         {selectUserInfo?.findIndex((v) => v.subject?.userID === item.subject?.userID) !== -1 && (<div><CheckMarkSingle /></div>)}
                                     </div>
                                 );

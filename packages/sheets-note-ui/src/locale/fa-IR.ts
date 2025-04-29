@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-const locale = {
+import type zhCN from './zh-CN';
+
+const locale: typeof zhCN = {
     rightClick: {
-        addNote: '添加批注',
-        deleteNote: '删除批注',
-        toggleNote: '显示/隐藏批注',
+        addNote: 'افزودن یادداشت',
+        deleteNote: 'حذف یادداشت',
+        toggleNote: 'نمایش/پنهان کردن یادداشت',
     },
     note: {
-        placeholder: '在此输入',
+        placeholder: 'اینجا تایپ کنید',
     },
 };
 

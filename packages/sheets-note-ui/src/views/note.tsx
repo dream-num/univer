@@ -17,7 +17,7 @@
 import type { ISheetLocationBase } from '@univerjs/sheets';
 import type { ISheetNote } from '@univerjs/sheets-note';
 import type { IPopup } from '@univerjs/ui';
-import { ICommandService } from '@univerjs/core';
+import { ICommandService, LocaleService } from '@univerjs/core';
 import { RemoveNoteMutation, SheetsNoteModel, UpdateNoteMutation } from '@univerjs/sheets-note';
 import { useDebounceFn, useDependency } from '@univerjs/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -25,6 +25,7 @@ import { of } from 'rxjs';
 
 export const SheetsNote = (props: { popup: IPopup<{ location: ISheetLocationBase }> }) => {
     const noteModel = useDependency(SheetsNoteModel);
+    const localeService = useDependency(LocaleService);
     const [note, setNote] = useState<ISheetNote>({ width: 160, height: 60, note: '' });
     const activePopup = props.popup.extraProps?.location;
     const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -116,8 +117,7 @@ export const SheetsNote = (props: { popup: IPopup<{ location: ISheetLocationBase
             `}
             value={note.note}
             onChange={handleNoteChange}
-            placeholder="type here"
-
+            placeholder={localeService.t('note.placeholder')}
         />
     );
 };

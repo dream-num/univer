@@ -19,6 +19,11 @@ import type zhCN from './zh-CN';
 const locale: typeof zhCN = {
     rightClick: {
         addNote: 'Add Note',
+        deleteNote: 'Delete Note',
+        toggleNote: 'Show/Hide Note',
+    },
+    note: {
+        placeholder: 'Type here',
     },
 };
 

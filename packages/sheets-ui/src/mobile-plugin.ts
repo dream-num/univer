@@ -53,6 +53,7 @@ import { AutoFillService, IAutoFillService } from './services/auto-fill/auto-fil
 import { SheetCanvasPopManagerService } from './services/canvas-pop-manager.service';
 import { CellAlertManagerService } from './services/cell-alert-manager.service';
 import { ISheetCellDropdownManagerService, SheetCellDropdownManagerService } from './services/cell-dropdown-manager.service';
+import { CellPopupManagerService } from './services/cell-popup-manager.service';
 import { ISheetClipboardService, SheetClipboardService } from './services/clipboard/clipboard.service';
 import { DragManagerService } from './services/drag-manager.service';
 import { EditorBridgeService, IEditorBridgeService } from './services/editor-bridge.service';
@@ -105,6 +106,7 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
                 [HoverManagerService],
                 [DragManagerService],
                 [SheetCanvasPopManagerService],
+                [CellPopupManagerService],
                 [CellAlertManagerService],
                 [SelectAllService],
                 [ISheetCellDropdownManagerService, { useClass: SheetCellDropdownManagerService }],

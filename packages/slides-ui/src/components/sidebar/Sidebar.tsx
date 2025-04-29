@@ -19,13 +19,10 @@ import type { BaseObject } from '@univerjs/engine-render';
 import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { ObjectType } from '@univerjs/engine-render';
 import { useDependency } from '@univerjs/ui';
-
-import React from 'react';
 import { CanvasView } from '../../controllers/canvas-view';
 import ArrangePanel from '../panels/ArrangePanel';
 import FillPanel from '../panels/FillPanel';
 import TransformPanel from '../panels/TransformPanel';
-import styles from './index.module.less';
 
 export const COMPONENT_SLIDE_SIDEBAR = 'COMPONENT_SLIDE_SIDEBAR';
 
@@ -56,7 +53,7 @@ export default function RectSidebar() {
     const unitId = univerInstanceService.getFocusedUnit()?.getUnitId() || '';
 
     return (
-        <section className={styles.imageCommonPanel}>
+        <section className="univer-p-2 univer-text-center univer-text-sm">
             <ArrangePanel pageId={pageId} unitId={unitId} />
             <TransformPanel pageId={pageId} unitId={unitId} />
             {object.objectType === ObjectType.RECT && <FillPanel pageId={pageId} unitId={unitId} />}

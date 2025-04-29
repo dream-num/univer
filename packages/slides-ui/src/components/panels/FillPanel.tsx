@@ -18,14 +18,13 @@ import type { Nullable } from '@univerjs/core';
 
 import type { Rect } from '@univerjs/engine-render';
 import { ICommandService, LocaleService } from '@univerjs/core';
-import { clsx, ColorPicker, Dropdown } from '@univerjs/design';
+import { ColorPicker, Dropdown } from '@univerjs/design';
 import { MoreDownSingle, PaintBucket } from '@univerjs/icons';
 import { useDependency } from '@univerjs/ui';
 
 import React from 'react';
 import { UpdateSlideElementOperation } from '../../commands/operations/update-element.operation';
 import { CanvasView } from '../../controllers/canvas-view';
-import styles from './index.module.less';
 
 interface IProps {
     pageId: string;
@@ -82,16 +81,19 @@ export default function ArrangePanel(props: IProps) {
 
     return (
         <div
-            className={clsx(styles.imageCommonPanelGrid, styles.imageCommonPanelBorder)}
+            className={`
+              univer-relative univer-bottom-0 univer-mt-5 univer-w-full univer-border-t univer-border-solid
+              univer-border-t-gray-200
+            `}
         >
-            <div className={styles.imageCommonPanelGrid}>
-                <div className={styles.imageCommonPanelRow}>
-                    <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelTitle)}>
+            <div className="univer-relative univer-w-full">
+                <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start">
+                    <div className="univer-w-full univer-text-left univer-text-gray-600">
                         <div>{localeService.t('slide.panel.fill.title')}</div>
                     </div>
                 </div>
-                <div className={styles.imageCommonPanelRow}>
-                    <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSpan2)}>
+                <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start">
+                    <div className="univer-w-1/2">
                         <Dropdown
                             overlay={(
                                 <div className="univer-rounded-lg univer-p-4">
@@ -102,11 +104,9 @@ export default function ArrangePanel(props: IProps) {
                                 </div>
                             )}
                         >
-                            <a className={styles.uiPluginSheetsBorderPanelButton}>
-                                <PaintBucket extend={{ colorChannel1: color ?? 'rgb(var(--primary-color))' }} />
-                                <span className={styles.uiPluginSheetsBorderPanelMoreIcon}>
-                                    <MoreDownSingle />
-                                </span>
+                            <a className="univer-flex univer-cursor-pointer univer-items-center univer-gap-1">
+                                <PaintBucket className="univer-fill-primary-600" />
+                                <MoreDownSingle className="univer-text-[10px] univer-text-gray-400" />
                             </a>
                         </Dropdown>
                     </div>

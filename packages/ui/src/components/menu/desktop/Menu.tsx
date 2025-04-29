@@ -41,8 +41,10 @@ import { ContextMenuGroup } from '../../../services/menu/types';
 import { useDependency, useObservable } from '../../../utils/di';
 import { CustomLabel } from '../../custom-label/CustomLabel';
 import { useScrollYOverContainer } from '../../hooks/layout';
-import styles from './index.module.less';
 import { UITinyMenuGroup } from './TinyMenuGroup';
+
+const contentClassName = 'univer-inline-flex univer-gap-2 univer-items-center';
+const moreIconClassName = 'univer-size-3.5 univer-text-gray-900';
 
 /** @deprecated */
 export interface IBaseMenuProps {
@@ -154,21 +156,21 @@ function MenuOptionsWrapper(props: IBaseMenuProps) {
         };
 
         const _className = clsx({
-            [styles.menuItemNoHover]: typeof option.label !== 'string' && !option.label?.hoverable,
+            'univer-bg-none': typeof option.label !== 'string' && !option.label?.hoverable,
         });
 
         return (
             <DesignMenuItem disabled={option.disabled} key={key} eventKey={key} className={_className} onClick={handleClick}>
                 <span
-                    className={clsx(styles.menuItemContent, {
-                        [styles.menuItemSelectable]: !(
+                    className={clsx(contentClassName, {
+                        'univer-relative univer-pl-5': !(
                             typeof option.label !== 'string' && !option.label?.hoverable
                         ),
                     })}
                 >
                     {typeof value !== 'undefined' && String(value) === String(option.value) && (
-                        <span className={styles.menuItemSelectableIcon}>
-                            <CheckMarkSingle style={{ color: 'rgb(var(--success-color))' }} />
+                        <span className="univer-absolute univer-left-0 univer-inline-flex univer-items-center">
+                            <CheckMarkSingle className="univer-text-primary-600" />
                         </span>
                     )}
                     <CustomLabel
@@ -252,13 +254,13 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
                 eventKey={item.id}
                 disabled={disabled}
                 className={clsx({
-                    [styles.menuItemActivated]: activated,
+                    'univer-bg-gray-200': activated,
                 })}
                 onClick={() => {
                     onClick({ commandId: item.commandId, value: inputValue, id: item.id });
                 }}
             >
-                <span className={styles.menuItemContent}>
+                <span className={contentClassName}>
                     <CustomLabel
                         value={value}
                         title={title}
@@ -281,7 +283,7 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
                     eventKey={item.id}
                     popupOffset={[18, 0]}
                     title={(
-                        <span className={styles.menuItemContent}>
+                        <span className={contentClassName}>
                             <CustomLabel
                                 title={item.title}
                                 value={inputValue}
@@ -292,7 +294,7 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
                             {item.shortcut && ` (${item.shortcut})`}
                         </span>
                     )}
-                    expandIcon={<MoreSingle className={styles.menuItemMoreIcon} />}
+                    expandIcon={<MoreSingle className={moreIconClassName} />}
                 >
                     <DesignMenuItemGroup>
                         {selections.length > 0 && (
@@ -312,7 +314,7 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
 
         return (
             <DesignMenuItem key={item.id} eventKey={item.id}>
-                <span className={styles.menuItemContent}>
+                <span className={contentClassName}>
                     <CustomLabel
                         title={item.title}
                         value={inputValue}
@@ -337,11 +339,11 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
                 eventKey={item.id}
                 popupOffset={[18, 0]}
                 title={(
-                    <span className={styles.menuItemContent}>
+                    <span className={contentClassName}>
                         <CustomLabel title={item.title} icon={item.icon} label={item.label} onChange={onChange} />
                     </span>
                 )}
-                expandIcon={<MoreSingle className={styles.menuItemMoreIcon} />}
+                expandIcon={<MoreSingle className={moreIconClassName} />}
             >
                 <DesignMenuItemGroup>
                     {subMenuItems.length && <MenuWrapper menuType={item.id} parentKey={item.id} onOptionSelect={onClick} />}

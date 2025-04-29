@@ -18,11 +18,11 @@ import type { DrawingTypeEnum, ICommandInfo, INeedCheckDisposable, IRange, Nulla
 import type { BaseObject, IBoundRectNoAngle, IRender, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
 import type { ISetWorksheetRowAutoHeightMutationParams, ISheetLocationBase } from '@univerjs/sheets';
 import type { IPopup } from '@univerjs/ui';
-import { Disposable, DisposableCollection, ICommandService, Inject, IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
+import { Disposable, DisposableCollection, fromEventSubject, ICommandService, Inject, IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { COMMAND_LISTENER_SKELETON_CHANGE, IRefSelectionsService, RefRangeService, SetFrozenMutation, SetWorksheetRowAutoHeightMutation, SheetsSelectionsService } from '@univerjs/sheets';
 import { ICanvasPopupService } from '@univerjs/ui';
-import { BehaviorSubject, map } from 'rxjs';
+import { BehaviorSubject, map, throttleTime } from 'rxjs';
 import { SetScrollOperation } from '../commands/operations/scroll.operation';
 import { SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.operation';
 import { getViewportByCell, transformBound2OffsetBound } from '../common/utils';
@@ -181,9 +181,12 @@ export class SheetCanvasPopManagerService extends Disposable {
 
         disposable.add(this._commandService.onCommandExecuted((commandInfo) => {
             if (commandInfo.id === SetFrozenMutation.id) {
-                const newRects = calc();
-                rects$.next(newRects);
+                rects$.next(calc());
             }
+        }));
+
+        disposable.add(fromEventSubject(currentRender.engine.onTransformChange$).pipe(throttleTime(16)).subscribe(() => {
+            rects$.next(calc());
         }));
 
         return {
@@ -597,7 +600,7 @@ export class SheetCanvasPopManagerService extends Disposable {
 
         const disposable = new DisposableCollection();
         disposable.add(currentRender.engine.clientRect$.subscribe(() => updatePosition()));
-        disposable.add(currentRender.engine.onTransformChange$.subscribeEvent(() => updatePosition()));
+        disposable.add(fromEventSubject(currentRender.engine.onTransformChange$).pipe(throttleTime(16)).subscribe(() => updatePosition()));
         disposable.add(this._commandService.onCommandExecuted((commandInfo) => {
             if (commandInfo.id === SetWorksheetRowAutoHeightMutation.id) {
                 const params = commandInfo.params as ISetWorksheetRowAutoHeightMutationParams;

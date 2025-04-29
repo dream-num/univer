@@ -22,7 +22,6 @@ import { ComponentContainer, ISidebarService, useComponentsOfPart, useDependency
 import React, { useEffect, useState } from 'react';
 import { UNIVER_SHEET_PERMISSION_USER_PART } from '../../../consts/permission';
 import { checkRangeValid, generateDefaultRule, generateRuleByUnitType } from '../util';
-import styles from './index.module.less';
 import { PermissionDetailFooterPart } from './PermissionDetailFooterPart';
 import { PermissionDetailMainPart } from './PermissionDetailMainPart';
 
@@ -63,7 +62,9 @@ export const SheetPermissionPanelDetail = (props: ISheetPermissionPanelDetailPro
     }, []);
 
     return (
-        <div className={styles.permissionPanelDetailWrapper}>
+        <div
+            className="univer-mt-4 univer-flex univer-h-[calc(100%-16px)] univer-flex-col"
+        >
             <PermissionDetailMainPart
                 permissionId={activeRule.permissionId}
                 ranges={ranges}

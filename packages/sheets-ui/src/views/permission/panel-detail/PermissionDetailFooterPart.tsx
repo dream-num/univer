@@ -27,7 +27,6 @@ import { UNIVER_SHEET_PERMISSION_PANEL } from '../../../consts/permission';
 import { SheetPermissionPanelModel } from '../../../services/permission/sheet-permission-panel.model';
 import { SheetPermissionUserManagerService } from '../../../services/permission/sheet-permission-user-list.service';
 import { checkRangesIsWholeSheet } from '../util';
-import styles from './index.module.less';
 
 interface IPermissionDetailFooterPartProps {
     permissionId: string;
@@ -59,7 +58,7 @@ export const PermissionDetailFooterPart = (props: IPermissionDetailFooterPartPro
     const subUnitId = worksheet.getSheetId();
 
     return (
-        <div className={styles.sheetPermissionPanelFooter}>
+        <div className="univer-mt-auto univer-flex univer-flex-row-reverse univer-py-5 univer-gap2">
             <Button
                 variant="primary"
                 onClick={async () => {
@@ -208,7 +207,6 @@ export const PermissionDetailFooterPart = (props: IPermissionDetailFooterPartPro
                 {localeService.t('permission.button.confirm')}
             </Button>
             <Button
-                className={styles.sheetPermissionPanelFooterCancel}
                 onClick={() => {
                     sheetPermissionPanelModel.reset();
                     sheetPermissionUserManagerService.reset();

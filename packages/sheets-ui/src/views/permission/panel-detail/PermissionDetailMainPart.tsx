@@ -24,7 +24,6 @@ import { ComponentManager, useDependency } from '@univerjs/ui';
 import React, { useMemo } from 'react';
 import { RANGE_SELECTOR_COMPONENT_KEY } from '../../../common/keys';
 import { checkRangeValid } from '../util';
-import styles from './index.module.less';
 
 interface IPermissionDetailMainPartProps {
     permissionId: string;
@@ -77,7 +76,7 @@ export const PermissionDetailMainPart = (props: IPermissionDetailMainPartProps) 
     return (
         <>
             <FormLayout
-                className={styles.sheetPermissionPanelTitle}
+                className="univer-font-medium"
                 label={localeService.t('permission.panel.protectedRange')}
                 error={rangesErrMsg}
             >
@@ -90,7 +89,7 @@ export const PermissionDetailMainPart = (props: IPermissionDetailMainPartProps) 
                     />
                 )}
             </FormLayout>
-            <FormLayout className={styles.sheetPermissionPanelTitle} label={localeService.t('permission.panel.permissionDirection')}>
+            <FormLayout className="univer-font-medium" label={localeService.t('permission.panel.permissionDirection')}>
                 <Input
                     value={desc}
                     onChange={(v) => onDescChange(v)}

@@ -16,7 +16,7 @@
 
 import type { ICollaborator } from '@univerjs/protocol';
 import { LocaleService } from '@univerjs/core';
-import { Avatar, Button, clsx, Input } from '@univerjs/design';
+import { Avatar, Button, Input } from '@univerjs/design';
 import { CheckMarkSingle } from '@univerjs/icons';
 import { UnitRole } from '@univerjs/protocol';
 import { IDialogService, useDependency, useObservable } from '@univerjs/ui';
@@ -24,7 +24,6 @@ import { useState } from 'react';
 import { UNIVER_SHEET_PERMISSION_USER_DIALOG_ID } from '../../../consts/permission';
 import { SheetPermissionUserManagerService } from '../../../services/permission/sheet-permission-user-list.service';
 import { UserEmptyBase64 } from './constant';
-import styles from './index.module.less';
 
 export const SheetPermissionUserDialog = () => {
     const [inputValue, setInputValue] = useState('');
@@ -50,7 +49,7 @@ export const SheetPermissionUserDialog = () => {
 
     return (
         <div>
-            <div className={styles.sheetPermissionUserDialogSearch}>
+            <div>
                 <Input
                     className="univer-w-full"
                     placeholder={localeService.t('permission.dialog.search')}
@@ -58,7 +57,7 @@ export const SheetPermissionUserDialog = () => {
                     onChange={(v) => setInputValue(v)}
                 />
             </div>
-            <div className={styles.sheetPermissionUserList}>
+            <div className="univer-h-60 univer-overflow-y-auto">
                 {searchUserList?.length > 0
                     ? (
                         <>
@@ -66,11 +65,11 @@ export const SheetPermissionUserDialog = () => {
                                 return (
                                     <div
                                         key={item.subject?.userID}
-                                        className={styles.sheetPermissionUserItem}
+                                        className="univer-my-1 univer-flex univer-items-center univer-rounded-md"
                                         onClick={() => handleChangeUser(item)}
                                     >
                                         <Avatar src={item.subject?.avatar} size={24} />
-                                        <div className={styles.sheetPermissionUserItemName}>{item.subject?.name}</div>
+                                        <div className="univer-ml-1.5">{item.subject?.name}</div>
                                         {selectUserInfo?.findIndex((v) => v.subject?.userID === item.subject?.userID) !== -1 && (<div><CheckMarkSingle /></div>)}
                                     </div>
                                 );
@@ -78,7 +77,7 @@ export const SheetPermissionUserDialog = () => {
                         </>
                     )
                     : (
-                        <div className={styles.sheetPermissionUserListEmpty}>
+                        <div className="univer-flex univer-h-full univer-flex-col univer-items-center">
                             <img
                                 className="univer-w-full"
                                 src={UserEmptyBase64}
@@ -91,10 +90,9 @@ export const SheetPermissionUserDialog = () => {
                         </div>
                     )}
             </div>
-            <div className={styles.sheetPermissionSplit} />
-            <div className="univer-flex univer-items-center univer-justify-end univer-gap-1 univer-py-1">
+            <div className="univer-h-[1px] univer-w-full univer-bg-gray-200" />
+            <div className="univer-flex univer-items-center univer-justify-end univer-gap-1 univer-py-2">
                 <Button
-                    className={styles.sheetPermissionUserDialogButton}
                     onClick={() => dialogService.close(UNIVER_SHEET_PERMISSION_USER_DIALOG_ID)}
                 >
                     {localeService.t('permission.button.cancel')}
@@ -105,7 +103,6 @@ export const SheetPermissionUserDialog = () => {
                         sheetPermissionUserManagerService.setSelectUserList(selectUserInfo);
                         dialogService.close(UNIVER_SHEET_PERMISSION_USER_DIALOG_ID);
                     }}
-                    className={clsx(styles.sheetPermissionUserDialogFooterConfirm, styles.sheetPermissionUserDialogButton)}
                 >
                     {localeService.t('permission.button.confirm')}
                 </Button>

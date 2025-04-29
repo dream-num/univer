@@ -31,7 +31,6 @@ import { UNIVER_SHEET_PERMISSION_PANEL } from '../../../consts/permission';
 import { useHighlightRange } from '../../../hooks/use-highlight-range';
 import { SheetPermissionUserManagerService } from '../../../services/permission/sheet-permission-user-list.service';
 import { panelListEmptyBase64 } from './constant';
-import styles from './index.module.less';
 
 type IRuleItem = IRangeProtectionRule | IWorksheetProtectionRule;
 export const SheetPermissionPanelList = () => {
@@ -206,21 +205,21 @@ export const SheetPermissionPanelList = () => {
     const hasSetProtectPermission = permissionService.getPermissionPoint(new WorkbookCreateProtectPermission(unitId).id)?.value;
 
     return (
-        <div className={styles.sheetPermissionListPanelWrapper}>
-            <div className={styles.sheetPermissionListPanelHeader}>
-                <div className={styles.sheetPermissionListPanelHeaderType} onClick={() => handleChangeHeaderType(true)}>
-                    <div className={clsx({ [styles.sheetPermissionListPanelHeaderSelect]: isCurrentSheet })}>{localeService.t('permission.panel.currentSheet')}</div>
-                    {isCurrentSheet && <div className={styles.sheetPermissionListPanelHeaderTypeBottom} />}
+        <div className="univer-mt-2 univer-flex univer-h-[calc(100%-8px)] univer-flex-col">
+            <div className="univer-flex univer-h-[30px] univer-py-2">
+                <div className="univer-mr-5 univer-flex univer-cursor-pointer univer-flex-col univer-items-center" onClick={() => handleChangeHeaderType(true)}>
+                    <div className={clsx({ 'univer-h-6 univer-font-medium univer-leading-6 univer-text-blue-500 univer-text-base-': isCurrentSheet })}>{localeService.t('permission.panel.currentSheet')}</div>
+                    {isCurrentSheet && <div className="univer-mt-1 univer-w-6 univer-bg-blue-500" />}
                 </div>
-                <div className={styles.sheetPermissionListPanelHeaderType} onClick={() => handleChangeHeaderType(false)}>
-                    <div className={clsx({ [styles.sheetPermissionListPanelHeaderSelect]: !isCurrentSheet })}>{localeService.t('permission.panel.allSheet')}</div>
-                    {!isCurrentSheet && <div className={styles.sheetPermissionListPanelHeaderTypeBottom} />}
+                <div className="univer-mr-5 univer-flex univer-cursor-pointer univer-flex-col univer-items-center" onClick={() => handleChangeHeaderType(false)}>
+                    <div className={clsx({ 'univer-h-6 univer-text-base univer-font-medium univer-leading-6 univer-text-blue-500': !isCurrentSheet })}>{localeService.t('permission.panel.allSheet')}</div>
+                    {!isCurrentSheet && <div className="univer-mt-1 univer-w-6 univer-bg-blue-500" />}
                 </div>
             </div>
 
             {ruleList?.length > 0
                 ? (
-                    <div className={styles.sheetPermissionListPanelContent}>
+                    <div>
                         {ruleList?.map((item) => {
                             const rule = allRuleMap.get(item.objectID);
 
@@ -260,7 +259,10 @@ export const SheetPermissionPanelList = () => {
                             return (
                                 <div
                                     key={item.objectID}
-                                    className={styles.sheetPermissionListItem}
+                                    className={`
+                                      univer-mt-3 univer-rounded-lg univer-border univer-border-solid
+                                      univer-border-gray-200 univer-p-3
+                                    `}
                                     onMouseMove={() => {
                                         const { subUnitId, unitType } = rule;
                                         const activeSheet = workbook.getActiveSheet();
@@ -281,46 +283,80 @@ export const SheetPermissionPanelList = () => {
                                     }}
                                     onMouseLeave={() => currentRuleRangesSet([])}
                                 >
-                                    <div className={styles.sheetPermissionListItemHeader}>
+                                    <div className="univer-flex univer-h-5 univer-justify-between univer-leading-5">
                                         <Tooltip title={ruleName}>
-                                            <div className={styles.sheetPermissionListItemHeaderName}>{ruleName}</div>
+                                            <div
+                                                className="univer-max-w-[200px] univer-text-ellipsis univer-font-medium"
+                                            >
+                                                {ruleName}
+                                            </div>
                                         </Tooltip>
 
                                         {(hasManagerPermission || hasDeletePermission) && (
-                                            <div className={styles.sheetPermissionListItemHeaderOperator}>
+                                            <div className="univer-flex univer-items-center">
                                                 {hasManagerPermission && (
                                                     <Tooltip title={localeService.t('permission.panel.edit')}>
-                                                        <div className={styles.sheetPermissionListItemHeaderIcon} onClick={() => handleEdit(rule as IPermissionPanelRule)}><WriteSingle /></div>
+                                                        <div
+                                                            className={`
+                                                              univer-box-border univer-h-6 univer-rounded-sm univer-p-1
+                                                              hover:univer-bg-gray-200
+                                                            `}
+                                                            onClick={() => handleEdit(rule as IPermissionPanelRule)}
+                                                        >
+                                                            <WriteSingle />
+                                                        </div>
                                                     </Tooltip>
                                                 )}
                                                 {hasDeletePermission && (
                                                     <Tooltip title={localeService.t('permission.panel.delete')}>
-                                                        <div className={styles.sheetPermissionListItemHeaderIcon} onClick={() => handleDelete(rule)}><DeleteSingle /></div>
+                                                        <div
+                                                            className={`
+                                                              univer-box-border univer-h-6 univer-rounded-sm univer-p-1
+                                                              hover:univer-bg-gray-200
+                                                            `}
+                                                            onClick={() => handleDelete(rule)}
+                                                        >
+                                                            <DeleteSingle />
+                                                        </div>
                                                     </Tooltip>
                                                 )}
                                             </div>
                                         )}
                                     </div>
-                                    <div className={styles.sheetPermissionListItemSplit} />
-                                    <div className={styles.sheetPermissionListItemContent}>
-                                        <div className={styles.sheetPermissionListItemContentEdit}>
+                                    <div className="univer-my-2 univer-h-[1px] univer-bg-gray-200" />
+                                    <div>
+                                        <div className="univer-flex univer-items-center">
 
                                             <Tooltip title={item.creator?.name ?? ''}>
                                                 <div>
-                                                    <Avatar src={item.creator?.avatar} style={{ marginRight: 6 }} size={24} />
+                                                    <Avatar src={item.creator?.avatar} className="univer-mr-1.5" size={24} />
                                                 </div>
                                             </Tooltip>
-                                            <span className={styles.sheetPermissionListItemContentTitle}>{localeService.t('permission.panel.created')}</span>
-                                            <span className={styles.sheetPermissionListItemContentSub}>{editPermission ? `${localeService.t('permission.panel.iCanEdit')}` : `${localeService.t('permission.panel.iCanNotEdit')}`}</span>
+                                            <span
+                                                className="univer-h-4 univer-flex-grow univer-text-xs univer-text-black"
+                                            >
+                                                {localeService.t('permission.panel.created')}
+                                            </span>
+                                            <span className="univer-h-4 univer-text-xs univer-text-black">{editPermission ? `${localeService.t('permission.panel.iCanEdit')}` : `${localeService.t('permission.panel.iCanNotEdit')}`}</span>
 
                                         </div>
-                                        <div className={styles.sheetPermissionListItemContentView}>
-                                            <span className={styles.sheetPermissionListItemContentTitle}>{localeService.t('permission.panel.viewPermission')}</span>
-                                            <span className={styles.sheetPermissionListItemContentSub}>{viewPermission ? `${localeService.t('permission.panel.iCanView')}` : `${localeService.t('permission.panel.iCanNotView')}`}</span>
+                                        <div className="univer-mt-2 univer-flex univer-items-center">
+                                            <span
+                                                className="univer-h-4 univer-flex-grow univer-text-xs univer-text-black"
+                                            >
+                                                {localeService.t('permission.panel.viewPermission')}
+                                            </span>
+                                            <span className="univer-h-4 univer-text-xs univer-text-black">{viewPermission ? `${localeService.t('permission.panel.iCanView')}` : `${localeService.t('permission.panel.iCanNotView')}`}</span>
                                         </div>
                                         {rule.description && (
                                             <Tooltip title={rule.description}>
-                                                <div className={styles.sheetPermissionListItemContentDesc}>
+                                                <div
+                                                    className={`
+                                                      univer-text-3 univer-max-w-64 univer-overflow-hidden
+                                                      univer-text-ellipsis univer-whitespace-nowrap univer-text-gray-400
+                                                      univer-mt-2]
+                                                    `}
+                                                >
                                                     {rule.description}
                                                 </div>
                                             </Tooltip>
@@ -332,16 +368,16 @@ export const SheetPermissionPanelList = () => {
                     </div>
                 )
                 : (
-                    <div className={styles.sheetPermissionListEmpty}>
+                    <div className="univer-flex univer-flex-1 univer-flex-col univer-items-center univer-justify-center">
                         <img width={240} height={120} src={panelListEmptyBase64} alt="" />
-                        <p className={styles.sheetPermissionListEmptyText}>{localeService.t('permission.dialog.listEmpty')}</p>
+                        <p className="univer-w-60 univer-break-words univer-text-[13px] univer-text-gray-400">{localeService.t('permission.dialog.listEmpty')}</p>
                     </div>
                 )}
 
             {hasSetProtectPermission && (
-                <div className={styles.sheetPermissionPanelAddWrapper}>
+                <div className="univer-mt-auto univer-py-5">
                     <Button
-                        className={styles.sheetPermissionPanelAddButton}
+                        className="univer-w-full"
                         variant="primary"
                         onClick={() => {
                             const sidebarProps = {

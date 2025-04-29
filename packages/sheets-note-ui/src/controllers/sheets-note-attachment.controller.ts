@@ -21,6 +21,7 @@ import { Disposable, Inject, IUniverInstanceService, ObjectMatrix, UniverInstanc
 import { SheetsNoteModel } from '@univerjs/sheets-note';
 import { CellPopupManagerService } from '@univerjs/sheets-ui';
 import { of, switchMap } from 'rxjs';
+import { SheetsNotePopupService } from '../services/sheets-note-popup.service';
 import { SHEET_NOTE_COMPONENT } from '../views/config';
 
 export class SheetsNoteAttachmentController extends Disposable {
@@ -29,7 +30,8 @@ export class SheetsNoteAttachmentController extends Disposable {
     constructor(
         @Inject(SheetsNoteModel) private readonly _sheetsNoteModel: SheetsNoteModel,
         @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService,
-        @Inject(CellPopupManagerService) private readonly _cellPopupManagerService: CellPopupManagerService
+        @Inject(CellPopupManagerService) private readonly _cellPopupManagerService: CellPopupManagerService,
+        @Inject(SheetsNotePopupService) private readonly _sheetsNotePopupService: SheetsNotePopupService
     ) {
         super();
 
@@ -37,6 +39,8 @@ export class SheetsNoteAttachmentController extends Disposable {
     }
 
     private _showPopup(unitId: string, sheetId: string, row: number, col: number) {
+        this._sheetsNotePopupService.hidePopup(true);
+
         return this._cellPopupManagerService.showPopup(
             {
                 unitId,

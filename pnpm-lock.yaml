@@ -2663,9 +2663,6 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../core
-      '@univerjs/design':
-        specifier: workspace:*
-        version: link:../design
       '@univerjs/engine-render':
         specifier: workspace:*
         version: link:../engine-render
@@ -2684,9 +2681,6 @@ importers:
       react:
         specifier: '19'
         version: 19.0.0
-      react-dom:
-        specifier: '19'
-        version: 19.0.0(react@19.0.0)
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -5012,7 +5006,7 @@ packages:
     engines: {node: '>=12'}
 
   '@protobufjs/aspromise@1.1.2':
-    resolution: {integrity: sha1-m4sMxmPWaafY9vXQiToU00jzD78=}
+    resolution: {integrity: sha512-j+gKExEuLmKwvz3OgROXtrJ2UG2x8Ch2YZUxahh+s1F2HZ+wAceUNLkvy6zKCPVRkU++ZWQrdxsUeQXmcg4uoQ==}
 
   '@protobufjs/base64@1.1.2':
     resolution: {integrity: sha512-AZkcAA5vnN/v4PDqKyMR5lx7hZttPDgClv83E//FMNhR2TMcLUhfRUBHCmSl0oi9zMgDDqRUJkSxO3wm85+XLg==}
@@ -5030,7 +5024,7 @@ packages:
     resolution: {integrity: sha512-Ddb+kVXlXst9d+R9PfTIxh1EdNkgoRe5tOX6t01f1lYWOvJnSPDBlG241QLzcyPdoNTsblLUdujGSE4RzrTZGQ==}
 
   '@protobufjs/inquire@1.1.0':
-    resolution: {integrity: sha512-kdSefcPdruJiFMVSbn801t4vFK7KB/5gd2fYvrxhuJYg8ILrmn9SKSX2tZdV6V+ksulWqS7aXjBcRXl3wHoD9Q==}
+    resolution: {integrity: sha1-/yAOPnzyQp4tyvwRQIKOjMY48Ik=}
 
   '@protobufjs/path@1.1.2':
     resolution: {integrity: sha512-6JOcJ5Tm08dOHAbdR3GrvP+yUUfkjG5ePsHYczMFLq3ZmMkAD98cDgcT2iA1lJ9NVwFd4tH/iSSoe44YWkltEA==}

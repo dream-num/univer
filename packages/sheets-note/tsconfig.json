@@ -5,5 +5,5 @@
         "outDir": "lib/types"
     },
     "references": [{ "path": "./tsconfig.node.json" }],
-    "include": ["src", "../sheets-note-ui/src/controllers/sheets-cell-content.controller.ts"]
+    "include": ["src"]
 }

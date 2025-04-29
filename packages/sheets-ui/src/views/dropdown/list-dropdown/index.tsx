@@ -20,7 +20,7 @@ import type { ISheetLocation } from '@univerjs/sheets';
 import type { IPopup } from '@univerjs/ui';
 import type { IBaseDropdownProps } from '../type';
 import { BuildTextUtils, ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
-import { Scrollbar } from '@univerjs/design';
+import { clsx, scrollbarClassName } from '@univerjs/design';
 import { RichTextEditingMutation } from '@univerjs/docs';
 import { CheckMarkSingle } from '@univerjs/icons';
 import { RangeProtectionPermissionEditPoint, SheetPermissionCheckController, WorkbookEditablePermission, WorksheetEditPermission } from '@univerjs/sheets';
@@ -73,50 +73,51 @@ const SelectList = (props: ISelectListProps) => {
             <div className={styles.dvListDropdownTitle}>
                 {title}
             </div>
-            <div className={styles.dvListDropdownList}>
-                <Scrollbar key={filter}>
-                    <div className={styles.dvListDropdownListContainer}>
-                        {filteredOptions.map((item, i) => {
-                            const selected = value.indexOf(item.value) > -1;
-                            const handleClick = () => {
-                                let set: Set<string>;
-                                if (selected) {
-                                    set = new Set(value.filter((sub) => sub !== item.value));
-                                } else {
-                                    set = new Set(multiple ? [...value, item.value] : [item.value]);
+            <div className="univer-max-h-52">
+                <div
+                    key={filter}
+                    className={clsx('univer-px-2', scrollbarClassName)}
+                >
+                    {filteredOptions.map((item, i) => {
+                        const selected = value.indexOf(item.value) > -1;
+                        const handleClick = () => {
+                            let set: Set<string>;
+                            if (selected) {
+                                set = new Set(value.filter((sub) => sub !== item.value));
+                            } else {
+                                set = new Set(multiple ? [...value, item.value] : [item.value]);
+                            }
+                            const newValue: string[] = [];
+                            options.forEach((opt) => {
+                                if (set.has(opt.value)) {
+                                    newValue.push(opt.value);
                                 }
-                                const newValue: string[] = [];
-                                options.forEach((opt) => {
-                                    if (set.has(opt.value)) {
-                                        newValue.push(opt.value);
-                                    }
-                                });
+                            });
 
-                                onChange(newValue);
-                            };
+                            onChange(newValue);
+                        };
 
-                            const index = item.label.toLocaleLowerCase().indexOf(lowerFilter!);
-                            return (
-                                <div key={i} className={styles.dvListDropdownItemContainer} onClick={handleClick}>
-                                    <div className={styles.dvListDropdownItem} style={{ background: item.color }}>
-                                        {lowerFilter && item.label.toLowerCase().includes(lowerFilter)
-                                            ? (
-                                                <>
-                                                    <span>{item.label.substring(0, index)}</span>
-                                                    <span style={{ fontWeight: 'bold' }}>{item.label.substring(index, index + lowerFilter.length)}</span>
-                                                    <span>{item.label.substring(index + lowerFilter.length)}</span>
-                                                </>
-                                            )
-                                            : item.label}
-                                    </div>
-                                    <div className={styles.dvListDropdownSelectedIcon}>
-                                        {selected ? <CheckMarkSingle /> : null}
-                                    </div>
+                        const index = item.label.toLocaleLowerCase().indexOf(lowerFilter!);
+                        return (
+                            <div key={i} className={styles.dvListDropdownItemContainer} onClick={handleClick}>
+                                <div className={styles.dvListDropdownItem} style={{ background: item.color }}>
+                                    {lowerFilter && item.label.toLowerCase().includes(lowerFilter)
+                                        ? (
+                                            <>
+                                                <span>{item.label.substring(0, index)}</span>
+                                                <span style={{ fontWeight: 'bold' }}>{item.label.substring(index, index + lowerFilter.length)}</span>
+                                                <span>{item.label.substring(index + lowerFilter.length)}</span>
+                                            </>
+                                        )
+                                        : item.label}
                                 </div>
-                            );
-                        })}
-                    </div>
-                </Scrollbar>
+                                <div className={styles.dvListDropdownSelectedIcon}>
+                                    {selected ? <CheckMarkSingle /> : null}
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
             </div>
             {showEditOnDropdown && hasPermission
                 ? (

@@ -46,6 +46,15 @@ export const Playground = {
             { label: 'Option 9', value: 'option9' },
             { label: 'Option 10', value: 'option10' },
             { label: 'Option 11', value: 'option11' },
+            { label: 'Option 12', value: 'option12' },
+            { label: 'Option 13', value: 'option13' },
+            { label: 'Option 14', value: 'option14' },
+            { label: 'Option 15', value: 'option15' },
+            { label: 'Option 16', value: 'option16' },
+            { label: 'Option 17', value: 'option17' },
+            { label: 'Option 18', value: 'option18' },
+            { label: 'Option 19', value: 'option19' },
+            { label: 'Option 20', value: 'option20' },
         ];
 
         function handleChange(value: string | string[] | undefined) {

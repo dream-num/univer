@@ -84,12 +84,106 @@ export const Playground = {
                 value: '会计专用',
                 label: '会计专用',
             },
+            {
+                value: '百分比',
+                label: '百分比',
+                children: [
+                    {
+                        value: '1.23%',
+                        label: '1.23%',
+                    },
+                    {
+                        value: '123.00%',
+                        label: '123.00%',
+                    },
+                    {
+                        value: '1.23%',
+                        label: '1.23%',
+                    },
+                    {
+                        value: '123.00%',
+                        label: '123.00%',
+                    },
+                    {
+                        value: '1.23%',
+                        label: '1.23%',
+                    },
+                    {
+                        value: '123.00%',
+                        label: '123.00%',
+                    },
+                    {
+                        value: '1.23%',
+                        label: '1.23%',
+                    },
+                    {
+                        value: '123.00%',
+                        label: '123.00%',
+                    },
+                    {
+                        value: '1.23%',
+                        label: '1.23%',
+                    },
+                    {
+                        value: '123.00%',
+                        label: '123.00%',
+                    },
+                    {
+                        value: '1.23%',
+                        label: '1.23%',
+                    },
+                    {
+                        value: '123.00%',
+                        label: '123.00%',
+                    },
+                    {
+                        value: '1.23%',
+                        label: '1.23%',
+                    },
+                    {
+                        value: '123.00%',
+                        label: '123.00%',
+                    },
+                    {
+                        value: '1.23%',
+                        label: '1.23%',
+                    },
+                    {
+                        value: '123.00%',
+                        label: '123.00%',
+                    },
+                    {
+                        value: '1.23%',
+                        label: '1.23%',
+                    },
+                    {
+                        value: '123.00%',
+                        label: '123.00%',
+                    },
+                    {
+                        value: '1.23%',
+                        label: '1.23%',
+                    },
+                    {
+                        value: '123.00%',
+                        label: '123.00%',
+                    },
+                    {
+                        value: '1.23%',
+                        label: '1.23%',
+                    },
+                    {
+                        value: '123.00%',
+                        label: '123.00%',
+                    },
+                ],
+            },
         ];
 
         function handleChange(value: string[]) {
             setValue(value);
         }
 
-        return <CascaderList value={value} options={options} onChange={handleChange} />;
+        return <CascaderList wrapperClassName="univer-h-[150px]" value={value} options={options} onChange={handleChange} />;
     },
 };

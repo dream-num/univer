@@ -16,8 +16,7 @@
 
 import { CheckMarkSingle } from '@univerjs/icons';
 import { clsx } from '../../helper/clsx';
-
-import styles from './index.module.less';
+import { scrollbarClassName } from '../../helper/scrollbar-cls';
 
 export interface ISelectListProps {
     /**
@@ -83,19 +82,35 @@ export function SelectList(props: ISelectListProps) {
     }
 
     return (
-        <ul className={clsx(styles.selectList, className)}>
+        <ul
+            className={clsx(`
+              univer-m-0 univer-grid univer-max-h-80 univer-list-none univer-gap-1 univer-overflow-y-auto univer-rounded
+              univer-border univer-border-solid univer-border-gray-200 univer-p-1.5
+            `, scrollbarClassName, className)}
+        >
             {options.map((option, index) => {
                 const checked = value.indexOf(option.value) > -1;
                 return (
-                    <li
-                        key={index}
-                        className={clsx(styles.selectListItem, optionClassName, { [styles.selectListItemSelect]: checked })}
-                    >
-                        <a onClick={() => handleSelect(option.value)}>
+                    <li key={index}>
+                        <a
+                            className={clsx(`
+                              univer-relative univer-block univer-cursor-pointer univer-select-none univer-rounded
+                              univer-py-1.5 univer-pl-8 univer-pr-2 univer-text-sm univer-transition-colors
+                              hover:univer-bg-gray-100
+                            `, optionClassName, {
+                                'univer-bg-gray-200': checked,
+                            })}
+                            onClick={() => handleSelect(option.value)}
+                        >
                             {!hideCheckMark && (
-                                <span className={styles.selectListItemIcon}>
-                                    {checked && <CheckMarkSingle />}
-                                </span>
+                                checked && (
+                                    <CheckMarkSingle
+                                        className={`
+                                          univer-absolute univer-left-0 univer-top-1/2 -univer-translate-y-1/2
+                                          univer-pl-2 univer-text-primary-600
+                                        `}
+                                    />
+                                )
                             )}
                             <span style={{ color: option.color }}>{option.label}</span>
                         </a>

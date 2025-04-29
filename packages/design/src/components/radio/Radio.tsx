@@ -17,8 +17,6 @@
 import React, { useRef } from 'react';
 import { clsx } from '../../helper/clsx';
 
-import styles from './index.module.less';
-
 export interface IRadioProps {
     children?: React.ReactNode;
 
@@ -66,22 +64,44 @@ export function Radio(props: IRadioProps) {
         }
     }
 
-    const _className = clsx(styles.radio, {
-        [styles.radioDisabled]: disabled,
-    });
-
     return (
-        <label className={_className}>
-            <span className={styles.radioTarget}>
+        <label
+            className={clsx(`
+              univer-box-border univer-inline-grid univer-grid-flow-col univer-items-center univer-gap-2 univer-text-sm
+            `, {
+                'univer-cursor-pointer univer-text-gray-900 dark:univer-text-white': !disabled,
+                'univer-text-gray-400': disabled,
+            })}
+        >
+            <span className="univer-relative univer-block">
                 <input
                     ref={inputRef}
-                    className={styles.radioTargetInput}
+                    className="univer-absolute univer-size-0 univer-opacity-0"
                     type="radio"
                     checked={checked}
                     disabled={disabled}
                     onChange={handleChange}
                 />
-                <span className={styles.radioTargetInner} />
+                <span
+                    className={clsx(`
+                      univer-relative univer-box-border univer-flex univer-size-4 univer-items-center
+                      univer-justify-center univer-overflow-hidden univer-rounded-full univer-border univer-border-solid
+                      univer-border-gray-300 univer-bg-gray-50 univer-transition-colors
+                      dark:univer-border-gray-500 dark:univer-bg-gray-600
+                    `, {
+                        'univer-opacity-50': disabled,
+                        'univer-border-primary-600 univer-bg-primary-600 dark:univer-bg-primary-600': checked,
+                    })}
+                >
+                    {checked && (
+                        <span
+                            className={`
+                              univer-absolute univer-left-1/2 univer-top-1/2 univer-block univer-size-2
+                              -univer-translate-x-1/2 -univer-translate-y-1/2 univer-rounded-full univer-bg-white
+                            `}
+                        />
+                    )}
+                </span>
             </span>
 
             <span>{children}</span>

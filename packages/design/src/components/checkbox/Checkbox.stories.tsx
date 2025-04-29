@@ -37,7 +37,12 @@ export const CheckboxBasic = {
             setChecked(value as boolean);
         }
 
-        return <Checkbox checked={checked} onChange={handleChange}>checkbox 1</Checkbox>;
+        return (
+            <>
+                <Checkbox checked={checked} onChange={handleChange}>checkbox 1</Checkbox>
+                <Checkbox checked onChange={handleChange}>checkbox 1</Checkbox>
+            </>
+        );
     },
 };
 

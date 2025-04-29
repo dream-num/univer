@@ -16,7 +16,7 @@
 
 import type { SlideDataModel } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
-import { clsx } from '@univerjs/design';
+import { clsx, scrollbarClassName } from '@univerjs/design';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { IncreaseSingle } from '@univerjs/icons';
 import { ActivateSlidePageOperation, AppendSlideOperation, SetSlidePageThumbOperation } from '@univerjs/slides-ui';
@@ -98,7 +98,10 @@ export function UniSlideSideBar() {
 
     return (
         <div className="univer-flex univer-h-full univer-select-none univer-flex-col" ref={slideBarRef}>
-            <div className="univer-overflow-y-auto univer-scrollbar-thin" style={{ height: `${barHeight}px` }}>
+            <div
+                className={clsx('univer-overflow-y-auto', scrollbarClassName)}
+                style={{ height: `${barHeight}px` }}
+            >
                 {slideList.map((item, index) => (
                     <div
                         key={item.id}

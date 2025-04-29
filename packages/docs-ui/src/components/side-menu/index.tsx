@@ -134,10 +134,9 @@ export const SideMenu = forwardRef<ISideMenuInstance, ISideMenuProps>((props, re
             >
                 <div
                     ref={containerRef}
-                    className={`
+                    className={clsx(`
                       univer-flex-1 univer-overflow-y-auto univer-overflow-x-hidden univer-scrollbar-none
-                      [&::-webkit-scrollbar]:univer-hidden
-                    `}
+                    `)}
                 >
                     {menus?.map((menu) => (
                         <div

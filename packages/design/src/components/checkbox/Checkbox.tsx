@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import React, { useRef } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
+import { CheckMarkSingle } from '@univerjs/icons';
+import { useRef } from 'react';
 import { clsx } from '../../helper/clsx';
 
-import styles from './index.module.less';
-
 export interface ICheckboxProps {
-    children?: React.ReactNode;
+    children?: ReactNode;
 
     /**
      * The class name of the checkbox group
@@ -30,7 +30,7 @@ export interface ICheckboxProps {
     /**
      * The style of the checkbox group
      */
-    style?: React.CSSProperties;
+    style?: CSSProperties;
 
     /**
      * Used for setting the currently selected value
@@ -85,26 +85,56 @@ export function Checkbox(props: ICheckboxProps) {
         }
     }
 
-    const _className = clsx(className, styles.checkbox, {
-        [styles.checkboxDisabled]: disabled,
-        [styles.checkboxIndeterminate]: indeterminate && !checked,
-    });
-
     return (
-        <label className={_className} style={style}>
-            <span className={styles.checkboxTarget}>
+        <label
+            className={clsx(`
+              univer-box-border univer-inline-grid univer-grid-flow-col univer-items-center univer-gap-2 univer-text-sm
+            `, {
+                'univer-cursor-pointer univer-text-gray-900 dark:univer-text-white': !disabled,
+                'univer-text-gray-400': disabled,
+            }, className)}
+            style={style}
+        >
+            <span className="univer-relative univer-block">
                 <input
                     ref={inputRef}
-                    className={styles.checkboxTargetInput}
+                    className="univer-absolute univer-size-0 univer-opacity-0"
                     type="checkbox"
                     checked={checked}
                     disabled={disabled}
                     onChange={handleChange}
                 />
-                <span className={styles.checkboxTargetInner} />
+                <span
+                    className={clsx(`
+                      univer-relative univer-box-border univer-flex univer-size-4 univer-items-center
+                      univer-justify-center univer-overflow-hidden univer-rounded univer-border univer-border-solid
+                      univer-border-gray-300 univer-bg-gray-50 univer-transition-colors
+                      dark:univer-border-gray-500 dark:univer-bg-gray-600
+                    `, {
+                        'univer-opacity-50': disabled,
+                        'univer-border-primary-600 univer-bg-primary-600': checked || indeterminate,
+                    })}
+                >
+                    {checked && (
+                        <CheckMarkSingle
+                            className={`
+                              univer-absolute univer-left-1/2 univer-top-1/2 univer-block univer-size-3
+                              -univer-translate-x-1/2 -univer-translate-y-1/2 univer-text-white
+                            `}
+                        />
+                    )}
+                    {indeterminate && !checked && (
+                        <span
+                            className={`
+                              univer-absolute univer-left-1/2 univer-top-1/2 univer-block univer-h-0.5 univer-w-2.5
+                              -univer-translate-x-1/2 -univer-translate-y-1/2 univer-rounded univer-bg-white
+                            `}
+                        />
+                    )}
+                </span>
             </span>
 
-            <span className={contentClassName}>{children}</span>
+            <span className={clsx('univer-select-none', contentClassName)}>{children}</span>
         </label>
     );
 }

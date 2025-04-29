@@ -20,7 +20,7 @@
 
 import type { ReactElement } from 'react';
 import type { IButtonProps } from './Button';
-import React, { Children, cloneElement } from 'react';
+import { Children, cloneElement } from 'react';
 import { clsx } from '../../helper/clsx';
 
 export interface IButtonGroupProps {

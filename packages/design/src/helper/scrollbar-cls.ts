@@ -14,25 +14,4 @@
  * limitations under the License.
  */
 
-import { render } from '@testing-library/react';
-import React from 'react';
-import { describe, expect, it } from 'vitest';
-
-import { Scrollbar } from '../Scrollbar';
-
-describe('Scrollbar', () => {
-    it('should not render thumb', () => {
-        const { container } = render(
-            <section style={{ height: '100px' }}>
-                <Scrollbar>
-                    <div>foo</div>
-                    <div>foo</div>
-                </Scrollbar>
-            </section>
-        );
-
-        const scrollbar = container.querySelector('[role=scrollbar]');
-
-        expect(scrollbar).toBeNull();
-    });
-});
+export const scrollbarClassName = 'univer-scrollbar-thin univer-scrollbar-track-gray-50 univer-scrollbar-thumb-gray-300 dark:univer-bg-black dark:univer-scrollbar-track-gray-900 dark:univer-scrollbar-thumb-gray-700';

@@ -135,7 +135,7 @@ export class SheetsNoteRefRangeController extends Disposable {
         this._watcherMap.set(
             this._getIdWithUnitId(unitId, subUnitId, row, col),
             this._refRangeService.watchRange(unitId, subUnitId, oldRange, (before, after) => {
-                const { redos } = this._handleRangeChange(unitId, subUnitId, note, row, col, after, true);
+                const { redos } = this._handleRangeChange(unitId, subUnitId, note, before.startRow, before.startColumn, after, true);
                 sequenceExecuteAsync(redos, this._commandService, { onlyLocal: true });
             }, true)
         );
@@ -190,12 +190,12 @@ export class SheetsNoteRefRangeController extends Disposable {
                         const { unitId, sheetId, row, col, newPosition, note, silent } = option;
                         this._unregister(unitId, sheetId, row, col);
 
-                        this._register(unitId, sheetId, note, newPosition.row, newPosition.col);
                         if (!silent) {
                             this._unwatch(unitId, sheetId, row, col);
                             this._watch(unitId, sheetId, note, newPosition.row, newPosition.col);
                         }
 
+                        this._register(unitId, sheetId, note, newPosition.row, newPosition.col);
                         break;
                     }
                 }

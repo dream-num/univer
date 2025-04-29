@@ -17,12 +17,13 @@
 import type { MenuSchemaType } from '@univerjs/ui';
 import { SheetDeleteNoteCommand, SheetToggleNotePopupCommand } from '@univerjs/sheets-note';
 import { ContextMenuGroup, ContextMenuPosition } from '@univerjs/ui';
-import { SHEET_NOTE_CONTEXT_MENU_ID, sheetDeleteNoteMenuFactory, sheetNoteContextMenuFactory, sheetNoteToggleMenuFactory } from './note.menu';
+import { AddNotePopupOperation } from '../commands/operations/add-note-popup.operation';
+import { sheetDeleteNoteMenuFactory, sheetNoteContextMenuFactory, sheetNoteToggleMenuFactory } from './note.menu';
 
 export const menuSchema: MenuSchemaType = {
     [ContextMenuPosition.MAIN_AREA]: {
         [ContextMenuGroup.DATA]: {
-            [SHEET_NOTE_CONTEXT_MENU_ID]: {
+            [AddNotePopupOperation.id]: {
                 order: 1,
                 menuItemFactory: sheetNoteContextMenuFactory,
             },

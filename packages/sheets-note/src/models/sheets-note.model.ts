@@ -83,6 +83,13 @@ export class SheetsNoteModel extends Disposable {
         );
     }
 
+    getCellNoteChange$(unitId: string, sheetId: string, row: number, col: number) {
+        return this._change$.pipe(
+            filter(({ unitId: u, sheetId: s, row: r, col: c }) => u === unitId && s === sheetId && r === row && c === col),
+            map(({ note }) => note)
+        );
+    }
+
     updateNote(unitId: string, sheetId: string, row: number, col: number, note: ISheetNote, silent?: boolean): void {
         const matrix = this._ensureNoteMatrix(unitId, sheetId);
         matrix.setValue(row, col, note);

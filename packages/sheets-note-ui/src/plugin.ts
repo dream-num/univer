@@ -19,6 +19,7 @@ import { DependentOn, IConfigService, Inject, Injector, merge, Plugin, touchDepe
 import { SheetsNotePlugin } from '@univerjs/sheets-note';
 import { menuSchema } from './controllers/menu.schema';
 import { SheetsCellContentController } from './controllers/sheets-cell-content.controller';
+import { SheetsNoteAttachmentController } from './controllers/sheets-note-attachment.controller';
 import { SheetsNotePopupController } from './controllers/sheets-note-popup.controller';
 import { SheetsNoteUIController } from './controllers/sheets-note-ui.controller';
 import { SheetsNotePopupService } from './services/sheets-note-popup.service';
@@ -65,6 +66,7 @@ export class SheetsNoteUIPlugin extends Plugin {
             [SheetsCellContentController],
             [SheetsNotePopupController],
             [SheetsNoteUIController],
+            [SheetsNoteAttachmentController],
         ] as Dependency[]).forEach((dependency) => {
             this._injector.add(dependency);
         });
@@ -74,6 +76,7 @@ export class SheetsNoteUIPlugin extends Plugin {
         touchDependencies(this._injector, [
             [SheetsNoteUIController],
             [SheetsCellContentController],
+            [SheetsNoteAttachmentController],
         ]);
     }
 

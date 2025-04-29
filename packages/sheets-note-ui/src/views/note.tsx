@@ -20,7 +20,8 @@ import type { IPopup } from '@univerjs/ui';
 import { ICommandService } from '@univerjs/core';
 import { RemoveNoteMutation, SheetsNoteModel, UpdateNoteMutation } from '@univerjs/sheets-note';
 import { useDebounceFn, useDependency } from '@univerjs/ui';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { of } from 'rxjs';
 
 export const SheetsNote = (props: { popup: IPopup<{ location: ISheetLocationBase }> }) => {
     const noteModel = useDependency(SheetsNoteModel);
@@ -28,6 +29,7 @@ export const SheetsNote = (props: { popup: IPopup<{ location: ISheetLocationBase
     const activePopup = props.popup.extraProps?.location;
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const commandService = useDependency(ICommandService);
+    const cellNoteChange$ = useMemo(() => activePopup ? noteModel.getCellNoteChange$(activePopup.unitId, activePopup.subUnitId!, activePopup.row, activePopup.col) : of(null), [activePopup]);
 
     const updateNote = useDebounceFn((newNote: ISheetNote) => {
         if (!activePopup) return;
@@ -60,6 +62,18 @@ export const SheetsNote = (props: { popup: IPopup<{ location: ISheetLocationBase
             }
         }
     }, [activePopup, noteModel]);
+
+    useEffect(() => {
+        const sub = cellNoteChange$.subscribe(() => {
+            if (!activePopup) return;
+            const existingNote = noteModel.getNote(activePopup.unitId, activePopup.subUnitId!, activePopup.row, activePopup.col);
+            if (existingNote) {
+                setNote(existingNote);
+            }
+        });
+
+        return () => sub.unsubscribe();
+    }, [cellNoteChange$]);
 
     useEffect(() => {
         const textarea = textareaRef.current;

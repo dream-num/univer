@@ -43,11 +43,12 @@ function getHasNote$(accessor: IAccessor): Observable<boolean> {
 
 export function sheetNoteContextMenuFactory(accessor: IAccessor): IMenuItem {
     return {
-        id: SHEET_NOTE_CONTEXT_MENU_ID,
+        id: AddNotePopupOperation.id,
         type: MenuItemType.BUTTON,
         title: 'rightClick.addNote',
         icon: 'NoteAdd',
-        hidden$: combineLatest([getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET), getHasNote$(accessor)]).pipe(map(([hidden, hasNote]) => hidden || hasNote)),
+        hidden$: combineLatest([getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET), getHasNote$(accessor)])
+            .pipe(map(([hidden, hasNote]) => hidden || hasNote)),
         disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission] }),
         commandId: AddNotePopupOperation.id,
     };

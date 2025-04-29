@@ -102,6 +102,7 @@ export class SheetsNotePopupService extends Disposable {
                 extraProps: {
                     location,
                 },
+                priority: 3,
             }
         );
 

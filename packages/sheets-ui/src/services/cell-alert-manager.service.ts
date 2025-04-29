@@ -101,6 +101,7 @@ export class CellAlertManagerService extends Disposable {
                 extraProps: {
                     alert,
                 },
+                priority: 1,
             }
         );
         if (disposable) {

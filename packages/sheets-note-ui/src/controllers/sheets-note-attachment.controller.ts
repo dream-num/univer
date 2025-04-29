@@ -59,6 +59,7 @@ export class SheetsNoteAttachmentController extends Disposable {
                         col,
                     } as ISheetLocationBase,
                 },
+                priority: 3,
             }
         );
     }

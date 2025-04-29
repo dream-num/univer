@@ -25,6 +25,7 @@ import { SheetCanvasPopManagerService } from './canvas-pop-manager.service';
 export interface ICellPopup extends Omit<ICanvasPopup, 'direction' | 'offset' | 'mask'> {
     direction?: 'horizontal' | 'vertical';
     id?: string;
+    priority: number;
 }
 
 export interface ICellPopupDirectionCache {
@@ -125,6 +126,7 @@ export class CellPopupManagerService extends Disposable {
             });
         } else {
             directionCache.popups.push(popup);
+            directionCache.popups.sort((a, b) => a.priority - b.priority);
         }
 
         this._change$.next({

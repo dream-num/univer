@@ -15,12 +15,10 @@
  */
 
 import { ColorKit } from '@univerjs/core';
-import { Dropdown, ColorPicker as OriginColorPicker } from '@univerjs/design';
+import { clsx, Dropdown, ColorPicker as OriginColorPicker } from '@univerjs/design';
 import { MoreDownSingle } from '@univerjs/icons';
 import { ComponentManager, useDependency } from '@univerjs/ui';
-import React, { useMemo } from 'react';
-
-import styles from './index.module.less';
+import { useMemo } from 'react';
 
 interface IColorPickerProps {
     color: string;
@@ -38,7 +36,9 @@ export const ColorPicker = (props: IColorPickerProps) => {
     const colorKit = useMemo(() => new ColorKit(color), [color]);
     const Icon = componentManager.get(iconId);
 
-    return Icon && (!disable
+    if (!Icon) return null;
+
+    return !disable
         ? (
             <Dropdown
                 overlay={(
@@ -48,15 +48,19 @@ export const ColorPicker = (props: IColorPickerProps) => {
                 )}
             >
                 <span
-                    className={`
-                      ${styles.cfColorPickerIcon}
-                      ${className}
-                    `}
+                    className={clsx(`
+                      univer-flex univer-cursor-pointer univer-items-center univer-rounded univer-p-1
+                      hover:univer-bg-gray-100
+                    `, className)}
                 >
-                    <Icon extend={{ colorChannel1: colorKit.isValid ? color : 'rgb(var(--primary-color))' }} />
-                    {isNeedDropdownIcon && <MoreDownSingle className={styles.iconDropdown} />}
+                    <Icon className="univer-fill-primary-600" extend={{ colorChannel1: colorKit.isValid ? color : '' }} />
+                    {isNeedDropdownIcon && (
+                        <MoreDownSingle
+                            className="univer-ml-1.5 univer-text-[10px] univer-text-gray-400"
+                        />
+                    )}
                 </span>
             </Dropdown>
         )
-        : <Icon className={className} extend={{ colorChannel1: colorKit.isValid ? color : 'rgb(var(--primary-color))' }} />);
+        : <Icon className={clsx('univer-fill-primary-600', className)} extend={{ colorChannel1: colorKit.isValid ? color : '' }} />;
 };

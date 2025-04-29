@@ -98,7 +98,7 @@ export function PageSettings(props: IConfirmChildrenProps) {
     };
 
     return (
-        <div className="univer-theme univer-flex univer-flex-col univer-gap-4">
+        <div className="univer-flex univer-flex-col univer-gap-4">
             <div className="univer-flex univer-flex-col univer-gap-2">
                 <label className="univer-text-sm univer-font-medium univer-text-[#0E111E]">
                     {localeService.t('page-settings.paper-size')}

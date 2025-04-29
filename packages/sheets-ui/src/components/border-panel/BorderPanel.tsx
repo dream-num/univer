@@ -132,7 +132,7 @@ export function BorderPanel(props: IBorderPanelProps) {
                             `}
                             type="button"
                         >
-                            <PaintBucket extend={{ colorChannel1: value?.color ?? 'rgb(var(--primary-color))' }} />
+                            <PaintBucket className="univer-fill-primary-600" extend={{ colorChannel1: value?.color ?? '' }} />
                             <MoreDownSingle className="univer-text-gray-400" />
                         </button>
                     </Dropdown>

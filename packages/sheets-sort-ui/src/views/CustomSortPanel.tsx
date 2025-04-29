@@ -245,8 +245,7 @@ export function SortOptionItem(props: ISortOptionItemProps) {
                                 className={`
                                   univer-my-0 univer-box-border univer-grid univer-max-h-[310px] univer-items-center
                                   univer-gap-1 univer-overflow-y-auto univer-overflow-x-hidden univer-rounded-lg
-                                  univer-p-1 univer-theme univer-border univer-bg-white univer-text-base
-                                  univer-shadow-lg
+                                  univer-border univer-bg-white univer-p-1 univer-text-base univer-shadow-lg
                                 `}
                             >
                                 {availableMenu.map((menuItem) => (

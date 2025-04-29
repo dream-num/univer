@@ -141,12 +141,14 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                                 ? (
                                     <Dropdown
                                         overlay={(
-                                            <div className="univer-rounded-lg univer-p-4 univer-theme">
+                                            <div className="univer-rounded-lg">
                                                 <ul
                                                     className={`
-                                                      univer-m-0 univer-grid univer-list-none univer-gap-2 univer-p-0
-                                                      univer-text-sm
-                                                      [&_a]:univer-cursor-pointer [&_a]:univer-rounded [&_a]:univer-p-1
+                                                      univer-m-0 univer-box-border univer-grid univer-list-none
+                                                      univer-p-1.5 univer-text-[13px] univer-text-sm
+                                                      [&_a]:univer-block [&_a]:univer-cursor-pointer
+                                                      [&_a]:univer-rounded [&_a]:univer-px-2 [&_a]:univer-py-1.5
+                                                      [&_a]:univer-transition-colors
                                                     `}
                                                 >
                                                     <li>
@@ -172,7 +174,7 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                                         <div
                                             className={`
                                               univer-ml-1 univer-inline-flex univer-h-6 univer-w-6 univer-cursor-pointer
-                                              univer-items-center univer-justify-center univer-rounded-[3px]
+                                              univer-items-center univer-justify-center univer-rounded-sm
                                               univer-text-base
                                               hover:univer-bg-gray-50
                                             `}
@@ -186,7 +188,7 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                     </div>
                 )
                 : null}
-            <div className="univer-mb-1 univer-text-xs univer-leading-[1.5] univer-text-gray-600">{item.dT}</div>
+            <div className="univer-mb-1 univer-text-xs/normal univer-text-gray-600">{item.dT}</div>
             {editing
                 ? (
                     <ThreadCommentEditor
@@ -215,7 +217,7 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                     />
                 )
                 : (
-                    <div className="univer-text-[13px] univer-leading-5 univer-text-gray-900">
+                    <div className="univer-text-[13px]/normal univer-text-gray-900">
                         {transformDocument2TextNodes(item.text).map((paragraph, i) => (
                             <div key={i} className="univer-break-words">
                                 {paragraph.map((item, i) => {

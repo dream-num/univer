@@ -174,7 +174,7 @@ export const ReplaceDialog = forwardRef(function ReplaceDialogImpl(_props, ref) 
     }, [findCompleted, matchesCount, messageService, localeService]);
 
     return (
-        <div className="univer-theme">
+        <div>
             <FormLayout label={localeService.t('find-replace.dialog.find')}>
                 <SearchInput
                     findCompleted={findCompleted}

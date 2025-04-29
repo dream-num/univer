@@ -98,10 +98,7 @@ export const ImagePopupMenu: React.FC<IImagePopupMenuProps> = (props: IImagePopu
                         'univer-bg-white': !visible,
                     })}
                 >
-                    <Autofill
-                        style={{ color: '#35322B' }}
-                        extend={{ colorChannel1: 'rgb(var(--green-700, #409f11))' }}
-                    />
+                    <Autofill className="univer-fill-green-500 univer-text-gray-900" />
                     {showMore && <MoreDownSingle className="univer-text-[10px] univer-text-gray-400" />}
                 </div>
             </DropdownMenu>

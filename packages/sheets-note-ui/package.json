@@ -32,26 +32,37 @@
     ],
     "publishConfig": {
         "access": "public",
-        "registry": "https://registry.npmjs.org/"
+        "main": "./lib/es/index.js",
+        "module": "./lib/es/index.js",
+        "exports": {
+            ".": {
+                "import": "./lib/es/index.js",
+                "require": "./lib/cjs/index.js",
+                "types": "./lib/types/index.d.ts"
+            },
+            "./*": {
+                "import": "./lib/es/*",
+                "require": "./lib/cjs/*",
+                "types": "./lib/types/index.d.ts"
+            },
+            "./locale/*": {
+                "import": "./lib/es/locale/*.js",
+                "require": "./lib/cjs/locale/*.js",
+                "types": "./lib/types/locale/*.d.ts"
+            },
+            "./lib/*": "./lib/*"
+        }
     },
     "scripts": {
         "test": "vitest run",
         "test:watch": "vitest",
-        "build": "tsc && vite build",
-        "build:dev": "vite build"
+        "build": "univer-cli build"
     },
     "peerDependencies": {
         "react": ">=16.9.0",
         "react-dom": ">=16.9.0"
     },
     "dependencies": {
-        "@univerjs/core": "workspace:*",
-        "@univerjs/design": "workspace:*",
-        "@univerjs/engine-render": "workspace:*",
-        "@univerjs/sheets": "workspace:*",
-        "@univerjs/sheets-note": "workspace:*",
-        "@univerjs/sheets-ui": "workspace:*",
-        "@univerjs/ui": "workspace:*",
         "rxjs": "^7.8.1"
     },
     "devDependencies": {

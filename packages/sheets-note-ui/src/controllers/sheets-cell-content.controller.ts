@@ -14,19 +14,23 @@
  * limitations under the License.
  */
 
-import { Disposable, Inject, InterceptorEffectEnum } from '@univerjs/core';
+import type { Workbook } from '@univerjs/core';
+import { Disposable, Inject, InterceptorEffectEnum, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import { SheetsNoteModel } from '@univerjs/sheets-note';
+import { debounceTime } from 'rxjs';
 
 export class SheetsCellContentController extends Disposable {
     constructor(
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
         @Inject(SheetsNoteModel) private readonly _sheetsNoteModel: SheetsNoteModel,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();
         this._initViewModelIntercept();
+        this._initSkeletonChange();
     }
 
     private _initViewModelIntercept() {
@@ -57,5 +61,19 @@ export class SheetsCellContentController extends Disposable {
                 }
             )
         );
+    }
+
+    private _initSkeletonChange() {
+        const markSkeletonDirty = () => {
+            const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+            if (!workbook) return;
+            const unitId = workbook.getUnitId();
+            const currentRender = this._renderManagerService.getRenderById(unitId);
+            currentRender?.mainComponent?.makeForceDirty();
+        };
+
+        this.disposeWithMe(this._sheetsNoteModel.change$.pipe(debounceTime(16)).subscribe(() => {
+            markSkeletonDirty();
+        }));
     }
 }

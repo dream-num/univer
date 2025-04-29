@@ -15,19 +15,38 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import type { Observable } from 'rxjs';
+import type { ISheetLocationBase } from '@univerjs/sheets';
 import { Disposable, ObjectMatrix } from '@univerjs/core';
-import { filter, Subject } from 'rxjs';
+import { filter, map, Subject } from 'rxjs';
 
 export interface ISheetNote {
     width: number;
     height: number;
     note: string;
+    show?: boolean;
 }
+
+export type ISheetNoteChange = {
+    unitId: string;
+    sheetId: string;
+    row: number;
+    col: number;
+    silent?: boolean;
+} & ({
+    type: 'update';
+    note: Nullable<ISheetNote>;
+} | {
+    type: 'ref';
+    newPosition: {
+        row: number;
+        col: number;
+    };
+    note: ISheetNote;
+});
 
 export class SheetsNoteModel extends Disposable {
     private _noteMatrix = new Map<string, Map<string, ObjectMatrix<ISheetNote>>>();
-    private readonly _change$ = new Subject<{ unitId: string; sheetId: string; row: number; col: number; note: Nullable<ISheetNote> }>();
+    private readonly _change$ = new Subject<ISheetNoteChange>();
     readonly change$ = this._change$.asObservable();
 
     private _ensureNoteMatrix(unitId: string, sheetId: string): ObjectMatrix<ISheetNote> {
@@ -46,22 +65,70 @@ export class SheetsNoteModel extends Disposable {
         return matrix;
     }
 
-    getCellNoteChange$(unitId: string, sheetId: string, row: number, col: number): Observable<{ note: Nullable<ISheetNote> }> {
-        return this.change$.pipe(
-            filter(({ unitId: u, sheetId: s, row: r, col: c }) => u === unitId && s === sheetId && r === row && c === col)
+    getSheetShowNotes$(unitId: string, sheetId: string) {
+        return this._change$.pipe(
+            filter(({ unitId: u, sheetId: s }) => u === unitId && s === sheetId),
+            map(() => {
+                const matrix = this._ensureNoteMatrix(unitId, sheetId);
+                const notes: { loc: ISheetLocationBase; note: ISheetNote }[] = [];
+
+                matrix.forValue((row, col, note) => {
+                    if (note.show) {
+                        notes.push({ loc: { row, col, unitId, subUnitId: sheetId }, note });
+                    }
+                });
+
+                return notes;
+            })
         );
     }
 
-    updateNote(unitId: string, sheetId: string, row: number, col: number, note: ISheetNote): void {
+    updateNote(unitId: string, sheetId: string, row: number, col: number, note: ISheetNote, silent?: boolean): void {
         const matrix = this._ensureNoteMatrix(unitId, sheetId);
         matrix.setValue(row, col, note);
-        this._change$.next({ unitId, sheetId, row, col, note });
+        this._change$.next({ unitId, sheetId, row, col, type: 'update', note, silent });
     }
 
-    removeNote(unitId: string, sheetId: string, row: number, col: number): void {
+    removeNote(unitId: string, sheetId: string, row: number, col: number, silent?: boolean): void {
         const matrix = this._ensureNoteMatrix(unitId, sheetId);
         matrix.realDeleteValue(row, col);
-        this._change$.next({ unitId, sheetId, row, col, note: null });
+        this._change$.next({ unitId, sheetId, row, col, type: 'update', note: null, silent });
+    }
+
+    toggleNotePopup(unitId: string, sheetId: string, row: number, col: number, silent?: boolean): void {
+        const matrix = this._ensureNoteMatrix(unitId, sheetId);
+        const note = matrix.getValue(row, col);
+        if (note) {
+            note.show = !note.show;
+        }
+        this._change$.next({
+            unitId,
+            sheetId,
+            row,
+            col,
+            type: 'update',
+            note,
+            silent,
+        });
+    }
+
+    updateNotePosition(unitId: string, sheetId: string, row: number, col: number, newRow: number, newCol: number, silent?: boolean): void {
+        const matrix = this._ensureNoteMatrix(unitId, sheetId);
+        const note = matrix.getValue(row, col);
+        if (note) {
+            matrix.realDeleteValue(row, col);
+            matrix.setValue(newRow, newCol, note);
+            this._change$.next({
+                unitId,
+                sheetId,
+                row,
+                col,
+                type: 'ref',
+                newPosition: { row: newRow, col: newCol },
+                note,
+                silent,
+            });
+        }
     }
 
     getNote(unitId: string, sheetId: string, row: number, col: number): Nullable<ISheetNote> {
@@ -71,6 +138,10 @@ export class SheetsNoteModel extends Disposable {
 
     getUnitNotes(unitId: string): Map<string, ObjectMatrix<ISheetNote>> | undefined {
         return this._noteMatrix.get(unitId);
+    }
+
+    getNotes() {
+        return this._noteMatrix;
     }
 
     deleteUnitNotes(unitId: string): void {

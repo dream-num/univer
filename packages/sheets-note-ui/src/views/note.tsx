@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
+import type { ISheetLocationBase } from '@univerjs/sheets';
 import type { ISheetNote } from '@univerjs/sheets-note';
+import type { IPopup } from '@univerjs/ui';
 import { ICommandService } from '@univerjs/core';
 import { RemoveNoteMutation, SheetsNoteModel, UpdateNoteMutation } from '@univerjs/sheets-note';
-import { useDebounceFn, useDependency, useObservable } from '@univerjs/ui';
+import { useDebounceFn, useDependency } from '@univerjs/ui';
 import { useEffect, useRef, useState } from 'react';
-import { SheetsNotePopupService } from '../services/sheets-note-popup.service';
 
-export const SheetsNote = () => {
-    const notePopupService = useDependency(SheetsNotePopupService);
+export const SheetsNote = (props: { popup: IPopup<{ location: ISheetLocationBase }> }) => {
     const noteModel = useDependency(SheetsNoteModel);
     const [note, setNote] = useState<ISheetNote>({ width: 160, height: 60, note: '' });
-    const activePopup = useObservable(notePopupService.activePopup$);
+    const activePopup = props.popup.extraProps?.location;
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const commandService = useDependency(ICommandService);
 
@@ -96,7 +96,8 @@ export const SheetsNote = () => {
             style={{ width: note.width, height: note.height }}
             ref={textareaRef}
             className={`
-              univer-note-textarea univer-resize-both univer-ml-[1px] univer-rounded univer-p-1 univer-shadow-sm
+              univer-note-textarea univer-resize-both univer-ml-[1px] univer-rounded univer-border univer-border-solid
+              univer-border-gray-200 univer-p-2 univer-shadow
               focus:univer-outline-none
             `}
             value={note.note}

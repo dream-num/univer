@@ -17,4 +17,4 @@
 export * from './plugin';
 export * from './models/sheets-note.model';
 export * from './controllers/sheets-note-resource.controller';
-export * from './commands/mutations/update-note.mutation';
+export * from './commands/mutations/note.mutation';

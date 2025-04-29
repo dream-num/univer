@@ -95,6 +95,9 @@ export class SheetsNotePopupService extends Disposable {
                     ...Array.from(document.querySelectorAll('.univer-note')),
                     document.getElementById('note-add'),
                 ].filter(Boolean) as HTMLElement[],
+                extraProps: {
+                    location,
+                },
             }
         );
 

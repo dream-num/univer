@@ -14,14 +14,9 @@
  * limitations under the License.
  */
 
-import type { IDisposable } from '@univerjs/core';
-import type { IMessageProps } from '@univerjs/design';
-import { createIdentifier } from '@univerjs/core';
+// TODO@siam-ese: these styles are widely used in drawing's components. They should be deprecated once the
+// Form component is completed.
 
-export const IMessageService = createIdentifier<IMessageService>('ui.message.service');
-
-export interface IMessageService {
-    show(options: IMessageProps): IDisposable;
-    remove(id: string): void;
-    removeAll(): void;
-}
+export const rowClassName = 'univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start univer-justify-between univer-gap-2 univer-flex-no-wrap';
+export const columnTitleClassName = 'univer-w-full univer-text-left univer-text-gray-400';
+export const inlineClassName = 'univer-flex univer-items-center univer-gap-1';

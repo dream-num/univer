@@ -24,8 +24,7 @@ import { GroupSingle, UngroupSingle } from '@univerjs/icons';
 import { useDependency } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
 import { getUpdateParams } from '../../utils/get-update-params';
-
-import styles from './index.module.less';
+import { columnTitleClassName, inlineClassName, rowClassName } from '../utils/classnames';
 
 export interface IDrawingGroupProps {
     drawings: IDrawingParam[];
@@ -187,24 +186,24 @@ export const DrawingGroup = (props: IDrawingGroupProps) => {
     }, []);
 
     return (
-        <div className={clsx(styles.imageCommonPanelGrid, styles.imageCommonPanelBorder)} style={{ display: gridDisplay(hasGroup === true ? groupShow : false) }}>
-            <div className={styles.imageCommonPanelRow}>
-                <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelTitle)}>
+        <div className="univer-relative univer-mt-5 univer-w-full" style={{ display: gridDisplay(hasGroup === true ? groupShow : false) }}>
+            <div className={rowClassName}>
+                <div className={columnTitleClassName}>
                     <div>{localeService.t('image-panel.group.title')}</div>
                 </div>
             </div>
-            <div className={styles.imageCommonPanelRow}>
-                <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSpan2, styles.imageCommonPanelColumnCenter)}>
+            <div className={rowClassName}>
+                <div className={clsx(inlineClassName, 'univer-justify-center')}>
                     <Button style={{ display: gridDisplay(groupBtnShow) }} onClick={onGroupBtnClick}>
-                        <span className={styles.imageCommonPanelInline}>
+                        <span className="univer-flex univer-items-center univer-gap-1">
                             <GroupSingle />
                             {localeService.t('image-panel.group.group')}
                         </span>
                     </Button>
                 </div>
-                <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSpan2, styles.imageCommonPanelColumnCenter)}>
+                <div className={clsx(inlineClassName, 'univer-justify-center')}>
                     <Button style={{ display: gridDisplay(ungroupBtnShow) }} onClick={onUngroupBtnClick}>
-                        <span className={styles.imageCommonPanelInline}>
+                        <span className="univer-flex univer-items-center univer-gap-1">
                             <UngroupSingle />
                             {localeService.t('image-panel.group.unGroup')}
                         </span>

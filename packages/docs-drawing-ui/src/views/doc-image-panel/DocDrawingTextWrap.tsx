@@ -24,7 +24,6 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import { useDependency } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
 import { TextWrappingStyle, UpdateDocDrawingDistanceCommand, UpdateDocDrawingWrappingStyleCommand, UpdateDocDrawingWrapTextCommand } from '../../commands/commands/update-doc-drawing.command';
-import styles from './index.module.less';
 
 const MIN_MARGIN = 0;
 const MAX_MARGIN = 100;
@@ -263,19 +262,36 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
     }, []);
 
     return (
-        <div className={clsx(styles.imageCommonPanelGrid, styles.imageCommonPanelBorder)} style={{ display: showPanel ? 'block' : 'none' }}>
-            <div className={styles.imageCommonPanelRow}>
-                <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelTitle)}>
+        <div
+            className={`
+              univer-relative univer-mt-5 univer-w-full univer-border-t univer-border-solid univer-border-gray-200
+            `}
+            style={{ display: showPanel ? 'block' : 'none' }}
+        >
+            <div
+                className={`
+                  univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start univer-justify-start
+                `}
+            >
+                <div className={clsx('univer-flex univer-items-center univer-gap-1 univer-text-gray-600')}>
                     <div>{localeService.t('image-text-wrap.title')}</div>
                 </div>
             </div>
-            <div className={styles.imageCommonPanelRow}>
-                <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSubtitle)}>
+            <div
+                className={`
+                  univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start univer-justify-start
+                `}
+            >
+                <div className={clsx('univer-flex univer-items-center univer-gap-1 univer-text-black')}>
                     <div>{localeService.t('image-text-wrap.wrappingStyle')}</div>
                 </div>
             </div>
-            <div className={clsx(styles.imageCommonPanelRow)}>
-                <div className={clsx(styles.imageCommonPanelColumn)}>
+            <div
+                className={clsx(`
+                  univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start univer-justify-start
+                `)}
+            >
+                <div className={clsx('univer-flex univer-items-center univer-gap-1')}>
                     <RadioGroup value={wrappingStyle} onChange={handleWrappingStyleChange} direction="vertical">
                         <Radio value={TextWrappingStyle.INLINE}>{localeService.t('image-text-wrap.inline')}</Radio>
                         <Radio value={TextWrappingStyle.WRAP_SQUARE}>{localeService.t('image-text-wrap.square')}</Radio>
@@ -286,13 +302,21 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
                 </div>
             </div>
 
-            <div className={styles.imageCommonPanelRow}>
-                <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSubtitle)}>
+            <div
+                className={`
+                  univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start univer-justify-start
+                `}
+            >
+                <div className={clsx('univer-flex univer-items-center univer-gap-1 univer-text-black')}>
                     <div>{localeService.t('image-text-wrap.wrapText')}</div>
                 </div>
             </div>
-            <div className={clsx(styles.imageCommonPanelRow)}>
-                <div className={clsx(styles.imageCommonPanelColumn)}>
+            <div
+                className={clsx(`
+                  univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start univer-justify-start
+                `)}
+            >
+                <div className={clsx('univer-flex univer-items-center univer-gap-1')}>
                     <RadioGroup disabled={disableWrapText} value={wrapText} onChange={handleWrapTextChange} direction="horizontal">
                         <Radio value={WrapTextType.BOTH_SIDES}>{localeService.t('image-text-wrap.bothSide')}</Radio>
                         <Radio value={WrapTextType.LEFT}>{localeService.t('image-text-wrap.leftOnly')}</Radio>
@@ -301,22 +325,40 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
                 </div>
             </div>
 
-            <div className={styles.imageCommonPanelRow}>
-                <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSubtitle)}>
+            <div
+                className={`
+                  univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start univer-justify-start
+                `}
+            >
+                <div className={clsx('univer-flex univer-items-center univer-gap-1 univer-text-black')}>
                     <div>{localeService.t('image-text-wrap.distanceFromText')}</div>
                 </div>
             </div>
 
-            <div className={styles.imageCommonPanelRow}>
-                <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSpan2)}>
+            <div
+                className={`
+                  univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start univer-justify-start
+                `}
+            >
+                <div className={clsx('univer-flex univer-items-center univer-gap-1')}>
                     <label>
-                        <div className={styles.imageCommonPanelRow}>
-                            <div className={styles.imageCommonPanelColumn}>
+                        <div
+                            className={`
+                              univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start
+                              univer-justify-start
+                            `}
+                        >
+                            <div className="univer-flex univer-items-center univer-gap-1">
                                 {localeService.t('image-text-wrap.top')}
                             </div>
                         </div>
-                        <div className={styles.imageCommonPanelRow}>
-                            <div className={styles.imageCommonPanelColumn}>
+                        <div
+                            className={`
+                              univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start
+                              univer-justify-start
+                            `}
+                        >
+                            <div className="univer-flex univer-items-center univer-gap-1">
                                 <InputNumber
                                     min={MIN_MARGIN}
                                     max={MAX_MARGIN}
@@ -324,21 +366,30 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
                                     precision={1}
                                     value={distToText.distT}
                                     onChange={(val) => { handleDistToTextChange(val, 'distT'); }}
-                                    className={styles.imageCommonPanelInput}
                                 />
                             </div>
                         </div>
                     </label>
                 </div>
-                <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSpan2)}>
+                <div className={clsx('univer-flex univer-items-center univer-gap-1')}>
                     <label>
-                        <div className={styles.imageCommonPanelRow}>
-                            <div className={styles.imageCommonPanelColumn}>
+                        <div
+                            className={`
+                              univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start
+                              univer-justify-start
+                            `}
+                        >
+                            <div className="univer-flex univer-items-center univer-gap-1">
                                 {localeService.t('image-text-wrap.left')}
                             </div>
                         </div>
-                        <div className={styles.imageCommonPanelRow}>
-                            <div className={styles.imageCommonPanelColumn}>
+                        <div
+                            className={`
+                              univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start
+                              univer-justify-start
+                            `}
+                        >
+                            <div className="univer-flex univer-items-center univer-gap-1">
                                 <InputNumber
                                     min={MIN_MARGIN}
                                     max={MAX_MARGIN}
@@ -346,23 +397,36 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
                                     precision={1}
                                     value={distToText.distL}
                                     onChange={(val) => { handleDistToTextChange(val, 'distL'); }}
-                                    className={styles.imageCommonPanelInput}
                                 />
                             </div>
                         </div>
                     </label>
                 </div>
             </div>
-            <div className={styles.imageCommonPanelRow}>
-                <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSpan2)}>
+            <div
+                className={`
+                  univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start univer-justify-start
+                `}
+            >
+                <div className={clsx('univer-flex univer-items-center univer-gap-1')}>
                     <label>
-                        <div className={styles.imageCommonPanelRow}>
-                            <div className={styles.imageCommonPanelColumn}>
+                        <div
+                            className={`
+                              univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start
+                              univer-justify-start
+                            `}
+                        >
+                            <div className="univer-flex univer-items-center univer-gap-1">
                                 {localeService.t('image-text-wrap.bottom')}
                             </div>
                         </div>
-                        <div className={styles.imageCommonPanelRow}>
-                            <div className={styles.imageCommonPanelColumn}>
+                        <div
+                            className={`
+                              univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start
+                              univer-justify-start
+                            `}
+                        >
+                            <div className="univer-flex univer-items-center univer-gap-1">
                                 <InputNumber
                                     min={MIN_MARGIN}
                                     max={MAX_MARGIN}
@@ -370,21 +434,30 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
                                     precision={1}
                                     value={distToText.distB}
                                     onChange={(val) => { handleDistToTextChange(val, 'distB'); }}
-                                    className={styles.imageCommonPanelInput}
                                 />
                             </div>
                         </div>
                     </label>
                 </div>
-                <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSpan2)}>
+                <div className={clsx('univer-flex univer-items-center univer-gap-1')}>
                     <label>
-                        <div className={styles.imageCommonPanelRow}>
-                            <div className={styles.imageCommonPanelColumn}>
+                        <div
+                            className={`
+                              univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start
+                              univer-justify-start
+                            `}
+                        >
+                            <div className="univer-flex univer-items-center univer-gap-1">
                                 {localeService.t('image-text-wrap.right')}
                             </div>
                         </div>
-                        <div className={styles.imageCommonPanelRow}>
-                            <div className={styles.imageCommonPanelColumn}>
+                        <div
+                            className={`
+                              univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start
+                              univer-justify-start
+                            `}
+                        >
+                            <div className="univer-flex univer-items-center univer-gap-1">
                                 <InputNumber
                                     min={MIN_MARGIN}
                                     max={MAX_MARGIN}
@@ -392,7 +465,6 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
                                     precision={1}
                                     value={distToText.distR}
                                     onChange={(val) => { handleDistToTextChange(val, 'distR'); }}
-                                    className={styles.imageCommonPanelInput}
                                 />
                             </div>
                         </div>

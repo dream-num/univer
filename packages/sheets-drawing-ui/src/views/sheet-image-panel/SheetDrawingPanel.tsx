@@ -18,8 +18,7 @@ import type { IDrawingParam } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { DrawingCommonPanel } from '@univerjs/drawing-ui';
 import { useDependency } from '@univerjs/ui';
-import React, { useEffect, useState } from 'react';
-import styles from './index.module.less';
+import { useEffect, useState } from 'react';
 import { SheetDrawingAnchor } from './SheetDrawingAnchor';
 
 export const SheetDrawingPanel = () => {
@@ -39,7 +38,7 @@ export const SheetDrawingPanel = () => {
     }, []);
 
     return !!drawings?.length && (
-        <div className={styles.imageCommonPanel}>
+        <div className="univer-p-2 univer-text-center univer-text-sm">
             <DrawingCommonPanel drawings={drawings} />
             <SheetDrawingAnchor drawings={drawings} />
         </div>

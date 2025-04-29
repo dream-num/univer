@@ -18,7 +18,7 @@ import type { ICommandInfo, IDrawingParam, IObjectPositionH, IObjectPositionV, N
 import type { IDocDrawing } from '@univerjs/docs-drawing';
 import type { IDocumentSkeletonDrawing } from '@univerjs/engine-render';
 import { DocumentFlavor, ICommandService, IUniverInstanceService, LocaleService, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType } from '@univerjs/core';
-import { Checkbox, clsx, InputNumber, Select } from '@univerjs/design';
+import { Checkbox, InputNumber, Select } from '@univerjs/design';
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import { IDrawingManagerService } from '@univerjs/drawing';
@@ -26,7 +26,6 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import { useDependency } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
 import { UpdateDrawingDocTransformCommand } from '../../commands/commands/update-doc-drawing.command';
-import styles from './index.module.less';
 
 const MIN_OFFSET = -1000;
 const MAX_OFFSET = 1000;
@@ -360,28 +359,55 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
     }, []);
 
     return (
-        <div className={clsx(styles.imageCommonPanelGrid, styles.imageCommonPanelBorder)} style={{ display: showPanel ? 'block' : 'none' }}>
-            <div className={styles.imageCommonPanelRow}>
-                <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelTitle)}>
+        <div
+            className={`
+              univer-relative univer-mt-5 univer-w-full univer-border-t univer-border-solid univer-border-gray-200
+            `}
+            style={{ display: showPanel ? 'block' : 'none' }}
+        >
+            <div
+                className={`
+                  univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start univer-justify-start
+                `}
+            >
+                <div className="univer-flex univer-items-center univer-gap-1 univer-text-gray-400">
                     <div>{localeService.t('image-position.title')}</div>
                 </div>
             </div>
-            <div className={styles.imageCommonPanelRow}>
-                <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSubtitle)}>
+            <div
+                className={`
+                  univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start univer-justify-start
+                `}
+            >
+                <div className="univer-flex univer-items-center univer-gap-1 univer-text-black">
                     <div>{localeService.t('image-position.horizontal')}</div>
                 </div>
             </div>
 
-            <div className={styles.imageCommonPanelRow}>
-                <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSpan2)}>
+            <div
+                className={`
+                  univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start univer-justify-start
+                `}
+            >
+                <div className="univer-flex univer-items-center univer-gap-1 univer-text-gray-400">
                     <label>
-                        <div className={styles.imageCommonPanelRow}>
-                            <div className={styles.imageCommonPanelColumn}>
+                        <div
+                            className={`
+                              univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start
+                              univer-justify-start
+                            `}
+                        >
+                            <div className="univer-flex univer-items-center univer-gap-1">
                                 {localeService.t('image-position.absolutePosition')}
                             </div>
                         </div>
-                        <div className={styles.imageCommonPanelRow}>
-                            <div className={styles.imageCommonPanelColumn}>
+                        <div
+                            className={`
+                              univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start
+                              univer-justify-start
+                            `}
+                        >
+                            <div className="univer-flex univer-items-center univer-gap-1">
                                 <InputNumber
                                     min={MIN_OFFSET}
                                     max={MAX_OFFSET}
@@ -394,21 +420,30 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
                                             posOffset: val as number,
                                         });
                                     }}
-                                    className={styles.imageCommonPanelInput}
                                 />
                             </div>
                         </div>
                     </label>
                 </div>
-                <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSpan2)}>
+                <div className="univer-flex univer-items-center univer-gap-1">
                     <label>
-                        <div className={styles.imageCommonPanelRow}>
-                            <div className={styles.imageCommonPanelColumn}>
+                        <div
+                            className={`
+                              univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start
+                              univer-justify-start
+                            `}
+                        >
+                            <div className="univer-flex univer-items-center univer-gap-1">
                                 {localeService.t('image-position.toTheRightOf')}
                             </div>
                         </div>
-                        <div className={styles.imageCommonPanelRow}>
-                            <div className={styles.imageCommonPanelColumn}>
+                        <div
+                            className={`
+                              univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start
+                              univer-justify-start
+                            `}
+                        >
+                            <div className="univer-flex univer-items-center univer-gap-1">
                                 <Select
                                     value={String(hPosition.relativeFrom)}
                                     disabled={disabled}
@@ -421,22 +456,40 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
                 </div>
             </div>
 
-            <div className={styles.imageCommonPanelRow}>
-                <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSubtitle)}>
+            <div
+                className={`
+                  univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start univer-justify-start
+                `}
+            >
+                <div className="univer-flex univer-items-center univer-gap-1 univer-text-black">
                     <div>{localeService.t('image-position.vertical')}</div>
                 </div>
             </div>
 
-            <div className={styles.imageCommonPanelRow}>
-                <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSpan2)}>
+            <div
+                className={`
+                  univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start univer-justify-start
+                `}
+            >
+                <div className="univer-flex univer-items-center univer-gap-1">
                     <label>
-                        <div className={styles.imageCommonPanelRow}>
-                            <div className={styles.imageCommonPanelColumn}>
+                        <div
+                            className={`
+                              univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start
+                              univer-justify-start
+                            `}
+                        >
+                            <div className="univer-flex univer-items-center univer-gap-1">
                                 {localeService.t('image-position.absolutePosition')}
                             </div>
                         </div>
-                        <div className={styles.imageCommonPanelRow}>
-                            <div className={styles.imageCommonPanelColumn}>
+                        <div
+                            className={`
+                              univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start
+                              univer-justify-start
+                            `}
+                        >
+                            <div className="univer-flex univer-items-center univer-gap-1">
                                 <InputNumber
                                     min={MIN_OFFSET}
                                     max={MAX_OFFSET}
@@ -449,21 +502,30 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
                                             posOffset: val as number,
                                         });
                                     }}
-                                    className={styles.imageCommonPanelInput}
                                 />
                             </div>
                         </div>
                     </label>
                 </div>
-                <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSpan2)}>
+                <div className="univer-flex univer-items-center univer-gap-1">
                     <label>
-                        <div className={styles.imageCommonPanelRow}>
-                            <div className={styles.imageCommonPanelColumn}>
+                        <div
+                            className={`
+                              univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start
+                              univer-justify-start
+                            `}
+                        >
+                            <div className="univer-flex univer-items-center univer-gap-1">
                                 {localeService.t('image-position.bellow')}
                             </div>
                         </div>
-                        <div className={styles.imageCommonPanelRow}>
-                            <div className={styles.imageCommonPanelColumn}>
+                        <div
+                            className={`
+                              univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start
+                              univer-justify-start
+                            `}
+                        >
+                            <div className="univer-flex univer-items-center univer-gap-1">
                                 <Select
                                     disabled={disabled}
                                     value={String(vPosition.relativeFrom)}
@@ -476,14 +538,23 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
                 </div>
             </div>
 
-            <div className={styles.imageCommonPanelRow}>
-                <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSubtitle)}>
+            <div
+                className={`
+                  univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start univer-justify-start
+                `}
+            >
+                <div className="univer-flex univer-items-center univer-gap-1 univer-text-black">
                     <div>{localeService.t('image-position.options')}</div>
                 </div>
             </div>
 
-            <div className={styles.imageCommonPanelRow} style={{ marginBottom: '50px' }}>
-                <div className={styles.imageCommonPanelColumn}>
+            <div
+                className={`
+                  univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start univer-justify-start
+                `}
+                style={{ marginBottom: '50px' }}
+            >
+                <div className="univer-flex univer-items-center univer-gap-1">
                     <Checkbox disabled={disabled} checked={followTextMove} onChange={handleFollowTextMoveCheck}>{localeService.t('image-position.moveObjectWithText')}</Checkbox>
                 </div>
             </div>

@@ -16,11 +16,10 @@
 
 import type { IDrawingParam } from '@univerjs/core';
 import { ICommandService, LocaleService } from '@univerjs/core';
-import { clsx, Select } from '@univerjs/design';
+import { Select } from '@univerjs/design';
 import { useDependency } from '@univerjs/ui';
 import { useState } from 'react';
 import { AlignType, SetDrawingAlignOperation } from '../../commands/operations/drawing-align.operation';
-import styles from './index.module.less';
 
 export interface IDrawingAlignProps {
     drawings: IDrawingParam[];
@@ -97,14 +96,28 @@ export const DrawingAlign = (props: IDrawingAlignProps) => {
     };
 
     return (
-        <div className={clsx(styles.imageCommonPanelGrid, styles.imageCommonPanelBorder)} style={{ display: gridDisplay(alignShow) }}>
-            <div className={styles.imageCommonPanelRow}>
-                <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelTitle)}>
+        <div
+            className={`
+              univer-relative univer-w-full univer-border-l-0 univer-border-r-0 univer-border-t univer-border-solid
+              univer-border-gray-200
+            `}
+            style={{ display: gridDisplay(alignShow) }}
+        >
+            <div
+                className={`
+                  univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start univer-justify-start
+                `}
+            >
+                <div className="univer-w-full univer-text-gray-900">
                     <div>{localeService.t('image-panel.align.title')}</div>
                 </div>
             </div>
-            <div className={styles.imageCommonPanelRow}>
-                <div className={clsx(styles.imageCommonPanelColumn)}>
+            <div
+                className={`
+                  univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start univer-justify-start
+                `}
+            >
+                <div className="univer-w-full univer-text-gray-900">
                     <Select value={alignValue} options={alignOptions} onChange={handleAlignChange} />
                 </div>
             </div>

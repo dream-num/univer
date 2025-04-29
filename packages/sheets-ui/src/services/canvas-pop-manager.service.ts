@@ -597,6 +597,7 @@ export class SheetCanvasPopManagerService extends Disposable {
 
         const disposable = new DisposableCollection();
         disposable.add(currentRender.engine.clientRect$.subscribe(() => updatePosition()));
+        disposable.add(currentRender.engine.onTransformChange$.subscribeEvent(() => updatePosition()));
         disposable.add(this._commandService.onCommandExecuted((commandInfo) => {
             if (commandInfo.id === SetWorksheetRowAutoHeightMutation.id) {
                 const params = commandInfo.params as ISetWorksheetRowAutoHeightMutationParams;

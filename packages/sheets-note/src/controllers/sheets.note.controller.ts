@@ -15,7 +15,7 @@
  */
 
 import { Disposable, ICommandService } from '@univerjs/core';
-import { SheetDeleteNoteCommand, SheetToggleNotePopupCommand } from '../commands/commands/note.command';
+import { SheetDeleteNoteCommand, SheetToggleNotePopupCommand, SheetUpdateNoteCommand } from '../commands/commands/note.command';
 import { RemoveNoteMutation, ToggleNotePopupMutation, UpdateNoteMutation, UpdateNotePositionMutation } from '../commands/mutations/note.mutation';
 
 export class SheetsNoteController extends Disposable {
@@ -35,6 +35,7 @@ export class SheetsNoteController extends Disposable {
             RemoveNoteMutation,
             SheetDeleteNoteCommand,
             SheetToggleNotePopupCommand,
+            SheetUpdateNoteCommand,
         ].forEach((command) => {
             this.disposeWithMe(
                 this._commandService.registerCommand(command)

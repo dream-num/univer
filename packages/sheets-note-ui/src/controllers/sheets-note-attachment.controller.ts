@@ -84,6 +84,10 @@ export class SheetsNoteAttachmentController extends Disposable {
             }
         };
 
+        this._sheetsNoteModel.getSheetNotes(targetUnitId, targetSheetId)?.forValue((row, col, note) => {
+            handleNote(targetUnitId, targetSheetId, row, col, note);
+        });
+
         return this._sheetsNoteModel.change$.subscribe((change) => {
             if (change.unitId !== targetUnitId || change.sheetId !== targetSheetId) {
                 return;

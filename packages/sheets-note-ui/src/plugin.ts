@@ -76,13 +76,13 @@ export class SheetsNoteUIPlugin extends Plugin {
         touchDependencies(this._injector, [
             [SheetsNoteUIController],
             [SheetsCellContentController],
-            [SheetsNoteAttachmentController],
         ]);
     }
 
     override onRendered(): void {
         touchDependencies(this._injector, [
             [SheetsNotePopupController],
+            [SheetsNoteAttachmentController],
         ]);
     }
 }

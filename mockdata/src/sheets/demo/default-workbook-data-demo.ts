@@ -24109,6 +24109,10 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
             }),
         },
         {
+            name: 'SHEET_NOTE_PLUGIN',
+            data: '{"sheet-0011":{"10":{"9":{"width":160,"height":60,"note":"This is a note of sheet","show":true}},"26":{"9":{"width":160,"height":60,"note":"This is note 2"}}}}',
+        },
+        {
             name: 'SHEET_FILTER_PLUGIN',
             data: JSON.stringify({
                 'sheet-0011': {

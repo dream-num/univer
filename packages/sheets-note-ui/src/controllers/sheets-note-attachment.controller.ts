@@ -131,6 +131,11 @@ export class SheetsNoteAttachmentController extends Disposable {
                     return () => {
                         disposable.unsubscribe();
                     };
+                } else {
+                    this._noteMatrix.forValue((_, __, disposable) => {
+                        disposable.dispose();
+                    });
+                    this._noteMatrix = new ObjectMatrix();
                 }
             })
         );

@@ -27,7 +27,7 @@ interface ISingleCanvasPopupProps {
     children?: React.ReactNode;
 }
 
-const SingleCanvasPopup = ({ popup, children }: ISingleCanvasPopupProps) => {
+export const SingleCanvasPopup = ({ popup, children }: ISingleCanvasPopupProps) => {
     const [hidden, setHidden] = useState(false);
     const anchorRect$ = useMemo(() => popup.anchorRect$.pipe(
         throttleTime(0, animationFrameScheduler),

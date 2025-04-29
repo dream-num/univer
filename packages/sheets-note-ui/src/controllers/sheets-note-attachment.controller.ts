@@ -19,7 +19,7 @@ import type { ISheetLocationBase } from '@univerjs/sheets';
 import type { ISheetNote } from '@univerjs/sheets-note';
 import { Disposable, Inject, IUniverInstanceService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
 import { SheetsNoteModel } from '@univerjs/sheets-note';
-import { SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
+import { CellPopupManagerService } from '@univerjs/sheets-ui';
 import { of, switchMap } from 'rxjs';
 import { SHEET_NOTE_COMPONENT } from '../views/config';
 
@@ -28,8 +28,8 @@ export class SheetsNoteAttachmentController extends Disposable {
 
     constructor(
         @Inject(SheetsNoteModel) private readonly _sheetsNoteModel: SheetsNoteModel,
-        @Inject(SheetCanvasPopManagerService) private readonly _canvasPopupManagerService: SheetCanvasPopManagerService,
-        @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService
+        @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService,
+        @Inject(CellPopupManagerService) private readonly _cellPopupManagerService: CellPopupManagerService
     ) {
         super();
 
@@ -37,9 +37,13 @@ export class SheetsNoteAttachmentController extends Disposable {
     }
 
     private _showPopup(unitId: string, sheetId: string, row: number, col: number) {
-        return this._canvasPopupManagerService.attachPopupToCell(
-            row,
-            col,
+        return this._cellPopupManagerService.showPopup(
+            {
+                unitId,
+                subUnitId: sheetId,
+                row,
+                col,
+            },
             {
                 componentKey: SHEET_NOTE_COMPONENT,
                 direction: 'horizontal',

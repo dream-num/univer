@@ -104,6 +104,8 @@ import {
 } from '../components/font-family';
 import { FONT_SIZE_COMPONENT, FontSize } from '../components/font-size';
 import { MENU_ITEM_INPUT_COMPONENT, MenuItemInput } from '../components/menu-item-input';
+import { CellPopup } from '../views/cell-popup';
+import { CELL_POPUP_COMPONENT_KEY } from '../views/cell-popup/config';
 import { DEFINED_NAME_CONTAINER } from '../views/defined-name/component-name';
 import { DefinedNameContainer } from '../views/defined-name/DefinedNameContainer';
 import { RenderSheetContent, RenderSheetFooter, RenderSheetHeader } from '../views/sheet-container/SheetContainer';
@@ -198,6 +200,7 @@ export class SheetUIController extends Disposable {
         this.disposeWithMe(componentManager.register(FONT_FAMILY_ITEM_COMPONENT, FontFamilyItem));
         this.disposeWithMe(componentManager.register(FONT_SIZE_COMPONENT, FontSize));
         this.disposeWithMe(componentManager.register(DEFINED_NAME_CONTAINER, DefinedNameContainer));
+        this.disposeWithMe(componentManager.register(CELL_POPUP_COMPONENT_KEY, CellPopup));
 
         // init icons
         this.disposeWithMe(componentManager.register('HideGridlines', HideGridlines));

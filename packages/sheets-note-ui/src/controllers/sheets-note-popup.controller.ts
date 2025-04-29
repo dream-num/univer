@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
+import type { Nullable } from '@univerjs/core';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
+import type { IHoverCellPosition } from '@univerjs/sheets-ui';
 import { Disposable, Inject, RANGE_TYPE, Rectangle } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetsSelectionsService } from '@univerjs/sheets';
 import { SheetsNoteModel } from '@univerjs/sheets-note';
-import { IEditorBridgeService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { HoverManagerService, IEditorBridgeService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { debounceTime } from 'rxjs/operators';
 import { SheetsNotePopupService } from '../services/sheets-note-popup.service';
 
 export class SheetsNotePopupController extends Disposable {
@@ -30,12 +33,14 @@ export class SheetsNotePopupController extends Disposable {
         @Inject(SheetsNoteModel) private readonly _sheetsNoteModel: SheetsNoteModel,
         @Inject(SheetsSelectionsService) private readonly _sheetSelectionService: SheetsSelectionsService,
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
+        @Inject(HoverManagerService) private readonly _hoverManagerService: HoverManagerService
     ) {
         super();
 
         this._initSelectionUpdateListener();
         this._initEditorBridge();
+        this._initHoverEvent();
     }
 
     private _handleSelectionChange(selections: ISelectionWithStyle[], unitId: string, subUnitId: string) {
@@ -94,6 +99,29 @@ export class SheetsNotePopupController extends Disposable {
         this.disposeWithMe(
             this._editorBridgeService.visible$.subscribe((visible) => {
                 if (visible.visible) {
+                    this._sheetsNotePopupService.hidePopup();
+                }
+            })
+        );
+    }
+
+    private _initHoverEvent() {
+        this.disposeWithMe(
+            this._hoverManagerService.currentCell$.pipe(debounceTime(100)).subscribe((cell: Nullable<IHoverCellPosition>) => {
+                if (!cell?.location) return;
+
+                const { unitId, subUnitId, row, col } = cell.location;
+
+                const note = this._sheetsNoteModel.getNote(unitId, subUnitId, row, col);
+                if (note) {
+                    this._sheetsNotePopupService.showPopup({
+                        unitId,
+                        subUnitId,
+                        row,
+                        col,
+                        temp: true,
+                    });
+                } else {
                     this._sheetsNotePopupService.hidePopup();
                 }
             })

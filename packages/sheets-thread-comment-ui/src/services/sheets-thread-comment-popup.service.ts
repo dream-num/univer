@@ -17,7 +17,7 @@
 import type { IDisposable, Nullable } from '@univerjs/core';
 import type { ISheetLocationBase } from '@univerjs/sheets';
 import { Disposable, DisposableCollection, Inject } from '@univerjs/core';
-import { SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
+import { CellPopupManagerService, SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
 import { IZenZoneService } from '@univerjs/ui';
 import { BehaviorSubject } from 'rxjs';
 import { SHEETS_THREAD_COMMENT_MODAL } from '../types/const';
@@ -42,7 +42,8 @@ export class SheetsThreadCommentPopupService extends Disposable {
 
     constructor(
         @Inject(SheetCanvasPopManagerService) private readonly _canvasPopupManagerService: SheetCanvasPopManagerService,
-        @IZenZoneService private readonly _zenZoneService: IZenZoneService
+        @IZenZoneService private readonly _zenZoneService: IZenZoneService,
+        @Inject(CellPopupManagerService) private readonly _cellPopupManagerService: CellPopupManagerService
     ) {
         super();
         this._initZenVisible();
@@ -83,9 +84,13 @@ export class SheetsThreadCommentPopupService extends Disposable {
         this._activePopup = location;
         this._activePopup$.next(location);
 
-        const popupDisposable = this._canvasPopupManagerService.attachPopupToCell(
-            row,
-            col,
+        const popupDisposable = this._cellPopupManagerService.showPopup(
+            {
+                row,
+                col,
+                unitId,
+                subUnitId,
+            },
             {
                 componentKey: SHEETS_THREAD_COMMENT_MODAL,
                 onClickOutside: () => {

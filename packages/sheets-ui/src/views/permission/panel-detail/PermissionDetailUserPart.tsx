@@ -142,8 +142,8 @@ export const PermissionDetailUserPart = (props: IPermissionDetailUserPartProps) 
                                             {item.subject?.name}
                                         </span>
                                         <Select
-                                            className="univer-cursor-pointer !univer-w-[90px] univer-min-w-0 "
-                                                borderless
+                                            className="!univer-w-[90px] univer-min-w-0 univer-cursor-pointer"
+                                            borderless
                                             value="edit"
                                             options={[
                                                 { label: `${localeService.t('permission.panel.canEdit')}`, value: 'edit' },

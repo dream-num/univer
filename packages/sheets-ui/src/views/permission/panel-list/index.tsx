@@ -208,199 +208,206 @@ export const SheetPermissionPanelList = () => {
         <div className="univer-mt-2 univer-flex univer-h-[calc(100%-8px)] univer-flex-col">
             <div className="univer-flex univer-h-[30px] univer-py-2">
                 <div className="univer-mr-5 univer-flex univer-cursor-pointer univer-flex-col univer-items-center" onClick={() => handleChangeHeaderType(true)}>
-                    <div className={clsx('univer-h-6 univer-font-medium univer-leading-6  univer-text-base', { 'univer-text-blue-500': isCurrentSheet })} > {localeService.t('permission.panel.currentSheet')}</div>
-                    <div className={clsx(`univer-mt-1 univer-w-6 univer-h-0.5`, { 'univer-bg-blue-500': isCurrentSheet })} />
+                    <div className={clsx('univer-h-6 univer-text-base univer-font-medium univer-leading-6', { 'univer-text-blue-500': isCurrentSheet })}>
+                        {' '}
+                        {localeService.t('permission.panel.currentSheet')}
+                    </div>
+                    <div className={clsx('univer-mt-1 univer-h-0.5 univer-w-6', { 'univer-bg-blue-500': isCurrentSheet })} />
                 </div>
                 <div className="univer-mr-5 univer-flex univer-cursor-pointer univer-flex-col univer-items-center" onClick={() => handleChangeHeaderType(false)}>
-                    <div className={clsx('univer-h-6 univer-font-medium univer-leading-6  univer-text-base', { 'univer-text-blue-500': !isCurrentSheet })} >{localeService.t('permission.panel.allSheet')}</div>
-                    <div className={clsx(`univer-mt-1 univer-w-6 univer-h-0.5`, { 'univer-bg-blue-500': !isCurrentSheet })} />
+                    <div className={clsx('univer-h-6 univer-text-base univer-font-medium univer-leading-6', { 'univer-text-blue-500': !isCurrentSheet })}>{localeService.t('permission.panel.allSheet')}</div>
+                    <div className={clsx('univer-mt-1 univer-h-0.5 univer-w-6', { 'univer-bg-blue-500': !isCurrentSheet })} />
                 </div>
             </div>
 
-            {
-                ruleList?.length > 0
-                    ? (
-                        <div>
-                            {ruleList?.map((item) => {
-                                const rule = allRuleMap.get(item.objectID);
+            {ruleList?.length > 0
+                ? (
+                    <div>
+                        {ruleList?.map((item) => {
+                            const rule = allRuleMap.get(item.objectID);
 
-                                if (!rule) {
-                                    return null;
-                                }
+                            if (!rule) {
+                                return null;
+                            }
 
-                                const editAction = item.actions.find((action) => action.action === UnitAction.Edit);
-                                const editPermission = editAction?.allowed;
+                            const editAction = item.actions.find((action) => action.action === UnitAction.Edit);
+                            const editPermission = editAction?.allowed;
 
-                                const viewAction = item.actions.find((action) => action.action === UnitAction.View);
-                                const viewPermission = viewAction?.allowed;
+                            const viewAction = item.actions.find((action) => action.action === UnitAction.View);
+                            const viewPermission = viewAction?.allowed;
 
-                                const manageCollaboratorAction = item.actions.find((action) => action.action === UnitAction.ManageCollaborator);
-                                const deleteAction = item.actions.find((action) => action.action === UnitAction.Delete);
+                            const manageCollaboratorAction = item.actions.find((action) => action.action === UnitAction.ManageCollaborator);
+                            const deleteAction = item.actions.find((action) => action.action === UnitAction.Delete);
 
-                                const hasManagerPermission = manageCollaboratorAction?.allowed || currentUser.userID === item.creator?.userID;
-                                const hasDeletePermission = deleteAction?.allowed || currentUser.userID === item.creator?.userID;
+                            const hasManagerPermission = manageCollaboratorAction?.allowed || currentUser.userID === item.creator?.userID;
+                            const hasDeletePermission = deleteAction?.allowed || currentUser.userID === item.creator?.userID;
 
-                                let ruleName = '';
+                            let ruleName = '';
 
-                                const targetSheet = workbook.getSheetBySheetId(rule.subUnitId);
-                                const targetName = targetSheet?.getName();
-                                if (rule.unitType === UnitObject.SelectRange) {
-                                    const ranges = (rule as IRangeProtectionRule).ranges;
-                                    const rangeStr = ranges?.length
-                                        ? ranges.map((range) => {
-                                            const v = serializeRange(range);
-                                            return v === 'NaN' ? '' : v;
-                                        }).filter((r) => !!r).join(',')
-                                        : '';
-                                    ruleName = `${targetName}(${rangeStr})`;
-                                } else if (rule.unitType === UnitObject.Worksheet) {
-                                    ruleName = targetName || '';
-                                }
+                            const targetSheet = workbook.getSheetBySheetId(rule.subUnitId);
+                            const targetName = targetSheet?.getName();
+                            if (rule.unitType === UnitObject.SelectRange) {
+                                const ranges = (rule as IRangeProtectionRule).ranges;
+                                const rangeStr = ranges?.length
+                                    ? ranges.map((range) => {
+                                        const v = serializeRange(range);
+                                        return v === 'NaN' ? '' : v;
+                                    }).filter((r) => !!r).join(',')
+                                    : '';
+                                ruleName = `${targetName}(${rangeStr})`;
+                            } else if (rule.unitType === UnitObject.Worksheet) {
+                                ruleName = targetName || '';
+                            }
 
-                                return (
-                                    <div
-                                        key={item.objectID}
-                                        className={`
+                            return (
+                                <div
+                                    key={item.objectID}
+                                    className={`
                                       univer-mt-3 univer-rounded-lg univer-border univer-border-solid
                                       univer-border-gray-200 univer-p-3
                                       hover:univer-bg-gray-50
                                     `}
-                                        onMouseMove={() => {
-                                            const { subUnitId, unitType } = rule;
-                                            const activeSheet = workbook.getActiveSheet();
-                                            if (!activeSheet) {
-                                                return false;
-                                            }
-                                            const activeSubUnitId = activeSheet.getSheetId();
-                                            if (subUnitId !== activeSubUnitId) {
-                                                return false;
-                                            }
-                                            if (unitType === UnitObject.SelectRange) {
-                                                const ranges = (rule as IRangeProtectionRule).ranges || [];
-                                                ranges !== currentRuleRanges && currentRuleRangesSet(ranges);
-                                            } else if (unitType === UnitObject.Worksheet) {
-                                                const ranges = [{ startRow: 0, endRow: activeSheet.getRowCount() - 1, startColumn: 0, endColumn: activeSheet.getColumnCount() - 1 }];
-                                                ranges !== currentRuleRanges && currentRuleRangesSet(ranges);
-                                            }
-                                        }}
-                                        onMouseLeave={() => currentRuleRangesSet([])}
-                                    >
-                                        <div className="univer-flex univer-h-5 univer-justify-between univer-leading-5">
-                                            <Tooltip title={ruleName}>
-                                                <div
-                                                    className="univer-max-w-[200px] univer-text-ellipsis univer-font-medium"
-                                                >
-                                                    {ruleName}
+                                    onMouseMove={() => {
+                                        const { subUnitId, unitType } = rule;
+                                        const activeSheet = workbook.getActiveSheet();
+                                        if (!activeSheet) {
+                                            return false;
+                                        }
+                                        const activeSubUnitId = activeSheet.getSheetId();
+                                        if (subUnitId !== activeSubUnitId) {
+                                            return false;
+                                        }
+                                        if (unitType === UnitObject.SelectRange) {
+                                            const ranges = (rule as IRangeProtectionRule).ranges || [];
+                                            ranges !== currentRuleRanges && currentRuleRangesSet(ranges);
+                                        } else if (unitType === UnitObject.Worksheet) {
+                                            const ranges = [{ startRow: 0, endRow: activeSheet.getRowCount() - 1, startColumn: 0, endColumn: activeSheet.getColumnCount() - 1 }];
+                                            ranges !== currentRuleRanges && currentRuleRangesSet(ranges);
+                                        }
+                                    }}
+                                    onMouseLeave={() => currentRuleRangesSet([])}
+                                >
+                                    <div className="univer-flex univer-h-5 univer-justify-between univer-leading-5">
+                                        <Tooltip title={ruleName}>
+                                            <div
+                                                className={`
+                                                  univer-max-w-[200px] univer-text-ellipsis univer-font-medium
+                                                `}
+                                            >
+                                                {ruleName}
+                                            </div>
+                                        </Tooltip>
+
+                                        {(hasManagerPermission || hasDeletePermission) && (
+                                            <div className="univer-flex univer-items-center">
+                                                {hasManagerPermission && (
+                                                    <Tooltip title={localeService.t('permission.panel.edit')}>
+                                                        <div
+                                                            className={`
+                                                              univer-box-border univer-h-6 univer-rounded-sm univer-p-1
+                                                              hover:univer-bg-gray-200
+                                                            `}
+                                                            onClick={() => handleEdit(rule as IPermissionPanelRule)}
+                                                        >
+                                                            <WriteSingle />
+                                                        </div>
+                                                    </Tooltip>
+                                                )}
+                                                {hasDeletePermission && (
+                                                    <Tooltip title={localeService.t('permission.panel.delete')}>
+                                                        <div
+                                                            className={`
+                                                              univer-box-border univer-h-6 univer-rounded-sm univer-p-1
+                                                              hover:univer-bg-gray-200
+                                                            `}
+                                                            onClick={() => handleDelete(rule)}
+                                                        >
+                                                            <DeleteSingle />
+                                                        </div>
+                                                    </Tooltip>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="univer-my-2 univer-h-[1px] univer-bg-gray-200" />
+                                    <div>
+                                        <div className="univer-flex univer-items-center">
+
+                                            <Tooltip title={item.creator?.name ?? ''}>
+                                                <div>
+                                                    <Avatar src={item.creator?.avatar} className="univer-mr-1.5" size={24} />
                                                 </div>
                                             </Tooltip>
+                                            <span
+                                                className={`
+                                                  univer-h-4 univer-flex-grow univer-text-xs univer-text-black
+                                                `}
+                                            >
+                                                {localeService.t('permission.panel.created')}
+                                            </span>
+                                            <span className="univer-h-4 univer-text-xs univer-text-black">{editPermission ? `${localeService.t('permission.panel.iCanEdit')}` : `${localeService.t('permission.panel.iCanNotEdit')}`}</span>
 
-                                            {(hasManagerPermission || hasDeletePermission) && (
-                                                <div className="univer-flex univer-items-center">
-                                                    {hasManagerPermission && (
-                                                        <Tooltip title={localeService.t('permission.panel.edit')}>
-                                                            <div
-                                                                className={`
-                                                              univer-box-border univer-h-6 univer-rounded-sm univer-p-1
-                                                              hover:univer-bg-gray-200
-                                                            `}
-                                                                onClick={() => handleEdit(rule as IPermissionPanelRule)}
-                                                            >
-                                                                <WriteSingle />
-                                                            </div>
-                                                        </Tooltip>
-                                                    )}
-                                                    {hasDeletePermission && (
-                                                        <Tooltip title={localeService.t('permission.panel.delete')}>
-                                                            <div
-                                                                className={`
-                                                              univer-box-border univer-h-6 univer-rounded-sm univer-p-1
-                                                              hover:univer-bg-gray-200
-                                                            `}
-                                                                onClick={() => handleDelete(rule)}
-                                                            >
-                                                                <DeleteSingle />
-                                                            </div>
-                                                        </Tooltip>
-                                                    )}
-                                                </div>
-                                            )}
                                         </div>
-                                        <div className="univer-my-2 univer-h-[1px] univer-bg-gray-200" />
-                                        <div>
-                                            <div className="univer-flex univer-items-center">
-
-                                                <Tooltip title={item.creator?.name ?? ''}>
-                                                    <div>
-                                                        <Avatar src={item.creator?.avatar} className="univer-mr-1.5" size={24} />
-                                                    </div>
-                                                </Tooltip>
-                                                <span
-                                                    className="univer-h-4 univer-flex-grow univer-text-xs univer-text-black"
-                                                >
-                                                    {localeService.t('permission.panel.created')}
-                                                </span>
-                                                <span className="univer-h-4 univer-text-xs univer-text-black">{editPermission ? `${localeService.t('permission.panel.iCanEdit')}` : `${localeService.t('permission.panel.iCanNotEdit')}`}</span>
-
-                                            </div>
-                                            <div className="univer-mt-2 univer-flex univer-items-center">
-                                                <span
-                                                    className="univer-h-4 univer-flex-grow univer-text-xs univer-text-black"
-                                                >
-                                                    {localeService.t('permission.panel.viewPermission')}
-                                                </span>
-                                                <span className="univer-h-4 univer-text-xs univer-text-black">{viewPermission ? `${localeService.t('permission.panel.iCanView')}` : `${localeService.t('permission.panel.iCanNotView')}`}</span>
-                                            </div>
-                                            {rule.description && (
-                                                <Tooltip title={rule.description}>
-                                                    <div
-                                                        className={`
+                                        <div className="univer-mt-2 univer-flex univer-items-center">
+                                            <span
+                                                className={`
+                                                  univer-h-4 univer-flex-grow univer-text-xs univer-text-black
+                                                `}
+                                            >
+                                                {localeService.t('permission.panel.viewPermission')}
+                                            </span>
+                                            <span className="univer-h-4 univer-text-xs univer-text-black">{viewPermission ? `${localeService.t('permission.panel.iCanView')}` : `${localeService.t('permission.panel.iCanNotView')}`}</span>
+                                        </div>
+                                        {rule.description && (
+                                            <Tooltip title={rule.description}>
+                                                <div
+                                                    className={`
                                                       univer-text-3 univer-max-w-64 univer-overflow-hidden
                                                       univer-text-ellipsis univer-whitespace-nowrap univer-text-gray-400
                                                       univer-mt-2]
                                                     `}
-                                                    >
-                                                        {rule.description}
-                                                    </div>
-                                                </Tooltip>
-                                            )}
-                                        </div>
+                                                >
+                                                    {rule.description}
+                                                </div>
+                                            </Tooltip>
+                                        )}
                                     </div>
-                                );
-                            })}
-                        </div>
-                    )
-                    : (
-                        <div className="univer-flex univer-flex-1 univer-flex-col univer-items-center univer-justify-center">
-                            <img width={240} height={120} src={panelListEmptyBase64} alt="" />
-                            <p className="univer-w-60 univer-break-words univer-text-[13px] univer-text-gray-400">{localeService.t('permission.dialog.listEmpty')}</p>
-                        </div>
-                    )
-            }
-
-            {
-                hasSetProtectPermission && (
-                    <div className="univer-mt-auto univer-py-5">
-                        <Button
-                            className="univer-w-full"
-                            variant="primary"
-                            onClick={() => {
-                                const sidebarProps = {
-                                    header: { title: `${localeService.t('permission.panel.title')}` },
-                                    children: {
-                                        label: UNIVER_SHEET_PERMISSION_PANEL,
-                                        showDetail: true,
-                                    },
-                                    width: 330,
-                                };
-                                sidebarService.open(sidebarProps);
-                            }}
-                        >
-                            <div>+ </div>
-                            {localeService.t('permission.button.addNewPermission')}
-                        </Button>
+                                </div>
+                            );
+                        })}
                     </div>
                 )
-            }
-        </div >
+                : (
+                    <div
+                        className="univer-flex univer-flex-1 univer-flex-col univer-items-center univer-justify-center"
+                    >
+                        <img width={240} height={120} src={panelListEmptyBase64} alt="" />
+                        <p className="univer-w-60 univer-break-words univer-text-[13px] univer-text-gray-400">{localeService.t('permission.dialog.listEmpty')}</p>
+                    </div>
+                )}
+
+            {hasSetProtectPermission && (
+                <div className="univer-mt-auto univer-py-5">
+                    <Button
+                        className="univer-w-full"
+                        variant="primary"
+                        onClick={() => {
+                            const sidebarProps = {
+                                header: { title: `${localeService.t('permission.panel.title')}` },
+                                children: {
+                                    label: UNIVER_SHEET_PERMISSION_PANEL,
+                                    showDetail: true,
+                                },
+                                width: 330,
+                            };
+                            sidebarService.open(sidebarProps);
+                        }}
+                    >
+                        <div>+ </div>
+                        {localeService.t('permission.button.addNewPermission')}
+                    </Button>
+                </div>
+            )}
+        </div>
     );
 };

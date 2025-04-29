@@ -113,6 +113,7 @@ export class SheetsNotePopupController extends Disposable {
                 const { unitId, subUnitId, row, col } = cell.location;
 
                 const note = this._sheetsNoteModel.getNote(unitId, subUnitId, row, col);
+                if (note?.show) return;
                 if (note) {
                     this._sheetsNotePopupService.showPopup({
                         unitId,

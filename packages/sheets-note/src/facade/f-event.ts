@@ -24,6 +24,7 @@ export interface ISheetNoteAddEventParmas {
     row: number;
     col: number;
     note: ISheetNote;
+    cancel?: boolean;
 }
 
 export interface ISheetNoteDeleteEventParmas {
@@ -32,6 +33,7 @@ export interface ISheetNoteDeleteEventParmas {
     row: number;
     col: number;
     oldNote: ISheetNote;
+    cancel?: boolean;
 }
 
 export interface ISheetNoteUpdateEventParmas {
@@ -41,6 +43,7 @@ export interface ISheetNoteUpdateEventParmas {
     col: number;
     note: ISheetNote;
     oldNote: ISheetNote;
+    cancel?: boolean;
 }
 
 export interface ISheetNoteShowEventParmas {
@@ -48,6 +51,7 @@ export interface ISheetNoteShowEventParmas {
     worksheet: FWorksheet;
     row: number;
     col: number;
+    cancel?: boolean;
 }
 
 export interface ISheetNoteHideEventParmas {
@@ -55,6 +59,7 @@ export interface ISheetNoteHideEventParmas {
     worksheet: FWorksheet;
     row: number;
     col: number;
+    cancel?: boolean;
 }
 
 /**

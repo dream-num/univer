@@ -22,8 +22,19 @@ import { IMessageService } from '@univerjs/ui';
 export const MessageOperation: ICommand = {
     id: 'debugger.operation.message',
     type: CommandType.OPERATION,
-    handler: async (accessor: IAccessor) => {
+    handler: async (accessor: IAccessor, params: { value: string }) => {
         const messageService = accessor.get(IMessageService);
+
+        if (params.value === 'loading') {
+            messageService.show({
+                type: MessageType.Loading,
+                content: 'Loading message',
+                duration: 3000,
+            });
+
+            return true;
+        }
+
         messageService.show({
             type: MessageType.Success,
             content: 'Demo message',

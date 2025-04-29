@@ -15,13 +15,13 @@
  */
 
 import type { FC } from 'react';
-import type { IBusinessComponentProps } from '../interface';
+import type { IBusinessComponentProps } from './interface';
 import { LocaleService } from '@univerjs/core';
 import { InputNumber, Select } from '@univerjs/design';
 import { getCurrencyType, getDecimalFromPattern, setPatternDecimal } from '@univerjs/sheets-numfmt';
 import { useDependency } from '@univerjs/ui';
 import { useContext, useMemo, useState } from 'react';
-import { UserHabitCurrencyContext } from '../../../controllers/user-habit.controller';
+import { UserHabitCurrencyContext } from '../../controllers/user-habit.controller';
 
 export const isAccountingPanel = (pattern: string) => {
     const type = getCurrencyType(pattern);

@@ -18,7 +18,6 @@ import type { CSSProperties, ReactNode } from 'react';
 import type { IRadioProps } from '../radio/Radio';
 import { Children, cloneElement, isValidElement } from 'react';
 import { clsx } from '../../helper/clsx';
-import styles from './index.module.less';
 
 export interface IRadioGroupProps {
     children: ReactNode[];
@@ -66,12 +65,13 @@ export function RadioGroup(props: IRadioGroupProps) {
         onChange(value);
     };
 
-    const _className = clsx(className, styles.radioGroup, {
-        [styles.radioGroupDirectionVertical]: direction === 'vertical',
-    });
-
     return (
-        <div className={clsx(styles.radioGroup, _className)} style={style}>
+        <div
+            className={clsx('univer-flex univer-gap-2', {
+                'univer-flex-col': direction === 'vertical',
+            }, className)}
+            style={style}
+        >
             {Children.map(children, (child, index) => {
                 if (isValidElement<IRadioProps>(child)) {
                     return cloneElement(child, {

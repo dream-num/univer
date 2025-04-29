@@ -15,7 +15,7 @@
  */
 
 import type { FC } from 'react';
-import type { IBusinessComponentProps } from '../interface';
+import type { IBusinessComponentProps } from './interface';
 import { LocaleService } from '@univerjs/core';
 import { useDependency } from '@univerjs/ui';
 
@@ -25,6 +25,7 @@ export const GeneralPanel: FC<IBusinessComponentProps> = (props) => {
     const localeService = useDependency(LocaleService);
     const t = localeService.t;
 
+    // FIXME: WTF
     props.action.current = () => '';
 
     return (

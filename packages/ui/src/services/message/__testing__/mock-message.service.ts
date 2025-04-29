@@ -28,6 +28,14 @@ export class MockMessageService implements IMessageService {
         return toDisposable(() => { /* empty */ });
     }
 
+    remove(_id: string): void {
+        // empty
+    }
+
+    removeAll(): void {
+        // empty
+    }
+
     setContainer(): void {
         // empty
     }

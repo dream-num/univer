@@ -20,7 +20,6 @@ import { clsx, Dropdown } from '@univerjs/design';
 import { Autofill, MoreDownSingle } from '@univerjs/icons';
 import { useDependency } from '@univerjs/ui';
 import { useState } from 'react';
-import styles from './index.module.less';
 
 export interface IImagePopupMenuItem {
     label: string;
@@ -83,17 +82,25 @@ export function SlideImagePopupMenu(props: IImagePopupMenuProps) {
                 align="start"
                 overlay={(
                     <ul
-                        className={clsx(styles.imagePopupMenu, `
-                          univer-box-border univer-p-2 univer-text-sm univer-theme
-                        `)}
+                        className={`
+                          univer-m-0 univer-box-border univer-grid univer-list-none univer-items-center univer-gap-1
+                          univer-rounded-lg univer-border univer-border-solid univer-border-gray-200 univer-bg-white
+                          univer-p-1.5 univer-text-sm univer-shadow-lg
+                        `}
                     >
                         {availableMenu.map((item) => (
                             <li
                                 key={item.index}
+                                className={`
+                                  univer-relative univer-box-border univer-flex univer-h-8 univer-cursor-pointer
+                                  univer-items-center univer-rounded univer-text-sm univer-transition-colors
+                                  hover:univer-bg-gray-100
+                                `}
                                 onClick={() => handleClick(item)}
-                                className={styles.imagePopupMenuItem}
                             >
-                                <span className={styles.imagePopupMenuItemTitle}>{localeService.t(item.label)}</span>
+                                <span className="univer-px-2 univer-py-1.5 univer-align-middle">
+                                    {localeService.t(item.label)}
+                                </span>
                             </li>
                         ))}
                     </ul>
@@ -102,15 +109,15 @@ export function SlideImagePopupMenu(props: IImagePopupMenuProps) {
                 onOpenChange={onVisibleChange}
             >
                 <div
-                    className={clsx(styles.btnContainer, {
-                        [styles.btnContainerExpand]: visible,
+                    className={clsx(`
+                      univer-flex univer-items-center univer-justify-center univer-rounded univer-border
+                      univer-border-solid univer-border-gray-200 univer-bg-white univer-p-1
+                    `, {
+                        'univer-bg-gray-100': visible,
                     })}
                 >
-                    <Autofill
-                        style={{ color: '#35322B' }}
-                        extend={{ colorChannel1: 'rgb(var(--green-700, #409f11))' }}
-                    />
-                    {showMore && <MoreDownSingle style={{ color: '#CCCCCC', fontSize: '8px', marginLeft: '8px' }} />}
+                    <Autofill className="univer-fill-green-500 univer-text-gray-900" />
+                    {showMore && <MoreDownSingle className="univer-text-[10px] univer-text-gray-400" />}
                 </div>
             </Dropdown>
         </div>

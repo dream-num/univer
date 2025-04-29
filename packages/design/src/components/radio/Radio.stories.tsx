@@ -31,7 +31,13 @@ export default meta;
 
 export const RadioBasic = {
     render() {
-        return <Radio>radio 1</Radio>;
+        return (
+            <>
+                <Radio>radio 1</Radio>
+                <Radio checked={false}>radio 1</Radio>
+                <Radio checked>radio 1</Radio>
+            </>
+        );
     },
 };
 

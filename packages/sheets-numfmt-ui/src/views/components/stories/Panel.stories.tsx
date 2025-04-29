@@ -35,7 +35,7 @@ const meta: Meta = {
 
 export default meta;
 
-export const Test: StoryObj<ISheetNumfmtPanelProps> = {
+export const NumfmtPanel: StoryObj<ISheetNumfmtPanelProps> = {
     render() {
         const { injector } = useContext(RediContext);
 
@@ -57,12 +57,14 @@ export const Test: StoryObj<ISheetNumfmtPanelProps> = {
 
         return (
             <RediContext.Provider value={{ injector: inject }}>
-                <SheetNumfmtPanel
-                    value={{ defaultPattern: '', defaultValue: 123123, row: 2, col: 3 }}
-                    onChange={(_pattern) => {
+                <div className="univer-w-[340px]">
+                    <SheetNumfmtPanel
+                        value={{ defaultPattern: '', defaultValue: 123123, row: 2, col: 3 }}
+                        onChange={(_pattern) => {
                         // empty
-                    }}
-                />
+                        }}
+                    />
+                </div>
             </RediContext.Provider>
         );
     },

@@ -16,12 +16,12 @@
 
 import type { IDrawingParam } from '@univerjs/core';
 import { ArrangeTypeEnum, LocaleService } from '@univerjs/core';
-import { Button, clsx } from '@univerjs/design';
+import { Button } from '@univerjs/design';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { BottomSingle, MoveDownSingle, MoveUpSingle, TopmostSingle } from '@univerjs/icons';
 import { useDependency } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
-import styles from './index.module.less';
+import { columnTitleClassName, inlineClassName, rowClassName } from '../utils/classnames';
 
 export interface IDrawingArrangeProps {
     arrangeShow: boolean;
@@ -51,50 +51,36 @@ export const DrawingArrange = (props: IDrawingArrangeProps) => {
     }, []);
 
     const onArrangeBtnClick = (arrangeType: ArrangeTypeEnum) => {
-        // commandService.executeCommand(SetDrawingArrangeCommand.id, {
-        //     unitId: drawings[0].unitId,
-        //     subUnitId: drawings[0].subUnitId,
-        //     drawingIds: drawings.map((drawing) => drawing.drawingId),
-        //     arrangeType,
-        // });
-
         const unitId = drawings[0].unitId;
         const subUnitId = drawings[0].subUnitId;
         const drawingIds = drawings.map((drawing) => drawing.drawingId);
 
         drawingManagerService.featurePluginOrderUpdateNotification({ unitId, subUnitId, drawingIds, arrangeType });
-
-        // if (arrangeType === ArrangeType.forward) {
-        //     drawingManagerService.forwardDrawings(unitId, subUnitId, drawingIds);
-        // } else if (arrangeType === ArrangeType.backward) {
-        //     drawingManagerService.backwardDrawing(unitId, subUnitId, drawingIds);
-        // } else if (arrangeType === ArrangeType.front) {
-        //     drawingManagerService.frontDrawing(unitId, subUnitId, drawingIds);
-        // } else if (arrangeType === ArrangeType.back) {
-        //     drawingManagerService.backDrawing(unitId, subUnitId, drawingIds);
-        // }
     };
 
     return (
-        <div className={styles.imageCommonPanelGrid} style={{ display: gridDisplay(arrangeShow) }}>
-            <div className={styles.imageCommonPanelRow}>
-                <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelTitle)}>
+        <div
+            className="univer-relative univer-mt-5 univer-w-full"
+            style={{ display: gridDisplay(arrangeShow) }}
+        >
+            <div className={rowClassName}>
+                <div className={columnTitleClassName}>
                     <div>{localeService.t('image-panel.arrange.title')}</div>
                 </div>
             </div>
-            <div className={styles.imageCommonPanelRow}>
-                <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSpan2)}>
+            <div className={rowClassName}>
+                <div className="univer-w-1/2">
                     <Button onClick={() => { onArrangeBtnClick(ArrangeTypeEnum.forward); }}>
-                        <span className={styles.imageCommonPanelInline}>
+                        <span className={inlineClassName}>
                             <MoveUpSingle />
                             {localeService.t('image-panel.arrange.forward')}
                         </span>
 
                     </Button>
                 </div>
-                <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSpan2)}>
+                <div className="univer-w-1/2">
                     <Button onClick={() => { onArrangeBtnClick(ArrangeTypeEnum.backward); }}>
-                        <span className={styles.imageCommonPanelInline}>
+                        <span className={inlineClassName}>
                             <MoveDownSingle />
                             {localeService.t('image-panel.arrange.backward')}
                         </span>
@@ -102,18 +88,18 @@ export const DrawingArrange = (props: IDrawingArrangeProps) => {
                     </Button>
                 </div>
             </div>
-            <div className={styles.imageCommonPanelRow}>
-                <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSpan2)}>
+            <div className={rowClassName}>
+                <div className="univer-w-1/2">
                     <Button onClick={() => { onArrangeBtnClick(ArrangeTypeEnum.front); }}>
-                        <span className={styles.imageCommonPanelInline}>
+                        <span className={inlineClassName}>
                             <TopmostSingle />
                             {localeService.t('image-panel.arrange.front')}
                         </span>
                     </Button>
                 </div>
-                <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSpan2)}>
+                <div className="univer-w-1/2">
                     <Button onClick={() => { onArrangeBtnClick(ArrangeTypeEnum.back); }}>
-                        <span className={styles.imageCommonPanelInline}>
+                        <span className={inlineClassName}>
                             <BottomSingle />
                             {localeService.t('image-panel.arrange.back')}
                         </span>

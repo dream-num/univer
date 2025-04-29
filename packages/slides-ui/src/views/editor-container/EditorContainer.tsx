@@ -18,13 +18,10 @@ import type { IDocumentData } from '@univerjs/core';
 import { DEFAULT_EMPTY_DOCUMENT_VALUE, DocumentFlavor, IContextService } from '@univerjs/core';
 import { IEditorService } from '@univerjs/docs-ui';
 import { FIX_ONE_PIXEL_BLUR_OFFSET } from '@univerjs/engine-render';
-
 import { DISABLE_AUTO_FOCUS_KEY, useDependency, useObservable } from '@univerjs/ui';
 import React, { useEffect, useState } from 'react';
 import { SLIDE_EDITOR_ID } from '../../const';
-// import { ICellEditorManagerService } from '../../services/editor/cell-editor-manager.service';
 import { ISlideEditorManagerService } from '../../services/slide-editor-manager.service';
-import styles from './index.module.less';
 
 interface ICellIEditorProps { }
 
@@ -111,19 +108,20 @@ export const SlideEditorContainer: React.FC<ICellIEditorProps> = () => {
                 slideEditorManagerService.setRect({ left, top, width, height });
             }
         });
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []); // Empty dependency array means this effect runs once on mount and clean up on unmount
 
     useEffect(() => {
         if (!disableAutoFocus) {
             slideEditorManagerService.setFocus(true);
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [disableAutoFocus, state]);
 
     return (
         <div
-            className={styles.slideEditorContainer}
+            className={`
+              univer-absolute univer-z-10 univer-box-border univer-flex univer-border univer-border-solid
+              univer-border-gray-200
+            `}
             style={{
                 left: state.left,
                 top: state.top,

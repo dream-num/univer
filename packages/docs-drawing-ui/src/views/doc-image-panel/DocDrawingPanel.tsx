@@ -18,10 +18,9 @@ import type { IDrawingParam } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { DrawingCommonPanel } from '@univerjs/drawing-ui';
 import { useDependency } from '@univerjs/ui';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { DocDrawingPosition } from './DocDrawingPosition';
 import { DocDrawingTextWrap } from './DocDrawingTextWrap';
-import styles from './index.module.less';
 
 export const DocDrawingPanel = () => {
     const drawingManagerService = useDependency(IDrawingManagerService);
@@ -37,11 +36,10 @@ export const DocDrawingPanel = () => {
         return () => {
             focusDispose.unsubscribe();
         };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return !!drawings?.length && (
-        <div className={styles.imageCommonPanel}>
+        <div className="univer-p-2 univer-text-center univer-text-sm">
             <DrawingCommonPanel drawings={drawings} hasAlign={false} hasCropper={false} hasGroup={false} hasTransform={false} />
             <DocDrawingTextWrap drawings={drawings} />
             <DocDrawingPosition drawings={drawings} />

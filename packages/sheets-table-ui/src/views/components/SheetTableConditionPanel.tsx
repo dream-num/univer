@@ -92,13 +92,14 @@ export const SheetTableConditionPanel = (props: IConditionFilterProps) => {
         <div>
             <LegacySelect
                 key={version}
+                className="univer-w-full"
                 dropdownRender={() => (
                     <CascaderList
                         value={[conditionInfo.type, conditionInfo.compare!]}
                         options={cascaderOptions}
                         onChange={handleChange}
                         contentClassName="univer-flex-1"
-                        wrapperClassName="univer-max-h-[150px]"
+                        wrapperClassName="!univer-h-[150px]"
                     />
                 )}
                 value={selectType}

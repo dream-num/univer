@@ -34,6 +34,7 @@ import {
 } from '@radix-ui/react-dropdown-menu';
 import { CheckMarkSingle, MoreRightSingle } from '@univerjs/icons';
 import { clsx } from '../../helper/clsx';
+import { scrollbarClassName } from '../../helper/scrollbar-cls';
 
 function DropdownMenuPrimitive({
     ...props
@@ -127,8 +128,7 @@ function DropdownMenuSubContent({
                 `
                   univer-z-[1080] univer-box-border univer-max-h-[var(--radix-popper-available-height)]
                   univer-overflow-y-auto univer-rounded-md univer-border univer-border-solid univer-border-gray-200
-                  univer-bg-white univer-p-1.5 univer-text-gray-900 univer-shadow-md univer-scrollbar-thin
-                  univer-scrollbar-track-gray-50 univer-scrollbar-thumb-gray-300
+                  univer-bg-white univer-p-1.5 univer-text-gray-900 univer-shadow-md
                   dark:univer-border-gray-600 dark:univer-bg-gray-700 dark:univer-text-white
                   data-[side=bottom]:univer-slide-in-from-top-2
                   data-[side=left]:univer-slide-in-from-right-2
@@ -139,6 +139,7 @@ function DropdownMenuSubContent({
                   data-[state=open]:univer-animate-in data-[state=open]:univer-fade-in-0
                   data-[state=open]:univer-zoom-in-95
                 `,
+                scrollbarClassName,
                 className
             )}
             {...props}
@@ -160,8 +161,7 @@ function DropdownMenuContent({
                     `
                       univer-z-[1080] univer-box-border univer-max-h-[var(--radix-popper-available-height)]
                       univer-overflow-y-auto univer-rounded-md univer-border univer-border-solid univer-border-gray-200
-                      univer-bg-white univer-p-1.5 univer-text-gray-900 univer-shadow-md univer-scrollbar-thin
-                      univer-scrollbar-track-gray-50 univer-scrollbar-thumb-gray-300
+                      univer-bg-white univer-p-1.5 univer-text-gray-900 univer-shadow-md
                       dark:univer-border-gray-600 dark:univer-bg-gray-700 dark:univer-text-white
                       data-[side=bottom]:univer-slide-in-from-top-2
                       data-[side=left]:univer-slide-in-from-right-2
@@ -172,6 +172,7 @@ function DropdownMenuContent({
                       data-[state=open]:univer-animate-in data-[state=open]:univer-fade-in-0
                       data-[state=open]:univer-zoom-in-95
                     `,
+                    scrollbarClassName,
                     className
                 )}
                 {...props}

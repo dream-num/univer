@@ -18,14 +18,13 @@ import type { Workbook } from '@univerjs/core';
 
 import type { ICollaborator, UnitAction } from '@univerjs/protocol';
 import { IAuthzIoService, ICommandService, IPermissionService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
-import { Button, clsx, Switch } from '@univerjs/design';
+import { Button, Switch } from '@univerjs/design';
 import { ObjectScope, UnitObject, UnitRole } from '@univerjs/protocol';
 import { getAllWorksheetPermissionPoint, SetWorksheetPermissionPointsCommand, WorksheetProtectionPointModel } from '@univerjs/sheets';
 import { IDialogService, useDependency } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
 import { defaultWorksheetUnitActionList, subUnitPermissionTypeMap, UNIVER_SHEET_PERMISSION_DIALOG_ID } from '../../../consts/permission';
 import Spin from '../spin';
-import styles from './index.module.less';
 
 interface IPermissionMap {
     [key: string]: {
@@ -176,13 +175,19 @@ export const SheetPermissionDialog = () => {
 
     return (
         <Spin loading={loading}>
-            <div className={styles.sheetPermissionDialogWrapper}>
-                <div className={styles.sheetPermissionDialogSplit} />
+            <div className="univer-flex univer-flex-col univer-p-2">
+                <div className="univer-h-px univer-bg-gray-200" />
                 {Object.keys(permissionMap).map((action) => {
                     const actionItem = permissionMap[action];
                     const { text, allowed } = actionItem;
                     return (
-                        <div key={text} className={styles.sheetPermissionDialogItem}>
+                        <div
+                            key={text}
+                            className={`
+                              univer-my-1.5 univer-flex univer-h-5 univer-items-center univer-justify-between
+                              univer-leading-5
+                            `}
+                        >
                             <div>{text}</div>
                             <Switch
                                 defaultChecked={allowed}
@@ -199,11 +204,10 @@ export const SheetPermissionDialog = () => {
                         </div>
                     );
                 })}
-                <div className={styles.sheetPermissionDialogSplit} />
-                <div className={styles.sheetPermissionUserDialogFooter}>
+                <div className="univer-h-px univer-bg-gray-200" />
+                <div className="univer-mt-2 univer-flex univer-h-9 univer-items-center univer-justify-end univer-gap-2">
 
                     <Button
-                        className={styles.sheetPermissionUserDialogButton}
                         onClick={() => {
                             dialogService.close(UNIVER_SHEET_PERMISSION_DIALOG_ID);
                         }}
@@ -216,7 +220,6 @@ export const SheetPermissionDialog = () => {
                             handleChangeActionPermission();
                             dialogService.close(UNIVER_SHEET_PERMISSION_DIALOG_ID);
                         }}
-                        className={clsx(styles.sheetPermissionUserDialogFooterConfirm, styles.sheetPermissionUserDialogButton)}
                     >
                         {localeService.t('permission.button.confirm')}
                     </Button>

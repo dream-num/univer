@@ -21,21 +21,22 @@ import { LocaleService } from '@univerjs/core';
 import { Button, Select } from '@univerjs/design';
 import { getCurrencyType } from '@univerjs/sheets-numfmt';
 import { useDependency } from '@univerjs/ui';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { UserHabitCurrencyContext } from '../../controllers/user-habit.controller';
 import { useCurrencyOptions } from '../hooks/use-currency-options';
 import { useNextTick } from '../hooks/use-next-tick';
-import { AccountingPanel, isAccountingPanel } from './accounting';
-import { CurrencyPanel, isCurrencyPanel } from './currency';
-import { CustomFormat } from './custom-format';
-import { DatePanel, isDatePanel } from './date';
-import { GeneralPanel, isGeneralPanel } from './general';
-import { isThousandthPercentilePanel, ThousandthPercentilePanel } from './thousandth-percentile';
+import { AccountingPanel, isAccountingPanel } from './Accounting';
+import { CurrencyPanel, isCurrencyPanel } from './Currency';
+import { CustomFormat } from './CustomFormat';
+import { DatePanel, isDatePanel } from './Date';
+import { GeneralPanel, isGeneralPanel } from './General';
+import { isThousandthPercentilePanel, ThousandthPercentilePanel } from './ThousandthPercentile';
 
 export interface ISheetNumfmtPanelProps {
     value: { defaultValue: number; defaultPattern: string; row: number; col: number };
     onChange: (config: { type: 'change' | 'cancel' | 'confirm'; value: string }) => void;
 }
+
 export const SheetNumfmtPanel: FC<ISheetNumfmtPanelProps> = (props) => {
     const { defaultValue, defaultPattern, row, col } = props.value;
     const localeService = useDependency(LocaleService);
@@ -79,9 +80,9 @@ export const SheetNumfmtPanel: FC<ISheetNumfmtPanelProps> = (props) => {
         nextTick(() => props.onChange({ type: 'change', value: getCurrentPattern.current() || '' }));
     };
 
-    const handleChange = (v: string) => {
+    const handleChange = useCallback((v: string) => {
         props.onChange({ type: 'change', value: v });
-    };
+    }, []);
 
     const handleConfirm = () => {
         const pattern = getCurrentPattern.current() || '';
@@ -91,6 +92,7 @@ export const SheetNumfmtPanel: FC<ISheetNumfmtPanelProps> = (props) => {
         }
         props.onChange({ type: 'confirm', value: pattern });
     };
+
     const handleCancel = () => {
         props.onChange({ type: 'cancel', value: '' });
     };

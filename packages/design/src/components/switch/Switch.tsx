@@ -15,7 +15,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import styles from './index.module.less';
+import { clsx } from '../../helper/clsx';
 
 export interface ISwitchProps {
     defaultChecked?: boolean;
@@ -36,10 +36,31 @@ const Switch = (props: ISwitchProps) => {
     }, [defaultChecked]);
 
     return (
-        <div className={styles.switchWrapper}>
-            <label className={styles.switch}>
-                <input type="checkbox" checked={checked} onChange={handleChange} />
-                <span className={styles.slider} />
+        <div className="univer-h-4">
+            <label className="univer-relative univer-inline-block univer-h-4 univer-w-7">
+                <input
+                    className="univer-size-0 univer-opacity-0"
+                    type="checkbox"
+                    checked={checked}
+                    onChange={handleChange}
+                />
+                <span
+                    className={clsx(`
+                      univer-absolute univer-inset-0 univer-cursor-pointer univer-rounded-2xl univer-bg-gray-50
+                      univer-transition-colors univer-duration-200
+                    `, {
+                        'univer-bg-primary-600': checked,
+                    })}
+                >
+                    <span
+                        className={clsx(`
+                          univer-absolute univer-bottom-0.5 univer-left-0.5 univer-h-3 univer-w-3 univer-rounded-full
+                          univer-bg-white univer-transition-transform univer-duration-200
+                        `, {
+                            'univer-translate-x-3': checked,
+                        })}
+                    />
+                </span>
             </label>
         </div>
     );

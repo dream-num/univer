@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export { type IScrollbarProps, Scrollbar } from './Scrollbar';
+export const scrollbarClassName = 'univer-scrollbar-thin univer-scrollbar-track-gray-50 univer-scrollbar-thumb-gray-300 dark:univer-bg-black dark:univer-scrollbar-track-gray-900 dark:univer-scrollbar-thumb-gray-700';

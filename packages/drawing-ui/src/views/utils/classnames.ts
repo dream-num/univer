@@ -14,25 +14,9 @@
  * limitations under the License.
  */
 
-import { render } from '@testing-library/react';
-import React from 'react';
-import { describe, expect, it } from 'vitest';
+// TODO@siam-ese: these styles are widely used in drawing's components. They should be deprecated once the
+// Form component is completed.
 
-import { Scrollbar } from '../Scrollbar';
-
-describe('Scrollbar', () => {
-    it('should not render thumb', () => {
-        const { container } = render(
-            <section style={{ height: '100px' }}>
-                <Scrollbar>
-                    <div>foo</div>
-                    <div>foo</div>
-                </Scrollbar>
-            </section>
-        );
-
-        const scrollbar = container.querySelector('[role=scrollbar]');
-
-        expect(scrollbar).toBeNull();
-    });
-});
+export const rowClassName = 'univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start univer-justify-between univer-gap-2 univer-flex-no-wrap';
+export const columnTitleClassName = 'univer-w-full univer-text-left univer-text-gray-400';
+export const inlineClassName = 'univer-flex univer-items-center univer-gap-1';

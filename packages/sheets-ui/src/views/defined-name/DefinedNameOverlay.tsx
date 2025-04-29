@@ -18,6 +18,7 @@ import type { Workbook } from '@univerjs/core';
 
 import type { IDefinedNamesServiceParam } from '@univerjs/engine-formula';
 import { ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
+import { clsx, scrollbarClassName } from '@univerjs/design';
 import { IDefinedNamesService } from '@univerjs/engine-formula';
 import { SetWorksheetShowCommand } from '@univerjs/sheets';
 import { ISidebarService, useDependency } from '@univerjs/ui';
@@ -98,11 +99,7 @@ export function DefinedNameOverlay(props: IDefinedNameOverlayProps) {
     return (
         <div className="univer-w-[300px]">
             <ul
-                className={`
-                  univer-m-0 univer-max-h-[360px] univer-list-none univer-overflow-y-auto univer-p-0
-                  univer-scrollbar-thin univer-scrollbar-track-transparent univer-scrollbar-thumb-gray-300
-                  univer-scrollbar-w-[4px]
-                `}
+                className={clsx('univer-m-0 univer-max-h-[360px] univer-list-none univer-overflow-y-auto univer-p-0', scrollbarClassName)}
             >
                 {definedNames.map((definedName, index) => {
                     return (

@@ -16,14 +16,13 @@
 
 import type { SlideDataModel } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
-import { clsx, Scrollbar } from '@univerjs/design';
+import { clsx, scrollbarClassName } from '@univerjs/design';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { useDependency } from '@univerjs/ui';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { createRef, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ActivateSlidePageOperation } from '../../commands/operations/activate.operation';
 import { AppendSlideOperation } from '../../commands/operations/append-slide.operation';
 import { SetSlidePageThumbOperation } from '../../commands/operations/set-thumb.operation';
-import styles from './index.module.less';
 
 /**
  * This components works as the root component of the left Sidebar of Slide.
@@ -54,7 +53,7 @@ export function SlideSideBar() {
 
     const [activatePageId, setActivatePageId] = useState<string | null>(currentSlide?.getActivePage()?.id ?? null);
 
-    const divRefs = useMemo(() => slideList.map(() => React.createRef<HTMLDivElement>()), [slideList]);
+    const divRefs = useMemo(() => slideList.map(() => createRef<HTMLDivElement>()), [slideList]);
 
     useEffect(() => {
         const subscriber = currentSlide?.activePage$.subscribe((page) => {
@@ -90,27 +89,46 @@ export function SlideSideBar() {
     }, [commandService, currentSlide]);
 
     return (
-        <aside className={styles.slideBar} ref={slideBarRef}>
-            <Scrollbar>
-                <div className={styles.slideBarContent}>
-                    <header className={styles.slideBarContentHeader}>
-                        <a onClick={handleAppendSlide}>{localeService.t('slide.append')}</a>
-                    </header>
+        <aside
+            ref={slideBarRef}
+            className={clsx(`
+              univer-flex univer-h-full univer-w-64 univer-flex-col univer-overflow-y-auto univer-overflow-x-hidden
+            `, scrollbarClassName)}
+        >
+            <div className="univer-px-4">
+                <header className="univer-flex univer-justify-center univer-pt-4">
+                    <a
+                        className={`
+                          univer-box-border univer-block univer-h-8 univer-w-full univer-cursor-pointer
+                          univer-rounded-md univer-border univer-border-solid univer-border-gray-200 univer-bg-white
+                          univer-text-center univer-text-sm univer-leading-8 univer-transition-colors
+                        `}
+                        onClick={handleAppendSlide}
+                    >
+                        {localeService.t('slide.append')}
+                    </a>
+                </header>
 
-                    {slideList.map((item, index) => (
+                {slideList.map((item, index) => (
+                    <div
+                        key={item.id}
+                        className={clsx('univer-my-4 univer-flex univer-gap-2', {
+                            '[&>div]:univer-border-primary-600 [&>span]:univer-text-primary-600': item.id === activatePageId,
+                        })}
+                        onClick={() => activatePage(item.id)}
+                    >
+                        <span>{index + 1}</span>
                         <div
-                            key={item.id}
-                            className={clsx(styles.slideBarItem, {
-                                [styles.slideBarItemActive]: item.id === activatePageId,
-                            })}
-                            onClick={() => activatePage(item.id)}
-                        >
-                            <span>{index + 1}</span>
-                            <div ref={divRefs[index]} className={styles.slideBarBox} />
-                        </div>
-                    ))}
-                </div>
-            </Scrollbar>
+                            ref={divRefs[index]}
+                            className={`
+                              univer-relative univer-box-border univer-h-32 univer-w-52 univer-border
+                              univer-border-solid univer-border-gray-200 univer-bg-white
+                              hover:univer-border-primary-600
+                            `}
+                        />
+                    </div>
+                ))}
+            </div>
         </aside>
     );
 }

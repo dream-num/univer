@@ -17,16 +17,19 @@
 import type { ISheetLocationBase } from '@univerjs/sheets';
 import type { ISheetNote } from '@univerjs/sheets-note';
 import type { IPopup } from '@univerjs/ui';
+import type { IUniverSheetsNoteUIPluginConfig } from '../plugin';
 import { ICommandService, LocaleService } from '@univerjs/core';
 import { SheetDeleteNoteCommand, SheetsNoteModel, SheetUpdateNoteCommand } from '@univerjs/sheets-note';
-import { useDebounceFn, useDependency } from '@univerjs/ui';
+import { useConfigValue, useDebounceFn, useDependency } from '@univerjs/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { of } from 'rxjs';
+import { SHEETS_NOTE_UI_PLUGIN_CONFIG_KEY } from '../plugin';
 
 export const SheetsNote = (props: { popup: IPopup<{ location: ISheetLocationBase }> }) => {
     const noteModel = useDependency(SheetsNoteModel);
     const localeService = useDependency(LocaleService);
-    const [note, setNote] = useState<ISheetNote>({ width: 216, height: 92, note: '' });
+    const config = useConfigValue<IUniverSheetsNoteUIPluginConfig>(SHEETS_NOTE_UI_PLUGIN_CONFIG_KEY);
+    const [note, setNote] = useState<ISheetNote>({ width: config?.defaultNoteSize?.width || 216, height: config?.defaultNoteSize?.height || 92, note: '' });
     const activePopup = props.popup.extraProps?.location;
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const commandService = useDependency(ICommandService);

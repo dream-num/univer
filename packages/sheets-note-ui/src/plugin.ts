@@ -31,6 +31,10 @@ export interface IUniverSheetsNoteUIPluginConfig {
     menu?: {
         [key: string]: unknown;
     };
+    defaultNoteSize?: {
+        width: number;
+        height: number;
+    };
 }
 
 const defaultPluginConfig: IUniverSheetsNoteUIPluginConfig = {

@@ -18,14 +18,14 @@ import { ILocalStorageService, Inject, RxDisposable, ThemeService } from '@unive
 
 export class DarkModeController extends RxDisposable {
     constructor(
-        @Inject(ILocalStorageService) private _localStorageService: ILocalStorageService,
-        @Inject(ThemeService) private _themeService: ThemeService
+        @ILocalStorageService private _localStorageService: ILocalStorageService,
+        @Inject(ThemeService) themeService: ThemeService
     ) {
         super();
 
         this._localStorageService.getItem('local.darkMode').then((darkMode) => {
             if (darkMode === 'dark') {
-                _themeService.setDarkMode(true);
+                themeService.setDarkMode(true);
             }
         });
     }

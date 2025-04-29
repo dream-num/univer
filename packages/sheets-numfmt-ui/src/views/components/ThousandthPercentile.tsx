@@ -15,7 +15,7 @@
  */
 
 import type { FC } from 'react';
-import type { IBusinessComponentProps } from '../interface';
+import type { IBusinessComponentProps } from './interface';
 import { LocaleService } from '@univerjs/core';
 import { InputNumber, SelectList } from '@univerjs/design';
 import { getDecimalFromPattern, getNumberFormatOptions, isPatternEqualWithoutDecimal, isPatternHasDecimal, setPatternDecimal } from '@univerjs/sheets-numfmt';

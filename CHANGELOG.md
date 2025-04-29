@@ -1,5 +1,46 @@
 # Changelog
 
+# [0.7.0-beta.0](https://github.com/dream-num/univer/compare/v0.6.10...v0.7.0-beta.0) (2025-04-29)
+
+
+### Bug Fixes
+
+* **design:** fix dropdown menu props name ([#5072](https://github.com/dream-num/univer/issues/5072)) ([7be328e](https://github.com/dream-num/univer/commit/7be328ebcdea1819d65481d0ff55608349a85da5))
+* **docs-quick-insert-ui:** hide empty heading and quck-insert menu filter ([#5078](https://github.com/dream-num/univer/issues/5078)) ([c368147](https://github.com/dream-num/univer/commit/c36814703c29508ee3c2fc995154a72f62d3e971))
+* **docs-ui:** doc print layout calc error ([#5116](https://github.com/dream-num/univer/issues/5116)) ([665a805](https://github.com/dream-num/univer/commit/665a8056334782e33edc99471b300248434acba7))
+* **docs-ui:** export command from wrong path ([#5115](https://github.com/dream-num/univer/issues/5115)) ([4d21b59](https://github.com/dream-num/univer/commit/4d21b5974fa3573ca2baf35dc22b4ae96cc860b6))
+* fix menu icon and en_US title ([#5049](https://github.com/dream-num/univer/issues/5049)) ([b59f35b](https://github.com/dream-num/univer/commit/b59f35bf0b09bac83c57d7f9ffdfc8eb0419ba07))
+* fix transformStyle ([#5071](https://github.com/dream-num/univer/issues/5071)) ([3808a6f](https://github.com/dream-num/univer/commit/3808a6fa05f04b3efbbcaa8c22eff308a101282e))
+* **sheets-numfmt-ui:** numfmt display NaN if undefind is given ([#5096](https://github.com/dream-num/univer/issues/5096)) ([d3b1734](https://github.com/dream-num/univer/commit/d3b1734d31e89768baa71b83f80a1a78b7632ebb))
+* **sheets-ui:** fix zoom not changed on skeleton change ([#5099](https://github.com/dream-num/univer/issues/5099)) ([011ae47](https://github.com/dream-num/univer/commit/011ae477dc2140042ced05ed33cd62da8b3f74eb))
+* **table:** update table anchor display time ([#5101](https://github.com/dream-num/univer/issues/5101)) ([bddbc51](https://github.com/dream-num/univer/commit/bddbc51f00e5d5784df5a0ac3de57ef91baf0f9f))
+* **ui:** float-dom error disposed on zen-mode ([#5093](https://github.com/dream-num/univer/issues/5093)) ([615e709](https://github.com/dream-num/univer/commit/615e709e36262b243f3bb7b481bb3e29f4c892e6))
+* **uniui:** fix formula editor ([#5090](https://github.com/dream-num/univer/issues/5090)) ([05b07f4](https://github.com/dream-num/univer/commit/05b07f46c03728cc085b7f5171732bbb5266b6f8))
+
+
+### Features
+
+* **design:** add ButtonGroup component ([#5077](https://github.com/dream-num/univer/issues/5077)) ([6982e11](https://github.com/dream-num/univer/commit/6982e11bb260f38f809d778205c687bafdb66fd9))
+* **design:** add danger button variant ([#5080](https://github.com/dream-num/univer/issues/5080)) ([2d1530f](https://github.com/dream-num/univer/commit/2d1530ff0683c393efd614d7e578c5ec229ae432))
+* **design:** add KBD component ([#5057](https://github.com/dream-num/univer/issues/5057)) ([e1775d9](https://github.com/dream-num/univer/commit/e1775d90d212fa4a5cf68f07b1957562b54136c9))
+* **design:** input support slot usage ([#5095](https://github.com/dream-num/univer/issues/5095)) ([3195ec6](https://github.com/dream-num/univer/commit/3195ec60a9358d6e94d4735cf16edca3ceb2f0ff))
+* **docs-ui:** export switch mode command ([#5108](https://github.com/dream-num/univer/issues/5108)) ([786c5a7](https://github.com/dream-num/univer/commit/786c5a76cc370976742fe8f63d48531bcdad0506))
+* **docs-ui:** support doc page setup to set paper size and margin ([#5088](https://github.com/dream-num/univer/issues/5088)) ([3e2ff16](https://github.com/dream-num/univer/commit/3e2ff167521bc61ec8403bde8209bb95be72f131))
+* **drawing-ui:** support custom printing ([#5112](https://github.com/dream-num/univer/issues/5112)) ([2396100](https://github.com/dream-num/univer/commit/239610031d2e9469d4d4ee8397b1c0fbf47309e8))
+* **drawing-ui:** support custom printing component ([#5113](https://github.com/dream-num/univer/issues/5113)) ([44df30d](https://github.com/dream-num/univer/commit/44df30df679b849649c3783f26c10f8465c4a3f0))
+* **filter-ui:** refactor less to tailwindcss ([#5063](https://github.com/dream-num/univer/issues/5063)) ([1783aca](https://github.com/dream-num/univer/commit/1783aca0cd672dc776588dca53283f4e950074a9))
+* **sheets-data-validation:** use tailwindcss to rewrite the style of data-validation ([#5089](https://github.com/dream-num/univer/issues/5089)) ([fb4bec4](https://github.com/dream-num/univer/commit/fb4bec4c5cf27ae5cdf950ee318614744c440d83))
+* **sheets-ui:** add Delete Right shortcut to editor shortcuts ([#5068](https://github.com/dream-num/univer/issues/5068)) ([287dc52](https://github.com/dream-num/univer/commit/287dc52694ec76ec16326bb1eb6b787fb3870724))
+* **sheets-ui:** add Shift + Delete shortcut for cut selection ([#5047](https://github.com/dream-num/univer/issues/5047)) ([450e776](https://github.com/dream-num/univer/commit/450e776235d4b1e52e7f019e96628330bb0efeca))
+* **sheets-ui:** optimize permission ui custom api ([#5052](https://github.com/dream-num/univer/issues/5052)) ([5ac2352](https://github.com/dream-num/univer/commit/5ac235214bd5f2018690b1ddac44ff0b5df0cb51))
+* table support ([#4831](https://github.com/dream-num/univer/issues/4831)) ([1442329](https://github.com/dream-num/univer/commit/1442329d903ab9f9a0d31a72ab4e708e771436e1))
+* **thread-comment-ui:** use tailwindcss to rewrite the style of thread-comment-ui ([#5091](https://github.com/dream-num/univer/issues/5091)) ([fa53a11](https://github.com/dream-num/univer/commit/fa53a11658fec78e06ea36bac29d963969d418b1))
+* **ui:** add dark mode support to ThemeService ([#5062](https://github.com/dream-num/univer/issues/5062)) ([cab4c85](https://github.com/dream-num/univer/commit/cab4c8514f4eb1ab5dc181fda94b585404c24613))
+* **ui:** add segmented component dark mode ([#5059](https://github.com/dream-num/univer/issues/5059)) ([43b2853](https://github.com/dream-num/univer/commit/43b28531bf9f6054c79b9339edb6942bd8c5ba90))
+* **ui:** input support dark mode ([#5061](https://github.com/dream-num/univer/issues/5061)) ([e2b425b](https://github.com/dream-num/univer/commit/e2b425ba21afa827a3cac4c918aa8313fd582184))
+* **ui:** make config dynamic to support set by user through facade ([#5044](https://github.com/dream-num/univer/issues/5044)) ([72ba856](https://github.com/dream-num/univer/commit/72ba8566b5e1b0de6e50b5720d28911b6c7659b6))
+* upgrade redi ([#5082](https://github.com/dream-num/univer/issues/5082)) ([528fdf1](https://github.com/dream-num/univer/commit/528fdf1c9dd38a1ce4efbb8f4ee8c376873c53a9))
+
 ## [0.6.10](https://github.com/dream-num/univer/compare/v0.6.10-alpha.0...v0.6.10) (2025-04-18)
 
 

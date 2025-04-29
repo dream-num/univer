@@ -15,25 +15,56 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import { IConfigService, Inject, Injector, Plugin, touchDependencies, UniverInstanceType } from '@univerjs/core';
-import { SheetsCellContentController } from '../../sheets-note-ui/src/controllers/sheets-cell-content.controller';
+import { DependentOn, IConfigService, Inject, Injector, merge, Plugin, touchDependencies, UniverInstanceType } from '@univerjs/core';
+import { SheetsNotePlugin } from '@univerjs/sheets-note';
+import { menuSchema } from './controllers/menu.schema';
+import { SheetsCellContentController } from './controllers/sheets-cell-content.controller';
+import { SheetsNotePopupController } from './controllers/sheets-note-popup.controller';
+import { SheetsNoteUIController } from './controllers/sheets-note-ui.controller';
+import { SheetsNotePopupService } from './services/sheets-note-popup.service';
 
-export const PLUGIN_NAME = 'SHEET_NOTE_PLUGIN';
+export const PLUGIN_NAME = 'SHEET_NOTE_UI_PLUGIN';
+export const SHEETS_NOTE_UI_PLUGIN_CONFIG_KEY = 'sheets-note-ui';
 
-export class SheetsNotePlugin extends Plugin {
+export interface IUniverSheetsNoteUIPluginConfig {
+    menu?: {
+        [key: string]: unknown;
+    };
+}
+
+const defaultPluginConfig: IUniverSheetsNoteUIPluginConfig = {
+    menu: menuSchema,
+};
+
+@DependentOn(SheetsNotePlugin)
+export class SheetsNoteUIPlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;
     static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(
+        private readonly _config: Partial<IUniverSheetsNoteUIPluginConfig> = defaultPluginConfig,
         @Inject(Injector) protected override readonly _injector: Injector,
         @IConfigService private readonly _configService: IConfigService
     ) {
         super();
+        // Manage the plugin configuration.
+        const { menu, ...rest } = merge(
+            {},
+            defaultPluginConfig,
+            this._config
+        );
+        if (menu) {
+            this._configService.setConfig('menu', menu, { merge: true });
+        }
+        this._configService.setConfig(SHEETS_NOTE_UI_PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {
         ([
+            [SheetsNotePopupService],
             [SheetsCellContentController],
+            [SheetsNotePopupController],
+            [SheetsNoteUIController],
         ] as Dependency[]).forEach((dependency) => {
             this._injector.add(dependency);
         });
@@ -41,7 +72,14 @@ export class SheetsNotePlugin extends Plugin {
 
     override onReady(): void {
         touchDependencies(this._injector, [
+            [SheetsNoteUIController],
             [SheetsCellContentController],
+        ]);
+    }
+
+    override onRendered(): void {
+        touchDependencies(this._injector, [
+            [SheetsNotePopupController],
         ]);
     }
 }

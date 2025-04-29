@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { ISheetNote } from '../models/sheets-note.model';
 import { Disposable, Inject, IResourceManagerService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { SheetsNoteModel } from '../models/sheets-note.model';
 import { PLUGIN_NAME } from '../plugin';
@@ -21,7 +22,7 @@ import { PLUGIN_NAME } from '../plugin';
 interface INoteData {
     [sheetId: string]: {
         [row: number]: {
-            [col: number]: string;
+            [col: number]: ISheetNote;
         };
     };
 }

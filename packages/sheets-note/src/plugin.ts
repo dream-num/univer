@@ -15,13 +15,15 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import { IConfigService, Inject, Injector, Plugin, touchDependencies, UniverInstanceType } from '@univerjs/core';
+import { DependentOn, IConfigService, Inject, Injector, Plugin, touchDependencies, UniverInstanceType } from '@univerjs/core';
+import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { SheetsNoteResourceController } from './controllers/sheets-note-resource.controller';
 import { SheetsNoteController } from './controllers/sheets.note.controller';
 import { SheetsNoteModel } from './models/sheets-note.model';
 
 export const PLUGIN_NAME = 'SHEET_NOTE_PLUGIN';
 
+@DependentOn(UniverSheetsPlugin)
 export class SheetsNotePlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;
     static override type = UniverInstanceType.UNIVER_SHEET;

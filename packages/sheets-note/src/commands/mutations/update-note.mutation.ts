@@ -15,6 +15,7 @@
  */
 
 import type { IAccessor, IMutation } from '@univerjs/core';
+import type { ISheetNote } from '../../models/sheets-note.model';
 import { CommandType } from '@univerjs/core';
 import { SheetsNoteModel } from '../../models/sheets-note.model';
 
@@ -23,7 +24,7 @@ export interface IUpdateNoteMutationParams {
     sheetId: string;
     row: number;
     col: number;
-    note: string;
+    note: ISheetNote;
 }
 
 export const UpdateNoteMutation: IMutation<IUpdateNoteMutationParams> = {
@@ -33,6 +34,24 @@ export const UpdateNoteMutation: IMutation<IUpdateNoteMutationParams> = {
         const { unitId, sheetId, row, col, note } = params;
         const sheetsNoteModel = accessor.get(SheetsNoteModel);
         sheetsNoteModel.updateNote(unitId, sheetId, row, col, note);
+        return true;
+    },
+};
+
+export interface IRemoveNoteMutationParams {
+    unitId: string;
+    sheetId: string;
+    row: number;
+    col: number;
+}
+
+export const RemoveNoteMutation: IMutation<IRemoveNoteMutationParams> = {
+    id: 'sheet.mutation.remove-note',
+    type: CommandType.MUTATION,
+    handler: (accessor: IAccessor, params: IUpdateNoteMutationParams) => {
+        const { unitId, sheetId, row, col } = params;
+        const sheetsNoteModel = accessor.get(SheetsNoteModel);
+        sheetsNoteModel.removeNote(unitId, sheetId, row, col);
         return true;
     },
 };

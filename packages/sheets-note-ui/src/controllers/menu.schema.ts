@@ -14,9 +14,17 @@
  * limitations under the License.
  */
 
-export { useEvent } from './event';
-export { useConfigValue } from './layout';
-export { useUpdateEffect } from './update-effect';
-export { useClickOutSide } from './use-click-out-side';
-export { useDebounceFn } from './use-debounce';
-export { useVirtualList } from './virtual-list';
+import type { MenuSchemaType } from '@univerjs/ui';
+import { ContextMenuGroup, ContextMenuPosition } from '@univerjs/ui';
+import { SHEET_NOTE_CONTEXT_MENU_ID, sheetNoteContextMenuFactory } from './note.menu';
+
+export const menuSchema: MenuSchemaType = {
+    [ContextMenuPosition.MAIN_AREA]: {
+        [ContextMenuGroup.DATA]: {
+            [SHEET_NOTE_CONTEXT_MENU_ID]: {
+                order: 1,
+                menuItemFactory: sheetNoteContextMenuFactory,
+            },
+        },
+    },
+};

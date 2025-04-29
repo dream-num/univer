@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-export { useEvent } from './event';
-export { useConfigValue } from './layout';
-export { useUpdateEffect } from './update-effect';
-export { useClickOutSide } from './use-click-out-side';
-export { useDebounceFn } from './use-debounce';
-export { useVirtualList } from './virtual-list';
+import type zhCN from './zh-CN';
+
+const locale: typeof zhCN = {
+    rightClick: {
+        addNote: 'Add Note',
+    },
+};
+
+export default locale;

@@ -14,9 +14,18 @@
  * limitations under the License.
  */
 
-export { useEvent } from './event';
-export { useConfigValue } from './layout';
-export { useUpdateEffect } from './update-effect';
-export { useClickOutSide } from './use-click-out-side';
-export { useDebounceFn } from './use-debounce';
-export { useVirtualList } from './virtual-list';
+import { useCallback, useRef } from 'react';
+
+export function useDebounceFn<T extends (...args: any[]) => void>(fn: T, delay = 300) {
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+    return useCallback((...args: Parameters<T>) => {
+        if (timeoutRef.current) {
+            clearTimeout(timeoutRef.current);
+        }
+
+        timeoutRef.current = setTimeout(() => {
+            fn(...args);
+        }, delay);
+    }, [fn, delay]) as T;
+}

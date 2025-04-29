@@ -19,12 +19,18 @@ import type { Observable } from 'rxjs';
 import { Disposable, ObjectMatrix } from '@univerjs/core';
 import { filter, Subject } from 'rxjs';
 
+export interface ISheetNote {
+    width: number;
+    height: number;
+    note: string;
+}
+
 export class SheetsNoteModel extends Disposable {
-    private _noteMatrix = new Map<string, Map<string, ObjectMatrix<string>>>();
-    private readonly _change$ = new Subject<{ unitId: string; sheetId: string; row: number; col: number; note: string }>();
+    private _noteMatrix = new Map<string, Map<string, ObjectMatrix<ISheetNote>>>();
+    private readonly _change$ = new Subject<{ unitId: string; sheetId: string; row: number; col: number; note: Nullable<ISheetNote> }>();
     readonly change$ = this._change$.asObservable();
 
-    private _ensureNoteMatrix(unitId: string, sheetId: string): ObjectMatrix<string> {
+    private _ensureNoteMatrix(unitId: string, sheetId: string): ObjectMatrix<ISheetNote> {
         let unitMap = this._noteMatrix.get(unitId);
         if (!unitMap) {
             unitMap = new Map();
@@ -33,31 +39,37 @@ export class SheetsNoteModel extends Disposable {
 
         let matrix = unitMap.get(sheetId);
         if (!matrix) {
-            matrix = new ObjectMatrix<string>();
+            matrix = new ObjectMatrix<ISheetNote>();
             unitMap.set(sheetId, matrix);
         }
 
         return matrix;
     }
 
-    getCellNoteChange$(unitId: string, sheetId: string, row: number, col: number): Observable<{ note: string }> {
+    getCellNoteChange$(unitId: string, sheetId: string, row: number, col: number): Observable<{ note: Nullable<ISheetNote> }> {
         return this.change$.pipe(
             filter(({ unitId: u, sheetId: s, row: r, col: c }) => u === unitId && s === sheetId && r === row && c === col)
         );
     }
 
-    updateNote(unitId: string, sheetId: string, row: number, col: number, note: string): void {
+    updateNote(unitId: string, sheetId: string, row: number, col: number, note: ISheetNote): void {
         const matrix = this._ensureNoteMatrix(unitId, sheetId);
         matrix.setValue(row, col, note);
         this._change$.next({ unitId, sheetId, row, col, note });
     }
 
-    getNote(unitId: string, sheetId: string, row: number, col: number): Nullable<string> {
+    removeNote(unitId: string, sheetId: string, row: number, col: number): void {
+        const matrix = this._ensureNoteMatrix(unitId, sheetId);
+        matrix.realDeleteValue(row, col);
+        this._change$.next({ unitId, sheetId, row, col, note: null });
+    }
+
+    getNote(unitId: string, sheetId: string, row: number, col: number): Nullable<ISheetNote> {
         const matrix = this._ensureNoteMatrix(unitId, sheetId);
         return matrix.getValue(row, col);
     }
 
-    getUnitNotes(unitId: string): Map<string, ObjectMatrix<string>> | undefined {
+    getUnitNotes(unitId: string): Map<string, ObjectMatrix<ISheetNote>> | undefined {
         return this._noteMatrix.get(unitId);
     }
 

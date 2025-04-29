@@ -14,9 +14,4 @@
  * limitations under the License.
  */
 
-export { useEvent } from './event';
-export { useConfigValue } from './layout';
-export { useUpdateEffect } from './update-effect';
-export { useClickOutSide } from './use-click-out-side';
-export { useDebounceFn } from './use-debounce';
-export { useVirtualList } from './virtual-list';
+export const SHEET_NOTE_COMPONENT = 'SHEET_NOTE_COMPONENT';

@@ -204,7 +204,7 @@ interface ISheetNoteEvent {
 /**
  * @ignore
  */
-export class FDataValidationEvent implements ISheetNoteEvent {
+export class FSheetNoteEvent implements ISheetNoteEvent {
     get SheetNoteAdd(): 'SheetNoteAdd' {
         return 'SheetNoteAdd';
     }
@@ -263,7 +263,7 @@ export interface ISheetNoteEventConfig {
     BeforeSheetNoteHide: ISheetNoteHideEventParmas;
 }
 
-FEventName.extend(FDataValidationEvent);
+FEventName.extend(FSheetNoteEvent);
 declare module '@univerjs/core/facade' {
     // eslint-disable-next-line ts/naming-convention
     interface FEventName extends ISheetNoteEvent {

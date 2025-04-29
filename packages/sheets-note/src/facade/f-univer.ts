@@ -20,7 +20,14 @@ import { CanceledError, ICommandService } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
 import { SheetDeleteNoteCommand, SheetsNoteModel, SheetToggleNotePopupCommand, SheetUpdateNoteCommand } from '@univerjs/sheets-note';
 
-export class FSheetNote extends FUniver {
+/**
+ * @ignore
+ */
+export interface IFUniverSheetNoteMixin {
+    // Add any note-specific methods here if needed
+}
+
+export class FUniverSheetNoteMixin extends FUniver implements IFUniverSheetNoteMixin {
     override _initialize(injector: Injector): void {
         this.registerEventHandler(
             this.Event.SheetNoteAdd,
@@ -297,4 +304,8 @@ export class FSheetNote extends FUniver {
     }
 }
 
-FUniver.extend(FSheetNote);
+FUniver.extend(FUniverSheetNoteMixin);
+declare module '@univerjs/core/facade' {
+    // eslint-disable-next-line ts/naming-convention
+    interface FUniver extends IFUniverSheetNoteMixin {}
+}

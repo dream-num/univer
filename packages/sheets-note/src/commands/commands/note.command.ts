@@ -15,9 +15,10 @@
  */
 
 import type { ICommand } from '@univerjs/core';
+import type { IUpdateNoteMutationParams } from '../mutations/note.mutation';
 import { CommandType, ICommandService, IUniverInstanceService } from '@univerjs/core';
 import { getSheetCommandTarget, SheetsSelectionsService } from '@univerjs/sheets';
-import { RemoveNoteMutation, ToggleNotePopupMutation } from '../mutations/note.mutation';
+import { RemoveNoteMutation, ToggleNotePopupMutation, UpdateNoteMutation } from '../mutations/note.mutation';
 
 export const SheetDeleteNoteCommand: ICommand = {
     id: 'sheet.command.delete-note',
@@ -59,5 +60,14 @@ export const SheetToggleNotePopupCommand: ICommand = {
             row: actualRow,
             col: actualColumn,
         });
+    },
+};
+
+export const SheetUpdateNoteCommand: ICommand<IUpdateNoteMutationParams> = {
+    id: 'sheet.command.update-note',
+    type: CommandType.COMMAND,
+    handler: (accessor, params) => {
+        const commandService = accessor.get(ICommandService);
+        return commandService.syncExecuteCommand(UpdateNoteMutation.id, params);
     },
 };

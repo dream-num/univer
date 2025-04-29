@@ -18,7 +18,7 @@ import type { ISheetLocationBase } from '@univerjs/sheets';
 import type { ISheetNote } from '@univerjs/sheets-note';
 import type { IPopup } from '@univerjs/ui';
 import { ICommandService, LocaleService } from '@univerjs/core';
-import { RemoveNoteMutation, SheetsNoteModel, UpdateNoteMutation } from '@univerjs/sheets-note';
+import { SheetDeleteNoteCommand, SheetsNoteModel, SheetUpdateNoteCommand } from '@univerjs/sheets-note';
 import { useDebounceFn, useDependency } from '@univerjs/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { of } from 'rxjs';
@@ -36,7 +36,7 @@ export const SheetsNote = (props: { popup: IPopup<{ location: ISheetLocationBase
         if (!activePopup) return;
 
         if (newNote.note) {
-            commandService.executeCommand(UpdateNoteMutation.id, {
+            commandService.executeCommand(SheetUpdateNoteCommand.id, {
                 unitId: activePopup.unitId,
                 sheetId: activePopup.subUnitId!,
                 row: activePopup.row,
@@ -44,7 +44,7 @@ export const SheetsNote = (props: { popup: IPopup<{ location: ISheetLocationBase
                 note: newNote,
             });
         } else {
-            commandService.executeCommand(RemoveNoteMutation.id, {
+            commandService.executeCommand(SheetDeleteNoteCommand.id, {
                 unitId: activePopup.unitId,
                 sheetId: activePopup.subUnitId!,
                 row: activePopup.row,

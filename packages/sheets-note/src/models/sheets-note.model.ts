@@ -35,6 +35,7 @@ export type ISheetNoteChange = {
 } & ({
     type: 'update';
     note: Nullable<ISheetNote>;
+    oldNote: Nullable<ISheetNote>;
 } | {
     type: 'ref';
     newPosition: {
@@ -92,14 +93,16 @@ export class SheetsNoteModel extends Disposable {
 
     updateNote(unitId: string, sheetId: string, row: number, col: number, note: ISheetNote, silent?: boolean): void {
         const matrix = this._ensureNoteMatrix(unitId, sheetId);
+        const oldNote = matrix.getValue(row, col);
         matrix.setValue(row, col, note);
-        this._change$.next({ unitId, sheetId, row, col, type: 'update', note, silent });
+        this._change$.next({ unitId, sheetId, row, col, type: 'update', note, oldNote, silent });
     }
 
     removeNote(unitId: string, sheetId: string, row: number, col: number, silent?: boolean): void {
         const matrix = this._ensureNoteMatrix(unitId, sheetId);
+        const oldNote = matrix.getValue(row, col);
         matrix.realDeleteValue(row, col);
-        this._change$.next({ unitId, sheetId, row, col, type: 'update', note: null, silent });
+        this._change$.next({ unitId, sheetId, row, col, type: 'update', note: null, oldNote, silent });
     }
 
     toggleNotePopup(unitId: string, sheetId: string, row: number, col: number, silent?: boolean): void {
@@ -107,16 +110,19 @@ export class SheetsNoteModel extends Disposable {
         const note = matrix.getValue(row, col);
         if (note) {
             note.show = !note.show;
+            const newNote = { ...note, show: note.show };
+            matrix.setValue(row, col, newNote);
+            this._change$.next({
+                unitId,
+                sheetId,
+                row,
+                col,
+                type: 'update',
+                note: newNote,
+                oldNote: note,
+                silent,
+            });
         }
-        this._change$.next({
-            unitId,
-            sheetId,
-            row,
-            col,
-            type: 'update',
-            note,
-            silent,
-        });
     }
 
     updateNotePosition(unitId: string, sheetId: string, row: number, col: number, newRow: number, newCol: number, silent?: boolean): void {
@@ -145,6 +151,14 @@ export class SheetsNoteModel extends Disposable {
 
     getUnitNotes(unitId: string): Map<string, ObjectMatrix<ISheetNote>> | undefined {
         return this._noteMatrix.get(unitId);
+    }
+
+    getSheetNotes(unitId: string, sheetId: string): ObjectMatrix<ISheetNote> | undefined {
+        const unitMap = this._noteMatrix.get(unitId);
+        if (!unitMap) {
+            return undefined;
+        }
+        return unitMap.get(sheetId);
     }
 
     getNotes() {

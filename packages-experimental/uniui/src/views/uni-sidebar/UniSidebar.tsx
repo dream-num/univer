@@ -15,7 +15,7 @@
  */
 
 import type { ISidebarMethodOptions } from '@univerjs/ui';
-import { clsx } from '@univerjs/design';
+import { clsx, scrollbarClassName } from '@univerjs/design';
 import { CloseSingle } from '@univerjs/icons';
 import { CustomLabel, ILeftSidebarService, ISidebarService, useDependency, useObservable } from '@univerjs/ui';
 import React, { useEffect, useMemo, useRef } from 'react';
@@ -117,11 +117,10 @@ export function UniSidebar(props: IUniSidebarProps) {
             style={{ width }}
         >
             <section
-                className={`
+                className={clsx(`
                   univer-m-auto univer-box-border univer-flex univer-h-0 univer-min-h-full univer-w-full univer-flex-col
-                  univer-overflow-hidden univer-overflow-y-auto univer-bg-white univer-scrollbar-thin
-                  univer-scrollbar-gutter-auto univer-scrollbar-track-slate-700
-                `}
+                  univer-overflow-hidden univer-overflow-y-auto univer-bg-white
+                `, scrollbarClassName)}
                 ref={scrollRef}
             >
                 { showClose && (

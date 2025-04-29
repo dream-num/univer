@@ -18,7 +18,7 @@ import type { IUnitRangeName, Nullable } from '@univerjs/core';
 import type { Editor, IRichTextEditorProps } from '@univerjs/docs-ui';
 import type { ISelectionWithStyle, ISetSelectionsOperationParams } from '@univerjs/sheets';
 import { ICommandService, LocaleService, RichTextBuilder } from '@univerjs/core';
-import { Button, Dialog, Input, Tooltip } from '@univerjs/design';
+import { Button, clsx, Dialog, Input, scrollbarClassName, Tooltip } from '@univerjs/design';
 import { IEditorService, RichTextEditor } from '@univerjs/docs-ui';
 import { deserializeRangeWithSheet, LexerTreeBuilder, matchToken, sequenceNodeType, serializeRange, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { DeleteSingle, IncreaseSingle, SelectRangeSingle } from '@univerjs/icons';
@@ -181,10 +181,7 @@ export function RangeSelectorDialog(props: IRangeSelectorDialogProps) {
         >
             <div
                 ref={scrollbarRef}
-                className={`
-                  -univer-mx-6 univer-max-h-60 univer-overflow-y-auto univer-px-6 univer-scrollbar-thin
-                  univer-scrollbar-track-transparent univer-scrollbar-thumb-[#73737366]
-                `}
+                className={clsx('-univer-mx-6 univer-max-h-60 univer-overflow-y-auto univer-px-6', scrollbarClassName)}
             >
                 {ranges.map((text, index) => (
                     <div

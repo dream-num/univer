@@ -18,7 +18,6 @@ import type { CSSProperties, ReactNode } from 'react';
 import type { ICheckboxProps } from '../checkbox/Checkbox';
 import { Children, cloneElement, isValidElement } from 'react';
 import { clsx } from '../../helper/clsx';
-import styles from './index.module.less';
 
 export interface ICheckboxGroupProps {
     children: ReactNode[];
@@ -70,12 +69,13 @@ export function CheckboxGroup(props: ICheckboxGroupProps) {
         }
     };
 
-    const _className = clsx(className, styles.checkboxGroup, {
-        [styles.checkboxGroupDirectionVertical]: direction === 'vertical',
-    });
-
     return (
-        <div className={_className} style={style}>
+        <div
+            className={clsx('univer-flex univer-gap-2', {
+                'univer-flex-col': direction === 'vertical',
+            }, className)}
+            style={style}
+        >
             {Children.map(children, (child, index) => {
                 if (isValidElement<ICheckboxProps>(child)) {
                     return cloneElement(child, {

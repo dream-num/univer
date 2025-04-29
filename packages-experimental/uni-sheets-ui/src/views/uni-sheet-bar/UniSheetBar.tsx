@@ -17,7 +17,7 @@
 import type { ICommandInfo } from '@univerjs/core';
 import type { IBaseSheetBarProps } from '@univerjs/sheets-ui';
 import { ICommandService } from '@univerjs/core';
-import { clsx, Tooltip } from '@univerjs/design';
+import { clsx, scrollbarClassName, Tooltip } from '@univerjs/design';
 import { IncreaseSingle } from '@univerjs/icons';
 import { InsertSheetCommand, InsertSheetMutation, RemoveSheetMutation, SetTabColorMutation, SetWorksheetActiveOperation, SetWorksheetHideMutation, SetWorksheetNameMutation, SetWorksheetOrderMutation } from '@univerjs/sheets';
 import { useActiveWorkbook } from '@univerjs/sheets-ui';
@@ -94,7 +94,7 @@ export function UniSheetBar() {
 
     return (
         <div className="univer-flex univer-h-full univer-select-none univer-flex-col univer-justify-between" ref={sheetBarRef}>
-            <div className="univer-overflow-y-auto univer-scrollbar-thin">
+            <div className={clsx('univer-overflow-y-auto', scrollbarClassName)}>
                 <div className="univer-flex univer-flex-col univer-gap-1 univer-text-sm univer-font-medium">
                     {sheetList.map((item, index) => (
                         <div

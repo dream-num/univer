@@ -16,7 +16,7 @@
 
 import type { CSSProperties } from 'react';
 import type { ICustomLabelProps } from '../../../components/custom-label/CustomLabel';
-import { clsx } from '@univerjs/design';
+import { clsx, scrollbarClassName } from '@univerjs/design';
 import { CloseSingle } from '@univerjs/icons';
 import React, { useEffect, useMemo, useRef } from 'react';
 import { CustomLabel } from '../../../components/custom-label/CustomLabel';
@@ -120,14 +120,12 @@ export function Sidebar() {
             style={{ width }}
         >
             <section
-                className={`
+                ref={scrollRef}
+                className={clsx(`
                   univer-box-border univer-grid univer-h-0 univer-min-h-full univer-grid-rows-[auto_1fr_auto]
                   univer-overflow-y-auto univer-border-0 univer-border-b univer-border-l univer-border-solid
-                  univer-border-gray-200 univer-bg-white univer-scrollbar-thin univer-scrollbar-track-gray-50
-                  univer-scrollbar-thumb-gray-300
-                  dark:univer-bg-black dark:univer-scrollbar-track-gray-900 dark:univer-scrollbar-thumb-gray-700
-                `}
-                ref={scrollRef}
+                  univer-border-gray-200 univer-bg-white
+                `, scrollbarClassName)}
             >
                 <header
                     className={`

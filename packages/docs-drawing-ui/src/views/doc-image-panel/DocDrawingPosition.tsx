@@ -370,7 +370,7 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
                   univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start univer-justify-start
                 `}
             >
-                <div className="'univer-flex univer-items-center univer-gap-1', styles.imageCommonPanelTitle">
+                <div className="univer-flex univer-items-center univer-gap-1 univer-text-gray-400">
                     <div>{localeService.t('image-position.title')}</div>
                 </div>
             </div>
@@ -389,7 +389,7 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
                   univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start univer-justify-start
                 `}
             >
-                <div className="univer-flex univer-items-center univer-gap-1">
+                <div className="univer-flex univer-items-center univer-gap-1 univer-text-gray-400">
                     <label>
                         <div
                             className={`
@@ -420,7 +420,6 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
                                             posOffset: val as number,
                                         });
                                     }}
-                                    className={styles.imageCommonPanelInput}
                                 />
                             </div>
                         </div>

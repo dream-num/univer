@@ -34,9 +34,6 @@ export function getTestFilePath() {
     return name.replace(/[ >]/g, '-').toLowerCase();
 }
 
-/**
- *
- */
 export async function expectCalculationResultMatchesSnapshot() {
     const testBed = createFormulaTestBed();
     const snapshotRootDir = path.join(import.meta.dirname, '../__snapshots__');
@@ -49,9 +46,9 @@ export async function expectCalculationResultMatchesSnapshot() {
     const testSnapshotRaw = fs.readFileSync(testSnapshotPath, 'utf-8');
     const testSnapshot = JSON.parse(testSnapshotRaw) as IWorkbookData;
 
-    const workbook = testBed.api.createUniverSheet(testSnapshot);
+    const workbook = testBed.api.createWorkbook(testSnapshot);
     const formula = testBed.api.getFormula();
-    await formula.onCalculationEnd();
+    await formula.whenComputingCompleteAsync();
 
     const resultSnapshot = workbook.save();
     const snapshotFilePath = path.resolve(snapshotRootDir, `${getTestFilePath()}-result.json`);

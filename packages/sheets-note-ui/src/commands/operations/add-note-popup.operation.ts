@@ -49,7 +49,7 @@ export const AddNotePopupOperation: ICommand = {
             subUnitId: worksheet.getSheetId(),
             row: primary.actualRow,
             col: primary.actualColumn,
-            temp: true,
+            temp: false,
             trigger: params?.trigger,
         });
 

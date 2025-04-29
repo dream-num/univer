@@ -26,7 +26,7 @@ import { of } from 'rxjs';
 export const SheetsNote = (props: { popup: IPopup<{ location: ISheetLocationBase }> }) => {
     const noteModel = useDependency(SheetsNoteModel);
     const localeService = useDependency(LocaleService);
-    const [note, setNote] = useState<ISheetNote>({ width: 160, height: 60, note: '' });
+    const [note, setNote] = useState<ISheetNote>({ width: 216, height: 92, note: '' });
     const activePopup = props.popup.extraProps?.location;
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const commandService = useDependency(ICommandService);

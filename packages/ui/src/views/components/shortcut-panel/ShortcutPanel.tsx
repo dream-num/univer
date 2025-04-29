@@ -89,7 +89,12 @@ export function ShortcutPanel() {
     }, [shortcutService, updateShortcuts]);
 
     return (
-        <ul className="univer-m-0 univer-list-none univer-p-0 univer-text-gray-900">
+        <ul
+            className={`
+              univer-m-0 univer-list-none univer-p-0 univer-text-gray-900
+              dark:univer-text-white
+            `}
+        >
             {shortcutItems.map((group) => (
                 <li key={group.name}>
                     <div className="univer-flex univer-h-10 univer-items-center univer-text-sm univer-font-semibold">
@@ -101,6 +106,7 @@ export function ShortcutPanel() {
                           univer-list-none univer-p-0
                           [&>li]:univer-border-0 [&>li]:univer-border-b [&>li]:univer-border-solid
                           [&>li]:univer-border-b-gray-200
+                          dark:[&>li]:univer-border-b-gray-700
                         `}
                     >
                         {group.items.map((item) => (

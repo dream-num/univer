@@ -21,7 +21,7 @@ import { LocaleService } from '@univerjs/core';
 import { Button, Select } from '@univerjs/design';
 import { getCurrencyType } from '@univerjs/sheets-numfmt';
 import { useDependency } from '@univerjs/ui';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { UserHabitCurrencyContext } from '../../controllers/user-habit.controller';
 import { useCurrencyOptions } from '../hooks/use-currency-options';
 import { useNextTick } from '../hooks/use-next-tick';

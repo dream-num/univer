@@ -65,7 +65,10 @@ export const SheetPermissionUserDialog = () => {
                                 return (
                                     <div
                                         key={item.subject?.userID}
-                                        className="univer-my-2 univer-flex univer-items-center univer-rounded-md hover:univer-bg-gray-50"
+                                        className={`
+                                          univer-my-2 univer-flex univer-items-center univer-rounded-md
+                                          hover:univer-bg-gray-50
+                                        `}
                                         onClick={() => handleChangeUser(item)}
                                     >
                                         <Avatar src={item.subject?.avatar} size={24} />
@@ -90,7 +93,7 @@ export const SheetPermissionUserDialog = () => {
                         </div>
                     )}
             </div>
-            <div className="univer-h-[1px] univer-w-full univer-bg-gray-200" />
+            <div className="univer-h-px univer-w-full univer-bg-gray-200" />
             <div className="univer-flex univer-items-center univer-justify-end univer-gap-1 univer-py-2">
                 <Button
                     onClick={() => dialogService.close(UNIVER_SHEET_PERMISSION_USER_DIALOG_ID)}

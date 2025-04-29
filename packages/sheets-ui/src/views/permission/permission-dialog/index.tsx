@@ -176,7 +176,7 @@ export const SheetPermissionDialog = () => {
     return (
         <Spin loading={loading}>
             <div className="univer-flex univer-flex-col univer-p-2">
-                <div className="univer-h-[1px] univer-bg-gray-200" />
+                <div className="univer-h-px univer-bg-gray-200" />
                 {Object.keys(permissionMap).map((action) => {
                     const actionItem = permissionMap[action];
                     const { text, allowed } = actionItem;
@@ -204,8 +204,8 @@ export const SheetPermissionDialog = () => {
                         </div>
                     );
                 })}
-                <div className="univer-h-[1px] univer-bg-gray-200" />
-                <div className="univer-flex univer-h-9 univer-items-center univer-justify-end univer-mg-2 univer-gap-2">
+                <div className="univer-h-px univer-bg-gray-200" />
+                <div className="univer-mt-2 univer-flex univer-h-9 univer-items-center univer-justify-end univer-gap-2">
 
                     <Button
                         onClick={() => {

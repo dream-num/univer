@@ -329,7 +329,7 @@ export const SheetPermissionPanelList = () => {
                                             </div>
                                         )}
                                     </div>
-                                    <div className="univer-my-2 univer-h-[1px] univer-bg-gray-200" />
+                                    <div className="univer-my-2 univer-h-px univer-bg-gray-200" />
                                     <div>
                                         <div className="univer-flex univer-items-center">
 

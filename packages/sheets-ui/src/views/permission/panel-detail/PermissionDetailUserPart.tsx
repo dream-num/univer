@@ -121,7 +121,7 @@ export const PermissionDetailUserPart = (props: IPermissionDetailUserPartProps) 
                         <span>{localeService.t('permission.panel.designedPerson')}</span>
                         <span className="univer-cursor-pointer univer-text-primary-600" onClick={handleAddPerson}>{localeService.t('permission.panel.addPerson')}</span>
                     </div>
-                    <div className="univer-my-2 univer-h-[1px] univer-bg-gray-200" />
+                    <div className="univer-my-2 univer-h-px univer-bg-gray-200" />
                     <div className="univer-flex-1">
                         {selectUserList?.length > 0
                             ? selectUserList.map((item) => {

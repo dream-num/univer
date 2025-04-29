@@ -46,14 +46,14 @@ const Switch = (props: ISwitchProps) => {
                 />
                 <span
                     className={clsx(`
-                      univer-absolute univer-bottom-0 univer-left-0 univer-right-0 univer-top-0 univer-cursor-pointer
-                      univer-rounded-2xl univer-bg-gray-50 univer-transition-colors univer-duration-200
+                      univer-absolute univer-inset-0 univer-cursor-pointer univer-rounded-2xl univer-bg-gray-50
+                      univer-transition-colors univer-duration-200
                     `, { 'univer-bg-primary-600': checked })}
                 >
                     <span
                         className={clsx(`
-                          univer-absolute univer-bottom-0.5 univer-left-0.5 univer-h-3 univer-w-3 univer-rounded-[50%]
-                          univer-bg-white univer-transition-transform univer-duration-200 univer-content-['']
+                          univer-absolute univer-bottom-0.5 univer-left-0.5 univer-h-3 univer-w-3 univer-rounded-full
+                          univer-bg-white univer-transition-transform univer-duration-200
                         `, { 'univer-translate-x-3': checked })}
                     />
                 </span>

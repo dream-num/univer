@@ -15,8 +15,9 @@
  */
 
 import type { MenuSchemaType } from '@univerjs/ui';
+import { SheetDeleteNoteCommand, SheetToggleNotePopupCommand } from '@univerjs/sheets-note';
 import { ContextMenuGroup, ContextMenuPosition } from '@univerjs/ui';
-import { SHEET_NOTE_CONTEXT_MENU_ID, sheetNoteContextMenuFactory } from './note.menu';
+import { SHEET_NOTE_CONTEXT_MENU_ID, sheetDeleteNoteMenuFactory, sheetNoteContextMenuFactory, sheetNoteToggleMenuFactory } from './note.menu';
 
 export const menuSchema: MenuSchemaType = {
     [ContextMenuPosition.MAIN_AREA]: {
@@ -24,6 +25,14 @@ export const menuSchema: MenuSchemaType = {
             [SHEET_NOTE_CONTEXT_MENU_ID]: {
                 order: 1,
                 menuItemFactory: sheetNoteContextMenuFactory,
+            },
+            [SheetDeleteNoteCommand.id]: {
+                order: 2,
+                menuItemFactory: sheetDeleteNoteMenuFactory,
+            },
+            [SheetToggleNotePopupCommand.id]: {
+                order: 3,
+                menuItemFactory: sheetNoteToggleMenuFactory,
             },
         },
     },

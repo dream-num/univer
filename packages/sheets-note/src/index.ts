@@ -18,3 +18,4 @@ export * from './plugin';
 export * from './models/sheets-note.model';
 export * from './controllers/sheets-note-resource.controller';
 export * from './commands/mutations/note.mutation';
+export * from './commands/commands/note.command';

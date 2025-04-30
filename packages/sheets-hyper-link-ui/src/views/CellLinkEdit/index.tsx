@@ -34,7 +34,6 @@ import { SheetsHyperLinkPopupService } from '../../services/popup.service';
 import { SheetsHyperLinkResolverService } from '../../services/resolver.service';
 import { SheetsHyperLinkSidePanelService } from '../../services/side-panel.service';
 import { HyperLinkEditSourceType } from '../../types/enums/edit-source';
-import styles from './index.module.less';
 
 export const CellLinkEdit = () => {
     const [id, setId] = useState('');
@@ -416,7 +415,12 @@ export const CellLinkEdit = () => {
     }
 
     return (
-        <div className={styles.cellLinkEdit} style={{ display: hide ? 'none' : 'block' }}>
+        <div
+            className={`
+              univer-box-border univer-w-[296px] univer-rounded-xl univer-border univer-border-solid
+              univer-border-gray-200 univer-bg-white univer-p-4 univer-shadow-md
+            `}
+        >
             {showLabel
                 ? (
                     <FormLayout
@@ -442,6 +446,7 @@ export const CellLinkEdit = () => {
                 : null}
             <FormLayout label={localeService.t('hyperLink.form.type')}>
                 <Select
+                    className="univer-w-full"
                     options={linkTypeOptions}
                     value={type}
                     onChange={(newType) => {
@@ -458,7 +463,7 @@ export const CellLinkEdit = () => {
                         value={payload}
                         onChange={(newLink) => {
                             setPayload(newLink);
-                            if (newLink && (setByPayload.current || !display || display === payload)) {
+                            if (newLink && (setByPayload.current || !display || display === newLink)) {
                                 setDisplay(newLink);
                                 setByPayload.current = true;
                             }
@@ -524,6 +529,7 @@ export const CellLinkEdit = () => {
             {type === SheetHyperLinkType.SHEET && (
                 <FormLayout error={showError && !payload ? localeService.t('hyperLink.form.selectError') : ''}>
                     <Select
+                        className="univer-w-full"
                         options={sheetsOption}
                         value={payload}
                         onChange={(newPayload) => {
@@ -541,6 +547,7 @@ export const CellLinkEdit = () => {
             {type === SheetHyperLinkType.DEFINE_NAME && (
                 <FormLayout error={showError && !payload ? localeService.t('hyperLink.form.selectError') : ''}>
                     <Select
+                        className="univer-w-full"
                         options={definedNames}
                         value={payload}
                         onChange={(newValue) => {
@@ -569,7 +576,7 @@ export const CellLinkEdit = () => {
                     setPayload={setPayload}
                 />
             )}
-            <div className={styles.cellLinkEditButtons}>
+            <div className="univer-flex univer-flex-row univer-justify-end">
                 <Button
                     onClick={() => {
                         if (editing) {

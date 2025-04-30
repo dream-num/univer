@@ -27,7 +27,6 @@ import { OpenHyperLinkEditPanelOperation } from '../../commands/operations/popup
 import { SheetsHyperLinkPopupService } from '../../services/popup.service';
 import { SheetsHyperLinkResolverService } from '../../services/resolver.service';
 import { HyperLinkEditSourceType } from '../../types/enums/edit-source';
-import styles from './index.module.less';
 
 const iconsMap = {
     [SheetHyperLinkType.URL]: <LinkSingle />,
@@ -66,9 +65,20 @@ export const CellLinkPopupPure = (props: ICellLinkPopupPureProps) => {
     const isError = linkObj.type === SheetHyperLinkType.INVALID;
 
     return (
-        <div className={styles.cellLink} onClick={() => popupService.hideCurrentPopup()}>
+        <div
+            className={`
+              univer-mb-1 univer-flex univer-max-w-[328px] univer-flex-row univer-items-center univer-justify-between
+              univer-overflow-hidden univer-rounded-lg univer-border univer-border-solid univer-border-gray-200
+              univer-bg-white univer-p-3 univer-shadow-md
+            `}
+            onClick={() => popupService.hideCurrentPopup()}
+        >
             <div
-                className={clsx(styles.cellLinkContent, { [styles.cellLinkContentError]: isError })}
+                className={clsx(`
+                  univer-flex univer-h-6 univer-flex-1 univer-cursor-pointer univer-flex-row univer-items-center
+                  univer-overflow-hidden univer-text-ellipsis univer-whitespace-nowrap univer-text-sm univer-leading-5
+                  univer-text-blue-500
+                `, { 'univer-text-gray-500': isError })}
                 onClick={() => {
                     if (zenZoneService.visible) {
                         return;
@@ -81,17 +91,30 @@ export const CellLinkPopupPure = (props: ICellLinkPopupPureProps) => {
                     resolverService.navigate(linkObj);
                 }}
             >
-                <div className={styles.cellLinkType}>
+                <div
+                    className={`
+                      univer-mr-2 univer-flex univer-h-5 univer-w-5 univer-flex-none univer-items-center
+                      univer-justify-center univer-text-base univer-text-black
+                    `}
+                >
                     {iconsMap[linkObj.type]}
                 </div>
                 <Tooltip showIfEllipsis title={linkObj.name} asChild>
-                    <span className={styles.cellLinkUrl}>{linkObj.name}</span>
+                    <span className="univer-flex-1 univer-overflow-hidden univer-text-ellipsis">{linkObj.name}</span>
                 </Tooltip>
             </div>
-            <div className={styles.cellLinkOperations}>
+            <div
+                className={`
+                  univer-flex univer-h-6 univer-flex-none univer-flex-row univer-items-center univer-justify-center
+                `}
+            >
                 {copyPermission && (
                     <div
-                        className={clsx(styles.cellLinkOperation, { [styles.cellLinkOperationError]: isError })}
+                        className={clsx(`
+                          univer-ml-2 univer-flex univer-h-6 univer-w-6 univer-cursor-pointer univer-flex-row
+                          univer-items-center univer-justify-center univer-rounded univer-text-base
+                          hover:univer-bg-gray-200
+                        `, { 'univer-text-gray-500': isError })}
                         onClick={() => {
                             if (isError) {
                                 return;
@@ -112,13 +135,16 @@ export const CellLinkPopupPure = (props: ICellLinkPopupPureProps) => {
                         <Tooltip placement="bottom" title={localeService.t('hyperLink.popup.copy')}>
                             <CopySingle />
                         </Tooltip>
-
                     </div>
                 )}
                 {editPermission && (
                     <>
                         <div
-                            className={styles.cellLinkOperation}
+                            className={`
+                              univer-ml-2 univer-flex univer-h-6 univer-w-6 univer-cursor-pointer univer-flex-row
+                              univer-items-center univer-justify-center univer-rounded univer-text-base
+                              hover:univer-bg-gray-200
+                            `}
                             onClick={() => {
                                 commandService.executeCommand(OpenHyperLinkEditPanelOperation.id, {
                                     unitId,
@@ -135,7 +161,11 @@ export const CellLinkPopupPure = (props: ICellLinkPopupPureProps) => {
                             </Tooltip>
                         </div>
                         <div
-                            className={styles.cellLinkOperation}
+                            className={`
+                              univer-ml-2 univer-flex univer-h-6 univer-w-6 univer-cursor-pointer univer-flex-row
+                              univer-items-center univer-justify-center univer-rounded univer-text-base
+                              hover:univer-bg-gray-200
+                            `}
                             onClick={() => {
                                 const commandId = (type === HyperLinkEditSourceType.EDITING || type === HyperLinkEditSourceType.ZEN_EDITOR) ? CancelRichHyperLinkCommand.id : CancelHyperLinkCommand.id;
                                 if (commandService.syncExecuteCommand(commandId, {

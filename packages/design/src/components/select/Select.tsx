@@ -23,8 +23,13 @@ import { DropdownMenu } from '../dropdown-menu/DropdownMenu';
 
 interface IOption {
     label?: string | ReactNode;
-    value?: string;
+    value: string;
+    disabled?: boolean;
     options?: IOption[];
+}
+
+interface IOptionSeparator {
+    type: 'separator';
 }
 
 export interface ISelectProps {
@@ -83,15 +88,34 @@ export function Select(props: ISelectProps) {
     }
 
     const items: IDropdownMenuProps['items'] = useMemo(() => {
+        const selectOptions: (IOption | IOptionSeparator)[] = [];
+
+        for (const option of options) {
+            if (option.options) {
+                option.options.forEach((opt) => {
+                    selectOptions.push({
+                        label: opt.label,
+                        value: opt.value!,
+                        disabled: opt.disabled,
+                    });
+                });
+                selectOptions.push({
+                    type: 'separator',
+                });
+            } else {
+                selectOptions.push({
+                    label: option.label,
+                    value: option.value!,
+                    disabled: option.disabled,
+                });
+            }
+        }
+
         return [{
             type: 'radio',
             value,
             hideIndicator: true,
-            options: options.map((option) => ({
-                label: option.label,
-                value: option.value!,
-                disabled: false,
-            })),
+            options: selectOptions,
             onSelect: (item) => {
                 onChange(item);
             },
@@ -99,8 +123,25 @@ export function Select(props: ISelectProps) {
     }, [options]);
 
     const displayValue = useMemo(() => {
-        const selectedOption = options.find((option) => option.value === value);
-        return selectedOption ? selectedOption.label : '';
+        let label = null;
+
+        for (const option of options) {
+            if (option.options) {
+                for (const opt of option.options) {
+                    if (opt.value === value) {
+                        label = opt.label;
+                        break;
+                    }
+                }
+            } else {
+                if (option.value === value) {
+                    label = option.label;
+                    break;
+                }
+            }
+        }
+
+        return label || value;
     }, [options, value]);
 
     return (

@@ -26,23 +26,35 @@ import {
     DropdownMenuTrigger,
 } from './DropdownMenuPrimitive';
 
-type DropdownMenu = {
+interface IDropdownMenuNormalItem {
     type: 'item';
     className?: string;
     children: ReactNode;
     disabled?: boolean;
     onSelect?: (item: DropdownMenu) => void;
-} | {
-    type?: 'separator';
+}
+
+interface IDropdownMenuSeparatorItem {
+    type: 'separator';
     className?: string;
-} | {
-    type?: 'radio';
+}
+
+interface IDropdownMenuOption {
+    label?: ReactNode;
+    value: string;
+    disabled?: boolean;
+}
+
+interface IDropdownMenuRadioItem {
+    type: 'radio';
     className?: string;
     value: string;
     hideIndicator?: boolean;
-    options: { value: string; label: ReactNode; disabled?: boolean }[];
+    options: (IDropdownMenuOption | IDropdownMenuSeparatorItem)[];
     onSelect?: (item: string) => void;
-};
+}
+
+type DropdownMenu = IDropdownMenuNormalItem | IDropdownMenuSeparatorItem | IDropdownMenuRadioItem;
 
 export interface IDropdownMenuProps extends ComponentProps<typeof DropdownMenuContent> {
     children: ReactNode;
@@ -78,7 +90,6 @@ export function DropdownMenu(props: IDropdownMenuProps) {
     }
 
     function renderMenuItem(item: DropdownMenu, index: number) {
-        // const { type, children, icon, checked, hidden, onSelect } = item;
         const { className, type } = item;
 
         if (type === 'separator') {
@@ -91,16 +102,25 @@ export function DropdownMenu(props: IDropdownMenuProps) {
                     value={item.value}
                     onValueChange={item.onSelect}
                 >
-                    {item.options.map((option) => (
-                        <DropdownMenuRadioItem
-                            key={option.value}
-                            value={option.value}
-                            disabled={option.disabled}
-                            hideIndicator={item.hideIndicator}
-                        >
-                            {option.label}
-                        </DropdownMenuRadioItem>
-                    ))}
+                    {item.options.map((option, index) => {
+                        if ('type' in option) {
+                            if (option.type === 'separator') {
+                                return <DropdownMenuSeparator key={index} className={className} />;
+                            }
+                        } else {
+                            return (
+                                <DropdownMenuRadioItem
+                                    key={option.value}
+                                    value={option.value}
+                                    disabled={option.disabled}
+                                    hideIndicator={item.hideIndicator}
+                                >
+                                    {option.label}
+                                </DropdownMenuRadioItem>
+                            );
+                        }
+                        return null;
+                    })}
                 </DropdownMenuRadioGroup>
             );
         } else if (type === 'item') {

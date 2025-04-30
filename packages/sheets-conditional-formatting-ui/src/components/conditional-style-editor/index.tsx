@@ -21,7 +21,6 @@ import { removeUndefinedAttr } from '@univerjs/sheets-conditional-formatting';
 import { ComponentManager, useDependency } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
 import { ColorPicker } from '../color-picker';
-import styles from './index.module.less';
 
 interface IConditionalStyleEditorProps {
     className?: string;
@@ -101,13 +100,16 @@ export const ConditionalStyleEditor = (props: IConditionalStyleEditorProps) => {
         }
         onChange(removeUndefinedAttr(resultStyle));
     }, [isBold, isItalic, isUnderline, isStrikethrough, fontColor, bgColor]);
+
+    const buttonItemClassName = 'univer-flex univer-cursor-pointer univer-items-center univer-rounded univer-px-1';
+
     return (
-        <div
-            className={clsx(styles.cfStyleEdit, className)}
-        >
+        <div className={clsx('univer-my-2.5 univer-flex univer-justify-between', className)}>
             {BoldSingleIcon && (
                 <div
-                    className={clsx({ [styles.isActive]: getBooleanFromNumber(isBold || BooleanNumber.FALSE) }, styles.buttonItem)}
+                    className={clsx(buttonItemClassName, {
+                        'univer-bg-gray-100': getBooleanFromNumber(isBold || BooleanNumber.FALSE),
+                    })}
                     onClick={() => isBoldSet(getAnotherBooleanNumber(isBold))}
                 >
                     <BoldSingleIcon />
@@ -115,7 +117,9 @@ export const ConditionalStyleEditor = (props: IConditionalStyleEditorProps) => {
             )}
             {ItalicSingleIcon && (
                 <div
-                    className={clsx({ [styles.isActive]: getBooleanFromNumber(isItalic || BooleanNumber.FALSE) }, styles.buttonItem)}
+                    className={clsx(buttonItemClassName, {
+                        'univer-bg-gray-100': getBooleanFromNumber(isItalic || BooleanNumber.FALSE),
+                    })}
                     onClick={() => isItalicSet(getAnotherBooleanNumber(isItalic))}
                 >
                     <ItalicSingleIcon />
@@ -123,7 +127,9 @@ export const ConditionalStyleEditor = (props: IConditionalStyleEditorProps) => {
             )}
             {UnderlineSingleIcon && (
                 <div
-                    className={clsx({ [styles.isActive]: getBooleanFromNumber(isUnderline || BooleanNumber.FALSE) }, styles.buttonItem)}
+                    className={clsx(buttonItemClassName, {
+                        'univer-bg-gray-100': getBooleanFromNumber(isUnderline || BooleanNumber.FALSE),
+                    })}
                     onClick={() => isUnderlineSet(getAnotherBooleanNumber(isUnderline))}
                 >
                     <UnderlineSingleIcon />
@@ -131,7 +137,9 @@ export const ConditionalStyleEditor = (props: IConditionalStyleEditorProps) => {
             )}
             {StrikethroughSingle && (
                 <div
-                    className={clsx({ [styles.isActive]: getBooleanFromNumber(isStrikethrough || BooleanNumber.FALSE) }, styles.buttonItem)}
+                    className={clsx(buttonItemClassName, {
+                        'univer-bg-gray-100': getBooleanFromNumber(isStrikethrough || BooleanNumber.FALSE),
+                    })}
                     onClick={() => isStrikethroughSet(getAnotherBooleanNumber(isStrikethrough))}
                 >
                     <StrikethroughSingle />

@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-import React from 'react';
-
-import styles from './index.module.less';
 import { ZoomSlider } from './ZoomSlider';
 
 interface ICountBarProps {
@@ -26,7 +23,7 @@ interface ICountBarProps {
 
 export function CountBar(props: ICountBarProps) {
     return (
-        <section className={styles.countBar}>
+        <section className="univer-flex univer-flex-shrink-0 univer-justify-end">
             <ZoomSlider />
         </section>
     );

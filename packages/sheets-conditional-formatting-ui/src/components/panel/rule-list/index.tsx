@@ -40,7 +40,6 @@ import GridLayout from 'react-grid-layout';
 import { debounceTime, Observable } from 'rxjs';
 import { ConditionalFormattingI18nController } from '../../../controllers/cf.i18n.controller';
 import { Preview } from '../../preview';
-import styles from './index.module.less';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 
@@ -319,13 +318,13 @@ export const RuleList = (props: IRuleListProps) => {
     }, [ruleList]);
 
     return (
-        <div className={styles.cfRuleList}>
-            <div className={styles.ruleSelector}>
-                <div>
+        <div>
+            <div className="univer-flex univer-items-center univer-justify-between univer-gap-2 univer-text-sm">
+                <div className="univer-flex univer-items-center univer-gap-2">
                     {conditionalFormattingI18nController.tWithReactNode(
                         'sheet.cf.panel.managerRuleSelect',
                         <Select
-                            className={styles.select}
+                            className="univer-w-36"
                             options={selectOption}
                             value={selectValue}
                             onChange={(v) => { setSelectValue(v); }}
@@ -334,97 +333,119 @@ export const RuleList = (props: IRuleListProps) => {
                 </div>
                 <div className="univer-flex univer-justify-end">
                     <Tooltip title={localeService.t('sheet.cf.panel.createRule')} placement="bottom">
-                        <div
-                            className="univer-size-5"
+                        <a
+                            className="univer-size-5 univer-cursor-pointer"
                             onClick={handleCreate}
                         >
                             <IncreaseSingle />
-                        </div>
+                        </a>
                     </Tooltip>
                     {(ruleList.length && isHasAllRuleEditPermission)
                         ? (
                             <Tooltip title={localeService.t('sheet.cf.panel.clear')} placement="bottom">
-                                <div
-                                    className={clsx(styles.gap, 'univer-size-5')}
+                                <a
+                                    className="univer-size-5 univer-cursor-pointer"
                                     onClick={handleClear}
                                 >
-                                    <DeleteSingle />
-                                </div>
+                                    <DeleteSingle className="univer-text-red-500" />
+                                </a>
                             </Tooltip>
                         )
                         : (
-                            <div className={clsx(styles.gap, styles.disabled)}>
-                                <DeleteSingle />
+                            <div>
+                                <DeleteSingle className="univer-text-gray-300" />
                             </div>
                         )}
 
                 </div>
 
             </div>
-            <div ref={layoutContainerRef} className={styles.gridLayoutWrap}>
-                {layoutWidth
-                    ? (
-                        <GridLayout
-                            draggableHandle=".draggableHandle"
-                            layout={layout}
-                            cols={12}
-                            rowHeight={60}
-                            width={layoutWidth}
-                            margin={[0, 10]}
-                            onDragStop={handleDragStop}
-                            onDragStart={handleDragStart}
-                        >
-                            {ruleListByPermissionCheck?.map((rule, index) => {
-                                return (
-                                    <div key={`${rule.cfId}`}>
+
+            <div ref={layoutContainerRef}>
+                {layoutWidth > 0 && (
+                    <GridLayout
+                        className={`
+                          [&_.react-grid-item]:univer-transition-none
+                          [&_.react-grid-placeholder]:univer-rounded [&_.react-grid-placeholder]:!univer-bg-gray-200
+                        `}
+                        draggableHandle=".draggableHandle"
+                        layout={layout}
+                        cols={12}
+                        rowHeight={60}
+                        width={layoutWidth}
+                        margin={[0, 10]}
+                        onDragStop={handleDragStop}
+                        onDragStart={handleDragStart}
+                    >
+                        {ruleListByPermissionCheck?.map((rule, index) => {
+                            return (
+                                <div key={`${rule.cfId}`}>
+                                    <div
+                                        className={clsx(`
+                                          univer-group univer-relative univer-flex univer-items-center
+                                          univer-justify-between univer-rounded univer-py-2 univer-pl-5 univer-pr-8
+                                          hover:univer-bg-gray-100
+                                        `, {
+                                            'univer-bg-gray-100': draggingId === index,
+                                        })}
+                                        onMouseMove={() => {
+                                            rule.ranges !== currentRuleRanges && currentRuleRangesSet(rule.ranges);
+                                        }}
+                                        onMouseLeave={() => currentRuleRangesSet([])}
+                                        onClick={() => {
+                                            onClick(rule);
+                                        }}
+                                    >
                                         <div
-                                            className={clsx(styles.ruleItem, {
-                                                [styles.active]: draggingId === index,
-                                            })}
-                                            onMouseMove={() => {
-                                                rule.ranges !== currentRuleRanges && currentRuleRangesSet(rule.ranges);
-                                            }}
-                                            onMouseLeave={() => currentRuleRangesSet([])}
-                                            onClick={() => {
-                                                onClick(rule);
-                                            }}
+                                            className={clsx(`
+                                              univer-absolute univer-left-0 univer-hidden univer-size-5
+                                              univer-cursor-grab univer-items-center univer-justify-center
+                                              univer-rounded
+                                              group-hover:univer-flex
+                                            `, 'draggableHandle')}
+                                            onClick={(e) => e.stopPropagation()}
                                         >
-                                            <div
-                                                className={clsx(styles.draggableHandle, 'draggableHandle')}
-                                                onClick={(e) => e.stopPropagation()}
-                                            >
-                                                <SequenceSingle />
+                                            <SequenceSingle />
+                                        </div>
+                                        <div
+                                            className={`
+                                              univer-min-w-0 univer-max-w-full univer-flex-shrink univer-overflow-hidden
+                                            `}
+                                        >
+                                            <div className="univer-text-sm univer-text-gray-900">
+                                                {getRuleDescribe(rule, localeService)}
                                             </div>
-                                            <div className={styles.ruleDescribe}>
-                                                <div className={styles.ruleType}>
-                                                    {getRuleDescribe(rule, localeService)}
-                                                </div>
-                                                <div className={styles.ruleRange}>
-                                                    {rule.ranges.map((range) => serializeRange(range)).join(',')}
-                                                </div>
-                                            </div>
-                                            <div>
-                                                <Preview rule={rule.rule} />
-                                            </div>
-                                            <div
-                                                className={clsx(styles.deleteItem, {
-                                                    [styles.active]: draggingId === index,
-                                                })}
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleDelete(rule);
-                                                    currentRuleRangesSet([]);
-                                                }}
-                                            >
-                                                <DeleteSingle />
+                                            <div className="univer-text-xs univer-text-gray-400">
+                                                {rule.ranges.map((range) => serializeRange(range)).join(',')}
                                             </div>
                                         </div>
+                                        <div>
+                                            <Preview rule={rule.rule} />
+                                        </div>
+                                        <div
+                                            className={clsx(`
+                                              univer-absolute univer-right-1 univer-hidden univer-size-6
+                                              univer-cursor-pointer univer-items-center univer-justify-center
+                                              univer-rounded
+                                              group-hover:univer-flex
+                                              hover:univer-bg-gray-200
+                                            `, {
+                                                'univer-flex univer-items-center univer-justify-center': draggingId === index,
+                                            })}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleDelete(rule);
+                                                currentRuleRangesSet([]);
+                                            }}
+                                        >
+                                            <DeleteSingle />
+                                        </div>
                                     </div>
-                                );
-                            })}
-                        </GridLayout>
-                    )
-                    : null}
+                                </div>
+                            );
+                        })}
+                    </GridLayout>
+                ) }
             </div>
         </div>
     );

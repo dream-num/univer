@@ -16,16 +16,16 @@
 
 import type { IConditionalFormattingRuleConfig } from '@univerjs/sheets-conditional-formatting';
 import { BooleanNumber, ColorKit } from '@univerjs/core';
+import { clsx } from '@univerjs/design';
 import { SlashSingle } from '@univerjs/icons';
 import { CFRuleType, DEFAULT_BG_COLOR, DEFAULT_FONT_COLOR, defaultDataBarNativeColor, defaultDataBarPositiveColor, getColorScaleFromValue, iconMap } from '@univerjs/sheets-conditional-formatting';
-import React, { useMemo } from 'react';
-import styles from './index.module.less';
+import { useMemo } from 'react';
 
 export const Preview = (props: { rule?: IConditionalFormattingRuleConfig }) => {
     const rule = props.rule;
-    if (!rule) {
-        return null;
-    }
+
+    if (!rule) return null;
+
     const colorList = useMemo(() => {
         if (rule.type === CFRuleType.colorScale) {
             const config = rule.config.map((c, index) => ({ color: new ColorKit(c.color), value: index }));
@@ -35,6 +35,7 @@ export const Preview = (props: { rule?: IConditionalFormattingRuleConfig }) => {
         }
         return null;
     }, [rule]);
+
     const iconSet = useMemo(() => {
         if (rule.type === CFRuleType.iconSet) {
             return rule.config.map((item) => {
@@ -43,34 +44,53 @@ export const Preview = (props: { rule?: IConditionalFormattingRuleConfig }) => {
             });
         }
     }, [rule]);
+
+    const previewClassName = `univer-pointer-events-none univer-flex univer-h-5 univer-min-w-[72px] univer-items-center
+    univer-justify-center univer-text-xs`;
+
     switch (rule.type) {
         case CFRuleType.dataBar:
         {
             const { isGradient } = rule.config;
-            const commonStyle = { width: '50%', height: '100%' };
             const positiveColor = isGradient ? `linear-gradient(to right, ${rule.config.positiveColor || defaultDataBarPositiveColor}, rgb(255 255 255))` : rule.config.positiveColor;
             const nativeColor = isGradient ? `linear-gradient(to right,  rgb(255 255 255),${rule.config.nativeColor || defaultDataBarNativeColor})` : rule.config.nativeColor;
+
             return (
-                <div className={styles.cfPreview}>
-                    <div style={{ ...commonStyle, background: nativeColor, border: `1px solid ${rule.config.nativeColor || defaultDataBarNativeColor}` }} />
-                    <div style={{ ...commonStyle, background: positiveColor, border: `1px solid ${rule.config.positiveColor || defaultDataBarPositiveColor}` }} />
+                <div className={previewClassName}>
+                    <div
+                        className="univer-h-full univer-w-1/2"
+                        style={{
+                            background: nativeColor,
+                            border: `1px solid ${rule.config.nativeColor || defaultDataBarNativeColor}`,
+                        }}
+                    />
+                    <div
+                        className="univer-h-full univer-w-1/2"
+                        style={{
+                            background: positiveColor,
+                            border: `1px solid ${rule.config.positiveColor || defaultDataBarPositiveColor}`,
+                        }}
+                    />
                 </div>
             );
         }
 
         case CFRuleType.colorScale: {
             return colorList && (
-                <div className={styles.cfPreview}>
+                <div className={previewClassName}>
                     {colorList.map((item, index) => (
-                        <div key={index} style={{ width: `${100 / colorList.length}%`, height: '100%', background: item }} />
+                        <div key={index} className="univer-h-full" style={{ width: `${100 / colorList.length}%`, background: item }} />
                     ))}
                 </div>
             );
         }
         case CFRuleType.iconSet: {
             return iconSet && (
-                <div className={styles.cfPreview}>
-                    {iconSet.map((base64, index) => (base64 ? <img style={{ height: '100%' }} key={index} src={base64} /> : <SlashSingle key={index} />))}
+                <div className={previewClassName}>
+                    {iconSet.map((base64, index) => (
+                        base64 ?
+                            <img key={index} className="univer-h-full" src={base64} draggable={false} />
+                            : <SlashSingle key={index} />))}
                 </div>
             );
         }
@@ -83,18 +103,22 @@ export const Preview = (props: { rule?: IConditionalFormattingRuleConfig }) => {
             const bgColor = bg?.rgb ?? DEFAULT_BG_COLOR;
             const fontColor = cl?.rgb ?? DEFAULT_FONT_COLOR;
             const style = {
-                fontWeight: isBold ? 'bold' : undefined,
-                fontStyle: isItalic ? 'italic' : undefined,
-                textDecoration: `${isUnderline ? 'underline' : ''} ${isStrikethrough ? 'line-through' : ''}`.replace(/^ /, '') || undefined,
+                textDecoration: `${isUnderline ? 'underline' : ''} ${isStrikethrough ? 'line-through' : ''}`.replace(/^ /, '') ?? undefined,
                 backgroundColor: bgColor,
                 color: fontColor,
             };
+
             return (
-                <div style={style} className={styles.cfPreview}>
+                <div
+                    className={clsx(previewClassName, {
+                        'univer-font-bold': isBold,
+                        'univer-italic': isItalic,
+                    })}
+                    style={style}
+                >
                     123
                 </div>
             );
         }
     }
-    return null;
 };

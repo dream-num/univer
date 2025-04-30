@@ -27,7 +27,6 @@
         "@univerjs/docs-drawing-ui": "workspace:*",
         "@univerjs/docs-hyper-link-ui": "workspace:*",
         "@univerjs/docs-mention-ui": "workspace:*",
-
         "@univerjs/docs-quick-insert-ui": "workspace:*",
         "@univerjs/docs-thread-comment-ui": "workspace:*",
         "@univerjs/docs-ui": "workspace:*",
@@ -36,7 +35,7 @@
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/find-replace": "workspace:*",
-        "@univerjs/icons": "0.3.23",
+        "@univerjs/icons": "0.3.24",
         "@univerjs/mockdata": "workspace:*",
         "@univerjs/network": "workspace:*",
         "@univerjs/rpc": "workspace:*",

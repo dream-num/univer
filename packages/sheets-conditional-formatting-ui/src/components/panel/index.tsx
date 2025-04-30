@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-import React, { useState } from 'react';
 import type { IConditionFormattingRule } from '@univerjs/sheets-conditional-formatting';
-import styles from './index.module.less';
-import { RuleList } from './rule-list';
+import { useState } from 'react';
 import { RuleEdit } from './rule-edit';
+import { RuleList } from './rule-list';
 
 interface IConditionFormattingPanelProps { rule?: IConditionFormattingRule };
 
@@ -41,7 +40,7 @@ export const ConditionFormattingPanel = (props: IConditionFormattingPanelProps) 
     };
 
     return (
-        <div className={styles.conditionalFormattingWrap}>
+        <div className="univer-flex univer-h-full univer-flex-col univer-justify-between">
             {isShowRuleEditor
                 ? (
                     <RuleEdit onCancel={handleCancel} rule={currentEditRule} />

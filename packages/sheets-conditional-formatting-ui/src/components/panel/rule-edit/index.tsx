@@ -26,13 +26,11 @@ import { AddCfCommand, CFRuleType, CFSubRuleType, ConditionalFormattingRuleModel
 import { RangeSelector } from '@univerjs/sheets-formula-ui';
 import { useDependency } from '@univerjs/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import styleBase from '../index.module.less';
 import { ColorScaleStyleEditor } from './ColorScale';
 import { DataBarStyleEditor } from './DataBar';
 import { FormulaStyleEditor } from './Formula';
 import { HighlightCellStyleEditor } from './HighlightCell';
 import { IconSet } from './IconSet';
-import styles from './index.module.less';
 import { RankStyleEditor } from './Rank';
 import { beforeSubmit, submit } from './type';
 
@@ -231,8 +229,10 @@ export const RuleEdit = (props: IRuleEditProps) => {
         }
     };
     return (
-        <div className={styles.cfRuleStyleEditor}>
-            <div className={styleBase.title}>{localeService.t('sheet.cf.panel.range')}</div>
+        <div>
+            <div className="univer-mt-4 univer-text-sm univer-text-gray-600">
+                {localeService.t('sheet.cf.panel.range')}
+            </div>
             <div className="univer-mt-4">
                 <RangeSelector
                     unitId={unitId}
@@ -241,9 +241,11 @@ export const RuleEdit = (props: IRuleEditProps) => {
                     onChange={(_, text) => onRangeSelectorChange(text)}
                     onVerify={handleVerify}
                 />
-                {errorText && <div className={styles.cfErrorText}>{errorText}</div>}
+                {errorText && <div className="univer-mt-1 univer-text-xs univer-text-red-500">{errorText}</div>}
             </div>
-            <div className={styleBase.title}>{localeService.t('sheet.cf.panel.styleType')}</div>
+            <div className="univer-mt-4 univer-text-sm univer-text-gray-600">
+                {localeService.t('sheet.cf.panel.styleType')}
+            </div>
             <Select
                 className="univer-mt-4 univer-w-full"
                 value={ruleType}

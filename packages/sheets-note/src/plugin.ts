@@ -30,8 +30,8 @@ export class SheetsNotePlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(
-        @Inject(Injector) protected override readonly _injector: Injector,
-        @IConfigService private readonly _configService: IConfigService
+        @IConfigService private readonly _configService: IConfigService,
+        @Inject(Injector) protected override readonly _injector: Injector
     ) {
         super();
     }

@@ -14,10 +14,4 @@
  * limitations under the License.
  */
 
-import './global.css';
-
-export * from './plugin';
-export * from './services/sheets-note-popup.service';
-export * from './views/note';
-export * from './controllers/sheets-note-popup.controller';
-export * from './controllers/sheets-cell-content.controller';
+export const previewClassName = 'univer-mt-5 univer-px-1 univer-py-2 univer-border univer-border-solid univer-border-gray-200 univer-rounded';

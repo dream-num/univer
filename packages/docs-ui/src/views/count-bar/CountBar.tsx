@@ -24,7 +24,7 @@ interface ICountBarProps {
 
 export function CountBar(_props: ICountBarProps) {
     return (
-        <section className="univer-flex univer-flex-shrink-0 univer-flex-grow-0 univer-basis-[260px] univer-justify-end">
+        <section className="univer-flex univer-flex-shrink-0 univer-justify-end">
             <ZoomSlider />
         </section>
     );

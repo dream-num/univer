@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import './global.css';
+
 export * from './plugin';
 export * from './services/sheets-note-popup.service';
 export * from './views/note';

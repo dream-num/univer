@@ -111,16 +111,16 @@ export const SheetsNote = (props: { popup: IPopup<{ location: ISheetLocationBase
 
     return (
         <textarea
-            style={{ width: note.width, height: note.height }}
             ref={textareaRef}
             className={`
               univer-note-textarea univer-resize-both univer-ml-[1px] univer-rounded univer-border univer-border-solid
               univer-border-gray-200 univer-p-2 univer-shadow
               focus:univer-outline-none
             `}
+            style={{ width: note.width, height: note.height }}
             value={note.note}
-            onChange={handleNoteChange}
             placeholder={localeService.t('note.placeholder')}
+            onChange={handleNoteChange}
         />
     );
 };

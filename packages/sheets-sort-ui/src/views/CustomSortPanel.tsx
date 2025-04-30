@@ -156,7 +156,7 @@ function CustomSortPanelImpl({ state }: { state: ICustomSortState }) {
                         list={dragList}
                         onListChange={setList}
                         idKey="id"
-                        draggableHandle='[data-u-comp="sort-panel-item-handler"]'
+                        draggableHandle="[data-u-comp=sort-panel-item-handler]"
                         itemRender={(item) => (
                             <SortOptionItem
                                 titles={titles}

@@ -22,17 +22,18 @@ import { sheetDeleteNoteMenuFactory, sheetNoteContextMenuFactory, sheetNoteToggl
 
 export const menuSchema: MenuSchemaType = {
     [ContextMenuPosition.MAIN_AREA]: {
-        [ContextMenuGroup.DATA]: {
+        [ContextMenuGroup.OTHERS]: {
+            order: 0,
             [AddNotePopupOperation.id]: {
-                order: 1,
+                order: 0,
                 menuItemFactory: sheetNoteContextMenuFactory,
             },
             [SheetDeleteNoteCommand.id]: {
-                order: 2,
+                order: 1,
                 menuItemFactory: sheetDeleteNoteMenuFactory,
             },
             [SheetToggleNotePopupCommand.id]: {
-                order: 3,
+                order: 2,
                 menuItemFactory: sheetNoteToggleMenuFactory,
             },
         },

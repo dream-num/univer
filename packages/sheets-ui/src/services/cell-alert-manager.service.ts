@@ -21,6 +21,7 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import { Subject } from 'rxjs';
 import { CELL_ALERT_KEY } from '../views/cell-alert';
 import { SheetCanvasPopManagerService } from './canvas-pop-manager.service';
+import { CellPopupManagerService } from './cell-popup-manager.service';
 
 export enum CellAlertType {
     INFO,
@@ -50,7 +51,8 @@ export class CellAlertManagerService extends Disposable {
 
     constructor(
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @Inject(SheetCanvasPopManagerService) private readonly _canvasPopManagerService: SheetCanvasPopManagerService
+        @Inject(SheetCanvasPopManagerService) private readonly _canvasPopManagerService: SheetCanvasPopManagerService,
+        @Inject(CellPopupManagerService) private readonly _cellPopupManagerService: CellPopupManagerService
     ) {
         super();
 
@@ -79,21 +81,29 @@ export class CellAlertManagerService extends Disposable {
         }
 
         const { location } = alert;
-        const { row, col, unitId } = location;
+        const { row, col, unitId, subUnitId } = location;
 
         const currentRender = this._renderManagerService.getRenderById(unitId);
         if (!currentRender) {
             return;
         }
 
-        const disposable = this._canvasPopManagerService.attachPopupToCell(row, col, {
-            componentKey: CELL_ALERT_KEY,
-            direction: 'horizontal',
-            offset: [2, 0],
-            extraProps: {
-                alert,
+        const disposable = this._cellPopupManagerService.showPopup(
+            {
+                unitId,
+                subUnitId,
+                row,
+                col,
             },
-        });
+            {
+                componentKey: CELL_ALERT_KEY,
+                direction: 'horizontal',
+                extraProps: {
+                    alert,
+                },
+                priority: 1,
+            }
+        );
         if (disposable) {
             lastPopup.dispose = disposable;
         }

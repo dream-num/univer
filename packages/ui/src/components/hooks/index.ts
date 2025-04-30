@@ -18,4 +18,5 @@ export { useEvent } from './event';
 export { useConfigValue } from './layout';
 export { useUpdateEffect } from './update-effect';
 export { useClickOutSide } from './use-click-out-side';
+export { useDebounceFn } from './use-debounce';
 export { useVirtualList } from './virtual-list';

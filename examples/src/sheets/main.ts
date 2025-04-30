@@ -31,6 +31,8 @@ import { UniverSheetsDataValidationPlugin } from '@univerjs/sheets-data-validati
 import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
 import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
 import { UniverSheetsHyperLinkPlugin } from '@univerjs/sheets-hyper-link';
+import { SheetsNotePlugin } from '@univerjs/sheets-note';
+import { SheetsNoteUIPlugin } from '@univerjs/sheets-note-ui';
 import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
 import { UniverSheetsSortPlugin } from '@univerjs/sheets-sort';
 import { UniverSheetsBindingSourcePlugin } from '@univerjs/sheets-source-binding';
@@ -38,13 +40,13 @@ import { UniverSheetTablePlugin } from '@univerjs/sheets-table';
 import { UniverSheetsThreadCommentPlugin } from '@univerjs/sheets-thread-comment';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 import { UniverSheetsZenEditorPlugin } from '@univerjs/sheets-zen-editor';
+
 import { UniverUIPlugin } from '@univerjs/ui';
 
 import { enUS, faIR, frFR, ruRU, viVN, zhCN, zhTW } from '../locales';
-
 import { UniverSheetsCustomMenuPlugin } from './custom-menu';
-import ImportCSVButtonPlugin from './custom-plugin/import-csv-button';
 
+import ImportCSVButtonPlugin from './custom-plugin/import-csv-button';
 import '@univerjs/sheets/facade';
 import '@univerjs/ui/facade';
 import '@univerjs/docs-ui/facade';
@@ -131,7 +133,8 @@ function createNewInstance() {
 
     univer.registerPlugin(UniverSheetTablePlugin);
     univer.registerPlugin(UniverNetworkPlugin);
-
+    univer.registerPlugin(SheetsNotePlugin);
+    univer.registerPlugin(SheetsNoteUIPlugin);
     univer.registerPlugin(ImportCSVButtonPlugin);
 
     // If we are running in e2e platform, we should immediately register the debugger plugin.

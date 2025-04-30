@@ -27,6 +27,7 @@
         "@univerjs/docs-drawing-ui": "workspace:*",
         "@univerjs/docs-hyper-link-ui": "workspace:*",
         "@univerjs/docs-mention-ui": "workspace:*",
+
         "@univerjs/docs-quick-insert-ui": "workspace:*",
         "@univerjs/docs-thread-comment-ui": "workspace:*",
         "@univerjs/docs-ui": "workspace:*",
@@ -55,6 +56,8 @@
         "@univerjs/sheets-formula-ui": "workspace:*",
         "@univerjs/sheets-hyper-link": "workspace:*",
         "@univerjs/sheets-hyper-link-ui": "workspace:*",
+        "@univerjs/sheets-note": "workspace:*",
+        "@univerjs/sheets-note-ui": "workspace:*",
         "@univerjs/sheets-numfmt": "workspace:*",
         "@univerjs/sheets-numfmt-ui": "workspace:*",
         "@univerjs/sheets-sort": "workspace:*",

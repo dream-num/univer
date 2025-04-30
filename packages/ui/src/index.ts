@@ -127,7 +127,7 @@ export { MobileContextMenu } from './views/components/context-menu/MobileContext
 export { type IDialogPartMethodOptions } from './views/components/dialog-part/interface';
 export { FloatDom } from './views/components/dom/FloatDom';
 export { GlobalZone } from './views/components/global-zone/GlobalZone';
-export { CanvasPopup } from './views/components/popup/CanvasPopup';
+export { CanvasPopup, SingleCanvasPopup } from './views/components/popup/CanvasPopup';
 export { ToolbarButton } from './views/components/ribbon/Button/ToolbarButton';
 export { useToolbarItemStatus } from './views/components/ribbon/hook';
 export { Ribbon } from './views/components/ribbon/Ribbon';

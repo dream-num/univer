@@ -16,15 +16,12 @@
 
 import type { IScrollState } from './sheet-bar-tabs/utils/slide-tab-bar';
 import { ICommandService, IPermissionService } from '@univerjs/core';
-import { clsx } from '@univerjs/design';
 import { IncreaseSingle, MoreSingle } from '@univerjs/icons';
 import { InsertSheetCommand, WorkbookCreateSheetPermission, WorkbookEditablePermission } from '@univerjs/sheets';
-
 import { useDependency, useObservable } from '@univerjs/ui';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useActiveWorkbook } from '../../components/hook';
 import { ISheetBarService } from '../../services/sheet-bar/sheet-bar.service';
-import styles from './index.module.less';
 import { SheetBarButton } from './sheet-bar-button/SheetBarButton';
 import { SheetBarMenu } from './sheet-bar-menu/SheetBarMenu';
 import { SheetBarTabs } from './sheet-bar-tabs/SheetBarTabs';
@@ -78,8 +75,8 @@ export const SheetBar = () => {
     };
 
     return (
-        <div className={clsx(styles.sheetBar, 'univer-relative univer-flex univer-h-full univer-flex-1')}>
-            <div className={styles.sheetBarOptions}>
+        <div className="univer-relative univer-flex univer-h-full univer-min-w-0 univer-flex-1">
+            <div className="univer-flex univer-items-center univer-pl-2">
                 {/* Add sheet button */}
                 <SheetBarButton onClick={addSheet} disabled={!(workbookCreateSheetPermission?.value && workbookEditablePermission?.value)}>
                     <IncreaseSingle />
@@ -95,12 +92,13 @@ export const SheetBar = () => {
             {(!leftScrollState || !rightScrollState) && (
                 <div
                     className={`
-                      ${styles.sheetBarOptions}
-                      ${styles.sheetBarOptionsDivider}
+                      univer-relative univer-flex univer-items-center univer-px-2
+                      after:univer-absolute after:univer-right-0 after:univer-top-1/2 after:univer-h-4 after:univer-w-px
+                      after:-univer-translate-y-1/2 after:univer-bg-gray-200 after:univer-content-[""]
                     `}
                 >
                     <SheetBarButton disabled={leftScrollState} onClick={handleScrollLeft}>
-                        <MoreSingle style={{ transform: 'rotateZ(180deg)' }} />
+                        <MoreSingle className="univer-rotate-180" />
                     </SheetBarButton>
                     <SheetBarButton disabled={rightScrollState} onClick={handleScrollRight}>
                         <MoreSingle />

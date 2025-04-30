@@ -25,8 +25,7 @@ import { useDependency, useSidebarClick } from '@univerjs/ui';
 import { useEffect, useRef, useState } from 'react';
 import { ConditionalStyleEditor } from '../../conditional-style-editor';
 import { Preview } from '../../preview';
-import stylesBase from '../index.module.less';
-import styles from './index.module.less';
+import { previewClassName } from './styles';
 
 export const FormulaStyleEditor = (props: IStyleEditorProps) => {
     const { onChange, interceptorManager } = props;
@@ -38,16 +37,16 @@ export const FormulaStyleEditor = (props: IStyleEditorProps) => {
     const rule = props.rule?.type === CFRuleType.highlightCell ? props.rule : undefined as IRankHighlightCell | IAverageHighlightCell | undefined;
 
     const divEleRef = useRef<HTMLDivElement>(null);
-    const [isFocusFormulaEditor, isFocusFormulaEditorSet] = useState(false);
+    const [isFocusFormulaEditor, setIsFocusFormulaEditor] = useState(false);
     const formulaEditorRef = useRef<IFormulaEditorRef>(null);
-    const [style, styleSet] = useState<IHighlightCell['style']>({});
-    const [formula, formulaSet] = useState(() => {
+    const [style, setStyle] = useState<IHighlightCell['style']>({});
+    const [formula, setFormula] = useState(() => {
         if (rule?.subType === CFSubRuleType.formula) {
             return rule.value;
         }
         return '=';
     });
-    const [formulaError, formulaErrorSet] = useState<string | undefined>(undefined);
+    const [formulaError, setFormulaError] = useState<string | undefined>(undefined);
 
     const getResult = (config: {
         style: IHighlightCell['style'];
@@ -73,7 +72,7 @@ export const FormulaStyleEditor = (props: IStyleEditorProps) => {
         const dispose = interceptorManager.intercept(interceptorManager.getInterceptPoints().beforeSubmit, {
             handler: (v, _c, next) => {
                 if (formulaError || formula.length === 1 || !formula.startsWith('=')) {
-                    formulaErrorSet(localeService.t('sheet.cf.errorMessage.formulaError'));
+                    setFormulaError(localeService.t('sheet.cf.errorMessage.formulaError'));
                     return false;
                 }
                 return next(v);
@@ -91,34 +90,29 @@ export const FormulaStyleEditor = (props: IStyleEditorProps) => {
 
     useSidebarClick((e: MouseEvent) => {
         const isOutSide = formulaEditorRef.current?.isClickOutSide(e);
-        isOutSide && isFocusFormulaEditorSet(false);
+        isOutSide && setIsFocusFormulaEditor(false);
     });
 
     return (
         <div ref={divEleRef}>
-            <div
-                className={`
-                  ${stylesBase.title}
-                  univer-mt-4
-                `}
-            >
+            <div className="univer-mt-4 univer-text-sm univer-text-gray-600">
                 {localeService.t('sheet.cf.panel.styleRule')}
             </div>
             <div className="univer-mt-3">
                 <FormulaEditor
                     onChange={(formula) => {
-                        formulaSet(formula);
+                        setFormula(formula);
                         _onChange({ style, formula });
                     }}
                     onVerify={(result, formula) => {
                         if (!result || formula.length === 1) {
-                            formulaErrorSet(localeService.t('sheet.cf.errorMessage.formulaError'));
+                            setFormulaError(localeService.t('sheet.cf.errorMessage.formulaError'));
                         } else {
-                            formulaErrorSet(undefined);
+                            setFormulaError(undefined);
                         }
                     }}
                     errorText={formulaError}
-                    onFocus={() => { isFocusFormulaEditorSet(true); }}
+                    onFocus={() => { setIsFocusFormulaEditor(true); }}
                     isFocus={isFocusFormulaEditor}
                     initValue={formula as any}
                     unitId={workbook.getUnitId()}
@@ -128,18 +122,14 @@ export const FormulaStyleEditor = (props: IStyleEditorProps) => {
 
             </div>
 
-            <div
-                className={`
-                  ${styles.cfPreviewWrap}
-                `}
-            >
+            <div className={previewClassName}>
                 <Preview rule={getResult({ style, formula }) as IConditionalFormattingRuleConfig} />
             </div>
             <ConditionalStyleEditor
                 style={rule?.style}
                 className="univer-mt-3"
                 onChange={(v) => {
-                    styleSet(v);
+                    setStyle(v);
                     _onChange({ style: v, formula });
                 }}
             />

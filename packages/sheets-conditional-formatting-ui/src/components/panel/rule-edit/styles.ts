@@ -14,18 +14,4 @@
  * limitations under the License.
  */
 
-import React from 'react';
-import { ZoomSlider } from './ZoomSlider';
-
-interface ICountBarProps {
-    changeRatio?: (ratio: string) => void;
-    onChange?: (value: string) => void;
-}
-
-export function CountBar(_props: ICountBarProps) {
-    return (
-        <section className="univer-flex univer-flex-shrink-0 univer-justify-end">
-            <ZoomSlider />
-        </section>
-    );
-}
+export const previewClassName = 'univer-mt-5 univer-px-1 univer-py-2 univer-border univer-border-solid univer-border-gray-200 univer-rounded';

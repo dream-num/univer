@@ -56,7 +56,7 @@ export function RenderSheetFooter() {
             {sheetBar && <SheetBar />}
             {statisticBar && <StatusBar />}
             {menus && footerMenus.length && (
-                <div className="univer-mr-2 univer-flex univer-gap-2">
+                <div className="univer-box-border univer-flex univer-gap-2 univer-px-2">
                     {footerMenus.map((item) => item.children?.map((child) => (
                         child?.item && (
                             <ToolbarItem

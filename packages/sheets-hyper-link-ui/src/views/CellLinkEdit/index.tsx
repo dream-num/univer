@@ -34,7 +34,6 @@ import { SheetsHyperLinkPopupService } from '../../services/popup.service';
 import { SheetsHyperLinkResolverService } from '../../services/resolver.service';
 import { SheetsHyperLinkSidePanelService } from '../../services/side-panel.service';
 import { HyperLinkEditSourceType } from '../../types/enums/edit-source';
-import styles from './index.module.less';
 
 export const CellLinkEdit = () => {
     const [id, setId] = useState('');
@@ -416,7 +415,12 @@ export const CellLinkEdit = () => {
     }
 
     return (
-        <div className={styles.cellLinkEdit} style={{ display: hide ? 'none' : 'block' }}>
+        <div
+            className={`
+              univer-p-4 univer-bg-white univer-box-border univer-w-[296px] univer-rounded-xl univer-border
+              univer-border-gray-200 univer-shadow-[0px_4px_10px_-1px_rgba(17,22,40,0.1)]
+            `}
+        >
             {showLabel
                 ? (
                     <FormLayout
@@ -442,6 +446,7 @@ export const CellLinkEdit = () => {
                 : null}
             <FormLayout label={localeService.t('hyperLink.form.type')}>
                 <Select
+                    className="univer-w-full"
                     options={linkTypeOptions}
                     value={type}
                     onChange={(newType) => {
@@ -458,7 +463,7 @@ export const CellLinkEdit = () => {
                         value={payload}
                         onChange={(newLink) => {
                             setPayload(newLink);
-                            if (newLink && (setByPayload.current || !display || display === payload)) {
+                            if (newLink && (setByPayload.current || !display || display === newLink)) {
                                 setDisplay(newLink);
                                 setByPayload.current = true;
                             }
@@ -569,7 +574,7 @@ export const CellLinkEdit = () => {
                     setPayload={setPayload}
                 />
             )}
-            <div className={styles.cellLinkEditButtons}>
+            <div className="univer-flex univer-flex-row univer-justify-end">
                 <Button
                     onClick={() => {
                         if (editing) {

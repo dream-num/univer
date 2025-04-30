@@ -31,11 +31,10 @@ export const CellPopup = (props: { popup: IPopup<ISheetLocationBase & { directio
     const componentManager = useDependency(ComponentManager);
 
     return (
-        <div className="univer-cell-popup univer-flex univer-flex-col univer-ml-[1px]">
-            {popups.map((item) => {
-                const popup = item;
+        <div className="univer-cell-popup univer-ml-[1px] univer-flex univer-flex-col">
+            {popups.map((popup) => {
                 const Component = componentManager.get(popup.componentKey);
-                return Component ? <Component popup={popup} /> : null;
+                return Component ? <Component key={popup.id ?? popup.componentKey} popup={popup} /> : null;
             })}
         </div>
     );

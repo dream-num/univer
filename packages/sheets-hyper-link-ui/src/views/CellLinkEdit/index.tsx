@@ -529,6 +529,7 @@ export const CellLinkEdit = () => {
             {type === SheetHyperLinkType.SHEET && (
                 <FormLayout error={showError && !payload ? localeService.t('hyperLink.form.selectError') : ''}>
                     <Select
+                        className="univer-w-full"
                         options={sheetsOption}
                         value={payload}
                         onChange={(newPayload) => {
@@ -546,6 +547,7 @@ export const CellLinkEdit = () => {
             {type === SheetHyperLinkType.DEFINE_NAME && (
                 <FormLayout error={showError && !payload ? localeService.t('hyperLink.form.selectError') : ''}>
                     <Select
+                        className="univer-w-full"
                         options={definedNames}
                         value={payload}
                         onChange={(newValue) => {

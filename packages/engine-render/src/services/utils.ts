@@ -14,20 +14,13 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICommand, IStyleSheet } from '@univerjs/core';
-import { CommandType, ThemeService } from '@univerjs/core';
+export type RGBColor = [number, number, number];
+export type HSLColor = RGBColor;
 
-export interface IThemeCommandParams {
-    value?: IStyleSheet;
+export function normalizeRGBColor(color: RGBColor): RGBColor {
+    return color.map((c) => c / 255) as RGBColor;
 }
 
-export const ThemeOperation: ICommand = {
-    id: 'debugger.operation.theme',
-    type: CommandType.COMMAND,
-    handler: async (accessor: IAccessor, params: IThemeCommandParams) => {
-        const themeService = accessor.get(ThemeService);
-
-        params.value && themeService.setTheme(params.value);
-        return true;
-    },
-};
+export function denormalizeRGBColor(color: RGBColor): RGBColor {
+    return color.map((c) => Math.round(c * 255)) as RGBColor;
+}

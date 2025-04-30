@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
+import type { Nullable } from '../types';
 import { THEME_COLORS } from '../../types/const/theme-color-map';
 import { ColorType, ThemeColors, ThemeColorType } from '../../types/enum';
-import type { Nullable } from '../types';
 
+/**
+ * @deprecated
+ */
 export class ColorBuilder {
     private _themeValue: ThemeColorType = ThemeColorType.LIGHT1;
 
@@ -84,6 +87,9 @@ export class ColorBuilder {
     }
 }
 
+/**
+ * @deprecated
+ */
 export class Color {
     protected _builder: ColorBuilder;
 

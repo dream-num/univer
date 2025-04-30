@@ -57,13 +57,16 @@ export class UniverDebuggerPlugin extends Plugin {
             [E2EController],
             [UniverWatermarkMenuController],
         ];
+
         if (this._config.performanceMonitor?.enabled !== false) {
             dependencies.push([PerformanceMonitorController]);
         }
+
         registerDependencies(this._injector, dependencies);
 
         touchDependencies(this._injector, [
             [E2EController],
+            [DarkModeController],
         ]);
     }
 
@@ -76,7 +79,6 @@ export class UniverDebuggerPlugin extends Plugin {
 
     override onRendered(): void {
         touchDependencies(this._injector, [
-            [DarkModeController],
             [PerformanceMonitorController],
             [UniverWatermarkMenuController],
         ]);

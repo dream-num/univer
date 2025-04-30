@@ -38,7 +38,7 @@ function useFindInputFocus(findReplaceService: IFindReplaceService, ref: Forward
     }, []);
 
     const selectHasFocus = useCallback(() => {
-        const allInputs = document.querySelectorAll('[data-u-comp="find-replace-dialog"] [data-u-comp="search-input"]');
+        const allInputs = document.querySelectorAll('[data-u-comp=find-replace-dialog] [data-u-comp=search-input]');
         return Array.from(allInputs).some((input) => input === document.activeElement);
     }, []);
 

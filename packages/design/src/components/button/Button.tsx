@@ -36,7 +36,7 @@ export const buttonVariants = cva(
                   univer-border-gray-200 univer-bg-white univer-text-gray-700
                   active:univer-bg-gray-200
                   dark:univer-border-gray-600 dark:univer-bg-gray-700 dark:univer-text-white
-                  dark:hover:univer-bg-gray-600 dark:active:univer-bg-gray-500
+                  dark:hover:univer-bg-gray-600 dark:active:univer-bg-gray-700
                   hover:univer-bg-gray-100
                 `,
                 primary: `

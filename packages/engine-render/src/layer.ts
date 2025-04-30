@@ -257,14 +257,14 @@ export class Layer extends Disposable {
     }
 
     private _initialCacheCanvas() {
-        this._cacheCanvas = new Canvas();
-
         const engine = this.scene.getEngine();
         if (engine) {
             this.disposeWithMe(engine.onTransformChange$.subscribeEvent(() => {
                 this._resizeCacheCanvas();
             }));
         }
+
+        this._cacheCanvas = new Canvas({ colorService: engine?.canvasColorService });
     }
 
     private _draw(mainCtx: UniverRenderingContext, isMaxLayer: boolean) {

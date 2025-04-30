@@ -110,7 +110,7 @@ export interface ITestBed {
 
 class RenderManagerServiceTestBed extends RenderManagerService {
     override createRender(unitId: string): IRender {
-        const renderer = this._createRender(unitId, new Engine(100, 100));
+        const renderer = this._createRender(unitId, new Engine('', { elementHeight: 100, elementWidth: 100 }));
         return renderer;
     }
 }

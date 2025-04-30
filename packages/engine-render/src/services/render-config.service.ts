@@ -22,6 +22,8 @@ import { debounceTime, Subject } from 'rxjs';
 /**
  * This service carries managers render config that would be passed
  * to every widget, so some rendering could be optimized.
+ *
+ * @deprecated Will be replaced by ICanvasColorService.
  */
 export class UniverRenderConfigService {
     private readonly _renderConfig: IRenderConfig = {

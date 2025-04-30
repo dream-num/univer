@@ -150,7 +150,12 @@ export function DefinedNameOverlay(props: IDefinedNameOverlayProps) {
                 `}
                 onClick={openSlider}
             >
-                <div className="univer-mb-2 univer-text-sm univer-font-semibold univer-text-gray-600">
+                <div
+                    className={`
+                      univer-mb-2 univer-text-sm univer-font-semibold univer-text-gray-600
+                      dark:univer-text-gray-200
+                    `}
+                >
                     {localeService.t('definedName.managerTitle')}
                 </div>
                 <div className="univer-text-xs univer-text-gray-400">

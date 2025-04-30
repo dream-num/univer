@@ -152,7 +152,10 @@ export function DesktopWorkbenchContent(props: IUniverWorkbenchProps) {
 
                 {/* header */}
                 {header && toolbar && (
-                    <header className="univer-relative univer-z-10 univer-w-full">
+                    <header
+                        data-u-comp="headerbar"
+                        className="univer-relative univer-z-10 univer-w-full"
+                    >
                         <ComponentContainer
                             key="toolbar"
                             components={toolbarComponents}
@@ -181,6 +184,7 @@ export function DesktopWorkbenchContent(props: IUniverWorkbenchProps) {
                               univer-relative univer-grid univer-flex-1 univer-grid-rows-[auto_1fr]
                               univer-overflow-hidden univer-border-0 univer-border-b univer-border-solid
                               univer-border-b-gray-200 univer-bg-white
+                              dark:univer-border-b-gray-700
                             `}
                         >
                             <header>
@@ -188,7 +192,10 @@ export function DesktopWorkbenchContent(props: IUniverWorkbenchProps) {
                             </header>
 
                             <section
-                                className="univer-relative univer-overflow-hidden"
+                                className={`
+                                  univer-relative univer-overflow-hidden
+                                  dark:univer-bg-gray-900
+                                `}
                                 ref={contentRef}
                                 data-range-selector
                                 onContextMenu={(e) => e.preventDefault()}

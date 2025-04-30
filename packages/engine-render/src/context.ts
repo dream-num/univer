@@ -15,9 +15,14 @@
  */
 
 import type { Nullable } from '@univerjs/core';
+import type { ICanvasColorService } from './services/canvas-color.service';
 import type { IRenderConfig } from './services/render-config';
 import { Tools } from '@univerjs/core';
 import { fixLineWidthByScale, getColor } from './basics/tools';
+
+export interface IUniverRenderingContextOptions {
+    canvasColorService?: ICanvasColorService;
+}
 
 export class UniverRenderingContext2D implements CanvasRenderingContext2D {
     __mode = 'rendering';
@@ -31,9 +36,13 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
 
     renderConfig: Readonly<IRenderConfig> = {};
 
-    constructor(context: CanvasRenderingContext2D) {
+    private _canvasColorService?: ICanvasColorService;
+
+    constructor(context: CanvasRenderingContext2D, options?: IUniverRenderingContextOptions) {
         this.canvas = context.canvas;
         this._context = context;
+
+        this._canvasColorService = options?.canvasColorService;
     }
 
     private _id: string;
@@ -69,13 +78,14 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
         this._context.globalCompositeOperation = val;
     }
 
-    // fillStyle: string | CanvasGradient | CanvasPattern;
     get fillStyle() {
         return this._context.fillStyle;
     }
 
     set fillStyle(val: string | CanvasGradient | CanvasPattern) {
-        this._context.fillStyle = val;
+        this._context.fillStyle = this._canvasColorService && typeof val === 'string'
+            ? this._canvasColorService.getRenderColor(val)
+            : val;
     }
 
     // strokeStyle: string | CanvasGradient | CanvasPattern;
@@ -84,7 +94,9 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
     }
 
     set strokeStyle(val: string | CanvasGradient | CanvasPattern) {
-        this._context.strokeStyle = val;
+        this._context.strokeStyle = this._canvasColorService && typeof val === 'string'
+            ? this._canvasColorService.getRenderColor(val)
+            : val;
     }
 
     // filter: string;

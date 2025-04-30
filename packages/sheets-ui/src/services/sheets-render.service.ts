@@ -17,8 +17,10 @@
 import type { IDisposable, Workbook } from '@univerjs/core';
 import {
     IContextService,
+    Inject,
     IUniverInstanceService,
     RxDisposable,
+    ThemeService,
     toDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
@@ -36,7 +38,8 @@ export class SheetsRenderService extends RxDisposable {
     constructor(
         @IContextService private readonly _contextService: IContextService,
         @IUniverInstanceService private readonly _instanceSrv: IUniverInstanceService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
+        @Inject(ThemeService) private readonly _themeService: ThemeService
     ) {
         super();
 
@@ -69,6 +72,18 @@ export class SheetsRenderService extends RxDisposable {
     private _init() {
         this._initWorkbookListener();
         this._initContextListener();
+        this._initDarkModeListener();
+    }
+
+    private _initDarkModeListener(): void {
+        this.disposeWithMe(this._themeService.darkMode$.subscribe(() => {
+            this._renderManagerService.getRenderAll().forEach((renderer) => {
+                renderer.components.forEach((component) => {
+                    component.makeForceDirty(true);
+                    component.makeDirty(true);
+                });
+            });
+        }));
     }
 
     private _initWorkbookListener(): void {

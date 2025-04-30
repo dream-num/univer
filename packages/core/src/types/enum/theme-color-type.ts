@@ -16,6 +16,8 @@
 
 /**
  * Theme color type enum
+ *
+ * @deprecated
  */
 export enum ThemeColorType {
     /**
@@ -44,6 +46,9 @@ export enum ThemeColorType {
 // TODO: get color list to color picker
 // TODO: 取色
 
+/**
+ * @deprecated
+ */
 export enum ThemeColors {
     OFFICE = 'Office',
     OFFICE_2007_2010 = 'Office 2007-2010',

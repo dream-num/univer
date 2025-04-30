@@ -38,9 +38,8 @@ test('sheets no gridlines', async () => {
     const filename = generateSnapshotName('sheets-no-gridlines');
     const screenshot = await page.screenshot({
         mask: [
-            page.locator('.univer-headerbar'),
-            page.locator('.univer-workbench-container-header'),
-            page.locator('.univer-formula-box'),
+            page.locator('[data-u-comp=headerbar]'),
+            page.locator('[data-u-comp=formula-bar]'),
         ],
         fullPage: true,
     });

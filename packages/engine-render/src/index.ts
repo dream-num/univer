@@ -19,7 +19,6 @@ export * from './basics';
 export { getOffsetRectForDom } from './basics/position';
 export * from './canvas';
 export * from './components';
-export { UniverRenderConfigService } from './services/render-config.service';
 export { DocBackground } from './components/docs/doc-background';
 export { Documents } from './components/docs/document';
 export type { IPageRenderConfig } from './components/docs/document';
@@ -41,7 +40,14 @@ export * from './engine';
 export * from './group';
 export * from './layer';
 export { IRenderingEngine, UniverRenderEnginePlugin } from './plugin';
-export { getCurrentTypeOfRenderer, IRenderManagerService, type RenderComponentType, RenderManagerService, withCurrentTypeOfRenderer } from './render-manager/render-manager.service';
+export {
+    getCurrentTypeOfRenderer,
+    IRenderManagerService,
+    type RenderComponentType,
+    RenderManagerService,
+    withCurrentTypeOfRenderer,
+} from './render-manager/render-manager.service';
+export { CanvasColorService, DumbCanvasColorService, ICanvasColorService } from './services/canvas-color.service';
 export { type IRender, type IRenderContext, type IRenderModule, RenderUnit } from './render-manager/render-unit';
 export * from './scene';
 export { type IChangeObserverConfig } from './scene.transformer';

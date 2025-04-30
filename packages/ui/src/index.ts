@@ -113,13 +113,12 @@ export { DesktopZenZoneService } from './services/zen-zone/desktop-zen-zone.serv
 export { IZenZoneService } from './services/zen-zone/zen-zone.service';
 export { FloatDomSingle } from './views/components/dom/FloatDom';
 export { PrintFloatDomSingle } from './views/components/dom/print';
-export { DISABLE_AUTO_FOCUS_KEY, UniverUIPlugin } from './ui-plugin';
-
-export { UNIVER_UI_PLUGIN_NAME } from './ui-plugin';
+export { DISABLE_AUTO_FOCUS_KEY, UNIVER_UI_PLUGIN_NAME, UniverUIPlugin } from './ui-plugin';
 export * from './utils';
 export { ComponentContainer, type IComponentContainerProps, useComponentsOfPart } from './views/components/ComponentContainer';
 export { ZenZone } from './views/components/zen-zone/ZenZone';
 export { Menu as DesktopMenu } from './components/menu/desktop/Menu';
+
 // #region - workbench components
 
 export { type IConfirmPartMethodOptions } from './views/components/confirm-part/interface';
@@ -140,4 +139,8 @@ export { type ISidebarMethodOptions, Sidebar } from './views/components/sidebar/
 
 export { ToggleShortcutPanelOperation } from './commands/operations/toggle-shortcut-panel.operation';
 
+// #endregion
+
+// #region testing
+export { MockMessageService } from './services/message/__testing__/mock-message.service.ts';
 // #endregion

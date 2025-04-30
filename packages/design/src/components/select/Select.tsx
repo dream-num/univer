@@ -23,7 +23,7 @@ import { DropdownMenu } from '../dropdown-menu/DropdownMenu';
 
 interface IOption {
     label?: string | ReactNode;
-    value: string;
+    value?: string;
     disabled?: boolean;
     options?: IOption[];
 }

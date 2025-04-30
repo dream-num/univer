@@ -41,7 +41,7 @@ interface IDropdownMenuSeparatorItem {
 
 interface IDropdownMenuOption {
     label?: ReactNode;
-    value: string;
+    value?: string;
     disabled?: boolean;
 }
 
@@ -108,6 +108,9 @@ export function DropdownMenu(props: IDropdownMenuProps) {
                                 return <DropdownMenuSeparator key={index} className={className} />;
                             }
                         } else {
+                            if (option.value === undefined) {
+                                throw new Error('[DropdownMenu]: `value` is required');
+                            }
                             return (
                                 <DropdownMenuRadioItem
                                     key={option.value}

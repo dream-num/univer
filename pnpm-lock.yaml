@@ -2660,6 +2660,9 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../core
+      '@univerjs/design':
+        specifier: workspace:*
+        version: link:../design
       '@univerjs/engine-render':
         specifier: workspace:*
         version: link:../engine-render

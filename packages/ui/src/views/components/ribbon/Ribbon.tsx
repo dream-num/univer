@@ -242,7 +242,7 @@ export function Ribbon(props: IRibbonProps) {
                   univer-relative univer-box-border univer-flex univer-h-8 univer-select-none univer-items-center
                   univer-border-0 univer-border-b univer-border-solid univer-border-b-gray-200 univer-bg-white
                   univer-text-base univer-text-gray-800 univer-transition-opacity
-                  dark:univer-bg-gray-900
+                  dark:univer-border-b-gray-700 dark:univer-bg-gray-900
                 `}
             >
                 <div

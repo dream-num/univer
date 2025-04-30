@@ -190,7 +190,7 @@ export function DesktopWorkbenchContent(props: IUniverWorkbenchProps) {
                             <section
                                 className={`
                                   univer-relative univer-overflow-hidden
-                                  dark:univer-bg-black
+                                  dark:univer-bg-gray-900
                                 `}
                                 ref={contentRef}
                                 data-range-selector

@@ -96,7 +96,8 @@ export function ToolbarButton(props: IBaseToolbarButtonProps) {
               hover:univer-bg-gray-100
             `, {
                 'univer-p-4': noIcon,
-                '!univer-bg-gray-200 dark:univer-bg-gray-500': active,
+                'univer-bg-gray-200 dark:univer-bg-gray-500': active,
+                // '!univer-bg-gray-200 !dark:univer-bg-gray-500': active,
             })}
             style={style}
             disabled={disabled}

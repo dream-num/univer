@@ -32,7 +32,6 @@ import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { IFormulaEditorManagerService } from '../../services/editor/formula-editor-manager.service';
 import { DefinedName } from '../defined-name/DefinedName';
 import { useKeyEventConfig } from '../editor-container/hooks';
-import styles from './index.module.less';
 
 enum ArrowDirection {
     Down,
@@ -46,7 +45,7 @@ interface IProps {
 
 export function FormulaBar(props: IProps) {
     const { className, disableDefinedName } = props;
-    const [iconStyle, setIconStyle] = useState<string>(styles.formulaGrey);
+    const [iconActivated, setIconActivated] = useState<boolean>(false);
     const [arrowDirection, setArrowDirection] = useState<ArrowDirection>(ArrowDirection.Down);
     const formulaEditorManagerService = useDependency(IFormulaEditorManagerService);
     const editorBridgeService = useDependency(IEditorBridgeService);
@@ -138,7 +137,7 @@ export function FormulaBar(props: IProps) {
 
     useEffect(() => {
         const subscription = editorBridgeService.visible$.subscribe((visibleInfo) => {
-            setIconStyle(visibleInfo.visible ? styles.formulaActive : styles.formulaGrey);
+            setIconActivated(visibleInfo.visible);
         });
 
         return () => subscription.unsubscribe();
@@ -254,42 +253,72 @@ export function FormulaBar(props: IProps) {
 
     return (
         <div
-            className={clsx(styles.formulaBox, className)}
+            className={clsx(`
+              univer-box-border univer-flex univer-h-7 univer-border-0 univer-border-b univer-border-solid
+              univer-bg-white univer-border-bg-gray-200 univer-border-b-gray-200 univer-transition-[height]
+              dark:univer-border-b-gray-700 dark:univer-bg-gray-900
+            `, className)}
             style={{
                 height: ArrowDirection.Down === arrowDirection ? '28px' : '82px',
                 pointerEvents: editDisable ? 'none' : 'auto',
             }}
         >
-            <div className={styles.nameRanges}>
+            <div className="univer-relative univer-box-border univer-h-full univer-w-[100px]">
                 <DefinedName disable={disableDefinedName ?? editDisable} />
             </div>
 
-            <div className={styles.formulaBar}>
-                <div className={clsx(styles.formulaIcon, { [styles.formulaIconDisable]: disabled })}>
-                    <div className={styles.formulaIconWrapper}>
+            <div className="univer-flex univer-h-full univer-w-full">
+                <div className={clsx('univer-py-1.5', { 'univer-cursor-not-allowed univer-text-gray-200': disabled })}>
+                    <div
+                        className={`
+                          univer-relative univer-box-border univer-flex univer-h-full univer-w-20 univer-items-center
+                          univer-justify-center univer-border-0 univer-border-r univer-border-solid
+                          univer-border-r-gray-200 univer-text-xs
+                          dark:univer-border-r-gray-700
+                        `}
+                    >
+                        {/* TODO: use buttons to replace these re-implementation of buttons. */}
                         <span
-                            className={clsx(styles.iconContainer, styles.iconContainerError, iconStyle)}
+                            className={clsx(`
+                              univer-flex univer-items-center univer-justify-center univer-rounded univer-p-1
+                              univer-text-base
+                              dark:univer-text-white
+                            `, {
+                                'univer-cursor-pointer univer-text-green-600 dark:univer-text-green-400 dark:hover:univer-bg-gray-700 hover:univer-bg-gray-100': iconActivated,
+                            })}
                             onClick={handleCloseBtnClick}
                         >
                             <CloseSingle />
                         </span>
-
                         <span
-                            className={clsx(styles.iconContainer, styles.iconContainerSuccess, iconStyle)}
+                            className={clsx(`
+                              univer-flex univer-items-center univer-justify-center univer-rounded univer-p-1
+                              univer-text-base
+                              dark:univer-text-white
+                            `, {
+                                'univer-cursor-pointer univer-text-red-600 dark:univer-text-red-400 dark:hover:univer-bg-gray-700 hover:univer-bg-gray-100': iconActivated,
+                            })}
                             onClick={handleConfirmBtnClick}
                         >
                             <CheckMarkSingle />
                         </span>
-
-                        <span className={clsx(styles.iconContainer, styles.iconContainerFx)} onClick={handlerFxBtnClick}>
+                        <span
+                            className={clsx(`
+                              univer-flex univer-cursor-pointer univer-items-center univer-justify-center univer-rounded
+                              univer-p-1 univer-text-base
+                              dark:univer-text-white dark:hover:univer-bg-gray-700
+                              hover:univer-bg-gray-100
+                            `)}
+                            onClick={handlerFxBtnClick}
+                        >
                             <FxSingle />
                         </span>
                     </div>
                 </div>
 
-                <div className={styles.formulaContainer}>
+                <div className="univer-flex univer-w-full univer-flex-1 univer-overflow-hidden univer-pl-3">
                     <div
-                        className={styles.formulaInput}
+                        className="univer-relative univer-flex-1"
                         onPointerDown={handlePointerDown}
                         onPointerUp={handlePointerUp}
                         ref={ref}
@@ -302,7 +331,9 @@ export function FormulaBar(props: IProps) {
                                 initValue=""
                                 onChange={() => { }}
                                 isFocus={isFocusFxBar}
-                                className={styles.formulaContent}
+                                className={`
+                                  univer-relative univer-h-full univer-w-full univer-break-words univer-outline-none
+                                `}
                                 unitId={editState?.unitId}
                                 subUnitId={editState?.sheetId}
                                 isSupportAcrossSheet
@@ -322,9 +353,27 @@ export function FormulaBar(props: IProps) {
                                 disableContextMenu={false}
                             />
                         )}
-                        {hideEditor ? <div className={styles.formulaInputMask} /> : null}
+                        {/* When the editor is hidden, we just cover a div on the editor because re-instantiate
+                        the formula editor will be expensive. */}
+                        {hideEditor
+                            ? (
+                                <div
+                                    className={`
+                                      univer-pointer-events-none univer-relative univer-left-0 univer-top-0
+                                      univer-z-[100] univer-h-full univer-w-full univer-cursor-not-allowed
+                                      univer-bg-white
+                                    `}
+                                />
+                            )
+                            : null}
                     </div>
-                    <div className={clsx(styles.arrowContainer, { [styles.arrowContainerDisable]: editDisable })} onClick={handleArrowClick}>
+                    <div
+                        className={clsx(`
+                          univer-flex univer-h-full univer-w-5 univer-cursor-pointer univer-items-center
+                          univer-justify-center univer-text-xs univer-text-gray-600
+                        `, { 'univer-cursor-not-allowed univer-text-gray-200': editDisable })}
+                        onClick={handleArrowClick}
+                    >
                         {arrowDirection === ArrowDirection.Down
                             ? (
                                 <DropdownSingle />

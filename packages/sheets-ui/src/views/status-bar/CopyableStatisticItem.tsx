@@ -38,7 +38,7 @@ const allowPatternFunctions: IFunctionNames[] = [
     FUNCTION_NAMES_STATISTICAL.MAX,
 ];
 
-export const functionDisplayNames: FunctionNameMap = {
+export const functionDisplayNames: IFunctionNameMap = {
     [FUNCTION_NAMES_MATH.SUM]: 'statusbar.sum',
     [FUNCTION_NAMES_STATISTICAL.AVERAGE]: 'statusbar.average',
     [FUNCTION_NAMES_STATISTICAL.MIN]: 'statusbar.min',
@@ -47,7 +47,8 @@ export const functionDisplayNames: FunctionNameMap = {
     [FUNCTION_NAMES_STATISTICAL.COUNTA]: 'statusbar.countA',
     [FUNCTION_NAMES_TEXT.CONCATENATE]: 'concatenate',
 };
-interface FunctionNameMap {
+
+interface IFunctionNameMap {
     [key: string]: string;
 }
 

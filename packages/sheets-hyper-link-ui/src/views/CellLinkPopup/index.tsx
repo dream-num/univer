@@ -113,7 +113,7 @@ export const CellLinkPopupPure = (props: ICellLinkPopupPureProps) => {
                         className={clsx(`
                           univer-ml-2 univer-flex univer-h-6 univer-w-6 univer-cursor-pointer univer-flex-row
                           univer-items-center univer-justify-center univer-rounded univer-text-base
-                          hover:univer-bg-gray-300
+                          hover:univer-bg-gray-200
                         `, { 'univer-text-gray-500': isError })}
                         onClick={() => {
                             if (isError) {
@@ -143,7 +143,7 @@ export const CellLinkPopupPure = (props: ICellLinkPopupPureProps) => {
                             className={`
                               univer-ml-2 univer-flex univer-h-6 univer-w-6 univer-cursor-pointer univer-flex-row
                               univer-items-center univer-justify-center univer-rounded univer-text-base
-                              hover:univer-bg-gray-300
+                              hover:univer-bg-gray-200
                             `}
                             onClick={() => {
                                 commandService.executeCommand(OpenHyperLinkEditPanelOperation.id, {
@@ -164,7 +164,7 @@ export const CellLinkPopupPure = (props: ICellLinkPopupPureProps) => {
                             className={`
                               univer-ml-2 univer-flex univer-h-6 univer-w-6 univer-cursor-pointer univer-flex-row
                               univer-items-center univer-justify-center univer-rounded univer-text-base
-                              hover:univer-bg-gray-300
+                              hover:univer-bg-gray-200
                             `}
                             onClick={() => {
                                 const commandId = (type === HyperLinkEditSourceType.EDITING || type === HyperLinkEditSourceType.ZEN_EDITOR) ? CancelRichHyperLinkCommand.id : CancelHyperLinkCommand.id;

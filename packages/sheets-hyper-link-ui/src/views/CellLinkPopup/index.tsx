@@ -67,17 +67,17 @@ export const CellLinkPopupPure = (props: ICellLinkPopupPureProps) => {
     return (
         <div
             className={`
-              univer-flex univer-flex-row univer-items-center univer-justify-between univer-p-3 univer-shadow
-              univer-rounded-lg univer-border univer-border-gray-200 univer-bg-white univer-max-w-[328px]
-              univer-overflow-hidden univer-mb-1
+              univer-mb-1 univer-flex univer-max-w-[328px] univer-flex-row univer-items-center univer-justify-between
+              univer-overflow-hidden univer-rounded-lg univer-border univer-border-solid univer-border-gray-200
+              univer-bg-white univer-p-3 univer-shadow-md
             `}
             onClick={() => popupService.hideCurrentPopup()}
         >
             <div
                 className={clsx(`
-                  univer-h-6 univer-flex univer-flex-row univer-items-center univer-text-sm univer-leading-5
-                  univer-text-blue-500 univer-cursor-pointer univer-flex-1 univer-overflow-hidden univer-text-ellipsis
-                  univer-whitespace-nowrap
+                  univer-flex univer-h-6 univer-flex-1 univer-cursor-pointer univer-flex-row univer-items-center
+                  univer-overflow-hidden univer-text-ellipsis univer-whitespace-nowrap univer-text-sm univer-leading-5
+                  univer-text-blue-500
                 `, { 'univer-text-gray-500': isError })}
                 onClick={() => {
                     if (zenZoneService.visible) {
@@ -93,8 +93,8 @@ export const CellLinkPopupPure = (props: ICellLinkPopupPureProps) => {
             >
                 <div
                     className={`
-                      univer-h-5 univer-w-5 univer-text-base univer-mr-2 univer-flex univer-items-center
-                      univer-justify-center univer-flex-none univer-text-black
+                      univer-mr-2 univer-flex univer-h-5 univer-w-5 univer-flex-none univer-items-center
+                      univer-justify-center univer-text-base univer-text-black
                     `}
                 >
                     {iconsMap[linkObj.type]}
@@ -105,14 +105,14 @@ export const CellLinkPopupPure = (props: ICellLinkPopupPureProps) => {
             </div>
             <div
                 className={`
-                  univer-flex univer-flex-row univer-justify-center univer-items-center univer-h-6 univer-flex-none
+                  univer-flex univer-h-6 univer-flex-none univer-flex-row univer-items-center univer-justify-center
                 `}
             >
                 {copyPermission && (
                     <div
                         className={clsx(`
-                          univer-w-6 univer-h-6 univer-rounded univer-ml-2 univer-text-base univer-flex univer-flex-row
-                          univer-justify-center univer-items-center univer-cursor-pointer
+                          univer-ml-2 univer-flex univer-h-6 univer-w-6 univer-cursor-pointer univer-flex-row
+                          univer-items-center univer-justify-center univer-rounded univer-text-base
                           hover:univer-bg-gray-300
                         `, { 'univer-text-gray-500': isError })}
                         onClick={() => {
@@ -141,8 +141,8 @@ export const CellLinkPopupPure = (props: ICellLinkPopupPureProps) => {
                     <>
                         <div
                             className={`
-                              univer-w-6 univer-h-6 univer-rounded univer-ml-2 univer-text-base univer-flex
-                              univer-flex-row univer-justify-center univer-items-center univer-cursor-pointer
+                              univer-ml-2 univer-flex univer-h-6 univer-w-6 univer-cursor-pointer univer-flex-row
+                              univer-items-center univer-justify-center univer-rounded univer-text-base
                               hover:univer-bg-gray-300
                             `}
                             onClick={() => {
@@ -162,8 +162,8 @@ export const CellLinkPopupPure = (props: ICellLinkPopupPureProps) => {
                         </div>
                         <div
                             className={`
-                              univer-w-6 univer-h-6 univer-rounded univer-ml-2 univer-text-base univer-flex
-                              univer-flex-row univer-justify-center univer-items-center univer-cursor-pointer
+                              univer-ml-2 univer-flex univer-h-6 univer-w-6 univer-cursor-pointer univer-flex-row
+                              univer-items-center univer-justify-center univer-rounded univer-text-base
                               hover:univer-bg-gray-300
                             `}
                             onClick={() => {

@@ -417,8 +417,8 @@ export const CellLinkEdit = () => {
     return (
         <div
             className={`
-              univer-p-4 univer-bg-white univer-box-border univer-w-[296px] univer-rounded-xl univer-border
-              univer-border-gray-200 univer-shadow-[0px_4px_10px_-1px_rgba(17,22,40,0.1)]
+              univer-box-border univer-w-[296px] univer-rounded-xl univer-border univer-border-solid
+              univer-border-gray-200 univer-bg-white univer-p-4 univer-shadow-md
             `}
         >
             {showLabel

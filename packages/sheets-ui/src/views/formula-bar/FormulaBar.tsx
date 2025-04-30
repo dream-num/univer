@@ -256,6 +256,7 @@ export function FormulaBar(props: IProps) {
             className={clsx(`
               univer-box-border univer-flex univer-h-7 univer-border-0 univer-border-b univer-border-solid
               univer-bg-white univer-border-bg-gray-200 univer-border-b-gray-200 univer-transition-[height]
+              univer-ease-linear
               dark:univer-border-b-gray-700 dark:univer-bg-gray-900
             `, className)}
             style={{
@@ -370,8 +371,9 @@ export function FormulaBar(props: IProps) {
                     <div
                         className={clsx(`
                           univer-flex univer-h-full univer-w-5 univer-cursor-pointer univer-items-center
-                          univer-justify-center univer-text-xs univer-text-gray-600
-                        `, { 'univer-cursor-not-allowed univer-text-gray-200': editDisable })}
+                          univer-justify-center univer-text-xs univer-text-gray-700
+                          dark:univer-text-gray-200
+                        `, { 'univer-cursor-not-allowed univer-text-gray-200 dark:univer-text-gray-700': editDisable })}
                         onClick={handleArrowClick}
                     >
                         {arrowDirection === ArrowDirection.Down

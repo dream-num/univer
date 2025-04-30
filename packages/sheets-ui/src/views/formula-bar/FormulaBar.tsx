@@ -253,6 +253,7 @@ export function FormulaBar(props: IProps) {
 
     return (
         <div
+            data-u-comp="formula-bar"
             className={clsx(`
               univer-box-border univer-flex univer-h-7 univer-border-0 univer-border-b univer-border-solid
               univer-bg-white univer-border-bg-gray-200 univer-border-b-gray-200 univer-transition-[height]

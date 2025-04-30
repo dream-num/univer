@@ -43,6 +43,7 @@ export function DefinedName({ disable }: { disable: boolean }) {
 
     return (
         <div
+            data-u-comp="defined-name"
             className={`
               univer-relative univer-box-border univer-flex univer-h-full univer-w-24 univer-border-r-gray-200
               univer-py-1.5 univer-transition-all

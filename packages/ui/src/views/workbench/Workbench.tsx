@@ -152,7 +152,10 @@ export function DesktopWorkbenchContent(props: IUniverWorkbenchProps) {
 
                 {/* header */}
                 {header && toolbar && (
-                    <header className="univer-relative univer-z-10 univer-w-full">
+                    <header
+                        data-u-comp="headerbar"
+                        className="univer-relative univer-z-10 univer-w-full"
+                    >
                         <ComponentContainer
                             key="toolbar"
                             components={toolbarComponents}

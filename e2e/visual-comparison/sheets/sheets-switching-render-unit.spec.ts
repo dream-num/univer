@@ -41,8 +41,8 @@ test('ensure switching render unit successful with no errors', async () => {
     const filename = generateSnapshotName('switching-render-unit');
     const firstScreenshot = await page.screenshot({
         mask: [
-            page.locator('.univer-headerbar'),
-            page.locator('.univer-defined-name'),
+            page.locator('[data-u-comp=headerbar]'),
+            page.locator('[data-u-comp=formula-bar]'),
         ],
         fullPage: true,
     });

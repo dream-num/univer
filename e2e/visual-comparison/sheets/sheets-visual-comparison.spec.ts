@@ -38,8 +38,8 @@ test('diff default sheet toolbar', async () => {
     const filename = generateSnapshotName('default-sheet-fullpage');
     const screenshot = await page.screenshot({
         mask: [
-            page.locator('.univer-headerbar'),
-            page.locator('.univer-defined-name'),
+            page.locator('[data-u-comp=headerbar]'),
+            page.locator('[data-u-comp=defined-name]'),
         ],
         fullPage: true,
     });
@@ -67,8 +67,8 @@ test('diff sheet dark mode', async () => {
     const filename = generateSnapshotName('dark-mode');
     const screenshot = await page.screenshot({
         mask: [
-            page.locator('.univer-headerbar'),
-            page.locator('.univer-defined-name'),
+            page.locator('[data-u-comp=headerbar]'),
+            page.locator('[data-u-comp=defined-name]'),
         ],
         fullPage: true,
     });

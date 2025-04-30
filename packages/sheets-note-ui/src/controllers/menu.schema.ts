@@ -29,11 +29,11 @@ export const menuSchema: MenuSchemaType = {
                 menuItemFactory: sheetNoteContextMenuFactory,
             },
             [SheetDeleteNoteCommand.id]: {
-                order: 1,
+                order: 0,
                 menuItemFactory: sheetDeleteNoteMenuFactory,
             },
             [SheetToggleNotePopupCommand.id]: {
-                order: 2,
+                order: 0,
                 menuItemFactory: sheetNoteToggleMenuFactory,
             },
         },

@@ -181,6 +181,7 @@ export function DesktopWorkbenchContent(props: IUniverWorkbenchProps) {
                               univer-relative univer-grid univer-flex-1 univer-grid-rows-[auto_1fr]
                               univer-overflow-hidden univer-border-0 univer-border-b univer-border-solid
                               univer-border-b-gray-200 univer-bg-white
+                              dark:univer-border-b-gray-700
                             `}
                         >
                             <header>

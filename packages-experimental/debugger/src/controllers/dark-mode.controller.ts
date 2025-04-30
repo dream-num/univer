@@ -16,8 +16,6 @@
 
 import { ILocalStorageService, Inject, RxDisposable, ThemeService } from '@univerjs/core';
 
-// TODO@jikkai: this should be merged into the theme service
-
 export class DarkModeController extends RxDisposable {
     constructor(
         @ILocalStorageService private _localStorageService: ILocalStorageService,

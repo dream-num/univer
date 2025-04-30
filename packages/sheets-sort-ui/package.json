@@ -69,7 +69,7 @@
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
-        "@univerjs/icons": "^0.3.22",
+        "@univerjs/icons": "^0.3.24",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-sort": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",

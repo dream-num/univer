@@ -15,6 +15,7 @@
  */
 
 import { Disposable, ICommandService, Inject } from '@univerjs/core';
+import { AddNoteSingle, DeleteNoteSingle, HideNoteSingle } from '@univerjs/icons';
 import { ComponentManager, IMenuManagerService } from '@univerjs/ui';
 import { AddNotePopupOperation } from '../commands/operations/add-note-popup.operation';
 import { SHEET_NOTE_COMPONENT } from '../views/config';
@@ -35,9 +36,10 @@ export class SheetsNoteUIController extends Disposable {
     }
 
     private _initComponents() {
-        this.disposeWithMe(
-            this._componentManager.register(SHEET_NOTE_COMPONENT, SheetsNote)
-        );
+        this.disposeWithMe(this._componentManager.register(SHEET_NOTE_COMPONENT, SheetsNote));
+        this.disposeWithMe(this._componentManager.register('AddNoteSingle', AddNoteSingle));
+        this.disposeWithMe(this._componentManager.register('DeleteNoteSingle', DeleteNoteSingle));
+        this.disposeWithMe(this._componentManager.register('HideNoteSingle', HideNoteSingle));
     }
 
     private _initMenu() {

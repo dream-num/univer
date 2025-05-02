@@ -185,7 +185,7 @@ export const UniControls = ({ zoom, onItemClick }: { zoom: number; onItemClick?:
                 <a
                     className={clsx(
                         `
-                          univer-h-[28px] univer-w-[55px] univer-cursor-pointer univer-rounded univer-text-center
+                          univer-h-7 univer-w-[55px] univer-cursor-pointer univer-rounded univer-text-center
                           univer-text-xs univer-leading-loose univer-text-gray-700 univer-no-underline
                           univer-transition-all univer-duration-200
                           group-data-[open=true]:univer-bg-gray-200

@@ -139,14 +139,9 @@ export const SheetTableAnchor = () => {
                     <div
                         key={item.tableId}
                         className={`
-                          univer-absolute univer-box-border univer-flex
-                          ${anchorHeight
-                        ? `
-                          univer-h-[${anchorHeight}px]
-                        `
-                        : 'univer-h-[24px]'}
-                          univer-cursor-pointer univer-items-center univer-rounded-xl univer-border univer-border-solid
-                          univer-border-gray-500 univer-pl-2 univer-pr-2 univer-shadow-xs
+                          univer-absolute univer-box-border univer-flex univer-cursor-pointer univer-items-center
+                          univer-rounded-xl univer-border univer-border-solid univer-border-gray-500 univer-pl-2
+                          univer-pr-2 univer-shadow-xs
                         `}
                         style={{
                             left: item.x,
@@ -155,6 +150,7 @@ export const SheetTableAnchor = () => {
                             color: headerTextColor,
                             borderWidth: '0.5px',
                             display: shouldHidden ? 'none' : 'flex',
+                            height: anchorHeight ? `${anchorHeight}px` : '24px',
                         }}
                     >
                         <div className="univer-text-nowrap">
@@ -204,7 +200,7 @@ export const SheetTableAnchor = () => {
                                     </div>
                                     <div
                                         className={`
-                                          univer-mb-1 univer-mt-1 univer-h-[1px] univer-w-full univer-bg-gray-200
+                                          univer-mb-1 univer-mt-1 univer-h-px univer-w-full univer-bg-gray-200
                                         `}
                                     />
                                     <div
@@ -252,7 +248,7 @@ export const SheetTableAnchor = () => {
                                     </div>
                                     <div
                                         className={`
-                                          univer-mb-1 univer-mt-1 univer-h-[1px] univer-w-full univer-bg-gray-200
+                                          univer-mb-1 univer-mt-1 univer-h-px univer-w-full univer-bg-gray-200
                                         `}
                                     />
                                     <div

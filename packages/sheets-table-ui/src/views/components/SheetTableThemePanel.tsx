@@ -140,16 +140,16 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
                     return (
                         <div
                             key={item}
-                            className="univer-h-10 univer-w-8 univer-cursor-pointer univer-p-[1px]"
+                            className="univer-h-10 univer-w-8 univer-cursor-pointer univer-p-px"
                             onClick={() => handleThemeChange(item)}
                             style={{
                                 border: item === themeConfig.theme ? TABLE_BORDER_SELECTED : TABLE_BORDER_DEFAULT,
                             }}
                         >
-                            <div className="univer-box-border univer-h-[10px]" style={{ background: headerRowBg, border: `${headerRowBg ? TABLE_BORDER_NONE : TABLE_BORDER_DEFAULT}` }} />
-                            <div className="univer-box-border univer-h-[10px]" style={{ background: firstRowBg, border: `${firstRowBg ? TABLE_BORDER_NONE : TABLE_BORDER_DEFAULT}` }} />
-                            <div className="univer-box-border univer-h-[10px]" style={{ background: secondRowBg, border: `${secondRowBg ? TABLE_BORDER_NONE : TABLE_BORDER_DEFAULT}` }} />
-                            <div className="univer-box-border univer-h-[10px]" style={{ background: lastRowBg, border: `${lastRowBg ? TABLE_BORDER_NONE : TABLE_BORDER_DEFAULT}` }} />
+                            <div className="univer-box-border univer-h-2.5" style={{ background: headerRowBg, border: `${headerRowBg ? TABLE_BORDER_NONE : TABLE_BORDER_DEFAULT}` }} />
+                            <div className="univer-box-border univer-h-2.5" style={{ background: firstRowBg, border: `${firstRowBg ? TABLE_BORDER_NONE : TABLE_BORDER_DEFAULT}` }} />
+                            <div className="univer-box-border univer-h-2.5" style={{ background: secondRowBg, border: `${secondRowBg ? TABLE_BORDER_NONE : TABLE_BORDER_DEFAULT}` }} />
+                            <div className="univer-box-border univer-h-2.5" style={{ background: lastRowBg, border: `${lastRowBg ? TABLE_BORDER_NONE : TABLE_BORDER_DEFAULT}` }} />
                         </div>
                     );
                 })}
@@ -161,7 +161,7 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
                     <div
                         className={`
                           univer-h-10 univer-w-8 univer-cursor-pointer univer-border univer-border-solid
-                          univer-border-gray-200 univer-p-[1px] univer-text-center univer-leading-10
+                          univer-border-gray-200 univer-p-px univer-text-center univer-leading-10
                         `}
                         onClick={handleAddCustomTheme}
                     >
@@ -177,7 +177,7 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
                         return (
                             <div
                                 key={item}
-                                className="univer-relative univer-h-10 univer-w-8 univer-cursor-pointer univer-p-[1px]"
+                                className="univer-relative univer-h-10 univer-w-8 univer-cursor-pointer univer-p-px"
                                 onClick={() => handleThemeChange(item)}
                                 style={{
                                     border: item === themeConfig.theme ? TABLE_BORDER_SELECTED : TABLE_BORDER_DEFAULT,
@@ -185,10 +185,10 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
                                 onMouseEnter={() => setHoverCustomId(item)}
                                 onMouseLeave={() => setHoverCustomId(null)}
                             >
-                                <div className="univer-box-border univer-h-[10px]" style={{ background: headerRowBg ?? TABLE_BORDER_NONE, border: `${headerRowBg ? TABLE_BORDER_NONE : TABLE_BORDER_DEFAULT}` }} />
-                                <div className="univer-box-border univer-h-[10px]" style={{ background: firstRowBg ?? TABLE_BORDER_NONE, border: `${firstRowBg ? TABLE_BORDER_NONE : TABLE_BORDER_DEFAULT}` }} />
-                                <div className="univer-box-border univer-h-[10px]" style={{ background: secondRowBg ?? TABLE_BORDER_NONE, border: `${secondRowBg ? TABLE_BORDER_NONE : TABLE_BORDER_DEFAULT}` }} />
-                                <div className="univer-box-border univer-h-[10px]" style={{ background: lastRowBg ?? TABLE_BORDER_NONE, border: `${lastRowBg ? TABLE_BORDER_NONE : TABLE_BORDER_DEFAULT}` }} />
+                                <div className="univer-box-border univer-h-2.5" style={{ background: headerRowBg ?? TABLE_BORDER_NONE, border: `${headerRowBg ? TABLE_BORDER_NONE : TABLE_BORDER_DEFAULT}` }} />
+                                <div className="univer-box-border univer-h-2.5" style={{ background: firstRowBg ?? TABLE_BORDER_NONE, border: `${firstRowBg ? TABLE_BORDER_NONE : TABLE_BORDER_DEFAULT}` }} />
+                                <div className="univer-box-border univer-h-2.5" style={{ background: secondRowBg ?? TABLE_BORDER_NONE, border: `${secondRowBg ? TABLE_BORDER_NONE : TABLE_BORDER_DEFAULT}` }} />
+                                <div className="univer-box-border univer-h-2.5" style={{ background: lastRowBg ?? TABLE_BORDER_NONE, border: `${lastRowBg ? TABLE_BORDER_NONE : TABLE_BORDER_DEFAULT}` }} />
 
                                 <div
                                     className={`
@@ -211,7 +211,7 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
 
                 {customSelected && (
                     <>
-                        <div className="univer-h-[1px] univer-w-full univer-bg-gray-200" />
+                        <div className="univer-h-px univer-w-full univer-bg-gray-200" />
                         <div className="univer-flex univer-flex-col univer-gap-2 univer-p-2">
                             <div className="univer-flex univer-h-9 univer-gap-2">
                                 <div

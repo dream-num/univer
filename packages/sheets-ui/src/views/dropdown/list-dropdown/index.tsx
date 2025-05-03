@@ -27,7 +27,6 @@ import { RangeProtectionPermissionEditPoint, SheetPermissionCheckController, Wor
 import { RectPopup, useDependency } from '@univerjs/ui';
 import React, { useEffect, useMemo, useState } from 'react';
 import { IEditorBridgeService } from '../../../services/editor-bridge.service';
-import styles from './index.module.less';
 
 function serializeListOptions(options: string[]) {
     return options.filter(Boolean).join(',');
@@ -51,7 +50,7 @@ interface ISelectListProps {
 }
 
 const SelectList = (props: ISelectListProps) => {
-    const { value, onChange, multiple, options, title, onEdit, style, filter, location, showEdit: showEditOnDropdown } = props;
+    const { value, onChange, multiple, options, title, onEdit, filter, style, location, showEdit: showEditOnDropdown } = props;
     const localeService = useDependency(LocaleService);
     const lowerFilter = filter?.toLowerCase();
     const { row, col, unitId, subUnitId } = location;
@@ -69,8 +68,18 @@ const SelectList = (props: ISelectListProps) => {
     ), [sheetPermissionCheckController, col, row, unitId, subUnitId]);
 
     return (
-        <div className={styles.dvListDropdown} style={style}>
-            <div className={styles.dvListDropdownTitle}>
+        <div
+            data-u-comp="select-list"
+            className={`
+              univer-box-border univer-rounded-lg univer-border univer-border-solid univer-border-gray-200
+              univer-bg-white univer-pb-1 univer-text-black univer-shadow
+              dark:univer-border-gray-700 dark:univer-bg-black dark:univer-text-white
+            `}
+            style={style}
+        >
+            <div
+                className="univer-flex-shrink-0 univer-flex-grow-0 univer-px-[14px] univer-py-2 univer-text-xs"
+            >
                 {title}
             </div>
             <div
@@ -98,8 +107,24 @@ const SelectList = (props: ISelectListProps) => {
 
                     const index = item.label.toLocaleLowerCase().indexOf(lowerFilter!);
                     return (
-                        <div key={i} className={styles.dvListDropdownItemContainer} onClick={handleClick}>
-                            <div className={styles.dvListDropdownItem} style={{ background: item.color }}>
+                        <div
+                            key={i}
+                            className={`
+                              univer-mt-1 univer-flex univer-cursor-pointer univer-flex-row univer-items-center
+                              univer-justify-between univer-rounded-md univer-px-1.5 univer-py-1
+                              dark:hover:univer-bg-gray-700
+                              hover:univer-bg-gray-50
+                            `}
+                            onClick={handleClick}
+                        >
+                            <div
+                                className={`
+                                  univer-h-4 univer-w-fit univer-flex-[0_1_auto] univer-overflow-hidden univer-truncate
+                                  univer-whitespace-nowrap univer-rounded-[8px] univer-px-1 univer-py-0 univer-text-xs
+                                  univer-font-normal
+                                `}
+                                style={{ background: item.color }}
+                            >
                                 {lowerFilter && item.label.toLowerCase().includes(lowerFilter)
                                     ? (
                                         <>
@@ -110,7 +135,12 @@ const SelectList = (props: ISelectListProps) => {
                                     )
                                     : item.label}
                             </div>
-                            <div className={styles.dvListDropdownSelectedIcon}>
+                            <div
+                                className={`
+                                  univer-ml-3 univer-h-4 univer-w-4 univer-flex-shrink-0 univer-flex-grow-0
+                                  univer-text-base univer-text-primary-500
+                                `}
+                            >
                                 {selected ? <CheckMarkSingle /> : null}
                             </div>
                         </div>
@@ -120,9 +150,26 @@ const SelectList = (props: ISelectListProps) => {
             {showEditOnDropdown && hasPermission
                 ? (
                     <>
-                        <div className={styles.dvListDropdownSplit} />
-                        <div className={styles.dvListDropdownEdit}>
-                            <a onClick={onEdit}>{localeService.t('dataValidation.list.edit')}</a>
+                        <div
+                            className={`
+                              univer-my-1 univer-h-[1px] univer-flex-shrink-0 univer-flex-grow-0 univer-bg-gray-200
+                              dark:univer-bg-gray-700
+                            `}
+                        />
+                        <div
+                            className="univer-flex-shrink-0 univer-flex-grow-0 univer-px-1 univer-py-0"
+                        >
+                            <a
+                                className={`
+                                  univer-block univer-cursor-pointer univer-rounded univer-px-1.5 univer-py-1
+                                  univer-text-xs
+                                  dark:hover:univer-bg-gray-700
+                                  hover:univer-bg-gray-200
+                                `}
+                                onClick={onEdit}
+                            >
+                                {localeService.t('dataValidation.list.edit')}
+                            </a>
                         </div>
                     </>
                 )

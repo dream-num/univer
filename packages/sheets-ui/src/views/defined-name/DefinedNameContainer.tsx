@@ -21,11 +21,17 @@ import { ICommandService, IUniverInstanceService, LocaleService, Tools, UniverIn
 import { clsx, Confirm, Tooltip } from '@univerjs/design';
 import { IDefinedNamesService, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { CheckMarkSingle, DeleteSingle, IncreaseSingle } from '@univerjs/icons';
-import { InsertDefinedNameCommand, RemoveDefinedNameCommand, SCOPE_WORKBOOK_VALUE_DEFINED_NAME, SetDefinedNameCommand, SetWorksheetShowCommand, SheetsSelectionsService } from '@univerjs/sheets';
+import {
+    InsertDefinedNameCommand,
+    RemoveDefinedNameCommand,
+    SCOPE_WORKBOOK_VALUE_DEFINED_NAME,
+    SetDefinedNameCommand,
+    SetWorksheetShowCommand,
+    SheetsSelectionsService,
+} from '@univerjs/sheets';
 import { useDependency } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
 import { DefinedNameInput } from './DefinedNameInput';
-import styles from './index.module.less';
 
 export const DefinedNameContainer = () => {
     const commandService = useDependency(ICommandService);
@@ -169,12 +175,23 @@ export const DefinedNameContainer = () => {
     };
 
     return (
-        <div className={styles.definedNameContainer}>
-            <div className={styles.definedNameContainerScroll}>
+        <div className="univer-relative univer-w-full">
+            <div className="univer-absolute univer-w-full univer-overflow-hidden univer-overflow-y-auto">
                 <div key="insertDefinedName">
-                    <div onClick={openInsertCloseKeyEditor} className={styles.definedNameContainerAddButton} style={{ display: editState ? 'none' : 'flex' }}>
+                    <div
+                        onClick={openInsertCloseKeyEditor}
+                        className={clsx(
+                            `
+                              univer-flex univer-h-10 univer-w-full univer-items-center univer-justify-center
+                              univer-border-0 univer-border-b univer-border-t univer-border-solid univer-border-gray-200
+                              univer-text-base univer-text-primary univer-cursor-pointer
+                              hover:univer-bg-gray-50
+                            `,
+                            { 'univer-hidden': editState }
+                        )}
+                    >
                         <IncreaseSingle />
-                        <span className={styles.definedNameContainerAddButtonText}>{localeService.t('definedName.addButton')}</span>
+                        <span className="univer-ml-1">{localeService.t('definedName.addButton')}</span>
                     </div>
                     {editState && <DefinedNameInput confirm={insertConfirm} cancel={closeInput} state={editState} inputId="insertDefinedName" name={getInsertDefinedName()} formulaOrRefString={getInertFormulaOrRefString()} />}
                 </div>
@@ -182,23 +199,74 @@ export const DefinedNameContainer = () => {
                 {definedNames.map((definedName, index) => {
                     return (
                         <div key={index}>
-                            <div onClick={() => { focusDefinedName(definedName); }} className={styles.definedNameContainerItem} style={{ display: definedName.id === editorKey ? 'none' : 'flex' }}>
+                            <div
+                                onClick={() => { focusDefinedName(definedName); }}
+                                className={clsx(
+                                    'univer-relative univer-flex univer-items-center univer-justify-between univer-p-2',
+                                    'univer-border-0 univer-border-b univer-border-solid univer-border-gray-200',
+                                    `
+                                      univer-cursor-default univer-select-none
+                                      hover:univer-bg-gray-50
+                                    `,
+                                    { 'univer-hidden': definedName.id === editorKey }
+                                )}
+                            >
                                 <div title={definedName.comment}>
-                                    <div className={styles.definedNameContainerItemName}>
+                                    <div
+                                        className={`
+                                          univer-my-1 univer-max-h-[100px] univer-max-w-[190px] univer-overflow-hidden
+                                          univer-text-sm univer-font-medium univer-text-black
+                                        `}
+                                    >
                                         {definedName.name}
-                                        <span className={styles.definedNameContainerItemNameForSheet}>
+                                        <span
+                                            className={`
+                                              univer-text-xxs univer-ml-1 univer-font-normal univer-text-gray-400
+                                            `}
+                                        >
                                             {(definedName.localSheetId === SCOPE_WORKBOOK_VALUE_DEFINED_NAME || definedName.localSheetId == null) ? '' : getSheetNameBySheetId(definedName.localSheetId)}
                                         </span>
                                     </div>
-                                    <div className={styles.definedNameContainerItemFormulaOrRefString}>{definedName.formulaOrRefString}</div>
+                                    <div
+                                        className={`
+                                          univer-m-[5px_0] univer-max-h-[100px] univer-overflow-hidden
+                                          univer-text-ellipsis univer-text-xs univer-font-normal univer-text-gray-500
+                                        `}
+                                    >
+                                        {definedName.formulaOrRefString}
+                                    </div>
                                 </div>
                                 <Tooltip title={localeService.t('definedName.updateButton')} placement="top">
-                                    <div className={clsx(styles.definedNameContainerItemUpdate, styles.definedNameContainerItemShow)} onClick={() => { closeInsertOpenKeyEditor(definedName.id); }}>
+                                    <div
+                                        className={`
+                                          univer-absolute univer-text-xs univer-text-primary univer-right-[60px]
+                                          univer-top-5 univer-hidden univer-translate-y-[-50%] univer-cursor-pointer
+                                          univer-rounded univer-p-1
+                                          group-hover:univer-block
+                                          hover:univer-bg-hyacinth-50
+                                        `}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            closeInsertOpenKeyEditor(definedName.id);
+                                        }}
+                                    >
                                         <CheckMarkSingle />
                                     </div>
                                 </Tooltip>
                                 <Tooltip title={localeService.t('definedName.deleteButton')} placement="top">
-                                    <div className={clsx(styles.definedNameContainerItemDelete, styles.definedNameContainerItemShow)} onClick={() => { deleteDefinedName(definedName.id); }}>
+                                    <div
+                                        className={`
+                                          univer-absolute univer-text-xs univer-text-error univer-right-5 univer-top-5
+                                          univer-hidden -univer-translate-y-1/2 univer-cursor-pointer univer-rounded
+                                          univer-p-1
+                                          group-hover:univer-block
+                                          hover:univer-bg-hyacinth-50
+                                        `}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            deleteDefinedName(definedName.id);
+                                        }}
+                                    >
                                         <DeleteSingle />
                                     </div>
                                 </Tooltip>
@@ -225,7 +293,6 @@ export const DefinedNameContainer = () => {
                                     localSheetId={definedName.localSheetId}
                                 />
                             )}
-
                         </div>
                     );
                 })}

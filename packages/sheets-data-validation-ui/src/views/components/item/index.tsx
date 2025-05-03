@@ -76,7 +76,7 @@ export const DataValidationItem = (props: IDataValidationDetailProps) => {
                 `
                   univer-rounded-md univer-bg-secondary univer-relative univer--ml-2 univer--mr-2 univer-box-border
                   univer-flex univer-w-[287px] univer-cursor-pointer univer-flex-col univer-justify-between
-                  univer-overflow-hidden univer-rounded-lg univer-p-2 univer-pr-9
+                  univer-overflow-hidden univer-p-2 univer-pr-9
                 `,
                 {
                     'hover:univer-bg-gray-50': !disable,

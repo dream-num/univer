@@ -243,22 +243,31 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
                     )
                 )
                 : (FormulaEditor && (
-                    <FormulaEditor
-                        initValue={formulaOrRefStringValue as any}
-                        unitId={unitId}
-                        subUnitId={subUnitId}
-                        isFocus={isFocusFormulaEditor}
-                        isSupportAcrossSheet
-                        onChange={(v = '') => {
-                            const formula = v || '';
-                            formulaEditorChange(formula);
-                        }}
-                        onVerify={(res: boolean) => {
-                            setValidFormulaOrRange(res);
-                        }}
-                        onFocus={() => isFocusFormulaEditorSet(true)}
-                        ref={formulaEditorRef}
-                    />
+                    <div
+                        className={`
+                          univer-relative univer-mt-4 univer-h-full univer-rounded univer-border univer-border-solid
+                          univer-border-gray-200 univer-px-[6px] univer-transition-all univer-duration-150
+                        `}
+                    >
+                        <div className="univer-relative univer-h-[30px] univer-w-[95%] univer-select-none">
+                            <FormulaEditor
+                                initValue={formulaOrRefStringValue as any}
+                                unitId={unitId}
+                                subUnitId={subUnitId}
+                                isFocus={isFocusFormulaEditor}
+                                isSupportAcrossSheet
+                                onChange={(v = '') => {
+                                    const formula = v || '';
+                                    formulaEditorChange(formula);
+                                }}
+                                onVerify={(res: boolean) => {
+                                    setValidFormulaOrRange(res);
+                                }}
+                                onFocus={() => isFocusFormulaEditorSet(true)}
+                                ref={formulaEditorRef}
+                            />
+                        </div>
+                    </div>
                 ))}
             <div>
                 <Select

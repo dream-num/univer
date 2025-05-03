@@ -20,7 +20,6 @@ import { dayjs, LocaleService, numfmt } from '@univerjs/core';
 import { Button, DatePanel } from '@univerjs/design';
 import { useDependency } from '@univerjs/ui';
 import { useMemo, useState } from 'react';
-import styles from './index.module.less';
 
 export interface IDateDropdownProps {
     defaultValue?: dayjs.Dayjs;
@@ -47,7 +46,12 @@ export function DateDropdown(props: { popup: IPopup<IDateDropdownProps & IBaseDr
     };
 
     return (
-        <div className={styles.dvDateDropdown}>
+        <div
+            className={`
+              univer-rounded univer-bg-white univer-p-2 univer-shadow-lg
+              dark:univer-bg-black
+            `}
+        >
             <DatePanel
                 value={date}
                 pickerValue={date}
@@ -61,7 +65,13 @@ export function DateDropdown(props: { popup: IPopup<IDateDropdownProps & IBaseDr
                 }}
                 disabledDate={(current) => !numfmt.parseDate(current.format('YYYY-MM-DD'))}
             />
-            <div className={styles.dvDateDropdownBtns}>
+            <div
+                className={`
+                  univer-flex univer-justify-end univer-border-0 univer-border-t univer-border-solid
+                  univer-border-t-gray-200 univer-pt-2
+                  dark:univer-border-t-gray-700
+                `}
+            >
                 <Button size="small" variant="primary" onClick={handleSave} disabled={!date || !date.isValid()}>
                     {localeService.t('dataValidation.alert.ok')}
                 </Button>

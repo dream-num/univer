@@ -32,7 +32,11 @@ export const SheetsNote = (props: { popup: IPopup<{ location: ISheetLocationBase
     const themeService = useDependency(ThemeService);
     const isDarkMode = useObservable(themeService.darkMode$, themeService.darkMode);
     const config = useConfigValue<IUniverSheetsNoteUIPluginConfig>(SHEETS_NOTE_UI_PLUGIN_CONFIG_KEY);
-    const activePopup = props.popup.extraProps!.location;
+    const activePopup = props.popup.extraProps?.location;
+    if (!activePopup) {
+        console.error("Popup extraProps or location is undefined.");
+        return null; // Or handle this case appropriately
+    }
     const [note, setNote] = useState<ISheetNote>(() => {
         const defaultNote = { width: config?.defaultNoteSize?.width || 216, height: config?.defaultNoteSize?.height || 92, note: '' };
         const existingNote = noteModel.getNote(activePopup.unitId, activePopup.subUnitId!, activePopup.row, activePopup.col);

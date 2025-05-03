@@ -79,7 +79,7 @@ export function SheetBarItem(props: IBaseSheetBarProps) {
             <div
                 className={`
                   univer-box-border univer-flex univer-items-center univer-whitespace-nowrap univer-rounded
-                  univer-border-2 univer-border-solid univer-border-transparent univer-px-2 univer-py-1
+                  univer-border-2 univer-border-solid univer-border-transparent univer-py-1
                 `}
             >
                 {label}

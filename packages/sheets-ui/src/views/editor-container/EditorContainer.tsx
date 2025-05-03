@@ -26,7 +26,6 @@ import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY } from '../../common/keys';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { ICellEditorManagerService } from '../../services/editor/cell-editor-manager.service';
 import { useKeyEventConfig } from './hooks';
-import styles from './index.module.less';
 
 interface ICellIEditorProps { }
 
@@ -138,7 +137,11 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
 
     return (
         <div
-            className={styles.editorContainer}
+            className={`
+              univer-absolute univer-z-10 univer-top-[200px] univer-left-[100px] univer-flex univer-w-[100px]
+              univer-h-[50px] univer-border univer-border-solid univer-border-gray-100
+              dark:univer-bg-gray-700
+            `}
             style={{
                 left: state.left,
                 top: state.top,
@@ -149,7 +152,10 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
             {FormulaEditor && (
                 <FormulaEditor
                     editorId={DOCS_NORMAL_EDITOR_UNIT_ID_KEY}
-                    className={styles.editorInput}
+                    className={`
+                      univer-relative univer-flex univer-w-full univer-h-full
+                      [&_*canvas]:univer-absolute
+                    `}
                     initValue=""
                     onChange={() => {}}
                     isFocus={visible?.visible}

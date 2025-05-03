@@ -16,10 +16,9 @@
 
 import type { BooleanNumber } from '@univerjs/core';
 import { ColorKit, ThemeService } from '@univerjs/core';
+import { clsx } from '@univerjs/design';
 import { useDependency } from '@univerjs/ui';
 import React, { useEffect, useState } from 'react';
-
-import styles from './index.module.less';
 
 export interface IBaseSheetBarProps {
     label?: React.ReactNode;
@@ -53,14 +52,23 @@ export function SheetBarItem(props: IBaseSheetBarProps) {
 
     return (
         <div
+            data-u-comp="slide-tab-item"
             key={sheetId}
             data-id={sheetId}
-            className={currentSelected
+            className={clsx(`
+              univer-mx-1 univer-box-border univer-flex univer-flex-grow univer-cursor-pointer univer-select-none
+              univer-flex-row univer-items-center univer-rounded univer-text-xs univer-text-black
+              dark:univer-text-white
+            `, currentSelected
                 ? `
-                  ${styles.slideTabActive}
-                  ${styles.slideTabItem}
+                  univer-flex univer-justify-center univer-bg-white univer-font-bold univer-text-primary-700
+                  univer-shadow-sm univer-transition-[box-shadow]
+                  dark:univer-bg-black
                 `
-                : styles.slideTabItem}
+                : `
+                  dark:hover:univer-bg-gray-700
+                  hover:univer-bg-gray-100
+                `)}
             style={{
                 backgroundColor: !currentSelected && color ? color : '',
                 color: !currentSelected && color ? getTextColor(color) : '',
@@ -68,7 +76,14 @@ export function SheetBarItem(props: IBaseSheetBarProps) {
                     currentSelected && color ? `0px 0px 8px rgba(0, 0, 0, 0.08), inset 0px -2px 0px 0px ${color}` : '',
             }}
         >
-            <div className={styles.slideTabDiv}>{label}</div>
+            <div
+                className={`
+                  univer-box-border univer-flex univer-items-center univer-whitespace-nowrap univer-rounded
+                  univer-border-2 univer-border-solid univer-border-transparent univer-py-1
+                `}
+            >
+                {label}
+            </div>
         </div>
     );
 }

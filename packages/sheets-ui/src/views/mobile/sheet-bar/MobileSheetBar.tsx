@@ -30,7 +30,6 @@ import {
 import { useDependency } from '@univerjs/ui';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useActiveWorkbook } from '../../../components/hook';
-import styles from './index.module.less';
 
 export function MobileSheetBar() {
     const workbook = useActiveWorkbook();
@@ -107,14 +106,26 @@ function MobileSheetBarImpl(props: { workbook: Workbook }) {
     }, [commandService, updateSheetItems]);
 
     return (
-        <div className={styles.mobileSheetBarContainer}>
-            <div className={styles.mobileSheetBarSlider}>
+        <div
+            className={`
+              univer-w-full univer-overflow-x-scroll univer-h-8 univer-bg-gray-100
+              dark:univer-bg-gray-900
+            `}
+        >
+            <div className="univer-flex univer-flex-nowrap univer-items-center univer-h-8">
                 {sheetList.map((sheet) => (
                     <div
                         className={clsx(
-                            styles.mobileSheetBarItem,
+                            `
+                              univer-items-center univer-box-border univer-shrink-0 univer-flex-nowrap univer-text-xs
+                              univer-h-full univer-min-w-12 univer-overflow-hidden univer-py-0.5 univer-px-1
+                              univer-text-center univer-whitespace-nowrap univer-border-0 univer-border-r
+                              univer-border-solid univer-border-r-gray-200 univer-truncate univer-max-w-[120px]
+                              univer-leading-7
+                              dark:univer-border-r-gray-700
+                            `,
                             {
-                                [styles.mobileSheetBarItemActivated]: sheet.sheetId === activeKey,
+                                'univer-text-primary-600 univer-bg-white dark:univer-bg-slate-600': sheet.sheetId === activeKey,
                             }
                         )}
                         key={sheet.sheetId}

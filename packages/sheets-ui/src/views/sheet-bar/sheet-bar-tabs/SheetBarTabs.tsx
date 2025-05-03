@@ -43,7 +43,6 @@ import { merge } from 'rxjs';
 import { useActiveWorkbook } from '../../../components/hook';
 import { IEditorBridgeService } from '../../../services/editor-bridge.service';
 import { ISheetBarService } from '../../../services/sheet-bar/sheet-bar.service';
-import styles from './index.module.less';
 import { SheetBarItem } from './SheetBarItem';
 import { SlideTabBar } from './utils/slide-tab-bar';
 
@@ -84,10 +83,10 @@ export function SheetBarTabs() {
                     ? (
                         <>
                             <LockSingle />
-                            <span>{sheet.getName()}</span>
+                            <span className="univer-outline-none">{sheet.getName()}</span>
                         </>
                     )
-                    : <span>{sheet.getName()}</span>;
+                    : <span className="univer-outline-none">{sheet.getName()}</span>;
 
                 return {
                     sheetId: sheet.getSheetId(),
@@ -142,10 +141,8 @@ export function SheetBarTabs() {
 
     const setupSlideTabBarInit = () => {
         const slideTabBar = new SlideTabBar({
-            slideTabBarClassName: styles.slideTabBar,
-            slideTabBarItemActiveClassName: styles.slideTabActive,
-            slideTabBarItemClassName: styles.slideTabItem,
-            slideTabBarSpanEditClassName: styles.slideTabDivEdit,
+            slideTabBarSelector: '[data-u-comp=slide-tab-bar]',
+            slideTabBarItemSelector: '[data-u-comp=slide-tab-item]',
             slideTabBarItemAutoSort: true,
             slideTabBarContainer: slideTabBarContainerRef.current,
             currentIndex: 0,
@@ -375,7 +372,7 @@ export function SheetBarTabs() {
 
     const resizeInit = (slideTabBar: SlideTabBar) => {
         // Target element
-        const slideTabBarContainer = slideTabBarContainerRef.current?.querySelector(`.${styles.slideTabBar}`);
+        const slideTabBarContainer = slideTabBarContainerRef.current?.querySelector('[data-u-comp=slide-tab-bar]');
         if (!slideTabBarContainer) return;
 
         // Create a ResizeObserver
@@ -412,7 +409,7 @@ export function SheetBarTabs() {
 
     return (
         <DropdownLegacy
-            className={styles.slideTabItemDropdown}
+            className="univer-select-none"
             visible={visible}
             align={{ offset }}
             trigger={['contextMenu']}
@@ -429,12 +426,19 @@ export function SheetBarTabs() {
             onVisibleChange={onVisibleChange}
         >
             <div
-                className={styles.slideTabBarContainer}
+                className="univer-max-w-[calc(100%-112px)] univer-overflow-hidden"
                 ref={slideTabBarContainerRef}
                 onDragStart={(e) => e.preventDefault()}
                 onContextMenu={(e) => e.preventDefault()}
             >
-                <div className={styles.slideTabBar} style={{ boxShadow }}>
+                <div
+                    data-u-comp="slide-tab-bar"
+                    className={`
+                      univer-flex univer-select-none univer-flex-row univer-items-center univer-overflow-hidden
+                      univer-px-1.5 univer-py-1
+                    `}
+                    style={{ boxShadow }}
+                >
                     {sheetList.map((item) => (
                         <SheetBarItem {...item} key={item.sheetId} selected={activeKey === item.sheetId} />
                     ))}

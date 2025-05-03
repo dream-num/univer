@@ -20,11 +20,9 @@ export interface IScrollState {
     leftEnd: boolean;
     rightEnd: boolean;
 }
-export interface SlideTabBarConfig {
-    slideTabBarClassName: string;
-    slideTabBarItemActiveClassName: string;
-    slideTabBarItemClassName: string;
-    slideTabBarSpanEditClassName: string;
+export interface ISlideTabBarConfig {
+    slideTabBarSelector: string;
+    slideTabBarItemSelector: string;
     slideTabBarContainer: HTMLDivElement | null;
     slideTabBarItemAutoSort: boolean;
     currentIndex: number;
@@ -138,7 +136,6 @@ export class SlideTabItem {
                     input.removeEventListener('compositionend', compositionendAction);
                     input.removeEventListener('input', inputAction);
                     input.removeEventListener('keydown', keydownAction);
-                    input.classList.remove(this._slideTabBar.getConfig().slideTabBarSpanEditClassName);
                 }
 
                 // Event must be removed before updateItems
@@ -194,7 +191,6 @@ export class SlideTabItem {
                 input.addEventListener('compositionend', compositionendAction);
                 input.addEventListener('input', inputAction);
                 input.addEventListener('keydown', keydownAction);
-                input.classList.add(this._slideTabBar.getConfig().slideTabBarSpanEditClassName);
                 this._editMode = true;
                 SlideTabBar.keepSelectAll(input);
             }
@@ -394,7 +390,7 @@ export class SlideTabBar {
 
     protected _slideTabItems: SlideTabItem[] = [];
 
-    protected _config: SlideTabBarConfig;
+    protected _config: ISlideTabBarConfig;
 
     protected _downActionX: number = 0;
 
@@ -443,21 +439,19 @@ export class SlideTabBar {
     protected _rightMoveX: number = 0;
 
     // eslint-disable-next-line max-lines-per-function
-    constructor(config: Partial<SlideTabBarConfig>) {
+    constructor(config: Partial<ISlideTabBarConfig>) {
         if (config.slideTabBarContainer == null) {
             throw new Error('not found slide-tab-bar root element');
         }
 
-        const slideTabBar = config.slideTabBarContainer.querySelector(
-            `.${config.slideTabBarClassName ?? 'slide-tab-bar'}`
-        );
+        const slideTabBar = config.slideTabBarContainer.querySelector(`${config.slideTabBarSelector}`);
         if (slideTabBar == null) {
             throw new Error('not found slide-tab-bar');
         }
 
         this._slideTabBar = slideTabBar as HTMLElement;
         this._slideScrollbar = new SlideScrollbar(this);
-        this._config = config as SlideTabBarConfig;
+        this._config = config as ISlideTabBarConfig;
 
         this._initConfig();
 
@@ -478,7 +472,7 @@ export class SlideTabBar {
             }
 
             const slideItemId = (downEvent.target as HTMLElement)
-                ?.closest(`.${config.slideTabBarItemClassName}`)
+                ?.closest(`${config.slideTabBarItemSelector}`)
                 ?.getAttribute('data-id');
             const slideItemIndex = this._slideTabItems.findIndex((item) => item.getId() === slideItemId);
 
@@ -672,7 +666,7 @@ export class SlideTabBar {
         return this._slideScrollbar;
     }
 
-    getConfig(): SlideTabBarConfig {
+    getConfig(): ISlideTabBarConfig {
         return this._config;
     }
 
@@ -1035,9 +1029,7 @@ export class SlideTabBar {
     }
 
     protected _initConfig(): void {
-        const slideTabItems = this._slideTabBar.querySelectorAll(
-            `.${this._config.slideTabBarItemClassName ?? 'slide-tab-item'}`
-        );
+        const slideTabItems = this._slideTabBar.querySelectorAll(`${this._config.slideTabBarItemSelector}`);
 
         this._downActionX = 0;
         this._moveActionX = 0;

@@ -22,10 +22,10 @@ import { useMemo } from 'react';
 import { useActiveWorkbook } from '../../components/hook';
 import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../controllers/config.schema';
 import { AutoFillPopupMenu } from '../auto-fill-popup-menu/AutoFillPopupMenu';
-import { CountBar } from '../count-bar/CountBar';
 import { EditorContainer } from '../editor-container/EditorContainer';
 import { FormulaBar } from '../formula-bar/FormulaBar';
 import { SheetBar } from '../sheet-bar/SheetBar';
+import { SheetZoomSlider } from '../sheet-slider/CountBar';
 import { StatusBar } from '../status-bar/StatusBar';
 
 export const SHEET_FOOTER_BAR_HEIGHT = 36;
@@ -67,7 +67,7 @@ export function RenderSheetFooter() {
                     )))}
                 </div>
             )}
-            {zoomSlider && <CountBar />}
+            {zoomSlider && <SheetZoomSlider />}
         </section>
     );
 }

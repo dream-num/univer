@@ -26,11 +26,7 @@ import React, { useEffect, useState } from 'react';
 import { SidebarDefinedNameOperation } from '../../commands/operations/sidebar-defined-name.operation';
 import { DEFINED_NAME_CONTAINER } from './component-name';
 
-export interface IDefinedNameOverlayProps {
-
-}
-
-export function DefinedNameOverlay(props: IDefinedNameOverlayProps) {
+export function DefinedNameOverlay() {
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
     const definedNamesService = useDependency(IDefinedNamesService);

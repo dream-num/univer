@@ -15,7 +15,9 @@
  */
 
 import React from 'react';
-import styles from './index.module.less';
+
+// TODO@jikkai: this component should be moved to the design package
+// so it could be reused.
 
 interface ISpinProps {
     loading: boolean;
@@ -24,13 +26,25 @@ interface ISpinProps {
 
 const Spin = ({ loading, children }: ISpinProps) => {
     return (
-        <div className={styles.spinContainer}>
+        <div className="univer-relative univer-h-full univer-w-full">
             {loading && (
-                <div className={styles.spinOverlay}>
-                    <div className={styles.spinner} />
+                <div
+                    className={`
+                      univer-absolute -univer-bottom-0.5 -univer-left-0.5 -univer-right-0.5 -univer-top-0.5 univer-z-10
+                      univer-flex univer-items-center univer-justify-center univer-bg-white univer-backdrop-blur
+                      dark:univer-bg-black
+                    `}
+                >
+                    <div
+                        className={`
+                          univer-size-10 univer-animate-spin univer-rounded-full univer-border-4 univer-border-solid
+                          univer-border-gray-100 univer-border-t-primary-500
+                        `}
+                    />
+
                 </div>
             )}
-            <div className={loading ? styles.contentBlur : ''}>
+            <div className={loading ? 'univer-pointer-events-none univer-blur-sm' : ''}>
                 {children}
             </div>
         </div>

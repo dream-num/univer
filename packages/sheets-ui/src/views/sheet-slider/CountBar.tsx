@@ -16,12 +16,7 @@
 
 import { ZoomSlider } from './ZoomSlider';
 
-interface ICountBarProps {
-    changeRatio?: (ratio: string) => void;
-    onChange?: (value: string) => void;
-}
-
-export function CountBar(props: ICountBarProps) {
+export function SheetZoomSlider() {
     return (
         <section className="univer-flex univer-flex-shrink-0 univer-justify-end">
             <ZoomSlider />

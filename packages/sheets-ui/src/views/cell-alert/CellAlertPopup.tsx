@@ -16,10 +16,8 @@
 
 import type { ICanvasPopup } from '../../services/canvas-pop-manager.service';
 import type { ICellAlert } from '../../services/cell-alert-manager.service';
-import { clsx } from '@univerjs/design';
 import { ErrorSingle, WarningSingle } from '@univerjs/icons';
 import { CellAlertType } from '../../services/cell-alert-manager.service';
-import styles from './index.module.less';
 
 /**
  *
@@ -35,18 +33,29 @@ export function CellAlert({ popup }: { popup: ICanvasPopup }) {
     const { type, title, message } = alert as ICellAlert;
 
     const iconMap = {
-        [CellAlertType.ERROR]: <ErrorSingle className={clsx(styles.cellAlertIcon, styles.cellAlertIconError)} />,
-        [CellAlertType.INFO]: <WarningSingle className={clsx(styles.cellAlertIcon, styles.cellAlertIconInfo)} />,
-        [CellAlertType.WARNING]: <WarningSingle className={clsx(styles.cellAlertIcon, styles.cellAlertIconWarning)} />,
+        [CellAlertType.ERROR]: <ErrorSingle className="univer-mr-1.5 univer-text-red-400" />,
+        [CellAlertType.INFO]: <WarningSingle className="univer-mr-1.5 univer-text-blue-500" />,
+        [CellAlertType.WARNING]: <WarningSingle className="univer-mr-1.5 univer-text-orange-400" />,
     };
 
     return (
-        <div className={styles.cellAlert}>
-            <div className={styles.cellAlertTitle}>
+        <div
+            className={`
+              univer-z-[100] univer-box-border univer-w-[156px] univer-rounded-lg univer-bg-white univer-px-2
+              univer-py-1 univer-text-black univer-shadow
+              dark:univer-bg-black dark:univer-text-white
+            `}
+        >
+            <div
+                className={`
+                  univer-mb-1.5 univer-flex univer-h-5 univer-flex-row univer-items-center univer-text-sm
+                  univer-font-medium
+                `}
+            >
                 {type ? iconMap[type] : null}
                 {title}
             </div>
-            <div className={styles.cellAlertContent}>{message}</div>
+            <div className="univer-text-sm">{message}</div>
         </div>
     );
 }

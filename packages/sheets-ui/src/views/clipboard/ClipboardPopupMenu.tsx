@@ -17,19 +17,17 @@
 import type { IDiscreteRange } from '../../controllers/utils/range-tools';
 import type { IPasteHookKeyType } from '../../services/clipboard/type';
 import { ICommandService, IUniverInstanceService, LocaleService } from '@univerjs/core';
-import { clsx, Dropdown } from '@univerjs/design';
+import { Dropdown } from '@univerjs/design';
 import { convertTransformToOffsetX, convertTransformToOffsetY, IRenderManagerService } from '@univerjs/engine-render';
 import { CheckMarkSingle, MoreDownSingle, PasteSpecial } from '@univerjs/icons';
 import { useDependency, useObservable } from '@univerjs/ui';
 import { useState } from 'react';
 import { SheetOptionalPasteCommand } from '../../commands/commands/clipboard.command';
 import { useActiveWorkbook } from '../../components/hook';
-// import { SheetClipboardController } from '../../controllers/clipboard/clipboard.controller';
 import { getSheetObject } from '../../controllers/utils/component-tools';
 import { ISheetClipboardService, PREDEFINED_HOOK_NAME } from '../../services/clipboard/clipboard.service';
 import { ISheetSelectionRenderService } from '../../services/selection/base-selection-render.service';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
-import styles from './index.module.less';
 
 const DEFAULT_PADDING = 2;
 
@@ -138,7 +136,11 @@ export const ClipboardPopupMenu = () => {
 
     return (
         <div
-            className={styles.sheetPasteOptionsWrapper}
+            className={`
+              univer-absolute univer-cursor-pointer univer-items-center univer-justify-center univer-rounded
+              univer-border univer-border-solid univer-border-gray-200 univer-p-1
+              dark:univer-border-gray-700
+            `}
             style={{
                 left: relativePosition.positionX + DEFAULT_PADDING,
                 top: relativePosition.positionY + DEFAULT_PADDING,
@@ -149,9 +151,11 @@ export const ClipboardPopupMenu = () => {
             <Dropdown
                 overlay={(
                     <div
-                        className={clsx(styles.sheetPasteOptionsMenu, `
-                          univer-border univer-border-solid univer-border-gray-200 univer-opacity-100
-                        `)}
+                        // TODO: a query here?
+                        className={`
+                          univer-border univer-border-solid univer-border-gray-200 univer-opacity-100 univer-shadow
+                          dark:univer-border-gray-700
+                        `}
                     >
                         <ul>
                             {SheetPasteOptions.map((item) => {
@@ -160,18 +164,24 @@ export const ClipboardPopupMenu = () => {
                                 return (
                                     <li
                                         key={item.value}
-                                        className={clsx(styles.sheetPasteOptionsMenuItem, 'hover:univer-bg-neutral-100')}
+                                        className={`
+                                          univer-rounded univer-border univer-border-solid univer-border-gray-200
+                                          univer-shadow
+                                          dark:univer-border-gray-700
+                                          hover:univer-bg-neutral-100
+                                        `}
                                         onClick={() => handleClick(item.value)}
                                     >
                                         <span>
                                             {selected && (
-                                                <CheckMarkSingle className={styles.sheetPasteOptionsMenuItemIcon} style={{ color: 'rgb(var(--green-700, #409f11))' }} />
+                                                <CheckMarkSingle className="univer-absolute" style={{ color: 'rgb(var(--green-700, #409f11))' }} />
                                             )}
                                         </span>
                                         <div
-                                            className={clsx(styles.sheetPasteOptionsMenuItemTitle, `
-                                              univer-text-gray-700
-                                            `)}
+                                            className={`
+                                              univer-ml-5 univer-text-sm univer-text-gray-700
+                                              dark:univer-text-white
+                                            `}
                                         >
                                             {localeService.t(item.label)}
                                         </div>
@@ -186,7 +196,11 @@ export const ClipboardPopupMenu = () => {
             >
 
                 <div
-                    className={styles.sheetPasteOptionsIconWrapper}
+                    className={`
+                      univer-flex univer-cursor-pointer univer-content-center univer-items-center univer-rounded
+                      univer-border univer-border-solid univer-border-gray-200 univer-py-1
+                      dark:univer-border-gray-700
+                    `}
                     onClick={() => {
                         setMenuVisible(!menuVisible);
                     }}

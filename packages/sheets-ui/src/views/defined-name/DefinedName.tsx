@@ -20,7 +20,6 @@ import { MoreDownSingle } from '@univerjs/icons';
 import { useDependency } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
 import { DefinedNameOverlay } from './DefinedNameOverlay';
-import styles from './index.module.less';
 
 export function DefinedName({ disable }: { disable: boolean }) {
     const [rangeString, setRangeString] = useState('');
@@ -56,7 +55,7 @@ export function DefinedName({ disable }: { disable: boolean }) {
                   dark:univer-border-r-gray-700 dark:univer-bg-gray-900 dark:univer-text-white
                   focus:univer-outline-none
                 `, {
-                    [styles.defineNameInputDisable]: disable,
+                    'univer-cursor-not-allowed': disable,
                 })}
                 type="text"
                 value={rangeString}

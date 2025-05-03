@@ -78,7 +78,11 @@ export const SheetBar = () => {
         <div className="univer-relative univer-flex univer-h-full univer-min-w-0 univer-flex-1">
             <div className="univer-flex univer-items-center univer-pl-2">
                 {/* Add sheet button */}
-                <SheetBarButton onClick={addSheet} disabled={!(workbookCreateSheetPermission?.value && workbookEditablePermission?.value)}>
+                <SheetBarButton
+                    className="univer-mr-2"
+                    onClick={addSheet}
+                    disabled={!(workbookCreateSheetPermission?.value && workbookEditablePermission?.value)}
+                >
                     <IncreaseSingle />
                 </SheetBarButton>
                 {/* All sheets button */}

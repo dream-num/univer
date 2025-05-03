@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import React from 'react';
+import { Button } from '@univerjs/design';
 
-import styles from './index.module.less';
+import React from 'react';
 
 export interface IBaseSheetBarButtonProps {
     children?: React.ReactNode;
@@ -53,16 +53,8 @@ export function SheetBarButton(props: IBaseSheetBarButtonProps) {
     };
 
     return (
-        <button
-            data-u-comp="sheet-bar-append-button"
-            className={styles.sheetBarBtn}
-            type="button"
-            style={style}
-            disabled={disabled}
-            onClick={handleClick}
-            {...restProps}
-        >
+        <Button data-u-comp="sheet-bar-append-button" size="small" disabled={disabled} onClick={handleClick} style={style} {...restProps} variant="text" className={className}>
             {children}
-        </button>
+        </Button>
     );
 }

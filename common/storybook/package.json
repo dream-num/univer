@@ -31,7 +31,7 @@
         "@univerjs/design": "workspace:*",
         "@univerjs/ui": "workspace:*",
         "css-loader": "^7.1.2",
-        "less-loader": "^12.2.0",
+        "less-loader": "^12.3.0",
         "postcss-loader": "^8.1.1",
         "storybook": "^8.6.12",
         "storybook-addon-swc": "^1.2.0",

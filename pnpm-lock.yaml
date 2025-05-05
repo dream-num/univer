@@ -241,8 +241,8 @@ importers:
         specifier: ^7.1.2
         version: 7.1.2(webpack@5.98.0(@swc/core@1.10.18)(esbuild@0.25.3))
       less-loader:
-        specifier: ^12.2.0
-        version: 12.2.0(less@4.3.0)(webpack@5.98.0(@swc/core@1.10.18)(esbuild@0.25.3))
+        specifier: ^12.3.0
+        version: 12.3.0(less@4.3.0)(webpack@5.98.0(@swc/core@1.10.18)(esbuild@0.25.3))
       postcss-loader:
         specifier: ^8.1.1
         version: 8.1.1(postcss@8.5.3)(typescript@5.8.3)(webpack@5.98.0(@swc/core@1.10.18)(esbuild@0.25.3))
@@ -8685,8 +8685,8 @@ packages:
     resolution: {integrity: sha512-7W0vV3rqv5tokqkBAFV1LbR7HPOWzXQDpDgEuib/aJ1jsZZx6x3c2mBI+TJhJzOhkGeaLbCKEHXEXLfirtG2JA==}
     engines: {node: '>=18'}
 
-  less-loader@12.2.0:
-    resolution: {integrity: sha512-MYUxjSQSBUQmowc0l5nPieOYwMzGPUaTzB6inNW/bdPEG9zOL3eAAD1Qw5ZxSPk7we5dMojHwNODYMV1hq4EVg==}
+  less-loader@12.3.0:
+    resolution: {integrity: sha512-0M6+uYulvYIWs52y0LqN4+QM9TqWAohYSNTo4htE8Z7Cn3G/qQMEmktfHmyJT23k+20kU9zHH2wrfFXkxNLtVw==}
     engines: {node: '>= 18.12.0'}
     peerDependencies:
       '@rspack/core': 0.x || 1.x
@@ -17198,7 +17198,7 @@ snapshots:
     dependencies:
       package-json: 10.0.1
 
-  less-loader@12.2.0(less@4.3.0)(webpack@5.98.0(@swc/core@1.10.18)(esbuild@0.25.3)):
+  less-loader@12.3.0(less@4.3.0)(webpack@5.98.0(@swc/core@1.10.18)(esbuild@0.25.3)):
     dependencies:
       less: 4.3.0
     optionalDependencies:

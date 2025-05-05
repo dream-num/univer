@@ -30,12 +30,20 @@ export const SheetsNote = (props: { popup: IPopup<{ location: ISheetLocationBase
     const noteModel = useDependency(SheetsNoteModel);
     const localeService = useDependency(LocaleService);
     const config = useConfigValue<IUniverSheetsNoteUIPluginConfig>(SHEETS_NOTE_UI_PLUGIN_CONFIG_KEY);
-    const [note, setNote] = useState<ISheetNote>({ width: config?.defaultNoteSize?.width || 216, height: config?.defaultNoteSize?.height || 92, note: '' });
     const activePopup = props.popup.extraProps?.location;
+    if (!activePopup) {
+        console.error('Popup extraProps or location is undefined.');
+        return null; // Or handle this case appropriately
+    }
+    const [note, setNote] = useState<ISheetNote>(() => {
+        const defaultNote = { width: config?.defaultNoteSize?.width || 216, height: config?.defaultNoteSize?.height || 92, note: '' };
+        const existingNote = noteModel.getNote(activePopup.unitId, activePopup.subUnitId!, activePopup.row, activePopup.col);
+        return existingNote || defaultNote;
+    });
+
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const commandService = useDependency(ICommandService);
     const cellNoteChange$ = useMemo(() => activePopup ? noteModel.getCellNoteChange$(activePopup.unitId, activePopup.subUnitId!, activePopup.row, activePopup.col) : of(null), [activePopup]);
-
     const updateNote = useDebounceFn((newNote: ISheetNote) => {
         if (!activePopup) return;
 
@@ -60,9 +68,7 @@ export const SheetsNote = (props: { popup: IPopup<{ location: ISheetLocationBase
     useEffect(() => {
         if (activePopup) {
             const existingNote = noteModel.getNote(activePopup.unitId, activePopup.subUnitId!, activePopup.row, activePopup.col);
-            if (existingNote) {
-                setNote(existingNote);
-            } else {
+            if (!existingNote) {
                 textareaRef.current?.focus();
             }
         }
@@ -108,15 +114,14 @@ export const SheetsNote = (props: { popup: IPopup<{ location: ISheetLocationBase
         updateNote(newNote);
     };
 
-    if (!activePopup) return null;
-
     return (
         <textarea
             ref={textareaRef}
             data-u-comp="note-textarea"
             className={clsx(`
-              univer-resize-both univer-ml-[1px] univer-rounded univer-border univer-border-solid univer-border-gray-200
-              univer-p-2 univer-shadow
+              univer-resize-both univer-ml-px univer-rounded univer-border univer-border-solid univer-border-gray-200
+              univer-bg-white univer-p-2 univer-text-gray-900 univer-shadow
+              dark:univer-bg-gray-800 dark:univer-text-white
               focus:univer-outline-none
             `, scrollbarClassName)}
             style={{ width: note.width, height: note.height }}

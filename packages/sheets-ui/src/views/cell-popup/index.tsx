@@ -26,16 +26,19 @@ export const CellPopup = (props: { popup: IPopup<ISheetLocationBase & { directio
     const location = popup.extraProps!;
     const { row, col, direction, unitId, subUnitId } = location;
     const cellPopupManagerService = useDependency(CellPopupManagerService);
-    useObservable(useMemo(() => cellPopupManagerService.change$.pipe(filter((change) => change.row === row && change.col === col && change.direction === direction)), [cellPopupManagerService, row, col, direction]));
+    useObservable(
+        useMemo(() => cellPopupManagerService.change$.pipe(
+            filter((change) => change.row === row && change.col === col && change.direction === direction)
+        ), [cellPopupManagerService, row, col, direction])
+    );
     const popups = cellPopupManagerService.getPopups(unitId, subUnitId, row, col, direction);
     const componentManager = useDependency(ComponentManager);
 
     return (
-        <div className="univer-cell-popup univer-flex univer-flex-col univer-ml-[1px]">
-            {popups.map((item) => {
-                const popup = item;
+        <div data-u-comp="cell-popup" className="univer-ml-px univer-flex univer-flex-col">
+            {popups.map((popup) => {
                 const Component = componentManager.get(popup.componentKey);
-                return Component ? <Component popup={popup} /> : null;
+                return Component ? <Component key={popup.id ?? popup.componentKey} popup={popup} /> : null;
             })}
         </div>
     );

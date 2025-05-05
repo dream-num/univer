@@ -25,6 +25,7 @@
     },
     "dependencies": {
         "@typescript-eslint/parser": "^8.31.1",
+        "@univerjs/themes": "workspace:*",
         "@vitejs/plugin-react": "^4.4.1",
         "@vitejs/plugin-vue": "^5.2.3",
         "@vitest/coverage-istanbul": "^3.1.2",

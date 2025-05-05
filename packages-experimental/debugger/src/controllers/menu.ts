@@ -17,9 +17,8 @@
 import type { IAccessor } from '@univerjs/core';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import { LocaleType } from '@univerjs/core';
-import { defaultTheme, greenTheme } from '@univerjs/design';
+// import { defaultTheme } from '@univerjs/themes';
 import { MenuItemType } from '@univerjs/ui';
-
 import { CreateFloatDomCommand } from '../commands/commands/float-dom.command';
 import { CreateEmptySheetCommand, DisposeCurrentUnitCommand, DisposeUniverCommand, LoadSheetSnapshotCommand } from '../commands/commands/unit.command';
 import { ShowCellContentOperation } from '../commands/operations/cell.operation';
@@ -98,14 +97,14 @@ export function ThemeMenuItemFactory(): IMenuSelectorItem {
         tooltip: 'Theme',
         type: MenuItemType.SELECTOR,
         selections: [
-            {
-                label: 'green',
-                value: greenTheme as any,
-            },
-            {
-                label: 'default',
-                value: defaultTheme as any,
-            },
+            // {
+            //     label: 'green',
+            //     value: greenTheme as any,
+            // },
+            // {
+            //     label: 'default',
+            //     value: defaultTheme as any,
+            // },
         ],
     };
 }

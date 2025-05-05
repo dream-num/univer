@@ -17,7 +17,6 @@
 import { Injector, LocaleType, LogLevel, Univer, UniverInstanceType } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
 import { UniverDebuggerPlugin } from '@univerjs/debugger';
-import { defaultTheme } from '@univerjs/design';
 import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverDocsDrawingUIPlugin } from '@univerjs/docs-drawing-ui';
 import { DocUIController, UniverDocsUIPlugin } from '@univerjs/docs-ui';
@@ -53,7 +52,6 @@ const LOAD_LAZY_PLUGINS_TIMEOUT = 4_000;
 
 // univer
 const univer = new Univer({
-    theme: defaultTheme,
     locale: LocaleType.EN_US,
     locales: {
         [LocaleType.EN_US]: enUS,

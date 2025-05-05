@@ -128,6 +128,9 @@ importers:
       '@typescript-eslint/parser':
         specifier: ^8.31.1
         version: 8.31.1(eslint@9.25.1(jiti@2.4.2))(typescript@5.8.3)
+      '@univerjs/themes':
+        specifier: workspace:*
+        version: link:../../packages/themes
       '@vitejs/plugin-react':
         specifier: ^4.4.1
         version: 4.4.1(vite@6.3.4(@types/node@22.15.3)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1))
@@ -990,6 +993,9 @@ importers:
       '@univerjs/sheets-ui':
         specifier: workspace:*
         version: link:../../packages/sheets-ui
+      '@univerjs/themes':
+        specifier: workspace:*
+        version: link:../../packages/themes
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -1030,6 +1036,9 @@ importers:
       '@univerjs/protocol':
         specifier: 0.1.45
         version: 0.1.45(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+      '@univerjs/themes':
+        specifier: workspace:*
+        version: link:../themes
       '@wendellhu/redi':
         specifier: 0.18.0
         version: 0.18.0
@@ -3281,6 +3290,12 @@ importers:
         specifier: ^3.1.2
         version: 3.1.2(@types/debug@4.1.12)(@types/node@22.15.3)(happy-dom@17.4.4)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
 
+  packages/themes:
+    devDependencies:
+      vite:
+        specifier: ^6.3.4
+        version: 6.3.4(@types/node@22.15.3)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+
   packages/thread-comment:
     dependencies:
       '@univerjs/core':
@@ -3369,6 +3384,9 @@ importers:
       '@univerjs/icons':
         specifier: ^0.3.24
         version: 0.3.24(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      '@univerjs/themes':
+        specifier: workspace:*
+        version: link:../themes
       '@wendellhu/redi':
         specifier: 0.18.0
         version: 0.18.0

@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export { themeInstance } from './theme';
+export { default as defaultTheme } from './default';

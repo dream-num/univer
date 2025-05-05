@@ -17,7 +17,8 @@
 import type { ILocale } from '@univerjs/design';
 import type { IWorkbenchOptions } from '../../controllers/ui/ui.controller';
 import { LocaleService, ThemeService } from '@univerjs/core';
-import { clsx, ConfigProvider, defaultTheme, themeInstance } from '@univerjs/design';
+import { clsx, ConfigProvider, themeInstance } from '@univerjs/design';
+import { defaultTheme } from '@univerjs/themes';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { BuiltInUIPart } from '../../services/parts/parts.service';
 import { useDependency } from '../../utils/di';

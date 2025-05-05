@@ -74,6 +74,7 @@
     },
     "dependencies": {
         "@univerjs/protocol": "0.1.45",
+        "@univerjs/themes": "workspace:*",
         "@wendellhu/redi": "0.18.0",
         "async-lock": "^1.4.1",
         "dayjs": "^1.11.13",

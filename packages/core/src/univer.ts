@@ -56,7 +56,7 @@ import { Workbook } from './sheets/workbook';
 import { SlideDataModel } from './slides/slide-model';
 
 export interface IUniverConfig {
-    theme: IStyleSheet;
+    theme?: IStyleSheet;
     locale: LocaleType;
     locales: ILocales;
     logLevel: LogLevel;

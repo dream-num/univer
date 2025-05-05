@@ -32,21 +32,6 @@ pnpm add @univerjs/design
 
 This package contains CSS and has the highest priority. Please import it before importing any other Univer style files.
 
-### Built-in themes
-
-The package provides two built-in themes: `defaultTheme` and `greenTheme`. You can import them directly and use them in your application.
-
-```typescript
-import { defaultTheme } from '@univerjs/design';
-// import { greenTheme } from '@univerjs/design';
-
-// Use the default theme
-new Univer({
-    theme: defaultTheme,
-    // theme: greenTheme,
-});
-```
-
 <!-- Links -->
 [npm-version-shield]: https://img.shields.io/npm/v/@univerjs/design?style=flat-square
 [npm-version-link]: https://npmjs.com/package/@univerjs/design

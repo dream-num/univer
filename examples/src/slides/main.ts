@@ -15,7 +15,6 @@
  */
 
 import { LocaleType, Univer, UniverInstanceType } from '@univerjs/core';
-import { greenTheme } from '@univerjs/design';
 import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { UniverDrawingPlugin } from '@univerjs/drawing';
@@ -32,7 +31,6 @@ import '../global.css';
 
 // univer
 const univer = new Univer({
-    theme: greenTheme,
     locale: LocaleType.ZH_CN,
     locales: {
         [LocaleType.ZH_CN]: zhCN,

@@ -1,8 +1,8 @@
 {
-    "name": "@univerjs/uniui",
-    "version": "0.6.6",
-    "private": true,
-    "description": "",
+    "name": "@univerjs/themes",
+    "version": "0.7.0-beta.0",
+    "private": false,
+    "description": "Themes package for Univer",
     "author": "DreamNum <developer@univer.ai>",
     "license": "Apache-2.0",
     "funding": {
@@ -17,7 +17,10 @@
     "bugs": {
         "url": "https://github.com/dream-num/univer/issues"
     },
-    "keywords": [],
+    "keywords": [
+        "univer",
+        "theme"
+    ],
     "exports": {
         ".": "./src/index.ts",
         "./*": "./src/*"
@@ -49,38 +52,10 @@
         "lib"
     ],
     "scripts": {
-        "test": "vitest run",
-        "test:watch": "vitest",
-        "coverage": "vitest run --coverage",
         "lint:types": "tsc --noEmit",
         "build": "univer-cli build"
     },
-    "peerDependencies": {
-        "react": "^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc",
-        "react-dom": "^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc",
-        "rxjs": ">=7.0.0"
-    },
-    "dependencies": {
-        "@floating-ui/react-dom": "^2.1.2",
-        "@univerjs/core": "workspace:*",
-        "@univerjs/design": "workspace:*",
-        "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons": "^0.3.24",
-        "@univerjs/sheets": "workspace:*",
-        "@univerjs/sheets-ui": "workspace:*",
-        "@univerjs/themes": "workspace:*",
-        "@univerjs/ui": "workspace:*",
-        "@xyflow/react": "^12.5.5"
-    },
     "devDependencies": {
-        "@univerjs-infra/shared": "workspace:*",
-        "postcss": "^8.5.3",
-        "react": "18.3.1",
-        "react-dom": "18.3.1",
-        "rxjs": "^7.8.1",
-        "tailwindcss": "^3.4.17",
-        "typescript": "^5.8.3",
-        "vite": "^6.3.4",
-        "vitest": "^3.1.2"
+        "vite": "^6.3.4"
     }
 }

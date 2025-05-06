@@ -19,7 +19,7 @@ import type { Editor } from '@univerjs/docs-ui';
 import type { ISequenceNode } from '@univerjs/engine-formula';
 import type { ISelectionWithStyle, SheetsSelectionsService } from '@univerjs/sheets';
 import type { INode } from './use-formula-token';
-import { get, getBodySlice, ICommandService, IUniverInstanceService, ThemeService, UniverInstanceType } from '@univerjs/core';
+import { getBodySlice, ICommandService, IUniverInstanceService, ThemeService, UniverInstanceType } from '@univerjs/core';
 import { ReplaceTextRunsCommand } from '@univerjs/docs-ui';
 import { deserializeRangeWithSheet, sequenceNodeType } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -253,22 +253,22 @@ export function useColor(): IColorMap {
     const theme = themeService.getCurrentTheme();
     const result = useMemo(() => {
         const formulaRefColors = [
-            get(theme, 'loop-color.1'),
-            get(theme, 'loop-color.2'),
-            get(theme, 'loop-color.3'),
-            get(theme, 'loop-color.4'),
-            get(theme, 'loop-color.5'),
-            get(theme, 'loop-color.6'),
-            get(theme, 'loop-color.7'),
-            get(theme, 'loop-color.8'),
-            get(theme, 'loop-color.9'),
-            get(theme, 'loop-color.10'),
-            get(theme, 'loop-color.11'),
-            get(theme, 'loop-color.12'),
+            themeService.getColorFromTheme('loop-color.1'),
+            themeService.getColorFromTheme('loop-color.2'),
+            themeService.getColorFromTheme('loop-color.3'),
+            themeService.getColorFromTheme('loop-color.4'),
+            themeService.getColorFromTheme('loop-color.5'),
+            themeService.getColorFromTheme('loop-color.6'),
+            themeService.getColorFromTheme('loop-color.7'),
+            themeService.getColorFromTheme('loop-color.8'),
+            themeService.getColorFromTheme('loop-color.9'),
+            themeService.getColorFromTheme('loop-color.10'),
+            themeService.getColorFromTheme('loop-color.11'),
+            themeService.getColorFromTheme('loop-color.12'),
         ];
-        const numberColor = get(theme, 'blue.700');
-        const stringColor = get(theme, 'jiqing.800');
-        const plainTextColor = get(theme, 'black');
+        const numberColor = themeService.getColorFromTheme('blue.700');
+        const stringColor = themeService.getColorFromTheme('jiqing.800');
+        const plainTextColor = themeService.getColorFromTheme('black');
         return { formulaRefColors, numberColor, stringColor, plainTextColor };
     }, [theme]);
 

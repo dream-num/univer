@@ -16,8 +16,7 @@
 
 import type { IMouseEvent, IPointerEvent, IShapeProps, UniverRenderingContext2D } from '@univerjs/engine-render';
 import type { IOpenFilterPanelOperationParams } from '../../commands/operations/sheets-filter.operation';
-import { get, ICommandService, IContextService, Inject, ThemeService } from '@univerjs/core';
-
+import { ICommandService, IContextService, Inject, ThemeService } from '@univerjs/core';
 import { Shape } from '@univerjs/engine-render';
 import { FILTER_PANEL_OPENED_KEY, OpenFilterPanelOperation } from '../../commands/operations/sheets-filter.operation';
 import { FilterButton } from './drawings';
@@ -92,10 +91,10 @@ export class SheetsFilterButtonShape extends Shape<ISheetsFilterButtonShapeProps
         ctx.clip(cellRegion);
 
         const { hasCriteria } = this._filterParams!;
-        const theme = this._themeService.getCurrentTheme();
-        const fgColor = get(theme, 'primary.600');
+
+        const fgColor = this._themeService.getColorFromTheme('primary.600');
         const bgColor = this._hovered
-            ? get(theme, 'gray.50')
+            ? this._themeService.getColorFromTheme('gray.50')
             : 'rgba(255, 255, 255, 1.0)';
 
         if (hasCriteria) {

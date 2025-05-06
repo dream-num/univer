@@ -15,8 +15,18 @@
  */
 
 import type { ICommand } from '@univerjs/core';
-import { CommandType, EDITOR_ACTIVATED, get, ICommandService, IContextService, ThemeService } from '@univerjs/core';
-import { SetInlineFormatBoldCommand, SetInlineFormatFontFamilyCommand, SetInlineFormatFontSizeCommand, SetInlineFormatItalicCommand, SetInlineFormatStrikethroughCommand, SetInlineFormatSubscriptCommand, SetInlineFormatSuperscriptCommand, SetInlineFormatTextColorCommand, SetInlineFormatUnderlineCommand } from '@univerjs/docs-ui';
+import { CommandType, EDITOR_ACTIVATED, ICommandService, IContextService, ThemeService } from '@univerjs/core';
+import {
+    SetInlineFormatBoldCommand,
+    SetInlineFormatFontFamilyCommand,
+    SetInlineFormatFontSizeCommand,
+    SetInlineFormatItalicCommand,
+    SetInlineFormatStrikethroughCommand,
+    SetInlineFormatSubscriptCommand,
+    SetInlineFormatSuperscriptCommand,
+    SetInlineFormatTextColorCommand,
+    SetInlineFormatUnderlineCommand,
+} from '@univerjs/docs-ui';
 import {
     SetBoldCommand,
     SetFontFamilyCommand,
@@ -190,9 +200,8 @@ export const ResetRangeTextColorCommand: ICommand = {
             return commandService.executeCommand(SetInlineFormatTextColorCommand.id, { value: null });
         }
 
-        const theme = themeService.getCurrentTheme();
         return commandService.executeCommand(SetTextColorCommand.id, {
-            value: get(theme, 'gray.900'),
+            value: themeService.getColorFromTheme('gray.900'),
         });
     },
 };

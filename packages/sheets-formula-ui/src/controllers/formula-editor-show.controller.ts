@@ -20,7 +20,6 @@ import type { ISelectionWithStyle, ISetWorksheetRowAutoHeightMutationParams } fr
 import {
     ColorKit,
     Disposable,
-    get,
     ICommandService,
     ILogService,
     Inject,
@@ -222,14 +221,13 @@ export class FormulaEditorShowController extends Disposable implements IRenderMo
         const { scene } = renderUnit;
         if (!scene) return;
 
-        const theme = this._themeService.getCurrentTheme();
         const selectionWithStyle: ISelectionWithStyle = {
             range: arrayRange,
             primary: null,
             style: {
                 strokeWidth: 1,
-                stroke: get(theme, 'primary.600'),
-                fill: new ColorKit(get(theme, 'white')).setAlpha(0).toString(),
+                stroke: this._themeService.getColorFromTheme('primary.600'),
+                fill: new ColorKit(this._themeService.getColorFromTheme('white')).setAlpha(0).toString(),
                 widgets: {},
             },
         };

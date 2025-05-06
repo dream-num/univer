@@ -16,21 +16,20 @@
 
 import type { ThemeService } from '@univerjs/core';
 import type { ISelectionStyle } from '@univerjs/sheets';
-import { ColorKit, get } from '@univerjs/core';
+import { ColorKit } from '@univerjs/core';
 
 export const FORMULA_REF_SELECTION_PLUGIN_NAME = 'formula_reference_selection_plugin_name';
 
 export function genFormulaRefSelectionStyle(themeService: ThemeService, refColor: string, id: string): ISelectionStyle {
-    const theme = themeService.getCurrentTheme();
     const fill = new ColorKit(refColor).setAlpha(0.05).toRgbString();
     return {
         id,
         strokeWidth: 1,
-        stroke: get(theme, refColor),
+        stroke: themeService.getColorFromTheme(refColor),
         fill,
         widgets: { tl: true, tc: true, tr: true, ml: true, mr: true, bl: true, bc: true, br: true },
         widgetSize: 6,
         widgetStrokeWidth: 1,
-        widgetStroke: get(theme, 'white'),
+        widgetStroke: themeService.getColorFromTheme('white'),
     };
 }

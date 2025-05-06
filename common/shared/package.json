@@ -32,7 +32,7 @@
         "autoprefixer": "^10.4.21",
         "eslint-plugin-readable-tailwind": "^1.9.1",
         "fs-extra": "^11.3.0",
-        "happy-dom": "17.4.4",
+        "happy-dom": "17.4.6",
         "javascript-obfuscator": "^4.1.1",
         "postcss-preset-env": "^10.1.6",
         "sort-keys": "^5.1.0",

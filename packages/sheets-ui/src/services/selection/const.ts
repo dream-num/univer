@@ -17,7 +17,7 @@
 import type { ThemeService } from '@univerjs/core';
 import type { Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { ISelectionStyle } from '@univerjs/sheets';
-import { ColorKit, createInterceptorKey, get } from '@univerjs/core';
+import { ColorKit, createInterceptorKey } from '@univerjs/core';
 
 export const RANGE_MOVE_PERMISSION_CHECK = createInterceptorKey<boolean, null>('rangeMovePermissionCheck');
 export const RANGE_FILL_PERMISSION_CHECK = createInterceptorKey<boolean, { x: number; y: number; skeleton: SpreadsheetSkeleton; scene: Scene }>('rangeFillPermissionCheck');
@@ -28,9 +28,8 @@ export enum SELECTION_SHAPE_DEPTH {
 };
 
 export function genNormalSelectionStyle(themeService: ThemeService): ISelectionStyle {
-    const theme = themeService.getCurrentTheme();
-    const primaryColor = get(theme, 'primary.600');
-    const whiteColor = get(theme, 'white');
+    const primaryColor = themeService.getColorFromTheme('primary.600');
+    const whiteColor = themeService.getColorFromTheme('white');
     const fill = new ColorKit(primaryColor).setAlpha(0.07).toRgbString();
     return {
         strokeWidth: 1,

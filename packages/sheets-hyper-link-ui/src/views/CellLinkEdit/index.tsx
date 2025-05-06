@@ -16,7 +16,24 @@
 
 import type { DocumentDataModel, Nullable, Workbook } from '@univerjs/core';
 import type { ISelectionWithStyle, ISetSelectionsOperationParams } from '@univerjs/sheets';
-import { BuildTextUtils, ColorKit, CustomRangeType, DataStreamTreeTokenType, DisposableCollection, DOCS_ZEN_EDITOR_UNIT_ID_KEY, FOCUSING_SHEET, generateRandomId, get, ICommandService, IContextService, isValidRange, IUniverInstanceService, LocaleService, ThemeService, Tools, UniverInstanceType } from '@univerjs/core';
+import {
+    BuildTextUtils,
+    ColorKit,
+    CustomRangeType,
+    DataStreamTreeTokenType,
+    DisposableCollection,
+    DOCS_ZEN_EDITOR_UNIT_ID_KEY,
+    FOCUSING_SHEET,
+    generateRandomId,
+    ICommandService,
+    IContextService,
+    isValidRange,
+    IUniverInstanceService,
+    LocaleService,
+    ThemeService,
+    Tools,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { Button, FormLayout, Input, Select } from '@univerjs/design';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { DocBackScrollRenderController, DocSelectionRenderService } from '@univerjs/docs-ui';
@@ -27,7 +44,7 @@ import { RangeSelector } from '@univerjs/sheets-formula-ui';
 import { AddHyperLinkCommand, AddRichHyperLinkCommand, SheetHyperLinkType, SheetsHyperLinkParserService, UpdateHyperLinkCommand, UpdateRichHyperLinkCommand } from '@univerjs/sheets-hyper-link';
 import { IEditorBridgeService, IMarkSelectionService, ScrollToRangeOperation } from '@univerjs/sheets-ui';
 import { IZenZoneService, KeyCode, useDependency, useEvent, useObservable } from '@univerjs/ui';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CloseHyperLinkPopupOperation } from '../../commands/operations/popup.operations';
 import { isLegalLink, serializeUrl } from '../../common/util';
 import { SheetsHyperLinkPopupService } from '../../services/popup.service';
@@ -198,8 +215,7 @@ export const CellLinkEdit = () => {
             const workbook = univerInstanceService.getUnit<Workbook>(editing.unitId, UniverInstanceType.UNIVER_SHEET);
             const worksheet = workbook?.getSheetBySheetId(editing.subUnitId);
             const mergeInfo = worksheet?.getMergedCell(editing.row, editing.col);
-            const theme = themeService.getCurrentTheme();
-            const color = new ColorKit(get(theme, 'primary.600')).toRgb();
+            const color = new ColorKit(themeService.getColorFromTheme('primary.600')).toRgb();
             id = markSelectionService.addShape(
                 {
                     range: mergeInfo ?? {

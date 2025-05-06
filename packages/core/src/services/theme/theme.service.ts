@@ -16,6 +16,7 @@
 
 import type { Observable } from 'rxjs';
 import { defaultTheme } from '@univerjs/themes';
+import { get } from 'lodash-es';
 import { BehaviorSubject } from 'rxjs';
 import { Disposable, toDisposable } from '../../shared/lifecycle';
 
@@ -50,5 +51,9 @@ export class ThemeService extends Disposable {
 
     setDarkMode(darkMode: boolean): void {
         this._darkMode$.next(darkMode);
+    }
+
+    getColorFromTheme(color: string): string {
+        return get(this._currentTheme, color);
     }
 }

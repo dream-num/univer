@@ -26,7 +26,6 @@ import {
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     EDITOR_ACTIVATED,
     FOCUSING_EDITOR_STANDALONE,
-    get,
     IContextService,
     Inject,
     IUniverInstanceService,
@@ -390,15 +389,13 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
         if (cell?.isInArrayFormulaRange === true) {
             const body = documentLayoutObject.documentModel?.getBody();
             if (body) {
-                const theme = this._themeService.getCurrentTheme();
-
                 body.textRuns = [
                     {
                         st: 0,
                         ed: body.dataStream.length - 2,
                         ts: {
                             cl: {
-                                rgb: get(theme, 'gray.600'),
+                                rgb: this._themeService.getColorFromTheme('gray.600'),
                             },
                         },
                     },

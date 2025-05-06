@@ -16,16 +16,13 @@
 
 import type { ThemeService } from '@univerjs/core';
 import type { ISelectionStyle } from '@univerjs/sheets';
-import { get } from '@univerjs/core';
 
 export function createCopyPasteSelectionStyle(
     themeService: ThemeService
 ): Partial<ISelectionStyle> {
-    const theme = themeService.getCurrentTheme();
-
     return {
         strokeWidth: 1.5,
-        stroke: get(theme, 'primary.600'),
+        stroke: themeService.getColorFromTheme('primary.600'),
         fill: 'rgba(178, 178, 178, 0.10)',
         widgets: {},
         strokeDash: 8,

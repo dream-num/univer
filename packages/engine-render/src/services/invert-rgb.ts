@@ -17,14 +17,14 @@
 import type { RGBColor } from './utils';
 import { denormalizeRGBColor, normalizeRGBColor } from './utils';
 
-function invertNormalizedColorByMatrix(color: RGBColor): RGBColor {
-    const matrix = [
-        [0.333, -0.667, -0.667, 0, 1],
-        [-0.667, 0.333, -0.667, 0, 1],
-        [-0.667, -0.667, 0.333, 0, 1],
-        [0, 0, 0, 1, 0],
-    ];
+const matrix = [
+    [0.333, -0.667, -0.667, 0, 1],
+    [-0.667, 0.333, -0.667, 0, 1],
+    [-0.667, -0.667, 0.333, 0, 1],
+    [0, 0, 0, 1, 0],
+];
 
+function invertNormalizedColorByMatrix(color: RGBColor): RGBColor {
     const r = color[0];
     const g = color[1];
     const b = color[2];

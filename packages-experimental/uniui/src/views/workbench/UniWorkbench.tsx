@@ -214,7 +214,7 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
 
                                     onNodesChange(nodes);
                                 }}
-                                onResize={resizeUnits}
+                                onReset={resizeUnits}
                                 fitView
                                 defaultViewport={{ zoom: MIN_ZOOM, x: 0, y: 0 }}
                                 onPointerDown={(event) => {

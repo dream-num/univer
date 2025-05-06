@@ -328,14 +328,15 @@ export function FormulaBar(props: IProps) {
                     >
                         {FormulaEditor && (
                             <FormulaEditor
+                                className={`
+                                  univer-relative univer-h-full univer-w-full univer-break-words univer-outline-none
+                                  [&>div]:univer-ring-transparent
+                                `}
                                 disableSelectionOnClick
                                 editorId={DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY}
                                 initValue=""
                                 onChange={() => { }}
                                 isFocus={isFocusFxBar}
-                                className={`
-                                  univer-relative univer-h-full univer-w-full univer-break-words univer-outline-none
-                                `}
                                 unitId={editState?.unitId}
                                 subUnitId={editState?.sheetId}
                                 isSupportAcrossSheet

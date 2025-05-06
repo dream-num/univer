@@ -313,7 +313,7 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
     };
 
     return (
-        <div style={style} className={className}>
+        <div className={className}>
             <div
                 className={clsx(
                     `
@@ -328,8 +328,8 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
                 ref={sheetEmbeddingRef}
             >
                 <div
-                    className="univer-relative univer-h-full univer-w-full"
                     ref={formulaEditorContainerRef}
+                    className="univer-relative univer-h-full univer-w-full"
                     onMouseUp={handleMouseUp}
                 />
             </div>

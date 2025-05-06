@@ -138,8 +138,8 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
     return (
         <div
             className={`
-              univer-absolute univer-z-10 univer-top-[200px] univer-left-[100px] univer-flex univer-w-[100px]
-              univer-h-[50px] univer-border univer-border-solid univer-border-gray-100
+              univer-absolute univer-left-[100px] univer-top-[200px] univer-z-10 univer-flex univer-h-[50px]
+              univer-w-[100px] univer-border univer-border-solid univer-border-gray-100
               dark:univer-bg-gray-700
             `}
             style={{
@@ -153,8 +153,8 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
                 <FormulaEditor
                     editorId={DOCS_NORMAL_EDITOR_UNIT_ID_KEY}
                     className={`
-                      univer-relative univer-flex univer-w-full univer-h-full
-                      [&_*canvas]:univer-absolute
+                      univer-relative univer-flex univer-h-full univer-w-full
+                      [&_canvas]:univer-absolute
                     `}
                     initValue=""
                     onChange={() => {}}

@@ -15,7 +15,7 @@
  */
 
 import type { BooleanNumber } from '@univerjs/core';
-import { ColorKit, get, ThemeService } from '@univerjs/core';
+import { ColorKit, ThemeService } from '@univerjs/core';
 import { clsx } from '@univerjs/design';
 import { useDependency } from '@univerjs/ui';
 import React, { useEffect, useState } from 'react';
@@ -44,9 +44,8 @@ export function SheetBarItem(props: IBaseSheetBarProps) {
     }, [selected]);
 
     const getTextColor = (color: string) => {
-        const theme = themeService.getCurrentTheme();
-        const darkTextColor = get(theme, 'gray.900');
-        const lightTextColor = get(theme, 'white');
+        const darkTextColor = themeService.getColorFromTheme('gray.900');
+        const lightTextColor = themeService.getColorFromTheme('white');
         return new ColorKit(color).isDark() ? lightTextColor : darkTextColor;
     };
 

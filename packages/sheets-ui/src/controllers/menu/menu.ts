@@ -25,7 +25,6 @@ import {
     FOCUSING_SHEET,
     FontItalic,
     FontWeight,
-    get,
     HorizontalAlign,
     ICommandService,
     IContextService,
@@ -36,7 +35,6 @@ import {
     VerticalAlign,
     WrapStrategy,
 } from '@univerjs/core';
-
 import { DocSelectionManagerService, SetTextSelectionsOperation } from '@univerjs/docs';
 import { SetInlineFormatCommand } from '@univerjs/docs-ui';
 import {
@@ -81,7 +79,6 @@ import {
     IClipboardInterfaceService,
     MenuItemType,
 } from '@univerjs/ui';
-
 import { combineLatestWith, map, Observable } from 'rxjs';
 import {
     SheetCopyCommand,
@@ -103,15 +100,8 @@ import {
     SetRangeTextColorCommand,
     SetRangeUnderlineCommand,
 } from '../../commands/commands/inline-format.command';
-import {
-    SetInfiniteFormatPainterCommand,
-    SetOnceFormatPainterCommand,
-} from '../../commands/commands/set-format-painter.command';
-import {
-    SetColumnFrozenCommand,
-    SetRowFrozenCommand,
-    SetSelectionFrozenCommand,
-} from '../../commands/commands/set-frozen.command';
+import { SetInfiniteFormatPainterCommand, SetOnceFormatPainterCommand } from '../../commands/commands/set-format-painter.command';
+import { SetColumnFrozenCommand, SetRowFrozenCommand, SetSelectionFrozenCommand } from '../../commands/commands/set-frozen.command';
 import { SetWorksheetColAutoWidthCommand } from '../../commands/commands/set-worksheet-auto-col-width.command';
 import { COLOR_PICKER_COMPONENT } from '../../components/color-picker';
 import { FONT_FAMILY_COMPONENT, FONT_FAMILY_ITEM_COMPONENT } from '../../components/font-family';
@@ -541,8 +531,7 @@ export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSele
             },
         ],
         value$: new Observable<string>((subscriber) => {
-            const theme = themeService.getCurrentTheme();
-            const defaultValue = get(theme, 'gray.900');
+            const defaultValue = themeService.getColorFromTheme('gray.900');
             const disposable = commandService.onCommandExecuted((c) => {
                 if (c.id === SetRangeTextColorCommand.id) {
                     const color = (c.params as { value: string }).value;
@@ -587,8 +576,7 @@ export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMe
             },
         ],
         value$: new Observable<string>((subscriber) => {
-            const theme = themeService.getCurrentTheme();
-            const defaultValue = get(theme, 'primary.600');
+            const defaultValue = themeService.getColorFromTheme('primary.600');
             const disposable = commandService.onCommandExecuted((c) => {
                 if (c.id === SetBackgroundColorCommand.id) {
                     const color = (c.params as { value: string }).value;

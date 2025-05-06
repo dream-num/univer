@@ -16,8 +16,7 @@
 
 import type { IMouseEvent, IPointerEvent, IShapeProps, UniverRenderingContext2D } from '@univerjs/engine-render';
 import type { IOpenTableFilterPanelOperationParams } from '../../commands/operations/open-table-filter-dialog.opration';
-
-import { get, ICommandService, IContextService, Inject, ThemeService } from '@univerjs/core';
+import { ICommandService, IContextService, Inject, ThemeService } from '@univerjs/core';
 import { Shape } from '@univerjs/engine-render';
 import { SheetsTableButtonStateEnum } from '@univerjs/sheets-table';
 import { OpenTableFilterPanelOperation } from '../../commands/operations/open-table-filter-dialog.opration';
@@ -95,10 +94,10 @@ export class SheetsTableFilterButtonShape extends Shape<ISheetsTableFilterButton
         ctx.clip(cellRegion);
 
         const { buttonState } = this._filterParams!;
-        const theme = this._themeService.getCurrentTheme();
-        const fgColor = get(theme, 'primary.600');
+
+        const fgColor = this._themeService.getColorFromTheme('primary.600');
         const bgColor = this._hovered
-            ? get(theme, 'gray.50')
+            ? this._themeService.getColorFromTheme('gray.50')
             : 'rgba(255, 255, 255, 1.0)';
 
         let icons;

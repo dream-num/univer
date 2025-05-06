@@ -56,6 +56,6 @@
         "build": "univer-cli build"
     },
     "devDependencies": {
-        "vite": "^6.3.4"
+        "vite": "^6.3.5"
     }
 }

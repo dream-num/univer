@@ -56,3 +56,6 @@ export { DateRangePicker } from './components/date-range-picker';
 export { type IKBDProps, KBD } from './components/kbd';
 export { type IToasterProps, toast, Toaster } from './components/toaster/Toaster';
 export { scrollbarClassName } from './helper/scrollbar-cls';
+
+/** @deprecated Only for compatibility with versions before 0.7.0, will be removed in future versions */
+export { defaultTheme, greenTheme } from '@univerjs/themes';

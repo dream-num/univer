@@ -83,27 +83,6 @@ const config: StorybookConfig = {
                             },
                         ],
                     },
-                    {
-                        test: /\.less$/i,
-                        sideEffects: true,
-                        use: [
-                            'style-loader',
-                            {
-                                loader: 'css-loader',
-                                options: {
-                                    modules: {
-                                        namedExport: false,
-                                        exportLocalsConvention: 'camelCaseOnly',
-                                        localIdentName: 'univer-[local]',
-                                    },
-                                },
-                            },
-                            {
-                                loader: 'less-loader',
-                                options: { implementation: 'less' },
-                            },
-                        ],
-                    },
                 ],
             },
         },

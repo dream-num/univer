@@ -19,7 +19,7 @@ import type { IBaseDataValidationWidget, IFormulaResult } from '@univerjs/data-v
 import type { IMouseEvent, IPointerEvent, UniverRenderingContext, UniverRenderingContext2D } from '@univerjs/engine-render';
 import type { ISetRangeValuesCommandParams } from '@univerjs/sheets';
 import type { CheckboxValidator } from '@univerjs/sheets-data-validation';
-import { HorizontalAlign, ICommandService, Inject, isFormulaString, IUniverInstanceService, ThemeService, UniverInstanceType, VerticalAlign } from '@univerjs/core';
+import { get, HorizontalAlign, ICommandService, Inject, isFormulaString, IUniverInstanceService, ThemeService, UniverInstanceType, VerticalAlign } from '@univerjs/core';
 import { CheckboxShape as Checkbox, CURSOR_TYPE, fixLineWidthByScale, getCurrentTypeOfRenderer, IRenderManagerService, Transform } from '@univerjs/engine-render';
 import { SetRangeValuesCommand } from '@univerjs/sheets';
 import { CHECKBOX_FORMULA_1, CHECKBOX_FORMULA_2, DataValidationFormulaService, getCellValueOrigin, getFormulaResult, isLegalFormulaResult, SheetDataValidationModel, transformCheckboxValue } from '@univerjs/sheets-data-validation';
@@ -114,7 +114,7 @@ export class CheckboxRender implements IBaseDataValidationWidget {
             return;
         }
 
-        const colors = this._themeService.getCurrentTheme();
+        const theme = this._themeService.getCurrentTheme();
         if (!validator.skipDefaultFontRender?.(rule, value, { unitId: unitId!, subUnitId, row, column: col })) {
             return;
         }
@@ -151,7 +151,7 @@ export class CheckboxRender implements IBaseDataValidationWidget {
         const size = (style?.fs ?? 10) * 1.6;
 
         const checked = String(value) === String(formula1);
-        const defaultColor = colors.hyacinth500;
+        const defaultColor = get(theme, 'primary.600');
 
         Checkbox.drawWith(ctx as UniverRenderingContext, {
             checked,

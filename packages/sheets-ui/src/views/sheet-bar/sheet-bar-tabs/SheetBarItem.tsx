@@ -15,7 +15,7 @@
  */
 
 import type { BooleanNumber } from '@univerjs/core';
-import { ColorKit, ThemeService } from '@univerjs/core';
+import { ColorKit, get, ThemeService } from '@univerjs/core';
 import { clsx } from '@univerjs/design';
 import { useDependency } from '@univerjs/ui';
 import React, { useEffect, useState } from 'react';
@@ -45,8 +45,8 @@ export function SheetBarItem(props: IBaseSheetBarProps) {
 
     const getTextColor = (color: string) => {
         const theme = themeService.getCurrentTheme();
-        const darkTextColor = theme.textColor;
-        const lightTextColor = theme.colorWhite;
+        const darkTextColor = get(theme, 'gray.900');
+        const lightTextColor = get(theme, 'white');
         return new ColorKit(color).isDark() ? lightTextColor : darkTextColor;
     };
 
@@ -58,6 +58,7 @@ export function SheetBarItem(props: IBaseSheetBarProps) {
             className={clsx(`
               univer-mx-1 univer-box-border univer-flex univer-flex-grow univer-cursor-pointer univer-select-none
               univer-flex-row univer-items-center univer-rounded univer-text-xs univer-text-black
+              univer-transition-colors
               dark:univer-text-white
             `, currentSelected
                 ? `
@@ -78,8 +79,8 @@ export function SheetBarItem(props: IBaseSheetBarProps) {
         >
             <div
                 className={`
-                  univer-box-border univer-flex univer-items-center univer-whitespace-nowrap univer-rounded
-                  univer-border-2 univer-border-solid univer-border-transparent univer-py-1
+                  univer-box-border univer-flex univer-items-center univer-gap-1 univer-whitespace-nowrap univer-rounded
+                  univer-border-2 univer-border-solid univer-border-transparent univer-px-1.5 univer-py-1
                 `}
             >
                 {label}

@@ -20,7 +20,7 @@ import type { ISelectionWithStyle, ISelectRangeCommandParams, ISetRangeValuesCom
 import type { IScrollToCellCommandParams } from '@univerjs/sheets-ui';
 import type { ISheetReplaceCommandParams, ISheetReplacement } from '../commands/commands/sheet-replace.command';
 import type { ISheetFindReplaceHighlightShapeProps } from '../views/shapes/find-replace-highlight.shape';
-import { ColorKit, CommandType, Disposable, EDITOR_ACTIVATED, fromCallback, groupBy, ICommandService, IContextService, Inject, Injector, IUniverInstanceService, ObjectMatrix, replaceInDocumentBody, rotate, ThemeService, Tools, UniverInstanceType } from '@univerjs/core';
+import { ColorKit, CommandType, Disposable, EDITOR_ACTIVATED, fromCallback, get, groupBy, ICommandService, IContextService, Inject, Injector, IUniverInstanceService, ObjectMatrix, replaceInDocumentBody, rotate, ThemeService, Tools, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService, RENDER_RAW_FORMULA_KEY } from '@univerjs/engine-render';
 import { FindBy, FindDirection, FindModel, FindReplaceController, FindScope, IFindReplaceService } from '@univerjs/find-replace';
 import { SelectRangeCommand, SetRangeValuesCommand, SetSelectionsOperation, SetWorksheetActivateCommand, SetWorksheetActiveOperation, SheetsSelectionsService } from '@univerjs/sheets';
@@ -481,7 +481,8 @@ export class SheetFindModel extends FindModel {
         const { scene } = currentRender;
         const matches = this._matches;
 
-        const searchBackgroundColor = this._themeService.getCurrentTheme().gold400;
+        const theme = this._themeService.getCurrentTheme();
+        const searchBackgroundColor = get(theme, 'yellow.400');
         const color = new ColorKit(searchBackgroundColor).toRgb();
         const worksheet = this._workbook.getActiveSheet();
         if (!worksheet) {

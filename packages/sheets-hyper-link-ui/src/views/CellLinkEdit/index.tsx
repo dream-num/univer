@@ -16,7 +16,7 @@
 
 import type { DocumentDataModel, Nullable, Workbook } from '@univerjs/core';
 import type { ISelectionWithStyle, ISetSelectionsOperationParams } from '@univerjs/sheets';
-import { BuildTextUtils, ColorKit, CustomRangeType, DataStreamTreeTokenType, DisposableCollection, DOCS_ZEN_EDITOR_UNIT_ID_KEY, FOCUSING_SHEET, generateRandomId, ICommandService, IContextService, isValidRange, IUniverInstanceService, LocaleService, ThemeService, Tools, UniverInstanceType } from '@univerjs/core';
+import { BuildTextUtils, ColorKit, CustomRangeType, DataStreamTreeTokenType, DisposableCollection, DOCS_ZEN_EDITOR_UNIT_ID_KEY, FOCUSING_SHEET, generateRandomId, get, ICommandService, IContextService, isValidRange, IUniverInstanceService, LocaleService, ThemeService, Tools, UniverInstanceType } from '@univerjs/core';
 import { Button, FormLayout, Input, Select } from '@univerjs/design';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { DocBackScrollRenderController, DocSelectionRenderService } from '@univerjs/docs-ui';
@@ -198,7 +198,8 @@ export const CellLinkEdit = () => {
             const workbook = univerInstanceService.getUnit<Workbook>(editing.unitId, UniverInstanceType.UNIVER_SHEET);
             const worksheet = workbook?.getSheetBySheetId(editing.subUnitId);
             const mergeInfo = worksheet?.getMergedCell(editing.row, editing.col);
-            const color = new ColorKit(themeService.getCurrentTheme().hyacinth500).toRgb();
+            const theme = themeService.getCurrentTheme();
+            const color = new ColorKit(get(theme, 'primary.600')).toRgb();
             id = markSelectionService.addShape(
                 {
                     range: mergeInfo ?? {

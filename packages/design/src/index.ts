@@ -45,7 +45,6 @@ export { type ITooltipProps, Tooltip } from './components/tooltip';
 export { filterLeafNode, findNodePathFromTree, findSubTreeFromPath, type ITreeNodeProps, type ITreeProps, mergeTreeSelected, Tree, TreeSelectionMode } from './components/tree';
 export { Switch } from './components/switch';
 export { type ILocale } from './locale/interface';
-export { defaultTheme, greenTheme, themeInstance } from './themes';
 export { DraggableList, type IDraggableListProps } from './components/draggable-list';
 export { clsx } from './helper/clsx';
 export { resizeObserverCtor } from './helper/resize-observer';
@@ -57,3 +56,6 @@ export { DateRangePicker } from './components/date-range-picker';
 export { type IKBDProps, KBD } from './components/kbd';
 export { type IToasterProps, toast, Toaster } from './components/toaster/Toaster';
 export { scrollbarClassName } from './helper/scrollbar-cls';
+
+/** @deprecated Only for compatibility with versions before 0.7.0, will be removed in future versions */
+export { defaultTheme, greenTheme } from '@univerjs/themes';

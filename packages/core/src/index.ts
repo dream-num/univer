@@ -124,7 +124,7 @@ export { IResourceLoaderService } from './services/resource-loader/type';
 export { ResourceManagerService } from './services/resource-manager/resource-manager.service';
 export type { IResourceHook, IResources } from './services/resource-manager/type';
 export { IResourceManagerService } from './services/resource-manager/type';
-export { type IStyleSheet, ThemeService } from './services/theme/theme.service';
+export { ThemeService } from './services/theme/theme.service';
 
 // #region sheet
 

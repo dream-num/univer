@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
+import type { CSSProperties, ReactNode } from 'react';
 import { DropdownSingle } from '@univerjs/icons';
 import VirtualList from 'rc-virtual-list';
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { clsx } from '../../helper/clsx';
 import { Checkbox } from '../checkbox';
 import { Tooltip } from '../tooltip';
-import styles from './index.module.less';
+import styles from './index.module.css';
 import { createCacheWithFindNodePathFromTree, isIntermediated } from './util';
 
 export enum TreeSelectionMode {
@@ -58,11 +59,11 @@ export interface ITreeProps {
 
     itemHeight?: number;
 
-    attachRender?: (node: ITreeItemProps) => React.ReactNode;
+    attachRender?: (node: ITreeItemProps) => ReactNode;
 
     treeNodeClassName?: string;
 
-    style?: React.CSSProperties;
+    style?: CSSProperties;
 
     defaultCache?: Map<string, string[]>;
 }
@@ -114,10 +115,6 @@ export function Tree(props: ITreeProps) {
     }, [defaultExpandAll, data]);
 
     const flatData = useMemo(() => flattenTree(data, expandKeySet), [data, update, expandKeySet]);
-
-    function handleChange(treeItem: ITreeItemProps) {
-        const path: string[] = findNode.findNodePathFromTreeWithCache(treeItem.key);
-    }
 
     function handleExpendItem(treeItem: ITreeItemProps) {
         if (treeItem.children?.length) {
@@ -204,7 +201,6 @@ export function Tree(props: ITreeProps) {
                     {(item: ITreeItemProps) => renderTreeItem(item)}
                 </VirtualList>
             </div>
-
         </section>
     );
 }

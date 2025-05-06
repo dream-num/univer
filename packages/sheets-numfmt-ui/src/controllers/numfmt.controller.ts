@@ -22,6 +22,7 @@ import {
     CellValueType,
     Disposable,
     DisposableCollection,
+    get,
     ICommandService,
     Inject,
     InterceptorEffectEnum,
@@ -268,8 +269,8 @@ export class SheetNumfmtUIController extends Disposable {
                                         }
                                         const info = getPatternPreviewIgnoreGeneral(this._previewPattern, value as number, this._sheetsNumfmtCellContentController.local);
                                         if (info.color) {
-                                            const colorMap = this._themeService.getCurrentTheme();
-                                            const color = colorMap[`${info.color}500`];
+                                            const theme = this._themeService.getCurrentTheme();
+                                            const color = get(theme, `${info.color}.500`);
                                             return {
                                                 ...defaultValue,
                                                 v: info.result,

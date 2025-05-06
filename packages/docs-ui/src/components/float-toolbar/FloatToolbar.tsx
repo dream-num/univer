@@ -79,8 +79,7 @@ export function FloatToolbar(props: IFloatToolbarProps) {
         <div
             className={`
               univer-box-border univer-flex univer-rounded univer-border univer-border-solid univer-border-gray-200
-              univer-bg-white univer-py-1.5
-              univer-shadow-[0_1px_6px_-2px_rgba(30,40,77,0.08),0_2px_6px_-1px_rgba(30,40,77,0.10)]
+              univer-bg-white univer-py-1.5 univer-shadow-sm
             `}
         >
             {menus.map((groupItem) => groupItem.item && (

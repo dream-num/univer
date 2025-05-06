@@ -18,7 +18,7 @@ import type { Meta } from '@storybook/react';
 
 import type { NoUndefinedRangeValueType } from 'rc-picker/lib/PickerInput/RangePicker';
 import { dayjs } from '@univerjs/core';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { DateRangePicker } from './DateRangePicker';
 
 const meta: Meta<typeof DateRangePicker> = {

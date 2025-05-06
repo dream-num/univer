@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICommand, IStyleSheet } from '@univerjs/core';
+import type { IAccessor, ICommand } from '@univerjs/core';
+import type { Theme } from '@univerjs/themes';
 import { CommandType, ThemeService } from '@univerjs/core';
 
 export interface IThemeCommandParams {
-    value?: IStyleSheet;
+    value?: Theme;
 }
 
 export const ThemeOperation: ICommand = {

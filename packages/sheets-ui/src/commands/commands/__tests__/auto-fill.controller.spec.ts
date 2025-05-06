@@ -21,6 +21,7 @@ import {
     IUniverInstanceService,
     LocaleType,
     RedoCommand,
+    set,
     ThemeService,
     UndoCommand,
     UniverInstanceType,
@@ -303,7 +304,10 @@ describe('Test auto fill rules in controller', () => {
 
         commandService = get(ICommandService);
         themeService = get(ThemeService);
-        themeService.setTheme(theme);
+        const theme = themeService.getCurrentTheme();
+        const newTheme = set(theme, 'black', '#35322b');
+        themeService.setTheme(newTheme);
+
         autoFillController = get(AutoFillController);
         selectionManagerService = get(SheetsSelectionsService);
         commandService.registerCommand(SetRangeValuesMutation);

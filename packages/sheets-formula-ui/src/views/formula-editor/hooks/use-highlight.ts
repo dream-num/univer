@@ -19,7 +19,7 @@ import type { Editor } from '@univerjs/docs-ui';
 import type { ISequenceNode } from '@univerjs/engine-formula';
 import type { ISelectionWithStyle, SheetsSelectionsService } from '@univerjs/sheets';
 import type { INode } from './use-formula-token';
-import { getBodySlice, ICommandService, IUniverInstanceService, ThemeService, UniverInstanceType } from '@univerjs/core';
+import { get, getBodySlice, ICommandService, IUniverInstanceService, ThemeService, UniverInstanceType } from '@univerjs/core';
 import { ReplaceTextRunsCommand } from '@univerjs/docs-ui';
 import { deserializeRangeWithSheet, sequenceNodeType } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -250,27 +250,28 @@ interface IColorMap {
 
 export function useColor(): IColorMap {
     const themeService = useDependency(ThemeService);
-    const style = themeService.getCurrentTheme();
+    const theme = themeService.getCurrentTheme();
     const result = useMemo(() => {
         const formulaRefColors = [
-            style.loopColor1,
-            style.loopColor2,
-            style.loopColor3,
-            style.loopColor4,
-            style.loopColor5,
-            style.loopColor6,
-            style.loopColor7,
-            style.loopColor8,
-            style.loopColor9,
-            style.loopColor10,
-            style.loopColor11,
-            style.loopColor12,
+            get(theme, 'loop-color.1'),
+            get(theme, 'loop-color.2'),
+            get(theme, 'loop-color.3'),
+            get(theme, 'loop-color.4'),
+            get(theme, 'loop-color.5'),
+            get(theme, 'loop-color.6'),
+            get(theme, 'loop-color.7'),
+            get(theme, 'loop-color.8'),
+            get(theme, 'loop-color.9'),
+            get(theme, 'loop-color.10'),
+            get(theme, 'loop-color.11'),
+            get(theme, 'loop-color.12'),
         ];
-        const numberColor = style.hyacinth700;
-        const stringColor = style.verdancy800;
-        const plainTextColor = style.colorBlack;
+        const numberColor = get(theme, 'blue.700');
+        const stringColor = get(theme, 'jiqing.800');
+        const plainTextColor = get(theme, 'black');
         return { formulaRefColors, numberColor, stringColor, plainTextColor };
-    }, [style]);
+    }, [theme]);
+
     return result;
 }
 

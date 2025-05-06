@@ -17,7 +17,6 @@
 import { LocaleType, LogLevel, Univer, UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
 import { UniverDebuggerPlugin } from '@univerjs/debugger';
-import { defaultTheme } from '@univerjs/design';
 import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
@@ -89,8 +88,6 @@ export const mockUser = {
 function createNewInstance() {
     // univer
     const univer = new Univer({
-        theme: defaultTheme,
-        locale: LocaleType.ZH_CN,
         locales: {
             [LocaleType.ZH_CN]: zhCN,
             [LocaleType.EN_US]: enUS,

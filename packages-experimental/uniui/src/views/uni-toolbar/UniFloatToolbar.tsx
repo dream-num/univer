@@ -111,7 +111,7 @@ export const UniFloatingToolbar = React.forwardRef<IFloatingToolbarRef, { node: 
 });
 
 export function UniDiv() {
-    return <div className="univer-h-6 univer-w-[1px] univer-bg-gray-100" />;
+    return <div className="univer-h-6 univer-w-px univer-bg-gray-100" />;
 }
 
 export function UnitName({ unitId }: { unitId: string }) {

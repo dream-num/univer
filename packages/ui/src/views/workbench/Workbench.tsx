@@ -18,7 +18,8 @@ import type { ILocale } from '@univerjs/design';
 import type { IUniverUIConfig } from '../../controllers/config.schema';
 import type { IWorkbenchOptions } from '../../controllers/ui/ui.controller';
 import { IConfigService, LocaleService, ThemeService } from '@univerjs/core';
-import { clsx, ConfigContext, ConfigProvider, defaultTheme, themeInstance } from '@univerjs/design';
+import { clsx, ConfigContext, ConfigProvider } from '@univerjs/design';
+import { defaultTheme } from '@univerjs/themes';
 import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useConfigValue } from '../../components/hooks';
@@ -109,12 +110,6 @@ export function DesktopWorkbenchContent(props: IUniverWorkbenchProps) {
         const subscriptions = [
             localeService.localeChanged$.subscribe(() => {
                 setLocale(localeService.getLocales() as unknown as ILocale);
-            }),
-            themeService.currentTheme$.subscribe((theme) => {
-                themeInstance.setTheme(mountContainer, theme);
-                if (portalContainer) {
-                    themeInstance.setTheme(portalContainer, theme);
-                }
             }),
         ];
 

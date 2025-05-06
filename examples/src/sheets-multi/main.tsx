@@ -15,8 +15,7 @@
  */
 
 import { LocaleType, LogLevel, Tools, Univer, UniverInstanceType } from '@univerjs/core';
-import { defaultTheme, render } from '@univerjs/design';
-
+import { render } from '@univerjs/design';
 import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
@@ -29,7 +28,7 @@ import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
 import { UniverSheetsNumfmtUIPlugin } from '@univerjs/sheets-numfmt-ui';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 import { UniverUIPlugin } from '@univerjs/ui';
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { Mosaic, MosaicWindow } from 'react-mosaic-component';
 import { enUS, faIR, frFR, ruRU, zhCN } from '../locales';
 
@@ -40,7 +39,6 @@ import '../global.css';
 function factory(id: string) {
     return function createUniverOnContainer() {
         const univer = new Univer({
-            theme: defaultTheme,
             locale: LocaleType.ZH_CN,
             locales: {
                 [LocaleType.ZH_CN]: zhCN,

@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
+import type { Theme } from '@univerjs/themes';
 import type { Dependency, IDisposable } from './common/di';
 import type { UnitModel, UnitType } from './common/unit';
 import type { LogLevel } from './services/log/log.service';
 import type { DependencyOverride } from './services/plugin/plugin-override';
 import type { Plugin, PluginCtor } from './services/plugin/plugin.service';
-import type { IStyleSheet } from './services/theme/theme.service';
 import type { ILocales } from './shared';
 import type { IWorkbookData } from './sheets/typedef';
 import type { LocaleType } from './types/enum/locale-type';
@@ -56,7 +56,7 @@ import { Workbook } from './sheets/workbook';
 import { SlideDataModel } from './slides/slide-model';
 
 export interface IUniverConfig {
-    theme: IStyleSheet;
+    theme?: Theme;
     locale: LocaleType;
     locales: ILocales;
     logLevel: LogLevel;

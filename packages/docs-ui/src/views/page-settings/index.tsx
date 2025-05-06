@@ -100,7 +100,7 @@ export function PageSettings(props: IConfirmChildrenProps) {
     return (
         <div className="univer-flex univer-flex-col univer-gap-4">
             <div className="univer-flex univer-flex-col univer-gap-2">
-                <label className="univer-text-sm univer-font-medium univer-text-[#0E111E]">
+                <label className="univer-text-sm univer-font-medium univer-text-gray-900">
                     {localeService.t('page-settings.paper-size')}
                 </label>
                 <Select
@@ -114,7 +114,7 @@ export function PageSettings(props: IConfirmChildrenProps) {
             </div>
 
             {/* <div className="univer-flex univer-flex-col univer-gap-2">
-                <label className="univer-text-sm univer-font-medium univer-text-[#0E111E]">
+                <label className="univer-text-sm univer-font-medium univer-text-gray-900">
                     {localeService.t('page-settings.orientation')}
                 </label>
                 <div className="univer-flex univer-gap-3">

@@ -25,6 +25,7 @@ import {
     DEFAULT_STYLES,
     DOCS_ZEN_EDITOR_UNIT_ID_KEY,
     DocumentFlavor,
+    get,
     HorizontalAlign,
     ICommandService,
     IUniverInstanceService,
@@ -636,7 +637,9 @@ export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSele
             },
         ],
         value$: new Observable<string>((subscriber) => {
-            const defaultColor = themeService.getCurrentTheme().textColor;
+            const theme = themeService.getCurrentTheme();
+            const defaultColor = get(theme, 'gray.900');
+
             const disposable = commandService.onCommandExecuted((c) => {
                 if (c.id === SetInlineFormatTextColorCommand.id) {
                     const color = (c.params as { value: string }).value;
@@ -999,7 +1002,9 @@ export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMe
             },
         ],
         value$: new Observable<string>((subscriber) => {
-            const defaultColor = themeService.getCurrentTheme().primaryColor;
+            const theme = themeService.getCurrentTheme();
+            const defaultColor = get(theme, 'primary.600');
+
             const disposable = commandService.onCommandExecuted((c) => {
                 if (c.id === SetInlineFormatTextBackgroundColorCommand.id) {
                     const color = (c.params as { value: string }).value;

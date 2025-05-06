@@ -318,11 +318,11 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
                 className={clsx(
                     `
                       univer-relative univer-box-border univer-flex univer-h-full univer-w-full univer-items-center
-                      univer-justify-around univer-gap-2 univer-rounded-none univer-border-none univer-p-0
+                      univer-justify-around univer-gap-2 univer-rounded-none univer-p-0 univer-ring-1
                     `,
                     {
-                        'univer-border-primary-500': isFocus,
-                        'univer-border-red-500': isError,
+                        'univer-ring-primary-500': isFocus,
+                        'univer-ring-red-500': isError,
                     }
                 )}
                 ref={sheetEmbeddingRef}

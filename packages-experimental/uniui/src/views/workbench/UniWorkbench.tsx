@@ -25,7 +25,7 @@ import type {
 } from '@xyflow/react';
 import type { IFloatingToolbarRef } from '../uni-toolbar/UniFloatToolbar';
 import { debounce, ICommandService, IContextService, IUniverInstanceService, LocaleService, ThemeService } from '@univerjs/core';
-import { clsx, ConfigContext, ConfigProvider, defaultTheme, themeInstance } from '@univerjs/design';
+import { clsx, ConfigContext, ConfigProvider } from '@univerjs/design';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { MenuSingle } from '@univerjs/icons';
 import {
@@ -45,7 +45,7 @@ import {
     ReactFlowProvider,
     useNodesState,
 } from '@xyflow/react';
-import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { UniFocusUnitOperation } from '../../commands/operations/uni-focus-unit.operation';
 import { FlowManagerService } from '../../services/flow/flow-manager.service';
@@ -92,12 +92,6 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
     const focusedUnit = useObservable(instanceService.focused$);
 
     useEffect(() => {
-        if (!themeService.getCurrentTheme()) {
-            themeService.setTheme(defaultTheme);
-        }
-    }, []);
-
-    useEffect(() => {
         if (contentRef.current) {
             onRendered?.(contentRef.current);
         }
@@ -128,10 +122,6 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
         const subscriptions = [
             localeService.localeChanged$.subscribe(() => {
                 setLocale(localeService.getLocales() as unknown as ILocale);
-            }),
-            themeService.currentTheme$.subscribe((theme) => {
-                themeInstance.setTheme(mountContainer, theme);
-                portalContainer && themeInstance.setTheme(portalContainer, theme);
             }),
         ];
 

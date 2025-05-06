@@ -1,0 +1,61 @@
+{
+    "name": "@univerjs/themes",
+    "version": "0.7.0-beta.0",
+    "private": false,
+    "description": "Themes package for Univer",
+    "author": "DreamNum <developer@univer.ai>",
+    "license": "Apache-2.0",
+    "funding": {
+        "type": "opencollective",
+        "url": "https://opencollective.com/univer"
+    },
+    "homepage": "https://univer.ai",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/dream-num/univer"
+    },
+    "bugs": {
+        "url": "https://github.com/dream-num/univer/issues"
+    },
+    "keywords": [
+        "univer",
+        "theme"
+    ],
+    "exports": {
+        ".": "./src/index.ts",
+        "./*": "./src/*"
+    },
+    "main": "./src/index.ts",
+    "types": "./lib/types/index.d.ts",
+    "publishConfig": {
+        "access": "public",
+        "main": "./lib/es/index.js",
+        "module": "./lib/es/index.js",
+        "exports": {
+            ".": {
+                "import": "./lib/es/index.js",
+                "require": "./lib/cjs/index.js",
+                "types": "./lib/types/index.d.ts"
+            },
+            "./*": {
+                "import": "./lib/es/*",
+                "require": "./lib/cjs/*",
+                "types": "./lib/types/index.d.ts"
+            },
+            "./lib/*": "./lib/*"
+        }
+    },
+    "directories": {
+        "lib": "lib"
+    },
+    "files": [
+        "lib"
+    ],
+    "scripts": {
+        "lint:types": "tsc --noEmit",
+        "build": "univer-cli build"
+    },
+    "devDependencies": {
+        "vite": "^6.3.5"
+    }
+}

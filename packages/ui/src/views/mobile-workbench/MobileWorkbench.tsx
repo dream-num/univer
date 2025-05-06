@@ -17,7 +17,7 @@
 import type { ILocale } from '@univerjs/design';
 import type { IWorkbenchOptions } from '../../controllers/ui/ui.controller';
 import { LocaleService, ThemeService } from '@univerjs/core';
-import { clsx, ConfigProvider, defaultTheme, themeInstance } from '@univerjs/design';
+import { clsx, ConfigProvider } from '@univerjs/design';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { BuiltInUIPart } from '../../services/parts/parts.service';
 import { useDependency } from '../../utils/di';
@@ -52,12 +52,6 @@ export function MobileWorkbench(props: IUniverAppProps) {
     const leftSidebarComponents = useComponentsOfPart(BuiltInUIPart.LEFT_SIDEBAR);
     const globalComponents = useComponentsOfPart(BuiltInUIPart.GLOBAL);
 
-    useEffect(() => {
-        if (!themeService.getCurrentTheme()) {
-            themeService.setTheme(defaultTheme);
-        }
-    }, []);
-
     const [darkMode, setDarkMode] = useState<boolean>(false);
     useEffect(() => {
         const sub = themeService.darkMode$.subscribe((darkMode) => {
@@ -86,10 +80,6 @@ export function MobileWorkbench(props: IUniverAppProps) {
         const subscriptions = [
             localeService.localeChanged$.subscribe(() => {
                 setLocale(localeService.getLocales() as unknown as ILocale);
-            }),
-            themeService.currentTheme$.subscribe((theme) => {
-                themeInstance.setTheme(mountContainer, theme);
-                portalContainer && themeInstance.setTheme(portalContainer, theme);
             }),
         ];
 

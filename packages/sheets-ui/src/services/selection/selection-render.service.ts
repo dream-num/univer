@@ -19,7 +19,7 @@ import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, Viewpor
 import type { ISelectionWithCoord, ISelectionWithStyle, ISetSelectionsOperationParams, WorkbookSelectionModel } from '@univerjs/sheets';
 import type { ISheetObjectParam } from '../../controllers/utils/component-tools';
 import type { SelectionControl } from './selection-control';
-import { ICommandService, IContextService, ILogService, Inject, Injector, RANGE_TYPE, Rectangle, ThemeService, toDisposable } from '@univerjs/core';
+import { ICommandService, IContextService, ILogService, Inject, Injector, RANGE_TYPE, Rectangle, set, ThemeService, toDisposable } from '@univerjs/core';
 import { ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 import { convertSelectionDataToRange, REF_SELECTIONS_ENABLED, SelectionMoveType, SELECTIONS_ENABLED, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { IShortcutService } from '@univerjs/ui';
@@ -170,9 +170,10 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
     }
 
     transparentSelection() {
-        this.setSelectionTheme({
-            primaryColor: 'transparent',
-        });
+        const theme = this._themeService.getCurrentTheme();
+        const newTheme = set(theme, 'primary.600', 'transparent');
+        this.setSelectionTheme(newTheme);
+
         const selectionsWithStyle = this._workbookSelections.getCurrentSelections();
         for (let index = 0; index < selectionsWithStyle.length; index++) {
             const selectionWithStyle = selectionsWithStyle[index];
@@ -182,8 +183,8 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
     }
 
     showSelection() {
-        const currTheme = this._themeService.getCurrentTheme();
-        this.setSelectionTheme(currTheme);
+        const theme = this._themeService.getCurrentTheme();
+        this.setSelectionTheme(theme);
         const selectionsWithStyle = this._workbookSelections.getCurrentSelections();
         for (let index = 0; index < selectionsWithStyle.length; index++) {
             const selectionWithStyle = selectionsWithStyle[index];

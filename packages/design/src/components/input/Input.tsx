@@ -118,6 +118,7 @@ export const Input = forwardRef<HTMLInputElement, IInputProps>(
 
         return (
             <div
+                data-u-comp="input"
                 className={clsx(
                     'univer-relative univer-inline-flex univer-w-full univer-items-center univer-rounded-md',
                     disabled && 'univer-cursor-not-allowed',

@@ -62,6 +62,6 @@
         "@univerjs-infra/shared": "workspace:*",
         "typescript": "^5.8.3",
         "vite": "^6.3.4",
-        "vitest": "^3.1.2"
+        "vitest": "^3.1.3"
     }
 }

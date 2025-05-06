@@ -151,7 +151,7 @@ const defaultTheme = {
     },
     'loop-color': {
         1: 'purple.400',
-        2: 'green.600',
+        2: 'green.500',
         3: 'blue.500',
         4: 'gold.400',
         5: 'magenta.300',

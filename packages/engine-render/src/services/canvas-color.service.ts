@@ -15,7 +15,7 @@
  */
 
 import type { RGBColor } from './utils';
-import { createIdentifier, Disposable, Inject, ThemeService } from '@univerjs/core';
+import { createIdentifier, Disposable, get, Inject, ThemeService } from '@univerjs/core';
 // import { invertColorByHSL } from './invert-hsl';
 import { invertColorByMatrix } from './invert-rgb';
 
@@ -83,6 +83,9 @@ export class CanvasColorService extends Disposable implements ICanvasColorServic
             const stripped = color.slice(4, -1).split(',');
             const invertedColor = this._invertAlgo(stripped.map(Number) as RGBColor);
             cachedColor = `rgb(${invertedColor[0]},${invertedColor[1]},${invertedColor[2]})`;
+        } else if (color.includes('.')) {
+            const theme = this._themeService.getCurrentTheme();
+            cachedColor = get(theme, color);
         } else {
             throw new Error(`[CanvasColorService]: illegal color ${color}`);
         }

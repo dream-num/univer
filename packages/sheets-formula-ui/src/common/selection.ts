@@ -26,7 +26,7 @@ export function genFormulaRefSelectionStyle(themeService: ThemeService, refColor
     return {
         id,
         strokeWidth: 1,
-        stroke: refColor,
+        stroke: get(theme, refColor),
         fill,
         widgets: { tl: true, tc: true, tr: true, ml: true, mr: true, bl: true, bc: true, br: true },
         widgetSize: 6,

@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { CSSTransition } from 'react-transition-group';
-
 import { ConfigContext } from '../config-provider/ConfigProvider';
-import styles from './index.module.less';
+import styles from './index.module.css';
 
 export interface IPopupProps {
-    children: React.ReactElement;
+    children: ReactElement;
 
     /**
      * whether popup is visible

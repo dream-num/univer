@@ -14,21 +14,19 @@
  * limitations under the License.
  */
 
-import type { PropsWithChildren } from 'react';
+import type { CSSProperties, PropsWithChildren, ReactNode } from 'react';
 import { MoreUpSingle } from '@univerjs/icons';
-import React, { createContext, useContext, useState } from 'react';
+import { createContext, useState } from 'react';
 import { clsx } from '../../helper/clsx';
 
-import styles from './index.module.less';
-
 export interface IFormLayoutProps {
-    label?: React.ReactNode;
-    desc?: React.ReactNode;
-    children?: React.ReactNode;
+    label?: ReactNode;
+    desc?: ReactNode;
+    children?: ReactNode;
 
-    style?: React.CSSProperties;
+    style?: CSSProperties;
     className?: string;
-    contentStyle?: React.CSSProperties;
+    contentStyle?: CSSProperties;
     error?: string;
     collapsable?: boolean;
     defaultCollapsed?: boolean;
@@ -39,22 +37,27 @@ const FormLayoutContext = createContext(false);
 export const FormLayout = (props: IFormLayoutProps) => {
     const { label, desc, children, style, className, error, contentStyle, collapsable = false, defaultCollapsed = false } = props;
     const [collapsed, setCollapsed] = useState(defaultCollapsed);
-    const isInner = useContext(FormLayoutContext);
 
     return (
         <FormLayoutContext.Provider value>
-            <div className={clsx(styles.formLayout, isInner ? styles.formLayoutInner : '', className)} style={style}>
+            <div data-u-comp="form-layout" className={clsx('univer-mb-3 univer-flex univer-flex-col', className)} style={style}>
                 {label && (
-                    <div style={{ cursor: collapsable ? 'pointer' : 'default' }} className={styles.formLayoutLabel} onClick={() => setCollapsed(!collapsed)}>
+                    <div
+                        className={clsx(`
+                          univer-mb-2 univer-flex univer-min-h-3.5 univer-items-center univer-text-sm
+                          univer-text-gray-900
+                        `, {
+                            'univer-cursor-pointer': collapsable,
+                        })}
+                        onClick={() => setCollapsed(!collapsed)}
+                    >
                         {label}
                         {collapsable
                             ? (
                                 <MoreUpSingle
-                                    style={{
-                                        marginLeft: 4,
-                                        transform: collapsed ? 'rotate(180deg)' : 'rotate(0deg)',
-                                        transition: 'transform 0.3s',
-                                    }}
+                                    className={clsx('univer-ml-1 univer-transition-transform', {
+                                        'univer-rotate-180': collapsed,
+                                    })}
                                 />
                             )
                             : null}
@@ -64,14 +67,24 @@ export const FormLayout = (props: IFormLayoutProps) => {
                     ? null
                     : (
                         <>
-                            {desc && <div className={styles.formLayoutDesc}>{desc}</div>}
+                            {desc && <div className="univer-mt-1 univer-text-[13px] univer-text-gray-600">{desc}</div>}
                             {children
                                 ? (
-                                    <div style={contentStyle} className={clsx(styles.formLayoutContent, error ? styles.formLayoutContentError : '')}>
+                                    <div
+                                        className={clsx(`
+                                          [&_[data-u-comp=input]]:univer-w-full
+                                          [&_[data-u-comp=select]]:univer-w-full
+                                          last:univer-mb-0
+                                        `, {
+                                            '[&_[data-u-comp=input]]:univer-border-red-500': error,
+                                            '[&_[data-u-comp=select]]:univer-border-red-500': error,
+                                        })}
+                                        style={contentStyle}
+                                    >
                                         {children}
                                         {error
                                             ? (
-                                                <div className={styles.formLayoutError}>
+                                                <div className="univer-mt-1 univer-text-xs univer-text-red-500">
                                                     {error}
                                                 </div>
                                             )
@@ -94,7 +107,13 @@ export type IFormDualColumnLayoutProps = PropsWithChildren;
  */
 export const FormDualColumnLayout = (props: IFormDualColumnLayoutProps) => {
     return (
-        <div className={styles.formDualColumnLayout}>
+        <div
+            className={`
+              univer-flex univer-justify-between
+              [&_[data-u-comp=form-layout]]:univer-max-w-[calc(50%-8px)] [&_[data-u-comp=form-layout]]:univer-shrink
+              [&_[data-u-comp=form-layout]]:univer-grow
+            `}
+        >
             {props.children}
         </div>
     );

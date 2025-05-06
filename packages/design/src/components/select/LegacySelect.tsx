@@ -21,7 +21,7 @@ import RcSelect from 'rc-select';
 import { useContext } from 'react';
 import { clsx } from '../../helper/clsx';
 import { ConfigContext } from '../config-provider/ConfigProvider';
-import styles from './index.module.less';
+import styles from './index.module.css';
 
 /** @deprecated */
 interface ILegacyOption {

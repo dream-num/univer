@@ -19,9 +19,9 @@ import type { PickerProps } from 'rc-picker';
 import { CalendarSingle } from '@univerjs/icons';
 import RcPicker from 'rc-picker';
 import generateConfig from 'rc-picker/lib/generate/dayjs';
-import React, { useContext } from 'react';
+import { useContext } from 'react';
 import { ConfigContext } from '../config-provider/ConfigProvider';
-import styles from './index.module.less';
+import styles from './index.module.css';
 
 export interface IDatePickerProps extends Omit<PickerProps<dayjs.Dayjs>, 'value' | 'onChange' | 'locale' | 'generateConfig' | 'prefixCls'> {
     /**

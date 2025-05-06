@@ -154,6 +154,7 @@ export function Select(props: ISelectProps) {
             onOpenChange={handleOpenChange}
         >
             <div
+                data-u-comp="select"
                 className={clsx(`
                   univer-box-border univer-inline-flex univer-h-8 univer-min-w-36 univer-cursor-pointer
                   univer-items-center univer-justify-between univer-gap-2 univer-rounded-lg univer-border

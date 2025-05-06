@@ -1,0 +1,304 @@
+.menu {
+    @apply univer-m-0 univer-py-1 univer-px-2 univer-text-sm univer-list-none univer-rounded-md univer-box-border univer-shadow-md univer-border-solid univer-border univer-border-gray-200 univer-min-w-52 univer-max-w-52 univer-bg-white;
+}
+
+.menu-vertical {
+    display: grid;
+}
+
+.menu-hidden,
+.menu-submenu-hidden {
+    display: none;
+}
+
+.menu-item-group {
+    @apply univer-py-1;
+}
+
+.menu-item-group:not(:last-child) {
+    border-bottom: 1px solid #e3e5ea;
+}
+
+.menu-item-group-list {
+    display: grid;
+    margin: 0;
+    padding: 0;
+    @apply univer-gap-1;
+}
+
+.menu-item-group-title {
+    font-weight: 600;
+    line-height: 1.5em;
+    padding: 4px;
+    padding-top: 6px;
+    @apply univer-text-gray-600 univer-text-xs univer-px-2;
+}
+
+.menu-item-group-title:empty {
+    display: none;
+}
+
+.menu-item-active,
+.menu-submenu-active {
+    @apply univer-bg-gray-50 univer-rounded-md;
+}
+
+.menu-item-selected {
+    transform: translateZ(0);
+    @apply univer-bg-gray-50 univer-rounded-md;
+}
+
+.menu-submenu-selected {
+    @apply univer-bg-gray-50 univer-rounded-md;
+}
+
+.menu > li.menu-submenu {
+    padding: 0;
+}
+
+.menu-horizontal-sub,
+.menu-vertical-sub,
+.menu-vertical-left-sub,
+.menu-vertical-right-sub {
+    min-width: 160px;
+    margin-top: 0;
+}
+
+.menu-item {
+    display: flex;
+    align-items: center;
+    min-height: 32px;
+    line-height: 1.5em;
+    @apply univer-rounded-md univer-text-sm univer-text-gray-900 univer-px-2 univer-gap-3;
+}
+
+.menu-item:hover {
+    @apply univer-bg-gray-50;
+}
+
+.menu-item .icon {
+    @apply univer-text-gray-600;
+}
+
+.menu-item,
+.menu-submenu {
+    cursor: pointer;
+    position: relative;
+    box-sizing: border-box;
+    margin: 0;
+    white-space: nowrap;
+    list-style: none;
+}
+
+.menu-item.menu-item-disabled,
+.menu-submenu.menu-submenu-disabled {
+    cursor: not-allowed;
+    @apply !univer-text-gray-400;
+}
+
+.menu-submenu-popup {
+    position: absolute;
+    z-index: 1070;
+}
+
+.menu-submenu-popup .submenu-title-wrapper {
+    @apply univer-pr-5;
+}
+
+.menu-submenu-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 100%;
+    min-height: 32px;
+    line-height: 1.5em;
+    @apply univer-text-gray-900 univer-text-sm univer-px-2;
+}
+
+.menu-submenu-title-more-icon,
+.menu-item-more-icon {
+    @apply univer-text-gray-400 univer-text-sm univer-ml-2;
+}
+
+.menu-horizontal {
+    overflow: hidden;
+    white-space: nowrap;
+    border: none;
+    border-bottom: 1px solid #e3e5ea;
+    box-shadow: none;
+}
+
+.menu-horizontal > .menu-item,
+.menu-horizontal > .menu-submenu > .menu-submenu-title {
+    padding: 15px 20px;
+}
+
+.menu-horizontal > .menu-submenu,
+.menu-horizontal > .menu-item {
+    display: inline-block;
+    vertical-align: bottom;
+    border-bottom: 2px solid transparent;
+}
+
+.menu-vertical,
+.menu-vertical-left,
+.menu-vertical-right,
+.menu-inline {
+    width: 100%;
+}
+
+.menu-vertical > .menu-item,
+.menu-vertical > .menu-submenu > .menu-submenu-title,
+.menu-vertical-left > .menu-item,
+.menu-vertical-left > .menu-submenu > .menu-submenu-title,
+.menu-vertical-right > .menu-item,
+.menu-vertical-right > .menu-submenu > .menu-submenu-title,
+.menu-inline > .menu-item,
+.menu-inline > .menu-submenu > .menu-submenu-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 28px;
+    @apply univer-p-1;
+}
+
+.menu-vertical .menu-submenu-arrow,
+.menu-vertical-left .menu-submenu-arrow,
+.menu-vertical-right .menu-submenu-arrow,
+.menu-inline .menu-submenu-arrow {
+    position: absolute;
+    right: 16px;
+    display: inline-block;
+    font-size: inherit;
+    line-height: 1.5em;
+    text-align: center;
+    text-transform: none;
+    text-rendering: auto;
+    vertical-align: baseline;
+}
+
+.menu-sub-inline {
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+.menu-sub-inline > .menu-item,
+.menu-sub-inline > .menu-submenu > .menu-submenu-title {
+    padding-top: 8px;
+    padding-right: 0;
+    padding-bottom: 8px;
+}
+
+.menu-open-slide-up-enter,
+.menu-open-slide-up-appear {
+    opacity: 0;
+    animation-play-state: paused;
+    animation-timing-function: cubic-bezier(0.08, 0.82, 0.17, 1);
+    transform-origin: 0 0;
+    animation-duration: 0.3s;
+    animation-fill-mode: both;
+}
+
+.menu-open-slide-up-leave {
+    opacity: 1;
+    animation-play-state: paused;
+    animation-timing-function: cubic-bezier(0.6, 0.04, 0.98, 0.34);
+    transform-origin: 0 0;
+    animation-duration: 0.3s;
+    animation-fill-mode: both;
+}
+
+.menu-open-slide-up-enter.menu-open-slide-up-enter-active,
+.menu-open-slide-up-appear.menu-open-slide-up-appear-active {
+    animation-name: menu-open-slide-up-in;
+    animation-play-state: running;
+}
+
+.menu-open-slide-up-leave.menu-open-slide-up-leave-active {
+    animation-name: menu-open-slide-up-out;
+    animation-play-state: running;
+}
+
+@keyframes menu-open-slide-up-in {
+    0% {
+        transform-origin: 0% 0%;
+        transform: scaleY(0);
+        opacity: 0;
+    }
+
+    100% {
+        transform-origin: 0% 0%;
+        transform: scaleY(1);
+        opacity: 1;
+    }
+}
+
+@keyframes menu-open-slide-up-out {
+    0% {
+        transform-origin: 0% 0%;
+        transform: scaleY(1);
+        opacity: 1;
+    }
+
+    100% {
+        transform-origin: 0% 0%;
+        transform: scaleY(0);
+        opacity: 0;
+    }
+}
+
+.menu-open-zoom-enter,
+.menu-open-zoom-appear {
+    opacity: 0;
+    animation-play-state: paused;
+    animation-timing-function: cubic-bezier(0.08, 0.82, 0.17, 1);
+    transform-origin: 0 0;
+    animation-duration: 0.3s;
+    animation-fill-mode: both;
+}
+
+.menu-open-zoom-leave {
+    animation-play-state: paused;
+    animation-timing-function: cubic-bezier(0.6, 0.04, 0.98, 0.34);
+    transform-origin: 0 0;
+    animation-duration: 0.3s;
+    animation-fill-mode: both;
+}
+
+.menu-open-zoom-enter.menu-open-zoom-enter-active,
+.menu-open-zoom-appear.menu-open-zoom-appear-active {
+    animation-name: menu-open-zoom-in;
+    animation-play-state: running;
+}
+
+.menu-open-zoom-leave.menu-open-zoom-leave-active {
+    animation-name: menu-open-zoom-out;
+    animation-play-state: running;
+}
+
+@keyframes menu-open-zoom-in {
+    0% {
+        transform: scale(0, 0);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scale(1, 1);
+        opacity: 1;
+    }
+}
+
+@keyframes menu-open-zoom-out {
+    0% {
+        transform: scale(1, 1);
+    }
+
+    100% {
+        transform: scale(0, 0);
+        opacity: 0;
+    }
+}

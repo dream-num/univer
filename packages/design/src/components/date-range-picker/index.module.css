@@ -1,0 +1,277 @@
+.date-range-picker {
+    position: relative;
+    width: 280px;
+    height: 32px;
+    border-radius: 4px;
+    box-sizing: border-box;
+    display: inline-flex;
+    @apply univer-border univer-border-solid univer-border-gray-200;
+}
+
+.date-range-picker-rtl {
+    direction: rtl;
+}
+
+.date-range-picker-invalid {
+    box-shadow: 0 0 2px red;
+}
+
+.date-range-picker-panel {
+    display: inline-block;
+    vertical-align: top;
+}
+
+.date-range-picker-panel-focused {
+    border-color: blue;
+}
+
+.date-range-picker-panel-rtl {
+    direction: rtl;
+}
+
+.date-range-picker-suffix-icon {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    padding: 0 8px;
+    transform: translateY(-50%);
+    cursor: pointer;
+    @apply univer-text-gray-600;
+}
+
+/* Shared Panels */
+.date-range-picker-decade-panel,
+.date-range-picker-year-panel,
+.date-range-picker-month-panel,
+.date-range-picker-week-panel,
+.date-range-picker-date-panel,
+.date-range-picker-time-panel {
+    display: flex;
+    flex-direction: column;
+}
+
+.date-range-picker-decade-panel table,
+.date-range-picker-year-panel table,
+.date-range-picker-month-panel table,
+.date-range-picker-week-panel table,
+.date-range-picker-date-panel table,
+.date-range-picker-time-panel table {
+    text-align: center;
+    border-collapse: collapse;
+}
+
+/* Header */
+.date-range-picker-header {
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+}
+
+.date-range-picker-header > * {
+    flex: none;
+}
+
+.date-range-picker-header-view {
+    height: 16px;
+    flex: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
+
+.date-range-picker-header-view > button {
+    padding: 0;
+    border: 0;
+    background-color: transparent;
+    cursor: pointer;
+}
+
+.date-range-picker-header-super-prev-btn,
+.date-range-picker-header-super-next-btn,
+.date-range-picker-header-prev-btn,
+.date-range-picker-header-next-btn {
+    width: 16px;
+    height: 16px;
+    padding: 0;
+    line-height: 16px;
+    font-size: 16px;
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+}
+
+/* Content */
+.date-range-picker-cell {
+    color: #aaa;
+}
+
+.date-range-picker-cell-disabled {
+    opacity: 0.2;
+}
+
+.date-range-picker-cell-inner {
+    display: inline-block;
+    box-sizing: border-box;
+    width: 100%;
+    height: 24px;
+    margin: 0;
+    padding: 0;
+    font-size: 12px;
+    line-height: 24px;
+    background: transparent;
+    border: 0;
+    border-radius: 4px;
+    outline: none;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.date-range-picker-cell-in-view {
+    color: #333;
+}
+
+.date-range-picker-cell-in-range > .date-range-picker-cell-inner {
+    background: rgba(0, 0, 255, 0.05);
+}
+
+.date-range-picker-cell-hover > .date-range-picker-cell-inner {
+    @apply univer-bg-gray-100;
+}
+
+.date-range-picker-cell-range-hover-start::after,
+.date-range-picker-cell-range-hover-end::after,
+.date-range-picker-cell-range-hover::after {
+    position: absolute;
+    top: 3px;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    border: 1px solid green;
+    border-right: 0;
+    border-left: 0;
+    content: '';
+    pointer-events: none;
+}
+
+.date-range-picker-cell-range-hover-start::after {
+    border-left: 1px solid green !important;
+}
+
+.date-range-picker-cell-range-hover-end::after {
+    border-right: 1px solid green !important;
+}
+
+.date-range-picker-cell-today > .date-range-picker-cell-inner {
+    @apply univer-border univer-border-solid univer-border-primary-600;
+}
+
+.date-range-picker-cell-range-start > .date-range-picker-cell-inner,
+.date-range-picker-cell-range-end > .date-range-picker-cell-inner,
+.date-range-picker-cell-selected > .date-range-picker-cell-inner {
+    color: #fff;
+    @apply univer-bg-primary-600;
+}
+
+/* Preset */
+.date-range-picker-presets {
+    background: #ccccff;
+}
+
+.date-range-picker-presets ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+/* Now Button */
+.date-range-picker-now {
+    padding-top: 12px;
+}
+
+.date-range-picker-now-btn {
+    font-size: 13px;
+    cursor: pointer;
+    @apply univer-text-primary-600;
+}
+
+/* Footer */
+.date-range-picker-footer,
+.date-range-picker-picker-footer {
+    margin-top: 12px;
+    @apply univer-border-0 univer-border-t univer-border-solid univer-border-t-gray-200;
+}
+
+/* Dropdown */
+.date-range-picker-dropdown {
+    position: absolute;
+    pointer-events: none;
+}
+
+.date-range-picker-dropdown-range {
+    padding: 10px 0;
+}
+
+.date-range-picker-dropdown-hidden {
+    display: none;
+}
+
+/* Range Picker */
+.date-range-picker-range {
+    position: relative;
+    display: inline-flex;
+}
+
+.date-range-picker-range-wrapper {
+    display: flex;
+}
+
+.date-range-picker-active-bar {
+    bottom: 0;
+    height: 3px;
+    opacity: 0;
+    transition: all 0.3s;
+    pointer-events: none;
+    @apply univer-bg-primary-600;
+}
+
+.date-range-picker-focused .date-range-picker-active-bar {
+    opacity: 1;
+}
+
+.date-range-picker-panel-container {
+    display: inline-block;
+    vertical-align: top;
+    transition: margin 0.3s;
+    pointer-events: all;
+}
+
+.date-range-picker-panel-layout {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    overflow: hidden;
+    @apply univer-bg-white univer-border univer-border-solid univer-border-gray-200 univer-rounded univer-shadow univer-p-4;
+}
+
+/* Input */
+.date-range-picker-input {
+    position: relative;
+    display: inline-flex;
+    width: 100%;
+}
+
+.date-range-picker-input > input {
+    width: 100%;
+    padding-left: 12px;
+    border: none;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.date-range-picker-input > input:focus {
+    outline: none;
+}

@@ -20,7 +20,7 @@ import React, { useContext } from 'react';
 import { clsx } from '../../helper/clsx';
 import { ConfigContext } from '../config-provider/ConfigProvider';
 import { Tooltip } from '../tooltip';
-import styles from './index.module.less';
+import styles from './index.module.css';
 
 /** @deprecated */
 export const Menu = React.forwardRef<MenuRef, MenuProps & { wrapperClass?: string }>((props, ref) => {
@@ -76,16 +76,16 @@ export function TinyMenuGroup({ items }: ITinyMenuGroupProps) {
                 const ele = (
                     <div
                         key={item.key}
-                        onClick={() => item.onClick()}
                         className={`
-                          univer-flex univer-h-6 univer-w-6 univer-cursor-pointer univer-items-center
-                          univer-justify-center univer-rounded-md
-                          hover:univer-bg-[#EEEFF1]
-                          ${item.active ? 'univer-bg-[#EEEFF1]' : ''}
+                          univer-flex univer-size-6 univer-cursor-pointer univer-items-center univer-justify-center
+                          univer-rounded-md
+                          hover:univer-bg-gray-50
+                          ${item.active ? 'univer-bg-gray-50' : ''}
                           ${item.className}
                         `}
+                        onClick={() => item.onClick()}
                     >
-                        <item.Icon className="univer-h-4 univer-w-4 univer-text-[#181C2A]" />
+                        <item.Icon className="univer-size-4 univer-text-gray-900" />
                     </div>
                 );
                 return item.tooltip

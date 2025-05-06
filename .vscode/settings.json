@@ -198,7 +198,6 @@
         "jsonc",
         "yaml",
         "toml",
-        "less",
         "css"
     ],
 

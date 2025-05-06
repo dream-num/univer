@@ -15,7 +15,7 @@
  */
 
 import type { ISheetDataValidationRule } from '@univerjs/core';
-import { ColorKit, ICommandService, ThemeService } from '@univerjs/core';
+import { ColorKit, get, ICommandService, ThemeService } from '@univerjs/core';
 import { DataValidatorRegistryService } from '@univerjs/data-validation';
 import { clsx } from '@univerjs/design';
 import { serializeRange } from '@univerjs/engine-formula';
@@ -44,7 +44,11 @@ export const DataValidationItem = (props: IDataValidationDetailProps) => {
     const themeService = useDependency(ThemeService);
     const theme = useObservable(themeService.currentTheme$);
     const style = useMemo(() => {
-        const color = theme?.loopColor2 ?? '#49B811';
+        const defaultColor = get(theme, 'primary.600');
+        const key = get(theme, 'loop-color.2');
+        if (!key) throw new Error('theme.loop-color.2 is not defined');
+        const color = get(theme, key, defaultColor);
+
         const rgb = new ColorKit(color).toRgb();
         return {
             fill: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.1)`,

@@ -25,6 +25,7 @@ import {
     FOCUSING_SHEET,
     FontItalic,
     FontWeight,
+    get,
     HorizontalAlign,
     ICommandService,
     IContextService,
@@ -540,7 +541,8 @@ export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSele
             },
         ],
         value$: new Observable<string>((subscriber) => {
-            const defaultValue = themeService.getCurrentTheme().textColor;
+            const theme = themeService.getCurrentTheme();
+            const defaultValue = get(theme, 'gray.900');
             const disposable = commandService.onCommandExecuted((c) => {
                 if (c.id === SetRangeTextColorCommand.id) {
                     const color = (c.params as { value: string }).value;
@@ -585,7 +587,8 @@ export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMe
             },
         ],
         value$: new Observable<string>((subscriber) => {
-            const defaultValue = themeService.getCurrentTheme().primaryColor;
+            const theme = themeService.getCurrentTheme();
+            const defaultValue = get(theme, 'primary.600');
             const disposable = commandService.onCommandExecuted((c) => {
                 if (c.id === SetBackgroundColorCommand.id) {
                     const color = (c.params as { value: string }).value;

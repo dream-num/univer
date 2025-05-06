@@ -24,14 +24,15 @@ import type {
     Injector,
     IRange,
     IRangeWithCoord,
-    IStyleSheet,
     Nullable,
 } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, IRenderModule, Scene, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
 import type { ISelectionStyle, ISelectionWithCoord, ISelectionWithStyle } from '@univerjs/sheets';
+import type { Theme } from '@univerjs/themes';
 import type { IShortcutService } from '@univerjs/ui';
 import type { Observable, Subscription } from 'rxjs';
 import type { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
+
 import {
     convertCellToRange,
     createIdentifier,
@@ -40,7 +41,6 @@ import {
     RANGE_TYPE,
     ThemeService,
 } from '@univerjs/core';
-
 import { ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 import { REF_SELECTIONS_ENABLED, SELECTIONS_ENABLED } from '@univerjs/sheets';
 import { BehaviorSubject, Subject } from 'rxjs';
@@ -315,13 +315,13 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     }
 
     _initSelectionThemeFromThemeService() {
-        const currTheme = this._themeService.getCurrentTheme();
+        const theme = this._themeService.getCurrentTheme();
         this._selectionTheme = new ThemeService();
-        this._selectionTheme.setTheme(currTheme);
+        this._selectionTheme.setTheme(theme);
     }
 
-    setSelectionTheme(prop: IStyleSheet) {
-        this._selectionTheme.setTheme(prop);
+    setSelectionTheme(theme: Theme) {
+        this._selectionTheme.setTheme(theme);
     }
 
     protected _changeRuntime(skeleton: SpreadsheetSkeleton, scene: Scene, viewport?: Viewport): void {
@@ -481,6 +481,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
      * @param moveStartPosX
      * @param moveStartPosY
      */
+    // eslint-disable-next-line max-lines-per-function
     protected _setupPointerMoveListener(
         viewportMain: Nullable<Viewport>,
         activeSelectionControl: SelectionControl,
@@ -500,7 +501,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         const startViewport = scene.getActiveViewportByCoord(Vector2.FromArray([moveStartPosX, moveStartPosY]));
 
         // #region onPointerMove$
-        // eslint-disable-next-line complexity
+        // eslint-disable-next-line max-lines-per-function, complexity
         this._scenePointerMoveSub = scene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
             const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
 

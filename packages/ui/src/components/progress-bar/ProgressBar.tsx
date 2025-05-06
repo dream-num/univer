@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-import { ThemeService } from '@univerjs/core';
 import { clsx, Tooltip } from '@univerjs/design';
 import { CloseSingle } from '@univerjs/icons';
 import { useEffect, useRef, useState } from 'react';
-import { useDependency } from '../../utils/di';
 
 export interface IProgressBarProps {
     progress: { done: number; count: number; label?: string };
@@ -30,9 +28,6 @@ export interface IProgressBarProps {
 export function ProgressBar(props: IProgressBarProps) {
     const { barColor, progress, onTerminate, onClearProgress } = props;
     const { count, done, label = '' } = progress;
-
-    const themeService = useDependency(ThemeService);
-    const color = barColor ?? themeService.getCurrentTheme().primaryColor; ;
 
     const progressBarInnerRef = useRef<HTMLDivElement>(null!);
     const [visible, setVisible] = useState(false);
@@ -99,9 +94,9 @@ export function ProgressBar(props: IProgressBarProps) {
             <div className="univer-h-1 univer-w-40 univer-overflow-hidden univer-rounded-lg univer-bg-gray-200">
                 <div
                     ref={progressBarInnerRef}
-                    className="univer-h-full univer-transition-[width]"
+                    className="univer-h-full univer-bg-primary-600 univer-transition-[width]"
                     style={{
-                        backgroundColor: color,
+                        backgroundColor: barColor,
                     }}
                 />
             </div>

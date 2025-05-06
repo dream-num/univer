@@ -25,6 +25,7 @@ import {
     LocaleType,
     LogLevel,
     Plugin,
+    set,
     ThemeService,
     Univer,
     UniverInstanceType,
@@ -161,7 +162,9 @@ export function createWorksheetTestBed(workbookData?: IWorkbookData, dependencie
 
     // load theme service
     const themeService = injector.get(ThemeService);
-    themeService.setTheme({ colorBlack: '#35322b' });
+    const theme = themeService.getCurrentTheme();
+    const newTheme = set(theme, 'black', '#35322b');
+    themeService.setTheme(newTheme);
 
     // register builtin plugins
     // note that UI plugins are not registered here, because the unit test environment does not have a UI

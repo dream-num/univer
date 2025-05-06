@@ -90,6 +90,7 @@
         "@univerjs/protocol": "0.1.45",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/telemetry": "workspace:*",
+        "@univerjs/themes": "workspace:*",
         "@univerjs/ui": "workspace:*"
     },
     "devDependencies": {

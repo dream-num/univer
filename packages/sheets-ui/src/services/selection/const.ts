@@ -17,7 +17,7 @@
 import type { ThemeService } from '@univerjs/core';
 import type { Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { ISelectionStyle } from '@univerjs/sheets';
-import { ColorKit, createInterceptorKey } from '@univerjs/core';
+import { ColorKit, createInterceptorKey, get } from '@univerjs/core';
 
 export const RANGE_MOVE_PERMISSION_CHECK = createInterceptorKey<boolean, null>('rangeMovePermissionCheck');
 export const RANGE_FILL_PERMISSION_CHECK = createInterceptorKey<boolean, { x: number; y: number; skeleton: SpreadsheetSkeleton; scene: Scene }>('rangeFillPermissionCheck');
@@ -28,28 +28,30 @@ export enum SELECTION_SHAPE_DEPTH {
 };
 
 export function genNormalSelectionStyle(themeService: ThemeService): ISelectionStyle {
-    const styleSheet = themeService.getCurrentTheme();
-    const fill = new ColorKit(styleSheet.primaryColor).setAlpha(0.07).toRgbString();
+    const theme = themeService.getCurrentTheme();
+    const primaryColor = get(theme, 'primary.600');
+    const whiteColor = get(theme, 'white');
+    const fill = new ColorKit(primaryColor).setAlpha(0.07).toRgbString();
     return {
         strokeWidth: 1,
-        stroke: styleSheet.primaryColor,
+        stroke: primaryColor,
         fill,
         // widgets: { tl: true, tc: true, tr: true, ml: true, mr: true, bl: true, bc: true, br: true },
         widgets: {},
         widgetSize: 6,
         widgetStrokeWidth: 1,
-        widgetStroke: styleSheet.colorWhite,
+        widgetStroke: whiteColor,
 
         autofillSize: 6,
         autofillStrokeWidth: 1,
-        autofillStroke: styleSheet.colorWhite,
+        autofillStroke: whiteColor,
 
         rowHeaderFill: fill,
-        rowHeaderStroke: styleSheet.primaryColor,
+        rowHeaderStroke: primaryColor,
         rowHeaderStrokeWidth: 1,
 
         columnHeaderFill: fill,
-        columnHeaderStroke: styleSheet.primaryColor,
+        columnHeaderStroke: primaryColor,
         columnHeaderStrokeWidth: 1,
 
         expandCornerSize: 40,

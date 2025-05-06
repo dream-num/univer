@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import { ICommandService, IContextService, Inject, ThemeService } from '@univerjs/core';
-import { type IMouseEvent, type IPointerEvent, type IShapeProps, Shape, type UniverRenderingContext2D } from '@univerjs/engine-render';
+import type { IMouseEvent, IPointerEvent, IShapeProps, UniverRenderingContext2D } from '@univerjs/engine-render';
+import type { IOpenFilterPanelOperationParams } from '../../commands/operations/sheets-filter.operation';
+import { get, ICommandService, IContextService, Inject, ThemeService } from '@univerjs/core';
 
-import { FILTER_PANEL_OPENED_KEY, type IOpenFilterPanelOperationParams, OpenFilterPanelOperation } from '../../commands/operations/sheets-filter.operation';
+import { Shape } from '@univerjs/engine-render';
+import { FILTER_PANEL_OPENED_KEY, OpenFilterPanelOperation } from '../../commands/operations/sheets-filter.operation';
 import { FilterButton } from './drawings';
 
 export const FILTER_ICON_SIZE = 16;
@@ -90,9 +92,10 @@ export class SheetsFilterButtonShape extends Shape<ISheetsFilterButtonShapeProps
         ctx.clip(cellRegion);
 
         const { hasCriteria } = this._filterParams!;
-        const fgColor = this._themeService.getCurrentTheme().primaryColor;
+        const theme = this._themeService.getCurrentTheme();
+        const fgColor = get(theme, 'primary.600');
         const bgColor = this._hovered
-            ? this._themeService.getCurrentTheme().grey50
+            ? get(theme, 'gray.50')
             : 'rgba(255, 255, 255, 1.0)';
 
         if (hasCriteria) {

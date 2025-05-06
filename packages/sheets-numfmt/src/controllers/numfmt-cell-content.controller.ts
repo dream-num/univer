@@ -25,6 +25,7 @@ import type { IUniverSheetsNumfmtConfig } from './config.schema';
 import {
     CellValueType,
     Disposable,
+    get,
     ICommandService,
     IConfigService,
     Inject,
@@ -174,7 +175,8 @@ export class SheetsNumfmtCellContentController extends Disposable {
 
                 const res: ICellDataForSheetInterceptor = { v: numfmtRes, t: CellValueType.NUMBER };
                 if (info.color) {
-                    const color = this._themeService.getCurrentTheme()[`${info.color}500`];
+                    const theme = this._themeService.getCurrentTheme();
+                    const color = get(theme, `${info.color}.500`);
 
                     if (color) {
                         res.interceptorStyle = { cl: { rgb: color } };

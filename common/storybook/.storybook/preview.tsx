@@ -40,7 +40,7 @@ import {
     ThemeService,
     UniverInstanceService,
 } from '@univerjs/core';
-import { ConfigProvider, defaultTheme, greenTheme, themeInstance } from '@univerjs/design';
+import { ConfigProvider } from '@univerjs/design';
 import enUS from '@univerjs/design/locale/en-US';
 import zhCN from '@univerjs/design/locale/zh-CN';
 import { DesktopLocalStorageService, RediContext } from '@univerjs/ui';
@@ -49,8 +49,8 @@ import React, { useMemo } from 'react';
 import './global.css';
 
 export const themes: Record<string, Record<string, string>> = {
-    default: defaultTheme,
-    green: greenTheme,
+    // default: defaultTheme,
+    // green: greenTheme,
 };
 
 const preview: Preview = {
@@ -104,7 +104,7 @@ const preview: Preview = {
     },
 
     decorators: [(Story, context) => {
-        themeInstance.setTheme(document.body, themes[context.globals.theme]);
+        // themeInstance.setTheme(document.body, themes[context.globals.theme]);
         const designLocale = context.globals.i18n === LocaleType.ZH_CN ? zhCN.design : enUS.design;
 
         if (context.globals.darkMode === 'dark') {

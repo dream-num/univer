@@ -45,7 +45,6 @@ export { type ITooltipProps, Tooltip } from './components/tooltip';
 export { filterLeafNode, findNodePathFromTree, findSubTreeFromPath, type ITreeNodeProps, type ITreeProps, mergeTreeSelected, Tree, TreeSelectionMode } from './components/tree';
 export { Switch } from './components/switch';
 export { type ILocale } from './locale/interface';
-export { themeInstance } from './themes';
 export { DraggableList, type IDraggableListProps } from './components/draggable-list';
 export { clsx } from './helper/clsx';
 export { resizeObserverCtor } from './helper/resize-observer';

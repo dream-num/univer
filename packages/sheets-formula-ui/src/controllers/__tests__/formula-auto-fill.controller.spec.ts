@@ -20,6 +20,7 @@ import {
     IUniverInstanceService,
     RANGE_TYPE,
     RedoCommand,
+    set,
     ThemeService,
     UndoCommand,
 } from '@univerjs/core';
@@ -46,10 +47,6 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { FormulaAutoFillController } from '../formula-auto-fill.controller';
 import { createCommandTestBed } from './create-command-test-bed';
-
-const theme = {
-    colorBlack: '#35322b',
-};
 
 class mockSheetsRenderService {
     registerSkeletonChangingMutations(id: string) {
@@ -86,7 +83,10 @@ describe('Test auto fill with formula', () => {
 
         commandService = get(ICommandService);
         themeService = get(ThemeService);
-        themeService.setTheme(theme);
+        const theme = themeService.getCurrentTheme();
+        const newTheme = set(theme, 'black', '#35322b');
+        themeService.setTheme(newTheme);
+
         get(AutoFillController);
 
         commandService.registerCommand(SetRangeValuesMutation);

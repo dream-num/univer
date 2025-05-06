@@ -17,8 +17,8 @@
 import type { Meta } from '@storybook/react';
 
 import type { Dependency } from '@univerjs/core';
-import { LocaleService, LocaleType, ThemeService } from '@univerjs/core';
-import { ColorPicker, defaultTheme } from '@univerjs/design';
+import { LocaleService, LocaleType } from '@univerjs/core';
+import { ColorPicker } from '@univerjs/design';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { ComponentManager, DesktopLayoutService, FontFamily, FontFamilyItem, FontSize, ILayoutService, IMenuManagerService, MenuManagerService, RediContext } from '@univerjs/ui';
@@ -82,8 +82,6 @@ export const Playground = {
 
         useEffect(() => {
             if (!inject) return;
-            const themeService = inject.get(ThemeService);
-            themeService.setTheme(defaultTheme);
 
             const componentManager = inject.get(ComponentManager);
             componentManager.register(COLOR_PICKER_COMPONENT, ColorPicker);

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IFreeze, IRange, IStyleSheet, IWorksheetData, Nullable, Workbook } from '@univerjs/core';
+import type { ICommandInfo, IFreeze, IRange, IWorksheetData, Nullable, Workbook } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, Viewport } from '@univerjs/engine-render';
 import type {
     IInsertColCommandParams,
@@ -29,12 +29,14 @@ import type {
     ISetWorksheetRowAutoHeightMutationParams,
     ISetWorksheetRowHeightMutationParams,
 } from '@univerjs/sheets';
+import type { Theme } from '@univerjs/themes';
 import type { IViewportScrollState } from '../../services/scroll-manager.service';
 import {
     ColorKit,
     createInterceptorKey,
     Direction,
     Disposable,
+    get,
     ICommandService,
     Inject,
     Injector,
@@ -43,8 +45,8 @@ import {
     ThemeService,
     toDisposable,
 } from '@univerjs/core';
-import { CURSOR_TYPE, Rect, SHEET_VIEWPORT_KEY, TRANSFORM_CHANGE_OBSERVABLE_TYPE, Vector2 } from '@univerjs/engine-render';
 
+import { CURSOR_TYPE, Rect, SHEET_VIEWPORT_KEY, TRANSFORM_CHANGE_OBSERVABLE_TYPE, Vector2 } from '@univerjs/engine-render';
 import {
     InsertColCommand,
     InsertRangeMoveDownCommand,
@@ -70,8 +72,8 @@ import {
 } from '@univerjs/sheets';
 import { Subscription } from 'rxjs';
 import { SetColumnHeaderHeightCommand, SetRowHeaderWidthCommand } from '../../commands/commands/headersize-changed.command';
-import { ScrollCommand } from '../../commands/commands/set-scroll.command';
 
+import { ScrollCommand } from '../../commands/commands/set-scroll.command';
 import { SetZoomRatioOperation } from '../../commands/operations/set-zoom-ratio.operation';
 import { SHEET_COMPONENT_HEADER_LAYER_INDEX } from '../../common/keys';
 import { SheetScrollManagerService } from '../../services/scroll-manager.service';
@@ -1186,24 +1188,24 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
     private _themeChangeListener() {
         this._themeChange(this._themeService.getCurrentTheme());
         this.disposeWithMe(
-            this._themeService.currentTheme$.subscribe((style) => {
+            this._themeService.currentTheme$.subscribe((theme) => {
                 this._clearFreeze();
-                this._themeChange(style);
+                this._themeChange(theme);
                 this._refreshCurrent();
             })
         );
     }
 
-    private _themeChange(style: IStyleSheet) {
-        this._freezeNormalHeaderColor = style.grey400;
+    private _themeChange(theme: Theme) {
+        this._freezeNormalHeaderColor = get(theme, 'gray.300');
 
-        this._freezeNormalMainColor = new ColorKit(style.grey400)
+        this._freezeNormalMainColor = new ColorKit(this._freezeNormalHeaderColor)
             .setAlpha(AUXILIARY_CLICK_HIDDEN_OBJECT_TRANSPARENCY)
             .toRgbString();
 
-        this._freezeActiveColor = style.primaryColor;
+        this._freezeActiveColor = get(theme, 'primary.600');
 
-        this._freezeHoverColor = style.grey500;
+        this._freezeHoverColor = get(theme, 'gray.500');
     }
 
     // eslint-disable-next-line max-lines-per-function

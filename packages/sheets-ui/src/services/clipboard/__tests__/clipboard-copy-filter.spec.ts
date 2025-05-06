@@ -16,7 +16,7 @@
 
 import type { ICellData, Injector, Nullable, Univer } from '@univerjs/core';
 import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
-import { ICommandService, IUniverInstanceService, LocaleType, RANGE_TYPE, ThemeService } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, LocaleType, RANGE_TYPE, set, ThemeService } from '@univerjs/core';
 import {
     AddWorksheetMergeMutation,
     RemoveWorksheetMergeMutation,
@@ -31,9 +31,6 @@ import { SheetCopyCommand, SheetPasteCommand } from '../../../commands/commands/
 import { ISheetClipboardService } from '../clipboard.service';
 import { clipboardTestBed } from './clipboard-test-bed';
 
-const theme = {
-    colorBlack: '#35322b',
-};
 describe('Test clipboard', () => {
     let univer: Univer;
     let get: Injector['get'];
@@ -98,7 +95,9 @@ describe('Test clipboard', () => {
         sheetClipboardService = get(ISheetClipboardService);
 
         themeService = get(ThemeService);
-        themeService.setTheme(theme);
+        const theme = themeService.getCurrentTheme();
+        const newTheme = set(theme, 'black', '#35322b');
+        themeService.setTheme(newTheme);
         getValues = (
             startRow: number,
             startColumn: number,

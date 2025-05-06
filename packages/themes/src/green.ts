@@ -14,20 +14,22 @@
  * limitations under the License.
  */
 
-const defaultTheme = {
+import type { Theme } from './default';
+
+const greenTheme: Theme = {
     white: '#FFFFFF',
     black: '#000000',
     primary: {
-        50: '#F3F5FF',
-        100: '#E9EDFF',
-        200: '#D2DAFA',
-        300: '#BAC6F8',
-        400: '#6280F9',
-        500: '#466AF7',
-        600: '#2C53F1',
-        700: '#143EE3',
-        800: '#083AD1',
-        900: '#1033BF',
+        50: '#F3FAF7',
+        100: '#DEF7EC',
+        200: '#BCF0DA',
+        300: '#84E1BC',
+        400: '#31C48D',
+        500: '#0DA471',
+        600: '#057A55',
+        700: '#046C4E',
+        800: '#03543F',
+        900: '#014737',
     },
     gray: {
         50: '#F9FAFB',
@@ -165,5 +167,4 @@ const defaultTheme = {
     },
 };
 
-export type Theme = typeof defaultTheme;
-export default defaultTheme;
+export default greenTheme;

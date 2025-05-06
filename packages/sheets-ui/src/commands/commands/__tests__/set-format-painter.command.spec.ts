@@ -22,6 +22,7 @@ import {
     IUniverInstanceService,
     LocaleType,
     RedoCommand,
+    set,
     ThemeService,
     UndoCommand,
     UniverInstanceType,
@@ -48,10 +49,6 @@ import {
     SetOnceFormatPainterCommand,
 } from '../set-format-painter.command';
 import { createCommandTestBed } from './create-command-test-bed';
-
-const theme = {
-    colorBlack: '#35322b',
-};
 
 const TEST_WORKBOOK_DATA = {
     id: 'workbook-01',
@@ -230,7 +227,9 @@ describe('Test format painter rules in controller', () => {
 
         commandService = get(ICommandService);
         themeService = get(ThemeService);
-        themeService.setTheme(theme);
+        const theme = themeService.getCurrentTheme();
+        const newTheme = set(theme, 'black', '#35322b');
+        themeService.setTheme(newTheme);
 
         get(FormatPainterController);
         commandService.registerCommand(SetFormatPainterOperation);

@@ -3354,9 +3354,6 @@ importers:
       '@univerjs/icons':
         specifier: ^0.3.24
         version: 0.3.24(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
-      '@univerjs/themes':
-        specifier: workspace:*
-        version: link:../themes
       '@wendellhu/redi':
         specifier: 0.18.0
         version: 0.18.0
@@ -3370,6 +3367,9 @@ importers:
       '@univerjs-infra/shared':
         specifier: workspace:*
         version: link:../../common/shared
+      '@univerjs/themes':
+        specifier: workspace:*
+        version: link:../themes
       postcss:
         specifier: ^8.5.3
         version: 8.5.3

@@ -91,7 +91,7 @@ export function DropdownWrapper(props: Omit<Partial<IDropdownProps>, 'overlay'> 
         <Dropdown
             align={align}
             overlay={(
-                <div className="univer-grid univer-gap-2 univer-theme">
+                <div className="univer-grid univer-gap-2">
                     {overlay}
                 </div>
             )}

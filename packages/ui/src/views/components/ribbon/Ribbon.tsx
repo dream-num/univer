@@ -56,7 +56,7 @@ export function Ribbon(props: IRibbonProps) {
     [&>*:last-child:after]:univer-top-1/2 [&>*:last-child:after]:univer-h-5 [&>*:last-child:after]:univer-translate-x-[3px]
     [&>*:last-child:after]:univer-w-px [&>*:last-child:after]:-univer-translate-y-1/2
     [&>*:last-child:after]:univer-bg-gray-200 [&>*:last-child:after]:univer-content-['']
-    [&>*:last-child]:univer-relative`;
+    [&>*:last-child]:univer-relative dark:[&>*:last-child:after]:univer-bg-gray-600`;
 
     const handleSelectTab = useCallback((group: IMenuSchema) => {
         toolbarItemRefs.current = {};

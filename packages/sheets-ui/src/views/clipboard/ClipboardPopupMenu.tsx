@@ -137,9 +137,11 @@ export const ClipboardPopupMenu = () => {
     return (
         <div
             className={`
-              univer-absolute univer-cursor-pointer univer-items-center univer-justify-center univer-rounded
-              univer-border univer-border-solid univer-border-gray-200 univer-p-1
+              univer-absolute univer-z-[1080] univer-flex univer-cursor-pointer univer-items-center
+              univer-justify-center univer-gap-2 univer-rounded univer-border univer-border-solid univer-border-gray-200
+              univer-bg-white univer-p-1
               dark:univer-border-gray-700
+              hover:univer-bg-gray-100
             `}
             style={{
                 left: relativePosition.positionX + DEFAULT_PADDING,
@@ -149,56 +151,48 @@ export const ClipboardPopupMenu = () => {
             onMouseLeave={() => setMenuHovered(false)}
         >
             <Dropdown
+                align="start"
                 overlay={(
-                    <div
-                        // TODO: a query here?
-                        className={`
-                          univer-border univer-border-solid univer-border-gray-200 univer-opacity-100 univer-shadow
-                          dark:univer-border-gray-700
-                        `}
-                    >
-                        <ul>
-                            {SheetPasteOptions.map((item) => {
-                                const itemType = PREDEFINED_HOOK_NAME[item.value as IPasteHookKeyType];
-                                const selected = pasteOptionsCache?.pasteType === itemType;
-                                return (
-                                    <li
-                                        key={item.value}
+                    <ul className="univer-m-0 univer-list-none univer-p-1.5">
+                        {SheetPasteOptions.map((item) => {
+                            const itemType = PREDEFINED_HOOK_NAME[item.value as IPasteHookKeyType];
+                            const selected = pasteOptionsCache?.pasteType === itemType;
+                            return (
+                                <li
+                                    key={item.value}
+                                    className={`
+                                      univer-cursor-pointer univer-rounded univer-px-2 univer-py-1.5
+                                      univer-transition-colors
+                                      dark:univer-border-gray-700
+                                      hover:univer-bg-gray-100
+                                    `}
+                                    onClick={() => handleClick(item.value)}
+                                >
+                                    <span>
+                                        {selected && (
+                                            <CheckMarkSingle className="univer-absolute" style={{ color: 'rgb(var(--green-700, #409f11))' }} />
+                                        )}
+                                    </span>
+                                    <div
                                         className={`
-                                          univer-rounded univer-border univer-border-solid univer-border-gray-200
-                                          univer-shadow
-                                          dark:univer-border-gray-700
-                                          hover:univer-bg-neutral-100
+                                          univer-ml-5 univer-text-sm univer-text-gray-700
+                                          dark:univer-text-white
                                         `}
-                                        onClick={() => handleClick(item.value)}
                                     >
-                                        <span>
-                                            {selected && (
-                                                <CheckMarkSingle className="univer-absolute" style={{ color: 'rgb(var(--green-700, #409f11))' }} />
-                                            )}
-                                        </span>
-                                        <div
-                                            className={`
-                                              univer-ml-5 univer-text-sm univer-text-gray-700
-                                              dark:univer-text-white
-                                            `}
-                                        >
-                                            {localeService.t(item.label)}
-                                        </div>
-                                    </li>
-                                );
-                            })}
-                        </ul>
-                    </div>
+                                        {localeService.t(item.label)}
+                                    </div>
+                                </li>
+                            );
+                        })}
+                    </ul>
                 )}
                 open={menuVisible}
                 onOpenChange={setMenuVisible}
             >
-
                 <div
                     className={`
                       univer-flex univer-cursor-pointer univer-content-center univer-items-center univer-rounded
-                      univer-border univer-border-solid univer-border-gray-200 univer-py-1
+                      univer-py-1
                       dark:univer-border-gray-700
                     `}
                     onClick={() => {
@@ -206,8 +200,7 @@ export const ClipboardPopupMenu = () => {
                     }}
                 >
                     <PasteSpecial
-                        style={{ color: '#35322B' }}
-                        extend={{ colorChannel1: 'rgb(var(--green-700))' }}
+                        className="univer-fill-primary-600 univer-text-gray-900"
                     />
                     {iconVisible && <MoreDownSingle />}
                 </div>

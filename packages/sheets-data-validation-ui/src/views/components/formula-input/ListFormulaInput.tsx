@@ -20,8 +20,8 @@ import type { IFormulaEditorRef } from '@univerjs/sheets-formula-ui';
 import type { CSSProperties } from 'react';
 import { DataValidationType, isFormulaString, LocaleService, Tools } from '@univerjs/core';
 import { DataValidationModel, DataValidatorRegistryService } from '@univerjs/data-validation';
-import { clsx, DraggableList, FormLayout, Input, LegacySelect, Radio, RadioGroup } from '@univerjs/design';
-import { DeleteSingle, IncreaseSingle, SequenceSingle } from '@univerjs/icons';
+import { clsx, DraggableList, Dropdown, FormLayout, Input, Radio, RadioGroup } from '@univerjs/design';
+import { DeleteSingle, IncreaseSingle, MoreDownSingle, SequenceSingle } from '@univerjs/icons';
 import { DataValidationFormulaController, deserializeListOptions, serializeListOptions } from '@univerjs/sheets-data-validation';
 import { FormulaEditor } from '@univerjs/sheets-formula-ui';
 import { useDependency, useEvent, useObservable, useSidebarClick } from '@univerjs/ui';
@@ -72,54 +72,59 @@ interface IColorSelectProps {
 const ColorSelect = (props: IColorSelectProps) => {
     const { value, onChange, disabled } = props;
     const [open, setOpen] = useState(false);
+
     return (
-        <LegacySelect
+        <Dropdown
+            align="start"
             disabled={disabled}
             open={open}
-            onDropdownVisibleChange={setOpen}
-            dropdownStyle={{ width: 112 }}
-            style={{ width: 96, cursor: 'pointer' }}
-            className="univer-ml-1 univer-mr-2 univer-w-[92px]"
-            value={value}
-            onChange={onChange}
-            labelRender={(item) => (
+            onOpenChange={setOpen}
+            overlay={(
+                <div
+                    className={`
+                      univer-box-border univer-grid univer-w-fit univer-grid-cols-6 univer-flex-wrap univer-gap-2
+                      univer-p-1.5
+                    `}
+                >
+                    {DEFAULT_COLOR_PRESET.map(
+                        (color) => (
+                            <div
+                                key={color}
+                                className={`
+                                  univer-box-border univer-size-4 univer-cursor-pointer univer-rounded univer-border
+                                  univer-border-solid univer-border-gray-200
+                                `}
+                                style={{ background: color }}
+                                onClick={() => {
+                                    onChange(color);
+                                    setOpen(false);
+                                }}
+                            />
+                        )
+                    )}
+                </div>
+            )}
+        >
+            <div
+                className={`
+                  univer-box-border univer-inline-flex univer-h-8 univer-w-16 univer-cursor-pointer univer-items-center
+                  univer-justify-between univer-gap-2 univer-rounded-lg univer-border univer-border-solid
+                  univer-border-gray-200 univer-bg-white univer-px-2.5 univer-transition-colors univer-duration-200
+                  dark:univer-border-gray-600 dark:univer-bg-gray-700 dark:univer-text-white
+                  hover:univer-border-primary-600
+                `}
+            >
                 <div
                     className={`
                       univer-box-border univer-h-4 univer-w-4 univer-rounded univer-border univer-border-gray-200
                       univer-text-base
                     `}
-                    style={{ background: item.value, marginTop: 5 }}
+                    style={{ background: value }}
                 />
-            )}
-            dropdownRender={() => {
-                return (
-                    <div
-                        className={`
-                          univer-box-border univer-flex univer-w-28 univer-flex-row univer-flex-wrap
-                          univer-justify-between univer-p-3 univer-pl-3
-                        `}
-                    >
-                        {DEFAULT_COLOR_PRESET.map(
-                            (color) => (
-                                <div
-                                    onClick={() => {
-                                        onChange(color);
-                                        setOpen(false);
-                                    }}
-                                    className={`
-                                      univer-mb-2 univer-mr-2 univer-box-border univer-box-border univer-h-4 univer-w-4
-                                      univer-cursor-pointer univer-rounded univer-border univer-border-gray-200
-                                      univer-text-base
-                                    `}
-                                    style={{ background: color }}
-                                    key={color}
-                                />
-                            )
-                        )}
-                    </div>
-                );
-            }}
-        />
+
+                <MoreDownSingle className="univer-text-gray-600" />
+            </div>
+        </Dropdown>
     );
 };
 
@@ -128,7 +133,7 @@ const Template = (props: { item: IDropdownItem; commonProps: any; style?: CSSPro
     const { onItemChange, onItemDelete } = commonProps;
 
     return (
-        <div className="univer-flex univer-items-center univer-pb-0.5" style={style}>
+        <div className="univer-flex univer-items-center univer-gap-2" style={style}>
             {!item.isRef
                 ? (
                     <div className={clsx('univer-cursor-move', 'draggableHandle')}>
@@ -148,7 +153,6 @@ const Template = (props: { item: IDropdownItem; commonProps: any; style?: CSSPro
                 onChange={(label) => {
                     onItemChange(item.id, label, item.color);
                 }}
-                inputStyle={{ height: 28 }}
             />
             {item.isRef
                 ? null

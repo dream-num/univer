@@ -151,17 +151,17 @@ export class NumfmtEditorController extends Disposable {
                             context.row,
                             context.col
                         );
-                        const currentNumfmtType = (currentNumfmtValue && getPatternType(currentNumfmtValue.pattern)) ?? '';
-                        const clean = () => {
-                            currentNumfmtValue &&
-                                    this._collectEffectMutation.add(
-                                        context.unitId,
-                                        context.subUnitId,
-                                        context.row,
-                                        context.col,
-                                        null
-                                    );
-                        };
+                        // const currentNumfmtType = (currentNumfmtValue && getPatternType(currentNumfmtValue.pattern)) ?? '';
+                        // const clean = () => {
+                        //     currentNumfmtValue &&
+                        //             this._collectEffectMutation.add(
+                        //                 context.unitId,
+                        //                 context.subUnitId,
+                        //                 context.row,
+                        //                 context.col,
+                        //                 null
+                        //             );
+                        // };
                         if (!value?.v && !value?.p) {
                             return next(value);
                         }
@@ -202,9 +202,10 @@ export class NumfmtEditorController extends Disposable {
                             }
                             const v = Number(numfmtInfo.v);
                             return next({ ...value, p: undefined, v, t: CellValueType.NUMBER });
-                        } else if (['date', 'time', 'datetime', 'percent'].includes(currentNumfmtType) || !isNumeric(content)) {
-                            clean();
                         }
+                        // else if (['date', 'time', 'datetime', 'percent'].includes(currentNumfmtType) || !isNumeric(content)) {
+                        //     clean();
+                        // }
                         return next(value);
                     },
                 })

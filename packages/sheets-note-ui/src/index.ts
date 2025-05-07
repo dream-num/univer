@@ -16,7 +16,7 @@
 
 import './global.css';
 
-export * from './plugin';
+export { type IUniverSheetsNoteUIPluginConfig, UniverSheetsNoteUIPlugin } from './plugin';
 export * from './services/sheets-note-popup.service';
 export * from './views/note';
 export * from './controllers/sheets-note-popup.controller';

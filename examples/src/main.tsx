@@ -15,7 +15,6 @@
  */
 
 import { render } from '@univerjs/design';
-import React from 'react';
 import pkg from '../../package.json';
 
 import './global.css';

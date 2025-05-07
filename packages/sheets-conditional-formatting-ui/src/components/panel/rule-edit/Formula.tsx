@@ -100,6 +100,22 @@ export const FormulaStyleEditor = (props: IStyleEditorProps) => {
             </div>
             <div className="univer-mt-3">
                 <FormulaEditor
+                    ref={formulaEditorRef}
+                    className={`
+                      univer-box-border univer-h-8 univer-w-full univer-cursor-pointer univer-items-center
+                      univer-rounded-lg univer-border univer-border-solid univer-border-gray-200 univer-bg-white
+                      univer-pt-2 univer-transition-colors
+                      [&>div:first-child]:univer-px-2.5
+                      [&>div]:univer-h-5 [&>div]:univer-ring-transparent
+                      dark:univer-border-gray-600 dark:univer-bg-gray-700 dark:univer-text-white
+                      hover:univer-border-primary-600
+                    `}
+                    errorText={formulaError}
+                    isFocus={isFocusFormulaEditor}
+                    initValue={formula as any}
+                    unitId={workbook.getUnitId()}
+                    subUnitId={worksheet?.getSheetId()}
+                    onFocus={() => { setIsFocusFormulaEditor(true); }}
                     onChange={(formula) => {
                         setFormula(formula);
                         _onChange({ style, formula });
@@ -111,15 +127,7 @@ export const FormulaStyleEditor = (props: IStyleEditorProps) => {
                             setFormulaError(undefined);
                         }
                     }}
-                    errorText={formulaError}
-                    onFocus={() => { setIsFocusFormulaEditor(true); }}
-                    isFocus={isFocusFormulaEditor}
-                    initValue={formula as any}
-                    unitId={workbook.getUnitId()}
-                    subUnitId={worksheet?.getSheetId()}
-                    ref={formulaEditorRef}
                 />
-
             </div>
 
             <div className={previewClassName}>

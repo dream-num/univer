@@ -39,18 +39,24 @@ export const SheetTableConditionPanel = (props: IConditionFilterProps) => {
     const { conditionInfo, onChange } = props;
     const localeService = useDependency(LocaleService);
 
-    const [version, setVersion] = useState(Math.random());
     const [conditionVisible, setConditionVisible] = useState(false);
 
     const injector = useDependency(Injector);
 
     const cascaderOptions = getCascaderListOptions(injector);
 
+    const handleConditionInfo = (info: IConditionExpect, type?: ITableConditionTypeEnumWithoutLogic, compare?: IConditionCompareTypeEnum) => {
+        onChange({
+            type: type ?? conditionInfo.type,
+            compare: compare ?? conditionInfo.compare,
+            info,
+        });
+    };
+
     const handleChange = (value: string[]) => {
         const type = value[0] as ITableConditionTypeEnumWithoutLogic;
         const compare = value[1] as IConditionCompareTypeEnum;
         if (compare) {
-            setVersion(Math.random());
             setConditionVisible(false);
         };
         const info: IConditionExpect = {};
@@ -80,14 +86,6 @@ export const SheetTableConditionPanel = (props: IConditionFilterProps) => {
     } else {
         selectType = localeService.t(`sheets-table.condition.${conditionInfo.type}`);
     }
-
-    const handleConditionInfo = (info: IConditionExpect, type?: ITableConditionTypeEnumWithoutLogic, compare?: IConditionCompareTypeEnum) => {
-        onChange({
-            type: type ?? conditionInfo.type,
-            compare: compare ?? conditionInfo.compare,
-            info,
-        });
-    };
 
     const conditionDateOptions = getConditionDateSelect(injector, conditionInfo.compare as TableDateCompareTypeEnum);
 

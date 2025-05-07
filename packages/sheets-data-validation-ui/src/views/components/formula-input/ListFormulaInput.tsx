@@ -357,19 +357,28 @@ export function ListFormulaInput(props: IFormulaInputProps) {
                 ? (
                     <>
                         <FormulaEditor
+                            ref={formulaEditorRef}
+                            className={`
+                              univer-box-border univer-h-8 univer-w-full univer-cursor-pointer univer-items-center
+                              univer-rounded-lg univer-border univer-border-solid univer-border-gray-200 univer-bg-white
+                              univer-pt-2 univer-transition-colors
+                              [&>div:first-child]:univer-px-2.5
+                              [&>div]:univer-h-5 [&>div]:univer-ring-transparent
+                              dark:univer-border-gray-600 dark:univer-bg-gray-700 dark:univer-text-white
+                              hover:univer-border-primary-600
+                            `}
                             initValue={formulaStr as any}
                             unitId={unitId}
                             subUnitId={subUnitId}
                             isFocus={isFocusFormulaEditor}
+                            errorText={(formula1Res || localError) || undefined}
+                            isSupportAcrossSheet
+                            onFocus={() => isFocusFormulaEditorSet(true)}
                             onChange={(v = '') => {
                                 const str = (v ?? '').trim();
                                 setFormulaStrCopy(str);
                                 updateFormula(str);
                             }}
-                            errorText={(formula1Res || localError) || undefined}
-                            onFocus={() => isFocusFormulaEditorSet(true)}
-                            isSupportAcrossSheet
-                            ref={formulaEditorRef}
                         />
                         {refFinalList.length > 0 && (
                             <div style={{ marginTop: '12px' }}>

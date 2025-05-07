@@ -244,16 +244,21 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
                 : (FormulaEditor && (
                     <div
                         className={`
-                          univer-relative univer-mt-4 univer-h-full univer-rounded univer-border univer-border-solid
-                          univer-border-gray-200 univer-px-1.5 univer-transition-all univer-duration-150
+                          univer-relative univer-mt-4 univer-h-full univer-rounded univer-px-1.5 univer-transition-all
+                          univer-duration-150
                         `}
                     >
                         <div className="univer-relative univer-h-8 univer-select-none">
                             <FormulaEditor
                                 ref={formulaEditorRef}
                                 className={`
-                                  univer-h-full
-                                  [&>div]:univer-ring-transparent
+                                  univer-box-border univer-h-8 univer-w-full univer-cursor-pointer univer-items-center
+                                  univer-rounded-lg univer-border univer-border-solid univer-border-gray-200
+                                  univer-bg-white univer-pt-2 univer-transition-colors
+                                  [&>div:first-child]:univer-px-2.5
+                                  [&>div]:univer-h-5 [&>div]:univer-ring-transparent
+                                  dark:univer-border-gray-600 dark:univer-bg-gray-700 dark:univer-text-white
+                                  hover:univer-border-primary-600
                                 `}
                                 initValue={formulaOrRefStringValue as any}
                                 unitId={unitId}

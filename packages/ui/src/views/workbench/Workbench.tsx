@@ -19,12 +19,12 @@ import type { IUniverUIConfig } from '../../controllers/config.schema';
 import type { IWorkbenchOptions } from '../../controllers/ui/ui.controller';
 import { IConfigService, LocaleService, ThemeService } from '@univerjs/core';
 import { clsx, ConfigContext, ConfigProvider } from '@univerjs/design';
-import { defaultTheme } from '@univerjs/themes';
 import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useConfigValue } from '../../components/hooks';
 import { UI_PLUGIN_CONFIG_KEY } from '../../controllers/config.schema';
 import { BuiltInUIPart } from '../../services/parts/parts.service';
+import { ThemeSwitcherService } from '../../services/theme-switcher/theme-switcher.service';
 import { useDependency } from '../../utils/di';
 import { ComponentContainer, useComponentsOfPart } from '../components/ComponentContainer';
 import { DesktopContextMenu } from '../components/context-menu/ContextMenu';
@@ -56,6 +56,7 @@ export function DesktopWorkbenchContent(props: IUniverWorkbenchProps) {
 
     const localeService = useDependency(LocaleService);
     const themeService = useDependency(ThemeService);
+    const themeSwitcherService = useDependency(ThemeSwitcherService);
     const contentRef = useRef<HTMLDivElement>(null);
     const configService = useDependency(IConfigService);
     const uiConfig = configService.getConfig(UI_PLUGIN_CONFIG_KEY) as IUniverUIConfig;
@@ -71,9 +72,13 @@ export function DesktopWorkbenchContent(props: IUniverWorkbenchProps) {
     const popupRootId = uiConfig?.popupRootId ?? 'univer-popup-portal';
 
     useEffect(() => {
-        if (!themeService.getCurrentTheme()) {
-            themeService.setTheme(defaultTheme);
-        }
+        const sub = themeService.currentTheme$.subscribe((theme) => {
+            themeSwitcherService.injectThemeToHead(theme);
+        });
+
+        return () => {
+            sub.unsubscribe();
+        };
     }, []);
 
     const [darkMode, setDarkMode] = useState<boolean>(false);

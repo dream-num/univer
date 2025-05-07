@@ -27,7 +27,7 @@ export const ExtendConfirm = (props: IExtendConfirmProps) => {
     const [extend, setExtend] = useState<string>('0');
     const localeService = useDependency(LocaleService);
     return (
-        <div className="univer-text-sm univer-theme">
+        <div className="univer-text-sm">
             <div className="extend-confirm-desc">
                 {localeService.t('sheets-sort.dialog.sort-reminder-desc')}
             </div>

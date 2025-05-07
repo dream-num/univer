@@ -121,7 +121,7 @@ export const SheetsNote = (props: { popup: IPopup<{ location: ISheetLocationBase
             className={clsx(`
               univer-resize-both univer-ml-px univer-rounded univer-border univer-border-solid univer-border-gray-200
               univer-bg-white univer-p-2 univer-text-gray-900 univer-shadow
-              dark:univer-bg-gray-800 dark:univer-text-white
+              dark:univer-border-gray-600 dark:univer-bg-gray-800 dark:univer-text-white
               focus:univer-outline-none
             `, scrollbarClassName)}
             style={{ width: note.width, height: note.height }}

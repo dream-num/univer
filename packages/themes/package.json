@@ -56,6 +56,7 @@
         "build": "univer-cli build"
     },
     "devDependencies": {
+        "@univerjs-infra/shared": "workspace:*",
         "vite": "^6.3.5"
     }
 }

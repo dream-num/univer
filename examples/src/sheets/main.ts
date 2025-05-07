@@ -38,13 +38,13 @@ import { UniverSheetsBindingSourcePlugin } from '@univerjs/sheets-source-binding
 import { UniverSheetTablePlugin } from '@univerjs/sheets-table';
 import { UniverSheetsThreadCommentPlugin } from '@univerjs/sheets-thread-comment';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
+
 import { UniverSheetsZenEditorPlugin } from '@univerjs/sheets-zen-editor';
 
 import { UniverUIPlugin } from '@univerjs/ui';
-
 import { enUS, faIR, frFR, ruRU, viVN, zhCN, zhTW } from '../locales';
-import { UniverSheetsCustomMenuPlugin } from './custom-menu';
 
+import { UniverSheetsCustomMenuPlugin } from './custom-menu';
 import ImportCSVButtonPlugin from './custom-plugin/import-csv-button';
 import '@univerjs/sheets/facade';
 import '@univerjs/ui/facade';
@@ -88,6 +88,7 @@ export const mockUser = {
 function createNewInstance() {
     // univer
     const univer = new Univer({
+        // theme: greenTheme,
         locales: {
             [LocaleType.ZH_CN]: zhCN,
             [LocaleType.EN_US]: enUS,

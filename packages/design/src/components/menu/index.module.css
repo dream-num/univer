@@ -1,6 +1,9 @@
 .menu {
     @apply univer-m-0 univer-py-1 univer-px-2 univer-text-sm univer-list-none univer-rounded-md univer-box-border univer-shadow-md univer-border-solid univer-border univer-border-gray-200 univer-min-w-52 univer-max-w-52 univer-bg-white;
 }
+.dark .menu {
+    @apply univer-bg-gray-700 univer-border-gray-600;
+}
 
 .menu-vertical {
     display: grid;
@@ -18,6 +21,9 @@
 .menu-item-group:not(:last-child) {
     border-bottom: 1px solid #e3e5ea;
 }
+.dark .menu-item-group:not(:last-child) {
+    @apply univer-border-b-gray-600;
+}
 
 .menu-item-group-list {
     display: grid;
@@ -33,6 +39,9 @@
     padding-top: 6px;
     @apply univer-text-gray-600 univer-text-xs univer-px-2;
 }
+.dark .menu-item-group-title {
+    @apply univer-text-white;
+}
 
 .menu-item-group-title:empty {
     display: none;
@@ -42,14 +51,24 @@
 .menu-submenu-active {
     @apply univer-bg-gray-50 univer-rounded-md;
 }
+.dark .menu-item-active,
+.dark .menu-submenu-active {
+    @apply univer-bg-gray-600;
+}
 
 .menu-item-selected {
     transform: translateZ(0);
     @apply univer-bg-gray-50 univer-rounded-md;
 }
+.dark .menu-item-selected {
+    @apply univer-bg-gray-600;
+}
 
 .menu-submenu-selected {
     @apply univer-bg-gray-50 univer-rounded-md;
+}
+.dark .menu-submenu-selected {
+    @apply univer-bg-gray-600;
 }
 
 .menu > li.menu-submenu {
@@ -71,13 +90,22 @@
     line-height: 1.5em;
     @apply univer-rounded-md univer-text-sm univer-text-gray-900 univer-px-2 univer-gap-3;
 }
+.dark .menu-item {
+    @apply univer-text-white;
+}
 
 .menu-item:hover {
     @apply univer-bg-gray-50;
 }
+.dark .menu-item:hover {
+    @apply univer-bg-gray-600;
+}
 
 .menu-item .icon {
     @apply univer-text-gray-600;
+}
+.dark .menu-item .icon {
+    @apply univer-text-white;
 }
 
 .menu-item,
@@ -114,6 +142,9 @@
     line-height: 1.5em;
     @apply univer-text-gray-900 univer-text-sm univer-px-2;
 }
+.dark .menu-submenu-title {
+    @apply univer-text-white;
+}
 
 .menu-submenu-title-more-icon,
 .menu-item-more-icon {
@@ -124,8 +155,12 @@
     overflow: hidden;
     white-space: nowrap;
     border: none;
-    border-bottom: 1px solid #e3e5ea;
+    border-bottom: 1px solid transparent;
     box-shadow: none;
+    @apply univer-border-b-gray-200;
+}
+.dark .menu-horizontal {
+    @apply univer-border-b-gray-600;
 }
 
 .menu-horizontal > .menu-item,

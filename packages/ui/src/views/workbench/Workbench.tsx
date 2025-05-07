@@ -19,7 +19,7 @@ import type { IUniverUIConfig } from '../../controllers/config.schema';
 import type { IWorkbenchOptions } from '../../controllers/ui/ui.controller';
 import { IConfigService, LocaleService, ThemeService } from '@univerjs/core';
 import { clsx, ConfigContext, ConfigProvider } from '@univerjs/design';
-import { useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useConfigValue } from '../../components/hooks';
 import { UI_PLUGIN_CONFIG_KEY } from '../../controllers/config.schema';
@@ -71,7 +71,7 @@ export function DesktopWorkbenchContent(props: IUniverWorkbenchProps) {
 
     const popupRootId = uiConfig?.popupRootId ?? 'univer-popup-portal';
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         const sub = themeService.currentTheme$.subscribe((theme) => {
             themeSwitcherService.injectThemeToHead(theme);
         });
@@ -82,7 +82,7 @@ export function DesktopWorkbenchContent(props: IUniverWorkbenchProps) {
     }, []);
 
     const [darkMode, setDarkMode] = useState<boolean>(false);
-    useEffect(() => {
+    useLayoutEffect(() => {
         const sub = themeService.darkMode$.subscribe((darkMode) => {
             setDarkMode(darkMode);
 

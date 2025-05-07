@@ -17,7 +17,6 @@
 import type { Dependency } from '@univerjs/core';
 import type { IUniverUIConfig } from './controllers/config.schema';
 import { DependentOn, generateRandomId, IConfigService, IContextService, ILocalStorageService, Inject, Injector, merge, mergeOverrideWithDependencies, Plugin } from '@univerjs/core';
-
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { ComponentManager } from './common/component-manager';
 import { ZIndexManager } from './common/z-index-manager';
@@ -53,6 +52,7 @@ import { ShortcutPanelService } from './services/shortcut/shortcut-panel.service
 import { IShortcutService, ShortcutService } from './services/shortcut/shortcut.service';
 import { DesktopSidebarService } from './services/sidebar/desktop-sidebar.service';
 import { ISidebarService } from './services/sidebar/sidebar.service';
+import { ThemeSwitcherService } from './services/theme-switcher/theme-switcher.service';
 import { DesktopZenZoneService } from './services/zen-zone/desktop-zen-zone.service';
 import { IZenZoneService } from './services/zen-zone/zen-zone.service';
 
@@ -96,6 +96,7 @@ export class UniverUIPlugin extends Plugin {
     override onStarting(): void {
         const dependencies: Dependency[] = mergeOverrideWithDependencies([
             [ComponentManager],
+            [ThemeSwitcherService],
             [ZIndexManager],
             [ShortcutPanelService],
             [IUIPartsService, { useClass: UIPartsService }],

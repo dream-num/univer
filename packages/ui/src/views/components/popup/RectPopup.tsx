@@ -86,6 +86,8 @@ export interface IRectPopupProps {
     maskZIndex?: number;
     onMaskClick?: () => void;
     noPushMinimumGap?: boolean;
+
+    autoRelayout?: boolean;
 }
 
 export interface IPopupLayoutInfo extends Pick<IRectPopupProps, 'direction'> {
@@ -193,6 +195,7 @@ function RectPopup(props: IRectPopupProps) {
         maskZIndex = 100,
         onMaskClick,
         noPushMinimumGap,
+        autoRelayout = true,
     } = props;
     const nodeRef = useRef<HTMLElement>(null);
     const clickOtherFn = useEvent(onClickOutside ?? (() => { /* empty */ }));
@@ -207,7 +210,7 @@ function RectPopup(props: IRectPopupProps) {
     const uiConfig = configService.getConfig(UI_PLUGIN_CONFIG_KEY) as IUniverUIConfig;
     const popupRootId = uiConfig?.popupRootId ?? 'univer-popup-portal';
 
-    function updatePosition(position: IAbsolutePosition) {
+    const updatePosition = useEvent((position: IAbsolutePosition) => {
         requestAnimationFrame(() => {
             if (!nodeRef.current) return;
 
@@ -230,12 +233,13 @@ function RectPopup(props: IRectPopupProps) {
             nodeRef.current.style.top = `${positionRef.current.top}px`;
             nodeRef.current.style.left = `${positionRef.current.left}px`;
         });
-    }
+    });
 
     useEffect(() => {
         let observer: ResizeObserver | null;
         if (nodeRef.current) {
             observer = new ResizeObserver(() => {
+                if (!autoRelayout) return;
                 if (!anchorRectRef.current) return;
                 updatePosition(anchorRectRef.current);
             });
@@ -246,7 +250,7 @@ function RectPopup(props: IRectPopupProps) {
         return () => {
             observer?.disconnect();
         };
-    }, [nodeRef.current]);
+    }, [nodeRef.current, autoRelayout]);
 
     useEffect(() => {
         const anchorRectSub = anchorRect$.subscribe((anchorRect) => {

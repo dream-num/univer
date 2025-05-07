@@ -487,6 +487,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                     const rectShape = scene.getObject(rectShapeKey);
                     if (rectShape?.oKey) {
                         transformer.clearControlByIds([rectShape?.oKey]);
+                        scene.getTransformer()?.clearSelectedObjects();
                     }
                 });
             })

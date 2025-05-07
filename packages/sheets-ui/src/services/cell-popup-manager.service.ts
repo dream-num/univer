@@ -112,6 +112,7 @@ export class CellPopupManagerService extends Disposable {
                         direction,
                     },
                     noPushMinimumGap: true,
+                    autoRelayout: false,
                 },
                 unitId,
                 subUnitId

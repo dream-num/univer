@@ -30,8 +30,8 @@ import { UniverSheetsDataValidationPlugin } from '@univerjs/sheets-data-validati
 import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
 import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
 import { UniverSheetsHyperLinkPlugin } from '@univerjs/sheets-hyper-link';
-import { SheetsNotePlugin } from '@univerjs/sheets-note';
-import { SheetsNoteUIPlugin } from '@univerjs/sheets-note-ui';
+import { UniverSheetsNotePlugin } from '@univerjs/sheets-note';
+import { UniverSheetsNoteUIPlugin } from '@univerjs/sheets-note-ui';
 import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
 import { UniverSheetsSortPlugin } from '@univerjs/sheets-sort';
 import { UniverSheetsBindingSourcePlugin } from '@univerjs/sheets-source-binding';
@@ -130,8 +130,8 @@ function createNewInstance() {
 
     univer.registerPlugin(UniverSheetTablePlugin);
     univer.registerPlugin(UniverNetworkPlugin);
-    univer.registerPlugin(SheetsNotePlugin);
-    univer.registerPlugin(SheetsNoteUIPlugin);
+    univer.registerPlugin(UniverSheetsNotePlugin);
+    univer.registerPlugin(UniverSheetsNoteUIPlugin);
     univer.registerPlugin(ImportCSVButtonPlugin);
 
     // If we are running in e2e platform, we should immediately register the debugger plugin.

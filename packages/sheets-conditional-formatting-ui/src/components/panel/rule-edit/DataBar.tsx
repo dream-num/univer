@@ -63,6 +63,16 @@ const InputText = (props: { disabled?: boolean; id: string; className: string; t
         return (
             <div className="univer-ml-3 univer-w-full">
                 <FormulaEditor
+                    ref={formulaEditorRef}
+                    className={`
+                      univer-box-border univer-h-8 univer-w-full univer-cursor-pointer univer-items-center
+                      univer-rounded-lg univer-border univer-border-solid univer-border-gray-200 univer-bg-white
+                      univer-pt-2 univer-transition-colors
+                      [&>div:first-child]:univer-px-2.5
+                      [&>div]:univer-h-5 [&>div]:univer-ring-transparent
+                      dark:univer-border-gray-600 dark:univer-bg-gray-700 dark:univer-text-white
+                      hover:univer-border-primary-600
+                    `}
                     initValue={v as any}
                     unitId={unitId}
                     subUnitId={subUnitId}
@@ -72,7 +82,6 @@ const InputText = (props: { disabled?: boolean; id: string; className: string; t
                         onChange(formula);
                     }}
                     onFocus={() => setIsFocusFormulaEditor(true)}
-                    ref={formulaEditorRef}
                 />
             </div>
         );

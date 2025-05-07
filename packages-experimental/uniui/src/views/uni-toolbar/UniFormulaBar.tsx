@@ -231,7 +231,6 @@ export function FormulaBar() {
                     disableContextMenu={false}
                 />
             )}
-
         </div>
     );
 }

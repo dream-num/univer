@@ -33,10 +33,22 @@ export function CustomFormulaInput(props: IFormulaInputProps) {
 
     return (
         <FormulaEditor
+            ref={formulaEditorRef}
+            className={`
+              univer-box-border univer-h-8 univer-w-full univer-cursor-pointer univer-items-center univer-rounded-lg
+              univer-border univer-border-solid univer-border-gray-200 univer-bg-white univer-pt-2
+              univer-transition-colors
+              [&>div:first-child]:univer-px-2.5
+              [&>div]:univer-h-5 [&>div]:univer-ring-transparent
+              dark:univer-border-gray-600 dark:univer-bg-gray-700 dark:univer-text-white
+              hover:univer-border-primary-600
+            `}
             initValue={value?.formula1 ?? '=' as any}
             unitId={unitId}
             subUnitId={subUnitId}
             isFocus={isFocusFormulaEditor}
+            errorText={formula1Res}
+            isSupportAcrossSheet
             onChange={(newValue) => {
                 const newFormula = (newValue ?? '').trim();
                 if (newFormula === value?.formula1) {
@@ -48,10 +60,7 @@ export function CustomFormulaInput(props: IFormulaInputProps) {
                     formula1: newFormula,
                 });
             }}
-            errorText={formula1Res}
             onFocus={() => isFocusFormulaEditorSet(true)}
-            isSupportAcrossSheet
-            ref={formulaEditorRef}
         />
     );
 }

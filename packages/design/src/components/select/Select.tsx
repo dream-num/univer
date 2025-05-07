@@ -167,14 +167,14 @@ export function Select(props: ISelectProps) {
                     'univer-border-transparent univer-bg-transparent hover:univer-border-transparent': borderless,
                 }, className)}
             >
-                <span
+                <div
                     className={`
-                      univer-truncate univer-text-sm univer-text-gray-500
+                      univer-flex-1 univer-truncate univer-text-sm univer-text-gray-500
                       dark:univer-text-white
                     `}
                 >
                     {displayValue}
-                </span>
+                </div>
                 <MoreDownSingle
                     className={`
                       univer-flex-shrink-0

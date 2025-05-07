@@ -66,9 +66,7 @@ export function Radio(props: IRadioProps) {
 
     return (
         <label
-            className={clsx(`
-              univer-box-border univer-inline-grid univer-grid-flow-col univer-items-center univer-gap-2 univer-text-sm
-            `, {
+            className={clsx('univer-box-border univer-inline-flex univer-items-center univer-gap-2 univer-text-sm', {
                 'univer-cursor-pointer univer-text-gray-900 dark:univer-text-white': !disabled,
                 'univer-text-gray-400': disabled,
             })}

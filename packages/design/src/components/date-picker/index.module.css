@@ -127,6 +127,7 @@
     outline: none;
     cursor: pointer;
     transition: background 0.3s;
+    @apply univer-px-1.5;
 }
 
 .date-picker-cell-in-view {
@@ -138,7 +139,7 @@
 }
 
 .date-picker-cell-hover > .date-picker-cell-inner {
-    @apply univer-bg-gray-100;
+    @apply hover:univer-bg-gray-100;
 }
 
 .date-picker-cell-range-hover-start::after,
@@ -202,6 +203,10 @@
 .date-picker-picker-footer {
     margin-top: 12px;
     @apply univer-border-0 univer-border-t univer-border-solid univer-border-t-gray-200;
+}
+
+.date-picker-ranges {
+    @apply univer-list-none univer-m-0 univer-p-0 univer-flex univer-items-center univer-justify-center;
 }
 
 /* Clear Button */

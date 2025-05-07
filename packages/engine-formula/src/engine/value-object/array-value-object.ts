@@ -1472,7 +1472,14 @@ export class ArrayValueObject extends BaseValueObject {
 
         for (let c = 0; c < columnCount; c++) {
             const value = valueList[c];
-            this._batchOperatorValue(value, c, result, batchOperatorType, operator, isCaseSensitive);
+            this._batchOperatorValue(
+                value,
+                c,
+                result,
+                batchOperatorType,
+                operator,
+                isCaseSensitive
+            );
         }
 
         const newArray = this._createNewArray(result, rowCount, columnCount);

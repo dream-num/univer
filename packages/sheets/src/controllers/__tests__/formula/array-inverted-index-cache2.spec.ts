@@ -14,34 +14,42 @@
  * limitations under the License.
  */
 
-import type { Injector, IWorkbookData } from '@univerjs/core';
-import type { LexerNode } from '../../analysis/lexer-node';
-
-import type { BaseAstNode } from '../../ast-node/base-ast-node';
-import { LocaleType } from '@univerjs/core';
+import type { Ctor, Injector, IWorkbookData } from '@univerjs/core';
+import type { BaseAstNode, BaseFunction, IFunctionNames, LexerNode } from '@univerjs/engine-formula';
+import { ICommandService, LocaleType } from '@univerjs/core';
+import {
+    AstTreeBuilder,
+    functionLogical,
+    functionMath,
+    functionMeta,
+    generateExecuteAstNodeData,
+    IFormulaCurrentConfigService,
+    IFormulaRuntimeService,
+    IFunctionService,
+    Interpreter,
+    Lexer,
+    SetArrayFormulaDataMutation,
+    SetFormulaCalculationNotificationMutation,
+    SetFormulaCalculationResultMutation,
+    SetFormulaCalculationStartMutation,
+    SetFormulaCalculationStopMutation,
+} from '@univerjs/engine-formula';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { createFunctionTestBed, getObjectValue } from '../../../functions/__tests__/create-function-test-bed';
-import { FUNCTION_NAMES_LOGICAL } from '../../../functions/logical/function-names';
-import { If } from '../../../functions/logical/if';
-import { FUNCTION_NAMES_MATH } from '../../../functions/math/function-names';
-import { Sumif } from '../../../functions/math/sumif';
-import { Compare } from '../../../functions/meta/compare';
-import { FUNCTION_NAMES_META } from '../../../functions/meta/function-names';
-import { IFormulaCurrentConfigService } from '../../../services/current-data.service';
-import { IFunctionService } from '../../../services/function.service';
-import { IFormulaRuntimeService } from '../../../services/runtime.service';
-import { Lexer } from '../../analysis/lexer';
-import { AstTreeBuilder } from '../../analysis/parser';
-import { Interpreter } from '../../interpreter/interpreter';
-import { generateExecuteAstNodeData } from '../../utils/ast-node-tool';
+import { SetRangeValuesMutation } from '../../../commands/mutations/set-range-values.mutation';
+import { createFunctionTestBed, getObjectValue } from './create-function-test-bed';
+
+import '@univerjs/engine-formula/facade';
+
+const unitId = 'test';
+const subUnitId = 'sheet1';
 
 const getFunctionsTestWorkbookData = (): IWorkbookData => {
     return {
-        id: 'test',
+        id: unitId,
         appVersion: '3.0.0-alpha',
         sheets: {
             sheet1: {
-                id: 'sheet1',
+                id: subUnitId,
                 cellData: {
                     7: {
                         1: {
@@ -150,14 +158,16 @@ const getFunctionsTestWorkbookData = (): IWorkbookData => {
         styles: {},
     };
 };
+
 describe('Test inverted index cache', () => {
     let get: Injector['get'];
     let lexer: Lexer;
     let astTreeBuilder: AstTreeBuilder;
     let interpreter: Interpreter;
+    let commandService: ICommandService;
     let calculate: (formula: string) => (string | number | boolean | null)[][] | string | number | boolean;
 
-    beforeEach(() => {
+    beforeEach(async () => {
         const testBed = createFunctionTestBed(getFunctionsTestWorkbookData());
 
         get = testBed.get;
@@ -165,6 +175,14 @@ describe('Test inverted index cache', () => {
         lexer = get(Lexer);
         astTreeBuilder = get(AstTreeBuilder);
         interpreter = get(Interpreter);
+        commandService = get(ICommandService);
+
+        commandService.registerCommand(SetFormulaCalculationStartMutation);
+        commandService.registerCommand(SetFormulaCalculationStopMutation);
+        commandService.registerCommand(SetFormulaCalculationResultMutation);
+        commandService.registerCommand(SetFormulaCalculationNotificationMutation);
+        commandService.registerCommand(SetArrayFormulaDataMutation);
+        commandService.registerCommand(SetRangeValuesMutation);
 
         const functionService = get(IFunctionService);
 
@@ -199,10 +217,20 @@ describe('Test inverted index cache', () => {
             testBed.unitId
         );
 
+        const functions = [
+            ...functionMath,
+            ...functionMeta,
+            ...functionLogical,
+        ]
+            .map((registerObject) => {
+                const Func = registerObject[0] as Ctor<BaseFunction>;
+                const name = registerObject[1] as IFunctionNames;
+
+                return new Func(name);
+            });
+
         functionService.registerExecutors(
-            new If(FUNCTION_NAMES_LOGICAL.IF),
-            new Sumif(FUNCTION_NAMES_MATH.SUMIF),
-            new Compare(FUNCTION_NAMES_META.COMPARE)
+            ...functions
         );
 
         calculate = (formula: string) => {

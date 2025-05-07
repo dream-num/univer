@@ -34,8 +34,8 @@ export class InvertedIndexCache {
 
     private _continueBuildingCache: Map<string, Map<string, Map<number, IntervalTree<NumericTuple>>>> = new Map();
 
-    set(unitId: string, sheetId: string, column: number, value: string | number | boolean | null, row: number) {
-        if (!this.shouldContinueBuildingCache(unitId, sheetId, column, row)) {
+    set(unitId: string, sheetId: string, column: number, value: string | number | boolean | null, row: number, isForceUpdate: boolean = false) {
+        if (!this.shouldContinueBuildingCache(unitId, sheetId, column, row) && !isForceUpdate) {
             return;
         }
 
@@ -55,6 +55,16 @@ export class InvertedIndexCache {
         if (columnMap == null) {
             columnMap = new Map();
             sheetMap.set(column, columnMap);
+        }
+
+        // If is force update, we need to remove the old value from the map
+        if (isForceUpdate) {
+            for (const [_, _cellList] of columnMap) {
+                if (_cellList.has(row)) {
+                    _cellList.delete(row);
+                    break;
+                }
+            }
         }
 
         let cellList = columnMap.get(value);

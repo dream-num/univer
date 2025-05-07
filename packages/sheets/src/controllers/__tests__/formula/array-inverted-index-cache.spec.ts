@@ -14,34 +14,43 @@
  * limitations under the License.
  */
 
-import type { Injector, IWorkbookData } from '@univerjs/core';
-import type { LexerNode } from '../../analysis/lexer-node';
-
-import type { BaseAstNode } from '../../ast-node/base-ast-node';
-import { LocaleType } from '@univerjs/core';
+import type { CellValue, Ctor, Injector, IWorkbookData, Nullable, Worksheet } from '@univerjs/core';
+import type { BaseAstNode, BaseFunction, IFunctionNames, LexerNode } from '@univerjs/engine-formula';
+import type { FFormula } from '@univerjs/engine-formula/facade';
+import { ICommandService, LocaleType } from '@univerjs/core';
+import {
+    AstTreeBuilder,
+    functionLogical,
+    functionMath,
+    functionMeta,
+    generateExecuteAstNodeData,
+    IFormulaCurrentConfigService,
+    IFormulaRuntimeService,
+    IFunctionService,
+    Interpreter,
+    Lexer,
+    SetArrayFormulaDataMutation,
+    SetFormulaCalculationNotificationMutation,
+    SetFormulaCalculationResultMutation,
+    SetFormulaCalculationStartMutation,
+    SetFormulaCalculationStopMutation,
+} from '@univerjs/engine-formula';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { createFunctionTestBed, getObjectValue } from '../../../functions/__tests__/create-function-test-bed';
-import { FUNCTION_NAMES_LOGICAL } from '../../../functions/logical/function-names';
-import { If } from '../../../functions/logical/if';
-import { FUNCTION_NAMES_MATH } from '../../../functions/math/function-names';
-import { Sumif } from '../../../functions/math/sumif';
-import { Compare } from '../../../functions/meta/compare';
-import { FUNCTION_NAMES_META } from '../../../functions/meta/function-names';
-import { IFormulaCurrentConfigService } from '../../../services/current-data.service';
-import { IFunctionService } from '../../../services/function.service';
-import { IFormulaRuntimeService } from '../../../services/runtime.service';
-import { Lexer } from '../../analysis/lexer';
-import { AstTreeBuilder } from '../../analysis/parser';
-import { Interpreter } from '../../interpreter/interpreter';
-import { generateExecuteAstNodeData } from '../../utils/ast-node-tool';
+import { SetRangeValuesMutation } from '../../../commands/mutations/set-range-values.mutation';
+import { createFunctionTestBed, getObjectValue } from './create-function-test-bed';
+
+import '@univerjs/engine-formula/facade';
+
+const unitId = 'test';
+const subUnitId = 'sheet1';
 
 const getFunctionsTestWorkbookData = (): IWorkbookData => {
     return {
-        id: 'test',
+        id: unitId,
         appVersion: '3.0.0-alpha',
         sheets: {
             sheet1: {
-                id: 'sheet1',
+                id: subUnitId,
                 cellData: {
                     0: {
                         0: {
@@ -161,6 +170,9 @@ const getFunctionsTestWorkbookData = (): IWorkbookData => {
                         2: {
                             f: '=C32/C33',
                         },
+                        3: {
+                            f: '=IF(C8<0,IF(C31<1,1,0.8),IF(C31<1,0.95,1))',
+                        },
                     },
                     31: {
                         2: {
@@ -187,21 +199,36 @@ const getFunctionsTestWorkbookData = (): IWorkbookData => {
         styles: {},
     };
 };
+
 describe('Test inverted index cache', () => {
     let get: Injector['get'];
+    let worksheet: Worksheet;
+    let formulaEngine: FFormula;
     let lexer: Lexer;
     let astTreeBuilder: AstTreeBuilder;
     let interpreter: Interpreter;
+    let commandService: ICommandService;
+    let getCellValue: (row: number, column: number) => Nullable<CellValue>;
     let calculate: (formula: string) => (string | number | boolean | null)[][] | string | number | boolean;
 
-    beforeEach(() => {
+    beforeEach(async () => {
         const testBed = createFunctionTestBed(getFunctionsTestWorkbookData());
 
         get = testBed.get;
+        worksheet = testBed.sheet.getSheetBySheetId(subUnitId) as Worksheet;
+        formulaEngine = testBed.api.getFormula() as FFormula;
 
         lexer = get(Lexer);
         astTreeBuilder = get(AstTreeBuilder);
         interpreter = get(Interpreter);
+        commandService = get(ICommandService);
+
+        commandService.registerCommand(SetFormulaCalculationStartMutation);
+        commandService.registerCommand(SetFormulaCalculationStopMutation);
+        commandService.registerCommand(SetFormulaCalculationResultMutation);
+        commandService.registerCommand(SetFormulaCalculationNotificationMutation);
+        commandService.registerCommand(SetArrayFormulaDataMutation);
+        commandService.registerCommand(SetRangeValuesMutation);
 
         const functionService = get(IFunctionService);
 
@@ -236,11 +263,28 @@ describe('Test inverted index cache', () => {
             testBed.unitId
         );
 
+        const functions = [
+            ...functionMath,
+            ...functionMeta,
+            ...functionLogical,
+        ]
+            .map((registerObject) => {
+                const Func = registerObject[0] as Ctor<BaseFunction>;
+                const name = registerObject[1] as IFunctionNames;
+
+                return new Func(name);
+            });
+
         functionService.registerExecutors(
-            new If(FUNCTION_NAMES_LOGICAL.IF),
-            new Sumif(FUNCTION_NAMES_MATH.SUMIF),
-            new Compare(FUNCTION_NAMES_META.COMPARE)
+            ...functions
         );
+
+        formulaEngine.executeCalculation();
+        await formulaEngine.onCalculationEnd();
+
+        getCellValue = (row: number, column: number) => {
+            return worksheet.getCellRaw(row, column)?.v;
+        };
 
         calculate = (formula: string) => {
             const lexerNode = lexer.treeBuilder(formula);
@@ -254,9 +298,28 @@ describe('Test inverted index cache', () => {
     });
 
     describe('Test formula', () => {
-        it('If formula test', () => {
-            const result = calculate('=IF(C8<0,IF(C31<1,1,0.8),IF(C31<1,0.95,1))');
-            expect(result).toBe(0.95);
+        it('If formula test', async () => {
+            // D31 is IF formula: =IF(C8<0,IF(C31<1,1,0.8),IF(C31<1,0.95,1))
+            expect(getCellValue(30, 3)).toBe(0.95);
+
+            // Update C24 value to 100
+            await commandService.executeCommand(SetRangeValuesMutation.id, {
+                unitId,
+                subUnitId,
+                cellValue: {
+                    23: {
+                        2: {
+                            v: 100,
+                            t: 2,
+                        },
+                    },
+                },
+            });
+            formulaEngine.executeCalculation();
+            await formulaEngine.onCalculationEnd();
+
+            // now result should be 1
+            expect(getCellValue(30, 3)).toBe(1);
         });
 
         it('Sumif formula test', () => {

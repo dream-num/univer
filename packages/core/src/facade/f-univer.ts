@@ -57,30 +57,7 @@ export class FUniver extends Disposable {
      */
     static newAPI(wrapped: Univer | Injector): FUniver {
         const injector = wrapped instanceof Univer ? wrapped.__getInjector() : wrapped;
-        const instance = injector.createInstance(FUniver);
-
-        /**
-         * Uses Proxy to intercept method calls and check if the method exists.
-         */
-        return new Proxy(instance, {
-            get(target, prop): FUniver {
-                if (prop in Object.prototype ||
-                    typeof prop === 'symbol' ||
-                    ['toString', 'valueOf', 'toJSON', 'constructor', 'hasOwnProperty', 'isPrototypeOf', 'propertyIsEnumerable', 'inspect', 'then', 'catch', 'finally'].includes(String(prop))) {
-                    return Reflect.get(target, prop);
-                }
-
-                if (prop in target) {
-                    return Reflect.get(target, prop);
-                } else {
-                    throw new TypeError(
-                        `[FUniver]: The method '${String(prop)}' does not exist on the FUniver instance. ` +
-                        'This may occur if you haven\'t imported the required facade package or if you\'re calling an incorrect method. ' +
-                        'Please verify the method name and ensure all necessary modules are imported.'
-                    );
-                }
-            },
-        });
+        return injector.createInstance(FUniver);
     }
 
     declare private [InitializerSymbol]: Initializers | undefined;

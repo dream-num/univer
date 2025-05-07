@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
-import React, { useMemo } from 'react';
+import type { ReactNode } from 'react';
+import type { Layout, ReactGridLayoutProps } from 'react-grid-layout';
+import { useMemo } from 'react';
 import RGL, { WidthProvider } from 'react-grid-layout';
 import 'react-grid-layout/css/styles.css';
 
-const ReactGridLayout = WidthProvider(RGL);
+export const ReactGridLayout = WidthProvider(RGL);
 
-export interface IDraggableListProps<T> extends Omit<RGL.ReactGridLayoutProps, 'layout' | 'onLayoutChange' | 'cols' | 'isResizable'> {
+export interface IDraggableListProps<T> extends Omit<ReactGridLayoutProps, 'layout' | 'onLayoutChange' | 'cols' | 'isResizable'> {
     list: T[];
     onListChange: (list: T[]) => void;
     idKey: keyof T;
-    itemRender: (item: T, index: number) => React.ReactNode;
+    itemRender: (item: T, index: number) => ReactNode;
 }
 
 export function DraggableList<T = any>(props: IDraggableListProps<T>) {
@@ -39,7 +41,7 @@ export function DraggableList<T = any>(props: IDraggableListProps<T>) {
         return listMap;
     }, [idKey, list]);
 
-    const layouts: RGL.Layout[] = useMemo(() => {
+    const layouts: Layout[] = useMemo(() => {
         return list.map((item, index) => ({
             i: item[idKey] as string,
             w: 12,

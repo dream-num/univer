@@ -17,7 +17,7 @@
 import type { IRange, Workbook } from '@univerjs/core';
 import type { IConditionFormattingRule, IDeleteCfCommandParams, IMoveCfCommandParams } from '@univerjs/sheets-conditional-formatting';
 import { ICommandService, Injector, IUniverInstanceService, LocaleService, Rectangle, UniverInstanceType } from '@univerjs/core';
-import { clsx, Select, Tooltip } from '@univerjs/design';
+import { clsx, ReactGridLayout, Select, Tooltip } from '@univerjs/design';
 import { serializeRange } from '@univerjs/engine-formula';
 import { DeleteSingle, IncreaseSingle, SequenceSingle } from '@univerjs/icons';
 import { checkRangesEditablePermission, SetSelectionsOperation, SetWorksheetActiveOperation, SheetsSelectionsService } from '@univerjs/sheets';
@@ -36,12 +36,9 @@ import {
 import { useHighlightRange } from '@univerjs/sheets-ui';
 import { ISidebarService, useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import GridLayout from 'react-grid-layout';
 import { debounceTime, Observable } from 'rxjs';
 import { ConditionalFormattingI18nController } from '../../../controllers/cf.i18n.controller';
 import { Preview } from '../../preview';
-import 'react-grid-layout/css/styles.css';
-import 'react-resizable/css/styles.css';
 
 interface IRuleListProps {
     onClick: (rule: IConditionFormattingRule) => void;
@@ -363,7 +360,7 @@ export const RuleList = (props: IRuleListProps) => {
 
             <div ref={layoutContainerRef}>
                 {layoutWidth > 0 && (
-                    <GridLayout
+                    <ReactGridLayout
                         className={`
                           [&_.react-grid-item]:univer-transition-none
                           [&_.react-grid-placeholder]:univer-rounded [&_.react-grid-placeholder]:!univer-bg-gray-200
@@ -444,7 +441,7 @@ export const RuleList = (props: IRuleListProps) => {
                                 </div>
                             );
                         })}
-                    </GridLayout>
+                    </ReactGridLayout>
                 ) }
             </div>
         </div>

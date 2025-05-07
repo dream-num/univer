@@ -25,7 +25,7 @@ import { SheetsNoteModel } from './models/sheets-note.model';
 export const PLUGIN_NAME = 'SHEET_NOTE_PLUGIN';
 
 @DependentOn(UniverSheetsPlugin)
-export class SheetsNotePlugin extends Plugin {
+export class UniverSheetsNotePlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;
     static override type = UniverInstanceType.UNIVER_SHEET;
 

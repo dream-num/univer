@@ -16,7 +16,7 @@
 
 import type { Dependency } from '@univerjs/core';
 import { DependentOn, IConfigService, Inject, Injector, merge, Plugin, touchDependencies, UniverInstanceType } from '@univerjs/core';
-import { SheetsNotePlugin } from '@univerjs/sheets-note';
+import { UniverSheetsNotePlugin } from '@univerjs/sheets-note';
 import { menuSchema } from './controllers/menu.schema';
 import { SheetsCellContentController } from './controllers/sheets-cell-content.controller';
 import { SheetsNoteAttachmentController } from './controllers/sheets-note-attachment.controller';
@@ -41,8 +41,8 @@ const defaultPluginConfig: IUniverSheetsNoteUIPluginConfig = {
     menu: menuSchema,
 };
 
-@DependentOn(SheetsNotePlugin)
-export class SheetsNoteUIPlugin extends Plugin {
+@DependentOn(UniverSheetsNotePlugin)
+export class UniverSheetsNoteUIPlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;
     static override type = UniverInstanceType.UNIVER_SHEET;
 

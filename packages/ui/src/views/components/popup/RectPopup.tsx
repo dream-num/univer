@@ -169,7 +169,9 @@ function calcPopupPosition(layout: IPopupLayoutInfo): { top: number; left: numbe
     } else {
         // If the popup element exceed the visible area. We should "push" it back.
         verticalStyle = ((startY + height) > containerHeight)
-            ? { top: Math.max(endY - height, minTop) } // on top
+            ? Math.max(endY - height, minTop) < PUSHING_MINIMUM_GAP
+                ? { top: Math.min(startY, maxTop) }
+                : { top: Math.max(endY - height, minTop) } // on top
             : { top: Math.min(startY, maxTop) }; // on bottom
     }
 

@@ -123,7 +123,7 @@ export function MultipleSelect(props: IMultipleSelectProps) {
             onOpenChange={handleOpenChange}
         >
             <div
-                data-u-comp="select"
+                data-u-comp="multiple-select"
                 className={clsx(`
                   univer-box-border univer-inline-flex univer-h-8 univer-min-w-36 univer-cursor-pointer
                   univer-items-center univer-justify-between univer-gap-2 univer-rounded-lg univer-border

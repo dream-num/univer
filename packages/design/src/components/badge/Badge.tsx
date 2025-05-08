@@ -30,6 +30,7 @@ export function Badge(props: IBadgeProps) {
 
     return (
         <span
+            data-u-comp="badge"
             className={clsx(
                 `
                   univer-box-border univer-inline-flex univer-items-center univer-gap-1 univer-truncate

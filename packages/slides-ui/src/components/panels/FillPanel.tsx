@@ -106,7 +106,7 @@ export default function ArrangePanel(props: IProps) {
                         >
                             <a className="univer-flex univer-cursor-pointer univer-items-center univer-gap-1">
                                 <PaintBucket className="univer-fill-primary-600" />
-                                <MoreDownSingle className="univer-text-[10px] univer-text-gray-400" />
+                                <MoreDownSingle />
                             </a>
                         </Dropdown>
                     </div>

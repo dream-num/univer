@@ -14,4 +14,14 @@
  * limitations under the License.
  */
 
-export { CheckboxGroup, type ICheckboxGroupProps } from './CheckboxGroup';
+import type { IDisposable } from '@univerjs/core';
+import type { IGalleryProps } from '@univerjs/design';
+import type { Subject } from 'rxjs';
+import { createIdentifier } from '@univerjs/core';
+
+export const IGalleryService = createIdentifier<IGalleryService>('univer.ui.gallery-service');
+export interface IGalleryService {
+    gallery$: Subject<IGalleryProps>;
+    open(params: IGalleryProps): IDisposable;
+    close(): void;
+}

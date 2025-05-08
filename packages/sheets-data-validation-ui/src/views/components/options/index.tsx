@@ -46,10 +46,10 @@ export function DataValidationOptions(props: IDataValidationOptionsParams) {
                 {localeService.t('dataValidation.panel.options')}
                 {show
                     ? (
-                        <MoreUpSingle className="univer-ml-1 univer-text-[8px]" />
+                        <MoreUpSingle className="univer-ml-1" />
                     )
                     : (
-                        <MoreDownSingle className="univer-ml-1 univer-text-[8px]" />
+                        <MoreDownSingle className="univer-ml-1" />
                     )}
             </div>
             {show && (

@@ -14,4 +14,29 @@
  * limitations under the License.
  */
 
-export { DropdownMenu, type IDropdownMenuProps } from './DropdownMenu';
+import type { Meta } from '@storybook/react';
+import { Badge } from './Badge';
+
+const meta: Meta<typeof Badge> = {
+    title: 'Components / Badge',
+    component: Badge,
+    parameters: {
+        layout: 'centered',
+    },
+    tags: ['autodocs'],
+};
+
+export default meta;
+
+export const BadgeBasic = {
+    render() {
+        return (
+            <>
+                <div>
+                    <Badge>Badge</Badge>
+                    <Badge closable>Badge</Badge>
+                </div>
+            </>
+        );
+    },
+};

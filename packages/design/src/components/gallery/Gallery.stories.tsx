@@ -15,40 +15,33 @@
  */
 
 import type { Meta } from '@storybook/react';
+import { useState } from 'react';
+import { Button } from '../button/Button';
+import { Gallery } from './Gallery';
 
-import { Input } from '../input/Input';
-import { Select } from '../select/Select';
-import { FormLayout } from './FormLayout';
-
-const meta: Meta = {
-    title: 'Components / FormLayout',
+const meta: Meta<typeof Gallery> = {
+    title: 'Components / Gallery',
+    component: Gallery,
     parameters: {
         layout: 'centered',
     },
     tags: ['autodocs'],
-    args: {},
 };
 
 export default meta;
 
-function PagerDemo() {
-    return (
-        <>
-            <FormLayout label="行标题与列标题" desc="转到“查看”>“冻结”可选择要在所有页面重复的行/列">
-                <Input placeholder="请输入" />
-            </FormLayout>
-            <FormLayout label="行标题与列标题" desc="转到“查看”>“冻结”可选择要在所有页面重复的行/列" error="123">
-                <Select value="" onChange={() => { /* empty */ }} />
-            </FormLayout>
-        </>
-    );
-}
+export const GalleryBasic = {
+    render() {
+        const [open, setOpen] = useState(false);
 
-export const Playground = {
-    render: () => {
+        const images = ['https://github.com/dream-num.png', 'https://github.com/awesome-univer.png', 'https://github.com/dream-num.png'];
+
         return (
             <>
-                <PagerDemo />
+                <div>
+                    <Button onClick={() => setOpen(true)}>Open Gallery</Button>
+                    <Gallery open={open} onOpenChange={setOpen} images={images} />
+                </div>
             </>
         );
     },

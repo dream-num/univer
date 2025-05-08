@@ -291,7 +291,7 @@ export function SortOptionItem(props: ISortOptionItemProps) {
                             >
                                 {itemLabel}
                             </span>
-                            <MoreDownSingle className="univer-size-4 univer-text-gray-600" />
+                            <MoreDownSingle />
                         </div>
                     </Dropdown>
                 </div>

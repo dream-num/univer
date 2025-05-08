@@ -17,6 +17,7 @@
 import type { ComponentProps, ReactNode } from 'react';
 import { useState } from 'react';
 import {
+    DropdownMenuCheckboxItem,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuPrimitive,
@@ -31,7 +32,7 @@ interface IDropdownMenuNormalItem {
     className?: string;
     children: ReactNode;
     disabled?: boolean;
-    onSelect?: (item: DropdownMenu) => void;
+    onSelect?: (item: DropdownMenuType) => void;
 }
 
 interface IDropdownMenuSeparatorItem {
@@ -54,11 +55,21 @@ interface IDropdownMenuRadioItem {
     onSelect?: (item: string) => void;
 }
 
-type DropdownMenu = IDropdownMenuNormalItem | IDropdownMenuSeparatorItem | IDropdownMenuRadioItem;
+interface IDropdownMenuCheckItem {
+    type: 'checkbox';
+    className?: string;
+    label?: ReactNode;
+    value: string;
+    disabled?: boolean;
+    checked?: boolean;
+    onSelect?: (item: string) => void;
+}
+
+type DropdownMenuType = IDropdownMenuNormalItem | IDropdownMenuSeparatorItem | IDropdownMenuRadioItem | IDropdownMenuCheckItem;
 
 export interface IDropdownMenuProps extends ComponentProps<typeof DropdownMenuContent> {
     children: ReactNode;
-    items: DropdownMenu[];
+    items: DropdownMenuType[];
     disabled?: boolean;
     open?: boolean;
     onOpenChange?: (open: boolean) => void;
@@ -89,7 +100,7 @@ export function DropdownMenu(props: IDropdownMenuProps) {
         controlledOnOpenChange?.(newOpen);
     }
 
-    function renderMenuItem(item: DropdownMenu, index: number) {
+    function renderMenuItem(item: DropdownMenuType, index: number) {
         const { className, type } = item;
 
         if (type === 'separator') {
@@ -105,7 +116,7 @@ export function DropdownMenu(props: IDropdownMenuProps) {
                     {item.options.map((option, index) => {
                         if ('type' in option) {
                             if (option.type === 'separator') {
-                                return <DropdownMenuSeparator key={index} className={className} />;
+                                return <DropdownMenuSeparator key={index} className={option.className} />;
                             }
                         } else {
                             if (option.value === undefined) {
@@ -125,6 +136,20 @@ export function DropdownMenu(props: IDropdownMenuProps) {
                         return null;
                     })}
                 </DropdownMenuRadioGroup>
+            );
+        } else if (type === 'checkbox') {
+            return (
+                <DropdownMenuCheckboxItem
+                    key={index}
+                    className={className}
+                    disabled={item.disabled}
+                    checked={item.checked}
+                    onSelect={() => {
+                        item.onSelect?.(item.value);
+                    }}
+                >
+                    {item.label}
+                </DropdownMenuCheckboxItem>
             );
         } else if (type === 'item') {
             return (
@@ -147,7 +172,7 @@ export function DropdownMenu(props: IDropdownMenuProps) {
             <DropdownMenuTrigger asChild>
                 {children}
             </DropdownMenuTrigger>
-            <DropdownMenuContent {...restProps}>
+            <DropdownMenuContent {...restProps} onWheel={(e) => e.stopPropagation()}>
                 {items.map((item, index) => renderMenuItem(item, index))}
             </DropdownMenuContent>
         </DropdownMenuPrimitive>

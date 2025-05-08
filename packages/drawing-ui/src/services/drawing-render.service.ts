@@ -20,17 +20,16 @@ import type { IImageProps, IRectProps, Scene } from '@univerjs/engine-render';
 import { DrawingTypeEnum } from '@univerjs/core';
 import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService, IImageIoService, ImageSourceType } from '@univerjs/drawing';
 import { DRAWING_OBJECT_LAYER_INDEX, Image, Rect } from '@univerjs/engine-render';
-import { IDialogService } from '@univerjs/ui';
+import { IGalleryService } from '@univerjs/ui';
 import { insertGroupObject } from '../controllers/utils';
-import { COMPONENT_IMAGE_VIEWER } from '../views/image-viewer/component-name';
 
-const IMAGE_VIEWER_DROPDOWN_PADDING = 50;
+// const IMAGE_VIEWER_DROPDOWN_PADDING = 50;
 
 export class DrawingRenderService {
     constructor(
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
         @IImageIoService private readonly _imageIoService: IImageIoService,
-        @IDialogService private readonly _dialogService: IDialogService
+        @IGalleryService private readonly _galleryService: IGalleryService
     ) { }
 
     // eslint-disable-next-line max-lines-per-function
@@ -211,30 +210,20 @@ export class DrawingRenderService {
     }
 
     previewImage(key: string, src: string, width: number, height: number) {
-        const dialogId = `${key}-viewer-dialog`;
+        // const dialogId = `${key}-viewer-dialog`;
 
-        const screenWidth = window.innerWidth - IMAGE_VIEWER_DROPDOWN_PADDING;
-        const screenHeight = window.innerHeight - IMAGE_VIEWER_DROPDOWN_PADDING;
+        // const screenWidth = window.innerWidth - IMAGE_VIEWER_DROPDOWN_PADDING;
+        // const screenHeight = window.innerHeight - IMAGE_VIEWER_DROPDOWN_PADDING;
 
-        const adjustSize = this._adjustImageSize(width, height, screenWidth, screenHeight);
-        const dialog = this._dialogService.open({
-            width: Math.max(adjustSize.width, 200),
-            id: dialogId,
-            children: {
-                label: {
-                    name: COMPONENT_IMAGE_VIEWER,
-                    props: {
-                        src,
-                        width: adjustSize.width,
-                        height: adjustSize.height,
-                    },
-                },
-            },
-            destroyOnClose: true,
-            closable: false,
-            onClose: () => {
-                this._dialogService.close(dialogId);
-                dialog.dispose();
+        // const adjustSize = this._adjustImageSize(width, height, screenWidth, screenHeight);
+        this._galleryService.open({
+            images: [src],
+            // width: adjustSize.width,
+            // height: adjustSize.height,
+            onOpenChange: (open) => {
+                if (!open) {
+                    this._galleryService.close();
+                }
             },
             style: {
                 padding: 0,

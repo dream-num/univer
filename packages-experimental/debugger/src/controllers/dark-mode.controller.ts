@@ -23,22 +23,22 @@ export class DarkModeController extends RxDisposable {
     ) {
         super();
 
-        this._localStorageService.getItem('local.darkMode').then((darkMode) => {
-            if (darkMode === 'dark') {
-                document.documentElement.classList.add('univer-dark');
-                themeService.setDarkMode(true);
-            } else if (darkMode === 'system') {
-                const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-                darkModeMediaQuery.addEventListener('change', (e) => {
-                    if (e.matches) {
-                        document.documentElement.classList.add('univer-dark');
-                        themeService.setDarkMode(true);
-                    } else {
-                        document.documentElement.classList.remove('univer-dark');
-                        themeService.setDarkMode(false);
-                    }
-                });
-            }
-        });
+        const darkMode = localStorage.getItem('local.darkMode');
+
+        if (darkMode === 'dark') {
+            document.documentElement.classList.add('univer-dark');
+            themeService.setDarkMode(true);
+        } else if (darkMode === 'system') {
+            const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+            darkModeMediaQuery.addEventListener('change', (e) => {
+                if (e.matches) {
+                    document.documentElement.classList.add('univer-dark');
+                    themeService.setDarkMode(true);
+                } else {
+                    document.documentElement.classList.remove('univer-dark');
+                    themeService.setDarkMode(false);
+                }
+            });
+        }
     }
 }

@@ -19,7 +19,7 @@ import RcMenu, { MenuItem as RcMenuItem, MenuItemGroup as RcMenuItemGroup, SubMe
 import React, { useContext } from 'react';
 import { clsx } from '../../helper/clsx';
 import { ConfigContext } from '../config-provider/ConfigProvider';
-import { Tooltip } from '../tooltip';
+import { Tooltip } from '../tooltip/Tooltip';
 import styles from './index.module.css';
 
 /** @deprecated */

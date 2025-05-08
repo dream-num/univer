@@ -21,8 +21,6 @@ import { AutoImageCropOperation, CloseImageCropOperation, OpenImageCropOperation
 import { ImageResetSizeOperation } from '../commands/operations/image-reset-size.operation';
 import { COMPONENT_IMAGE_POPUP_MENU } from '../views/image-popup-menu/component-name';
 import { ImagePopupMenu } from '../views/image-popup-menu/ImagePopupMenu';
-import { COMPONENT_IMAGE_VIEWER } from '../views/image-viewer/component-name';
-import { ImageViewer } from '../views/image-viewer/ImageViewer';
 
 export class DrawingUIController extends Disposable {
     constructor(
@@ -37,7 +35,6 @@ export class DrawingUIController extends Disposable {
     private _initCustomComponents(): void {
         const componentManager = this._componentManager;
         this.disposeWithMe(componentManager.register(COMPONENT_IMAGE_POPUP_MENU, ImagePopupMenu));
-        this.disposeWithMe(componentManager.register(COMPONENT_IMAGE_VIEWER, ImageViewer));
     }
 
     private _initCommands() {

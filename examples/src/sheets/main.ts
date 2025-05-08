@@ -89,6 +89,8 @@ function createNewInstance() {
     // univer
     const univer = new Univer({
         // theme: greenTheme,
+        darkMode: localStorage.getItem('local.darkMode') === 'dark',
+        locale: LocaleType.ZH_CN,
         locales: {
             [LocaleType.ZH_CN]: zhCN,
             [LocaleType.EN_US]: enUS,

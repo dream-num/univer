@@ -20,6 +20,8 @@
         "noEmit": true,
         "noImplicitOverride": true,
         "isolatedModules": true,
-        "skipLibCheck": true
+        "skipLibCheck": true,
+
+        "stripInternal": true
     }
 }

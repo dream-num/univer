@@ -236,6 +236,10 @@ export class DrawingRenderService {
                 this._dialogService.close(dialogId);
                 dialog.dispose();
             },
+            style: {
+                padding: 0,
+                borderRadius: 0,
+            },
         });
     }
 

@@ -29,7 +29,7 @@ export const ImageViewer: React.FC<IImageViewerProps> = (props: IImageViewerProp
     }
 
     return (
-        <div className="univer-py-2">
+        <div>
             <img
                 className="univer-relative univer-block univer-size-full"
                 src={src}

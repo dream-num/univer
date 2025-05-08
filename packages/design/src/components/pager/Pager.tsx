@@ -16,8 +16,11 @@
 
 import { MoreLeftSingle, MoreRightSingle } from '@univerjs/icons';
 import { useMemo } from 'react';
+import { clsx } from '../../helper/clsx';
 
 export interface IPagerProps {
+    className?: string;
+
     text?: string;
 
     value: number;
@@ -28,7 +31,8 @@ export interface IPagerProps {
 }
 
 export function Pager(props: IPagerProps) {
-    const { value: current = 0, total: count = 0, loop, text: propText } = props;
+    const { className, value: current = 0, total: count = 0, loop, text: propText } = props;
+
     const text = useMemo(() => propText ?? `${current}/${count}`, [current, count, propText]);
     const hasValue = count > 0;
 
@@ -53,13 +57,21 @@ export function Pager(props: IPagerProps) {
     };
 
     return (
-        <div className="univer-flex univer-flex-shrink-0 univer-items-center univer-text-[13px] univer-text-gray-700">
+        <div
+            data-u-comp="pager"
+            className={clsx(`
+              univer-flex univer-flex-shrink-0 univer-items-center univer-text-[13px] univer-text-gray-700
+              dark:univer-text-gray-400
+            `, className)}
+        >
             {hasValue
                 ? (
                     <>
                         <div
+                            data-u-comp="pager-left-arrow"
                             className={`
                               univer-inline-flex univer-size-4 univer-cursor-pointer univer-items-center univer-rounded
+                              dark:hover:univer-bg-gray-600
                               hover:univer-bg-gray-50
                             `}
                             role="button"
@@ -69,8 +81,10 @@ export function Pager(props: IPagerProps) {
                         </div>
                         <div className="univer-mx-1">{text}</div>
                         <div
+                            data-u-comp="pager-right-arrow"
                             className={`
                               univer-inline-flex univer-size-4 univer-cursor-pointer univer-items-center univer-rounded
+                              dark:hover:univer-bg-gray-600
                               hover:univer-bg-gray-50
                             `}
                             role="button"

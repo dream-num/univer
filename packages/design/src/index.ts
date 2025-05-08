@@ -45,6 +45,7 @@ export { Separator } from './components/separator/Separator';
 export { type IKBDProps, KBD } from './components/kbd/Kbd';
 export { type IToasterProps, toast, Toaster } from './components/toaster/Toaster';
 export { Accordion, type IAccordionProps } from './components/accordion/Accordion';
+export { Gallery, type IGalleryProps } from './components/gallery/Gallery';
 
 export { DatePanel, DatePicker, type IDatePanelProps, type IDatePickerProps } from './components/date-picker';
 export { DropdownLegacy, type IDropdownLegacyProps } from './components/dropdown-legacy';

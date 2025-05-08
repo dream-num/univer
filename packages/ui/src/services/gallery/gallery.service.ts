@@ -14,4 +14,14 @@
  * limitations under the License.
  */
 
-export const COMPONENT_IMAGE_VIEWER = 'COMPONENT_IMAGE_VIEWER';
+import type { IDisposable } from '@univerjs/core';
+import type { IGalleryProps } from '@univerjs/design';
+import type { Subject } from 'rxjs';
+import { createIdentifier } from '@univerjs/core';
+
+export const IGalleryService = createIdentifier<IGalleryService>('univer.ui.gallery-service');
+export interface IGalleryService {
+    gallery$: Subject<IGalleryProps>;
+    open(params: IGalleryProps): IDisposable;
+    close(): void;
+}

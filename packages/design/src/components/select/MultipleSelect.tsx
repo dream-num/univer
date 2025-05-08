@@ -126,8 +126,8 @@ export function MultipleSelect(props: IMultipleSelectProps) {
                 data-u-comp="multiple-select"
                 className={clsx(`
                   univer-box-border univer-inline-flex univer-h-8 univer-min-w-36 univer-items-center
-                  univer-justify-between univer-gap-2 univer-rounded-lg univer-border univer-border-solid
-                  univer-border-gray-200 univer-bg-white univer-px-2.5 univer-transition-colors univer-duration-200
+                  univer-justify-between univer-rounded-lg univer-border univer-border-solid univer-border-gray-200
+                  univer-bg-white univer-px-2.5 univer-transition-colors univer-duration-200
                   dark:univer-border-gray-600 dark:univer-bg-gray-700 dark:univer-text-white
                 `, {
                     'univer-border-primary-600 univer-outline-none univer-ring-2 univer-ring-primary-600/20': open && !borderless,
@@ -138,7 +138,7 @@ export function MultipleSelect(props: IMultipleSelectProps) {
                 }, className)}
             >
                 <div
-                    className="univer-flex univer-flex-1 univer-gap-2"
+                    className="univer-flex univer-gap-2 univer-box-border univer-pr-2 univer-w-[calc(100%-16px)]"
                 >
                     {displayValue}
                 </div>

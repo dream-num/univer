@@ -345,7 +345,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
         <div
             className={clsx(
                 `
-                  univer-relative univer-box-border univer-rounded-lg univer-border univer-border-solid
+                  univer-relative univer-box-border univer-rounded-md univer-border univer-border-solid
                   univer-border-gray-200 univer-bg-white univer-p-4
                 `,
                 full ? 'univer-w-full' : 'univer-w-[278px]',

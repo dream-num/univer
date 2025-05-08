@@ -74,17 +74,14 @@ export function FilterPanel() {
             className={`
               univer-box-border univer-flex univer-h-[432px] univer-w-[312px] univer-flex-col univer-rounded-lg
               univer-bg-white univer-p-4 univer-shadow-lg
-              dark:univer-bg-black
+              dark:univer-border-gray-600 dark:univer-bg-gray-700
             `}
         >
             <ComponentContainer
                 components={FilterPanelEmbedPointPart}
                 sharedProps={{ range, colIndex, onClose: onCancel }}
             />
-            <div
-                data-u-comp="sheets-filter-panel"
-                className="univer-mb-1 univer-flex-shrink-0 univer-flex-grow-0"
-            >
+            <div className="univer-mb-1 univer-flex-shrink-0 univer-flex-grow-0">
                 <Segmented
                     value={filterBy}
                     items={items}

@@ -99,7 +99,7 @@ export const ImagePopupMenu: React.FC<IImagePopupMenuProps> = (props: IImagePopu
                     })}
                 >
                     <Autofill className="univer-fill-primary-600 univer-text-gray-900" />
-                    {showMore && <MoreDownSingle className="univer-text-[10px] univer-text-gray-400" />}
+                    {showMore && <MoreDownSingle />}
                 </div>
             </DropdownMenu>
         </div>

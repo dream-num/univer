@@ -133,7 +133,7 @@ export function BorderPanel(props: IBorderPanelProps) {
                             type="button"
                         >
                             <PaintBucket className="univer-fill-primary-600" extend={{ colorChannel1: value?.color ?? '' }} />
-                            <MoreDownSingle className="univer-text-gray-400" />
+                            <MoreDownSingle />
                         </button>
                     </Dropdown>
                 </div>
@@ -169,7 +169,7 @@ export function BorderPanel(props: IBorderPanelProps) {
                             type="button"
                         >
                             <BorderLine type={BorderStyleTypes.THIN} />
-                            <MoreDownSingle className="univer-text-gray-400" />
+                            <MoreDownSingle />
                         </button>
                     </Dropdown>
                 </div>

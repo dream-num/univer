@@ -17,7 +17,7 @@
 import type { CSSProperties, MouseEvent as ReactMouseEvent, ReactNode } from 'react';
 import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { clsx } from '../../helper/clsx';
-import { Button } from '../button';
+import { Button } from '../button/Button';
 import { ConfigContext } from '../config-provider/ConfigProvider';
 import { DialogContent, DialogDescription, DialogFooter, DialogHeader, Dialog as DialogProvider, DialogTitle } from './DialogPrimitive';
 

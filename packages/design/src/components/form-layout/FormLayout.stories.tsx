@@ -16,7 +16,7 @@
 
 import type { Meta } from '@storybook/react';
 
-import { Input } from '../input';
+import { Input } from '../input/Input';
 import { Select } from '../select/Select';
 import { FormLayout } from './FormLayout';
 

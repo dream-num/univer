@@ -208,8 +208,8 @@ export const AutoFillPopupMenu: React.FC<{}> = () => {
                             'univer-bg-white': !visible,
                         })}
                     >
-                        <Autofill className="univer-fill-green-500 univer-text-gray-900" />
-                        {showMore && <MoreDownSingle className="univer-text-[10px] univer-text-gray-400" />}
+                        <Autofill className="univer-fill-primary-600 univer-text-gray-900" />
+                        {showMore && <MoreDownSingle />}
                     </div>
                 </DropdownMenu>
             </div>

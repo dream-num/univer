@@ -19,8 +19,8 @@ import { DropdownSingle } from '@univerjs/icons';
 import VirtualList from 'rc-virtual-list';
 import { useEffect, useMemo, useState } from 'react';
 import { clsx } from '../../helper/clsx';
-import { Checkbox } from '../checkbox';
-import { Tooltip } from '../tooltip';
+import { Checkbox } from '../checkbox/Checkbox';
+import { Tooltip } from '../tooltip/Tooltip';
 import styles from './index.module.css';
 import { createCacheWithFindNodePathFromTree, isIntermediated } from './util';
 

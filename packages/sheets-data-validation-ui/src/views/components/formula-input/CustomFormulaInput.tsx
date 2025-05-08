@@ -16,6 +16,7 @@
 
 import type { IFormulaInputProps } from '@univerjs/data-validation';
 import type { IFormulaEditorRef } from '@univerjs/sheets-formula-ui';
+import { FormLayout } from '@univerjs/design';
 import { FormulaEditor } from '@univerjs/sheets-formula-ui';
 import { useSidebarClick } from '@univerjs/ui';
 import { useRef, useState } from 'react';
@@ -32,35 +33,36 @@ export function CustomFormulaInput(props: IFormulaInputProps) {
     });
 
     return (
-        <FormulaEditor
-            ref={formulaEditorRef}
-            className={`
-              univer-box-border univer-h-8 univer-w-full univer-cursor-pointer univer-items-center univer-rounded-lg
-              univer-border univer-border-solid univer-border-gray-200 univer-bg-white univer-pt-2
-              univer-transition-colors
-              [&>div:first-child]:univer-px-2.5
-              [&>div]:univer-h-5 [&>div]:univer-ring-transparent
-              dark:univer-border-gray-600 dark:univer-bg-gray-700 dark:univer-text-white
-              hover:univer-border-primary-600
-            `}
-            initValue={value?.formula1 ?? '=' as any}
-            unitId={unitId}
-            subUnitId={subUnitId}
-            isFocus={isFocusFormulaEditor}
-            errorText={formula1Res}
-            isSupportAcrossSheet
-            onChange={(newValue) => {
-                const newFormula = (newValue ?? '').trim();
-                if (newFormula === value?.formula1) {
-                    return;
-                }
+        <FormLayout error={formula1Res}>
+            <FormulaEditor
+                ref={formulaEditorRef}
+                className={`
+                  univer-box-border univer-h-8 univer-w-full univer-cursor-pointer univer-items-center univer-rounded-lg
+                  univer-border univer-border-solid univer-border-gray-200 univer-bg-white univer-pt-2
+                  univer-transition-colors
+                  [&>div:first-child]:univer-px-2.5
+                  [&>div]:univer-h-5 [&>div]:univer-ring-transparent
+                  dark:univer-border-gray-600 dark:univer-bg-gray-700 dark:univer-text-white
+                  hover:univer-border-primary-600
+                `}
+                initValue={value?.formula1 ?? '=' as any}
+                unitId={unitId}
+                subUnitId={subUnitId}
+                isFocus={isFocusFormulaEditor}
+                isSupportAcrossSheet
+                onChange={(newValue) => {
+                    const newFormula = (newValue ?? '').trim();
+                    if (newFormula === value?.formula1) {
+                        return;
+                    }
 
-                onChange?.({
-                    ...value,
-                    formula1: newFormula,
-                });
-            }}
-            onFocus={() => isFocusFormulaEditorSet(true)}
-        />
+                    onChange?.({
+                        ...value,
+                        formula1: newFormula,
+                    });
+                }}
+                onFocus={() => isFocusFormulaEditorSet(true)}
+            />
+        </FormLayout>
     );
 }

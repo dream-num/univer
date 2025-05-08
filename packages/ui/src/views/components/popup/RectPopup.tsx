@@ -86,6 +86,8 @@ export interface IRectPopupProps {
     maskZIndex?: number;
     onMaskClick?: () => void;
     noPushMinimumGap?: boolean;
+
+    autoRelayout?: boolean;
 }
 
 export interface IPopupLayoutInfo extends Pick<IRectPopupProps, 'direction'> {
@@ -133,7 +135,9 @@ function calcPopupPosition(layout: IPopupLayoutInfo): { top: number; left: numbe
         } else {
             // If the popup element exceed the visible area. We should "push" it back.
             horizontalStyle = (startX + width) > containerWidth
-                ? { left: Math.max(endX - width, minLeft) } // on left
+                ? Math.max(endX - width, minLeft) < PUSHING_MINIMUM_GAP
+                    ? { left: Math.min(startX, maxLeft) }
+                    : { left: Math.max(endX - width, minLeft) } // on left
                 : { left: Math.min(startX, maxLeft) }; // on right
         }
 
@@ -167,7 +171,9 @@ function calcPopupPosition(layout: IPopupLayoutInfo): { top: number; left: numbe
     } else {
         // If the popup element exceed the visible area. We should "push" it back.
         verticalStyle = ((startY + height) > containerHeight)
-            ? { top: Math.max(endY - height, minTop) } // on top
+            ? Math.max(endY - height, minTop) < PUSHING_MINIMUM_GAP
+                ? { top: Math.min(startY, maxTop) }
+                : { top: Math.max(endY - height, minTop) } // on top
             : { top: Math.min(startY, maxTop) }; // on bottom
     }
 
@@ -193,6 +199,7 @@ function RectPopup(props: IRectPopupProps) {
         maskZIndex = 100,
         onMaskClick,
         noPushMinimumGap,
+        autoRelayout = true,
     } = props;
     const nodeRef = useRef<HTMLElement>(null);
     const clickOtherFn = useEvent(onClickOutside ?? (() => { /* empty */ }));
@@ -207,7 +214,7 @@ function RectPopup(props: IRectPopupProps) {
     const uiConfig = configService.getConfig(UI_PLUGIN_CONFIG_KEY) as IUniverUIConfig;
     const popupRootId = uiConfig?.popupRootId ?? 'univer-popup-portal';
 
-    function updatePosition(position: IAbsolutePosition) {
+    const updatePosition = useEvent((position: IAbsolutePosition) => {
         requestAnimationFrame(() => {
             if (!nodeRef.current) return;
 
@@ -230,12 +237,13 @@ function RectPopup(props: IRectPopupProps) {
             nodeRef.current.style.top = `${positionRef.current.top}px`;
             nodeRef.current.style.left = `${positionRef.current.left}px`;
         });
-    }
+    });
 
     useEffect(() => {
         let observer: ResizeObserver | null;
         if (nodeRef.current) {
             observer = new ResizeObserver(() => {
+                if (!autoRelayout) return;
                 if (!anchorRectRef.current) return;
                 updatePosition(anchorRectRef.current);
             });
@@ -246,7 +254,7 @@ function RectPopup(props: IRectPopupProps) {
         return () => {
             observer?.disconnect();
         };
-    }, [nodeRef.current]);
+    }, [nodeRef.current, autoRelayout]);
 
     useEffect(() => {
         const anchorRectSub = anchorRect$.subscribe((anchorRect) => {

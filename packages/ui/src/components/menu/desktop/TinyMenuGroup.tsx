@@ -23,11 +23,13 @@ import { combineLatest, of } from 'rxjs';
 import { ComponentManager } from '../../../common';
 import { useDependency } from '../../../utils/di';
 
+/** @deprecated */
 interface IUITinyMenuGroupProps {
     item: IMenuSchema;
     onOptionSelect?: (option: IValueOption) => void;
 }
 
+/** @deprecated */
 export function UITinyMenuGroup(props: IUITinyMenuGroupProps) {
     const { item, onOptionSelect } = props;
     const [activeItems, setActiveItems] = useState<string[]>([]);

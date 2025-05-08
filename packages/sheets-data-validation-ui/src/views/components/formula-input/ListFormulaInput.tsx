@@ -359,7 +359,7 @@ export function ListFormulaInput(props: IFormulaInputProps) {
             </FormLayout>
             {isFormulaStr === '1'
                 ? (
-                    <FormLayout className="univer-mb-0" error={(formula1Res || localError) || undefined}>
+                    <FormLayout error={(formula1Res || localError) || undefined}>
                         <FormulaEditor
                             ref={formulaEditorRef}
                             className={`
@@ -400,7 +400,7 @@ export function ListFormulaInput(props: IFormulaInputProps) {
                     </FormLayout>
                 )
                 : (
-                    <FormLayout className="univer-mb-0" error={formula1Res}>
+                    <FormLayout error={formula1Res}>
                         <div style={{ marginTop: '-12px' }}>
                             <DraggableList
                                 list={strList}

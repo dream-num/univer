@@ -125,15 +125,16 @@ export function MultipleSelect(props: IMultipleSelectProps) {
             <div
                 data-u-comp="multiple-select"
                 className={clsx(`
-                  univer-box-border univer-inline-flex univer-h-8 univer-min-w-36 univer-cursor-pointer
-                  univer-items-center univer-justify-between univer-gap-2 univer-rounded-lg univer-border
-                  univer-border-solid univer-border-gray-200 univer-bg-white univer-px-2.5 univer-transition-colors
-                  univer-duration-200
+                  univer-box-border univer-inline-flex univer-h-8 univer-min-w-36 univer-items-center
+                  univer-justify-between univer-gap-2 univer-rounded-lg univer-border univer-border-solid
+                  univer-border-gray-200 univer-bg-white univer-px-2.5 univer-transition-colors univer-duration-200
                   dark:univer-border-gray-600 dark:univer-bg-gray-700 dark:univer-text-white
-                  hover:univer-border-primary-600
                 `, {
                     'univer-border-primary-600 univer-outline-none univer-ring-2 univer-ring-primary-600/20': open && !borderless,
                     'univer-border-transparent univer-bg-transparent hover:univer-border-transparent': borderless,
+                    'univer-cursor-not-allowed': disabled,
+                    'hover:univer-border-primary-600': !disabled && !borderless,
+                    'univer-cursor-pointer': !disabled && !open,
                 }, className)}
             >
                 <div

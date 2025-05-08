@@ -64,6 +64,7 @@ export { ContextMenuService, type IContextMenuHandler, IContextMenuService } fro
 export { DesktopDialogService } from './services/dialog/desktop-dialog.service';
 export { IDialogService } from './services/dialog/dialog.service';
 export { IGalleryService } from './services/gallery/gallery.service';
+export { DesktopGalleryService } from './services/gallery/desktop-gallery.service';
 export { CanvasFloatDomService, type IFloatDom, type IFloatDomLayout } from './services/dom/canvas-dom-layer.service';
 export { DesktopGlobalZoneService } from './services/global-zone/desktop-global-zone.service';
 export { IGlobalZoneService } from './services/global-zone/global-zone.service';

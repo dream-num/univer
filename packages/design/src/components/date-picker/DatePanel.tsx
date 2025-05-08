@@ -19,7 +19,7 @@ import type { BasePickerPanelProps } from 'rc-picker';
 import { PickerPanel } from 'rc-picker';
 import generateConfig from 'rc-picker/lib/generate/dayjs';
 import { useContext } from 'react';
-import { ConfigContext } from '../config-provider';
+import { ConfigContext } from '../config-provider/ConfigProvider';
 import styles from './index.module.css';
 
 export type IDatePanelProps = Omit<BasePickerPanelProps<dayjs.Dayjs>, 'prefixCls' | 'locale' | 'generateConfig'> & {

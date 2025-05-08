@@ -34,6 +34,8 @@ import { ContextMenuService, IContextMenuService } from './services/contextmenu/
 import { DesktopDialogService } from './services/dialog/desktop-dialog.service';
 import { IDialogService } from './services/dialog/dialog.service';
 import { CanvasFloatDomService } from './services/dom/canvas-dom-layer.service';
+import { DesktopGalleryService } from './services/gallery/desktop-gallery.service';
+import { IGalleryService } from './services/gallery/gallery.service';
 import { DesktopGlobalZoneService } from './services/global-zone/desktop-global-zone.service';
 import { IGlobalZoneService } from './services/global-zone/global-zone.service';
 import { DesktopLayoutService, ILayoutService } from './services/layout/layout.service';
@@ -107,6 +109,7 @@ export class UniverUIPlugin extends Plugin {
             [IContextMenuService, { useClass: ContextMenuService }],
             [IClipboardInterfaceService, { useClass: BrowserClipboardService, lazy: true }],
             [INotificationService, { useClass: DesktopNotificationService, lazy: true }],
+            [IGalleryService, { useClass: DesktopGalleryService, lazy: true }],
             [IDialogService, { useClass: DesktopDialogService, lazy: true }],
             [IConfirmService, { useClass: DesktopConfirmService, lazy: true }],
             [ISidebarService, { useClass: DesktopSidebarService, lazy: true }],

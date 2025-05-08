@@ -14,27 +14,17 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
-import React from 'react';
+import { Gallery } from '@univerjs/design';
+import { IGalleryService } from '../../../services/gallery/gallery.service';
+import { useDependency, useObservable } from '../../../utils/di';
 
-export interface IImageViewerProps {
-    src: Nullable<string>;
-}
+export function GalleryPart() {
+    const galleryService = useDependency(IGalleryService);
 
-export const ImageViewer: React.FC<IImageViewerProps> = (props: IImageViewerProps) => {
-    const { src } = props;
-
-    if (!src) {
+    const gallery = useObservable(galleryService.gallery$);
+    if (!gallery) {
         return null;
     }
 
-    return (
-        <div className="univer-py-2">
-            <img
-                className="univer-relative univer-block univer-size-full"
-                src={src}
-                alt="Univer Image Viewer"
-            />
-        </div>
-    );
-};
+    return <Gallery {...gallery} />;
+}

@@ -47,7 +47,7 @@ const indexTemplate = `<!doctype html>
             body {
                 height: 100%;
                 margin: 0;
-                font-family: PingFang SC, Microsoft YaHei, Arial, sans-serif;
+                font-family: Arial;
             }
         </style>${ESBUILD_SCRIPT}
     </head>

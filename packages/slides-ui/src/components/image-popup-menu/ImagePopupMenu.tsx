@@ -117,7 +117,7 @@ export function SlideImagePopupMenu(props: IImagePopupMenuProps) {
                     })}
                 >
                     <Autofill className="univer-fill-primary-600 univer-text-gray-900" />
-                    {showMore && <MoreDownSingle className="univer-text-[10px] univer-text-gray-400" />}
+                    {showMore && <MoreDownSingle />}
                 </div>
             </Dropdown>
         </div>

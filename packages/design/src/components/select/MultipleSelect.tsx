@@ -19,26 +19,22 @@ import type { IDropdownMenuProps } from '../dropdown-menu/DropdownMenu';
 import { MoreDownSingle } from '@univerjs/icons';
 import { useMemo, useState } from 'react';
 import { clsx } from '../../helper/clsx';
+import { Badge } from '../badge/Badge';
 import { DropdownMenu } from '../dropdown-menu/DropdownMenu';
 
 interface IOption {
     label?: string | ReactNode;
     value?: string;
     disabled?: boolean;
-    options?: IOption[];
 }
 
-interface IOptionSeparator {
-    type: 'separator';
-}
-
-export interface ISelectProps {
+export interface IMultipleSelectProps {
     className?: string;
 
     /**
      * The value of select
      */
-    value: string;
+    value: string[];
 
     /**
      * Whether the select is disabled
@@ -61,13 +57,13 @@ export interface ISelectProps {
     /**
      * The callback function that is triggered when the value is changed
      */
-    onChange: (value: string) => void;
+    onChange: (values: string[]) => void;
 }
 
-export function Select(props: ISelectProps) {
+export function MultipleSelect(props: IMultipleSelectProps) {
     const {
         className,
-        value,
+        value = [],
         disabled = false,
         options = [],
         borderless = false,
@@ -81,60 +77,40 @@ export function Select(props: ISelectProps) {
     }
 
     const items: IDropdownMenuProps['items'] = useMemo(() => {
-        const selectOptions: (IOption | IOptionSeparator)[] = [];
+        return options.map((option) => {
+            return {
+                type: 'checkbox',
+                value: option.value!,
+                label: option.label,
+                disabled: option.disabled,
+                checked: value.includes(option.value!),
+                onSelect: (item: string) => {
+                    const newValue = value.includes(item) ? value.filter((v) => v !== item) : [...value, item];
 
-        for (const option of options) {
-            if (option.options) {
-                option.options.forEach((opt) => {
-                    selectOptions.push({
-                        label: opt.label,
-                        value: opt.value!,
-                        disabled: opt.disabled,
-                    });
-                });
-                selectOptions.push({
-                    type: 'separator',
-                });
-            } else {
-                selectOptions.push({
-                    label: option.label,
-                    value: option.value!,
-                    disabled: option.disabled,
-                });
-            }
-        }
-
-        return [{
-            type: 'radio',
-            value,
-            hideIndicator: true,
-            options: selectOptions,
-            onSelect: (item) => {
-                onChange(item);
-            },
-        }];
+                    onChange(newValue);
+                },
+            };
+        });
     }, [options]);
 
+    function handleClose(item: string) {
+        const newValue = value.filter((v) => v !== item);
+        onChange(newValue);
+    }
+
     const displayValue = useMemo(() => {
-        let label = null;
-
-        for (const option of options) {
-            if (option.options) {
-                for (const opt of option.options) {
-                    if (opt.value === value) {
-                        label = opt.label;
-                        break;
-                    }
-                }
-            } else {
-                if (option.value === value) {
-                    label = option.label;
-                    break;
-                }
-            }
-        }
-
-        return label || value;
+        return options
+            .filter((option) => value.includes(option.value!))
+            .map((option, index) => (
+                <Badge
+                    key={index}
+                    className="univer-max-w-32"
+                    closable
+                    onClose={() => handleClose(option.value!)}
+                >
+                    {option.label}
+                </Badge>
+            ));
     }, [options, value]);
 
     return (
@@ -161,10 +137,7 @@ export function Select(props: ISelectProps) {
                 }, className)}
             >
                 <div
-                    className={`
-                      univer-flex-1 univer-truncate univer-text-sm univer-text-gray-500
-                      dark:univer-text-white
-                    `}
+                    className="univer-flex univer-flex-1 univer-gap-2"
                 >
                     {displayValue}
                 </div>

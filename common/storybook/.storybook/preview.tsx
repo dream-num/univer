@@ -15,6 +15,7 @@
  */
 
 import type { Preview } from '@storybook/react';
+import type { Theme } from '@univerjs/themes';
 import {
     CommandService,
     ConfigService,
@@ -43,14 +44,15 @@ import {
 import { ConfigProvider } from '@univerjs/design';
 import enUS from '@univerjs/design/locale/en-US';
 import zhCN from '@univerjs/design/locale/zh-CN';
-import { DesktopLocalStorageService, RediContext } from '@univerjs/ui';
-import React, { useMemo } from 'react';
+import { defaultTheme, greenTheme } from '@univerjs/themes';
+import { DesktopLocalStorageService, RediContext, ThemeSwitcherService } from '@univerjs/ui';
 
+import React, { useEffect, useMemo } from 'react';
 import './global.css';
 
-export const themes: Record<string, Record<string, string>> = {
-    // default: defaultTheme,
-    // green: greenTheme,
+export const themes: Record<string, Theme> = {
+    default: defaultTheme,
+    green: greenTheme,
 };
 
 const preview: Preview = {
@@ -115,6 +117,7 @@ const preview: Preview = {
 
         const rediContext = useMemo(() => {
             const injector = new Injector([
+                [ThemeSwitcherService],
                 [IUniverInstanceService, { useClass: UniverInstanceService }],
                 [ErrorService],
                 [LocaleService],
@@ -137,6 +140,12 @@ const preview: Preview = {
                 injector,
             };
         }, []);
+
+        useEffect(() => {
+            const theme = themes[context.globals.theme];
+
+            rediContext.injector.get(ThemeSwitcherService).injectThemeToHead(theme);
+        }, [context.globals.theme]);
 
         return (
             <RediContext.Provider value={rediContext}>

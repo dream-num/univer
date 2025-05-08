@@ -122,7 +122,7 @@ const ColorSelect = (props: IColorSelectProps) => {
                     style={{ background: value }}
                 />
 
-                <MoreDownSingle className="univer-text-gray-600" />
+                <MoreDownSingle />
             </div>
         </Dropdown>
     );

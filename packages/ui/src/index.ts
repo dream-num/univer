@@ -118,6 +118,7 @@ export * from './utils';
 export { ComponentContainer, type IComponentContainerProps, useComponentsOfPart } from './views/components/ComponentContainer';
 export { ZenZone } from './views/components/zen-zone/ZenZone';
 export { Menu as DesktopMenu } from './components/menu/desktop/Menu';
+export { ThemeSwitcherService } from './services/theme-switcher/theme-switcher.service';
 
 // #region - workbench components
 

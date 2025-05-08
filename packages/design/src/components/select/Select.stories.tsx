@@ -17,6 +17,7 @@
 import type { Meta } from '@storybook/react';
 import type { ISelectProps } from './Select';
 import { useState } from 'react';
+import { MultipleSelect } from './MultipleSelect';
 import { Select } from './Select';
 
 const meta: Meta<typeof Select> = {
@@ -48,6 +49,31 @@ export const SelectBasic = {
             <>
                 <Select value={value} options={options} onChange={handleChange} />
                 <Select disabled value={value} options={options} onChange={handleChange} />
+            </>
+        );
+    },
+};
+
+export const SelectMultiple = {
+    render() {
+        const [values, setValues] = useState<string[]>(['option2']);
+        const options = [
+            { label: 'Option 1', value: 'option1' },
+            { label: 'Option 2', value: 'option2' },
+            { label: 'Option 3 Option 3 Option 3 Option 3 Option 3 Option 3', value: 'option3' },
+        ];
+        function handleChange(values: string[]) {
+            setValues(values);
+        }
+
+        return (
+            <>
+                {values.toString()}
+                <MultipleSelect
+                    value={values}
+                    options={options}
+                    onChange={handleChange}
+                />
             </>
         );
     },

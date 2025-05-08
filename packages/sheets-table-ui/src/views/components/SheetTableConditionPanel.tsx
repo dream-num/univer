@@ -119,7 +119,7 @@ export const SheetTableConditionPanel = (props: IConditionFilterProps) => {
                         {selectType}
                     </span>
 
-                    <MoreDownSingle className="univer-text-gray-400" />
+                    <MoreDownSingle />
                 </div>
             </Dropdown>
 

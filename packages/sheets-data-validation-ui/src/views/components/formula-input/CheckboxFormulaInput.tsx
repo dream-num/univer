@@ -68,7 +68,7 @@ export function CheckboxFormulaInput(props: IFormulaInputProps) {
                 : null}
             {checked
                 ? (
-                    <FormLayout label={localeService.t('dataValidation.checkbox.unchecked')} error={formula2Res}>
+                    <FormLayout className="univer-mb-0" label={localeService.t('dataValidation.checkbox.unchecked')} error={formula2Res}>
                         <Input
                             className="univer-w-full"
                             placeholder={localeService.t('dataValidation.panel.valuePlaceholder')}

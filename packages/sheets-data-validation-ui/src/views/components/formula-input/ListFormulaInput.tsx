@@ -359,7 +359,7 @@ export function ListFormulaInput(props: IFormulaInputProps) {
             </FormLayout>
             {isFormulaStr === '1'
                 ? (
-                    <>
+                    <FormLayout className="univer-mb-0" error={(formula1Res || localError) || undefined}>
                         <FormulaEditor
                             ref={formulaEditorRef}
                             className={`
@@ -375,7 +375,6 @@ export function ListFormulaInput(props: IFormulaInputProps) {
                             unitId={unitId}
                             subUnitId={subUnitId}
                             isFocus={isFocusFormulaEditor}
-                            errorText={(formula1Res || localError) || undefined}
                             isSupportAcrossSheet
                             onFocus={() => isFocusFormulaEditorSet(true)}
                             onChange={(v = '') => {
@@ -398,10 +397,10 @@ export function ListFormulaInput(props: IFormulaInputProps) {
                                 })}
                             </div>
                         )}
-                    </>
+                    </FormLayout>
                 )
                 : (
-                    <FormLayout error={formula1Res}>
+                    <FormLayout className="univer-mb-0" error={formula1Res}>
                         <div style={{ marginTop: '-12px' }}>
                             <DraggableList
                                 list={strList}

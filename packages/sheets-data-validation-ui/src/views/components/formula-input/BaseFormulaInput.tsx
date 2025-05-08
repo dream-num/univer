@@ -62,7 +62,7 @@ export const BaseFormulaInput = (props: IFormulaInputProps) => {
     }
 
     return (
-        <FormLayout error={formula1Res}>
+        <FormLayout className="univer-mb-0" error={formula1Res}>
             <Input
                 className="univer-w-full"
                 placeholder={localeService.t('dataValidation.panel.formulaPlaceholder')}

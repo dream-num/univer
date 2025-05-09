@@ -106,7 +106,8 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
                 <div
                     className={clsx(`
                       univer-group univer-relative univer-flex univer-h-6 univer-cursor-pointer univer-items-center
-                      univer-rounded univer-pr-5 univer-transition-colors univer-animate-in univer-fade-in
+                      univer-rounded univer-pr-5 univer-text-sm univer-transition-colors univer-animate-in
+                      univer-fade-in
                       dark:hover:univer-bg-gray-700
                       hover:univer-bg-gray-100
                     `, {

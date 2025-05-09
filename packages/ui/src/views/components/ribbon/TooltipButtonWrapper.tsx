@@ -129,6 +129,7 @@ function Label({ icon, value, option, onOptionSelect }: {
                 />
             )}
             <CustomLabel
+                className="univer-text-sm"
                 icon={icon}
                 value$={option.value$}
                 value={option.value}

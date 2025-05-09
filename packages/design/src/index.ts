@@ -56,6 +56,8 @@ export { Menu, MenuItem, MenuItemGroup, type MenuRef, SubMenu, TinyMenuGroup } f
 export { type IPopupProps, Popup } from './components/popup';
 export { DateRangePicker } from './components/date-range-picker';
 
+export * from '@univerjs/icons';
+
 export { type ILocale } from './locale/interface';
 
 export { clsx } from './helper/clsx';

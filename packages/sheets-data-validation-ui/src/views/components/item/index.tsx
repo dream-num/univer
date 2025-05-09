@@ -107,7 +107,7 @@ export const DataValidationItem = (props: IDataValidationDetailProps) => {
             <div
                 className={`
                   univer-overflow-hidden univer-text-ellipsis univer-text-sm univer-font-medium univer-leading-[22px]
-                  univer-text-black
+                  univer-text-gray-900
                 `}
             >
                 {validator?.generateRuleName(rule)}

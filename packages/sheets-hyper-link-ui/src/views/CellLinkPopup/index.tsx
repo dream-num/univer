@@ -94,7 +94,7 @@ export const CellLinkPopupPure = (props: ICellLinkPopupPureProps) => {
                 <div
                     className={`
                       univer-mr-2 univer-flex univer-h-5 univer-w-5 univer-flex-none univer-items-center
-                      univer-justify-center univer-text-base univer-text-black
+                      univer-justify-center univer-text-base univer-text-gray-900
                     `}
                 >
                     {iconsMap[linkObj.type]}

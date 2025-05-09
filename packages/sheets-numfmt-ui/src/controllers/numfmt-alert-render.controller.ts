@@ -18,7 +18,6 @@ import type { Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import type { IUniverSheetsNumfmtConfig } from '@univerjs/sheets-numfmt';
 import { Disposable, IConfigService, Inject, isRealNum, LocaleService } from '@univerjs/core';
-import { FormulaDataModel } from '@univerjs/engine-formula';
 import { isTextFormat } from '@univerjs/engine-numfmt';
 import { INumfmtService } from '@univerjs/sheets';
 import { SHEETS_NUMFMT_PLUGIN_CONFIG_KEY } from '@univerjs/sheets-numfmt';
@@ -34,7 +33,6 @@ export class NumfmtAlertRenderController extends Disposable implements IRenderMo
         @Inject(HoverManagerService) private readonly _hoverManagerService: HoverManagerService,
         @Inject(CellAlertManagerService) private readonly _cellAlertManagerService: CellAlertManagerService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
-        @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel,
         @IZenZoneService private readonly _zenZoneService: IZenZoneService,
         @Inject(INumfmtService) private _numfmtService: INumfmtService,
         @IConfigService private readonly _configService: IConfigService

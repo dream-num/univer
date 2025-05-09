@@ -56,7 +56,7 @@ export function SheetBarItem(props: IBaseSheetBarProps) {
             data-id={sheetId}
             className={clsx(`
               univer-mx-1 univer-box-border univer-flex univer-flex-grow univer-cursor-pointer univer-select-none
-              univer-flex-row univer-items-center univer-rounded univer-text-xs univer-text-black
+              univer-flex-row univer-items-center univer-rounded univer-text-xs univer-text-gray-900
               univer-transition-colors
               dark:univer-text-white
             `, currentSelected
@@ -66,6 +66,7 @@ export function SheetBarItem(props: IBaseSheetBarProps) {
                   dark:univer-bg-black
                 `
                 : `
+                  univer-font-medium
                   dark:hover:univer-bg-gray-700
                   hover:univer-bg-gray-100
                 `)}

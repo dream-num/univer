@@ -97,7 +97,7 @@ function MobileMenuItem(props: IMobileMenuItemProps) {
             className={clsx(`
               univer-flex univer-w-12 univer-flex-col univer-items-center univer-justify-center univer-border-none
               univer-bg-transparent univer-text-white
-              [&>span]:univer-mt-0.5 [&>span]:univer-w-full [&>span]:univer-truncate [&>span]:univer-text-[13px]
+              [&>span]:univer-mt-0.5 [&>span]:univer-w-full [&>span]:univer-truncate [&>span]:univer-text-sm
               [&>svg]:univer-size-[18px] [&>svg]:univer-text-lg
             `, {
                 // '': activated,

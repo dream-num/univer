@@ -145,7 +145,7 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                                                 <ul
                                                     className={`
                                                       univer-m-0 univer-box-border univer-grid univer-list-none
-                                                      univer-p-1.5 univer-text-[13px] univer-text-sm
+                                                      univer-p-1.5 univer-text-sm univer-text-sm
                                                       [&_a]:univer-block [&_a]:univer-cursor-pointer
                                                       [&_a]:univer-rounded [&_a]:univer-px-2 [&_a]:univer-py-1.5
                                                       [&_a]:univer-transition-colors
@@ -217,7 +217,7 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                     />
                 )
                 : (
-                    <div className="univer-text-[13px]/normal univer-text-gray-900">
+                    <div className="univer-text-smmal univer-text-gray-900">
                         {transformDocument2TextNodes(item.text).map((paragraph, i) => (
                             <div key={i} className="univer-break-words">
                                 {paragraph.map((item, i) => {

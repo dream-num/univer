@@ -34,16 +34,12 @@ import { UniverSheetsNotePlugin } from '@univerjs/sheets-note';
 import { UniverSheetsNoteUIPlugin } from '@univerjs/sheets-note-ui';
 import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
 import { UniverSheetsSortPlugin } from '@univerjs/sheets-sort';
-import { UniverSheetsBindingSourcePlugin } from '@univerjs/sheets-source-binding';
 import { UniverSheetTablePlugin } from '@univerjs/sheets-table';
 import { UniverSheetsThreadCommentPlugin } from '@univerjs/sheets-thread-comment';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
-
 import { UniverSheetsZenEditorPlugin } from '@univerjs/sheets-zen-editor';
-
 import { UniverUIPlugin } from '@univerjs/ui';
 import { enUS, faIR, frFR, ruRU, viVN, zhCN, zhTW } from '../locales';
-
 import { UniverSheetsCustomMenuPlugin } from './custom-menu';
 import ImportCSVButtonPlugin from './custom-plugin/import-csv-button';
 import '@univerjs/sheets/facade';
@@ -61,7 +57,6 @@ import '@univerjs/sheets-conditional-formatting/facade';
 import '@univerjs/sheets-find-replace/facade';
 import '@univerjs/sheets-drawing-ui/facade';
 import '@univerjs/sheets-zen-editor/facade';
-import '@univerjs/sheets-source-binding/facade';
 import '@univerjs/sheets-crosshair-highlight/facade';
 import '@univerjs/sheets-formula-ui/facade';
 import '@univerjs/sheets-table/facade';
@@ -128,7 +123,6 @@ function createNewInstance() {
     univer.registerPlugin(UniverSheetsSortPlugin);
     univer.registerPlugin(UniverSheetsHyperLinkPlugin);
     univer.registerPlugin(UniverSheetsThreadCommentPlugin);
-    univer.registerPlugin(UniverSheetsBindingSourcePlugin);
     univer.registerPlugin(UniverSheetsCustomMenuPlugin);
 
     univer.registerPlugin(UniverSheetTablePlugin);

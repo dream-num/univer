@@ -42,7 +42,7 @@ export function CellAlert({ popup }: { popup: ICanvasPopup }) {
         <div
             className={`
               univer-z-[100] univer-box-border univer-w-[156px] univer-rounded-lg univer-bg-white univer-px-2
-              univer-py-1 univer-text-black univer-shadow
+              univer-py-1 univer-text-gray-900 univer-shadow
               dark:univer-bg-black dark:univer-text-white
             `}
         >

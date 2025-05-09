@@ -30,7 +30,7 @@ export const GeneralPanel: FC<IBusinessComponentProps> = (props) => {
 
     return (
         <div>
-            <div className="univer-mt-3.5 univer-text-[13px]/5 univer-text-gray-600">
+            <div className="univer-mt-3.5 univer-text-sm/5 univer-text-gray-600">
                 {t('sheet.numfmt.generalDes')}
             </div>
         </div>

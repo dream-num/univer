@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { CommandType } from '@univerjs/core';
 import type { IOperation } from '@univerjs/core';
+import { CommandType } from '@univerjs/core';
 import { ActionRecorderService } from '../../services/action-recorder.service';
 
 export const OpenRecordPanelOperation: IOperation = {

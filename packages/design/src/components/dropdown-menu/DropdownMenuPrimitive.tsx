@@ -101,7 +101,7 @@ function DropdownMenuSubTrigger({
             className={clsx(
                 `
                   univer-flex univer-cursor-default univer-select-none univer-items-center univer-justify-between
-                  univer-gap-2 univer-rounded univer-px-2 univer-py-1.5 univer-text-[13px] univer-outline-none
+                  univer-gap-2 univer-rounded univer-px-2 univer-py-1.5 univer-text-sm univer-outline-none
                   [&_svg]:univer-pointer-events-none [&_svg]:univer-size-4 [&_svg]:univer-shrink-0
                   dark:focus:univer-bg-gray-600
                   data-[state=open]:univer-bg-gray-100
@@ -198,8 +198,7 @@ function DropdownMenuItem({
             className={clsx(
                 `
                   univer-relative univer-flex univer-cursor-default univer-select-none univer-items-center univer-gap-2
-                  univer-rounded univer-px-2 univer-py-1.5 univer-text-[13px] univer-outline-none
-                  univer-transition-colors
+                  univer-rounded univer-px-2 univer-py-1.5 univer-text-smver-outline-none univer-transition-colors
                   [&>svg]:univer-size-4 [&>svg]:univer-shrink-0
                   dark:focus:univer-bg-gray-600
                   data-[disabled]:univer-pointer-events-none data-[disabled]:univer-opacity-50
@@ -225,8 +224,7 @@ function DropdownMenuCheckboxItem({
             className={clsx(
                 `
                   univer-relative univer-flex univer-cursor-default univer-select-none univer-items-center
-                  univer-rounded univer-py-1.5 univer-pr-2 univer-text-[13px] univer-outline-none
-                  univer-transition-colors
+                  univer-rounded univer-py-1.5 univer-pr-2 univer-text-smver-outline-none univer-transition-colors
                   dark:focus:univer-bg-gray-600
                   data-[disabled]:univer-pointer-events-none data-[disabled]:univer-opacity-50
                   focus:univer-bg-gray-100
@@ -271,8 +269,7 @@ function DropdownMenuRadioItem({
             className={clsx(
                 `
                   univer-relative univer-flex univer-cursor-default univer-select-none univer-items-center
-                  univer-rounded univer-py-1.5 univer-pr-2 univer-text-[13px] univer-outline-none
-                  univer-transition-colors
+                  univer-rounded univer-py-1.5 univer-pr-2 univer-text-smver-outline-none univer-transition-colors
                   dark:focus:univer-bg-gray-600
                   data-[disabled]:univer-pointer-events-none data-[disabled]:univer-opacity-50
                   focus:univer-bg-gray-100
@@ -317,7 +314,7 @@ function DropdownMenuLabel({
             data-slot="dropdown-menu-label"
             data-inset={inset}
             className={clsx(
-                'univer-px-2 univer-py-1.5 univer-text-[13px] univer-font-semibold',
+                'univer-px-2 univer-py-1.5 univer-text-smver-font-semibold',
                 className
             )}
             {...props}
@@ -342,7 +339,7 @@ function DropdownMenuShortcut({
 }: ComponentProps<'span'>) {
     return (
         <span
-            className={clsx('univer-ml-auto univer-text-[13px] univer-tracking-widest univer-opacity-60', className)}
+            className={clsx('univer-ml-auto univer-text-smver-tracking-widest univer-opacity-60', className)}
             {...props}
         />
     );

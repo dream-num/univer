@@ -26,7 +26,7 @@ export const HeadingItem = (props: { value: NamedStyleType; text: string }) => {
 
     return (
         <span
-            className="univer-text-[13px]"
+            className="univer-text-sm"
             style={{
                 fontSize: style?.fs,
                 fontWeight: style?.bl ? 'bold' : 'normal',

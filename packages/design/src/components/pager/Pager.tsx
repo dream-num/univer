@@ -60,7 +60,7 @@ export function Pager(props: IPagerProps) {
         <div
             data-u-comp="pager"
             className={clsx(`
-              univer-flex univer-flex-shrink-0 univer-items-center univer-text-[13px] univer-text-gray-700
+              univer-flex univer-flex-shrink-0 univer-items-center univer-text-sm univer-text-gray-700
               dark:univer-text-gray-400
             `, className)}
         >

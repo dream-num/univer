@@ -24,6 +24,8 @@ import { ComponentManager } from '../../common/component-manager';
 import { useDependency } from '../../utils/di';
 
 export type ICustomLabelProps<T = undefined> = {
+    className?: string;
+
     value?: string | number | undefined;
 
     value$?: Observable<T>;
@@ -38,7 +40,7 @@ export type ICustomLabelProps<T = undefined> = {
  * @param props
  */
 export function CustomLabel(props: ICustomLabelProps) {
-    const { title, icon, label, value, value$ } = props;
+    const { className, title, icon, label, value, value$ } = props;
     const localeService = useDependency(LocaleService);
     const componentManager = useDependency(ComponentManager);
     const [subscribedValue, setSubscribedValue] = useState(value);
@@ -108,13 +110,13 @@ export function CustomLabel(props: ICustomLabelProps) {
         const CustomComponent = componentManager.get(labelName);
 
         if (CustomComponent) {
-            nodes.push(<CustomComponent key={index++} {...customProps} value={realValue} />);
+            nodes.push(<CustomComponent key={index++} {...customProps} className={className} value={realValue} />);
         } else {
-            nodes.push(<span key={index++}>{localeService.t(labelName)}</span>);
+            nodes.push(<span key={index++} className={className}>{localeService.t(labelName)}</span>);
         }
     }
     if (title) {
-        nodes.push(<span key={index++}>{typeof title === 'string' ? localeService.t(title) : title}</span>);
+        nodes.push(<span key={index++} className={className}>{typeof title === 'string' ? localeService.t(title) : title}</span>);
     }
 
     return <>{nodes}</>;

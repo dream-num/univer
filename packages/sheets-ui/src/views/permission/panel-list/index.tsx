@@ -340,23 +340,23 @@ export const SheetPermissionPanelList = () => {
                                             </Tooltip>
                                             <span
                                                 className={`
-                                                  univer-h-4 univer-flex-grow univer-text-xs univer-text-black
+                                                  univer-h-4 univer-flex-grow univer-text-xs univer-text-gray-900
                                                 `}
                                             >
                                                 {localeService.t('permission.panel.created')}
                                             </span>
-                                            <span className="univer-h-4 univer-text-xs univer-text-black">{editPermission ? `${localeService.t('permission.panel.iCanEdit')}` : `${localeService.t('permission.panel.iCanNotEdit')}`}</span>
+                                            <span className="univer-h-4 univer-text-xs univer-text-gray-900">{editPermission ? `${localeService.t('permission.panel.iCanEdit')}` : `${localeService.t('permission.panel.iCanNotEdit')}`}</span>
 
                                         </div>
                                         <div className="univer-mt-2 univer-flex univer-items-center">
                                             <span
                                                 className={`
-                                                  univer-h-4 univer-flex-grow univer-text-xs univer-text-black
+                                                  univer-h-4 univer-flex-grow univer-text-xs univer-text-gray-900
                                                 `}
                                             >
                                                 {localeService.t('permission.panel.viewPermission')}
                                             </span>
-                                            <span className="univer-h-4 univer-text-xs univer-text-black">{viewPermission ? `${localeService.t('permission.panel.iCanView')}` : `${localeService.t('permission.panel.iCanNotView')}`}</span>
+                                            <span className="univer-h-4 univer-text-xs univer-text-gray-900">{viewPermission ? `${localeService.t('permission.panel.iCanView')}` : `${localeService.t('permission.panel.iCanNotView')}`}</span>
                                         </div>
                                         {rule.description && (
                                             <Tooltip title={rule.description}>
@@ -382,7 +382,7 @@ export const SheetPermissionPanelList = () => {
                         className="univer-flex univer-flex-1 univer-flex-col univer-items-center univer-justify-center"
                     >
                         <img width={240} height={120} src={panelListEmptyBase64} alt="" />
-                        <p className="univer-w-60 univer-break-words univer-text-[13px] univer-text-gray-400">{localeService.t('permission.dialog.listEmpty')}</p>
+                        <p className="univer-w-60 univer-break-words univer-text-sm univer-text-gray-400">{localeService.t('permission.dialog.listEmpty')}</p>
                     </div>
                 )}
 

@@ -282,7 +282,7 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
                   univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start univer-justify-start
                 `}
             >
-                <div className={clsx('univer-flex univer-items-center univer-gap-1 univer-text-black')}>
+                <div className={clsx('univer-flex univer-items-center univer-gap-1 univer-text-gray-900')}>
                     <div>{localeService.t('image-text-wrap.wrappingStyle')}</div>
                 </div>
             </div>
@@ -307,7 +307,7 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
                   univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start univer-justify-start
                 `}
             >
-                <div className={clsx('univer-flex univer-items-center univer-gap-1 univer-text-black')}>
+                <div className={clsx('univer-flex univer-items-center univer-gap-1 univer-text-gray-900')}>
                     <div>{localeService.t('image-text-wrap.wrapText')}</div>
                 </div>
             </div>
@@ -330,7 +330,7 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
                   univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start univer-justify-start
                 `}
             >
-                <div className={clsx('univer-flex univer-items-center univer-gap-1 univer-text-black')}>
+                <div className={clsx('univer-flex univer-items-center univer-gap-1 univer-text-gray-900')}>
                     <div>{localeService.t('image-text-wrap.distanceFromText')}</div>
                 </div>
             </div>

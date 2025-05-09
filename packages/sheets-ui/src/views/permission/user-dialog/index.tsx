@@ -87,7 +87,7 @@ export const SheetPermissionUserDialog = () => {
                                 alt="empty list"
                                 draggable={false}
                             />
-                            <p className="univer-text-[13px] univer-text-gray-400">
+                            <p className="univer-text-sm univer-text-gray-400">
                                 {localeService.t('permission.dialog.userEmpty')}
                             </p>
                         </div>

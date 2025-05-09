@@ -215,14 +215,12 @@ export const DefinedNameContainer = () => {
                                     <div
                                         className={`
                                           univer-my-1 univer-max-h-[100px] univer-max-w-[190px] univer-overflow-hidden
-                                          univer-text-sm univer-font-medium univer-text-black
+                                          univer-text-sm univer-font-medium univer-text-gray-900
                                         `}
                                     >
                                         {definedName.name}
                                         <span
-                                            className={`
-                                              univer-text-xxs univer-ml-1 univer-font-normal univer-text-gray-400
-                                            `}
+                                            className="univer-text-xxs univer-ml-1 univer-text-gray-400"
                                         >
                                             {(definedName.localSheetId === SCOPE_WORKBOOK_VALUE_DEFINED_NAME || definedName.localSheetId == null) ? '' : getSheetNameBySheetId(definedName.localSheetId)}
                                         </span>
@@ -230,7 +228,7 @@ export const DefinedNameContainer = () => {
                                     <div
                                         className={`
                                           univer-m-[5px_0] univer-max-h-[100px] univer-overflow-hidden
-                                          univer-text-ellipsis univer-text-xs univer-font-normal univer-text-gray-500
+                                          univer-text-ellipsis univer-text-xs univer-text-gray-500
                                         `}
                                     >
                                         {definedName.formulaOrRefString}

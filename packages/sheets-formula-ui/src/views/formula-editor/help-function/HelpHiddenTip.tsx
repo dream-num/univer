@@ -19,9 +19,8 @@ export const HelpHiddenTip = ({ onClick }: { onClick: () => void }) => {
         <div
             className={`
               univer-z-[15] univer-box-border univer-h-[18px] univer-cursor-pointer univer-overflow-visible
-              univer-whitespace-nowrap univer-rounded-l univer-border univer-border-r-0 univer-border-[#5790f6]
-              univer-bg-[#1a73e8] univer-p-0.5 univer-text-[11px] univer-font-bold univer-leading-[13px]
-              univer-text-white
+              univer-whitespace-nowrap univer-rounded-l univer-border univer-border-r-0 univer-border-gray-600
+              univer-bg-primary-600 univer-p-0.5 univer-text-xs univer-font-bold univer-leading-[13px] univer-text-white
             `}
             onClick={onClick}
         >

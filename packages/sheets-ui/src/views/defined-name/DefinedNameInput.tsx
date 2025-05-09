@@ -294,7 +294,7 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
                 />
             </div>
             <div
-                className={clsx('univer-items-center univer-text-[13px] univer-text-red-500', {
+                className={clsx('univer-items-center univer-text-sm univer-text-red-500', {
                     'univer-hidden': validString.length === 0,
                     'univer-flex': validString.length !== 0,
                 })}

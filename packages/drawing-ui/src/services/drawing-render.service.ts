@@ -218,16 +218,10 @@ export class DrawingRenderService {
         // const adjustSize = this._adjustImageSize(width, height, screenWidth, screenHeight);
         this._galleryService.open({
             images: [src],
-            // width: adjustSize.width,
-            // height: adjustSize.height,
             onOpenChange: (open) => {
                 if (!open) {
                     this._galleryService.close();
                 }
-            },
-            style: {
-                padding: 0,
-                borderRadius: 0,
             },
         });
     }

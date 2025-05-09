@@ -16,7 +16,7 @@
 
 import type { IDrawingSearch } from '@univerjs/core';
 import { ICommandService, LocaleService } from '@univerjs/core';
-import { clsx, DropdownMenu } from '@univerjs/design';
+import { borderClassName, clsx, DropdownMenu } from '@univerjs/design';
 import { Autofill, MoreDownSingle } from '@univerjs/icons';
 import { useDependency } from '@univerjs/ui';
 import React, { useState } from 'react';
@@ -90,15 +90,20 @@ export const ImagePopupMenu: React.FC<IImagePopupMenuProps> = (props: IImagePopu
             >
                 <div
                     className={clsx(`
-                      univer-flex univer-items-center univer-gap-2 univer-rounded univer-border univer-border-solid
-                      univer-border-gray-200 univer-p-1
+                      univer-flex univer-items-center univer-gap-2 univer-rounded univer-p-1
+                      dark:hover:univer-bg-gray-800
                       hover:univer-bg-gray-100
-                    `, {
-                        'univer-bg-gray-100': visible,
-                        'univer-bg-white': !visible,
+                    `, borderClassName, {
+                        'univer-bg-gray-100 dark:univer-bg-gray-800': visible,
+                        'univer-bg-white dark:univer-bg-gray-900': !visible,
                     })}
                 >
-                    <Autofill className="univer-fill-primary-600 univer-text-gray-900" />
+                    <Autofill
+                        className={`
+                          univer-fill-primary-600 univer-text-gray-900
+                          dark:univer-text-white
+                        `}
+                    />
                     {showMore && <MoreDownSingle />}
                 </div>
             </DropdownMenu>

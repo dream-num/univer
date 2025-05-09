@@ -18,7 +18,7 @@ import type { Nullable } from '@univerjs/core';
 
 import type { Rect } from '@univerjs/engine-render';
 import { ICommandService, LocaleService } from '@univerjs/core';
-import { ColorPicker, Dropdown } from '@univerjs/design';
+import { borderTopClassName, clsx, ColorPicker, Dropdown } from '@univerjs/design';
 import { MoreDownSingle, PaintBucket } from '@univerjs/icons';
 import { useDependency } from '@univerjs/ui';
 
@@ -81,10 +81,7 @@ export default function ArrangePanel(props: IProps) {
 
     return (
         <div
-            className={`
-              univer-relative univer-bottom-0 univer-mt-5 univer-w-full univer-border-t univer-border-solid
-              univer-border-t-gray-200
-            `}
+            className={clsx('univer-relative univer-bottom-0 univer-mt-5 univer-w-full', borderTopClassName)}
         >
             <div className="univer-relative univer-w-full">
                 <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start">

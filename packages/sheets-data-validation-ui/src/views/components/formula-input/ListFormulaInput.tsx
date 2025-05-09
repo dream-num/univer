@@ -20,7 +20,7 @@ import type { IFormulaEditorRef } from '@univerjs/sheets-formula-ui';
 import type { CSSProperties } from 'react';
 import { DataValidationType, isFormulaString, LocaleService, Tools } from '@univerjs/core';
 import { DataValidationModel, DataValidatorRegistryService } from '@univerjs/data-validation';
-import { clsx, DraggableList, Dropdown, FormLayout, Input, Radio, RadioGroup } from '@univerjs/design';
+import { borderClassName, clsx, DraggableList, Dropdown, FormLayout, Input, Radio, RadioGroup } from '@univerjs/design';
 import { DeleteSingle, IncreaseSingle, MoreDownSingle, SequenceSingle } from '@univerjs/icons';
 import { DataValidationFormulaController, deserializeListOptions, serializeListOptions } from '@univerjs/sheets-data-validation';
 import { FormulaEditor } from '@univerjs/sheets-formula-ui';
@@ -90,10 +90,7 @@ const ColorSelect = (props: IColorSelectProps) => {
                         (color) => (
                             <div
                                 key={color}
-                                className={`
-                                  univer-box-border univer-size-4 univer-cursor-pointer univer-rounded univer-border
-                                  univer-border-solid univer-border-gray-200
-                                `}
+                                className={clsx('univer-box-border univer-size-4 univer-cursor-pointer univer-rounded', borderClassName)}
                                 style={{ background: color }}
                                 onClick={() => {
                                     onChange(color);
@@ -106,19 +103,16 @@ const ColorSelect = (props: IColorSelectProps) => {
             )}
         >
             <div
-                className={`
+                className={clsx(`
                   univer-box-border univer-inline-flex univer-h-8 univer-w-16 univer-cursor-pointer univer-items-center
-                  univer-justify-between univer-gap-2 univer-rounded-lg univer-border univer-border-solid
-                  univer-border-gray-200 univer-bg-white univer-px-2.5 univer-transition-colors univer-duration-200
-                  dark:univer-border-gray-600 dark:univer-bg-gray-700 dark:univer-text-white
+                  univer-justify-between univer-gap-2 univer-rounded-lg univer-bg-white univer-px-2.5
+                  univer-transition-colors univer-duration-200
+                  dark:univer-bg-gray-700 dark:univer-text-white
                   hover:univer-border-primary-600
-                `}
+                `, borderClassName)}
             >
                 <div
-                    className={`
-                      univer-box-border univer-h-4 univer-w-4 univer-rounded univer-border univer-border-gray-200
-                      univer-text-base
-                    `}
+                    className="univer-box-border univer-h-4 univer-w-4 univer-rounded univer-text-base"
                     style={{ background: value }}
                 />
 
@@ -362,15 +356,14 @@ export function ListFormulaInput(props: IFormulaInputProps) {
                     <FormLayout error={(formula1Res || localError) || undefined}>
                         <FormulaEditor
                             ref={formulaEditorRef}
-                            className={`
+                            className={clsx(`
                               univer-box-border univer-h-8 univer-w-full univer-cursor-pointer univer-items-center
-                              univer-rounded-lg univer-border univer-border-solid univer-border-gray-200 univer-bg-white
-                              univer-pt-2 univer-transition-colors
+                              univer-rounded-lg univer-bg-white univer-pt-2 univer-transition-colors
                               [&>div:first-child]:univer-px-2.5
                               [&>div]:univer-h-5 [&>div]:univer-ring-transparent
-                              dark:univer-border-gray-600 dark:univer-bg-gray-700 dark:univer-text-white
+                              dark:univer-bg-gray-700 dark:univer-text-white
                               hover:univer-border-primary-600
-                            `}
+                            `, borderClassName)}
                             initValue={formulaStr as any}
                             unitId={unitId}
                             subUnitId={subUnitId}

@@ -14,4 +14,6 @@
  * limitations under the License.
  */
 
-export const previewClassName = 'univer-mt-5 univer-px-1 univer-py-2 univer-border univer-border-solid univer-border-gray-200 univer-rounded';
+import { borderClassName, clsx } from '@univerjs/design';
+
+export const previewClassName = clsx('univer-mt-5 univer-px-1 univer-py-2 univer-rounded', borderClassName);

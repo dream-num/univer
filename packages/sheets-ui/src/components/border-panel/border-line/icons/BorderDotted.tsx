@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import React from 'react';
-
 export const BorderDotted = () => (
     <svg width="120" height="2" viewBox="0 0 120 2" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M0.491699 1.69537H1.4917V0.695374H0.491699V1.69537Z" fill="black" />

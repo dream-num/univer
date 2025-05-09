@@ -17,7 +17,7 @@
 import type { ICustomRange, Nullable, Workbook } from '@univerjs/core';
 import type { IHyperLinkPopup } from '../../services/popup.service';
 import { DOCS_ZEN_EDITOR_UNIT_ID_KEY, ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
-import { clsx, MessageType, Tooltip } from '@univerjs/design';
+import { borderClassName, clsx, MessageType, Tooltip } from '@univerjs/design';
 import { AllBorderSingle, CopySingle, LinkSingle, UnlinkSingle, WriteSingle, Xlsx } from '@univerjs/icons';
 import { CancelHyperLinkCommand, CancelRichHyperLinkCommand, SheetHyperLinkType, SheetsHyperLinkParserService } from '@univerjs/sheets-hyper-link';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
@@ -66,11 +66,10 @@ export const CellLinkPopupPure = (props: ICellLinkPopupPureProps) => {
 
     return (
         <div
-            className={`
-              univer-mb-1 univer-flex univer-max-w-[328px] univer-flex-row univer-items-center univer-justify-between
-              univer-overflow-hidden univer-rounded-lg univer-border univer-border-solid univer-border-gray-200
-              univer-bg-white univer-p-3 univer-shadow-md
-            `}
+            className={clsx(`
+              univer-mb-1 univer-flex univer-max-w-80 univer-flex-row univer-items-center univer-justify-between
+              univer-overflow-hidden univer-rounded-lg univer-bg-white univer-p-3 univer-shadow-md
+            `, borderClassName)}
             onClick={() => popupService.hideCurrentPopup()}
         >
             <div

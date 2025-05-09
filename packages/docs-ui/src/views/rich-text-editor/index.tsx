@@ -19,7 +19,7 @@ import type { ReactNode } from 'react';
 import type { Editor } from '../../services/editor/editor';
 import type { IKeyboardEventConfig } from './hooks';
 import { BuildTextUtils, createInternalEditorID, generateRandomId, getPlainText } from '@univerjs/core';
-import { clsx } from '@univerjs/design';
+import { borderClassName, clsx } from '@univerjs/design';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { useDependency, useEvent, useObservable } from '@univerjs/ui';
@@ -161,9 +161,9 @@ export const RichTextEditor = (props: IRichTextEditorProps) => {
             <div
                 className={clsx(`
                   univer-relative univer-box-border univer-flex univer-h-8 univer-w-full univer-items-center
-                  univer-justify-around univer-gap-2 univer-rounded univer-border univer-border-solid
-                  univer-border-gray-200 univer-pb-0.5 univer-pl-1.5 univer-pr-2 univer-pt-1.5
-                `, {
+                  univer-justify-around univer-gap-2 univer-rounded-md univer-pb-0.5 univer-pl-1.5 univer-pr-2
+                  univer-pt-1.5
+                `, borderClassName, {
                     'univer-border-primary-500': isFocusing,
                 })}
                 style={{ height }}

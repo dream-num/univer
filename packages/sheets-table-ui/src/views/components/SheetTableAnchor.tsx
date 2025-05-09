@@ -16,7 +16,7 @@
 
 import type { IUniverSheetsTableUIConfig } from '../../controllers/config.schema';
 import { cellToRange, ICommandService, IConfigService, Injector, IUniverInstanceService, LocaleService, Rectangle } from '@univerjs/core';
-import { Dropdown, Input } from '@univerjs/design';
+import { borderClassName, clsx, Dropdown, Input } from '@univerjs/design';
 import { DeleteSingle, GridOutlineSingle, MoreDownSingle, PaintBucket, RenameSingle } from '@univerjs/icons';
 import { getSheetCommandTarget, SheetRangeThemeModel, SheetsSelectionsService, WorkbookPermissionService } from '@univerjs/sheets';
 import { DeleteSheetTableCommand, SetSheetTableCommand, TableManager } from '@univerjs/sheets-table';
@@ -138,11 +138,10 @@ export const SheetTableAnchor = () => {
                 return (
                     <div
                         key={item.tableId}
-                        className={`
+                        className={clsx(`
                           univer-absolute univer-box-border univer-flex univer-cursor-pointer univer-items-center
-                          univer-rounded-xl univer-border univer-border-solid univer-border-gray-500 univer-pl-2
-                          univer-pr-2 univer-shadow-xs
-                        `}
+                          univer-rounded-xl univer-pl-2 univer-pr-2 univer-shadow-xs
+                        `, borderClassName)}
                         style={{
                             left: item.x,
                             top: Math.max(item.y, 0),

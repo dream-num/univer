@@ -16,7 +16,7 @@
 
 import type { ITableFilterItem } from '@univerjs/sheets-table';
 import { LocaleService } from '@univerjs/core';
-import { Checkbox, clsx, Input, scrollbarClassName } from '@univerjs/design';
+import { borderClassName, Checkbox, clsx, Input, scrollbarClassName } from '@univerjs/design';
 import { useDependency } from '@univerjs/ui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { SheetsTableUiService } from '../../services/sheets-table-ui-service';
@@ -118,11 +118,10 @@ export function SheetTableItemsFilterPanel(props: ISheetTableItemsFilterPanelPro
         <div className="univer-flex univer-h-full univer-flex-col">
             <Input autoFocus value={searchText} placeholder={localeService.t('sheets-filter.panel.search-placeholder')} onChange={onSearchValueChange} />
             <div
-                className={`
+                className={clsx(`
                   univer-mt-2 univer-box-border univer-flex univer-h-[180px] univer-max-h-[180px] univer-flex-grow
-                  univer-flex-col univer-overflow-hidden univer-rounded-md univer-border univer-border-solid
-                  univer-border-gray-200 univer-py-1.5 univer-pl-2
-                `}
+                  univer-flex-col univer-overflow-hidden univer-rounded-md univer-py-1.5 univer-pl-2
+                `, borderClassName)}
             >
                 <div
                     className={clsx('univer-h-40 univer-overflow-y-auto univer-py-1 univer-pl-2', scrollbarClassName)}

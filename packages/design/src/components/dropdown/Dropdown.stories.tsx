@@ -16,6 +16,8 @@
 
 import type { Meta } from '@storybook/react';
 
+import { borderClassName } from '../../helper/class-utilities';
+import { clsx } from '../../helper/clsx';
 import { Dropdown } from './Dropdown';
 
 const meta: Meta<typeof Dropdown> = {
@@ -53,11 +55,10 @@ export const Playground = {
                     )}
                 >
                     <a
-                        className={`
-                          univer-cursor-pointer univer-rounded-lg univer-border univer-border-solid
-                          univer-border-gray-200 univer-px-4 univer-py-2 univer-transition-all
+                        className={clsx(`
+                          univer-cursor-pointer univer-rounded-lg univer-px-4 univer-py-2 univer-transition-all
                           hover:univer-bg-gray-100
-                        `}
+                        `, borderClassName)}
                     >
                         Click me
                     </a>

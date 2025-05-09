@@ -20,7 +20,7 @@ import type { ISheetLocation } from '@univerjs/sheets';
 import type { IPopup } from '@univerjs/ui';
 import type { IBaseDropdownProps } from '../type';
 import { BuildTextUtils, ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
-import { clsx, scrollbarClassName } from '@univerjs/design';
+import { borderClassName, clsx, scrollbarClassName } from '@univerjs/design';
 import { RichTextEditingMutation } from '@univerjs/docs';
 import { CheckMarkSingle } from '@univerjs/icons';
 import { RangeProtectionPermissionEditPoint, SheetPermissionCheckController, WorkbookEditablePermission, WorksheetEditPermission } from '@univerjs/sheets';
@@ -69,12 +69,11 @@ const SelectList = (props: ISelectListProps) => {
 
     return (
         <div
-            data-u-comp="select-list"
-            className={`
-              univer-box-border univer-rounded-lg univer-border univer-border-solid univer-border-gray-200
-              univer-bg-white univer-pb-1 univer-text-gray-900 univer-shadow
-              dark:univer-border-gray-700 dark:univer-bg-black dark:univer-text-white
-            `}
+            data-u-comp="sheets-dropdown-list"
+            className={clsx(`
+              univer-box-border univer-rounded-lg univer-bg-white univer-pb-1 univer-text-gray-900 univer-shadow
+              dark:univer-bg-black dark:univer-text-white
+            `, borderClassName)}
             style={style}
         >
             <div

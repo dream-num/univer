@@ -17,7 +17,7 @@
 import type { Editor } from '@univerjs/docs-ui';
 import type { ISequenceNode } from '@univerjs/engine-formula';
 import { CommandType, DisposableCollection, ICommandService } from '@univerjs/core';
-import { clsx, scrollbarClassName } from '@univerjs/design';
+import { borderClassName, clsx, scrollbarClassName } from '@univerjs/design';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { IShortcutService, KeyCode, RectPopup, useDependency } from '@univerjs/ui';
 import React, { forwardRef, useEffect, useMemo, useRef, useState } from 'react';
@@ -190,17 +190,17 @@ function SearchFunctionFactory(props: ISearchFunctionProps, ref: any) {
     return searchList.length > 0 && visible && (
         <RectPopup portal anchorRect$={position$} direction="vertical">
             <ul
-                className={clsx(`
-                  univer-m-0 univer-box-border univer-max-h-[400px] univer-w-[250px] univer-list-none
-                  univer-overflow-y-auto univer-rounded-lg univer-border univer-border-solid univer-border-gray-200
-                  univer-bg-white univer-p-2 univer-leading-5 univer-shadow-md univer-outline-none
-                `, scrollbarClassName)}
                 ref={(v) => {
                     ulRef.current = v!;
                     if (ref) {
                         ref.current = v!;
                     }
                 }}
+                className={clsx(`
+                  univer-m-0 univer-box-border univer-max-h-[400px] univer-w-[250px] univer-list-none
+                  univer-overflow-y-auto univer-rounded-lg univer-bg-white univer-p-2 univer-leading-5 univer-shadow-md
+                  univer-outline-none
+                `, borderClassName, scrollbarClassName)}
             >
                 {searchList.map((item, index) => (
                     <li

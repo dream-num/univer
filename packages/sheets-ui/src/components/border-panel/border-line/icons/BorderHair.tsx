@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import React from 'react';
-
 export const BorderHair = () => (
     <svg width="120" height="2" viewBox="0 0 120 2" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M-0.00976562 1.65707H0.990234V0.657074H-0.00976562V1.65707Z" fill="black" />

@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import React from 'react';
-
 export const BorderMediumDashed = () => (
     <svg width="118" height="3" viewBox="0 0 118 3" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M-0.00854492 2.94815H1.99146V0.948151H-0.00854492V2.94815Z" fill="black" />

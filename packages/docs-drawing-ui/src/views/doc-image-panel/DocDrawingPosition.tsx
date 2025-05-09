@@ -18,7 +18,7 @@ import type { ICommandInfo, IDrawingParam, IObjectPositionH, IObjectPositionV, N
 import type { IDocDrawing } from '@univerjs/docs-drawing';
 import type { IDocumentSkeletonDrawing } from '@univerjs/engine-render';
 import { DocumentFlavor, ICommandService, IUniverInstanceService, LocaleService, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType } from '@univerjs/core';
-import { Checkbox, InputNumber, Select } from '@univerjs/design';
+import { borderTopClassName, Checkbox, clsx, InputNumber, Select } from '@univerjs/design';
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import { IDrawingManagerService } from '@univerjs/drawing';
@@ -360,9 +360,7 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
 
     return (
         <div
-            className={`
-              univer-relative univer-mt-5 univer-w-full univer-border-t univer-border-solid univer-border-gray-200
-            `}
+            className={clsx('univer-relative univer-mt-5 univer-w-full', borderTopClassName)}
             style={{ display: showPanel ? 'block' : 'none' }}
         >
             <div

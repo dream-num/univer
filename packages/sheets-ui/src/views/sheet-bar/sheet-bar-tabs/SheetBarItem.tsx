@@ -62,8 +62,8 @@ export function SheetBarItem(props: IBaseSheetBarProps) {
             `, currentSelected
                 ? `
                   univer-flex univer-justify-center univer-bg-white univer-font-bold univer-text-primary-700
-                  univer-shadow-sm univer-transition-[box-shadow]
-                  dark:univer-bg-black
+                  univer-shadow-sm univer-transition-shadow
+                  dark:univer-bg-gray-900
                 `
                 : `
                   univer-font-medium

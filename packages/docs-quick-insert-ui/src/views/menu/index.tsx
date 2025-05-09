@@ -17,6 +17,7 @@
 import type { DocumentDataModel } from '@univerjs/core';
 import type { IDocPopup } from '../../services/doc-quick-insert-popup.service';
 import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { borderClassName, clsx } from '@univerjs/design';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { PlusSingle } from '@univerjs/icons';
@@ -75,16 +76,17 @@ export const QuickInsertButton = ({ className = '' }: IQuickInsertButtonProps) =
     });
     return (
         <div
-            className={`
+            className={clsx(`
               univer-mr-1 univer-flex univer-cursor-pointer univer-items-center univer-gap-2.5 univer-rounded-full
-              univer-border univer-border-solid univer-border-gray-200 univer-p-1.5 univer-shadow-sm
+              univer-p-1.5 univer-shadow-sm
               hover:univer-bg-gray-100
-              ${className}
-              ${editPopup ? 'univer-bg-gray-100' : 'univer-bg-white'}
-            `}
-            onClick={onClick}
+            `, borderClassName, {
+                'univer-bg-gray-100': editPopup,
+                'univer-bg-white': !editPopup,
+            }, className)}
             role="button"
             tabIndex={0}
+            onClick={onClick}
         >
             <PlusSingle className="univer-text-gray-800" />
         </div>

@@ -16,7 +16,7 @@
 
 import type { IDrawingParam } from '@univerjs/core';
 import { ICommandService, LocaleService } from '@univerjs/core';
-import { Select } from '@univerjs/design';
+import { borderTopClassName, clsx, Select } from '@univerjs/design';
 import { useDependency } from '@univerjs/ui';
 import { useState } from 'react';
 import { AlignType, SetDrawingAlignOperation } from '../../commands/operations/drawing-align.operation';
@@ -91,17 +91,11 @@ export const DrawingAlign = (props: IDrawingAlignProps) => {
         });
     }
 
-    const gridDisplay = (isShow: boolean) => {
-        return isShow ? 'block' : 'none';
-    };
-
     return (
         <div
-            className={`
-              univer-relative univer-w-full univer-border-l-0 univer-border-r-0 univer-border-t univer-border-solid
-              univer-border-gray-200
-            `}
-            style={{ display: gridDisplay(alignShow) }}
+            className={clsx('univer-relative univer-w-full', borderTopClassName, {
+                'univer-hidden': !alignShow,
+            })}
         >
             <div
                 className={`

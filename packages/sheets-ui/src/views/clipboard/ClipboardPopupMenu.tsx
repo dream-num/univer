@@ -17,7 +17,7 @@
 import type { IDiscreteRange } from '../../controllers/utils/range-tools';
 import type { IPasteHookKeyType } from '../../services/clipboard/type';
 import { ICommandService, IUniverInstanceService, LocaleService } from '@univerjs/core';
-import { Dropdown } from '@univerjs/design';
+import { borderClassName, clsx, Dropdown } from '@univerjs/design';
 import { convertTransformToOffsetX, convertTransformToOffsetY, IRenderManagerService } from '@univerjs/engine-render';
 import { CheckMarkSingle, MoreDownSingle, PasteSpecial } from '@univerjs/icons';
 import { useDependency, useObservable } from '@univerjs/ui';
@@ -136,13 +136,11 @@ export const ClipboardPopupMenu = () => {
 
     return (
         <div
-            className={`
+            className={clsx(`
               univer-absolute univer-z-[1080] univer-flex univer-cursor-pointer univer-items-center
-              univer-justify-center univer-gap-2 univer-rounded univer-border univer-border-solid univer-border-gray-200
-              univer-bg-white univer-p-1
-              dark:univer-border-gray-700
+              univer-justify-center univer-gap-2 univer-rounded univer-bg-white univer-p-1
               hover:univer-bg-gray-100
-            `}
+            `, borderClassName)}
             style={{
                 left: relativePosition.positionX + DEFAULT_PADDING,
                 top: relativePosition.positionY + DEFAULT_PADDING,
@@ -163,14 +161,13 @@ export const ClipboardPopupMenu = () => {
                                     className={`
                                       univer-cursor-pointer univer-rounded univer-px-2 univer-py-1.5
                                       univer-transition-colors
-                                      dark:univer-border-gray-700
                                       hover:univer-bg-gray-100
                                     `}
                                     onClick={() => handleClick(item.value)}
                                 >
                                     <span>
                                         {selected && (
-                                            <CheckMarkSingle className="univer-absolute" style={{ color: 'rgb(var(--green-700, #409f11))' }} />
+                                            <CheckMarkSingle className="univer-absolute univer-text-primary-600" />
                                         )}
                                     </span>
                                     <div
@@ -193,7 +190,6 @@ export const ClipboardPopupMenu = () => {
                     className={`
                       univer-flex univer-cursor-pointer univer-content-center univer-items-center univer-rounded
                       univer-py-1
-                      dark:univer-border-gray-700
                     `}
                     onClick={() => {
                         setMenuVisible(!menuVisible);

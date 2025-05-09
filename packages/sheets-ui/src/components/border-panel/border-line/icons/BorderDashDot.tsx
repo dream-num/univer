@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import React from 'react';
-
 export const BorderDashDot = () => (
     <svg width="120" height="2" viewBox="0 0 120 2" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M0.98999 1.08218H-0.0100098V0.0821838H0.98999V1.08218Z" fill="black" />

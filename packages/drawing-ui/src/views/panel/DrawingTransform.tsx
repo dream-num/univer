@@ -17,7 +17,7 @@
 import type { IDrawingParam, Nullable } from '@univerjs/core';
 import type { IChangeObserverConfig, Scene } from '@univerjs/engine-render';
 import { debounce, LocaleService } from '@univerjs/core';
-import { Checkbox, clsx, InputNumber } from '@univerjs/design';
+import { borderTopClassName, Checkbox, clsx, InputNumber } from '@univerjs/design';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { useDependency } from '@univerjs/ui';
@@ -362,17 +362,11 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
         transformer.keepRatio = val as boolean;
     };
 
-    const gridDisplay = (isShow: boolean) => {
-        return isShow ? 'block' : 'none';
-    };
-
     return (
         <div
-            className={`
-              univer-relative univer-mt-5 univer-w-full univer-border-b-0 univer-border-l-0 univer-border-r-0
-              univer-border-t univer-border-solid univer-border-t-gray-200
-            `}
-            style={{ display: gridDisplay(transformShow) }}
+            className={clsx('univer-relative univer-mt-5 univer-w-full', borderTopClassName, {
+                'univer-hidden': !transformShow,
+            })}
         >
             <div className={rowClassName}>
                 <div className={clsx(columnTitleClassName)}>

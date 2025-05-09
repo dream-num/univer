@@ -16,7 +16,7 @@
 
 import type { IDrawingSearch } from '@univerjs/core';
 import { ICommandService, LocaleService } from '@univerjs/core';
-import { clsx, Dropdown } from '@univerjs/design';
+import { borderClassName, clsx, Dropdown } from '@univerjs/design';
 import { Autofill, MoreDownSingle } from '@univerjs/icons';
 import { useDependency } from '@univerjs/ui';
 import { useState } from 'react';
@@ -82,11 +82,10 @@ export function SlideImagePopupMenu(props: IImagePopupMenuProps) {
                 align="start"
                 overlay={(
                     <ul
-                        className={`
+                        className={clsx(`
                           univer-m-0 univer-box-border univer-grid univer-list-none univer-items-center univer-gap-1
-                          univer-rounded-lg univer-border univer-border-solid univer-border-gray-200 univer-bg-white
-                          univer-p-1.5 univer-text-sm univer-shadow-lg
-                        `}
+                          univer-rounded-lg univer-bg-white univer-p-1.5 univer-text-sm univer-shadow-lg
+                        `, borderClassName)}
                     >
                         {availableMenu.map((item) => (
                             <li
@@ -110,9 +109,8 @@ export function SlideImagePopupMenu(props: IImagePopupMenuProps) {
             >
                 <div
                     className={clsx(`
-                      univer-flex univer-items-center univer-justify-center univer-rounded univer-border
-                      univer-border-solid univer-border-gray-200 univer-bg-white univer-p-1
-                    `, {
+                      univer-flex univer-items-center univer-justify-center univer-rounded univer-bg-white univer-p-1
+                    `, borderClassName, {
                         'univer-bg-gray-100': visible,
                     })}
                 >

@@ -17,6 +17,7 @@
 import type { DocumentDataModel } from '@univerjs/core';
 import type { IPopup } from '@univerjs/ui';
 import { ICommandService, IUniverInstanceService, NamedStyleType, UniverInstanceType } from '@univerjs/core';
+import { borderClassName, clsx } from '@univerjs/design';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { DownSingle } from '@univerjs/icons';
 import { ContextMenuPosition, DesktopMenu, ILayoutService, RectPopup, useDependency, useObservable } from '@univerjs/ui';
@@ -60,14 +61,15 @@ export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
     return (
         <>
             <div
-
                 ref={anchorRef}
-                className={`
+                className={clsx(`
                   univer-mr-1 univer-inline-flex univer-h-7 univer-cursor-pointer univer-items-center univer-gap-1
-                  univer-rounded-full univer-border univer-border-solid univer-border-gray-200 univer-px-2.5 univer-py-0
+                  univer-rounded-full univer-px-2.5 univer-py-0
                   hover:univer-bg-gray-100
-                  ${visible ? 'univer-bg-gray-100' : 'univer-bg-white'}
-                `}
+                `, borderClassName, {
+                    'univer-bg-gray-100': visible,
+                    'univer-bg-white': !visible,
+                })}
                 onMouseEnter={(e) => {
                     popup.onPointerEnter?.(e);
                     isMouseOver.current = true;

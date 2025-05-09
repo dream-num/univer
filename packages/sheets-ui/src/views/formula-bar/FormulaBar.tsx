@@ -17,7 +17,7 @@
 import type { Workbook } from '@univerjs/core';
 import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 import { DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, FOCUSING_FX_BAR_EDITOR, ICommandService, IContextService, IPermissionService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { clsx } from '@univerjs/design';
+import { borderBottomClassName, borderRightClassName, clsx } from '@univerjs/design';
 import { IEditorService } from '@univerjs/docs-ui';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { CheckMarkSingle, CloseSingle, DropdownSingle, FxSingle } from '@univerjs/icons';
@@ -255,11 +255,9 @@ export function FormulaBar(props: IProps) {
         <div
             data-u-comp="formula-bar"
             className={clsx(`
-              univer-box-border univer-flex univer-h-7 univer-border-0 univer-border-b univer-border-solid
-              univer-bg-white univer-border-bg-gray-200 univer-border-b-gray-200 univer-transition-[height]
-              univer-ease-linear
-              dark:univer-border-b-gray-700 dark:univer-bg-gray-900
-            `, className)}
+              univer-box-border univer-flex univer-h-7 univer-bg-white univer-transition-[height] univer-ease-linear
+              dark:univer-bg-gray-900
+            `, borderBottomClassName, className)}
             style={{
                 height: ArrowDirection.Down === arrowDirection ? '28px' : '82px',
                 pointerEvents: editDisable ? 'none' : 'auto',
@@ -272,12 +270,10 @@ export function FormulaBar(props: IProps) {
             <div className="univer-flex univer-h-full univer-w-full">
                 <div className={clsx('univer-py-1.5', { 'univer-cursor-not-allowed univer-text-gray-200': disabled })}>
                     <div
-                        className={`
+                        className={clsx(`
                           univer-relative univer-box-border univer-flex univer-h-full univer-w-20 univer-items-center
-                          univer-justify-center univer-border-0 univer-border-r univer-border-solid
-                          univer-border-r-gray-200 univer-text-xs
-                          dark:univer-border-r-gray-700
-                        `}
+                          univer-justify-center univer-text-xs
+                        `, borderRightClassName)}
                     >
                         {/* TODO: use buttons to replace these re-implementation of buttons. */}
                         <span

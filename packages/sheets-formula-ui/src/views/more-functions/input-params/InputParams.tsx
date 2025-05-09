@@ -15,8 +15,9 @@
  */
 
 import type { IFunctionInfo, IFunctionParam } from '@univerjs/engine-formula';
-import React, { useState } from 'react';
+import { borderLeftClassName, clsx } from '@univerjs/design';
 
+import React, { useState } from 'react';
 import { FunctionHelp } from '../function-help/FunctionHelp';
 import { FunctionParams } from '../function-params/FunctionParams';
 
@@ -68,7 +69,7 @@ export function InputParams(props: IInputParamsProps) {
                 ))}
             </div>
 
-            <div className="univer-flex-1 univer-border-l univer-border-solid univer-border-gray-200 univer-p-3">
+            <div className={clsx('univer-flex-1 univer-p-3', borderLeftClassName)}>
                 <FunctionParams
                     title={activeIndex === -1
                         ? <FunctionHelp prefix={functionInfo.functionName} value={functionParameter} />

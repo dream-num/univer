@@ -25,7 +25,7 @@ import type {
 } from '@xyflow/react';
 import type { IFloatingToolbarRef } from '../uni-toolbar/UniFloatToolbar';
 import { debounce, ICommandService, IContextService, IUniverInstanceService, LocaleService, ThemeService } from '@univerjs/core';
-import { clsx, ConfigContext, ConfigProvider } from '@univerjs/design';
+import { borderClassName, clsx, ConfigContext, ConfigProvider } from '@univerjs/design';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { MenuSingle } from '@univerjs/icons';
 import {
@@ -353,10 +353,9 @@ function UnitRenderer(props: IUnitRendererProps) {
     return (
         <div
             className={clsx(`
-              univer-relative univer-flex-1 univer-overflow-hidden univer-rounded-lg univer-borer univer-border-solid
-              univer-border-transparent
-            `, {
-                'univer-border-primary-500': focused,
+              univer-relative univer-flex-1 univer-overflow-hidden univer-rounded-lg univer-border-transparent
+            `, borderClassName, {
+                'univer-border-primary-600': focused,
             })}
             ref={mountRef}
             // We bind these focusing events on capture phrase so the

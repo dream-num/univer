@@ -16,7 +16,7 @@
 
 import type { ByValuesModel, IFilterByValueWithTreeItem } from '../../services/sheets-filter-panel.service';
 import { LocaleService } from '@univerjs/core';
-import { Checkbox, Input, Tree } from '@univerjs/design';
+import { borderClassName, Checkbox, clsx, Input, Tree } from '@univerjs/design';
 import { useDependency, useObservable } from '@univerjs/ui';
 import React, { useCallback } from 'react';
 import { statisticFilterByValueItems } from '../../models/utils';
@@ -62,7 +62,7 @@ export function FilterByValue(props: { model: ByValuesModel }) {
 
     return (
         <div
-            data-univer-comp-sheets-filter-panel-values-container
+            data-u-comp="sheets-filter-panel-values-container"
             className="univer-flex univer-h-full univer-flex-col"
         >
             <Input
@@ -72,19 +72,19 @@ export function FilterByValue(props: { model: ByValuesModel }) {
                 onChange={onSearchValueChange}
             />
             <div
-                data-univer-comp-sheets-filter-panel
-                className={`
+                data-u-comp="sheets-filter-panel"
+                className={clsx(`
                   univer-mt-2 univer-box-border univer-flex univer-flex-grow univer-flex-col univer-overflow-hidden
-                  univer-rounded-md univer-border univer-border-solid univer-border-gray-200 univer-px-2 univer-py-2.5
-                `}
+                  univer-rounded-md univer-px-2 univer-py-2.5
+                `, borderClassName)}
             >
                 {/* The on-top "Select All" button */}
                 <div
-                    data-univer-comp-sheets-filter-panel-values-item
+                    data-u-comp="sheets-filter-panel-values-item"
                     className="univer-box-border univer-h-8 univer-w-full univer-py-0.5"
                 >
                     <div
-                        data-univer-comp-sheets-filter-panel-values-item-inner
+                        data-u-comp="sheets-filter-panel-values-item-inner"
                         className={`
                           univer-box-border univer-flex univer-h-7 univer-items-center univer-rounded-md univer-pb-0
                           univer-pl-5 univer-pr-0.5 univer-pt-0 univer-text-sm
@@ -97,7 +97,7 @@ export function FilterByValue(props: { model: ByValuesModel }) {
                             onChange={onCheckAllToggled}
                         />
                         <span
-                            data-univer-comp-sheets-filter-panel-values-item-text
+                            data-u-comp="sheets-filter-panel-values-item-text"
                             className={`
                               univer-mx-1 univer-inline-block univer-flex-shrink univer-overflow-hidden
                               univer-text-ellipsis univer-whitespace-nowrap univer-text-gray-950
@@ -107,7 +107,7 @@ export function FilterByValue(props: { model: ByValuesModel }) {
                             {`${localeService.t('sheets-filter.panel.select-all')}`}
                         </span>
                         <span
-                            data-univer-comp-sheets-filter-panel-values-item-count
+                            data-u-comp="sheets-filter-panel-values-item-count"
                             className={`
                               univer-text-gray-400
                               dark:univer-text-gray-500
@@ -117,7 +117,7 @@ export function FilterByValue(props: { model: ByValuesModel }) {
                         </span>
                     </div>
                 </div>
-                <div data-univer-comp-sheets-filter-panel-values-virtual className="univer-flex-grow">
+                <div data-u-comp="sheets-filter-panel-values-virtual" className="univer-flex-grow">
                     <Tree
                         data={items}
                         defaultExpandAll={false}
@@ -143,7 +143,7 @@ export function FilterByValue(props: { model: ByValuesModel }) {
                                 `}
                             >
                                 <span
-                                    data-univer-comp-sheets-filter-panel-values-item-count
+                                    data-u-comp="sheets-filter-panel-values-item-count"
                                     className={`
                                       univer-text-gray-400
                                       dark:univer-text-gray-500

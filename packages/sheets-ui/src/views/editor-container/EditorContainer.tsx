@@ -16,12 +16,13 @@
 
 import type { KeyCode } from '@univerjs/ui';
 import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, ICommandService, IContextService } from '@univerjs/core';
+import { borderClassName, clsx } from '@univerjs/design';
 import { IEditorService } from '@univerjs/docs-ui';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { ComponentManager, DISABLE_AUTO_FOCUS_KEY, MetaKeys, useDependency, useEvent, useObservable, useSidebarClick } from '@univerjs/ui';
 import React, { useEffect, useRef, useState } from 'react';
-import { SetCellEditVisibleArrowOperation, SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
 
+import { SetCellEditVisibleArrowOperation, SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
 import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY } from '../../common/keys';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { ICellEditorManagerService } from '../../services/editor/cell-editor-manager.service';
@@ -137,11 +138,11 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
 
     return (
         <div
-            className={`
+            className={clsx(`
               univer-absolute univer-left-[100px] univer-top-[200px] univer-z-10 univer-flex univer-h-[50px]
-              univer-w-[100px] univer-border univer-border-solid univer-border-gray-100
+              univer-w-[100px]
               dark:univer-bg-gray-700
-            `}
+            `, borderClassName)}
             style={{
                 left: state.left,
                 top: state.top,

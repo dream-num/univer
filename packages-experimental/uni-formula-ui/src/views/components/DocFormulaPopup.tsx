@@ -28,10 +28,11 @@ import {
     VerticalAlign,
     WrapStrategy,
 } from '@univerjs/core';
+import { borderClassName, clsx } from '@univerjs/design';
 import { CheckMarkSingle, CloseSingle } from '@univerjs/icons';
 import { useDependency, useObservable } from '@univerjs/ui';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
 
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { CloseFormulaPopupOperation, ConfirmFormulaPopupCommand } from '../../commands/operations/operation';
 import { DOC_FORMULA_POPUP_KEY, UniFormulaPopupService } from '../../services/formula-popup.service';
 
@@ -131,12 +132,12 @@ function DocFormula(props: { popupInfo: IUniFormulaPopupInfo }) {
 
     return (
         <div
-            className={`
+            className={clsx(`
               univer-box-border univer-flex univer-h-12 univer-w-[482px] univer-items-center univer-gap-x-2
-              univer-overflow-hidden univer-rounded-lg univer-border univer-border-solid univer-border-gray-200
-              univer-bg-white univer-p-2 univer-shadow-lg
+              univer-overflow-hidden univer-rounded-lg u univer-border-gray-200 univer-bg-white univer-p-2
+              univer-shadow-lg
               dark:univer-bg-gray-900
-            `}
+            `, borderClassName)}
             onMouseEnter={() => onHovered(true)}
             onMouseLeave={() => onHovered(false)}
         >

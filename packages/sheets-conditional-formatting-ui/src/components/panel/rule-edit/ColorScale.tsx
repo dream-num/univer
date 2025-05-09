@@ -19,7 +19,7 @@ import type { IColorScale, IConditionalFormattingRuleConfig } from '@univerjs/sh
 import type { IFormulaEditorRef } from '@univerjs/sheets-formula-ui';
 import type { IStyleEditorProps } from './type';
 import { IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
-import { InputNumber, Select } from '@univerjs/design';
+import { borderClassName, clsx, InputNumber, Select } from '@univerjs/design';
 import { CFRuleType, CFValueType, createDefaultValueByValueType } from '@univerjs/sheets-conditional-formatting';
 import { FormulaEditor } from '@univerjs/sheets-formula-ui';
 import { useDependency, useSidebarClick } from '@univerjs/ui';
@@ -68,15 +68,14 @@ const TextInput = (props: { id: string; type: CFValueType | 'none'; value: numbe
             <div className="univer-ml-1 univer-w-full">
                 <FormulaEditor
                     ref={formulaEditorRef}
-                    className={`
+                    className={clsx(`
                       univer-box-border univer-h-8 univer-w-full univer-cursor-pointer univer-items-center
-                      univer-rounded-lg univer-border univer-border-solid univer-border-gray-200 univer-bg-white
-                      univer-pt-2 univer-transition-colors
+                      univer-rounded-lg univer-bg-white univer-pt-2 univer-transition-colors
                       [&>div:first-child]:univer-px-2.5
                       [&>div]:univer-h-5 [&>div]:univer-ring-transparent
-                      dark:univer-border-gray-600 dark:univer-bg-gray-700 dark:univer-text-white
+                      dark:univer-bg-gray-700 dark:univer-text-white
                       hover:univer-border-primary-600
-                    `}
+                    `, borderClassName)}
                     initValue={formulaInitValue as any}
                     unitId={unitId}
                     subUnitId={subUnitId}

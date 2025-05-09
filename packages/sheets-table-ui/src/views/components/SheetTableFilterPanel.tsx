@@ -18,7 +18,7 @@ import type { ISortRangeCommandParams } from '@univerjs/sheets-sort';
 import type { ITableConditionFilterItem, ITableManualFilterItem } from '@univerjs/sheets-table';
 import type { IConditionInfo } from './type';
 import { ICommandService, IPermissionService, LocaleService } from '@univerjs/core';
-import { Button, Segmented } from '@univerjs/design';
+import { borderClassName, Button, clsx, Segmented } from '@univerjs/design';
 import { AscendingSingle, DescendingSingle } from '@univerjs/icons';
 import { WorkbookEditablePermission } from '@univerjs/sheets';
 import { SortRangeCommand, SortType } from '@univerjs/sheets-sort';
@@ -153,30 +153,26 @@ export function SheetTableFilterPanel() {
             {editable && (
                 <div className="univer-mb-3 univer-flex">
                     <div
-                        className={`
+                        className={clsx(`
                           univer-flex univer-w-[140px] univer-flex-1 univer-cursor-default univer-items-center
-                          univer-justify-center univer-gap-1 univer-rounded-l-md univer-border univer-border-solid
-                          univer-border-gray-200 univer-py-1.5 univer-text-sm
+                          univer-justify-center univer-gap-1 univer-rounded-l-md univer-py-1.5 univer-text-sm
                           hover:univer-cursor-pointer hover:univer-bg-gray-100
-                          ${isAsc
-                    ? 'univer-bg-gray-100'
-                    : ''}
-                        `}
+                        `, borderClassName, {
+                            'univer-bg-gray-100': isAsc,
+                        })}
                         onClick={() => applySort(true)}
                     >
                         <AscendingSingle className="univer-text-base univer-text-color-[#1e222b] univer-mr-1" />
                         {localeService.t('sheets-sort.general.sort-asc')}
                     </div>
                     <div
-                        className={`
+                        className={clsx(`
                           univer-flex univer-w-[140px] univer-flex-1 univer-cursor-default univer-items-center
-                          univer-justify-center univer-gap-1 univer-rounded-r-md univer-border univer-border-solid
-                          univer-border-gray-200 univer-py-1.5 univer-text-sm
+                          univer-justify-center univer-gap-1 univer-rounded-r-md univer-py-1.5 univer-text-sm
                           hover:univer-cursor-pointer hover:univer-bg-gray-100
-                          ${isDesc
-                    ? 'univer-bg-gray-100'
-                    : ''}
-                        `}
+                        `, borderClassName, {
+                            'univer-bg-gray-100': isDesc,
+                        })}
                         onClick={() => applySort(false)}
                     >
                         <DescendingSingle className="univer-text-base univer-text-color-[#1e222b] univer-mr-1" />

@@ -18,7 +18,7 @@ import type { Workbook } from '@univerjs/core';
 
 import type { IDefinedNamesServiceParam } from '@univerjs/engine-formula';
 import { ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
-import { clsx, scrollbarClassName } from '@univerjs/design';
+import { borderBottomClassName, clsx, scrollbarClassName } from '@univerjs/design';
 import { IDefinedNamesService } from '@univerjs/engine-formula';
 import { SetWorksheetShowCommand } from '@univerjs/sheets';
 import { ISidebarService, useDependency } from '@univerjs/ui';
@@ -109,10 +109,9 @@ export function DefinedNameOverlay() {
                             onClick={() => { focusDefinedName(definedName); }}
                         >
                             <div
-                                className={`
-                                  univer-flex univer-items-center univer-justify-between univer-gap-2 univer-border-0
-                                  univer-border-b univer-border-solid univer-border-gray-200 univer-py-1
-                                `}
+                                className={clsx(`
+                                  univer-flex univer-items-center univer-justify-between univer-gap-2 univer-py-1
+                                `, borderBottomClassName)}
                             >
                                 <div
                                     className={`

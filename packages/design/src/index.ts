@@ -64,7 +64,16 @@ export { clsx } from './helper/clsx';
 export { resizeObserverCtor } from './helper/resize-observer';
 export { render, unmount } from './helper/react-dom';
 export { isBrowser } from './helper/is-browser';
-export { scrollbarClassName } from './helper/scrollbar-cls';
+export {
+    borderBottomClassName,
+    borderClassName,
+    borderLeftBottomClassName,
+    borderLeftClassName,
+    borderRightClassName,
+    borderTopClassName,
+    divideYClassName,
+    scrollbarClassName,
+} from './helper/class-utilities';
 
 /** @deprecated Only for compatibility with versions before 0.7.0, will be removed in future versions */
 export { defaultTheme, greenTheme } from '@univerjs/themes';

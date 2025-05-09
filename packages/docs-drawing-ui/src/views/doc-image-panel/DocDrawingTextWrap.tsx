@@ -17,7 +17,7 @@
 import type { ICommandInfo, IDrawingParam, Nullable } from '@univerjs/core';
 import type { IDocDrawing } from '@univerjs/docs-drawing';
 import { BooleanNumber, ICommandService, IUniverInstanceService, LocaleService, PositionedObjectLayoutType, WrapTextType } from '@univerjs/core';
-import { clsx, InputNumber, Radio, RadioGroup } from '@univerjs/design';
+import { borderTopClassName, clsx, InputNumber, Radio, RadioGroup } from '@univerjs/design';
 import { RichTextEditingMutation } from '@univerjs/docs';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -263,10 +263,9 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
 
     return (
         <div
-            className={`
-              univer-relative univer-mt-5 univer-w-full univer-border-t univer-border-solid univer-border-gray-200
-            `}
-            style={{ display: showPanel ? 'block' : 'none' }}
+            className={clsx('univer-relative univer-mt-5 univer-w-full', borderTopClassName, {
+                'univer-hidden': !showPanel,
+            })}
         >
             <div
                 className={`

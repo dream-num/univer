@@ -18,7 +18,7 @@ import type { Nullable, Workbook } from '@univerjs/core';
 import type { IDefinedNamesServiceParam } from '@univerjs/engine-formula';
 import type { IRangeSelectorProps } from '../../basics/editor/range';
 import { AbsoluteRefType, IUniverInstanceService, LocaleService, Tools, UniverInstanceType } from '@univerjs/core';
-import { Button, clsx, Input, Radio, RadioGroup, Select } from '@univerjs/design';
+import { borderBottomClassName, borderClassName, Button, clsx, Input, Radio, RadioGroup, Select } from '@univerjs/design';
 import { IDefinedNamesService, IFunctionService, isReferenceStrings, isReferenceStringWithEffectiveColumn, LexerTreeBuilder, operatorToken } from '@univerjs/engine-formula';
 import { hasCJKText } from '@univerjs/engine-render';
 import { ErrorSingle } from '@univerjs/icons';
@@ -206,11 +206,7 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
 
     return (
         <div
-            className={clsx(`
-              univer-flex univer-flex-col univer-items-center univer-border-0 univer-border-b univer-border-solid
-              univer-border-gray-200 univer-pb-1
-              [&>div]:univer-mt-4 [&>div]:univer-w-full
-            `, {
+            className={clsx('univer-grid univer-space-y-2 univer-pb-1', borderBottomClassName, {
                 'univer-hidden': !state,
             })}
         >
@@ -251,15 +247,14 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
                         <div className="univer-relative univer-h-8 univer-select-none">
                             <FormulaEditor
                                 ref={formulaEditorRef}
-                                className={`
+                                className={clsx(`
                                   univer-box-border univer-h-8 univer-w-full univer-cursor-pointer univer-items-center
-                                  univer-rounded-lg univer-border univer-border-solid univer-border-gray-200
-                                  univer-bg-white univer-pt-2 univer-transition-colors
+                                  univer-rounded-lg univer-bg-white univer-pt-2 univer-transition-colors
                                   [&>div:first-child]:univer-px-2.5
                                   [&>div]:univer-h-5 [&>div]:univer-ring-transparent
-                                  dark:univer-border-gray-600 dark:univer-bg-gray-700 dark:univer-text-white
+                                  dark:univer-bg-gray-700 dark:univer-text-white
                                   hover:univer-border-primary-600
-                                `}
+                                `, borderClassName)}
                                 initValue={formulaOrRefStringValue as any}
                                 unitId={unitId}
                                 subUnitId={subUnitId}

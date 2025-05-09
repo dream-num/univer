@@ -16,6 +16,7 @@
 
 import type { IDocumentData } from '@univerjs/core';
 import { DEFAULT_EMPTY_DOCUMENT_VALUE, DocumentFlavor, IContextService } from '@univerjs/core';
+import { borderClassName, clsx } from '@univerjs/design';
 import { IEditorService } from '@univerjs/docs-ui';
 import { FIX_ONE_PIXEL_BLUR_OFFSET } from '@univerjs/engine-render';
 import { DISABLE_AUTO_FOCUS_KEY, useDependency, useObservable } from '@univerjs/ui';
@@ -118,10 +119,7 @@ export const SlideEditorContainer: React.FC<ICellIEditorProps> = () => {
 
     return (
         <div
-            className={`
-              univer-absolute univer-z-10 univer-box-border univer-flex univer-border univer-border-solid
-              univer-border-gray-200
-            `}
+            className={clsx('univer-absolute univer-z-10 univer-box-border univer-flex', borderClassName)}
             style={{
                 left: state.left,
                 top: state.top,

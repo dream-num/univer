@@ -17,7 +17,7 @@
 import type { ILocale } from '@univerjs/design';
 import type { IWorkbenchOptions } from '../../controllers/ui/ui.controller';
 import { LocaleService, ThemeService } from '@univerjs/core';
-import { clsx, ConfigProvider } from '@univerjs/design';
+import { borderBottomClassName, clsx, ConfigProvider } from '@univerjs/design';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { BuiltInUIPart } from '../../services/parts/parts.service';
 import { useDependency } from '../../utils/di';
@@ -128,11 +128,10 @@ export function MobileWorkbench(props: IUniverAppProps) {
                         </aside>
 
                         <section
-                            className={`
+                            className={clsx(`
                               univer-relative univer-grid univer-flex-1 univer-grid-rows-[auto_1fr]
-                              univer-overflow-hidden univer-border-0 univer-border-b univer-border-solid
-                              univer-border-b-gray-200 univer-bg-white
-                            `}
+                              univer-overflow-hidden univer-bg-white
+                            `, borderBottomClassName)}
                         >
                             <header className="univer-w-screen">
                                 {header && <ComponentContainer key="header" components={headerComponents} />}

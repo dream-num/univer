@@ -34,7 +34,7 @@ import {
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
-import { Button, FormLayout, Input, Select } from '@univerjs/design';
+import { borderClassName, Button, clsx, FormLayout, Input, Select } from '@univerjs/design';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { DocBackScrollRenderController, DocSelectionRenderService } from '@univerjs/docs-ui';
 import { deserializeRangeWithSheet, IDefinedNamesService, serializeRange, serializeRangeToRefString, serializeRangeWithSheet } from '@univerjs/engine-formula';
@@ -433,10 +433,9 @@ export const CellLinkEdit = () => {
 
     return (
         <div
-            className={`
-              univer-box-border univer-w-[296px] univer-rounded-xl univer-border univer-border-solid
-              univer-border-gray-200 univer-bg-white univer-p-4 univer-shadow-md
-            `}
+            className={clsx(`
+              univer-box-border univer-w-[296px] univer-rounded-xl univer-bg-white univer-p-4 univer-shadow-md
+            `, borderClassName)}
         >
             {showLabel
                 ? (

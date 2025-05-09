@@ -17,6 +17,7 @@
 import type { Editor } from '@univerjs/docs-ui';
 import type { IFunctionParam } from '@univerjs/engine-formula';
 import { LocaleService } from '@univerjs/core';
+import { borderClassName, borderTopClassName, clsx } from '@univerjs/design';
 import { CloseSingle, MoreSingle } from '@univerjs/icons';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
 import { RectPopup, useDependency, useEvent, useObservable } from '@univerjs/ui';
@@ -126,18 +127,16 @@ export function HelpFunction(props: IHelpFunctionProps) {
             : (
                 <RectPopup key="show" portal onClickOutside={() => reset()} anchorRect$={position$} direction="vertical">
                     <div
-                        className={`
+                        className={clsx(`
                           univer-m-0 univer-box-border univer-w-[250px] univer-select-none univer-list-none
-                          univer-rounded-lg univer-border univer-border-solid univer-border-gray-200 univer-bg-white
-                          univer-leading-5 univer-shadow-md univer-outline-none
-                        `}
+                          univer-rounded-lg univer-bg-white univer-leading-5 univer-shadow-md univer-outline-none
+                        `, borderClassName)}
                     >
                         <div
-                            className={`
-                              univer-box-border univer-flex univer-items-center univer-justify-between univer-border-x-0
-                              univer-border-b univer-border-t-0 univer-border-solid univer-border-gray-200 univer-px-4
+                            className={clsx(`
+                              univer-box-border univer-flex univer-items-center univer-justify-between univer-px-4
                               univer-py-3 univer-text-xs univer-font-medium univer-text-gray-900 univer-wrap-anywhere
-                            `}
+                            `, borderTopClassName)}
                         >
                             <Help
                                 prefix={functionInfo.functionName}
@@ -149,9 +148,9 @@ export function HelpFunction(props: IHelpFunctionProps) {
                                 <div
                                     className={`
                                       univer-ml-2 univer-flex univer-h-6 univer-w-6 univer-cursor-pointer
-                                      univer-items-center univer-justify-center univer-rounded univer-border-0
-                                      univer-bg-transparent univer-p-0 univer-text-xs univer-text-gray-500
-                                      univer-outline-none univer-transition-colors
+                                      univer-items-center univer-justify-center univer-rounded univer-bg-transparent
+                                      univer-p-0 univer-text-xs univer-text-gray-500 univer-outline-none
+                                      univer-transition-colors
                                       hover:univer-bg-gray-200
                                     `}
                                     style={{ transform: contentVisible ? 'rotateZ(-90deg)' : 'rotateZ(90deg)' }}
@@ -162,9 +161,9 @@ export function HelpFunction(props: IHelpFunctionProps) {
                                 <div
                                     className={`
                                       univer-ml-2 univer-flex univer-h-6 univer-w-6 univer-cursor-pointer
-                                      univer-items-center univer-justify-center univer-rounded univer-border-0
-                                      univer-bg-transparent univer-p-0 univer-text-xs univer-text-gray-600
-                                      univer-outline-none univer-transition-colors
+                                      univer-items-center univer-justify-center univer-rounded univer-bg-transparent
+                                      univer-p-0 univer-text-xs univer-text-gray-600 univer-outline-none
+                                      univer-transition-colors
                                       hover:univer-bg-gray-300
                                     `}
                                     onClick={onClose}

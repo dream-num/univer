@@ -19,7 +19,7 @@ import type { IAddCommentCommandParams, IThreadComment, IUpdateCommentCommandPar
 import type { IUniverUIConfig } from '@univerjs/ui';
 import type { IThreadCommentEditorInstance } from '../thread-comment-editor';
 import { generateRandomId, ICommandService, LocaleService, UserManagerService } from '@univerjs/core';
-import { clsx, Dropdown, Tooltip } from '@univerjs/design';
+import { borderClassName, clsx, Dropdown, Tooltip } from '@univerjs/design';
 import { DeleteSingle, MoreHorizontalSingle, ReplyToCommentSingle, ResolvedSingle, SolveSingle } from '@univerjs/icons';
 import { AddCommentCommand, DeleteCommentCommand, DeleteCommentTreeCommand, getDT, ResolveCommentCommand, ThreadCommentModel, UpdateCommentCommand } from '@univerjs/thread-comment';
 import { UI_PLUGIN_CONFIG_KEY, useConfigValue, useDependency, useObservable } from '@univerjs/ui';
@@ -145,7 +145,7 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                                                 <ul
                                                     className={`
                                                       univer-m-0 univer-box-border univer-grid univer-list-none
-                                                      univer-p-1.5 univer-text-sm univer-text-sm
+                                                      univer-p-1.5 univer-text-sm
                                                       [&_a]:univer-block [&_a]:univer-cursor-pointer
                                                       [&_a]:univer-rounded [&_a]:univer-px-2 [&_a]:univer-py-1.5
                                                       [&_a]:univer-transition-colors
@@ -188,7 +188,14 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                     </div>
                 )
                 : null}
-            <div className="univer-mb-1 univer-text-xs/normal univer-text-gray-600">{item.dT}</div>
+            <time
+                className={`
+                  univer-mb-1 univer-text-xs/normal univer-text-gray-600
+                  dark:univer-text-gray-400
+                `}
+            >
+                {item.dT}
+            </time>
             {editing
                 ? (
                     <ThreadCommentEditor
@@ -217,7 +224,12 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                     />
                 )
                 : (
-                    <div className="univer-text-smmal univer-text-gray-900">
+                    <div
+                        className={`
+                          univer-text-smmal univer-text-gray-900
+                          dark:univer-text-white
+                        `}
+                    >
                         {transformDocument2TextNodes(item.text).map((paragraph, i) => (
                             <div key={i} className="univer-break-words">
                                 {paragraph.map((item, i) => {
@@ -343,19 +355,21 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
 
     return (
         <div
+            id={`${prefix}-${unitId}-${subUnitId}-${id}`}
             className={clsx(
                 `
-                  univer-relative univer-box-border univer-rounded-md univer-border univer-border-solid
-                  univer-border-gray-200 univer-bg-white univer-p-4
+                  univer-relative univer-box-border univer-rounded-md univer-bg-white univer-p-4
+                  dark:univer-bg-gray-900 dark:univer-text-white
                 `,
-                full ? 'univer-w-full' : 'univer-w-[278px]',
+                borderClassName,
                 {
+                    'univer-w-[278px]': !full,
+                    'univer-w-full': full,
                     'univer-shadow': !resolved && (showHighlight || isHover || prefix === 'cell'),
                 }
             )}
             style={style}
             onClick={onClick}
-            id={`${prefix}-${unitId}-${subUnitId}-${id}`}
             onMouseEnter={() => {
                 onMouseEnter?.();
                 setIsHover(true);
@@ -385,7 +399,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                     <div
                         className={`
                           univer-mr-2 univer-h-3.5 univer-w-[3px] univer-flex-shrink-0 univer-flex-grow-0
-                          univer-rounded-sm univer-bg-yellow-400
+                          univer-rounded-sm univer-bg-yellow-500
                         `}
                     />
                     <Tooltip showIfEllipsis title={title}>
@@ -402,17 +416,18 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                     ? (
                         <div className="univer-flex univer-flex-shrink-0 univer-flex-grow-0 univer-flex-row">
                             <div
-                                onClick={handleResolve}
                                 className={clsx(
                                     `
                                       univer-ml-1 univer-inline-flex univer-h-6 univer-w-6 univer-cursor-pointer
                                       univer-items-center univer-justify-center univer-rounded-[3px] univer-text-base
+                                      dark:hover:univer-bg-gray-800
                                       hover:univer-bg-gray-50
                                     `,
                                     {
                                         'univer-text-green-500': resolved,
                                     }
                                 )}
+                                onClick={handleResolve}
                             >
                                 {resolved ? <ResolvedSingle /> : <SolveSingle />}
                             </div>
@@ -423,6 +438,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                                           univer-ml-1 univer-inline-flex univer-h-6 univer-w-6 univer-cursor-pointer
                                           univer-items-center univer-justify-center univer-rounded-[3px]
                                           univer-text-base
+                                          dark:hover:univer-bg-gray-800
                                           hover:univer-bg-gray-50
                                         `}
                                         onClick={handleDeleteRoot}
@@ -437,7 +453,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
             </div>
             <div
                 ref={scroller}
-                className="univer-max-h-[300px] univer-overflow-y-auto univer-overflow-x-hidden"
+                className="univer-max-h-80 univer-overflow-y-auto univer-overflow-x-hidden"
             >
                 {renderComments.map(
                     (item) => (

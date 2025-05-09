@@ -17,7 +17,7 @@
 import type { Nullable } from '@univerjs/core';
 import type { BaseObject, IChangeObserverConfig, Image, Rect, RichText } from '@univerjs/engine-render';
 import { ICommandService, LocaleService } from '@univerjs/core';
-import { InputNumber } from '@univerjs/design';
+import { borderTopClassName, clsx, InputNumber } from '@univerjs/design';
 import { useDependency } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
 import { UpdateSlideElementOperation } from '../../commands/operations/update-element.operation';
@@ -181,10 +181,7 @@ export default function TransformPanel(props: IProps) {
 
     return (
         <div
-            className={`
-              univer-relative univer-bottom-0 univer-mt-5 univer-w-full univer-border-t univer-border-solid
-              univer-border-t-gray-200
-            `}
+            className={clsx('univer-relative univer-bottom-0 univer-mt-5 univer-w-full', borderTopClassName)}
         >
             <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start">
                 <div className="univer-w-full univer-text-left univer-text-gray-600">

@@ -1,5 +1,38 @@
 # Changelog
 
+# [0.7.0-beta.1](https://github.com/dream-num/univer/compare/v0.7.0-beta.0...v0.7.0-beta.1) (2025-05-09)
+
+
+### Bug Fixes
+
+* fix import styles type error ([2d5e2c5](https://github.com/dream-num/univer/commit/2d5e2c567aa68dd8cf9afed5023d13da09e31fa2))
+* fix styles ([#5157](https://github.com/dream-num/univer/issues/5157)) ([c01c348](https://github.com/dream-num/univer/commit/c01c3485f6c9baf0f919ad31e1721958c53aee1c))
+* fixed the issue where the cell number format was cleared after a non-number was entered into the cell ([#5152](https://github.com/dream-num/univer/issues/5152)) ([899227c](https://github.com/dream-num/univer/commit/899227c1f24ae195208db8f2e98fc9755eaf4053))
+* **formula:** fix CELL_INVERTED_INDEX_CACHE bug ([#5118](https://github.com/dream-num/univer/issues/5118)) ([b823a88](https://github.com/dream-num/univer/commit/b823a88fdd40a80c1761c32468dca5ea7eaae2b9))
+* **sheets-drawing-ui:** float-dom delete icon note hide after deleted & note resize issue ([#5158](https://github.com/dream-num/univer/issues/5158)) ([8520a1f](https://github.com/dream-num/univer/commit/8520a1fbfd1fb48f34d2f5ecea4c55db20583c1d))
+* **sheets-formula-ui:** use theme color for stroke in genFormulaRefSelectionStyle ([#5144](https://github.com/dream-num/univer/issues/5144)) ([42be385](https://github.com/dream-num/univer/commit/42be3853fc6258377909da93283cba4ac08afd4a))
+* **sheets-note-ui:** note display error on some conditions ([#5134](https://github.com/dream-num/univer/issues/5134)) ([59c693b](https://github.com/dream-num/univer/commit/59c693b2d7d0c3a942a92a8fbecd6f34c7143803))
+* **sheets-note:** rename SheetsNotePlugin to UniverSheetsNotePlugin for consistency ([#5148](https://github.com/dream-num/univer/issues/5148)) ([35d0f56](https://github.com/dream-num/univer/commit/35d0f5666e5c60a79f7ef0b512706f750d7eeb13))
+
+
+### Features
+
+* add dark mode on Univer Rendering Engine ([#5041](https://github.com/dream-num/univer/issues/5041)) ([5afa3ef](https://github.com/dream-num/univer/commit/5afa3ef002e872e49d240bda68047cf14deb10e4))
+* **core:** add `darkMode` configuration ([#5161](https://github.com/dream-num/univer/issues/5161)) ([ee7c52f](https://github.com/dream-num/univer/commit/ee7c52ffddc86c8b30443c1d2386f6edb8f87589))
+* **design:** add Accordion ([#5163](https://github.com/dream-num/univer/issues/5163)) ([6748e6f](https://github.com/dream-num/univer/commit/6748e6f7eef9cc561d69fd04cc8bfad38a4f85bf))
+* **design:** add Badge & MultipleSelect ([#5160](https://github.com/dream-num/univer/issues/5160)) ([232ce87](https://github.com/dream-num/univer/commit/232ce87815e661d6b68aa94ea48908a8c624720d))
+* **design:** add Gallery ([#5164](https://github.com/dream-num/univer/issues/5164)) ([d5858c5](https://github.com/dream-num/univer/commit/d5858c540a0b9d4315af323fbcd5ccd8ec21a662))
+* finish migrating ([d8f223d](https://github.com/dream-num/univer/commit/d8f223d4acaf1f17407f051972eb5567352227d3))
+* **numfmt:** refactor less to tailwindcss ([#5069](https://github.com/dream-num/univer/issues/5069)) ([433191b](https://github.com/dream-num/univer/commit/433191b1660786a0713196f390414b0c14a72b16))
+* **sheets-note:** support attach note to cells ([#5125](https://github.com/dream-num/univer/issues/5125)) ([1a58d80](https://github.com/dream-num/univer/commit/1a58d80e5d61b36bbaba4d075f13d7d333d1bd74))
+* **sidepanel:** add dark mode support ([#5114](https://github.com/dream-num/univer/issues/5114)) ([e08c0a6](https://github.com/dream-num/univer/commit/e08c0a6bd91874d27c159dad53efdde49ff4b799))
+* support theme switcher ([#5154](https://github.com/dream-num/univer/issues/5154)) ([fdc527c](https://github.com/dream-num/univer/commit/fdc527c97912b2c2cc22837a3fcae432ea693f40))
+
+
+### Performance Improvements
+
+* improve performance by avoiding reallocation ([0eb5170](https://github.com/dream-num/univer/commit/0eb517019eba34c4700b285b1a8f624ba9d09006))
+
 # [0.7.0-beta.0](https://github.com/dream-num/univer/compare/v0.6.10...v0.7.0-beta.0) (2025-04-29)
 
 

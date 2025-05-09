@@ -72,7 +72,7 @@ const SelectList = (props: ISelectListProps) => {
             data-u-comp="select-list"
             className={`
               univer-box-border univer-rounded-lg univer-border univer-border-solid univer-border-gray-200
-              univer-bg-white univer-pb-1 univer-text-black univer-shadow
+              univer-bg-white univer-pb-1 univer-text-gray-900 univer-shadow
               dark:univer-border-gray-700 dark:univer-bg-black dark:univer-text-white
             `}
             style={style}
@@ -120,8 +120,7 @@ const SelectList = (props: ISelectListProps) => {
                             <div
                                 className={`
                                   univer-h-4 univer-w-fit univer-flex-[0_1_auto] univer-overflow-hidden univer-truncate
-                                  univer-whitespace-nowrap univer-rounded-[8px] univer-px-1 univer-py-0 univer-text-xs
-                                  univer-font-normal
+                                  univer-whitespace-nowrap univer-rounded-lg univer-px-1 univer-py-0 univer-text-xs
                                 `}
                                 style={{ background: item.color }}
                             >

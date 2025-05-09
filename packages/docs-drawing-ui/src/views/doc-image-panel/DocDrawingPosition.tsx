@@ -379,7 +379,7 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
                   univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start univer-justify-start
                 `}
             >
-                <div className="univer-flex univer-items-center univer-gap-1 univer-text-black">
+                <div className="univer-flex univer-items-center univer-gap-1 univer-text-gray-900">
                     <div>{localeService.t('image-position.horizontal')}</div>
                 </div>
             </div>
@@ -461,7 +461,7 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
                   univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start univer-justify-start
                 `}
             >
-                <div className="univer-flex univer-items-center univer-gap-1 univer-text-black">
+                <div className="univer-flex univer-items-center univer-gap-1 univer-text-gray-900">
                     <div>{localeService.t('image-position.vertical')}</div>
                 </div>
             </div>
@@ -543,7 +543,7 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
                   univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start univer-justify-start
                 `}
             >
-                <div className="univer-flex univer-items-center univer-gap-1 univer-text-black">
+                <div className="univer-flex univer-items-center univer-gap-1 univer-text-gray-900">
                     <div>{localeService.t('image-position.options')}</div>
                 </div>
             </div>

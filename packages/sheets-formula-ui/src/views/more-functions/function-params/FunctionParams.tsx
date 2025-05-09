@@ -34,7 +34,7 @@ export function FunctionParams(props: IParamsProps) {
             >
                 {title}
             </div>
-            <div className="univer-font-normal univer-text-gray-900">
+            <div className="univer-text-gray-900">
                 {value}
             </div>
         </div>

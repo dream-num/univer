@@ -83,7 +83,7 @@
         "rc-dropdown": "^4.2.1",
         "rc-menu": "^9.16.0",
         "rc-picker": "^4.9.0",
-        "rc-virtual-list": "^3.16.1",
+        "rc-virtual-list": "^3.18.6",
         "react-grid-layout": "^1.5.1",
         "react-transition-group": "^4.4.5",
         "sonner": "^2.0.3",

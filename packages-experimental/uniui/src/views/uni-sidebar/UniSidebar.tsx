@@ -15,7 +15,7 @@
  */
 
 import type { ISidebarMethodOptions } from '@univerjs/ui';
-import { clsx, scrollbarClassName } from '@univerjs/design';
+import { borderClassName, clsx, scrollbarClassName } from '@univerjs/design';
 import { CloseSingle } from '@univerjs/icons';
 import { CustomLabel, ILeftSidebarService, ISidebarService, useDependency, useObservable } from '@univerjs/ui';
 import React, { useEffect, useMemo, useRef } from 'react';
@@ -106,9 +106,8 @@ export function UniSidebar(props: IUniSidebarProps) {
         <aside
             className={clsx(`
               univer-pointer-events-auto univer-fixed univer-bottom-3 univer-top-12 univer-z-20 univer-box-border
-              univer-overflow-hidden univer-rounded-lg univer-border univer-border-solid univer-border-gray-200
-              univer-shadow-lg univer-transition-all
-            `, {
+              univer-overflow-hidden univer-rounded-lg univer-shadow-lg univer-transition-all
+            `, borderClassName, {
                 'univer-left-3 univer-w-[180px]': position === 'left',
                 'univer-right-3 univer-min-w-[280px] univer-max-w-[400px]': position === 'right',
                 'univer-translate-x-[calc(-100%-12px)]': position === 'left' && !visible,
@@ -117,11 +116,11 @@ export function UniSidebar(props: IUniSidebarProps) {
             style={{ width }}
         >
             <section
+                ref={scrollRef}
                 className={clsx(`
                   univer-m-auto univer-box-border univer-flex univer-h-0 univer-min-h-full univer-w-full univer-flex-col
                   univer-overflow-hidden univer-overflow-y-auto univer-bg-white
                 `, scrollbarClassName)}
-                ref={scrollRef}
             >
                 { showClose && (
                     <header

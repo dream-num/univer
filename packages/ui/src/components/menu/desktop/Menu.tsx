@@ -44,7 +44,7 @@ import { useScrollYOverContainer } from '../../hooks/layout';
 import { UITinyMenuGroup } from './TinyMenuGroup';
 
 const contentClassName = 'univer-inline-flex univer-gap-2 univer-items-center';
-const moreIconClassName = 'univer-size-3.5 univer-text-gray-900';
+const moreIconClassName = 'univer-size-3.5 univer-text-gray-900 dark:univer-text-white';
 
 /** @deprecated */
 export interface IBaseMenuProps {

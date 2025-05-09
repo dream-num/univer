@@ -19,7 +19,7 @@ import type { ISheetNote } from '@univerjs/sheets-note';
 import type { IPopup } from '@univerjs/ui';
 import type { IUniverSheetsNoteUIPluginConfig } from '../plugin';
 import { ICommandService, LocaleService } from '@univerjs/core';
-import { clsx, scrollbarClassName } from '@univerjs/design';
+import { borderClassName, clsx, scrollbarClassName } from '@univerjs/design';
 import { SheetDeleteNoteCommand, SheetsNoteModel, SheetUpdateNoteCommand } from '@univerjs/sheets-note';
 import { useConfigValue, useDebounceFn, useDependency } from '@univerjs/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -119,11 +119,11 @@ export const SheetsNote = (props: { popup: IPopup<{ location: ISheetLocationBase
             ref={textareaRef}
             data-u-comp="note-textarea"
             className={clsx(`
-              univer-resize-both univer-ml-px univer-rounded-md univer-border univer-border-solid univer-border-gray-200
-              univer-bg-white univer-p-2 univer-text-gray-900 univer-shadow
-              dark:univer-border-gray-600 dark:univer-bg-gray-800 dark:univer-text-white
+              univer-resize-both univer-ml-px univer-rounded-md univer-bg-white univer-p-2 univer-text-gray-900
+              univer-shadow
+              dark:univer-bg-gray-800 dark:univer-text-white
               focus:univer-outline-none
-            `, scrollbarClassName)}
+            `, borderClassName, scrollbarClassName)}
             style={{ width: note.width, height: note.height }}
             value={note.note}
             placeholder={localeService.t('note.placeholder')}

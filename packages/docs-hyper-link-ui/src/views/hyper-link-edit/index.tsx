@@ -16,7 +16,7 @@
 
 import type { DocumentDataModel } from '@univerjs/core';
 import { BuildTextUtils, getBodySlice, ICommandService, IUniverInstanceService, LocaleService, Tools, UniverInstanceType } from '@univerjs/core';
-import { Button, FormLayout, Input } from '@univerjs/design';
+import { borderClassName, Button, clsx, FormLayout, Input } from '@univerjs/design';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { KeyCode, useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
@@ -115,10 +115,9 @@ export const DocHyperLinkEdit = () => {
 
     return (
         <div
-            className={`
-              univer-box-border univer-w-[328px] univer-rounded-xl univer-border univer-border-solid
-              univer-border-gray-200 univer-bg-white univer-px-6 univer-py-5 univer-shadow
-            `}
+            className={clsx(`
+              univer-box-border univer-w-[328px] univer-rounded-xl univer-bg-white univer-px-6 univer-py-5 univer-shadow
+            `, borderClassName)}
         >
             <div>
                 {editing

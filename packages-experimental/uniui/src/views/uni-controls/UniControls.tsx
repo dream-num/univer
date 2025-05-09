@@ -15,7 +15,7 @@
  */
 
 import type { IProjectNode } from '../../services/unit-grid/unit-grid.service';
-import { Button, clsx, Dropdown, Tooltip } from '@univerjs/design';
+import { borderClassName, Button, clsx, Dropdown, Tooltip } from '@univerjs/design';
 import { CheckMarkSingle, FullscreenSingle, IncreaseSingle, ZoomReduceSingle } from '@univerjs/icons';
 import { ISidebarService, useDependency } from '@univerjs/ui';
 import { useReactFlow } from '@xyflow/react';
@@ -124,11 +124,10 @@ export const UniControls = ({ zoom, onItemClick }: { zoom: number; onItemClick?:
 
     return (
         <div
-            className={`
+            className={clsx(`
               univer-fixed univer-bottom-3 univer-right-3 univer-flex univer-w-fit univer-items-center univer-gap-3
-              univer-rounded-[10px] univer-border univer-border-solid univer-border-gray-200 univer-bg-white univer-p-2
-              univer-shadow
-            `}
+              univer-rounded-[10px] univer-bg-white univer-p-2 univer-shadow
+            `, borderClassName)}
             style={{ right: `${rightPadding}px` }}
         >
             <UniControlButton tooltips="Full screen" onClick={onFullscreenHandler}>
@@ -140,13 +139,10 @@ export const UniControls = ({ zoom, onItemClick }: { zoom: number; onItemClick?:
             <Dropdown
                 overlay={(
                     <div
-                        className={clsx(
-                            `
-                              univer-box-border univer-grid univer-w-32 univer-items-center univer-gap-1
-                              univer-rounded-lg univer-border univer-border-gray-300 univer-bg-white univer-p-4
-                              univer-text-xs univer-shadow-lg
-                            `
-                        )}
+                        className={`
+                          univer-box-border univer-grid univer-w-32 univer-items-center univer-gap-1 univer-p-4
+                          univer-text-xs
+                        `}
                     >
                         {shortcuts?.map((item) => (
                             <a

@@ -15,7 +15,7 @@
  */
 
 import { PresetListType } from '@univerjs/core';
-import { clsx } from '@univerjs/design';
+import { borderClassName, clsx } from '@univerjs/design';
 
 export interface IListTypePickerBaseProps {
     value?: PresetListType;
@@ -36,9 +36,9 @@ export const ListTypePicker = (props: IListTypePickerProps) => {
                         key={item.value}
                         className={clsx(`
                           univer-block univer-h-20 univer-w-[72px] univer-cursor-pointer univer-overflow-hidden
-                          univer-rounded univer-border univer-border-solid univer-border-gray-200 univer-transition-all
+                          univer-rounded univer-transition-all
                           hover:univer-border-primary-500
-                        `, {
+                        `, borderClassName, {
                             'univer-border-primary-500': value === item.value,
                         })}
                         onClick={() => {

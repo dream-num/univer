@@ -17,7 +17,7 @@
 import type { IRangeThemeStyleItem, ISetRangeThemeMutationParams } from '@univerjs/sheets';
 import type { IAddTableThemeCommandParams, ISetSheetTableCommandParams, ITableSetConfig } from '@univerjs/sheets-table';
 import { ColorKit, ErrorService, ICommandService, LocaleService } from '@univerjs/core';
-import { ColorPicker, Dropdown } from '@univerjs/design';
+import { borderClassName, clsx, ColorPicker, Dropdown } from '@univerjs/design';
 import { DropdownSingle } from '@univerjs/icons';
 import { RangeThemeStyle, SetRangeThemeMutation, SheetRangeThemeModel } from '@univerjs/sheets';
 import { AddTableThemeCommand, customEmptyThemeWithBorderStyle, processStyleWithBorderStyle, RemoveTableThemeCommand, SetSheetTableCommand, TableManager } from '@univerjs/sheets-table';
@@ -156,13 +156,12 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
             </div>
 
             <h5>{localeService.t('sheets-table.customStyle')}</h5>
-            <div className="univer-w-full univer-rounded-sm univer-border univer-border-solid univer-border-gray-200">
+            <div className={clsx('univer-w-full univer-rounded-sm', borderClassName)}>
                 <div className="univer-flex univer-flex-wrap univer-gap-2 univer-p-2">
                     <div
-                        className={`
-                          univer-h-10 univer-w-8 univer-cursor-pointer univer-border univer-border-solid
-                          univer-border-gray-200 univer-p-px univer-text-center univer-leading-10
-                        `}
+                        className={clsx(`
+                          univer-h-10 univer-w-8 univer-cursor-pointer univer-p-px univer-text-center univer-leading-10
+                        `, borderClassName)}
                         onClick={handleAddCustomTheme}
                     >
                         +
@@ -215,10 +214,10 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
                         <div className="univer-flex univer-flex-col univer-gap-2 univer-p-2">
                             <div className="univer-flex univer-h-9 univer-gap-2">
                                 <div
-                                    className={`
-                                      univer-box-border univer-h-full univer-w-52 univer-rounded-sm univer-border
-                                      univer-border-solid univer-border-gray-200 univer-text-center univer-leading-9
-                                    `}
+                                    className={clsx(`
+                                      univer-box-border univer-h-full univer-w-52 univer-rounded-sm univer-text-center
+                                      univer-leading-9
+                                    `, borderClassName)}
                                     style={{
                                         background: headerBg,
                                         color: new ColorKit(headerBg).isDark() ? '#fff' : '#000',
@@ -247,17 +246,13 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
                                     )}
                                 >
                                     <div
-                                        className={`
+                                        className={clsx(`
                                           univer-flex univer-cursor-pointer univer-items-center univer-gap-2
-                                          univer-rounded-sm univer-border univer-border-solid univer-border-gray-200
-                                          univer-bg-white univer-p-1
-                                        `}
+                                          univer-rounded-sm univer-bg-white univer-p-1
+                                        `, borderClassName)}
                                     >
                                         <div
-                                            className={`
-                                              univer-h-4 univer-w-4 univer-rounded-[8px] univer-border
-                                              univer-border-solid univer-border-gray-200 univer-bg-slate-400
-                                            `}
+                                            className={clsx('univer-h-4 univer-w-4 univer-rounded-lg univer-bg-gray-400', borderClassName)}
                                             style={{
                                                 background: headerBg,
                                                 color: new ColorKit(headerBg).isDark() ? '#fff' : '#000',
@@ -269,10 +264,10 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
                             </div>
                             <div className="univer-flex univer-h-9 univer-gap-2">
                                 <div
-                                    className={`
-                                      univer-box-border univer-h-full univer-w-52 univer-rounded-sm univer-border
-                                      univer-border-solid univer-border-gray-200 univer-text-center univer-leading-9
-                                    `}
+                                    className={clsx(`
+                                      univer-box-border univer-h-full univer-w-52 univer-rounded-sm univer-text-center
+                                      univer-leading-9
+                                    `, borderClassName)}
                                     style={{
                                         background: firstRowBg,
                                         color: new ColorKit(firstRowBg).isDark() ? '#fff' : '#000',
@@ -302,17 +297,13 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
                                     )}
                                 >
                                     <div
-                                        className={`
+                                        className={clsx(`
                                           univer-flex univer-cursor-pointer univer-items-center univer-gap-2
-                                          univer-rounded-sm univer-border univer-border-solid univer-border-gray-200
-                                          univer-bg-white univer-p-1
-                                        `}
+                                          univer-rounded-sm univer-bg-white univer-p-1
+                                        `, borderClassName)}
                                     >
                                         <div
-                                            className={`
-                                              univer-h-4 univer-w-4 univer-rounded-[8px] univer-border
-                                              univer-border-solid univer-border-gray-200 univer-bg-slate-400
-                                            `}
+                                            className={clsx('univer-h-4 univer-w-4 univer-rounded-lg univer-bg-gray-400', borderClassName)}
                                             style={{ background: firstRowBg }}
                                         />
                                         <DropdownSingle className="univer-h-2 univer-w-2" />
@@ -321,10 +312,10 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
                             </div>
                             <div className="univer-flex univer-h-9 univer-gap-2">
                                 <div
-                                    className={`
-                                      univer-box-border univer-h-full univer-w-52 univer-rounded-sm univer-border
-                                      univer-border-solid univer-border-gray-200 univer-text-center univer-leading-9
-                                    `}
+                                    className={clsx(`
+                                      univer-box-border univer-h-full univer-w-52 univer-rounded-sm univer-text-center
+                                      univer-leading-9
+                                    `, borderClassName)}
                                     style={{
                                         background: secondRowBg,
                                         color: new ColorKit(secondRowBg).isDark() ? '#fff' : '#000',
@@ -352,17 +343,13 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
                                     )}
                                 >
                                     <div
-                                        className={`
+                                        className={clsx(`
                                           univer-flex univer-cursor-pointer univer-items-center univer-gap-2
-                                          univer-rounded-sm univer-border univer-border-solid univer-border-gray-200
-                                          univer-bg-white univer-p-1
-                                        `}
+                                          univer-rounded-sm univer-bg-white univer-p-1
+                                        `)}
                                     >
                                         <div
-                                            className={`
-                                              univer-h-4 univer-w-4 univer-rounded-[8px] univer-border
-                                              univer-border-solid univer-border-gray-200 univer-bg-slate-400
-                                            `}
+                                            className={clsx('univer-h-4 univer-w-4 univer-rounded-lg univer-bg-gray-400', borderClassName)}
                                             style={{ background: secondRowBg }}
                                         />
                                         <DropdownSingle className="univer-h-2 univer-w-2" />
@@ -371,10 +358,10 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
                             </div>
                             <div className="univer-flex univer-h-9 univer-gap-2">
                                 <div
-                                    className={`
-                                      univer-box-border univer-h-full univer-w-52 univer-rounded-sm univer-border
-                                      univer-border-solid univer-border-gray-200 univer-text-center univer-leading-9
-                                    `}
+                                    className={clsx(`
+                                      univer-box-border univer-h-full univer-w-52 univer-rounded-sm univer-text-center
+                                      univer-leading-9
+                                    `, borderClassName)}
                                     style={{
                                         background: lastRowBg,
                                         color: new ColorKit(lastRowBg).isDark() ? '#fff' : '#000',
@@ -403,17 +390,13 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
                                     )}
                                 >
                                     <div
-                                        className={`
+                                        className={clsx(`
                                           univer-flex univer-cursor-pointer univer-items-center univer-gap-2
-                                          univer-rounded-sm univer-border univer-border-solid univer-border-gray-200
-                                          univer-bg-white univer-p-1
-                                        `}
+                                          univer-rounded-sm univer-bg-white univer-p-1
+                                        `, borderClassName)}
                                     >
                                         <div
-                                            className={`
-                                              univer-h-4 univer-w-4 univer-rounded-[8px] univer-border
-                                              univer-border-solid univer-border-gray-200 univer-bg-slate-400
-                                            `}
+                                            className={clsx('univer-h-4 univer-w-4 univer-rounded-lg univer-bg-gray-400', borderClassName)}
                                             style={{ background: lastRowBg }}
                                         />
                                         <DropdownSingle className="univer-h-2 univer-w-2" />

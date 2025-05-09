@@ -18,7 +18,7 @@ import type { IFunctionInfo, IFunctionParam } from '@univerjs/engine-formula';
 import type { ISearchItem } from '@univerjs/sheets-formula';
 import type { ISidebarMethodOptions } from '@univerjs/ui';
 import { LocaleService } from '@univerjs/core';
-import { Input, Select } from '@univerjs/design';
+import { borderClassName, clsx, Input, Select } from '@univerjs/design';
 import { FunctionType } from '@univerjs/engine-formula';
 import { CheckMarkSingle } from '@univerjs/icons';
 import { IDescriptionService } from '@univerjs/sheets-formula';
@@ -161,26 +161,23 @@ export function SelectFunction(props: ISelectFunctionProps) {
             </div>
 
             <ul
-                className={`
+                className={clsx(`
                   univer-mx-0 univer-mb-0 univer-mt-2 univer-box-border univer-max-h-[364px] univer-w-full
-                  univer-select-none univer-list-none univer-overflow-y-auto univer-rounded univer-border
-                  univer-border-solid univer-border-gray-200 univer-p-3 univer-outline-none
-                `}
+                  univer-select-none univer-list-none univer-overflow-y-auto univer-rounded univer-p-3
+                  univer-outline-none
+                `, borderClassName)}
                 onKeyDown={handleSelectListKeyDown}
                 tabIndex={-1}
             >
                 {selectList.map(({ name }, index) => (
                     <li
                         key={index}
-                        className={active === index
-                            ? `
-                              univer-relative univer-box-border univer-cursor-pointer univer-rounded univer-bg-gray-200
-                              univer-px-7 univer-py-1 univer-text-sm univer-text-gray-900 univer-transition-colors
-                            `
-                            : `
-                              univer-relative univer-box-border univer-cursor-pointer univer-rounded univer-px-7
-                              univer-py-1 univer-text-smver-text-gray-900 univer-transition-colors
-                            `}
+                        className={clsx(`
+                          univer-relative univer-box-border univer-cursor-pointer univer-rounded univer-px-7 univer-py-1
+                          univer-text-sm univer-text-gray-900 univer-transition-colors
+                        `, {
+                            'univer-bg-gray-200': active === index,
+                        })}
                         onMouseEnter={() => handleLiMouseEnter(index)}
                         onMouseLeave={handleLiMouseLeave}
                         onClick={() => setCurrentFunctionInfo(index)}

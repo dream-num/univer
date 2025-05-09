@@ -19,7 +19,7 @@ import type { IIconSet, IIconType } from '@univerjs/sheets-conditional-formattin
 import type { IFormulaEditorRef } from '@univerjs/sheets-formula-ui';
 import type { IStyleEditorProps } from './type';
 import { get, IUniverInstanceService, LocaleService, set, Tools, UniverInstanceType } from '@univerjs/core';
-import { Checkbox, clsx, Dropdown, InputNumber, Select } from '@univerjs/design';
+import { borderClassName, Checkbox, clsx, Dropdown, InputNumber, Select } from '@univerjs/design';
 import { MoreDownSingle, SlashSingle } from '@univerjs/icons';
 import {
     CFNumberOperator,
@@ -298,13 +298,12 @@ const IconSetRuleEdit = (props: {
                                 )}
                             >
                                 <div
-                                    className={`
+                                    className={clsx(`
                                       univer-box-border univer-flex univer-h-8 univer-w-full univer-items-center
-                                      univer-justify-between univer-rounded-md univer-border univer-border-solid
-                                      univer-border-gray-200 univer-bg-white univer-px-4 univer-py-2 univer-text-xs
-                                      univer-text-gray-600 univer-transition-all
+                                      univer-justify-between univer-rounded-md univer-bg-white univer-px-4 univer-py-2
+                                      univer-text-xs univer-text-gray-600 univer-transition-all
                                       hover:univer-border-primary-600
-                                    `}
+                                    `, borderClassName)}
                                 >
                                     {icon
                                         ? <img src={icon} className="univer-size-4" draggable={false} />
@@ -568,11 +567,10 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
                     <div
                         className={clsx(`
                           univer-box-border univer-flex univer-h-8 univer-w-full univer-items-center
-                          univer-justify-between univer-rounded-md univer-border univer-border-solid
-                          univer-border-gray-200 univer-bg-white univer-px-4 univer-py-2 univer-text-xs
-                          univer-text-gray-600 univer-transition-all
+                          univer-justify-between univer-rounded-md univer-bg-white univer-px-4 univer-py-2
+                          univer-text-xs univer-text-gray-600 univer-transition-all
                           hover:univer-border-primary-600
-                        `)}
+                        `, borderClassName)}
                     >
                         {previewIcon}
                         <MoreDownSingle />

@@ -15,7 +15,7 @@
  */
 
 import type { IMention, ITypeMentionList } from '@univerjs/core';
-import { clsx } from '@univerjs/design';
+import { borderClassName, clsx } from '@univerjs/design';
 import { useRef, useState } from 'react';
 
 export interface IMentionListProps {
@@ -39,10 +39,10 @@ export const MentionList = (props: IMentionListProps) => {
             ref={ref}
             data-editorid={editorId}
             tabIndex={0}
-            className={`
-              univer-max-h-72 univer-w-72 univer-overflow-hidden univer-rounded-lg univer-border univer-border-solid
-              univer-border-gray-200 univer-bg-white univer-p-2 univer-shadow-md
-            `}
+            className={clsx(`
+              univer-max-h-72 univer-w-72 univer-overflow-hidden univer-rounded-lg univer-bg-white univer-p-2
+              univer-shadow-md
+            `, borderClassName)}
             onClick={onClick}
         >
             {mentions.map((typeMentions) => (

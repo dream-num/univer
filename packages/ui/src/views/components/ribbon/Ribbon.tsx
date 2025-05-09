@@ -17,7 +17,7 @@
 import type { ComponentType } from 'react';
 import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
 import { LocaleService } from '@univerjs/core';
-import { clsx } from '@univerjs/design';
+import { borderBottomClassName, clsx } from '@univerjs/design';
 import { MoreFunctionSingle } from '@univerjs/icons';
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
@@ -238,12 +238,11 @@ export function Ribbon(props: IRibbonProps) {
 
             <section
                 role="toolbar"
-                className={`
+                className={clsx(`
                   univer-relative univer-box-border univer-flex univer-h-8 univer-select-none univer-items-center
-                  univer-border-0 univer-border-b univer-border-solid univer-border-b-gray-200 univer-bg-white
-                  univer-text-base univer-text-gray-800 univer-transition-opacity
-                  dark:univer-border-b-gray-700 dark:univer-bg-gray-900
-                `}
+                  univer-bg-white univer-text-base univer-text-gray-800 univer-transition-opacity
+                  dark:univer-bg-gray-900
+                `, borderBottomClassName)}
             >
                 <div
                     className={clsx(`

@@ -18,7 +18,7 @@ import type { ILocale } from '@univerjs/design';
 import type { IUniverUIConfig } from '../../controllers/config.schema';
 import type { IWorkbenchOptions } from '../../controllers/ui/ui.controller';
 import { IConfigService, LocaleService, ThemeService } from '@univerjs/core';
-import { clsx, ConfigContext, ConfigProvider } from '@univerjs/design';
+import { borderBottomClassName, clsx, ConfigContext, ConfigProvider } from '@univerjs/design';
 import { useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useConfigValue } from '../../components/hooks';
@@ -175,17 +175,15 @@ export function DesktopWorkbenchContent(props: IUniverWorkbenchProps) {
                           univer-overflow-hidden
                         `}
                     >
-                        <aside className="univer-h-full">
+                        <aside data-u-comp="left-sidebar" className="univer-h-full">
                             <ComponentContainer key="left-sidebar" components={leftSidebarComponents} />
                         </aside>
 
                         <section
-                            className={`
+                            className={clsx(`
                               univer-relative univer-grid univer-flex-1 univer-grid-rows-[auto_1fr]
-                              univer-overflow-hidden univer-border-0 univer-border-b univer-border-solid
-                              univer-border-b-gray-200 univer-bg-white
-                              dark:univer-border-b-gray-700
-                            `}
+                              univer-overflow-hidden univer-bg-white
+                            `, borderBottomClassName)}
                         >
                             <header>
                                 {header && <ComponentContainer key="header" components={headerComponents} />}
@@ -205,7 +203,7 @@ export function DesktopWorkbenchContent(props: IUniverWorkbenchProps) {
 
                         </section>
 
-                        <aside className="univer-h-full">
+                        <aside data-u-comp="right-sidebar" className="univer-h-full">
                             <Sidebar />
                         </aside>
                     </div>

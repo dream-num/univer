@@ -15,8 +15,8 @@
  */
 
 import { CheckMarkSingle } from '@univerjs/icons';
+import { borderClassName, scrollbarClassName } from '../../helper/class-utilities';
 import { clsx } from '../../helper/clsx';
-import { scrollbarClassName } from '../../helper/scrollbar-cls';
 
 export interface ISelectListProps {
     /**
@@ -85,8 +85,8 @@ export function SelectList(props: ISelectListProps) {
         <ul
             className={clsx(`
               univer-m-0 univer-grid univer-max-h-80 univer-list-none univer-gap-1 univer-overflow-y-auto univer-rounded
-              univer-border univer-border-solid univer-border-gray-200 univer-p-1.5
-            `, scrollbarClassName, className)}
+              univer-p-1.5
+            `, borderClassName, scrollbarClassName, className)}
         >
             {options.map((option, index) => {
                 const checked = value.indexOf(option.value) > -1;
@@ -95,8 +95,8 @@ export function SelectList(props: ISelectListProps) {
                         <a
                             className={clsx(`
                               univer-relative univer-block univer-cursor-pointer univer-select-none univer-rounded
-                              univer-py-1.5 univer-pl-8 univer-pr-2 univer-text-sm univer-transition-colors
-                              univer-text-gray-900
+                              univer-py-1.5 univer-pl-8 univer-pr-2 univer-text-sm univer-text-gray-900
+                              univer-transition-colors
                               dark:univer-text-white dark:hover:univer-bg-gray-600
                               hover:univer-bg-gray-100
                             `, optionClassName, {

@@ -16,7 +16,7 @@
 
 import type { IBusinessComponentProps } from './interface';
 import { ILocalStorageService, LocaleService } from '@univerjs/core';
-import { Input } from '@univerjs/design';
+import { borderClassName, clsx, Input } from '@univerjs/design';
 import { CheckMarkSingle } from '@univerjs/icons';
 import { CURRENCYFORMAT, DATEFMTLISG, NUMBERFORMAT } from '@univerjs/sheets-numfmt';
 import { useDependency } from '@univerjs/ui';
@@ -79,10 +79,7 @@ export function CustomFormat(props: IBusinessComponentProps) {
                 className="univer-mt-2 univer-w-full"
             />
             <div
-                className={`
-                  univer-mt-2 univer-max-h-[400px] univer-overflow-auto univer-rounded-lg univer-border
-                  univer-border-solid univer-border-gray-200 univer-p-2
-                `}
+                className={clsx('univer-mt-2 univer-max-h-[400px] univer-overflow-auto univer-rounded-lg univer-p-2', borderClassName)}
             >
                 {options.map((p) => (
                     <div

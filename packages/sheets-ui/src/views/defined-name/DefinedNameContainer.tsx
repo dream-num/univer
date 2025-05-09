@@ -18,7 +18,7 @@ import type { Nullable, Workbook } from '@univerjs/core';
 
 import type { IDefinedNamesServiceParam, ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
 import { ICommandService, IUniverInstanceService, LocaleService, Tools, UniverInstanceType } from '@univerjs/core';
-import { clsx, Confirm, Tooltip } from '@univerjs/design';
+import { Button, clsx, Confirm, Tooltip } from '@univerjs/design';
 import { IDefinedNamesService, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { CheckMarkSingle, DeleteSingle, IncreaseSingle } from '@univerjs/icons';
 import {
@@ -175,37 +175,52 @@ export const DefinedNameContainer = () => {
     };
 
     return (
-        <div className="univer-relative univer-w-full">
-            <div className="univer-absolute univer-w-full univer-overflow-hidden univer-overflow-y-auto">
-                <div key="insertDefinedName">
-                    <div
-                        onClick={openInsertCloseKeyEditor}
+        <div
+            data-u-comp="defined-name-container"
+            className="univer-relative univer-box-border univer-w-full"
+        >
+            <div className="univer-w-full univer-overflow-hidden univer-overflow-y-auto">
+                <div key="insertDefinedName" className="univer-mb-4">
+                    <Button
                         className={clsx(
-                            `
-                              univer-flex univer-h-10 univer-w-full univer-items-center univer-justify-center
-                              univer-border-0 univer-border-b univer-border-t univer-border-solid univer-border-gray-200
-                              univer-text-base univer-text-primary univer-cursor-pointer
-                              hover:univer-bg-gray-50
-                            `,
-                            { 'univer-hidden': editState }
+                            'univer-w-full',
+                            {
+                                'univer-hidden': editState,
+                            }
                         )}
+                        onClick={openInsertCloseKeyEditor}
                     >
                         <IncreaseSingle />
                         <span className="univer-ml-1">{localeService.t('definedName.addButton')}</span>
-                    </div>
-                    {editState && <DefinedNameInput confirm={insertConfirm} cancel={closeInput} state={editState} inputId="insertDefinedName" name={getInsertDefinedName()} formulaOrRefString={getInertFormulaOrRefString()} />}
+                    </Button>
+                    {editState && (
+                        <DefinedNameInput
+                            confirm={insertConfirm}
+                            cancel={closeInput}
+                            state={editState}
+                            inputId="insertDefinedName"
+                            name={getInsertDefinedName()}
+                            formulaOrRefString={getInertFormulaOrRefString()}
+                        />
+                    )}
                 </div>
 
                 {definedNames.map((definedName, index) => {
                     return (
-                        <div key={index}>
+                        <div
+                            key={index}
+                            className={`
+                              univer-divide-x-0 univer-divide-y univer-divide-solid univer-divide-gray-200
+                              dark:univer-divide-gray-600
+                            `}
+                        >
                             <div
                                 onClick={() => { focusDefinedName(definedName); }}
                                 className={clsx(
-                                    'univer-relative univer-flex univer-items-center univer-justify-between univer-p-2',
-                                    'univer-border-0 univer-border-b univer-border-solid univer-border-gray-200',
                                     `
-                                      univer-cursor-default univer-select-none
+                                      univer-relative univer-flex univer-cursor-default univer-select-none
+                                      univer-items-center univer-justify-between univer-rounded-md univer-p-2
+                                      dark:hover:univer-bg-gray-700
                                       hover:univer-bg-gray-50
                                     `,
                                     { 'univer-hidden': definedName.id === editorKey }
@@ -216,6 +231,7 @@ export const DefinedNameContainer = () => {
                                         className={`
                                           univer-my-1 univer-max-h-[100px] univer-max-w-[190px] univer-overflow-hidden
                                           univer-text-sm univer-font-medium univer-text-gray-900
+                                          dark:univer-text-white
                                         `}
                                     >
                                         {definedName.name}
@@ -227,8 +243,8 @@ export const DefinedNameContainer = () => {
                                     </div>
                                     <div
                                         className={`
-                                          univer-m-[5px_0] univer-max-h-[100px] univer-overflow-hidden
-                                          univer-text-ellipsis univer-text-xs univer-text-gray-500
+                                          univer-my-1 univer-max-h-[100px] univer-overflow-hidden univer-text-ellipsis
+                                          univer-text-xs univer-text-gray-500
                                         `}
                                     >
                                         {definedName.formulaOrRefString}
@@ -238,7 +254,7 @@ export const DefinedNameContainer = () => {
                                     <div
                                         className={`
                                           univer-absolute univer-text-xs univer-text-primary univer-right-[60px]
-                                          univer-top-5 univer-hidden univer-translate-y-[-50%] univer-cursor-pointer
+                                          univer-top-5 univer-hidden -univer-translate-y-1/2 univer-cursor-pointer
                                           univer-rounded univer-p-1
                                           group-hover:univer-block
                                           hover:univer-bg-hyacinth-50

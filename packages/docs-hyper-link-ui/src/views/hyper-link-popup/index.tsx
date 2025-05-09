@@ -16,7 +16,7 @@
 
 import type { DocumentDataModel } from '@univerjs/core';
 import { CustomRangeType, ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
-import { MessageType, Tooltip } from '@univerjs/design';
+import { borderClassName, clsx, MessageType, Tooltip } from '@univerjs/design';
 import { CopySingle, LinkSingle, UnlinkSingle, WriteSingle } from '@univerjs/icons';
 import { IMessageService, useDependency, useObservable } from '@univerjs/ui';
 import { DeleteDocHyperLinkCommand } from '../../commands/commands/delete-link.command';
@@ -47,11 +47,11 @@ export const DocLinkPopup = () => {
 
     return (
         <div
-            className={`
-              univer-box-border univer-flex univer-max-w-[328px] univer-items-center univer-justify-between
-              univer-overflow-hidden univer-rounded-lg univer-border univer-border-solid univer-border-gray-200
-              univer-bg-white univer-p-3 univer-shadow
-            `}
+            className={clsx(`
+              univer-box-border univer-flex univer-max-w-80 univer-items-center univer-justify-between
+              univer-overflow-hidden univer-rounded-lg univer-bg-white univer-p-3 univer-shadow
+              dark:univer-bg-gray-900
+            `, borderClassName)}
             onClick={() => {
                 hyperLinkService.hideInfoPopup();
             }}

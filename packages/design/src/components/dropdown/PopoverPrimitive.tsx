@@ -16,8 +16,8 @@
 
 import type { ComponentProps } from 'react';
 import { Anchor, Content, Portal, Root, Trigger } from '@radix-ui/react-popover';
+import { borderClassName, scrollbarClassName } from '../../helper/class-utilities';
 import { clsx } from '../../helper/clsx';
-import { scrollbarClassName } from '../../helper/scrollbar-cls';
 
 function PopoverPrimitive({
     ...props
@@ -46,9 +46,8 @@ function PopoverContent({
                 className={clsx(
                     `
                       univer-z-[1080] univer-max-h-[var(--radix-popper-available-height)] univer-overflow-y-auto
-                      univer-rounded-md univer-border univer-border-solid univer-border-gray-200 univer-bg-white
-                      univer-text-gray-900 univer-shadow-md univer-outline-hidden
-                      dark:univer-border-gray-600 dark:univer-bg-gray-900
+                      univer-rounded-md univer-bg-white univer-text-gray-900 univer-shadow-md univer-outline-hidden
+                      dark:univer-bg-gray-900
                       data-[side=bottom]:univer-slide-in-from-top-2
                       data-[side=left]:univer-slide-in-from-right-2
                       data-[side=right]:univer-slide-in-from-left-2
@@ -58,6 +57,7 @@ function PopoverContent({
                       data-[state=open]:univer-animate-in data-[state=open]:univer-fade-in-0
                       data-[state=open]:univer-zoom-in-95
                     `,
+                    borderClassName,
                     scrollbarClassName,
                     className
                 )}

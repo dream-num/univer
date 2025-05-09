@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { clsx } from '@univerjs/design';
+import { borderClassName, clsx } from '@univerjs/design';
 import { useDependency, useObservable } from '@univerjs/ui';
 import { useCallback } from 'react';
 import { CROSSHAIR_HIGHLIGHT_COLORS, SheetsCrosshairHighlightService } from '../../services/crosshair.service';
@@ -41,10 +41,10 @@ export function CrosshairOverlay(props: ICrosshairOverlayProps) {
                     <div
                         key={color}
                         className={clsx(`
-                          univer-box-border univer-size-5 univer-cursor-pointer univer-rounded univer-border
-                          univer-border-solid univer-border-gray-200 univer-ring-offset-1 univer-transition-shadow
+                          univer-box-border univer-size-5 univer-cursor-pointer univer-rounded univer-ring-offset-1
+                          univer-transition-shadow
                           hover:univer-ring-[1.5px] hover:univer-ring-primary-600/40
-                        `, {
+                        `, borderClassName, {
                             'univer-ring-[1.5px] univer-ring-primary-600 hover:univer-ring-primary-600': color === currentColor,
                         })}
                         style={{ backgroundColor: color }}

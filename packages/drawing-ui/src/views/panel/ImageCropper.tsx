@@ -16,7 +16,7 @@
 
 import type { IDrawingParam } from '@univerjs/core';
 import { ICommandService, LocaleService } from '@univerjs/core';
-import { Button, Select } from '@univerjs/design';
+import { borderTopClassName, Button, clsx, Select } from '@univerjs/design';
 import { CreateCopySingle } from '@univerjs/icons';
 import { useDependency } from '@univerjs/ui';
 import { useEffect, useRef, useState } from 'react';
@@ -111,10 +111,6 @@ export const ImageCropper = (props: IImageCropperProps) => {
         }
     }
 
-    const gridDisplay = (isShow: boolean) => {
-        return isShow ? 'block' : 'none';
-    };
-
     const onCropperBtnClick = (val: CropType) => {
         commandService.executeCommand(AutoImageCropOperation.id, {
             cropType: val,
@@ -124,11 +120,9 @@ export const ImageCropper = (props: IImageCropperProps) => {
 
     return (
         <div
-            className={`
-              univer-relative univer-mt-5 univer-w-full univer-border-b-0 univer-border-l-0 univer-border-r-0
-              univer-border-t univer-border-solid univer-border-t-gray-200
-            `}
-            style={{ display: gridDisplay(cropperShow) }}
+            className={clsx('univer-relative univer-mt-5 univer-w-full', borderTopClassName, {
+                'univer-hidden': !cropperShow,
+            })}
         >
             <div className={rowClassName}>
                 <div className={columnTitleClassName}>

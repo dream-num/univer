@@ -15,6 +15,7 @@
  */
 
 import { Fragment } from 'react/jsx-runtime';
+import { borderClassName } from '../../helper/class-utilities';
 import { clsx } from '../../helper/clsx';
 
 export interface IKBDProps {
@@ -30,11 +31,10 @@ export function KBD(props: IKBDProps) {
     return (
         <span
             className={clsx(`
-              univer-inline-block univer-h-6 univer-select-none univer-rounded-md univer-border univer-border-solid
-              univer-border-gray-200 univer-bg-gray-50 univer-px-2 univer-font-mono univer-text-xs/6 univer-font-medium
-              univer-text-gray-700
-              dark:univer-border-gray-500 dark:univer-bg-gray-700 dark:univer-text-white
-            `, className)}
+              univer-inline-block univer-h-6 univer-select-none univer-rounded-md univer-bg-gray-50 univer-px-2
+              univer-font-mono univer-text-xs/6 univer-font-medium univer-text-gray-700
+              dark:univer-bg-gray-700 dark:univer-text-white
+            `, borderClassName, className)}
         >
             {keys.map((text, index) => (
                 <Fragment key={index}>

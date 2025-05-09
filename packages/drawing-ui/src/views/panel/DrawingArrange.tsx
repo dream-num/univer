@@ -16,7 +16,7 @@
 
 import type { IDrawingParam } from '@univerjs/core';
 import { ArrangeTypeEnum, LocaleService } from '@univerjs/core';
-import { Button } from '@univerjs/design';
+import { Button, clsx } from '@univerjs/design';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { BottomSingle, MoveDownSingle, MoveUpSingle, TopmostSingle } from '@univerjs/icons';
 import { useDependency } from '@univerjs/ui';
@@ -33,10 +33,6 @@ export const DrawingArrange = (props: IDrawingArrangeProps) => {
 
     const localeService = useDependency(LocaleService);
     const drawingManagerService = useDependency(IDrawingManagerService);
-
-    const gridDisplay = (isShow: boolean) => {
-        return isShow ? 'block' : 'none';
-    };
 
     const [drawings, setDrawings] = useState<IDrawingParam[]>(focusDrawings);
 
@@ -60,8 +56,9 @@ export const DrawingArrange = (props: IDrawingArrangeProps) => {
 
     return (
         <div
-            className="univer-relative univer-mt-5 univer-w-full"
-            style={{ display: gridDisplay(arrangeShow) }}
+            className={clsx('univer-relative univer-mt-5 univer-w-full', {
+                'univer-hidden': !arrangeShow,
+            })}
         >
             <div className={rowClassName}>
                 <div className={columnTitleClassName}>

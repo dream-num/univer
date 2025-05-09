@@ -18,7 +18,7 @@ import type { IDrawingParam, Nullable } from '@univerjs/core';
 import type { BaseObject } from '@univerjs/engine-render';
 import type { ISheetDrawing } from '@univerjs/sheets-drawing';
 import { ICommandService, LocaleService } from '@univerjs/core';
-import { Radio, RadioGroup } from '@univerjs/design';
+import { borderTopClassName, clsx, Radio, RadioGroup } from '@univerjs/design';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetDrawingAnchorType } from '@univerjs/sheets-drawing';
@@ -134,17 +134,11 @@ export const SheetDrawingAnchor = (props: ISheetDrawingAnchorProps) => {
         });
     }
 
-    const gridDisplay = (isShow: boolean) => {
-        return isShow ? 'block' : 'none';
-    };
-
     return (
         <div
-            className={`
-              univer-relative univer-mt-5 univer-w-full univer-border-b-0 univer-border-l-0 univer-border-r-0
-              univer-border-t univer-border-solid univer-border-gray-200
-            `}
-            style={{ display: gridDisplay(anchorShow) }}
+            className={clsx('univer-relative univer-mt-5 univer-w-full', borderTopClassName, {
+                'univer-hidden': !anchorShow,
+            })}
         >
             <div
                 className={`

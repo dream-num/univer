@@ -16,7 +16,7 @@
 
 import type { ICommandInfo, IExecutionOptions } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, LocaleService, toDisposable } from '@univerjs/core';
-import { clsx, DropdownMenu } from '@univerjs/design';
+import { borderClassName, clsx, DropdownMenu } from '@univerjs/design';
 import { convertTransformToOffsetX, convertTransformToOffsetY, IRenderManagerService } from '@univerjs/engine-render';
 import { Autofill, MoreDownSingle } from '@univerjs/icons';
 import { useDependency } from '@univerjs/ui';
@@ -200,10 +200,9 @@ export const AutoFillPopupMenu: React.FC<{}> = () => {
                 >
                     <div
                         className={clsx(`
-                          univer-flex univer-items-center univer-gap-2 univer-rounded univer-border univer-border-solid
-                          univer-border-gray-200 univer-p-1
+                          univer-flex univer-items-center univer-gap-2 univer-rounded univer-p-1
                           hover:univer-bg-gray-100
-                        `, {
+                        `, borderClassName, {
                             'univer-bg-gray-100': visible,
                             'univer-bg-white': !visible,
                         })}

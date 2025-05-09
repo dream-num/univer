@@ -16,7 +16,7 @@
 
 import type { SlideDataModel } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
-import { clsx, scrollbarClassName } from '@univerjs/design';
+import { borderClassName, clsx, scrollbarClassName } from '@univerjs/design';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { IncreaseSingle } from '@univerjs/icons';
 import { ActivateSlidePageOperation, AppendSlideOperation, SetSlidePageThumbOperation } from '@univerjs/slides-ui';
@@ -107,10 +107,9 @@ export function UniSlideSideBar() {
                         key={item.id}
                         className={clsx(`
                           univer-relative univer-my-4 univer-box-border univer-flex univer-w-[160px]
-                          univer-overflow-hidden univer-rounded-lg univer-border univer-border-solid
-                          univer-border-gray-200
-                          hover:univer-border-primary-500
-                        `, item.id === activatePageId && 'univer-border-primary-500')}
+                          univer-overflow-hidden univer-rounded-lg
+                          hover:univer-border-primary-600
+                        `, borderClassName, item.id === activatePageId && 'univer-border-primary-600')}
                         onClick={() => activatePage(item.id)}
                     >
                         <span

@@ -15,6 +15,7 @@
  */
 
 import type { IMenuSchema } from '@univerjs/ui';
+import { borderClassName, clsx } from '@univerjs/design';
 import { IMenuManagerService, MenuManagerPosition, ToolbarItem, useDependency } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
 import {
@@ -77,10 +78,10 @@ export function FloatToolbar(props: IFloatToolbarProps) {
 
     return (
         <div
-            className={`
-              univer-box-border univer-flex univer-rounded univer-border univer-border-solid univer-border-gray-200
-              univer-bg-white univer-py-1.5 univer-shadow-sm
-            `}
+            className={clsx(`
+              univer-box-border univer-flex univer-rounded univer-bg-white univer-py-1.5 univer-shadow-sm
+              dark:univer-bg-gray-900
+            `, borderClassName)}
         >
             {menus.map((groupItem) => groupItem.item && (
                 <div key={groupItem.key} className="univer-flex univer-flex-nowrap univer-gap-2 univer-px-2">

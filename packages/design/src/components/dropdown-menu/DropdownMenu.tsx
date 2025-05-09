@@ -172,7 +172,7 @@ export function DropdownMenu(props: IDropdownMenuProps) {
             <DropdownMenuTrigger asChild>
                 {children}
             </DropdownMenuTrigger>
-            <DropdownMenuContent {...restProps} onWheel={(e) => e.stopPropagation()}>
+            <DropdownMenuContent className="univer-text-sm" {...restProps} onWheel={(e) => e.stopPropagation()}>
                 {items.map((item, index) => renderMenuItem(item, index))}
             </DropdownMenuContent>
         </DropdownMenuPrimitive>

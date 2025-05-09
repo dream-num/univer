@@ -18,15 +18,15 @@ import type { VariantProps } from 'class-variance-authority';
 import { CloseSingle } from '@univerjs/icons';
 import { cva } from 'class-variance-authority';
 import React, { forwardRef, useEffect, useMemo, useRef, useState } from 'react';
+import { borderClassName } from '../../helper/class-utilities';
 import { clsx } from '../../helper/clsx';
 
 type InputProps = React.InputHTMLAttributes<HTMLInputElement>;
 
 export const inputVariants = cva(
     `
-      univer-box-border univer-w-full univer-rounded-md univer-border univer-border-solid univer-border-gray-200
-      univer-bg-white univer-transition-colors univer-duration-200
-      dark:univer-border-gray-600 dark:univer-bg-gray-700 dark:univer-text-white
+      univer-box-border univer-w-full univer-rounded-md univer-bg-white univer-transition-colors univer-duration-200
+      dark:univer-bg-gray-700 dark:univer-text-white
       focus:univer-border-primary-600 focus:univer-outline-none focus:univer-ring-2 focus:univer-ring-primary-600/20
       placeholder:univer-text-gray-400
     `,
@@ -131,6 +131,7 @@ export const Input = forwardRef<HTMLInputElement, IInputProps>(
                     type={type}
                     className={clsx(
                         inputVariants({ size }),
+                        borderClassName,
                         disabled && `
                           univer-cursor-not-allowed univer-bg-gray-50 univer-text-gray-400
                           dark:univer-text-gray-500

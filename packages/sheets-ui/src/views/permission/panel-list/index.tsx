@@ -19,7 +19,7 @@ import type { IPermissionPoint } from '@univerjs/protocol';
 import type { IRangeProtectionRule, IWorksheetProtectionRule } from '@univerjs/sheets';
 import type { IPermissionPanelRule } from '../../../services/permission/sheet-permission-panel.model';
 import { IAuthzIoService, ICommandService, IPermissionService, IUniverInstanceService, LocaleService, Tools, UniverInstanceType, UserManagerService } from '@univerjs/core';
-import { Avatar, Button, clsx, Tooltip } from '@univerjs/design';
+import { Avatar, borderClassName, Button, clsx, Tooltip } from '@univerjs/design';
 import { serializeRange } from '@univerjs/engine-formula';
 import { DeleteSingle, WriteSingle } from '@univerjs/icons';
 import { UnitAction, UnitObject } from '@univerjs/protocol';
@@ -262,11 +262,10 @@ export const SheetPermissionPanelList = () => {
                             return (
                                 <div
                                     key={item.objectID}
-                                    className={`
-                                      univer-mt-3 univer-rounded-lg univer-border univer-border-solid
-                                      univer-border-gray-200 univer-p-3
+                                    className={clsx(`
+                                      univer-mt-3 univer-rounded-lg univer-p-3
                                       hover:univer-bg-gray-50
-                                    `}
+                                    `, borderClassName)}
                                     onMouseMove={() => {
                                         const { subUnitId, unitType } = rule;
                                         const activeSheet = workbook.getActiveSheet();

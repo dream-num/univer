@@ -17,7 +17,7 @@
 import type { ITableFilterItem } from '@univerjs/sheets-table';
 import type { IConditionCompareTypeEnum, IConditionExpect, IConditionInfo, ITableConditionTypeEnumWithoutLogic } from './type';
 import { dayjs, Injector, LocaleService } from '@univerjs/core';
-import { CascaderList, DatePicker, DateRangePicker, Dropdown, Input, InputNumber, Select } from '@univerjs/design';
+import { borderClassName, CascaderList, clsx, DatePicker, DateRangePicker, Dropdown, Input, InputNumber, Select } from '@univerjs/design';
 import { MoreDownSingle } from '@univerjs/icons';
 import { TableConditionTypeEnum, TableDateCompareTypeEnum, TableStringCompareTypeEnum } from '@univerjs/sheets-table';
 import { useDependency } from '@univerjs/ui';
@@ -106,14 +106,14 @@ export const SheetTableConditionPanel = (props: IConditionFilterProps) => {
                 )}
             >
                 <div
-                    className={`
+                    className={clsx(`
                       univer-box-border univer-flex univer-h-8 univer-w-full univer-items-center univer-justify-between
-                      univer-rounded-md univer-border univer-border-solid univer-border-gray-200 univer-bg-white
-                      univer-px-2 univer-text-sm univer-transition-colors univer-duration-200
-                      dark:univer-border-gray-600 dark:univer-bg-gray-700 dark:univer-text-white
+                      univer-rounded-md univer-bg-white univer-px-2 univer-text-sm univer-transition-colors
+                      univer-duration-200
+                      dark:univer-bg-gray-700 dark:univer-text-white
                       focus:univer-border-primary-600 focus:univer-outline-none focus:univer-ring-2
                       hover:univer-border-primary-600
-                    `}
+                    `, borderClassName)}
                 >
                     <span>
                         {selectType}

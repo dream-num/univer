@@ -16,7 +16,7 @@
 
 import type { SlideDataModel } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
-import { clsx, scrollbarClassName } from '@univerjs/design';
+import { borderClassName, clsx, scrollbarClassName } from '@univerjs/design';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { useDependency } from '@univerjs/ui';
 import { createRef, useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -98,11 +98,11 @@ export function SlideSideBar() {
             <div className="univer-px-4">
                 <header className="univer-flex univer-justify-center univer-pt-4">
                     <a
-                        className={`
+                        className={clsx(`
                           univer-box-border univer-block univer-h-8 univer-w-full univer-cursor-pointer
-                          univer-rounded-md univer-border univer-border-solid univer-border-gray-200 univer-bg-white
-                          univer-text-center univer-text-sm univer-leading-8 univer-transition-colors
-                        `}
+                          univer-rounded-md univer-bg-white univer-text-center univer-text-sm univer-leading-8
+                          univer-transition-colors
+                        `, borderClassName)}
                         onClick={handleAppendSlide}
                     >
                         {localeService.t('slide.append')}
@@ -120,11 +120,10 @@ export function SlideSideBar() {
                         <span>{index + 1}</span>
                         <div
                             ref={divRefs[index]}
-                            className={`
-                              univer-relative univer-box-border univer-h-32 univer-w-52 univer-border
-                              univer-border-solid univer-border-gray-200 univer-bg-white
+                            className={clsx(`
+                              univer-relative univer-box-border univer-h-32 univer-w-52 univer-bg-white
                               hover:univer-border-primary-600
-                            `}
+                            `, borderClassName)}
                         />
                     </div>
                 ))}

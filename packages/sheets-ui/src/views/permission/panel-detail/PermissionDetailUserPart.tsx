@@ -17,7 +17,7 @@
 import type { Workbook } from '@univerjs/core';
 import type { ICollaborator } from '@univerjs/protocol';
 import { IAuthzIoService, IUniverInstanceService, LocaleService, UniverInstanceType, UserManagerService } from '@univerjs/core';
-import { Avatar, FormLayout, Radio, RadioGroup, Select } from '@univerjs/design';
+import { Avatar, borderClassName, clsx, FormLayout, Radio, RadioGroup, Select } from '@univerjs/design';
 import { UnitRole } from '@univerjs/protocol';
 import { EditStateEnum, ViewStateEnum } from '@univerjs/sheets';
 import { IDialogService, useDependency, useObservable } from '@univerjs/ui';
@@ -112,10 +112,9 @@ export const PermissionDetailUserPart = (props: IPermissionDetailUserPartProps) 
             </FormLayout>
             {editState === EditStateEnum.DesignedUserCanEdit && (
                 <div
-                    className={`
-                      univer-mb-2 univer-flex univer-h-[270px] univer-flex-col univer-rounded-lg univer-border
-                      univer-border-solid univer-border-gray-200 univer-p-3
-                    `}
+                    className={clsx(`
+                      univer-mb-2 univer-flex univer-h-[270px] univer-flex-col univer-rounded-lg univer-p-3
+                    `, borderClassName)}
                 >
                     <div className="univer-flex univer-items-center univer-justify-between">
                         <span>{localeService.t('permission.panel.designedPerson')}</span>

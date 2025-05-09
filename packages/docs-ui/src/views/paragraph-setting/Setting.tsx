@@ -15,7 +15,7 @@
  */
 
 import { HorizontalAlign, LocaleService, SpacingRule } from '@univerjs/core';
-import { clsx, InputNumber, Select, Tooltip } from '@univerjs/design';
+import { borderClassName, clsx, InputNumber, Select, Tooltip } from '@univerjs/design';
 import { AlignTextBothSingle, HorizontallySingle, LeftJustifyingSingle, RightJustifyingSingle } from '@univerjs/icons';
 import { useDependency } from '@univerjs/ui';
 import { useMemo, useRef } from 'react';
@@ -96,10 +96,10 @@ export function ParagraphSetting() {
         <div>
             <div className="univer-t-4 univer-text-sm univer-font-medium">{localeService.t('doc.paragraphSetting.alignment')}</div>
             <div
-                className={`
+                className={clsx(`
                   univer-mt-4 univer-box-border univer-flex univer-w-full univer-items-center univer-justify-between
-                  univer-gap-1 univer-rounded-md univer-border univer-border-solid univer-border-gray-200 univer-p-1
-                `}
+                  univer-gap-1 univer-rounded-md univer-p-1
+                `, borderClassName)}
             >
                 {alignmentOptions.map((item) => {
                     return (

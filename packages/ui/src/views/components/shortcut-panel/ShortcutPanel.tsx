@@ -16,7 +16,7 @@
 
 import { dedupeBy, LocaleService } from '@univerjs/core';
 
-import { KBD } from '@univerjs/design';
+import { clsx, divideYClassName, KBD } from '@univerjs/design';
 import { useCallback, useEffect, useState } from 'react';
 import { IShortcutService } from '../../../services/shortcut/shortcut.service';
 import { useDependency, useObservable } from '../../../utils/di';
@@ -102,12 +102,7 @@ export function ShortcutPanel() {
                     </div>
 
                     <ul
-                        className={`
-                          univer-list-none univer-p-0
-                          [&>li]:univer-border-0 [&>li]:univer-border-b [&>li]:univer-border-solid
-                          [&>li]:univer-border-b-gray-200
-                          dark:[&>li]:univer-border-b-gray-700
-                        `}
+                        className={clsx('univer-list-none univer-p-0', divideYClassName)}
                     >
                         {group.items.map((item) => (
                             <li

@@ -16,8 +16,8 @@
 
 import { CheckMarkSingle } from '@univerjs/icons';
 import { useContext, useMemo } from 'react';
+import { borderClassName, scrollbarClassName } from '../../helper/class-utilities';
 import { clsx } from '../../helper/clsx';
-import { scrollbarClassName } from '../../helper/scrollbar-cls';
 import { ConfigContext } from '../config-provider/ConfigProvider';
 
 export interface ICascaderOption {
@@ -104,10 +104,10 @@ export function CascaderList(props: ICascaderListProps) {
         <section
             className={clsx(`
               univer-grid univer-h-full univer-max-h-80 univer-grid-flow-col univer-overflow-auto-y univer-rounded
-              univer-border univer-border-solid univer-border-gray-200 univer-py-2 univer-text-gray-900
+              univer-py-2 univer-text-gray-900
               [&>ul:not(:last-child)]:univer-border-0 [&>ul:not(:last-child)]:univer-border-r
               [&>ul:not(:last-child)]:univer-border-solid [&>ul:not(:last-child)]:univer-border-r-gray-200
-            `, scrollbarClassName, wrapperClassName)}
+            `, borderClassName, scrollbarClassName, wrapperClassName)}
         >
             {activeOptions.map((options, index) =>
                 options.length

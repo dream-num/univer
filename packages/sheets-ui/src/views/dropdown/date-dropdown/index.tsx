@@ -17,7 +17,7 @@
 import type { IPopup } from '@univerjs/ui';
 import type { IBaseDropdownProps } from '../type';
 import { dayjs, LocaleService, numfmt } from '@univerjs/core';
-import { Button, DatePanel } from '@univerjs/design';
+import { borderTopClassName, Button, clsx, DatePanel } from '@univerjs/design';
 import { useDependency } from '@univerjs/ui';
 import { useMemo, useState } from 'react';
 
@@ -66,11 +66,7 @@ export function DateDropdown(props: { popup: IPopup<IDateDropdownProps & IBaseDr
                 disabledDate={(current) => !numfmt.parseDate(current.format('YYYY-MM-DD'))}
             />
             <div
-                className={`
-                  univer-flex univer-justify-end univer-border-0 univer-border-t univer-border-solid
-                  univer-border-t-gray-200 univer-pt-2
-                  dark:univer-border-t-gray-700
-                `}
+                className={clsx('univer-flex univer-justify-end univer-pt-2', borderTopClassName)}
             >
                 <Button size="small" variant="primary" onClick={handleSave} disabled={!date || !date.isValid()}>
                     {localeService.t('dataValidation.alert.ok')}

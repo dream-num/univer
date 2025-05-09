@@ -32,16 +32,13 @@ import { UniverSheetsHyperLinkPlugin } from '@univerjs/sheets-hyper-link';
 import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
 import { UniverSheetsNumfmtUIPlugin } from '@univerjs/sheets-numfmt-ui';
 import { UniverSheetsSortPlugin } from '@univerjs/sheets-sort';
-import { UniverSheetsBindingSourcePlugin } from '@univerjs/sheets-source-binding';
 import { UniverSheetsThreadCommentPlugin } from '@univerjs/sheets-thread-comment';
 import { UniverSheetsThreadCommentUIPlugin } from '@univerjs/sheets-thread-comment-ui';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 import { UniverSheetsZenEditorPlugin } from '@univerjs/sheets-zen-editor';
 import { UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
 import { UniverUIPlugin } from '@univerjs/ui';
-
 import { enUS, faIR, frFR, ruRU, viVN, zhCN, zhTW } from '../locales';
-
 import '@univerjs/sheets/facade';
 import '@univerjs/ui/facade';
 import '@univerjs/docs-ui/facade';
@@ -57,7 +54,6 @@ import '@univerjs/sheets-conditional-formatting/facade';
 import '@univerjs/sheets-find-replace/facade';
 import '@univerjs/sheets-drawing-ui/facade';
 import '@univerjs/sheets-zen-editor/facade';
-import '@univerjs/sheets-source-binding/facade';
 import '@univerjs/sheets-crosshair-highlight/facade';
 import '@univerjs/sheets-sort/facade';
 
@@ -113,7 +109,6 @@ univer.registerPlugin(UniverSheetsHyperLinkPlugin);
 univer.registerPlugin(UniverThreadCommentUIPlugin);
 univer.registerPlugin(UniverSheetsThreadCommentPlugin);
 univer.registerPlugin(UniverSheetsThreadCommentUIPlugin);
-univer.registerPlugin(UniverSheetsBindingSourcePlugin);
 
 const injector = univer.__getInjector();
 const userManagerService = injector.get(UserManagerService);

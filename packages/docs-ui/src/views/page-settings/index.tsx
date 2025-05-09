@@ -134,7 +134,7 @@ export function PageSettings(props: IConfirmChildrenProps) {
             </div> */}
 
             <div className="univer-flex univer-flex-col univer-gap-2">
-                <label className="univer-text-sm univer-font-medium univer-text-[#0E111E]">
+                <label className="univer-text-sm univer-font-medium univer-text-gray-900">
                     {localeService.t('page-settings.custom-paper-size')}
                 </label>
                 <div className="univer-flex univer-flex-col univer-gap-2.5">

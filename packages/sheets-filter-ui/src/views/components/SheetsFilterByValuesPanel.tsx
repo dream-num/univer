@@ -87,7 +87,7 @@ export function FilterByValue(props: { model: ByValuesModel }) {
                         data-univer-comp-sheets-filter-panel-values-item-inner
                         className={`
                           univer-box-border univer-flex univer-h-7 univer-items-center univer-rounded-md univer-pb-0
-                          univer-pl-5 univer-pr-0.5 univer-pt-0 univer-text-[13px]
+                          univer-pl-5 univer-pr-0.5 univer-pt-0 univer-text-sm
                         `}
                     >
                         <Checkbox
@@ -139,7 +139,7 @@ export function FilterByValue(props: { model: ByValuesModel }) {
                             <div
                                 className={`
                                   univer-ml-1 univer-flex univer-h-5 univer-flex-1 univer-cursor-pointer
-                                  univer-items-center univer-justify-between univer-text-[13px] univer-text-primary-500
+                                  univer-items-center univer-justify-between univer-text-smver-text-primary-500
                                 `}
                             >
                                 <span

@@ -67,7 +67,7 @@ export const FormLayout = (props: IFormLayoutProps) => {
                     ? null
                     : (
                         <>
-                            {desc && <div className="univer-mt-1 univer-text-[13px] univer-text-gray-600">{desc}</div>}
+                            {desc && <div className="univer-mt-1 univer-text-sm univer-text-gray-600">{desc}</div>}
                             {children
                                 ? (
                                     <div

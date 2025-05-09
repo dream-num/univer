@@ -167,9 +167,7 @@ export const PermissionDetailUserPart = (props: IPermissionDetailUserPartProps) 
                                 >
                                     <img width={240} height={120} src={UserEmptyBase64} alt="" />
                                     <p
-                                        className={`
-                                          univer-w-60 univer-break-words univer-text-[13px] univer-text-gray-400
-                                        `}
+                                        className="univer-w-60 univer-break-words univer-text-sm univer-text-gray-400"
                                     >
                                         {localeService.t('permission.dialog.userEmpty')}
                                     </p>

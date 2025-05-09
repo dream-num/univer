@@ -69,7 +69,7 @@ function RecordPanelImpl() {
             <div className="univer-mr-2 univer-size-5 univer-shrink-0 univer-grow-0 univer-text-xl">
                 <RecordSingle />
             </div>
-            <div className="univer-flex-1 univer-text-[13px]">{titleText}</div>
+            <div className="univer-flex-1 univer-text-sm">{titleText}</div>
             <div className="univer-flex univer-w-64 univer-shrink-0 univer-grow-0 univer-justify-between">
                 <Button
                     className="univer-w-20"

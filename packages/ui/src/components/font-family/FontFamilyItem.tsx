@@ -24,7 +24,7 @@ export const FontFamilyItem = (props: IFontFamilyItemProps) => {
     const localeService = useDependency(LocaleService);
 
     return (
-        <span className="univer-text-[13px]" style={{ fontFamily: value }}>
+        <span className="univer-text-sm" style={{ fontFamily: value }}>
             {localeService.t(`fontFamily.${(`${value ?? ''}`).replace(/\s/g, '')}`)}
         </span>
     );

@@ -39,7 +39,7 @@ export const FontFamily = (props: IFontFamilyProps) => {
 
     return (
         <div
-            className="univer-w-32 univer-overflow-hidden univer-truncate univer-text-[13px]"
+            className="univer-w-32 univer-overflow-hidden univer-truncate univer-text-sm"
             style={{ fontFamily: value as string }}
         >
             {viewValue}

@@ -175,11 +175,11 @@ export function SelectFunction(props: ISelectFunctionProps) {
                         className={active === index
                             ? `
                               univer-relative univer-box-border univer-cursor-pointer univer-rounded univer-bg-gray-200
-                              univer-px-7 univer-py-1 univer-text-[13px] univer-text-gray-900 univer-transition-colors
+                              univer-px-7 univer-py-1 univer-text-sm univer-text-gray-900 univer-transition-colors
                             `
                             : `
                               univer-relative univer-box-border univer-cursor-pointer univer-rounded univer-px-7
-                              univer-py-1 univer-text-[13px] univer-text-gray-900 univer-transition-colors
+                              univer-py-1 univer-text-smver-text-gray-900 univer-transition-colors
                             `}
                         onMouseEnter={() => handleLiMouseEnter(index)}
                         onMouseLeave={handleLiMouseLeave}

@@ -113,7 +113,7 @@ export function ShortcutPanel() {
                             <li
                                 key={`${item.title}-${item.shortcut}`}
                                 className={`
-                                  univer-flex univer-h-10 univer-items-center univer-justify-between univer-text-[13px]
+                                  univer-flex univer-h-10 univer-items-center univer-justify-between univer-text-sm
                                   last:univer-border-b-0
                                 `}
                             >

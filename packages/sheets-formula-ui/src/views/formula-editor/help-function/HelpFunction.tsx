@@ -36,7 +36,7 @@ const Params = ({ className, title, value }: IParamsProps) => (
     <div className="univer-my-2">
         <div
             className={`
-              univer-mb-2 univer-text-[13px] univer-font-medium univer-text-gray-900
+              univer-mb-2 univer-text-sm univer-font-medium univer-text-gray-900
               ${className}
             `}
         >

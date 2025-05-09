@@ -86,7 +86,7 @@ export const Options = () => {
                         key={index}
                         className={`
                           univer-flex univer-h-7 univer-items-center univer-justify-between univer-gap-6 univer-rounded
-                          univer-px-2 univer-text-[13px]
+                          univer-px-2 univer-text-sm
                           hover:univer-bg-gray-100
                         `}
                         onClick={() => {

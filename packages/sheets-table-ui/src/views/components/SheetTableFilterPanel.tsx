@@ -156,7 +156,7 @@ export function SheetTableFilterPanel() {
                         className={`
                           univer-flex univer-w-[140px] univer-flex-1 univer-cursor-default univer-items-center
                           univer-justify-center univer-gap-1 univer-rounded-l-md univer-border univer-border-solid
-                          univer-border-gray-200 univer-py-1.5 univer-text-[13px] univer-font-normal
+                          univer-border-gray-200 univer-py-1.5 univer-text-sm univer-font-normal
                           hover:univer-cursor-pointer hover:univer-bg-gray-100
                           ${isAsc
                     ? 'univer-bg-gray-100'
@@ -171,7 +171,7 @@ export function SheetTableFilterPanel() {
                         className={`
                           univer-flex univer-w-[140px] univer-flex-1 univer-cursor-default univer-items-center
                           univer-justify-center univer-gap-1 univer-rounded-r-md univer-border univer-border-solid
-                          univer-border-gray-200 univer-py-1.5 univer-text-[13px] univer-font-normal
+                          univer-border-gray-200 univer-py-1.5 univer-text-sm univer-font-normal
                           hover:univer-cursor-pointer hover:univer-bg-gray-100
                           ${isDesc
                     ? 'univer-bg-gray-100'

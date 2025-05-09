@@ -382,7 +382,7 @@ export const SheetPermissionPanelList = () => {
                         className="univer-flex univer-flex-1 univer-flex-col univer-items-center univer-justify-center"
                     >
                         <img width={240} height={120} src={panelListEmptyBase64} alt="" />
-                        <p className="univer-w-60 univer-break-words univer-text-[13px] univer-text-gray-400">{localeService.t('permission.dialog.listEmpty')}</p>
+                        <p className="univer-w-60 univer-break-words univer-text-sm univer-text-gray-400">{localeService.t('permission.dialog.listEmpty')}</p>
                     </div>
                 )}
 

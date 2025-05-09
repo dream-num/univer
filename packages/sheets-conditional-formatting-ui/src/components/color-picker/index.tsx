@@ -56,7 +56,7 @@ export const ColorPicker = (props: IColorPickerProps) => {
                     <Icon className="univer-fill-primary-600" extend={{ colorChannel1: colorKit.isValid ? color : '' }} />
                     {isNeedDropdownIcon && (
                         <MoreDownSingle
-                            className="univer-ml-1.5 univer-text-[10px] univer-text-gray-400"
+                            className="univer-ml-1.5 univer-text-gray-400"
                         />
                     )}
                 </span>

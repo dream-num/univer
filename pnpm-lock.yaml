@@ -16,7 +16,7 @@ importers:
     devDependencies:
       '@antfu/eslint-config':
         specifier: 4.13.0
-        version: 4.13.0(@eslint-react/eslint-plugin@1.49.0(eslint@9.26.0(jiti@2.4.2))(ts-api-utils@2.1.0(typescript@5.8.3))(typescript@5.8.3))(@typescript-eslint/utils@8.32.0(eslint@9.26.0(jiti@2.4.2))(typescript@5.8.3))(@vue/compiler-sfc@3.5.13)(eslint-plugin-format@1.0.1(eslint@9.26.0(jiti@2.4.2)))(eslint-plugin-react-hooks@5.2.0(eslint@9.26.0(jiti@2.4.2)))(eslint-plugin-react-refresh@0.4.20(eslint@9.26.0(jiti@2.4.2)))(eslint@9.26.0(jiti@2.4.2))(typescript@5.8.3)(vitest@3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1))
+        version: 4.13.0(@eslint-react/eslint-plugin@1.49.0(eslint@9.26.0(jiti@2.4.2))(ts-api-utils@2.1.0(typescript@5.8.3))(typescript@5.8.3))(@typescript-eslint/utils@8.32.0(eslint@9.26.0(jiti@2.4.2))(typescript@5.8.3))(@vue/compiler-sfc@3.5.13)(eslint-plugin-format@1.0.1(eslint@9.26.0(jiti@2.4.2)))(eslint-plugin-react-hooks@5.2.0(eslint@9.26.0(jiti@2.4.2)))(eslint-plugin-react-refresh@0.4.20(eslint@9.26.0(jiti@2.4.2)))(eslint@9.26.0(jiti@2.4.2))(typescript@5.8.3)(vitest@3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1))
       '@commitlint/cli':
         specifier: ^19.8.1
         version: 19.8.1(@types/node@22.15.17)(typescript@5.8.3)
@@ -121,7 +121,7 @@ importers:
         version: 5.8.3
       vitest:
         specifier: ^3.1.3
-        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
 
   common/shared:
     dependencies:
@@ -133,10 +133,10 @@ importers:
         version: 4.4.1(vite@6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1))
       '@vitejs/plugin-vue':
         specifier: ^5.2.3
-        version: 5.2.3(vite@6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1))(vue@3.5.13(typescript@5.8.3))
+        version: 5.2.4(vite@6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1))(vue@3.5.13(typescript@5.8.3))
       '@vitest/coverage-istanbul':
         specifier: ^3.1.3
-        version: 3.1.3(vitest@3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1))
+        version: 3.1.3(vitest@3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1))
       autoprefixer:
         specifier: ^10.4.21
         version: 10.4.21(postcss@8.4.49)
@@ -178,7 +178,7 @@ importers:
         version: 6.2.2
       vitest:
         specifier: ^3.1.3
-        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
     devDependencies:
       '@types/fs-extra':
         specifier: ^11.0.4
@@ -191,7 +191,7 @@ importers:
         version: 0.3.24
       '@univerjs/protocol':
         specifier: 0.1.45
-        version: 0.1.45(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        version: 0.1.45(@grpc/grpc-js@1.10.9)(rxjs@7.8.2)
 
   common/storybook:
     dependencies:
@@ -644,8 +644,8 @@ importers:
         specifier: ^19.1.0
         version: 19.1.0
       rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
+        specifier: ^7.8.2
+        version: 7.8.2
       tailwindcss:
         specifier: ^3.4.17
         version: 3.4.17
@@ -657,7 +657,7 @@ importers:
         version: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
       vitest:
         specifier: ^3.1.3
-        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
     optionalDependencies:
       vue:
         specifier: '>=3.0.0'
@@ -694,8 +694,8 @@ importers:
         specifier: ^8.5.3
         version: 8.5.3
       rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
+        specifier: ^7.8.2
+        version: 7.8.2
       tailwindcss:
         specifier: ^3.4.17
         version: 3.4.17
@@ -707,7 +707,7 @@ importers:
         version: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
       vitest:
         specifier: ^3.1.3
-        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
 
   packages-experimental/uni-formula:
     dependencies:
@@ -726,7 +726,7 @@ importers:
         version: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
       vitest:
         specifier: ^3.1.3
-        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
 
   packages-experimental/uni-formula-ui:
     dependencies:
@@ -774,8 +774,8 @@ importers:
         specifier: ^19.1.0
         version: 19.1.0
       rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
+        specifier: ^7.8.2
+        version: 7.8.2
       tailwindcss:
         specifier: ^3.4.17
         version: 3.4.17
@@ -787,7 +787,7 @@ importers:
         version: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
       vitest:
         specifier: ^3.1.3
-        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
 
   packages-experimental/uni-sheets-ui:
     dependencies:
@@ -832,8 +832,8 @@ importers:
         specifier: ^19.1.0
         version: 19.1.0
       rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
+        specifier: ^7.8.2
+        version: 7.8.2
       tailwindcss:
         specifier: ^3.4.17
         version: 3.4.17
@@ -845,7 +845,7 @@ importers:
         version: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
       vitest:
         specifier: ^3.1.3
-        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
 
   packages-experimental/uni-slides-ui:
     dependencies:
@@ -881,8 +881,8 @@ importers:
         specifier: ^19.1.0
         version: 19.1.0
       rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
+        specifier: ^7.8.2
+        version: 7.8.2
       tailwindcss:
         specifier: ^3.4.17
         version: 3.4.17
@@ -894,7 +894,7 @@ importers:
         version: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
       vitest:
         specifier: ^3.1.3
-        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
 
   packages-experimental/uniui:
     dependencies:
@@ -942,8 +942,8 @@ importers:
         specifier: ^19.1.0
         version: 19.1.0(react@19.1.0)
       rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
+        specifier: ^7.8.2
+        version: 7.8.2
       tailwindcss:
         specifier: ^3.4.17
         version: 3.4.17
@@ -955,7 +955,7 @@ importers:
         version: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
       vitest:
         specifier: ^3.1.3
-        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
 
   packages/action-recorder:
     dependencies:
@@ -988,8 +988,8 @@ importers:
         specifier: ^19.1.0
         version: 19.1.0
       rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
+        specifier: ^7.8.2
+        version: 7.8.2
       tailwindcss:
         specifier: ^3.4.17
         version: 3.4.17
@@ -1001,13 +1001,13 @@ importers:
         version: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
       vitest:
         specifier: ^3.1.3
-        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
 
   packages/core:
     dependencies:
       '@univerjs/protocol':
         specifier: 0.1.45
-        version: 0.1.45(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        version: 0.1.45(@grpc/grpc-js@1.10.9)(rxjs@7.8.2)
       '@univerjs/themes':
         specifier: workspace:*
         version: link:../themes
@@ -1061,8 +1061,8 @@ importers:
         specifier: workspace:*
         version: link:../../common/shared
       rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
+        specifier: ^7.8.2
+        version: 7.8.2
       typescript:
         specifier: ^5.8.3
         version: 5.8.3
@@ -1071,7 +1071,7 @@ importers:
         version: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
       vitest:
         specifier: ^3.1.3
-        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
 
   packages/data-validation:
     dependencies:
@@ -1084,13 +1084,13 @@ importers:
         version: link:../../common/shared
       '@univerjs/protocol':
         specifier: 0.1.45
-        version: 0.1.45(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        version: 0.1.45(@grpc/grpc-js@1.10.9)(rxjs@7.8.2)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
       rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
+        specifier: ^7.8.2
+        version: 7.8.2
       typescript:
         specifier: ^5.8.3
         version: 5.8.3
@@ -1099,7 +1099,7 @@ importers:
         version: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
       vitest:
         specifier: ^3.1.3
-        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
 
   packages/design:
     dependencies:
@@ -1144,13 +1144,13 @@ importers:
         version: 4.2.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       rc-menu:
         specifier: ^9.16.0
-        version: 9.16.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+        version: 9.16.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       rc-picker:
         specifier: ^4.9.0
-        version: 4.9.0(dayjs@1.11.13)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+        version: 4.11.3(dayjs@1.11.13)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       rc-virtual-list:
         specifier: ^3.16.1
-        version: 3.16.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+        version: 3.18.6(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       react-grid-layout:
         specifier: ^1.5.1
         version: 1.5.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -1202,7 +1202,7 @@ importers:
         version: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
       vitest:
         specifier: ^3.1.3
-        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
 
   packages/docs:
     dependencies:
@@ -1217,8 +1217,8 @@ importers:
         specifier: workspace:*
         version: link:../../common/shared
       rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
+        specifier: ^7.8.2
+        version: 7.8.2
       typescript:
         specifier: ^5.8.3
         version: 5.8.3
@@ -1227,7 +1227,7 @@ importers:
         version: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
       vitest:
         specifier: ^3.1.3
-        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
 
   packages/docs-drawing:
     dependencies:
@@ -1249,7 +1249,7 @@ importers:
         version: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
       vitest:
         specifier: ^3.1.3
-        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
 
   packages/docs-drawing-ui:
     dependencies:
@@ -1294,8 +1294,8 @@ importers:
         specifier: ^19.1.0
         version: 19.1.0
       rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
+        specifier: ^7.8.2
+        version: 7.8.2
       tailwindcss:
         specifier: ^3.4.17
         version: 3.4.17
@@ -1307,7 +1307,7 @@ importers:
         version: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
       vitest:
         specifier: ^3.1.3
-        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
 
   packages/docs-hyper-link:
     dependencies:
@@ -1326,7 +1326,7 @@ importers:
         version: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
       vitest:
         specifier: ^3.1.3
-        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
 
   packages/docs-hyper-link-ui:
     dependencies:
@@ -1365,8 +1365,8 @@ importers:
         specifier: ^19.1.0
         version: 19.1.0
       rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
+        specifier: ^7.8.2
+        version: 7.8.2
       tailwindcss:
         specifier: ^3.4.17
         version: 3.4.17
@@ -1378,7 +1378,7 @@ importers:
         version: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
       vitest:
         specifier: ^3.1.3
-        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
 
   packages/docs-mention-ui:
     dependencies:
@@ -1408,8 +1408,8 @@ importers:
         specifier: ^19.1.0
         version: 19.1.0
       rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
+        specifier: ^7.8.2
+        version: 7.8.2
       tailwindcss:
         specifier: ^3.4.17
         version: 3.4.17
@@ -1421,7 +1421,7 @@ importers:
         version: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
       vitest:
         specifier: ^3.1.3
-        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
 
   packages/docs-quick-insert-ui:
     dependencies:
@@ -1469,8 +1469,8 @@ importers:
         specifier: ^19.1.0
         version: 19.1.0
       rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
+        specifier: ^7.8.2
+        version: 7.8.2
       tailwindcss:
         specifier: ^3.4.17
         version: 3.4.17
@@ -1482,7 +1482,7 @@ importers:
         version: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
       vitest:
         specifier: ^3.1.3
-        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
 
   packages/docs-thread-comment-ui:
     dependencies:
@@ -1521,8 +1521,8 @@ importers:
         specifier: ^19.1.0
         version: 19.1.0
       rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
+        specifier: ^7.8.2
+        version: 7.8.2
       tailwindcss:
         specifier: ^3.4.17
         version: 3.4.17
@@ -1534,7 +1534,7 @@ importers:
         version: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
       vitest:
         specifier: ^3.1.3
-        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
 
   packages/docs-ui:
     dependencies:
@@ -1571,7 +1571,7 @@ importers:
         version: 2.5.2
       jsdom:
         specifier: ^24.1.1
-        version: 24.1.1
+        version: 24.1.3
       postcss:
         specifier: ^8.5.3
         version: 8.5.3
@@ -1579,8 +1579,8 @@ importers:
         specifier: ^19.1.0
         version: 19.1.0
       rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
+        specifier: ^7.8.2
+        version: 7.8.2
       tailwindcss:
         specifier: ^3.4.17
         version: 3.4.17
@@ -1592,7 +1592,7 @@ importers:
         version: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
       vitest:
         specifier: ^3.1.3
-        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
 
   packages/drawing:
     dependencies:
@@ -1607,8 +1607,8 @@ importers:
         specifier: workspace:*
         version: link:../../common/shared
       rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
+        specifier: ^7.8.2
+        version: 7.8.2
       typescript:
         specifier: ^5.8.3
         version: 5.8.3
@@ -1617,7 +1617,7 @@ importers:
         version: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
       vitest:
         specifier: ^3.1.3
-        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
 
   packages/drawing-ui:
     dependencies:
@@ -1650,8 +1650,8 @@ importers:
         specifier: ^19.1.0
         version: 19.1.0
       rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
+        specifier: ^7.8.2
+        version: 7.8.2
       tailwindcss:
         specifier: ^3.4.17
         version: 3.4.17
@@ -1663,7 +1663,7 @@ importers:
         version: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
       vitest:
         specifier: ^3.1.3
-        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
 
   packages/engine-formula:
     dependencies:
@@ -1690,8 +1690,8 @@ importers:
         specifier: workspace:*
         version: link:../../common/shared
       rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
+        specifier: ^7.8.2
+        version: 7.8.2
       typescript:
         specifier: ^5.8.3
         version: 5.8.3
@@ -1700,7 +1700,7 @@ importers:
         version: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
       vitest:
         specifier: ^3.1.3
-        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
 
   packages/engine-numfmt:
     devDependencies:
@@ -1715,13 +1715,13 @@ importers:
         version: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
       vitest:
         specifier: ^3.1.3
-        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
 
   packages/engine-render:
     dependencies:
       '@floating-ui/dom':
         specifier: ^1.6.13
-        version: 1.6.13
+        version: 1.7.0
       '@floating-ui/utils':
         specifier: ^0.2.9
         version: 0.2.9
@@ -1745,8 +1745,8 @@ importers:
         specifier: workspace:*
         version: link:../../common/shared
       rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
+        specifier: ^7.8.2
+        version: 7.8.2
       typescript:
         specifier: ^5.8.3
         version: 5.8.3
@@ -1755,7 +1755,7 @@ importers:
         version: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
       vitest:
         specifier: ^3.1.3
-        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
 
   packages/find-replace:
     dependencies:
@@ -1785,8 +1785,8 @@ importers:
         specifier: ^19.1.0
         version: 19.1.0
       rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
+        specifier: ^7.8.2
+        version: 7.8.2
       tailwindcss:
         specifier: ^3.4.17
         version: 3.4.17
@@ -1798,7 +1798,7 @@ importers:
         version: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
       vitest:
         specifier: ^3.1.3
-        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
 
   packages/network:
     dependencies:
@@ -1810,8 +1810,8 @@ importers:
         specifier: workspace:*
         version: link:../../common/shared
       rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
+        specifier: ^7.8.2
+        version: 7.8.2
       typescript:
         specifier: ^5.8.3
         version: 5.8.3
@@ -1820,7 +1820,7 @@ importers:
         version: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
       vitest:
         specifier: ^3.1.3
-        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
 
   packages/rpc:
     dependencies:
@@ -1832,8 +1832,8 @@ importers:
         specifier: workspace:*
         version: link:../../common/shared
       rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
+        specifier: ^7.8.2
+        version: 7.8.2
       typescript:
         specifier: ^5.8.3
         version: 5.8.3
@@ -1842,7 +1842,7 @@ importers:
         version: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
       vitest:
         specifier: ^3.1.3
-        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
 
   packages/rpc-node:
     dependencies:
@@ -1857,8 +1857,8 @@ importers:
         specifier: workspace:*
         version: link:../../common/shared
       rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
+        specifier: ^7.8.2
+        version: 7.8.2
       typescript:
         specifier: ^5.8.3
         version: 5.8.3
@@ -1867,7 +1867,7 @@ importers:
         version: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
       vitest:
         specifier: ^3.1.3
-        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
 
   packages/sheets:
     dependencies:
@@ -1882,7 +1882,7 @@ importers:
         version: link:../engine-numfmt
       '@univerjs/protocol':
         specifier: 0.1.45
-        version: 0.1.45(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        version: 0.1.45(@grpc/grpc-js@1.10.9)(rxjs@7.8.2)
       '@univerjs/rpc':
         specifier: workspace:*
         version: link:../rpc
@@ -1897,8 +1897,8 @@ importers:
         specifier: workspace:*
         version: link:../network
       rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
+        specifier: ^7.8.2
+        version: 7.8.2
       typescript:
         specifier: ^5.8.3
         version: 5.8.3
@@ -1907,7 +1907,7 @@ importers:
         version: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
       vitest:
         specifier: ^3.1.3
-        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
 
   packages/sheets-conditional-formatting:
     dependencies:
@@ -1931,8 +1931,8 @@ importers:
         specifier: ^0.3.24
         version: 0.3.24
       rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
+        specifier: ^7.8.2
+        version: 7.8.2
       typescript:
         specifier: ^5.8.3
         version: 5.8.3
@@ -1941,7 +1941,7 @@ importers:
         version: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
       vitest:
         specifier: ^3.1.3
-        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
 
   packages/sheets-conditional-formatting-ui:
     dependencies:
@@ -1986,8 +1986,8 @@ importers:
         specifier: ^19.1.0
         version: 19.1.0
       rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
+        specifier: ^7.8.2
+        version: 7.8.2
       tailwindcss:
         specifier: ^3.4.17
         version: 3.4.17
@@ -1999,7 +1999,7 @@ importers:
         version: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
       vitest:
         specifier: ^3.1.3
-        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
 
   packages/sheets-crosshair-highlight:
     dependencies:
@@ -2035,8 +2035,8 @@ importers:
         specifier: ^19.1.0
         version: 19.1.0
       rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
+        specifier: ^7.8.2
+        version: 7.8.2
       tailwindcss:
         specifier: ^3.4.17
         version: 3.4.17
@@ -2048,7 +2048,7 @@ importers:
         version: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
       vitest:
         specifier: ^3.1.3
-        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
 
   packages/sheets-data-validation:
     dependencies:
@@ -2063,7 +2063,7 @@ importers:
         version: link:../engine-formula
       '@univerjs/protocol':
         specifier: 0.1.45
-        version: 0.1.45(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        version: 0.1.45(@grpc/grpc-js@1.10.9)(rxjs@7.8.2)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -2075,8 +2075,8 @@ importers:
         specifier: workspace:*
         version: link:../../common/shared
       rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
+        specifier: ^7.8.2
+        version: 7.8.2
       typescript:
         specifier: ^5.8.3
         version: 5.8.3
@@ -2085,7 +2085,7 @@ importers:
         version: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
       vitest:
         specifier: ^3.1.3
-        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
 
   packages/sheets-data-validation-ui:
     dependencies:
@@ -2139,8 +2139,8 @@ importers:
         specifier: ^19.1.0
         version: 19.1.0
       rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
+        specifier: ^7.8.2
+        version: 7.8.2
       tailwindcss:
         specifier: ^3.4.17
         version: 3.4.17
@@ -2152,7 +2152,7 @@ importers:
         version: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
       vitest:
         specifier: ^3.1.3
-        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
 
   packages/sheets-drawing:
     dependencies:
@@ -2177,7 +2177,7 @@ importers:
         version: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
       vitest:
         specifier: ^3.1.3
-        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
 
   packages/sheets-drawing-ui:
     dependencies:
@@ -2228,8 +2228,8 @@ importers:
         specifier: ^19.1.0
         version: 19.1.0
       rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
+        specifier: ^7.8.2
+        version: 7.8.2
       tailwindcss:
         specifier: ^3.4.17
         version: 3.4.17
@@ -2241,7 +2241,7 @@ importers:
         version: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
       vitest:
         specifier: ^3.1.3
-        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
 
   packages/sheets-filter:
     dependencies:
@@ -2262,8 +2262,8 @@ importers:
         specifier: workspace:*
         version: link:../../common/shared
       rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
+        specifier: ^7.8.2
+        version: 7.8.2
       typescript:
         specifier: ^5.8.3
         version: 5.8.3
@@ -2272,7 +2272,7 @@ importers:
         version: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
       vitest:
         specifier: ^3.1.3
-        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
 
   packages/sheets-filter-ui:
     dependencies:
@@ -2317,8 +2317,8 @@ importers:
         specifier: ^19.1.0
         version: 19.1.0
       rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
+        specifier: ^7.8.2
+        version: 7.8.2
       tailwindcss:
         specifier: ^3.4.17
         version: 3.4.17
@@ -2330,7 +2330,7 @@ importers:
         version: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
       vitest:
         specifier: ^3.1.3
-        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
 
   packages/sheets-find-replace:
     dependencies:
@@ -2354,8 +2354,8 @@ importers:
         specifier: workspace:*
         version: link:../../common/shared
       rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
+        specifier: ^7.8.2
+        version: 7.8.2
       typescript:
         specifier: ^5.8.3
         version: 5.8.3
@@ -2364,7 +2364,7 @@ importers:
         version: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
       vitest:
         specifier: ^3.1.3
-        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
 
   packages/sheets-formula:
     dependencies:
@@ -2388,8 +2388,8 @@ importers:
         specifier: workspace:*
         version: link:../docs
       rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
+        specifier: ^7.8.2
+        version: 7.8.2
       typescript:
         specifier: ^5.8.3
         version: 5.8.3
@@ -2398,7 +2398,7 @@ importers:
         version: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
       vitest:
         specifier: ^3.1.3
-        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
 
   packages/sheets-formula-ui:
     dependencies:
@@ -2446,8 +2446,8 @@ importers:
         specifier: ^19.1.0
         version: 19.1.0
       rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
+        specifier: ^7.8.2
+        version: 7.8.2
       tailwindcss:
         specifier: ^3.4.17
         version: 3.4.17
@@ -2459,7 +2459,7 @@ importers:
         version: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
       vitest:
         specifier: ^3.1.3
-        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
 
   packages/sheets-graphics:
     dependencies:
@@ -2484,7 +2484,7 @@ importers:
         version: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
       vitest:
         specifier: ^3.1.3
-        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
 
   packages/sheets-hyper-link:
     dependencies:
@@ -2499,7 +2499,7 @@ importers:
         version: link:../engine-formula
       '@univerjs/protocol':
         specifier: 0.1.45
-        version: 0.1.45(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        version: 0.1.45(@grpc/grpc-js@1.10.9)(rxjs@7.8.2)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -2508,8 +2508,8 @@ importers:
         specifier: workspace:*
         version: link:../../common/shared
       rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
+        specifier: ^7.8.2
+        version: 7.8.2
       typescript:
         specifier: ^5.8.3
         version: 5.8.3
@@ -2518,7 +2518,7 @@ importers:
         version: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
       vitest:
         specifier: ^3.1.3
-        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
 
   packages/sheets-hyper-link-ui:
     dependencies:
@@ -2572,8 +2572,8 @@ importers:
         specifier: ^19.1.0
         version: 19.1.0
       rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
+        specifier: ^7.8.2
+        version: 7.8.2
       tailwindcss:
         specifier: ^3.4.17
         version: 3.4.17
@@ -2585,7 +2585,7 @@ importers:
         version: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
       vitest:
         specifier: ^3.1.3
-        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
 
   packages/sheets-note:
     dependencies:
@@ -2600,8 +2600,8 @@ importers:
         specifier: workspace:*
         version: link:../../common/shared
       rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
+        specifier: ^7.8.2
+        version: 7.8.2
       typescript:
         specifier: ^5.8.3
         version: 5.8.3
@@ -2610,7 +2610,7 @@ importers:
         version: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
       vitest:
         specifier: ^3.1.3
-        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
 
   packages/sheets-note-ui:
     dependencies:
@@ -2642,8 +2642,8 @@ importers:
         specifier: ^19.1.0
         version: 19.1.0
       rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
+        specifier: ^7.8.2
+        version: 7.8.2
     devDependencies:
       '@types/react':
         specifier: ^19.1.3
@@ -2665,7 +2665,7 @@ importers:
         version: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
       vitest:
         specifier: ^3.1.3
-        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
 
   packages/sheets-numfmt:
     dependencies:
@@ -2686,8 +2686,8 @@ importers:
         specifier: workspace:*
         version: link:../../common/shared
       rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
+        specifier: ^7.8.2
+        version: 7.8.2
       typescript:
         specifier: ^5.8.3
         version: 5.8.3
@@ -2696,7 +2696,7 @@ importers:
         version: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
       vitest:
         specifier: ^3.1.3
-        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
 
   packages/sheets-numfmt-ui:
     dependencies:
@@ -2741,8 +2741,8 @@ importers:
         specifier: ^19.1.0
         version: 19.1.0
       rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
+        specifier: ^7.8.2
+        version: 7.8.2
       tailwindcss:
         specifier: ^3.4.17
         version: 3.4.17
@@ -2754,7 +2754,7 @@ importers:
         version: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
       vitest:
         specifier: ^3.1.3
-        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
 
   packages/sheets-sort:
     dependencies:
@@ -2779,7 +2779,7 @@ importers:
         version: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
       vitest:
         specifier: ^3.1.3
-        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
 
   packages/sheets-sort-ui:
     dependencies:
@@ -2821,8 +2821,8 @@ importers:
         specifier: ^19.1.0
         version: 19.1.0
       rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
+        specifier: ^7.8.2
+        version: 7.8.2
       tailwindcss:
         specifier: ^3.4.17
         version: 3.4.17
@@ -2834,7 +2834,7 @@ importers:
         version: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
       vitest:
         specifier: ^3.1.3
-        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
 
   packages/sheets-table:
     dependencies:
@@ -2849,8 +2849,8 @@ importers:
         specifier: workspace:*
         version: link:../../common/shared
       rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
+        specifier: ^7.8.2
+        version: 7.8.2
       typescript:
         specifier: ^5.8.3
         version: 5.8.3
@@ -2859,7 +2859,7 @@ importers:
         version: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
       vitest:
         specifier: ^3.1.3
-        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
 
   packages/sheets-table-ui:
     dependencies:
@@ -2907,8 +2907,8 @@ importers:
         specifier: ^19.1.0
         version: 19.1.0
       rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
+        specifier: ^7.8.2
+        version: 7.8.2
       tailwindcss:
         specifier: ^3.4.17
         version: 3.4.17
@@ -2920,7 +2920,7 @@ importers:
         version: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
       vitest:
         specifier: ^3.1.3
-        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
 
   packages/sheets-thread-comment:
     dependencies:
@@ -2941,8 +2941,8 @@ importers:
         specifier: workspace:*
         version: link:../../common/shared
       rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
+        specifier: ^7.8.2
+        version: 7.8.2
       typescript:
         specifier: ^5.8.3
         version: 5.8.3
@@ -2951,7 +2951,7 @@ importers:
         version: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
       vitest:
         specifier: ^3.1.3
-        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
 
   packages/sheets-thread-comment-ui:
     dependencies:
@@ -2996,8 +2996,8 @@ importers:
         specifier: ^19.1.0
         version: 19.1.0
       rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
+        specifier: ^7.8.2
+        version: 7.8.2
       tailwindcss:
         specifier: ^3.4.17
         version: 3.4.17
@@ -3009,7 +3009,7 @@ importers:
         version: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
       vitest:
         specifier: ^3.1.3
-        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
 
   packages/sheets-ui:
     dependencies:
@@ -3039,7 +3039,7 @@ importers:
         version: 0.3.24(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@univerjs/protocol':
         specifier: 0.1.45
-        version: 0.1.45(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        version: 0.1.45(@grpc/grpc-js@1.10.9)(rxjs@7.8.2)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -3063,8 +3063,8 @@ importers:
         specifier: ^19.1.0
         version: 19.1.0
       rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
+        specifier: ^7.8.2
+        version: 7.8.2
       tailwindcss:
         specifier: ^3.4.17
         version: 3.4.17
@@ -3076,7 +3076,7 @@ importers:
         version: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
       vitest:
         specifier: ^3.1.3
-        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
 
   packages/sheets-zen-editor:
     dependencies:
@@ -3118,8 +3118,8 @@ importers:
         specifier: ^19.1.0
         version: 19.1.0
       rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
+        specifier: ^7.8.2
+        version: 7.8.2
       tailwindcss:
         specifier: ^3.4.17
         version: 3.4.17
@@ -3131,7 +3131,7 @@ importers:
         version: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
       vitest:
         specifier: ^3.1.3
-        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
 
   packages/slides:
     dependencies:
@@ -3153,7 +3153,7 @@ importers:
         version: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
       vitest:
         specifier: ^3.1.3
-        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
 
   packages/slides-ui:
     dependencies:
@@ -3195,8 +3195,8 @@ importers:
         specifier: ^19.1.0
         version: 19.1.0
       rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
+        specifier: ^7.8.2
+        version: 7.8.2
       tailwindcss:
         specifier: ^3.4.17
         version: 3.4.17
@@ -3208,7 +3208,7 @@ importers:
         version: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
       vitest:
         specifier: ^3.1.3
-        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
 
   packages/telemetry:
     dependencies:
@@ -3227,7 +3227,7 @@ importers:
         version: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
       vitest:
         specifier: ^3.1.3
-        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
 
   packages/themes:
     devDependencies:
@@ -3245,14 +3245,14 @@ importers:
         version: link:../core
       '@univerjs/protocol':
         specifier: 0.1.45
-        version: 0.1.45(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        version: 0.1.45(@grpc/grpc-js@1.10.9)(rxjs@7.8.2)
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
         version: link:../../common/shared
       rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
+        specifier: ^7.8.2
+        version: 7.8.2
       typescript:
         specifier: ^5.8.3
         version: 5.8.3
@@ -3261,7 +3261,7 @@ importers:
         version: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
       vitest:
         specifier: ^3.1.3
-        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
 
   packages/thread-comment-ui:
     dependencies:
@@ -3294,8 +3294,8 @@ importers:
         specifier: ^19.1.0
         version: 19.1.0
       rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
+        specifier: ^7.8.2
+        version: 7.8.2
       tailwindcss:
         specifier: ^3.4.17
         version: 3.4.17
@@ -3307,7 +3307,7 @@ importers:
         version: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
       vitest:
         specifier: ^3.1.3
-        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
 
   packages/ui:
     dependencies:
@@ -3349,8 +3349,8 @@ importers:
         specifier: ^19.1.0
         version: 19.1.0(react@19.1.0)
       rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
+        specifier: ^7.8.2
+        version: 7.8.2
       tailwindcss:
         specifier: ^3.4.17
         version: 3.4.17
@@ -3365,7 +3365,7 @@ importers:
         version: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
       vitest:
         specifier: ^3.1.3
-        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
     optionalDependencies:
       vue:
         specifier: '>=3.0.0'
@@ -3402,8 +3402,8 @@ importers:
         specifier: ^19.1.0
         version: 19.1.0
       rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
+        specifier: ^7.8.2
+        version: 7.8.2
       tailwindcss:
         specifier: ^3.4.17
         version: 3.4.17
@@ -3415,7 +3415,7 @@ importers:
         version: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
       vitest:
         specifier: ^3.1.3
-        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
 
   packages/watermark:
     dependencies:
@@ -3430,8 +3430,8 @@ importers:
         specifier: workspace:*
         version: link:../../common/shared
       rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
+        specifier: ^7.8.2
+        version: 7.8.2
       typescript:
         specifier: ^5.8.3
         version: 5.8.3
@@ -3440,7 +3440,7 @@ importers:
         version: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
       vitest:
         specifier: ^3.1.3
-        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
 
   tests/formula-integration:
     dependencies:
@@ -3489,7 +3489,7 @@ importers:
         version: 5.8.3
       vitest:
         specifier: ^3.1.3
-        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+        version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
 
 packages:
 
@@ -4383,14 +4383,14 @@ packages:
   '@floating-ui/core@1.6.4':
     resolution: {integrity: sha512-a4IowK4QkXl4SCWTGUR0INAfEOX3wtsYw3rKK5InQEHMGObkR8Xk44qYQD9P4r6HHw0iIfK6GUKECmY8sTkqRA==}
 
-  '@floating-ui/core@1.6.9':
-    resolution: {integrity: sha512-uMXCuQ3BItDUbAMhIXw7UPXRfAlOAvZzdK9BWpE60MCn+Svt3aLn9jsPTi/WNGlRUu2uI0v5S7JiIUsbsvh3fw==}
+  '@floating-ui/core@1.7.0':
+    resolution: {integrity: sha512-FRdBLykrPPA6P76GGGqlex/e7fbe0F1ykgxHYNXQsH/iTEtjMj/f9bpY5oQqbjt5VgZvgz/uKXbGuROijh3VLA==}
 
   '@floating-ui/dom@1.6.11':
     resolution: {integrity: sha512-qkMCxSR24v2vGkhYDo/UzxfJN3D4syqSjyuTFz6C7XcpU1pASPRieNI0Kj5VP3/503mOfYiGY891ugBX1GlABQ==}
 
-  '@floating-ui/dom@1.6.13':
-    resolution: {integrity: sha512-umqzocjDgNRGTuO7Q8CU32dkHkECqI8ZdMZ5Swb6QAM0t5rnlrN3lGo1hdpscRd3WS8T6DKYK4ephgIH9iRh3w==}
+  '@floating-ui/dom@1.7.0':
+    resolution: {integrity: sha512-lGTor4VlXcesUMh1cupTUTDoCxMb0V6bm3CnxHzQcw8Eaf1jQbgQX4i02fYgT0vJ82tb5MZ4CZk1LRGkktJCzg==}
 
   '@floating-ui/react-dom@2.1.2':
     resolution: {integrity: sha512-06okr5cgPzMNBy+Ycse2A6udMi4bqwW/zgBF/rwjcNqWkyr82Mcg8b0vjX8OJpZFy/FKjJmw6wV7t44kK6kW7A==}
@@ -5771,8 +5771,8 @@ packages:
     peerDependencies:
       vite: ^4.2.0 || ^5.0.0 || ^6.0.0
 
-  '@vitejs/plugin-vue@5.2.3':
-    resolution: {integrity: sha512-IYSLEQj4LgZZuoVpdSUCw3dIynTWQgPlaRP6iAvMle4My0HdYwr5g5wQAfwOeHQBmYwEkqF70nRpSilr6PoUDg==}
+  '@vitejs/plugin-vue@5.2.4':
+    resolution: {integrity: sha512-7Yx/SXSOcQq5HiiV3orevHUFn+pmMB4cgbEkDYgnkUWb0WfeQ/wa2yFv6D5ICiCQOVpjA7vYDXrC7AGO8yjDHA==}
     engines: {node: ^18.0.0 || >=20.0.0}
     peerDependencies:
       vite: ^5.0.0 || ^6.0.0
@@ -8683,8 +8683,8 @@ packages:
     resolution: {integrity: sha512-Hicd6JK5Njt2QB6XYFS7ok9e37O8AYk3jTcppG4YVQnYjOemymvTcmc7OWsmq/Qqj5TdRFO5/x/tIPmBeRtGHg==}
     engines: {node: '>=12.0.0'}
 
-  jsdom@24.1.1:
-    resolution: {integrity: sha512-5O1wWV99Jhq4DV7rCLIoZ/UIhyQeDR7wHVyZAHAshbrvZsLs+Xzz7gtwnlJTJDjleiTKh54F4dXrX70vJQTyJQ==}
+  jsdom@24.1.3:
+    resolution: {integrity: sha512-MyL55p3Ut3cXbeBEG7Hcv0mVM8pp8PBNWxRqchZnSfAiES1v1mRnMeFfaHWIPULpwsYfvO+ZmMZz5tGCnjzDUQ==}
     engines: {node: '>=18'}
     peerDependencies:
       canvas: ^2.11.2
@@ -9962,8 +9962,8 @@ packages:
   proto-list@1.2.4:
     resolution: {integrity: sha512-vtK/94akxsTMhe0/cbfpR+syPuszcuwhqVjJq26CuNDgFGj682oRBXOP5MJpv2r7JtE8MsiepGIqvvOTBwn2vA==}
 
-  protobufjs@7.5.0:
-    resolution: {integrity: sha512-Z2E/kOY1QjoMlCytmexzYfDm/w5fKAiRwpSzGtdnXW1zC88Z2yXazHHrOtwCzn+7wSxyE8PYM4rvVcMphF9sOA==}
+  protobufjs@7.5.1:
+    resolution: {integrity: sha512-3qx3IRjR9WPQKagdwrKjO3Gu8RgQR2qqw+1KnigWhoVjFqegIj1K3bP11sGqhxrO46/XL7lekuG4jmjL+4cLsw==}
     engines: {node: '>=12.0.0'}
 
   protocols@2.0.1:
@@ -10037,8 +10037,8 @@ packages:
       react: ^19.1.0
       react-dom: ^19.1.0
 
-  rc-menu@9.16.0:
-    resolution: {integrity: sha512-vAL0yqPkmXWk3+YKRkmIR8TYj3RVdEt3ptG2jCJXWNAvQbT0VJJdRyHZ7kG/l1JsZlB+VJq/VcYOo69VR4oD+w==}
+  rc-menu@9.16.1:
+    resolution: {integrity: sha512-ghHx6/6Dvp+fw8CJhDUHFHDJ84hJE3BXNCzSgLdmNiFErWSOaZNsihDAsKq9ByTALo/xkNIwtDFGIl6r+RPXBg==}
     peerDependencies:
       react: ^19.1.0
       react-dom: ^19.1.0
@@ -10055,8 +10055,8 @@ packages:
       react: ^19.1.0
       react-dom: ^19.1.0
 
-  rc-picker@4.9.0:
-    resolution: {integrity: sha512-37Cx1tCsKuCMCLRAJZTjLJNVmX14QcapLlNQFUhcBjpPbzT3a62Q+p9ct7Oa9oKDn6nvfBh4I5CC3q92pOPq3w==}
+  rc-picker@4.11.3:
+    resolution: {integrity: sha512-MJ5teb7FlNE0NFHTncxXQ62Y5lytq6sh5nUw0iH8OkHL/TjARSEvSHpr940pWgjGANpjCwyMdvsEV55l5tYNSg==}
     engines: {node: '>=8.x'}
     peerDependencies:
       date-fns: '>= 2.x'
@@ -10093,8 +10093,8 @@ packages:
       react: ^19.1.0
       react-dom: ^19.1.0
 
-  rc-virtual-list@3.16.1:
-    resolution: {integrity: sha512-algM5UsB7vrlPNr9lsZEH8s9KHkP8XbT/Y0qylyPkiM8mIOlSJLjBNADcmbYPEQCm4zW82mZRJuVHNzqqN0EAQ==}
+  rc-virtual-list@3.18.6:
+    resolution: {integrity: sha512-TQ5SsutL3McvWmmxqQtMIbfeoE3dGjJrRSfKekgby7WQMpPIFvv4ghytp5Z0s3D8Nik9i9YNOCqHBfk86AwgAA==}
     engines: {node: '>=8.x'}
     peerDependencies:
       react: ^19.1.0
@@ -10424,8 +10424,8 @@ packages:
   run-parallel@1.2.0:
     resolution: {integrity: sha512-5l4VyZR86LZ/lDxZTR6jqL8AFE2S0IFLMP26AbjsLVADxHdhB/c0GUsH+y39UfCi3dzz8OlQuPmnaJOMoDHQBA==}
 
-  rxjs@7.8.1:
-    resolution: {integrity: sha512-AA3TVj+0A2iuIoQkWEK/tqFjBq2j+6PO6Y0zJcvzLAFhEFIO3HL0vls9hWLncZbAAbK0mar7oZ4V079I/qPMxg==}
+  rxjs@7.8.2:
+    resolution: {integrity: sha512-dhKf903U/PQZY6boNNtAGdWbG85WAbjT/1xYoZIC7FAY0yWapOBQVsVrDl58W86//e1VpMNBtRV4MaXfdMySFA==}
 
   safe-array-concat@1.1.3:
     resolution: {integrity: sha512-AURm5f0jYEOydBj7VQlVvDrjeFgthDdEF5H1dP+6mNpoXOMo1quQqJ4wvJDyRZ9+pO3kGWoOdmV08cSv2aJV6Q==}
@@ -11621,7 +11621,7 @@ snapshots:
       '@jridgewell/gen-mapping': 0.3.8
       '@jridgewell/trace-mapping': 0.3.25
 
-  '@antfu/eslint-config@4.13.0(@eslint-react/eslint-plugin@1.49.0(eslint@9.26.0(jiti@2.4.2))(ts-api-utils@2.1.0(typescript@5.8.3))(typescript@5.8.3))(@typescript-eslint/utils@8.32.0(eslint@9.26.0(jiti@2.4.2))(typescript@5.8.3))(@vue/compiler-sfc@3.5.13)(eslint-plugin-format@1.0.1(eslint@9.26.0(jiti@2.4.2)))(eslint-plugin-react-hooks@5.2.0(eslint@9.26.0(jiti@2.4.2)))(eslint-plugin-react-refresh@0.4.20(eslint@9.26.0(jiti@2.4.2)))(eslint@9.26.0(jiti@2.4.2))(typescript@5.8.3)(vitest@3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1))':
+  '@antfu/eslint-config@4.13.0(@eslint-react/eslint-plugin@1.49.0(eslint@9.26.0(jiti@2.4.2))(ts-api-utils@2.1.0(typescript@5.8.3))(typescript@5.8.3))(@typescript-eslint/utils@8.32.0(eslint@9.26.0(jiti@2.4.2))(typescript@5.8.3))(@vue/compiler-sfc@3.5.13)(eslint-plugin-format@1.0.1(eslint@9.26.0(jiti@2.4.2)))(eslint-plugin-react-hooks@5.2.0(eslint@9.26.0(jiti@2.4.2)))(eslint-plugin-react-refresh@0.4.20(eslint@9.26.0(jiti@2.4.2)))(eslint@9.26.0(jiti@2.4.2))(typescript@5.8.3)(vitest@3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1))':
     dependencies:
       '@antfu/install-pkg': 1.1.0
       '@clack/prompts': 0.10.1
@@ -11630,7 +11630,7 @@ snapshots:
       '@stylistic/eslint-plugin': 4.2.0(eslint@9.26.0(jiti@2.4.2))(typescript@5.8.3)
       '@typescript-eslint/eslint-plugin': 8.32.0(@typescript-eslint/parser@8.32.0(eslint@9.26.0(jiti@2.4.2))(typescript@5.8.3))(eslint@9.26.0(jiti@2.4.2))(typescript@5.8.3)
       '@typescript-eslint/parser': 8.32.0(eslint@9.26.0(jiti@2.4.2))(typescript@5.8.3)
-      '@vitest/eslint-plugin': 1.1.44(@typescript-eslint/utils@8.32.0(eslint@9.26.0(jiti@2.4.2))(typescript@5.8.3))(eslint@9.26.0(jiti@2.4.2))(typescript@5.8.3)(vitest@3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1))
+      '@vitest/eslint-plugin': 1.1.44(@typescript-eslint/utils@8.32.0(eslint@9.26.0(jiti@2.4.2))(typescript@5.8.3))(eslint@9.26.0(jiti@2.4.2))(typescript@5.8.3)(vitest@3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1))
       ansis: 3.17.0
       cac: 6.7.14
       eslint: 9.26.0(jiti@2.4.2)
@@ -12638,7 +12638,7 @@ snapshots:
     dependencies:
       '@floating-ui/utils': 0.2.9
 
-  '@floating-ui/core@1.6.9':
+  '@floating-ui/core@1.7.0':
     dependencies:
       '@floating-ui/utils': 0.2.9
 
@@ -12647,9 +12647,9 @@ snapshots:
       '@floating-ui/core': 1.6.4
       '@floating-ui/utils': 0.2.9
 
-  '@floating-ui/dom@1.6.13':
+  '@floating-ui/dom@1.7.0':
     dependencies:
-      '@floating-ui/core': 1.6.9
+      '@floating-ui/core': 1.7.0
       '@floating-ui/utils': 0.2.9
 
   '@floating-ui/react-dom@2.1.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
@@ -12669,7 +12669,7 @@ snapshots:
     dependencies:
       lodash.camelcase: 4.3.0
       long: 5.3.2
-      protobufjs: 7.5.0
+      protobufjs: 7.5.1
       yargs: 17.7.2
 
   '@humanfs/core@0.19.1': {}
@@ -14057,10 +14057,10 @@ snapshots:
       react: 19.1.0
       react-dom: 19.1.0(react@19.1.0)
 
-  '@univerjs/protocol@0.1.45(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)':
+  '@univerjs/protocol@0.1.45(@grpc/grpc-js@1.10.9)(rxjs@7.8.2)':
     dependencies:
       '@grpc/grpc-js': 1.10.9
-      rxjs: 7.8.1
+      rxjs: 7.8.2
 
   '@unrs/resolver-binding-darwin-arm64@1.7.2':
     optional: true
@@ -14126,12 +14126,12 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@vitejs/plugin-vue@5.2.3(vite@6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1))(vue@3.5.13(typescript@5.8.3))':
+  '@vitejs/plugin-vue@5.2.4(vite@6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1))(vue@3.5.13(typescript@5.8.3))':
     dependencies:
       vite: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
       vue: 3.5.13(typescript@5.8.3)
 
-  '@vitest/coverage-istanbul@3.1.3(vitest@3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1))':
+  '@vitest/coverage-istanbul@3.1.3(vitest@3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1))':
     dependencies:
       '@istanbuljs/schema': 0.1.3
       debug: 4.4.0
@@ -14143,17 +14143,17 @@ snapshots:
       magicast: 0.3.5
       test-exclude: 7.0.1
       tinyrainbow: 2.0.0
-      vitest: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+      vitest: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
     transitivePeerDependencies:
       - supports-color
 
-  '@vitest/eslint-plugin@1.1.44(@typescript-eslint/utils@8.32.0(eslint@9.26.0(jiti@2.4.2))(typescript@5.8.3))(eslint@9.26.0(jiti@2.4.2))(typescript@5.8.3)(vitest@3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1))':
+  '@vitest/eslint-plugin@1.1.44(@typescript-eslint/utils@8.32.0(eslint@9.26.0(jiti@2.4.2))(typescript@5.8.3))(eslint@9.26.0(jiti@2.4.2))(typescript@5.8.3)(vitest@3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1))':
     dependencies:
       '@typescript-eslint/utils': 8.32.0(eslint@9.26.0(jiti@2.4.2))(typescript@5.8.3)
       eslint: 9.26.0(jiti@2.4.2)
     optionalDependencies:
       typescript: 5.8.3
-      vitest: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
+      vitest: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
 
   '@vitest/expect@2.0.5':
     dependencies:
@@ -17058,7 +17058,7 @@ snapshots:
       mute-stream: 1.0.0
       ora: 5.4.1
       run-async: 3.0.0
-      rxjs: 7.8.1
+      rxjs: 7.8.2
       string-width: 4.2.3
       strip-ansi: 6.0.1
       wrap-ansi: 6.2.0
@@ -17423,7 +17423,7 @@ snapshots:
 
   jsdoc-type-pratt-parser@4.1.0: {}
 
-  jsdom@24.1.1:
+  jsdom@24.1.3:
     dependencies:
       cssstyle: 4.0.1
       data-urls: 5.0.0
@@ -18929,7 +18929,7 @@ snapshots:
 
   proto-list@1.2.4: {}
 
-  protobufjs@7.5.0:
+  protobufjs@7.5.1:
     dependencies:
       '@protobufjs/aspromise': 1.1.2
       '@protobufjs/base64': 1.1.2
@@ -19019,7 +19019,7 @@ snapshots:
       react: 19.1.0
       react-dom: 19.1.0(react@19.1.0)
 
-  rc-menu@9.16.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0):
+  rc-menu@9.16.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0):
     dependencies:
       '@babel/runtime': 7.26.0
       '@rc-component/trigger': 2.2.6(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -19047,7 +19047,7 @@ snapshots:
       react: 19.1.0
       react-dom: 19.1.0(react@19.1.0)
 
-  rc-picker@4.9.0(dayjs@1.11.13)(react-dom@19.1.0(react@19.1.0))(react@19.1.0):
+  rc-picker@4.11.3(dayjs@1.11.13)(react-dom@19.1.0(react@19.1.0))(react@19.1.0):
     dependencies:
       '@babel/runtime': 7.26.0
       '@rc-component/trigger': 2.2.6(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -19083,7 +19083,7 @@ snapshots:
       react-dom: 19.1.0(react@19.1.0)
       react-is: 18.3.1
 
-  rc-virtual-list@3.16.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0):
+  rc-virtual-list@3.18.6(react-dom@19.1.0(react@19.1.0))(react@19.1.0):
     dependencies:
       '@babel/runtime': 7.26.0
       classnames: 2.5.1
@@ -19511,7 +19511,7 @@ snapshots:
     dependencies:
       queue-microtask: 1.2.3
 
-  rxjs@7.8.1:
+  rxjs@7.8.2:
     dependencies:
       tslib: 2.8.1
 
@@ -20492,7 +20492,7 @@ snapshots:
       tsx: 4.19.4
       yaml: 2.7.1
 
-  vitest@3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.1)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1):
+  vitest@3.1.3(@types/debug@4.1.12)(@types/node@22.15.17)(happy-dom@17.4.6)(jiti@2.4.2)(jsdom@24.1.3)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1):
     dependencies:
       '@vitest/expect': 3.1.3
       '@vitest/mocker': 3.1.3(vite@6.3.5(@types/node@22.15.17)(jiti@2.4.2)(less@4.3.0)(sass@1.77.5)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1))
@@ -20519,7 +20519,7 @@ snapshots:
       '@types/debug': 4.1.12
       '@types/node': 22.15.17
       happy-dom: 17.4.6
-      jsdom: 24.1.1
+      jsdom: 24.1.3
     transitivePeerDependencies:
       - jiti
       - less

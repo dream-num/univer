@@ -93,7 +93,7 @@
         "@types/numeral": "^2.0.5",
         "@types/rbush": "^4.0.0",
         "@univerjs-infra/shared": "workspace:*",
-        "rxjs": "^7.8.1",
+        "rxjs": "^7.8.2",
         "typescript": "^5.8.3",
         "vite": "^6.3.5",
         "vitest": "^3.1.3"

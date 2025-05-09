@@ -46,7 +46,9 @@ export class SheetsDrawingRenderController extends Disposable implements IRender
             const subUnitData = data[subUnit];
             for (const drawingId in subUnitData.data) {
                 const drawingData = subUnitData.data[drawingId];
-                drawingData.transform = drawingPositionToTransform(drawingData.sheetTransform, this._sheetSelectionRenderService, this._sheetSkeletonManagerService);
+                if (drawingData.sheetTransform) {
+                    drawingData.transform = drawingPositionToTransform(drawingData.sheetTransform, this._sheetSelectionRenderService, this._sheetSkeletonManagerService);
+                }
             }
         }
 

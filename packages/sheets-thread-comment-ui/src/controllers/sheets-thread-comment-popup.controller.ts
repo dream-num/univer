@@ -251,7 +251,7 @@ export class SheetsThreadCommentPopupController extends Disposable {
                     range: mergeInfo,
                     style: {
                         // hasAutoFill: false,
-                        fill: 'rgb(255, 189, 55, 0.35)',
+                        fill: 'rgba(255, 189, 55, 0.35)',
                         strokeWidth: 1,
                         stroke: '#FFBD37',
                         widgets: {},

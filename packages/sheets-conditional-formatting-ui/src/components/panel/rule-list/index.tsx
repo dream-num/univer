@@ -219,7 +219,7 @@ export const RuleList = (props: IRuleListProps) => {
             const targetElement = sidebarService.getContainer();
             if (targetElement) {
                 let time = setTimeout(() => {
-                    subscribe.next();
+                    subscribe.next(undefined);
                 }, 150);
                 const clearTime = () => {
                     time && clearTimeout(time);
@@ -228,7 +228,7 @@ export const RuleList = (props: IRuleListProps) => {
                 const handle: any = (e: TransitionEvent) => {
                     if (e.propertyName === 'width') {
                         clearTime();
-                        subscribe.next();
+                        subscribe.next(undefined);
                     }
                 };
                 targetElement.addEventListener('transitionend', handle);

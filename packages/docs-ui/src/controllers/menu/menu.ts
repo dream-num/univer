@@ -840,7 +840,7 @@ export function HorizontalLineFactory(accessor: IAccessor): IMenuButtonItem {
 }
 
 const listValueFactory$ = (accessor: IAccessor) => {
-    return new Observable<PresetListType>((subscriber) => {
+    return new Observable<PresetListType | undefined>((subscriber) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
         let textSubscription: Subscription | undefined;
@@ -886,7 +886,7 @@ const listValueFactory$ = (accessor: IAccessor) => {
     });
 };
 
-export function OrderListMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<PresetListType, PresetListType> {
+export function OrderListMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<PresetListType, PresetListType | undefined> {
     return {
         id: OrderListCommand.id,
         type: MenuItemType.BUTTON_SELECTOR,
@@ -905,11 +905,11 @@ export function OrderListMenuItemFactory(accessor: IAccessor): IMenuSelectorItem
         tooltip: 'toolbar.order',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
         disabled$: disableMenuWhenNoDocRange(accessor),
-        activated$: listValueFactory$(accessor).pipe(map((v) => v && v.indexOf('ORDER_LIST') === 0)),
+        activated$: listValueFactory$(accessor).pipe(map((v) => Boolean(v && v.indexOf('ORDER_LIST') === 0))),
     };
 }
 
-export function BulletListMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<PresetListType, PresetListType> {
+export function BulletListMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<PresetListType, PresetListType | undefined> {
     return {
         id: BulletListCommand.id,
         type: MenuItemType.BUTTON_SELECTOR,
@@ -928,7 +928,7 @@ export function BulletListMenuItemFactory(accessor: IAccessor): IMenuSelectorIte
         tooltip: 'toolbar.unorder',
         disabled$: disableMenuWhenNoDocRange(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
-        activated$: listValueFactory$(accessor).pipe(map((v) => v && v.indexOf('BULLET_LIST') === 0)),
+        activated$: listValueFactory$(accessor).pipe(map((v) => Boolean(v && v.indexOf('BULLET_LIST') === 0))),
     };
 }
 
@@ -940,7 +940,7 @@ export function CheckListMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         tooltip: 'toolbar.checklist',
         disabled$: disableMenuWhenNoDocRange(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
-        activated$: listValueFactory$(accessor).pipe(map((v) => v && v.indexOf('CHECK_LIST') === 0)),
+        activated$: listValueFactory$(accessor).pipe(map((v) => Boolean(v && v.indexOf('CHECK_LIST') === 0))),
     };
 }
 

@@ -1,0 +1,122 @@
+.univer-dropdown {
+    position: absolute;
+    z-index: 1070;
+    top: -9999px;
+    left: -9999px;
+    display: block;
+}
+
+.univer-dropdown-hidden {
+    display: none;
+}
+
+.univer-dropdown-slide-up-enter,
+.univer-dropdown-slide-up-appear {
+    transform-origin: 0 0;
+    display: block !important;
+    animation-duration: 0.15s;
+    animation-fill-mode: both;
+    opacity: 0;
+    animation-play-state: paused;
+    animation-timing-function: cubic-bezier(0.08, 0.82, 0.17, 1);
+}
+
+.univer-dropdown-slide-up-leave {
+    transform-origin: 0 0;
+    display: block !important;
+    animation-duration: 0.15s;
+    animation-fill-mode: both;
+    opacity: 1;
+    animation-play-state: paused;
+    animation-timing-function: cubic-bezier(0.6, 0.04, 0.98, 0.34);
+}
+
+.univer-dropdown-slide-up-enter.univer-dropdown-slide-up-enter-active.univer-dropdown-placement-bottomLeft,
+.univer-dropdown-slide-up-appear.univer-dropdown-slide-up-appear-active.univer-dropdown-placement-bottomLeft,
+.univer-dropdown-slide-up-enter.univer-dropdown-slide-up-enter-active.univer-dropdown-placement-bottomCenter,
+.univer-dropdown-slide-up-appear.univer-dropdown-slide-up-appear-active.univer-dropdown-placement-bottomCenter,
+.univer-dropdown-slide-up-enter.univer-dropdown-slide-up-enter-active.univer-dropdown-placement-bottomRight,
+.univer-dropdown-slide-up-appear.univer-dropdown-slide-up-appear-active.univer-dropdown-placement-bottomRight {
+    animation-name: dropdown-slide-up-in;
+    animation-play-state: running;
+}
+
+.univer-dropdown-slide-up-enter.univer-dropdown-slide-up-enter-active.univer-dropdown-placement-topLeft,
+.univer-dropdown-slide-up-appear.univer-dropdown-slide-up-appear-active.univer-dropdown-placement-topLeft,
+.univer-dropdown-slide-up-enter.univer-dropdown-slide-up-enter-active.univer-dropdown-placement-topCenter,
+.univer-dropdown-slide-up-appear.univer-dropdown-slide-up-appear-active.univer-dropdown-placement-topCenter,
+.univer-dropdown-slide-up-enter.univer-dropdown-slide-up-enter-active.univer-dropdown-placement-topRight,
+.univer-dropdown-slide-up-appear.univer-dropdown-slide-up-appear-active.univer-dropdown-placement-topRight {
+    animation-name: dropdown-slide-down-in;
+    animation-play-state: running;
+}
+
+.univer-dropdown-slide-up-leave.univer-dropdown-slide-up-leave-active.univer-dropdown-placement-bottomLeft,
+.univer-dropdown-slide-up-leave.univer-dropdown-slide-up-leave-active.univer-dropdown-placement-bottomCenter,
+.univer-dropdown-slide-up-leave.univer-dropdown-slide-up-leave-active.univer-dropdown-placement-bottomRight {
+    animation-name: dropdown-slide-up-out;
+    animation-play-state: running;
+}
+
+.univer-dropdown-slide-up-leave.univer-dropdown-slide-up-leave-active.univer-dropdown-placement-topLeft,
+.univer-dropdown-slide-up-leave.univer-dropdown-slide-up-leave-active.univer-dropdown-placement-topCenter,
+.univer-dropdown-slide-up-leave.univer-dropdown-slide-up-leave-active.univer-dropdown-placement-topRight {
+    animation-name: dropdown-slide-down-out;
+    animation-play-state: running;
+}
+
+@keyframes dropdown-slide-up-in {
+    0% {
+        transform-origin: 0% 0%;
+        transform: scaleY(0);
+        opacity: 0;
+    }
+
+    100% {
+        transform-origin: 0% 0%;
+        transform: scaleY(1);
+        opacity: 1;
+    }
+}
+
+@keyframes dropdown-slide-up-out {
+    0% {
+        transform-origin: 0% 0%;
+        transform: scaleY(1);
+        opacity: 1;
+    }
+
+    100% {
+        transform-origin: 0% 0%;
+        transform: scaleY(0);
+        opacity: 0;
+    }
+}
+
+@keyframes dropdown-slide-down-in {
+    0% {
+        transform-origin: 0% 100%;
+        transform: scaleY(0);
+        opacity: 0;
+    }
+
+    100% {
+        transform-origin: 0% 100%;
+        transform: scaleY(1);
+        opacity: 1;
+    }
+}
+
+@keyframes dropdown-slide-down-out {
+    0% {
+        transform-origin: 0% 100%;
+        transform: scaleY(1);
+        opacity: 1;
+    }
+
+    100% {
+        transform-origin: 0% 100%;
+        transform: scaleY(0);
+        opacity: 0;
+    }
+}

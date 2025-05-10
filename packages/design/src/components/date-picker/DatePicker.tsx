@@ -21,7 +21,7 @@ import RcPicker from 'rc-picker';
 import generateConfig from 'rc-picker/lib/generate/dayjs';
 import { useContext } from 'react';
 import { ConfigContext } from '../config-provider/ConfigProvider';
-import styles from './index.module.css';
+import './index.css';
 
 export interface IDatePickerProps extends Omit<PickerProps<dayjs.Dayjs>, 'value' | 'onChange' | 'locale' | 'generateConfig' | 'prefixCls'> {
     /**
@@ -50,10 +50,10 @@ export function DatePicker(props: IDatePickerProps) {
         <RcPicker<dayjs.Dayjs>
             {...ext}
             value={value}
-            prefixCls={styles.datePicker}
+            prefixCls="univer-date-picker"
             generateConfig={generateConfig}
             locale={locale?.Picker!}
-            suffixIcon={<CalendarSingle className={styles.datePickerSuffixIcon} />}
+            suffixIcon={<CalendarSingle className="univer-date-picker-suffix-icon" />}
             onChange={handleChange}
         />
     );

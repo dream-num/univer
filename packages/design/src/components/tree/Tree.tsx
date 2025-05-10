@@ -21,8 +21,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { clsx } from '../../helper/clsx';
 import { Checkbox } from '../checkbox/Checkbox';
 import { Tooltip } from '../tooltip/Tooltip';
-import styles from './index.module.css';
 import { createCacheWithFindNodePathFromTree, isIntermediated } from './util';
+import './index.css';
 
 export enum TreeSelectionMode {
     ONLY_LEAF_NODE,
@@ -143,18 +143,18 @@ export function Tree(props: ITreeProps) {
         return (
             <div
                 key={key}
-                className={clsx(styles.treeListItem, treeNodeClassName)}
+                className={clsx('univer-tree-list-item', treeNodeClassName)}
                 style={{ paddingLeft: `${level * 20}px` }}
             >
                 <div
-                    className={clsx(styles.treeListItemContent, {
-                        [styles.treeListItemContentSelected]: selected,
+                    className={clsx('univer-tree-list-item-content', {
+                        'univer-tree-list-item-content-selected': selected,
                     })}
                 >
                     {treeItem.children && treeItem.children.length > 0 && (
                         <span
-                            className={clsx(styles.treeIcon, {
-                                [styles.treeIconExpand]: expended,
+                            className={clsx('univer-tree-icon', {
+                                'univer-tree-icon-expand': expended,
                             })}
                             onClick={(e) => {
                                 e.stopPropagation();
@@ -172,7 +172,7 @@ export function Tree(props: ITreeProps) {
                         }}
                     />
                     <div
-                        className={styles.treeListItemTitle}
+                        className="univer-tree-list-item-title"
                         onClick={(e) => {
                             e.stopPropagation();
                             handleExpendItem(treeItem);
@@ -190,8 +190,8 @@ export function Tree(props: ITreeProps) {
     }
 
     return (
-        <section className={styles.tree}>
-            <div className={styles.treeList} style={style}>
+        <section className="univer-tree">
+            <div className="univer-tree-list" style={style}>
                 <VirtualList
                     data={flatData}
                     itemKey={(item) => item.key}

@@ -20,7 +20,7 @@ import React, { useContext } from 'react';
 import { clsx } from '../../helper/clsx';
 import { ConfigContext } from '../config-provider/ConfigProvider';
 import { Tooltip } from '../tooltip/Tooltip';
-import styles from './index.module.css';
+import './index.css';
 
 /** @deprecated */
 export const Menu = React.forwardRef<MenuRef, MenuProps & { wrapperClass?: string }>((props, ref) => {
@@ -29,7 +29,7 @@ export const Menu = React.forwardRef<MenuRef, MenuProps & { wrapperClass?: strin
     return mountContainer && (
         <RcMenu
             ref={ref}
-            prefixCls={clsx(styles.menu, props.className)}
+            prefixCls={clsx('univer-menu', props.className)}
             getPopupContainer={() => mountContainer}
             {...rest}
             className={wrapperClass}

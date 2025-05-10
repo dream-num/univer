@@ -215,12 +215,6 @@ export async function build(options?: IBuildOptions) {
             'process.env.NODE_ENV': JSON.stringify('production'),
             'process.env.BUILD_TIMESTAMP': JSON.stringify(Math.floor(Date.now() / 1000)),
         },
-        css: {
-            modules: {
-                localsConvention: 'camelCaseOnly',
-                generateScopedName: 'univer-[local]',
-            },
-        },
         plugins: [
             react(),
             vue(),

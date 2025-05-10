@@ -274,10 +274,6 @@ const config: SameShape<BuildOptions, BuildOptions> = {
             postcss: {
                 plugins: [tailwindcss as any],
             },
-            cssModulesOptions: {
-                localsConvention: 'camelCaseOnly',
-                generateScopedName: 'univer-[local]',
-            },
             renderOptions: {
                 lessOptions: {
                     paths: [nodeModules],

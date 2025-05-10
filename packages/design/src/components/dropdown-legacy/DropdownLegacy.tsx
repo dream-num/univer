@@ -20,7 +20,7 @@ import type { ReactElement } from 'react';
 import RcDropdown from 'rc-dropdown';
 import { useContext } from 'react';
 import { ConfigContext } from '../config-provider/ConfigProvider';
-import styles from './index.module.css';
+import './index.css';
 
 export interface IDropdownLegacyProps {
     /** Semantic DOM class */
@@ -100,7 +100,7 @@ export function DropdownLegacy(props: IDropdownLegacyProps) {
         <RcDropdown
             {...props}
             overlayClassName={className}
-            prefixCls={styles.dropdown}
+            prefixCls="univer-dropdown"
             getPopupContainer={() => mountContainer}
             trigger={trigger}
             animation="slide-up"

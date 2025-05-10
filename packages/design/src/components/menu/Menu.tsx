@@ -86,7 +86,12 @@ export function TinyMenuGroup({ items }: ITinyMenuGroupProps) {
                         }, item.className)}
                         onClick={() => item.onClick()}
                     >
-                        <item.Icon className="univer-size-4 univer-text-gray-900" />
+                        <item.Icon
+                            className={`
+                              univer-size-4 univer-text-gray-900
+                              dark:univer-text-gray-200
+                            `}
+                        />
                     </div>
                 );
                 return item.tooltip

@@ -205,13 +205,13 @@ function SearchFunctionFactory(props: ISearchFunctionProps, ref: any) {
                 {searchList.map((item, index) => (
                     <li
                         key={item.name}
-                        className={`
+                        className={clsx(`
                           univer-box-border univer-cursor-pointer univer-rounded univer-px-2 univer-py-1
                           univer-text-gray-900 univer-transition-colors
-                          ${active === index
-                        ? 'univer-bg-gray-200'
-                        : ''}
-                        `}
+                          dark:univer-text-white
+                        `, {
+                            'univer-bg-gray-200 dark:univer-bg-gray-600': active === index,
+                        })}
                         onMouseEnter={() => handleLiMouseEnter(index)}
                         onMouseLeave={handleLiMouseLeave}
                         onMouseMove={debounceResetMouseState}

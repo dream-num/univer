@@ -141,18 +141,14 @@ export const SheetDrawingAnchor = (props: ISheetDrawingAnchorProps) => {
             })}
         >
             <div
-                className={`
-                  univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start univer-justify-start
-                `}
+                className="univer-relative univer-mt-2.5 univer-flex univer-h-full"
             >
                 <div className="univer-w-full univer-text-left univer-text-gray-400">
                     <div>{localeService.t('drawing-anchor.title')}</div>
                 </div>
             </div>
             <div
-                className={`
-                  univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start univer-justify-start
-                `}
+                className="univer-relative univer-mt-2.5 univer-flex univer-h-full"
             >
                 <div className="univer-flex univer-items-center univer-gap-1">
                     <RadioGroup value={value} onChange={handleChange} direction="vertical">

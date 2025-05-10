@@ -319,7 +319,12 @@ function UnitNode({ data }: IUnitNodeProps) {
                 <MenuSingle />
             </div>
 
-            <div className="univer-absolute -univer-top-6 univer-left-0 univer-text-sm univer-text-gray-600">
+            <div
+                className={`
+                  univer-absolute -univer-top-6 univer-left-0 univer-text-sm univer-text-gray-600
+                  dark:univer-text-gray-200
+                `}
+            >
                 {title}
             </div>
             <ComponentContainer key="unit" components={unitComponents} sharedProps={{ unitId }} />

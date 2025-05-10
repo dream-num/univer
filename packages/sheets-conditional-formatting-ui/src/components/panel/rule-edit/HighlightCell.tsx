@@ -367,7 +367,12 @@ export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, ITextHigh
 
     return (
         <div>
-            <div className="univer-mt-4 univer-text-sm univer-text-gray-600">
+            <div
+                className={`
+                  univer-mt-4 univer-text-sm univer-text-gray-600
+                  dark:univer-text-gray-200
+                `}
+            >
                 {localeService.t('sheet.cf.panel.styleRule')}
             </div>
             <div className="univer-flex univer-justify-between univer-gap-4">

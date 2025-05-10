@@ -17,6 +17,6 @@
 // TODO@siam-ese: these styles are widely used in drawing's components. They should be deprecated once the
 // Form component is completed.
 
-export const rowClassName = 'univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start univer-justify-between univer-gap-2 univer-flex-no-wrap';
+export const rowClassName = 'univer-relative univer-mt-2.5 univer-flex univer-h-full univer-justify-between univer-gap-2 univer-flex-no-wrap';
 export const columnTitleClassName = 'univer-w-full univer-text-left univer-text-gray-400';
 export const inlineClassName = 'univer-flex univer-items-center univer-gap-1';

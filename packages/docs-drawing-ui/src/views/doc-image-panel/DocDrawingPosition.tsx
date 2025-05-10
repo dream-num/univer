@@ -360,50 +360,42 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
 
     return (
         <div
-            className={clsx('univer-relative univer-mt-5 univer-w-full', borderTopClassName)}
-            style={{ display: showPanel ? 'block' : 'none' }}
+            className={clsx('univer-relative univer-mt-5 univer-w-full', borderTopClassName, {
+                'univer-hidden': !showPanel,
+            })}
         >
-            <div
-                className={`
-                  univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start univer-justify-start
-                `}
-            >
+            <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full">
                 <div className="univer-flex univer-items-center univer-gap-1 univer-text-gray-400">
                     <div>{localeService.t('image-position.title')}</div>
                 </div>
             </div>
             <div
-                className={`
-                  univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start univer-justify-start
-                `}
+                className="univer-relative univer-mt-2.5 univer-flex univer-h-full"
             >
-                <div className="univer-flex univer-items-center univer-gap-1 univer-text-gray-900">
+                <div
+                    className={`
+                      univer-flex univer-items-center univer-gap-1 univer-text-gray-900
+                      dark:univer-text-white
+                    `}
+                >
                     <div>{localeService.t('image-position.horizontal')}</div>
                 </div>
             </div>
 
             <div
-                className={`
-                  univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start univer-justify-start
-                `}
+                className="univer-relative univer-mt-2.5 univer-flex univer-h-full"
             >
                 <div className="univer-flex univer-items-center univer-gap-1 univer-text-gray-400">
                     <label>
                         <div
-                            className={`
-                              univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start
-                              univer-justify-start
-                            `}
+                            className="univer-relative univer-mt-2.5 univer-flex univer-h-full"
                         >
                             <div className="univer-flex univer-items-center univer-gap-1">
                                 {localeService.t('image-position.absolutePosition')}
                             </div>
                         </div>
                         <div
-                            className={`
-                              univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start
-                              univer-justify-start
-                            `}
+                            className="univer-relative univer-mt-2.5 univer-flex univer-h-full"
                         >
                             <div className="univer-flex univer-items-center univer-gap-1">
                                 <InputNumber
@@ -425,21 +417,13 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
                 </div>
                 <div className="univer-flex univer-items-center univer-gap-1">
                     <label>
-                        <div
-                            className={`
-                              univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start
-                              univer-justify-start
-                            `}
-                        >
+                        <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full">
                             <div className="univer-flex univer-items-center univer-gap-1">
                                 {localeService.t('image-position.toTheRightOf')}
                             </div>
                         </div>
                         <div
-                            className={`
-                              univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start
-                              univer-justify-start
-                            `}
+                            className="univer-relative univer-mt-2.5 univer-flex univer-h-full"
                         >
                             <div className="univer-flex univer-items-center univer-gap-1">
                                 <Select
@@ -454,38 +438,27 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
                 </div>
             </div>
 
-            <div
-                className={`
-                  univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start univer-justify-start
-                `}
-            >
-                <div className="univer-flex univer-items-center univer-gap-1 univer-text-gray-900">
+            <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full">
+                <div
+                    className={`
+                      univer-flex univer-items-center univer-gap-1 univer-text-gray-900
+                      dark:univer-text-white
+                    `}
+                >
                     <div>{localeService.t('image-position.vertical')}</div>
                 </div>
             </div>
 
-            <div
-                className={`
-                  univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start univer-justify-start
-                `}
-            >
+            <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full">
                 <div className="univer-flex univer-items-center univer-gap-1">
                     <label>
-                        <div
-                            className={`
-                              univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start
-                              univer-justify-start
-                            `}
-                        >
+                        <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full">
                             <div className="univer-flex univer-items-center univer-gap-1">
                                 {localeService.t('image-position.absolutePosition')}
                             </div>
                         </div>
                         <div
-                            className={`
-                              univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start
-                              univer-justify-start
-                            `}
+                            className="univer-relative univer-mt-2.5 univer-flex univer-h-full"
                         >
                             <div className="univer-flex univer-items-center univer-gap-1">
                                 <InputNumber
@@ -507,21 +480,13 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
                 </div>
                 <div className="univer-flex univer-items-center univer-gap-1">
                     <label>
-                        <div
-                            className={`
-                              univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start
-                              univer-justify-start
-                            `}
-                        >
+                        <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full">
                             <div className="univer-flex univer-items-center univer-gap-1">
                                 {localeService.t('image-position.bellow')}
                             </div>
                         </div>
                         <div
-                            className={`
-                              univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start
-                              univer-justify-start
-                            `}
+                            className="univer-relative univer-mt-2.5 univer-flex univer-h-full"
                         >
                             <div className="univer-flex univer-items-center univer-gap-1">
                                 <Select
@@ -536,21 +501,19 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
                 </div>
             </div>
 
-            <div
-                className={`
-                  univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start univer-justify-start
-                `}
-            >
-                <div className="univer-flex univer-items-center univer-gap-1 univer-text-gray-900">
+            <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full">
+                <div
+                    className={`
+                      univer-flex univer-items-center univer-gap-1 univer-text-gray-900
+                      dark:univer-text-white
+                    `}
+                >
                     <div>{localeService.t('image-position.options')}</div>
                 </div>
             </div>
 
             <div
-                className={`
-                  univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start univer-justify-start
-                `}
-                style={{ marginBottom: '50px' }}
+                className="univer-relative univer-mb-12 univer-mt-2.5 univer-flex univer-h-full"
             >
                 <div className="univer-flex univer-items-center univer-gap-1">
                     <Checkbox disabled={disabled} checked={followTextMove} onChange={handleFollowTextMoveCheck}>{localeService.t('image-position.moveObjectWithText')}</Checkbox>

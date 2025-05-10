@@ -186,7 +186,7 @@ export function RangeSelectorDialog(props: IRangeSelectorDialogProps) {
                 {ranges.map((text, index) => (
                     <div
                         key={index}
-                        className="univer-mb-2 univer-flex univer-items-center univer-justify-start univer-gap-4"
+                        className="univer-mb-2 univer-flex univer-items-center univer-gap-4"
                     >
                         <Input
                             className="univer-w-full"

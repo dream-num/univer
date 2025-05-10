@@ -57,7 +57,12 @@ export interface ICascaderListProps {
 
 function Empty({ emptyText }: { emptyText?: string }) {
     return (
-        <section className="univer-h-8 univer-px-2 univer-pr-32 univer-text-sm/8 univer-text-gray-600">
+        <section
+            className={`
+              univer-h-8 univer-px-2 univer-pr-32 univer-text-sm/8 univer-text-gray-600
+              dark:univer-text-gray-200
+            `}
+        >
             {emptyText}
         </section>
     );
@@ -102,11 +107,13 @@ export function CascaderList(props: ICascaderListProps) {
 
     return (
         <section
+            data-u-comp="cascader-list"
             className={clsx(`
               univer-grid univer-h-full univer-max-h-80 univer-grid-flow-col univer-overflow-auto-y univer-rounded
               univer-py-2 univer-text-gray-900
               [&>ul:not(:last-child)]:univer-border-0 [&>ul:not(:last-child)]:univer-border-r
               [&>ul:not(:last-child)]:univer-border-solid [&>ul:not(:last-child)]:univer-border-r-gray-200
+              dark:univer-text-white
             `, borderClassName, scrollbarClassName, wrapperClassName)}
         >
             {activeOptions.map((options, index) =>
@@ -128,7 +135,7 @@ export function CascaderList(props: ICascaderListProps) {
                                         `, {
                                             'univer-px-7': index > 0,
                                             'univer-px-1.5': index === 0,
-                                            'univer-bg-gray-200': option.value === value[index],
+                                            'univer-bg-gray-200 dark:univer-bg-gray-600': option.value === value[index],
                                         })}
                                         onClick={() => handleChange(index, option.value)}
                                     >

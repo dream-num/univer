@@ -127,23 +127,18 @@ export function SheetTableItemsFilterPanel(props: ISheetTableItemsFilterPanelPro
                     className={clsx('univer-h-40 univer-overflow-y-auto univer-py-1 univer-pl-2', scrollbarClassName)}
                 >
                     <div className="univer-h-full">
-                        <div
-                            className="univer-flex univer-items-center univer-px-2 univer-py-1"
-                        >
+                        <div className="univer-flex univer-items-center univer-px-2 univer-py-1">
                             <Checkbox
                                 indeterminate={indeterminate}
                                 disabled={items.length === 0}
                                 checked={allChecked}
                                 onChange={onCheckAllToggled}
-                            />
-                            <div
-                                className={`
-                                  univer-ml-1 univer-flex univer-h-5 univer-flex-1 univer-items-center univer-text-sm
-                                `}
                             >
-                                <span className="univer-inline-block univer-truncate">{`${localeService.t('sheets-filter.panel.select-all')}`}</span>
-                                <span className="univer-ml univer-text-gray-400">{`(${checkedCount}/${searchText ? displayItems.length : allItemsCount})`}</span>
-                            </div>
+                                <div className="univer-flex univer-h-5 univer-flex-1 univer-items-center univer-text-sm">
+                                    <span className="univer-inline-block univer-truncate">{`${localeService.t('sheets-filter.panel.select-all')}`}</span>
+                                    <span className="univer-ml univer-text-gray-400">{`(${checkedCount}/${searchText ? displayItems.length : allItemsCount})`}</span>
+                                </div>
+                            </Checkbox>
                         </div>
                         {displayItems.map((item) => {
                             return (
@@ -151,17 +146,15 @@ export function SheetTableItemsFilterPanel(props: ISheetTableItemsFilterPanelPro
                                     key={item.key}
                                     className="univer-flex univer-items-center univer-px-2 univer-py-1"
                                 >
-                                    <Checkbox checked={allChecked || checkedItemSet.has(item.title)} onChange={() => { onCheckItemToggled(item.title); }} />
-                                    <div
-                                        className={`
-                                          univer-ml-1 univer-flex univer-h-5 univer-flex-1 univer-items-start
-                                          univer-text-sm
-                                        `}
+                                    <Checkbox
+                                        checked={allChecked || checkedItemSet.has(item.title)}
+                                        onChange={() => { onCheckItemToggled(item.title); }}
                                     >
-
-                                        <span className="univer-inline-block univer-truncate">{item.title}</span>
-                                        <span className="univer-ml-1 univer-text-gray-400">{`(${itemsCountMap.get(item.title) || 0})`}</span>
-                                    </div>
+                                        <div className="univer-flex univer-h-5 univer-flex-1 univer-text-sm">
+                                            <span className="univer-inline-block univer-truncate">{item.title}</span>
+                                            <span className="univer-ml-1 univer-text-gray-400">{`(${itemsCountMap.get(item.title) || 0})`}</span>
+                                        </div>
+                                    </Checkbox>
                                 </div>
                             );
                         })}

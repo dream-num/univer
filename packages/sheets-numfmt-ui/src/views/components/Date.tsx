@@ -61,7 +61,12 @@ export const DatePanel: FC<IBusinessComponentProps> = (props) => {
             <div className="univer-mt-2">
                 <SelectList value={suffix} options={options} onChange={onChange} />
             </div>
-            <div className="univer-mt-3.5 univer-text-sm/5 univer-text-gray-600">
+            <div
+                className={`
+                  univer-mt-3.5 univer-text-sm/5 univer-text-gray-600
+                  dark:univer-text-gray-200
+                `}
+            >
                 {t('sheet.numfmt.dateDes')}
             </div>
         </div>

@@ -84,12 +84,17 @@ export default function ArrangePanel(props: IProps) {
             className={clsx('univer-relative univer-bottom-0 univer-mt-5 univer-w-full', borderTopClassName)}
         >
             <div className="univer-relative univer-w-full">
-                <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start">
-                    <div className="univer-w-full univer-text-left univer-text-gray-600">
+                <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full">
+                    <div
+                        className={`
+                          univer-w-full univer-text-left univer-text-gray-600
+                          dark:univer-text-gray-200
+                        `}
+                    >
                         <div>{localeService.t('slide.panel.fill.title')}</div>
                     </div>
                 </div>
-                <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start">
+                <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full">
                     <div className="univer-w-1/2">
                         <Dropdown
                             overlay={(

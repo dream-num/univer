@@ -74,7 +74,12 @@ export const ThousandthPercentilePanel: FC<IBusinessComponentProps> = (props) =>
             <div className="univer-mt-2">
                 <SelectList onChange={handleClick} options={options} value={suffix} />
             </div>
-            <div className="univer-mt-3.5 univer-text-sm/5 univer-text-gray-600">
+            <div
+                className={`
+                  univer-mt-3.5 univer-text-sm/5 univer-text-gray-600
+                  dark:univer-text-gray-200
+                `}
+            >
                 {localeService.t('sheet.numfmt.thousandthPercentileDes')}
             </div>
         </div>

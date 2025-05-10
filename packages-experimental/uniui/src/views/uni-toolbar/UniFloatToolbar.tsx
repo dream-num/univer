@@ -123,6 +123,7 @@ export function UnitName({ unitId }: { unitId: string }) {
             className={`
               univer-flex univer-h-6 univer-items-center univer-gap-1 univer-rounded-md univer-bg-white univer-px-1
               univer-py-0 univer-text-sm univer-text-gray-900
+              dark:univer-text-white
             `}
         >
             {name}

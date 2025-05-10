@@ -135,7 +135,8 @@ export const PermissionDetailUserPart = (props: IPermissionDetailUserPartProps) 
                                         <Avatar size={24} src={item.subject?.avatar} />
                                         <span
                                             className={`
-                                              univer-ml-1.5 univer-w-[130px] univer-text-ellipsis univer-text-gray-900
+                                              univer-ml-1.5 univer-w-[130px] univer-truncate univer-text-gray-900
+                                              dark:univer-text-white
                                             `}
                                         >
                                             {item.subject?.name}

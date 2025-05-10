@@ -100,7 +100,7 @@ export function FilterByValue(props: { model: ByValuesModel }) {
                             data-u-comp="sheets-filter-panel-values-item-text"
                             className={`
                               univer-mx-1 univer-inline-block univer-flex-shrink univer-overflow-hidden
-                              univer-text-ellipsis univer-whitespace-nowrap univer-text-gray-950
+                              univer-text-ellipsis univer-whitespace-nowrap univer-text-gray-900
                               dark:univer-text-white
                             `}
                         >
@@ -132,7 +132,7 @@ export function FilterByValue(props: { model: ByValuesModel }) {
                           univer-pr-2 univer-border-box univer-max-w-[245px] univer-rounded-md
                           [&:hover_a]:univer-inline-block
                           hover:univer-bg-gray-50 univer-h-full
-                          univer-text-gray-950 dark:hover:univer-bg-gray-900
+                          univer-text-gray-900 dark:hover:univer-bg-gray-900
                           dark:univer-text-white
                         `}
                         attachRender={(item) => (

@@ -104,7 +104,7 @@ export const ImagePopupMenu: React.FC<IImagePopupMenuProps> = (props: IImagePopu
                           dark:univer-text-white
                         `}
                     />
-                    {showMore && <MoreDownSingle />}
+                    {showMore && <MoreDownSingle className="dark:univer-text-white" />}
                 </div>
             </DropdownMenu>
         </div>

@@ -90,12 +90,17 @@ export default function ArrangePanel(props: IProps) {
 
     return (
         <div className="univer-relative univer-w-full">
-            <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start">
-                <div className="univer-w-full univer-text-left univer-text-gray-600">
+            <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full">
+                <div
+                    className={`
+                      univer-w-full univer-text-left univer-text-gray-600
+                      dark:univer-text-gray-200
+                    `}
+                >
                     <div>{localeService.t('image-panel.arrange.title')}</div>
                 </div>
             </div>
-            <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start">
+            <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full">
                 <div className="univer-w-1/2">
                     <Button onClick={() => { onArrangeBtnClick(ArrangeTypeEnum.forward); }}>
                         <span className="univer-flex univer-items-center univer-gap-1">
@@ -115,7 +120,7 @@ export default function ArrangePanel(props: IProps) {
                     </Button>
                 </div>
             </div>
-            <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start">
+            <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full">
                 <div className="univer-w-1/2">
                     <Button onClick={() => { onArrangeBtnClick(ArrangeTypeEnum.front); }}>
                         <span className="univer-flex univer-items-center univer-gap-1">

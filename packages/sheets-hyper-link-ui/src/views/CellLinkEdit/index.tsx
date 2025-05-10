@@ -435,6 +435,7 @@ export const CellLinkEdit = () => {
         <div
             className={clsx(`
               univer-box-border univer-w-[296px] univer-rounded-xl univer-bg-white univer-p-4 univer-shadow-md
+              dark:univer-bg-gray-900
             `, borderClassName)}
         >
             {showLabel

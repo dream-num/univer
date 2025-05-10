@@ -9,7 +9,7 @@
     @apply univer-text-gray-900;
 }
 .univer-dark .univer-date-picker {
-    @apply univer-text-white;
+    @apply univer-text-white univer-bg-gray-900;
 }
 
 .univer-date-picker-rtl {
@@ -44,6 +44,9 @@
     transform: translateY(-50%);
     cursor: pointer;
     @apply univer-text-gray-600;
+}
+.univer-dark .univer-date-picker-suffix-icon {
+    @apply univer-text-gray-200;
 }
 
 .univer-date-picker-decade-panel,
@@ -115,7 +118,7 @@
 .univer-dark .univer-date-picker-header-super-next-btn,
 .univer-dark .univer-date-picker-header-prev-btn,
 .univer-dark .univer-date-picker-header-next-btn {
-    @apply univer-text-gray-400;
+    @apply univer-text-gray-200;
 }
 
 /* Content */
@@ -123,7 +126,7 @@
     @apply univer-text-gray-600;
 }
 .univer-dark .univer-date-picker-cell {
-    @apply univer-text-gray-400;
+    @apply univer-text-gray-200;
 }
 
 .univer-date-picker-cell-disabled {
@@ -323,6 +326,7 @@
     border: none;
     border-radius: 4px;
     box-sizing: border-box;
+    @apply univer-bg-transparent;
 }
 
 .univer-date-picker-input > input:focus {

@@ -3,6 +3,9 @@
     position: relative;
     @apply univer-text-gray-900;
 }
+.univer-dark .univer-tree {
+    @apply univer-text-white;
+}
 
 .univer-tree-icon {
     position: absolute;

@@ -18,7 +18,7 @@ import type { ISortRangeCommandParams } from '@univerjs/sheets-sort';
 import type { ITableConditionFilterItem, ITableManualFilterItem } from '@univerjs/sheets-table';
 import type { IConditionInfo } from './type';
 import { ICommandService, IPermissionService, LocaleService } from '@univerjs/core';
-import { borderClassName, Button, clsx, Segmented } from '@univerjs/design';
+import { Button, ButtonGroup, Segmented } from '@univerjs/design';
 import { AscendingSingle, DescendingSingle } from '@univerjs/icons';
 import { WorkbookEditablePermission } from '@univerjs/sheets';
 import { SortRangeCommand, SortType } from '@univerjs/sheets-sort';
@@ -148,37 +148,21 @@ export function SheetTableFilterPanel() {
             className={`
               univer-box-border univer-flex univer-w-[312px] univer-flex-col univer-rounded-[10px] univer-bg-white
               univer-p-4 univer-shadow-lg
+              dark:univer-border-gray-600 dark:univer-bg-gray-700
             `}
         >
             {editable && (
                 <div className="univer-mb-3 univer-flex">
-                    <div
-                        className={clsx(`
-                          univer-flex univer-w-[140px] univer-flex-1 univer-cursor-default univer-items-center
-                          univer-justify-center univer-gap-1 univer-rounded-l-md univer-py-1.5 univer-text-sm
-                          hover:univer-cursor-pointer hover:univer-bg-gray-100
-                        `, borderClassName, {
-                            'univer-bg-gray-100': isAsc,
-                        })}
-                        onClick={() => applySort(true)}
-                    >
-                        <AscendingSingle className="univer-text-base univer-text-color-[#1e222b] univer-mr-1" />
-                        {localeService.t('sheets-sort.general.sort-asc')}
-                    </div>
-                    <div
-                        className={clsx(`
-                          univer-flex univer-w-[140px] univer-flex-1 univer-cursor-default univer-items-center
-                          univer-justify-center univer-gap-1 univer-rounded-r-md univer-py-1.5 univer-text-sm
-                          hover:univer-cursor-pointer hover:univer-bg-gray-100
-                        `, borderClassName, {
-                            'univer-bg-gray-100': isDesc,
-                        })}
-                        onClick={() => applySort(false)}
-                    >
-                        <DescendingSingle className="univer-text-base univer-text-color-[#1e222b] univer-mr-1" />
-                        {localeService.t('sheets-sort.general.sort-desc')}
-                    </div>
-
+                    <ButtonGroup className="univer-mb-3 univer-w-full">
+                        <Button className="univer-w-1/2" onClick={() => applySort(true)}>
+                            <AscendingSingle className="univer-mr-1" />
+                            {localeService.t('sheets-sort.general.sort-asc')}
+                        </Button>
+                        <Button className="univer-w-1/2" onClick={() => applySort(false)}>
+                            <DescendingSingle className="univer-mr-1" />
+                            {localeService.t('sheets-sort.general.sort-desc')}
+                        </Button>
+                    </ButtonGroup>
                 </div>
             )}
             <div className="univer-w-full">

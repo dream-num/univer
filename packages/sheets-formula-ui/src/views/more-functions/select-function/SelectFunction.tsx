@@ -175,6 +175,7 @@ export function SelectFunction(props: ISelectFunctionProps) {
                         className={clsx(`
                           univer-relative univer-box-border univer-cursor-pointer univer-rounded univer-px-7 univer-py-1
                           univer-text-sm univer-text-gray-900 univer-transition-colors
+                          dark:univer-text-white
                         `, {
                             'univer-bg-gray-200': active === index,
                         })}
@@ -186,7 +187,7 @@ export function SelectFunction(props: ISelectFunctionProps) {
                             <CheckMarkSingle
                                 className={`
                                   univer-absolute univer-left-1.5 univer-top-1/2 univer-inline-flex
-                                  univer--translate-y-1/2 univer-text-base univer-text-green-500
+                                  -univer-translate-y-1/2 univer-text-base univer-text-primary-600
                                 `}
                             />
                         )}

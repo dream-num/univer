@@ -409,7 +409,12 @@ export const RuleList = (props: IRuleListProps) => {
                                               univer-min-w-0 univer-max-w-full univer-flex-shrink univer-overflow-hidden
                                             `}
                                         >
-                                            <div className="univer-text-sm univer-text-gray-900">
+                                            <div
+                                                className={`
+                                                  univer-text-sm univer-text-gray-900
+                                                  dark:univer-text-white
+                                                `}
+                                            >
                                                 {getRuleDescribe(rule, localeService)}
                                             </div>
                                             <div className="univer-text-xs univer-text-gray-400">

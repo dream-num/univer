@@ -95,7 +95,7 @@ export function BorderPanel(props: IBorderPanelProps) {
             <div
                 className={`
                   univer-box-border univer-grid univer-grid-cols-5 univer-gap-2 univer-text-gray-600
-                  dark:univer-text-gray-400
+                  dark:univer-text-gray-200
                 `}
             >
                 {BORDER_LINE_CHILDREN.map((item) => (

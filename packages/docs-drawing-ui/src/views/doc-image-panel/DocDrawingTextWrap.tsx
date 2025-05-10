@@ -267,30 +267,28 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
                 'univer-hidden': !showPanel,
             })}
         >
-            <div
-                className={`
-                  univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start univer-justify-start
-                `}
-            >
-                <div className={clsx('univer-flex univer-items-center univer-gap-1 univer-text-gray-600')}>
+            <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full">
+                <div
+                    className={`
+                      univer-flex univer-items-center univer-gap-1 univer-text-gray-600
+                      dark:univer-text-gray-200
+                    `}
+                >
                     <div>{localeService.t('image-text-wrap.title')}</div>
                 </div>
             </div>
-            <div
-                className={`
-                  univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start univer-justify-start
-                `}
-            >
-                <div className={clsx('univer-flex univer-items-center univer-gap-1 univer-text-gray-900')}>
+            <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full">
+                <div
+                    className={`
+                      univer-flex univer-items-center univer-gap-1 univer-text-gray-900
+                      dark:univer-text-white
+                    `}
+                >
                     <div>{localeService.t('image-text-wrap.wrappingStyle')}</div>
                 </div>
             </div>
-            <div
-                className={clsx(`
-                  univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start univer-justify-start
-                `)}
-            >
-                <div className={clsx('univer-flex univer-items-center univer-gap-1')}>
+            <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full">
+                <div className="univer-flex univer-items-center univer-gap-1">
                     <RadioGroup value={wrappingStyle} onChange={handleWrappingStyleChange} direction="vertical">
                         <Radio value={TextWrappingStyle.INLINE}>{localeService.t('image-text-wrap.inline')}</Radio>
                         <Radio value={TextWrappingStyle.WRAP_SQUARE}>{localeService.t('image-text-wrap.square')}</Radio>
@@ -301,21 +299,20 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
                 </div>
             </div>
 
-            <div
-                className={`
-                  univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start univer-justify-start
-                `}
-            >
-                <div className={clsx('univer-flex univer-items-center univer-gap-1 univer-text-gray-900')}>
+            <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full">
+                <div
+                    className={`
+                      univer-flex univer-items-center univer-gap-1 univer-text-gray-900
+                      dark:univer-text-white
+                    `}
+                >
                     <div>{localeService.t('image-text-wrap.wrapText')}</div>
                 </div>
             </div>
             <div
-                className={clsx(`
-                  univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start univer-justify-start
-                `)}
+                className="univer-relative univer-mt-2.5 univer-flex univer-h-full"
             >
-                <div className={clsx('univer-flex univer-items-center univer-gap-1')}>
+                <div className="univer-flex univer-items-center univer-gap-1">
                     <RadioGroup disabled={disableWrapText} value={wrapText} onChange={handleWrapTextChange} direction="horizontal">
                         <Radio value={WrapTextType.BOTH_SIDES}>{localeService.t('image-text-wrap.bothSide')}</Radio>
                         <Radio value={WrapTextType.LEFT}>{localeService.t('image-text-wrap.leftOnly')}</Radio>
@@ -324,39 +321,28 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
                 </div>
             </div>
 
-            <div
-                className={`
-                  univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start univer-justify-start
-                `}
-            >
-                <div className={clsx('univer-flex univer-items-center univer-gap-1 univer-text-gray-900')}>
+            <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full">
+                <div
+                    className={`
+                      univer-flex univer-items-center univer-gap-1 univer-text-gray-900
+                      dark:univer-text-white
+                    `}
+                >
                     <div>{localeService.t('image-text-wrap.distanceFromText')}</div>
                 </div>
             </div>
 
             <div
-                className={`
-                  univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start univer-justify-start
-                `}
+                className="univer-relative univer-mt-2.5 univer-flex univer-h-full"
             >
-                <div className={clsx('univer-flex univer-items-center univer-gap-1')}>
+                <div className="univer-flex univer-items-center univer-gap-1">
                     <label>
-                        <div
-                            className={`
-                              univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start
-                              univer-justify-start
-                            `}
-                        >
+                        <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full">
                             <div className="univer-flex univer-items-center univer-gap-1">
                                 {localeService.t('image-text-wrap.top')}
                             </div>
                         </div>
-                        <div
-                            className={`
-                              univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start
-                              univer-justify-start
-                            `}
-                        >
+                        <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full">
                             <div className="univer-flex univer-items-center univer-gap-1">
                                 <InputNumber
                                     min={MIN_MARGIN}
@@ -373,21 +359,13 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
                 <div className={clsx('univer-flex univer-items-center univer-gap-1')}>
                     <label>
                         <div
-                            className={`
-                              univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start
-                              univer-justify-start
-                            `}
+                            className="univer-relative univer-mt-2.5 univer-flex univer-h-full"
                         >
                             <div className="univer-flex univer-items-center univer-gap-1">
                                 {localeService.t('image-text-wrap.left')}
                             </div>
                         </div>
-                        <div
-                            className={`
-                              univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start
-                              univer-justify-start
-                            `}
-                        >
+                        <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full">
                             <div className="univer-flex univer-items-center univer-gap-1">
                                 <InputNumber
                                     min={MIN_MARGIN}
@@ -403,28 +381,16 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
                 </div>
             </div>
             <div
-                className={`
-                  univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start univer-justify-start
-                `}
+                className="univer-relative univer-mt-2.5 univer-flex univer-h-full"
             >
-                <div className={clsx('univer-flex univer-items-center univer-gap-1')}>
+                <div className="univer-flex univer-items-center univer-gap-1">
                     <label>
-                        <div
-                            className={`
-                              univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start
-                              univer-justify-start
-                            `}
-                        >
+                        <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full">
                             <div className="univer-flex univer-items-center univer-gap-1">
                                 {localeService.t('image-text-wrap.bottom')}
                             </div>
                         </div>
-                        <div
-                            className={`
-                              univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start
-                              univer-justify-start
-                            `}
-                        >
+                        <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full">
                             <div className="univer-flex univer-items-center univer-gap-1">
                                 <InputNumber
                                     min={MIN_MARGIN}
@@ -438,24 +404,14 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
                         </div>
                     </label>
                 </div>
-                <div className={clsx('univer-flex univer-items-center univer-gap-1')}>
+                <div className="univer-flex univer-items-center univer-gap-1">
                     <label>
-                        <div
-                            className={`
-                              univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start
-                              univer-justify-start
-                            `}
-                        >
+                        <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full">
                             <div className="univer-flex univer-items-center univer-gap-1">
                                 {localeService.t('image-text-wrap.right')}
                             </div>
                         </div>
-                        <div
-                            className={`
-                              univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start
-                              univer-justify-start
-                            `}
-                        >
+                        <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full">
                             <div className="univer-flex univer-items-center univer-gap-1">
                                 <InputNumber
                                     min={MIN_MARGIN}

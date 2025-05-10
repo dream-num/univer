@@ -106,16 +106,14 @@ export const DataValidationItem = (props: IDataValidationDetailProps) => {
         >
             <div
                 className={`
-                  univer-overflow-hidden univer-text-ellipsis univer-text-sm univer-font-medium univer-leading-[22px]
-                  univer-text-gray-900
+                  univer-truncate univer-text-sm univer-font-medium univer-leading-[22px] univer-text-gray-900
+                  dark:univer-text-white
                 `}
             >
                 {validator?.generateRuleName(rule)}
             </div>
             <div
-                className={`
-                  univer-text-secondary univer-overflow-hidden univer-text-ellipsis univer-text-xs univer-leading-[18px]
-                `}
+                className="univer-text-secondary univer-truncate univer-text-xs univer-leading-[18px]"
             >
                 {rule.ranges.map((range) => serializeRange(range)).join(',')}
             </div>

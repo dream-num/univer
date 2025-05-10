@@ -98,20 +98,26 @@ export const DrawingAlign = (props: IDrawingAlignProps) => {
             })}
         >
             <div
-                className={`
-                  univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start univer-justify-start
-                `}
+                className="univer-relative univer-mt-2.5 univer-flex univer-h-full"
             >
-                <div className="univer-w-full univer-text-gray-900">
+                <div
+                    className={`
+                      univer-w-full univer-text-gray-900
+                      dark:univer-text-white
+                    `}
+                >
                     <div>{localeService.t('image-panel.align.title')}</div>
                 </div>
             </div>
             <div
-                className={`
-                  univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start univer-justify-start
-                `}
+                className="univer-relative univer-mt-2.5 univer-flex univer-h-full"
             >
-                <div className="univer-w-full univer-text-gray-900">
+                <div
+                    className={`
+                      univer-w-full univer-text-gray-900
+                      dark:univer-text-white
+                    `}
+                >
                     <Select value={alignValue} options={alignOptions} onChange={handleAlignChange} />
                 </div>
             </div>

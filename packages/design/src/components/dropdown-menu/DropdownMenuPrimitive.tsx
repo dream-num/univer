@@ -200,7 +200,7 @@ function DropdownMenuItem({
             className={clsx(
                 `
                   univer-relative univer-flex univer-cursor-default univer-select-none univer-items-center univer-gap-2
-                  univer-rounded univer-px-2 univer-py-1.5 univer-text-smver-outline-none univer-transition-colors
+                  univer-rounded univer-px-2 univer-py-1.5 univer-text-sm univer-outline-none univer-transition-colors
                   [&>svg]:univer-size-4 [&>svg]:univer-shrink-0
                   dark:focus:univer-bg-gray-600
                   data-[disabled]:univer-pointer-events-none data-[disabled]:univer-opacity-50
@@ -226,7 +226,7 @@ function DropdownMenuCheckboxItem({
             className={clsx(
                 `
                   univer-relative univer-flex univer-cursor-default univer-select-none univer-items-center
-                  univer-rounded univer-py-1.5 univer-pr-2 univer-text-smver-outline-none univer-transition-colors
+                  univer-rounded univer-py-1.5 univer-pr-2 univer-text-sm univer-outline-none univer-transition-colors
                   dark:focus:univer-bg-gray-600
                   data-[disabled]:univer-pointer-events-none data-[disabled]:univer-opacity-50
                   focus:univer-bg-gray-100
@@ -271,7 +271,7 @@ function DropdownMenuRadioItem({
             className={clsx(
                 `
                   univer-relative univer-flex univer-cursor-default univer-select-none univer-items-center
-                  univer-rounded univer-py-1.5 univer-pr-2 univer-text-smver-outline-none univer-transition-colors
+                  univer-rounded univer-py-1.5 univer-pr-2 univer-text-sm univer-outline-none univer-transition-colors
                   dark:focus:univer-bg-gray-600
                   data-[disabled]:univer-pointer-events-none data-[disabled]:univer-opacity-50
                   focus:univer-bg-gray-100

@@ -100,7 +100,12 @@ export function PageSettings(props: IConfirmChildrenProps) {
     return (
         <div className="univer-flex univer-flex-col univer-gap-4">
             <div className="univer-flex univer-flex-col univer-gap-2">
-                <label className="univer-text-sm univer-font-medium univer-text-gray-900">
+                <label
+                    className={`
+                      univer-text-sm univer-font-medium univer-text-gray-900
+                      dark:univer-text-white
+                    `}
+                >
                     {localeService.t('page-settings.paper-size')}
                 </label>
                 <Select
@@ -113,28 +118,13 @@ export function PageSettings(props: IConfirmChildrenProps) {
                 />
             </div>
 
-            {/* <div className="univer-flex univer-flex-col univer-gap-2">
-                <label className="univer-text-sm univer-font-medium univer-text-gray-900">
-                    {localeService.t('page-settings.orientation')}
-                </label>
-                <div className="univer-flex univer-gap-3">
-                    <Radio
-                        checked={settings.orientation === PageOrientType.PORTRAIT}
-                        onChange={() => handleOrientationChange(PageOrientType.PORTRAIT)}
-                    >
-                        {localeService.t('page-settings.portrait')}
-                    </Radio>
-                    <Radio
-                        checked={settings.orientation === PageOrientType.LANDSCAPE}
-                        onChange={() => handleOrientationChange(PageOrientType.LANDSCAPE)}
-                    >
-                        {localeService.t('page-settings.landscape')}
-                    </Radio>
-                </div>
-            </div> */}
-
             <div className="univer-flex univer-flex-col univer-gap-2">
-                <label className="univer-text-sm univer-font-medium univer-text-gray-900">
+                <label
+                    className={`
+                      univer-text-sm univer-font-medium univer-text-gray-900
+                      dark:univer-text-white
+                    `}
+                >
                     {localeService.t('page-settings.custom-paper-size')}
                 </label>
                 <div className="univer-flex univer-flex-col univer-gap-2.5">

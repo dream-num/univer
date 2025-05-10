@@ -65,7 +65,7 @@ const Message = ({ content, type = MessageType.Info }: IMessageProps) => {
                 `
             )}
         >
-            <div className="univer-flex univer-items-start univer-gap-2">
+            <div className="univer-flex univer-gap-2">
                 <span className="[&>svg]:univer-relative [&>svg]:univer-top-0.5 [&>svg]:univer-block">
                     {icon}
                 </span>

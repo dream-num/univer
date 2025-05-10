@@ -224,13 +224,23 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
     };
     return (
         <div>
-            <div className="univer-mt-4 univer-text-sm univer-text-gray-600">
+            <div
+                className={`
+                  univer-mt-4 univer-text-sm univer-text-gray-600
+                  dark:univer-text-gray-200
+                `}
+            >
                 {localeService.t('sheet.cf.panel.styleRule')}
             </div>
             <div className={previewClassName}>
                 <Preview rule={getResult({ minType, medianType, maxType, minValue, medianValue, maxValue, minColor, medianColor, maxColor }) as IConditionalFormattingRuleConfig} />
             </div>
-            <div className="univer-mt-3 univer-text-xs univer-text-gray-600">
+            <div
+                className={`
+                  univer-mt-3 univer-text-xs univer-text-gray-600
+                  dark:univer-text-gray-200
+                `}
+            >
                 {localeService.t('sheet.cf.valueType.min')}
             </div>
             <div className="univer-mt-3 univer-flex univer-h-8 univer-items-center">
@@ -242,7 +252,17 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
                         setMinType(v as CFValueType);
                         const value = createDefaultValueByValueType(v as CFValueType, 10);
                         setMinValue(value);
-                        handleChange({ minType: v as CFValueType, medianType, maxType, minValue: value, medianValue, maxValue, minColor, medianColor, maxColor });
+                        handleChange({
+                            minType: v as CFValueType,
+                            medianType,
+                            maxType,
+                            minValue: value,
+                            medianValue,
+                            maxValue,
+                            minColor,
+                            medianColor,
+                            maxColor,
+                        });
                     }}
                 />
                 <TextInput
@@ -252,7 +272,17 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
                     type={minType}
                     onChange={(v) => {
                         setMinValue(v);
-                        handleChange({ minType, medianType, maxType, minValue: v, medianValue, maxValue, minColor, medianColor, maxColor });
+                        handleChange({
+                            minType,
+                            medianType,
+                            maxType,
+                            minValue: v,
+                            medianValue,
+                            maxValue,
+                            minColor,
+                            medianColor,
+                            maxColor,
+                        });
                     }}
                 />
                 <ColorPicker
@@ -260,11 +290,28 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
                     color={minColor}
                     onChange={(v) => {
                         setMinColor(v);
-                        handleChange({ minType, medianType, maxType, minValue, medianValue, maxValue, minColor: v, medianColor, maxColor });
+                        handleChange({
+                            minType,
+                            medianType,
+                            maxType,
+                            minValue,
+                            medianValue,
+                            maxValue,
+                            minColor: v,
+                            medianColor,
+                            maxColor,
+                        });
                     }}
                 />
             </div>
-            <div className="univer-mt-3 univer-text-xs univer-text-gray-600">{localeService.t('sheet.cf.panel.medianValue')}</div>
+            <div
+                className={`
+                  univer-mt-3 univer-text-xs
+                  univer-text-gray-600dark:univer-text-gray-200
+                `}
+            >
+                {localeService.t('sheet.cf.panel.medianValue')}
+            </div>
             <div className="univer-mt-3 univer-flex univer-h-8 univer-items-center">
                 <Select
                     className="univer-flex-shrink-0"
@@ -330,7 +377,14 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
                 )}
 
             </div>
-            <div className="univer-mt-3 univer-text-xs univer-text-gray-600">{localeService.t('sheet.cf.valueType.max')}</div>
+            <div
+                className={`
+                  univer-mt-3 univer-text-xs univer-text-gray-600
+                  dark:univer-text-gray-200
+                `}
+            >
+                {localeService.t('sheet.cf.valueType.max')}
+            </div>
             <div className="univer-mt-3 univer-flex univer-h-8 univer-items-center">
                 <Select
                     className="univer-flex-shrink-0"

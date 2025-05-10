@@ -191,7 +191,7 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
             <time
                 className={`
                   univer-mb-1 univer-text-xs/normal univer-text-gray-600
-                  dark:univer-text-gray-400
+                  dark:univer-text-gray-200
                 `}
             >
                 {item.dT}
@@ -226,7 +226,7 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                 : (
                     <div
                         className={`
-                          univer-text-smmal univer-text-gray-900
+                          univer-text-sm univer-text-gray-900
                           dark:univer-text-white
                         `}
                     >
@@ -404,9 +404,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                     />
                     <Tooltip showIfEllipsis title={title}>
                         <div
-                            className={`
-                              univer-flex-1 univer-overflow-hidden univer-text-ellipsis univer-whitespace-nowrap
-                            `}
+                            className="univer-flex-1 univer-truncate"
                         >
                             {title}
                         </div>

@@ -262,6 +262,7 @@ const IconSetRuleEdit = (props: {
                         className={`
                           univer-mt-3 univer-flex univer-items-center univer-justify-between univer-text-sm
                           univer-text-gray-600
+                          dark:univer-text-gray-200
                         `}
                     >
                         <div
@@ -275,7 +276,12 @@ const IconSetRuleEdit = (props: {
                             <>
                                 {!isFirst && !isEnd && localeService.t('sheet.cf.iconSet.rule')}
                                 {!isFirst && !isEnd && (
-                                    <span className="univer-font-medium univer-text-gray-600">
+                                    <span
+                                        className={`
+                                          univer-font-medium univer-text-gray-600
+                                          dark:univer-text-gray-200
+                                        `}
+                                    >
                                         (
                                         {localeService.t('sheet.cf.iconSet.when')}
                                         {localeService.t(`sheet.cf.symbol.${getOppositeOperator(preItem.operator)}`)}
@@ -302,6 +308,7 @@ const IconSetRuleEdit = (props: {
                                       univer-box-border univer-flex univer-h-8 univer-w-full univer-items-center
                                       univer-justify-between univer-rounded-md univer-bg-white univer-px-4 univer-py-2
                                       univer-text-xs univer-text-gray-600 univer-transition-all
+                                      dark:univer-text-gray-200
                                       hover:univer-border-primary-600
                                     `, borderClassName)}
                                 >
@@ -325,9 +332,14 @@ const IconSetRuleEdit = (props: {
                                 />
                             )
                             : (
-                                <div className="univer-mt-0 univer-w-[45%] univer-text-sm univer-text-gray-600">
+                                <div
+                                    className={`
+                                      univer-mt-0 univer-w-[45%] univer-text-sm univer-text-gray-600
+                                      dark:univer-text-gray-200
+                                    `}
+                                >
                                     {localeService.t('sheet.cf.iconSet.rule')}
-                                    <span className="univer-font-medium univer-text-gray-600">
+                                    <span className="univer-font-medium">
                                         {localeService.t('sheet.cf.iconSet.when')}
                                         {localeService.t(`sheet.cf.symbol.${getOppositeOperator(preItem.operator)}`)}
                                         {lessThanText}
@@ -343,6 +355,7 @@ const IconSetRuleEdit = (props: {
                                     className={`
                                       univer-mt-3 univer-flex univer-items-center univer-justify-between univer-gap-4
                                       univer-text-sm univer-text-gray-600
+                                      dark:univer-text-gray-200
                                     `}
                                 >
                                     <div>

@@ -40,6 +40,7 @@ export function DataValidationOptions(props: IDataValidationOptionsParams) {
             <div
                 className={`
                   univer-mb-3 univer-flex univer-cursor-pointer univer-items-center univer-text-sm univer-text-gray-900
+                  dark:univer-text-white
                 `}
                 onClick={() => setShow(!show)}
             >

@@ -109,7 +109,12 @@ export function ProgressBar(props: IProgressBarProps) {
                 type="button"
                 onClick={onTerminate}
             >
-                <CloseSingle className="univer-size-3.5 univer-text-gray-900" />
+                <CloseSingle
+                    className={`
+                      univer-size-3.5
+                      dark:univer-text-white
+                    `}
+                />
             </button>
         </div>
     );

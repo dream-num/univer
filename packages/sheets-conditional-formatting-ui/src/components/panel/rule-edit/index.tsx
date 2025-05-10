@@ -230,7 +230,12 @@ export const RuleEdit = (props: IRuleEditProps) => {
     };
     return (
         <div>
-            <div className="univer-mt-4 univer-text-sm univer-text-gray-600">
+            <div
+                className={`
+                  univer-mt-4 univer-text-sm univer-text-gray-600
+                  dark:univer-text-gray-200
+                `}
+            >
                 {localeService.t('sheet.cf.panel.range')}
             </div>
             <div className="univer-mt-4">
@@ -243,7 +248,12 @@ export const RuleEdit = (props: IRuleEditProps) => {
                 />
                 {errorText && <div className="univer-mt-1 univer-text-xs univer-text-red-500">{errorText}</div>}
             </div>
-            <div className="univer-mt-4 univer-text-sm univer-text-gray-600">
+            <div
+                className={`
+                  univer-mt-4 univer-text-sm univer-text-gray-600
+                  dark:univer-text-gray-200
+                `}
+            >
                 {localeService.t('sheet.cf.panel.styleType')}
             </div>
             <Select

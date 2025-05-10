@@ -183,20 +183,25 @@ export default function TransformPanel(props: IProps) {
         <div
             className={clsx('univer-relative univer-bottom-0 univer-mt-5 univer-w-full', borderTopClassName)}
         >
-            <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start">
-                <div className="univer-w-full univer-text-left univer-text-gray-600">
+            <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full">
+                <div
+                    className={`
+                      univer-w-full univer-text-left univer-text-gray-600
+                      dark:univer-text-gray-200
+                    `}
+                >
                     <div>{localeService.t('image-panel.transform.title')}</div>
                 </div>
             </div>
-            <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start">
+            <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full">
                 <div className="univer-w-1/3">
                     <label>
-                        <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start">
+                        <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full">
                             <div className="univer-w-full">
                                 {localeService.t('image-panel.transform.width')}
                             </div>
                         </div>
-                        <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start">
+                        <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full">
                             <div className="univer-w-full">
                                 <InputNumber
                                     className="univer-w-11/12"
@@ -210,12 +215,12 @@ export default function TransformPanel(props: IProps) {
                 </div>
                 <div className="univer-w-1/3">
                     <label>
-                        <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start">
+                        <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full">
                             <div className="univer-w-full">
                                 {localeService.t('image-panel.transform.height')}
                             </div>
                         </div>
-                        <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start">
+                        <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full">
                             <div className="univer-w-full">
                                 <InputNumber
                                     className="univer-w-11/12"
@@ -228,15 +233,15 @@ export default function TransformPanel(props: IProps) {
                     </label>
                 </div>
             </div>
-            <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start">
+            <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full">
                 <div className="univer-w-1/3">
                     <label>
-                        <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start">
+                        <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full">
                             <div className="univer-w-full">
                                 {localeService.t('image-panel.transform.x')}
                             </div>
                         </div>
-                        <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start">
+                        <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full">
                             <div className="univer-w-full">
                                 <InputNumber
                                     className="univer-w-11/12"
@@ -251,12 +256,12 @@ export default function TransformPanel(props: IProps) {
                 </div>
                 <div className="univer-w-1/3">
                     <label>
-                        <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start">
+                        <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full">
                             <div className="univer-w-full">
                                 {localeService.t('image-panel.transform.y')}
                             </div>
                         </div>
-                        <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start">
+                        <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full">
                             <div className="univer-w-full">
                                 <InputNumber
                                     className="univer-w-11/12"
@@ -271,12 +276,12 @@ export default function TransformPanel(props: IProps) {
                 </div>
                 <div className="univer-w-1/3">
                     <label>
-                        <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start">
+                        <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full">
                             <div className="univer-w-full">
                                 {localeService.t('image-panel.transform.rotate')}
                             </div>
                         </div>
-                        <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full univer-items-start">
+                        <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full">
                             <div className="univer-w-full">
                                 <InputNumber
                                     className="univer-w-11/12"

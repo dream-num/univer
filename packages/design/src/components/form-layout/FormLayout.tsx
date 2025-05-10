@@ -46,6 +46,7 @@ export const FormLayout = (props: IFormLayoutProps) => {
                         className={clsx(`
                           univer-mb-2 univer-flex univer-min-h-3.5 univer-items-center univer-text-sm
                           univer-text-gray-900
+                          dark:univer-text-white
                         `, {
                             'univer-cursor-pointer': collapsable,
                         })}
@@ -67,7 +68,16 @@ export const FormLayout = (props: IFormLayoutProps) => {
                     ? null
                     : (
                         <>
-                            {desc && <div className="univer-mt-1 univer-text-sm univer-text-gray-600">{desc}</div>}
+                            {desc && (
+                                <div
+                                    className={`
+                                      univer-mt-1 univer-text-sm univer-text-gray-600
+                                      dark:univer-text-gray-200
+                                    `}
+                                >
+                                    {desc}
+                                </div>
+                            )}
                             {children
                                 ? (
                                     <div

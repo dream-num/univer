@@ -9,7 +9,7 @@
     @apply univer-text-gray-900;
 }
 .univer-dark .univer-date-range-picker {
-    @apply univer-text-white;
+    @apply univer-text-white univer-bg-gray-900;
 }
 
 .univer-date-range-picker-rtl {
@@ -284,6 +284,7 @@
     border: none;
     border-radius: 4px;
     box-sizing: border-box;
+    @apply univer-bg-transparent;
 }
 
 .univer-date-range-picker-input > input:focus {

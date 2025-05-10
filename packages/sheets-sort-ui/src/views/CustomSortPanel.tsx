@@ -281,13 +281,11 @@ export function SortOptionItem(props: ISortOptionItemProps) {
                               univer-ml-2 univer-flex univer-w-[236px] univer-items-center univer-justify-between
                               univer-overflow-hidden univer-rounded-md univer-border univer-border-gray-200
                               univer-px-2.5 univer-py-1.5 univer-text-sm univer-text-gray-900
+                              dark:univer-text-white
                             `}
                         >
                             <span
-                                className={`
-                                  univer-max-w-[220px] univer-overflow-hidden univer-text-ellipsis
-                                  univer-whitespace-nowrap
-                                `}
+                                className="univer-max-w-[220px] univer-truncate"
                             >
                                 {itemLabel}
                             </span>

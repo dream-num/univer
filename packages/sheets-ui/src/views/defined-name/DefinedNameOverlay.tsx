@@ -117,6 +117,7 @@ export function DefinedNameOverlay() {
                                     className={`
                                       univer-w-[50%] univer-flex-shrink-0 univer-overflow-hidden univer-text-ellipsis
                                       univer-whitespace-nowrap univer-text-sm univer-text-gray-600
+                                      dark:univer-text-gray-200
                                     `}
                                     title={definedName.name}
                                 >

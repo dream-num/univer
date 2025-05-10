@@ -89,8 +89,18 @@ export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
                     docParagraphMenuService?.setParagraphMenuActive(true);
                 }}
             >
-                <icon.component className="univer-h-4 univer-w-4 univer-text-gray-900" />
-                <DownSingle className="univer-h-3 univer-w-3 univer-text-gray-600" />
+                <icon.component
+                    className={`
+                      univer-size-4 univer-text-gray-900
+                      dark:univer-text-white
+                    `}
+                />
+                <DownSingle
+                    className={`
+                      univer-size-3 univer-text-gray-600
+                      dark:univer-text-gray-200
+                    `}
+                />
             </div>
             {visible && (
                 <RectPopup

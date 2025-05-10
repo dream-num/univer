@@ -1,10 +1,10 @@
-.tree {
+.univer-tree {
     user-select: none;
     position: relative;
     @apply univer-text-gray-900;
 }
 
-.tree-icon {
+.univer-tree-icon {
     position: absolute;
     top: 50%;
     left: calc(-1 * 16px);
@@ -15,40 +15,40 @@
     font-size: 8px;
 }
 
-.tree-icon-expand {
+.univer-tree-icon-expand {
     transform: translateY(-50%);
 }
 
-.tree-list {
+.univer-tree-list {
     margin: 0;
     padding: 0;
     list-style: none;
     height: 100%;
 }
 
-.tree-list .tree-list {
+.univer-tree-list .univer-tree-list {
     overflow: hidden;
     height: 0;
 }
 
-.tree-list .tree-list-expand {
+.univer-tree-list .univer-tree-list-expand {
     height: inherit;
 }
 
-.tree-list-item {
+.univer-tree-list-item {
     position: relative;
     padding-left: 20px;
     font-size: 13px;
 }
 
-.tree-list-item > a {
+.univer-tree-list-item > a {
     position: relative;
     display: flex;
     align-items: center;
     cursor: pointer;
 }
 
-.tree-list-item-title {
+.univer-tree-list-item-title {
     display: inline-block;
     height: 100%;
     margin: 0 4px;
@@ -58,7 +58,7 @@
     white-space: nowrap;
 }
 
-.tree-list-item-content {
+.univer-tree-list-item-content {
     margin: 4px 0;
     width: 100%;
     position: relative;
@@ -66,7 +66,7 @@
     align-items: center;
 }
 
-.tree-list-item-content-selected-icon {
+.univer-tree-list-item-content-selected-icon {
     position: absolute;
     top: 50%;
     left: calc(-1 * 20px);

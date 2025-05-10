@@ -20,7 +20,7 @@ import { PickerPanel } from 'rc-picker';
 import generateConfig from 'rc-picker/lib/generate/dayjs';
 import { useContext } from 'react';
 import { ConfigContext } from '../config-provider/ConfigProvider';
-import styles from './index.module.css';
+import './index.css';
 
 export type IDatePanelProps = Omit<BasePickerPanelProps<dayjs.Dayjs>, 'prefixCls' | 'locale' | 'generateConfig'> & {
     multiple?: boolean;
@@ -35,8 +35,8 @@ export const DatePanel = (props: IDatePanelProps) => {
     return (
         <PickerPanel
             {...props}
+            prefixCls="univer-date-picker"
             generateConfig={generateConfig}
-            prefixCls={styles.datePicker}
             locale={locale?.Picker!}
         />
     );

@@ -19,7 +19,7 @@ import { useContext, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { CSSTransition } from 'react-transition-group';
 import { ConfigContext } from '../config-provider/ConfigProvider';
-import styles from './index.module.css';
+import './index.css';
 
 export interface IPopupProps {
     children: ReactElement;
@@ -72,16 +72,16 @@ export function Popup(props: IPopupProps) {
             nodeRef={nodeRef}
             timeout={500}
             classNames={{
-                enter: styles.popupEnter,
-                enterActive: styles.popupEnterActive,
-                enterDone: styles.popupEnterDone,
-                exitActive: styles.popupExit,
-                exitDone: styles.popupExitActive,
+                enter: 'univer-popup-enter',
+                enterActive: 'univer-popup-enter-active',
+                enterDone: 'univer-popup-enter-done',
+                exitActive: 'univer-popup-exit',
+                exitDone: 'univer-popup-exit-active',
             }}
         >
             <section
                 ref={nodeRef}
-                className={styles.popup}
+                className="univer-popup"
                 style={{
                     // Fix #1089. If the popup does not have this 2px offset, the pointerup event's target would
                     // become the popup itself not the canvas element, hence the selection gesture is not terminated.

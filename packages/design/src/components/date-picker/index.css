@@ -1,4 +1,4 @@
-.date-picker {
+.univer-date-picker {
     position: relative;
     width: 200px;
     height: 32px;
@@ -6,30 +6,34 @@
     box-sizing: border-box;
     display: inline-flex;
     @apply univer-bg-white univer-border univer-border-solid univer-border-gray-200;
+    @apply univer-text-gray-900;
+}
+.univer-dark .univer-date-picker {
+    @apply univer-text-white;
 }
 
-.date-picker-rtl {
+.univer-date-picker-rtl {
     direction: rtl;
 }
 
-.date-picker-invalid {
+.univer-date-picker-invalid {
     box-shadow: 0 0 2px red;
 }
 
-.date-picker-panel {
+.univer-date-picker-panel {
     display: inline-block;
     vertical-align: top;
 }
 
-.date-picker-panel-focused {
+.univer-date-picker-panel-focused {
     border-color: blue;
 }
 
-.date-picker-panel-rtl {
+.univer-date-picker-panel-rtl {
     direction: rtl;
 }
 
-.date-picker-suffix-icon {
+.univer-date-picker-suffix-icon {
     position: absolute;
     top: 50%;
     right: 0;
@@ -42,38 +46,38 @@
     @apply univer-text-gray-600;
 }
 
-.date-picker-decade-panel,
-.date-picker-year-panel,
-.date-picker-month-panel,
-.date-picker-week-panel,
-.date-picker-date-panel,
-.date-picker-time-panel {
+.univer-date-picker-decade-panel,
+.univer-date-picker-year-panel,
+.univer-date-picker-month-panel,
+.univer-date-picker-week-panel,
+.univer-date-picker-date-panel,
+.univer-date-picker-time-panel {
     display: flex;
     flex-direction: column;
 }
 
-.date-picker-decade-panel table,
-.date-picker-year-panel table,
-.date-picker-month-panel table,
-.date-picker-week-panel table,
-.date-picker-date-panel table,
-.date-picker-time-panel table {
+.univer-date-picker-decade-panel table,
+.univer-date-picker-year-panel table,
+.univer-date-picker-month-panel table,
+.univer-date-picker-week-panel table,
+.univer-date-picker-date-panel table,
+.univer-date-picker-time-panel table {
     text-align: center;
     border-collapse: collapse;
 }
 
 /* Header */
-.date-picker-header {
+.univer-date-picker-header {
     margin-bottom: 12px;
     display: flex;
     align-items: center;
 }
 
-.date-picker-header > * {
+.univer-date-picker-header > * {
     flex: none;
 }
 
-.date-picker-header-view {
+.univer-date-picker-header-view {
     height: 16px;
     flex: auto;
     display: flex;
@@ -82,17 +86,21 @@
     gap: 8px;
 }
 
-.date-picker-header-view > button {
+.univer-date-picker-header-view > button {
     padding: 0;
     border: 0;
     background-color: transparent;
     cursor: pointer;
+    @apply univer-text-gray-900;
+}
+.univer-dark .univer-date-picker-header-view > button {
+    @apply univer-text-white;
 }
 
-.date-picker-header-super-prev-btn,
-.date-picker-header-super-next-btn,
-.date-picker-header-prev-btn,
-.date-picker-header-next-btn {
+.univer-date-picker-header-super-prev-btn,
+.univer-date-picker-header-super-next-btn,
+.univer-date-picker-header-prev-btn,
+.univer-date-picker-header-next-btn {
     width: 16px;
     height: 16px;
     padding: 0;
@@ -101,18 +109,28 @@
     border: none;
     background-color: transparent;
     cursor: pointer;
+    @apply univer-text-gray-600;
+}
+.univer-dark .univer-date-picker-header-super-prev-btn,
+.univer-dark .univer-date-picker-header-super-next-btn,
+.univer-dark .univer-date-picker-header-prev-btn,
+.univer-dark .univer-date-picker-header-next-btn {
+    @apply univer-text-gray-400;
 }
 
 /* Content */
-.date-picker-cell {
-    color: #aaa;
+.univer-date-picker-cell {
+    @apply univer-text-gray-600;
+}
+.univer-dark .univer-date-picker-cell {
+    @apply univer-text-gray-400;
 }
 
-.date-picker-cell-disabled {
+.univer-date-picker-cell-disabled {
     opacity: 0.2;
 }
 
-.date-picker-cell-inner {
+.univer-date-picker-cell-inner {
     display: inline-block;
     box-sizing: border-box;
     width: 100%;
@@ -130,21 +148,21 @@
     @apply univer-px-1.5;
 }
 
-.date-picker-cell-in-view {
+.univer-date-picker-cell-in-view {
     color: #333;
 }
 
-.date-picker-cell-in-range > .date-picker-cell-inner {
+.univer-date-picker-cell-in-range > .univer-date-picker-cell-inner {
     background: rgba(0, 0, 255, 0.05);
 }
 
-.date-picker-cell-hover > .date-picker-cell-inner {
+.univer-date-picker-cell-hover > .univer-date-picker-cell-inner {
     @apply hover:univer-bg-gray-100;
 }
 
-.date-picker-cell-range-hover-start::after,
-.date-picker-cell-range-hover-end::after,
-.date-picker-cell-range-hover::after {
+.univer-date-picker-cell-range-hover-start::after,
+.univer-date-picker-cell-range-hover-end::after,
+.univer-date-picker-cell-range-hover::after {
     position: absolute;
     top: 3px;
     right: 0;
@@ -157,67 +175,67 @@
     pointer-events: none;
 }
 
-.date-picker-cell-range-hover-start::after {
+.univer-date-picker-cell-range-hover-start::after {
     border-left: 1px solid green !important;
 }
 
-.date-picker-cell-range-hover-end::after {
+.univer-date-picker-cell-range-hover-end::after {
     border-right: 1px solid green !important;
 }
 
-.date-picker-cell-today > .date-picker-cell-inner {
+.univer-date-picker-cell-today > .univer-date-picker-cell-inner {
     @apply univer-border univer-border-solid univer-border-primary-600;
 }
 
-.date-picker-cell-range-start > .date-picker-cell-inner,
-.date-picker-cell-range-end > .date-picker-cell-inner,
-.date-picker-cell-selected > .date-picker-cell-inner {
+.univer-date-picker-cell-range-start > .univer-date-picker-cell-inner,
+.univer-date-picker-cell-range-end > .univer-date-picker-cell-inner,
+.univer-date-picker-cell-selected > .univer-date-picker-cell-inner {
     color: #fff;
     @apply univer-bg-primary-600;
 }
 
 /* Preset */
-.date-picker-presets {
+.univer-date-picker-presets {
     background: #ccccff;
 }
 
-.date-picker-presets ul {
+.univer-date-picker-presets ul {
     margin: 0;
     padding: 0;
     list-style: none;
 }
 
 /* Now Button */
-.date-picker-now {
+.univer-date-picker-now {
     padding-top: 12px;
 }
 
-.date-picker-now-btn {
+.univer-date-picker-now-btn {
     font-size: 13px;
     cursor: pointer;
     @apply univer-text-primary-600;
 }
 
 /* Footer */
-.date-picker-footer,
-.date-picker-picker-footer {
+.univer-date-picker-footer,
+.univer-date-picker-picker-footer {
     margin-top: 12px;
     @apply univer-border-0 univer-border-t univer-border-solid univer-border-t-gray-200;
 }
 
-.date-picker-ranges {
+.univer-date-picker-ranges {
     @apply univer-list-none univer-m-0 univer-p-0 univer-flex univer-items-center univer-justify-center;
 }
 
 /* Clear Button */
-.date-picker-clear {
+.univer-date-picker-clear {
     position: absolute;
     top: 7px;
     right: 8px;
     cursor: pointer;
 }
 
-.date-picker-clear-btn {
+.univer-date-picker-clear-btn {
     width: 16px;
     height: 16px;
     text-align: center;
@@ -227,7 +245,7 @@
     @apply univer-bg-gray-500;
 }
 
-.date-picker-clear-btn::before {
+.univer-date-picker-clear-btn::before {
     content: '×';
     position: absolute;
     top: -1px;
@@ -240,30 +258,30 @@
 }
 
 /* Dropdown */
-.date-picker-dropdown {
+.univer-date-picker-dropdown {
     position: absolute;
     pointer-events: none;
 }
 
-.date-picker-dropdown-range {
+.univer-date-picker-dropdown-range {
     padding: 10px 0;
 }
 
-.date-picker-dropdown-hidden {
+.univer-date-picker-dropdown-hidden {
     display: none;
 }
 
 /* Range Picker */
-.date-picker-range {
+.univer-date-picker-range {
     position: relative;
     display: inline-flex;
 }
 
-.date-picker-range-wrapper {
+.univer-date-picker-range-wrapper {
     display: flex;
 }
 
-.date-picker-active-bar {
+.univer-date-picker-active-bar {
     bottom: 0;
     height: 3px;
     background: green;
@@ -272,19 +290,19 @@
     pointer-events: none;
 }
 
-.date-picker-focused .date-picker-active-bar {
+.univer-date-picker-focused .univer-date-picker-active-bar {
     opacity: 1;
 }
 
 /* Panel Container */
-.date-picker-panel-container {
+.univer-date-picker-panel-container {
     display: inline-block;
     vertical-align: top;
     transition: margin 0.3s;
     pointer-events: all;
 }
 
-.date-picker-panel-layout {
+.univer-date-picker-panel-layout {
     display: flex;
     flex-wrap: nowrap;
     align-items: stretch;
@@ -293,13 +311,13 @@
 }
 
 /* Input */
-.date-picker-input {
+.univer-date-picker-input {
     position: relative;
     display: inline-flex;
     width: 100%;
 }
 
-.date-picker-input > input {
+.univer-date-picker-input > input {
     width: 100%;
     padding-left: 12px;
     border: none;
@@ -307,6 +325,6 @@
     box-sizing: border-box;
 }
 
-.date-picker-input > input:focus {
+.univer-date-picker-input > input:focus {
     outline: none;
 }

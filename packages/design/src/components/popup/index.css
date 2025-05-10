@@ -1,4 +1,4 @@
-.popup {
+.univer-popup {
     position: fixed;
     z-index: 1070;
     top: -9999px;
@@ -8,7 +8,7 @@
     @apply univer-shadow;
 }
 
-.popup-enter {
+.univer-popup-enter {
     transform-origin: 0 0;
     animation-duration: 0.15s;
     animation-fill-mode: both;
@@ -17,12 +17,12 @@
     animation-timing-function: cubic-bezier(0.08, 0.82, 0.17, 1);
 }
 
-.popup-enter-active {
+.univer-popup-enter-active {
     animation-name: popup-slide-up-in;
     animation-play-state: running;
 }
 
-.popup-exit {
+.univer-popup-exit {
     transform-origin: 0 0;
     animation-duration: 0.15s;
     animation-fill-mode: both;
@@ -32,7 +32,7 @@
     animation-timing-function: cubic-bezier(0.6, 0.04, 0.98, 0.34);
 }
 
-.popup-exit-active {
+.univer-popup-exit-active {
     display: none;
 }
 
@@ -64,7 +64,7 @@
     }
 }
 
-.popup-mask {
+.univer-popup-mask {
     position: fixed;
     z-index: 1060;
     top: 0;

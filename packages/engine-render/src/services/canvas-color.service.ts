@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-import type { RGBColor } from './utils';
-import { createIdentifier, Disposable, Inject, ThemeService } from '@univerjs/core';
-// import { invertColorByHSL } from './invert-hsl';
-import { invertColorByMatrix } from './invert-rgb';
+import type { RGBColorType } from '@univerjs/core';
+import { createIdentifier, Disposable, Inject, invertColorByMatrix, ThemeService } from '@univerjs/core';
 
 export const ICanvasColorService = createIdentifier<ICanvasColorService>('univer.engine-render.canvas-color.service');
 /**
@@ -77,11 +75,11 @@ export class CanvasColorService extends Disposable implements ICanvasColorServic
             }
         } else if (color.startsWith('rgba')) {
             const stripped = color.slice(5, -1).split(',');
-            const invertedColor = this._invertAlgo(stripped.slice(0, 3).map(Number) as RGBColor);
+            const invertedColor = this._invertAlgo(stripped.slice(0, 3).map(Number) as RGBColorType);
             cachedColor = `rgba(${invertedColor[0]},${invertedColor[1]},${invertedColor[2]},${stripped[3]})`;
         } else if (color.startsWith('rgb')) {
             const stripped = color.slice(4, -1).split(',');
-            const invertedColor = this._invertAlgo(stripped.map(Number) as RGBColor);
+            const invertedColor = this._invertAlgo(stripped.map(Number) as RGBColorType);
             cachedColor = `rgb(${invertedColor[0]},${invertedColor[1]},${invertedColor[2]})`;
         } else if (color.includes('.')) {
             cachedColor = this._themeService.getColorFromTheme(color);
@@ -94,7 +92,7 @@ export class CanvasColorService extends Disposable implements ICanvasColorServic
     }
 }
 
-export function hexToRgb(_hex: string): RGBColor {
+export function hexToRgb(_hex: string): RGBColorType {
     const hex = _hex.replace(/^#/, '');
 
     let r;
@@ -111,10 +109,10 @@ export function hexToRgb(_hex: string): RGBColor {
     }
 
     // Return normalized RGBA values as an array
-    return [r, g, b] as RGBColor;
+    return [r, g, b] as RGBColorType;
 }
 
-export function rgbToHex(rgbColor: RGBColor): string {
+export function rgbToHex(rgbColor: RGBColorType): string {
     const r = Math.round(rgbColor[0]);
     const g = Math.round(rgbColor[1]);
     const b = Math.round(rgbColor[2]);

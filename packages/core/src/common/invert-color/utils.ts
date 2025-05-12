@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-export type RGBColor = [number, number, number];
-export type HSLColor = RGBColor;
+export type RGBColorType = [number, number, number];
+export type HSLColorType = RGBColorType;
 
-export function normalizeRGBColor(color: RGBColor): RGBColor {
-    return color.map((c) => c / 255) as RGBColor;
+export function normalizeRGBColor(color: RGBColorType): RGBColorType {
+    return color.map((c) => c / 255) as RGBColorType;
 }
 
-export function denormalizeRGBColor(color: RGBColor): RGBColor {
-    return color.map((c) => Math.round(c * 255)) as RGBColor;
+export function denormalizeRGBColor(color: RGBColorType): RGBColorType {
+    return color.map((c) => Math.round(c * 255)) as RGBColorType;
 }

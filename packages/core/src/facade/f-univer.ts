@@ -17,7 +17,7 @@
 import type { CommandListener, DocumentDataModel, IDisposable, IDocumentData, IExecutionOptions, IParagraphStyle, ITextDecoration, ITextStyle, LifecycleStages } from '@univerjs/core';
 import type { Subscription } from 'rxjs';
 import type { ICommandEvent, IEventParamConfig } from './f-event';
-import { CanceledError, ColorBuilder, Disposable, ICommandService, Inject, Injector, IUniverInstanceService, LifecycleService, ParagraphStyleBuilder, ParagraphStyleValue, RedoCommand, RichTextBuilder, RichTextValue, TextDecorationBuilder, TextStyleBuilder, TextStyleValue, toDisposable, UndoCommand, Univer, UniverInstanceType } from '@univerjs/core';
+import { CanceledError, ColorBuilder, Disposable, ICommandService, Inject, Injector, IUniverInstanceService, LifecycleService, ParagraphStyleBuilder, ParagraphStyleValue, RedoCommand, RichTextBuilder, RichTextValue, TextDecorationBuilder, TextStyleBuilder, TextStyleValue, ThemeService, toDisposable, UndoCommand, Univer, UniverInstanceType } from '@univerjs/core';
 import { FBlob } from './f-blob';
 import { FDoc } from './f-doc';
 import { FEnum } from './f-enum';
@@ -316,6 +316,20 @@ export class FUniver extends Disposable {
      */
     redo(): Promise<boolean> {
         return this._commandService.executeCommand(RedoCommand.id);
+    }
+
+    /**
+     * Toggle dark mode on or off.
+     * @param {boolean} isDarkMode - Whether the dark mode is enabled.
+     * @internal
+     * @example
+     * ```ts
+     * univerAPI.toggleDarkMode(true);
+     * ```
+     */
+    toggleDarkMode(isDarkMode: boolean): void {
+        const themeService = this._injector.get(ThemeService);
+        themeService.setDarkMode(isDarkMode);
     }
 
     /**

@@ -95,7 +95,7 @@ export function CustomLabel(props: ICustomLabelProps) {
             nodes.push(
                 <Icon
                     key={index++}
-                    className="univer-fill-primary-600 univer-text-base"
+                    className="univer-text-base"
                     extend={{ colorChannel1: isValid ? realValue : 'var(--univer-primary-600)' }}
                 />
             );

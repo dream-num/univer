@@ -101,6 +101,7 @@ export const SideMenu = forwardRef<ISideMenuInstance, ISideMenuProps>((props, re
                   univer-cursor-pointer univer-items-center univer-justify-center univer-rounded-full univer-bg-white
                   univer-text-gray-800
                   univer-shadow-[0px_1px_3px_-1px_rgba(30,40,77,0.10),0px_1px_4px_0px_rgba(30,40,77,0.12)]
+                  dark:univer-bg-gray-600 dark:univer-text-gray-200
                 `, iconClass)}
                 style={iconStyle}
             >
@@ -148,8 +149,8 @@ export const SideMenu = forwardRef<ISideMenuInstance, ISideMenuProps>((props, re
                                     [titleClass]: menu.isTitle,
                                     [h1Class]: menu.level === 1,
                                     [textClass]: menu.level > 1,
-                                    'univer-text-gray-500': menu.id !== activeId,
-                                    'univer-text-gray-800': menu.id === activeId,
+                                    'univer-text-gray-500 dark:univer-text-gray-400': menu.id !== activeId,
+                                    'univer-text-gray-800 dark:univer-text-gray-200': menu.id === activeId,
                                 }
                             )}
                             style={{

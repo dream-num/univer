@@ -28,7 +28,7 @@ export function autoDetectedExternalPlugin(): Plugin {
         apply: 'build',
 
         resolveId(source) {
-            if (source.endsWith('.less') || source.endsWith('.css')) {
+            if (source.endsWith('.css')) {
                 hasCss = true;
                 return null;
             }

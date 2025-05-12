@@ -139,7 +139,7 @@ export function FilterByValue(props: { model: ByValuesModel }) {
                             <div
                                 className={`
                                   univer-ml-1 univer-flex univer-h-5 univer-flex-1 univer-cursor-pointer
-                                  univer-items-center univer-justify-between univer-text-smver-text-primary-500
+                                  univer-items-center univer-justify-between univer-text-sm univer-text-primary-500
                                 `}
                             >
                                 <span

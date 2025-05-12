@@ -316,7 +316,7 @@ function DropdownMenuLabel({
             data-slot="dropdown-menu-label"
             data-inset={inset}
             className={clsx(
-                'univer-px-2 univer-py-1.5 univer-text-smver-font-semibold',
+                'univer-px-2 univer-py-1.5 univer-text-sm univer-font-semibold',
                 className
             )}
             {...props}
@@ -341,7 +341,7 @@ function DropdownMenuShortcut({
 }: ComponentProps<'span'>) {
     return (
         <span
-            className={clsx('univer-ml-auto univer-text-smver-tracking-widest univer-opacity-60', className)}
+            className={clsx('univer-ml-auto univer-text-sm univer-tracking-widest univer-opacity-60', className)}
             {...props}
         />
     );

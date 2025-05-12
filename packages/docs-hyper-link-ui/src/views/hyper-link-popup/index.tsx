@@ -61,7 +61,7 @@ export const DocLinkPopup = () => {
                   univer-flex univer-h-6 univer-flex-1 univer-cursor-pointer univer-items-center univer-truncate
                   univer-text-sm univer-leading-5 univer-text-primary-500
                 `}
-                onClick={() => window.open(url, undefined, 'noopener,noreferrer')}
+                onClick={() => window.open(url, undefined, 'noopener noreferrer')}
             >
                 <div
                     className={`

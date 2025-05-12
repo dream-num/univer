@@ -87,7 +87,7 @@ export function BorderPanel(props: IBorderPanelProps) {
     function renderIcon(icon: string) {
         const Icon = componentManager.get(icon);
 
-        return Icon && <Icon extend={{ colorChannel1: '#2c53f1' }} />;
+        return Icon && <Icon className="univer-fill-primary-600" />;
     }
 
     return (
@@ -139,7 +139,13 @@ export function BorderPanel(props: IBorderPanelProps) {
                             `}
                             type="button"
                         >
-                            <PaintBucket className="univer-fill-primary-600" extend={{ colorChannel1: value?.color ?? '' }} />
+                            <PaintBucket
+                                className={`
+                                  univer-fill-primary-600
+                                  dark:univer-text-white
+                                `}
+                                extend={{ colorChannel1: value?.color ?? '' }}
+                            />
                             <MoreDownSingle />
                         </button>
                     </Dropdown>
@@ -161,7 +167,13 @@ export function BorderPanel(props: IBorderPanelProps) {
                                             `}
                                             onClick={() => handleClick(item.value, 'style')}
                                         >
-                                            <BorderLine type={item.value} />
+                                            <BorderLine
+                                                className={`
+                                                  univer-fill-gray-900
+                                                  dark:univer-fill-white
+                                                `}
+                                                type={item.value}
+                                            />
                                         </li>
                                     ))}
                                 </ul>
@@ -177,7 +189,13 @@ export function BorderPanel(props: IBorderPanelProps) {
                             `}
                             type="button"
                         >
-                            <BorderLine type={BorderStyleTypes.THIN} />
+                            <BorderLine
+                                className={`
+                                  univer-fill-gray-900
+                                  dark:univer-fill-white
+                                `}
+                                type={BorderStyleTypes.THIN}
+                            />
                             <MoreDownSingle />
                         </button>
                     </Dropdown>

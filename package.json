@@ -63,7 +63,7 @@
         "eslint": "9.26.0",
         "eslint-plugin-format": "^1.0.1",
         "eslint-plugin-header": "^3.1.1",
-        "eslint-plugin-jsdoc": "^50.6.11",
+        "eslint-plugin-jsdoc": "^50.6.14",
         "eslint-plugin-no-barrel-import": "^0.0.2",
         "eslint-plugin-no-penetrating-import": "^0.0.1",
         "eslint-plugin-react": "^7.37.5",

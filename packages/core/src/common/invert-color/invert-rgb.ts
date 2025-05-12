@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { RGBColor } from './utils';
+import type { RGBColorType } from './utils';
 import { denormalizeRGBColor, normalizeRGBColor } from './utils';
 
 const matrix = [
@@ -24,7 +24,7 @@ const matrix = [
     [0, 0, 0, 1, 0],
 ];
 
-function invertNormalizedColorByMatrix(color: RGBColor): RGBColor {
+function invertNormalizedColorByMatrix(color: RGBColorType): RGBColorType {
     const r = color[0];
     const g = color[1];
     const b = color[2];
@@ -38,7 +38,7 @@ function invertNormalizedColorByMatrix(color: RGBColor): RGBColor {
     // Clamp values between 0 and 1, or we can normalize it.
     // It is better to normalize before rendering.
     newColor = newColor.map((c) => (c > 1 ? 1 : c < 0 ? 0 : c));
-    return newColor as RGBColor;
+    return newColor as RGBColorType;
 }
 
 /**
@@ -46,6 +46,6 @@ function invertNormalizedColorByMatrix(color: RGBColor): RGBColor {
  * @param color The color to invert. Note that this color is already normalized.
  * @returns The inverted color.
  */
-export function invertColorByMatrix(color: RGBColor): RGBColor {
+export function invertColorByMatrix(color: RGBColorType): RGBColorType {
     return denormalizeRGBColor(invertNormalizedColorByMatrix(normalizeRGBColor(color)));
 }

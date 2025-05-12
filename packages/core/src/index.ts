@@ -199,3 +199,8 @@ export { Skeleton } from './skeleton';
 export type { IGetRowColByPosOptions } from './sheets/sheet-skeleton';
 export type { IPosition } from './sheets/typedef.ts';
 export * from './sheets/sheet-skeleton';
+
+// invert color utils
+export { invertColorByMatrix } from './common/invert-color/invert-rgb';
+export { invertColorByHSL } from './common/invert-color/invert-hsl';
+export type { RGBColorType } from './common/invert-color/utils';

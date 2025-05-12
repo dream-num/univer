@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { RGBColor } from './utils';
+import type { RGBColorType } from './utils';
 import { denormalizeRGBColor, normalizeRGBColor } from './utils';
 
-function rgbToHsl([r, g, b]: RGBColor): RGBColor {
+function rgbToHsl([r, g, b]: RGBColorType): RGBColorType {
     const max = Math.max(r, g, b);
     const min = Math.min(r, g, b);
     const l = (max + min) / 2;
@@ -60,7 +60,7 @@ function getContrastRatio(luminance1: number, luminance2: number) {
     );
 }
 
-function hslToRgb(h: number, s: number, l: number): RGBColor {
+function hslToRgb(h: number, s: number, l: number): RGBColorType {
     let r, g, b;
 
     if (s === 0) {
@@ -87,8 +87,8 @@ function hslToRgb(h: number, s: number, l: number): RGBColor {
     return [r, g, b];
 }
 
-export function stringToRgb(color: string): RGBColor {
-    return color.split(',').slice(0, 3).map(Number) as RGBColor;
+export function stringToRgb(color: string): RGBColorType {
+    return color.split(',').slice(0, 3).map(Number) as RGBColorType;
 }
 
 const white = { r: 1, g: 1, b: 1 };
@@ -102,7 +102,7 @@ const blackLuminance = getLuminance(black.r, black.g, black.b);
  * @param color The color to invert. Note that this color is already normalized.
  * @returns The inverted color.
  */
-function invertNormalizedColorByHSL(color: RGBColor): RGBColor {
+function invertNormalizedColorByHSL(color: RGBColorType): RGBColorType {
     const originalLuminance = getLuminance(color[0], color[1], color[2]);
     const originalContrast = getContrastRatio(
         whiteLuminance,
@@ -122,6 +122,6 @@ function invertNormalizedColorByHSL(color: RGBColor): RGBColor {
     return newColor;
 }
 
-export function invertColorByHSL(color: RGBColor): RGBColor {
+export function invertColorByHSL(color: RGBColorType): RGBColorType {
     return denormalizeRGBColor(invertNormalizedColorByHSL(normalizeRGBColor(color)));
 }

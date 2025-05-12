@@ -81,7 +81,7 @@ export enum SheetSkeletonChangeType {
     INSERT_COL = 'sheet.mutation.insert-col',
     INSERT_ROW = 'sheet.mutation.insert-row',
     REMOVE_COL = 'sheet.mutation.remove-col',
-    REMOVE_ROW = 'sheet.mutation.remove-row',
+    REMOVE_ROW = 'sheet.mutation.remove-rows',
     TOGGLE_GRIDLINES = 'sheet.mutation.toggle-gridlines',
     SET_GRIDLINES_COLOR = 'sheet.mutation.set-gridlines-color',
 }

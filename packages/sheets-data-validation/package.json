@@ -76,7 +76,7 @@
         "@univerjs/core": "workspace:*",
         "@univerjs/data-validation": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
-        "@univerjs/protocol": "0.1.45",
+        "@univerjs/protocol": "0.1.46",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-formula": "workspace:*"
     },

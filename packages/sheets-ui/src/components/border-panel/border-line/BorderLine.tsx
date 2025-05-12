@@ -28,34 +28,34 @@ import { BorderThick } from './icons/BorderThick';
 import { BorderThin } from './icons/BorderThin';
 
 interface IBorderLineProps {
+    className: string;
     type: BorderStyleTypes;
 }
 
 export function BorderLine(props: IBorderLineProps) {
-    const { type = BorderStyleTypes.THIN } = props;
+    const { type = BorderStyleTypes.THIN, className } = props;
 
     switch (type) {
         case BorderStyleTypes.DASH_DOT:
-            return <BorderDashDot />;
+            return <BorderDashDot className={className} />;
         case BorderStyleTypes.DASH_DOT_DOT:
-            return <BorderDashDotDot />;
+            return <BorderDashDotDot className={className} />;
         case BorderStyleTypes.DASHED:
-            return <BorderDashed />;
+            return <BorderDashed className={className} />;
         case BorderStyleTypes.HAIR:
-            return <BorderHair />;
+            return <BorderHair className={className} />;
         case BorderStyleTypes.MEDIUM:
-            return <BorderMedium />;
+            return <BorderMedium className={className} />;
         case BorderStyleTypes.MEDIUM_DASH_DOT:
-            return <BorderMediumDashDot />;
+            return <BorderMediumDashDot className={className} />;
         case BorderStyleTypes.MEDIUM_DASH_DOT_DOT:
-            return <BorderMediumDashDotDot />;
+            return <BorderMediumDashDotDot className={className} />;
         case BorderStyleTypes.MEDIUM_DASHED:
-            return <BorderMediumDashed />;
+            return <BorderMediumDashed className={className} />;
         case BorderStyleTypes.THICK:
-            return <BorderThick />;
+            return <BorderThick className={className} />;
         case BorderStyleTypes.THIN:
-            return <BorderThin />;
         default:
-            return <BorderThin />;
+            return <BorderThin className={className} />;
     }
 }

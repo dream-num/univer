@@ -23,9 +23,9 @@ import fs from 'fs-extra';
 import { mergeConfig, build as viteBuild } from 'vite';
 import dts from 'vite-plugin-dts';
 import vitePluginExternal from 'vite-plugin-external';
-
 import { autoDetectedExternalPlugin } from './auto-detected-external-plugin';
 import { cleanupPkgPlugin } from './cleanup-pkg-plugin';
+import { trimClassNamePlugin } from './plugin-trim-classname-plugin';
 import { convertLibNameFromPackageName, obfuscator } from './utils';
 
 interface IBuildExecuterOptions {
@@ -216,6 +216,7 @@ export async function build(options?: IBuildOptions) {
             'process.env.BUILD_TIMESTAMP': JSON.stringify(Math.floor(Date.now() / 1000)),
         },
         plugins: [
+            trimClassNamePlugin(),
             react(),
             vue(),
             autoDetectedExternalPlugin(),

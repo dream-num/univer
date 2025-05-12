@@ -15,8 +15,7 @@
  */
 
 import type { ISheetHyperLink } from '../types/interfaces/i-hyper-link';
-import { Disposable, Inject, IResourceManagerService } from '@univerjs/core';
-import { UniverType } from '@univerjs/protocol';
+import { Disposable, Inject, IResourceManagerService, UniverInstanceType } from '@univerjs/core';
 import { HyperLinkModel } from '../models/hyper-link.model';
 import { SHEET_HYPER_LINK_PLUGIN } from '../types/const';
 
@@ -58,7 +57,7 @@ export class SheetsHyperLinkResourceController extends Disposable {
         this.disposeWithMe(
             this._resourceManagerService.registerPluginResource({
                 pluginName: SHEET_HYPER_LINK_PLUGIN,
-                businesses: [UniverType.UNIVER_SHEET],
+                businesses: [UniverInstanceType.UNIVER_SHEET],
                 toJson: (unitID) => toJson(unitID),
                 parseJson: (json) => parseJson(json),
                 onUnLoad: (unitID) => {

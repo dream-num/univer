@@ -181,6 +181,5 @@ export function FilterByValue(props: { model: ByValuesModel }) {
                 </div>
             </div>
         </div>
-
     );
 }

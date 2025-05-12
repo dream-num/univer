@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { ContextMenuGroup, ContextMenuPosition, type MenuSchemaType } from '@univerjs/ui';
+import type { MenuSchemaType } from '@univerjs/ui';
+import { ContextMenuGroup, ContextMenuPosition } from '@univerjs/ui';
 import { ToggleCrosshairHighlightOperation } from '../commands/operations/operation';
 import { CrosshairHighlightMenuItemFactory } from './crosshair.menu';
 

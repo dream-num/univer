@@ -15,6 +15,8 @@
  */
 
 import { render } from '@univerjs/design';
+import { defaultTheme } from '@univerjs/themes';
+import { ThemeSwitcherService } from '@univerjs/ui';
 import pkg from '../../package.json';
 
 import './global.css';
@@ -36,6 +38,8 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 function Examples() {
+    new ThemeSwitcherService().injectThemeToHead(defaultTheme);
+
     const demos = [{
         title: '📊 Sheets',
         href: './sheets/',

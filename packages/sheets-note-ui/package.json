@@ -71,7 +71,7 @@
         "@univerjs/sheets-note": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "rxjs": "^7.8.1"
+        "rxjs": "^7.8.2"
     },
     "devDependencies": {
         "@types/react": "^18.0.15",

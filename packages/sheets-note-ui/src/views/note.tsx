@@ -95,6 +95,7 @@ export const SheetsNote = (props: { popup: IPopup<{ location: ISheetLocationBase
             if (!entry) return;
 
             const { width, height } = entry.contentRect;
+            if (width === 0 && height === 0) return;
             const newNote = { ...note, width, height };
             setNote(newNote);
             updateNote(newNote);
@@ -103,6 +104,7 @@ export const SheetsNote = (props: { popup: IPopup<{ location: ISheetLocationBase
         resizeObserver.observe(textarea);
 
         return () => {
+            resizeObserver.unobserve(textarea);
             resizeObserver.disconnect();
         };
     }, [note.note]); // Only re-run when note content changes

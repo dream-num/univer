@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ICommandService, Inject, Injector, Plugin, registerDependencies, touchDependencies, UniverInstanceType } from '@univerjs/core';
+import { ICommandService, IConfigService, Inject, Injector, merge, Plugin, registerDependencies, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { AddSheetTableCommand } from './commands/commands/add-sheet-table.command';
 import { AddTableThemeCommand } from './commands/commands/add-table-theme.command';
 import { DeleteSheetTableCommand } from './commands/commands/delete-sheet-table.command';
@@ -27,6 +27,7 @@ import { DeleteSheetTableMutation } from './commands/mutations/delete-sheet-tabl
 import { SetSheetTableMutation } from './commands/mutations/set-sheet-table.mutation';
 import { SetSheetTableFilterMutation } from './commands/mutations/set-table-filter.mutation';
 import { PLUGIN_NAME } from './const';
+import { defaultPluginConfig, SHEETS_TABLE_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { SheetTableRangeController } from './controllers/sheet-table-range.controller';
 import { SheetTableRefRangeController } from './controllers/sheet-table-ref-range.controller';
 import { SheetsTableThemeController } from './controllers/sheet-table-theme.controller';
@@ -35,16 +36,25 @@ import { TableFilterController } from './controllers/table-filter.controller';
 import { TableManager } from './model/table-manager';
 import { SheetTableService } from './services/table-service';
 
-export class UniverSheetTablePlugin extends Plugin {
+export class UniverSheetsTablePlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;
     static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(
-        private readonly _config = {},
+        private readonly _config = defaultPluginConfig,
         @Inject(Injector) protected override _injector: Injector,
+        @IConfigService private readonly _configService: IConfigService,
         @Inject(ICommandService) private _commandService: ICommandService
     ) {
         super();
+        // Manage the plugin configuration.
+        const { ...rest } = merge(
+            {},
+            defaultPluginConfig,
+            this._config
+        );
+        this._configService.setConfig(SHEETS_TABLE_PLUGIN_CONFIG_KEY, rest);
+
         this._initRegisterCommand();
     }
 

@@ -16,13 +16,13 @@
 
 import type { Dependency } from '@univerjs/core';
 import type { IUniverSheetsTableUIConfig } from './controllers/config.schema';
-import { DependentOn, ICommandService, IConfigService, Inject, Injector, Plugin, registerDependencies, touchDependencies, UniverInstanceType } from '@univerjs/core';
+import { DependentOn, ICommandService, IConfigService, Inject, Injector, merge, Plugin, registerDependencies, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { UniverSheetTablePlugin } from '@univerjs/sheets-table';
+import { UniverSheetsTablePlugin } from '@univerjs/sheets-table';
 import { OpenTableFilterPanelOperation } from './commands/operations/open-table-filter-dialog.opration';
 import { OpenTableSelectorOperation } from './commands/operations/open-table-selector.operation';
 import { PLUGIN_NAME } from './const';
-import { SHEETS_TABLE_UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { defaultPluginConfig, SHEETS_TABLE_UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { SheetTableAnchorController } from './controllers/sheet-table-anchor.controller';
 import { SheetsTableComponentController } from './controllers/sheet-table-component.controller';
 import { SheetsTableFilterButtonRenderController } from './controllers/sheet-table-filter-button-render.controller';
@@ -32,22 +32,31 @@ import { SheetTableSelectionController } from './controllers/sheet-table-selecti
 import { SheetTableThemeUIController } from './controllers/sheet-table-theme-ui.controller';
 import { SheetsTableUiService } from './services/sheets-table-ui-service';
 
-@DependentOn(UniverSheetTablePlugin)
-export class UniverSheetTableUIPlugin extends Plugin {
+@DependentOn(UniverSheetsTablePlugin)
+export class UniverSheetsTableUIPlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;
     static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(
-        private readonly _config: Partial<IUniverSheetsTableUIConfig> = {},
+        private readonly _config: Partial<IUniverSheetsTableUIConfig> = defaultPluginConfig,
         @Inject(Injector) protected override _injector: Injector,
         @Inject(ICommandService) private _commandService: ICommandService,
         @IConfigService private readonly _configService: IConfigService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
         super();
-        this._initRegisterCommand();
+        // Manage the plugin configuration.
+        const { menu, ...rest } = merge(
+            {},
+            defaultPluginConfig,
+            this._config
+        );
+        if (menu) {
+            this._configService.setConfig('menu', menu, { merge: true });
+        }
+        this._configService.setConfig(SHEETS_TABLE_UI_PLUGIN_CONFIG_KEY, rest);
 
-        this._configService.setConfig(SHEETS_TABLE_UI_PLUGIN_CONFIG_KEY, this._config);
+        this._initRegisterCommand();
     }
 
     override onStarting(): void {

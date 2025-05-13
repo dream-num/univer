@@ -14,6 +14,4 @@
  * limitations under the License.
  */
 
-import './global.css';
-
-export { UniverSheetsTableUIPlugin } from './plugin';
+export const PLUGIN_NAME = 'SHEET_NOTE_PLUGIN';

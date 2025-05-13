@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
-import './global.css';
+export const SHEETS_TABLE_PLUGIN_CONFIG_KEY = 'sheets-table.config';
 
-export { UniverSheetsTableUIPlugin } from './plugin';
+export const configSymbol = Symbol(SHEETS_TABLE_PLUGIN_CONFIG_KEY);
+
+export interface IUniverSheetsTableConfig {}
+
+export const defaultPluginConfig: IUniverSheetsTableConfig = {};

@@ -14,6 +14,19 @@
  * limitations under the License.
  */
 
-import './global.css';
+import type { MenuConfig } from '@univerjs/ui';
 
-export { UniverSheetsTableUIPlugin } from './plugin';
+export const SHEETS_NOTE_UI_PLUGIN_CONFIG_KEY = 'sheets-note-ui.config';
+
+export const configSymbol = Symbol(SHEETS_NOTE_UI_PLUGIN_CONFIG_KEY);
+
+export interface IUniverSheetsNoteUIPluginConfig {
+    menu?: MenuConfig;
+
+    defaultNoteSize?: {
+        width: number;
+        height: number;
+    };
+}
+
+export const defaultPluginConfig: IUniverSheetsNoteUIPluginConfig = {};

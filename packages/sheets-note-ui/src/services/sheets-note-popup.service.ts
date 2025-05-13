@@ -22,7 +22,7 @@ import { IZenZoneService } from '@univerjs/ui';
 import { BehaviorSubject } from 'rxjs';
 import { SHEET_NOTE_COMPONENT } from '../views/config';
 
-export interface INotePopup extends ISheetLocationBase {
+interface INotePopup extends ISheetLocationBase {
     noteId?: string;
     temp?: boolean;
     trigger?: string;

@@ -42,7 +42,7 @@ export { ShortcutPanelController } from './controllers/shortcut-display/shortcut
 export { IUIController, type IWorkbenchOptions } from './controllers/ui/ui.controller';
 export { DesktopUIController } from './controllers/ui/ui-desktop.controller';
 export { SingleUnitUIController } from './controllers/ui/ui-shared.controller';
-export { UniverMobileUIPlugin } from './mobile-ui-plugin';
+export { UniverMobileUIPlugin } from './mobile-plugin';
 export { DesktopBeforeCloseService, IBeforeCloseService } from './services/before-close/before-close.service';
 export { CopyCommand, CutCommand, PasteCommand, SheetPasteShortKeyCommandName } from './services/clipboard/clipboard.command';
 export { supportClipboardAPI } from './services/clipboard/clipboard-utils';
@@ -115,7 +115,7 @@ export { DesktopZenZoneService } from './services/zen-zone/desktop-zen-zone.serv
 export { IZenZoneService } from './services/zen-zone/zen-zone.service';
 export { FloatDomSingle } from './views/components/dom/FloatDom';
 export { PrintFloatDomSingle } from './views/components/dom/print';
-export { DISABLE_AUTO_FOCUS_KEY, UNIVER_UI_PLUGIN_NAME, UniverUIPlugin } from './ui-plugin';
+export { DISABLE_AUTO_FOCUS_KEY, UNIVER_UI_PLUGIN_NAME, UniverUIPlugin } from './plugin';
 export * from './utils';
 export { ComponentContainer, type IComponentContainerProps, useComponentsOfPart } from './views/components/ComponentContainer';
 export { ZenZone } from './views/components/zen-zone/ZenZone';

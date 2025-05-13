@@ -34,7 +34,7 @@ export { menuSchema as DocsUIMenuSchema } from './controllers/menu.schema';
 export { DocBackScrollRenderController } from './controllers/render-controllers/back-scroll.render-controller';
 export { DocRenderController } from './controllers/render-controllers/doc.render-controller';
 export type { IUniverDocsUIConfig } from './controllers/config.schema';
-export * from './docs-ui-plugin';
+export { UniverDocsUIPlugin } from './plugin';
 export * from './services';
 export { IDocClipboardService } from './services/clipboard/clipboard.service';
 export { DocEventManagerService } from './services/doc-event-manager.service';

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export { UniverSheetsPlugin } from './sheets-plugin';
+export { UniverSheetsPlugin } from './plugin';
 
 // #region services
 export {

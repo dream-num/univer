@@ -16,8 +16,8 @@
 
 import './global.css';
 
-export { UniverSheetsFilterUIPlugin } from './filter-ui-desktop.plugin';
-export { UniverSheetsFilterMobileUIPlugin } from './filter-ui-mobile.plugin';
+export { UniverSheetsFilterUIPlugin } from './plugin';
+export { UniverSheetsFilterMobileUIPlugin } from './mobile-plugin';
 export { UniverSheetsFilterUIWorkerPlugin } from './worker/plugin';
 
 // #region - all commands

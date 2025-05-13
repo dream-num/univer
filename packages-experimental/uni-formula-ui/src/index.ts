@@ -16,5 +16,5 @@
 
 import './global.css';
 
-export { UniverDocUniFormulaUIPlugin } from './uni-formula-ui.plugin';
+export { UniverDocUniFormulaUIPlugin } from './plugin';
 export { UniFormulaService } from './services/uni-formula.service';

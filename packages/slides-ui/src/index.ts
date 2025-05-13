@@ -16,7 +16,7 @@
 
 import './global.css';
 
-export { UniverSlidesUIPlugin } from './slides-ui-plugin';
+export { UniverSlidesUIPlugin } from './plugin';
 export { SlidesUIController } from './controllers/slide-ui.controller';
 export { SlideSideBar } from './components/slide-bar/SlideBar';
 

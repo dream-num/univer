@@ -15,7 +15,7 @@
  */
 
 export { SheetsTableButtonStateEnum, SheetsTableSortStateEnum, TableColumnDataTypeEnum, TableColumnFilterTypeEnum, TableConditionTypeEnum, TableDateCompareTypeEnum, TableNumberCompareTypeEnum, TableStringCompareTypeEnum } from './types/enum';
-export { UniverSheetTablePlugin } from './plugin';
+export { UniverSheetsTablePlugin } from './plugin';
 export type { ITableColumnJson, ITableConditionFilterItem, ITableData, ITableFilterItem, ITableInfo, ITableInfoWithUnitId, ITableManualFilterItem, ITableOptions, ITableRange, ITableRangeWithState, TableMetaType, TableRelationTupleType } from './types/type';
 export { SheetTableService } from '../src/services/table-service';
 export { TableManager } from '../src/model/table-manager';

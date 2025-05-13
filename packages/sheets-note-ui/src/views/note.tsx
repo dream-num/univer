@@ -17,14 +17,14 @@
 import type { ISheetLocationBase } from '@univerjs/sheets';
 import type { ISheetNote } from '@univerjs/sheets-note';
 import type { IPopup } from '@univerjs/ui';
-import type { IUniverSheetsNoteUIPluginConfig } from '../plugin';
+import type { IUniverSheetsNoteUIPluginConfig } from '../controllers/config.schema';
 import { ICommandService, LocaleService } from '@univerjs/core';
 import { borderClassName, clsx, scrollbarClassName } from '@univerjs/design';
 import { SheetDeleteNoteCommand, SheetsNoteModel, SheetUpdateNoteCommand } from '@univerjs/sheets-note';
 import { useConfigValue, useDebounceFn, useDependency } from '@univerjs/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { of } from 'rxjs';
-import { SHEETS_NOTE_UI_PLUGIN_CONFIG_KEY } from '../plugin';
+import { SHEETS_NOTE_UI_PLUGIN_CONFIG_KEY } from '../controllers/config.schema';
 
 export const SheetsNote = (props: { popup: IPopup<{ location: ISheetLocationBase }> }) => {
     const noteModel = useDependency(SheetsNoteModel);

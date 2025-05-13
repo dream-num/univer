@@ -15,7 +15,7 @@
  */
 
 export type { IUniverDocsConfig } from './controllers/config.schema';
-export { UniverDocsPlugin } from './doc-plugin';
+export { UniverDocsPlugin } from './plugin';
 export { DocInterceptorService } from './services/doc-interceptor/doc-interceptor.service';
 export { DOC_INTERCEPTOR_POINT } from './services/doc-interceptor/interceptor-const';
 export { DocSelectionManagerService } from './services/doc-selection-manager.service';

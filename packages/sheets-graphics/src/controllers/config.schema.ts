@@ -20,8 +20,8 @@ export const PLUGIN_CONFIG_KEY = 'graphics.config';
 
 export const configSymbol = Symbol(PLUGIN_CONFIG_KEY);
 
-export interface IUniverSheetGraphicsConfig {
+export interface IUniverSheetsGraphicsConfig {
     override?: DependencyOverride;
 }
 
-export const defaultPluginConfig: IUniverSheetGraphicsConfig = {};
+export const defaultPluginConfig: IUniverSheetsGraphicsConfig = {};

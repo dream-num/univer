@@ -34,7 +34,7 @@ import { UniverSheetsNotePlugin } from '@univerjs/sheets-note';
 import { UniverSheetsNoteUIPlugin } from '@univerjs/sheets-note-ui';
 import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
 import { UniverSheetsSortPlugin } from '@univerjs/sheets-sort';
-import { UniverSheetTablePlugin } from '@univerjs/sheets-table';
+import { UniverSheetsTablePlugin } from '@univerjs/sheets-table';
 import { UniverSheetsThreadCommentPlugin } from '@univerjs/sheets-thread-comment';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 import { UniverSheetsZenEditorPlugin } from '@univerjs/sheets-zen-editor';
@@ -125,7 +125,7 @@ function createNewInstance() {
     univer.registerPlugin(UniverSheetsThreadCommentPlugin);
     univer.registerPlugin(UniverSheetsCustomMenuPlugin);
 
-    univer.registerPlugin(UniverSheetTablePlugin);
+    univer.registerPlugin(UniverSheetsTablePlugin);
     univer.registerPlugin(UniverNetworkPlugin);
     univer.registerPlugin(UniverSheetsNotePlugin);
     univer.registerPlugin(UniverSheetsNoteUIPlugin);

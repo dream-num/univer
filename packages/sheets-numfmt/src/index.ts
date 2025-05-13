@@ -16,7 +16,7 @@
 
 export { countryCurrencyMap } from './base/const/currency-symbols';
 export { CURRENCYFORMAT, DATEFMTLISG, NUMBERFORMAT } from './base/const/formatdetail';
-export { UniverSheetsNumfmtPlugin } from './numfmt-plugin';
+export { UniverSheetsNumfmtPlugin } from './plugin';
 export { MenuCurrencyService } from './service/menu.currency.service';
 export { getPatternPreview, getPatternPreviewIgnoreGeneral, getPatternType } from './utils/pattern';
 export { getDecimalFromPattern, getDecimalString, isPatternEqualWithoutDecimal, isPatternHasDecimal, setPatternDecimal } from './utils/decimal';

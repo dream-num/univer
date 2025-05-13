@@ -15,9 +15,10 @@
  */
 
 import type { Dependency } from '@univerjs/core';
+import type { IUniverSheetsNoteUIPluginConfig } from './controllers/config.schema';
 import { DependentOn, IConfigService, Inject, Injector, merge, Plugin, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { UniverSheetsNotePlugin } from '@univerjs/sheets-note';
-import { menuSchema } from './controllers/menu.schema';
+import { defaultPluginConfig, SHEETS_NOTE_UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { SheetsCellContentController } from './controllers/sheets-cell-content.controller';
 import { SheetsNoteAttachmentController } from './controllers/sheets-note-attachment.controller';
 import { SheetsNotePopupController } from './controllers/sheets-note-popup.controller';
@@ -25,21 +26,6 @@ import { SheetsNoteUIController } from './controllers/sheets-note-ui.controller'
 import { SheetsNotePopupService } from './services/sheets-note-popup.service';
 
 export const PLUGIN_NAME = 'SHEET_NOTE_UI_PLUGIN';
-export const SHEETS_NOTE_UI_PLUGIN_CONFIG_KEY = 'sheets-note-ui';
-
-export interface IUniverSheetsNoteUIPluginConfig {
-    menu?: {
-        [key: string]: unknown;
-    };
-    defaultNoteSize?: {
-        width: number;
-        height: number;
-    };
-}
-
-const defaultPluginConfig: IUniverSheetsNoteUIPluginConfig = {
-    menu: menuSchema,
-};
 
 @DependentOn(UniverSheetsNotePlugin)
 export class UniverSheetsNoteUIPlugin extends Plugin {

@@ -9,9 +9,9 @@ npm i @univerjs/sheets-table
 ### Import
 
 ```ts
-import { UniverSheetTablePlugin } from '@univerjs/sheets-table';
+import { UniverSheetsTablePlugin } from '@univerjs/sheets-table';
 
-univer.registerPlugin(UniverSheetTablePlugin);
+univer.registerPlugin(UniverSheetsTablePlugin);
 ```
 
 <!-- Links -->

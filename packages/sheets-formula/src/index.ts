@@ -32,6 +32,6 @@ export { RegisterFunctionService } from './services/register-function.service';
 export { IRegisterFunctionService } from './services/register-function.service';
 export { RegisterOtherFormulaService } from './services/register-other-formula.service';
 export { IRemoteRegisterFunctionService, RemoteRegisterFunctionService } from './services/remote/remote-register-function.service';
-export { UniverRemoteSheetsFormulaPlugin, UniverSheetsFormulaPlugin } from './sheets-formula.plugin';
+export { UniverRemoteSheetsFormulaPlugin, UniverSheetsFormulaPlugin } from './plugin';
 
 // #endregion

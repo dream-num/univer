@@ -14,5 +14,5 @@
  * limitations under the License.
  */
 
-export { UniverSlidesPlugin } from './slides-plugin';
+export { UniverSlidesPlugin } from './plugin';
 export * from './views/render';

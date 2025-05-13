@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
-import './global.css';
+export const SHEETS_NOTE_PLUGIN_CONFIG_KEY = 'sheets-note.config';
 
-export { UniverSheetsTableUIPlugin } from './plugin';
+export const configSymbol = Symbol(SHEETS_NOTE_PLUGIN_CONFIG_KEY);
+
+export interface IUniverSheetsNoteConfig {}
+
+export const defaultPluginConfig: IUniverSheetsNoteConfig = {};

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export { UniverDocUniFormulaPlugin } from './uni-formula.plugin';
+export { UniverDocUniFormulaPlugin } from './plugin';
 export { DumbUniFormulaService, IUniFormulaService } from './services/uni-formula.service';
 export { UNI_FORMULA_PLUGIN_NAME as DOC_FORMULA_PLUGIN_NAME } from './const';
 export type { IDocFormulaCache, IDocFormulaData, IDocFormulaReference } from './models/doc-formula';

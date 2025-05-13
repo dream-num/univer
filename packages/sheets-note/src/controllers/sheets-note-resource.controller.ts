@@ -16,8 +16,8 @@
 
 import type { ISheetNote } from '../models/sheets-note.model';
 import { Disposable, Inject, IResourceManagerService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { PLUGIN_NAME } from '../const';
 import { SheetsNoteModel } from '../models/sheets-note.model';
-import { PLUGIN_NAME } from '../plugin';
 
 interface INoteData {
     [sheetId: string]: {

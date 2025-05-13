@@ -32,6 +32,6 @@ export { GlobalRangeSelectorService, type IShowRangeSelectorDialogOptions } from
 export { FormulaReorderController } from './controllers/formula-reorder.controller';
 
 export { FORMULA_PROMPT_ACTIVATED } from './services/prompt.service';
-export { UniverSheetsFormulaUIPlugin } from './sheets-formula-ui.plugin';
+export { UniverSheetsFormulaUIPlugin } from './plugin';
 
 // #endregion

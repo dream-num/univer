@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import type { MenuConfig } from '@univerjs/ui';
+
 export const SHEETS_TABLE_UI_PLUGIN_CONFIG_KEY = 'sheets-table-ui.config';
 
 export const configSymbol = Symbol(SHEETS_TABLE_UI_PLUGIN_CONFIG_KEY);
@@ -22,6 +24,8 @@ export interface IUniverSheetsTableUIConfig {
     anchorHeight?: number;
     anchorBackgroundColor?: string;
     hideAnchor?: boolean;
+
+    menu?: MenuConfig;
 }
 
 export const defaultPluginConfig: IUniverSheetsTableUIConfig = {

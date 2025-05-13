@@ -15,7 +15,7 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import type { IUniverSheetGraphicsConfig } from './controllers/config.schema';
+import type { IUniverSheetsGraphicsConfig } from './controllers/config.schema';
 
 import { IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -24,11 +24,11 @@ import { SheetGraphicsRenderController } from './controllers/graphics-render.con
 
 const PLUGIN_NAME = 'UNIVER_SHEET_DRAWING_PLUGIN';
 
-export class UniverSheetGraphicsPlugin extends Plugin {
+export class UniverSheetsGraphicsPlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;
 
     constructor(
-        private readonly _config: Partial<IUniverSheetGraphicsConfig> = defaultPluginConfig,
+        private readonly _config: Partial<IUniverSheetsGraphicsConfig> = defaultPluginConfig,
         @Inject(Injector) protected _injector: Injector,
         @IConfigService private readonly _configService: IConfigService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService

@@ -16,30 +16,30 @@
 
 import type { MenuSchemaType } from '@univerjs/ui';
 import { AddDecimalCommand, SetCurrencyCommand, SetPercentCommand, SubtractDecimalCommand } from '@univerjs/sheets-numfmt';
-import { RibbonStartGroup } from '@univerjs/ui';
+import { RibbonDataGroup } from '@univerjs/ui';
 import { OpenNumfmtPanelOperator } from '../commands/operations/open.numfmt.panel.operation';
 import { AddDecimalMenuItem, CurrencyMenuItem, FactoryOtherMenuItem, PercentMenuItem, SubtractDecimalMenuItem } from './menu';
 
 export const menuSchema: MenuSchemaType = {
-    [RibbonStartGroup.FORMULAS_INSERT]: {
+    [RibbonDataGroup.FORMULAS]: {
         [SetCurrencyCommand.id]: {
-            order: 4,
+            order: 0,
             menuItemFactory: CurrencyMenuItem,
         },
         [AddDecimalCommand.id]: {
-            order: 5,
+            order: 1,
             menuItemFactory: AddDecimalMenuItem,
         },
         [SubtractDecimalCommand.id]: {
-            order: 6,
+            order: 2,
             menuItemFactory: SubtractDecimalMenuItem,
         },
         [SetPercentCommand.id]: {
-            order: 7,
+            order: 3,
             menuItemFactory: PercentMenuItem,
         },
         [OpenNumfmtPanelOperator.id]: {
-            order: 8,
+            order: 4,
             menuItemFactory: FactoryOtherMenuItem,
         },
     },

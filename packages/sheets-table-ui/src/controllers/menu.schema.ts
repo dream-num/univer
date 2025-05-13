@@ -16,12 +16,12 @@
 
 import type { MenuSchemaType } from '@univerjs/ui';
 import { SheetTableInsertColCommand, SheetTableInsertRowCommand, SheetTableRemoveColCommand, SheetTableRemoveRowCommand } from '@univerjs/sheets-table';
-import { ContextMenuGroup, ContextMenuPosition, RibbonStartGroup } from '@univerjs/ui';
+import { ContextMenuGroup, ContextMenuPosition, RibbonDataGroup } from '@univerjs/ui';
 import { OpenTableSelectorOperation } from '../commands/operations/open-table-selector.operation';
 import { SHEET_TABLE_CONTEXT_INSERT_MENU_ID, SHEET_TABLE_CONTEXT_REMOVE_MENU_ID, SheetTableInsertColMenuFactory, SheetTableInsertContextMenuFactory, SheetTableInsertRowMenuFactory, SheetTableRemoveColMenuFactory, SheetTableRemoveContextMenuFactory, SheetTableRemoveRowMenuFactory, sheetTableToolbarInsertMenuFactory } from '../views/menu';
 
 export const menuSchema: MenuSchemaType = {
-    [RibbonStartGroup.FORMULAS_VIEW]: {
+    [RibbonDataGroup.ORGANIZATION]: {
         [OpenTableSelectorOperation.id]: {
             order: 0,
             menuItemFactory: sheetTableToolbarInsertMenuFactory,

@@ -33,11 +33,17 @@ const locale: typeof enUS = {
     },
     ribbon: {
         start: 'Démarrer',
+        startDesc: 'Initialiser la feuille de calcul et définir les paramètres de base.',
         insert: 'Insérer',
+        insertDesc: 'Insérer des lignes, des colonnes, des graphiques et divers autres éléments.',
         formulas: 'Formules',
+        formulasDesc: 'Utiliser des fonctions et des formules pour les calculs de données.',
         data: 'Données',
+        dataDesc: 'Gérer les données, y compris l\'importation, le tri et le filtrage.',
         view: 'Vue',
+        viewDesc: 'Changer les modes d\'affichage et ajuster l\'effet d\'affichage.',
         others: 'Autres',
+        othersDesc: 'Autres fonctions et paramètres.',
         more: 'Plus',
     },
     fontFamily: {

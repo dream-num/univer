@@ -49,7 +49,7 @@ import {
     SetWorksheetRowIsAutoHeightCommand,
     ToggleGridlinesCommand,
 } from '@univerjs/sheets';
-import { ContextMenuGroup, ContextMenuPosition, RibbonStartGroup } from '@univerjs/ui';
+import { ContextMenuGroup, ContextMenuPosition, RibbonPosition, RibbonStartGroup } from '@univerjs/ui';
 import {
     SheetCopyCommand,
     // SheetCutCommand,
@@ -176,98 +176,108 @@ import {
 } from './menu/sheet.menu';
 
 export const menuSchema: MenuSchemaType = {
-    [RibbonStartGroup.FORMAT]: {
-        [SetOnceFormatPainterCommand.id]: {
-            order: 0,
-            menuItemFactory: FormatPainterMenuItemFactory,
-        },
-        [SetRangeBoldCommand.id]: {
-            order: 1,
-            menuItemFactory: BoldMenuItemFactory,
-        },
-        [SetRangeItalicCommand.id]: {
-            order: 2,
-            menuItemFactory: ItalicMenuItemFactory,
-        },
-        [SetRangeUnderlineCommand.id]: {
-            order: 3,
-            menuItemFactory: UnderlineMenuItemFactory,
-        },
-        [SetRangeStrickThroughCommand.id]: {
-            order: 4,
-            menuItemFactory: StrikeThroughMenuItemFactory,
-        },
-        [SetRangeFontFamilyCommand.id]: {
-            order: 5,
-            menuItemFactory: FontFamilySelectorMenuItemFactory,
-        },
-        [SetRangeFontSizeCommand.id]: {
-            order: 6,
-            menuItemFactory: FontSizeSelectorMenuItemFactory,
-        },
-        [SetRangeTextColorCommand.id]: {
-            order: 7,
-            menuItemFactory: TextColorSelectorMenuItemFactory,
-            [ResetTextColorCommand.id]: {
-                order: 0,
-                menuItemFactory: ResetTextColorMenuItemFactory,
-            },
-        },
-        [SetBackgroundColorCommand.id]: {
-            order: 9,
-            menuItemFactory: BackgroundColorSelectorMenuItemFactory,
-            [ResetBackgroundColorCommand.id]: {
-                order: 0,
-                menuItemFactory: ResetBackgroundColorMenuItemFactory,
-            },
-        },
-        [SetBorderBasicCommand.id]: {
-            order: 10,
-            menuItemFactory: CellBorderSelectorMenuItemFactory,
-        },
-    },
-    [RibbonStartGroup.LAYOUT]: {
-        [AddWorksheetMergeCommand.id]: {
-            order: 0,
-            menuItemFactory: CellMergeMenuItemFactory,
-            [AddWorksheetMergeAllCommand.id]: {
-                order: 0,
-                menuItemFactory: CellMergeAllMenuItemFactory,
-            },
-            [AddWorksheetMergeVerticalCommand.id]: {
-                order: 1,
-                menuItemFactory: CellMergeVerticalMenuItemFactory,
-            },
-            [AddWorksheetMergeHorizontalCommand.id]: {
+    [RibbonPosition.START]: {
+        [RibbonStartGroup.HISTORY]: {
+            [SetOnceFormatPainterCommand.id]: {
                 order: 2,
-                menuItemFactory: CellMergeHorizontalMenuItemFactory,
+                menuItemFactory: FormatPainterMenuItemFactory,
             },
-            [RemoveWorksheetMergeCommand.id]: {
+            [ClearSelectionAllCommand.id]: {
                 order: 3,
-                menuItemFactory: CellMergeCancelMenuItemFactory,
+                menuItemFactory: ClearSelectionAllMenuItemFactory,
             },
         },
-        [SetHorizontalTextAlignCommand.id]: {
-            order: 1,
-            menuItemFactory: HorizontalAlignMenuItemFactory,
+        [RibbonStartGroup.FORMAT]: {
+            [SetRangeFontFamilyCommand.id]: {
+                order: 1,
+                menuItemFactory: FontFamilySelectorMenuItemFactory,
+            },
+            [SetRangeFontSizeCommand.id]: {
+                order: 2,
+                menuItemFactory: FontSizeSelectorMenuItemFactory,
+            },
+        // TODO: fontsize +
+        // TODO: fontsize -
+            [SetRangeBoldCommand.id]: {
+                order: 5,
+                menuItemFactory: BoldMenuItemFactory,
+            },
+            [SetRangeItalicCommand.id]: {
+                order: 6,
+                menuItemFactory: ItalicMenuItemFactory,
+            },
+            [SetRangeUnderlineCommand.id]: {
+                order: 7,
+                menuItemFactory: UnderlineMenuItemFactory,
+            },
+            [SetRangeStrickThroughCommand.id]: {
+                order: 8,
+                menuItemFactory: StrikeThroughMenuItemFactory,
+            },
+            [SetRangeTextColorCommand.id]: {
+                order: 9,
+                menuItemFactory: TextColorSelectorMenuItemFactory,
+                [ResetTextColorCommand.id]: {
+                    order: 0,
+                    menuItemFactory: ResetTextColorMenuItemFactory,
+                },
+            },
+            [SetBackgroundColorCommand.id]: {
+                order: 10,
+                menuItemFactory: BackgroundColorSelectorMenuItemFactory,
+                [ResetBackgroundColorCommand.id]: {
+                    order: 0,
+                    menuItemFactory: ResetBackgroundColorMenuItemFactory,
+                },
+            },
+            [SetBorderBasicCommand.id]: {
+                order: 11,
+                menuItemFactory: CellBorderSelectorMenuItemFactory,
+            },
         },
-        [SetVerticalTextAlignCommand.id]: {
-            order: 1,
-            menuItemFactory: VerticalAlignMenuItemFactory,
+        [RibbonStartGroup.LAYOUT]: {
+            [SetHorizontalTextAlignCommand.id]: {
+                order: 0,
+                menuItemFactory: HorizontalAlignMenuItemFactory,
+            },
+            [SetVerticalTextAlignCommand.id]: {
+                order: 3,
+                menuItemFactory: VerticalAlignMenuItemFactory,
+            },
+            [SetTextWrapCommand.id]: {
+                order: 6,
+                menuItemFactory: WrapTextMenuItemFactory,
+            },
+            [SetTextRotationCommand.id]: {
+                order: 7,
+                menuItemFactory: TextRotateMenuItemFactory,
+            },
+            [AddWorksheetMergeCommand.id]: {
+                order: 8,
+                menuItemFactory: CellMergeMenuItemFactory,
+                [AddWorksheetMergeAllCommand.id]: {
+                    order: 0,
+                    menuItemFactory: CellMergeAllMenuItemFactory,
+                },
+                [AddWorksheetMergeVerticalCommand.id]: {
+                    order: 1,
+                    menuItemFactory: CellMergeVerticalMenuItemFactory,
+                },
+                [AddWorksheetMergeHorizontalCommand.id]: {
+                    order: 2,
+                    menuItemFactory: CellMergeHorizontalMenuItemFactory,
+                },
+                [RemoveWorksheetMergeCommand.id]: {
+                    order: 3,
+                    menuItemFactory: CellMergeCancelMenuItemFactory,
+                },
+            },
         },
-        [SetTextWrapCommand.id]: {
-            order: 2,
-            menuItemFactory: WrapTextMenuItemFactory,
-        },
-        [SetTextRotationCommand.id]: {
-            order: 3,
-            menuItemFactory: TextRotateMenuItemFactory,
-        },
-    },
-    [RibbonStartGroup.OTHERS]: {
-        [AddRangeProtectionFromToolbarCommand.id]: {
-            order: 0,
-            menuItemFactory: sheetPermissionToolbarMenuFactory,
+        [RibbonStartGroup.OTHERS]: {
+            [AddRangeProtectionFromToolbarCommand.id]: {
+                order: 0,
+                menuItemFactory: sheetPermissionToolbarMenuFactory,
+            },
         },
     },
     [ContextMenuPosition.MAIN_AREA]: {

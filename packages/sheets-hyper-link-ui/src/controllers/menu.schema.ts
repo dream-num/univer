@@ -15,18 +15,18 @@
  */
 
 import type { MenuSchemaType } from '@univerjs/ui';
-import { ContextMenuGroup, ContextMenuPosition, RibbonStartGroup } from '@univerjs/ui';
+import { ContextMenuGroup, ContextMenuPosition, RibbonInsertGroup } from '@univerjs/ui';
 import { InsertHyperLinkToolbarOperation } from '../commands/operations/popup.operations';
 import { genZenEditorMenuId, insertLinkMenuFactory, insertLinkMenuToolbarFactory, zenEditorInsertLinkMenuFactory, zenEditorInsertLinkMenuToolbarFactory } from './menu';
 
 export const menuSchema: MenuSchemaType = {
-    [RibbonStartGroup.OTHERS]: {
+    [RibbonInsertGroup.MEDIA]: {
         [InsertHyperLinkToolbarOperation.id]: {
-            order: 2,
+            order: 1,
             menuItemFactory: insertLinkMenuToolbarFactory,
         },
         [genZenEditorMenuId(InsertHyperLinkToolbarOperation.id)]: {
-            order: 2,
+            order: 1,
             menuItemFactory: zenEditorInsertLinkMenuToolbarFactory,
         },
     },

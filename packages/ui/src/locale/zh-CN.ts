@@ -31,11 +31,17 @@ const locale = {
     },
     ribbon: {
         start: '开始',
+        startDesc: '初始化工作表并设置基本参数。',
         insert: '插入',
+        insertDesc: '插入行、列、图表和各种其他元素。',
         formulas: '公式',
+        formulasDesc: '使用函数和公式进行数据计算。',
         data: '数据',
+        dataDesc: '管理数据，包括导入、排序和筛选。',
         view: '视图',
+        viewDesc: '切换视图模式并调整显示效果。',
         others: '其他',
+        othersDesc: '其他功能和设置。',
         more: '更多',
     },
     fontFamily: {

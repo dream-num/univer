@@ -41,7 +41,7 @@ import {
     ComponentManager,
     IMenuManagerService,
     MenuItemType,
-    RibbonStartGroup,
+    RibbonOthersGroup,
 } from '@univerjs/ui';
 
 /**
@@ -210,7 +210,7 @@ class ImportCSVButtonPlugin extends Plugin {
         });
 
         this.menuManagerService.mergeMenu({
-            [RibbonStartGroup.OTHERS]: {
+            [RibbonOthersGroup.OTHERS]: {
                 [buttonId]: {
                     order: 10,
                     menuItemFactory,

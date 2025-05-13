@@ -20,7 +20,7 @@ import {
     ReCalcSheetsFilterCommand,
     SmartToggleSheetsFilterCommand,
 } from '@univerjs/sheets-filter';
-import { RibbonStartGroup } from '@univerjs/ui';
+import { RibbonDataGroup } from '@univerjs/ui';
 import {
     ClearFilterCriteriaMenuItemFactory,
     ReCalcFilterMenuItemFactory,
@@ -28,9 +28,9 @@ import {
 } from './sheets-filter.menu';
 
 export const menuSchema: MenuSchemaType = {
-    [RibbonStartGroup.FORMULAS_INSERT]: {
+    [RibbonDataGroup.ORGANIZATION]: {
         [SmartToggleSheetsFilterCommand.id]: {
-            order: 10,
+            order: 0,
             menuItemFactory: SmartToggleFilterMenuItemFactory,
             [ClearSheetsFilterCriteriaCommand.id]: {
                 order: 0,

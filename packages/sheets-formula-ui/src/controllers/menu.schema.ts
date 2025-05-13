@@ -16,16 +16,16 @@
 
 import type { MenuSchemaType } from '@univerjs/ui';
 import { PASTE_SPECIAL_MENU_ID } from '@univerjs/sheets-ui';
-import { RibbonStartGroup } from '@univerjs/ui';
+import { RibbonFormulasGroup } from '@univerjs/ui';
 import { SheetOnlyPasteFormulaCommand } from '../commands/commands/formula-clipboard.command';
 import { InsertFunctionOperation } from '../commands/operations/insert-function.operation';
 import { MoreFunctionsOperation } from '../commands/operations/more-functions.operation';
 import { InsertFunctionMenuItemFactory, MoreFunctionsMenuItemFactory, PasteFormulaMenuItemFactory } from './menu';
 
 export const menuSchema: MenuSchemaType = {
-    [RibbonStartGroup.FORMULAS_INSERT]: {
+    [RibbonFormulasGroup.BASIC]: {
         [InsertFunctionOperation.id]: {
-            order: 1,
+            order: 0,
             menuItemFactory: InsertFunctionMenuItemFactory,
             [MoreFunctionsOperation.id]: {
                 order: 1,

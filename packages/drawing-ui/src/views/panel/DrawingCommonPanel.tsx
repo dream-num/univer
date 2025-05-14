@@ -16,10 +16,11 @@
 
 import type { IDrawingParam } from '@univerjs/core';
 import { LocaleService } from '@univerjs/core';
+import { clsx } from '@univerjs/design';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { useDependency } from '@univerjs/ui';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { getUpdateParams } from '../../utils/get-update-params';
 import { DrawingAlign } from './DrawingAlign';
 import { DrawingArrange } from './DrawingArrange';
@@ -130,16 +131,20 @@ export const DrawingCommonPanel = (props: IDrawingCommonPanelProps) => {
         };
     }, []);
 
-    // TODO@siam-ese: use the new Form component to refactor this dialog panel.
     return (
         <>
-            <div style={{ display: nullShow === true ? 'block' : 'none', height: '100%' }}>
-                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', top: '50%', marginTop: '-100px' }}>
+            <div
+                className={clsx('univer-h-full', {
+                    'univer-hidden': !nullShow,
+                })}
+            >
+                <div className="univer-flex univer-h-full univer-items-center univer-justify-center">
                     <span>
                         {localeService.t('image-panel.null')}
                     </span>
                 </div>
             </div>
+
             <DrawingArrange arrangeShow={hasArrange === true ? arrangeShow : false} drawings={drawings} />
             <DrawingTransform transformShow={hasTransform === true ? transformShow : false} drawings={drawings} />
             <DrawingAlign alignShow={hasAlign === true ? alignShow : false} drawings={drawings} />

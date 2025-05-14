@@ -39,7 +39,7 @@ export const DocDrawingPanel = () => {
     }, []);
 
     return !!drawings?.length && (
-        <div className="univer-p-2 univer-text-center univer-text-sm">
+        <div className="univer-text-sm">
             <DrawingCommonPanel drawings={drawings} hasAlign={false} hasCropper={false} hasGroup={false} hasTransform={false} />
             <DocDrawingTextWrap drawings={drawings} />
             <DocDrawingPosition drawings={drawings} />

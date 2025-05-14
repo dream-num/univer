@@ -24,7 +24,6 @@ import { GroupSingle, UngroupSingle } from '@univerjs/icons';
 import { useDependency } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
 import { getUpdateParams } from '../../utils/get-update-params';
-import { columnTitleClassName, inlineClassName, rowClassName } from '../utils/classnames';
 
 export interface IDrawingGroupProps {
     drawings: IDrawingParam[];
@@ -42,10 +41,6 @@ export const DrawingGroup = (props: IDrawingGroupProps) => {
 
     const [groupBtnShow, setGroupBtnShow] = useState(true);
     const [ungroupBtnShow, setUngroupBtnShow] = useState(true);
-
-    const gridDisplay = (isShow: boolean) => {
-        return isShow ? 'block' : 'none';
-    };
 
     const onGroupBtnClick = () => {
         const focusDrawings = drawingManagerService.getFocusDrawings();
@@ -186,29 +181,39 @@ export const DrawingGroup = (props: IDrawingGroupProps) => {
     }, []);
 
     return (
-        <div className="univer-relative univer-mt-5 univer-w-full" style={{ display: gridDisplay(hasGroup === true ? groupShow : false) }}>
-            <div className={rowClassName}>
-                <div className={columnTitleClassName}>
-                    <div>{localeService.t('image-panel.group.title')}</div>
-                </div>
-            </div>
-            <div className={rowClassName}>
-                <div className={clsx(inlineClassName, 'univer-justify-center')}>
-                    <Button style={{ display: gridDisplay(groupBtnShow) }} onClick={onGroupBtnClick}>
-                        <span className="univer-flex univer-items-center univer-gap-1">
-                            <GroupSingle />
-                            {localeService.t('image-panel.group.group')}
-                        </span>
-                    </Button>
-                </div>
-                <div className={clsx(inlineClassName, 'univer-justify-center')}>
-                    <Button style={{ display: gridDisplay(ungroupBtnShow) }} onClick={onUngroupBtnClick}>
-                        <span className="univer-flex univer-items-center univer-gap-1">
-                            <UngroupSingle />
-                            {localeService.t('image-panel.group.unGroup')}
-                        </span>
-                    </Button>
-                </div>
+        <div
+            className={clsx('univer-grid univer-gap-2 univer-py-2 univer-text-gray-400', {
+                'univer-hidden': (hasGroup === true && groupShow === false) || hasGroup === false,
+            })}
+        >
+            <header
+                className={`
+                  univer-text-gray-600
+                  dark:univer-text-gray-200
+                `}
+            >
+                <div>{localeService.t('image-panel.group.title')}</div>
+            </header>
+
+            <div className="univer-flex univer-items-center univer-justify-center univer-gap-2">
+                <Button
+                    className={clsx({
+                        'univer-hidden': !groupBtnShow,
+                    })}
+                    onClick={onGroupBtnClick}
+                >
+                    <GroupSingle />
+                    {localeService.t('image-panel.group.group')}
+                </Button>
+                <Button
+                    className={clsx({
+                        'univer-hidden': !ungroupBtnShow,
+                    })}
+                    onClick={onUngroupBtnClick}
+                >
+                    <UngroupSingle />
+                    {localeService.t('image-panel.group.unGroup')}
+                </Button>
             </div>
         </div>
     );

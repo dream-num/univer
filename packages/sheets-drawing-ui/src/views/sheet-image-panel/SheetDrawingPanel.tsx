@@ -38,7 +38,7 @@ export const SheetDrawingPanel = () => {
     }, []);
 
     return !!drawings?.length && (
-        <div className="univer-p-2 univer-text-center univer-text-sm">
+        <div className="univer-text-sm">
             <DrawingCommonPanel drawings={drawings} />
             <SheetDrawingAnchor drawings={drawings} />
         </div>

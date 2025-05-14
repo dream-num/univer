@@ -214,6 +214,9 @@ const entryPoints = [
     // sheets-uniscript
     './src/sheets-uniscript/main.ts',
 
+    // sheets-webcomponent
+    './src/sheets-webcomponent/main.tsx',
+
     // docs
     './src/docs/main.ts',
 

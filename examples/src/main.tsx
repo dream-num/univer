@@ -53,6 +53,9 @@ function Examples() {
         title: '🗂️ Sheets Multi Instance',
         href: './sheets-multi/',
     }, {
+        title: '🗂️ Sheets With Webcomponent',
+        href: './sheets-webcomponent/',
+    }, {
         title: '🏡 Sheets Multi Units',
         href: './sheets-multi-units/',
     }, {

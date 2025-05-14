@@ -130,7 +130,7 @@ export function Ribbon(props: IRibbonProps) {
     return (
         <>
             {headerMenu && (headerMenuComponents && headerMenuComponents.size > 0) && (
-                <header className="univer-relative univer-select-none">
+                <header className={clsx('univer-relative univer-h-11 univer-select-none', borderBottomClassName)}>
                     <div
                         className={`
                           univer-absolute univer-right-2 univer-top-0 univer-flex univer-h-full univer-items-center
@@ -262,8 +262,8 @@ export function Ribbon(props: IRibbonProps) {
                 ref={fakeToolbarRef}
                 aria-hidden
                 className={clsx(`
-                  univer-box-border univer-flex univer-h-11 univer-min-w-min univer-items-center univer-px-3
-                  univer-invisible univer-absolute -univer-left-[99999] -univer-top-[99999] univer-opacity-0
+                  univer-invisible univer-absolute -univer-left-[99999] -univer-top-[99999] univer-box-border
+                  univer-flex univer-h-11 univer-min-w-min univer-items-center univer-px-3 univer-opacity-0
                 `, borderBottomClassName)}
             >
                 {activeGroup.allGroups.map((groupItem) => (groupItem.children?.length || groupItem.item) && (

@@ -30,7 +30,7 @@ import {
 export const menuSchema: MenuSchemaType = {
     [RibbonDataGroup.ORGANIZATION]: {
         [SmartToggleSheetsFilterCommand.id]: {
-            order: 0,
+            order: 2,
             menuItemFactory: SmartToggleFilterMenuItemFactory,
             [ClearSheetsFilterCriteriaCommand.id]: {
                 order: 0,

@@ -43,7 +43,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
         commandService.executeCommand(commandId, params);
     };
 
-    const { tooltip, shortcut, icon, title, label, id, commandId, type, slot } = props;
+    const { tooltip, shortcut, icon, title, label, id, commandId, type, slot, params } = props;
 
     const tooltipTitle = localeService.t(tooltip ?? '') + (shortcut ? ` (${shortcut})` : '');
 
@@ -216,10 +216,11 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
         return (
             <ToolbarButton
                 data-u-command={id}
+                className="univer-text-sm"
                 noIcon={!icon}
                 active={activated}
                 disabled={disabled}
-                onClick={() => executeCommand(props.commandId ?? props.id)}
+                onClick={() => executeCommand(props.commandId ?? props.id, value ?? params)}
                 onDoubleClick={() => props.subId && executeCommand(props.subId)}
             >
                 {isCustomComponent

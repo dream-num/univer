@@ -319,7 +319,11 @@ export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
             subscriber.next(!!(isUnderline && isUnderline.s));
             return disposable.dispose;
         })),
-        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission], rangeTypes: [RangeProtectionPermissionEditPoint] }, true),
+        disabled$: getCurrentRangeDisable$(accessor, {
+            workbookTypes: [WorkbookEditablePermission],
+            worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission],
+            rangeTypes: [RangeProtectionPermissionEditPoint],
+        }, true),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }
@@ -336,7 +340,11 @@ export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonIt
         icon: 'StrikethroughSingle',
         title: 'Set strike through',
         tooltip: 'toolbar.strikethrough',
-        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission], rangeTypes: [RangeProtectionPermissionEditPoint] }, true),
+        disabled$: getCurrentRangeDisable$(accessor, {
+            workbookTypes: [WorkbookEditablePermission],
+            worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission],
+            rangeTypes: [RangeProtectionPermissionEditPoint],
+        }, true),
         activated$: deriveStateFromActiveSheet$(univerInstanceService, false, ({ worksheet }) => new Observable<boolean>((subscriber) => {
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
@@ -401,7 +409,11 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
             value: item.value,
         })),
 
-        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission], rangeTypes: [RangeProtectionPermissionEditPoint] }, true),
+        disabled$: getCurrentRangeDisable$(accessor, {
+            workbookTypes: [WorkbookEditablePermission],
+            worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission],
+            rangeTypes: [RangeProtectionPermissionEditPoint],
+        }, true),
         value$: deriveStateFromActiveSheet$(univerInstanceService, defaultValue, ({ worksheet }) => new Observable((subscriber) => {
             const updateSheet = () => {
                 let ff = defaultValue;
@@ -442,7 +454,11 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
     const contextService = accessor.get(IContextService);
 
     const defaultValue = DEFAULT_STYLES.fs;
-    const disabled$ = getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission], rangeTypes: [RangeProtectionPermissionEditPoint] }, true);
+    const disabled$ = getCurrentRangeDisable$(accessor, {
+        workbookTypes: [WorkbookEditablePermission],
+        worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission],
+        rangeTypes: [RangeProtectionPermissionEditPoint],
+    }, true);
 
     return {
         id: SetRangeFontSizeCommand.id,
@@ -507,7 +523,11 @@ export function ResetTextColorMenuItemFactory(accessor: IAccessor): IMenuButtonI
         type: MenuItemType.BUTTON,
         title: 'toolbar.resetColor',
         icon: 'NoColor',
-        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission], rangeTypes: [RangeProtectionPermissionEditPoint] }, true),
+        disabled$: getCurrentRangeDisable$(accessor, {
+            workbookTypes: [WorkbookEditablePermission],
+            worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission],
+            rangeTypes: [RangeProtectionPermissionEditPoint],
+        }, true),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }
@@ -543,7 +563,11 @@ export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSele
             return disposable.dispose;
         }),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
-        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission], rangeTypes: [RangeProtectionPermissionEditPoint] }, true),
+        disabled$: getCurrentRangeDisable$(accessor, {
+            workbookTypes: [WorkbookEditablePermission],
+            worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission],
+            rangeTypes: [RangeProtectionPermissionEditPoint],
+        }, true),
     };
 }
 
@@ -553,7 +577,11 @@ export function ResetBackgroundColorMenuItemFactory(accessor: IAccessor): IMenuB
         type: MenuItemType.BUTTON,
         title: 'toolbar.resetColor',
         icon: 'NoColor',
-        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
+        disabled$: getCurrentRangeDisable$(accessor, {
+            workbookTypes: [WorkbookEditablePermission],
+            worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission],
+            rangeTypes: [RangeProtectionPermissionEditPoint],
+        }),
     };
 }
 
@@ -588,7 +616,11 @@ export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMe
             return disposable.dispose;
         }),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
-        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
+        disabled$: getCurrentRangeDisable$(accessor, {
+            workbookTypes: [WorkbookEditablePermission],
+            worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission],
+            rangeTypes: [RangeProtectionPermissionEditPoint],
+        }),
     };
 }
 
@@ -651,7 +683,11 @@ export function HorizontalAlignMenuItemFactory(accessor: IAccessor): IMenuSelect
             return disposable.dispose;
         })),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
-        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
+        disabled$: getCurrentRangeDisable$(accessor, {
+            workbookTypes: [WorkbookEditablePermission],
+            worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission],
+            rangeTypes: [RangeProtectionPermissionEditPoint],
+        }),
     };
 }
 
@@ -714,7 +750,11 @@ export function VerticalAlignMenuItemFactory(accessor: IAccessor): IMenuSelector
             return disposable.dispose;
         })),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
-        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
+        disabled$: getCurrentRangeDisable$(accessor, {
+            workbookTypes: [WorkbookEditablePermission],
+            worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission],
+            rangeTypes: [RangeProtectionPermissionEditPoint],
+        }),
     };
 }
 
@@ -777,7 +817,11 @@ export function WrapTextMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<
             return disposable.dispose;
         })),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
-        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
+        disabled$: getCurrentRangeDisable$(accessor, {
+            workbookTypes: [WorkbookEditablePermission],
+            worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission],
+            rangeTypes: [RangeProtectionPermissionEditPoint],
+        }),
     };
 }
 
@@ -863,7 +907,11 @@ export function TextRotateMenuItemFactory(accessor: IAccessor): IMenuSelectorIte
             return disposable.dispose;
         })),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
-        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
+        disabled$: getCurrentRangeDisable$(accessor, {
+            workbookTypes: [WorkbookEditablePermission],
+            worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission],
+            rangeTypes: [RangeProtectionPermissionEditPoint],
+        }),
     };
 }
 
@@ -882,7 +930,11 @@ export function CopyMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         type: MenuItemType.BUTTON,
         title: 'rightClick.copy',
         icon: 'Copy',
-        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookCopyPermission], worksheetTypes: [WorksheetCopyPermission], rangeTypes: [RangeProtectionPermissionViewPoint] }),
+        disabled$: getCurrentRangeDisable$(accessor, {
+            workbookTypes: [WorkbookCopyPermission],
+            worksheetTypes: [WorksheetCopyPermission],
+            rangeTypes: [RangeProtectionPermissionViewPoint],
+        }),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }
@@ -893,7 +945,11 @@ export function CutMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         commandId: CutCommand.id,
         type: MenuItemType.BUTTON,
         title: 'contextMenu.cut',
-        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], rangeTypes: [RangeProtectionPermissionEditPoint], worksheetTypes: [WorksheetCopyPermission, WorksheetEditPermission] }),
+        disabled$: getCurrentRangeDisable$(accessor, {
+            workbookTypes: [WorkbookEditablePermission],
+            rangeTypes: [RangeProtectionPermissionEditPoint],
+            worksheetTypes: [WorksheetCopyPermission, WorksheetEditPermission],
+        }),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }
@@ -906,7 +962,11 @@ export function PasteMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         title: 'rightClick.paste',
         icon: 'PasteSpecial',
         disabled$: menuClipboardDisabledObservable(accessor).pipe(
-            combineLatestWith(getCurrentRangeDisable$(accessor, { rangeTypes: [RangeProtectionPermissionEditPoint], worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission, WorksheetSetCellValuePermission], workbookTypes: [WorkbookEditablePermission] })),
+            combineLatestWith(getCurrentRangeDisable$(accessor, {
+                rangeTypes: [RangeProtectionPermissionEditPoint],
+                worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission, WorksheetSetCellValuePermission],
+                workbookTypes: [WorkbookEditablePermission],
+            })),
             map(([d1, d2]) => d1 || d2)
         ),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
@@ -930,7 +990,11 @@ export function PasteValueMenuItemFactory(accessor: IAccessor): IMenuButtonItem<
         type: MenuItemType.BUTTON,
         title: 'rightClick.pasteValue',
         disabled$: menuClipboardDisabledObservable(accessor).pipe(
-            combineLatestWith(getCurrentRangeDisable$(accessor, { rangeTypes: [RangeProtectionPermissionEditPoint], worksheetTypes: [WorksheetSetCellValuePermission, WorksheetEditPermission], workbookTypes: [WorkbookEditablePermission] })),
+            combineLatestWith(getCurrentRangeDisable$(accessor, {
+                rangeTypes: [RangeProtectionPermissionEditPoint],
+                worksheetTypes: [WorksheetSetCellValuePermission, WorksheetEditPermission],
+                workbookTypes: [WorkbookEditablePermission],
+            })),
             map(([d1, d2]) => d1 || d2)
         ),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
@@ -943,7 +1007,11 @@ export function PasteFormatMenuItemFactory(accessor: IAccessor): IMenuButtonItem
         type: MenuItemType.BUTTON,
         title: 'rightClick.pasteFormat',
         disabled$: menuClipboardDisabledObservable(accessor).pipe(
-            combineLatestWith(getCurrentRangeDisable$(accessor, { rangeTypes: [RangeProtectionPermissionEditPoint], worksheetTypes: [WorksheetSetCellStylePermission, WorksheetEditPermission], workbookTypes: [WorkbookEditablePermission] })),
+            combineLatestWith(getCurrentRangeDisable$(accessor, {
+                rangeTypes: [RangeProtectionPermissionEditPoint],
+                worksheetTypes: [WorksheetSetCellStylePermission, WorksheetEditPermission],
+                workbookTypes: [WorkbookEditablePermission],
+            })),
             map(([d1, d2]) => d1 || d2)
         ),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
@@ -956,7 +1024,11 @@ export function PasteColWidthMenuItemFactory(accessor: IAccessor): IMenuButtonIt
         type: MenuItemType.BUTTON,
         title: 'rightClick.pasteColWidth',
         disabled$: menuClipboardDisabledObservable(accessor).pipe(
-            combineLatestWith(getCurrentRangeDisable$(accessor, { rangeTypes: [RangeProtectionPermissionEditPoint], worksheetTypes: [WorksheetSetColumnStylePermission, WorksheetEditPermission], workbookTypes: [WorkbookEditablePermission] })),
+            combineLatestWith(getCurrentRangeDisable$(accessor, {
+                rangeTypes: [RangeProtectionPermissionEditPoint],
+                worksheetTypes: [WorksheetSetColumnStylePermission, WorksheetEditPermission],
+                workbookTypes: [WorkbookEditablePermission],
+            })),
             map(([d1, d2]) => d1 || d2)
         ),
     };
@@ -968,7 +1040,17 @@ export function PasteBesidesBorderMenuItemFactory(accessor: IAccessor): IMenuBut
         type: MenuItemType.BUTTON,
         title: 'rightClick.pasteBesidesBorder',
         disabled$: menuClipboardDisabledObservable(accessor).pipe(
-            combineLatestWith(getCurrentRangeDisable$(accessor, { rangeTypes: [RangeProtectionPermissionEditPoint], worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission, WorksheetSetCellValuePermission, WorksheetSetRowStylePermission, WorksheetSetColumnStylePermission], workbookTypes: [WorkbookEditablePermission] })),
+            combineLatestWith(getCurrentRangeDisable$(accessor, {
+                rangeTypes: [RangeProtectionPermissionEditPoint],
+                worksheetTypes: [
+                    WorksheetEditPermission,
+                    WorksheetSetCellStylePermission,
+                    WorksheetSetCellValuePermission,
+                    WorksheetSetRowStylePermission,
+                    WorksheetSetColumnStylePermission,
+                ],
+                workbookTypes: [WorkbookEditablePermission],
+            })),
             map(([d1, d2]) => d1 || d2)
         ),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
@@ -981,7 +1063,11 @@ export function FitContentMenuItemFactory(accessor: IAccessor): IMenuButtonItem 
         type: MenuItemType.BUTTON,
         icon: 'AutoHeight',
         title: 'rightClick.fitContent',
-        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetSetRowStylePermission, WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
+        disabled$: getCurrentRangeDisable$(accessor, {
+            workbookTypes: [WorkbookEditablePermission],
+            worksheetTypes: [WorksheetSetRowStylePermission, WorksheetEditPermission],
+            rangeTypes: [RangeProtectionPermissionEditPoint],
+        }),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }
@@ -992,7 +1078,11 @@ export function ColAutoWidthMenuItemFactory(accessor: IAccessor): IMenuButtonIte
         type: MenuItemType.BUTTON,
         icon: 'AutoWidth',
         title: 'rightClick.fitContent',
-        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetSetRowStylePermission, WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
+        disabled$: getCurrentRangeDisable$(accessor, {
+            workbookTypes: [WorkbookEditablePermission],
+            worksheetTypes: [WorksheetSetRowStylePermission, WorksheetEditPermission],
+            rangeTypes: [RangeProtectionPermissionEditPoint],
+        }),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }
@@ -1071,7 +1161,11 @@ export function HideRowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         type: MenuItemType.BUTTON,
         icon: 'Hide',
         title: 'rightClick.hideSelectedRow',
-        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetSetRowStylePermission, WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
+        disabled$: getCurrentRangeDisable$(accessor, {
+            workbookTypes: [WorkbookEditablePermission],
+            worksheetTypes: [WorksheetSetRowStylePermission, WorksheetEditPermission],
+            rangeTypes: [RangeProtectionPermissionEditPoint],
+        }),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }
@@ -1082,7 +1176,11 @@ export function HideColMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         type: MenuItemType.BUTTON,
         icon: 'Hide',
         title: 'rightClick.hideSelectedColumn',
-        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetSetColumnStylePermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
+        disabled$: getCurrentRangeDisable$(accessor, {
+            workbookTypes: [WorkbookEditablePermission],
+            worksheetTypes: [WorksheetEditPermission, WorksheetSetColumnStylePermission],
+            rangeTypes: [RangeProtectionPermissionEditPoint],
+        }),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }
@@ -1120,7 +1218,11 @@ export function ShowRowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
             subscriber.next(!hasHiddenRowsInSelections());
             return () => disposable.dispose();
         })),
-        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetSetRowStylePermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
+        disabled$: getCurrentRangeDisable$(accessor, {
+            workbookTypes: [WorkbookEditablePermission],
+            worksheetTypes: [WorksheetEditPermission, WorksheetSetRowStylePermission],
+            rangeTypes: [RangeProtectionPermissionEditPoint],
+        }),
     };
 }
 
@@ -1156,7 +1258,11 @@ export function ShowColMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
             subscriber.next(!hasHiddenColsInSelections());
             return () => disposable.dispose();
         })),
-        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetSetColumnStylePermission, WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
+        disabled$: getCurrentRangeDisable$(accessor, {
+            workbookTypes: [WorkbookEditablePermission],
+            worksheetTypes: [WorksheetSetColumnStylePermission, WorksheetEditPermission],
+            rangeTypes: [RangeProtectionPermissionEditPoint],
+        }),
     };
 }
 
@@ -1197,7 +1303,11 @@ export function SetRowHeightMenuItemFactory(accessor: IAccessor): IMenuButtonIte
             update();
             return disposable.dispose;
         })),
-        hidden$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetSetRowStylePermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
+        hidden$: getCurrentRangeDisable$(accessor, {
+            workbookTypes: [WorkbookEditablePermission],
+            worksheetTypes: [WorksheetEditPermission, WorksheetSetRowStylePermission],
+            rangeTypes: [RangeProtectionPermissionEditPoint],
+        }),
     };
 }
 
@@ -1242,7 +1352,11 @@ export function SetColWidthMenuItemFactory(accessor: IAccessor): IMenuButtonItem
             update();
             return disposable.dispose;
         })),
-        hidden$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetSetColumnStylePermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
+        hidden$: getCurrentRangeDisable$(accessor, {
+            workbookTypes: [WorkbookEditablePermission],
+            worksheetTypes: [WorksheetEditPermission, WorksheetSetColumnStylePermission],
+            rangeTypes: [RangeProtectionPermissionEditPoint],
+        }),
     };
 }
 

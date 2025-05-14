@@ -152,7 +152,7 @@ Univer 是一个包容和友好的项目。在参与社区之前，请阅读我�
 - 在 [Stack Overflow][stackoverflow-community-link] 上开一个话题，并标记为 `univer`。
 - 微信扫描下方二维码，加入 Univer 中文社群
 
-![wecom-qr-code](https://univer.ai/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fqrcode.45c72be6.png&w=828&q=75)
+![wecom-qr-code](https://univer.ai/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fcommunity-qrcode.2988a6ca.png&w=256&q=75)
 
 你也可以在以下社交平台找到 Univer：
 

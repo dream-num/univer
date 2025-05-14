@@ -261,6 +261,14 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
         if (!selection) {
             return false;
         }
+
+        // use start row and col when upload image to a merged cell
+        let row = selection.primary.actualRow;
+        let col = selection.primary.actualColumn;
+        if (selection.primary.isMerged) {
+            row = selection.primary.startRow;
+            col = selection.primary.startColumn;
+        }
         const docDataModel = createDocumentModelWithStyle('', {});
 
         const imageSize = getDrawingSizeByCell(
@@ -268,8 +276,8 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
             {
                 unitId: this._context.unitId,
                 subUnitId: this._context.unit.getActiveSheet().getSheetId(),
-                row: selection.primary.actualRow,
-                col: selection.primary.actualColumn,
+                row,
+                col,
             },
             width,
             height,
@@ -328,8 +336,8 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
 
             return this._commandService.syncExecuteCommand(SetRangeValuesCommand.id, {
                 value: {
-                    [location?.row ?? selection.primary.actualRow]: {
-                        [location?.col ?? selection.primary.actualColumn]: {
+                    [location?.row ?? row]: {
+                        [location?.col ?? col]: {
                             p: (docDataModel.getSnapshot()),
                             t: 1,
                         },

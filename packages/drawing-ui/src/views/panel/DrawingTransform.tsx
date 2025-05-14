@@ -17,14 +17,13 @@
 import type { IDrawingParam, Nullable } from '@univerjs/core';
 import type { IChangeObserverConfig, Scene } from '@univerjs/engine-render';
 import { debounce, LocaleService } from '@univerjs/core';
-import { borderTopClassName, Checkbox, clsx, InputNumber } from '@univerjs/design';
+import { Checkbox, clsx, InputNumber } from '@univerjs/design';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { useDependency } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
 import { MIN_DRAWING_HEIGHT_LIMIT, MIN_DRAWING_WIDTH_LIMIT, RANGE_DRAWING_ROTATION_LIMIT } from '../../utils/config';
 import { getUpdateParams } from '../../utils/get-update-params';
-import { columnTitleClassName, rowClassName } from '../utils/classnames';
 
 export interface IDrawingTransformProps {
     transformShow: boolean;
@@ -364,104 +363,60 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
 
     return (
         <div
-            className={clsx('univer-relative univer-mt-5 univer-w-full', borderTopClassName, {
+            className={clsx('univer-grid univer-gap-2 univer-py-2 univer-text-gray-400', {
                 'univer-hidden': !transformShow,
             })}
         >
-            <div className={rowClassName}>
-                <div className={clsx(columnTitleClassName)}>
-                    <div>{localeService.t('image-panel.transform.title')}</div>
+            <header
+                className={`
+                  univer-text-gray-600
+                  dark:univer-text-gray-200
+                `}
+            >
+                <div>{localeService.t('image-panel.transform.title')}</div>
+            </header>
+
+            <div
+                className={`
+                  univer-grid univer-grid-cols-3 univer-gap-2
+                  [&>div]:univer-grid [&>div]:univer-gap-2
+                `}
+            >
+                <div>
+                    <span>{localeService.t('image-panel.transform.width')}</span>
+                    <InputNumber precision={1} value={width} onChange={(val) => { handleWidthChange(val); }} />
+                </div>
+                <div>
+                    <span>{localeService.t('image-panel.transform.height')}</span>
+                    <InputNumber precision={1} value={height} onChange={(val) => { handleHeightChange(val); }} />
+                </div>
+                <div>
+                    <span>{localeService.t('image-panel.transform.lock')}</span>
+                    <div className="univer-text-center">
+                        <Checkbox checked={lockRatio} onChange={handleLockRatioChange} />
+                    </div>
                 </div>
             </div>
-            <div className={rowClassName}>
-                <div className={clsx(columnTitleClassName)}>
-                    <label>
-                        <div className={rowClassName}>
-                            <div className={columnTitleClassName}>
-                                {localeService.t('image-panel.transform.width')}
-                            </div>
-                        </div>
-                        <div className={rowClassName}>
-                            <div className={columnTitleClassName}>
-                                <InputNumber precision={1} value={width} onChange={(val) => { handleWidthChange(val); }} />
-                            </div>
-                        </div>
-                    </label>
+
+            <div
+                className={`
+                  univer-grid univer-grid-cols-3 univer-gap-2
+                  [&>div]:univer-grid [&>div]:univer-gap-2
+                `}
+            >
+                <div>
+                    <span>{localeService.t('image-panel.transform.x')}</span>
+                    <InputNumber precision={1} value={xPosition} onChange={(val) => { handleXChange(val); }} />
                 </div>
-                <div className={clsx(columnTitleClassName)}>
-                    <label>
-                        <div className={rowClassName}>
-                            <div className={columnTitleClassName}>
-                                {localeService.t('image-panel.transform.height')}
-                            </div>
-                        </div>
-                        <div className={rowClassName}>
-                            <div className={columnTitleClassName}>
-                                <InputNumber precision={1} value={height} onChange={(val) => { handleHeightChange(val); }} />
-                            </div>
-                        </div>
-                    </label>
+                <div>
+                    <span>{localeService.t('image-panel.transform.y')}</span>
+                    <InputNumber precision={1} value={yPosition} onChange={(val) => { handleYChange(val); }} />
                 </div>
-                <div className={clsx(columnTitleClassName)}>
-                    <label>
-                        <div className={rowClassName}>
-                            <div className={columnTitleClassName}>
-                                {localeService.t('image-panel.transform.lock')}
-                            </div>
-                        </div>
-                        <div className={clsx(rowClassName, 'univer-h-9 univer-items-center univer-justify-center')}>
-                            <div className={columnTitleClassName}>
-                                <Checkbox checked={lockRatio} onChange={handleLockRatioChange} />
-                            </div>
-                        </div>
-                    </label>
-                </div>
-            </div>
-            <div className={rowClassName}>
-                <div className={clsx(columnTitleClassName)}>
-                    <label>
-                        <div className={rowClassName}>
-                            <div className={columnTitleClassName}>
-                                {localeService.t('image-panel.transform.x')}
-                            </div>
-                        </div>
-                        <div className={rowClassName}>
-                            <div className={columnTitleClassName}>
-                                <InputNumber precision={1} value={xPosition} onChange={(val) => { handleXChange(val); }} />
-                            </div>
-                        </div>
-                    </label>
-                </div>
-                <div className={clsx(columnTitleClassName)}>
-                    <label>
-                        <div className={rowClassName}>
-                            <div className={columnTitleClassName}>
-                                {localeService.t('image-panel.transform.y')}
-                            </div>
-                        </div>
-                        <div className={rowClassName}>
-                            <div className={columnTitleClassName}>
-                                <InputNumber precision={1} value={yPosition} onChange={(val) => { handleYChange(val); }} />
-                            </div>
-                        </div>
-                    </label>
-                </div>
-                <div className={clsx(columnTitleClassName)}>
-                    <label>
-                        <div className={rowClassName}>
-                            <div className={columnTitleClassName}>
-                                {localeService.t('image-panel.transform.rotate')}
-                            </div>
-                        </div>
-                        <div className={rowClassName}>
-                            <div className={columnTitleClassName}>
-                                <InputNumber precision={1} value={rotation} onChange={handleRotationChange} />
-                            </div>
-                        </div>
-                    </label>
+                <div>
+                    <span>{localeService.t('image-panel.transform.rotate')}</span>
+                    <InputNumber precision={1} value={rotation} onChange={handleRotationChange} />
                 </div>
             </div>
         </div>
-
     );
 };

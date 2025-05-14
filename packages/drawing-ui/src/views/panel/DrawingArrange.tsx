@@ -21,7 +21,6 @@ import { IDrawingManagerService } from '@univerjs/drawing';
 import { BottomSingle, MoveDownSingle, MoveUpSingle, TopmostSingle } from '@univerjs/icons';
 import { useDependency } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
-import { columnTitleClassName, inlineClassName, rowClassName } from '../utils/classnames';
 
 export interface IDrawingArrangeProps {
     arrangeShow: boolean;
@@ -56,52 +55,36 @@ export const DrawingArrange = (props: IDrawingArrangeProps) => {
 
     return (
         <div
-            className={clsx('univer-relative univer-mt-5 univer-w-full', {
+            className={clsx('univer-grid univer-gap-2 univer-py-2 univer-text-gray-400', {
                 'univer-hidden': !arrangeShow,
             })}
         >
-            <div className={rowClassName}>
-                <div className={columnTitleClassName}>
-                    <div>{localeService.t('image-panel.arrange.title')}</div>
-                </div>
-            </div>
-            <div className={rowClassName}>
-                <div className="univer-w-1/2">
-                    <Button onClick={() => { onArrangeBtnClick(ArrangeTypeEnum.forward); }}>
-                        <span className={inlineClassName}>
-                            <MoveUpSingle />
-                            {localeService.t('image-panel.arrange.forward')}
-                        </span>
+            <header
+                className={`
+                  univer-text-gray-600
+                  dark:univer-text-gray-200
+                `}
+            >
+                <div>{localeService.t('image-panel.arrange.title')}</div>
+            </header>
 
-                    </Button>
-                </div>
-                <div className="univer-w-1/2">
-                    <Button onClick={() => { onArrangeBtnClick(ArrangeTypeEnum.backward); }}>
-                        <span className={inlineClassName}>
-                            <MoveDownSingle />
-                            {localeService.t('image-panel.arrange.backward')}
-                        </span>
-
-                    </Button>
-                </div>
-            </div>
-            <div className={rowClassName}>
-                <div className="univer-w-1/2">
-                    <Button onClick={() => { onArrangeBtnClick(ArrangeTypeEnum.front); }}>
-                        <span className={inlineClassName}>
-                            <TopmostSingle />
-                            {localeService.t('image-panel.arrange.front')}
-                        </span>
-                    </Button>
-                </div>
-                <div className="univer-w-1/2">
-                    <Button onClick={() => { onArrangeBtnClick(ArrangeTypeEnum.back); }}>
-                        <span className={inlineClassName}>
-                            <BottomSingle />
-                            {localeService.t('image-panel.arrange.back')}
-                        </span>
-                    </Button>
-                </div>
+            <div className="univer-grid univer-grid-cols-2 univer-gap-2 univer-px-8">
+                <Button onClick={() => { onArrangeBtnClick(ArrangeTypeEnum.forward); }}>
+                    <MoveUpSingle />
+                    {localeService.t('image-panel.arrange.forward')}
+                </Button>
+                <Button onClick={() => { onArrangeBtnClick(ArrangeTypeEnum.backward); }}>
+                    <MoveDownSingle />
+                    {localeService.t('image-panel.arrange.backward')}
+                </Button>
+                <Button onClick={() => { onArrangeBtnClick(ArrangeTypeEnum.front); }}>
+                    <TopmostSingle />
+                    {localeService.t('image-panel.arrange.front')}
+                </Button>
+                <Button onClick={() => { onArrangeBtnClick(ArrangeTypeEnum.back); }}>
+                    <BottomSingle />
+                    {localeService.t('image-panel.arrange.back')}
+                </Button>
             </div>
         </div>
     );

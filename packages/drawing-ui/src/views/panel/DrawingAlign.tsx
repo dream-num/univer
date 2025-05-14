@@ -16,7 +16,7 @@
 
 import type { IDrawingParam } from '@univerjs/core';
 import { ICommandService, LocaleService } from '@univerjs/core';
-import { borderTopClassName, clsx, Select } from '@univerjs/design';
+import { clsx, Select } from '@univerjs/design';
 import { useDependency } from '@univerjs/ui';
 import { useState } from 'react';
 import { AlignType, SetDrawingAlignOperation } from '../../commands/operations/drawing-align.operation';
@@ -93,25 +93,20 @@ export const DrawingAlign = (props: IDrawingAlignProps) => {
 
     return (
         <div
-            className={clsx('univer-relative univer-w-full', borderTopClassName, {
+            className={clsx('univer-relative univer-w-full', {
                 'univer-hidden': !alignShow,
             })}
         >
-            <div
-                className="univer-relative univer-mt-2.5 univer-flex univer-h-full"
+            <header
+                className={`
+                  univer-text-gray-600
+                  dark:univer-text-gray-200
+                `}
             >
-                <div
-                    className={`
-                      univer-w-full univer-text-gray-900
-                      dark:univer-text-white
-                    `}
-                >
-                    <div>{localeService.t('image-panel.align.title')}</div>
-                </div>
-            </div>
-            <div
-                className="univer-relative univer-mt-2.5 univer-flex univer-h-full"
-            >
+                <div>{localeService.t('image-panel.align.title')}</div>
+            </header>
+
+            <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full">
                 <div
                     className={`
                       univer-w-full univer-text-gray-900

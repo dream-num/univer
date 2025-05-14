@@ -134,9 +134,9 @@ export function Sidebar() {
                 <header
                     className={`
                       univer-sticky univer-top-0 univer-z-10 univer-box-border univer-flex univer-items-center
-                      univer-justify-between univer-p-4 univer-pb-2 univer-text-base univer-font-medium
+                      univer-justify-between univer-bg-white univer-p-4 univer-pb-2 univer-text-base univer-font-medium
                       univer-text-gray-800
-                      dark:univer-text-white
+                      dark:univer-bg-gray-900 dark:univer-text-white
                     `}
                 >
                     {options?.header}
@@ -152,7 +152,10 @@ export function Sidebar() {
 
                 {options?.footer && (
                     <footer
-                        className="univer-sticky univer-bottom-0 univer-box-border univer-p-4"
+                        className={`
+                          univer-sticky univer-bottom-0 univer-box-border univer-bg-white univer-p-4
+                          dark:univer-bg-gray-900
+                        `}
                     >
                         {options.footer}
                     </footer>

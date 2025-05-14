@@ -16,14 +16,26 @@
 
 import type { ICommandInfo, IDrawingParam, Nullable } from '@univerjs/core';
 import type { IDocDrawing } from '@univerjs/docs-drawing';
-import { BooleanNumber, ICommandService, IUniverInstanceService, LocaleService, PositionedObjectLayoutType, WrapTextType } from '@univerjs/core';
-import { borderTopClassName, clsx, InputNumber, Radio, RadioGroup } from '@univerjs/design';
+import {
+    BooleanNumber,
+    ICommandService,
+    IUniverInstanceService,
+    LocaleService,
+    PositionedObjectLayoutType,
+    WrapTextType,
+} from '@univerjs/core';
+import { clsx, InputNumber, Radio, RadioGroup } from '@univerjs/design';
 import { RichTextEditingMutation } from '@univerjs/docs';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { useDependency } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
-import { TextWrappingStyle, UpdateDocDrawingDistanceCommand, UpdateDocDrawingWrappingStyleCommand, UpdateDocDrawingWrapTextCommand } from '../../commands/commands/update-doc-drawing.command';
+import {
+    TextWrappingStyle,
+    UpdateDocDrawingDistanceCommand,
+    UpdateDocDrawingWrappingStyleCommand,
+    UpdateDocDrawingWrapTextCommand,
+} from '../../commands/commands/update-doc-drawing.command';
 
 const MIN_MARGIN = 0;
 const MAX_MARGIN = 100;
@@ -263,167 +275,121 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
 
     return (
         <div
-            className={clsx('univer-relative univer-mt-5 univer-w-full', borderTopClassName, {
+            className={clsx('univer-grid univer-gap-2 univer-py-2 univer-text-gray-400', {
                 'univer-hidden': !showPanel,
             })}
         >
-            <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full">
-                <div
-                    className={`
-                      univer-flex univer-items-center univer-gap-1 univer-text-gray-600
-                      dark:univer-text-gray-200
-                    `}
-                >
-                    <div>{localeService.t('image-text-wrap.title')}</div>
-                </div>
-            </div>
-            <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full">
-                <div
-                    className={`
-                      univer-flex univer-items-center univer-gap-1 univer-text-gray-900
-                      dark:univer-text-white
-                    `}
-                >
-                    <div>{localeService.t('image-text-wrap.wrappingStyle')}</div>
-                </div>
-            </div>
-            <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full">
-                <div className="univer-flex univer-items-center univer-gap-1">
-                    <RadioGroup value={wrappingStyle} onChange={handleWrappingStyleChange} direction="vertical">
-                        <Radio value={TextWrappingStyle.INLINE}>{localeService.t('image-text-wrap.inline')}</Radio>
-                        <Radio value={TextWrappingStyle.WRAP_SQUARE}>{localeService.t('image-text-wrap.square')}</Radio>
-                        <Radio value={TextWrappingStyle.WRAP_TOP_AND_BOTTOM}>{localeService.t('image-text-wrap.topAndBottom')}</Radio>
-                        <Radio value={TextWrappingStyle.BEHIND_TEXT}>{localeService.t('image-text-wrap.behindText')}</Radio>
-                        <Radio value={TextWrappingStyle.IN_FRONT_OF_TEXT}>{localeService.t('image-text-wrap.inFrontText')}</Radio>
-                    </RadioGroup>
-                </div>
-            </div>
-
-            <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full">
-                <div
-                    className={`
-                      univer-flex univer-items-center univer-gap-1 univer-text-gray-900
-                      dark:univer-text-white
-                    `}
-                >
-                    <div>{localeService.t('image-text-wrap.wrapText')}</div>
-                </div>
-            </div>
-            <div
-                className="univer-relative univer-mt-2.5 univer-flex univer-h-full"
+            <header
+                className={`
+                  univer-text-gray-600
+                  dark:univer-text-gray-200
+                `}
             >
-                <div className="univer-flex univer-items-center univer-gap-1">
-                    <RadioGroup disabled={disableWrapText} value={wrapText} onChange={handleWrapTextChange} direction="horizontal">
-                        <Radio value={WrapTextType.BOTH_SIDES}>{localeService.t('image-text-wrap.bothSide')}</Radio>
-                        <Radio value={WrapTextType.LEFT}>{localeService.t('image-text-wrap.leftOnly')}</Radio>
-                        <Radio value={WrapTextType.RIGHT}>{localeService.t('image-text-wrap.rightOnly')}</Radio>
-                    </RadioGroup>
-                </div>
+                <div>{localeService.t('image-text-wrap.title')}</div>
+            </header>
+
+            <div
+                className={`
+                  univer-text-gray-600
+                  dark:univer-text-gray-200
+                `}
+            >
+                <div>{localeService.t('image-text-wrap.wrappingStyle')}</div>
             </div>
 
-            <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full">
-                <div
-                    className={`
-                      univer-flex univer-items-center univer-gap-1 univer-text-gray-900
-                      dark:univer-text-white
-                    `}
-                >
-                    <div>{localeService.t('image-text-wrap.distanceFromText')}</div>
-                </div>
+            <div>
+                <RadioGroup value={wrappingStyle} onChange={handleWrappingStyleChange} direction="vertical">
+                    <Radio value={TextWrappingStyle.INLINE}>{localeService.t('image-text-wrap.inline')}</Radio>
+                    <Radio value={TextWrappingStyle.WRAP_SQUARE}>{localeService.t('image-text-wrap.square')}</Radio>
+                    <Radio value={TextWrappingStyle.WRAP_TOP_AND_BOTTOM}>{localeService.t('image-text-wrap.topAndBottom')}</Radio>
+                    <Radio value={TextWrappingStyle.BEHIND_TEXT}>{localeService.t('image-text-wrap.behindText')}</Radio>
+                    <Radio value={TextWrappingStyle.IN_FRONT_OF_TEXT}>{localeService.t('image-text-wrap.inFrontText')}</Radio>
+                </RadioGroup>
             </div>
 
             <div
-                className="univer-relative univer-mt-2.5 univer-flex univer-h-full"
+                className={`
+                  univer-text-gray-600
+                  dark:univer-text-gray-200
+                `}
             >
-                <div className="univer-flex univer-items-center univer-gap-1">
-                    <label>
-                        <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full">
-                            <div className="univer-flex univer-items-center univer-gap-1">
-                                {localeService.t('image-text-wrap.top')}
-                            </div>
-                        </div>
-                        <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full">
-                            <div className="univer-flex univer-items-center univer-gap-1">
-                                <InputNumber
-                                    min={MIN_MARGIN}
-                                    max={MAX_MARGIN}
-                                    disabled={disableDistTB}
-                                    precision={1}
-                                    value={distToText.distT}
-                                    onChange={(val) => { handleDistToTextChange(val, 'distT'); }}
-                                />
-                            </div>
-                        </div>
-                    </label>
+                <div>{localeService.t('image-text-wrap.wrapText')}</div>
+            </div>
+
+            <div>
+                <RadioGroup disabled={disableWrapText} value={wrapText} onChange={handleWrapTextChange} direction="horizontal">
+                    <Radio value={WrapTextType.BOTH_SIDES}>{localeService.t('image-text-wrap.bothSide')}</Radio>
+                    <Radio value={WrapTextType.LEFT}>{localeService.t('image-text-wrap.leftOnly')}</Radio>
+                    <Radio value={WrapTextType.RIGHT}>{localeService.t('image-text-wrap.rightOnly')}</Radio>
+                </RadioGroup>
+            </div>
+
+            <div
+                className={`
+                  univer-text-gray-600
+                  dark:univer-text-gray-200
+                `}
+            >
+                <div>{localeService.t('image-text-wrap.distanceFromText')}</div>
+            </div>
+
+            <div
+                className={`
+                  univer-grid univer-grid-cols-2 univer-gap-2
+                  [&>div]:univer-grid [&>div]:univer-gap-2
+                `}
+            >
+                <div>
+                    <span>{localeService.t('image-text-wrap.top')}</span>
+                    <InputNumber
+                        min={MIN_MARGIN}
+                        max={MAX_MARGIN}
+                        disabled={disableDistTB}
+                        precision={1}
+                        value={distToText.distT}
+                        onChange={(val) => { handleDistToTextChange(val, 'distT'); }}
+                    />
                 </div>
-                <div className={clsx('univer-flex univer-items-center univer-gap-1')}>
-                    <label>
-                        <div
-                            className="univer-relative univer-mt-2.5 univer-flex univer-h-full"
-                        >
-                            <div className="univer-flex univer-items-center univer-gap-1">
-                                {localeService.t('image-text-wrap.left')}
-                            </div>
-                        </div>
-                        <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full">
-                            <div className="univer-flex univer-items-center univer-gap-1">
-                                <InputNumber
-                                    min={MIN_MARGIN}
-                                    max={MAX_MARGIN}
-                                    disabled={disableDistLR}
-                                    precision={1}
-                                    value={distToText.distL}
-                                    onChange={(val) => { handleDistToTextChange(val, 'distL'); }}
-                                />
-                            </div>
-                        </div>
-                    </label>
+                <div>
+                    <span>{localeService.t('image-text-wrap.left')}</span>
+                    <InputNumber
+                        min={MIN_MARGIN}
+                        max={MAX_MARGIN}
+                        disabled={disableDistLR}
+                        precision={1}
+                        value={distToText.distL}
+                        onChange={(val) => { handleDistToTextChange(val, 'distL'); }}
+                    />
                 </div>
             </div>
+
             <div
-                className="univer-relative univer-mt-2.5 univer-flex univer-h-full"
+                className={`
+                  univer-grid univer-grid-cols-2 univer-gap-2
+                  [&>div]:univer-grid [&>div]:univer-gap-2
+                `}
             >
-                <div className="univer-flex univer-items-center univer-gap-1">
-                    <label>
-                        <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full">
-                            <div className="univer-flex univer-items-center univer-gap-1">
-                                {localeService.t('image-text-wrap.bottom')}
-                            </div>
-                        </div>
-                        <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full">
-                            <div className="univer-flex univer-items-center univer-gap-1">
-                                <InputNumber
-                                    min={MIN_MARGIN}
-                                    max={MAX_MARGIN}
-                                    disabled={disableDistTB}
-                                    precision={1}
-                                    value={distToText.distB}
-                                    onChange={(val) => { handleDistToTextChange(val, 'distB'); }}
-                                />
-                            </div>
-                        </div>
-                    </label>
+                <div>
+                    <span>{localeService.t('image-text-wrap.bottom')}</span>
+                    <InputNumber
+                        min={MIN_MARGIN}
+                        max={MAX_MARGIN}
+                        disabled={disableDistTB}
+                        precision={1}
+                        value={distToText.distB}
+                        onChange={(val) => { handleDistToTextChange(val, 'distB'); }}
+                    />
                 </div>
-                <div className="univer-flex univer-items-center univer-gap-1">
-                    <label>
-                        <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full">
-                            <div className="univer-flex univer-items-center univer-gap-1">
-                                {localeService.t('image-text-wrap.right')}
-                            </div>
-                        </div>
-                        <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full">
-                            <div className="univer-flex univer-items-center univer-gap-1">
-                                <InputNumber
-                                    min={MIN_MARGIN}
-                                    max={MAX_MARGIN}
-                                    disabled={disableDistLR}
-                                    precision={1}
-                                    value={distToText.distR}
-                                    onChange={(val) => { handleDistToTextChange(val, 'distR'); }}
-                                />
-                            </div>
-                        </div>
-                    </label>
+                <div>
+                    <span>{localeService.t('image-text-wrap.right')}</span>
+                    <InputNumber
+                        min={MIN_MARGIN}
+                        max={MAX_MARGIN}
+                        disabled={disableDistLR}
+                        precision={1}
+                        value={distToText.distR}
+                        onChange={(val) => { handleDistToTextChange(val, 'distR'); }}
+                    />
                 </div>
             </div>
         </div>

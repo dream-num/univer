@@ -63,13 +63,13 @@ export class CanvasColorService extends Disposable implements ICanvasColorServic
             cachedColor = rgbToHex(invertedColor);
 
             // append alpha channel if the original has alpha channel
-            if (color.length === 4) {
-                const alpha = color.charAt(3);
-                cachedColor += alpha + alpha;
-            }
+            // if (color.length === 4) {
+            //     const alpha = color.charAt(3);
+            //     cachedColor += alpha + alpha;
+            // }
 
             // For 8-digit hex (e.g., #RRGGBB[AA]), the alpha is the last two characters
-            else if (color.length === 9) {
+            if (color.length === 9) {
                 const alpha = color.substring(7, 9);
                 cachedColor += alpha;
             }

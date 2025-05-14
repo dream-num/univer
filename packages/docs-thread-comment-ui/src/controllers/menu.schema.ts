@@ -15,7 +15,7 @@
  */
 
 import type { MenuSchemaType } from '@univerjs/ui';
-import { ContextMenuGroup, ContextMenuPosition, RibbonStartGroup } from '@univerjs/ui';
+import { ContextMenuGroup, ContextMenuPosition, RibbonInsertGroup } from '@univerjs/ui';
 import {
     StartAddCommentOperation,
     ToggleCommentPanelOperation,
@@ -23,9 +23,9 @@ import {
 import { AddDocCommentMenuItemFactory, ToolbarDocCommentMenuItemFactory } from './menu';
 
 export const menuSchema: MenuSchemaType = {
-    [RibbonStartGroup.OTHERS]: {
+    [RibbonInsertGroup.MEDIA]: {
         [ToggleCommentPanelOperation.id]: {
-            order: 1,
+            order: 3,
             menuItemFactory: ToolbarDocCommentMenuItemFactory,
         },
     },

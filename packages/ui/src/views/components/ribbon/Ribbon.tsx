@@ -15,14 +15,16 @@
  */
 
 import type { ComponentType } from 'react';
+import type { Observable } from 'rxjs';
 import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
 import { LocaleService } from '@univerjs/core';
 import { borderBottomClassName, borderClassName, clsx, divideXClassName, Dropdown } from '@univerjs/design';
 import { HomeSingle, MoreDownSingle, MoreFunctionSingle } from '@univerjs/icons';
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { combineLatest } from 'rxjs';
 import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
 import { MenuManagerPosition, RibbonPosition } from '../../../services/menu/types';
-import { useDependency } from '../../../utils/di';
+import { useDependency, useObservable } from '../../../utils/di';
 import { ComponentContainer } from '../ComponentContainer';
 import { ToolbarButton } from './ToolbarButton';
 import { ToolbarItem } from './ToolbarItem';
@@ -47,6 +49,8 @@ export function Ribbon(props: IRibbonProps) {
     const menuManagerService = useDependency(IMenuManagerService);
     const localeService = useDependency(LocaleService);
 
+    const menuChanged = useObservable(menuManagerService.menuChanged$);
+
     const containerRef = useRef<HTMLDivElement>(null!);
     const fakeToolbarRef = useRef<HTMLDivElement>(null!);
 
@@ -64,12 +68,6 @@ export function Ribbon(props: IRibbonProps) {
     // const [changingActiveTab, setChangingActiveTab] = useState(false);
     // const [collapsedIds, setCollapsedIds] = useState<string[]>([]);
 
-    // const separatorClassName = `[&>*:last-child:after]:univer-absolute [&>*:last-child:after]:-univer-right-2
-    // [&>*:last-child:after]:univer-top-1/2 [&>*:last-child:after]:univer-h-5 [&>*:last-child:after]:univer-translate-x-[3px]
-    // [&>*:last-child:after]:univer-w-px [&>*:last-child:after]:-univer-translate-y-1/2
-    // [&>*:last-child:after]:univer-bg-gray-200 [&>*:last-child:after]:univer-content-['']
-    // [&>*:last-child]:univer-relative dark:[&>*:last-child:after]:univer-bg-gray-600`;
-
     const handleSelectTab = useCallback((group: IMenuSchema) => {
         // toolbarItemRefs.current = {};
         // setChangingActiveTab(true);
@@ -86,18 +84,89 @@ export function Ribbon(props: IRibbonProps) {
 
     // subscribe to menu changes
     useEffect(() => {
-        function getRibbon(): void {
-            const ribbon = menuManagerService.getMenuByPositionKey(MenuManagerPosition.RIBBON);
-            setRibbon(ribbon);
-        }
-        getRibbon();
+        // function getRibbon(): void {
+        //     const ribbon = menuManagerService.getMenuByPositionKey(MenuManagerPosition.RIBBON);
 
-        const subscription = menuManagerService.menuChanged$.subscribe(getRibbon);
+        //     setRibbon(ribbon);
+        // }
+
+        // const subscription = menuManagerService.menuChanged$.pipe(
+        //     debounceTime(300)
+        // ).subscribe(getRibbon);
+
+        // getRibbon()
+
+        const ribbon = menuManagerService.getMenuByPositionKey(MenuManagerPosition.RIBBON);
+
+        const hiddenObservaleMap: Observable<boolean>[] = [];
+        const hiddenKeyMap: string[] = [];
+        for (const group of ribbon) {
+            if (group.children) {
+                for (const item of group.children) {
+                    if (item.children) {
+                        for (const child of item.children) {
+                            if (child.item?.hidden$) {
+                                hiddenObservaleMap.push(child.item.hidden$);
+                                hiddenKeyMap.push(`${group.key}/${item.key}/${child.key}`);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        const subscription = combineLatest(hiddenObservaleMap)
+            // .pipe(debounceTime(300))
+            .subscribe((hiddenMap) => {
+                const newRibbon: IMenuSchema[] = [];
+
+                const hiddenPathMap = hiddenMap.map((hidden, index) => {
+                    if (hidden) {
+                        return hiddenKeyMap[index];
+                    }
+                    return null;
+                }).filter((item) => !!item) as string[];
+
+                for (const group of ribbon) {
+                    const newGroup: IMenuSchema = { ...group, children: [] };
+
+                    if (group.children?.length) {
+                        for (const item of group.children) {
+                            const newItem: IMenuSchema = { ...item, children: [] };
+                            let shouldAddItem = true;
+
+                            if (item.children?.length) {
+                                for (const child of item.children) {
+                                    const path = `${group.key}/${item.key}/${child.key}`;
+
+                                    if (!hiddenPathMap.includes(path)) {
+                                        newItem.children?.push(child);
+                                    }
+                                }
+
+                                if (newItem.children?.every((child) => child.children?.length === 0)) {
+                                    shouldAddItem = false;
+                                }
+                            }
+
+                            if (shouldAddItem) {
+                                newGroup.children?.push(newItem);
+                            }
+                        }
+                    }
+
+                    if (newGroup.children?.length && newGroup.children.every((item) => item.children?.length)) {
+                        newRibbon.push(newGroup);
+                    }
+                }
+
+                setRibbon(newRibbon);
+            });
 
         return () => {
             subscription.unsubscribe();
         };
-    }, [menuManagerService]);
+    }, [menuChanged]);
 
     const activeGroup = useMemo(() => {
         const allGroups = ribbon.find((group) => group.key === activatedTab)?.children ?? [];
@@ -125,6 +194,10 @@ export function Ribbon(props: IRibbonProps) {
         });
 
         observer.observe(containerRef.current);
+
+        return () => {
+            observer.disconnect();
+        };
     }, [activatedTab]);
 
     return (
@@ -147,7 +220,7 @@ export function Ribbon(props: IRibbonProps) {
 
             <div
                 className={clsx(`
-                  univer-box-border univer-grid univer-h-11 univer-grid-flow-col univer-items-center univer-px-3
+                  univer-box-border univer-grid univer-h-10 univer-grid-flow-col univer-items-center univer-px-3
                 `, 'univer-grid-cols-[auto,1fr]', borderBottomClassName)}
             >
                 {/* <search className="univer-mr-1 univer-w-20">
@@ -263,7 +336,7 @@ export function Ribbon(props: IRibbonProps) {
                 aria-hidden
                 className={clsx(`
                   univer-invisible univer-absolute -univer-left-[99999] -univer-top-[99999] univer-box-border
-                  univer-flex univer-h-11 univer-min-w-min univer-items-center univer-px-3 univer-opacity-0
+                  univer-flex univer-h-10 univer-min-w-min univer-items-center univer-px-3 univer-opacity-0
                 `, borderBottomClassName)}
             >
                 {activeGroup.allGroups.map((groupItem) => (groupItem.children?.length || groupItem.item) && (

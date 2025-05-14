@@ -15,14 +15,14 @@
  */
 
 import type { MenuSchemaType } from '@univerjs/ui';
-import { ContextMenuGroup, ContextMenuPosition, RibbonStartGroup } from '@univerjs/ui';
+import { ContextMenuGroup, ContextMenuPosition, RibbonInsertGroup } from '@univerjs/ui';
 import { ShowDocHyperLinkEditPopupOperation } from '../commands/operations/popup.operation';
 import { AddHyperLinkMenuItemFactory } from './menu';
 
 export const menuSchema: MenuSchemaType = {
-    [RibbonStartGroup.OTHERS]: {
+    [RibbonInsertGroup.MEDIA]: {
         [ShowDocHyperLinkEditPopupOperation.id]: {
-            order: 0,
+            order: 1,
             menuItemFactory: AddHyperLinkMenuItemFactory,
         },
     },

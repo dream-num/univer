@@ -76,7 +76,7 @@ export const SheetBar = () => {
 
     return (
         <div className="univer-relative univer-flex univer-h-full univer-min-w-0 univer-flex-1">
-            <div className="univer-flex univer-items-center univer-pl-2">
+            <div className="univer-flex univer-items-center">
                 {/* Add sheet button */}
                 <SheetBarButton
                     className="univer-mr-2"

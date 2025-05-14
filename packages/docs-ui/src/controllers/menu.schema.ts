@@ -15,7 +15,7 @@
  */
 
 import type { MenuSchemaType } from '@univerjs/ui';
-import { ContextMenuGroup, ContextMenuPosition, RibbonStartGroup } from '@univerjs/ui';
+import { ContextMenuGroup, ContextMenuPosition, RibbonInsertGroup, RibbonStartGroup } from '@univerjs/ui';
 import { DocCopyCommand, DocCopyCurrentParagraphCommand, DocCutCommand, DocCutCurrentParagraphCommand, DocPasteCommand } from '../commands/commands/clipboard.command';
 import { DeleteCurrentParagraphCommand, DeleteLeftCommand } from '../commands/commands/doc-delete.command';
 import { OpenHeaderFooterPanelCommand } from '../commands/commands/doc-header-footer.command';
@@ -131,14 +131,6 @@ export const menuSchema: MenuSchemaType = {
         },
     },
     [RibbonStartGroup.LAYOUT]: {
-        [TABLE_MENU_ID]: {
-            order: 1,
-            menuItemFactory: TableMenuFactory,
-            [DocCreateTableOperation.id]: {
-                order: 0,
-                menuItemFactory: InsertTableMenuFactory,
-            },
-        },
         [AlignLeftCommand.id]: {
             order: 2,
             menuItemFactory: AlignLeftMenuItemFactory,
@@ -182,6 +174,16 @@ export const menuSchema: MenuSchemaType = {
         [DocOpenPageSettingCommand.id]: {
             order: 12,
             menuItemFactory: PageSettingMenuItemFactory,
+        },
+    },
+    [RibbonInsertGroup.MEDIA]: {
+        [TABLE_MENU_ID]: {
+            order: 2,
+            menuItemFactory: TableMenuFactory,
+            [DocCreateTableOperation.id]: {
+                order: 0,
+                menuItemFactory: InsertTableMenuFactory,
+            },
         },
     },
     [ContextMenuPosition.MAIN_AREA]: {

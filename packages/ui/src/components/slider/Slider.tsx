@@ -232,17 +232,13 @@ export function Slider(props: ISliderProps) {
                 open={zoomListVisible}
                 onOpenChange={setZoomListVisible}
             >
-                <a
-                    className={`
-                      univer-flex univer-h-7 univer-w-[55px] univer-cursor-pointer univer-items-center
-                      univer-justify-center univer-rounded univer-text-sm univer-text-gray-800 univer-transition-all
-                      dark:univer-text-white dark:hover:univer-bg-gray-700
-                      hover:univer-bg-gray-100
-                    `}
+                <Button
+                    size="small"
+                    variant="text"
                 >
                     {value}
                     %
-                </a>
+                </Button>
             </DropdownMenu>
         </div>
     );

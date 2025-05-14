@@ -34,7 +34,7 @@ export interface IMenuSchema {
 }
 
 export interface IMenuManagerService {
-    readonly menuChanged$: Observable<void>;
+    readonly menuChanged$: Observable<number>;
 
     mergeMenu(source: MenuSchemaType, target?: MenuSchemaType): void;
 
@@ -54,7 +54,7 @@ export type MenuSchemaType = {
 };
 
 export class MenuManagerService extends Disposable implements IMenuManagerService {
-    readonly menuChanged$ = new Subject<void>();
+    readonly menuChanged$ = new Subject<number>();
 
     private _menu: MenuSchemaType = {
         [MenuManagerPosition.RIBBON]: {
@@ -243,7 +243,7 @@ export class MenuManagerService extends Disposable implements IMenuManagerServic
                 const _key = key as keyof MenuSchemaType;
                 _target[_key] = merge({}, _target[_key], source[_key]);
 
-                this.menuChanged$.next();
+                this.menuChanged$.next(Date.now());
             } else if (typeof value === 'object') {
                 this.mergeMenu(source, value);
             }
@@ -252,7 +252,7 @@ export class MenuManagerService extends Disposable implements IMenuManagerServic
 
     appendRootMenu(source: MenuSchemaType): void {
         this._menu = merge({}, this._menu, source);
-        this.menuChanged$.next();
+        this.menuChanged$.next(Date.now());
     }
 
     private _buildMenuSchema(data: MenuSchemaType): IMenuSchema[] {

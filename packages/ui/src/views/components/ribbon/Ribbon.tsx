@@ -19,7 +19,7 @@ import type { Observable } from 'rxjs';
 import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
 import { LocaleService } from '@univerjs/core';
 import { borderBottomClassName, borderClassName, clsx, divideXClassName, Dropdown } from '@univerjs/design';
-import { HomeSingle, MoreDownSingle, MoreFunctionSingle } from '@univerjs/icons';
+import { DatabaseSingle, EyeSingle, FunctionSingle, HomeSingle, InsertSingle, MoreDownSingle, MoreFunctionSingle } from '@univerjs/icons';
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { combineLatest } from 'rxjs';
 import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
@@ -36,11 +36,11 @@ interface IRibbonProps {
 
 const iconMap = {
     [RibbonPosition.START]: HomeSingle,
-    [RibbonPosition.INSERT]: HomeSingle,
-    [RibbonPosition.FORMULAS]: HomeSingle,
-    [RibbonPosition.DATA]: HomeSingle,
-    [RibbonPosition.VIEW]: HomeSingle,
-    [RibbonPosition.OTHERS]: HomeSingle,
+    [RibbonPosition.INSERT]: InsertSingle,
+    [RibbonPosition.FORMULAS]: FunctionSingle,
+    [RibbonPosition.DATA]: DatabaseSingle,
+    [RibbonPosition.VIEW]: EyeSingle,
+    [RibbonPosition.OTHERS]: MoreFunctionSingle,
 };
 
 export function Ribbon(props: IRibbonProps) {
@@ -254,7 +254,7 @@ export function Ribbon(props: IRibbonProps) {
 
                 {ribbon.length > 1 && (
                     <Dropdown
-                        className="!univer-rounded-xl univer-animate-in univer-fade-in"
+                        className="univer-max-w-96 !univer-rounded-xl univer-animate-in univer-fade-in"
                         align="start"
                         open={groupSelectorVisible}
                         overlay={(
@@ -275,8 +275,8 @@ export function Ribbon(props: IRibbonProps) {
                                         >
                                             <span
                                                 className={clsx(`
-                                                  univer-box-border univer-flex univer-size-9 univer-items-center
-                                                  univer-justify-center univer-rounded-lg
+                                                  univer-box-border univer-flex univer-size-9 univer-flex-shrink-0
+                                                  univer-items-center univer-justify-center univer-rounded-lg
                                                 `, borderClassName)}
                                             >
                                                 <Icon

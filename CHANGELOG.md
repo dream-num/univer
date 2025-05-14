@@ -1,5 +1,25 @@
 # Changelog
 
+# [0.7.0](https://github.com/dream-num/univer/compare/v0.7.0-beta.1...v0.7.0) (2025-05-14)
+
+
+### Bug Fixes
+
+* **docs-ui:** fix dark ui dark mode ([#5181](https://github.com/dream-num/univer/issues/5181)) ([72eb2b7](https://github.com/dream-num/univer/commit/72eb2b70b0eb74de1f836e74fec797e399647944))
+* **drawing:** fix some data lost make throw eror ([#5166](https://github.com/dream-num/univer/issues/5166)) ([3df141f](https://github.com/dream-num/univer/commit/3df141f728fc55fe4915035aeaf47eb4be65fbea))
+* **facade:** skeleton change event not fired on remove-row ([#5183](https://github.com/dream-num/univer/issues/5183)) ([0e02f88](https://github.com/dream-num/univer/commit/0e02f882b4989d04acdb8a6b84befdcfc88d6675))
+* **sheets-comment:** fix color to adapt dark mode ([#5175](https://github.com/dream-num/univer/issues/5175)) ([f329131](https://github.com/dream-num/univer/commit/f32913104928bcf17eede553494acea38bddc864))
+* **sheets-note-ui:** note error resize to zero when hide ([#5179](https://github.com/dream-num/univer/issues/5179)) ([735b7aa](https://github.com/dream-num/univer/commit/735b7aaeae4ef2ca67f69bb7652e63fbe45711ba))
+* **sheets-ui:** range disable status error after switch menus ([#5195](https://github.com/dream-num/univer/issues/5195)) ([89570fe](https://github.com/dream-num/univer/commit/89570fe33d4bbd2cf0ea0dcc27c2546c4f987c95))
+* **ui:** remove unnecessary className for icon component ([#5189](https://github.com/dream-num/univer/issues/5189)) ([43ee14f](https://github.com/dream-num/univer/commit/43ee14f33dc9d26e3d8fbd75e57eb62199cba31e))
+
+
+### Features
+
+* **color:** move invert to core package ([#5188](https://github.com/dream-num/univer/issues/5188)) ([3028849](https://github.com/dream-num/univer/commit/3028849ab52da05a107d77dd326972dde1ec9292))
+* **docs-ui:** add doc float toolbar dark mode ([#5170](https://github.com/dream-num/univer/issues/5170)) ([3217d6a](https://github.com/dream-num/univer/commit/3217d6aa9503b44f4c9429a4077282c2c8a4ba0e))
+* support dark mode ([#5176](https://github.com/dream-num/univer/issues/5176)) ([ceebb52](https://github.com/dream-num/univer/commit/ceebb52202821abe19f2217d77fca2321afa1e68))
+
 # [0.7.0-beta.1](https://github.com/dream-num/univer/compare/v0.7.0-beta.0...v0.7.0-beta.1) (2025-05-09)
 
 

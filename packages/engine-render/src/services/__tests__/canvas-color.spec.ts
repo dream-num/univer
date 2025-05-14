@@ -81,4 +81,14 @@ describe('Test Canvas Color', () => {
         const invertedColor2 = canvasColorService.getRenderColor(color);
         expect(invertedColor2).toEqual('#333333ff');
     });
+
+    it('test short hex color with alpha', async () => {
+        const color = '#cccf';
+        themeService.setDarkMode(false);
+        const invertedColor = canvasColorService.getRenderColor(color);
+        expect(invertedColor).toEqual(color);
+        themeService.setDarkMode(true);
+        const invertedColor2 = canvasColorService.getRenderColor(color);
+        expect(invertedColor2).toEqual('#333333ff');
+    });
 });

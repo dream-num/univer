@@ -21,39 +21,51 @@ import { FRange } from '@univerjs/sheets/facade';
 
 export interface IFSheetsNoteRange {
     /**
-     * get the note of the primary cell
-     * @returns {Nullable<ISheetNote>} the note of the primary cell
+     * Get the annotation of the top-left cell in the range
+     * @returns {Nullable<ISheetNote>} The annotation of the top-left cell in the range
      * @example
      * ```ts
-     * const fWorkbook = univerAPI.getWorkbook();
-     * const fWorksheet = fWorkbook.getWorksheet();
-     * const fRange = fWorksheet.getRange(0, 0, 1, 1);
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:D10');
      * const note = fRange.getNote();
+     * console.log(note);
      * ```
      */
     getNote(): Nullable<ISheetNote>;
     /**
-     * create a new note and attach to the primary cell
-     * @param {ISheetNote} note the note to create
-     * @returns {FRange} the range
+     * Create or update the annotation of the top-left cell in the range
+     * @param {ISheetNote} note The annotation to create or update
+     * @returns {FRange} This range for method chaining
      * @example
      * ```ts
-     * const fWorkbook = univerAPI.getWorkbook();
-     * const fWorksheet = fWorkbook.getWorksheet();
-     * const fRange = fWorksheet.getRange(0, 0, 1, 1);
-     * const note = fRange.createOrUpdateNote({});
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1');
+     * fRange.createOrUpdateNote({
+     *   note: 'This is a note',
+     *   width: 160,
+     *   height: 100,
+     *   show: true,
+     * });
      * ```
      */
     createOrUpdateNote(note: ISheetNote): FRange;
     /**
-     * delete the note of the primary cell
-     * @returns {FRange} the range
+     * Delete the annotation of the top-left cell in the range
+     * @returns {FRange} This range for method chaining
      * @example
      * ```ts
-     * const fWorkbook = univerAPI.getWorkbook();
-     * const fWorksheet = fWorkbook.getWorksheet();
-     * const fRange = fWorksheet.getRange(0, 0, 1, 1);
-     * fRange.deleteNote();
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const notes = fWorksheet.getNotes();
+     * console.log(notes);
+     *
+     * if (notes.length > 0) {
+     *   // Delete the first note
+     *   const { row, col } = notes[0];
+     *   fWorksheet.getRange(row, col).deleteNote();
+     * }
      * ```
      */
     deleteNote(): FRange;
@@ -76,7 +88,6 @@ export class FSheetsNoteRange extends FRange implements IFSheetsNoteRange {
     }
 
     deleteNote(): FRange {
-        const model = this._injector.get(SheetsNoteModel);
         this._commandService.syncExecuteCommand(
             RemoveNoteMutation.id,
             {

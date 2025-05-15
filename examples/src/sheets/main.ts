@@ -42,6 +42,7 @@ import { UniverUIPlugin } from '@univerjs/ui';
 import { enUS, faIR, frFR, ruRU, viVN, zhCN, zhTW } from '../locales';
 import { UniverSheetsCustomMenuPlugin } from './custom-menu';
 import ImportCSVButtonPlugin from './custom-plugin/import-csv-button';
+
 import '@univerjs/sheets/facade';
 import '@univerjs/ui/facade';
 import '@univerjs/docs-ui/facade';
@@ -62,6 +63,7 @@ import '@univerjs/sheets-formula-ui/facade';
 import '@univerjs/sheets-table/facade';
 import '@univerjs/sheets-sort/facade';
 import '@univerjs/network/facade';
+import '@univerjs/sheets-note/facade';
 import '../global.css';
 import './styles';
 
@@ -108,7 +110,10 @@ function createNewInstance() {
     });
     univer.registerPlugin(UniverDocsUIPlugin);
 
-    univer.registerPlugin(UniverSheetsPlugin, { notExecuteFormula: true });
+    univer.registerPlugin(UniverSheetsPlugin, {
+        notExecuteFormula: true,
+        autoHeightForMergedCells: true,
+    });
     univer.registerPlugin(UniverSheetsUIPlugin);
     univer.registerPlugin(UniverSheetsNumfmtPlugin, {
         disableTextFormatAlert: true,

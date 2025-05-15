@@ -191,7 +191,7 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
             <time
                 className={`
                   univer-mb-1 univer-text-xs/normal univer-text-gray-600
-                  dark:univer-text-gray-200
+                  dark:!univer-text-gray-200
                 `}
             >
                 {item.dT}
@@ -227,7 +227,7 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                     <div
                         className={`
                           univer-text-sm univer-text-gray-900
-                          dark:univer-text-white
+                          dark:!univer-text-white
                         `}
                     >
                         {transformDocument2TextNodes(item.text).map((paragraph, i) => (
@@ -359,7 +359,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
             className={clsx(
                 `
                   univer-relative univer-box-border univer-rounded-md univer-bg-white univer-p-4
-                  dark:univer-bg-gray-900 dark:univer-text-white
+                  dark:!univer-bg-gray-900 dark:!univer-text-white
                 `,
                 borderClassName,
                 {
@@ -418,7 +418,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                                     `
                                       univer-ml-1 univer-inline-flex univer-h-6 univer-w-6 univer-cursor-pointer
                                       univer-items-center univer-justify-center univer-rounded-[3px] univer-text-base
-                                      dark:hover:univer-bg-gray-800
+                                      dark:hover:!univer-bg-gray-800
                                       hover:univer-bg-gray-50
                                     `,
                                     {
@@ -436,7 +436,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                                           univer-ml-1 univer-inline-flex univer-h-6 univer-w-6 univer-cursor-pointer
                                           univer-items-center univer-justify-center univer-rounded-[3px]
                                           univer-text-base
-                                          dark:hover:univer-bg-gray-800
+                                          dark:hover:!univer-bg-gray-800
                                           hover:univer-bg-gray-50
                                         `}
                                         onClick={handleDeleteRoot}

@@ -282,7 +282,7 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
             <header
                 className={`
                   univer-text-gray-600
-                  dark:univer-text-gray-200
+                  dark:!univer-text-gray-200
                 `}
             >
                 <div>{localeService.t('image-text-wrap.title')}</div>
@@ -291,7 +291,7 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
             <div
                 className={`
                   univer-text-gray-600
-                  dark:univer-text-gray-200
+                  dark:!univer-text-gray-200
                 `}
             >
                 <div>{localeService.t('image-text-wrap.wrappingStyle')}</div>
@@ -310,7 +310,7 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
             <div
                 className={`
                   univer-text-gray-600
-                  dark:univer-text-gray-200
+                  dark:!univer-text-gray-200
                 `}
             >
                 <div>{localeService.t('image-text-wrap.wrapText')}</div>
@@ -327,7 +327,7 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
             <div
                 className={`
                   univer-text-gray-600
-                  dark:univer-text-gray-200
+                  dark:!univer-text-gray-200
                 `}
             >
                 <div>{localeService.t('image-text-wrap.distanceFromText')}</div>

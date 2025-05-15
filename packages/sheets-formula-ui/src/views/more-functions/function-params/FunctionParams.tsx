@@ -37,7 +37,7 @@ export function FunctionParams(props: IParamsProps) {
             <div
                 className={`
                   univer-text-gray-900
-                  dark:univer-text-white
+                  dark:!univer-text-white
                 `}
             >
                 {value}

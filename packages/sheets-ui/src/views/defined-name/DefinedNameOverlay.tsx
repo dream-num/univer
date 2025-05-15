@@ -103,7 +103,7 @@ export function DefinedNameOverlay() {
                             key={index}
                             className={`
                               univer-cursor-pointer univer-px-2 univer-transition-colors univer-duration-200
-                              dark:hover:univer-bg-gray-600
+                              dark:hover:!univer-bg-gray-600
                               hover:univer-bg-gray-100
                             `}
                             onClick={() => { focusDefinedName(definedName); }}
@@ -117,7 +117,7 @@ export function DefinedNameOverlay() {
                                     className={`
                                       univer-w-[50%] univer-flex-shrink-0 univer-overflow-hidden univer-text-ellipsis
                                       univer-whitespace-nowrap univer-text-sm univer-text-gray-600
-                                      dark:univer-text-gray-200
+                                      dark:!univer-text-gray-200
                                     `}
                                     title={definedName.name}
                                 >
@@ -141,7 +141,7 @@ export function DefinedNameOverlay() {
             <div
                 className={`
                   univer-cursor-pointer univer-p-2 univer-transition-colors univer-duration-200
-                  dark:hover:univer-bg-gray-600
+                  dark:hover:!univer-bg-gray-600
                   hover:univer-bg-gray-100
                 `}
                 onClick={openSlider}
@@ -149,7 +149,7 @@ export function DefinedNameOverlay() {
                 <div
                     className={`
                       univer-mb-2 univer-text-sm univer-font-semibold univer-text-gray-600
-                      dark:univer-text-gray-200
+                      dark:!univer-text-gray-200
                     `}
                 >
                     {localeService.t('definedName.managerTitle')}

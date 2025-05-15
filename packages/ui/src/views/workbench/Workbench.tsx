@@ -138,7 +138,7 @@ export function DesktopWorkbenchContent(props: IUniverWorkbenchProps) {
                 data-u-comp="workbench-layout"
                 className={clsx(`
                   univer-flex univer-h-full univer-min-h-0 univer-flex-col univer-bg-white
-                  dark:univer-bg-gray-800
+                  dark:!univer-bg-gray-800
                 `, {
                     'univer-dark': darkMode,
                 })}
@@ -192,7 +192,7 @@ export function DesktopWorkbenchContent(props: IUniverWorkbenchProps) {
                             <section
                                 className={`
                                   univer-relative univer-overflow-hidden
-                                  dark:univer-bg-gray-900
+                                  dark:!univer-bg-gray-900
                                 `}
                                 ref={contentRef}
                                 data-range-selector

@@ -208,9 +208,9 @@ function SearchFunctionFactory(props: ISearchFunctionProps, ref: any) {
                         className={clsx(`
                           univer-box-border univer-cursor-pointer univer-rounded univer-px-2 univer-py-1
                           univer-text-gray-900 univer-transition-colors
-                          dark:univer-text-white
+                          dark:!univer-text-white
                         `, {
-                            'univer-bg-gray-200 dark:univer-bg-gray-600': active === index,
+                            'univer-bg-gray-200 dark:!univer-bg-gray-600': active === index,
                         })}
                         onMouseEnter={() => handleLiMouseEnter(index)}
                         onMouseLeave={handleLiMouseLeave}

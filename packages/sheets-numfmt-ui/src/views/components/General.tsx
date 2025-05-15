@@ -33,7 +33,7 @@ export const GeneralPanel: FC<IBusinessComponentProps> = (props) => {
             <div
                 className={`
                   univer-mt-3.5 univer-text-sm/5 univer-text-gray-600
-                  dark:univer-text-gray-200
+                  dark:!univer-text-gray-200
                 `}
             >
                 {t('sheet.numfmt.generalDes')}

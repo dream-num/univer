@@ -412,7 +412,7 @@ export const RuleList = (props: IRuleListProps) => {
                                             <div
                                                 className={`
                                                   univer-text-sm univer-text-gray-900
-                                                  dark:univer-text-white
+                                                  dark:!univer-text-white
                                                 `}
                                             >
                                                 {getRuleDescribe(rule, localeService)}

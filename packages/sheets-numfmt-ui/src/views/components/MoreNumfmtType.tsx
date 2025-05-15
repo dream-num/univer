@@ -87,7 +87,7 @@ export const Options = () => {
                         className={`
                           univer-flex univer-h-7 univer-items-center univer-justify-between univer-gap-6 univer-rounded
                           univer-px-2 univer-text-sm
-                          dark:hover:univer-bg-gray-700
+                          dark:hover:!univer-bg-gray-700
                           hover:univer-bg-gray-100
                         `}
                         onClick={() => {

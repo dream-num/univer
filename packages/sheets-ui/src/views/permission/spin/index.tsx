@@ -32,7 +32,7 @@ const Spin = ({ loading, children }: ISpinProps) => {
                     className={`
                       univer-absolute -univer-bottom-0.5 -univer-left-0.5 -univer-right-0.5 -univer-top-0.5 univer-z-10
                       univer-flex univer-items-center univer-justify-center univer-bg-white univer-backdrop-blur
-                      dark:univer-bg-black
+                      dark:!univer-bg-black
                     `}
                 >
                     <div

@@ -161,9 +161,9 @@ export const ThreadCommentSuggestion = ({ active, user }: { active: boolean; use
         className={clsx(
             `
               univer-flex univer-items-center univer-text-sm univer-text-gray-900
-              dark:univer-text-white
+              dark:!univer-text-white
             `,
-            { 'univer-bg-gray-50 dark:univer-bg-gray-900': active }
+            { 'univer-bg-gray-50 dark:!univer-bg-gray-900': active }
         )}
     >
         <img

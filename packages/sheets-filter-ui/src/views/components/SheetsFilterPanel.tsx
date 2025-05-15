@@ -74,7 +74,7 @@ export function FilterPanel() {
             className={`
               univer-box-border univer-flex univer-h-[432px] univer-w-[312px] univer-flex-col univer-rounded-lg
               univer-bg-white univer-p-4 univer-shadow-lg
-              dark:univer-border-gray-600 dark:univer-bg-gray-700
+              dark:!univer-border-gray-600 dark:!univer-bg-gray-700
             `}
         >
             <ComponentContainer

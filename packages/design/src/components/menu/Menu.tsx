@@ -79,17 +79,17 @@ export function TinyMenuGroup({ items }: ITinyMenuGroupProps) {
                         className={clsx(`
                           univer-flex univer-size-6 univer-cursor-pointer univer-items-center univer-justify-center
                           univer-rounded-md
-                          dark:hover:univer-bg-gray-900
+                          dark:hover:!univer-bg-gray-900
                           hover:univer-bg-gray-50
                         `, {
-                            'univer-bg-gray-50 dark:univer-bg-gray-900': item.active,
+                            'univer-bg-gray-50 dark:!univer-bg-gray-900': item.active,
                         }, item.className)}
                         onClick={() => item.onClick()}
                     >
                         <item.Icon
                             className={`
                               univer-size-4 univer-text-gray-900
-                              dark:univer-text-gray-200
+                              dark:!univer-text-gray-200
                             `}
                         />
                     </div>

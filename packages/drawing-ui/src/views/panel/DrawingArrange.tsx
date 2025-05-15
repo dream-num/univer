@@ -62,7 +62,7 @@ export const DrawingArrange = (props: IDrawingArrangeProps) => {
             <header
                 className={`
                   univer-text-gray-600
-                  dark:univer-text-gray-200
+                  dark:!univer-text-gray-200
                 `}
             >
                 <div>{localeService.t('image-panel.arrange.title')}</div>

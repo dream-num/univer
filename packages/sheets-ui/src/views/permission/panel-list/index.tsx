@@ -340,7 +340,7 @@ export const SheetPermissionPanelList = () => {
                                             <span
                                                 className={`
                                                   univer-h-4 univer-flex-grow univer-text-xs univer-text-gray-900
-                                                  dark:univer-text-white
+                                                  dark:!univer-text-white
                                                 `}
                                             >
                                                 {localeService.t('permission.panel.created')}
@@ -348,7 +348,7 @@ export const SheetPermissionPanelList = () => {
                                             <span
                                                 className={`
                                                   univer-h-4 univer-text-xs univer-text-gray-900
-                                                  dark:univer-text-white
+                                                  dark:!univer-text-white
                                                 `}
                                             >
                                                 {editPermission ? `${localeService.t('permission.panel.iCanEdit')}` : `${localeService.t('permission.panel.iCanNotEdit')}`}
@@ -359,7 +359,7 @@ export const SheetPermissionPanelList = () => {
                                             <span
                                                 className={`
                                                   univer-h-4 univer-flex-grow univer-text-xs univer-text-gray-900
-                                                  dark:univer-text-white
+                                                  dark:!univer-text-white
                                                 `}
                                             >
                                                 {localeService.t('permission.panel.viewPermission')}
@@ -367,7 +367,7 @@ export const SheetPermissionPanelList = () => {
                                             <span
                                                 className={`
                                                   univer-h-4 univer-text-xs univer-text-gray-900
-                                                  dark:univer-text-white
+                                                  dark:!univer-text-white
                                                 `}
                                             >
                                                 {viewPermission ? `${localeService.t('permission.panel.iCanView')}` : `${localeService.t('permission.panel.iCanNotView')}`}

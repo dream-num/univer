@@ -247,7 +247,7 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
                         className={`
                           univer-flex univer-flex-1 univer-flex-col univer-items-center univer-justify-center
                           univer-text-sm univer-text-gray-600
-                          dark:univer-text-gray-200
+                          dark:!univer-text-gray-200
                         `}
                     >
                         {localeService.t('threadCommentUI.panel.empty')}

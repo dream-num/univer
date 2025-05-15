@@ -16,14 +16,14 @@
 
 import { clsx } from './clsx';
 
-export const scrollbarClassName = 'univer-scrollbar-thin univer-scrollbar-track-gray-50 univer-scrollbar-thumb-gray-300 dark:univer-scrollbar-track-gray-900 dark:univer-scrollbar-thumb-gray-700';
+export const scrollbarClassName = 'univer-scrollbar-thin univer-scrollbar-track-gray-50 univer-scrollbar-thumb-gray-300 dark:!univer-scrollbar-track-gray-900 dark:!univer-scrollbar-thumb-gray-700';
 
-const borderBasicClassName = 'univer-border-gray-200 dark:univer-border-gray-600 univer-border-solid';
+const borderBasicClassName = 'univer-border-gray-200 dark:!univer-border-gray-600 univer-border-solid';
 export const borderClassName = clsx(borderBasicClassName, 'univer-border');
 export const borderLeftBottomClassName = clsx(borderBasicClassName, 'univer-border-l univer-border-b univer-border-0');
 export const borderLeftClassName = clsx(borderBasicClassName, 'univer-border-l univer-border-0');
 export const borderTopClassName = clsx(borderBasicClassName, 'univer-border-t univer-border-0');
 export const borderBottomClassName = clsx(borderBasicClassName, 'univer-border-b univer-border-0');
 export const borderRightClassName = clsx(borderBasicClassName, 'univer-border-r univer-border-0');
-export const divideYClassName = 'univer-divide-gray-200 dark:univer-divide-gray-600 univer-divide-y univer-divide-x-0 univer-divide-solid';
-export const divideXClassName = 'univer-divide-gray-200 dark:univer-divide-gray-600 univer-divide-x univer-divide-y-0 univer-divide-solid';
+export const divideYClassName = 'univer-divide-gray-200 dark:!univer-divide-gray-600 univer-divide-y univer-divide-x-0 univer-divide-solid';
+export const divideXClassName = 'univer-divide-gray-200 dark:!univer-divide-gray-600 univer-divide-x univer-divide-y-0 univer-divide-solid';

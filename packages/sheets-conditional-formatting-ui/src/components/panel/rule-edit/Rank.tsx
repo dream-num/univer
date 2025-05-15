@@ -144,7 +144,7 @@ export const RankStyleEditor = (props: IStyleEditorProps) => {
             <div
                 className={`
                   univer-mt-4 univer-text-sm univer-text-gray-600
-                  dark:univer-text-gray-200
+                  dark:!univer-text-gray-200
                 `}
             >
                 {localeService.t('sheet.cf.panel.styleRule')}

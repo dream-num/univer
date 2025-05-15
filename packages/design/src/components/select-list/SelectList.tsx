@@ -97,10 +97,10 @@ export function SelectList(props: ISelectListProps) {
                               univer-relative univer-block univer-cursor-pointer univer-select-none univer-rounded
                               univer-py-1.5 univer-pl-8 univer-pr-2 univer-text-sm univer-text-gray-900
                               univer-transition-colors
-                              dark:univer-text-white dark:hover:univer-bg-gray-600
+                              dark:!univer-text-white dark:hover:!univer-bg-gray-600
                               hover:univer-bg-gray-100
                             `, optionClassName, {
-                                'univer-bg-gray-200 dark:univer-bg-gray-500': checked,
+                                'univer-bg-gray-200 dark:!univer-bg-gray-500': checked,
                             })}
                             onClick={() => handleSelect(option.value)}
                         >

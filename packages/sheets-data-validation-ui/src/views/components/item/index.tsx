@@ -82,7 +82,7 @@ export const DataValidationItem = (props: IDataValidationDetailProps) => {
                   univer-overflow-hidden univer-p-2 univer-pr-9
                 `,
                 {
-                    'dark:hover:univer-bg-gray-700 hover:univer-bg-gray-50': !disable,
+                    'dark:hover:!univer-bg-gray-700 hover:univer-bg-gray-50': !disable,
                     'univer-opacity-50': disable,
                 }
             )}
@@ -107,7 +107,7 @@ export const DataValidationItem = (props: IDataValidationDetailProps) => {
             <div
                 className={`
                   univer-truncate univer-text-sm univer-font-medium univer-leading-[22px] univer-text-gray-900
-                  dark:univer-text-white
+                  dark:!univer-text-white
                 `}
             >
                 {validator?.generateRuleName(rule)}
@@ -115,7 +115,7 @@ export const DataValidationItem = (props: IDataValidationDetailProps) => {
             <div
                 className={`
                   univer-text-secondary univer-truncate univer-text-xs univer-leading-[18px]
-                  dark:univer-text-gray-300
+                  dark:!univer-text-gray-300
                 `}
             >
                 {rule.ranges.map((range) => serializeRange(range)).join(',')}
@@ -126,7 +126,7 @@ export const DataValidationItem = (props: IDataValidationDetailProps) => {
                         className={`
                           univer-absolute univer-right-2 univer-top-[19px] univer-flex univer-h-5 univer-w-5
                           univer-items-center univer-justify-center univer-rounded
-                          dark:univer-text-gray-300 dark:hover:univer-bg-gray-700
+                          dark:!univer-text-gray-300 dark:hover:!univer-bg-gray-700
                           hover:univer-bg-gray-200
                         `}
                         onClick={handleDelete}

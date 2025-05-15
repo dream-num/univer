@@ -100,7 +100,7 @@ export const DrawingAlign = (props: IDrawingAlignProps) => {
             <header
                 className={`
                   univer-text-gray-600
-                  dark:univer-text-gray-200
+                  dark:!univer-text-gray-200
                 `}
             >
                 <div>{localeService.t('image-panel.align.title')}</div>
@@ -110,7 +110,7 @@ export const DrawingAlign = (props: IDrawingAlignProps) => {
                 <div
                     className={`
                       univer-w-full univer-text-gray-900
-                      dark:univer-text-white
+                      dark:!univer-text-white
                     `}
                 >
                     <Select value={alignValue} options={alignOptions} onChange={handleAlignChange} />

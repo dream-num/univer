@@ -94,7 +94,7 @@ export default function ArrangePanel(props: IProps) {
                 <div
                     className={`
                       univer-w-full univer-text-left univer-text-gray-600
-                      dark:univer-text-gray-200
+                      dark:!univer-text-gray-200
                     `}
                 >
                     <div>{localeService.t('image-panel.arrange.title')}</div>

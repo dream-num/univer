@@ -38,7 +38,7 @@ const Params = ({ className, title, value }: IParamsProps) => (
         <div
             className={clsx(`
               univer-mb-2 univer-text-sm univer-font-medium univer-text-gray-900
-              dark:univer-text-white
+              dark:!univer-text-white
             `, className)}
         >
             {title}
@@ -136,7 +136,7 @@ export function HelpFunction(props: IHelpFunctionProps) {
                             className={clsx(`
                               univer-box-border univer-flex univer-items-center univer-justify-between univer-px-4
                               univer-py-3 univer-text-xs univer-font-medium univer-text-gray-900 univer-wrap-anywhere
-                              dark:univer-text-white
+                              dark:!univer-text-white
                             `, borderTopClassName)}
                         >
                             <Help
@@ -165,7 +165,7 @@ export function HelpFunction(props: IHelpFunctionProps) {
                                       univer-items-center univer-justify-center univer-rounded univer-bg-transparent
                                       univer-p-0 univer-text-xs univer-text-gray-600 univer-outline-none
                                       univer-transition-colors
-                                      dark:univer-text-gray-200
+                                      dark:!univer-text-gray-200
                                       hover:univer-bg-gray-300
                                     `}
                                     onClick={onClose}

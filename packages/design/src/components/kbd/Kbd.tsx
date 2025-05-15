@@ -33,7 +33,7 @@ export function KBD(props: IKBDProps) {
             className={clsx(`
               univer-inline-block univer-h-6 univer-select-none univer-rounded-md univer-bg-gray-50 univer-px-2
               univer-font-mono univer-text-xs/6 univer-font-medium univer-text-gray-700
-              dark:univer-bg-gray-700 dark:univer-text-white
+              dark:!univer-bg-gray-700 dark:!univer-text-white
             `, borderClassName, className)}
         >
             {keys.map((text, index) => (

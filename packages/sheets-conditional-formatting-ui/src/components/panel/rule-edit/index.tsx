@@ -233,7 +233,7 @@ export const RuleEdit = (props: IRuleEditProps) => {
             <div
                 className={`
                   univer-mt-4 univer-text-sm univer-text-gray-600
-                  dark:univer-text-gray-200
+                  dark:!univer-text-gray-200
                 `}
             >
                 {localeService.t('sheet.cf.panel.range')}
@@ -251,7 +251,7 @@ export const RuleEdit = (props: IRuleEditProps) => {
             <div
                 className={`
                   univer-mt-4 univer-text-sm univer-text-gray-600
-                  dark:univer-text-gray-200
+                  dark:!univer-text-gray-200
                 `}
             >
                 {localeService.t('sheet.cf.panel.styleType')}

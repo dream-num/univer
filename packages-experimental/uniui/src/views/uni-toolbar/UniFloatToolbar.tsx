@@ -88,7 +88,7 @@ export const UniFloatingToolbar = React.forwardRef<IFloatingToolbarRef, { node: 
             className={`
               univer-flex univer-items-center univer-gap-2 univer-rounded-md univer-bg-white univer-text-sm
               univer-text-primary-600
-              dark:univer-bg-gray-900
+              dark:!univer-bg-gray-900
             `}
             ref={setFloating}
             style={{ position: strategy, top: y ?? 0, left: x ?? 0 }}
@@ -123,7 +123,7 @@ export function UnitName({ unitId }: { unitId: string }) {
             className={`
               univer-flex univer-h-6 univer-items-center univer-gap-1 univer-rounded-md univer-bg-white univer-px-1
               univer-py-0 univer-text-sm univer-text-gray-900
-              dark:univer-text-white
+              dark:!univer-text-white
             `}
         >
             {name}

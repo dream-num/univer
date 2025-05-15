@@ -141,7 +141,7 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
             className={clsx(`
               univer-absolute univer-left-[100px] univer-top-[200px] univer-z-10 univer-flex univer-h-[50px]
               univer-w-[100px]
-              dark:univer-bg-gray-700
+              dark:!univer-bg-gray-700
             `, borderClassName)}
             style={{
                 left: state.left,

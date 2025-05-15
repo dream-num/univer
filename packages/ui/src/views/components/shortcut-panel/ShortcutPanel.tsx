@@ -92,7 +92,7 @@ export function ShortcutPanel() {
         <ul
             className={`
               univer-m-0 univer-list-none univer-p-0 univer-text-gray-900
-              dark:univer-text-white
+              dark:!univer-text-white
             `}
         >
             {shortcutItems.map((group) => (

@@ -336,7 +336,7 @@ export function ColorInput({ hsv, alpha, showAlpha, onChangeColor, onChangeAlpha
               [&_input]:univer-rounded [&_input]:univer-border [&_input]:univer-border-solid
               [&_input]:univer-border-gray-200 [&_input]:univer-bg-transparent [&_input]:univer-px-1.5
               [&_input]:univer-text-sm [&_input]:univer-text-gray-700 [&_input]:univer-outline-none
-              dark:[&_input]:univer-border-gray-600 dark:[&_input]:univer-text-white
+              dark:![&_input]:univer-border-gray-600 dark:![&_input]:univer-text-white
             `}
         >
             <Dropdown
@@ -346,7 +346,7 @@ export function ColorInput({ hsv, alpha, showAlpha, onChangeColor, onChangeAlpha
                         className={`
                           univer-grid univer-w-32
                           [&>a]:univer-cursor-pointer [&>a]:univer-px-2 [&>a]:univer-py-1 [&>a]:univer-text-sm
-                          dark:univer-text-white
+                          dark:!univer-text-white
                           focus-visible:univer-outline-none
                         `}
                     >
@@ -363,7 +363,7 @@ export function ColorInput({ hsv, alpha, showAlpha, onChangeColor, onChangeAlpha
                       univer-box-border univer-flex univer-h-8 univer-w-32 univer-cursor-pointer univer-items-center
                       univer-justify-between univer-gap-1 univer-rounded univer-border univer-border-solid
                       univer-border-gray-200 univer-px-1.5 univer-text-sm univer-text-gray-700
-                      dark:univer-border-gray-600 dark:univer-text-white
+                      dark:!univer-border-gray-600 dark:!univer-text-white
                     `}
                 >
                     <span>{format.toUpperCase()}</span>

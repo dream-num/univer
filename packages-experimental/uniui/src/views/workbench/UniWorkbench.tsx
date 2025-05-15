@@ -321,8 +321,7 @@ function UnitNode({ data }: IUnitNodeProps) {
 
             <div
                 className={`
-                  univer-absolute -univer-top-6 univer-left-0 univer-text-sm univer-text-gray-600
-                  dark:univer-text-gray-200
+                  univer-absolute -univer-top-6 univer-left-0 univer-text-sm univer-text-gray-600 !univer-text-gray-200
                 `}
             >
                 {title}

@@ -46,7 +46,7 @@ export function RenderSheetFooter() {
             className={`
               univer-box-border univer-flex univer-items-center univer-justify-between univer-bg-white univer-px-5
               univer-text-gray-900
-              dark:univer-bg-gray-900 dark:univer-text-gray-200
+              dark:!univer-bg-gray-900 dark:!univer-text-gray-200
             `}
             style={{
                 height: SHEET_FOOTER_BAR_HEIGHT,

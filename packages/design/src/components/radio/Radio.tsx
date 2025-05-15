@@ -68,7 +68,7 @@ export function Radio(props: IRadioProps) {
         <label
             data-u-comp="radio"
             className={clsx('univer-box-border univer-inline-flex univer-items-center univer-gap-2 univer-text-sm', {
-                'univer-cursor-pointer univer-text-gray-900 dark:univer-text-white': !disabled,
+                'univer-cursor-pointer univer-text-gray-900 dark:!univer-text-white': !disabled,
                 'univer-text-gray-400': disabled,
             })}
         >
@@ -86,10 +86,10 @@ export function Radio(props: IRadioProps) {
                       univer-relative univer-box-border univer-flex univer-size-4 univer-items-center
                       univer-justify-center univer-overflow-hidden univer-rounded-full univer-border univer-border-solid
                       univer-border-gray-300 univer-bg-gray-50 univer-transition-colors
-                      dark:univer-border-gray-500 dark:univer-bg-gray-600
+                      dark:!univer-border-gray-500 dark:!univer-bg-gray-600
                     `, {
                         'univer-opacity-50': disabled,
-                        'univer-border-primary-600 univer-bg-primary-600 dark:univer-bg-primary-600': checked,
+                        'univer-border-primary-600 univer-bg-primary-600 dark:!univer-bg-primary-600': checked,
                     })}
                 >
                     {checked && (

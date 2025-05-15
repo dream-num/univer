@@ -107,7 +107,7 @@ const ColorSelect = (props: IColorSelectProps) => {
                   univer-box-border univer-inline-flex univer-h-8 univer-w-16 univer-cursor-pointer univer-items-center
                   univer-justify-between univer-gap-2 univer-rounded-lg univer-bg-white univer-px-2.5
                   univer-transition-colors univer-duration-200
-                  dark:univer-bg-gray-700 dark:univer-text-white
+                  dark:!univer-bg-gray-700 dark:!univer-text-white
                   hover:univer-border-primary-600
                 `, borderClassName)}
             >
@@ -361,7 +361,7 @@ export function ListFormulaInput(props: IFormulaInputProps) {
                               univer-rounded-lg univer-bg-white univer-pt-2 univer-transition-colors
                               [&>div:first-child]:univer-px-2.5
                               [&>div]:univer-h-5 [&>div]:univer-ring-transparent
-                              dark:univer-bg-gray-700 dark:univer-text-white
+                              dark:!univer-bg-gray-700 dark:!univer-text-white
                               hover:univer-border-primary-600
                             `, borderClassName)}
                             initValue={formulaStr as any}

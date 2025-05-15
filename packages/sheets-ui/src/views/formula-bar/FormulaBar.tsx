@@ -256,7 +256,7 @@ export function FormulaBar(props: IProps) {
             data-u-comp="formula-bar"
             className={clsx(`
               univer-box-border univer-flex univer-h-7 univer-bg-white univer-transition-[height] univer-ease-linear
-              dark:univer-bg-gray-900
+              dark:!univer-bg-gray-900
             `, borderBottomClassName, className)}
             style={{
                 height: ArrowDirection.Down === arrowDirection ? '28px' : '82px',
@@ -280,9 +280,9 @@ export function FormulaBar(props: IProps) {
                             className={clsx(`
                               univer-flex univer-items-center univer-justify-center univer-rounded univer-p-1
                               univer-text-base
-                              dark:univer-text-white
+                              dark:!univer-text-white
                             `, {
-                                'univer-cursor-pointer univer-text-green-600 dark:univer-text-green-400 dark:hover:univer-bg-gray-700 hover:univer-bg-gray-100': iconActivated,
+                                'univer-cursor-pointer univer-text-green-600 dark:!univer-text-green-400 dark:hover:!univer-bg-gray-700 hover:univer-bg-gray-100': iconActivated,
                             })}
                             onClick={handleCloseBtnClick}
                         >
@@ -292,9 +292,9 @@ export function FormulaBar(props: IProps) {
                             className={clsx(`
                               univer-flex univer-items-center univer-justify-center univer-rounded univer-p-1
                               univer-text-base
-                              dark:univer-text-white
+                              dark:!univer-text-white
                             `, {
-                                'univer-cursor-pointer univer-text-red-600 dark:univer-text-red-400 dark:hover:univer-bg-gray-700 hover:univer-bg-gray-100': iconActivated,
+                                'univer-cursor-pointer univer-text-red-600 dark:!univer-text-red-400 dark:hover:!univer-bg-gray-700 hover:univer-bg-gray-100': iconActivated,
                             })}
                             onClick={handleConfirmBtnClick}
                         >
@@ -304,7 +304,7 @@ export function FormulaBar(props: IProps) {
                             className={clsx(`
                               univer-flex univer-cursor-pointer univer-items-center univer-justify-center univer-rounded
                               univer-p-1 univer-text-base
-                              dark:univer-text-white dark:hover:univer-bg-gray-700
+                              dark:!univer-text-white dark:hover:!univer-bg-gray-700
                               hover:univer-bg-gray-100
                             `)}
                             onClick={handlerFxBtnClick}
@@ -370,8 +370,8 @@ export function FormulaBar(props: IProps) {
                         className={clsx(`
                           univer-flex univer-h-full univer-w-5 univer-cursor-pointer univer-items-center
                           univer-justify-center univer-text-xs univer-text-gray-700
-                          dark:univer-text-gray-200
-                        `, { 'univer-cursor-not-allowed univer-text-gray-200 dark:univer-text-gray-700': editDisable })}
+                          dark:!univer-text-gray-200
+                        `, { 'univer-cursor-not-allowed univer-text-gray-200 dark:!univer-text-gray-700': editDisable })}
                         onClick={handleArrowClick}
                     >
                         {arrowDirection === ArrowDirection.Down

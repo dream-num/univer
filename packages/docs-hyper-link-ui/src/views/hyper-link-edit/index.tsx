@@ -117,6 +117,7 @@ export const DocHyperLinkEdit = () => {
         <div
             className={clsx(`
               univer-box-border univer-w-[328px] univer-rounded-xl univer-bg-white univer-px-6 univer-py-5 univer-shadow
+              dark:univer-bg-gray-900
             `, borderClassName)}
         >
             <div>

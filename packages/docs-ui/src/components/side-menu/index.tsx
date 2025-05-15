@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { clsx } from '@univerjs/design';
+import { clsx, scrollbarClassName } from '@univerjs/design';
 import { CatalogueSingle, LeftSingle } from '@univerjs/icons';
 import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef } from 'react';
 
@@ -99,8 +99,7 @@ export const SideMenu = forwardRef<ISideMenuInstance, ISideMenuProps>((props, re
                 className={clsx(`
                   univer-absolute univer-left-5 univer-top-4 univer-z-[100] univer-flex univer-h-8 univer-w-8
                   univer-cursor-pointer univer-items-center univer-justify-center univer-rounded-full univer-bg-white
-                  univer-text-gray-800
-                  univer-shadow-[0px_1px_3px_-1px_rgba(30,40,77,0.10),0px_1px_4px_0px_rgba(30,40,77,0.12)]
+                  univer-text-gray-800 univer-shadow-sm
                   dark:univer-bg-gray-600 dark:univer-text-gray-200
                 `, iconClass)}
                 style={iconStyle}
@@ -112,32 +111,24 @@ export const SideMenu = forwardRef<ISideMenuInstance, ISideMenuProps>((props, re
                     className,
                     `
                       univer-absolute univer-left-0 univer-top-0 univer-box-border univer-flex univer-min-w-[180px]
-                      univer-flex-col univer-pb-4 univer-pl-5 univer-pr-5 univer-pt-14 univer-transition-all
-                      univer-duration-300
+                      univer-flex-col univer-px-4 univer-pb-4 univer-pt-14 univer-transition-all univer-duration-300
                     `,
-                    isSideBar
-                        ? ''
-                        : [
-                            'univer-bg-white',
-                            'univer-rounded-r-2xl',
-                            'univer-shadow-[0px_1px_6px_-2px_rgba(30,40,77,0.08),0px_2px_6px_-1px_rgba(30,40,77,0.10)]',
-                            'univer-backdrop-blur-[10px]',
-                        ]
+                    {
+                        'univer-rounded-r-2xl univer-bg-white univer-shadow univer-backdrop-blur-[10px] dark:univer-bg-gray-900': isSideBar,
+                    }
                 )}
                 style={{
                     ...style,
                     transform: open ? 'translateX(0)' : 'translateX(-100%)',
                     maxHeight,
                     opacity: open ? 1 : 0,
-                    maxWidth: maxWidth ?? (mode === 'side-bar' ? 480 : 180),
+                    maxWidth: maxWidth ?? (mode === 'side-bar' ? 320 : 180),
                     paddingRight: mode === 'float' ? undefined : 0,
                 }}
             >
                 <div
                     ref={containerRef}
-                    className={clsx(`
-                      univer-flex-1 univer-overflow-y-auto univer-overflow-x-hidden univer-scrollbar-none
-                    `)}
+                    className={clsx('univer-flex-1 univer-overflow-y-auto univer-overflow-x-hidden', scrollbarClassName)}
                 >
                     {menus?.map((menu) => (
                         <div

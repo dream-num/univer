@@ -34,7 +34,7 @@ export interface IMenuSchema {
 }
 
 export interface IMenuManagerService {
-    readonly menuChanged$: Observable<void>;
+    readonly menuChanged$: Observable<number>;
 
     mergeMenu(source: MenuSchemaType, target?: MenuSchemaType): void;
 
@@ -54,7 +54,7 @@ export type MenuSchemaType = {
 };
 
 export class MenuManagerService extends Disposable implements IMenuManagerService {
-    readonly menuChanged$ = new Subject<void>();
+    readonly menuChanged$ = new Subject<number>();
 
     private _menu: MenuSchemaType = {
         [MenuManagerPosition.RIBBON]: {
@@ -69,39 +69,54 @@ export class MenuManagerService extends Disposable implements IMenuManagerServic
                 [RibbonStartGroup.LAYOUT]: {
                     order: 2,
                 },
-                [RibbonStartGroup.FORMULAS_INSERT]: {
-                    order: 3,
-                },
-                [RibbonStartGroup.FORMULAS_VIEW]: {
-                    order: 4,
-                },
-                [RibbonStartGroup.FILE]: {
-                    order: 5,
-                },
                 [RibbonStartGroup.OTHERS]: {
-                    order: 6,
+                    order: 3,
                 },
             },
             [RibbonPosition.INSERT]: {
                 order: 1,
-                [RibbonInsertGroup.OTHERS]: {
+                [RibbonInsertGroup.EDIT]: {
                     order: 0,
+                },
+                [RibbonInsertGroup.MEDIA]: {
+                    order: 1,
+                },
+                [RibbonInsertGroup.OTHERS]: {
+                    order: 2,
                 },
             },
             [RibbonPosition.FORMULAS]: {
                 order: 2,
-                [RibbonFormulasGroup.OTHERS]: {
+                [RibbonFormulasGroup.BASIC]: {
                     order: 0,
+                },
+                [RibbonFormulasGroup.OTHERS]: {
+                    order: 1,
                 },
             },
             [RibbonPosition.DATA]: {
                 order: 3,
-                [RibbonDataGroup.OTHERS]: {
+                [RibbonDataGroup.FORMULAS]: {
                     order: 0,
+                },
+                [RibbonDataGroup.RULES]: {
+                    order: 1,
+                },
+                [RibbonDataGroup.ORGANIZATION]: {
+                    order: 2,
+                },
+                [RibbonDataGroup.OTHERS]: {
+                    order: 3,
                 },
             },
             [RibbonPosition.VIEW]: {
                 order: 4,
+                [RibbonViewGroup.DISPLAY]: {
+                    order: 0,
+                },
+                [RibbonViewGroup.VISIBILITY]: {
+                    order: 0,
+                },
                 [RibbonViewGroup.OTHERS]: {
                     order: 0,
                 },
@@ -228,7 +243,7 @@ export class MenuManagerService extends Disposable implements IMenuManagerServic
                 const _key = key as keyof MenuSchemaType;
                 _target[_key] = merge({}, _target[_key], source[_key]);
 
-                this.menuChanged$.next();
+                this.menuChanged$.next(Date.now());
             } else if (typeof value === 'object') {
                 this.mergeMenu(source, value);
             }
@@ -237,7 +252,7 @@ export class MenuManagerService extends Disposable implements IMenuManagerServic
 
     appendRootMenu(source: MenuSchemaType): void {
         this._menu = merge({}, this._menu, source);
-        this.menuChanged$.next();
+        this.menuChanged$.next(Date.now());
     }
 
     private _buildMenuSchema(data: MenuSchemaType): IMenuSchema[] {

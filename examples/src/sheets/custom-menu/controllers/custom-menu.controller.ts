@@ -16,7 +16,7 @@
 
 import { Disposable, ICommandService, Inject, Injector } from '@univerjs/core';
 import { AiSingle, BarChartSingle, CommentSingle } from '@univerjs/icons';
-import { ComponentManager, ContextMenuGroup, ContextMenuPosition, IMenuManagerService, MenuItemType, RibbonStartGroup } from '@univerjs/ui';
+import { ComponentManager, ContextMenuGroup, ContextMenuPosition, IMenuManagerService, MenuItemType, RibbonOthersGroup } from '@univerjs/ui';
 import { DropdownListFirstItemOperation, DropdownListSecondItemOperation } from '../commands/operations/dropdown-list.operation';
 import { SingleButtonOperation } from '../commands/operations/single-button.operation';
 import { CUSTOM_MENU_DROPDOWN_LIST_OPERATION_ID, CustomMenuItemDropdownListFirstItemFactory, CustomMenuItemDropdownListMainButtonFactory, CustomMenuItemDropdownListSecondItemFactory } from './menu/dropdown-list.menu';
@@ -74,7 +74,7 @@ export class CustomMenuController extends Disposable {
             },
         }));
         this._menuManagerService.mergeMenu({
-            [RibbonStartGroup.OTHERS]: {
+            [RibbonOthersGroup.OTHERS]: {
                 [SingleButtonOperation.id]: {
                     order: 9999,
                     menuItemFactory: CustomMenuItemSingleButtonFactory,

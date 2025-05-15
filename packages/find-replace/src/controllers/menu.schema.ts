@@ -15,12 +15,12 @@
  */
 
 import type { MenuSchemaType } from '@univerjs/ui';
-import { RibbonStartGroup } from '@univerjs/ui';
+import { RibbonDataGroup } from '@univerjs/ui';
 import { OpenFindDialogOperation } from '../commands/operations/find-replace.operation';
 import { FindReplaceMenuItemFactory } from './find-replace.menu';
 
 export const menuSchema: MenuSchemaType = {
-    [RibbonStartGroup.OTHERS]: {
+    [RibbonDataGroup.ORGANIZATION]: {
         [OpenFindDialogOperation.id]: {
             order: 2,
             menuItemFactory: FindReplaceMenuItemFactory,

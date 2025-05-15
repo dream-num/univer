@@ -99,11 +99,11 @@ export function ThemeMenuItemFactory(): IMenuSelectorItem {
         type: MenuItemType.SELECTOR,
         selections: [
             {
-                label: 'green',
+                label: '🟢',
                 value: greenTheme as any,
             },
             {
-                label: 'default',
+                label: '🔵',
                 value: defaultTheme as any,
             },
         ],

@@ -15,14 +15,14 @@
  */
 
 import type { MenuSchemaType } from '@univerjs/ui';
-import { RibbonStartGroup } from '@univerjs/ui';
+import { RibbonDataGroup } from '@univerjs/ui';
 import { OpenConditionalFormattingOperator } from '../commands/operations/open-conditional-formatting-panel';
 import { FactoryManageConditionalFormattingRule } from '../menu/manage-rule';
 
 export const menuSchema: MenuSchemaType = {
-    [RibbonStartGroup.FORMULAS_INSERT]: {
+    [RibbonDataGroup.RULES]: {
         [OpenConditionalFormattingOperator.id]: {
-            order: 0,
+            order: 1,
             menuItemFactory: FactoryManageConditionalFormattingRule,
         },
     },

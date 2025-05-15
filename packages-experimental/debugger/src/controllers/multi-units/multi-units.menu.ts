@@ -17,7 +17,7 @@
 import type { IAccessor, IOperation, Workbook } from '@univerjs/core';
 import type { IMenuSelectorItem, IValueOption, MenuSchemaType } from '@univerjs/ui';
 import { CommandType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { MenuItemType, RibbonStartGroup } from '@univerjs/ui';
+import { MenuItemType, RibbonOthersGroup } from '@univerjs/ui';
 import { merge, Observable, shareReplay } from 'rxjs';
 
 export const SwitchUnitOperation: IOperation<{ value: string }> = {
@@ -53,7 +53,7 @@ function SwitchUnitMenuFactory(accessor: IAccessor): IMenuSelectorItem {
 }
 
 export const menuSchema: MenuSchemaType = {
-    [RibbonStartGroup.OTHERS]: {
+    [RibbonOthersGroup.OTHERS]: {
         [SwitchUnitOperation.id]: {
             order: 999,
             menuItemFactory: SwitchUnitMenuFactory,

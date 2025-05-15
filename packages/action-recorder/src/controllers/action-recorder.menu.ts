@@ -69,7 +69,7 @@ export function ReplayLocalRecordOnActiveMenuItemFactory(): IMenuButtonItem {
 export const menuSchema: MenuSchemaType = {
     [RibbonStartGroup.OTHERS]: {
         [RECORD_MENU_ITEM_ID]: {
-            order: 10,
+            order: 2,
             menuItemFactory: RecordMenuItemFactory,
             [OpenRecordPanelOperation.id]: {
                 order: 1,

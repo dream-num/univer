@@ -26,3 +26,4 @@ export const borderTopClassName = clsx(borderBasicClassName, 'univer-border-t un
 export const borderBottomClassName = clsx(borderBasicClassName, 'univer-border-b univer-border-0');
 export const borderRightClassName = clsx(borderBasicClassName, 'univer-border-r univer-border-0');
 export const divideYClassName = 'univer-divide-gray-200 dark:univer-divide-gray-600 univer-divide-y univer-divide-x-0 univer-divide-solid';
+export const divideXClassName = 'univer-divide-gray-200 dark:univer-divide-gray-600 univer-divide-x univer-divide-y-0 univer-divide-solid';

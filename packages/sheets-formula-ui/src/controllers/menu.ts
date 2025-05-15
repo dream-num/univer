@@ -20,12 +20,12 @@ import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { RangeProtectionPermissionEditPoint, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetCellValuePermission } from '@univerjs/sheets';
 import { getCurrentRangeDisable$ } from '@univerjs/sheets-ui';
 import { getMenuHiddenObservable, IClipboardInterfaceService, MenuItemType } from '@univerjs/ui';
-
 import { combineLatestWith, map, Observable, of, switchMap } from 'rxjs';
 import { SheetOnlyPasteFormulaCommand } from '../commands/commands/formula-clipboard.command';
 import { InsertFunctionOperation } from '../commands/operations/insert-function.operation';
 import { MoreFunctionsOperation } from '../commands/operations/more-functions.operation';
 
+/** @deprecated */
 export function InsertFunctionMenuItemFactory(accessor: IAccessor): IMenuItem {
     return {
         id: InsertFunctionOperation.id,
@@ -79,11 +79,113 @@ export function InsertFunctionMenuItemFactory(accessor: IAccessor): IMenuItem {
     };
 }
 
+// SUM
+export function InsertSUMFunctionMenuItemFactory(accessor: IAccessor): IMenuItem {
+    return {
+        id: InsertFunctionOperation.id,
+        title: 'SUM',
+        icon: 'SumSingle',
+        type: MenuItemType.BUTTON,
+        params: {
+            value: 'SUM',
+        },
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
+        disabled$: getCurrentRangeDisable$(accessor, {
+            workbookTypes: [WorkbookEditablePermission],
+            worksheetTypes: [WorksheetEditPermission, WorksheetSetCellValuePermission],
+            rangeTypes: [RangeProtectionPermissionEditPoint],
+        }),
+    };
+}
+
+// COUNT
+export function InsertCOUNTFunctionMenuItemFactory(accessor: IAccessor): IMenuItem {
+    return {
+        id: InsertFunctionOperation.id,
+        title: 'COUNT',
+        icon: 'CntSingle',
+        type: MenuItemType.BUTTON,
+        params: {
+            value: 'COUNT',
+        },
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
+        disabled$: getCurrentRangeDisable$(accessor, {
+            workbookTypes: [WorkbookEditablePermission],
+            worksheetTypes: [WorksheetEditPermission, WorksheetSetCellValuePermission],
+            rangeTypes: [RangeProtectionPermissionEditPoint],
+        }),
+    };
+}
+
+// AVERAGE
+export function InsertAVERAGEFunctionMenuItemFactory(accessor: IAccessor): IMenuItem {
+    return {
+        id: InsertFunctionOperation.id,
+        title: 'AVERAGE',
+        icon: 'AvgSingle',
+        type: MenuItemType.BUTTON,
+        params: {
+            value: 'AVERAGE',
+        },
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
+        disabled$: getCurrentRangeDisable$(accessor, {
+            workbookTypes: [WorkbookEditablePermission],
+            worksheetTypes: [WorksheetEditPermission, WorksheetSetCellValuePermission],
+            rangeTypes: [RangeProtectionPermissionEditPoint],
+        }),
+    };
+}
+
+// MAX
+export function InsertMAXFunctionMenuItemFactory(accessor: IAccessor): IMenuItem {
+    return {
+        id: InsertFunctionOperation.id,
+        title: 'MAX',
+        icon: 'MaxSingle',
+        type: MenuItemType.BUTTON,
+        params: {
+            value: 'MAX',
+        },
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
+        disabled$: getCurrentRangeDisable$(accessor, {
+            workbookTypes: [WorkbookEditablePermission],
+            worksheetTypes: [WorksheetEditPermission, WorksheetSetCellValuePermission],
+            rangeTypes: [RangeProtectionPermissionEditPoint],
+        }),
+    };
+}
+
+// MIN
+export function InsertMINFunctionMenuItemFactory(accessor: IAccessor): IMenuItem {
+    return {
+        id: InsertFunctionOperation.id,
+        title: 'MIN',
+        icon: 'MinSingle',
+        type: MenuItemType.BUTTON,
+        params: {
+            value: 'MIN',
+        },
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
+        disabled$: getCurrentRangeDisable$(accessor, {
+            workbookTypes: [WorkbookEditablePermission],
+            worksheetTypes: [WorksheetEditPermission, WorksheetSetCellValuePermission],
+            rangeTypes: [RangeProtectionPermissionEditPoint],
+        }),
+    };
+}
+
+// More Functions
 export function MoreFunctionsMenuItemFactory(accessor: IAccessor): IMenuItem {
     return {
         id: MoreFunctionsOperation.id,
         title: 'formula.insert.more',
         type: MenuItemType.BUTTON,
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
+        disabled$: getCurrentRangeDisable$(accessor, {
+            workbookTypes: [WorkbookEditablePermission],
+            worksheetTypes: [WorksheetEditPermission, WorksheetSetCellValuePermission],
+            rangeTypes: [RangeProtectionPermissionEditPoint],
+        }),
     };
 }
 
@@ -110,7 +212,11 @@ export function PasteFormulaMenuItemFactory(accessor: IAccessor): IMenuItem {
         type: MenuItemType.BUTTON,
         title: 'formula.operation.pasteFormula',
         disabled$: menuClipboardDisabledObservable(accessor).pipe(
-            combineLatestWith(getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], rangeTypes: [RangeProtectionPermissionEditPoint], worksheetTypes: [WorksheetSetCellValuePermission, WorksheetEditPermission] })),
+            combineLatestWith(getCurrentRangeDisable$(accessor, {
+                workbookTypes: [WorkbookEditablePermission],
+                rangeTypes: [RangeProtectionPermissionEditPoint],
+                worksheetTypes: [WorksheetSetCellValuePermission, WorksheetEditPermission],
+            })),
             map(([d1, d2]) => d1 || d2)
         ),
     };

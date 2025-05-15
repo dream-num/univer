@@ -30,7 +30,11 @@ export function DocFooter() {
     return workbook
         ? null
         : isShow && (
-            <div className="univer-box-border univer-flex univer-items-center univer-justify-between univer-px-5">
+            <div
+                className={`
+                  univer-box-border univer-flex univer-items-center univer-justify-between univer-px-5 univer-py-1.5
+                `}
+            >
                 <div />
                 <CountBar />
             </div>

@@ -33,11 +33,17 @@ const locale: typeof zhCN = {
     },
     ribbon: {
         start: 'Bắt đầu',
+        startDesc: 'Khởi tạo bảng tính và thiết lập các tham số cơ bản.',
         insert: 'Chèn',
+        insertDesc: 'Chèn hàng, cột, biểu đồ và các phần tử khác.',
         formulas: 'Công thức',
+        formulasDesc: 'Sử dụng hàm và công thức để tính toán dữ liệu.',
         data: 'Dữ liệu',
+        dataDesc: 'Sắp xếp, lọc và phân tích dữ liệu.',
         view: 'Xem',
+        viewDesc: 'Chuyển đổi chế độ xem và điều chỉnh hiệu ứng hiển thị.',
         others: 'Khác',
+        othersDesc: 'Các chức năng và cài đặt khác.',
         more: 'Thêm',
     },
     fontFamily: {

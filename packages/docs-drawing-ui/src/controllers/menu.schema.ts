@@ -15,7 +15,7 @@
  */
 
 import type { MenuSchemaType } from '@univerjs/ui';
-import { RibbonStartGroup } from '@univerjs/ui';
+import { RibbonInsertGroup } from '@univerjs/ui';
 import {
     DOCS_IMAGE_MENU_ID,
     IMAGE_MENU_UPLOAD_FLOAT_ID,
@@ -24,7 +24,7 @@ import {
 } from '../views/menu/image.menu';
 
 export const menuSchema: MenuSchemaType = {
-    [RibbonStartGroup.LAYOUT]: {
+    [RibbonInsertGroup.MEDIA]: {
         [DOCS_IMAGE_MENU_ID]: {
             order: 0,
             menuItemFactory: ImageMenuFactory,

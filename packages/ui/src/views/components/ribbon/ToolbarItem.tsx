@@ -26,8 +26,8 @@ import { CustomLabel } from '../../../components/custom-label/CustomLabel';
 import { ILayoutService } from '../../../services/layout/layout.service';
 import { MenuItemType } from '../../../services/menu/menu';
 import { useDependency, useObservable } from '../../../utils/di';
-import { ToolbarButton } from './Button/ToolbarButton';
 import { useToolbarItemStatus } from './hook';
+import { ToolbarButton } from './ToolbarButton';
 import { DropdownMenuWrapper, TooltipWrapper } from './TooltipButtonWrapper';
 
 export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenuItem>>((props, ref) => {
@@ -43,7 +43,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
         commandService.executeCommand(commandId, params);
     };
 
-    const { tooltip, shortcut, icon, title, label, id, commandId, type, slot } = props;
+    const { tooltip, shortcut, icon, title, label, id, commandId, type, slot, params } = props;
 
     const tooltipTitle = localeService.t(tooltip ?? '') + (shortcut ? ` (${shortcut})` : '');
 
@@ -104,6 +104,8 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
         if (menuType === MenuItemType.BUTTON_SELECTOR) {
             return (
                 <div
+                    data-u-command={id}
+                    data-disabled={disabled}
                     className={clsx(`
                       univer-group univer-relative univer-flex univer-h-6 univer-cursor-pointer univer-items-center
                       univer-rounded univer-pr-5 univer-text-sm univer-transition-colors univer-animate-in
@@ -114,7 +116,6 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
                         'univer-text-gray-900 dark:univer-text-white': !disabled,
                         'univer-pointer-events-none univer-cursor-not-allowed univer-text-gray-300 dark:univer-text-gray-600': disabled,
                     })}
-                    data-disabled={disabled}
                 >
                     <div
                         className={clsx(`
@@ -175,6 +176,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
                     onOptionSelect={handleSelect}
                 >
                     <div
+                        data-u-command={id}
                         className={clsx(`
                           univer-relative univer-flex univer-h-6 univer-cursor-pointer univer-items-center univer-gap-2
                           univer-whitespace-nowrap univer-rounded univer-px-1 univer-transition-colors univer-animate-in
@@ -213,10 +215,12 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
 
         return (
             <ToolbarButton
+                data-u-command={id}
+                className="univer-text-sm"
                 noIcon={!icon}
                 active={activated}
                 disabled={disabled}
-                onClick={() => executeCommand(props.commandId ?? props.id)}
+                onClick={() => executeCommand(props.commandId ?? props.id, value ?? params)}
                 onDoubleClick={() => props.subId && executeCommand(props.subId)}
             >
                 {isCustomComponent

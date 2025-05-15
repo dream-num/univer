@@ -16,22 +16,45 @@
 
 import type { MenuSchemaType } from '@univerjs/ui';
 import { PASTE_SPECIAL_MENU_ID } from '@univerjs/sheets-ui';
-import { RibbonStartGroup } from '@univerjs/ui';
+import { RibbonFormulasGroup } from '@univerjs/ui';
 import { SheetOnlyPasteFormulaCommand } from '../commands/commands/formula-clipboard.command';
 import { InsertFunctionOperation } from '../commands/operations/insert-function.operation';
-import { MoreFunctionsOperation } from '../commands/operations/more-functions.operation';
-import { InsertFunctionMenuItemFactory, MoreFunctionsMenuItemFactory, PasteFormulaMenuItemFactory } from './menu';
+import {
+    InsertAVERAGEFunctionMenuItemFactory,
+    InsertCOUNTFunctionMenuItemFactory,
+    InsertMAXFunctionMenuItemFactory,
+    InsertMINFunctionMenuItemFactory,
+    InsertSUMFunctionMenuItemFactory,
+    MoreFunctionsMenuItemFactory,
+    PasteFormulaMenuItemFactory,
+} from './menu';
 
 export const menuSchema: MenuSchemaType = {
-    [RibbonStartGroup.FORMULAS_INSERT]: {
-        [InsertFunctionOperation.id]: {
-            order: 1,
-            menuItemFactory: InsertFunctionMenuItemFactory,
-            [MoreFunctionsOperation.id]: {
-                order: 1,
-                menuItemFactory: MoreFunctionsMenuItemFactory,
-            },
+    [RibbonFormulasGroup.BASIC]: {
+        [`${InsertFunctionOperation.id}.sum`]: {
+            order: 0,
+            menuItemFactory: InsertSUMFunctionMenuItemFactory,
         },
+        [`${InsertFunctionOperation.id}.count`]: {
+            order: 0,
+            menuItemFactory: InsertCOUNTFunctionMenuItemFactory,
+        },
+        [`${InsertFunctionOperation.id}.average`]: {
+            order: 0,
+            menuItemFactory: InsertAVERAGEFunctionMenuItemFactory,
+        },
+        [`${InsertFunctionOperation.id}.max`]: {
+            order: 0,
+            menuItemFactory: InsertMAXFunctionMenuItemFactory,
+        },
+        [`${InsertFunctionOperation.id}.min`]: {
+            order: 0,
+            menuItemFactory: InsertMINFunctionMenuItemFactory,
+        },
+    },
+    [RibbonFormulasGroup.OTHERS]: {
+        order: 0,
+        menuItemFactory: MoreFunctionsMenuItemFactory,
     },
     [PASTE_SPECIAL_MENU_ID]: {
         [SheetOnlyPasteFormulaCommand.id]: {

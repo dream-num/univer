@@ -69,6 +69,7 @@ export {
     borderLeftClassName,
     borderRightClassName,
     borderTopClassName,
+    divideXClassName,
     divideYClassName,
     scrollbarClassName,
 } from './helper/class-utilities';

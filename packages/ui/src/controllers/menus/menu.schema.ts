@@ -34,7 +34,7 @@ export const menuSchema: MenuSchemaType = {
     },
     [RibbonStartGroup.OTHERS]: {
         [ToggleShortcutPanelOperation.id]: {
-            order: 99,
+            order: 1,
             menuItemFactory: ShortcutPanelMenuItemFactory,
         },
     },

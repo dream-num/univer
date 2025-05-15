@@ -16,9 +16,7 @@
 
 import type { IAccessor } from '@univerjs/core';
 import type { IMenuButtonItem } from '../../services/menu/menu';
-import { UniverInstanceType } from '@univerjs/core';
 import { ToggleShortcutPanelOperation } from '../../commands/operations/toggle-shortcut-panel.operation';
-import { getMenuHiddenObservable } from '../../common/menu-hidden-observable';
 import { MenuItemType } from '../../services/menu/menu';
 
 export function ShortcutPanelMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
@@ -28,7 +26,6 @@ export function ShortcutPanelMenuItemFactory(accessor: IAccessor): IMenuButtonIt
         tooltip: 'toggle-shortcut-panel',
         icon: 'KeyboardSingle',
         type: MenuItemType.BUTTON,
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
-        // disabled$: getCurrentSheetDisabled$(accessor),
+        // hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }

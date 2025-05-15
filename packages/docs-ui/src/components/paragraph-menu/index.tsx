@@ -66,11 +66,11 @@ export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
                 className={clsx(`
                   univer-mr-1 univer-inline-flex univer-h-7 univer-cursor-pointer univer-items-center univer-gap-1
                   univer-rounded-full univer-px-2.5 univer-py-0
-                  dark:hover:univer-bg-gray-600
+                  dark:hover:!univer-bg-gray-600
                   hover:univer-bg-gray-100
                 `, borderClassName, {
-                    'univer-bg-gray-100 dark:univer-bg-gray-700': visible,
-                    'univer-bg-white dark:univer-bg-gray-700': !visible,
+                    'univer-bg-gray-100 dark:!univer-bg-gray-700': visible,
+                    'univer-bg-white dark:!univer-bg-gray-700': !visible,
                 })}
                 onMouseEnter={(e) => {
                     popup.onPointerEnter?.(e);
@@ -94,13 +94,13 @@ export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
                 <icon.component
                     className={`
                       univer-size-4 univer-text-gray-900
-                      dark:univer-text-white
+                      dark:!univer-text-white
                     `}
                 />
                 <DownSingle
                     className={`
                       univer-size-3 univer-text-gray-600
-                      dark:univer-text-gray-200
+                      dark:!univer-text-gray-200
                     `}
                 />
             </div>

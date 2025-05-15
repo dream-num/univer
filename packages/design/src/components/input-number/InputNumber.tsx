@@ -331,7 +331,7 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
                                   univer-h-[calc(100%-2px)] univer-w-6 univer-flex-col univer-border univer-border-y-0
                                   univer-border-l univer-border-r-0 univer-border-solid univer-border-gray-200
                                   univer-border-l-gray-200
-                                  dark:univer-border-gray-600
+                                  dark:!univer-border-gray-600
                                 `,
                                 controlsClassName
                             )}
@@ -342,7 +342,7 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
                                   univer-border-none !univer-bg-transparent univer-text-xs
                                   after:univer-absolute after:-univer-bottom-px after:univer-block after:univer-h-px
                                   after:univer-w-full after:univer-bg-gray-200 after:univer-content-['']
-                                  dark:after:univer-bg-gray-600
+                                  dark:after:!univer-bg-gray-600
                                 `}
                                 tabIndex={-1}
                                 disabled={disabled || (max !== undefined && internalValue !== null && internalValue >= max)}

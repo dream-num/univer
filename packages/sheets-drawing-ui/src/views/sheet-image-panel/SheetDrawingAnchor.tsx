@@ -143,7 +143,7 @@ export const SheetDrawingAnchor = (props: ISheetDrawingAnchorProps) => {
             <header
                 className={`
                   univer-text-gray-600
-                  dark:univer-text-gray-200
+                  dark:!univer-text-gray-200
                 `}
             >
                 <div>{localeService.t('drawing-anchor.title')}</div>

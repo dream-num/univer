@@ -109,7 +109,7 @@ function MobileSheetBarImpl(props: { workbook: Workbook }) {
         <div
             className={`
               univer-h-8 univer-w-full univer-overflow-x-scroll univer-bg-gray-100
-              dark:univer-bg-gray-900
+              dark:!univer-bg-gray-900
             `}
         >
             <div className="univer-flex univer-h-8 univer-flex-nowrap univer-items-center">
@@ -127,7 +127,7 @@ function MobileSheetBarImpl(props: { workbook: Workbook }) {
                             `,
                             borderRightClassName,
                             {
-                                'univer-bg-white univer-text-primary-600 dark:univer-bg-slate-600': sheet.sheetId === activeKey,
+                                'univer-bg-white univer-text-primary-600 dark:!univer-bg-slate-600': sheet.sheetId === activeKey,
                             }
                         )}
                         key={sheet.sheetId}

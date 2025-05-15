@@ -268,7 +268,7 @@ export function Ribbon(props: IRibbonProps) {
                                             className={`
                                               univer-box-border univer-flex univer-cursor-pointer univer-items-center
                                               univer-gap-2.5 univer-rounded-lg univer-px-2 univer-py-1.5
-                                              dark:hover:univer-bg-gray-700
+                                              dark:hover:!univer-bg-gray-700
                                               hover:univer-bg-gray-100
                                             `}
                                             onClick={() => handleSelectTab(group)}
@@ -282,7 +282,7 @@ export function Ribbon(props: IRibbonProps) {
                                                 <Icon
                                                     className={`
                                                       univer-text-gray-500
-                                                      dark:univer-text-gray-300
+                                                      dark:!univer-text-gray-300
                                                     `}
                                                 />
                                             </span>
@@ -290,7 +290,7 @@ export function Ribbon(props: IRibbonProps) {
                                                 <strong
                                                     className={`
                                                       univer-text-sm univer-font-semibold univer-text-gray-800
-                                                      dark:univer-text-gray-200
+                                                      dark:!univer-text-gray-200
                                                     `}
                                                 >
                                                     {localeService.t(group.key)}
@@ -311,14 +311,14 @@ export function Ribbon(props: IRibbonProps) {
                               univer-mr-2 univer-flex univer-h-7 univer-cursor-pointer univer-items-center
                               univer-gap-1.5 univer-whitespace-nowrap !univer-rounded-full univer-bg-gray-700
                               univer-pl-3 univer-pr-2 univer-text-sm univer-text-white
-                              dark:univer-bg-gray-200 dark:univer-text-gray-800
+                              dark:!univer-bg-gray-200 dark:!univer-text-gray-800
                             `}
                         >
                             {localeService.t(activatedTab)}
                             <MoreDownSingle
                                 className={`
                                   univer-text-gray-200
-                                  dark:univer-text-gray-500
+                                  dark:!univer-text-gray-500
                                 `}
                             />
                         </a>

@@ -72,7 +72,7 @@ const SelectList = (props: ISelectListProps) => {
             data-u-comp="sheets-dropdown-list"
             className={clsx(`
               univer-box-border univer-rounded-lg univer-bg-white univer-pb-1 univer-text-gray-900 univer-shadow
-              dark:univer-bg-black dark:univer-text-white
+              dark:!univer-bg-black dark:!univer-text-white
             `, borderClassName)}
             style={style}
         >
@@ -111,7 +111,7 @@ const SelectList = (props: ISelectListProps) => {
                             className={`
                               univer-mt-1 univer-flex univer-cursor-pointer univer-flex-row univer-items-center
                               univer-justify-between univer-rounded-md univer-px-1.5 univer-py-1
-                              dark:hover:univer-bg-gray-700
+                              dark:hover:!univer-bg-gray-700
                               hover:univer-bg-gray-50
                             `}
                             onClick={handleClick}
@@ -151,7 +151,7 @@ const SelectList = (props: ISelectListProps) => {
                         <div
                             className={`
                               univer-my-1 univer-h-[1px] univer-flex-shrink-0 univer-flex-grow-0 univer-bg-gray-200
-                              dark:univer-bg-gray-700
+                              dark:!univer-bg-gray-700
                             `}
                         />
                         <div
@@ -161,7 +161,7 @@ const SelectList = (props: ISelectListProps) => {
                                 className={`
                                   univer-block univer-cursor-pointer univer-rounded univer-px-1.5 univer-py-1
                                   univer-text-xs
-                                  dark:hover:univer-bg-gray-700
+                                  dark:hover:!univer-bg-gray-700
                                   hover:univer-bg-gray-200
                                 `}
                                 onClick={onEdit}

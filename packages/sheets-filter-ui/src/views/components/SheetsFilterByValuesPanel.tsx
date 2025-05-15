@@ -101,7 +101,7 @@ export function FilterByValue(props: { model: ByValuesModel }) {
                             className={`
                               univer-mx-1 univer-inline-block univer-flex-shrink univer-overflow-hidden
                               univer-text-ellipsis univer-whitespace-nowrap univer-text-gray-900
-                              dark:univer-text-white
+                              dark:!univer-text-white
                             `}
                         >
                             {`${localeService.t('sheets-filter.panel.select-all')}`}
@@ -110,7 +110,7 @@ export function FilterByValue(props: { model: ByValuesModel }) {
                             data-u-comp="sheets-filter-panel-values-item-count"
                             className={`
                               univer-text-gray-400
-                              dark:univer-text-gray-500
+                              dark:!univer-text-gray-500
                             `}
                         >
                             {`(${stat.checked}/${stat.checked + stat.unchecked})`}
@@ -132,8 +132,8 @@ export function FilterByValue(props: { model: ByValuesModel }) {
                           univer-pr-2 univer-border-box univer-max-w-[245px] univer-rounded-md
                           [&:hover_a]:univer-inline-block
                           hover:univer-bg-gray-50 univer-h-full
-                          univer-text-gray-900 dark:hover:univer-bg-gray-900
-                          dark:univer-text-white
+                          univer-text-gray-900 dark:hover:!univer-bg-gray-900
+                          dark:!univer-text-white
                         `}
                         attachRender={(item) => (
                             <div
@@ -146,7 +146,7 @@ export function FilterByValue(props: { model: ByValuesModel }) {
                                     data-u-comp="sheets-filter-panel-values-item-count"
                                     className={`
                                       univer-text-gray-400
-                                      dark:univer-text-gray-500
+                                      dark:!univer-text-gray-500
                                     `}
                                 >
                                     {`(${item.count})`}

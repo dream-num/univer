@@ -136,7 +136,7 @@ function DocFormula(props: { popupInfo: IUniFormulaPopupInfo }) {
               univer-box-border univer-flex univer-h-12 univer-w-[482px] univer-items-center univer-gap-x-2
               univer-overflow-hidden univer-rounded-lg u univer-border-gray-200 univer-bg-white univer-p-2
               univer-shadow-lg
-              dark:univer-bg-gray-900
+              dark:!univer-bg-gray-900
             `, borderClassName)}
             onMouseEnter={() => onHovered(true)}
             onMouseLeave={() => onHovered(false)}

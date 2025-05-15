@@ -103,7 +103,7 @@ export function PageSettings(props: IConfirmChildrenProps) {
                 <label
                     className={`
                       univer-text-sm univer-font-medium univer-text-gray-900
-                      dark:univer-text-white
+                      dark:!univer-text-white
                     `}
                 >
                     {localeService.t('page-settings.paper-size')}
@@ -122,7 +122,7 @@ export function PageSettings(props: IConfirmChildrenProps) {
                 <label
                     className={`
                       univer-text-sm univer-font-medium univer-text-gray-900
-                      dark:univer-text-white
+                      dark:!univer-text-white
                     `}
                 >
                     {localeService.t('page-settings.custom-paper-size')}

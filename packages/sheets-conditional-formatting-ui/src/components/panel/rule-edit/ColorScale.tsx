@@ -73,7 +73,7 @@ const TextInput = (props: { id: string; type: CFValueType | 'none'; value: numbe
                       univer-rounded-lg univer-bg-white univer-pt-2 univer-transition-colors
                       [&>div:first-child]:univer-px-2.5
                       [&>div]:univer-h-5 [&>div]:univer-ring-transparent
-                      dark:univer-bg-gray-700 dark:univer-text-white
+                      dark:!univer-bg-gray-700 dark:!univer-text-white
                       hover:univer-border-primary-600
                     `, borderClassName)}
                     initValue={formulaInitValue as any}
@@ -227,7 +227,7 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
             <div
                 className={`
                   univer-mt-4 univer-text-sm univer-text-gray-600
-                  dark:univer-text-gray-200
+                  dark:!univer-text-gray-200
                 `}
             >
                 {localeService.t('sheet.cf.panel.styleRule')}
@@ -238,7 +238,7 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
             <div
                 className={`
                   univer-mt-3 univer-text-xs univer-text-gray-600
-                  dark:univer-text-gray-200
+                  dark:!univer-text-gray-200
                 `}
             >
                 {localeService.t('sheet.cf.valueType.min')}
@@ -307,7 +307,7 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
             <div
                 className={`
                   univer-mt-3 univer-text-xs
-                  univer-text-gray-600dark:univer-text-gray-200
+                  univer-text-gray-600dark:!univer-text-gray-200
                 `}
             >
                 {localeService.t('sheet.cf.panel.medianValue')}
@@ -380,7 +380,7 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
             <div
                 className={`
                   univer-mt-3 univer-text-xs univer-text-gray-600
-                  dark:univer-text-gray-200
+                  dark:!univer-text-gray-200
                 `}
             >
                 {localeService.t('sheet.cf.valueType.max')}

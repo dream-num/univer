@@ -103,7 +103,7 @@ export function MobileWorkbench(props: IUniverAppProps) {
                 data-u-comp="app-layout"
                 className={clsx(`
                   univer-relative univer-flex univer-h-full univer-min-h-0 univer-flex-col univer-bg-white
-                  dark:univer-bg-gray-800
+                  dark:!univer-bg-gray-800
                 `, {
                     'univer-dark': darkMode,
                 })}

@@ -85,7 +85,7 @@ export function ColorPicker({ format = 'hex', value = '#000000', showAlpha = fal
         <div
             className={`
               univer-w-[292px] univer-cursor-default univer-space-y-4 univer-rounded-lg univer-bg-white
-              dark:univer-bg-gray-700
+              dark:!univer-bg-gray-700
             `}
             onClick={(e) => e.stopPropagation()}
         >

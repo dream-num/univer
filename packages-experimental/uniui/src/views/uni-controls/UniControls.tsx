@@ -151,7 +151,7 @@ export const UniControls = ({ zoom, onItemClick }: { zoom: number; onItemClick?:
                                     `
                                       univer-relative univer-box-border univer-cursor-pointer univer-py-1 univer-pl-9
                                       univer-text-gray-900
-                                      dark:univer-text-white
+                                      dark:!univer-text-white
                                     `,
                                     `
                                       univer-rounded univer-no-underline univer-transition-colors univer-duration-200

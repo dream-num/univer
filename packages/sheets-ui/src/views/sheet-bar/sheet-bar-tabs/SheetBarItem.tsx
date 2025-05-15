@@ -58,16 +58,16 @@ export function SheetBarItem(props: IBaseSheetBarProps) {
               univer-mx-1 univer-box-border univer-flex univer-flex-grow univer-cursor-pointer univer-select-none
               univer-flex-row univer-items-center univer-rounded univer-text-xs univer-text-gray-900
               univer-transition-colors
-              dark:univer-text-white
+              dark:!univer-text-white
             `, currentSelected
                 ? `
                   univer-flex univer-justify-center univer-bg-white univer-font-bold univer-text-primary-700
                   univer-shadow-sm univer-transition-shadow
-                  dark:univer-bg-gray-900
+                  dark:!univer-bg-gray-900
                 `
                 : `
                   univer-font-medium
-                  dark:hover:univer-bg-gray-700
+                  dark:hover:!univer-bg-gray-700
                   hover:univer-bg-gray-100
                 `)}
             style={{

@@ -49,7 +49,7 @@ export function DateDropdown(props: { popup: IPopup<IDateDropdownProps & IBaseDr
         <div
             className={`
               univer-rounded univer-bg-white univer-p-2 univer-shadow-lg
-              dark:univer-bg-black
+              dark:!univer-bg-black
             `}
         >
             <DatePanel

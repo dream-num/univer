@@ -175,7 +175,7 @@ export function SelectFunction(props: ISelectFunctionProps) {
                         className={clsx(`
                           univer-relative univer-box-border univer-cursor-pointer univer-rounded univer-px-7 univer-py-1
                           univer-text-sm univer-text-gray-900 univer-transition-colors
-                          dark:univer-text-white
+                          dark:!univer-text-white
                         `, {
                             'univer-bg-gray-200': active === index,
                         })}

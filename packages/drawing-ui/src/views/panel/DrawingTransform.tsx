@@ -370,7 +370,7 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
             <header
                 className={`
                   univer-text-gray-600
-                  dark:univer-text-gray-200
+                  dark:!univer-text-gray-200
                 `}
             >
                 <div>{localeService.t('image-panel.transform.title')}</div>

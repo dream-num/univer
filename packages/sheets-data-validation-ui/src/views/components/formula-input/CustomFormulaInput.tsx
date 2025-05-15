@@ -41,7 +41,7 @@ export function CustomFormulaInput(props: IFormulaInputProps) {
                   univer-bg-white univer-pt-2 univer-transition-colors
                   [&>div:first-child]:univer-px-2.5
                   [&>div]:univer-h-5 [&>div]:univer-ring-transparent
-                  dark:univer-bg-gray-700 dark:univer-text-white
+                  dark:!univer-bg-gray-700 dark:!univer-text-white
                   hover:univer-border-primary-600
                 `, borderClassName)}
                 initValue={value?.formula1 ?? '=' as any}

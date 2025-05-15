@@ -69,7 +69,7 @@ export const CellLinkPopupPure = (props: ICellLinkPopupPureProps) => {
             className={clsx(`
               univer-mb-1 univer-flex univer-max-w-80 univer-flex-row univer-items-center univer-justify-between
               univer-overflow-hidden univer-rounded-lg univer-bg-white univer-p-3 univer-shadow-md
-              dark:univer-bg-gray-900
+              dark:!univer-bg-gray-900
             `, borderClassName)}
             onClick={() => popupService.hideCurrentPopup()}
         >
@@ -94,7 +94,7 @@ export const CellLinkPopupPure = (props: ICellLinkPopupPureProps) => {
                     className={`
                       univer-mr-2 univer-flex univer-h-5 univer-w-5 univer-flex-none univer-items-center
                       univer-justify-center univer-text-base univer-text-gray-900
-                      dark:univer-text-white
+                      dark:!univer-text-white
                     `}
                 >
                     {iconsMap[linkObj.type]}
@@ -113,7 +113,7 @@ export const CellLinkPopupPure = (props: ICellLinkPopupPureProps) => {
                         className={clsx(`
                           univer-ml-2 univer-flex univer-size-6 univer-cursor-pointer univer-flex-row
                           univer-items-center univer-justify-center univer-rounded univer-text-base
-                          dark:hover:univer-bg-gray-700
+                          dark:hover:!univer-bg-gray-700
                           hover:univer-bg-gray-100
                         `, { 'univer-text-red-500': isError })}
                         onClick={() => {
@@ -134,7 +134,7 @@ export const CellLinkPopupPure = (props: ICellLinkPopupPureProps) => {
                         }}
                     >
                         <Tooltip placement="bottom" title={localeService.t('hyperLink.popup.copy')}>
-                            <CopySingle className="dark:univer-text-white" />
+                            <CopySingle className="dark:!univer-text-white" />
                         </Tooltip>
                     </div>
                 )}
@@ -144,7 +144,7 @@ export const CellLinkPopupPure = (props: ICellLinkPopupPureProps) => {
                             className={`
                               univer-ml-2 univer-flex univer-size-6 univer-cursor-pointer univer-flex-row
                               univer-items-center univer-justify-center univer-rounded univer-text-base
-                              dark:hover:univer-bg-gray-700
+                              dark:hover:!univer-bg-gray-700
                               hover:univer-bg-gray-100
                             `}
                             onClick={() => {
@@ -159,14 +159,14 @@ export const CellLinkPopupPure = (props: ICellLinkPopupPureProps) => {
                             }}
                         >
                             <Tooltip placement="bottom" title={localeService.t('hyperLink.popup.edit')}>
-                                <WriteSingle className="dark:univer-text-white" />
+                                <WriteSingle className="dark:!univer-text-white" />
                             </Tooltip>
                         </div>
                         <div
                             className={`
                               univer-ml-2 univer-flex univer-size-6 univer-cursor-pointer univer-flex-row
                               univer-items-center univer-justify-center univer-rounded univer-text-base
-                              dark:hover:univer-bg-gray-700
+                              dark:hover:!univer-bg-gray-700
                               hover:univer-bg-gray-100
                             `}
                             onClick={() => {
@@ -186,7 +186,7 @@ export const CellLinkPopupPure = (props: ICellLinkPopupPureProps) => {
                             }}
                         >
                             <Tooltip placement="bottom" title={localeService.t('hyperLink.popup.cancel')}>
-                                <UnlinkSingle className="dark:univer-text-white" />
+                                <UnlinkSingle className="dark:!univer-text-white" />
                             </Tooltip>
                         </div>
                     </>

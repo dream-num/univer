@@ -95,7 +95,7 @@ export function BorderPanel(props: IBorderPanelProps) {
             <div
                 className={`
                   univer-box-border univer-grid univer-grid-cols-5 univer-gap-2 univer-text-gray-600
-                  dark:univer-text-gray-200
+                  dark:!univer-text-gray-200
                 `}
             >
                 {BORDER_LINE_CHILDREN.map((item) => (
@@ -104,10 +104,10 @@ export function BorderPanel(props: IBorderPanelProps) {
                         className={clsx(`
                           univer-flex univer-size-6 univer-cursor-pointer univer-items-center univer-justify-center
                           univer-justify-self-center univer-rounded
-                          dark:hover:univer-bg-gray-700
+                          dark:hover:!univer-bg-gray-700
                           hover:univer-bg-gray-100
                         `, {
-                            'univer-bg-gray-200 dark:univer-bg-gray-600': borderStyleManagerService.getBorderInfo().type === item.value,
+                            'univer-bg-gray-200 dark:!univer-bg-gray-600': borderStyleManagerService.getBorderInfo().type === item.value,
                         })}
                         onClick={(e) => {
                             e.stopPropagation();
@@ -134,7 +134,7 @@ export function BorderPanel(props: IBorderPanelProps) {
                             className={`
                               univer-flex univer-cursor-pointer univer-items-center univer-gap-2 univer-rounded
                               univer-border-none univer-bg-transparent univer-p-1
-                              dark:hover:univer-bg-gray-700
+                              dark:hover:!univer-bg-gray-700
                               hover:univer-bg-gray-100
                             `}
                             type="button"
@@ -142,7 +142,7 @@ export function BorderPanel(props: IBorderPanelProps) {
                             <PaintBucket
                                 className={`
                                   univer-fill-primary-600
-                                  dark:univer-text-white
+                                  dark:!univer-text-white
                                 `}
                                 extend={{ colorChannel1: value?.color ?? '' }}
                             />
@@ -162,7 +162,7 @@ export function BorderPanel(props: IBorderPanelProps) {
                                             className={`
                                               univer-flex univer-cursor-pointer univer-items-center
                                               univer-justify-center univer-rounded univer-px-1 univer-py-2
-                                              dark:hover:univer-bg-gray-700
+                                              dark:hover:!univer-bg-gray-700
                                               hover:univer-bg-gray-100
                                             `}
                                             onClick={() => handleClick(item.value, 'style')}
@@ -170,7 +170,7 @@ export function BorderPanel(props: IBorderPanelProps) {
                                             <BorderLine
                                                 className={`
                                                   univer-fill-gray-900
-                                                  dark:univer-fill-white
+                                                  dark:!univer-fill-white
                                                 `}
                                                 type={item.value}
                                             />
@@ -184,7 +184,7 @@ export function BorderPanel(props: IBorderPanelProps) {
                             className={`
                               univer-flex univer-cursor-pointer univer-items-center univer-gap-2 univer-rounded
                               univer-border-none univer-bg-transparent univer-p-1
-                              dark:hover:univer-bg-gray-700
+                              dark:hover:!univer-bg-gray-700
                               hover:univer-bg-gray-100
                             `}
                             type="button"
@@ -192,7 +192,7 @@ export function BorderPanel(props: IBorderPanelProps) {
                             <BorderLine
                                 className={`
                                   univer-fill-gray-900
-                                  dark:univer-fill-white
+                                  dark:!univer-fill-white
                                 `}
                                 type={BorderStyleTypes.THIN}
                             />

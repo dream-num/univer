@@ -126,7 +126,7 @@ export const ImageCropper = (props: IImageCropperProps) => {
             <header
                 className={`
                   univer-text-gray-600
-                  dark:univer-text-gray-200
+                  dark:!univer-text-gray-200
                 `}
             >
                 <div>{localeService.t('image-panel.crop.title')}</div>

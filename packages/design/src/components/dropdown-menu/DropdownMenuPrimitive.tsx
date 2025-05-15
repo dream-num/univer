@@ -103,7 +103,7 @@ function DropdownMenuSubTrigger({
                   univer-flex univer-cursor-default univer-select-none univer-items-center univer-justify-between
                   univer-gap-2 univer-rounded univer-px-2 univer-py-1.5 univer-text-sm univer-outline-none
                   [&_svg]:univer-pointer-events-none [&_svg]:univer-size-4 [&_svg]:univer-shrink-0
-                  dark:focus:univer-bg-gray-600
+                  dark:focus:!univer-bg-gray-600
                   data-[state=open]:univer-bg-gray-100
                   focus:univer-bg-gray-100
                 `,
@@ -129,7 +129,7 @@ function DropdownMenuSubContent({
                   univer-z-[1080] univer-box-border univer-max-h-[var(--radix-popper-available-height)]
                   univer-overflow-y-auto univer-rounded-md univer-bg-white univer-p-1.5 univer-text-gray-900
                   univer-shadow-md
-                  dark:univer-bg-gray-700 dark:univer-text-white
+                  dark:!univer-bg-gray-700 dark:!univer-text-white
                   data-[side=bottom]:univer-slide-in-from-top-2
                   data-[side=left]:univer-slide-in-from-right-2
                   data-[side=right]:univer-slide-in-from-left-2
@@ -163,7 +163,7 @@ function DropdownMenuContent({
                       univer-z-[1080] univer-box-border univer-max-h-[var(--radix-popper-available-height)]
                       univer-overflow-y-auto univer-rounded-md univer-bg-white univer-p-1.5 univer-text-gray-900
                       univer-shadow-md
-                      dark:univer-bg-gray-700 dark:univer-text-white
+                      dark:!univer-bg-gray-700 dark:!univer-text-white
                       data-[side=bottom]:univer-slide-in-from-top-2
                       data-[side=left]:univer-slide-in-from-right-2
                       data-[side=right]:univer-slide-in-from-left-2
@@ -202,7 +202,7 @@ function DropdownMenuItem({
                   univer-relative univer-flex univer-cursor-default univer-select-none univer-items-center univer-gap-2
                   univer-rounded univer-px-2 univer-py-1.5 univer-text-sm univer-outline-none univer-transition-colors
                   [&>svg]:univer-size-4 [&>svg]:univer-shrink-0
-                  dark:focus:univer-bg-gray-600
+                  dark:focus:!univer-bg-gray-600
                   data-[disabled]:univer-pointer-events-none data-[disabled]:univer-opacity-50
                   focus:univer-bg-gray-100
                 `,
@@ -227,7 +227,7 @@ function DropdownMenuCheckboxItem({
                 `
                   univer-relative univer-flex univer-cursor-default univer-select-none univer-items-center
                   univer-rounded univer-py-1.5 univer-pr-2 univer-text-sm univer-outline-none univer-transition-colors
-                  dark:focus:univer-bg-gray-600
+                  dark:focus:!univer-bg-gray-600
                   data-[disabled]:univer-pointer-events-none data-[disabled]:univer-opacity-50
                   focus:univer-bg-gray-100
                 `,
@@ -272,7 +272,7 @@ function DropdownMenuRadioItem({
                 `
                   univer-relative univer-flex univer-cursor-default univer-select-none univer-items-center
                   univer-rounded univer-py-1.5 univer-pr-2 univer-text-sm univer-outline-none univer-transition-colors
-                  dark:focus:univer-bg-gray-600
+                  dark:focus:!univer-bg-gray-600
                   data-[disabled]:univer-pointer-events-none data-[disabled]:univer-opacity-50
                   focus:univer-bg-gray-100
                 `,

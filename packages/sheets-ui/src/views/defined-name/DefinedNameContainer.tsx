@@ -211,7 +211,7 @@ export const DefinedNameContainer = () => {
                             key={index}
                             className={`
                               univer-divide-x-0 univer-divide-y univer-divide-solid univer-divide-gray-200
-                              dark:univer-divide-gray-600
+                              dark:!univer-divide-gray-600
                             `}
                         >
                             <div
@@ -220,7 +220,7 @@ export const DefinedNameContainer = () => {
                                     `
                                       univer-relative univer-flex univer-cursor-default univer-select-none
                                       univer-items-center univer-justify-between univer-rounded-md univer-p-2
-                                      dark:hover:univer-bg-gray-700
+                                      dark:hover:!univer-bg-gray-700
                                       hover:univer-bg-gray-50
                                     `,
                                     { 'univer-hidden': definedName.id === editorKey }
@@ -231,7 +231,7 @@ export const DefinedNameContainer = () => {
                                         className={`
                                           univer-my-1 univer-max-h-[100px] univer-max-w-[190px] univer-overflow-hidden
                                           univer-text-sm univer-font-medium univer-text-gray-900
-                                          dark:univer-text-white
+                                          dark:!univer-text-white
                                         `}
                                     >
                                         {definedName.name}

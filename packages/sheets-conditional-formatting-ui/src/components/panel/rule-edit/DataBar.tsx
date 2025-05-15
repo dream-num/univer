@@ -69,7 +69,7 @@ const InputText = (props: { disabled?: boolean; id: string; className: string; t
                       univer-rounded-lg univer-bg-white univer-pt-2 univer-transition-colors
                       [&>div:first-child]:univer-px-2.5
                       [&>div]:univer-h-5 [&>div]:univer-ring-transparent
-                      dark:univer-bg-gray-700 dark:univer-text-white
+                      dark:!univer-bg-gray-700 dark:!univer-text-white
                       hover:univer-border-primary-600
                     `, borderClassName)}
                     initValue={v as any}
@@ -253,7 +253,7 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
             <div
                 className={`
                   univer-mt-4 univer-text-sm univer-text-gray-600
-                  dark:univer-text-gray-200
+                  dark:!univer-text-gray-200
                 `}
             >
                 {localeService.t('sheet.cf.panel.styleRule')}
@@ -276,7 +276,7 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                 <div
                     className={`
                       univer-mt-3 univer-text-sm univer-text-gray-600
-                      dark:univer-text-gray-200
+                      dark:!univer-text-gray-200
                     `}
                 >
                     {localeService.t('sheet.cf.panel.fillType')}
@@ -331,7 +331,7 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                 <div
                     className={`
                       univer-mt-3 univer-text-sm univer-text-gray-600
-                      dark:univer-text-gray-200
+                      dark:!univer-text-gray-200
                     `}
                 >
                     {localeService.t('sheet.cf.panel.colorSet')}
@@ -362,7 +362,7 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                 <div
                     className={`
                       univer-mt-3 univer-text-sm univer-text-gray-600
-                      dark:univer-text-gray-200
+                      dark:!univer-text-gray-200
                     `}
                 >
                     {localeService.t('sheet.cf.valueType.min')}
@@ -413,7 +413,7 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                 <div
                     className={`
                       univer-mt-3 univer-text-sm univer-text-gray-600
-                      dark:univer-text-gray-200
+                      dark:!univer-text-gray-200
                     `}
                 >
                     {localeService.t('sheet.cf.valueType.max')}

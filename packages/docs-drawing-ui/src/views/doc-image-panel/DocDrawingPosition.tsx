@@ -375,7 +375,7 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
             <header
                 className={`
                   univer-text-gray-600
-                  dark:univer-text-gray-200
+                  dark:!univer-text-gray-200
                 `}
             >
                 <div>{localeService.t('image-position.title')}</div>
@@ -384,7 +384,7 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
             <div
                 className={`
                   univer-text-gray-600
-                  dark:univer-text-gray-200
+                  dark:!univer-text-gray-200
                 `}
             >
                 <div>{localeService.t('image-position.horizontal')}</div>
@@ -426,7 +426,7 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
             <div
                 className={`
                   univer-text-gray-600
-                  dark:univer-text-gray-200
+                  dark:!univer-text-gray-200
                 `}
             >
                 <div>{localeService.t('image-position.vertical')}</div>
@@ -468,7 +468,7 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
             <div
                 className={`
                   univer-text-gray-600
-                  dark:univer-text-gray-200
+                  dark:!univer-text-gray-200
                 `}
             >
                 <div>{localeService.t('image-position.options')}</div>

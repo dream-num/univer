@@ -26,7 +26,7 @@ type InputProps = React.InputHTMLAttributes<HTMLInputElement>;
 export const inputVariants = cva(
     `
       univer-box-border univer-w-full univer-rounded-md univer-bg-white univer-transition-colors univer-duration-200
-      dark:univer-bg-gray-700 dark:univer-text-white dark:focus:univer-ring-primary-900
+      dark:!univer-bg-gray-700 dark:!univer-text-white dark:focus:!univer-ring-primary-900
       focus:univer-border-primary-600 focus:univer-outline-none focus:univer-ring-2 focus:univer-ring-primary-50
       placeholder:univer-text-gray-400
     `,
@@ -134,7 +134,7 @@ export const Input = forwardRef<HTMLInputElement, IInputProps>(
                         borderClassName,
                         disabled && `
                           univer-cursor-not-allowed univer-bg-gray-50 univer-text-gray-400
-                          dark:univer-text-gray-500
+                          dark:!univer-text-gray-500
                         `,
                         (allowClear && !slot) && 'univer-pr-8',
                         inputClass

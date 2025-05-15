@@ -333,7 +333,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
                                 <SelectRangeSingle
                                     className={`
                                       univer-cursor-pointer
-                                      dark:univer-text-gray-300
+                                      dark:!univer-text-gray-300
                                     `}
                                     onClick={handleOpenModal}
                                 />

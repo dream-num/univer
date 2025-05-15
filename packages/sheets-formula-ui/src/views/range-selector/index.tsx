@@ -330,7 +330,13 @@ export function RangeSelector(props: IRangeSelectorProps) {
                         }}
                         icon={(
                             <Tooltip title={localeService.t('rangeSelector.buttonTooltip')} placement="bottom">
-                                <SelectRangeSingle className="univer-cursor-pointer" onClick={handleOpenModal} />
+                                <SelectRangeSingle
+                                    className={`
+                                      univer-cursor-pointer
+                                      dark:univer-text-gray-300
+                                    `}
+                                    onClick={handleOpenModal}
+                                />
                             </Tooltip>
                         )}
                     />

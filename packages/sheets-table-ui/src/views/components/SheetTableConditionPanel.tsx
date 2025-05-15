@@ -150,7 +150,7 @@ export const SheetTableConditionPanel = (props: IConditionFilterProps) => {
                     </>
                 )}
                 {!!(subComponentType === ConditionSubComponentEnum.DatePicker) && (
-                    <div id="univer-table-date-picker-wrapper" style={{ background: '#fff', position: 'relative' }}>
+                    <div id="univer-table-date-picker-wrapper">
                         <DatePicker
                             value={dayjs(conditionInfo.info.date)}
                             defaultPickerValue={dayjs()}
@@ -165,7 +165,7 @@ export const SheetTableConditionPanel = (props: IConditionFilterProps) => {
                     </div>
                 )}
                 {!!(subComponentType === ConditionSubComponentEnum.DateRange) && (
-                    <div id="univer-table-date-range-wrapper" style={{ background: '#fff', position: 'relative' }}>
+                    <div id="univer-table-date-range-wrapper">
                         <DateRangePicker
                             value={[dayjs(conditionInfo.info.dateRange?.[0]) ?? dayjs(), dayjs(conditionInfo.info.dateRange?.[1]) ?? dayjs()]}
                             defaultPickerValue={[dayjs(), dayjs()]}

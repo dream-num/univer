@@ -9,7 +9,7 @@
     @apply univer-text-gray-900;
 }
 .univer-dark .univer-date-picker {
-    @apply univer-text-white univer-bg-gray-900;
+    @apply univer-text-white univer-bg-gray-900 univer-border-gray-600;
 }
 
 .univer-date-picker-rtl {
@@ -311,6 +311,9 @@
     align-items: stretch;
     overflow: hidden;
     @apply univer-bg-white univer-border univer-border-solid univer-border-gray-200 univer-rounded univer-shadow univer-p-4;
+}
+.univer-dark .univer-date-picker-panel-layout {
+    @apply univer-bg-gray-900 univer-border-gray-600;
 }
 
 /* Input */

@@ -18,7 +18,7 @@ import type { ISheetNote } from '@univerjs/sheets-note';
 import type { FWorkbook, FWorksheet } from '@univerjs/sheets/facade';
 import { FEventName } from '@univerjs/core/facade';
 
-export interface ISheetNoteAddEventParmas {
+export interface ISheetNoteAddEventParams {
     workbook: FWorkbook;
     worksheet: FWorksheet;
     row: number;
@@ -27,7 +27,7 @@ export interface ISheetNoteAddEventParmas {
     cancel?: boolean;
 }
 
-export interface ISheetNoteDeleteEventParmas {
+export interface ISheetNoteDeleteEventParams {
     workbook: FWorkbook;
     worksheet: FWorksheet;
     row: number;
@@ -36,7 +36,7 @@ export interface ISheetNoteDeleteEventParmas {
     cancel?: boolean;
 }
 
-export interface ISheetNoteUpdateEventParmas {
+export interface ISheetNoteUpdateEventParams {
     workbook: FWorkbook;
     worksheet: FWorksheet;
     row: number;
@@ -46,7 +46,7 @@ export interface ISheetNoteUpdateEventParmas {
     cancel?: boolean;
 }
 
-export interface ISheetNoteShowEventParmas {
+export interface ISheetNoteShowEventParams {
     workbook: FWorkbook;
     worksheet: FWorksheet;
     row: number;
@@ -54,7 +54,7 @@ export interface ISheetNoteShowEventParmas {
     cancel?: boolean;
 }
 
-export interface ISheetNoteHideEventParmas {
+export interface ISheetNoteHideEventParams {
     workbook: FWorkbook;
     worksheet: FWorksheet;
     row: number;
@@ -66,17 +66,17 @@ export interface ISheetNoteHideEventParmas {
  * @ignore
  */
 export interface ISheetsNoteEventParamConfig {
-    SheetNoteAdd: ISheetNoteAddEventParmas;
-    SheetNoteDelete: ISheetNoteDeleteEventParmas;
-    SheetNoteUpdate: ISheetNoteUpdateEventParmas;
-    SheetNoteShow: ISheetNoteShowEventParmas;
-    SheetNoteHide: ISheetNoteHideEventParmas;
+    SheetNoteAdd: ISheetNoteAddEventParams;
+    SheetNoteDelete: ISheetNoteDeleteEventParams;
+    SheetNoteUpdate: ISheetNoteUpdateEventParams;
+    SheetNoteShow: ISheetNoteShowEventParams;
+    SheetNoteHide: ISheetNoteHideEventParams;
 
-    BeforeSheetNoteAdd: ISheetNoteAddEventParmas;
-    BeforeSheetNoteDelete: ISheetNoteDeleteEventParmas;
-    BeforeSheetNoteUpdate: ISheetNoteUpdateEventParmas;
-    BeforeSheetNoteShow: ISheetNoteShowEventParmas;
-    BeforeSheetNoteHide: ISheetNoteHideEventParmas;
+    BeforeSheetNoteAdd: ISheetNoteAddEventParams;
+    BeforeSheetNoteDelete: ISheetNoteDeleteEventParams;
+    BeforeSheetNoteUpdate: ISheetNoteUpdateEventParams;
+    BeforeSheetNoteShow: ISheetNoteShowEventParams;
+    BeforeSheetNoteHide: ISheetNoteHideEventParams;
 }
 
 /**
@@ -85,122 +85,157 @@ export interface ISheetsNoteEventParamConfig {
 interface ISheetNoteEvent {
     /**
      * Event fired when a note is added
-     * @see {@link ISheetNoteAddEventParmas}
+     * @see {@link ISheetNoteAddEventParams}
      * @example
      * ```ts
      * const disposable = univerAPI.addEvent(univerAPI.Event.SheetNoteAdd, (params) => {
      *   const { workbook, worksheet, row, col, note } = params;
      *   console.log(params);
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     SheetNoteAdd: 'SheetNoteAdd';
     /**
      * Event fired when a note is deleted
-     * @see {@link ISheetNoteDeleteEventParmas}
+     * @see {@link ISheetNoteDeleteEventParams}
      * @example
      * ```ts
      * const disposable = univerAPI.addEvent(univerAPI.Event.SheetNoteDelete, (params) => {
      *   const { workbook, worksheet, row, col, oldNote } = params;
      *   console.log(params);
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     SheetNoteDelete: 'SheetNoteDelete';
     /**
      * Event fired when a note is updated
-     * @see {@link ISheetNoteUpdateEventParmas}
+     * @see {@link ISheetNoteUpdateEventParams}
      * @example
      * ```ts
      * const disposable = univerAPI.addEvent(univerAPI.Event.SheetNoteUpdate, (params) => {
      *   const { workbook, worksheet, row, col, note, oldNote } = params;
      *   console.log(params);
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     SheetNoteUpdate: 'SheetNoteUpdate';
     /**
      * Event fired when a note is shown
-     * @see {@link ISheetNoteShowEventParmas}
+     * @see {@link ISheetNoteShowEventParams}
      * @example
      * ```ts
      * const disposable = univerAPI.addEvent(univerAPI.Event.SheetNoteShow, (params) => {
      *   const { workbook, worksheet, row, col } = params;
      *   console.log(params);
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     SheetNoteShow: 'SheetNoteShow';
     /**
      * Event fired when a note is hidden
-     * @see {@link ISheetNoteHideEventParmas}
+     * @see {@link ISheetNoteHideEventParams}
      * @example
      * ```ts
      * const disposable = univerAPI.addEvent(univerAPI.Event.SheetNoteHide, (params) => {
      *   const { workbook, worksheet, row, col } = params;
      *   console.log(params);
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     SheetNoteHide: 'SheetNoteHide';
 
     /**
      * Event fired before a note is added
-     * @see {@link ISheetNoteAddEventParmas}
+     * @see {@link ISheetNoteAddEventParams}
      * @example
      * ```ts
      * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeSheetNoteAdd, (params) => {
      *   const { workbook, worksheet, row, col, note } = params;
      *   console.log(params);
+     *
+     *   // Cancel the note addition operation
+     *   params.cancel = true;
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     BeforeSheetNoteAdd: 'BeforeSheetNoteAdd';
     /**
      * Event fired before a note is deleted
-     * @see {@link ISheetNoteDeleteEventParmas}
+     * @see {@link ISheetNoteDeleteEventParams}
      * @example
      * ```ts
      * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeSheetNoteDelete, (params) => {
      *   const { workbook, worksheet, row, col, oldNote } = params;
      *   console.log(params);
+     *
+     *   // Cancel the note deletion operation
+     *   params.cancel = true;
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     BeforeSheetNoteDelete: 'BeforeSheetNoteDelete';
     /**
      * Event fired before a note is updated
-     * @see {@link ISheetNoteUpdateEventParmas}
+     * @see {@link ISheetNoteUpdateEventParams}
      * @example
      * ```ts
      * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeSheetNoteUpdate, (params) => {
      *   const { workbook, worksheet, row, col, note, oldNote } = params;
      *   console.log(params);
+     *
+     *   // Cancel the note update operation
+     *   params.cancel = true;
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     BeforeSheetNoteUpdate: 'BeforeSheetNoteUpdate';
     /**
      * Event fired before a note is shown
-     * @see {@link ISheetNoteShowEventParmas}
+     * @see {@link ISheetNoteShowEventParams}
      * @example
      * ```ts
      * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeSheetNoteShow, (params) => {
      *   const { workbook, worksheet, row, col } = params;
      *   console.log(params);
+     *
+     *   // Cancel the note show operation
+     *   params.cancel = true;
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     BeforeSheetNoteShow: 'BeforeSheetNoteShow';
     /**
      * Event fired before a note is hidden
-     * @see {@link ISheetNoteHideEventParmas}
+     * @see {@link ISheetNoteHideEventParams}
      * @example
      * ```ts
      * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeSheetNoteHide, (params) => {
      *   const { workbook, worksheet, row, col } = params;
      *   console.log(params);
+     *
+     *   // Cancel the note hide operation
+     *   params.cancel = true;
      * });
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     BeforeSheetNoteHide: 'BeforeSheetNoteHide';
@@ -255,17 +290,17 @@ export class FSheetNoteEvent implements ISheetNoteEvent {
  * @ignore
  */
 export interface ISheetNoteEventConfig {
-    SheetNoteAdd: ISheetNoteAddEventParmas;
-    SheetNoteDelete: ISheetNoteDeleteEventParmas;
-    SheetNoteUpdate: ISheetNoteUpdateEventParmas;
-    SheetNoteShow: ISheetNoteShowEventParmas;
-    SheetNoteHide: ISheetNoteHideEventParmas;
+    SheetNoteAdd: ISheetNoteAddEventParams;
+    SheetNoteDelete: ISheetNoteDeleteEventParams;
+    SheetNoteUpdate: ISheetNoteUpdateEventParams;
+    SheetNoteShow: ISheetNoteShowEventParams;
+    SheetNoteHide: ISheetNoteHideEventParams;
 
-    BeforeSheetNoteAdd: ISheetNoteAddEventParmas;
-    BeforeSheetNoteDelete: ISheetNoteDeleteEventParmas;
-    BeforeSheetNoteUpdate: ISheetNoteUpdateEventParmas;
-    BeforeSheetNoteShow: ISheetNoteShowEventParmas;
-    BeforeSheetNoteHide: ISheetNoteHideEventParmas;
+    BeforeSheetNoteAdd: ISheetNoteAddEventParams;
+    BeforeSheetNoteDelete: ISheetNoteDeleteEventParams;
+    BeforeSheetNoteUpdate: ISheetNoteUpdateEventParams;
+    BeforeSheetNoteShow: ISheetNoteShowEventParams;
+    BeforeSheetNoteHide: ISheetNoteHideEventParams;
 }
 
 FEventName.extend(FSheetNoteEvent);

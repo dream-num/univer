@@ -25,7 +25,20 @@ export interface ISheetNoteInfo extends ISheetNote {
 
 export interface IFSheetsNoteWorksheet {
     /**
-     * get the note of the primary cell
+     * Get all annotations in the worksheet
+     * @returns {ISheetNoteInfo[]} An array of all annotations in the worksheet
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const notes = fWorksheet.getNotes();
+     * console.log(notes);
+     *
+     * notes.forEach((item) => {
+     *   const { row, col, note } = item;
+     *   console.log(`Cell ${fWorksheet.getRange(row, col).getA1Notation()} has a note: ${note}`);
+     * });
+     * ```
      */
     getNotes(): ISheetNoteInfo[];
 }

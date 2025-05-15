@@ -150,7 +150,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         if (!html && !text && files.length) {
             html = await this._createImagePasteHtml(files);
         }
-        if(!html && !text) {
+        if (!html && !text) {
             this._logService.warn('[DocClipboardController] html and text cannot be both empty!');
             return false;
         }

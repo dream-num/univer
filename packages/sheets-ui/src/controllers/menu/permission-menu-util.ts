@@ -17,7 +17,7 @@
 import type { IAccessor, Workbook } from '@univerjs/core';
 import { FOCUSING_COMMON_DRAWINGS, FOCUSING_FX_BAR_EDITOR, IContextService, IPermissionService, IUniverInstanceService, RANGE_TYPE, Rectangle, UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { RangeProtectionCache, RangeProtectionRuleModel, SheetsSelectionsService, UnitAction, WorkbookCreateProtectPermission, WorkbookEditablePermission, WorkbookManageCollaboratorPermission, WorksheetDeleteProtectionPermission, WorksheetManageCollaboratorPermission, WorksheetProtectionRuleModel } from '@univerjs/sheets';
-import { combineLatest, map, merge, of, startWith, switchMap } from 'rxjs';
+import { combineLatest, map, merge, of, shareReplay, startWith, switchMap } from 'rxjs';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 
 export function getAddPermissionHidden$(accessor: IAccessor) {
@@ -213,8 +213,14 @@ export function getAddPermissionDisableBase$(accessor: IAccessor) {
     const userManagerService = accessor.get(UserManagerService);
     const editorBridgeService = accessor.has(IEditorBridgeService) ? accessor.get(IEditorBridgeService) : null;
     const contextService = accessor.get(IContextService);
-    const formulaEditorFocus$ = contextService.subscribeContextValue$(FOCUSING_FX_BAR_EDITOR);
-    const editorVisible$ = editorBridgeService?.visible$ ?? of(null);
+    const formulaEditorFocus$ = contextService.subscribeContextValue$(FOCUSING_FX_BAR_EDITOR).pipe(
+        startWith(false),
+        shareReplay(1)
+    );
+    const editorVisible$ = editorBridgeService?.visible$.pipe(
+        startWith(null),
+        shareReplay(1)
+    ) ?? of(null);
 
     return combineLatest([workbook$, userManagerService.currentUser$, editorVisible$, formulaEditorFocus$]).pipe(
         switchMap(([workbook, _, visible, formulaEditorFocus]) => {

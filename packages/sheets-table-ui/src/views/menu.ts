@@ -24,17 +24,19 @@ import { MenuItemType } from '@univerjs/ui';
 import { of, switchMap } from 'rxjs';
 import { OpenTableSelectorOperation } from '../commands/operations/open-table-selector.operation';
 import { TABLE_TOOLBAR_BUTTON } from '../const';
+import { getCurrentRangeDisable$ } from '@univerjs/sheets-ui';
 
 export const SHEET_TABLE_CONTEXT_INSERT_MENU_ID = 'sheet.table.context-insert_menu-id';
 export const SHEET_TABLE_CONTEXT_REMOVE_MENU_ID = 'sheet.table.context-remove_menu-id';
 
-export function sheetTableToolbarInsertMenuFactory(_accessor: IAccessor): IMenuItem {
+export function sheetTableToolbarInsertMenuFactory(accessor: IAccessor): IMenuItem {
     return {
         id: OpenTableSelectorOperation.id,
         type: MenuItemType.BUTTON,
         icon: TABLE_TOOLBAR_BUTTON,
         tooltip: 'sheets-table.title',
         title: 'sheets-table.title',
+        disabled$: getCurrentRangeDisable$(accessor, {}, true),
     };
 }
 

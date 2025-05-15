@@ -140,7 +140,7 @@ export function Select(props: ISelectProps) {
 
     return (
         <DropdownMenu
-            className="univer-w-[var(--radix-popper-anchor-width)] univer-min-w-36"
+            className="univer-w-[var(--radix-popper-anchor-width)] univer-min-w-36 max-h"
             align="start"
             open={open}
             items={items}
@@ -155,7 +155,7 @@ export function Select(props: ISelectProps) {
                   univer-transition-colors univer-duration-200
                   dark:univer-bg-gray-700 dark:univer-text-white
                 `, borderClassName, {
-                    'univer-border-primary-600 univer-outline-none univer-ring-2 univer-ring-primary-50': open && !borderless,
+                    'univer-border-primary-600 univer-outline-none univer-ring-2 univer-ring-primary-50 dark:univer-ring-primary-900': open && !borderless,
                     'univer-border-transparent univer-bg-transparent hover:univer-border-transparent': borderless,
                     'univer-cursor-not-allowed': disabled,
                     'hover:univer-border-primary-600': !disabled && !borderless,

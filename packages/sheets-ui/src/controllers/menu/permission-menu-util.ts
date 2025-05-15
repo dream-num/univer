@@ -216,7 +216,7 @@ export function getAddPermissionDisableBase$(accessor: IAccessor) {
     const formulaEditorFocus$ = contextService.subscribeContextValue$(FOCUSING_FX_BAR_EDITOR).pipe(
         startWith(false),
         shareReplay(1)
-    )
+    );
     const editorVisible$ = editorBridgeService?.visible$.pipe(
         startWith(null),
         shareReplay(1)

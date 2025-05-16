@@ -15,10 +15,10 @@
  */
 
 import type { IAccessor, ICellData, ICommand } from '@univerjs/core';
-import type { ISetRangeValuesCommandParams } from '@univerjs/sheets';
-import { CommandType, ICommandService, IUniverInstanceService, ObjectMatrix, Rectangle } from '@univerjs/core';
+import type { ISetRangeValuesCommandParams, ISetSelectionsOperationParams } from '@univerjs/sheets';
+import { CommandType, ICommandService, IUniverInstanceService, ObjectMatrix, Rectangle, sequenceExecuteAsync } from '@univerjs/core';
 import { serializeRange } from '@univerjs/engine-formula';
-import { expandToContinuousRange, findFirstNonEmptyCell, getSheetCommandTarget, SetRangeValuesCommand, SheetsSelectionsService } from '@univerjs/sheets';
+import { expandToContinuousRange, findFirstNonEmptyCell, getSheetCommandTarget, SetRangeValuesCommand, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
 
 /**
  * Tries to insert =SUM formulas in selection regions.
@@ -49,27 +49,6 @@ export const QuickSumCommand: ICommand = {
 
         const setValueMatrix = new ObjectMatrix<ICellData>();
 
-        const lastColumn = expandToContinuousRange({
-            startRow: targetRange.startRow,
-            startColumn: targetRange.endColumn,
-            endRow: targetRange.endRow,
-            endColumn: targetRange.endColumn,
-        }, { left: true }, worksheet);
-        if (!Rectangle.equals(lastColumn, targetRange)) {
-            for (const cell of worksheet.iterateByRow(lastColumn)) {
-                if (!cell.value || !worksheet.cellHasValue(cell.value)) {
-                    setValueMatrix.setValue(cell.row, cell.col, {
-                        f: `=SUM(${serializeRange({
-                            startColumn: targetRange.startColumn,
-                            endColumn: cell.col - 1,
-                            startRow: cell.row,
-                            endRow: cell.row,
-                        })})`,
-                    });
-                }
-            }
-        }
-
         const lastRow = expandToContinuousRange({
             startRow: targetRange.endRow,
             endRow: targetRange.endRow,
@@ -91,10 +70,49 @@ export const QuickSumCommand: ICommand = {
             }
         }
 
+        const lastColumn = expandToContinuousRange({
+            startRow: targetRange.startRow,
+            startColumn: targetRange.endColumn,
+            endRow: targetRange.endRow,
+            endColumn: targetRange.endColumn,
+        }, { left: true }, worksheet);
+        if (!Rectangle.equals(lastColumn, targetRange)) {
+            for (const cell of worksheet.iterateByRow(lastColumn)) {
+                if (!cell.value || !worksheet.cellHasValue(cell.value)) {
+                    setValueMatrix.setValue(cell.row, cell.col, {
+                        f: `=SUM(${serializeRange({
+                            startColumn: targetRange.startColumn,
+                            endColumn: cell.col - 1,
+                            startRow: cell.row,
+                            endRow: cell.row,
+                        })})`,
+                    });
+                }
+            }
+        }
+
         const commandService = accessor.get(ICommandService);
-        return commandService.executeCommand(SetRangeValuesCommand.id, {
-            range: targetRange,
-            value: setValueMatrix.getMatrix(),
-        } as ISetRangeValuesCommandParams);
+
+        return sequenceExecuteAsync([
+            {
+                id: SetRangeValuesCommand.id,
+                params: {
+                    range: targetRange,
+                    value: setValueMatrix.getMatrix(),
+                } as ISetRangeValuesCommandParams,
+            },
+            {
+                id: SetSelectionsOperation.id,
+                params: {
+                    unitId: target.unitId,
+                    subUnitId: target.subUnitId,
+                    selections: [{
+                        range: targetRange,
+                        primary: Rectangle.contains(targetRange, currentSelection.primary) ? currentSelection.primary : { ...firstCell, actualRow: firstCell.startRow, actualColumn: firstCell.startColumn },
+                        style: null,
+                    }],
+                } as ISetSelectionsOperationParams,
+            },
+        ], commandService);
     },
 };

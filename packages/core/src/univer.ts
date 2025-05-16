@@ -63,7 +63,6 @@ export interface IUniverConfig {
 
     /**
      * Whether to use dark mode.
-     * @internal
      * @default false
      */
     darkMode?: boolean;

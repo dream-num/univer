@@ -26,7 +26,7 @@ import { alignToMergedCellsBorders, expandToContinuousRange, findFirstNonEmptyCe
 export const QuickSumCommand: ICommand = {
     id: 'sheets-formula.command.quick-sum',
     type: CommandType.COMMAND,
-    handler: (accessor: IAccessor) => {
+    handler: async (accessor: IAccessor) => {
         const selectionsService = accessor.get(SheetsSelectionsService);
         const currentSelection = selectionsService.getCurrentLastSelection();
         if (!currentSelection) return false;
@@ -94,7 +94,7 @@ export const QuickSumCommand: ICommand = {
 
         const commandService = accessor.get(ICommandService);
 
-        return sequenceExecuteAsync([
+        return (await sequenceExecuteAsync([
             {
                 id: SetRangeValuesCommand.id,
                 params: {
@@ -114,6 +114,6 @@ export const QuickSumCommand: ICommand = {
                     }],
                 } as ISetSelectionsOperationParams,
             },
-        ], commandService);
+        ], commandService)).result;
     },
 };

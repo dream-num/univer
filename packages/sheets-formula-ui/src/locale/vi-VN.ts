@@ -31,6 +31,11 @@ import univer from './function-list/univer/vi-VN';
 import web from './function-list/web/vi-VN';
 
 export default {
+    shortcut: {
+        'sheets-formula-ui': {
+            'quick-sum': 'Tổng nhanh',
+        },
+    },
     formula: {
         insert: {
             tooltip: 'Hàm',

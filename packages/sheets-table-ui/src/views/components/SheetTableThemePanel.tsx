@@ -23,7 +23,7 @@ import { RangeThemeStyle, SetRangeThemeMutation, SheetRangeThemeModel } from '@u
 import { AddTableThemeCommand, customEmptyThemeWithBorderStyle, processStyleWithBorderStyle, RemoveTableThemeCommand, SetSheetTableCommand, TableManager } from '@univerjs/sheets-table';
 import { useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
-import { TABLE_BORDER_DEFAULT, TABLE_BORDER_NONE, TABLE_BORDER_SELECTED, TABLE_CUSTOM_NAME_PREFIX, TABLE_DEFAULT_BG_COLOR, TABLE_DEFAULT_NAME_PREFIX } from '../../const';
+import { TABLE_BORDER_DEFAULT, TABLE_BORDER_NONE, TABLE_CUSTOM_NAME_PREFIX, TABLE_DEFAULT_BG_COLOR, TABLE_DEFAULT_NAME_PREFIX } from '../../const';
 import { SheetTableThemeUIController } from '../../controllers/sheet-table-theme-ui.controller';
 
 export interface ISheetTableThemePanelProps {
@@ -140,11 +140,13 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
                     return (
                         <div
                             key={item}
-                            className="univer-h-10 univer-w-8 univer-cursor-pointer univer-p-px"
+                            className={clsx(`
+                              univer-h-10 univer-w-8 univer-cursor-pointer univer-p-px univer-border univer-border-solid
+                              univer-border-gray-200
+                            `, {
+                                'univer-border-blue-500': item === themeConfig.theme,
+                            })}
                             onClick={() => handleThemeChange(item)}
-                            style={{
-                                border: item === themeConfig.theme ? TABLE_BORDER_SELECTED : TABLE_BORDER_DEFAULT,
-                            }}
                         >
                             <div className="univer-box-border univer-h-2.5" style={{ background: headerRowBg, border: `${headerRowBg ? TABLE_BORDER_NONE : TABLE_BORDER_DEFAULT}` }} />
                             <div className="univer-box-border univer-h-2.5" style={{ background: firstRowBg, border: `${firstRowBg ? TABLE_BORDER_NONE : TABLE_BORDER_DEFAULT}` }} />
@@ -176,11 +178,13 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
                         return (
                             <div
                                 key={item}
-                                className="univer-relative univer-h-10 univer-w-8 univer-cursor-pointer univer-p-px"
+                                className={clsx(`
+                                  univer-relative univer-h-10 univer-w-8 univer-cursor-pointer univer-p-px univer-border
+                                  univer-border-solid univer-border-gray-200
+                                `, {
+                                    'univer-border-blue-500': item === themeConfig.theme,
+                                })}
                                 onClick={() => handleThemeChange(item)}
-                                style={{
-                                    border: item === themeConfig.theme ? TABLE_BORDER_SELECTED : TABLE_BORDER_DEFAULT,
-                                }}
                                 onMouseEnter={() => setHoverCustomId(item)}
                                 onMouseLeave={() => setHoverCustomId(null)}
                             >
@@ -346,7 +350,7 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
                                         className={clsx(`
                                           univer-flex univer-cursor-pointer univer-items-center univer-gap-2
                                           univer-rounded-sm univer-bg-white univer-p-1
-                                        `)}
+                                        `, borderClassName)}
                                     >
                                         <div
                                             className={clsx('univer-h-4 univer-w-4 univer-rounded-lg univer-bg-gray-400', borderClassName)}

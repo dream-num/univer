@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
+import type { IRangeThemeStyleJSON } from '@univerjs/sheets';
 import type { IAddSheetTableCommandParams, IDeleteSheetTableParams, ISetSheetTableCommandParams, ISetSheetTableParams, ITableFilterItem, ITableInfoWithUnitId, ITableOptions, ITableRange } from '@univerjs/sheets-table';
-import { AddSheetTableCommand, DeleteSheetTableCommand, SetSheetTableCommand, SetSheetTableFilterCommand, SheetTableService } from '@univerjs/sheets-table';
+import { cellToRange, Rectangle } from '@univerjs/core';
+import { RangeThemeStyle } from '@univerjs/sheets';
+import { AddSheetTableCommand, AddTableThemeCommand, DeleteSheetTableCommand, SetSheetTableCommand, SetSheetTableFilterCommand, SheetTableService } from '@univerjs/sheets-table';
 import { FWorksheet } from '@univerjs/sheets/facade';
 
 /**
@@ -67,9 +70,9 @@ export interface IFWorkSheetTableMixin {
      * }, 'id-1', {
      *   showHeader: true
      * })
-     * const tableInfo = fWorkbook.getTableInfo(id);
+     * const tableInfo = fWorkbook.getTableInfo('id-1');
      * console.log('debugger tableInfo',tableInfo);
-     * const result = await fSheet.setTableFilter(id, 1, {
+     * const result = await fSheet.setTableFilter('id-1', 1, {
      *   filterType: univerAPI.Enum.TableColumnFilterTypeEnum.condition,
      *   filterInfo: {
      *    conditionType: univerAPI.Enum.TableConditionTypeEnum.Number,
@@ -183,6 +186,118 @@ export interface IFWorkSheetTableMixin {
      * ```
      */
     getSubTableInfos(): ITableInfoWithUnitId[];
+
+    /**
+     * Reset the column filter of a table
+     * @param tableId The table id
+     * @param column The column index
+     * @returns {Promise<boolean>} Whether the table filter was reset successfully
+     * @example
+     * ```typescript
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fSheet = fWorkbook.getActiveSheet();
+     * const subUnitId = fSheet.getSheetId();
+     * const res = await fSheet.addTable('name-1', {
+     *   startRow: 1,
+     *   startColumn: 1,
+     *   endRow: 10,
+     *   endColumn: 5,
+     * }, 'id-1', {
+     *   showHeader: true
+     * })
+     * const tableInfo = fWorkbook.getTableInfo('id-1');
+     * console.log('debugger tableInfo',tableInfo);
+     * const result = await fSheet.setTableFilter('id-1', 1, {
+     *  filterType: univerAPI.Enum.TableColumnFilterTypeEnum.condition,
+     *  filterInfo: {
+     *   conditionType: univerAPI.Enum.TableConditionTypeEnum.Number,
+     *   compareType: univerAPI.Enum.TableNumberCompareTypeEnum.GreaterThan,
+     *   expectedValue: 10,
+     *  }
+     * })
+     * console.log('debugger result',result);
+     * const result2 = await fSheet.resetFilter('id-1', 1);
+     * console.log('debugger result2',result2);
+     * const tableInfo2 = fWorkbook.getTableInfo('id-1');
+     * console.log('debugger tableInfo2',tableInfo2);
+     * ```
+     */
+    resetFilter(tableId: string, column: number): Promise<boolean>;
+
+    /**
+     * Get the table information by cell position
+     * @param row The row index
+     * @param column The column index
+     * @returns {ITableInfoWithUnitId | undefined} The table information or undefined if not found
+     * @example
+     * ```typescript
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fSheet = fWorkbook.getActiveSheet();
+     * const subUnitId = fSheet.getSheetId();
+     * const res = await fSheet.addTable('name-1', {
+     *  startRow: 1,
+     *  startColumn: 1,
+     *  endRow: 10,
+     *  endColumn: 5,
+     * }, 'id-1', {
+     *  showHeader: true
+     * })
+     * const tableInfo = fWorkbook.getTableInfo('id-1');
+     * console.log('debugger tableInfo',tableInfo);
+     * const tableInfo2 = fSheet.getTableByCell(1, 1);
+     * console.log('debugger tableInfo2',tableInfo2);
+     * ```
+     */
+    getTableByCell(row: number, column: number): ITableInfoWithUnitId | undefined;
+
+    /**
+     * Add a theme to the table
+     * @param tableId The table id
+     * @param themeStyleJSON The theme style JSON
+     * @returns {Promise<boolean>} Whether the theme was added successfully
+     * @example
+     * ```typescript
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fSheet = fWorkbook.getActiveSheet();
+     * const subUnitId = fSheet.getSheetId();
+     * const res = await fSheet.addTable('name-1', {
+     *  startRow: 1,
+     *  startColumn: 1,
+     *  endRow: 10,
+     *  endColumn: 5,
+     * }, 'id-1', {
+     * showHeader: true
+     * })
+     * const tableInfo = fWorkbook.getTableInfo('id-1');
+     * console.log('debugger tableInfo', tableInfo);
+     * const result = await fSheet.addTableTheme('id-1', {
+     *  name: "table-custom-1",
+     *  headerRowStyle: {
+     *     bd: {
+     *         t: {
+     *             s: 1,
+     *             cl: {
+     *                 rgb: "rgb(95 101 116)"
+     *             }
+     *         }
+     *     },
+     *     bg: {
+     *         rgb: 'rgb(255,123,65)'
+     *     }
+     *  },
+     * lastRowStyle: {
+     *     bd: {
+     *         b: {
+     *             s: 1,
+     *             cl: {
+     *                 rgb: "rgb(95 101 116)"
+     *             }
+     *         }
+     *     }
+     *   },
+     * });
+     */
+    addTableTheme(tableId: string, themeStyleJSON: IRangeThemeStyleJSON): Promise<boolean>;
 }
 
 export class FWorkSheetTableMixin extends FWorksheet implements IFWorkSheetTableMixin {
@@ -210,7 +325,6 @@ export class FWorkSheetTableMixin extends FWorksheet implements IFWorkSheetTable
         return this._commandService.executeCommand(SetSheetTableFilterCommand.id, setTableFilterParams);
     }
 
-    // remove table
     override removeTable(tableId: string): Promise<boolean> {
         const removedTableParams: IDeleteSheetTableParams = {
             unitId: this._fWorkbook.getId(),
@@ -220,7 +334,6 @@ export class FWorkSheetTableMixin extends FWorksheet implements IFWorkSheetTable
         return this._commandService.executeCommand(DeleteSheetTableCommand.id, removedTableParams);
     }
 
-    // set table range
     override setTableRange(tableId: string, rangeInfo: ITableRange): Promise<boolean> {
         const tableSetConfig: ISetSheetTableCommandParams = {
             unitId: this.getWorkbook().getUnitId(),
@@ -232,7 +345,6 @@ export class FWorkSheetTableMixin extends FWorksheet implements IFWorkSheetTable
         return this._commandService.executeCommand(SetSheetTableCommand.id, tableSetConfig);
     }
 
-    // set table name
     override setTableName(tableId: string, tableName: string): Promise<boolean> {
         const tableSetConfig: ISetSheetTableCommandParams = {
             unitId: this.getWorkbook().getUnitId(),
@@ -246,6 +358,37 @@ export class FWorkSheetTableMixin extends FWorksheet implements IFWorkSheetTable
         const unitId = this._fWorkbook.getId();
         const sheetTableService = this._injector.get(SheetTableService);
         return sheetTableService.getTableList(unitId).filter((table) => table.subUnitId === this.getSheetId());
+    }
+
+    override resetFilter(tableId: string, column: number): Promise<boolean> {
+        const setTableFilterParams: ISetSheetTableParams = {
+            unitId: this._fWorkbook.getId(),
+            tableId,
+            column,
+            tableFilter: undefined,
+        };
+        return this._commandService.executeCommand(SetSheetTableFilterCommand.id, setTableFilterParams);
+    }
+
+    override getTableByCell(row: number, column: number): ITableInfoWithUnitId | undefined {
+        const unitId = this._fWorkbook.getId();
+        const sheetTableService = this._injector.get(SheetTableService);
+        const allSubTableInfos = sheetTableService.getTableList(unitId).filter((table) => table.subUnitId === this.getSheetId());
+        const cellRange = cellToRange(row, column);
+        return allSubTableInfos.find((table) => {
+            const tableRange = table.range;
+            return Rectangle.intersects(tableRange, cellRange);
+        });
+    }
+
+    override addTableTheme(tableId: string, themeStyleJSON: IRangeThemeStyleJSON): Promise<boolean> {
+        const themeStyle = new RangeThemeStyle('table-style');
+        themeStyle.fromJson(themeStyleJSON);
+        return this._commandService.executeCommand(AddTableThemeCommand.id, {
+            unitId: this._fWorkbook.getId(),
+            tableId,
+            themeStyle,
+        });
     }
 }
 

@@ -16,21 +16,27 @@
 
 import type { ComponentProps, ReactNode } from 'react';
 import { useState } from 'react';
-import { PopoverContent, PopoverPrimitive, PopoverTrigger } from './PopoverPrimitive';
+import { HoverCardContent, HoverCardPrimitive, HoverCardTrigger } from './HoverCardPrimitive';
 
-export interface IDropdownProps extends ComponentProps<typeof PopoverContent> {
+export interface IHoverCardProps extends ComponentProps<typeof HoverCardContent> {
     children: ReactNode;
     overlay: ReactNode;
     disabled?: boolean;
+    /**
+     * Delay in milliseconds before the dropdown opens.
+     * @default 200
+     */
+    openDelay?: number;
     open?: boolean;
     onOpenChange?: (open: boolean) => void;
 }
 
-export function Dropdown(props: IDropdownProps) {
+export function HoverCard(props: IHoverCardProps) {
     const {
         children,
         overlay,
         disabled,
+        openDelay = 200,
         open: controlledOpen,
         onOpenChange: controlledOnOpenChange,
         ...restProps
@@ -52,13 +58,11 @@ export function Dropdown(props: IDropdownProps) {
     }
 
     return (
-        <PopoverPrimitive open={open} onOpenChange={handleChangeOpen}>
-            <PopoverTrigger asChild>
-                {children}
-            </PopoverTrigger>
-            <PopoverContent {...restProps}>
+        <HoverCardPrimitive open={open} onOpenChange={handleChangeOpen} openDelay={openDelay}>
+            <HoverCardTrigger asChild>{children}</HoverCardTrigger>
+            <HoverCardContent {...restProps}>
                 {overlay}
-            </PopoverContent>
-        </PopoverPrimitive>
+            </HoverCardContent>
+        </HoverCardPrimitive>
     );
 }

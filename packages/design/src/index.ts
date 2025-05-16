@@ -26,7 +26,8 @@ export { ColorPicker, type IColorPickerProps } from './components/color-picker/C
 export { ConfigContext, ConfigProvider, type IConfigProviderProps } from './components/config-provider/ConfigProvider';
 export { Confirm, type IConfirmProps } from './components/confirm/Confirm';
 export { Dialog, type IDialogProps } from './components/dialog/Dialog';
-export { Dropdown, type IDropdownProps } from './components/dropdown';
+export { Dropdown, type IDropdownProps } from './components/dropdown/Dropdown';
+export { HoverCard, type IHoverCardProps } from './components/hover-card/HoverCard';
 export { type IInputProps, Input } from './components/input/Input';
 export { type IInputNumberProps, InputNumber } from './components/input-number/InputNumber';
 export { type IMessageProps, message, Messager, MessageType, removeMessage } from './components/message/Message';

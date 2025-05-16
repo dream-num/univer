@@ -18,7 +18,7 @@ import type { ComponentType } from 'react';
 import type { Observable } from 'rxjs';
 import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
 import { LocaleService } from '@univerjs/core';
-import { borderBottomClassName, borderClassName, clsx, divideXClassName, Dropdown } from '@univerjs/design';
+import { borderBottomClassName, borderClassName, clsx, divideXClassName, Dropdown, HoverCard } from '@univerjs/design';
 import { DatabaseSingle, EyeSingle, FunctionSingle, HomeSingle, InsertSingle, MoreDownSingle, MoreFunctionSingle } from '@univerjs/icons';
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { combineLatest } from 'rxjs';
@@ -253,8 +253,8 @@ export function Ribbon(props: IRibbonProps) {
                 </search> */}
 
                 {ribbon.length > 1 && (
-                    <Dropdown
-                        className="univer-max-w-96 !univer-rounded-xl univer-animate-in univer-fade-in"
+                    <HoverCard
+                        className="univer-max-w-96 !univer-rounded-xl"
                         align="start"
                         open={groupSelectorVisible}
                         overlay={(
@@ -322,7 +322,7 @@ export function Ribbon(props: IRibbonProps) {
                                 `}
                             />
                         </a>
-                    </Dropdown>
+                    </HoverCard>
                 )}
 
                 <div ref={containerRef} className={clsx('univer-flex univer-overflow-hidden', divideXClassName)}>
@@ -336,9 +336,11 @@ export function Ribbon(props: IRibbonProps) {
                         </Fragment>
                     ))}
 
+                    {/* More functions dropdown */}
                     {collapsedIds.length > 0 && (
                         <div className="univer-pl-2">
                             <Dropdown
+                                collisionPadding={{ right: 12 }}
                                 overlay={(
                                     <div
                                         className={`

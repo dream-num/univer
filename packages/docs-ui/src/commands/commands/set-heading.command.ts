@@ -54,6 +54,7 @@ export const SetParagraphNamedStyleCommand: ICommand<ISetParagraphNamedStyleComm
                 headingId: !params.value || params.value === NamedStyleType.NORMAL_TEXT ? undefined : generateRandomId(6),
                 spaceAbove: undefined,
                 spaceBelow: undefined,
+                lineSpacing: undefined,
             },
             paragraphTextRun: {},
 

@@ -129,6 +129,7 @@ const IconGroupList = forwardRef<HTMLDivElement, IIconGroupListProps>((props, re
                                         <a
                                             className={`
                                               univer-cursor-pointer univer-rounded
+                                              dark:hover:!univer-bg-gray-700
                                               hover:univer-bg-gray-100
                                             `}
                                         >
@@ -192,6 +193,7 @@ const IconItemList = (props: { onClick: (iconType: IIconType, iconId: string) =>
                         className={`
                           univer-mb-2 univer-mr-2 univer-flex univer-cursor-pointer univer-items-center
                           univer-justify-center univer-rounded
+                          dark:hover:!univer-bg-gray-700
                           hover:univer-bg-gray-100
                         `}
                     >

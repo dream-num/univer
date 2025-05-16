@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-import type { ICommand } from '@univerjs/core';
-import { CommandType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocFloatDomController } from '@univerjs/docs-drawing-ui';
 import { SheetCanvasFloatDomManagerService } from '@univerjs/sheets-drawing-ui';
+import { useDependency } from '@univerjs/ui';
 
-export const CreateFloatDomCommand: ICommand = {
-    id: 'debugger.command.create-float-dom',
-    type: CommandType.COMMAND,
-    handler: (accessor) => {
-        const univerInstanceService = accessor.get(IUniverInstanceService);
+export function useFloatingDom() {
+    const univerInstanceService = useDependency(IUniverInstanceService);
+    const floatDomService = useDependency(SheetCanvasFloatDomManagerService);
+    const floatDomController = useDependency(DocFloatDomController);
+
+    const onSelect = () => {
         const currentSheet = univerInstanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_SHEET);
         if (currentSheet) {
-            const floatDomService = accessor.get(SheetCanvasFloatDomManagerService);
             floatDomService.addFloatDomToPosition({
                 allowTransform: true,
                 initPosition: {
@@ -41,7 +41,6 @@ export const CreateFloatDomCommand: ICommand = {
                 },
             });
         } else {
-            const floatDomController = accessor.get(DocFloatDomController);
             floatDomController.insertFloatDom({
                 allowTransform: true,
                 componentKey: 'ImageDemo',
@@ -52,7 +51,11 @@ export const CreateFloatDomCommand: ICommand = {
                 height: 300,
             });
         }
+    };
 
-        return true;
-    },
-};
+    return {
+        type: 'item' as const,
+        children: '☁️ Create floating DOM',
+        onSelect,
+    };
+}

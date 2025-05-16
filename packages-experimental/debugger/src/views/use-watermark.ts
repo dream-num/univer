@@ -14,18 +14,15 @@
  * limitations under the License.
  */
 
-import type { ICommand } from '@univerjs/core';
-import { CommandType, LocaleService } from '@univerjs/core';
-import { ISidebarService } from '@univerjs/ui';
-import { WATERMARK_PANEL, WATERMARK_PANEL_FOOTER } from '../../controllers/watermark.menu.controller';
+import { LocaleService } from '@univerjs/core';
+import { ISidebarService, useDependency } from '@univerjs/ui';
+import { WATERMARK_PANEL, WATERMARK_PANEL_FOOTER } from '../controllers/watermark.menu.controller';
 
-export const OpenWatermarkPanelOperation: ICommand = {
-    type: CommandType.OPERATION,
-    id: 'univer.operation.open-watermark-panel',
-    handler(accessor) {
-        const sidebarService = accessor.get(ISidebarService);
-        const localeService = accessor.get(LocaleService);
+export function useWatermark() {
+    const sidebarService = useDependency(ISidebarService);
+    const localeService = useDependency(LocaleService);
 
+    const onSelect = () => {
         sidebarService.open({
             header: { title: localeService.t('univer-watermark.title') },
             children: { label: WATERMARK_PANEL },
@@ -33,7 +30,11 @@ export const OpenWatermarkPanelOperation: ICommand = {
             onClose: () => { },
             width: 330,
         });
+    };
 
-        return true;
-    },
-};
+    return {
+        type: 'item' as const,
+        children: '🌊 Watermark Settings',
+        onSelect,
+    };
+}

@@ -20,10 +20,14 @@ import {
     DropdownMenuCheckboxItem,
     DropdownMenuContent,
     DropdownMenuItem,
+    DropdownMenuPortal,
     DropdownMenuPrimitive,
     DropdownMenuRadioGroup,
     DropdownMenuRadioItem,
     DropdownMenuSeparator,
+    DropdownMenuSub,
+    DropdownMenuSubContent,
+    DropdownMenuSubTrigger,
     DropdownMenuTrigger,
 } from './DropdownMenuPrimitive';
 
@@ -31,6 +35,15 @@ interface IDropdownMenuNormalItem {
     type: 'item';
     className?: string;
     children: ReactNode;
+    disabled?: boolean;
+    onSelect?: (item: DropdownMenuType) => void;
+}
+
+interface IDropdownMenuNormalSubItem {
+    type: 'subItem';
+    className?: string;
+    children: ReactNode;
+    options?: DropdownMenuType[];
     disabled?: boolean;
     onSelect?: (item: DropdownMenuType) => void;
 }
@@ -65,7 +78,7 @@ interface IDropdownMenuCheckItem {
     onSelect?: (item: string) => void;
 }
 
-type DropdownMenuType = IDropdownMenuNormalItem | IDropdownMenuSeparatorItem | IDropdownMenuRadioItem | IDropdownMenuCheckItem;
+type DropdownMenuType = IDropdownMenuNormalItem | IDropdownMenuNormalSubItem | IDropdownMenuSeparatorItem | IDropdownMenuRadioItem | IDropdownMenuCheckItem;
 
 export interface IDropdownMenuProps extends ComponentProps<typeof DropdownMenuContent> {
     children: ReactNode;
@@ -163,6 +176,19 @@ export function DropdownMenu(props: IDropdownMenuProps) {
                 >
                     {item.children}
                 </DropdownMenuItem>
+            );
+        } else if (type === 'subItem') {
+            return (
+                <DropdownMenuSub key={index}>
+                    <DropdownMenuSubTrigger>{item.children}</DropdownMenuSubTrigger>
+                    <DropdownMenuPortal>
+                        <DropdownMenuSubContent sideOffset={12}>
+                            {item.options?.map((subItem, subIndex) => (
+                                renderMenuItem(subItem, subIndex)
+                            ))}
+                        </DropdownMenuSubContent>
+                    </DropdownMenuPortal>
+                </DropdownMenuSub>
             );
         }
     }

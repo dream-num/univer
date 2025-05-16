@@ -155,6 +155,7 @@ export const UniControls = ({ zoom, onItemClick }: { zoom: number; onItemClick?:
                                     `,
                                     `
                                       univer-rounded univer-no-underline univer-transition-colors univer-duration-200
+                                      dark:hover:!univer-bg-gray-700
                                       hover:univer-bg-gray-100
                                     `,
                                     item === zoomPercent ? 'univer-bg-gray-100' : ''

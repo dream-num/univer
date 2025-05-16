@@ -29,7 +29,6 @@ const IS_E2E: boolean = !!process.env.IS_E2E;
 
 export default function getVeryLazyPlugins() {
     const plugins: Array<[PluginCtor<Plugin>] | [PluginCtor<Plugin>, unknown]> = [
-
         [UniverActionRecorderPlugin],
         [UniverSheetsHyperLinkUIPlugin],
         [UniverSheetsSortUIPlugin],

@@ -50,6 +50,7 @@ export const ColorPicker = (props: IColorPickerProps) => {
                 <span
                     className={clsx(`
                       univer-flex univer-cursor-pointer univer-items-center univer-rounded univer-p-1
+                      dark:hover:!univer-bg-gray-700
                       hover:univer-bg-gray-100
                     `, className)}
                 >

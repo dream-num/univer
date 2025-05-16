@@ -14,31 +14,34 @@
  * limitations under the License.
  */
 
-import { ILocalStorageService, Inject, RxDisposable, ThemeService } from '@univerjs/core';
+import { ThemeService } from '@univerjs/core';
+import { useDependency } from '@univerjs/ui';
+import { useEffect } from 'react';
 
-export class DarkModeController extends RxDisposable {
-    constructor(
-        @ILocalStorageService private _localStorageService: ILocalStorageService,
-        @Inject(ThemeService) themeService: ThemeService
-    ) {
-        super();
+export function useDarkMode() {
+    const themeService = useDependency(ThemeService);
 
+    useEffect(() => {
         const darkMode = localStorage.getItem('local.darkMode');
 
         if (darkMode === 'dark') {
             document.documentElement.classList.add('univer-dark');
             themeService.setDarkMode(true);
         } else if (darkMode === 'system') {
-            const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-            darkModeMediaQuery.addEventListener('change', (e) => {
-                if (e.matches) {
-                    document.documentElement.classList.add('univer-dark');
-                    themeService.setDarkMode(true);
-                } else {
-                    document.documentElement.classList.remove('univer-dark');
-                    themeService.setDarkMode(false);
-                }
-            });
+            themeService.setDarkMode(false);
         }
-    }
+    }, []);
+
+    const onSelect = () => {
+        const darkMode = themeService.darkMode ? 'light' : 'dark';
+
+        themeService.setDarkMode(darkMode === 'dark');
+        localStorage.setItem('local.darkMode', darkMode);
+    };
+
+    return {
+        type: 'item' as const,
+        children: '🌓 Toggle dark mode',
+        onSelect,
+    };
 }

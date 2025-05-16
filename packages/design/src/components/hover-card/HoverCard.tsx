@@ -16,7 +16,7 @@
 
 import type { ComponentProps, ReactNode } from 'react';
 import { useState } from 'react';
-import { HoverCardContent, HoverCardPrimitive, HoverCardTrigger } from './HoverCardPrimitive';
+import { HoverCardContent, HoverCardPortal, HoverCardPrimitive, HoverCardTrigger } from './HoverCardPrimitive';
 
 export interface IHoverCardProps extends ComponentProps<typeof HoverCardContent> {
     children: ReactNode;
@@ -60,9 +60,11 @@ export function HoverCard(props: IHoverCardProps) {
     return (
         <HoverCardPrimitive open={open} onOpenChange={handleChangeOpen} openDelay={openDelay}>
             <HoverCardTrigger asChild>{children}</HoverCardTrigger>
-            <HoverCardContent {...restProps}>
-                {overlay}
-            </HoverCardContent>
+            <HoverCardPortal>
+                <HoverCardContent {...restProps}>
+                    {overlay}
+                </HoverCardContent>
+            </HoverCardPortal>
         </HoverCardPrimitive>
     );
 }

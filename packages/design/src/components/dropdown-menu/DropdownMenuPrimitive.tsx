@@ -103,7 +103,7 @@ function DropdownMenuSubTrigger({
                   univer-flex univer-cursor-default univer-select-none univer-items-center univer-justify-between
                   univer-gap-2 univer-rounded univer-px-2 univer-py-1.5 univer-text-sm univer-outline-none
                   [&_svg]:univer-pointer-events-none [&_svg]:univer-size-4 [&_svg]:univer-shrink-0
-                  dark:focus:!univer-bg-gray-600
+                  dark:focus:!univer-bg-gray-600 dark:data-[state=open]:!univer-bg-gray-600
                   data-[state=open]:univer-bg-gray-100
                   focus:univer-bg-gray-100
                 `,
@@ -330,7 +330,10 @@ function DropdownMenuSeparator({
 }: ComponentProps<typeof Separator>) {
     return (
         <Separator
-            className={clsx('-univer-mx-1 univer-my-1 univer-h-px univer-bg-gray-200', className)}
+            className={clsx(`
+              -univer-mx-1 univer-my-1 univer-h-px univer-bg-gray-200
+              dark:!univer-bg-gray-600
+            `, className)}
             {...props}
         />
     );

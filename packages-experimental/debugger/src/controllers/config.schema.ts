@@ -22,9 +22,15 @@ export const configSymbol = Symbol(DEBUGGER_PLUGIN_CONFIG_KEY);
 
 export interface IUniverDebuggerConfig {
     menu?: MenuConfig;
+    fab?: boolean;
     performanceMonitor?: {
         enabled: boolean;
     };
 }
 
-export const defaultPluginConfig: IUniverDebuggerConfig = {};
+export const defaultPluginConfig: IUniverDebuggerConfig = {
+    fab: true,
+    performanceMonitor: {
+        enabled: true,
+    },
+};

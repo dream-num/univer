@@ -256,6 +256,7 @@ export function SortOptionItem(props: ISortOptionItemProps) {
                                           univer-relative univer-box-border univer-flex univer-h-7 univer-cursor-pointer
                                           univer-list-none univer-items-center univer-justify-between univer-rounded
                                           univer-px-2 univer-text-sm univer-transition-all
+                                          dark:hover:!univer-bg-gray-700
                                           hover:univer-bg-gray-100
                                         `}
                                     >

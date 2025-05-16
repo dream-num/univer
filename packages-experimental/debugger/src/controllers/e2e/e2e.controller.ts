@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { awaitTime, Disposable, ICommandService, Inject, IUniverInstanceService, ThemeService, UniverInstanceType } from '@univerjs/core';
-
+import type { Univer } from '@univerjs/core';
+import type { FUniver } from '@univerjs/core/facade';
+import { awaitTime, Disposable, Inject, IUniverInstanceService, ThemeService, UniverInstanceType } from '@univerjs/core';
 import { DEFAULT_WORKBOOK_DATA_DEMO, DEFAULT_WORKBOOK_DATA_DEMO_DEFAULT_STYLE } from '@univerjs/mockdata';
-import { DisposeUniverCommand } from '../../commands/commands/unit.command';
 import { getDefaultDocData } from './data/default-doc';
 import { getDefaultWorkbookData } from './data/default-sheet';
 
@@ -42,6 +42,8 @@ declare global {
     // eslint-disable-next-line ts/naming-convention
     interface Window {
         E2EControllerAPI: IE2EControllerAPI;
+        univer?: Univer;
+        univerAPI?: FUniver;
     }
 }
 
@@ -51,7 +53,6 @@ declare global {
 export class E2EController extends Disposable {
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @ICommandService private readonly _commandService: ICommandService,
         @Inject(ThemeService) private readonly _themeService: ThemeService
     ) {
         super();
@@ -126,7 +127,9 @@ export class E2EController extends Disposable {
     }
 
     private async _disposeUniver(): Promise<void> {
-        await this._commandService.executeCommand(DisposeUniverCommand.id);
+        window.univer?.dispose();
+        window.univer = undefined;
+        window.univerAPI = undefined;
     }
 
     private async _disposeDefaultSheetUnit(disposingTimeout: number = AWAIT_DISPOSING_TIMEOUT): Promise<void> {

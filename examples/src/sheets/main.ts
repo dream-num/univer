@@ -138,6 +138,7 @@ function createNewInstance() {
     // If we are running in e2e platform, we should immediately register the debugger plugin.
     if (IS_E2E) {
         univer.registerPlugin(UniverDebuggerPlugin, {
+            fab: false,
             performanceMonitor: {
                 enabled: false,
             },

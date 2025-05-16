@@ -14,21 +14,28 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICommand } from '@univerjs/core';
-import { CommandType } from '@univerjs/core';
-import { IDialogService } from '@univerjs/ui';
+import { IConfirmService, IDialogService, useDependency } from '@univerjs/ui';
 
-export interface IUIComponentCommandParams {
-    value: string;
-}
+const menu = [
+    {
+        label: 'Open dialog',
+        value: 'dialog',
+    },
+    {
+        label: 'Draggable dialog',
+        value: 'draggable',
+    },
+    {
+        label: 'Open confirm',
+        value: 'confirm',
+    },
+];
 
-export const DialogOperation: ICommand = {
-    id: 'debugger.operation.dialog',
-    type: CommandType.COMMAND,
-    handler: async (accessor: IAccessor, params: IUIComponentCommandParams) => {
-        const dialogService = accessor.get(IDialogService);
-        const { value } = params;
+export function useDialog() {
+    const dialogService = useDependency(IDialogService);
+    const confirmService = useDependency(IConfirmService);
 
+    const onSelect = (value: string) => {
         if (value === 'draggable') {
             dialogService.open({
                 id: 'draggable',
@@ -47,7 +54,7 @@ export const DialogOperation: ICommand = {
                     }
                 },
             });
-        } else {
+        } else if (value === 'dialog') {
             dialogService.open({
                 id: 'dialog1',
                 children: { title: 'Dialog Content' },
@@ -63,8 +70,36 @@ export const DialogOperation: ICommand = {
                     }
                 },
             });
-        }
+        } else if (value === 'confirm') {
+            confirmService.open({
+                id: 'confirm1',
+                children: { title: 'Confirm Content' },
+                title: { title: 'Confirm Title' },
+                confirmText: 'hello',
+                cancelText: 'world',
+                onClose() {
+                    confirmService.close('confirm1');
+                },
+            });
 
-        return true;
-    },
-};
+            confirmService.open({
+                id: 'confirm2',
+                children: { title: 'Confirm2 Content' },
+                title: { title: 'Confirm2 Title' },
+                onClose() {
+                    confirmService.close('confirm2');
+                },
+            });
+        }
+    };
+
+    return {
+        type: 'subItem' as const,
+        children: '💬 Dialog & Confirm',
+        options: menu.map((item) => ({
+            type: 'item' as const,
+            children: item.label,
+            onSelect: () => onSelect(item.value),
+        })),
+    };
+}

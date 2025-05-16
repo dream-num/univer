@@ -18,7 +18,6 @@ import type { Dependency } from '@univerjs/core';
 import type { IUniverDebuggerConfig } from './controllers/config.schema';
 import { IConfigService, Inject, Injector, merge, Plugin, registerDependencies, touchDependencies } from '@univerjs/core';
 import { DEBUGGER_PLUGIN_CONFIG_KEY, defaultPluginConfig } from './controllers/config.schema';
-import { DarkModeController } from './controllers/dark-mode.controller';
 import { DebuggerController } from './controllers/debugger.controller';
 import { E2EController } from './controllers/e2e/e2e.controller';
 import { MultiUnitsController } from './controllers/multi-units/multi-units.controller';
@@ -51,7 +50,6 @@ export class UniverDebuggerPlugin extends Plugin {
 
     override onStarting(): void {
         const dependencies: Dependency[] = [
-            [DarkModeController],
             [DebuggerController],
             [MultiUnitsController],
             [E2EController],
@@ -66,7 +64,6 @@ export class UniverDebuggerPlugin extends Plugin {
 
         touchDependencies(this._injector, [
             [E2EController],
-            [DarkModeController],
         ]);
     }
 

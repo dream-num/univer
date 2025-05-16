@@ -381,9 +381,10 @@ export const RuleList = (props: IRuleListProps) => {
                                         className={clsx(`
                                           univer-group univer-relative univer-flex univer-items-center
                                           univer-justify-between univer-rounded univer-py-2 univer-pl-5 univer-pr-8
+                                          dark:hover:!univer-bg-gray-700
                                           hover:univer-bg-gray-100
                                         `, {
-                                            'univer-bg-gray-100': draggingId === index,
+                                            'univer-bg-gray-100 dark:!univer-bg-gray-700': draggingId === index,
                                         })}
                                         onMouseMove={() => {
                                             rule.ranges !== currentRuleRanges && currentRuleRangesSet(rule.ranges);

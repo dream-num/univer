@@ -102,6 +102,7 @@ export function UniSheetBar() {
                             className={clsx(`
                               univer-flex univer-h-8 univer-cursor-pointer univer-items-center univer-rounded-lg
                               univer-px-1 univer-py-0
+                              dark:hover:!univer-bg-gray-700
                               hover:univer-bg-gray-100
                             `, activeKey === item.sheetId ? 'univer-text-primary-500' : '')}
                             onClick={() => handleSheetActiveChange(item.sheetId)}
@@ -125,6 +126,7 @@ export function UniSheetBar() {
                   univer-rounded-lg univer-border-0 univer-bg-transparent univer-text-primary-600
                   before:absolute before:left-0 before:top-0 before:h-full before:w-full before:bg-gray-100
                   before:content-['']
+                  dark:hover:!univer-bg-gray-700
                   hover:univer-cursor-pointer hover:univer-bg-gray-100
                 `}
 

@@ -72,9 +72,15 @@ univer.registerPlugin(UniverDocsQuickInsertUIPlugin);
 
 if (!IS_E2E) {
     univer.createUnit(UniverInstanceType.UNIVER_DOC, DEFAULT_DOCUMENT_DATA_SIMPLE);
+    univer.registerPlugin(UniverDebuggerPlugin);
+} else {
+    univer.registerPlugin(UniverDebuggerPlugin, {
+        fab: false,
+        performanceMonitor: {
+            enabled: false,
+        },
+    });
 }
-
-univer.registerPlugin(UniverDebuggerPlugin);
 
 // use for console test
 declare global {

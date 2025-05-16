@@ -102,21 +102,32 @@ export function WatermarkTextSetting(props: IWatermarkTextSettingProps) {
                             </div>
                         )}
                     >
-                        <a className="hover:univer-bg-gray-100">
+                        <a
+                            className={`
+                              dark:hover:!univer-bg-gray-700
+                              hover:univer-bg-gray-100
+                            `}
+                        >
                             <FontColor extend={{ colorChannel1: config.color ?? '#2c53f1' }} />
                         </a>
                     </Dropdown>
                     <a
-                        className={clsx('hover:univer-bg-gray-100', {
-                            'univer-bg-gray-200': config.bold,
+                        className={clsx(`
+                          dark:hover:!univer-bg-gray-700
+                          hover:univer-bg-gray-100
+                        `, {
+                            'univer-bg-gray-200 dark:!univer-bg-gray-600': config.bold,
                         })}
                         onClick={() => { onChange({ ...config, bold: !config.bold }); }}
                     >
                         <BoldSingle />
                     </a>
                     <a
-                        className={clsx('hover:univer-bg-gray-100', {
-                            'univer-bg-gray-200': config.italic,
+                        className={clsx(`
+                          dark:hover:!univer-bg-gray-700
+                          hover:univer-bg-gray-100
+                        `, {
+                            'univer-bg-gray-200 dark:!univer-bg-gray-600': config.italic,
                         })}
                         onClick={() => { onChange({ ...config, italic: !config.italic }); }}
                     >

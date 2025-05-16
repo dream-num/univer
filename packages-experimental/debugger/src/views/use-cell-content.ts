@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import { CommandType, type ICommand, ILogService, IUniverInstanceService, ObjectMatrix, Range } from '@univerjs/core';
+import { ILogService, IUniverInstanceService, ObjectMatrix, Range } from '@univerjs/core';
 import { getSheetCommandTarget, SheetsSelectionsService } from '@univerjs/sheets';
+import { useDependency } from '@univerjs/ui';
 
-export const ShowCellContentOperation: ICommand = {
-    id: 'debugger.operation.show-cell-content',
-    type: CommandType.OPERATION,
-    handler(accessor) {
-        const logService = accessor.get(ILogService);
-        const selectionManagerService = accessor.get(SheetsSelectionsService);
+export function useCellContent() {
+    const logService = useDependency(ILogService);
+    const selectionManagerService = useDependency(SheetsSelectionsService);
+    const univerInstanceService = useDependency(IUniverInstanceService);
+
+    const onSelect = () => {
         const selections = selectionManagerService.getCurrentSelections();
-        const univerInstanceService = accessor.get(IUniverInstanceService);
         const target = getSheetCommandTarget(univerInstanceService);
         const matrix = new ObjectMatrix();
         selections.forEach((selection) => {
@@ -33,6 +33,11 @@ export const ShowCellContentOperation: ICommand = {
             });
         });
         logService.debug('cell-content', matrix);
-        return true;
-    },
-};
+    };
+
+    return {
+        type: 'item' as const,
+        children: '🗒️ Console cell content',
+        onSelect,
+    };
+}

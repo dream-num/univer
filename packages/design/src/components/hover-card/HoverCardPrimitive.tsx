@@ -15,12 +15,14 @@
  */
 
 import type { ComponentPropsWithoutRef, ElementRef } from 'react';
-import { Content, Root, Trigger } from '@radix-ui/react-hover-card';
+import { Content, Portal, Root, Trigger } from '@radix-ui/react-hover-card';
 import { forwardRef } from 'react';
 import { borderClassName } from '../../helper/class-utilities';
 import { clsx } from '../../helper/clsx';
 
 const HoverCardPrimitive = Root;
+
+const HoverCardPortal = Portal;
 
 const HoverCardTrigger = Trigger;
 
@@ -36,7 +38,7 @@ const HoverCardContent = forwardRef<
             `
               univer-z-[1080] univer-w-64 univer-origin-[--radix-hover-card-content-transform-origin] univer-rounded-md
               univer-bg-white univer-text-gray-900 univer-shadow-md univer-outline-none
-              dark:univer-bg-gray-900 dark:univer-text-white
+              dark:!univer-bg-gray-900 dark:!univer-text-white
               data-[side=bottom]:univer-slide-in-from-top-2
               data-[side=left]:univer-slide-in-from-right-2
               data-[side=right]:univer-slide-in-from-left-2
@@ -54,4 +56,4 @@ const HoverCardContent = forwardRef<
 
 HoverCardContent.displayName = Content.displayName;
 
-export { HoverCardContent, HoverCardPrimitive, HoverCardTrigger };
+export { HoverCardContent, HoverCardPortal, HoverCardPrimitive, HoverCardTrigger };

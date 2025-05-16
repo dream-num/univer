@@ -79,10 +79,11 @@ export const QuickInsertButton = ({ className = '' }: IQuickInsertButtonProps) =
             className={clsx(`
               univer-mr-1 univer-flex univer-cursor-pointer univer-items-center univer-gap-2.5 univer-rounded-full
               univer-p-1.5 univer-shadow-sm
+              dark:hover:!univer-bg-gray-700
               hover:univer-bg-gray-100
             `, borderClassName, {
-                'univer-bg-gray-100': editPopup,
-                'univer-bg-white': !editPopup,
+                'univer-bg-gray-100 dark:!univer-bg-gray-700': editPopup,
+                'univer-bg-white dark:univer-bg-gray-900': !editPopup,
             }, className)}
             role="button"
             tabIndex={0}

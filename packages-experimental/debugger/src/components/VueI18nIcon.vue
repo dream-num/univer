@@ -1,5 +1,0 @@
-<template>
-    <section>
-        🌍
-    </section>
-</template>

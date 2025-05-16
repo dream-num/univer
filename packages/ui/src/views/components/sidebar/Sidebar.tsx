@@ -116,8 +116,8 @@ export function Sidebar() {
         <section
             data-u-comp="sidebar"
             className={clsx(`
-              univer-relative univer-h-full univer-bg-white
-              dark:!univer-bg-gray-900
+              univer-relative univer-h-full univer-bg-white univer-text-gray-900
+              dark:!univer-bg-gray-900 dark:!univer-text-white
             `, {
                 'univer-w-96 univer-translate-x-0': options?.visible,
                 'univer-w-0 univer-translate-x-full': !options?.visible,
@@ -141,7 +141,13 @@ export function Sidebar() {
                 >
                     {options?.header}
 
-                    <a className="univer-cursor-pointer univer-text-gray-500" onClick={handleClose}>
+                    <a
+                        className={`
+                          univer-cursor-pointer univer-text-gray-500
+                          dark:!univer-text-gray-300
+                        `}
+                        onClick={handleClose}
+                    >
                         <CloseSingle />
                     </a>
                 </header>

@@ -14,29 +14,35 @@
  * limitations under the License.
  */
 
-import { CommandType, IPermissionService, IUniverInstanceService } from '@univerjs/core';
+import { IPermissionService, IUniverInstanceService } from '@univerjs/core';
 import { getSheetCommandTarget, WorkbookEditablePermission, WorksheetEditPermission } from '@univerjs/sheets';
-import type { IAccessor, ICommand } from '@univerjs/core';
+import { useDependency } from '@univerjs/ui';
 
-export interface ISetEditableCommandParams {
-    value: 'sheet' | 'univer';
-}
+const menu = [
+    {
+        label: 'Change workbook editable',
+        value: 'univer',
+    },
+    {
+        label: 'Change worksheet editable',
+        value: 'sheet',
+    },
+];
 
-export const SetEditable: ICommand = {
-    id: 'debugger.operation.set.editable',
-    type: CommandType.OPERATION,
-    handler: (accessor: IAccessor, params: ISetEditableCommandParams) => {
-        const univerInstanceService = accessor.get(IUniverInstanceService);
+export function useEditable() {
+    const univerInstanceService = useDependency(IUniverInstanceService);
+    const permissionService = useDependency(IPermissionService);
+
+    const onSelect = (value: string) => {
         const target = getSheetCommandTarget(univerInstanceService);
         if (!target) {
             return false;
         }
         const { workbook, worksheet, unitId, subUnitId } = target;
-        const permissionService = accessor.get(IPermissionService);
         if (!workbook || !worksheet) {
             return false;
         }
-        if (params.value === 'sheet') {
+        if (value === 'sheet') {
             const editable = permissionService.getPermissionPoint(new WorksheetEditPermission(unitId, subUnitId).id);
             permissionService.updatePermissionPoint(new WorksheetEditPermission(unitId, subUnitId).id, !editable);
         } else {
@@ -44,6 +50,15 @@ export const SetEditable: ICommand = {
             const editable = permissionService.getPermissionPoint(new WorkbookEditablePermission(unitId).id);
             permissionService.updatePermissionPoint(new WorkbookEditablePermission(unitId).id, !editable);
         }
-        return true;
-    },
-};
+    };
+
+    return {
+        type: 'subItem' as const,
+        children: '✍️ Editable',
+        options: menu.map((item) => ({
+            type: 'item' as const,
+            children: item.label,
+            onSelect: () => onSelect(item.value),
+        })),
+    };
+}

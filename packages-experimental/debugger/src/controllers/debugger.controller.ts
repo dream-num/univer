@@ -14,79 +14,41 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, Inject, Injector } from '@univerjs/core';
-import { ComponentManager, IMenuManagerService } from '@univerjs/ui';
-import { CreateFloatDomCommand } from '../commands/commands/float-dom.command';
-import { CreateEmptySheetCommand, DisposeCurrentUnitCommand, DisposeUniverCommand, LoadSheetSnapshotCommand } from '../commands/commands/unit.command';
-import { ShowCellContentOperation } from '../commands/operations/cell.operation';
-import { ChangeUserCommand } from '../commands/operations/change-user.operation';
-import { ConfirmOperation } from '../commands/operations/confirm.operation';
-import { DarkModeOperation } from '../commands/operations/dark-mode.operation';
-import { DialogOperation } from '../commands/operations/dialog.operation';
-import { LocaleOperation } from '../commands/operations/locale.operation';
-import { MessageOperation } from '../commands/operations/message.operation';
-import { NotificationOperation } from '../commands/operations/notification.operation';
-import { OpenWatermarkPanelOperation } from '../commands/operations/open-watermark-panel.operation';
-import { SaveSnapshotOptions } from '../commands/operations/save-snapshot.operations';
-import { SetEditable } from '../commands/operations/set.editable.operation';
-import { SidebarOperation } from '../commands/operations/sidebar.operation';
-import { ThemeOperation } from '../commands/operations/theme.operation';
+import type { IUniverDebuggerConfig } from './config.schema';
+import { Disposable, IConfigService, Inject, Injector } from '@univerjs/core';
+import { BuiltInUIPart, ComponentManager, connectInjector, IUIPartsService } from '@univerjs/ui';
 import { AIButton, FloatButton } from '../components/FloatButton';
 import { ImageDemo } from '../components/Image';
 import { RangeLoading } from '../components/RangeLoading';
-// @ts-ignore
-import VueI18nIcon from '../components/VueI18nIcon.vue';
+import { Fab } from '../views/Fab';
+import { DEBUGGER_PLUGIN_CONFIG_KEY } from './config.schema';
 import { RecordController } from './local-save/record.controller';
-import { menuSchema } from './menu.schema';
 
 export class DebuggerController extends Disposable {
     constructor(
         @Inject(Injector) private readonly _injector: Injector,
-        @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,
-        @ICommandService private readonly _commandService: ICommandService,
+        @IConfigService private readonly _configService: IConfigService,
+        @IUIPartsService protected readonly _uiPartsService: IUIPartsService,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager
     ) {
         super();
 
-        this._initializeMenu();
         this._initCustomComponents();
-
-        [
-            LocaleOperation,
-            DarkModeOperation,
-            ThemeOperation,
-            NotificationOperation,
-            DialogOperation,
-            ConfirmOperation,
-            MessageOperation,
-            SidebarOperation,
-            SetEditable,
-            SaveSnapshotOptions,
-            DisposeUniverCommand,
-            DisposeCurrentUnitCommand,
-            CreateEmptySheetCommand,
-            LoadSheetSnapshotCommand,
-            CreateFloatDomCommand,
-            ChangeUserCommand,
-            ShowCellContentOperation,
-            OpenWatermarkPanelOperation,
-        ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
 
         this._injector.add([RecordController]);
     }
 
-    private _initializeMenu() {
-        this._menuManagerService.mergeMenu(menuSchema);
-    }
-
     private _initCustomComponents(): void {
         const componentManager = this._componentManager;
-        this.disposeWithMe(componentManager.register('VueI18nIcon', VueI18nIcon, {
-            framework: 'vue3',
-        }));
         this.disposeWithMe(componentManager.register('ImageDemo', ImageDemo));
         this.disposeWithMe(componentManager.register('RangeLoading', RangeLoading));
         this.disposeWithMe(componentManager.register('FloatButton', FloatButton));
         this.disposeWithMe(componentManager.register('AIButton', AIButton));
+
+        const configs = this._configService.getConfig<IUniverDebuggerConfig>(DEBUGGER_PLUGIN_CONFIG_KEY);
+
+        if (configs?.fab) {
+            this._uiPartsService.registerComponent(BuiltInUIPart.GLOBAL, () => connectInjector(Fab, this._injector));
+        }
     }
 }

@@ -130,7 +130,7 @@ export function HelpFunction(props: IHelpFunctionProps) {
                         className={clsx(`
                           univer-m-0 univer-box-border univer-w-[250px] univer-select-none univer-list-none
                           univer-rounded-lg univer-bg-white univer-leading-5 univer-shadow-md univer-outline-none
-                          dark:univer-bg-gray-900
+                          dark:!univer-bg-gray-900
                         `, borderClassName)}
                     >
                         <div

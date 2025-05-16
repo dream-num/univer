@@ -15,7 +15,6 @@
  */
 
 import type { IAccessor, ICellData, IObjectMatrixPrimitiveType, IRange, Nullable, UniverInstanceService, Workbook, Worksheet } from '@univerjs/core';
-import type { IExpandParams } from '../commands/commands/utils/selection-utils';
 import type { IDiscreteRange } from './interfaces';
 import { IUniverInstanceService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
 
@@ -53,113 +52,26 @@ export const createUniqueKey = (initValue = 0) => {
     };
 };
 
-function cellHasValue(cell: ICellData | undefined): boolean {
+function cellHasValue(cell: Nullable<ICellData>): boolean {
     if (cell === undefined || cell === null) {
         return false;
     }
     return (cell.v !== undefined && cell.v !== null && cell.v !== '') || cell.p !== undefined;
 }
 
-// eslint-disable-next-line max-lines-per-function
-export function expandToContinuousRange(startRange: IRange, directions: IExpandParams, worksheet: Worksheet): IRange {
-    const { left, right, up, down } = directions;
-    const maxRow = worksheet.getMaxRows();
-    const maxColumn = worksheet.getMaxColumns();
-
-    let changed = true;
-    const destRange: IRange = { ...startRange }; // startRange should not be used below
-
-    const allMatrix = worksheet.getMatrixWithMergedCells(0, 0, maxRow - 1, maxColumn - 1);
-    while (changed) {
-        changed = false;
-
-        if (up && destRange.startRow !== 0) {
-            // see if there are value in the upper row of contents
-            // set `changed` to true if `startRow` really changes
-            const destRow = destRange.startRow - 1; // it may decrease if there are merged cell
-
-            const checkRange = {
-                startRow: destRow,
-                startColumn: destRange.startColumn,
-                endRow: destRow,
-                endColumn: destRange.endColumn,
-            };
-            for (let col = checkRange.startColumn; col <= checkRange.endColumn; col++) {
-                const cell = allMatrix.getValue(checkRange.startRow, col)!;
-                if (cellHasValue(cell)) {
-                    destRange.startRow = Math.min(checkRange.startRow, destRange.startRow);
-                    destRange.startColumn = Math.min(col, destRange.startColumn);
-                    destRange.endColumn = Math.max(col, destRange.endColumn);
-                    changed = true;
-                }
-            }
-        }
-
-        if (down && destRange.endRow !== maxRow - 1) {
-            const destRow = destRange.endRow + 1;
-            const checkRange = {
-                startRow: destRow,
-                startColumn: destRange.startColumn,
-                endRow: destRow,
-                endColumn: destRange.endColumn,
-            };
-            for (let col = checkRange.startColumn; col <= checkRange.endColumn; col++) {
-                const cellValue = allMatrix.getValue(checkRange.startRow, col)!;
-                if (cellHasValue(cellValue)) {
-                    destRange.endRow = Math.max(checkRange.endRow, destRange.endRow);
-                    destRange.endRow = Math.max(
-                        checkRange.endRow + (cellValue.rowSpan !== undefined ? cellValue.rowSpan - 1 : 0),
-                        destRange.endRow
-                    );
-                    destRange.startColumn = Math.min(col, destRange.startColumn);
-                    destRange.endColumn = Math.max(col, destRange.endColumn);
-                    changed = true;
-                }
-            }
-        }
-
-        if (left && destRange.startColumn !== 0) {
-            const destCol = destRange.startColumn - 1;
-            const checkRange = {
-                startRow: destRange.startRow,
-                startColumn: destCol,
-                endRow: destRange.endRow,
-                endColumn: destCol,
-            };
-            for (let row = checkRange.startRow; row <= checkRange.endRow; row++) {
-                const cell = allMatrix.getValue(row, checkRange.startColumn)!;
-                if (cellHasValue(cell)) {
-                    destRange.startColumn = Math.min(checkRange.startColumn, destRange.startColumn);
-                    destRange.startRow = Math.min(row, destRange.startRow);
-                    destRange.endRow = Math.max(row, destRange.endRow);
-                    changed = true;
-                }
-            }
-        }
-
-        if (right && destRange.endColumn !== maxColumn - 1) {
-            const destCol = destRange.endColumn + 1;
-            const checkRange = {
-                startRow: destRange.startRow,
-                startColumn: destCol,
-                endRow: destRange.endRow,
-                endColumn: destCol,
-            };
-            for (let row = checkRange.startRow; row <= checkRange.endRow; row++) {
-                const cellValue = allMatrix.getValue(row, checkRange.endColumn)!;
-                if (cellHasValue(cellValue)) {
-                    destRange.endColumn = Math.max(
-                        checkRange.endColumn + (cellValue.colSpan !== undefined ? cellValue.colSpan - 1 : 0),
-                        destRange.endColumn
-                    );
-                    changed = true;
-                }
+export function findFirstNonEmptyCell(range: IRange, worksheet: Worksheet): IRange | null {
+    for (let row = range.startRow; row <= range.endRow; row++) {
+        for (let col = range.startColumn; col <= range.endColumn; col++) {
+            const cell = worksheet.getCell(row, col);
+            if (cellHasValue(cell)) {
+                return { startRow: row, startColumn: col, endRow: row, endColumn: col };
             }
         }
     }
 
-    return destRange;
+    return null;
 }
+
 /**
  * Generate cellValue from range and set null
  * @param range

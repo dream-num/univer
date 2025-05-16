@@ -40,6 +40,7 @@ import {
     promptSelectionShortcutItemShift,
     singleEditorPromptSelectionShortcutItem,
 } from './shortcuts/prompt.shortcut';
+import { QuickSumShortcut } from './shortcuts/quick-sum.shortcut';
 
 export class FormulaUIController extends Disposable {
     constructor(
@@ -87,6 +88,7 @@ export class FormulaUIController extends Disposable {
             ...promptSelectionShortcutItemCtrl(),
             ...promptSelectionShortcutItemCtrlAndShift(),
             ...singleEditorPromptSelectionShortcutItem(),
+            QuickSumShortcut,
             ChangeRefToAbsoluteShortcut,
         ].forEach((item) => {
             this.disposeWithMe(this._shortcutService.registerShortcut(item));

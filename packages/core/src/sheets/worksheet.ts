@@ -66,6 +66,7 @@ const DEFAULT_CELL_DOCUMENT_MODEL_OPTION = {
     displayRawFormula: false,
     ignoreTextRotation: false,
 };
+
 /**
  * The model of a Worksheet.
  */

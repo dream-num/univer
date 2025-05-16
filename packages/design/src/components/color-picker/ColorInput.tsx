@@ -16,7 +16,7 @@
 
 import { ChevronSortSingle } from '@univerjs/icons';
 import React, { useEffect, useMemo, useState } from 'react';
-import { Dropdown } from '../dropdown';
+import { Dropdown } from '../dropdown/Dropdown';
 import { hexToHsv, hslToHsv, hsvToHex, hsvToHsl, hsvToRgb, rgbToHsv } from './color-conversion';
 
 interface IColorInputProps {

@@ -16,6 +16,7 @@
 
 import { Disposable, ICommandService } from '@univerjs/core';
 import { InsertFunctionCommand } from '../commands/commands/insert-function.command';
+import { QuickSumCommand } from '../commands/commands/quick-sum.command';
 import { OtherFormulaMarkDirty } from '../commands/mutations/formula.mutation';
 
 export class FormulaController extends Disposable {
@@ -26,6 +27,7 @@ export class FormulaController extends Disposable {
 
         [
             InsertFunctionCommand,
+            QuickSumCommand,
             OtherFormulaMarkDirty,
         ].forEach((c) => this._commandService.registerCommand(c));
     }

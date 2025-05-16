@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { createRowColIter, ObjectMatrix, Rectangle } from '@univerjs/core';
 import type { ICellData, IRange, Worksheet } from '@univerjs/core';
+import { createRowColIter, ObjectMatrix, Rectangle } from '@univerjs/core';
 
 export interface IExpandParams {
     left?: boolean;

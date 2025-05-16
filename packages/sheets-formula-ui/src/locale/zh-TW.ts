@@ -31,6 +31,11 @@ import univer from './function-list/univer/zh-TW';
 import web from './function-list/web/zh-TW';
 
 export default {
+    shortcut: {
+        'sheets-formula-ui': {
+            'quick-sum': '快速求和',
+        },
+    },
     formula: {
         insert: {
             tooltip: '函數',

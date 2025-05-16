@@ -31,6 +31,11 @@ import univer from './function-list/univer/en-US';
 import web from './function-list/web/en-US';
 
 export default {
+    shortcut: {
+        'sheets-formula-ui': {
+            'quick-sum': 'جمع سریع',
+        },
+    },
     formula: {
         insert: {
             tooltip: 'توابع',

@@ -18,7 +18,7 @@ import type { IAccessor, ICellData, ICommand } from '@univerjs/core';
 import type { ISetRangeValuesCommandParams, ISetSelectionsOperationParams } from '@univerjs/sheets';
 import { CommandType, ICommandService, IUniverInstanceService, ObjectMatrix, Rectangle, sequenceExecuteAsync } from '@univerjs/core';
 import { serializeRange } from '@univerjs/engine-formula';
-import { expandToContinuousRange, findFirstNonEmptyCell, getSheetCommandTarget, SetRangeValuesCommand, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
+import { alignToMergedCellsBorders, expandToContinuousRange, findFirstNonEmptyCell, getSheetCommandTarget, SetRangeValuesCommand, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
 
 /**
  * Tries to insert =SUM formulas in selection regions.
@@ -37,9 +37,10 @@ export const QuickSumCommand: ICommand = {
 
         const range = currentSelection.range;
         const { worksheet } = target;
-        const firstCell = findFirstNonEmptyCell(range, worksheet);
+        let firstCell = findFirstNonEmptyCell(range, worksheet);
         if (!firstCell) return false;
 
+        firstCell = alignToMergedCellsBorders(firstCell, worksheet);
         const targetRange = expandToContinuousRange({
             startRow: firstCell.startRow,
             startColumn: firstCell.startColumn,
@@ -49,12 +50,12 @@ export const QuickSumCommand: ICommand = {
 
         const setValueMatrix = new ObjectMatrix<ICellData>();
 
-        const lastRow = expandToContinuousRange({
+        const lastRow = alignToMergedCellsBorders({
             startRow: targetRange.endRow,
             endRow: targetRange.endRow,
             startColumn: targetRange.startColumn,
             endColumn: targetRange.endColumn,
-        }, { up: true }, worksheet);
+        }, worksheet);
         if (!Rectangle.equals(lastRow, targetRange)) {
             for (const cell of worksheet.iterateByColumn(lastRow)) {
                 if (!cell.value || !worksheet.cellHasValue(cell.value)) {
@@ -70,12 +71,12 @@ export const QuickSumCommand: ICommand = {
             }
         }
 
-        const lastColumn = expandToContinuousRange({
+        const lastColumn = alignToMergedCellsBorders({
             startRow: targetRange.startRow,
             startColumn: targetRange.endColumn,
             endRow: targetRange.endRow,
             endColumn: targetRange.endColumn,
-        }, { left: true }, worksheet);
+        }, worksheet);
         if (!Rectangle.equals(lastColumn, targetRange)) {
             for (const cell of worksheet.iterateByRow(lastColumn)) {
                 if (!cell.value || !worksheet.cellHasValue(cell.value)) {

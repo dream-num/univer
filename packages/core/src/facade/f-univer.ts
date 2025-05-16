@@ -321,7 +321,6 @@ export class FUniver extends Disposable {
     /**
      * Toggle dark mode on or off.
      * @param {boolean} isDarkMode - Whether the dark mode is enabled.
-     * @internal
      * @example
      * ```ts
      * univerAPI.toggleDarkMode(true);

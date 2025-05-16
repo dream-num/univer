@@ -56,9 +56,7 @@ import '@univerjs/sheets-drawing-ui/facade';
 import '@univerjs/sheets-zen-editor/facade';
 import '@univerjs/sheets-crosshair-highlight/facade';
 import '@univerjs/sheets-sort/facade';
-
 import '../global.css';
-import './styles';
 
 const LOAD_LAZY_PLUGINS_TIMEOUT = 100;
 const LOAD_VERY_LAZY_PLUGINS_TIMEOUT = 1_000;

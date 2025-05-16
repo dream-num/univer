@@ -65,7 +65,6 @@ import '@univerjs/sheets-sort/facade';
 import '@univerjs/network/facade';
 import '@univerjs/sheets-note/facade';
 import '../global.css';
-import './styles';
 
 /* eslint-disable-next-line node/prefer-global/process */
 const IS_E2E: boolean = !!process.env.IS_E2E;

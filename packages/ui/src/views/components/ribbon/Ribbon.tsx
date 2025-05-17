@@ -16,6 +16,7 @@
 
 import type { ComponentType } from 'react';
 import type { Observable } from 'rxjs';
+import type { RibbonType } from '../../../controllers/ui/ui.controller';
 import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
 import { LocaleService, throttle } from '@univerjs/core';
 import { borderBottomClassName, borderClassName, clsx, divideXClassName, Dropdown, HoverCard } from '@univerjs/design';
@@ -30,6 +31,7 @@ import { ToolbarButton } from './ToolbarButton';
 import { ToolbarItem } from './ToolbarItem';
 
 interface IRibbonProps {
+    ribbonType: RibbonType;
     headerMenuComponents?: Set<ComponentType>;
     headerMenu?: boolean;
 }
@@ -44,7 +46,7 @@ const iconMap = {
 };
 
 export function Ribbon(props: IRibbonProps) {
-    const { headerMenuComponents, headerMenu = true } = props;
+    const { ribbonType, headerMenuComponents, headerMenu = true } = props;
 
     const menuManagerService = useDependency(IMenuManagerService);
     const localeService = useDependency(LocaleService);
@@ -156,7 +158,18 @@ export function Ribbon(props: IRibbonProps) {
                     }
                 }
 
-                setRibbon(newRibbon);
+                if (ribbonType === 'simple') {
+                    const simpleRibbon: IMenuSchema[] = [{ key: RibbonPosition.START, children: [], order: 0 }];
+                    newRibbon.forEach((group) => {
+                        group.children?.forEach((item) => {
+                            simpleRibbon[0].children?.push(item);
+                        });
+                    });
+
+                    setRibbon(simpleRibbon);
+                } else {
+                    setRibbon(newRibbon);
+                }
             })
             .unsubscribe();
     }, [menuChangedTimes]);
@@ -229,7 +242,7 @@ export function Ribbon(props: IRibbonProps) {
                     setFakeToolbarVisible(false);
                 });
             }
-        }, 300));
+        }, 100));
 
         observer.observe(containerRef.current);
 
@@ -239,15 +252,19 @@ export function Ribbon(props: IRibbonProps) {
     }, [ribbon, activatedTab]);
 
     const fakeToolbar = useMemo(() => {
-        if (!fakeToolbarVisible) return null;
+        // if (!fakeToolbarVisible) return null;
 
         return (
             <div
                 aria-hidden="true"
-                className={clsx(`
-                  univer-invisible univer-absolute -univer-left-[99999] -univer-top-[99999] univer-box-border
-                  univer-flex univer-h-10 univer-min-w-min univer-items-center univer-px-3 univer-opacity-0
-                `, borderBottomClassName)}
+                className={`
+                  univer-absolute univer-left-0 univer-top-32 univer-flex univer-h-10 univer-min-w-min
+                  univer-items-center univer-px-3
+                `}
+                // className={clsx(`
+                //   univer-invisible univer-absolute -univer-left-[99999] -univer-top-[99999] univer-box-border
+                //   univer-flex univer-h-10 univer-min-w-min univer-items-center univer-px-3 univer-opacity-0
+                // `, borderBottomClassName)}
             >
                 {activeGroup.allGroups.map((groupItem) => (groupItem.children?.length || groupItem.item) && (
                     <Fragment key={groupItem.key}>

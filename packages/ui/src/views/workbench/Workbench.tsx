@@ -50,6 +50,7 @@ export function DesktopWorkbenchContent(props: IUniverWorkbenchProps) {
         footer = true,
         headerMenu = true,
         contextMenu = true,
+        ribbonType = 'default',
         mountContainer,
         onRendered,
     } = props;
@@ -160,6 +161,7 @@ export function DesktopWorkbenchContent(props: IUniverWorkbenchProps) {
                             key="toolbar"
                             components={toolbarComponents}
                             sharedProps={{
+                                ribbonType,
                                 headerMenuComponents,
                                 headerMenu,
                             }}

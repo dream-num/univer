@@ -16,6 +16,8 @@
 
 import { createIdentifier } from '@univerjs/core';
 
+export type RibbonType = 'default' | 'simple';
+
 export interface IWorkbenchOptions {
     container?: string | HTMLElement;
 
@@ -28,6 +30,8 @@ export interface IWorkbenchOptions {
      * If Univer should make the toolbar bar visible.
      */
     toolbar?: boolean;
+
+    ribbonType?: RibbonType;
 
     /**
      * If Univer should make the footer bar visible.

@@ -105,6 +105,7 @@ function createNewInstance() {
     univer.registerPlugin(UniverRenderEnginePlugin);
     univer.registerPlugin(UniverUIPlugin, {
         container: 'app',
+        ribbonType: 'simple',
     });
     univer.registerPlugin(UniverDocsUIPlugin);
 

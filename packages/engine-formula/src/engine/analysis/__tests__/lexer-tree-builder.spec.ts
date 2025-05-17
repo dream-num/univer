@@ -749,11 +749,36 @@ describe('lexer nodeMaker test', () => {
             // The space before [workbook4] will lead to error.
             const node = lexerTreeBuilder.treeBuilder("'[workbook1]Sheet 01'!A5* [workbook4]aaa!A5") as LexerNode;
             expect(node.serialize()).toStrictEqual(
-                { token: 'R_1', st: -1, ed: -1, children: [
-                    "'[workbook1]Sheet 01'!A5",
-                    '[workbook4]aaa!A5',
-                    '*',
-                ] }
+                {
+                    token: 'R_1',
+                    st: -1,
+                    ed: -1,
+                    children: [
+                        "'[workbook1]Sheet 01'!A5",
+                        '[workbook4]aaa!A5',
+                        '*',
+                    ],
+                }
+            );
+        });
+
+        it('#5169', () => {
+            const node = lexerTreeBuilder.treeBuilder('(A1/A2)^0.5-1') as LexerNode;
+            expect(node.serialize()).toStrictEqual(
+                {
+                    token: 'R_1',
+                    st: -1,
+                    ed: -1,
+                    children: [
+                        'A1',
+                        'A2',
+                        '/',
+                        '0.5',
+                        '^',
+                        '1',
+                        '-',
+                    ],
+                }
             );
         });
     });

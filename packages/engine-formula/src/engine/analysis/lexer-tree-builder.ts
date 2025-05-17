@@ -729,7 +729,7 @@ export class LexerTreeBuilder extends Disposable {
                         const lastSymbolPriority = OPERATOR_TOKEN_PRIORITY.get(lastSymbol);
                         const charPriority = OPERATOR_TOKEN_PRIORITY.get(char);
 
-                        if (!lastSymbolPriority || !charPriority) {
+                        if (lastSymbolPriority === undefined || charPriority === undefined) {
                             break;
                         }
 

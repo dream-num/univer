@@ -50,7 +50,7 @@ export const OPERATOR_TOKEN_PRIORITY = new Map([
     [operatorToken.MINUS as string, 2],
     [operatorToken.DIVIDED as string, 1],
     [operatorToken.MULTIPLY as string, 1],
-    [operatorToken.POWER as string, 0],
+    [operatorToken.POWER as string, 0], // ^
 ]);
 
 export const OPERATOR_TOKEN_SET = new Set(OPERATOR_TOKEN_PRIORITY.keys());

@@ -72,13 +72,13 @@ export function UniToolbar() {
     return (
         <div
             className={`
-              univer-flex univer-p-2 univer-items-center univer-gap-2 univer-rounded-lg univer-border
-              univer-border-gray-300 univer-overflow-hidden univer-shadow-lg univer-select-none univer-relative
-              univer-box-border univer-text-sm univer-bg-white
+              univer-relative univer-box-border univer-flex univer-select-none univer-items-center univer-gap-2
+              univer-overflow-hidden univer-rounded-lg univer-border univer-border-gray-300 univer-bg-white univer-p-2
+              univer-text-sm univer-shadow-lg
             `}
         >
             {hasWorkbooks && <UniFormulaBar />}
-            <div className="univer-flex univer-gap-1 univer-items-center univer-shrink-0">
+            <div className="univer-flex univer-shrink-0 univer-items-center univer-gap-1">
                 {uniVisibleItems.map((subItem) => subItem && <ToolbarItem key={subItem.id} {...subItem} />)}
             </div>
         </div>

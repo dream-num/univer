@@ -17,14 +17,14 @@
 import type { ComponentType } from 'react';
 import type { Observable } from 'rxjs';
 import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
-import { LocaleService } from '@univerjs/core';
+import { LocaleService, throttle } from '@univerjs/core';
 import { borderBottomClassName, borderClassName, clsx, divideXClassName, Dropdown, HoverCard } from '@univerjs/design';
 import { DatabaseSingle, EyeSingle, FunctionSingle, HomeSingle, InsertSingle, MoreDownSingle, MoreFunctionSingle } from '@univerjs/icons';
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { combineLatest } from 'rxjs';
 import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
 import { MenuManagerPosition, RibbonPosition } from '../../../services/menu/types';
-import { useDependency, useObservable } from '../../../utils/di';
+import { useDependency } from '../../../utils/di';
 import { ComponentContainer } from '../ComponentContainer';
 import { ToolbarButton } from './ToolbarButton';
 import { ToolbarItem } from './ToolbarItem';
@@ -48,11 +48,19 @@ export function Ribbon(props: IRibbonProps) {
 
     const menuManagerService = useDependency(IMenuManagerService);
     const localeService = useDependency(LocaleService);
+    const [menuChangedTimes, setMenuChangedTimes] = useState(0);
 
-    const menuChanged = useObservable(menuManagerService.menuChanged$);
+    useEffect(() => {
+        const subscription = menuManagerService.menuChanged$.subscribe(() => {
+            setMenuChangedTimes((prev) => prev + 1);
+        });
+
+        return () => {
+            subscription.unsubscribe();
+        };
+    }, []);
 
     const containerRef = useRef<HTMLDivElement>(null!);
-    const fakeToolbarRef = useRef<HTMLDivElement>(null!);
     const toolbarItemRefs = useRef<Record<string, {
         el: HTMLSpanElement;
         key: string;
@@ -64,6 +72,7 @@ export function Ribbon(props: IRibbonProps) {
     const [activatedTab, setActivatedTab] = useState<string>(RibbonPosition.START);
     const [groupSelectorVisible, setGroupSelectorVisible] = useState(false);
     const [collapsedIds, setCollapsedIds] = useState<string[]>([]);
+    const [fakeToolbarVisible, setFakeToolbarVisible] = useState(false);
     // const [changingActiveTab, setChangingActiveTab] = useState(false);
 
     const handleSelectTab = useCallback((group: IMenuSchema) => {
@@ -80,10 +89,11 @@ export function Ribbon(props: IRibbonProps) {
         };
     }, []);
 
-    // subscribe to menu changes
+    // process menu changes
     useEffect(() => {
         const ribbon = menuManagerService.getMenuByPositionKey(MenuManagerPosition.RIBBON);
 
+        // Collect all hidden$ Observables and their corresponding paths
         const hiddenObservaleMap: Observable<boolean>[] = [];
         const hiddenKeyMap: string[] = [];
         for (const group of ribbon) {
@@ -101,8 +111,8 @@ export function Ribbon(props: IRibbonProps) {
             }
         }
 
-        const subscription = combineLatest(hiddenObservaleMap)
-            // .pipe(debounceTime(300))
+        // Only get the current value once, not continuously subscribe
+        combineLatest(hiddenObservaleMap)
             .subscribe((hiddenMap) => {
                 const newRibbon: IMenuSchema[] = [];
 
@@ -147,12 +157,9 @@ export function Ribbon(props: IRibbonProps) {
                 }
 
                 setRibbon(newRibbon);
-            });
-
-        return () => {
-            subscription.unsubscribe();
-        };
-    }, [menuChanged]);
+            })
+            .unsubscribe();
+    }, [menuChangedTimes]);
 
     const activeGroup = useMemo(() => {
         const allGroups = ribbon.find((group) => group.key === activatedTab)?.children ?? [];
@@ -186,37 +193,43 @@ export function Ribbon(props: IRibbonProps) {
     }, [collapsedIds, ribbon, activatedTab]);
 
     useEffect(() => {
-        const observer = new ResizeObserver((entries) => {
+        const observer = new ResizeObserver(throttle((entries) => {
             for (const entry of entries) {
-                const { width: avaliableWidth } = entry.contentRect;
-                const toolbarItems = Object.values(toolbarItemRefs.current);
-                const sortedToolbarItems = toolbarItems.sort((a, b) => {
-                    if (a.groupOrder === b.groupOrder) {
-                        return a.order - b.order;
+                setFakeToolbarVisible(true);
+
+                requestAnimationFrame(() => {
+                    const { width: avaliableWidth } = entry.contentRect;
+                    const toolbarItems = Object.values(toolbarItemRefs.current);
+                    const sortedToolbarItems = toolbarItems.sort((a, b) => {
+                        if (a.groupOrder === b.groupOrder) {
+                            return a.order - b.order;
+                        }
+                        return a.groupOrder - b.groupOrder;
+                    });
+
+                    const newCollapsedIds: string[] = [];
+                    let totalWidth = 32;
+                    const allGroups = ribbon.find((group) => group.key === activatedTab)?.children ?? [];
+
+                    const gapWidth = (allGroups.length - 1) * 8;
+                    totalWidth += gapWidth;
+
+                    for (const { el, key } of sortedToolbarItems) {
+                        if (!el) continue;
+
+                        totalWidth += el?.getBoundingClientRect().width + 8;
+
+                        if (totalWidth > avaliableWidth - gapWidth) {
+                            newCollapsedIds.push(key);
+                        }
                     }
-                    return a.groupOrder - b.groupOrder;
+
+                    setCollapsedIds(newCollapsedIds);
+
+                    setFakeToolbarVisible(false);
                 });
-
-                const newCollapsedIds: string[] = [];
-                let totalWidth = 32;
-                const allGroups = ribbon.find((group) => group.key === activatedTab)?.children ?? [];
-
-                const gapWidth = (allGroups.length - 1) * 8;
-                totalWidth += gapWidth;
-
-                for (const { el, key } of sortedToolbarItems) {
-                    if (!el) continue;
-
-                    totalWidth += el?.getBoundingClientRect().width + 8;
-
-                    if (totalWidth > avaliableWidth - gapWidth) {
-                        newCollapsedIds.push(key);
-                    }
-                }
-
-                setCollapsedIds(newCollapsedIds);
             }
-        });
+        }, 300));
 
         observer.observe(containerRef.current);
 
@@ -224,6 +237,45 @@ export function Ribbon(props: IRibbonProps) {
             observer.disconnect();
         };
     }, [ribbon, activatedTab]);
+
+    const fakeToolbar = useMemo(() => {
+        if (!fakeToolbarVisible) return null;
+
+        return (
+            <div
+                aria-hidden="true"
+                className={clsx(`
+                  univer-invisible univer-absolute -univer-left-[99999] -univer-top-[99999] univer-box-border
+                  univer-flex univer-h-10 univer-min-w-min univer-items-center univer-px-3 univer-opacity-0
+                `, borderBottomClassName)}
+            >
+                {activeGroup.allGroups.map((groupItem) => (groupItem.children?.length || groupItem.item) && (
+                    <Fragment key={groupItem.key}>
+                        <div className="univer-grid univer-grid-flow-col univer-gap-2 univer-px-2">
+                            {groupItem.children && groupItem.children?.map((child) => (
+                                child.item && (
+                                    <ToolbarItem
+                                        key={child.key}
+                                        {...child.item}
+                                        ref={(ref) => {
+                                            if (ref?.el) {
+                                                toolbarItemRefs.current[child.key] = {
+                                                    el: ref.el,
+                                                    key: child.key,
+                                                    groupOrder: groupItem.order,
+                                                    order: child.order,
+                                                };
+                                            }
+                                        }}
+                                    />
+                                )
+                            ))}
+                        </div>
+                    </Fragment>
+                ))}
+            </div>
+        );
+    }, [activeGroup.allGroups, fakeToolbarVisible]);
 
     return (
         <>
@@ -377,39 +429,7 @@ export function Ribbon(props: IRibbonProps) {
             </div>
 
             {/* fake toolbar */}
-            <div
-                ref={fakeToolbarRef}
-                aria-hidden
-                className={clsx(`
-                  univer-invisible univer-absolute -univer-left-[99999] -univer-top-[99999] univer-box-border
-                  univer-flex univer-h-10 univer-min-w-min univer-items-center univer-px-3 univer-opacity-0
-                `, borderBottomClassName)}
-            >
-                {activeGroup.allGroups.map((groupItem) => (groupItem.children?.length || groupItem.item) && (
-                    <Fragment key={groupItem.key}>
-                        <div className="univer-grid univer-grid-flow-col univer-gap-2 univer-px-2">
-                            {groupItem.children && groupItem.children?.map((child) => (
-                                child.item && (
-                                    <ToolbarItem
-                                        key={child.key}
-                                        {...child.item}
-                                        ref={(ref) => {
-                                            if (ref?.el) {
-                                                toolbarItemRefs.current[child.key] = {
-                                                    el: ref.el,
-                                                    key: child.key,
-                                                    groupOrder: groupItem.order,
-                                                    order: child.order,
-                                                };
-                                            }
-                                        }}
-                                    />
-                                )
-                            ))}
-                        </div>
-                    </Fragment>
-                ))}
-            </div>
+            {fakeToolbar}
         </>
     );
 }

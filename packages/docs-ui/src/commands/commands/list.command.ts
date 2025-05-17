@@ -20,7 +20,6 @@ import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import {
     BuildTextUtils,
     CommandType,
-    GridType,
     ICommandService,
     IUniverInstanceService,
     JSONX,
@@ -34,7 +33,6 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
-import { getCharSpaceApply, getNumberUnitValue } from '@univerjs/engine-render';
 import { getRichTextEditPath } from '../util';
 import { getCurrentParagraph } from './util';
 
@@ -393,18 +391,11 @@ export const QuickListCommand: ICommand<IQuickListCommandParams> = {
         const { segmentId, startOffset } = activeRange;
         const { listType, paragraph } = params;
         const { paragraphStart, paragraphEnd } = paragraph;
-        // const selection =
         const textX = new TextX();
         const jsonX = JSONX.getInstance();
-        const { defaultTabStop = 36 } = docDataModel.getSnapshot().documentStyle;
-        const sectionBreaks = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.sectionBreaks ?? [];
-        const { startIndex, paragraphStyle = {} } = paragraph;
-        const { indentFirstLine, snapToGrid, indentStart } = paragraphStyle;
+        const { paragraphStyle = {} } = paragraph;
         const paragraphProperties = PRESET_LIST_TYPE[listType].nestingLevel[0].paragraphProperties || {};
-        const { hanging: listHanging, indentStart: listIndentStart } = paragraphProperties;
         const bulletParagraphTextStyle = paragraphProperties.textStyle;
-        const { charSpace, gridType } = findNearestSectionBreak(startIndex, sectionBreaks) || { charSpace: 0, gridType: GridType.LINES };
-        const charSpaceApply = getCharSpaceApply(charSpace, defaultTabStop, gridType, snapToGrid);
 
         const ID_LENGTH = 6;
         let listId = Tools.generateRandomId(ID_LENGTH);
@@ -466,8 +457,6 @@ export const QuickListCommand: ICommand<IQuickListCommandParams> = {
                                 ...bulletParagraphTextStyle,
                             },
                             indentFirstLine: undefined,
-                            hanging: listHanging,
-                            indentStart: { v: getNumberUnitValue(listIndentStart, charSpaceApply) - getNumberUnitValue(listHanging, charSpaceApply) + getNumberUnitValue(indentFirstLine, charSpaceApply) + getNumberUnitValue(indentStart, charSpaceApply) },
                         },
                         bullet: {
                             ...(paragraph.bullet ?? {

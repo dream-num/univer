@@ -22,6 +22,7 @@ import { UniverSheetsDataValidationUIPlugin } from '@univerjs/sheets-data-valida
 import { UniverSheetsDrawingUIPlugin } from '@univerjs/sheets-drawing-ui';
 import { UniverSheetsFilterUIPlugin } from '@univerjs/sheets-filter-ui';
 import { UniverSheetsFormulaUIPlugin } from '@univerjs/sheets-formula-ui';
+import { UniverSheetsNoteUIPlugin } from '@univerjs/sheets-note-ui';
 import { UniverSheetsNumfmtUIPlugin } from '@univerjs/sheets-numfmt-ui';
 import { UniverSheetsTableUIPlugin } from '@univerjs/sheets-table-ui';
 import { UniverSheetsThreadCommentUIPlugin } from '@univerjs/sheets-thread-comment-ui';
@@ -34,6 +35,7 @@ export default function getLazyPlugins(): Array<[PluginCtor<Plugin>] | [PluginCt
         [UniverSheetsNumfmtUIPlugin],
         [UniverThreadCommentUIPlugin],
         [UniverSheetsThreadCommentUIPlugin],
+        [UniverSheetsNoteUIPlugin],
         [UniverSheetsTableUIPlugin],
         [UniverSheetsFormulaUIPlugin],
         [UniverSheetsDataValidationUIPlugin],

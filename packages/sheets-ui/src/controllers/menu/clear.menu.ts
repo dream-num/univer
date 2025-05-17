@@ -75,6 +75,7 @@ export function ClearSelectionAllMenuItemFactory(accessor: IAccessor): IMenuButt
         type: MenuItemType.BUTTON,
         icon: 'ClearFormat',
         title: 'rightClick.clearAll',
+        tooltip: 'rightClick.clearAll',
         disabled$: getObservableWithExclusiveRange$(accessor, getCurrentRangeDisable$(accessor, {
             workbookTypes: [WorkbookEditablePermission],
             worksheetTypes: [WorksheetEditPermission, WorksheetSetCellValuePermission, WorksheetSetCellStylePermission],

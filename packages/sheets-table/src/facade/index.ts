@@ -16,6 +16,7 @@
 
 import './f-workbook';
 import './f-worksheet';
+import './f-enum';
 
 export type * from './f-workbook';
 export type * from './f-worksheet';

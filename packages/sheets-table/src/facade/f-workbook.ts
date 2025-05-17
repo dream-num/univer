@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IAddSheetTableParams, IDeleteSheetTableParams, ISetSheetTableParams, ITableFilterItem, ITableInfo, ITableInfoWithUnitId, ITableOptions, ITableRange } from '@univerjs/sheets-table';
+import type { IAddSheetTableCommandParams, IDeleteSheetTableParams, ISetSheetTableParams, ITableFilterItem, ITableInfo, ITableInfoWithUnitId, ITableOptions, ITableRange } from '@univerjs/sheets-table';
 import { AddSheetTableCommand, DeleteSheetTableCommand, SetSheetTableFilterCommand, SheetTableService } from '@univerjs/sheets-table';
 import { FWorkbook } from '@univerjs/sheets/facade';
 
@@ -30,22 +30,44 @@ export interface IFWorkbookSheetsTableMixin {
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fSheet = fWorkbook.getActiveSheet();
-     * const id = fWorkbook.addTable('Table1', {
-     *  unitId: fWorkbook.getId(),
-     *  subUnitId:fSheet.getSheetId(),
-     *  range: {
-     *      startRow: 1,
-     *      startColumn: 1,
-     *      endRow: 10,
-     *      endColumn: 5,
-     * },
-     * }, { showHeader: true });
-     * const tableInfo = fWorkbook.getTableInfo(fWorkbook.getId(), id);
+     * const subUnitId = fSheet.getSheetId();
+     * const id = await fWorkbook.addTable(subUnitId, 'name-1', {
+     *    startRow: 1,
+     *    startColumn: 1,
+     *    endRow: 10,
+     *    endColumn: 5,
+     * }, 'id-1', {
+     * showHeader: true
+     * })
+     * const tableInfo = fWorkbook.getTableInfo(id);
+     * console.log('debugger tableInfo',tableInfo);
      * ```
      */
     getTableInfo(tableId: string): ITableInfoWithUnitId | undefined;
 
+    /**
+     * Get table information by name
+     * @param tableName The table name
+     * @returns {ITableInfo} The table information
+     * @example
+     * ```typescript
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fSheet = fWorkbook.getActiveSheet();
+     * const subUnitId = fSheet.getSheetId();
+     * const id = await fWorkbook.addTable(subUnitId, 'name-1', {
+     * startRow: 1,
+     *     startColumn: 1,
+     *     endRow: 10,
+     *     endColumn: 5,
+     * }, 'id-1', {
+     * showHeader: true
+     * })
+     * const tableInfo = fWorkbook.getTableInfoByName('name-1');
+     * console.log('debugger tableInfo',tableInfo);
+     * ```
+     */
     getTableInfoByName(tableName: string): ITableInfoWithUnitId | undefined;
+
     /**
      * Get table list
      * @returns {ITableInfo[]} The table list
@@ -53,44 +75,102 @@ export interface IFWorkbookSheetsTableMixin {
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fSheet = fWorkbook.getActiveSheet();
-     * const id = fWorkbook.addTable('Table1', {
-     *  unitId: fWorkbook.getId(),
-     *  subUnitId:fSheet.getSheetId(),
-     *  range: {
-     *      startRow: 1,
-     *      startColumn: 1,
-     *      endRow: 10,
-     *      endColumn: 5,
-     * },
-     * }, { showHeader: true });
+     * const subUnitId = fSheet.getSheetId();
+     * const id = await fWorkbook.addTable(subUnitId, 'name-1',{
+     *    startRow: 1,
+     *    startColumn: 1,
+     *    endRow: 10,
+     *    endColumn: 5,
+     * }, 'id-1',{
+     * showHeader: true
+     * })
      * const tableList = fWorkbook.getTableList(fWorkbook.getId());
+     * console.log('debugger tableList', tableList);
      * ```
      */
     getTableList(): ITableInfo[];
+
     /**
      * Add table
+     * @param {string} subUnitId The sub unit id
      * @param {string} tableName The table name
      * @param {ITableRange} rangeInfo The table range information
+     * @param {string} tableId The table id
      * @param {ITableOptions} options The table options
      * @returns {string} The table id
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fSheet = fWorkbook.getActiveSheet();
-     * const id = fWorkbook.addTable('Table1', {
-     *  unitId: fWorkbook.getId(),
-     *  subUnitId:fSheet.getSheetId(),
-     *  range: {
-     *      startRow: 1,
-     *      startColumn: 1,
-     *      endRow: 10,
-     *      endColumn: 5,
-     * },
-     * }, 'table1' ,{ showHeader: true });
+     * const subUnitId = fSheet.getSheetId();
+     * const unitId = fWorkbook.getId();
+     * const id = await fWorkbook.addTable(subUnitId, 'name-1',{
+     *    startRow: 1,
+     *    startColumn: 1,
+     *    endRow: 10,
+     *    endColumn: 5,
+     * }, 'id-1',{
+     * showHeader: true
+     * })
+     * console.log('tableId:', id)
      * ```
      */
     addTable(subUnitId: string, tableName: string, rangeInfo: ITableRange, tableId?: string, options?: ITableOptions): Promise<string | undefined>;
+
+    /**
+     * set table filter
+     * @param {string} tableId The table id
+     * @param {number} column The column index
+     * @param {ITableFilterItem} filter The filter item
+     * @returns {Promise<boolean>} The result of set table filter
+     * @example
+     * ```typescript
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fSheet = fWorkbook.getActiveSheet();
+     * const subUnitId = fSheet.getSheetId();
+     * const id = await fWorkbook.addTable(subUnitId, 'name-1',{
+     *   startRow: 1,
+     *   startColumn: 1,
+     *   endRow: 10,
+     *   endColumn: 5,
+     * }, 'id-1',{
+     * showHeader: true
+     * })
+     * const tableInfo = fWorkbook.getTableInfo(id);
+     * console.log('debugger tableInfo',tableInfo);
+     * const result = await fWorkbook.setTableFilter(id, 1, {
+     *  filterType: univerAPI.Enum.TableColumnFilterTypeEnum.condition,
+     *  filterInfo: {
+     *   conditionType: univerAPI.Enum.TableConditionTypeEnum.Number,
+     *   compareType: univerAPI.Enum.TableNumberCompareTypeEnum.GreaterThan,
+     *   expectedValue: 10,
+     *  }
+     * })
+     */
     setTableFilter(tableId: string, column: number, filter: ITableFilterItem | undefined): void;
+
+    /**
+     * Remove table
+     * @param {string} tableId The table id
+     * @returns {boolean} The result of remove table
+     * @example
+     * ```typescript
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fSheet = fWorkbook.getActiveSheet();
+     * const subUnitId = fSheet.getSheetId();
+     * const id = await fWorkbook.addTable(subUnitId, 'name-1', {
+     * startRow: 1,
+     * startColumn: 1,
+     * endRow: 10,
+     * endColumn: 5,
+     * }, 'id-1', {
+     * showHeader: true
+     * })
+     * const removedSuccess = await fWorkbook.removeTable(id);
+     * const tableInfo = fWorkbook.getTableInfo('id-1')
+     * console.log('debugger tableInfo is undefined', tableInfo)
+     * ```
+     */
     removeTable(tableId: string): Promise<boolean>;
 }
 
@@ -110,13 +190,13 @@ export class FWorkbookSheetsTableMixin extends FWorkbook implements IFWorkbookSh
     override async addTable(subUnitId: string, tableName: string, rangeInfo: ITableRange, tableId?: string, options?: ITableOptions): Promise<string | undefined> {
         const sheetTableService = this._injector.get(SheetTableService);
 
-        const addTableParams: IAddSheetTableParams = {
+        const addTableParams: IAddSheetTableCommandParams = {
             unitId: this.getId(),
             name: tableName,
             subUnitId,
             range: rangeInfo,
             options,
-            tableId,
+            id: tableId,
         };
         const rs = await this._commandService.executeCommand(AddSheetTableCommand.id, addTableParams);
         if (rs) {

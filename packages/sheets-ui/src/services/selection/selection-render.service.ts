@@ -78,6 +78,8 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
         const { spreadsheetRowHeader, spreadsheetColumnHeader, spreadsheet, spreadsheetLeftTopPlaceholder } = sheetObject;
         const { scene } = this._context;
 
+        // pointer down ---> selection start
+        // but pointer move & pointer up for selection end is bind on scene, not spreadsheet.
         this.disposeWithMe(spreadsheet?.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
             if (this.isSelectionDisabled()) return;
             if (this.inRefSelectionMode()) return;
@@ -432,7 +434,7 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
         }
         //#endregion
 
-        scene.disableObjectsEvent();
+        // scene.disableObjectsEvent();
         this._clearUpdatingListeners();
         this._addEndingListeners();
         scene.getTransformer()?.clearSelectedObjects();

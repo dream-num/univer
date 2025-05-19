@@ -99,10 +99,7 @@ function MobileMenuItem(props: IMobileMenuItemProps) {
               univer-bg-transparent univer-text-white
               [&>span]:univer-mt-0.5 [&>span]:univer-w-full [&>span]:univer-truncate [&>span]:univer-text-sm
               [&>svg]:univer-size-[18px] [&>svg]:univer-text-lg
-            `, {
-                // '': activated,
-                // '': hidden,
-            })}
+            `)}
             key={id}
             disabled={disabled}
             onClick={() => onClick({ id })}

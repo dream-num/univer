@@ -26,6 +26,7 @@ import cleanPlugin from 'esbuild-plugin-clean';
 import copyPlugin from 'esbuild-plugin-copy';
 import vue from 'esbuild-plugin-vue3';
 import stylePlugin from 'esbuild-style-plugin';
+import fs from 'fs-extra';
 import minimist from 'minimist';
 import React from 'react';
 import tailwindcss from 'tailwindcss';
@@ -165,6 +166,30 @@ const config: SameShape<BuildOptions, BuildOptions> = {
 
                 build.onLoad({ filter: /\/global\.css$/, namespace: 'ignore-global-css' }, () => {
                     return { contents: '' };
+                });
+            },
+        },
+        {
+            name: 'remove-classname-newlines',
+            setup(build) {
+                build.onLoad({ filter: /\.(tsx)$/ }, (args) => {
+                    const source = fs.readFileSync(args.path, 'utf8');
+
+                    const transformedSource = source.replace(
+                        /className\s*=\s*{([^}]*?)}/gs,
+                        (match, classNameValue) => {
+                            const cleanedValue = classNameValue.replace(/`([^`]*?)`/gs, (templateMatch, templateContent) => {
+                                return `\`${templateContent.replace(/\s*\n\s*/g, ' ').trim()}\``;
+                            });
+
+                            return `className={${cleanedValue.trim()}}`;
+                        }
+                    );
+
+                    return {
+                        contents: transformedSource,
+                        loader: 'tsx',
+                    };
                 });
             },
         },

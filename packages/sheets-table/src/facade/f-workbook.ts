@@ -29,41 +29,51 @@ export interface IFWorkbookSheetsTableMixin {
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fSheet = fWorkbook.getActiveSheet();
-     * const subUnitId = fSheet.getSheetId();
-     * const id = await fWorkbook.addTable(subUnitId, 'name-1', {
-     *    startRow: 1,
-     *    startColumn: 1,
-     *    endRow: 10,
-     *    endColumn: 5,
-     * }, 'id-1', {
-     * showHeader: true
-     * })
-     * const tableInfo = fWorkbook.getTableInfo(id);
-     * console.log('debugger tableInfo',tableInfo);
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // Insert a table in the range B2:F11
+     * const fRange = fWorksheet.getRange('B2:F11');
+     * const success = await fWorksheet.addTable(
+     *   'name-1',
+     *   fRange.getRange(),
+     *   'id-1',
+     *   {
+     *     showHeader: true,
+     *   }
+     * );
+     *
+     * if (success) {
+     *   const tableInfo = fWorkbook.getTableInfo('id-1');
+     *   console.log('debugger tableInfo', tableInfo);
+     * }
      * ```
      */
     getTableInfo(tableId: string): ITableInfoWithUnitId | undefined;
 
     /**
      * Get table information by name
-     * @param tableName The table name
+     * @param {string} tableName The table name
      * @returns {ITableInfo} The table information
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fSheet = fWorkbook.getActiveSheet();
-     * const subUnitId = fSheet.getSheetId();
-     * const id = await fWorkbook.addTable(subUnitId, 'name-1', {
-     * startRow: 1,
-     *     startColumn: 1,
-     *     endRow: 10,
-     *     endColumn: 5,
-     * }, 'id-1', {
-     * showHeader: true
-     * })
-     * const tableInfo = fWorkbook.getTableInfoByName('name-1');
-     * console.log('debugger tableInfo',tableInfo);
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // Insert a table in the range B2:F11
+     * const fRange = fWorksheet.getRange('B2:F11');
+     * const success = await fWorksheet.addTable(
+     *   'name-1',
+     *   fRange.getRange(),
+     *   'id-1',
+     *   {
+     *     showHeader: true,
+     *   }
+     * );
+     *
+     * if (success) {
+     *   const tableInfo = fWorkbook.getTableInfoByName('name-1');
+     *   console.log('debugger tableInfo', tableInfo);
+     * }
      * ```
      */
     getTableInfoByName(tableName: string): ITableInfoWithUnitId | undefined;
@@ -74,18 +84,8 @@ export interface IFWorkbookSheetsTableMixin {
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fSheet = fWorkbook.getActiveSheet();
-     * const subUnitId = fSheet.getSheetId();
-     * const id = await fWorkbook.addTable(subUnitId, 'name-1',{
-     *    startRow: 1,
-     *    startColumn: 1,
-     *    endRow: 10,
-     *    endColumn: 5,
-     * }, 'id-1',{
-     * showHeader: true
-     * })
-     * const tableList = fWorkbook.getTableList(fWorkbook.getId());
-     * console.log('debugger tableList', tableList);
+     * const tables = fWorkbook.getTableList();
+     * console.log('debugger tables', tables);
      * ```
      */
     getTableList(): ITableInfo[];
@@ -95,24 +95,30 @@ export interface IFWorkbookSheetsTableMixin {
      * @param {string} subUnitId The sub unit id
      * @param {string} tableName The table name
      * @param {ITableRange} rangeInfo The table range information
-     * @param {string} tableId The table id
-     * @param {ITableOptions} options The table options
+     * @param {string} [tableId] The table id
+     * @param {ITableOptions} [options] The table options
      * @returns {string} The table id
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fSheet = fWorkbook.getActiveSheet();
-     * const subUnitId = fSheet.getSheetId();
-     * const unitId = fWorkbook.getId();
-     * const id = await fWorkbook.addTable(subUnitId, 'name-1',{
-     *    startRow: 1,
-     *    startColumn: 1,
-     *    endRow: 10,
-     *    endColumn: 5,
-     * }, 'id-1',{
-     * showHeader: true
-     * })
-     * console.log('tableId:', id)
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // Insert a table in the range B2:F11
+     * const fRange = fWorksheet.getRange('B2:F11');
+     * const id = await fWorkbook.addTable(
+     *   fWorksheet.getSheetId(),
+     *   'name-1',
+     *   fRange.getRange(),
+     *   'id-1',
+     *   {
+     *     showHeader: true,
+     *   }
+     * );
+     *
+     * if (id) {
+     *   const tableInfo = fWorkbook.getTableInfo(id);
+     *   console.log('debugger tableInfo', tableInfo);
+     * }
      * ```
      */
     addTable(subUnitId: string, tableName: string, rangeInfo: ITableRange, tableId?: string, options?: ITableOptions): Promise<string | undefined>;
@@ -120,32 +126,40 @@ export interface IFWorkbookSheetsTableMixin {
     /**
      * set table filter
      * @param {string} tableId The table id
-     * @param {number} column The column index
+     * @param {number} column The column index, starting from 0.
      * @param {ITableFilterItem} filter The filter item
      * @returns {Promise<boolean>} The result of set table filter
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fSheet = fWorkbook.getActiveSheet();
-     * const subUnitId = fSheet.getSheetId();
-     * const id = await fWorkbook.addTable(subUnitId, 'name-1',{
-     *   startRow: 1,
-     *   startColumn: 1,
-     *   endRow: 10,
-     *   endColumn: 5,
-     * }, 'id-1',{
-     * showHeader: true
-     * })
-     * const tableInfo = fWorkbook.getTableInfo(id);
-     * console.log('debugger tableInfo',tableInfo);
-     * const result = await fWorkbook.setTableFilter(id, 1, {
-     *  filterType: univerAPI.Enum.TableColumnFilterTypeEnum.condition,
-     *  filterInfo: {
-     *   conditionType: univerAPI.Enum.TableConditionTypeEnum.Number,
-     *   compareType: univerAPI.Enum.TableNumberCompareTypeEnum.GreaterThan,
-     *   expectedValue: 10,
-     *  }
-     * })
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // Insert a table in the range B2:F11
+     * const fRange = fWorksheet.getRange('B2:F11');
+     * const success = await fWorksheet.addTable(
+     *   'name-1',
+     *   fRange.getRange(),
+     *   'id-1',
+     *   {
+     *     showHeader: true,
+     *   }
+     * );
+     *
+     * if (success) {
+     *   // Set the filter for the second column
+     *   await fWorkbook.setTableFilter('id-1', 1, {
+     *     filterType: univerAPI.Enum.TableColumnFilterTypeEnum.condition,
+     *     filterInfo: {
+     *       conditionType: univerAPI.Enum.TableConditionTypeEnum.Number,
+     *       compareType: univerAPI.Enum.TableNumberCompareTypeEnum.GreaterThan,
+     *       expectedValue: 10,
+     *     },
+     *   });
+     *
+     *   const tableInfo = fWorkbook.getTableInfo('id-1');
+     *   console.log('debugger tableInfo', tableInfo);
+     * }
+     * ```
      */
     setTableFilter(tableId: string, column: number, filter: ITableFilterItem | undefined): void;
 
@@ -156,19 +170,13 @@ export interface IFWorkbookSheetsTableMixin {
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fSheet = fWorkbook.getActiveSheet();
-     * const subUnitId = fSheet.getSheetId();
-     * const id = await fWorkbook.addTable(subUnitId, 'name-1', {
-     * startRow: 1,
-     * startColumn: 1,
-     * endRow: 10,
-     * endColumn: 5,
-     * }, 'id-1', {
-     * showHeader: true
-     * })
-     * const removedSuccess = await fWorkbook.removeTable(id);
-     * const tableInfo = fWorkbook.getTableInfo('id-1')
-     * console.log('debugger tableInfo is undefined', tableInfo)
+     * const tableInfo = fWorkbook.getTableInfo('id-1');
+     * console.log('debugger tableInfo', tableInfo);
+     *
+     * if (tableInfo) {
+     *   // Remove the table with the specified id
+     *   await fWorkbook.removeTable('id-1');
+     * }
      * ```
      */
     removeTable(tableId: string): Promise<boolean>;

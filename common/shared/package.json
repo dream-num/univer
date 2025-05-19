@@ -24,7 +24,7 @@
         "univer-cli": "bin/index.ts"
     },
     "dependencies": {
-        "@typescript-eslint/parser": "^8.32.0",
+        "@typescript-eslint/parser": "^8.32.1",
         "@vitejs/plugin-react": "^4.4.1",
         "@vitejs/plugin-vue": "^5.2.4",
         "@vitest/coverage-istanbul": "^3.1.3",

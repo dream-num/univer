@@ -19,6 +19,7 @@ import { execSync } from 'node:child_process';
 import path from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
+import { ignoreGlobalCssPlugin, removeClassnameNewlinesPlugin } from '@univerjs-infra/shared/esbuild';
 import detect from 'detect-port';
 import esbuild from 'esbuild';
 import aliasPlugin from 'esbuild-plugin-alias';
@@ -26,7 +27,6 @@ import cleanPlugin from 'esbuild-plugin-clean';
 import copyPlugin from 'esbuild-plugin-copy';
 import vue from 'esbuild-plugin-vue3';
 import stylePlugin from 'esbuild-style-plugin';
-import fs from 'fs-extra';
 import minimist from 'minimist';
 import React from 'react';
 import tailwindcss from 'tailwindcss';
@@ -149,50 +149,8 @@ const config: SameShape<BuildOptions, BuildOptions> = {
     minify: false,
     target: 'chrome70',
     plugins: [
-        {
-            name: 'ignore-global-css',
-            setup(build) {
-                build.onResolve({ filter: /\/global\.css$/ }, (args) => {
-                    if (args.importer.includes('packages')) {
-                        return {
-                            path: args.path,
-                            namespace: 'ignore-global-css',
-                            pluginData: {
-                                importer: args.importer,
-                            },
-                        };
-                    }
-                });
-
-                build.onLoad({ filter: /\/global\.css$/, namespace: 'ignore-global-css' }, () => {
-                    return { contents: '' };
-                });
-            },
-        },
-        {
-            name: 'remove-classname-newlines',
-            setup(build) {
-                build.onLoad({ filter: /\.(tsx)$/ }, (args) => {
-                    const source = fs.readFileSync(args.path, 'utf8');
-
-                    const transformedSource = source.replace(
-                        /className\s*=\s*{([^}]*?)}/gs,
-                        (match, classNameValue) => {
-                            const cleanedValue = classNameValue.replace(/`([^`]*?)`/gs, (templateMatch, templateContent) => {
-                                return `\`${templateContent.replace(/\s*\n\s*/g, ' ').trim()}\``;
-                            });
-
-                            return `className={${cleanedValue.trim()}}`;
-                        }
-                    );
-
-                    return {
-                        contents: transformedSource,
-                        loader: 'tsx',
-                    };
-                });
-            },
-        },
+        ignoreGlobalCssPlugin(),
+        removeClassnameNewlinesPlugin(),
         copyPlugin({
             assets: {
                 from: ['./public/**/*'],

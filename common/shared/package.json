@@ -16,6 +16,7 @@
         "./tsconfigs/*": "./tsconfigs/*.json",
         "./vite": "./vite/index.ts",
         "./vitest": "./vitest/index.js",
+        "./esbuild": "./esbuild/index.ts",
         "./tailwind": "./tailwind/tailwind.config.ts",
         "./postcss": "./postcss/postcss.config.mjs"
     },

@@ -19,6 +19,7 @@ import { execSync } from 'node:child_process';
 import path from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
+import { ignoreGlobalCssPlugin, removeClassnameNewlinesPlugin } from '@univerjs-infra/shared/esbuild';
 import detect from 'detect-port';
 import esbuild from 'esbuild';
 import aliasPlugin from 'esbuild-plugin-alias';
@@ -148,26 +149,8 @@ const config: SameShape<BuildOptions, BuildOptions> = {
     minify: false,
     target: 'chrome70',
     plugins: [
-        {
-            name: 'ignore-global-css',
-            setup(build) {
-                build.onResolve({ filter: /\/global\.css$/ }, (args) => {
-                    if (args.importer.includes('packages')) {
-                        return {
-                            path: args.path,
-                            namespace: 'ignore-global-css',
-                            pluginData: {
-                                importer: args.importer,
-                            },
-                        };
-                    }
-                });
-
-                build.onLoad({ filter: /\/global\.css$/, namespace: 'ignore-global-css' }, () => {
-                    return { contents: '' };
-                });
-            },
-        },
+        ignoreGlobalCssPlugin(),
+        removeClassnameNewlinesPlugin(),
         copyPlugin({
             assets: {
                 from: ['./public/**/*'],

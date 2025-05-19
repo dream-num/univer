@@ -16,6 +16,7 @@
         "./tsconfigs/*": "./tsconfigs/*.json",
         "./vite": "./vite/index.ts",
         "./vitest": "./vitest/index.js",
+        "./esbuild": "./esbuild/index.ts",
         "./tailwind": "./tailwind/tailwind.config.ts",
         "./postcss": "./postcss/postcss.config.mjs"
     },
@@ -24,7 +25,7 @@
         "univer-cli": "bin/index.ts"
     },
     "dependencies": {
-        "@typescript-eslint/parser": "^8.32.0",
+        "@typescript-eslint/parser": "^8.32.1",
         "@vitejs/plugin-react": "^4.4.1",
         "@vitejs/plugin-vue": "^5.2.4",
         "@vitest/coverage-istanbul": "^3.1.3",
@@ -39,7 +40,7 @@
         "tailwindcss": "^3.4.17",
         "tailwindcss-rem-to-px": "^0.1.1",
         "vite": "^6.3.5",
-        "vite-plugin-dts": "^4.5.3",
+        "vite-plugin-dts": "^4.5.4",
         "vite-plugin-external": "^6.2.2",
         "vitest": "^3.1.3"
     },

@@ -196,10 +196,12 @@ function SearchFunctionFactory(props: ISearchFunctionProps, ref: any) {
                         ref.current = v!;
                     }
                 }}
+                data-u-comp="sheets-formula-editor"
                 className={clsx(`
                   univer-m-0 univer-box-border univer-max-h-[400px] univer-w-[250px] univer-list-none
                   univer-overflow-y-auto univer-rounded-lg univer-bg-white univer-p-2 univer-leading-5 univer-shadow-md
                   univer-outline-none
+                  dark:univer-bg-gray-900
                 `, borderClassName, scrollbarClassName)}
             >
                 {searchList.map((item, index) => (

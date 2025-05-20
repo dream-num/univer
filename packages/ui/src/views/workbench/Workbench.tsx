@@ -144,6 +144,7 @@ export function DesktopWorkbenchContent(props: IUniverWorkbenchProps) {
                 })}
                 tabIndex={-1}
                 onBlur={(e) => e.stopPropagation()}
+                onContextMenu={(e) => e.preventDefault()}
             >
                 {/* user header */}
                 <div className="univer-relative univer-flex univer-min-h-0 univer-flex-col univer-bg-white">

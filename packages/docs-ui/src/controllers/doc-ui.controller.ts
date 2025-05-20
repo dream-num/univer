@@ -23,20 +23,11 @@ import {
     IUniverInstanceService,
     UniverInstanceType,
 } from '@univerjs/core';
-
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { CutSingle, DeleteSingle, DocSettingSingle, TodoList } from '@univerjs/icons';
 import { BuiltInUIPart, ComponentManager, connectInjector, ILayoutService, IMenuManagerService, IShortcutService, IUIPartsService } from '@univerjs/ui';
 import { CoreHeaderFooterCommand, OpenHeaderFooterPanelCommand } from '../commands/commands/doc-header-footer.command';
 import { SidebarDocHeaderFooterPanelOperation } from '../commands/operations/doc-header-footer-panel.operation';
-import { COLOR_PICKER_COMPONENT, ColorPicker } from '../components/color-picker';
-import {
-    FONT_FAMILY_COMPONENT,
-    FONT_FAMILY_ITEM_COMPONENT,
-    FontFamily,
-    FontFamilyItem,
-} from '../components/font-family';
-import { FONT_SIZE_COMPONENT, FontSize } from '../components/font-size';
 import { BULLET_LIST_TYPE_COMPONENT, BulletListTypePicker, ORDER_LIST_TYPE_COMPONENT, OrderListTypePicker } from '../components/list-type-picker';
 import { ParagraphMenu } from '../components/paragraph-menu';
 import { DocSelectionRenderService } from '../services/selection/doc-selection-render.service';
@@ -79,10 +70,6 @@ export class DocUIController extends Disposable {
 
     private _initCustomComponents(): void {
         const componentManager = this._componentManager;
-        this.disposeWithMe(componentManager.register(COLOR_PICKER_COMPONENT, ColorPicker));
-        this.disposeWithMe(componentManager.register(FONT_FAMILY_COMPONENT, FontFamily));
-        this.disposeWithMe(componentManager.register(FONT_FAMILY_ITEM_COMPONENT, FontFamilyItem));
-        this.disposeWithMe(componentManager.register(FONT_SIZE_COMPONENT, FontSize));
         this.disposeWithMe(componentManager.register(BULLET_LIST_TYPE_COMPONENT, BulletListTypePicker));
         this.disposeWithMe(componentManager.register(ORDER_LIST_TYPE_COMPONENT, OrderListTypePicker));
         this.disposeWithMe(componentManager.register('TodoList', TodoList));

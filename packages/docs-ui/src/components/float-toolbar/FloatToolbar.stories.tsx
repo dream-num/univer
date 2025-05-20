@@ -21,7 +21,7 @@ import { LocaleService, LocaleType } from '@univerjs/core';
 import { ColorPicker } from '@univerjs/design';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
-import { ComponentManager, DesktopLayoutService, FontFamily, FontFamilyItem, FontSize, ILayoutService, IMenuManagerService, MenuManagerService, RediContext } from '@univerjs/ui';
+import { COLOR_PICKER_COMPONENT, ComponentManager, DesktopLayoutService, FONT_FAMILY_COMPONENT, FONT_FAMILY_ITEM_COMPONENT, FONT_SIZE_COMPONENT, FontFamily, FontFamilyItem, FontSize, ILayoutService, IMenuManagerService, MenuManagerService, RediContext } from '@univerjs/ui';
 import { useContext, useEffect, useState } from 'react';
 import {
     SetInlineFormatBoldCommand,
@@ -39,9 +39,6 @@ import { menuSchema } from '../../controllers/menu.schema';
 import enUS from '../../locale/en-US';
 import ruRU from '../../locale/ru-RU';
 import zhCN from '../../locale/zh-CN';
-import { COLOR_PICKER_COMPONENT } from '../color-picker';
-import { FONT_FAMILY_COMPONENT, FONT_FAMILY_ITEM_COMPONENT } from '../font-family';
-import { FONT_SIZE_COMPONENT } from '../font-size';
 import { FloatToolbar } from './FloatToolbar';
 
 const meta: Meta<typeof FloatToolbar> = {

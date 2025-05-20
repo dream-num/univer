@@ -87,19 +87,9 @@ import { SheetPermissionOpenPanelOperation } from '../../commands/operations/she
 import { SidebarDefinedNameOperation } from '../../commands/operations/sidebar-defined-name.operation';
 import { BorderPanel } from '../../components/border-panel/BorderPanel';
 import { BORDER_PANEL_COMPONENT } from '../../components/border-panel/interface';
-import { COLOR_PICKER_COMPONENT, ColorPicker } from '../../components/color-picker';
-import {
-    FONT_FAMILY_COMPONENT,
-    FONT_FAMILY_ITEM_COMPONENT,
-    FontFamily,
-    FontFamilyItem,
-} from '../../components/font-family';
-
-import { FONT_SIZE_COMPONENT, FontSize } from '../../components/font-size';
 import { MENU_ITEM_INPUT_COMPONENT, MenuItemInput } from '../../components/menu-item-input';
 import { DEFINED_NAME_CONTAINER } from '../../views/defined-name/component-name';
 import { DefinedNameContainer } from '../../views/defined-name/DefinedNameContainer';
-
 import { MobileSheetBar } from '../../views/mobile/sheet-bar/MobileSheetBar';
 import {
     EditorBreakLineShortcut,
@@ -181,10 +171,6 @@ export class SheetUIMobileController extends Disposable {
         const componentManager = this._componentManager;
         this.disposeWithMe(componentManager.register(MENU_ITEM_INPUT_COMPONENT, MenuItemInput));
         this.disposeWithMe(componentManager.register(BORDER_PANEL_COMPONENT, BorderPanel));
-        this.disposeWithMe(componentManager.register(COLOR_PICKER_COMPONENT, ColorPicker));
-        this.disposeWithMe(componentManager.register(FONT_FAMILY_COMPONENT, FontFamily));
-        this.disposeWithMe(componentManager.register(FONT_FAMILY_ITEM_COMPONENT, FontFamilyItem));
-        this.disposeWithMe(componentManager.register(FONT_SIZE_COMPONENT, FontSize));
         this.disposeWithMe(componentManager.register(DEFINED_NAME_CONTAINER, DefinedNameContainer));
     }
 

@@ -19,12 +19,17 @@ import type { IUniverWorkbenchProps } from '../../views/workbench/Workbench';
 import type { IUniverUIConfig } from '../config.schema';
 import type { IWorkbenchOptions } from './ui.controller';
 import { Inject, Injector, IUniverInstanceService, LifecycleService, toDisposable } from '@univerjs/core';
-import { render as createRoot, unmount } from '@univerjs/design';
+import { ColorPicker, render as createRoot, unmount } from '@univerjs/design';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import React from 'react';
 import { ComponentManager } from '../../common';
 import { HEADING_ITEM_COMPONENT, HeadingItem } from '../../components';
+import { COLOR_PICKER_COMPONENT } from '../../components/color-picker/interface';
 import { COMMON_LABEL_COMPONENT, CommonLabel } from '../../components/common-label';
+import { FontFamily, FontFamilyItem } from '../../components/font-family';
+import { FONT_FAMILY_COMPONENT, FONT_FAMILY_ITEM_COMPONENT } from '../../components/font-family/interface';
+import { FontSize } from '../../components/font-size/FontSize';
+import { FONT_SIZE_COMPONENT } from '../../components/font-size/interface';
 import { ILayoutService } from '../../services/layout/layout.service';
 import { IMenuManagerService } from '../../services/menu/menu-manager.service';
 import { BuiltInUIPart, IUIPartsService } from '../../services/parts/parts.service';
@@ -68,6 +73,30 @@ export class DesktopUIController extends SingleUnitUIController {
             this._componentManager.register(
                 HEADING_ITEM_COMPONENT,
                 HeadingItem
+            )
+        );
+        this.disposeWithMe(
+            this._componentManager.register(
+                FONT_FAMILY_COMPONENT,
+                FontFamily
+            )
+        );
+        this.disposeWithMe(
+            this._componentManager.register(
+                FONT_FAMILY_ITEM_COMPONENT,
+                FontFamilyItem
+            )
+        );
+        this.disposeWithMe(
+            this._componentManager.register(
+                FONT_SIZE_COMPONENT,
+                FontSize
+            )
+        );
+        this.disposeWithMe(
+            this._componentManager.register(
+                COLOR_PICKER_COMPONENT,
+                ColorPicker
             )
         );
     }

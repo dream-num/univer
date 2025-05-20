@@ -72,8 +72,12 @@ import {
     WorksheetSetRowStylePermission,
 } from '@univerjs/sheets';
 import {
+    COLOR_PICKER_COMPONENT,
     CutCommand,
+    FONT_FAMILY_COMPONENT,
+    FONT_FAMILY_ITEM_COMPONENT,
     FONT_FAMILY_LIST,
+    FONT_SIZE_COMPONENT,
     FONT_SIZE_LIST,
     getMenuHiddenObservable,
     IClipboardInterfaceService,
@@ -103,9 +107,6 @@ import {
 import { SetInfiniteFormatPainterCommand, SetOnceFormatPainterCommand } from '../../commands/commands/set-format-painter.command';
 import { SetColumnFrozenCommand, SetRowFrozenCommand, SetSelectionFrozenCommand } from '../../commands/commands/set-frozen.command';
 import { SetWorksheetColAutoWidthCommand } from '../../commands/commands/set-worksheet-auto-col-width.command';
-import { COLOR_PICKER_COMPONENT } from '../../components/color-picker';
-import { FONT_FAMILY_COMPONENT, FONT_FAMILY_ITEM_COMPONENT } from '../../components/font-family';
-import { FONT_SIZE_COMPONENT } from '../../components/font-size';
 import { MENU_ITEM_INPUT_COMPONENT } from '../../components/menu-item-input';
 import { FormatPainterStatus, IFormatPainterService } from '../../services/format-painter/format-painter.service';
 import { deriveStateFromActiveSheet$, getCurrentRangeDisable$, getObservableWithExclusiveRange$ } from './menu-util';

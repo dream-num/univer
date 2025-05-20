@@ -33,7 +33,10 @@ export const MenuItemInput = (props: IMenuItemInputProps) => {
             setInputValue(min.toString());
             return;
         }
-        setInputValue(value?.toString());
+
+        const inputValue = value.toString();
+        setInputValue(inputValue);
+        onChange(inputValue);
     };
 
     useEffect(() => {

@@ -146,7 +146,7 @@ export function BorderPanel(props: IBorderPanelProps) {
                                 `}
                                 extend={{ colorChannel1: value?.color ?? '' }}
                             />
-                            <MoreDownSingle />
+                            <MoreDownSingle className="dark:!univer-text-white" />
                         </button>
                     </Dropdown>
                 </div>
@@ -196,7 +196,7 @@ export function BorderPanel(props: IBorderPanelProps) {
                                 `}
                                 type={BorderStyleTypes.THIN}
                             />
-                            <MoreDownSingle />
+                            <MoreDownSingle className="dark:!univer-text-white" />
                         </button>
                     </Dropdown>
                 </div>

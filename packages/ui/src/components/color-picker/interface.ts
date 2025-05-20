@@ -14,6 +14,4 @@
  * limitations under the License.
  */
 
-import { COMPONENT_PREFIX } from '../const';
-
-export const COLOR_PICKER_COMPONENT = `${COMPONENT_PREFIX}_COLOR_PICKER_COMPONENT`;
+export const COLOR_PICKER_COMPONENT = 'UI_COLOR_PICKER_COMPONENT';

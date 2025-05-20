@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-import { type IAccessor, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { type IMenuButtonItem, type IMenuItem, type IMenuSelectorItem, MenuItemType } from '@univerjs/ui';
+import type { IAccessor } from '@univerjs/core';
+import type { IMenuButtonItem, IMenuItem, IMenuSelectorItem } from '@univerjs/ui';
+import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { MenuItemType } from '@univerjs/ui';
 import { Observable } from 'rxjs';
 import { DisposeUnitOperation } from '../commands/operations/uni.operation';
 
@@ -50,7 +52,7 @@ export function FakeFontFamilySelectorMenuItemFactory(accessor: IAccessor): IMen
         id: FAKE_FONT_FAMILY_MENU_ID,
         tooltip: 'toolbar.font',
         type: MenuItemType.SELECTOR,
-        label: 'UI_PLUGIN_DOCS_FONT_FAMILY_COMPONENT',
+        label: 'UI_PLUGIN_DOCS_FONT_SIZE_COMPONENT',
         selections: [],
         disabled$: new Observable((subscriber) => { subscriber.next(true); }),
     };

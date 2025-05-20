@@ -128,3 +128,5 @@ export const HEADING_LIST = [
         value: NamedStyleType.HEADING_5,
     },
 ];
+
+export const FONT_SIZE_COMPONENT = 'UI_FONT_SIZE_COMPONENT';

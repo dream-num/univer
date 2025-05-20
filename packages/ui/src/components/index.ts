@@ -16,8 +16,8 @@
 
 export * from './common-label';
 export * from './custom-label';
-export * from './font-family';
-export * from './font-size';
 export * from './heading-item';
+
 export { useScrollYOverContainer } from './hooks/layout';
+
 export { type ISliderProps, Slider } from './slider';

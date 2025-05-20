@@ -171,11 +171,14 @@ export class FormulaEditorController extends RxDisposable {
                         dataStream: newContent,
                     },
                     segmentId: '',
+                    textRanges,
                 };
 
-                this._commandService.executeCommand(CoverContentCommand.id, coverContentParams);
+                this._commandService.syncExecuteCommand(CoverContentCommand.id, coverContentParams);
 
-                this._textSelectionManagerService.replaceDocRanges(textRanges);
+                requestAnimationFrame(() => {
+                    this._textSelectionManagerService.replaceDocRanges(textRanges);
+                });
             }
         });
     }

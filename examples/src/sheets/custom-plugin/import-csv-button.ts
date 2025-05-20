@@ -18,6 +18,7 @@ import type { ICommand, IMutationInfo, Workbook } from '@univerjs/core';
 import type { ISetRangeValuesMutationParams, ISetWorksheetColumnCountMutationParams, ISetWorksheetRowCountMutationParams } from '@univerjs/sheets';
 import {
     CommandType,
+    covertCellValues,
     ICommandService,
     Inject,
     Injector,
@@ -36,7 +37,6 @@ import {
     SetWorksheetRowCountMutation,
     SetWorksheetRowCountUndoMutationFactory,
 } from '@univerjs/sheets';
-import { covertCellValues } from '@univerjs/sheets/facade';
 import {
     ComponentManager,
     IMenuManagerService,

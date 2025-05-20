@@ -75,6 +75,7 @@ export interface IUniverSheetsUIConfig {
         hidePasteOptions?: boolean;
     };
 
+    /** The config of the scroll bar. */
     scrollConfig?: IScrollBarProps;
 
     /**

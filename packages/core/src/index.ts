@@ -117,7 +117,7 @@ export type { IPermissionParam } from './services/permission/type';
 
 export type { IPermissionPoint } from './services/permission/type';
 export type { IPermissionTypes, RangePermissionPointConstructor, WorkbookPermissionPointConstructor, WorkSheetPermissionPointConstructor } from './services/permission/type';
-export type { PluginCtor } from './services/plugin/plugin.service.ts';
+export type { PluginCtor } from './services/plugin/plugin.service';
 export { DependentOn, Plugin, PluginService } from './services/plugin/plugin.service';
 export { type DependencyOverride, mergeOverrideWithDependencies } from './services/plugin/plugin-override';
 export { IResourceLoaderService } from './services/resource-loader/type';
@@ -197,7 +197,7 @@ export { type IUniverConfig, Univer } from './univer';
 export { isNodeEnv } from './shared/tools';
 export { Skeleton } from './skeleton';
 export type { IGetRowColByPosOptions } from './sheets/sheet-skeleton';
-export type { IPosition } from './sheets/typedef.ts';
+export type { IPosition } from './sheets/typedef';
 export * from './sheets/sheet-skeleton';
 
 // invert color utils

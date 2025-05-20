@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
+import { covertCellValue, covertCellValues } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
-import { covertCellValue, covertCellValues } from '../utils';
 
 describe('Test utils', () => {
     it('function covertCellValue', () => {

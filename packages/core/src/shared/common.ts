@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import type { ICellData, ICellDataForSheetInterceptor, ICellWithCoord, IRange, IRangeWithCoord, ISelectionCell } from '../sheets/typedef';
+import type { CellValue, ICellData, ICellDataForSheetInterceptor, ICellWithCoord, IRange, IRangeWithCoord, ISelectionCell } from '../sheets/typedef';
 import type { Worksheet } from '../sheets/worksheet';
 import type { IDocumentData } from '../types/interfaces/i-document-data';
 import type { IColorStyle, IStyleData } from '../types/interfaces/i-style-data';
+import type { IObjectMatrixPrimitiveType } from './object-matrix';
 import type { Nullable } from './types';
-import { RANGE_TYPE } from '../sheets/typedef';
+import { isCellV, isICellData, RANGE_TYPE } from '../sheets/typedef';
 import {
     BaselineOffset,
     BorderStyleTypes,
@@ -29,6 +30,7 @@ import {
     WrapStrategy,
 } from '../types/enum';
 import { ColorBuilder } from './color/color';
+import { ObjectMatrix } from './object-matrix';
 import { Tools } from './tools';
 
 /**
@@ -547,4 +549,65 @@ export function isValidRange(range: IRange, worksheet?: Worksheet): boolean {
  */
 export function cellToRange(row: number, col: number): IRange {
     return { startRow: row, endRow: row, startColumn: col, endColumn: col };
+}
+
+/**
+ * Covert cell value to cell data.
+ * @param {CellValue | ICellData} value - The cell value.
+ * @returns {ICellData} The cell data.
+ */
+export function covertCellValue(value: CellValue | ICellData): ICellData {
+    if (isFormulaString(value)) {
+        return {
+            f: value as string,
+            v: null,
+            p: null,
+        };
+    }
+    if (isCellV(value)) {
+        return {
+            v: value as Nullable<CellValue>,
+            p: null,
+            f: null,
+        };
+    }
+    if (isICellData(value)) {
+        return value;
+    }
+
+    // maybe {}
+    return value as ICellData;
+}
+
+/**
+ * Covert cell value array or matrix to cell data.
+ * @param {CellValue[][] | IObjectMatrixPrimitiveType<CellValue> | ICellData[][] | IObjectMatrixPrimitiveType<ICellData>} value - The cell value array or matrix.
+ * @param {IRange} range - The range.
+ * @returns {IObjectMatrixPrimitiveType<ICellData>} The cell data matrix.
+ */
+export function covertCellValues(
+    value:
+        | CellValue[][]
+        | IObjectMatrixPrimitiveType<CellValue>
+        | ICellData[][]
+        | IObjectMatrixPrimitiveType<ICellData>,
+    range: IRange
+): IObjectMatrixPrimitiveType<ICellData> {
+    const cellValue = new ObjectMatrix<ICellData>();
+    const { startRow, startColumn, endRow, endColumn } = range;
+
+    if (Tools.isArray(value)) {
+        for (let r = 0; r <= endRow - startRow; r++) {
+            for (let c = 0; c <= endColumn - startColumn; c++) {
+                cellValue.setValue(r + startRow, c + startColumn, covertCellValue(value[r][c]));
+            }
+        }
+    } else {
+        const valueMatrix = new ObjectMatrix(value as IObjectMatrixPrimitiveType<ICellData | CellValue>);
+        valueMatrix.forValue((r, c, v) => {
+            cellValue.setValue(r, c, covertCellValue(v));
+        });
+    }
+
+    return cellValue.getMatrix();
 }

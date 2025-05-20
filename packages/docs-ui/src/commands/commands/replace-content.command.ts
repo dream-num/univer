@@ -218,6 +218,7 @@ interface ICoverContentCommandParams {
     unitId: string;
     body: IDocumentBody; // Do not contain `\r\n` at the end.
     segmentId?: string;
+    textRanges?: ITextRangeWithStyle[];
 }
 
 // Cover all content with new body, and clear undo/redo stack.
@@ -226,8 +227,8 @@ export const CoverContentCommand: ICommand<ICoverContentCommandParams> = {
 
     type: CommandType.COMMAND,
 
-    handler: async (accessor, params: ICoverContentCommandParams) => {
-        const { unitId, body, segmentId = '' } = params;
+    handler: (accessor, params: ICoverContentCommandParams) => {
+        const { unitId, body, segmentId = '', textRanges } = params;
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
@@ -245,6 +246,7 @@ export const CoverContentCommand: ICommand<ICoverContentCommandParams> = {
         // No need to set the cursor or selection.
         doMutation.params.noNeedSetTextRange = true;
         doMutation.params.noHistory = true;
+        doMutation.params.textRanges = textRanges;
 
         commandService.syncExecuteCommand<IRichTextEditingMutationParams, IRichTextEditingMutationParams>(
             doMutation.id,

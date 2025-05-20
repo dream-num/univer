@@ -28,31 +28,26 @@ import { Rect } from './rect';
 
 export interface IScrollBarProps {
     mainScene?: Scene;
+    /** Margin between the track to the edge of the scrollable area. Default is 2px. */
     thumbMargin?: number;
     thumbLengthRatio?: number;
+    /** Background color of the thumb. */
     thumbBackgroundColor?: string;
+    /** Background color of the thumb on hover. */
     thumbHoverBackgroundColor?: string;
+    /** Background color of the thumb when active. */
     thumbActiveBackgroundColor?: string;
-    /**
-     * The thickness of a scrolling track(not scrolling thumb).
-     */
+    /** The thickness of a scrolling track (not scrolling thumb). */
     barSize?: number;
-    /**
-     * The thickness of track border.
-     */
+    /** The thickness of track border. */
     barBorder?: number;
-
+    /** Enable the horizontal scroll bar. True by default. */
     enableHorizontal?: boolean;
+    /** Enable the vertical scroll bar. True by default. */
     enableVertical?: boolean;
-
-    /**
-     * The min width of horizon thumb
-     */
+    /** The min width of horizon thumb. Default is 17 px. */
     minThumbSizeH?: number;
-
-    /**
-     * The min height of vertical thumb
-     */
+    /** The min height of vertical thumb. Default is 17 px. */
     minThumbSizeV?: number;
 }
 

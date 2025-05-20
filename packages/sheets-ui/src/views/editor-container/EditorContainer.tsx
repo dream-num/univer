@@ -16,7 +16,6 @@
 
 import type { KeyCode } from '@univerjs/ui';
 import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, ICommandService, IContextService } from '@univerjs/core';
-import { borderClassName, clsx } from '@univerjs/design';
 import { IEditorService } from '@univerjs/docs-ui';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { ComponentManager, DISABLE_AUTO_FOCUS_KEY, MetaKeys, useDependency, useEvent, useObservable, useSidebarClick } from '@univerjs/ui';
@@ -138,11 +137,7 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
 
     return (
         <div
-            className={clsx(`
-              univer-absolute univer-left-[100px] univer-top-[200px] univer-z-10 univer-flex univer-h-[50px]
-              univer-w-[100px]
-              dark:!univer-bg-gray-700
-            `, borderClassName)}
+            className="univer-absolute univer-z-10 univer-flex"
             style={{
                 left: state.left,
                 top: state.top,

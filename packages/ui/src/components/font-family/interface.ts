@@ -20,9 +20,13 @@ export interface IFontFamilyProps extends ICustomComponentProps<string> {
     value: string;
 }
 
+export const FONT_FAMILY_COMPONENT = 'UI_FONT_FAMILY_COMPONENT';
+
 export interface IFontFamilyItemProps extends ICustomComponentProps<string> {
     value: string;
 }
+
+export const FONT_FAMILY_ITEM_COMPONENT = 'UI_FONT_FAMILY_ITEM_COMPONENT';
 
 export const FONT_FAMILY_LIST = [
     {

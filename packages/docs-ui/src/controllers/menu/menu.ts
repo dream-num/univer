@@ -42,8 +42,12 @@ import {
 } from '@univerjs/docs';
 import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
 import {
+    COLOR_PICKER_COMPONENT,
     COMMON_LABEL_COMPONENT,
+    FONT_FAMILY_COMPONENT,
+    FONT_FAMILY_ITEM_COMPONENT,
     FONT_FAMILY_LIST,
+    FONT_SIZE_COMPONENT,
     FONT_SIZE_LIST,
     getMenuHiddenObservable,
     HEADING_ITEM_COMPONENT,
@@ -62,9 +66,6 @@ import { SwitchDocModeCommand } from '../../commands/commands/switch-doc-mode.co
 import { DocCreateTableOperation } from '../../commands/operations/doc-create-table.operation';
 import { DocOpenPageSettingCommand } from '../../commands/operations/open-page-setting.operation';
 import { getCommandSkeleton } from '../../commands/util';
-import { COLOR_PICKER_COMPONENT } from '../../components/color-picker';
-import { FONT_FAMILY_COMPONENT, FONT_FAMILY_ITEM_COMPONENT } from '../../components/font-family';
-import { FONT_SIZE_COMPONENT } from '../../components/font-size';
 import { BULLET_LIST_TYPE_COMPONENT, ORDER_LIST_TYPE_COMPONENT } from '../../components/list-type-picker';
 import { DocMenuStyleService } from '../../services/doc-menu-style.service';
 

@@ -32,13 +32,12 @@ import {
     WorkbookHideSheetPermission,
     WorkbookRenameSheetPermission,
 } from '@univerjs/sheets';
-import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
+import { COLOR_PICKER_COMPONENT, getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { combineLatest, combineLatestWith, map, Observable } from 'rxjs';
 
 import { RemoveSheetConfirmCommand } from '../../commands/commands/remove-sheet-confirm.command';
 import { ShowMenuListCommand } from '../../commands/commands/unhide.command';
 import { RenameSheetOperation } from '../../commands/operations/rename-sheet.operation';
-import { COLOR_PICKER_COMPONENT } from '../../components/color-picker';
 import { getWorkbookPermissionDisable$ } from './menu-util';
 
 export function DeleteSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem {

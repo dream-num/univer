@@ -83,10 +83,7 @@ export type { IRangeProtectionRenderCellData } from './views/permission/extensio
 export { SheetBar } from './views/sheet-bar/SheetBar';
 export { RenderSheetContent, RenderSheetFooter, RenderSheetHeader } from './views/sheet-container/SheetContainer';
 export { type IUniverSheetsUIConfig } from './controllers/config.schema';
-
 export { getCellRealRange } from './common/utils';
-export { FONT_FAMILY_COMPONENT, FONT_FAMILY_ITEM_COMPONENT } from './components/font-family/interface';
-export { FONT_SIZE_COMPONENT } from './components/font-size/interface';
 export { EMBEDDING_FORMULA_EDITOR, isEmbeddingFormulaEditor } from './controllers/editor/utils/is-embedding-formula-editor';
 export { isRangeSelector, RANGE_SELECTOR_SYMBOLS } from './controllers/editor/utils/is-range-selector';
 export { menuSchema as SheetsUIMenuSchema } from './controllers/menu.schema';

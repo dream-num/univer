@@ -1303,7 +1303,7 @@ describe('Test set range values commands', () => {
             it('set value 1e3', async () => {
                 function getParams() {
                     const params: ISetRangeValuesCommandParams = {
-                        value: { 10: { 3: { v: '1e3' } } },
+                        value: { 10: { 3: { v: 1e3 } } },
                     };
 
                     return params;
@@ -1376,6 +1376,47 @@ describe('Test set range values commands', () => {
                     [
                         {
                             v: 1,
+                            t: CellValueType.NUMBER,
+                        },
+                    ],
+                ]);
+            });
+
+            it('set value +123.', async () => {
+                function getParams() {
+                    const params: ISetRangeValuesCommandParams = {
+                        value: { 10: { 5: { v: '+123.' } } },
+                    };
+
+                    return params;
+                }
+
+                expect(await commandService.executeCommand(SetRangeValuesCommand.id, getParams())).toBeTruthy();
+
+                const newValue = getValues(10, 5, 10, 5);
+                expect(newValue).toStrictEqual([
+                    [
+                        {
+                            v: 123,
+                            t: CellValueType.NUMBER,
+                        },
+                    ],
+                ]);
+
+                // undo
+                expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+                expect(getValues(10, 5, 10, 5)).toStrictEqual([
+                    [null],
+                ]);
+
+                // redo
+                expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+
+                const redoNewValue = getValues(10, 5, 10, 5);
+                expect(redoNewValue).toStrictEqual([
+                    [
+                        {
+                            v: 123,
                             t: CellValueType.NUMBER,
                         },
                     ],

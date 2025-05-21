@@ -354,7 +354,7 @@ export function getSetCellValueMutations(
                     // If the numeric string will lose precision when converted to a number, set the cell type to force string
                     // e.g. 123456789123456789
                     // e.g. 1212121212121212.2345
-                    if (isNumericWillLosePrecision(content)) {
+                    if (!numfmtValue.z && isNumericWillLosePrecision(content)) {
                         cellValue.t = CellValueType.FORCE_STRING;
                     } else {
                         cellValue.v = numfmtValue.v;

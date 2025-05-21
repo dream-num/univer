@@ -1259,10 +1259,10 @@ describe('Test set range values commands', () => {
                 ]);
             });
 
-            it('set value 1e3', async () => {
+            it('set value 1212121212121212', async () => {
                 function getParams() {
                     const params: ISetRangeValuesCommandParams = {
-                        value: { 10: { 2: { v: '1e3' } } },
+                        value: { 10: { 2: { v: '1212121212121212' } } },
                     };
 
                     return params;
@@ -1274,7 +1274,7 @@ describe('Test set range values commands', () => {
                 expect(newValue).toStrictEqual([
                     [
                         {
-                            v: 1000,
+                            v: 1212121212121212,
                             t: CellValueType.NUMBER,
                         },
                     ],
@@ -1293,17 +1293,17 @@ describe('Test set range values commands', () => {
                 expect(redoNewValue).toStrictEqual([
                     [
                         {
-                            v: 1000,
+                            v: 1212121212121212,
                             t: CellValueType.NUMBER,
                         },
                     ],
                 ]);
             });
 
-            it('set value 001', async () => {
+            it('set value 1e3', async () => {
                 function getParams() {
                     const params: ISetRangeValuesCommandParams = {
-                        value: { 10: { 3: { v: '001' } } },
+                        value: { 10: { 3: { v: '1e3' } } },
                     };
 
                     return params;
@@ -1315,7 +1315,7 @@ describe('Test set range values commands', () => {
                 expect(newValue).toStrictEqual([
                     [
                         {
-                            v: 1,
+                            v: 1000,
                             t: CellValueType.NUMBER,
                         },
                     ],
@@ -1331,6 +1331,47 @@ describe('Test set range values commands', () => {
                 expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
 
                 const redoNewValue = getValues(10, 3, 10, 3);
+                expect(redoNewValue).toStrictEqual([
+                    [
+                        {
+                            v: 1000,
+                            t: CellValueType.NUMBER,
+                        },
+                    ],
+                ]);
+            });
+
+            it('set value 001', async () => {
+                function getParams() {
+                    const params: ISetRangeValuesCommandParams = {
+                        value: { 10: { 4: { v: '001' } } },
+                    };
+
+                    return params;
+                }
+
+                expect(await commandService.executeCommand(SetRangeValuesCommand.id, getParams())).toBeTruthy();
+
+                const newValue = getValues(10, 4, 10, 4);
+                expect(newValue).toStrictEqual([
+                    [
+                        {
+                            v: 1,
+                            t: CellValueType.NUMBER,
+                        },
+                    ],
+                ]);
+
+                // undo
+                expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+                expect(getValues(10, 4, 10, 4)).toStrictEqual([
+                    [null],
+                ]);
+
+                // redo
+                expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+
+                const redoNewValue = getValues(10, 4, 10, 4);
                 expect(redoNewValue).toStrictEqual([
                     [
                         {

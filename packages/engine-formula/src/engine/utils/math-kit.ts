@@ -188,6 +188,12 @@ export function lessThanOrEquals(a: number, b: number): boolean {
  * @returns
  */
 export function strip(num: number, precision = 15) {
+    // If the integer part of the number is greater than or equal to the precision, return the number directly
+    // e.g. 1212121212121212 should not be displayed as 1212121212121210
+    if (Math.floor(Math.abs(num)).toString().length >= precision) {
+        return num;
+    }
+
     return Number.parseFloat(num.toPrecision(precision));
 }
 

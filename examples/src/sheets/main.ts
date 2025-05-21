@@ -106,7 +106,9 @@ function createNewInstance() {
         notExecuteFormula: true,
         autoHeightForMergedCells: true,
     });
-    univer.registerPlugin(UniverSheetsUIPlugin);
+    univer.registerPlugin(UniverSheetsUIPlugin, {
+        disableForceStringAlert: true,
+    });
     univer.registerPlugin(UniverSheetsNumfmtPlugin, {
         disableTextFormatAlert: true,
         disableTextFormatMark: true,

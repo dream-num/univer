@@ -26,3 +26,18 @@ export function isSafeNumeric(str: string): boolean {
 
     return Number(str) <= Number.MAX_SAFE_INTEGER;
 }
+
+/**
+ * Whether the numeric string will lose precision when converted to a number.
+ */
+export function isNumericWillLosePrecision(str: string): boolean {
+    if (!isSafeNumeric) {
+        return true;
+    }
+
+    if (str !== Number(str).toString()) {
+        return true;
+    }
+
+    return false;
+}

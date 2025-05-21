@@ -27,7 +27,7 @@ import type {
 import type { ICellDataWithSpanInfo, ICopyPastePayload, ISheetDiscreteRangeLocation } from '../../services/clipboard/type';
 import type { IDiscreteRange } from '../utils/range-tools';
 
-import { cellToRange, CellValueType, CustomRangeType, DEFAULT_STYLES, generateRandomId, IUniverInstanceService, numfmt, ObjectMatrix, Range, Rectangle, Tools } from '@univerjs/core';
+import { cellToRange, CellValueType, CustomRangeType, DEFAULT_STYLES, generateRandomId, isNumericWillLosePrecision, IUniverInstanceService, numfmt, ObjectMatrix, Range, Rectangle, Tools } from '@univerjs/core';
 import { isTextFormat } from '@univerjs/engine-numfmt';
 import { DEFAULT_PADDING_DATA } from '@univerjs/engine-render';
 import {
@@ -351,7 +351,14 @@ export function getSetCellValueMutations(
                 const content = String(value.v);
                 const numfmtValue = numfmt.parseValue(content);
                 if (numfmtValue?.v !== undefined && typeof numfmtValue.v === 'number') {
-                    cellValue.v = numfmtValue.v;
+                    // If the numeric string will lose precision when converted to a number, set the cell type to force string
+                    // e.g. 123456789123456789
+                    // e.g. 1212121212121212.2345
+                    if (isNumericWillLosePrecision(content)) {
+                        cellValue.t = CellValueType.FORCE_STRING;
+                    } else {
+                        cellValue.v = numfmtValue.v;
+                    }
                 }
             }
         }

@@ -20,7 +20,6 @@ import { IConfigService, Inject, Injector, merge, Plugin, registerDependencies, 
 import { DEBUGGER_PLUGIN_CONFIG_KEY, defaultPluginConfig } from './controllers/config.schema';
 import { DebuggerController } from './controllers/debugger.controller';
 import { E2EController } from './controllers/e2e/e2e.controller';
-import { MultiUnitsController } from './controllers/multi-units/multi-units.controller';
 import { PerformanceMonitorController } from './controllers/performance-monitor.controller';
 import { UniverWatermarkMenuController } from './controllers/watermark.menu.controller';
 
@@ -51,7 +50,6 @@ export class UniverDebuggerPlugin extends Plugin {
     override onStarting(): void {
         const dependencies: Dependency[] = [
             [DebuggerController],
-            [MultiUnitsController],
             [E2EController],
             [UniverWatermarkMenuController],
         ];
@@ -70,7 +68,6 @@ export class UniverDebuggerPlugin extends Plugin {
     override onReady(): void {
         touchDependencies(this._injector, [
             [DebuggerController],
-            [MultiUnitsController],
         ]);
     }
 

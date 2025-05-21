@@ -32,6 +32,7 @@ import { useNotification } from './use-notification';
 import { useSidebar } from './use-sidebar';
 import { useSnapshot } from './use-snapshot';
 import { useTheme } from './use-theme';
+import { useUnits } from './use-units';
 import { useUser } from './use-user';
 import { useWatermark } from './use-watermark';
 
@@ -39,6 +40,8 @@ export function Fab() {
     const configService = useDependency(IConfigService);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const unitType = univerInstanceService.getFocusedUnit()?.type;
+
+    if (!unitType) return null;
 
     const items: IDropdownMenuProps['items'] = [
         useLocale(),
@@ -53,6 +56,7 @@ export function Fab() {
         { type: 'separator' },
         unitType === UniverInstanceType.UNIVER_SHEET && useFloatingDom(),
         unitType === UniverInstanceType.UNIVER_SHEET && useCellContent(),
+        unitType === UniverInstanceType.UNIVER_SHEET && useUnits(),
         useSnapshot(),
         useEditable(),
         useUser(),

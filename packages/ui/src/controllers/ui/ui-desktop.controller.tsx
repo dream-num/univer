@@ -63,42 +63,18 @@ export class DesktopUIController extends SingleUnitUIController {
     }
 
     private _registerComponents() {
-        this.disposeWithMe(
-            this._componentManager.register(
-                COMMON_LABEL_COMPONENT,
-                CommonLabel
-            )
-        );
-        this.disposeWithMe(
-            this._componentManager.register(
-                HEADING_ITEM_COMPONENT,
-                HeadingItem
-            )
-        );
-        this.disposeWithMe(
-            this._componentManager.register(
-                FONT_FAMILY_COMPONENT,
-                FontFamily
-            )
-        );
-        this.disposeWithMe(
-            this._componentManager.register(
-                FONT_FAMILY_ITEM_COMPONENT,
-                FontFamilyItem
-            )
-        );
-        this.disposeWithMe(
-            this._componentManager.register(
-                FONT_SIZE_COMPONENT,
-                FontSize
-            )
-        );
-        this.disposeWithMe(
-            this._componentManager.register(
-                COLOR_PICKER_COMPONENT,
-                ColorPicker
-            )
-        );
+        ([
+            [COMMON_LABEL_COMPONENT, CommonLabel],
+            [HEADING_ITEM_COMPONENT, HeadingItem],
+            [FONT_FAMILY_COMPONENT, FontFamily],
+            [FONT_FAMILY_ITEM_COMPONENT, FontFamilyItem],
+            [FONT_SIZE_COMPONENT, FontSize],
+            [COLOR_PICKER_COMPONENT, ColorPicker],
+        ] as [string, React.FC][]).forEach(([id, component]) => {
+            this.disposeWithMe(
+                this._componentManager.register(id, component)
+            );
+        });
     }
 
     override bootstrap(callback: (contentElement: HTMLElement, containerElement: HTMLElement) => void): IDisposable {

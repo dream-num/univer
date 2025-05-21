@@ -36,10 +36,16 @@ export class SheetsNoteUIController extends Disposable {
     }
 
     private _initComponents() {
-        this.disposeWithMe(this._componentManager.register(SHEET_NOTE_COMPONENT, SheetsNote));
-        this.disposeWithMe(this._componentManager.register('AddNoteSingle', AddNoteSingle));
-        this.disposeWithMe(this._componentManager.register('DeleteNoteSingle', DeleteNoteSingle));
-        this.disposeWithMe(this._componentManager.register('HideNoteSingle', HideNoteSingle));
+        ([
+            [SHEET_NOTE_COMPONENT, SheetsNote],
+            ['AddNoteSingle', AddNoteSingle],
+            ['DeleteNoteSingle', DeleteNoteSingle],
+            ['HideNoteSingle', HideNoteSingle],
+        ] as [string, React.FC][]).forEach(([id, component]) => {
+            this.disposeWithMe(
+                this._componentManager.register(id, component)
+            );
+        });
     }
 
     private _initMenu() {

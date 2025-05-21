@@ -33,6 +33,8 @@ export class CellAlertRenderController extends Disposable implements IRenderModu
     }
 
     private _initComponent() {
-        this._componentManager.register(CELL_ALERT_KEY, CellAlert);
+        this.disposeWithMe(
+            this._componentManager.register(CELL_ALERT_KEY, CellAlert)
+        );
     }
 }

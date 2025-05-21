@@ -50,7 +50,9 @@ export class SheetsThreadCommentController extends Disposable {
             [THREAD_COMMENT_PANEL, SheetsThreadCommentPanel],
             [COMMENT_SINGLE_ICON, CommentSingle],
         ] as const).forEach(([key, comp]) => {
-            this._componentManager.register(key, comp);
+            this.disposeWithMe(
+                this._componentManager.register(key, comp)
+            );
         });
     }
 }

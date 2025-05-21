@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-import { toDisposable } from '@univerjs/core';
-import { type IDisposable, Inject } from '@univerjs/core';
+import type { IDisposable } from '@univerjs/core';
 import type { ForwardRefExoticComponent } from 'react';
-import { Subject } from 'rxjs';
-
-import { ComponentManager } from '../../common/component-manager';
 import type { IGlobalZoneService } from './global-zone.service';
+import { Inject, toDisposable } from '@univerjs/core';
+import { Subject } from 'rxjs';
+import { ComponentManager } from '../../common/component-manager';
 
 export class DesktopGlobalZoneService implements IGlobalZoneService {
     readonly visible$ = new Subject<boolean>();

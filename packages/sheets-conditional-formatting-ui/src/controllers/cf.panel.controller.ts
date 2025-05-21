@@ -68,6 +68,8 @@ export class ConditionalFormattingPanelController extends Disposable {
     }
 
     private _initPanel() {
-        this._componentManager.register(CF_PANEL_KEY, ConditionFormattingPanel);
+        this.disposeWithMe(
+            this._componentManager.register(CF_PANEL_KEY, ConditionFormattingPanel)
+        );
     }
 }

@@ -110,8 +110,14 @@ export class FindReplaceController extends RxDisposable {
     }
 
     private _initUI(): void {
-        this.disposeWithMe(this._componentManager.register('FindReplaceDialog', FindReplaceDialog));
-        this.disposeWithMe(this._componentManager.register('SearchIcon', SearchSingle));
+        ([
+            ['FindReplaceDialog', FindReplaceDialog],
+            ['SearchIcon', SearchSingle],
+        ] as [string, React.FC][]).forEach(([id, component]) => {
+            this.disposeWithMe(
+                this._componentManager.register(id, component)
+            );
+        });
 
         this._menuManagerService.mergeMenu(menuSchema);
 

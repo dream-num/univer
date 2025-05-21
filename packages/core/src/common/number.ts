@@ -47,7 +47,6 @@ export function isNumericWillLosePrecision(str: string): boolean {
         return false;
     }
 
-    // Exclude scientific notation
     const normalizeStr = str
         .replace(/^(-?)0+(\d)/, '$1$2') // Remove leading zeros, e.g. 000123 -> 123
         .replace(/(\.\d*?[1-9])0+$/, '$1') // Remove the trailing zeros after the decimal point, e.g. 123.4500 -> 123.45

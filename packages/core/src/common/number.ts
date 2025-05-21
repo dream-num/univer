@@ -29,15 +29,29 @@ export function isSafeNumeric(str: string): boolean {
 
 /**
  * Whether the numeric string will lose precision when converted to a number.
+ * e.g. '123456789123456789' -> 123456789123456780
+ * e.g. '1212121212121212.2345' -> 1212121212121212.2
  */
 export function isNumericWillLosePrecision(str: string): boolean {
-    if (!isSafeNumeric) {
+    if (!/^[-+]?(\d+(\.\d+)?|\.\d+)(e[-+]?\d+)?$/i.test(str)) {
         return true;
     }
 
-    if (str !== Number(str).toString()) {
+    const num = Number(str);
+
+    if (num > Number.MAX_SAFE_INTEGER) {
         return true;
     }
 
-    return false;
+    if (str.indexOf('e') !== -1) {
+        return false;
+    }
+
+    // Exclude scientific notation
+    const normalizeStr = str
+        .replace(/^(-?)0+(\d)/, '$1$2') // Remove leading zeros, e.g. 000123 -> 123
+        .replace(/(\.\d*?[1-9])0+$/, '$1') // Remove the trailing zeros after the decimal point, e.g. 123.4500 -> 123.45
+        .replace(/\.0+$/, ''); // If the number is an integer, remove the decimal point and trailing zeros, e.g. 123.0 -> 123
+
+    return normalizeStr !== num.toString();
 }

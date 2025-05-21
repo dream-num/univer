@@ -1175,5 +1175,171 @@ describe('Test set range values commands', () => {
                 expect(result).toBeFalsy();
             });
         });
+
+        describe('Set a number that will lose precision', () => {
+            it('set value 123456789123456789', async () => {
+                function getParams() {
+                    const params: ISetRangeValuesCommandParams = {
+                        value: { 10: { 0: { v: '123456789123456789' } } },
+                    };
+
+                    return params;
+                }
+
+                expect(await commandService.executeCommand(SetRangeValuesCommand.id, getParams())).toBeTruthy();
+
+                const newValue = getValues(10, 0, 10, 0);
+                expect(newValue).toStrictEqual([
+                    [
+                        {
+                            v: '123456789123456789',
+                            t: CellValueType.FORCE_STRING,
+                        },
+                    ],
+                ]);
+
+                // undo
+                expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+                expect(getValues(10, 0, 10, 0)).toStrictEqual([
+                    [null],
+                ]);
+
+                // redo
+                expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+
+                const redoNewValue = getValues(10, 0, 10, 0);
+                expect(redoNewValue).toStrictEqual([
+                    [
+                        {
+                            v: '123456789123456789',
+                            t: CellValueType.FORCE_STRING,
+                        },
+                    ],
+                ]);
+            });
+
+            it('set value 1212121212121212.2345', async () => {
+                function getParams() {
+                    const params: ISetRangeValuesCommandParams = {
+                        value: { 10: { 1: { v: '1212121212121212.2345' } } },
+                    };
+
+                    return params;
+                }
+
+                expect(await commandService.executeCommand(SetRangeValuesCommand.id, getParams())).toBeTruthy();
+
+                const newValue = getValues(10, 1, 10, 1);
+                expect(newValue).toStrictEqual([
+                    [
+                        {
+                            v: '1212121212121212.2345',
+                            t: CellValueType.FORCE_STRING,
+                        },
+                    ],
+                ]);
+
+                // undo
+                expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+                expect(getValues(10, 1, 10, 1)).toStrictEqual([
+                    [null],
+                ]);
+
+                // redo
+                expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+
+                const redoNewValue = getValues(10, 1, 10, 1);
+                expect(redoNewValue).toStrictEqual([
+                    [
+                        {
+                            v: '1212121212121212.2345',
+                            t: CellValueType.FORCE_STRING,
+                        },
+                    ],
+                ]);
+            });
+
+            it('set value 1e3', async () => {
+                function getParams() {
+                    const params: ISetRangeValuesCommandParams = {
+                        value: { 10: { 2: { v: '1e3' } } },
+                    };
+
+                    return params;
+                }
+
+                expect(await commandService.executeCommand(SetRangeValuesCommand.id, getParams())).toBeTruthy();
+
+                const newValue = getValues(10, 2, 10, 2);
+                expect(newValue).toStrictEqual([
+                    [
+                        {
+                            v: 1000,
+                            t: CellValueType.NUMBER,
+                        },
+                    ],
+                ]);
+
+                // undo
+                expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+                expect(getValues(10, 2, 10, 2)).toStrictEqual([
+                    [null],
+                ]);
+
+                // redo
+                expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+
+                const redoNewValue = getValues(10, 2, 10, 2);
+                expect(redoNewValue).toStrictEqual([
+                    [
+                        {
+                            v: 1000,
+                            t: CellValueType.NUMBER,
+                        },
+                    ],
+                ]);
+            });
+
+            it('set value 001', async () => {
+                function getParams() {
+                    const params: ISetRangeValuesCommandParams = {
+                        value: { 10: { 3: { v: '001' } } },
+                    };
+
+                    return params;
+                }
+
+                expect(await commandService.executeCommand(SetRangeValuesCommand.id, getParams())).toBeTruthy();
+
+                const newValue = getValues(10, 3, 10, 3);
+                expect(newValue).toStrictEqual([
+                    [
+                        {
+                            v: 1,
+                            t: CellValueType.NUMBER,
+                        },
+                    ],
+                ]);
+
+                // undo
+                expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+                expect(getValues(10, 3, 10, 3)).toStrictEqual([
+                    [null],
+                ]);
+
+                // redo
+                expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+
+                const redoNewValue = getValues(10, 3, 10, 3);
+                expect(redoNewValue).toStrictEqual([
+                    [
+                        {
+                            v: 1,
+                            t: CellValueType.NUMBER,
+                        },
+                    ],
+                ]);
+            });
+        });
     });
 });

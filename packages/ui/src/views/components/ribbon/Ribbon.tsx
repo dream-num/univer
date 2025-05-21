@@ -16,6 +16,7 @@
 
 import type { ComponentType } from 'react';
 import type { Observable } from 'rxjs';
+import type { RibbonType } from '../../../controllers/ui/ui.controller';
 import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
 import { LocaleService, throttle } from '@univerjs/core';
 import { borderBottomClassName, borderClassName, clsx, divideXClassName, Dropdown, HoverCard } from '@univerjs/design';
@@ -30,6 +31,7 @@ import { ToolbarButton } from './ToolbarButton';
 import { ToolbarItem } from './ToolbarItem';
 
 interface IRibbonProps {
+    ribbonType: RibbonType;
     headerMenuComponents?: Set<ComponentType>;
     headerMenu?: boolean;
 }
@@ -44,7 +46,7 @@ const iconMap = {
 };
 
 export function Ribbon(props: IRibbonProps) {
-    const { headerMenuComponents, headerMenu = true } = props;
+    const { ribbonType, headerMenuComponents, headerMenu = true } = props;
 
     const menuManagerService = useDependency(IMenuManagerService);
     const localeService = useDependency(LocaleService);
@@ -64,8 +66,9 @@ export function Ribbon(props: IRibbonProps) {
     const toolbarItemRefs = useRef<Record<string, {
         el: HTMLSpanElement;
         key: string;
-        groupOrder: number;
         order: number;
+        groupOrder: number;
+        itemOrder: number;
     }>>({});
 
     const [ribbon, setRibbon] = useState<IMenuSchema[]>([]);
@@ -156,7 +159,18 @@ export function Ribbon(props: IRibbonProps) {
                     }
                 }
 
-                setRibbon(newRibbon);
+                if (ribbonType === 'simple') {
+                    const simpleRibbon: IMenuSchema[] = [{ key: RibbonPosition.START, children: [], order: 0 }];
+                    newRibbon.forEach((group) => {
+                        group.children?.forEach((item) => {
+                            simpleRibbon[0].children?.push(item);
+                        });
+                    });
+
+                    setRibbon(simpleRibbon);
+                } else {
+                    setRibbon(newRibbon);
+                }
             })
             .unsubscribe();
     }, [menuChangedTimes]);
@@ -201,10 +215,7 @@ export function Ribbon(props: IRibbonProps) {
                     const { width: avaliableWidth } = entry.contentRect;
                     const toolbarItems = Object.values(toolbarItemRefs.current);
                     const sortedToolbarItems = toolbarItems.sort((a, b) => {
-                        if (a.groupOrder === b.groupOrder) {
-                            return a.order - b.order;
-                        }
-                        return a.groupOrder - b.groupOrder;
+                        return a.order - b.order || a.groupOrder - b.groupOrder || a.itemOrder - b.itemOrder;
                     });
 
                     const newCollapsedIds: string[] = [];
@@ -229,7 +240,7 @@ export function Ribbon(props: IRibbonProps) {
                     setFakeToolbarVisible(false);
                 });
             }
-        }, 300));
+        }, 100));
 
         observer.observe(containerRef.current);
 
@@ -249,7 +260,7 @@ export function Ribbon(props: IRibbonProps) {
                   univer-flex univer-h-10 univer-min-w-min univer-items-center univer-px-3 univer-opacity-0
                 `, borderBottomClassName)}
             >
-                {activeGroup.allGroups.map((groupItem) => (groupItem.children?.length || groupItem.item) && (
+                {activeGroup.allGroups.map((groupItem, index) => (groupItem.children?.length || groupItem.item) && (
                     <Fragment key={groupItem.key}>
                         <div className="univer-grid univer-grid-flow-col univer-gap-2 univer-px-2">
                             {groupItem.children && groupItem.children?.map((child) => (
@@ -262,8 +273,9 @@ export function Ribbon(props: IRibbonProps) {
                                                 toolbarItemRefs.current[child.key] = {
                                                     el: ref.el,
                                                     key: child.key,
+                                                    order: index,
                                                     groupOrder: groupItem.order,
-                                                    order: child.order,
+                                                    itemOrder: child.order,
                                                 };
                                             }
                                         }}
@@ -298,7 +310,10 @@ export function Ribbon(props: IRibbonProps) {
             <div
                 className={clsx(`
                   univer-box-border univer-grid univer-h-10 univer-grid-flow-col univer-items-center univer-px-3
-                `, 'univer-grid-cols-[auto,1fr]', borderBottomClassName)}
+                `, {
+                    'univer-grid-cols-[auto,1fr]': ribbon.length > 1,
+                    'univer-grid-cols-none': ribbon.length === 1,
+                }, borderBottomClassName)}
             >
                 {/* <search className="univer-mr-1 univer-w-20">
                     <Input />
@@ -317,6 +332,7 @@ export function Ribbon(props: IRibbonProps) {
                                     return (
                                         <a
                                             key={group.key}
+                                            data-u-comp="ribbon-group-btn"
                                             className={`
                                               univer-box-border univer-flex univer-cursor-pointer univer-items-center
                                               univer-gap-2.5 univer-rounded-lg univer-px-2 univer-py-1.5
@@ -377,7 +393,11 @@ export function Ribbon(props: IRibbonProps) {
                     </HoverCard>
                 )}
 
-                <div ref={containerRef} className={clsx('univer-flex univer-overflow-hidden', divideXClassName)}>
+                <div
+                    data-u-comp="ribbon-toolbar"
+                    ref={containerRef}
+                    className={clsx('univer-flex univer-overflow-hidden', divideXClassName)}
+                >
                     {activeGroup.visibleGroups.map((groupItem) => (groupItem.children?.length || groupItem.item) && (
                         <Fragment key={groupItem.key}>
                             <div className="univer-grid univer-grid-flow-col univer-gap-2 univer-px-2">
@@ -390,7 +410,7 @@ export function Ribbon(props: IRibbonProps) {
 
                     {/* More functions dropdown */}
                     {collapsedIds.length > 0 && (
-                        <div className="univer-pl-2">
+                        <div data-u-comp="ribbon-toolbar-more" className="univer-pl-2">
                             <Dropdown
                                 collisionPadding={{ right: 12 }}
                                 overlay={(

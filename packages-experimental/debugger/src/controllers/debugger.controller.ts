@@ -48,7 +48,9 @@ export class DebuggerController extends Disposable {
         const configs = this._configService.getConfig<IUniverDebuggerConfig>(DEBUGGER_PLUGIN_CONFIG_KEY);
 
         if (configs?.fab) {
-            this._uiPartsService.registerComponent(BuiltInUIPart.GLOBAL, () => connectInjector(Fab, this._injector));
+            this.disposeWithMe(
+                this._uiPartsService.registerComponent(BuiltInUIPart.GLOBAL, () => connectInjector(Fab, this._injector))
+            );
         }
     }
 }

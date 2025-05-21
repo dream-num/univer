@@ -39,7 +39,6 @@ import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 import { UniverSheetsZenEditorPlugin } from '@univerjs/sheets-zen-editor';
 import { UniverUIPlugin } from '@univerjs/ui';
 import { enUS, faIR, frFR, ruRU, viVN, zhCN, zhTW } from '../locales';
-import { UniverSheetsCustomMenuPlugin } from './custom-menu';
 import ImportCSVButtonPlugin from './custom-plugin/import-csv-button';
 
 import '@univerjs/sheets/facade';
@@ -105,6 +104,7 @@ function createNewInstance() {
     univer.registerPlugin(UniverRenderEnginePlugin);
     univer.registerPlugin(UniverUIPlugin, {
         container: 'app',
+        // ribbonType: 'simple',
     });
     univer.registerPlugin(UniverDocsUIPlugin);
 
@@ -126,7 +126,6 @@ function createNewInstance() {
     univer.registerPlugin(UniverSheetsSortPlugin);
     univer.registerPlugin(UniverSheetsHyperLinkPlugin);
     univer.registerPlugin(UniverSheetsThreadCommentPlugin);
-    univer.registerPlugin(UniverSheetsCustomMenuPlugin);
 
     univer.registerPlugin(UniverSheetsTablePlugin);
     univer.registerPlugin(UniverNetworkPlugin);

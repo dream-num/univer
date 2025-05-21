@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { IUniverInstanceService } from '@univerjs/core';
 import { useDependency } from '@univerjs/ui';
 
 const menu = [
@@ -25,10 +25,6 @@ const menu = [
     {
         label: 'Dispose current unit',
         value: 'unit',
-    },
-    {
-        label: 'Create another sheet',
-        value: 'create',
     },
 ];
 
@@ -45,8 +41,6 @@ export function useDispose() {
             if (!focused) return false;
 
             return univerInstanceService.disposeUnit(focused.getUnitId());
-        } else if (value === 'create') {
-            univerInstanceService.createUnit(UniverInstanceType.UNIVER_SHEET, {});
         }
     };
 

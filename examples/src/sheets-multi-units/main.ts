@@ -22,6 +22,7 @@ import { UniverDocsMentionUIPlugin } from '@univerjs/docs-mention-ui';
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
+import zhCN from '@univerjs/mockdata/locales/zh-CN';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverSheetsConditionalFormattingPlugin } from '@univerjs/sheets-conditional-formatting';
 import { UniverSheetsDataValidationPlugin } from '@univerjs/sheets-data-validation';
@@ -38,7 +39,6 @@ import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 import { UniverSheetsZenEditorPlugin } from '@univerjs/sheets-zen-editor';
 import { UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
 import { UniverUIPlugin } from '@univerjs/ui';
-import { enUS, faIR, frFR, ruRU, viVN, zhCN, zhTW } from '../locales';
 import '@univerjs/sheets/facade';
 import '@univerjs/ui/facade';
 import '@univerjs/docs-ui/facade';
@@ -74,12 +74,6 @@ const univer = new Univer({
     locale: LocaleType.ZH_CN,
     locales: {
         [LocaleType.ZH_CN]: zhCN,
-        [LocaleType.EN_US]: enUS,
-        [LocaleType.FR_FR]: frFR,
-        [LocaleType.RU_RU]: ruRU,
-        [LocaleType.ZH_TW]: zhTW,
-        [LocaleType.VI_VN]: viVN,
-        [LocaleType.FA_IR]: faIR,
     },
     logLevel: LogLevel.VERBOSE,
 });

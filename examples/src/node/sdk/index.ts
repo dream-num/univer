@@ -21,6 +21,7 @@ import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverDocsDrawingPlugin } from '@univerjs/docs-drawing';
 import { UniverDrawingPlugin } from '@univerjs/drawing';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
+import zhCN from '@univerjs/mockdata/locales/zh-CN';
 import { UniverRPCNodeMainPlugin } from '@univerjs/rpc-node';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverSheetsConditionalFormattingPlugin } from '@univerjs/sheets-conditional-formatting';
@@ -32,8 +33,6 @@ import { UniverSheetsHyperLinkPlugin } from '@univerjs/sheets-hyper-link';
 import { UniverSheetsSortPlugin } from '@univerjs/sheets-sort';
 import { UniverThreadCommentPlugin } from '@univerjs/thread-comment';
 
-import { enUS } from '../../locales';
-
 import './facade';
 
 export interface ICreateUniverOnNodeOptions {
@@ -44,9 +43,9 @@ export function createUniverOnNode(options: ICreateUniverOnNodeOptions = {}): Un
     const { useComputingWorker = false } = options;
 
     const univer = new Univer({
-        locale: LocaleType.EN_US,
+        locale: LocaleType.ZH_CN,
         locales: {
-            [LocaleType.EN_US]: enUS,
+            [LocaleType.ZH_CN]: zhCN,
         },
     });
 

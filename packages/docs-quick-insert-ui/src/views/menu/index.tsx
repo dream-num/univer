@@ -74,13 +74,13 @@ export const QuickInsertButton = ({ className = '' }: IQuickInsertButtonProps) =
             layoutService.focus();
         });
     });
+
     return (
         <div
             className={clsx(`
               univer-mr-1 univer-flex univer-cursor-pointer univer-items-center univer-gap-2.5 univer-rounded-full
               univer-p-1.5 univer-shadow-sm
-              dark:hover:!univer-bg-gray-700
-              dark:univer-text-gray-200
+              dark:!univer-text-gray-200 dark:hover:!univer-bg-gray-700
               hover:univer-bg-gray-100
             `, borderClassName, {
                 'univer-bg-gray-100 dark:!univer-bg-gray-700': editPopup,
@@ -90,7 +90,12 @@ export const QuickInsertButton = ({ className = '' }: IQuickInsertButtonProps) =
             tabIndex={0}
             onClick={onClick}
         >
-            <PlusSingle className="univer-text-gray-800 dark:univer-text-gray-200" />
+            <PlusSingle
+                className={`
+                  univer-text-gray-800
+                  dark:!univer-text-gray-200
+                `}
+            />
         </div>
     );
 };

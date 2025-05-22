@@ -545,58 +545,145 @@ importers:
 
   mockdata:
     dependencies:
+      '@univerjs/action-recorder':
+        specifier: workspace:*
+        version: link:../packages/action-recorder
       '@univerjs/core':
         specifier: workspace:*
         version: link:../packages/core
       '@univerjs/data-validation':
         specifier: workspace:*
         version: link:../packages/data-validation
+      '@univerjs/design':
+        specifier: workspace:*
+        version: link:../packages/design
       '@univerjs/docs':
         specifier: workspace:*
         version: link:../packages/docs
       '@univerjs/docs-drawing':
         specifier: workspace:*
         version: link:../packages/docs-drawing
+      '@univerjs/docs-drawing-ui':
+        specifier: workspace:*
+        version: link:../packages/docs-drawing-ui
+      '@univerjs/docs-hyper-link-ui':
+        specifier: workspace:*
+        version: link:../packages/docs-hyper-link-ui
+      '@univerjs/docs-quick-insert-ui':
+        specifier: workspace:*
+        version: link:../packages/docs-quick-insert-ui
+      '@univerjs/docs-ui':
+        specifier: workspace:*
+        version: link:../packages/docs-ui
       '@univerjs/drawing':
         specifier: workspace:*
         version: link:../packages/drawing
+      '@univerjs/drawing-ui':
+        specifier: workspace:*
+        version: link:../packages/drawing-ui
       '@univerjs/engine-render':
         specifier: workspace:*
         version: link:../packages/engine-render
+      '@univerjs/find-replace':
+        specifier: workspace:*
+        version: link:../packages/find-replace
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../packages/sheets
       '@univerjs/sheets-conditional-formatting':
         specifier: workspace:*
         version: link:../packages/sheets-conditional-formatting
+      '@univerjs/sheets-conditional-formatting-ui':
+        specifier: workspace:*
+        version: link:../packages/sheets-conditional-formatting-ui
+      '@univerjs/sheets-crosshair-highlight':
+        specifier: workspace:*
+        version: link:../packages/sheets-crosshair-highlight
       '@univerjs/sheets-data-validation':
         specifier: workspace:*
         version: link:../packages/sheets-data-validation
+      '@univerjs/sheets-data-validation-ui':
+        specifier: workspace:*
+        version: link:../packages/sheets-data-validation-ui
       '@univerjs/sheets-drawing':
         specifier: workspace:*
         version: link:../packages/sheets-drawing
+      '@univerjs/sheets-drawing-ui':
+        specifier: workspace:*
+        version: link:../packages/sheets-drawing-ui
       '@univerjs/sheets-filter':
         specifier: workspace:*
         version: link:../packages/sheets-filter
+      '@univerjs/sheets-filter-ui':
+        specifier: workspace:*
+        version: link:../packages/sheets-filter-ui
+      '@univerjs/sheets-find-replace':
+        specifier: workspace:*
+        version: link:../packages/sheets-find-replace
       '@univerjs/sheets-formula':
         specifier: workspace:*
         version: link:../packages/sheets-formula
+      '@univerjs/sheets-formula-ui':
+        specifier: workspace:*
+        version: link:../packages/sheets-formula-ui
       '@univerjs/sheets-hyper-link':
         specifier: workspace:*
         version: link:../packages/sheets-hyper-link
+      '@univerjs/sheets-hyper-link-ui':
+        specifier: workspace:*
+        version: link:../packages/sheets-hyper-link-ui
+      '@univerjs/sheets-note-ui':
+        specifier: workspace:*
+        version: link:../packages/sheets-note-ui
+      '@univerjs/sheets-numfmt-ui':
+        specifier: workspace:*
+        version: link:../packages/sheets-numfmt-ui
       '@univerjs/sheets-sort':
         specifier: workspace:*
         version: link:../packages/sheets-sort
+      '@univerjs/sheets-sort-ui':
+        specifier: workspace:*
+        version: link:../packages/sheets-sort-ui
+      '@univerjs/sheets-table-ui':
+        specifier: workspace:*
+        version: link:../packages/sheets-table-ui
       '@univerjs/sheets-thread-comment':
         specifier: workspace:*
         version: link:../packages/sheets-thread-comment
+      '@univerjs/sheets-thread-comment-ui':
+        specifier: workspace:*
+        version: link:../packages/sheets-thread-comment-ui
+      '@univerjs/sheets-ui':
+        specifier: workspace:*
+        version: link:../packages/sheets-ui
+      '@univerjs/sheets-zen-editor':
+        specifier: workspace:*
+        version: link:../packages/sheets-zen-editor
+      '@univerjs/slides-ui':
+        specifier: workspace:*
+        version: link:../packages/slides-ui
       '@univerjs/thread-comment':
         specifier: workspace:*
         version: link:../packages/thread-comment
+      '@univerjs/thread-comment-ui':
+        specifier: workspace:*
+        version: link:../packages/thread-comment-ui
+      '@univerjs/ui':
+        specifier: workspace:*
+        version: link:../packages/ui
+      '@univerjs/uni-formula-ui':
+        specifier: workspace:*
+        version: link:../packages-experimental/uni-formula-ui
+      '@univerjs/uniscript':
+        specifier: workspace:*
+        version: link:../packages/uniscript
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
         version: link:../common/shared
+      fs-extra:
+        specifier: ^11.3.0
+        version: 11.3.0
       typescript:
         specifier: ^5.8.3
         version: 5.8.3

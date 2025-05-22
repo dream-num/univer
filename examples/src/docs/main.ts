@@ -27,8 +27,8 @@ import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { DEFAULT_DOCUMENT_DATA_SIMPLE } from '@univerjs/mockdata';
+import zhCN from '@univerjs/mockdata/locales/zh-CN';
 import { UniverUIPlugin } from '@univerjs/ui';
-import { enUS, faIR, ruRU, zhCN } from '../locales';
 
 import '../global.css';
 
@@ -40,9 +40,6 @@ const univer = new Univer({
     locale: LocaleType.ZH_CN,
     locales: {
         [LocaleType.ZH_CN]: zhCN,
-        [LocaleType.EN_US]: enUS,
-        [LocaleType.RU_RU]: ruRU,
-        [LocaleType.FA_IR]: faIR,
     },
     logLevel: LogLevel.VERBOSE,
 });

@@ -15,7 +15,6 @@
  */
 
 import type { IImageWatermarkConfig } from '@univerjs/engine-render';
-import { LocaleService } from '@univerjs/core';
 import { Button, Checkbox, InputNumber } from '@univerjs/design';
 import { ILocalFileService, useDependency } from '@univerjs/ui';
 import { WATERMARK_IMAGE_ALLOW_IMAGE_LIST } from '@univerjs/watermark';
@@ -27,7 +26,6 @@ interface IWatermarkImageSettingProps {
 
 export function WatermarkImageSetting({ config, onChange }: IWatermarkImageSettingProps) {
     const fileOpenService = useDependency(ILocalFileService);
-    const localeService = useDependency(LocaleService);
 
     if (!config) return null;
 
@@ -64,19 +62,19 @@ export function WatermarkImageSetting({ config, onChange }: IWatermarkImageSetti
 
     return (
         <div className="univer-grid univer-gap-2">
-            <div className="univer-text-gray-400">{localeService.t('univer-watermark.image')}</div>
+            <div className="univer-text-gray-400">Image</div>
 
             <div className="univer-mb-4 univer-grid univer-gap-1">
                 <Button
                     className="univer-mb-2"
                     onClick={handleUpdateImageUrl}
                 >
-                    {config.url ? localeService.t('univer-watermark.replaceImage') : localeService.t('univer-watermark.uploadImage')}
+                    {config.url ? 'Replace Image' : 'Upload Image'}
                 </Button>
 
                 <div className="univer-flex univer-gap-2 univer-text-center">
                     <div className="univer-grid univer-flex-1 univer-gap-1">
-                        <div>{localeService.t('univer-watermark.opacity')}</div>
+                        <div>Opacity</div>
                         <InputNumber
                             className="univer-box-border univer-h-7"
                             value={config.opacity}
@@ -92,7 +90,7 @@ export function WatermarkImageSetting({ config, onChange }: IWatermarkImageSetti
                     </div>
 
                     <div className="univer-grid univer-flex-1 univer-gap-1">
-                        <div>{localeService.t('univer-watermark.keepRatio')}</div>
+                        <div>Keep Ratio</div>
                         <Checkbox
                             className="univer-justify-center univer-self-baseline"
                             checked={config.maintainAspectRatio}
@@ -111,7 +109,7 @@ export function WatermarkImageSetting({ config, onChange }: IWatermarkImageSetti
             <div className="univer-grid univer-gap-2 univer-text-center">
                 <div className="univer-flex univer-gap-2">
                     <div className="univer-grid univer-flex-1 univer-gap-1">
-                        <div>{localeService.t('univer-watermark.width')}</div>
+                        <div>Width</div>
                         <InputNumber
                             className="univer-box-border univer-h-7"
                             value={config.width}
@@ -130,7 +128,7 @@ export function WatermarkImageSetting({ config, onChange }: IWatermarkImageSetti
                     </div>
 
                     <div className="univer-grid univer-flex-1 univer-gap-1">
-                        <div>{localeService.t('univer-watermark.height')}</div>
+                        <div>Height</div>
                         <InputNumber
                             className="univer-box-border univer-h-7"
                             value={config.height}
@@ -150,12 +148,12 @@ export function WatermarkImageSetting({ config, onChange }: IWatermarkImageSetti
                 </div>
             </div>
 
-            <div className="univer-text-gray-400">{localeService.t('univer-watermark.layout')}</div>
+            <div className="univer-text-gray-400">Layout Settings</div>
 
             <div className="univer-grid univer-gap-2 univer-text-center">
                 <div className="univer-flex univer-gap-2">
                     <div className="univer-grid univer-flex-1 univer-gap-1">
-                        <div>{localeService.t('univer-watermark.rotate')}</div>
+                        <div>Rotate</div>
                         <InputNumber
                             className="univer-box-border univer-h-7"
                             value={config.rotate}
@@ -169,7 +167,7 @@ export function WatermarkImageSetting({ config, onChange }: IWatermarkImageSetti
                         />
                     </div>
                     <div className="univer-grid univer-flex-1 univer-gap-1">
-                        <div>{localeService.t('univer-watermark.repeat')}</div>
+                        <div>Repeat</div>
                         <Checkbox
                             className="univer-justify-center univer-self-baseline"
                             checked={config.repeat}
@@ -179,7 +177,7 @@ export function WatermarkImageSetting({ config, onChange }: IWatermarkImageSetti
                 </div>
                 <div className="univer-flex univer-gap-2">
                     <div className="univer-grid univer-flex-1 univer-gap-1">
-                        <div>{localeService.t('univer-watermark.spacingX')}</div>
+                        <div>Horizontal Spacing</div>
                         <InputNumber
                             className="univer-box-border univer-h-7"
                             value={config.spacingX}
@@ -193,7 +191,7 @@ export function WatermarkImageSetting({ config, onChange }: IWatermarkImageSetti
                     </div>
 
                     <div className="univer-grid univer-flex-1 univer-gap-1">
-                        <div>{localeService.t('univer-watermark.spacingY')}</div>
+                        <div>Vertical Spacing</div>
                         <InputNumber
                             className="univer-box-border univer-h-7"
                             value={config.spacingY}
@@ -208,7 +206,7 @@ export function WatermarkImageSetting({ config, onChange }: IWatermarkImageSetti
                 </div>
                 <div className="univer-flex univer-gap-2">
                     <div className="univer-grid univer-flex-1 univer-gap-1">
-                        <div>{localeService.t('univer-watermark.startX')}</div>
+                        <div>Horizontal Start Position</div>
                         <InputNumber
                             className="univer-box-border univer-h-7"
                             value={config.x}
@@ -222,7 +220,7 @@ export function WatermarkImageSetting({ config, onChange }: IWatermarkImageSetti
                     </div>
 
                     <div className="univer-grid univer-flex-1 univer-gap-1">
-                        <div>{localeService.t('univer-watermark.startY')}</div>
+                        <div>Vertical Start Position</div>
                         <InputNumber
                             className="univer-box-border univer-h-7"
                             value={config.y}

@@ -14,17 +14,15 @@
  * limitations under the License.
  */
 
-import { LocaleService } from '@univerjs/core';
 import { ISidebarService, useDependency } from '@univerjs/ui';
 import { WATERMARK_PANEL, WATERMARK_PANEL_FOOTER } from '../controllers/watermark.menu.controller';
 
 export function useWatermark() {
     const sidebarService = useDependency(ISidebarService);
-    const localeService = useDependency(LocaleService);
 
     const onSelect = () => {
         sidebarService.open({
-            header: { title: localeService.t('univer-watermark.title') },
+            header: { title: 'Watermark' },
             children: { label: WATERMARK_PANEL },
             footer: { label: WATERMARK_PANEL_FOOTER },
             onClose: () => { },

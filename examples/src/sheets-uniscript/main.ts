@@ -21,6 +21,7 @@ import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { UNISCRIT_WORKBOOK_DATA_DEMO } from '@univerjs/mockdata';
+import zhCN from '@univerjs/mockdata/locales/zh-CN';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
 import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
@@ -28,7 +29,6 @@ import { UniverSheetsNumfmtUIPlugin } from '@univerjs/sheets-numfmt-ui';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 import { UniverUIPlugin } from '@univerjs/ui';
 import { UniverUniscriptPlugin } from '@univerjs/uniscript';
-import { enUS, faIR, ruRU, zhCN } from '../locales';
 
 import '../global.css';
 
@@ -37,9 +37,6 @@ const univer = new Univer({
     locale: LocaleType.ZH_CN,
     locales: {
         [LocaleType.ZH_CN]: zhCN,
-        [LocaleType.EN_US]: enUS,
-        [LocaleType.RU_RU]: ruRU,
-        [LocaleType.FA_IR]: faIR,
     },
     logLevel: LogLevel.VERBOSE,
 });

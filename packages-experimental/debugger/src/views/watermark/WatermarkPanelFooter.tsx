@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import { LocaleService } from '@univerjs/core';
 import { Button } from '@univerjs/design';
 import { IWatermarkTypeEnum } from '@univerjs/engine-render';
 import { IClipboardInterfaceService, ISidebarService, useDependency } from '@univerjs/ui';
@@ -23,7 +22,6 @@ import { WatermarkService, WatermarkTextBaseConfig } from '@univerjs/watermark';
 export function WatermarkPanelFooter() {
     const sidebarService = useDependency(ISidebarService);
     const watermarkService = useDependency(WatermarkService);
-    const localeService = useDependency(LocaleService);
     const clipboardService = useDependency(IClipboardInterfaceService);
 
     return (
@@ -38,7 +36,7 @@ export function WatermarkPanelFooter() {
                     watermarkService.refresh();
                 }}
             >
-                {localeService.t('univer-watermark.cancel')}
+                Cancel Watermark
             </a>
 
             <div className="univer-flex univer-items-center univer-gap-2">
@@ -54,7 +52,7 @@ export function WatermarkPanelFooter() {
                         clipboardService.writeText(JSON.stringify(config));
                     }}
                 >
-                    {localeService.t('univer-watermark.copy')}
+                    Copy Config
                 </Button>
                 <Button
                     onClick={async () => {
@@ -67,7 +65,7 @@ export function WatermarkPanelFooter() {
                         sidebarService.close();
                     }}
                 >
-                    {localeService.t('univer-watermark.close')}
+                    Close Panel
                 </Button>
             </div>
         </div>

@@ -48,15 +48,50 @@ const locales = [
 export function useLocale() {
     const localeService = useDependency(LocaleService);
 
+    async function loadLocales(value: string) {
+        let locales;
+        switch (value) {
+            case LocaleType.ZH_CN:
+                locales = await import('@univerjs/mockdata/locales/zh-CN');
+                break;
+            case LocaleType.ZH_TW:
+                locales = await import('@univerjs/mockdata/locales/zh-TW');
+                break;
+            case LocaleType.FR_FR:
+                locales = await import('@univerjs/mockdata/locales/fr-FR');
+                break;
+            case LocaleType.RU_RU:
+                locales = await import('@univerjs/mockdata/locales/ru-RU');
+                break;
+            case LocaleType.VI_VN:
+                locales = await import('@univerjs/mockdata/locales/vi-VN');
+                break;
+            case LocaleType.EN_US:
+            default:
+                locales = await import('@univerjs/mockdata/locales/en-US');
+                break;
+        }
+
+        localeService.load({
+            [value]: locales.default,
+        });
+    }
+
     useEffect(() => {
         const locale = localStorage.getItem('local.locale');
+
         if (locale) {
-            localeService.setLocale(locale as LocaleType);
+            loadLocales(locale).then(() => {
+                localeService.setLocale(locale as LocaleType);
+            });
         }
     }, []);
 
-    const onSelect = (value: string) => {
+    const onSelect = async (value: string) => {
+        await loadLocales(value);
+
         localeService.setLocale(value as LocaleType);
+
         localStorage.setItem('local.locale', value);
     };
 

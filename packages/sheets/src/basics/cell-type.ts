@@ -15,7 +15,7 @@
  */
 
 import type { CellValue, ICellData, IStyleData, Nullable, Styles } from '@univerjs/core';
-import { CellValueType, isBooleanString, isNumericWillLosePrecision, isRealNum } from '@univerjs/core';
+import { CellValueType, isBooleanString, isRealNum, willLoseNumericPrecision } from '@univerjs/core';
 import { isTextFormat } from '@univerjs/engine-numfmt';
 
 /**
@@ -92,7 +92,7 @@ export function checkCellValueType(v: Nullable<CellValue>, type: Nullable<CellVa
             // If the numeric string will lose precision when converted to a number, set the cell type to force string
             // e.g. 123456789123456789
             // e.g. 1212121212121212.2345
-            if (isNumericWillLosePrecision(v)) {
+            if (willLoseNumericPrecision(v)) {
                 return CellValueType.FORCE_STRING;
             }
 

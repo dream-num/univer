@@ -32,18 +32,6 @@ export function isSafeNumeric(str: string): boolean {
  * e.g. '123456789123456789' -> 123456789123456780
  * e.g. '1212121212121212.2345' -> 1212121212121212.2
  */
-export function isNumericWillLosePrecision(str: string): boolean {
-    const num = Number(str);
-
-    if (num > Number.MAX_SAFE_INTEGER) {
-        return true;
-    }
-
-    const normalizeStr = str
-        .replace(/^\+/, '') // Remove the leading plus sign, e.g. +123 -> 123
-        .replace(/^(-?)0+(\d)/, '$1$2') // Remove leading zeros, e.g. 000123 -> 123
-        .replace(/(\.\d*?[1-9])0+$/, '$1') // Remove the trailing zeros after the decimal point, e.g. 123.4500 -> 123.45
-        .replace(/\.0*$/, ''); // If the number is an integer, remove the decimal point and trailing zeros, e.g. 123.0 -> 123
-
-    return normalizeStr !== num.toString();
+export function willLoseNumericPrecision(str: string): boolean {
+    return Number(str) > Number.MAX_SAFE_INTEGER || str.length >= 18;
 }

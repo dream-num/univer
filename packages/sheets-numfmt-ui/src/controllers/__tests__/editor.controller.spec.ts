@@ -16,7 +16,7 @@
 
 import type { ICellDataForSheetInterceptor, Injector, Univer, Workbook, Worksheet } from '@univerjs/core';
 import type { ISetNumfmtMutationParams, ISheetLocation } from '@univerjs/sheets';
-import { CellModeEnum, createInterceptorKey, ICommandService, InterceptorManager, IUniverInstanceService, LocaleType, UniverInstanceType } from '@univerjs/core';
+import { CellModeEnum, CellValueType, createInterceptorKey, ICommandService, InterceptorManager, IUniverInstanceService, LocaleType, UniverInstanceType } from '@univerjs/core';
 import { SetNumfmtMutation, SheetInterceptorService } from '@univerjs/sheets';
 
 import { SheetsNumfmtCellContentController } from '@univerjs/sheets-numfmt';
@@ -155,7 +155,6 @@ describe('test editor', () => {
             col: 0,
             origin: cellData,
         };
-
         const result = sheetInterceptorService.writeCellInterceptor.fetchThroughInterceptors(AFTER_CELL_EDIT)(cellData, location);
         // The date-time drop is a numeric value, not a literal string
         expect(result?.v).toBe(0.5231712962962963);
@@ -317,6 +316,120 @@ describe('test editor', () => {
         const result = sheetInterceptorService.writeCellInterceptor.fetchThroughInterceptors(AFTER_CELL_EDIT)(cellData, location);
         expect(result?.p).toEqual(richTextParams);
         expect(result?.v).toBeFalsy();
+    });
+
+    it('edit number 123456789123456789', () => {
+        const sheetInterceptorService = testBed.get(SheetInterceptorService);
+        const cellData = { v: '123456789123456789' };
+        const location = {
+            workbook,
+            worksheet,
+            unitId,
+            subUnitId,
+            row: 0,
+            col: 0,
+            origin: cellData,
+        };
+
+        const result = sheetInterceptorService.writeCellInterceptor.fetchThroughInterceptors(AFTER_CELL_EDIT)(cellData, location);
+
+        expect(result?.v).toBe('123456789123456789');
+        expect(result?.t).toBe(CellValueType.FORCE_STRING);
+    });
+
+    it('edit number 1212121212121212.2345', () => {
+        const sheetInterceptorService = testBed.get(SheetInterceptorService);
+        const cellData = { v: '1212121212121212.2345' };
+        const location = {
+            workbook,
+            worksheet,
+            unitId,
+            subUnitId,
+            row: 0,
+            col: 0,
+            origin: cellData,
+        };
+
+        const result = sheetInterceptorService.writeCellInterceptor.fetchThroughInterceptors(AFTER_CELL_EDIT)(cellData, location);
+
+        expect(result?.v).toBe('1212121212121212.2345');
+        expect(result?.t).toBe(CellValueType.FORCE_STRING);
+    });
+
+    it('edit number 1212121212121212', () => {
+        const sheetInterceptorService = testBed.get(SheetInterceptorService);
+        const cellData = { v: '1212121212121212' };
+        const location = {
+            workbook,
+            worksheet,
+            unitId,
+            subUnitId,
+            row: 0,
+            col: 0,
+            origin: cellData,
+        };
+
+        const result = sheetInterceptorService.writeCellInterceptor.fetchThroughInterceptors(AFTER_CELL_EDIT)(cellData, location);
+
+        expect(result?.v).toBe(1212121212121212);
+        expect(result?.t).toBe(CellValueType.NUMBER);
+    });
+
+    it('edit number 1e3', () => {
+        const sheetInterceptorService = testBed.get(SheetInterceptorService);
+        const cellData = { v: '1e3' };
+        const location = {
+            workbook,
+            worksheet,
+            unitId,
+            subUnitId,
+            row: 0,
+            col: 0,
+            origin: cellData,
+        };
+
+        const result = sheetInterceptorService.writeCellInterceptor.fetchThroughInterceptors(AFTER_CELL_EDIT)(cellData, location);
+
+        expect(result?.v).toBe(1000);
+        expect(result?.t).toBe(CellValueType.NUMBER);
+    });
+
+    it('edit number 001', () => {
+        const sheetInterceptorService = testBed.get(SheetInterceptorService);
+        const cellData = { v: '001' };
+        const location = {
+            workbook,
+            worksheet,
+            unitId,
+            subUnitId,
+            row: 0,
+            col: 0,
+            origin: cellData,
+        };
+
+        const result = sheetInterceptorService.writeCellInterceptor.fetchThroughInterceptors(AFTER_CELL_EDIT)(cellData, location);
+
+        expect(result?.v).toBe(1);
+        expect(result?.t).toBe(CellValueType.NUMBER);
+    });
+
+    it('edit number +123.', () => {
+        const sheetInterceptorService = testBed.get(SheetInterceptorService);
+        const cellData = { v: '+123.' };
+        const location = {
+            workbook,
+            worksheet,
+            unitId,
+            subUnitId,
+            row: 0,
+            col: 0,
+            origin: cellData,
+        };
+
+        const result = sheetInterceptorService.writeCellInterceptor.fetchThroughInterceptors(AFTER_CELL_EDIT)(cellData, location);
+
+        expect(result?.v).toBe(123);
+        expect(result?.t).toBe(CellValueType.NUMBER);
     });
 });
 

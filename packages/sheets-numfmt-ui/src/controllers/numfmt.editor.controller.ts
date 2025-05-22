@@ -26,12 +26,12 @@ import {
     Disposable,
     Inject,
     Injector,
-    isNumericWillLosePrecision,
     IUniverInstanceService,
     numfmt,
     Optional,
     toDisposable,
     UniverInstanceType,
+    willLoseNumericPrecision,
 } from '@univerjs/core';
 import { isTextFormat } from '@univerjs/engine-numfmt';
 import {
@@ -192,7 +192,7 @@ export class NumfmtEditorController extends Disposable {
                             // If the numeric string will lose precision when converted to a number, set the cell type to force string
                             // e.g. 123456789123456789
                             // e.g. 1212121212121212.2345
-                            if (!numfmtInfo.z && isNumericWillLosePrecision(content)) {
+                            if (!numfmtInfo.z && willLoseNumericPrecision(content)) {
                                 return next({
                                     ...value,
                                     p: undefined,

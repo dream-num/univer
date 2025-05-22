@@ -24,7 +24,7 @@ jobs:
         steps:
             # Get PR id from artifact
             - name: download pr artifact
-              uses: dawidd6/action-download-artifact@v6
+              uses: dawidd6/action-download-artifact@v9
               with:
                   workflow: ${{ github.event.workflow_run.workflow_id }}
                   run_id: ${{ github.event.workflow_run.id }}
@@ -36,7 +36,7 @@ jobs:
 
             # Get PR ref from artifact
             - name: download pr artifact
-              uses: dawidd6/action-download-artifact@v6
+              uses: dawidd6/action-download-artifact@v9
               with:
                   workflow: ${{ github.event.workflow_run.workflow_id }}
                   run_id: ${{ github.event.workflow_run.id }}
@@ -48,7 +48,7 @@ jobs:
 
             # Get PR repo from artifact
             - name: download pr artifact
-              uses: dawidd6/action-download-artifact@v6
+              uses: dawidd6/action-download-artifact@v9
               with:
                   workflow: ${{ github.event.workflow_run.workflow_id }}
                   run_id: ${{ github.event.workflow_run.id }}

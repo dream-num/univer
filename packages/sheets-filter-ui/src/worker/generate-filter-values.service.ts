@@ -177,7 +177,7 @@ export function getFilterTreeByValueItems(
             }
 
             const fmtStr = (cell.value?.v && !cell.value.p) ? styles.get(cell.value?.s)?.n?.pattern : '';
-            const isDateValue = fmtStr && numfmt.isDate(fmtStr);
+            const isDateValue = fmtStr && numfmt.getFormatInfo(fmtStr).isDate;
             if (fmtStr && isDateValue && canSplitPatternSet.has(fmtStr)) {
                 // const originValue = numfmt.parseDate(value).v as number;
                 const originValue = worksheet.getCellRaw(cell.row, cell.col)?.v as number;

@@ -80,7 +80,7 @@ class CalculateValueSet {
 
             const { pattern } = style.n;
             if (!patternInfoRecord[pattern]) {
-                patternInfoRecord[pattern] = numfmt.getInfo(pattern);
+                patternInfoRecord[pattern] = numfmt.getFormatInfo(pattern);
             }
 
             const formatInfo = patternInfoRecord[pattern];

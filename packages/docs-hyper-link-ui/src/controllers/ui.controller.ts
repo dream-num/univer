@@ -52,7 +52,9 @@ export class DocHyperLinkUIController extends Disposable {
             [DocLinkPopup, DocLinkPopup.componentKey],
             [LinkSingle, DOC_LINK_ICON],
         ] as const).forEach(([comp, key]) => {
-            this._componentManager.register(key, comp);
+            this.disposeWithMe(
+                this._componentManager.register(key, comp)
+            );
         });
     }
 

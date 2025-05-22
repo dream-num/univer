@@ -33,7 +33,13 @@ export class NumfmtMenuController extends Disposable {
     private _initMenu() {
         this._menuManagerService.mergeMenu(menuSchema);
 
-        this.disposeWithMe((this._componentManager.register(MORE_NUMFMT_TYPE_KEY, MoreNumfmtType)));
-        this.disposeWithMe((this._componentManager.register(OPTIONS_KEY, Options)));
+        ([
+            [MORE_NUMFMT_TYPE_KEY, MoreNumfmtType],
+            [OPTIONS_KEY, Options],
+        ] as [string, React.FC][]).forEach(([id, component]) => {
+            this.disposeWithMe(
+                this._componentManager.register(id, component)
+            );
+        });
     }
 }

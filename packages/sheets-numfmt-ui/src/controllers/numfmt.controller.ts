@@ -187,7 +187,9 @@ export class SheetNumfmtUIController extends Disposable {
     }
 
     private _initPanel() {
-        this._componentManager.register(SHEET_NUMFMT_PANEL, SheetNumfmtPanel);
+        this.disposeWithMe(
+            this._componentManager.register(SHEET_NUMFMT_PANEL, SheetNumfmtPanel)
+        );
     }
 
     // eslint-disable-next-line max-lines-per-function

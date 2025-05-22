@@ -124,12 +124,15 @@ export class UniverSheetsUIPlugin extends Plugin {
 
         if (rest.protectedRangeUserSelector) {
             customComponents.add(UNIVER_SHEET_PERMISSION_USER_PART);
-            this._componentManager.register(
-                UNIVER_SHEET_PERMISSION_USER_PART,
-                rest.protectedRangeUserSelector.component,
-                {
-                    framework: rest.protectedRangeUserSelector.framework,
-                }
+
+            this.disposeWithMe(
+                this._componentManager.register(
+                    UNIVER_SHEET_PERMISSION_USER_PART,
+                    rest.protectedRangeUserSelector.component,
+                    {
+                        framework: rest.protectedRangeUserSelector.framework,
+                    }
+                )
             );
         }
 

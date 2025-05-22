@@ -76,13 +76,22 @@ export class SheetsSortUIController extends RxDisposable {
     }
 
     private _initUI(): void {
-        this.disposeWithMe(this._componentManager.register('CustomSortPanel', CustomSortPanel));
-        this.disposeWithMe(this._uiPartsService.registerComponent(SheetsUIPart.FILTER_PANEL_EMBED_POINT, () => connectInjector(EmbedSortBtn, this._injector)));
-        this.disposeWithMe(this._componentManager.register(SHEETS_SORT_ASC_ICON, AscendingSingle));
-        this.disposeWithMe(this._componentManager.register(SHEETS_SORT_ASC_EXT_ICON, ExpandAscendingSingle));
-        this.disposeWithMe(this._componentManager.register(SHEETS_SORT_DESC_ICON, DescendingSingle));
-        this.disposeWithMe(this._componentManager.register(SHEETS_SORT_DESC_EXT_ICON, ExpandDescendingSingle));
-        this.disposeWithMe(this._componentManager.register(SHEETS_SORT_CUSTOM_ICON, CustomSortSingle));
+        this.disposeWithMe(
+            this._uiPartsService.registerComponent(SheetsUIPart.FILTER_PANEL_EMBED_POINT, () => connectInjector(EmbedSortBtn, this._injector))
+        );
+
+        ([
+            ['CustomSortPanel', CustomSortPanel],
+            [SHEETS_SORT_ASC_ICON, AscendingSingle],
+            [SHEETS_SORT_ASC_EXT_ICON, ExpandAscendingSingle],
+            [SHEETS_SORT_DESC_ICON, DescendingSingle],
+            [SHEETS_SORT_DESC_EXT_ICON, ExpandDescendingSingle],
+            [SHEETS_SORT_CUSTOM_ICON, CustomSortSingle],
+        ] as [string, React.FC][]).forEach(([id, component]) => {
+            this.disposeWithMe(
+                this._componentManager.register(id, component)
+            );
+        });
 
         // this controller is also responsible for toggling the CustomSortDialog
         this._sheetsSortUIService.customSortState$.pipe(takeUntil(this.dispose$)).subscribe((newState) => {

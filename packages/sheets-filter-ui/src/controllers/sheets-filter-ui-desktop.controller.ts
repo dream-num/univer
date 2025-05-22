@@ -94,8 +94,15 @@ export class SheetsFilterUIDesktopController extends SheetsFilterUIMobileControl
     }
 
     private _initUI(): void {
-        this.disposeWithMe(this._componentManager.register(FILTER_PANEL_POPUP_KEY, FilterPanel));
-        this.disposeWithMe(this._componentManager.register('FilterSingle', FilterSingle));
+        ([
+            [FILTER_PANEL_POPUP_KEY, FilterPanel],
+            ['FilterSingle', FilterSingle],
+        ] as [string, React.FC][]).forEach(([id, component]) => {
+            this.disposeWithMe(
+                this._componentManager.register(id, component)
+            );
+        });
+
         this.disposeWithMe(this._contextService.subscribeContextValue$(FILTER_PANEL_OPENED_KEY)
             .pipe(distinctUntilChanged())
             .subscribe((open) => {

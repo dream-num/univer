@@ -115,7 +115,9 @@ export class ActionRecorderController extends Disposable {
 
     private _initUI(): void {
         this._uiPartsSrv.registerComponent(BuiltInUIPart.GLOBAL, () => connectInjector(RecorderPanel, this._injector));
-        this._componentManager.register('RecordSingle', RecordSingle);
+        this.disposeWithMe(
+            this._componentManager.register('RecordSingle', RecordSingle)
+        );
         this._menuManagerService.mergeMenu(menuSchema);
     }
 

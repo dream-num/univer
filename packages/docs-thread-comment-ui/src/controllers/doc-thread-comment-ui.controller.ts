@@ -52,10 +52,13 @@ export class DocThreadCommentUIController extends Disposable {
     }
 
     private _initComponents() {
-        [DocThreadCommentPanel].forEach((comp) => {
-            this.disposeWithMe(this._componentManager.register(comp.componentKey, comp));
+        ([
+            [DocThreadCommentPanel.componentKey, DocThreadCommentPanel],
+            ['CommentSingle', CommentSingle],
+        ] as [string, React.FC][]).forEach(([id, component]) => {
+            this.disposeWithMe(
+                this._componentManager.register(id, component)
+            );
         });
-
-        this.disposeWithMe(this._componentManager.register('CommentSingle', CommentSingle));
     }
 }

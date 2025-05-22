@@ -35,7 +35,6 @@ import { customElement } from 'lit/decorators.js';
 import React from 'react';
 import '../global.css';
 
-// 创建 Lit Element
 @customElement('my-univer')
 class MyWebComponent extends LitElement {
     override firstUpdated() {
@@ -77,13 +76,12 @@ class MyWebComponent extends LitElement {
     }
 }
 
-// 将 Web Component 包装为 React 组件
 const App = createComponent({
     tagName: 'my-univer',
     elementClass: MyWebComponent,
     react: React,
     events: {
-        onMyEvent: 'my-event', // 事件映射
+        onMyEvent: 'my-event',
     },
 });
 

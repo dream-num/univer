@@ -20,6 +20,7 @@ import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '@univerjs/mockdata';
+import zhCN from '@univerjs/mockdata/locales/zh-CN';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
 import { UniverSheetsFormulaUIPlugin } from '@univerjs/sheets-formula-ui';
@@ -28,7 +29,6 @@ import { UniverSheetsNumfmtUIPlugin } from '@univerjs/sheets-numfmt-ui';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 import { UniverUIPlugin } from '@univerjs/ui';
 import { useEffect, useRef } from 'react';
-import { enUS, faIR, frFR, ruRU, zhCN } from '../locales';
 
 import '../global.css';
 
@@ -40,10 +40,6 @@ export function UniverComponent() {
             locale: LocaleType.ZH_CN,
             locales: {
                 [LocaleType.ZH_CN]: zhCN,
-                [LocaleType.EN_US]: enUS,
-                [LocaleType.FR_FR]: frFR,
-                [LocaleType.RU_RU]: ruRU,
-                [LocaleType.FA_IR]: faIR,
             },
             logLevel: LogLevel.VERBOSE,
         });

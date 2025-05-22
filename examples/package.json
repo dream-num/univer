@@ -8,7 +8,7 @@
         "./*": "./src/*"
     },
     "scripts": {
-        "prepare": "tsx ./scripts/generate-locales.ts && tsx ./scripts/generate-html.ts",
+        "prepare": "tsx ./scripts/generate-html.ts",
         "build:demo": "tsx ./esbuild.config.ts",
         "dev:demo": "tsx ./esbuild.config.ts --watch",
         "dev:e2e": "tsx ./esbuild.config.ts --watch --e2e",

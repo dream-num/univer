@@ -15,24 +15,26 @@
  */
 
 import type { BooleanNumber } from '@univerjs/core';
+import type { CSSProperties, ReactNode } from 'react';
 import { ColorKit, ThemeService } from '@univerjs/core';
 import { clsx } from '@univerjs/design';
 import { useDependency } from '@univerjs/ui';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export interface IBaseSheetBarProps {
-    label?: React.ReactNode;
+    label?: ReactNode;
     children?: any[];
     index?: number;
     color?: string;
     sheetId?: string;
-    style?: React.CSSProperties;
+    style?: CSSProperties;
     hidden?: BooleanNumber;
     selected?: boolean;
+    menuOverlay?: ReactNode;
 }
 
 export function SheetBarItem(props: IBaseSheetBarProps) {
-    const { sheetId, label, color, selected } = props;
+    const { sheetId, label, color, selected, menuOverlay } = props;
 
     const [currentSelected, setCurrentSelected] = useState(selected);
 
@@ -61,8 +63,8 @@ export function SheetBarItem(props: IBaseSheetBarProps) {
               dark:!univer-text-white
             `, currentSelected
                 ? `
-                  univer-flex univer-justify-center univer-bg-white univer-font-bold univer-text-primary-700
-                  univer-shadow-sm univer-transition-shadow
+                  univer-justify-center univer-bg-white univer-font-bold univer-text-primary-700 univer-shadow-sm
+                  univer-transition-shadow
                   dark:!univer-bg-gray-900
                 `
                 : `

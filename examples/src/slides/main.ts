@@ -19,13 +19,12 @@ import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { UniverDrawingPlugin } from '@univerjs/drawing';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
-
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { DEFAULT_SLIDE_DATA } from '@univerjs/mockdata';
+import zhCN from '@univerjs/mockdata/locales/zh-CN';
 import { UniverSlidesPlugin } from '@univerjs/slides';
 import { UniverSlidesUIPlugin } from '@univerjs/slides-ui';
 import { UniverUIPlugin } from '@univerjs/ui';
-import { enUS, faIR, ruRU, zhCN } from '../locales';
 
 import '../global.css';
 
@@ -34,9 +33,6 @@ const univer = new Univer({
     locale: LocaleType.ZH_CN,
     locales: {
         [LocaleType.ZH_CN]: zhCN,
-        [LocaleType.EN_US]: enUS,
-        [LocaleType.RU_RU]: ruRU,
-        [LocaleType.FA_IR]: faIR,
     },
 });
 

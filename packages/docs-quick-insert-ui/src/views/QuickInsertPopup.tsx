@@ -256,7 +256,7 @@ export const QuickInsertPopup = () => {
                     key={menu.id}
                     className={clsx('univer-w-[calc(220px-var(--padding-base)*2)] univer-text-sm', {
                         'hover:univer-bg-transparent': !isFocused,
-                        'univer-bg-gray-100 dark:univer-bg-gray-500': isFocused,
+                        'univer-bg-gray-100 dark:!univer-bg-gray-500': isFocused,
                     })}
                     onClick={() => {
                         handleMenuSelect(menu as IDocPopupMenuItem);

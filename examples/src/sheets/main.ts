@@ -22,6 +22,7 @@ import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '@univerjs/mockdata';
+import zhCN from '@univerjs/mockdata/locales/zh-CN';
 import { UniverNetworkPlugin } from '@univerjs/network';
 import { UniverRPCMainThreadPlugin } from '@univerjs/rpc';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
@@ -38,7 +39,6 @@ import { UniverSheetsThreadCommentPlugin } from '@univerjs/sheets-thread-comment
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 import { UniverSheetsZenEditorPlugin } from '@univerjs/sheets-zen-editor';
 import { UniverUIPlugin } from '@univerjs/ui';
-import { enUS, faIR, frFR, ruRU, viVN, zhCN, zhTW } from '../locales';
 import ImportCSVButtonPlugin from './custom-plugin/import-csv-button';
 
 import '@univerjs/sheets/facade';
@@ -87,12 +87,6 @@ function createNewInstance() {
         locale: LocaleType.ZH_CN,
         locales: {
             [LocaleType.ZH_CN]: zhCN,
-            [LocaleType.EN_US]: enUS,
-            [LocaleType.FR_FR]: frFR,
-            [LocaleType.RU_RU]: ruRU,
-            [LocaleType.ZH_TW]: zhTW,
-            [LocaleType.VI_VN]: viVN,
-            [LocaleType.FA_IR]: faIR,
         },
         logLevel: LogLevel.VERBOSE,
     });

@@ -19,9 +19,13 @@
     },
     "exports": {
         ".": "./src/index.ts",
+        "./locales/*": "./src/locales/*.ts",
         "./*": "./src/*"
     },
     "main": "./src/index.ts",
+    "scripts": {
+        "prepare": "tsx ./scripts/generate-locales.ts"
+    },
     "dependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/data-validation": "workspace:*",
@@ -38,10 +42,39 @@
         "@univerjs/sheets-hyper-link": "workspace:*",
         "@univerjs/sheets-sort": "workspace:*",
         "@univerjs/sheets-thread-comment": "workspace:*",
-        "@univerjs/thread-comment": "workspace:*"
+        "@univerjs/thread-comment": "workspace:*",
+        "@univerjs/action-recorder": "workspace:*",
+        "@univerjs/design": "workspace:*",
+        "@univerjs/docs-drawing-ui": "workspace:*",
+        "@univerjs/docs-hyper-link-ui": "workspace:*",
+        "@univerjs/docs-quick-insert-ui": "workspace:*",
+        "@univerjs/docs-ui": "workspace:*",
+        "@univerjs/drawing-ui": "workspace:*",
+        "@univerjs/find-replace": "workspace:*",
+        "@univerjs/sheets-conditional-formatting-ui": "workspace:*",
+        "@univerjs/sheets-crosshair-highlight": "workspace:*",
+        "@univerjs/sheets-data-validation-ui": "workspace:*",
+        "@univerjs/sheets-drawing-ui": "workspace:*",
+        "@univerjs/sheets-filter-ui": "workspace:*",
+        "@univerjs/sheets-find-replace": "workspace:*",
+        "@univerjs/sheets-formula-ui": "workspace:*",
+        "@univerjs/sheets-hyper-link-ui": "workspace:*",
+        "@univerjs/sheets-note-ui": "workspace:*",
+        "@univerjs/sheets-numfmt-ui": "workspace:*",
+        "@univerjs/sheets-sort-ui": "workspace:*",
+        "@univerjs/sheets-table-ui": "workspace:*",
+        "@univerjs/sheets-thread-comment-ui": "workspace:*",
+        "@univerjs/sheets-ui": "workspace:*",
+        "@univerjs/sheets-zen-editor": "workspace:*",
+        "@univerjs/slides-ui": "workspace:*",
+        "@univerjs/thread-comment-ui": "workspace:*",
+        "@univerjs/ui": "workspace:*",
+        "@univerjs/uniscript": "workspace:*",
+        "@univerjs/uni-formula-ui": "workspace:*"
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
+        "fs-extra": "^11.3.0",
         "typescript": "^5.8.3"
     }
 }

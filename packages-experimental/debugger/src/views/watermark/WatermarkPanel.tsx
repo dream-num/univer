@@ -15,22 +15,21 @@
  */
 
 import type { IWatermarkConfig, IWatermarkConfigWithType } from '@univerjs/engine-render';
-import { ILocalStorageService, LocaleService } from '@univerjs/core';
+import { ILocalStorageService } from '@univerjs/core';
 import { Select } from '@univerjs/design';
 import { IWatermarkTypeEnum, UNIVER_WATERMARK_STORAGE_KEY } from '@univerjs/engine-render';
 import { useDependency, useObservable } from '@univerjs/ui';
 import { WatermarkImageBaseConfig, WatermarkService, WatermarkTextBaseConfig } from '@univerjs/watermark';
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { WatermarkImageSetting } from './WatermarkImageSetting';
 import { WatermarkTextSetting } from './WatermarkTextSetting';
 
-export const WatermarkPanel: React.FC = () => {
+export function WatermarkPanel() {
     const [watermarkType, setWatermarkType] = useState<IWatermarkTypeEnum>(IWatermarkTypeEnum.Text);
     const [config, setConfig] = useState<IWatermarkConfig>();
     const watermarkService = useDependency(WatermarkService);
     const localStorageService = useDependency(ILocalStorageService);
     const _refresh = useObservable(watermarkService.refresh$);
-    const localeService = useDependency(LocaleService);
 
     function handleConfigChange(config: IWatermarkConfig, type?: IWatermarkTypeEnum) {
         setConfig(config);
@@ -55,12 +54,12 @@ export const WatermarkPanel: React.FC = () => {
         <div className="univer-grid univer-gap-3 univer-text-sm">
             {/* Watermark type */}
             <div className="univer-grid univer-gap-2">
-                <div className="univer-text-gray-400">{localeService.t('univer-watermark.type')}</div>
+                <div className="univer-text-gray-400">Type</div>
                 <Select
                     value={watermarkType}
                     options={[
-                        { label: localeService.t('univer-watermark.text'), value: IWatermarkTypeEnum.Text },
-                        { label: localeService.t('univer-watermark.image'), value: IWatermarkTypeEnum.Image },
+                        { label: 'Text', value: IWatermarkTypeEnum.Text },
+                        { label: 'Image', value: IWatermarkTypeEnum.Image },
                     ]}
                     onChange={(v) => {
                         setWatermarkType(v as IWatermarkTypeEnum);

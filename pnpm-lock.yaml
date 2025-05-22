@@ -1121,9 +1121,12 @@ importers:
       nanoid:
         specifier: 5.1.5
         version: 5.1.5
+      numeral:
+        specifier: ^2.0.6
+        version: 2.0.6
       numfmt:
-        specifier: ^2.5.2
-        version: 2.5.2
+        specifier: ^3.2.2
+        version: 3.2.2
       ot-json1:
         specifier: ^1.0.2
         version: 1.0.2
@@ -1765,9 +1768,6 @@ importers:
       decimal.js:
         specifier: ^10.5.0
         version: 10.5.0
-      numfmt:
-        specifier: ^2.5.2
-        version: 2.5.2
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
@@ -9113,8 +9113,11 @@ packages:
   nth-check@2.1.1:
     resolution: {integrity: sha512-lqjrjmaOoAnWfMmBPL+XNnynZh2+swxiX3WUE0s4yEHI6m+AwrK2UZOimIRl3X/4QctVqS8AiZjFqyOGrMXb/w==}
 
-  numfmt@2.5.2:
-    resolution: {integrity: sha512-VXrB2bpU9Xa0oCHq8IsqE2CcUx5OLupLC3oryFT4DB9e/xe+OnUzBndhXfNHUzxFE4DYI3Sx4OtzS1Sdaf7tEw==}
+  numeral@2.0.6:
+    resolution: {integrity: sha512-qaKRmtYPZ5qdw4jWJD6bxEf1FJEqllJrwxCLIm0sQU/A7v2/czigzOb+C2uSiFsa9lBUzeH7M1oK+Q+OLxL3kA==}
+
+  numfmt@3.2.2:
+    resolution: {integrity: sha512-vAdkKhb+8D1ebZcPx5TdUmPnzNYhzKGA+oVy+BoENFydDWljaZDci0wWWjNfvOUcXCdgKhwS08ErdTe+VzuQ+w==}
 
   nwsapi@2.2.20:
     resolution: {integrity: sha512-/ieB+mDe4MrrKMT8z+mQL8klXydZWGR5Dowt4RAGKbJ3kIGEx3X4ljUo+6V73IXtUPWgfOlU5B9MlGxFO5T+cA==}
@@ -17463,7 +17466,9 @@ snapshots:
     dependencies:
       boolbase: 1.0.0
 
-  numfmt@2.5.2: {}
+  numeral@2.0.6: {}
+
+  numfmt@3.2.2: {}
 
   nwsapi@2.2.20: {}
 

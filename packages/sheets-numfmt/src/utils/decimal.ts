@@ -24,7 +24,7 @@ export const getDecimalFromPattern = (pattern: string, defaultValue: number = 0)
         return defaultValue;
     }
 
-    const info = numfmt.getInfo(pattern);
+    const info = numfmt.getFormatInfo(pattern);
     return info.maxDecimals ?? defaultValue;
 };
 
@@ -50,8 +50,8 @@ export const isPatternEqualWithoutDecimal = (patternA: string, patternB: string)
             },
             { isEnd: false, result: '' }
         ).result;
-    const partitionsA = numfmt.getInfo(patternA)._partitions;
-    const partitionsB = numfmt.getInfo(patternB)._partitions;
+    const partitionsA = numfmt.getFormatInfo(patternA)._partitions;
+    const partitionsB = numfmt.getFormatInfo(patternB)._partitions;
     const A1 = getString(partitionsA[0].tokens);
     const B1 = getString(partitionsB[0].tokens);
     const A2 = getString(partitionsA[1].tokens);

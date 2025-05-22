@@ -169,7 +169,7 @@ export function parseFormattedTime(value: string) {
 }
 
 export function isDate(format: string) {
-    return numfmt.isDate(format);
+    return numfmt.getFormatInfo(format).isDate;
 }
 
 // Weekend is a weekend number or string that specifies when weekends occur.
@@ -301,12 +301,12 @@ export function getDateSerialNumberByObject(serialNumberObject: BaseValueObject)
     const dateValue = serialNumberObject.getValue();
 
     if (serialNumberObject.isString()) {
-        let dateSerial;
+        let dateSerial: any;
 
         if (parseFormattedDate(`${dateValue}`)) {
-            dateSerial = parseFormattedDate(`${dateValue}`).v;
+            dateSerial = parseFormattedDate(`${dateValue}`)!.v;
         } else if (parseFormattedTime(`${dateValue}`)) {
-            dateSerial = parseFormattedTime(`${dateValue}`).v;
+            dateSerial = parseFormattedTime(`${dateValue}`)!.v;
         } else if (isRealNum(dateValue)) {
             dateSerial = +dateValue;
         } else {

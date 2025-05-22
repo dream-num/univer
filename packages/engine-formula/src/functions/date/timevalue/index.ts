@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { excelDateTimeSerial, isDate, parseFormattedValue } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
 import { getFractionalPart } from '../../../engine/utils/math-kit';
-import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';

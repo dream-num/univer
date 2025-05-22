@@ -44,8 +44,8 @@ export function RenderSheetFooter() {
     return (
         <section
             className={`
-              univer-box-border univer-flex univer-items-center univer-justify-between univer-bg-white univer-px-5
-              univer-text-gray-900
+              univer-box-border univer-grid univer-w-full univer-grid-flow-col univer-grid-cols-[1fr,auto,auto,auto]
+              univer-items-center univer-justify-between univer-bg-white univer-px-5 univer-text-gray-900
               dark:!univer-bg-gray-900 dark:!univer-text-gray-200
             `}
             style={{
@@ -55,7 +55,7 @@ export function RenderSheetFooter() {
         >
             {sheetBar && <SheetBar />}
             {statisticBar && <StatusBar />}
-            {menus && footerMenus.length && (
+            {menus && footerMenus.length > 0 && (
                 <div className="univer-box-border univer-flex univer-gap-2 univer-px-2">
                     {footerMenus.map((item) => item.children?.map((child) => (
                         child?.item && (

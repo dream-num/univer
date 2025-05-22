@@ -37,6 +37,10 @@ export interface IScrollBarProps {
     thumbHoverBackgroundColor?: string;
     /** Background color of the thumb when active. */
     thumbActiveBackgroundColor?: string;
+    /** Background color of the track. */
+    trackBackgroundColor?: string;
+    /** Background color of the track border. */
+    trackBorderColor?: string;
     /** The thickness of a scrolling track (not scrolling thumb). */
     barSize?: number;
     /** The thickness of track border. */
@@ -154,6 +158,10 @@ export class ScrollBar extends Disposable {
                 (this as IKeyValue)[`_${key}`] = props[key as keyof IScrollBarProps];
             }
         });
+
+        if (Tools.isDefine(props.thumbBackgroundColor)) {
+            this._thumbDefaultBackgroundColor = props.thumbBackgroundColor;
+        }
 
         if (Tools.isDefine(props.barSize)) {
             this._trackThickness = props.barSize;
@@ -676,7 +684,7 @@ export class ScrollBar extends Disposable {
             thumb.setProps({
                 fill: color,
             });
-            this._trackThickness = HOVER_TRACK_SIZE;
+            // this._trackThickness = HOVER_TRACK_SIZE;
             this._resizeHorizontal();
             this.makeViewDirty(true);
         };

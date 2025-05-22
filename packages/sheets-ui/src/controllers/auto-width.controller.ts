@@ -70,17 +70,17 @@ export class AutoWidthController extends Disposable {
         if (!target) return defaultValue;
 
         const { unitId, subUnitId, worksheet } = target;
-        const sheetSkeletonService = this._renderManagerService.getRenderById(unitId)!.with<SheetSkeletonManagerService>(SheetSkeletonManagerService);
+        const sheetSkeletonService = this._renderManagerService.getRenderById(unitId)?.with<SheetSkeletonManagerService>(SheetSkeletonManagerService);
 
-        if (!sheetSkeletonService.getCurrentParam()) return defaultValue;
+        if (!sheetSkeletonService?.getCurrentParam()) return defaultValue;
 
         const { skeleton } = sheetSkeletonService.getCurrentParam()!;
         const colsAutoWidthInfo: IColAutoWidthInfo[] = skeleton.calculateAutoWidthInRange(params.ranges);
-
         const colWidthObject: IObjectArrayPrimitiveType<Nullable<number>> = {};
         for (const { col, width } of colsAutoWidthInfo) {
             colWidthObject[col] = width;
         }
+
         const redoParams: ISetWorksheetColWidthMutationParams = {
             subUnitId,
             unitId,

@@ -539,9 +539,13 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         // if there are no content in this column, return current column width.
 
         const visibleRangeViewMain = this.visibleRangeByViewportKey(SHEET_VIEWPORT_KEY.VIEW_MAIN);
-        if (!visibleRangeViewMain) return colWidth;
-
-        const { startRow: startRowOfViewMain, endRow: endRowOfViewMain } = visibleRangeViewMain;
+        let startRowOfViewMain = 0;
+        let endRowOfViewMain = Number.MAX_SAFE_INTEGER;
+        if (visibleRangeViewMain) {
+            const { startRow, endRow } = visibleRangeViewMain;
+            startRowOfViewMain = startRow;
+            endRowOfViewMain = endRow;
+        }
         const rowCount = this.worksheet.getRowCount();
 
         // check width of first row and last row,
@@ -576,7 +580,6 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         if (colIndex === 0) {
             currColWidth = this.columnWidthAccumulation[colIndex];
         }
-
         for (let i = 0; i < rowIdxArr.length; i++) {
             const row = rowIdxArr[i];
             const { isMerged, isMergedMainCell } = this.worksheet.getCellInfoInMergeData(colIndex, row);

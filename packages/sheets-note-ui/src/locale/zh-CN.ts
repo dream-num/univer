@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-const locale = {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     rightClick: {
         addNote: '添加批注',
         deleteNote: '删除批注',

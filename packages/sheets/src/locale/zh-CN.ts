@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-const locale = {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     sheets: {
         tabs: {
             sheetCopy: '（副本{0}）',

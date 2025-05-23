@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type zhCN from './zh-CN';
+import type enUS from './en-US';
 
-const locale: typeof zhCN = {
+const locale: typeof enUS = {
     toolbar: {
         undo: 'بازگرداندن',
         redo: 'تکرار',
@@ -100,6 +100,10 @@ const locale: typeof zhCN = {
         },
     },
     rightClick: {
+        copy: 'کپی',
+        cut: 'برش',
+        paste: 'چسباندن',
+        delete: 'حذف',
         bulletList: 'لیست بدون شماره',
         orderList: 'لیست شماره‌دار',
         checkList: 'لیست وظیفه',

@@ -100,6 +100,10 @@ const locale: typeof enUS = {
         },
     },
     rightClick: {
+        copy: 'Copier',
+        cut: 'Couper',
+        paste: 'Coller',
+        delete: 'Supprimer',
         bulletList: 'Liste non ordonnée',
         orderList: 'Liste ordonnée',
         checkList: 'Liste de tâches',

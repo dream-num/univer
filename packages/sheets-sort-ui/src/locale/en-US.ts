@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-import type zhCN from './zh-CN';
-
-const locale: typeof zhCN = {
+const locale = {
     'sheets-sort': {
         general: {
             sort: 'Sort',

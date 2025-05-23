@@ -73,7 +73,7 @@ const DEFAULT_CELL_DOCUMENT_MODEL_OPTION = {
 export class Worksheet {
     protected _sheetId: string;
     protected _snapshot: IWorksheetData;
-    protected _cellData: ObjectMatrix<ICellData>;
+    protected _cellData: ObjectMatrix<Nullable<ICellData>>;
 
     protected _rowManager: RowManager;
     protected _columnManager: ColumnManager;
@@ -91,7 +91,7 @@ export class Worksheet {
 
         const { columnData, rowData, cellData } = this._snapshot;
         this._sheetId = this._snapshot.id ?? Tools.generateRandomId(6);
-        this._cellData = new ObjectMatrix<ICellData>(cellData as IObjectMatrixPrimitiveType<ICellData>);
+        this._cellData = new ObjectMatrix<Nullable<ICellData>>(cellData as IObjectMatrixPrimitiveType<Nullable<ICellData>>);
 
         // This view model will immediately injected with hooks from SheetViewModel service as Worksheet is constructed.
         this._viewModel = new SheetViewModel((row, col) => this.getCellRaw(row, col));

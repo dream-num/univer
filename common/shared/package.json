@@ -30,7 +30,7 @@
         "@vitejs/plugin-vue": "^5.2.4",
         "@vitest/coverage-istanbul": "^3.1.4",
         "autoprefixer": "^10.4.21",
-        "eslint-plugin-readable-tailwind": "^1.9.1",
+        "eslint-plugin-readable-tailwind": "^2.1.2",
         "fs-extra": "^11.3.0",
         "happy-dom": "17.4.7",
         "javascript-obfuscator": "^4.1.1",

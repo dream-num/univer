@@ -543,6 +543,7 @@ export abstract class BaseObject extends Disposable {
     }
 
     /**
+     * Similar to setProps, but only props in BASE_OBJECT_ARRAY_Set
      * this[pKey] = option[pKey]
      * @param option
      */

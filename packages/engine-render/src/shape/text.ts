@@ -14,11 +14,85 @@
  * limitations under the License.
  */
 
+import type { IKeyValue } from '@univerjs/core';
+import type { UniverRenderingContext } from '../context';
 import type { IShapeProps } from './shape';
+import { HorizontalAlign, VerticalAlign } from '@univerjs/core';
+import { DocSimpleSkeleton } from '../components/docs/layout/doc-simple-skeleton';
 import { Shape } from './shape';
 
 export interface ITextProps extends IShapeProps {
     width: number;
+    height: number;
+    text: string;
+    fontStyle: string;
+    warp?: boolean;
+    hAlign?: HorizontalAlign;
+    vAlign?: VerticalAlign;
 }
 
-export class Text extends Shape<ITextProps> {}
+export const TEXT_OBJECT_ARRAY = ['text', 'fontStyle', 'warp', 'hAlign', 'vAlign', 'width', 'height'];
+
+export class Text extends Shape<ITextProps> {
+    text: string;
+    fontStyle: string;
+    warp: boolean;
+    hAlign: HorizontalAlign;
+    vAlign: VerticalAlign;
+
+    constructor(key: string, props: ITextProps) {
+        super(key, props);
+
+        this.width = props.width;
+        this.height = props.height;
+        this.text = props.text;
+        this.fontStyle = props.fontStyle;
+        this.warp = props.warp ?? false;
+        this.hAlign = props.hAlign ?? HorizontalAlign.LEFT;
+        this.vAlign = props.vAlign ?? VerticalAlign.TOP;
+    }
+
+    static override drawWith(ctx: UniverRenderingContext, props: ITextProps) {
+        const { text, fontStyle, warp, hAlign, vAlign, width, height, left = 0, top = 0 } = props;
+        const skeleton = new DocSimpleSkeleton(text, fontStyle, Boolean(warp), width);
+        const lines = skeleton.calculate();
+        const totalHeight = skeleton.getTotalHeight();
+        const offsetY = vAlign === VerticalAlign.TOP ? 0 : vAlign === VerticalAlign.MIDDLE ? (height - totalHeight) / 2 : height - totalHeight;
+        let lineTop = top + offsetY;
+
+        // Set font once outside the loop for better performance
+        ctx.save();
+        ctx.font = fontStyle;
+
+        // Get font metrics using FontCache for consistency with height calculation
+        for (const line of lines) {
+            const lineHeight = line.height;
+            const lineWidth = line.width;
+            const lineX = (hAlign === HorizontalAlign.LEFT || hAlign === HorizontalAlign.UNSPECIFIED) ? 0 : (hAlign === HorizontalAlign.CENTER ? (width - lineWidth) / 2 : (width - lineWidth));
+            const baselineY = lineTop + line.baseline;
+            ctx.fillText(line.text, left + lineX, baselineY);
+
+            lineTop += lineHeight;
+        }
+
+        ctx.restore();
+    }
+
+    protected override _draw(ctx: UniverRenderingContext) {
+        Text.drawWith(ctx, this);
+    }
+
+    override toJson() {
+        const props: IKeyValue = {};
+        TEXT_OBJECT_ARRAY.forEach((key) => {
+            if (this[key as keyof Text]) {
+                props[key] = this[key as keyof Text];
+            }
+        });
+
+        return {
+            ...super.toJson(),
+            ...props,
+        };
+    }
+}

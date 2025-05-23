@@ -50,6 +50,7 @@ export interface IFontCacheItem {
     wrapStrategy: WrapStrategy;
     imageCacheMap: ImageCacheMap;
     cellData: Nullable<ICellDataForSheetInterceptor>;
+    fontString: string;
 }
 
 type colorString = string;

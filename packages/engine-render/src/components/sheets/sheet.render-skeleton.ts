@@ -924,7 +924,6 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             if (cell.t === CellValueType.FORCE_STRING && displayRawFormula) {
                 cellText = `'${cellText}`;
             }
-
             documentModel = createDocumentModelWithStyle(cellText, textStyle, {
                 ...cellOtherConfig,
                 textRotation,
@@ -1241,7 +1240,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         if (modelObject) {
             const { documentModel } = modelObject;
             if (documentModel) {
-                const { fontString: _fontString, textRotation, wrapStrategy, verticalAlign, horizontalAlign } = modelObject;
+                const { fontString, textRotation, wrapStrategy, verticalAlign, horizontalAlign } = modelObject;
                 const documentViewModel = new DocumentViewModel(documentModel);
                 if (documentViewModel) {
                     const { vertexAngle, centerAngle } = convertTextRotation(textRotation);
@@ -1257,6 +1256,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
                         wrapStrategy,
                         imageCacheMap: this._imageCacheMap,
                         cellData,
+                        fontString,
                     };
                     this._calculateOverflowCell(row, col, config as IFontCacheItem);
                     this._handleFontMatrix.setValue(row, col, true);

@@ -455,8 +455,7 @@ export class Font extends SheetExtension {
         if (!fontCache) return;
 
         const { vertexAngle = 0, wrapStrategy, cellData } = fontCache;
-        if (!cellData?.v) return;
-
+        if (cellData?.v === undefined || cellData?.v === null) return;
         const text = String(cellData.v) as string;
         let { startX, startY, endX, endY } = renderFontCtx;
         let cellWidth = endX - startX - DEFAULT_PADDING_DATA.l - DEFAULT_PADDING_DATA.r;

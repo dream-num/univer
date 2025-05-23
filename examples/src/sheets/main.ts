@@ -106,13 +106,8 @@ function createNewInstance() {
         notExecuteFormula: true,
         autoHeightForMergedCells: true,
     });
-    univer.registerPlugin(UniverSheetsUIPlugin, {
-        disableForceStringAlert: true,
-    });
-    univer.registerPlugin(UniverSheetsNumfmtPlugin, {
-        disableTextFormatAlert: true,
-        disableTextFormatMark: true,
-    });
+    univer.registerPlugin(UniverSheetsUIPlugin);
+    univer.registerPlugin(UniverSheetsNumfmtPlugin);
     univer.registerPlugin(UniverSheetsZenEditorPlugin);
     univer.registerPlugin(UniverFormulaEnginePlugin, { notExecuteFormula: true });
     univer.registerPlugin(UniverSheetsFormulaPlugin, { notExecuteFormula: true });

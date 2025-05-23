@@ -34,7 +34,6 @@ import type {
     ITextRotation,
     Nullable,
     Styles,
-    VerticalAlign,
 
     Worksheet,
 } from '@univerjs/core';
@@ -64,9 +63,11 @@ import {
     searchArray,
     SheetSkeleton,
     Tools,
+    VerticalAlign,
     WrapStrategy,
 } from '@univerjs/core';
 import { distinctUntilChanged, startWith } from 'rxjs';
+import { FontCache } from '../../basics';
 import { BORDER_TYPE as BORDER_LTRB, COLOR_BLACK_RGB, MAXIMUM_COL_WIDTH, MAXIMUM_ROW_HEIGHT, MIN_COL_WIDTH } from '../../basics/const';
 import { getRotateOffsetAndFarthestHypotenuse } from '../../basics/draw';
 import { convertTextRotation, VERTICAL_ROTATE_ANGLE } from '../../basics/text-rotation';
@@ -999,8 +1000,17 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
                 return true;
             }
 
-            let contentSize = getDocsSkeletonPageSize(documentSkeleton, vertexAngle);
+            let contentSize;
 
+            if (documentSkeleton) {
+                contentSize = getDocsSkeletonPageSize(documentSkeleton, vertexAngle);
+            } else {
+                const textSize = FontCache.getMeasureText(`${docsConfig.cellData!.v!}`, docsConfig.fontString);
+                contentSize = {
+                    width: textSize.width,
+                    height: textSize.fontBoundingBoxDescent + textSize.fontBoundingBoxAscent,
+                };
+            }
             if (!contentSize) {
                 return true;
             }
@@ -1043,9 +1053,9 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             );
 
             const cellHeight = endY - startY;
-            documentSkeleton.getViewModel().getDataModel().updateDocumentDataPageSize(cellHeight);
-            documentSkeleton.calculate();
-            const contentSize = getDocsSkeletonPageSize(documentSkeleton, vertexAngle);
+            documentSkeleton!.getViewModel().getDataModel().updateDocumentDataPageSize(cellHeight);
+            documentSkeleton!.calculate();
+            const contentSize = getDocsSkeletonPageSize(documentSkeleton!, vertexAngle);
 
             if (!contentSize) {
                 return true;
@@ -1233,11 +1243,17 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             this._stylesCache.fontMatrix.setValue(row, col, cacheValue as IFontCacheItem);
             return;
         }
-
-        const modelObject = this._getCellDocumentModel(cellData, {
-            displayRawFormula: this._renderRawFormula,
-        });
         const style = this._styles.getStyleByCell(cellData);
+
+        const { vertexAngle, centerAngle } = convertTextRotation(style?.tr ?? { a: 0 });
+        const isRichText = cellData?.p || vertexAngle || centerAngle;
+
+        const modelObject = isRichText ?
+            this._getCellDocumentModel(cellData, {
+                displayRawFormula: this._renderRawFormula,
+            })
+            : null;
+
         if (modelObject) {
             const { documentModel } = modelObject;
             if (documentModel) {
@@ -1264,6 +1280,23 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
                     this._handleFontMatrix.setValue(row, col, true);
                 }
             }
+        } else {
+            const fontString = getFontStyleString(style ?? undefined).fontCache;
+            const { vt: verticalAlign, ht: horizontalAlign, tb: wrapStrategy } = style ?? {};
+            config = {
+                documentSkeleton: undefined,
+                vertexAngle,
+                centerAngle,
+                verticalAlign: verticalAlign ?? VerticalAlign.UNSPECIFIED,
+                horizontalAlign: horizontalAlign ?? HorizontalAlign.UNSPECIFIED,
+                wrapStrategy: wrapStrategy ?? WrapStrategy.OVERFLOW,
+                imageCacheMap: this._imageCacheMap,
+                cellData,
+                fontString,
+                style,
+            };
+            this._calculateOverflowCell(row, col, config as IFontCacheItem);
+            this._handleFontMatrix.setValue(row, col, true);
         }
 
         this._stylesCache.fontMatrix.setValue(row, col, config as IFontCacheItem);

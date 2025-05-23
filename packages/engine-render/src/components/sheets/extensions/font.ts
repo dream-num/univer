@@ -201,7 +201,6 @@ export class Font extends SheetExtension {
 
         const fontCache = fontMatrix.getValue(row, col);
         if (!fontCache) return true;
-        if (!fontCache.documentSkeleton) return true;
         renderFontCtx.fontCache = fontCache;
 
         //#region overflow
@@ -243,7 +242,7 @@ export class Font extends SheetExtension {
         //#endregion
 
         ctx.translate(renderFontCtx.startX + FIX_ONE_PIXEL_BLUR_OFFSET, renderFontCtx.startY + FIX_ONE_PIXEL_BLUR_OFFSET);
-        if (fontCache.cellData?.p || fontCache.vertexAngle) {
+        if (fontCache.documentSkeleton) {
             this._renderDocuments(ctx, row, col, renderFontCtx, spreadsheetSkeleton.overflowCache);
         } else {
             this._renderText(ctx, row, col, renderFontCtx, spreadsheetSkeleton.overflowCache);
@@ -251,14 +250,16 @@ export class Font extends SheetExtension {
         ctx.closePath();
         ctx.restore();
 
-        const documentDataModel = fontCache.documentSkeleton.getViewModel().getDataModel();
-        if (documentDataModel.getDrawingsOrder()?.length) {
-            ctx.save();
-            ctx.beginPath();
-            this._clipByRenderBounds(renderFontCtx, row, col, 1);
-            this._renderImages(ctx, fontCache, renderFontCtx.startX, renderFontCtx.startY, renderFontCtx.endX, renderFontCtx.endY);
-            ctx.closePath();
-            ctx.restore();
+        if (fontCache.documentSkeleton) {
+            const documentDataModel = fontCache.documentSkeleton.getViewModel().getDataModel();
+            if (documentDataModel.getDrawingsOrder()?.length) {
+                ctx.save();
+                ctx.beginPath();
+                this._clipByRenderBounds(renderFontCtx, row, col, 1);
+                this._renderImages(ctx, fontCache, renderFontCtx.startX, renderFontCtx.startY, renderFontCtx.endX, renderFontCtx.endY);
+                ctx.closePath();
+                ctx.restore();
+            }
         }
 
         renderFontCtx.startX = 0;
@@ -271,8 +272,8 @@ export class Font extends SheetExtension {
 
     private _renderImages(ctx: UniverRenderingContext, fontsConfig: IFontCacheItem, startX: number, startY: number, endX: number, endY: number) {
         const { documentSkeleton, verticalAlign, horizontalAlign } = fontsConfig;
-        const fontHeight = documentSkeleton.getSkeletonData()!.pages[0].height;
-        const fontWidth = documentSkeleton.getSkeletonData()!.pages[0].width;
+        const fontHeight = documentSkeleton!.getSkeletonData()!.pages[0].height;
+        const fontWidth = documentSkeleton!.getSkeletonData()!.pages[0].width;
         const PADDING = 2;
         let fontX = startX;
         let fontY = startY;
@@ -300,9 +301,9 @@ export class Font extends SheetExtension {
                 break;
         }
 
-        const documentDataModel = documentSkeleton.getViewModel().getDataModel();
+        const documentDataModel = documentSkeleton!.getViewModel().getDataModel();
         const drawingDatas = documentDataModel.getDrawings();
-        const drawings = documentSkeleton.getSkeletonData()?.pages[0].skeDrawings;
+        const drawings = documentSkeleton!.getSkeletonData()?.pages[0].skeDrawings;
         drawings?.forEach((drawing) => {
             const drawingData = drawingDatas?.[drawing.drawingId] as { imageSourceType: ImageSourceType; source: string } & IDocDrawingBase;
             if (drawingData) {

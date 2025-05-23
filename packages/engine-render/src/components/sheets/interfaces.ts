@@ -43,7 +43,7 @@ export interface BorderCacheItem {
 }
 
 export interface IFontCacheItem {
-    documentSkeleton: DocumentSkeleton;
+    documentSkeleton?: DocumentSkeleton;
     vertexAngle?: number; // Text rotation offset based on the top-left corner.
     centerAngle?: number; // Text rotation based on the center point.
     verticalAlign: VerticalAlign;

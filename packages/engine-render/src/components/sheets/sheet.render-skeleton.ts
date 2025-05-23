@@ -75,6 +75,7 @@ import {
     degToRad,
     getFontStyleString,
 } from '../../basics/tools';
+import { DocSimpleSkeleton } from '../docs/layout/doc-simple-skeleton';
 import { DocumentSkeleton } from '../docs/layout/doc-skeleton';
 import { columnIterator } from '../docs/layout/tools';
 import { DocumentViewModel } from '../docs/view-model/document-view-model';
@@ -405,55 +406,55 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         return results;
     }
 
-    // eslint-disable-next-line max-lines-per-function
-    private _calculateRowAutoHeight(rowNum: number): number {
-        const worksheet = this.worksheet;
-        const { columnCount, columnData, defaultRowHeight, defaultColumnWidth } = this._worksheetData;
-        let height = defaultRowHeight;
-
-        for (let i = 0; i < columnCount; i++) {
-            // When calculating the automatic height of a row, if a cell is in a merged cell,
-            // skip the cell directly, which currently follows the logic of Excel
-            const cellMergeInfo = this.worksheet.getCellInfoInMergeData(rowNum, i);
-            if (this._skipAutoHeightForMergedCells) {
-                if (cellMergeInfo.isMerged || cellMergeInfo.isMergedMainCell) {
-                    continue;
-                }
+    private _calculateAutoHeightForCell(row: number, col: number) {
+        const { columnData, defaultColumnWidth } = this._worksheetData;
+        // When calculating the automatic height of a row, if a cell is in a merged cell,
+        // skip the cell directly, which currently follows the logic of Excel
+        const cellMergeInfo = this.worksheet.getCellInfoInMergeData(row, col);
+        if (this._skipAutoHeightForMergedCells) {
+            if (cellMergeInfo.isMerged || cellMergeInfo.isMergedMainCell) {
+                return undefined;
             }
-            const cell = worksheet.getCell(rowNum, i);
-            if (cell?.interceptorAutoHeight) {
-                const cellHeight = cell.interceptorAutoHeight();
-                if (cellHeight) {
-                    height = Math.max(height, cellHeight);
-                    continue;
-                }
+        }
+        const cell = this.worksheet.getCell(row, col);
+        if (cell?.interceptorAutoHeight) {
+            const cellHeight = cell.interceptorAutoHeight();
+            if (cellHeight) {
+                return cellHeight;
             }
+        }
 
+        const style = this._styles.getStyleByCell(cell);
+        const { vertexAngle, centerAngle } = convertTextRotation(style?.tr ?? { a: 0 });
+        const isRichText = cell?.p || vertexAngle || centerAngle;
+
+        let colWidth = columnData[col]?.w ?? defaultColumnWidth;
+        if (cellMergeInfo.isMergedMainCell) {
+            const mergeCellStartCol = cellMergeInfo.startColumn;
+            const mergeCellEndCol = cellMergeInfo.endColumn;
+
+            colWidth = Array.from(
+                { length: mergeCellEndCol - mergeCellStartCol + 1 },
+                (_, index) => mergeCellStartCol + index
+            ).reduce((sum, colIndex) => {
+                return sum + (columnData[colIndex]?.w ?? defaultColumnWidth);
+            }, 0);
+        }
+
+        if (isRichText) {
             const modelObject = cell && this._getCellDocumentModel(cell);
             if (modelObject == null) {
-                continue;
+                return undefined;
             }
 
             const { documentModel, textRotation, wrapStrategy } = modelObject;
             if (documentModel == null) {
-                continue;
+                return undefined;
             }
 
             const documentViewModel = new DocumentViewModel(documentModel);
             const { vertexAngle: angle } = convertTextRotation(textRotation);
 
-            let colWidth = columnData[i]?.w ?? defaultColumnWidth;
-            if (cellMergeInfo.isMergedMainCell) {
-                const mergeCellStartCol = cellMergeInfo.startColumn;
-                const mergeCellEndCol = cellMergeInfo.endColumn;
-                const mergeCellWidth = mergeCellEndCol - mergeCellStartCol + 1;
-                colWidth = Array.from(
-                    { length: mergeCellEndCol - mergeCellStartCol + 1 },
-                    (_, index) => mergeCellStartCol + index
-                ).reduce((sum, colIndex) => {
-                    return sum + (columnData[colIndex]?.w ?? defaultColumnWidth);
-                }, 0);
-            }
             if (typeof colWidth === 'number' && wrapStrategy === WrapStrategy.WRAP) {
                 documentModel.updateDocumentDataPageSize(colWidth);
             }
@@ -483,7 +484,39 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
                     l * Math.sin(absAngleInRad);
             }
 
-            height = Math.max(height, h);
+            return h;
+        } else {
+            if (cell?.v === undefined || cell?.v === null) {
+                return undefined;
+            }
+
+            if (style?.tb === WrapStrategy.WRAP) {
+                const skeleton = new DocSimpleSkeleton(
+                    `${cell!.v!}`,
+                    getFontStyleString(style).fontCache,
+                    style?.tb === WrapStrategy.WRAP,
+                    colWidth
+                );
+                skeleton.calculate();
+                return skeleton.getTotalHeight();
+            } else {
+                // For same fontStyle, the height of the text is fixed.
+                // So we can use a fixed text to calculate the height to make a speed up.
+                const textSize = FontCache.getMeasureText('A', getFontStyleString(style).fontCache);
+                return textSize.fontBoundingBoxAscent + textSize.fontBoundingBoxDescent;
+            }
+        }
+    }
+
+    private _calculateRowAutoHeight(rowNum: number): number {
+        const { columnCount, defaultRowHeight } = this._worksheetData;
+        let height = defaultRowHeight;
+
+        for (let i = 0; i < columnCount; i++) {
+            const cellHeight = this._calculateAutoHeightForCell(rowNum, i);
+            if (cellHeight) {
+                height = Math.max(height, cellHeight);
+            }
         }
 
         return Math.min(height, MAXIMUM_ROW_HEIGHT);

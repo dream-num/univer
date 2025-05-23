@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IKeyValue } from '@univerjs/core';
+import type { IKeyValue, Nullable } from '@univerjs/core';
 import type { UniverRenderingContext } from '../context';
 import type { IShapeProps } from './shape';
 import { HorizontalAlign, VerticalAlign } from '@univerjs/core';
@@ -29,9 +29,12 @@ export interface ITextProps extends IShapeProps {
     warp?: boolean;
     hAlign?: HorizontalAlign;
     vAlign?: VerticalAlign;
+    color?: Nullable<string>;
+    strokeLine?: boolean;
+    underline?: boolean;
 }
 
-export const TEXT_OBJECT_ARRAY = ['text', 'fontStyle', 'warp', 'hAlign', 'vAlign', 'width', 'height'];
+export const TEXT_OBJECT_ARRAY = ['text', 'fontStyle', 'warp', 'hAlign', 'vAlign', 'width', 'height', 'color'];
 
 export class Text extends Shape<ITextProps> {
     text: string;
@@ -64,16 +67,67 @@ export class Text extends Shape<ITextProps> {
         ctx.save();
         ctx.font = fontStyle;
 
+        if (props.color) {
+            ctx.fillStyle = props.color;
+        }
+
         // Get font metrics using FontCache for consistency with height calculation
         for (const line of lines) {
             const lineHeight = line.height;
             const lineWidth = line.width;
             const lineX = (hAlign === HorizontalAlign.LEFT || hAlign === HorizontalAlign.UNSPECIFIED) ? 0 : (hAlign === HorizontalAlign.CENTER ? (width - lineWidth) / 2 : (width - lineWidth));
             const baselineY = lineTop + line.baseline;
+
+            // Draw the text
             ctx.fillText(line.text, left + lineX, baselineY);
 
-            lineTop += lineHeight;
+            // Draw underline if specified
+            if (props.underline) {
+                this._drawTextDecoration(ctx, {
+                    x: left + lineX,
+                    y: lineTop + lineHeight - 1, // Position underline near bottom of line
+                    width: lineWidth,
+                    color: props.color || '#000000',
+                    lineWidth: 1,
+                });
+            }
+
+            // Draw strikethrough if specified
+            if (props.strokeLine) {
+                this._drawTextDecoration(ctx, {
+                    x: left + lineX,
+                    y: lineTop + line.baseline - lineHeight * 0.3, // Position strikethrough roughly in middle
+                    width: lineWidth,
+                    color: props.color || '#000000',
+                    lineWidth: 1,
+                });
+            }
+
+            lineTop = lineTop + lineHeight;
         }
+
+        ctx.restore();
+    }
+
+    /**
+     * Draw text decoration lines (underline, strikethrough, etc.)
+     */
+    private static _drawTextDecoration(ctx: UniverRenderingContext, options: {
+        x: number;
+        y: number;
+        width: number;
+        color: string;
+        lineWidth: number;
+    }) {
+        const { x, y, width, color, lineWidth } = options;
+
+        ctx.save();
+        ctx.strokeStyle = color;
+        ctx.lineWidth = lineWidth;
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x + width, y);
+        ctx.stroke();
 
         ctx.restore();
     }

@@ -20,6 +20,7 @@ import type {
     ICellDataForSheetInterceptor,
     ICellWithCoord,
     ImageCacheMap,
+    IStyleData,
     Nullable,
     ObjectMatrix,
     VerticalAlign,
@@ -51,6 +52,7 @@ export interface IFontCacheItem {
     imageCacheMap: ImageCacheMap;
     cellData: Nullable<ICellDataForSheetInterceptor>;
     fontString: string;
+    style?: Nullable<IStyleData>;
 }
 
 type colorString = string;

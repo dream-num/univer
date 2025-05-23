@@ -1237,6 +1237,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         const modelObject = this._getCellDocumentModel(cellData, {
             displayRawFormula: this._renderRawFormula,
         });
+        const style = this._styles.getStyleByCell(cellData);
         if (modelObject) {
             const { documentModel } = modelObject;
             if (documentModel) {
@@ -1257,6 +1258,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
                         imageCacheMap: this._imageCacheMap,
                         cellData,
                         fontString,
+                        style,
                     };
                     this._calculateOverflowCell(row, col, config as IFontCacheItem);
                     this._handleFontMatrix.setValue(row, col, true);

@@ -243,7 +243,7 @@ export class Font extends SheetExtension {
         //#endregion
 
         ctx.translate(renderFontCtx.startX + FIX_ONE_PIXEL_BLUR_OFFSET, renderFontCtx.startY + FIX_ONE_PIXEL_BLUR_OFFSET);
-        if (fontCache.cellData?.p) {
+        if (fontCache.cellData?.p || fontCache.vertexAngle) {
             this._renderDocuments(ctx, row, col, renderFontCtx, spreadsheetSkeleton.overflowCache);
         } else {
             this._renderText(ctx, row, col, renderFontCtx, spreadsheetSkeleton.overflowCache);
@@ -489,6 +489,9 @@ export class Font extends SheetExtension {
             height: cellHeight,
             left: DEFAULT_PADDING_DATA.l,
             top: DEFAULT_PADDING_DATA.t,
+            color: fontCache.style?.cl?.rgb,
+            strokeLine: Boolean(fontCache.style?.st?.s),
+            underline: Boolean(fontCache.style?.ul?.s),
         });
     }
 

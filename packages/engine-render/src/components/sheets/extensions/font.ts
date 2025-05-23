@@ -479,7 +479,7 @@ export class Font extends SheetExtension {
         }
 
         const isNumber = cellData.t === CellValueType.NUMBER && typeof cellData.v === 'number';
-        Text.drawWith(ctx, {
+        const height = Text.drawWith(ctx, {
             text,
             fontStyle: fontCache.fontString,
             warp: wrapStrategy === WrapStrategy.WRAP && vertexAngle === 0,
@@ -493,6 +493,7 @@ export class Font extends SheetExtension {
             strokeLine: Boolean(fontCache.style?.st?.s),
             underline: Boolean(fontCache.style?.ul?.s),
         });
+        renderFontCtx.spreadsheetSkeleton.setAutoHeightCache(row, col, height);
     }
 
     private _renderDocuments(
@@ -563,6 +564,7 @@ export class Font extends SheetExtension {
         };
         documentSkeleton.makeDirty(false);
         documents.resize(cellWidth, cellHeight);
+        renderFontCtx.spreadsheetSkeleton.setAutoHeightCache(row, col, getDocsSkeletonPageSize(documentSkeleton)?.height ?? undefined);
         documents.changeSkeleton(documentSkeleton).render(ctx, {
             viewBound: {
                 left: 0,

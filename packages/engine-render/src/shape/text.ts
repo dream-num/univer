@@ -107,6 +107,8 @@ export class Text extends Shape<ITextProps> {
         }
 
         ctx.restore();
+
+        return totalHeight;
     }
 
     /**

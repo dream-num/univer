@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-import type zhCN from './zh-CN';
-
-const locale: typeof zhCN = {
+const locale = {
     'action-recorder': {
         menu: {
             title: 'Record Actions',

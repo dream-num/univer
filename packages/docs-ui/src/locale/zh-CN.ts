@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-const locale = {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     toolbar: {
         undo: '撤销',
         redo: '重做',
@@ -98,6 +100,10 @@ const locale = {
         },
     },
     rightClick: {
+        copy: '复制',
+        cut: '剪切',
+        paste: '粘贴',
+        delete: '删除',
         bulletList: '无序列表',
         orderList: '有序列表',
         checkList: '任务列表',

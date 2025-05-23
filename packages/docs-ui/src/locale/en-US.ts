@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-import type zhCN from './zh-CN';
-
-const locale: typeof zhCN = {
+const locale = {
     toolbar: {
         undo: 'Undo',
         redo: 'Redo',
@@ -100,6 +98,10 @@ const locale: typeof zhCN = {
         },
     },
     rightClick: {
+        copy: 'Copy',
+        cut: 'Cut',
+        paste: 'Paste',
+        delete: 'Delete',
         bulletList: 'Bullet list',
         orderList: 'Ordered list',
         checkList: 'Task list',

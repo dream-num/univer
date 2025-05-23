@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type zhCN from './zh-CN';
+import type enUS from './en-US';
 
-const locale: typeof zhCN = {
+const locale: typeof enUS = {
     toolbar: {
         undo: '撤銷',
         redo: '重做',
@@ -100,6 +100,10 @@ const locale: typeof zhCN = {
         },
     },
     rightClick: {
+        copy: '複製',
+        cut: '剪切',
+        paste: '貼上',
+        delete: '刪除',
         bulletList: '無序列表',
         orderList: '有序列表',
         checkList: '任務列表',

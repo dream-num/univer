@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-const locale = {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     toolbar: {
         heading: {
             normal: '正文',

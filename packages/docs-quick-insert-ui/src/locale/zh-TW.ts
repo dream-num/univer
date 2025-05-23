@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type zhCN from './zh-CN';
+import type enUS from './en-US';
 
-const locale: typeof zhCN = {
+const locale: typeof enUS = {
     docQuickInsert: {
         menu: {
             numberedList: '有序列表',

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type zhCN from './zh-CN';
+import type enUS from './en-US';
 
-const locale: typeof zhCN = {
+const locale: typeof enUS = {
     toolbar: {
         undo: 'Hoàn tác',
         redo: 'Làm lại',
@@ -100,6 +100,10 @@ const locale: typeof zhCN = {
         },
     },
     rightClick: {
+        copy: 'Sao chép',
+        cut: 'Cắt',
+        paste: 'Dán',
+        delete: 'Xóa',
         bulletList: 'Danh sách không thứ tự',
         orderList: 'Danh sách có thứ tự',
         checkList: 'Danh sách công việc',

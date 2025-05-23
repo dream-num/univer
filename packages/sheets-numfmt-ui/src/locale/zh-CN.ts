@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-const locale = {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     sheet: {
         numfmt: {
             title: '数字格式',

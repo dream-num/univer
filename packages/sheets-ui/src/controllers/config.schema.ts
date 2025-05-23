@@ -98,6 +98,16 @@ export interface IUniverSheetsUIConfig {
         framework: 'react' | 'vue3';
     };
 
+    /**
+     * Whether to disable the force string alert.
+     * @default false
+     */
+    disableForceStringAlert?: boolean;
+    /**
+     * Whether to disable the force string mark.
+     * @default false
+     */
+    disableForceStringMark?: boolean;
 }
 
 export const defaultPluginConfig: IUniverSheetsUIConfig = {

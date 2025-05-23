@@ -16,16 +16,19 @@
 
 import type { Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import { CellValueType, Inject, InterceptorEffectEnum, isRealNum, RxDisposable } from '@univerjs/core';
+import type { IUniverSheetsUIConfig } from './config.schema';
+import { CellValueType, IConfigService, Inject, InterceptorEffectEnum, isRealNum, RxDisposable } from '@univerjs/core';
 import { isTextFormat } from '@univerjs/engine-numfmt';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
+import { SHEETS_UI_PLUGIN_CONFIG_KEY } from './config.schema';
 
 export class ForceStringRenderController extends RxDisposable implements IRenderModule {
     constructor(
         private readonly _context: IRenderContext<Workbook>,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
-        @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService
+        @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
+        @IConfigService private readonly _configService: IConfigService
     ) {
         super();
 
@@ -62,6 +65,11 @@ export class ForceStringRenderController extends RxDisposable implements IRender
                             // If the cell is in text format, follow the logic of number format
                             const cellStyle = pos.workbook.getStyles().get(cellRaw.s);
                             if (isTextFormat(cellStyle?.n?.pattern)) {
+                                return next(cell);
+                            }
+
+                            // If the user has disabled the force string mark, do not show it
+                            if (this._configService.getConfig<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY)?.disableForceStringMark) {
                                 return next(cell);
                             }
 

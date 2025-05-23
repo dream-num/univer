@@ -16,10 +16,12 @@
 
 import type { Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import { CellValueType, Disposable, Inject, isRealNum, LocaleService } from '@univerjs/core';
+import type { IUniverSheetsUIConfig } from './config.schema';
+import { CellValueType, Disposable, IConfigService, Inject, isRealNum, LocaleService } from '@univerjs/core';
 import { IZenZoneService } from '@univerjs/ui';
 import { CellAlertManagerService, CellAlertType } from '../services/cell-alert-manager.service';
 import { HoverManagerService } from '../services/hover-manager.service';
+import { SHEETS_UI_PLUGIN_CONFIG_KEY } from './config.schema';
 
 const ALERT_KEY = 'SHEET_FORCE_STRING_ALERT';
 
@@ -29,7 +31,8 @@ export class ForceStringAlertRenderController extends Disposable implements IRen
         @Inject(HoverManagerService) private readonly _hoverManagerService: HoverManagerService,
         @Inject(CellAlertManagerService) private readonly _cellAlertManagerService: CellAlertManagerService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
-        @IZenZoneService private readonly _zenZoneService: IZenZoneService
+        @IZenZoneService private readonly _zenZoneService: IZenZoneService,
+        @IConfigService private readonly _configService: IConfigService
     ) {
         super();
         this._init();
@@ -60,6 +63,11 @@ export class ForceStringAlertRenderController extends Disposable implements IRen
                         currentLoc.subUnitId === cellPos.location.subUnitId &&
                         currentLoc.unitId === cellPos.location.unitId
                     ) {
+                        return;
+                    }
+
+                    // If the user has disabled the force string alert, do not show it
+                    if (this._configService.getConfig<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY)?.disableForceStringAlert) {
                         return;
                     }
 

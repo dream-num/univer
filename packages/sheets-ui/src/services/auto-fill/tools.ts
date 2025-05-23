@@ -471,11 +471,13 @@ export function fillExtendNumber(data: Array<Nullable<ICellData>>, len: number, 
         removeCellCustom(d);
 
         const last = `${data[data.length - 1]?.v}`;
+        if (!last) continue;
+
         const match = last?.match(reg);
         const lastTxt = match?.[match.length - 1];
+        if (!lastTxt) continue;
 
         const num = Math.abs(Number(lastTxt) + step * i);
-        if (!last || !lastTxt) continue;
         const lastIndex = last.lastIndexOf(lastTxt);
         const valueTxt = last.substr(0, lastIndex) + num.toString() + last.substr(lastIndex + lastTxt.length);
 

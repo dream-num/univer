@@ -15,7 +15,7 @@
  */
 
 import type { ICellData, Injector, IStyleData, Nullable, Univer } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, LocaleType, RANGE_TYPE } from '@univerjs/core';
+import { CellValueType, ICommandService, IUniverInstanceService, LocaleType, RANGE_TYPE } from '@univerjs/core';
 import { DEFAULT_TEXT_FORMAT_EXCEL } from '@univerjs/engine-numfmt';
 import {
     AddWorksheetMergeMutation,
@@ -32,7 +32,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { SheetSkeletonManagerService } from '../../sheet-skeleton-manager.service';
 import { ISheetClipboardService } from '../clipboard.service';
 import { clipboardTestBed } from './clipboard-test-bed';
-import { excelSample, excelSample2 } from './constant';
+import { excelSample, excelSample2, excelSample3 } from './constant';
 
 describe('Test clipboard', () => {
     let univer: Univer;
@@ -323,6 +323,36 @@ describe('Test clipboard', () => {
                 tb: 1,
                 pd: { t: 0, b: 2, l: 2, r: 2 },
             });
+        });
+
+        it('copy number 123456789123456789', async () => {
+            const worksheet = get(IUniverInstanceService).getUniverSheetInstance('test')?.getSheetBySheetId('sheet1');
+            if (!worksheet) return false;
+
+            // set selection to K1:L1
+            const selectionManager = get(SheetsSelectionsService);
+            selectionManager.addSelections([
+                {
+                    range: {
+                        startRow: 0,
+                        startColumn: 0,
+                        endRow: 0,
+                        endColumn: 0,
+                        rangeType: RANGE_TYPE.NORMAL,
+                    },
+                    primary: null,
+                    style: null,
+                },
+            ]);
+
+            // paste data, excelSample2 value is 000123456
+            const res = await sheetClipboardService.legacyPaste(excelSample3);
+            expect(res).toBeTruthy();
+
+            // check the values
+            const cellValue = getValues(0, 0, 0, 0)?.[0]?.[0];
+            expect(cellValue?.v).toStrictEqual('123456789123456789');
+            expect(cellValue?.t).toStrictEqual(CellValueType.FORCE_STRING);
         });
     });
 });

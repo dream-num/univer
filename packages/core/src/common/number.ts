@@ -26,3 +26,12 @@ export function isSafeNumeric(str: string): boolean {
 
     return Number(str) <= Number.MAX_SAFE_INTEGER;
 }
+
+/**
+ * Whether the numeric string will lose precision when converted to a number.
+ * e.g. '123456789123456789' -> 123456789123456780
+ * e.g. '1212121212121212.2345' -> 1212121212121212.2
+ */
+export function willLoseNumericPrecision(str: string): boolean {
+    return Number(str) > Number.MAX_SAFE_INTEGER || str.length >= 18;
+}

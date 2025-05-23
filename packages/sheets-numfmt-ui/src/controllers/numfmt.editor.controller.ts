@@ -31,6 +31,7 @@ import {
     Optional,
     toDisposable,
     UniverInstanceType,
+    willLoseNumericPrecision,
 } from '@univerjs/core';
 import { isTextFormat } from '@univerjs/engine-numfmt';
 import {
@@ -45,7 +46,6 @@ import {
     SheetInterceptorService,
     transformCellsToRange,
 } from '@univerjs/sheets';
-
 import { getPatternType } from '@univerjs/sheets-numfmt';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
 
@@ -136,14 +136,14 @@ export class NumfmtEditorController extends Disposable {
      * @private
      * @memberof NumfmtService
      */
-
+    // eslint-disable-next-line max-lines-per-function
     private _initInterceptorEditorEnd() {
         this.disposeWithMe(
             toDisposable(
                 this._sheetInterceptorService.writeCellInterceptor.intercept(AFTER_CELL_EDIT, {
-                        // eslint-disable-next-line complexity
+                    // eslint-disable-next-line complexity
                     handler: (value, context, next) => {
-                            // clear the effect
+                        // clear the effect
                         this._collectEffectMutation.clean();
                         const currentNumfmtValue = this._numfmtService.getValue(
                             context.unitId,
@@ -166,7 +166,7 @@ export class NumfmtEditorController extends Disposable {
                             return next(value);
                         }
 
-                            // if the cell is text format or force string, do not convert the value
+                        // if the cell is text format or force string, do not convert the value
                         if (isTextFormat(currentNumfmtValue?.pattern) || value.t === CellValueType.FORCE_STRING) {
                             return next(value);
                         }
@@ -189,6 +189,18 @@ export class NumfmtEditorController extends Disposable {
                         }
 
                         if (numfmtInfo) {
+                            // If the numeric string will lose precision when converted to a number, set the cell type to force string
+                            // e.g. 123456789123456789
+                            // e.g. 1212121212121212.2345
+                            if (!numfmtInfo.z && willLoseNumericPrecision(content)) {
+                                return next({
+                                    ...value,
+                                    p: undefined,
+                                    v: content,
+                                    t: CellValueType.FORCE_STRING,
+                                });
+                            }
+
                             if (numfmtInfo.z) {
                                 this._collectEffectMutation.add(
                                     context.unitId,
@@ -200,7 +212,9 @@ export class NumfmtEditorController extends Disposable {
                                     }
                                 );
                             }
+
                             const v = Number(numfmtInfo.v);
+
                             return next({ ...value, p: undefined, v, t: CellValueType.NUMBER });
                         }
                         // else if (['date', 'time', 'datetime', 'percent'].includes(currentNumfmtType) || !isNumeric(content)) {

@@ -15,7 +15,7 @@
  */
 
 import type { CellValue, ICellData, IStyleData, Nullable, Styles } from '@univerjs/core';
-import { CellValueType, isBooleanString, isRealNum } from '@univerjs/core';
+import { CellValueType, isBooleanString, isRealNum, willLoseNumericPrecision } from '@univerjs/core';
 import { isTextFormat } from '@univerjs/engine-numfmt';
 
 /**
@@ -89,10 +89,20 @@ export function checkCellValueType(v: Nullable<CellValue>, type: Nullable<CellVa
                 return CellValueType.BOOLEAN;
             }
 
+            // If the numeric string will lose precision when converted to a number, set the cell type to force string
+            // e.g. 123456789123456789
+            // e.g. 1212121212121212.2345
+            if (willLoseNumericPrecision(v)) {
+                return CellValueType.FORCE_STRING;
+            }
+
             return CellValueType.NUMBER;
-        } else if (isBooleanString(v)) {
+        }
+
+        if (isBooleanString(v)) {
             return CellValueType.BOOLEAN;
         }
+
         return CellValueType.STRING;
     }
 
@@ -100,6 +110,7 @@ export function checkCellValueType(v: Nullable<CellValue>, type: Nullable<CellVa
         if ((v === 0 || v === 1) && type === CellValueType.BOOLEAN) {
             return CellValueType.BOOLEAN;
         }
+
         return CellValueType.NUMBER;
     }
 

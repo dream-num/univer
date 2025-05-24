@@ -14,9 +14,32 @@
  * limitations under the License.
  */
 
-import type { INumfmt, LocaleTag } from './types/numfmt.type';
-// @ts-ignore
-import _numfmt from 'numfmt';
+export { default as numfmt } from 'numfmt';
 
-const numfmt = _numfmt as INumfmt;
-export { LocaleTag as INumfmtLocalTag, numfmt };
+export type INumfmtLocalTag =
+    | 'zh-CN'
+    | 'zh-TW'
+    | 'cs'
+    | 'da'
+    | 'nl'
+    | 'en'
+    | 'fi'
+    | 'fr'
+    | 'de'
+    | 'el'
+    | 'hu'
+    | 'is'
+    | 'id'
+    | 'it'
+    | 'ja'
+    | 'ko'
+    | 'nb'
+    | 'pl'
+    | 'pt'
+    | 'ru'
+    | 'sk'
+    | 'es'
+    | 'sv'
+    | 'th'
+    | 'tr'
+    | 'vi';

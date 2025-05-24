@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import { CellValueType, Direction, IUniverInstanceService, numfmt } from '@univerjs/core';
 import type { Workbook } from '@univerjs/core';
+import type { IAutoFillRule } from './type';
 
+import { CellValueType, Direction, IUniverInstanceService, numfmt } from '@univerjs/core';
 import {
     chineseToNumber,
     fillChnNumber,
@@ -34,7 +35,6 @@ import {
     matchExtendNumber,
 } from './tools';
 import { APPLY_TYPE, DATA_TYPE } from './type';
-import type { IAutoFillRule } from './type';
 
 export const dateRule: IAutoFillRule = {
     type: DATA_TYPE.DATE,
@@ -51,9 +51,9 @@ export const dateRule: IAutoFillRule = {
                 const style = workbook.getStyles().get(cellData.s);
                 const pattern = style?.n?.pattern;
                 if (pattern) {
-                    return numfmt.getInfo(pattern).isDate;
+                    return numfmt.getFormatInfo(pattern).isDate;
                 }
-            } else if (cellData.s.n && numfmt.getInfo(cellData.s.n.pattern).isDate) {
+            } else if (cellData.s.n && numfmt.getFormatInfo(cellData.s.n.pattern).isDate) {
                 return true;
             }
         }

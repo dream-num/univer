@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { INumfmt } from '@univerjs/core';
 import { numfmt, Rectangle, Tools } from '@univerjs/core';
 
 /**
@@ -81,7 +80,7 @@ export class FUtil {
      * console.log(text);
      * ```
      */
-    get numfmt(): INumfmt {
+    get numfmt(): typeof numfmt {
         return numfmt;
     }
 

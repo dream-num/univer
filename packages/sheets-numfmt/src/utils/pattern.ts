@@ -19,14 +19,14 @@ import type { FormatType } from '@univerjs/sheets';
 import { numfmt } from '@univerjs/core';
 import { stripErrorMargin } from '@univerjs/engine-formula';
 
-export const getPatternType = (pattern: string): FormatType => numfmt.getInfo(pattern).type || 'unknown';
+export const getPatternType = (pattern: string): FormatType => numfmt.getFormatInfo(pattern).type || 'unknown';
 interface IPatternPreview {
     result: string;
     color?: string;
 }
 
 export const getPatternPreview = (pattern: string, value: number, locale: INumfmtLocalTag = 'en'): IPatternPreview => {
-    const info = numfmt.getInfo(pattern);
+    const info = numfmt.getFormatInfo(pattern);
     const negInfo = info._partitions[1];
 
     const result = numfmt.format(pattern, value, { locale, throws: false });

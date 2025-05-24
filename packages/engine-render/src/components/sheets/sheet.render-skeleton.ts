@@ -163,11 +163,6 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
     private _showGridlines: BooleanNumber = BooleanNumber.TRUE;
     private _gridlinesColor: string | undefined = undefined;
     private _scene: Nullable<Scene> = null;
-    private _autoHeightCache: ObjectMatrix<Nullable<number>> = new ObjectMatrix<Nullable<number>>();
-
-    get autoHeightCache() {
-        return this._autoHeightCache;
-    }
 
     constructor(
         worksheet: Worksheet,
@@ -189,69 +184,10 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
                 this.makeDirty(true);
             })
         );
-        this._initAutoHeightCache();
-    }
 
-    private _initAutoHeightCache() {
-        const { columnCount } = this._worksheetData;
-        this.disposeWithMe(this.worksheet.getCellMatrix().registerChangeCallback((change) => {
-            switch (change.type) {
-                case 'setValue':
-                    this._autoHeightCache.setValue(change.row, change.column, undefined);
-                    break;
-                case 'setRow':
-                    this._autoHeightCache.setRow(change.rowNumber, new Array(columnCount).fill(undefined));
-                    break;
-                case 'insertRows':
-                    this._autoHeightCache.insertRows(change.start, change.count);
-                    break;
-                case 'removeRows':
-                    this._autoHeightCache.removeRows(change.start, change.count);
-                    break;
-                case 'reset':
-                    this._autoHeightCache.reset();
-                    break;
-                case 'moveRows':
-                    this._autoHeightCache.moveRows(change.start, change.count, change.target);
-                    break;
-                case 'swapRow':
-                    this._autoHeightCache.swapRow(change.src, change.target);
-                    break;
-                case 'merge': {
-                    const newMatrix = new ObjectMatrix<Nullable<number>>();
-                    change.src.forValue((row, col, value) => {
-                        if (value) {
-                            newMatrix.setValue(row, col, undefined);
-                        }
-                    });
-                    this._autoHeightCache.merge(newMatrix);
-                    break;
-                }
-                case 'removeColumns':
-                    this._autoHeightCache.removeColumns(change.start, change.count);
-                    break;
-                case 'insertColumns':
-                    this._autoHeightCache.insertColumns(change.start, change.count);
-                    break;
-                case 'moveColumns':
-                    this._autoHeightCache.moveColumns(change.start, change.count, change.target);
-                    break;
-                default:
-                    break;
-            }
+        this.disposeWithMe(this.worksheet.registerGetCellHeight((row, col) => {
+            return this.calculateAutoHeightForCell(row, col) ?? this._worksheetData.defaultRowHeight;
         }));
-    }
-
-    setAutoHeightCache(row: number, col: number, height: Nullable<number>) {
-        this._autoHeightCache.setValue(row, col, height);
-    }
-
-    makeDirtyAutoHeightCacheByRange(ranges: IRange[]) {
-        for (const range of ranges) {
-            Range.foreach(Range.transformRange(range, this.worksheet), (row, col) => {
-                this._autoHeightCache.setValue(row, col, undefined);
-            });
-        }
     }
 
     setScene(scene: Scene) {
@@ -434,7 +370,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
      * @param ranges
      * @returns {IRowAutoHeightInfo[]} result
      */
-    calculateAutoHeightInRange(ranges: Nullable<IRange[]>): IRowAutoHeightInfo[] {
+    calculateAutoHeightInRange(ranges: Nullable<IRange[]>, currentCellHeights?: ObjectMatrix<number>): IRowAutoHeightInfo[] {
         if (!Tools.isArray(ranges)) {
             return [];
         }
@@ -462,12 +398,46 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
                 const hasUnMergedCell = this._hasUnMergedCellInRow(rowIndex, startColumn, endColumn);
 
                 if (hasUnMergedCell) {
-                    const autoHeight = this._calculateRowAutoHeight(rowIndex);
-                    calculatedRows.add(rowIndex);
-                    results.push({
-                        row: rowIndex,
-                        autoHeight,
-                    });
+                    if (currentCellHeights) {
+                        const currentAutoHeight = this.worksheet.getCellHeight(rowIndex, startColumn);
+                        let maxPrev = 0;
+                        let maxCurrent = 0;
+                        for (let colIndex = startColumn; colIndex <= endColumn; colIndex++) {
+                            const autoHeight = currentCellHeights.getValue(rowIndex, colIndex)!;
+                            maxPrev = Math.max(maxPrev, autoHeight);
+                            const currentHeight = this.calculateAutoHeightForCell(rowIndex, colIndex) ?? this._worksheetData.defaultRowHeight;
+                            maxCurrent = Math.max(maxCurrent, currentHeight);
+                        }
+                        if (maxPrev < currentAutoHeight) {
+                            calculatedRows.add(rowIndex);
+                            results.push({
+                                row: rowIndex,
+                                autoHeight: Math.max(currentAutoHeight, maxPrev),
+                            });
+                        } else {
+                            if (maxCurrent >= currentAutoHeight) {
+                                calculatedRows.add(rowIndex);
+                                results.push({
+                                    row: rowIndex,
+                                    autoHeight: maxPrev,
+                                });
+                            } else {
+                                const autoHeight = this._calculateRowAutoHeight(rowIndex);
+                                calculatedRows.add(rowIndex);
+                                results.push({
+                                    row: rowIndex,
+                                    autoHeight,
+                                });
+                            }
+                        }
+                    } else {
+                        const autoHeight = this._calculateRowAutoHeight(rowIndex);
+                        calculatedRows.add(rowIndex);
+                        results.push({
+                            row: rowIndex,
+                            autoHeight,
+                        });
+                    }
                 }
             }
         }
@@ -475,20 +445,9 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         return results;
     }
 
-    private _calculateAutoHeightForCellWithCache(row: number, col: number) {
-        const cacheHeight = this._autoHeightCache.getValue(row, col);
-        if (cacheHeight) {
-            return cacheHeight;
-        }
-        const height = this._calculateAutoHeightForCell(row, col);
-        this._autoHeightCache.setValue(row, col, height);
-        return height;
-    }
-
-    private _calculateAutoHeightForCell(row: number, col: number) {
+    // eslint-disable-next-line max-lines-per-function, complexity
+    calculateAutoHeightForCell(row: number, col: number) {
         const { columnData, defaultColumnWidth } = this._worksheetData;
-        // When calculating the automatic height of a row, if a cell is in a merged cell,
-        // skip the cell directly, which currently follows the logic of Excel
         const cellMergeInfo = this.worksheet.getCellInfoInMergeData(row, col);
         if (this._skipAutoHeightForMergedCells) {
             if (cellMergeInfo.isMerged || cellMergeInfo.isMergedMainCell) {
@@ -592,7 +551,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         let height = defaultRowHeight;
 
         for (let i = 0; i < columnCount; i++) {
-            const cellHeight = this._calculateAutoHeightForCellWithCache(rowNum, i);
+            const cellHeight = this.calculateAutoHeightForCell(rowNum, i);
             if (cellHeight) {
                 height = Math.max(height, cellHeight);
             }
@@ -623,7 +582,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
                 calculatedCols.add(colIndex);
                 results.push({
                     col: colIndex,
-                    width: autoWidth,
+                    width: Math.max(this._worksheetData.defaultColumnWidth, autoWidth),
                 });
             }
         }

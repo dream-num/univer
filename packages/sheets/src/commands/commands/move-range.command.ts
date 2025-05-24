@@ -36,6 +36,7 @@ import { SelectionMoveType } from '../../services/selections/type';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import { MoveRangeMutation } from '../mutations/move-range.mutation';
 import { SetSelectionsOperation } from '../operations/selection.operation';
+import { getRangesHeight } from './util';
 import { alignToMergedCellsBorders, getPrimaryForRange } from './utils/selection-utils';
 import { getSheetCommandTarget } from './utils/target-util';
 
@@ -49,6 +50,7 @@ export const MoveRangeCommand: ICommand = {
     type: CommandType.COMMAND,
     id: MoveRangeCommandId,
 
+    // eslint-disable-next-line max-lines-per-function
     handler: async (accessor: IAccessor, params: IMoveRangeCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
@@ -79,8 +81,10 @@ export const MoveRangeCommand: ICommand = {
 
         const interceptorCommands = sheetInterceptorService.onCommandExecute({
             id: MoveRangeCommand.id,
-            params: { ...params },
+            params,
         });
+
+        const cellHeights = getRangesHeight([params.fromRange, params.toRange], worksheet);
 
         const redos = [
             ...(interceptorCommands.preRedos ?? []),
@@ -115,7 +119,7 @@ export const MoveRangeCommand: ICommand = {
 
         const afterInterceptors = sheetInterceptorService.afterCommandExecute({
             id: MoveRangeCommand.id,
-            params: { ...params },
+            params: { ...params, cellHeights, subUnitId },
         });
 
         if (result) {

@@ -30,6 +30,21 @@ export interface IObjectArrayPrimitiveType<T> {
     [key: number]: T;
 }
 
+export function mapObjectMatrix<T, R>(o: IObjectMatrixPrimitiveType<T>, callback: (row: number, col: number, value: T) => R): IObjectMatrixPrimitiveType<R> {
+    const result: IObjectMatrixPrimitiveType<R> = {};
+    for (const row in o) {
+        const rowNumber = Number(row);
+        const columns = o[rowNumber];
+        for (const col in columns) {
+            const colNumber = Number(col);
+            const value = columns[colNumber];
+            const resultValue = callback(rowNumber, colNumber, value);
+            result[rowNumber][colNumber] = resultValue;
+        }
+    }
+    return result;
+}
+
 export function getArrayLength<T>(o: IObjectArrayPrimitiveType<T> | IObjectMatrixPrimitiveType<T>) {
     let maxIndex = 0;
     const keys = Object.keys(o);

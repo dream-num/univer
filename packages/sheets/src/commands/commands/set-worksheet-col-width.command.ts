@@ -32,6 +32,7 @@ import {
     SetWorksheetColWidthMutation,
     SetWorksheetColWidthMutationFactory,
 } from '../mutations/set-worksheet-col-width.mutation';
+import { getRangesHeight } from './util';
 import { getSheetCommandTarget } from './utils/target-util';
 
 export interface IDeltaColumnWidthCommandParams {
@@ -113,9 +114,14 @@ export const DeltaColumnWidthCommand: ICommand<IDeltaColumnWidthCommandParams> =
             };
         }
 
+        const cellHeights = getRangesHeight(redoMutationParams.ranges, worksheet);
+
         const { undos, redos } = accessor.get(SheetInterceptorService).onCommandExecute({
             id: DeltaColumnWidthCommand.id,
-            params: redoMutationParams,
+            params: {
+                ...redoMutationParams,
+                cellHeights,
+            },
         });
 
         const undoMutationParams: ISetWorksheetColWidthMutationParams = SetWorksheetColWidthMutationFactory(
@@ -175,12 +181,17 @@ export const SetColWidthCommand: ICommand = {
             colWidth: params.value,
         };
 
+        const cellHeights = getRangesHeight(redoMutationParams.ranges, worksheet);
+
         const undoMutationParams = SetWorksheetColWidthMutationFactory(redoMutationParams, worksheet);
         const setColWidthResult = commandService.syncExecuteCommand(SetWorksheetColWidthMutation.id, redoMutationParams);
 
         const { undos, redos } = accessor.get(SheetInterceptorService).onCommandExecute({
             id: SetColWidthCommand.id,
-            params: redoMutationParams,
+            params: {
+                ...redoMutationParams,
+                cellHeights,
+            },
         });
 
         const intercepted = sheetInterceptorService.onCommandExecute({

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { IDisposable } from '@wendellhu/redi';
 import type { IInterceptor } from '../common/interceptor';
 import type { IObjectMatrixPrimitiveType, Nullable } from '../shared';
 import type { BooleanNumber, HorizontalAlign, TextDirection, VerticalAlign, WrapStrategy } from '../types/enum';
@@ -22,7 +23,7 @@ import type { Styles } from './styles';
 import type { CustomData, ICellData, ICellDataForSheetInterceptor, ICellDataWithSpanAndDisplay, IFreeze, IRange, ISelectionCell, IWorksheetData } from './typedef';
 import { BuildTextUtils, DocumentDataModel } from '../docs';
 import { convertTextRotation, getFontStyleString } from '../docs/data-model/utils';
-import { composeStyles, ObjectMatrix, Tools } from '../shared';
+import { composeStyles, ObjectMatrix, toDisposable, Tools } from '../shared';
 import { createRowColIter } from '../shared/row-col-iter';
 import { DEFAULT_STYLES } from '../types/const';
 import { CellValueType } from '../types/enum';
@@ -82,6 +83,8 @@ export class Worksheet {
 
     protected _spanModel: SpanModel;
 
+    private _getCellHeight: Nullable<(row: number, col: number) => number>;
+
     constructor(
         public readonly unitId: string,
         snapshot: Partial<IWorksheetData>,
@@ -108,8 +111,23 @@ export class Worksheet {
         callback(this._viewModel);
     }
 
+    registerGetCellHeight(callback: (row: number, col: number) => number): IDisposable {
+        this._getCellHeight = callback;
+
+        return toDisposable(() => {
+            this._getCellHeight = null;
+        });
+    }
+
     getSnapshot(): IWorksheetData {
         return this._snapshot;
+    }
+
+    getCellHeight(row: number, col: number): number {
+        if (this._getCellHeight) {
+            return this._getCellHeight(row, col);
+        }
+        return this._snapshot.defaultRowHeight;
     }
 
     /**

@@ -24,6 +24,7 @@ import {
     isICellData,
     IUndoRedoService,
     IUniverInstanceService,
+    mapObjectMatrix,
     ObjectMatrix,
     sequenceExecute,
     Tools,
@@ -101,13 +102,14 @@ export const SetRangeValuesCommand: ICommand = {
 
         const setRangeValuesMutationParams = { subUnitId, unitId, cellValue: realCellValue ?? cellValue.getMatrix() };
         const redoParams = SetRangeValuesUndoMutationFactory(accessor, setRangeValuesMutationParams);
+        const cellHeights = mapObjectMatrix(setRangeValuesMutationParams.cellValue, (row, col) => worksheet.getCellHeight(row, col));
 
         const setValueMutationResult = commandService.syncExecuteCommand(SetRangeValuesMutation.id, setRangeValuesMutationParams);
         if (!setValueMutationResult) return false;
 
         const { undos, redos } = sheetInterceptorService.onCommandExecute({
             id: SetRangeValuesCommand.id,
-            params: { ...setRangeValuesMutationParams, range: currentSelections },
+            params: { ...setRangeValuesMutationParams, range: currentSelections, cellHeights },
         });
 
         const result = sequenceExecute([...redos], commandService);

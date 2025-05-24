@@ -63,6 +63,7 @@ export const ReorderRangeCommand: ICommand<IReorderRangeCommandParams> = {
             undoReorderMutation,
             ...interceptorCommands.undos,
         ];
+
         const result = sequenceExecute(redos, commandService);
 
         const reorderAfterIntercepted = sheetInterceptorService.afterCommandExecute({ id: ReorderRangeCommand.id, params });

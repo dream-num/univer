@@ -247,7 +247,7 @@ export function fixLineWidthByScale(num: number, scale: number) {
 
 // eslint-disable-next-line max-lines-per-function
 export function getFontStyleString(
-    textStyle?: IStyleBase
+    textStyle?: Nullable<IStyleBase>
 ): IDocumentSkeletonFontStyle {
     const defaultFont = DEFAULT_STYLES.ff;
 

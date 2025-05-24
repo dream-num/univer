@@ -392,7 +392,7 @@ describe('Test formula data model', () => {
                 },
             };
 
-            const cellMatrix = new ObjectMatrix(cellValue);
+            const cellMatrix = new ObjectMatrix<Nullable<ICellData>>(cellValue);
 
             const result = {
                 [unitId]: {

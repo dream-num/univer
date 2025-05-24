@@ -15,6 +15,7 @@
  */
 
 import type {
+    ICellData,
     ICommandInfo,
     IExecutionOptions,
     IUnitRange,
@@ -229,7 +230,7 @@ export class UpdateFormulaController extends Disposable {
 
         const formulaData = this._formulaDataModel.getFormulaData();
         const { id: sheetId, cellData } = sheet;
-        const cellMatrix = new ObjectMatrix(cellData);
+        const cellMatrix = new ObjectMatrix<Nullable<ICellData>>(cellData);
         const newFormulaData = initSheetFormulaData(formulaData, unitId, sheetId, cellMatrix);
 
         this._commandService.executeCommand(

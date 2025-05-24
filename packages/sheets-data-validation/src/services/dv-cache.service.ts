@@ -97,7 +97,9 @@ export class DataValidationCacheService extends Disposable {
         const cache = this._ensureCache(unitId, subUnitId);
         ranges.forEach((range) => {
             Range.foreach(range, (row, col) => {
-                cache.setValue(row, col, undefined);
+                if (cache.getValue(row, col) !== undefined) {
+                    cache.setValue(row, col, undefined);
+                }
             });
         });
 

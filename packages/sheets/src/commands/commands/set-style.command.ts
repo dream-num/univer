@@ -44,6 +44,7 @@ import {
 import { SheetsSelectionsService } from '../../services/selections/selection.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
+import { getRangesHeight } from './util';
 import { createRangeIteratorWithSkipFilteredRows } from './utils/selection-utils';
 import { getSheetCommandTarget } from './utils/target-util';
 
@@ -68,6 +69,7 @@ export const SetStyleCommand: ICommand<ISetStyleCommandParams<unknown>> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-style',
 
+    // eslint-disable-next-line max-lines-per-function
     handler: <T> (accessor: IAccessor, params: ISetStyleCommandParams<T>) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
@@ -116,6 +118,7 @@ export const SetStyleCommand: ICommand<ISetStyleCommandParams<unknown>> = {
             cellValue: cellValue.getMatrix(),
         };
 
+        const cellHeights = getRangesHeight(ranges, worksheet);
         const undoSetRangeValuesMutationParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
             accessor,
             setRangeValuesMutationParams
@@ -128,7 +131,10 @@ export const SetStyleCommand: ICommand<ISetStyleCommandParams<unknown>> = {
 
         const { undos, redos } = accessor.get(SheetInterceptorService).onCommandExecute({
             id: SetStyleCommand.id,
-            params,
+            params: {
+                ...params,
+                cellHeights,
+            },
         });
 
         const result = sequenceExecute([...redos], commandService);

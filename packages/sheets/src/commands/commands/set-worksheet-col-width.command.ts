@@ -32,6 +32,7 @@ import {
     SetWorksheetColWidthMutation,
     SetWorksheetColWidthMutationFactory,
 } from '../mutations/set-worksheet-col-width.mutation';
+import { getRangesHeight } from './util';
 import { getSheetCommandTarget } from './utils/target-util';
 
 export interface IDeltaColumnWidthCommandParams {
@@ -113,6 +114,8 @@ export const DeltaColumnWidthCommand: ICommand<IDeltaColumnWidthCommandParams> =
             };
         }
 
+        const cellHeights = getRangesHeight(redoMutationParams.ranges, worksheet);
+
         const { undos, redos } = accessor.get(SheetInterceptorService).onCommandExecute({
             id: DeltaColumnWidthCommand.id,
             params: redoMutationParams,
@@ -128,13 +131,21 @@ export const DeltaColumnWidthCommand: ICommand<IDeltaColumnWidthCommandParams> =
             redoMutationParams
         );
 
-        const result = sequenceExecute([...redos], commandService);
+        const { undos: afterUndos, redos: afterRedos } = accessor.get(SheetInterceptorService).afterCommandExecute({
+            id: DeltaColumnWidthCommand.id,
+            params: {
+                ...redoMutationParams,
+                cellHeights,
+            },
+        });
+
+        const result = sequenceExecute([...redos, ...afterRedos], commandService);
 
         if (setColWidthResult && result.result) {
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
-                undoMutations: [{ id: SetWorksheetColWidthMutation.id, params: undoMutationParams }, ...undos],
-                redoMutations: [{ id: SetWorksheetColWidthMutation.id, params: redoMutationParams }, ...redos],
+                undoMutations: [{ id: SetWorksheetColWidthMutation.id, params: undoMutationParams }, ...undos, ...afterUndos],
+                redoMutations: [{ id: SetWorksheetColWidthMutation.id, params: redoMutationParams }, ...redos, ...afterRedos],
             });
 
             return true;
@@ -175,12 +186,17 @@ export const SetColWidthCommand: ICommand = {
             colWidth: params.value,
         };
 
+        const cellHeights = getRangesHeight(redoMutationParams.ranges, worksheet);
+
         const undoMutationParams = SetWorksheetColWidthMutationFactory(redoMutationParams, worksheet);
         const setColWidthResult = commandService.syncExecuteCommand(SetWorksheetColWidthMutation.id, redoMutationParams);
 
         const { undos, redos } = accessor.get(SheetInterceptorService).onCommandExecute({
             id: SetColWidthCommand.id,
-            params: redoMutationParams,
+            params: {
+                ...redoMutationParams,
+                cellHeights,
+            },
         });
 
         const intercepted = sheetInterceptorService.onCommandExecute({

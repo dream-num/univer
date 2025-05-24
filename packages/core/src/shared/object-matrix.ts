@@ -16,6 +16,7 @@
 
 import type { IRange } from '../sheets/typedef';
 import type { Nullable } from './types';
+import { toDisposable } from './lifecycle';
 import { Tools } from './tools';
 
 /**
@@ -27,6 +28,23 @@ export interface IObjectMatrixPrimitiveType<T> {
 
 export interface IObjectArrayPrimitiveType<T> {
     [key: number]: T;
+}
+
+export function mapObjectMatrix<T, R>(o: IObjectMatrixPrimitiveType<T>, callback: (row: number, col: number, value: T) => R): IObjectMatrixPrimitiveType<R> {
+    const result: IObjectMatrixPrimitiveType<R> = {};
+    for (const row in o) {
+        const rowNumber = Number(row);
+        const columns = o[rowNumber];
+        for (const col in columns) {
+            const colNumber = Number(col);
+            const value = columns[colNumber];
+            const resultValue = callback(rowNumber, colNumber, value);
+            if (resultValue !== undefined) {
+                result[rowNumber][colNumber] = resultValue;
+            }
+        }
+    }
+    return result;
 }
 
 export function getArrayLength<T>(o: IObjectArrayPrimitiveType<T> | IObjectMatrixPrimitiveType<T>) {
@@ -211,7 +229,52 @@ function _moveForward<T>(
     });
 }
 
-// TODO: this is not a good name
+export type IObjectMatrixChange<T> = {
+    type: 'swapRow';
+    src: number;
+    target: number;
+} | {
+    type: 'reset';
+} | {
+    type: 'setValue';
+    row: number;
+    column: number;
+    value: Nullable<T>;
+} | {
+    type: 'setRow';
+    row: IObjectArrayPrimitiveType<T>;
+    rowNumber: number;
+} |
+{
+    type: 'insertRows';
+    start: number;
+    count: number;
+} | {
+    type: 'removeRows';
+    start: number;
+    count: number;
+} | {
+    type: 'moveRows';
+    start: number;
+    count: number;
+    target: number;
+} | {
+    type: 'insertColumns';
+    start: number;
+    count: number;
+} | {
+    type: 'removeColumns';
+    start: number;
+    count: number;
+} | {
+    type: 'moveColumns';
+    start: number;
+    count: number;
+    target: number;
+} | {
+    type: 'merge';
+    src: ObjectMatrix<Nullable<T>>;
+};
 
 /**
  * A two-dimensional array represented by a two-level deep object and provides an array-like API
@@ -220,9 +283,22 @@ function _moveForward<T>(
  */
 export class ObjectMatrix<T> {
     private _matrix!: IObjectMatrixPrimitiveType<T>;
+    private _changeCallbacks = new Set<(change: IObjectMatrixChange<T>) => void>();
 
     constructor(matrix: IObjectMatrixPrimitiveType<T> = {}) {
         this._setOriginValue(matrix);
+    }
+
+    private _onChange(change: IObjectMatrixChange<T>) {
+        this._changeCallbacks.forEach((callback) => callback(change));
+    }
+
+    registerChangeCallback(callback: (change: IObjectMatrixChange<T>) => void) {
+        this._changeCallbacks.add(callback);
+
+        return toDisposable(() => {
+            this._changeCallbacks.delete(callback);
+        });
     }
 
     static MakeObjectMatrixSize<T>(size: number): ObjectMatrix<T> {
@@ -302,6 +378,11 @@ export class ObjectMatrix<T> {
         this._matrix[src] = targetRow;
 
         this._matrix[target] = srcRow;
+        this._onChange({
+            type: 'swapRow',
+            src,
+            target,
+        });
     }
 
     getRow(rowIndex: number): Nullable<IObjectArrayPrimitiveType<T>> {
@@ -320,6 +401,9 @@ export class ObjectMatrix<T> {
 
     reset() {
         this._setOriginValue({});
+        this._onChange({
+            type: 'reset',
+        });
     }
 
     hasValue() {
@@ -347,6 +431,12 @@ export class ObjectMatrix<T> {
     setValue(row: number, column: number, value: T): void {
         const objectArray = this.getRowOrCreate(row);
         objectArray[column] = value;
+        this._onChange({
+            type: 'setValue',
+            row,
+            column,
+            value,
+        });
     }
 
     /**
@@ -356,6 +446,12 @@ export class ObjectMatrix<T> {
      */
     deleteValue(row: number, column: number): void {
         delete this._matrix?.[row]?.[column];
+        this._onChange({
+            type: 'setValue',
+            row,
+            column,
+            value: undefined,
+        });
     }
 
     realDeleteValue(row: number, column: number): void {
@@ -371,20 +467,47 @@ export class ObjectMatrix<T> {
                 delete this._matrix?.[row];
             }
         }
+
+        this._onChange({
+            type: 'setValue',
+            row,
+            column,
+            value: undefined,
+        });
     }
 
     setRow(rowNumber: number, row: IObjectArrayPrimitiveType<T>): void {
         this._matrix[rowNumber] = row;
+
+        this._onChange({
+            type: 'setRow',
+            row,
+            rowNumber,
+        });
     }
 
     moveRows(start: number, count: number, target: number): void {
         moveMatrixArray(start, count, target, this._matrix);
+
+        this._onChange({
+            type: 'moveRows',
+            start,
+            count,
+            target,
+        });
     }
 
     moveColumns(start: number, count: number, target: number): void {
         // loop all rows and move column one by one, because our matrix is row-first
         this.forEach((row, value) => {
             moveMatrixArray(start, count, target, value);
+        });
+
+        this._onChange({
+            type: 'moveColumns',
+            start,
+            count,
+            target,
         });
     }
 
@@ -393,6 +516,12 @@ export class ObjectMatrix<T> {
             const initial: IObjectArrayPrimitiveType<T> = {};
             insertMatrixArray(r, initial, this._matrix);
         }
+
+        this._onChange({
+            type: 'insertRows',
+            start,
+            count,
+        });
     }
 
     insertColumns(start: number, count: number): void {
@@ -403,10 +532,22 @@ export class ObjectMatrix<T> {
                 }
             });
         }
+
+        this._onChange({
+            type: 'insertColumns',
+            start,
+            count,
+        });
     }
 
     removeRows(start: number, count: number): void {
         spliceArray(start, count, this._matrix);
+
+        this._onChange({
+            type: 'removeRows',
+            start,
+            count,
+        });
     }
 
     removeColumns(start: number, count: number): void {
@@ -414,6 +555,12 @@ export class ObjectMatrix<T> {
             if (value) {
                 spliceArray(start, count, value);
             }
+        });
+
+        this._onChange({
+            type: 'removeColumns',
+            start,
+            count,
         });
     }
 
@@ -699,6 +846,20 @@ export class ObjectMatrix<T> {
         });
 
         return ranges;
+    }
+
+    merge(newObject: ObjectMatrix<Nullable<T>>) {
+        this.forValue((row, column) => {
+            const cellValue = newObject.getValue(row, column);
+            if (cellValue != null) {
+                this.setValue(row, column, cellValue);
+            }
+        });
+
+        this._onChange({
+            type: 'merge',
+            src: newObject,
+        });
     }
 
     private _setOriginValue(matrix: IObjectMatrixPrimitiveType<T> = {}) {

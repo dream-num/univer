@@ -186,7 +186,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         );
 
         this.disposeWithMe(this.worksheet.registerGetCellHeight((row, col) => {
-            return this.calculateAutoHeightForCell(row, col) ?? this._worksheetData.defaultRowHeight;
+            return this.calculateAutoHeightForCell(row, col) ?? 0;
         }));
     }
 
@@ -399,27 +399,29 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
 
                 if (hasUnMergedCell) {
                     if (currentCellHeights) {
-                        const currentAutoHeight = this.worksheet.getCellHeight(rowIndex, startColumn);
+                        const currentAutoHeight = this.worksheet.getRowHeight(rowIndex);
                         let maxPrev = 0;
                         let maxCurrent = 0;
                         for (let colIndex = startColumn; colIndex <= endColumn; colIndex++) {
-                            const autoHeight = currentCellHeights.getValue(rowIndex, colIndex)!;
+                            const autoHeight = currentCellHeights.getValue(rowIndex, colIndex) ?? 0;
                             maxPrev = Math.max(maxPrev, autoHeight);
                             const currentHeight = this.calculateAutoHeightForCell(rowIndex, colIndex) ?? this._worksheetData.defaultRowHeight;
                             maxCurrent = Math.max(maxCurrent, currentHeight);
                         }
+
                         if (maxPrev < currentAutoHeight) {
                             calculatedRows.add(rowIndex);
+
                             results.push({
                                 row: rowIndex,
-                                autoHeight: Math.max(currentAutoHeight, maxPrev),
+                                autoHeight: Math.max(currentAutoHeight, maxCurrent),
                             });
                         } else {
                             if (maxCurrent >= currentAutoHeight) {
                                 calculatedRows.add(rowIndex);
                                 results.push({
                                     row: rowIndex,
-                                    autoHeight: maxPrev,
+                                    autoHeight: maxCurrent,
                                 });
                             } else {
                                 const autoHeight = this._calculateRowAutoHeight(rowIndex);
@@ -547,8 +549,8 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
     }
 
     private _calculateRowAutoHeight(rowNum: number): number {
-        const { columnCount, defaultRowHeight } = this._worksheetData;
-        let height = defaultRowHeight;
+        const { columnCount } = this._worksheetData;
+        let height = this.worksheet.getRowHeight(rowNum);
 
         for (let i = 0; i < columnCount; i++) {
             const cellHeight = this.calculateAutoHeightForCell(rowNum, i);

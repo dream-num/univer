@@ -22,7 +22,9 @@ export function getRangesHeight(ranges: IRange[], worksheet: Worksheet) {
     ranges.map((range) => Range.transformRange(range, worksheet)).forEach((range) => {
         Range.foreach(range, (row, col) => {
             const cellHeight = worksheet.getCellHeight(row, col);
-            cellHeights.setValue(row, col, cellHeight);
+            if (cellHeight) {
+                cellHeights.setValue(row, col, cellHeight);
+            }
         });
     });
 

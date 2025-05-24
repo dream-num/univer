@@ -102,14 +102,14 @@ export const SetRangeValuesCommand: ICommand = {
 
         const setRangeValuesMutationParams = { subUnitId, unitId, cellValue: realCellValue ?? cellValue.getMatrix() };
         const redoParams = SetRangeValuesUndoMutationFactory(accessor, setRangeValuesMutationParams);
-        const cellHeights = mapObjectMatrix(setRangeValuesMutationParams.cellValue, (row, col) => worksheet.getCellHeight(row, col));
+        const cellHeights = mapObjectMatrix(setRangeValuesMutationParams.cellValue, (row, col) => worksheet.getCellHeight(row, col) || undefined);
 
         const setValueMutationResult = commandService.syncExecuteCommand(SetRangeValuesMutation.id, setRangeValuesMutationParams);
         if (!setValueMutationResult) return false;
 
         const { undos, redos } = sheetInterceptorService.onCommandExecute({
             id: SetRangeValuesCommand.id,
-            params: { ...setRangeValuesMutationParams, range: currentSelections, cellHeights },
+            params: { ...setRangeValuesMutationParams, range: currentSelections, cellHeights: new ObjectMatrix(cellHeights) },
         });
 
         const result = sequenceExecute([...redos], commandService);

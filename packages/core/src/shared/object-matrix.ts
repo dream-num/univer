@@ -39,7 +39,9 @@ export function mapObjectMatrix<T, R>(o: IObjectMatrixPrimitiveType<T>, callback
             const colNumber = Number(col);
             const value = columns[colNumber];
             const resultValue = callback(rowNumber, colNumber, value);
-            result[rowNumber][colNumber] = resultValue;
+            if (resultValue !== undefined) {
+                result[rowNumber][colNumber] = resultValue;
+            }
         }
     }
     return result;

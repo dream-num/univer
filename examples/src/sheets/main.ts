@@ -38,7 +38,7 @@ import { UniverSheetsTablePlugin } from '@univerjs/sheets-table';
 import { UniverSheetsThreadCommentPlugin } from '@univerjs/sheets-thread-comment';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 import { UniverSheetsZenEditorPlugin } from '@univerjs/sheets-zen-editor';
-import { UniverUIPlugin } from '@univerjs/ui';
+import { IMenuManagerService, UniverUIPlugin } from '@univerjs/ui';
 import ImportCSVButtonPlugin from './custom-plugin/import-csv-button';
 
 import '@univerjs/sheets/facade';
@@ -107,7 +107,10 @@ function createNewInstance() {
         autoHeightForMergedCells: true,
     });
     univer.registerPlugin(UniverSheetsUIPlugin);
-    univer.registerPlugin(UniverSheetsNumfmtPlugin);
+    univer.registerPlugin(UniverSheetsNumfmtPlugin, {
+        disableTextFormatAlert: true,
+        disableTextFormatMark: true,
+    });
     univer.registerPlugin(UniverSheetsZenEditorPlugin);
     univer.registerPlugin(UniverFormulaEnginePlugin, { notExecuteFormula: true });
     univer.registerPlugin(UniverSheetsFormulaPlugin, { notExecuteFormula: true });
@@ -164,6 +167,11 @@ function createNewInstance() {
 
     window.univer = univer;
     window.univerAPI = FUniver.newAPI(univer);
+
+    setTimeout(() => {
+        const menuManagerService = univer.__getInjector().get(IMenuManagerService);
+        // console.log(menuManagerService.getMenuByPositionKey(MenuManagerPosition.RIBBON));
+    }, 5000);
 }
 
 createNewInstance();

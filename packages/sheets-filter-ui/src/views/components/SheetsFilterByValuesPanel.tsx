@@ -16,7 +16,7 @@
 
 import type { ByValuesModel, IFilterByValueWithTreeItem } from '../../services/sheets-filter-panel.service';
 import { LocaleService } from '@univerjs/core';
-import { borderClassName, Checkbox, clsx, Input, Tree } from '@univerjs/design';
+import { borderClassName, Checkbox, clsx, Input, Tree, Tree2 } from '@univerjs/design';
 import { useDependency, useObservable } from '@univerjs/ui';
 import React, { useCallback } from 'react';
 import { statisticFilterByValueItems } from '../../models/utils';
@@ -118,6 +118,7 @@ export function FilterByValue(props: { model: ByValuesModel }) {
                     </div>
                 </div>
                 <div data-u-comp="sheets-filter-panel-values-virtual" className="univer-flex-grow">
+                    <Tree2 data={items} />
                     <Tree
                         data={items}
                         defaultExpandAll={false}

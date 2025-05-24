@@ -111,6 +111,10 @@ export class BaseValueObject extends ObjectClassType {
         return false;
     }
 
+    isHyperlink() {
+        return false;
+    }
+
     sum(): BaseValueObject {
         return ErrorValueObject.create(ErrorType.VALUE);
     }

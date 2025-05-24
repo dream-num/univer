@@ -25,6 +25,7 @@ import type { BaseAstNode } from '../engine/ast-node/base-ast-node';
 import type { BaseReferenceObject, FunctionVariantType } from '../engine/reference-object/base-reference-object';
 import type { ArrayValueObject } from '../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../engine/value-object/base-value-object';
+import type { StringValueObject } from '../engine/value-object/primitive-object';
 import { createIdentifier, Disposable, ObjectMatrix } from '@univerjs/core';
 import { isInDirtyRange } from '../basics/dirty';
 import { ErrorType } from '../basics/error-type';
@@ -36,6 +37,7 @@ import { clearReferenceToRangeCache } from '../engine/utils/reference-cache';
 import { objectValueToCellValue } from '../engine/utils/value-object';
 import { ErrorValueObject } from '../engine/value-object/base-value-object';
 import { IFormulaCurrentConfigService } from './current-data.service';
+import { IHyperlinkEngineFormulaService } from './hyperlink-engine-formula.service';
 
 /**
  * The formula engine has a lot of stages. IDLE and CALCULATION_COMPLETED can be considered as
@@ -223,7 +225,8 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
     private _isCycleDependency: boolean = false;
 
     constructor(
-        @IFormulaCurrentConfigService private readonly _currentConfigService: IFormulaCurrentConfigService
+        @IFormulaCurrentConfigService private readonly _currentConfigService: IFormulaCurrentConfigService,
+        @IHyperlinkEngineFormulaService private readonly _hyperlinkEngineFormulaService: IHyperlinkEngineFormulaService
     ) {
         super();
     }
@@ -421,7 +424,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
             const objectValueRefOrArray = functionVariant as BaseReferenceObject | ArrayValueObject;
             const { startRow, startColumn } = objectValueRefOrArray.getRangePosition();
             objectValueRefOrArray.iterator((valueObject, rowIndex, columnIndex) => {
-                const value = objectValueToCellValue(valueObject);
+                const value = this._getValueObjectOfRuntimeData(valueObject);
 
                 const row = rowIndex - startRow;
                 const column = columnIndex - startColumn;
@@ -432,7 +435,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
                 cellDatas[row][column] = value;
             });
         } else {
-            cellDatas = [[objectValueToCellValue(functionVariant as BaseValueObject)!]];
+            cellDatas = [[this._getValueObjectOfRuntimeData(functionVariant as BaseValueObject)!]];
         }
 
         if (subComponentData[formulaId] === undefined || subComponentData[formulaId] === null) {
@@ -519,7 +522,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
             if (startRow === endRow && startColumn === endColumn) {
                 const firstCell = objectValueRefOrArray.getFirstCell();
                 // TODO @Dushusir set pattern style
-                const valueObject = objectValueToCellValue(firstCell);
+                const valueObject = this._getValueObjectOfRuntimeData(firstCell);
                 sheetData.setValue(row, column, valueObject);
                 clearArrayUnitData.setValue(row, column, valueObject);
 
@@ -550,7 +553,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
                 this._checkIfArrayFormulaRangeHasData(unitId, sheetId, row, column, arrayRange) ||
                 this._checkIfArrayFormulaExceeded(rowCount, columnCount, arrayRange)
             ) {
-                const errorObject = objectValueToCellValue(ErrorValueObject.create(ErrorType.SPILL));
+                const errorObject = this._getValueObjectOfRuntimeData(ErrorValueObject.create(ErrorType.SPILL));
                 sheetData.setValue(row, column, errorObject);
                 clearArrayUnitData.setValue(row, column, errorObject);
 
@@ -601,7 +604,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
                         true
                     );
 
-                    const value = objectValueToCellValue(valueObject);
+                    const value = this._getValueObjectOfRuntimeData(valueObject);
                     if (rowIndex === startRow && columnIndex === startColumn) {
                         /**
                          * If the referenced range contains an error in the spill of the array formula,
@@ -609,7 +612,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
                          */
                         if (valueObject != null && valueObject.isError() && valueObject.isEqualType(spillError)) {
                             clearArrayUnitData.setValue(row, column, {});
-                            sheetData.setValue(row, column, { ...objectValueToCellValue(spillError) });
+                            sheetData.setValue(row, column, { ...this._getValueObjectOfRuntimeData(spillError) });
                             return false;
                         }
                         sheetData.setValue(row, column, { ...value });
@@ -622,7 +625,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
                 });
             }
         } else {
-            const valueObject = objectValueToCellValue(functionVariant as BaseValueObject);
+            const valueObject = this._getValueObjectOfRuntimeData(functionVariant as BaseValueObject);
             sheetData.setValue(row, column, valueObject);
 
             // Formula calculation results are saved to cache
@@ -637,6 +640,17 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
 
             clearArrayUnitData.setValue(row, column, valueObject);
         }
+    }
+
+    private _getValueObjectOfRuntimeData(variant: Nullable<BaseValueObject>): Nullable<ICellData> {
+        if (variant?.isString() && variant.isHyperlink()) {
+            return this._hyperlinkEngineFormulaService.generateCellValue(
+                (variant as StringValueObject).getHyperlinkUrl(),
+                variant.getValue() as string
+            );
+        }
+
+        return objectValueToCellValue(variant);
     }
 
     getUnitData() {

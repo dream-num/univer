@@ -239,8 +239,8 @@ export default {
         },
     },
     HYPERLINK: {
-        description: '创建快捷方式或跳转，以打开存储在网络服务器、Intranet 或 Internet 上的文档',
-        abstract: '创建快捷方式或跳转，以打开存储在网络服务器、Intranet 或 Internet 上的文档',
+        description: '在单元格内创建一个超链接',
+        abstract: '在单元格内创建一个超链接',
         links: [
             {
                 title: '教学',
@@ -248,8 +248,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            url: { name: '网址', detail: '以引号括住的链接位置的完整网址，或对包含这种网址的单元格的引用。' },
+            linkLabel: { name: '链接标签', detail: '要在单元格中作为链接显示的文本（用引号括起来的），或者指向包含这种标签的单元格的引用。' },
         },
     },
     IMAGE: {

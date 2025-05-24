@@ -157,6 +157,18 @@ export interface IFWorkbookSheetsUIMixin {
     endEditingAsync(save?: boolean): Promise<boolean>;
 
     /**
+     * @async
+     * End the editing process of the current active cell
+     * @returns {Promise<boolean>} Whether the editing process is ended successfully
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * await fWorkbook.endEditingAsync(false);
+     * ```
+     */
+    abortEditingAsync(): Promise<boolean>;
+
+    /**
      * Get scroll state of specified sheet.
      * @param {string} sheetId - sheet id
      * @returns {IScrollState} scroll state
@@ -351,6 +363,10 @@ export class FWorkbookSheetsUIMixin extends FWorkbook implements IFWorkbookSheet
 
     override endEditingAsync(save = true): Promise<boolean> {
         return this.endEditing(save);
+    }
+
+    override abortEditingAsync(): Promise<boolean> {
+        return this.endEditingAsync(false);
     }
 
     /**

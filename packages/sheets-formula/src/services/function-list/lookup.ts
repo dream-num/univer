@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { FUNCTION_NAMES_LOOKUP, FunctionType, type IFunctionInfo } from '@univerjs/engine-formula';
+import type { IFunctionInfo } from '@univerjs/engine-formula';
+import { FUNCTION_NAMES_LOOKUP, FunctionType } from '@univerjs/engine-formula';
 
 export const FUNCTION_LIST_LOOKUP: IFunctionInfo[] = [
     {
@@ -388,17 +389,17 @@ export const FUNCTION_LIST_LOOKUP: IFunctionInfo[] = [
         abstract: 'formula.functionList.HYPERLINK.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.HYPERLINK.functionParameter.number1.name',
-                detail: 'formula.functionList.HYPERLINK.functionParameter.number1.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.HYPERLINK.functionParameter.url.name',
+                detail: 'formula.functionList.HYPERLINK.functionParameter.url.detail',
+                example: '"https://univer.ai/"',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'formula.functionList.HYPERLINK.functionParameter.number2.name',
-                detail: 'formula.functionList.HYPERLINK.functionParameter.number2.detail',
-                example: 'A1:A20',
-                require: 1,
+                name: 'formula.functionList.HYPERLINK.functionParameter.linkLabel.name',
+                detail: 'formula.functionList.HYPERLINK.functionParameter.linkLabel.detail',
+                example: '"Univer"',
+                require: 0,
                 repeat: 0,
             },
         ],

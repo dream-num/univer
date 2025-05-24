@@ -1314,21 +1314,44 @@ export class NumberValueObject extends BaseValueObject {
     }
 }
 
+interface IStringValueObjectOptions {
+    isHyperlink?: boolean;
+    hyperlinkUrl?: string;
+}
+
 const STRING_CACHE_LRU_COUNT = 100000;
 
 export const StringValueObjectCache = new FormulaAstLRU<StringValueObject>(STRING_CACHE_LRU_COUNT);
 export class StringValueObject extends BaseValueObject {
     private _value: string;
+    private _isHyperlink: boolean = false;
+    private _hyperlinkUrl: string = '';
 
-    static create(value: string) {
+    static create(value: string, options?: IStringValueObjectOptions) {
         const cached = StringValueObjectCache.get(value);
-        if (cached) {
+        if (cached && options && this.checkCacheByOptions(cached, options)) {
             return cached;
         }
         const instance = new StringValueObject(value);
+        if (options?.isHyperlink) {
+            instance._isHyperlink = options.isHyperlink;
+            instance._hyperlinkUrl = options.hyperlinkUrl ?? '';
+        }
         StringValueObjectCache.set(value, instance);
         return instance;
     }
+
+    static checkCacheByOptions(cached: StringValueObject, options: IStringValueObjectOptions): boolean {
+        if (cached.isHyperlink() !== options.isHyperlink) {
+            return false;
+        }
+
+        if (cached.getHyperlinkUrl() !== options.hyperlinkUrl) {
+            return false;
+        }
+
+        return true;
+    };
 
     constructor(rawValue: string) {
         super(rawValue);
@@ -1341,6 +1364,14 @@ export class StringValueObject extends BaseValueObject {
 
     override isString() {
         return true;
+    }
+
+    override isHyperlink(): boolean {
+        return this._isHyperlink;
+    }
+
+    getHyperlinkUrl(): string {
+        return this._hyperlinkUrl;
     }
 
     override concatenateFront(valueObject: BaseValueObject): BaseValueObject {

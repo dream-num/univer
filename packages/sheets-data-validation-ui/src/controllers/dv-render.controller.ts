@@ -376,8 +376,10 @@ export class SheetsDataValidationMobileRenderController extends RxDisposable {
             .subscribe((infos) => {
                 const ranges: IRange[] = [];
                 infos.forEach((info) => {
-                    if (info.rule?.ranges) {
-                        ranges.push(...info.rule.ranges);
+                    if (info.rule.type === DataValidationType.LIST_MULTIPLE || info.rule.type === DataValidationType.LIST) {
+                        if (info.rule?.ranges) {
+                            ranges.push(...info.rule.ranges);
+                        }
                     }
                 });
 

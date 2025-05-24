@@ -165,6 +165,10 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
     private _scene: Nullable<Scene> = null;
     private _autoHeightCache: ObjectMatrix<Nullable<number>> = new ObjectMatrix<Nullable<number>>();
 
+    get autoHeightCache() {
+        return this._autoHeightCache;
+    }
+
     constructor(
         worksheet: Worksheet,
         _styles: Styles,
@@ -233,7 +237,6 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
                     this._autoHeightCache.moveColumns(change.start, change.count, change.target);
                     break;
                 default:
-                    console.warn('unknown change type', change);
                     break;
             }
         }));
@@ -241,6 +244,14 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
 
     setAutoHeightCache(row: number, col: number, height: Nullable<number>) {
         this._autoHeightCache.setValue(row, col, height);
+    }
+
+    makeDirtyAutoHeightCacheByRange(ranges: IRange[]) {
+        for (const range of ranges) {
+            Range.foreach(Range.transformRange(range, this.worksheet), (row, col) => {
+                this._autoHeightCache.setValue(row, col, undefined);
+            });
+        }
     }
 
     setScene(scene: Scene) {
@@ -432,11 +443,12 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         const { rowData } = this._worksheetData;
         const rowObjectArray = rowData;
         const calculatedRows = new Set<number>();
+        const rowCount = this.worksheet.getRowCount();
 
         for (const range of ranges) {
             const { startRow, endRow, startColumn, endColumn } = range;
-
-            for (let rowIndex = startRow; rowIndex <= endRow; rowIndex++) {
+            const end = Math.min(endRow, rowCount);
+            for (let rowIndex = startRow; rowIndex <= end; rowIndex++) {
                 // If the row has already been calculated, it does not need to be calculated
                 if (calculatedRows.has(rowIndex)) {
                     continue;
@@ -570,7 +582,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
                 // For same fontStyle, the height of the text is fixed.
                 // So we can use a fixed text to calculate the height to make a speed up.
                 const textSize = FontCache.getMeasureText('A', getFontStyleString(style).fontCache);
-                return textSize.fontBoundingBoxAscent + textSize.fontBoundingBoxDescent;
+                return textSize.fontBoundingBoxAscent + textSize.fontBoundingBoxDescent + DEFAULT_PADDING_DATA.t + DEFAULT_PADDING_DATA.b;
             }
         }
     }

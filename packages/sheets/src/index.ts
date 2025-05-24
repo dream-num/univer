@@ -331,6 +331,7 @@ export {
 export {
     DeltaColumnWidthCommand,
     type IDeltaColumnWidthCommandParams,
+    type ISetColWidthCommandParams,
     SetColWidthCommand,
 } from './commands/commands/set-worksheet-col-width.command';
 export { SetWorksheetHideCommand } from './commands/commands/set-worksheet-hide.command';

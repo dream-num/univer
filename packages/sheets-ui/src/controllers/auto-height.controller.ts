@@ -21,16 +21,18 @@ import type {
     IReorderRangeMutationParams,
     ISetRangeValuesRangeMutationParams,
     ISetStyleCommandParams,
+    ISetWorksheetColWidthMutationParams,
     ISetWorksheetRowAutoHeightMutationParams,
     ISetWorksheetRowIsAutoHeightMutationParams,
 } from '@univerjs/sheets';
-import type { IUniverSheetsUIConfig } from './config.schema';
 import { Disposable, IConfigService, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import {
+    DeltaColumnWidthCommand,
     getSheetCommandTarget,
     MoveRangeCommand,
     ReorderRangeCommand,
+    SetColWidthCommand,
     SetRangeValuesCommand,
     SetStyleCommand,
     SetWorksheetRowAutoHeightMutation,
@@ -40,7 +42,6 @@ import {
     SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
-import { SHEETS_UI_PLUGIN_CONFIG_KEY } from './config.schema';
 
 export const AFFECT_LAYOUT_STYLES = ['ff', 'fs', 'tr', 'tb'];
 
@@ -56,14 +57,14 @@ export class AutoHeightController extends Disposable {
         this._initialize();
     }
 
-    private _getRangesScope(ranges: IRange[]): number {
-        let start: number | undefined;
-        let end: number | undefined;
-        for (const { startRow, endRow } of ranges) {
-            start = start === undefined ? startRow : Math.min(start, startRow);
-            end = end === undefined ? endRow : Math.max(end, endRow);
+    private _getSkeleton(subUnitId?: string) {
+        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        const unitId = workbook.getUnitId();
+        const sheetSkeletonService = this._renderManagerService.getRenderById(unitId)!.with<SheetSkeletonManagerService>(SheetSkeletonManagerService);
+        if (!subUnitId) {
+            subUnitId = workbook.getActiveSheet().getSheetId();
         }
-        return (end as number) - (start as number) + 1;
+        return sheetSkeletonService.getSkeleton(subUnitId);
     }
 
     getUndoRedoParamsOfAutoHeight(ranges: IRange[], subUnitIdParam?: string): { redos: any[]; undos: any[] } {
@@ -93,28 +94,7 @@ export class AutoHeightController extends Disposable {
             };
         };
 
-        const config = configService.getConfig<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY);
-        let rangeList = ranges;
-        if (!Array.isArray(ranges)) {
-            // TODO: @weird94 after we resolve the performance issue of auto hight, we can remove this code.
-            // The code "const params = command.params as ISetRangeValuesRangeMutationParams;" of _initialize() method may make IRange as IRange[]. so need adjust here.
-            if (ranges && (ranges as IRange).startRow !== undefined && (ranges as IRange).startRow !== undefined) {
-                rangeList = [ranges];
-            } else {
-                rangeList = [];
-            }
-        }
-        const count = this._getRangesScope(rangeList);
-        const maxLimit = config?.maxAutoHeightCount ?? 1000;
-        if (maxLimit < count) {
-            return {
-                redos: [],
-                undos: [],
-            };
-        }
-
         const rowsAutoHeightInfo = skeleton.calculateAutoHeightInRange(ranges);
-
         const redoParams: ISetWorksheetRowAutoHeightMutationParams = {
             subUnitId,
             unitId,
@@ -141,7 +121,7 @@ export class AutoHeightController extends Disposable {
     private _initialize() {
         const { _sheetInterceptorService: sheetInterceptorService, _selectionManagerService: selectionManagerService } =
             this;
-        // for intercept'SetRangeValuesCommand' command.
+
         this.disposeWithMe(sheetInterceptorService.interceptCommand({
             getMutations: (command) => {
                 if (command.id === SetRangeValuesCommand.id) {
@@ -149,57 +129,58 @@ export class AutoHeightController extends Disposable {
                     return this.getUndoRedoParamsOfAutoHeight(params.range, params.subUnitId);
                 }
 
+                if (command.id === DeltaColumnWidthCommand.id) {
+                    const params = command.params as ISetWorksheetColWidthMutationParams;
+                    const skeleton = this._getSkeleton();
+
+                    if (skeleton) {
+                        skeleton.makeDirtyAutoHeightCacheByRange(params.ranges);
+                    }
+
+                    return this.getUndoRedoParamsOfAutoHeight(params.ranges);
+                }
+
+                if (command.id === SetColWidthCommand.id) {
+                    const params = command.params as ISetWorksheetColWidthMutationParams;
+                    if (params.ranges) {
+                        const skeleton = this._getSkeleton(params.subUnitId);
+                        if (skeleton) {
+                            skeleton.makeDirtyAutoHeightCacheByRange(params.ranges);
+                        }
+                        return this.getUndoRedoParamsOfAutoHeight(params.ranges, params.subUnitId);
+                    }
+                }
+
+                if (command.id === SetWorksheetRowIsAutoHeightCommand.id) {
+                    const params = command.params as ISetWorksheetRowIsAutoHeightMutationParams;
+                    return this.getUndoRedoParamsOfAutoHeight(params.ranges, params.subUnitId);
+                }
+
+                if (command.id === SetStyleCommand.id) {
+                    const params = command.params as ISetStyleCommandParams<number>;
+                    if (!AFFECT_LAYOUT_STYLES.includes(params?.style.type)) {
+                        return {
+                            redos: [],
+                            undos: [],
+                        };
+                    }
+
+                    const selections = selectionManagerService.getCurrentSelections()?.map((s) => s.range);
+
+                    if (!selections?.length) {
+                        return {
+                            redos: [],
+                            undos: [],
+                        };
+                    }
+
+                    return this.getUndoRedoParamsOfAutoHeight(selections, params.subUnitId);
+                }
+
                 return {
                     redos: [],
                     undos: [],
                 };
-            },
-        }));
-
-        // for intercept 'sheet.command.set-row-is-auto-height' command.
-        this.disposeWithMe(sheetInterceptorService.interceptCommand({
-            getMutations: (command: { id: string; params: ISetWorksheetRowIsAutoHeightMutationParams }) => {
-                if (command.id !== SetWorksheetRowIsAutoHeightCommand.id) {
-                    return {
-                        redos: [],
-                        undos: [],
-                    };
-                }
-
-                return this.getUndoRedoParamsOfAutoHeight(command.params.ranges, command.params.subUnitId);
-            },
-        }));
-
-        // for intercept set style command.
-        this.disposeWithMe(sheetInterceptorService.interceptCommand({
-            getMutations: (command: { id: string; params: ISetStyleCommandParams<number> }) => {
-                if (command.id !== SetStyleCommand.id) {
-                    return {
-                        redos: [],
-                        undos: [],
-                    };
-                }
-
-                // TODO: @jocs, All styles that affect the size of the cell,
-                // I don't know if the enumeration is complete, to be added in the future.
-
-                if (!AFFECT_LAYOUT_STYLES.includes(command.params?.style.type)) {
-                    return {
-                        redos: [],
-                        undos: [],
-                    };
-                }
-
-                const selections = selectionManagerService.getCurrentSelections()?.map((s) => s.range);
-
-                if (!selections?.length) {
-                    return {
-                        redos: [],
-                        undos: [],
-                    };
-                }
-
-                return this.getUndoRedoParamsOfAutoHeight(selections, command.params.subUnitId);
             },
         }));
 

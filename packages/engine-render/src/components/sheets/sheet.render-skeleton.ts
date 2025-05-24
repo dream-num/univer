@@ -535,7 +535,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
                     `${cell!.v!}`,
                     getFontStyleString(style).fontCache,
                     style?.tb === WrapStrategy.WRAP,
-                    colWidth
+                    colWidth - DEFAULT_PADDING_DATA.l - DEFAULT_PADDING_DATA.r
                 );
                 skeleton.calculate();
                 return skeleton.getTotalHeight();
@@ -549,8 +549,8 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
     }
 
     private _calculateRowAutoHeight(rowNum: number): number {
-        const { columnCount } = this._worksheetData;
-        let height = this.worksheet.getRowHeight(rowNum);
+        const { columnCount, defaultRowHeight } = this._worksheetData;
+        let height = defaultRowHeight;
 
         for (let i = 0; i < columnCount; i++) {
             const cellHeight = this.calculateAutoHeightForCell(rowNum, i);

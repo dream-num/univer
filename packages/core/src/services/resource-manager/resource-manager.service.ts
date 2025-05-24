@@ -19,12 +19,17 @@ import type { IResources } from '../resource-manager/type';
 import type { IResourceHook, IResourceManagerService, IResourceName } from './type';
 import { Subject } from 'rxjs';
 import { Disposable, toDisposable } from '../../shared/lifecycle';
+import { ILogService } from '../log/log.service';
 
 export class ResourceManagerService extends Disposable implements IResourceManagerService {
     private _resourceMap = new Map<IResourceName, IResourceHook>();
 
-    private _register$ = new Subject<IResourceHook>();
-    public register$ = this._register$.asObservable();
+    private readonly _register$ = new Subject<IResourceHook>();
+    public readonly register$ = this._register$.asObservable();
+
+    constructor(@ILogService private readonly _logService: ILogService) {
+        super();
+    }
 
     public getAllResourceHooks() {
         const list = [...this._resourceMap.values()];
@@ -82,8 +87,8 @@ export class ResourceManagerService extends Disposable implements IResourceManag
                 try {
                     const model = hook.parseJson(data);
                     hook.onLoad(unitId, model);
-                } catch (err) {
-                    console.error('LoadResources Error!');
+                } catch (err: unknown) {
+                    this._logService.error('[ResourceManagerService]', 'loadResources error', err);
                 }
             }
         });

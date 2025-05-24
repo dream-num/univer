@@ -137,12 +137,6 @@ export class AutoHeightController extends Disposable {
                     return this.getUndoRedoParamsOfAutoHeight(params.range, params.subUnitId, params.cellHeights);
                 }
 
-                if (command.id === DeltaColumnWidthCommand.id) {
-                    const params = command.params as ISetWorksheetColWidthMutationParams & { cellHeights?: ObjectMatrix<number> }; ;
-
-                    return this.getUndoRedoParamsOfAutoHeight(params.ranges, params.subUnitId, params.cellHeights);
-                }
-
                 if (command.id === SetColWidthCommand.id) {
                     const params = command.params as ISetWorksheetColWidthMutationParams & { cellHeights?: ObjectMatrix<number> };
 
@@ -194,6 +188,12 @@ export class AutoHeightController extends Disposable {
                 if (command.id === ReorderRangeCommand.id) {
                     const params = command.params as IReorderRangeMutationParams;
                     return this.getUndoRedoParamsOfAutoHeight([params.range]);
+                }
+
+                if (command.id === DeltaColumnWidthCommand.id) {
+                    const params = command.params as ISetWorksheetColWidthMutationParams & { cellHeights?: ObjectMatrix<number> }; ;
+
+                    return this.getUndoRedoParamsOfAutoHeight(params.ranges, params.subUnitId, params.cellHeights);
                 }
 
                 return {

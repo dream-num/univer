@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { CommandType, IUniverInstanceService } from '@univerjs/core';
 import type { BooleanNumber, IMutation, IObjectArrayPrimitiveType, IRange, IRowAutoHeightInfo, Nullable, Worksheet } from '@univerjs/core';
+import { CommandType, IUniverInstanceService } from '@univerjs/core';
 import { getSheetCommandTarget } from '../commands/utils/target-util';
 
 const MAXIMUM_ROW_HEIGHT = 2000;
@@ -101,7 +101,7 @@ export const SetWorksheetRowAutoHeightMutationFactory = (
         const { row } = rowInfo;
         const { ah } = manager.getRowOrCreate(row);
 
-        results.push({ row, autoHeight: ah });
+        results.push({ row, autoHeight: ah! });
     }
 
     return {

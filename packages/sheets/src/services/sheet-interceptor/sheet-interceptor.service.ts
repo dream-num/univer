@@ -145,7 +145,7 @@ export class SheetInterceptorService extends Disposable {
                     };
                 }
 
-                return rawData;
+                return rawData ? { ...rawData } : undefined;
             },
         });
 

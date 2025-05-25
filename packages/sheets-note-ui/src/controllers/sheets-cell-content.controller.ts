@@ -43,16 +43,19 @@ export class SheetsCellContentController extends Disposable {
                         const { row, col, unitId, subUnitId } = pos;
                         const note = this._sheetsNoteModel.getNote(unitId, subUnitId, row, col);
                         if (note) {
-                            return next({
-                                ...cell,
-                                markers: {
-                                    ...cell?.markers,
-                                    tr: {
-                                        color: '#FFBD37',
-                                        size: 6,
-                                    },
+                            if (!cell) {
+                                cell = {};
+                            }
+
+                            cell.markers = {
+                                ...cell?.markers,
+                                tr: {
+                                    color: '#FFBD37',
+                                    size: 6,
                                 },
-                            });
+                            };
+
+                            return next(cell);
                         }
 
                         return next(cell);

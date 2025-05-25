@@ -188,18 +188,18 @@ export class SheetsFilterRenderController extends RxDisposable implements IRende
                     subUnitId !== worksheetId ||
                     row !== startRow ||
                     col < startColumn ||
-                    col > endColumn
+                    col > endColumn ||
+                    !cell
                 ) {
                     return next(cell);
                 }
 
-                return next({
-                    ...cell,
-                    fontRenderExtension: {
-                        ...cell?.fontRenderExtension,
-                        rightOffset: FILTER_ICON_SIZE,
-                    },
-                });
+                cell.fontRenderExtension = {
+                    ...cell?.fontRenderExtension,
+                    rightOffset: FILTER_ICON_SIZE,
+                };
+
+                return next(cell);
             },
             priority: 10,
         });

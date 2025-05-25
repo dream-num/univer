@@ -122,7 +122,27 @@ export class SheetInterceptorService extends Disposable {
             handler(value, context): Nullable<ICellData> {
                 const rawData = context.worksheet.getCellRaw(context.row, context.col);
                 if (value) {
-                    return { ...rawData, ...value };
+                    return {
+                        p: null,
+                        v: null,
+                        t: null,
+                        f: null,
+                        s: null,
+                        si: null,
+                        interceptorStyle: null,
+                        isInArrayFormulaRange: null,
+                        markers: null,
+                        customRender: null,
+                        interceptorAutoHeight: undefined,
+                        interceptorAutoWidth: undefined,
+                        coverable: undefined,
+                        linkUrl: undefined,
+                        linkId: undefined,
+                        fontRenderExtension: undefined,
+                        themeStyle: null,
+                        ...rawData,
+                        ...value,
+                    };
                 }
 
                 return rawData;

@@ -73,13 +73,9 @@ export class ForceStringRenderController extends RxDisposable implements IRender
                                 return next(cell);
                             }
 
-                            return next({
-                                ...cell,
-                                markers: {
-                                    ...cell?.markers,
-                                    ...FORCE_STRING_MARK,
-                                },
-                            });
+                            cell.markers = { ...cell?.markers, ...FORCE_STRING_MARK };
+
+                            return next(cell);
                         }
 
                         return next(cell);

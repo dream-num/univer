@@ -142,13 +142,12 @@ export class FSheetHooksUIMixin extends FSheetHooks implements IFSheetHooksUIMix
         return this._injector.get(SheetInterceptorService).intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
             effect,
             handler: (cell, pos, next) => {
-                return next({
-                    ...cell,
-                    customRender: [
-                        ...(cell?.customRender || []),
-                        ...(customRender || []),
-                    ],
-                });
+                if (!cell) {
+                    return next(cell);
+                }
+
+                cell.customRender = [...(cell.customRender || []), ...(customRender || [])];
+                return next(cell);
             },
             priority,
         });

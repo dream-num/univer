@@ -120,26 +120,10 @@ export class SheetInterceptorService extends Disposable {
             priority: -1,
             effect: InterceptorEffectEnum.Style | InterceptorEffectEnum.Value,
             handler(value, context): Nullable<ICellData> {
+                // only copy here, should avoid unnecessary copy object when interceptor is called
                 const rawData = context.worksheet.getCellRaw(context.row, context.col);
                 if (value) {
                     return {
-                        p: null,
-                        v: null,
-                        t: null,
-                        f: null,
-                        s: null,
-                        si: null,
-                        interceptorStyle: null,
-                        isInArrayFormulaRange: null,
-                        markers: null,
-                        customRender: null,
-                        interceptorAutoHeight: undefined,
-                        interceptorAutoWidth: undefined,
-                        coverable: undefined,
-                        linkUrl: undefined,
-                        linkId: undefined,
-                        fontRenderExtension: undefined,
-                        themeStyle: null,
                         ...rawData,
                         ...value,
                     };

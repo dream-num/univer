@@ -27,7 +27,7 @@ import { IMenuManagerService } from '../../../services/menu/menu-manager.service
 import { MenuManagerPosition, RibbonPosition } from '../../../services/menu/types';
 import { useDependency } from '../../../utils/di';
 import { ComponentContainer } from '../ComponentContainer';
-import { ToolbarButton } from './ToolbarButton';
+import { toolbarButtonClassName } from './ToolbarButton';
 import { ToolbarItem } from './ToolbarItem';
 
 interface IRibbonProps {
@@ -64,7 +64,7 @@ export function Ribbon(props: IRibbonProps) {
 
     const containerRef = useRef<HTMLDivElement>(null!);
     const toolbarItemRefs = useRef<Record<string, {
-        el: HTMLSpanElement;
+        width: number;
         key: string;
         order: number;
         groupOrder: number;
@@ -76,20 +76,11 @@ export function Ribbon(props: IRibbonProps) {
     const [groupSelectorVisible, setGroupSelectorVisible] = useState(false);
     const [collapsedIds, setCollapsedIds] = useState<string[]>([]);
     const [fakeToolbarVisible, setFakeToolbarVisible] = useState(false);
-    // const [changingActiveTab, setChangingActiveTab] = useState(false);
 
     const handleSelectTab = useCallback((group: IMenuSchema) => {
         toolbarItemRefs.current = {};
-        // setChangingActiveTab(true);
-        // const timer = setTimeout(() => {
-        //     setChangingActiveTab(false);
-        // }, 300);
         setActivatedTab(group.key);
         setGroupSelectorVisible(false);
-
-        return () => {
-            // clearTimeout(timer);
-        };
     }, []);
 
     // process menu changes
@@ -207,11 +198,12 @@ export function Ribbon(props: IRibbonProps) {
     }, [collapsedIds, ribbon, activatedTab]);
 
     useEffect(() => {
+        let timer: number | null = null;
         const observer = new ResizeObserver(throttle((entries) => {
             for (const entry of entries) {
                 setFakeToolbarVisible(true);
 
-                requestAnimationFrame(() => {
+                timer = requestAnimationFrame(() => {
                     const { width: avaliableWidth } = entry.contentRect;
                     const toolbarItems = Object.values(toolbarItemRefs.current);
                     const sortedToolbarItems = toolbarItems.sort((a, b) => {
@@ -225,12 +217,10 @@ export function Ribbon(props: IRibbonProps) {
                     const gapWidth = (allGroups.length - 1) * 8;
                     totalWidth += gapWidth;
 
-                    for (const { el, key } of sortedToolbarItems) {
-                        if (!el) continue;
+                    for (const { width, key } of sortedToolbarItems) {
+                        totalWidth += width + 8;
 
-                        totalWidth += el?.getBoundingClientRect().width + 8;
-
-                        if (totalWidth > avaliableWidth - gapWidth) {
+                        if (totalWidth >= avaliableWidth) {
                             newCollapsedIds.push(key);
                         }
                     }
@@ -245,20 +235,21 @@ export function Ribbon(props: IRibbonProps) {
         observer.observe(containerRef.current);
 
         return () => {
+            timer && cancelAnimationFrame(timer);
             observer.disconnect();
         };
     }, [ribbon, activatedTab]);
 
     const fakeToolbar = useMemo(() => {
-        if (!fakeToolbarVisible) return null;
-
         return (
             <div
                 aria-hidden="true"
                 className={clsx(`
                   univer-invisible univer-absolute -univer-left-[99999] -univer-top-[99999] univer-box-border
                   univer-flex univer-h-10 univer-min-w-min univer-items-center univer-px-3 univer-opacity-0
-                `, borderBottomClassName)}
+                `, {
+                    'univer-hidden': !fakeToolbarVisible,
+                }, borderBottomClassName)}
             >
                 {activeGroup.allGroups.map((groupItem, index) => (groupItem.children?.length || groupItem.item) && (
                     <Fragment key={groupItem.key}>
@@ -271,7 +262,7 @@ export function Ribbon(props: IRibbonProps) {
                                         ref={(ref) => {
                                             if (ref?.el) {
                                                 toolbarItemRefs.current[child.key] = {
-                                                    el: ref.el,
+                                                    width: ref.el.getBoundingClientRect().width,
                                                     key: child.key,
                                                     order: index,
                                                     groupOrder: groupItem.order,
@@ -439,9 +430,9 @@ export function Ribbon(props: IRibbonProps) {
                                     </div>
                                 )}
                             >
-                                <ToolbarButton>
+                                <a className={toolbarButtonClassName} type="button">
                                     <MoreFunctionSingle />
-                                </ToolbarButton>
+                                </a>
                             </Dropdown>
                         </div>
                     )}

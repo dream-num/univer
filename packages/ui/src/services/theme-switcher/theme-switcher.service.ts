@@ -15,8 +15,9 @@
  */
 
 import type { Theme } from '@univerjs/themes';
+import { Disposable } from '@univerjs/core';
 
-export class ThemeSwitcherService {
+export class ThemeSwitcherService extends Disposable {
     private _styleSheetId = 'univer-theme-css-variables';
 
     injectThemeToHead(theme: Theme) {
@@ -51,5 +52,14 @@ export class ThemeSwitcherService {
         styleElement.setAttribute('id', this._styleSheetId);
         styleElement.innerHTML = `:root {\n${cssVariables}\n}`;
         document.head.appendChild(styleElement);
+    }
+
+    override dispose() {
+        super.dispose();
+
+        const existingStyleElement = document.getElementById(this._styleSheetId);
+        if (existingStyleElement) {
+            document.head.removeChild(existingStyleElement);
+        }
     }
 }

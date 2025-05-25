@@ -53,12 +53,11 @@ export const SetCellEditVisibleWithF2Operation: IOperation<IEditorBridgeServiceV
         if (!workbook) {
             return false;
         }
-        commandService.syncExecuteCommand(SetCellEditVisibleOperation.id, {
+
+        return commandService.syncExecuteCommand(SetCellEditVisibleOperation.id, {
             ...params,
             unitId: workbook.getUnitId(),
         });
-
-        return true;
     },
 };
 

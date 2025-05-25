@@ -261,17 +261,19 @@ export class SheetRangeThemeModel extends Disposable {
     fromJSON(unitId: string, json: ISheetRangeThemeModelJSON) {
         const { rangeThemeStyleRuleMap: rangeThemeStyleRuleMapJSON, rangeThemeStyleMapJson } = json;
 
-        Object.keys(rangeThemeStyleRuleMapJSON).forEach((key) => {
-            const ruleMap = rangeThemeStyleRuleMapJSON[key];
-            const { themeName, rangeInfo } = ruleMap;
-            // TODO Due to design issues, we will skip table-related theme registration.
-            // Here the table needs to have its own rangeTheme to be independent
-            if (!themeName.startsWith('table')) {
-                this.registerRangeThemeRule(themeName, rangeInfo);
-                const rTreeCollection = this._ensureRTreeCollection(rangeInfo.unitId);
-                rTreeCollection.insert({ unitId: key, sheetId: rangeInfo.subUnitId, range: rangeInfo.range, id: key });
-            }
-        });
+        if (rangeThemeStyleRuleMapJSON) {
+            Object.keys(rangeThemeStyleRuleMapJSON).forEach((key) => {
+                const ruleMap = rangeThemeStyleRuleMapJSON[key];
+                const { themeName, rangeInfo } = ruleMap;
+                // TODO Due to design issues, we will skip table-related theme registration.
+                // Here the table needs to have its own rangeTheme to be independent
+                if (!themeName.startsWith('table')) {
+                    this.registerRangeThemeRule(themeName, rangeInfo);
+                    const rTreeCollection = this._ensureRTreeCollection(rangeInfo.unitId);
+                    rTreeCollection.insert({ unitId: key, sheetId: rangeInfo.subUnitId, range: rangeInfo.range, id: key });
+                }
+            });
+        }
 
         if (rangeThemeStyleMapJson) {
             Object.keys(rangeThemeStyleMapJson).forEach((key) => {

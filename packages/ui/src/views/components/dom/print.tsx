@@ -71,16 +71,13 @@ export const PrintFloatDomSingle = memo((props: { layer: IFloatDom; id: string; 
     return (
         <div
             ref={domRef}
-            className="univer-z-10"
+            className="univer-absolute univer-z-10 univer-origin-center univer-overflow-hidden"
             style={{
-                position: 'absolute',
                 top: topRef.current,
                 left: leftRef.current,
                 width: Math.max(position.endX - position.startX - 2, 0),
                 height: Math.max(position.endY - position.startY - 2, 0),
                 transform: transformRef.current,
-                overflow: 'hidden',
-                transformOrigin: 'center center',
             }}
             onPointerMove={(e) => {
                 layer.onPointerMove(e.nativeEvent);
@@ -96,10 +93,10 @@ export const PrintFloatDomSingle = memo((props: { layer: IFloatDom; id: string; 
             }}
         >
             <div
-                id={id}
                 ref={innerDomRef}
-                className="univer-overflow-hidden"
-                style={{ position: 'absolute', ...innerStyle }}
+                id={id}
+                className="univer-absolute univer-overflow-hidden"
+                style={{ ...innerStyle }}
             >
                 {component}
             </div>

@@ -110,6 +110,7 @@ const createMessage = (() => {
         };
 
         useEffect(() => {
+            const timers: number[] = [];
             addMessage = (message) => {
                 const id = String(messageCount++);
                 setState((prev) => ({
@@ -117,12 +118,19 @@ const createMessage = (() => {
                 }));
 
                 if (message.duration !== Infinity) {
-                    setTimeout(() => {
+                    const timer = window.setTimeout(() => {
                         setState((prev) => ({
                             messages: prev.messages.filter((t) => t.id !== id),
                         }));
                     }, message.duration || 3000);
+                    timers.push(timer);
                 }
+            };
+
+            return () => {
+                timers.forEach((timer) => {
+                    window.clearTimeout(timer);
+                });
             };
         }, []);
 

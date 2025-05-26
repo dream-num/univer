@@ -53,7 +53,16 @@ export function SheetBarButton(props: IBaseSheetBarButtonProps) {
     };
 
     return (
-        <Button data-u-comp="sheet-bar-append-button" size="small" disabled={disabled} onClick={handleClick} style={style} {...restProps} variant="text" className={className}>
+        <Button
+            data-u-comp="sheet-bar-append-button"
+            className={className}
+            size="small"
+            disabled={disabled}
+            style={style}
+            variant="text"
+            onClick={handleClick}
+            {...restProps}
+        >
             {children}
         </Button>
     );

@@ -220,7 +220,7 @@ export function Ribbon(props: IRibbonProps) {
                     for (const { width, key } of sortedToolbarItems) {
                         totalWidth += width + 8;
 
-                        if (totalWidth >= avaliableWidth) {
+                        if (totalWidth > avaliableWidth) {
                             newCollapsedIds.push(key);
                         }
                     }
@@ -372,6 +372,7 @@ export function Ribbon(props: IRibbonProps) {
                               univer-pl-3 univer-pr-2 univer-text-sm univer-text-white
                               dark:!univer-bg-gray-200 dark:!univer-text-gray-800
                             `}
+                            onClick={() => setGroupSelectorVisible(true)}
                         >
                             {localeService.t(activatedTab)}
                             <MoreDownSingle
@@ -401,9 +402,15 @@ export function Ribbon(props: IRibbonProps) {
 
                     {/* More functions dropdown */}
                     {collapsedIds.length > 0 && (
-                        <div data-u-comp="ribbon-toolbar-more" className="univer-pl-2">
+                        <div
+                            data-u-comp="ribbon-toolbar-more"
+                            className={`
+                              univer-pl-2
+                              rtl:univer-pr-2
+                            `}
+                        >
                             <Dropdown
-                                collisionPadding={{ right: 12 }}
+                                collisionPadding={{ right: 12, left: 12 }}
                                 overlay={(
                                     <div
                                         className={`

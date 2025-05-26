@@ -238,12 +238,7 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
                     )
                 )
                 : (FormulaEditor && (
-                    <div
-                        className={`
-                          univer-relative univer-mt-4 univer-h-full univer-rounded univer-px-1.5 univer-transition-all
-                          univer-duration-150
-                        `}
-                    >
+                    <div className="univer-relative univer-mt-4 univer-h-full">
                         <div className="univer-relative univer-h-8 univer-select-none">
                             <FormulaEditor
                                 ref={formulaEditorRef}
@@ -289,17 +284,18 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
                 />
             </div>
             <div
-                className={clsx('univer-items-center univer-text-sm univer-text-red-500', {
+                className={clsx('univer-items-center univer-gap-1 univer-text-sm univer-text-red-500', {
                     'univer-hidden': validString.length === 0,
                     'univer-flex': validString.length !== 0,
                 })}
             >
-                <span className="univer-mr-0.5">
+                <span>
                     {validString}
                 </span>
                 <ErrorSingle />
             </div>
-            <div>
+
+            <div className="univer-flex univer-gap-2">
                 <Button
                     onClick={() => {
                         cancel?.();
@@ -308,7 +304,6 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
                     {localeService.t('definedName.cancel')}
                 </Button>
                 <Button
-                    style={{ marginLeft: 15 }}
                     variant="primary"
                     onClick={confirmChange}
                 >

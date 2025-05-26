@@ -100,7 +100,7 @@ export function FilterPanel() {
                     </div>
                 )
                 : (
-                    <div style={{ flex: 1 }} />
+                    <div className="univer-flex-1" />
                 )}
             <div
                 data-u-comp="sheets-filter-panel-footer"
@@ -112,7 +112,7 @@ export function FilterPanel() {
                 <Button variant="link" onClick={onClearCriteria} disabled={clearFilterDisabled}>
                     {localeService.t('sheets-filter.panel.clear-filter')}
                 </Button>
-                <span className="univer-space-x-2">
+                <span className="univer-flex univer-gap-2">
                     <Button variant="default" onClick={onCancel}>
                         {localeService.t('sheets-filter.panel.cancel')}
                     </Button>

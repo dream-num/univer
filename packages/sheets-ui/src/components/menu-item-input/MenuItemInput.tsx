@@ -67,6 +67,7 @@ export const MenuItemInput = (props: IMenuItemInputProps) => {
             <div className="univer-w-16" onClick={(e) => e.stopPropagation()}>
                 <InputNumber
                     value={Number(inputValue)}
+                    size="mini"
                     precision={0}
                     min={min}
                     max={max}

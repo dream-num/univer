@@ -593,7 +593,7 @@ export const CellLinkEdit = () => {
                     setPayload={setPayload}
                 />
             )}
-            <div className="univer-flex univer-flex-row univer-justify-end">
+            <div className="univer-flex univer-flex-row univer-justify-end univer-gap-2">
                 <Button
                     onClick={() => {
                         if (editing) {
@@ -606,7 +606,6 @@ export const CellLinkEdit = () => {
                 </Button>
                 <Button
                     variant="primary"
-                    style={{ marginLeft: 8 }}
                     onClick={async () => {
                         handleSubmit();
                     }}

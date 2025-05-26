@@ -17,7 +17,6 @@
 import type { IFormulaInputProps } from '@univerjs/data-validation';
 import type { ListValidator } from '@univerjs/sheets-data-validation';
 import type { IFormulaEditorRef } from '@univerjs/sheets-formula-ui';
-import type { CSSProperties } from 'react';
 import { DataValidationType, isFormulaString, LocaleService, Tools } from '@univerjs/core';
 import { DataValidationModel, DataValidatorRegistryService } from '@univerjs/data-validation';
 import { borderClassName, clsx, DraggableList, Dropdown, FormLayout, Input, Radio, RadioGroup } from '@univerjs/design';
@@ -122,19 +121,17 @@ const ColorSelect = (props: IColorSelectProps) => {
     );
 };
 
-const Template = (props: { item: IDropdownItem; commonProps: any; style?: CSSProperties }) => {
-    const { item, commonProps, style } = props;
+const Template = (props: { item: IDropdownItem; commonProps: any; className?: string }) => {
+    const { item, commonProps, className } = props;
     const { onItemChange, onItemDelete } = commonProps;
 
     return (
-        <div className="univer-flex univer-items-center univer-gap-2" style={style}>
-            {!item.isRef
-                ? (
-                    <div className={clsx('univer-cursor-move', 'draggableHandle')}>
-                        <SequenceSingle />
-                    </div>
-                )
-                : null}
+        <div className={clsx('univer-flex univer-items-center univer-gap-2', className)}>
+            {!item.isRef && (
+                <div className={clsx('univer-cursor-move', 'draggableHandle')}>
+                    <SequenceSingle />
+                </div>
+            )}
             <ColorSelect
                 value={item.color}
                 onChange={(color) => {
@@ -377,14 +374,14 @@ export function ListFormulaInput(props: IFormulaInputProps) {
                             }}
                         />
                         {refFinalList.length > 0 && (
-                            <div style={{ marginTop: '12px' }}>
+                            <div className="univer-mt-3">
                                 {refFinalList.map((item) => {
                                     return (
                                         <Template
                                             key={item.id}
+                                            className="univer-mb-3"
                                             item={item}
                                             commonProps={{ onItemChange: handleRefItemChange }}
-                                            style={{ marginBottom: 12 }}
                                         />
                                     );
                                 })}
@@ -394,7 +391,7 @@ export function ListFormulaInput(props: IFormulaInputProps) {
                 )
                 : (
                     <FormLayout error={formula1Res}>
-                        <div style={{ marginTop: '-12px' }}>
+                        <div className="-univer-mt-3">
                             <DraggableList
                                 list={strList}
                                 onListChange={setStrList}

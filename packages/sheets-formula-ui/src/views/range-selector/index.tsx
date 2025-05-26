@@ -157,10 +157,9 @@ export function RangeSelectorDialog(props: IRangeSelectorDialogProps) {
             mask={false}
             maskClosable={false}
             footer={(
-                <footer>
+                <footer className="univer-flex univer-gap-2">
                     <Button onClick={onClose}>{localeService.t('rangeSelector.cancel')}</Button>
                     <Button
-                        style={{ marginLeft: 10 }}
                         variant="primary"
                         onClick={() => {
                             onConfirm(
@@ -189,12 +188,13 @@ export function RangeSelectorDialog(props: IRangeSelectorDialogProps) {
                         className="univer-mb-2 univer-flex univer-items-center univer-gap-4"
                     >
                         <Input
-                            className="univer-w-full"
+                            className={clsx('univer-w-full', {
+                                'univer-border-primary-600': focusIndex === index,
+                            })}
                             placeholder={localeService.t('rangeSelector.placeHolder')}
                             onFocus={() => setFocusIndex(index)}
                             value={text}
                             onChange={(value) => handleRangeInput(index, value)}
-                            style={{ borderColor: focusIndex === index ? 'rgb(var(--primary-color))' : undefined }}
                         />
                         {ranges.length > 1 && (
                             <DeleteSingle

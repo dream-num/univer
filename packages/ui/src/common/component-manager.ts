@@ -298,12 +298,11 @@ export class ComponentManager {
             return value.component;
         } else if (value?.framework === 'vue3') {
             // TODO: slot support
-            return (props: any) => cloneElement(
+            // eslint-disable-next-line ts/no-explicit-any, react/no-clone-element
+            return (props: Record<string, any>) => cloneElement(
                 createElement(VueComponentWrapper, {
                     component: value.component,
-                    props: {
-                        ...props,
-                    },
+                    props,
                 })
             );
         } else {
@@ -329,6 +328,7 @@ async function renderVue3Component(VueComponent: ReturnType<typeof defineCompone
             document.body.removeChild(container);
         };
     } catch (error) {
+        console.warn('Vue3 component render error', error);
     }
 }
 

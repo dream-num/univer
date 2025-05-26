@@ -542,7 +542,8 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
                     `${cell!.v!}`,
                     getFontStyleString(style).fontCache,
                     style?.tb === WrapStrategy.WRAP,
-                    colWidth - DEFAULT_PADDING_DATA.l - DEFAULT_PADDING_DATA.r
+                    colWidth - DEFAULT_PADDING_DATA.l - DEFAULT_PADDING_DATA.r,
+                    Infinity
                 );
                 skeleton.calculate();
                 return skeleton.getTotalHeight();

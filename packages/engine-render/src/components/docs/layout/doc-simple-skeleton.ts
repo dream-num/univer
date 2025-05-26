@@ -32,7 +32,8 @@ export class DocSimpleSkeleton {
         private _text: string,
         private _fontStyle: string,
         private _warp: boolean,
-        private _width: number
+        private _width: number,
+        private _height: number
     ) {
         this._lineBreaker = new LineBreaker(this._text);
     }
@@ -58,6 +59,7 @@ export class DocSimpleSkeleton {
             baseline: 0,
         };
 
+        let totalHeight = 0;
         while (true) {
             const breakPoint = this._lineBreaker.nextBreakPoint();
             if (!breakPoint) {
@@ -72,7 +74,10 @@ export class DocSimpleSkeleton {
                 if (currentLine.text.length > 0) {
                     // Push the current line first
                     this._lines.push({ ...currentLine });
-
+                    totalHeight += currentLine.height;
+                    if (totalHeight > this._height) {
+                        break;
+                    }
                     // Reset current line and add the new text
                     currentLine = {
                         text,

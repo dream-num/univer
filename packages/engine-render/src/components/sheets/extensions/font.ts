@@ -479,7 +479,7 @@ export class Font extends SheetExtension {
         }
 
         const isNumber = cellData.t === CellValueType.NUMBER && typeof cellData.v === 'number';
-        const height = Text.drawWith(ctx, {
+        Text.drawWith(ctx, {
             text,
             fontStyle: fontCache.fontString,
             warp: wrapStrategy === WrapStrategy.WRAP && vertexAngle === 0,

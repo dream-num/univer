@@ -57,7 +57,7 @@ export class Text extends Shape<ITextProps> {
 
     static override drawWith(ctx: UniverRenderingContext, props: ITextProps) {
         const { text, fontStyle, warp, hAlign, vAlign, width, height, left = 0, top = 0 } = props;
-        const skeleton = new DocSimpleSkeleton(text, fontStyle, Boolean(warp), width);
+        const skeleton = new DocSimpleSkeleton(text, fontStyle, Boolean(warp), width, vAlign === VerticalAlign.TOP ? height : Infinity);
         const lines = skeleton.calculate();
         const totalHeight = skeleton.getTotalHeight();
         const offsetY = vAlign === VerticalAlign.TOP ? 0 : vAlign === VerticalAlign.MIDDLE ? (height - totalHeight) / 2 : height - totalHeight;

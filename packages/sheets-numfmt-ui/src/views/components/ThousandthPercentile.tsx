@@ -29,9 +29,9 @@ export const ThousandthPercentilePanel: FC<IBusinessComponentProps> = (props) =>
     const localeService = useDependency(LocaleService);
 
     const options = useMemo(getNumberFormatOptions, []);
-    const [decimal, decimalSet] = useState(() => getDecimalFromPattern(props.defaultPattern || '', 0));
+    const [decimal, setDecimal] = useState(() => getDecimalFromPattern(props.defaultPattern || '', 0));
 
-    const [suffix, suffixSet] = useState(() => {
+    const [suffix, setSuffix] = useState(() => {
         const item = options.find((item) => isPatternEqualWithoutDecimal(item.value, props.defaultPattern || ''));
         return item?.value || options[0].value;
     });
@@ -41,15 +41,15 @@ export const ThousandthPercentilePanel: FC<IBusinessComponentProps> = (props) =>
     const isInputDisable = useMemo(() => !isPatternHasDecimal(suffix), [suffix]);
 
     const handleDecimalChange = (decimal: number | null) => {
-        decimalSet(decimal || 0);
+        setDecimal(decimal || 0);
         props.onChange(setPatternDecimal(suffix, Number(decimal || 0)));
     };
     const handleClick = (v: any) => {
         if (v === undefined) {
             return;
         }
-        decimalSet(getDecimalFromPattern(v, 0));
-        suffixSet(v);
+        setDecimal(getDecimalFromPattern(v, 0));
+        setSuffix(v);
         props.onChange(v);
     };
 

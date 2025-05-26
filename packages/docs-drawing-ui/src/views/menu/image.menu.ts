@@ -23,7 +23,6 @@ import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { Observable } from 'rxjs';
 import { InsertDocImageCommand } from '../../commands/commands/insert-image.command';
 
-export const ImageUploadIcon = 'addition-and-subtraction-single';
 export const DOCS_IMAGE_MENU_ID = 'doc.menu.image';
 export const IMAGE_MENU_UPLOAD_FLOAT_ID = InsertDocImageCommand.id;
 
@@ -66,7 +65,7 @@ export function ImageMenuFactory(accessor: IAccessor): IMenuItem {
     return {
         id: DOCS_IMAGE_MENU_ID,
         type: MenuItemType.SUBITEMS,
-        icon: ImageUploadIcon,
+        icon: 'AddImageSingle',
         tooltip: 'docImage.title',
         disabled$: getDisableWhenSelectionInTableObservable(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC, undefined, DOCS_ZEN_EDITOR_UNIT_ID_KEY),

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { FC } from 'react';
 import type { IBusinessComponentProps } from './interface';
 import { LocaleService, numfmt } from '@univerjs/core';
 import { SelectList } from '@univerjs/design';
@@ -31,13 +30,15 @@ export const isDatePanel = (pattern: string) => {
     );
 };
 
-export const DatePanel: FC<IBusinessComponentProps> = (props) => {
+export function DatePanel(props: IBusinessComponentProps) {
+    const { onChange, defaultPattern } = props;
+
     const options = useMemo(getDateFormatOptions, []);
     const localeService = useDependency(LocaleService);
-    const t = localeService.t;
-    const [suffix, suffixSet] = useState(() => {
-        if (props.defaultPattern) {
-            const item = options.find((item) => item.value === props.defaultPattern);
+
+    const [suffix, setSuffix] = useState(() => {
+        if (defaultPattern) {
+            const item = options.find((item) => item.value === defaultPattern);
             if (item) {
                 return item.value;
             }
@@ -45,21 +46,22 @@ export const DatePanel: FC<IBusinessComponentProps> = (props) => {
         return options[0].value;
     });
 
+    // FIXME: WTF??
     props.action.current = () => suffix;
 
-    const onChange = (v: any) => {
+    const handleChange = (v: any) => {
         if (v === undefined) {
             return;
         }
-        suffixSet(v);
-        props.onChange(v);
+        setSuffix(v);
+        onChange(v);
     };
 
     return (
         <div>
-            <div className="univer-mt-4 univer-text-sm univer-text-gray-400">{t('sheet.numfmt.dateType')}</div>
+            <div className="univer-mt-4 univer-text-sm univer-text-gray-400">{localeService.t('sheet.numfmt.dateType')}</div>
             <div className="univer-mt-2">
-                <SelectList value={suffix} options={options} onChange={onChange} />
+                <SelectList value={suffix} options={options} onChange={handleChange} />
             </div>
             <div
                 className={`
@@ -67,7 +69,7 @@ export const DatePanel: FC<IBusinessComponentProps> = (props) => {
                   dark:!univer-text-gray-200
                 `}
             >
-                {t('sheet.numfmt.dateDes')}
+                {localeService.t('sheet.numfmt.dateDes')}
             </div>
         </div>
     );

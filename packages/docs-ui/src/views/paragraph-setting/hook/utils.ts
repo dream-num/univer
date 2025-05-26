@@ -100,134 +100,134 @@ export const useCurrentSections = (currentParagraphs: IParagraph[]) => {
 export const useFirstParagraphHorizontalAlign = (paragraph: IParagraph[], defaultValue: string) => {
     const commandService = useDependency(ICommandService);
 
-    const [horizontalAlign, _horizontalAlignSet] = useState(() => {
+    const [horizontalAlign, setHorizontalAlignSetInternal] = useState(() => {
         const firstParagraph = paragraph[0];
         if (!firstParagraph) {
             return defaultValue;
         }
         return String(firstParagraph.paragraphStyle?.horizontalAlign ?? defaultValue);
     });
-    const horizontalAlignSet = (v: string) => {
-        _horizontalAlignSet(v);
+    const sethorizontalAlign = (v: string) => {
+        setHorizontalAlignSetInternal(v);
         return commandService.executeCommand(DocParagraphSettingCommand.id, {
             paragraph: { horizontalAlign: Number(v) },
         } as IDocParagraphSettingCommandParams);
     };
-    return [horizontalAlign, horizontalAlignSet] as const;
+    return [horizontalAlign, sethorizontalAlign] as const;
 };
 
 export const useFirstParagraphIndentStart = (paragraph: IParagraph[]) => {
     const commandService = useDependency(ICommandService);
 
-    const [indentStart, _indentStartSet] = useState(() => {
+    const [indentStart, setIndentStartInternal] = useState(() => {
         const firstParagraph = paragraph[0];
         if (!firstParagraph) {
             return 0;
         }
         return getNumberUnitValue(firstParagraph.paragraphStyle?.indentStart, 0);
     });
-    const indentStartSet = (v: number) => {
-        _indentStartSet(v);
+    const setIndentStart = (v: number) => {
+        setIndentStartInternal(v);
         return commandService.executeCommand(DocParagraphSettingCommand.id, {
             paragraph: { indentStart: { v } },
         } as IDocParagraphSettingCommandParams);
     };
-    return [indentStart, indentStartSet] as const;
+    return [indentStart, setIndentStart] as const;
 };
 
 export const useFirstParagraphIndentEnd = (paragraph: IParagraph[]) => {
     const commandService = useDependency(ICommandService);
 
-    const [indentEnd, _indentEndSet] = useState(() => {
+    const [indentEnd, setIndentEndInternal] = useState(() => {
         const firstParagraph = paragraph[0];
         if (!firstParagraph) {
             return 0;
         }
         return getNumberUnitValue(firstParagraph.paragraphStyle?.indentEnd, 0);
     });
-    const indentEndSet = (v: number) => {
-        _indentEndSet(v);
+    const setIndentEnd = (v: number) => {
+        setIndentEndInternal(v);
         return commandService.executeCommand(DocParagraphSettingCommand.id, {
             paragraph: { indentEnd: { v } },
         } as IDocParagraphSettingCommandParams);
     };
-    return [indentEnd, indentEndSet] as const;
+    return [indentEnd, setIndentEnd] as const;
 };
 
 export const useFirstParagraphIndentFirstLine = (paragraph: IParagraph[]) => {
     const commandService = useDependency(ICommandService);
 
-    const [indentFirstLine, _indentFirstLineSet] = useState(() => {
+    const [indentFirstLine, setIndentFirstLineInternal] = useState(() => {
         const firstParagraph = paragraph[0];
         if (!firstParagraph) {
             return 0;
         }
         return getNumberUnitValue(firstParagraph.paragraphStyle?.indentFirstLine, 0);
     });
-    const indentFirstLineSet = (v: number) => {
-        _indentFirstLineSet(v);
+    const setIndentFirstLine = (v: number) => {
+        setIndentFirstLineInternal(v);
         return commandService.executeCommand(DocParagraphSettingCommand.id, {
             paragraph: { indentFirstLine: { v } },
         } as IDocParagraphSettingCommandParams);
     };
-    return [indentFirstLine, indentFirstLineSet] as const;
+    return [indentFirstLine, setIndentFirstLine] as const;
 };
 
 export const useFirstParagraphIndentHanging = (paragraph: IParagraph[]) => {
     const commandService = useDependency(ICommandService);
 
-    const [hanging, _hangingSet] = useState(() => {
+    const [hanging, setHangingInternal] = useState(() => {
         const firstParagraph = paragraph[0];
         if (!firstParagraph) {
             return 0;
         }
         return getNumberUnitValue(firstParagraph.paragraphStyle?.hanging, 0);
     });
-    const hangingSet = (v: number) => {
-        _hangingSet(v);
+    const setHanging = (v: number) => {
+        setHangingInternal(v);
         return commandService.executeCommand(DocParagraphSettingCommand.id, {
             paragraph: { hanging: { v } },
         } as IDocParagraphSettingCommandParams);
     };
-    return [hanging, hangingSet] as const;
+    return [hanging, setHanging] as const;
 };
 
 export const useFirstParagraphIndentSpaceAbove = (paragraph: IParagraph[]) => {
     const commandService = useDependency(ICommandService);
 
-    const [spaceAbove, _spaceAboveSet] = useState(() => {
+    const [spaceAbove, setSpaceAboveInternal] = useState(() => {
         const firstParagraph = paragraph[0];
         if (!firstParagraph) {
             return 0;
         }
         return getNumberUnitValue(firstParagraph.paragraphStyle?.spaceAbove, 0);
     });
-    const spaceAboveSet = (v: number) => {
-        _spaceAboveSet(v);
+    const setSpaceAbove = (v: number) => {
+        setSpaceAboveInternal(v);
         return commandService.executeCommand(DocParagraphSettingCommand.id, {
             paragraph: { spaceAbove: { v } },
         } as IDocParagraphSettingCommandParams);
     };
-    return [spaceAbove, spaceAboveSet] as const;
+    return [spaceAbove, setSpaceAbove] as const;
 };
 
 export const useFirstParagraphSpaceBelow = (paragraph: IParagraph[]) => {
     const commandService = useDependency(ICommandService);
 
-    const [spaceBelow, _spaceBelowSet] = useState(() => {
+    const [spaceBelow, setSpaceBelowInternal] = useState(() => {
         const firstParagraph = paragraph[0];
         if (!firstParagraph) {
             return 0;
         }
         return getNumberUnitValue(firstParagraph.paragraphStyle?.spaceBelow, 0);
     });
-    const spaceBelowSet = (v: number) => {
-        _spaceBelowSet(v);
+    const setSpaceBelow = (v: number) => {
+        setSpaceBelowInternal(v);
         return commandService.executeCommand(DocParagraphSettingCommand.id, {
             paragraph: { spaceBelow: { v } },
         } as IDocParagraphSettingCommandParams);
     };
-    return [spaceBelow, spaceBelowSet] as const;
+    return [spaceBelow, setSpaceBelow] as const;
 };
 
 // eslint-disable-next-line max-lines-per-function
@@ -246,7 +246,7 @@ export const useFirstParagraphLineSpacing = (paragraph: IParagraph[]) => {
 
     const stateChange$ = useMemo(() => new BehaviorSubject<{ spacingRule?: SpacingRule; lineSpacing?: number }>({}), []);
 
-    const [lineSpacing, _lineSpacingSet] = useState(() => {
+    const [lineSpacing, setLineSpacingInternal] = useState(() => {
         const firstParagraph = paragraph[0];
         if (!firstParagraph) {
             return 1;
@@ -256,7 +256,7 @@ export const useFirstParagraphLineSpacing = (paragraph: IParagraph[]) => {
 
     const lineSpacingCache = useRef<number>(lineSpacing);
 
-    const [spacingRule, _spacingRuleSet] = useState<SpacingRule>(() => {
+    const [spacingRule, setSpacingRuleInternal] = useState<SpacingRule>(() => {
         const firstParagraph = paragraph[0];
         if (!firstParagraph) {
             return SpacingRule.AUTO;
@@ -264,12 +264,12 @@ export const useFirstParagraphLineSpacing = (paragraph: IParagraph[]) => {
         return firstParagraph.paragraphStyle?.spacingRule ?? SpacingRule.AUTO;
     });
 
-    const lineSpacingSet = async (v: number) => {
-        _lineSpacingSet(v);
+    const setLineSpacing = async (v: number) => {
+        setLineSpacingInternal(v);
         stateChange$.next({ lineSpacing: v, spacingRule });
     };
 
-    const spacingRuleSet = async (v: SpacingRule) => {
+    const setSpacingRule = async (v: SpacingRule) => {
         if (v !== spacingRule) {
             let cache = lineSpacingCache.current;
             if (v === SpacingRule.AT_LEAST) {
@@ -288,8 +288,8 @@ export const useFirstParagraphLineSpacing = (paragraph: IParagraph[]) => {
                 }
             }
             lineSpacingCache.current = lineSpacing;
-            lineSpacingSet(cache);
-            _spacingRuleSet(v);
+            setLineSpacing(cache);
+            setSpacingRuleInternal(v);
             stateChange$.next({ spacingRule: v });
         }
     };
@@ -316,8 +316,7 @@ export const useFirstParagraphLineSpacing = (paragraph: IParagraph[]) => {
     }, []);
 
     return {
-        lineSpacing: [lineSpacing, lineSpacingSet] as const,
-        spacingRule: [spacingRule, spacingRuleSet] as const,
-
+        lineSpacing: [lineSpacing, setLineSpacing] as const,
+        spacingRule: [spacingRule, setSpacingRule] as const,
     };
 };

@@ -20,14 +20,13 @@ import { UniverInstanceType } from '@univerjs/core';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { InsertSlideFloatImageCommand } from '../commands/operations/insert-image.operation';
 
-export const IMAGE_UPLOAD_ICON = 'addition-and-subtraction-single';
 export const SLIDES_IMAGE_MENU_ID = 'slide.menu.image';
 
 export function SlideImageMenuFactory(accessor: IAccessor): IMenuItem {
     return {
         id: SLIDES_IMAGE_MENU_ID,
         type: MenuItemType.SUBITEMS,
-        icon: IMAGE_UPLOAD_ICON,
+        icon: 'AddImageSingle',
         tooltip: 'slide.image.insert.title',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SLIDE),
     };

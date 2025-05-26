@@ -21,6 +21,7 @@ import { toDisposable } from '@univerjs/core';
 
 import {
     AddDigitsSingle,
+    AddImageSingle,
     AdjustHeight,
     AdjustWidth,
     AlignBottomSingle,
@@ -154,6 +155,7 @@ export class ComponentManager {
     // eslint-disable-next-line max-lines-per-function
     constructor() {
         const iconList: Record<string, React.ForwardRefExoticComponent<any>> = {
+            AddImageSingle,
             AlignBottomSingle,
             AlignTopSingle,
             AllBorderSingle,

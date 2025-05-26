@@ -29,14 +29,14 @@ import { useStateRef } from '../hooks/use-state-ref';
 export const useFormulaSearch = (isNeed: boolean, nodes: INode[] = [], editor?: Editor) => {
     const descriptionService = useDependency(IDescriptionService);
 
-    const [searchList, searchListSet] = useState<ISearchItem[]>([]);
-    const [searchText, searchTextSet] = useState<string>('');
+    const [searchList, setSearchList] = useState<ISearchItem[]>([]);
+    const [searchText, setSearchText] = useState<string>('');
     const indexRef = useRef(-1);
     const stateRef = useStateRef({ nodes });
 
     const reset = () => {
-        searchListSet([]);
-        searchTextSet('');
+        setSearchList([]);
+        setSearchText('');
         indexRef.current = -1;
     };
 
@@ -56,15 +56,15 @@ export const useFormulaSearch = (isNeed: boolean, nodes: INode[] = [], editor?: 
                             indexRef.current = currentNodeIndex;
                             const token = currentNode.token;
                             const list = descriptionService.getSearchListByNameFirstLetter(token);
-                            searchListSet(list);
-                            searchTextSet(token);
+                            setSearchList(list);
+                            setSearchText(token);
                             return;
                         }
                     }
                 }
                 indexRef.current = -1;
-                searchTextSet('');
-                searchListSet((pre) => {
+                setSearchText('');
+                setSearchList((pre) => {
                     if (!pre?.length) {
                         return pre;
                     }

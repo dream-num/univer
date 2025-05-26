@@ -65,17 +65,21 @@ export const ReorderRangeCommand: ICommand<IReorderRangeCommandParams> = {
         ];
 
         const result = sequenceExecute(redos, commandService);
-
+        const { undos: autoHeightUndos, redos: autoHeightRedos } = sheetInterceptorService.generateMutationsByAutoHeight({
+            unitId,
+            subUnitId,
+            ranges: [range],
+        });
         const reorderAfterIntercepted = sheetInterceptorService.afterCommandExecute({ id: ReorderRangeCommand.id, params });
 
         if (result.result) {
-            sequenceExecute(reorderAfterIntercepted.redos, commandService);
+            sequenceExecute([...reorderAfterIntercepted.redos, ...autoHeightRedos], commandService);
 
             const undoRedoService = accessor.get(IUndoRedoService);
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
-                undoMutations: [...undos, ...reorderAfterIntercepted.undos],
-                redoMutations: [...redos, ...reorderAfterIntercepted.redos],
+                undoMutations: [...undos, ...reorderAfterIntercepted.undos, ...autoHeightUndos],
+                redoMutations: [...redos, ...reorderAfterIntercepted.redos, ...autoHeightRedos],
             });
             return true;
         }

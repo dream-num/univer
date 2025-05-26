@@ -27,6 +27,7 @@ import type {
     IRange,
     IUndoRedoCommandInfosByInterceptor,
     Nullable,
+    ObjectMatrix,
     Workbook,
     Worksheet,
 } from '@univerjs/core';
@@ -68,6 +69,20 @@ export interface IRangeInterceptors {
     getMutations(rangesInfo: IRangesInfo): IUndoRedoCommandInfosByInterceptor;
 }
 
+export interface IAutoHeightContext {
+    unitId: string;
+    subUnitId: string;
+    ranges: IRange[];
+    autoHeightRanges?: IRange[];
+    lazyAutoHeightRanges?: IRange[];
+    cellHeights?: ObjectMatrix<number>;
+}
+
+export interface IAutoHeightInterceptors {
+    priority?: number;
+    getMutations(ctx: IAutoHeightContext): IUndoRedoCommandInfosByInterceptor;
+}
+
 interface ISheetLocationForEditor extends ISheetLocation {
     origin: Nullable<ICellData>;
 }
@@ -83,6 +98,7 @@ export class SheetInterceptorService extends Disposable {
     private _interceptorsByName: Map<string, Array<IInterceptor<unknown, unknown>>> = new Map();
     private _commandInterceptors: ICommandInterceptor[] = [];
     private _rangeInterceptors: IRangeInterceptors[] = [];
+    private _autoHeightInterceptors: IAutoHeightInterceptors[] = [];
 
     private _beforeCommandInterceptor: IBeforeCommandInterceptor[] = [];
     private _afterCommandInterceptors: ICommandInterceptor[] = [];
@@ -212,6 +228,28 @@ export class SheetInterceptorService extends Disposable {
 
         return {
             undos: infos.map((i) => i.undos).flat(),
+            redos: infos.map((i) => i.redos).flat(),
+        };
+    }
+
+    interceptAutoHeight(interceptor: IAutoHeightInterceptors): IDisposable {
+        if (this._autoHeightInterceptors.includes(interceptor)) {
+            throw new Error('[SheetInterceptorService]: Interceptor already exists!');
+        }
+
+        this._autoHeightInterceptors.push(interceptor);
+        this._autoHeightInterceptors.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
+
+        return this.disposeWithMe(toDisposable(() => remove(this._autoHeightInterceptors, interceptor)));
+    }
+
+    generateMutationsByAutoHeight(ctx: IAutoHeightContext): IUndoRedoCommandInfosByInterceptor {
+        const infos = this._autoHeightInterceptors.map((i) => i.getMutations(ctx));
+
+        return {
+            preUndos: infos.map((i) => i.preUndos ?? []).flat(),
+            undos: infos.map((i) => i.undos).flat(),
+            preRedos: infos.map((i) => i.preRedos ?? []).flat(),
             redos: infos.map((i) => i.redos).flat(),
         };
     }

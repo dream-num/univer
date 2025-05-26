@@ -20,6 +20,7 @@ import type {
     ICellData,
     IColorStyle,
     ICommand,
+    IMutationInfo,
     IRange,
     IStyleData,
     ITextRotation,
@@ -61,6 +62,8 @@ interface ISetStyleCommonParams extends Partial<ISheetCommandSharedParams> {
 export interface ISetStyleCommandParams<T> extends ISetStyleCommonParams {
     style: IStyleTypeValue<T>;
 }
+
+export const AFFECT_LAYOUT_STYLES = ['ff', 'fs', 'tr', 'tb'];
 
 /**
  * The command to set cell style.
@@ -120,8 +123,7 @@ export const SetStyleCommand: ICommand<ISetStyleCommandParams<unknown>> = {
         };
 
         const skeleton = accessor.get(SheetSkeletonService).getSkeleton(unitId, subUnitId);
-        const { suitableRanges, remainingRanges } = getSuitableRangesInView(ranges, skeleton);
-        const cellHeights = getRangesHeight(suitableRanges, worksheet);
+
         const undoSetRangeValuesMutationParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
             accessor,
             setRangeValuesMutationParams
@@ -132,26 +134,36 @@ export const SetStyleCommand: ICommand<ISetStyleCommandParams<unknown>> = {
             setRangeValuesMutationParams
         );
 
-        const { undos, redos } = accessor.get(SheetInterceptorService).onCommandExecute({
-            id: SetStyleCommand.id,
-            params: {
-                ...params,
+        const interceptor = accessor.get(SheetInterceptorService);
+        let autoHeightUndos: IMutationInfo<object>[] = [];
+        let autoHeightRedos: IMutationInfo<object>[] = [];
+        if (AFFECT_LAYOUT_STYLES.includes(params?.style.type)) {
+            const { suitableRanges, remainingRanges } = getSuitableRangesInView(ranges, skeleton);
+            const cellHeights = getRangesHeight(suitableRanges, worksheet);
+            const { undos, redos } = interceptor.generateMutationsByAutoHeight({
                 unitId,
                 subUnitId,
-                cellHeights,
+                ranges: suitableRanges,
                 autoHeightRanges: suitableRanges,
                 lazyAutoHeightRanges: remainingRanges,
-                ranges,
-            },
+                cellHeights,
+            });
+            autoHeightUndos = undos;
+            autoHeightRedos = redos;
+        }
+
+        const { undos, redos } = interceptor.onCommandExecute({
+            id: SetStyleCommand.id,
+            params,
         });
 
-        const result = sequenceExecute([...redos], commandService);
+        const result = sequenceExecute([...redos, ...autoHeightRedos], commandService);
 
         if (setRangeValuesResult && result.result) {
             undoRedoService.pushUndoRedo({
                 unitID: setRangeValuesMutationParams.unitId,
-                undoMutations: [{ id: SetRangeValuesMutation.id, params: undoSetRangeValuesMutationParams }, ...undos],
-                redoMutations: [{ id: SetRangeValuesMutation.id, params: setRangeValuesMutationParams }, ...redos],
+                undoMutations: [{ id: SetRangeValuesMutation.id, params: undoSetRangeValuesMutationParams }, ...undos, ...autoHeightUndos],
+                redoMutations: [{ id: SetRangeValuesMutation.id, params: setRangeValuesMutationParams }, ...redos, ...autoHeightRedos],
             });
 
             return true;

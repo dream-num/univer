@@ -36,7 +36,6 @@ import { SelectionMoveType } from '../../services/selections/type';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import { MoveRangeMutation } from '../mutations/move-range.mutation';
 import { SetSelectionsOperation } from '../operations/selection.operation';
-import { getRangesHeight } from './util';
 import { alignToMergedCellsBorders, getPrimaryForRange } from './utils/selection-utils';
 import { getSheetCommandTarget } from './utils/target-util';
 
@@ -84,8 +83,6 @@ export const MoveRangeCommand: ICommand = {
             params,
         });
 
-        const cellHeights = getRangesHeight([params.fromRange, params.toRange], worksheet);
-
         const redos = [
             ...(interceptorCommands.preRedos ?? []),
             ...moveRangeMutations.redos,
@@ -117,17 +114,23 @@ export const MoveRangeCommand: ICommand = {
 
         const result = sequenceExecute(redos, commandService).result;
 
+        const { undos: autoHeightUndos, redos: autoHeightRedos } = sheetInterceptorService.generateMutationsByAutoHeight({
+            unitId,
+            subUnitId,
+            ranges: [params.fromRange, params.toRange],
+        });
+
         const afterInterceptors = sheetInterceptorService.afterCommandExecute({
             id: MoveRangeCommand.id,
-            params: { ...params, cellHeights, subUnitId },
+            params,
         });
 
         if (result) {
-            sequenceExecute(afterInterceptors.redos, commandService);
+            sequenceExecute([...afterInterceptors.redos, ...autoHeightRedos], commandService);
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
-                undoMutations: [...undos, ...afterInterceptors.undos],
-                redoMutations: [...redos, ...afterInterceptors.redos],
+                undoMutations: [...undos, ...afterInterceptors.undos, ...autoHeightUndos],
+                redoMutations: [...redos, ...afterInterceptors.redos, ...autoHeightRedos],
             });
             return true;
         }

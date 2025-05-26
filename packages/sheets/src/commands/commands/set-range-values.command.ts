@@ -109,10 +109,17 @@ export const SetRangeValuesCommand: ICommand = {
 
         const { undos, redos } = sheetInterceptorService.onCommandExecute({
             id: SetRangeValuesCommand.id,
-            params: { ...setRangeValuesMutationParams, range: currentSelections, cellHeights: new ObjectMatrix(cellHeights) },
+            params: setRangeValuesMutationParams,
         });
 
-        const result = sequenceExecute([...redos], commandService);
+        const { undos: autoHeightUndos, redos: autoHeightRedos } = sheetInterceptorService.generateMutationsByAutoHeight({
+            unitId,
+            subUnitId,
+            ranges: currentSelections,
+            cellHeights: new ObjectMatrix<number>(cellHeights as IObjectMatrixPrimitiveType<number>),
+        });
+
+        const result = sequenceExecute([...redos, ...autoHeightRedos], commandService);
         if (result.result) {
             const selectionOperation = followSelectionOperation(range ?? cellValue.getRange(), workbook, worksheet);
             undoRedoService.pushUndoRedo({
@@ -120,11 +127,13 @@ export const SetRangeValuesCommand: ICommand = {
                 undoMutations: [
                     { id: SetRangeValuesMutation.id, params: redoParams },
                     ...undos,
+                    ...autoHeightUndos,
                     selectionOperation,
                 ],
                 redoMutations: [
                     { id: SetRangeValuesMutation.id, params: setRangeValuesMutationParams },
                     ...redos,
+                    ...autoHeightRedos,
                     Tools.deepClone(selectionOperation),
                 ],
                 id: redoUndoId,

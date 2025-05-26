@@ -331,21 +331,26 @@ export const SetWorksheetRowIsAutoHeightCommand: ICommand = {
         const skeleton = accessor.get(SheetSkeletonService).getSkeleton(unitId, subUnitId);
         const { suitableRanges, remainingRanges } = getSuitableRangesInView(redoMutationParams.ranges, skeleton);
 
-        const { undos, redos } = accessor.get(SheetInterceptorService).onCommandExecute({
-            id: SetWorksheetRowIsAutoHeightCommand.id,
-            params: {
-                ...redoMutationParams,
-                autoHeightRanges: suitableRanges,
-                lazyAutoHeightRanges: remainingRanges,
-            },
+        const sheetInterceptorService = accessor.get(SheetInterceptorService);
+        const { undos: autoHeightUndos, redos: autoHeightRedos } = sheetInterceptorService.generateMutationsByAutoHeight({
+            unitId,
+            subUnitId,
+            ranges: suitableRanges,
+            autoHeightRanges: suitableRanges,
+            lazyAutoHeightRanges: remainingRanges,
         });
 
-        const result = sequenceExecute([...redos], commandService);
+        const { undos, redos } = sheetInterceptorService.onCommandExecute({
+            id: SetWorksheetRowIsAutoHeightCommand.id,
+            params: redoMutationParams,
+        });
+
+        const result = sequenceExecute([...redos, ...autoHeightRedos], commandService);
         if (setIsAutoHeightResult && result.result) {
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
-                undoMutations: [{ id: SetWorksheetRowIsAutoHeightMutation.id, params: undoMutationParams }, ...undos],
-                redoMutations: [{ id: SetWorksheetRowIsAutoHeightMutation.id, params: redoMutationParams }, ...redos],
+                undoMutations: [{ id: SetWorksheetRowIsAutoHeightMutation.id, params: undoMutationParams }, ...undos, ...autoHeightUndos],
+                redoMutations: [{ id: SetWorksheetRowIsAutoHeightMutation.id, params: redoMutationParams }, ...redos, ...autoHeightRedos],
             });
 
             return true;

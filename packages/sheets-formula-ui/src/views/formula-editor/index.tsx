@@ -120,7 +120,7 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
     const searchFunctionRef = useRef<HTMLElement>(null);
     const editorRef = useRef<Editor>(undefined);
     const editor = editorRef.current;
-    const [isFocus, isFocusSet] = useState(_isFocus);
+    const [isFocus, setIsFocus] = useState(_isFocus);
     const formulaEditorContainerRef = useRef(null);
     const editorId = useMemo(() => propEditorId ?? createInternalEditorID(`${EMBEDDING_FORMULA_EDITOR}-${generateRandomId(4)}`), []);
     const isError = useMemo(() => errorText !== undefined, [errorText]);
@@ -239,14 +239,14 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
 
     useLayoutEffect(() => {
         if (_isFocus) {
-            isFocusSet(_isFocus);
+            setIsFocus(_isFocus);
             focus();
         } else {
             if (resetSelectionOnBlur) {
                 editor?.blur();
                 resetSelection();
             }
-            isFocusSet(_isFocus);
+            setIsFocus(_isFocus);
         }
     }, [_isFocus, editor, focus, resetSelection, resetSelectionOnBlur]);
 
@@ -285,7 +285,7 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
         editor,
         handleSelectionChange
     );
-    useSwitchSheet(isFocus && Boolean(isSelecting && docFocusing), unitId, isSupportAcrossSheet, isFocusSet, onBlur, () => {
+    useSwitchSheet(isFocus && Boolean(isSelecting && docFocusing), unitId, isSupportAcrossSheet, setIsFocus, onBlur, () => {
         highlight(formulaTextRef.current, false, true);
     });
 
@@ -307,7 +307,7 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
     };
 
     const handleMouseUp = () => {
-        isFocusSet(true);
+        setIsFocus(true);
         onFocus();
         focus();
     };

@@ -321,11 +321,11 @@ export function ListFormulaInput(props: IFormulaInputProps) {
     });
 
     const formulaEditorRef = useRef<IFormulaEditorRef>(null);
-    const [isFocusFormulaEditor, isFocusFormulaEditorSet] = useState(false);
+    const [isFocusFormulaEditor, setIsFocusFormulaEditor] = useState(false);
 
     useSidebarClick((e: MouseEvent) => {
         const isOutSide = formulaEditorRef.current?.isClickOutSide(e);
-        isOutSide && isFocusFormulaEditorSet(false);
+        isOutSide && setIsFocusFormulaEditor(false);
     });
 
     return (
@@ -366,7 +366,7 @@ export function ListFormulaInput(props: IFormulaInputProps) {
                             subUnitId={subUnitId}
                             isFocus={isFocusFormulaEditor}
                             isSupportAcrossSheet
-                            onFocus={() => isFocusFormulaEditorSet(true)}
+                            onFocus={() => setIsFocusFormulaEditor(true)}
                             onChange={(v = '') => {
                                 const str = (v ?? '').trim();
                                 setFormulaStrCopy(str);

@@ -22,21 +22,21 @@ import { RuleList } from './rule-list';
 interface IConditionFormattingPanelProps { rule?: IConditionFormattingRule };
 
 export const ConditionFormattingPanel = (props: IConditionFormattingPanelProps) => {
-    const [currentEditRule, currentEditRuleSet] = useState<IConditionFormattingRule | undefined>(props.rule);
-    const [isShowRuleEditor, isShowRuleEditorSet] = useState(!!props.rule);
+    const [currentEditRule, setCurrentEditRule] = useState<IConditionFormattingRule | undefined>(props.rule);
+    const [isShowRuleEditor, setIsShowRuleEditor] = useState(!!props.rule);
 
     const createCfRule = () => {
-        isShowRuleEditorSet(true);
+        setIsShowRuleEditor(true);
     };
 
     const handleCancel = () => {
-        isShowRuleEditorSet(false);
-        currentEditRuleSet(undefined);
+        setIsShowRuleEditor(false);
+        setCurrentEditRule(undefined);
     };
 
     const handleRuleClick = (rule: IConditionFormattingRule) => {
-        currentEditRuleSet(rule);
-        isShowRuleEditorSet(true);
+        setCurrentEditRule(rule);
+        setIsShowRuleEditor(true);
     };
 
     return (

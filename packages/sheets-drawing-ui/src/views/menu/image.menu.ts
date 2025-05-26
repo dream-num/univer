@@ -22,14 +22,13 @@ import { getCurrentRangeDisable$ } from '@univerjs/sheets-ui';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { InsertCellImageCommand, InsertFloatImageCommand } from '../../commands/commands/insert-image.command';
 
-export const IMAGE_UPLOAD_ICON = 'addition-and-subtraction-single';
 export const SHEETS_IMAGE_MENU_ID = 'sheet.menu.image';
 
 export function ImageMenuFactory(accessor: IAccessor): IMenuItem {
     return {
         id: SHEETS_IMAGE_MENU_ID,
         type: MenuItemType.SUBITEMS,
-        icon: IMAGE_UPLOAD_ICON,
+        icon: 'AddImageSingle',
         tooltip: 'sheetImage.title',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),

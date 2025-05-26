@@ -27,17 +27,17 @@ export const useFormulaDescribe = (isNeed: boolean, formulaText: string, editor?
     const descriptionService = useDependency(IDescriptionService);
     const lexerTreeBuilder = useDependency(LexerTreeBuilder);
 
-    const [functionInfo, functionInfoSet] = useState<IFunctionInfo | undefined>();
-    const [paramIndex, paramIndexSet] = useState<number>(-1);
-    const [isShow, isShowSet] = useState(true);
+    const [functionInfo, setFunctionInfo] = useState<IFunctionInfo | undefined>();
+    const [paramIndex, setParamIndex] = useState<number>(-1);
+    const [isShow, setIsShow] = useState(true);
     const isShowRef = useStateRef(isShow);
 
     const formulaTextRef = useRef(formulaText);
     formulaTextRef.current = formulaText;
     const reset = () => {
-        functionInfoSet(undefined);
-        paramIndexSet(-1);
-        isShowSet(false);
+        setFunctionInfo(undefined);
+        setParamIndex(-1);
+        setIsShow(false);
     };
 
     useEffect(() => {
@@ -51,14 +51,14 @@ export const useFormulaDescribe = (isNeed: boolean, formulaText: string, editor?
                         if (res) {
                             const { functionName, paramIndex } = res;
                             const info = descriptionService.getFunctionInfo(functionName);
-                            functionInfoSet(info);
-                            paramIndexSet(paramIndex);
+                            setFunctionInfo(info);
+                            setParamIndex(paramIndex);
                             return;
                         }
                     }
                 }
-                functionInfoSet(undefined);
-                paramIndexSet(-1);
+                setFunctionInfo(undefined);
+                setParamIndex(-1);
             });
             const d2 = editor.selectionChange$.pipe(
                 filter((e) => e.isEditing),
@@ -66,7 +66,7 @@ export const useFormulaDescribe = (isNeed: boolean, formulaText: string, editor?
                 map((e) => e.textRanges[0].startOffset),
                 distinctUntilChanged()
             ).subscribe(() => {
-                isShowSet(true);
+                setIsShow(true);
             });
             return () => {
                 d.unsubscribe();

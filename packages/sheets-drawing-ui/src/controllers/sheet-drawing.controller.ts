@@ -17,7 +17,6 @@
 import { Disposable, ICommandService, Inject } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
 
-import { AddImageSingle } from '@univerjs/icons';
 import { SheetsSelectionsService } from '@univerjs/sheets';
 import { ComponentManager, IMenuManagerService, IShortcutService } from '@univerjs/ui';
 import { DeleteDrawingsCommand } from '../commands/commands/delete-drawings.command';
@@ -33,7 +32,6 @@ import { UngroupSheetDrawingCommand } from '../commands/commands/ungroup-sheet-d
 import { ClearSheetDrawingTransformerOperation } from '../commands/operations/clear-drawing-transformer.operation';
 import { EditSheetDrawingOperation } from '../commands/operations/edit-sheet-drawing.operation';
 import { SidebarSheetDrawingOperation } from '../commands/operations/open-drawing-panel.operation';
-import { IMAGE_UPLOAD_ICON } from '../views/menu/image.menu';
 import { COMPONENT_SHEET_DRAWING_PANEL } from '../views/sheet-image-panel/component-name';
 import { SheetDrawingPanel } from '../views/sheet-image-panel/SheetDrawingPanel';
 import { menuSchema } from './menu.schema';
@@ -55,7 +53,6 @@ export class SheetDrawingUIController extends Disposable {
 
     private _initCustomComponents(): void {
         const componentManager = this._componentManager;
-        this.disposeWithMe(componentManager.register(IMAGE_UPLOAD_ICON, AddImageSingle));
         this.disposeWithMe(componentManager.register(COMPONENT_SHEET_DRAWING_PANEL, SheetDrawingPanel));
     }
 

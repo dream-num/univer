@@ -235,7 +235,7 @@ export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, ITextHigh
     const localeService = useDependency(LocaleService);
 
     const rule = props.rule?.type === CFRuleType.highlightCell ? props.rule : undefined;
-    const [subType, subTypeSet] = useState<CFSubRuleType.number | CFSubRuleType.text | CFSubRuleType.timePeriod | CFSubRuleType.duplicateValues | CFSubRuleType.uniqueValues>(() => {
+    const [subType, setSubType] = useState<CFSubRuleType.number | CFSubRuleType.text | CFSubRuleType.timePeriod | CFSubRuleType.duplicateValues | CFSubRuleType.uniqueValues>(() => {
         const defaultV = CFSubRuleType.text;
         if (!rule) {
             return defaultV;
@@ -262,7 +262,7 @@ export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, ITextHigh
 
     const operatorOptions = useMemo(() => getOperatorOptions(subType, localeService), [subType]);
 
-    const [operator, operatorSet] = useState<IResult['operator'] | undefined>(() => {
+    const [operator, setOperator] = useState<IResult['operator'] | undefined>(() => {
         const defaultV = operatorOptions ? operatorOptions[0].value as IResult['operator'] : undefined;
         if (!rule) {
             return defaultV;
@@ -270,7 +270,7 @@ export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, ITextHigh
         return rule.operator || defaultV;
     });
 
-    const [value, valueSet] = useState<IValue>(() => {
+    const [value, setValue] = useState<IValue>(() => {
         const defaultV = '';
         if (!rule) {
             return defaultV;
@@ -336,7 +336,7 @@ export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, ITextHigh
 
     useEffect(() => {
         if (!typeOptions.some((item) => item.value === subType)) {
-            subTypeSet(typeOptions[0].value as CFSubRuleType.text);
+            setSubType(typeOptions[0].value as CFSubRuleType.text);
         }
     }, [typeOptions]);
 
@@ -344,20 +344,20 @@ export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, ITextHigh
         const _subType = v as typeof subType;
         const operatorList = getOperatorOptions(_subType, localeService);
         const _operator = operatorList && operatorList[0].value as typeof operator;
-        subTypeSet(_subType);
-        operatorSet(_operator);
-        _operator && valueSet(createDefaultValue(_subType, _operator));
+        setSubType(_subType);
+        setOperator(_operator);
+        _operator && setValue(createDefaultValue(_subType, _operator));
         onChange(getResult({ subType: _subType, operator: _operator }));
     };
 
     const onOperatorChange = (v: string) => {
         const _operator = v as typeof operator;
-        operatorSet(_operator);
+        setOperator(_operator);
         onChange(getResult({ operator: _operator }));
     };
 
     const onInputChange = (value: number | string | [number, number]) => {
-        valueSet(value);
+        setValue(value);
         onChange(getResult({ value }));
     };
 

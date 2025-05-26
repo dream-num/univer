@@ -16,9 +16,6 @@
 
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
-import { ErrorType } from '../../../basics/error-type';
-import { expandArrayValueObject } from '../../../engine/utils/array-object';
-import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { StringValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
@@ -28,57 +25,40 @@ export class Hyperlink extends BaseFunction {
     override maxParams = 2;
 
     override calculate(url: BaseValueObject, linkLabel?: BaseValueObject): BaseValueObject {
-        const maxRowLength = Math.max(
-            url.isArray() ? (url as ArrayValueObject).getRowCount() : 1,
-            linkLabel?.isArray() ? (linkLabel as ArrayValueObject).getRowCount() : 1
-        );
+        let _url = url;
 
-        const maxColumnLength = Math.max(
-            url.isArray() ? (url as ArrayValueObject).getColumnCount() : 1,
-            linkLabel?.isArray() ? (linkLabel as ArrayValueObject).getColumnCount() : 1
-        );
-
-        const urlArray = expandArrayValueObject(maxRowLength, maxColumnLength, url, ErrorValueObject.create(ErrorType.NA));
-        const linkLabelArray = linkLabel ? expandArrayValueObject(maxRowLength, maxColumnLength, linkLabel, ErrorValueObject.create(ErrorType.NA)) : [];
-
-        const resultArray = urlArray.mapValue((urlObject, rowIndex, columnIndex) => {
-            const linkLabelObject = linkLabel ? (linkLabelArray as ArrayValueObject).get(rowIndex, columnIndex) as BaseValueObject : undefined;
-
-            if (urlObject.isError()) {
-                return urlObject;
-            }
-
-            if (linkLabelObject?.isError()) {
-                return linkLabelObject;
-            }
-
-            return this._handleSingleObject(urlObject, linkLabelObject);
-        });
-
-        if ((resultArray as ArrayValueObject).getRowCount() === 1 && (resultArray as ArrayValueObject).getColumnCount() === 1) {
-            return (resultArray as ArrayValueObject).get(0, 0) as BaseValueObject;
+        if (url.isArray()) {
+            _url = (url as ArrayValueObject).get(0, 0) as BaseValueObject;
         }
 
-        return resultArray;
-    }
+        if (_url.isError()) {
+            return _url;
+        }
 
-    private _handleSingleObject(url: BaseValueObject, linkLabel?: BaseValueObject) {
-        let hyperlinkUrl = `${url.getValue()}`;
+        let _linkLabel = linkLabel;
 
-        if (url.isNull()) {
+        if (linkLabel?.isArray()) {
+            _linkLabel = (linkLabel as ArrayValueObject).get(0, 0) as BaseValueObject;
+        }
+
+        if (_linkLabel?.isError()) {
+            return _linkLabel;
+        }
+
+        let hyperlinkUrl = `${_url.getValue()}`;
+
+        if (_url.isNull()) {
             hyperlinkUrl = '';
         }
 
         let hyperlinkLabel = hyperlinkUrl;
 
-        if (linkLabel) {
-            hyperlinkLabel = `${linkLabel.getValue()}`;
+        if (_linkLabel) {
+            hyperlinkLabel = `${_linkLabel.getValue()}`;
 
-            if (linkLabel.isNull()) {
+            if (_linkLabel.isNull()) {
                 hyperlinkLabel = '0';
-            }
-
-            if (linkLabel.isBoolean()) {
+            } else if (_linkLabel.isBoolean()) {
                 hyperlinkLabel = hyperlinkLabel.toLocaleUpperCase();
             }
         }

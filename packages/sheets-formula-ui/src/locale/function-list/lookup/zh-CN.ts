@@ -244,7 +244,7 @@ export default {
         links: [
             {
                 title: '教学',
-                url: 'https://support.microsoft.com/zh-cn/office/hyperlink-%E5%87%BD%E6%95%B0-333c7ce6-c5ae-4164-9c47-7de9b76f577f',
+                url: 'https://support.google.com/docs/answer/3093313?sjid=14131674310032162335-NC&hl=zh-Hans',
             },
         ],
         functionParameter: {

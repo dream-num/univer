@@ -239,17 +239,17 @@ export default {
         },
     },
     HYPERLINK: {
-        description: '建立捷徑或跳轉，以開啟儲存在網頁伺服器、Intranet 或 Internet 上的文件',
-        abstract: '建立捷徑或跳轉，以開啟儲存在網頁伺服器、Intranet 或 Internet 上的文件',
+        description: '在儲存格內建立超連結',
+        abstract: '在儲存格內建立超連結',
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/hyperlink-%E5%87%BD%E6%95%B0-333c7ce6-c5ae-4164-9c47-7de9b76f577f',
+                url: 'https://support.google.com/docs/answer/3093313?sjid=14131674310032162335-NC&hl=zh-Hant',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            url: { name: '網址', detail: '連結位置的完整網址 (括在引號中)，或是包含這類網址的儲存格參照。' },
+            linkLabel: { name: '連結標籤', detail: '要顯示在儲存格中做為連結的文字，括在引號中，或者為包含此標籤的儲存格參照。' },
         },
     },
     IMAGE: {

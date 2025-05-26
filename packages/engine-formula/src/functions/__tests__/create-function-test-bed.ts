@@ -52,6 +52,7 @@ import { CalculateFormulaService, ICalculateFormulaService } from '../../service
 import { FormulaCurrentConfigService, IFormulaCurrentConfigService } from '../../services/current-data.service';
 import { DefinedNamesService, IDefinedNamesService } from '../../services/defined-names.service';
 import { FunctionService, IFunctionService } from '../../services/function.service';
+import { HyperlinkEngineFormulaService, IHyperlinkEngineFormulaService } from '../../services/hyperlink-engine-formula.service';
 import { IOtherFormulaManagerService, OtherFormulaManagerService } from '../../services/other-formula-manager.service';
 import { FormulaRuntimeService, IFormulaRuntimeService } from '../../services/runtime.service';
 import { ISheetRowFilteredService, SheetRowFilteredService } from '../../services/sheet-row-filtered.service';
@@ -64,6 +65,7 @@ const getTestWorkbookData = (): IWorkbookData => {
         sheets: {
             sheet1: {
                 id: 'sheet1',
+                name: 'Sheet1',
                 cellData: {
                     0: {
                         0: {
@@ -175,6 +177,7 @@ export function createFunctionTestBed(workbookData?: IWorkbookData, dependencies
             injector.add([LexerTreeBuilder]);
 
             injector.add([IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }]);
+            injector.add([IHyperlinkEngineFormulaService, { useClass: HyperlinkEngineFormulaService }]);
             injector.add([IFormulaRuntimeService, { useClass: FormulaRuntimeService }]);
             injector.add([IFunctionService, { useClass: FunctionService }]);
             injector.add([IOtherFormulaManagerService, { useClass: OtherFormulaManagerService }]);

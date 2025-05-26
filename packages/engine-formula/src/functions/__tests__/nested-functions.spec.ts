@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { Injector, IWorkbookData } from '@univerjs/core';
+import type { ICellData, ICustomRange, IDocumentData, IHyperLinkCustomRange, Injector, IWorkbookData, Nullable } from '@univerjs/core';
 import type { LexerNode } from '../../engine/analysis/lexer-node';
 
 import type { BaseAstNode } from '../../engine/ast-node/base-ast-node';
-import { LocaleType } from '@univerjs/core';
+import { CustomRangeType, LocaleType, RichTextValue } from '@univerjs/core';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { ErrorType } from '../../basics/error-type';
 import { Lexer } from '../../engine/analysis/lexer';
@@ -37,6 +37,7 @@ import { Iferror } from '../logical/iferror';
 import { Address } from '../lookup/address';
 import { Choose } from '../lookup/choose';
 import { FUNCTION_NAMES_LOOKUP } from '../lookup/function-names';
+import { Hyperlink } from '../lookup/hyperlink';
 import { Xlookup } from '../lookup/xlookup';
 import { Xmatch } from '../lookup/xmatch';
 import { Fact } from '../math/fact';
@@ -332,6 +333,7 @@ describe('Test nested functions', () => {
     let astTreeBuilder: AstTreeBuilder;
     let interpreter: Interpreter;
     let calculate: (formula: string) => (string | number | boolean | null)[][] | string | number | boolean;
+    let calculateByRuntime: (formula: string) => Nullable<ICellData>;
 
     beforeEach(() => {
         const testBed = createFunctionTestBed(getFunctionsTestWorkbookData());
@@ -397,7 +399,8 @@ describe('Test nested functions', () => {
             new Product(FUNCTION_NAMES_MATH.PRODUCT),
             new Fact(FUNCTION_NAMES_MATH.FACT),
             new T(FUNCTION_NAMES_TEXT.T),
-            new Text(FUNCTION_NAMES_TEXT.TEXT)
+            new Text(FUNCTION_NAMES_TEXT.TEXT),
+            new Hyperlink(FUNCTION_NAMES_LOOKUP.HYPERLINK)
         );
 
         calculate = (formula: string) => {
@@ -408,6 +411,20 @@ describe('Test nested functions', () => {
             const result = interpreter.execute(generateExecuteAstNodeData(astNode as BaseAstNode));
 
             return getObjectValue(result);
+        };
+
+        calculateByRuntime = (formula: string) => {
+            const lexerNode = lexer.treeBuilder(formula);
+
+            const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
+
+            const valueObject = interpreter.execute(generateExecuteAstNodeData(astNode as BaseAstNode));
+
+            formulaRuntimeService.setRuntimeData(valueObject);
+
+            const cellMatrix = formulaRuntimeService.getUnitData()?.[testBed.unitId]?.[testBed.sheetId];
+
+            return cellMatrix?.getValue(formulaRuntimeService.currentRow, formulaRuntimeService.currentColumn);
         };
     });
 
@@ -531,6 +548,45 @@ describe('Test nested functions', () => {
         it('T formula test', () => {
             const result = calculate('=T(A1:E1)');
             expect(result).toStrictEqual('A');
+        });
+
+        it('Hyperlink formula test', () => {
+            // test with a normal value
+            const result = calculateByRuntime('=HYPERLINK("https://univer.ai/", "Univer")');
+            const richTextValue = RichTextValue.create(result?.p as IDocumentData);
+            expect(richTextValue.toPlainText()).toBe('Univer');
+            const link = richTextValue.getLinks()[0] as ICustomRange;
+            expect(link.rangeType).toBe(CustomRangeType.HYPERLINK);
+            expect((link as IHyperLinkCustomRange).properties?.url).toBe('https://univer.ai/');
+
+            // test with a range reference
+            const result2 = calculateByRuntime('=HYPERLINK("#Sheet1!A1", "Go to A1")');
+            const richTextValue2 = RichTextValue.create(result2?.p as IDocumentData);
+            expect(richTextValue2.toPlainText()).toBe('Go to A1');
+            const link2 = richTextValue2.getLinks()[0] as ICustomRange;
+            expect(link2.rangeType).toBe(CustomRangeType.HYPERLINK);
+            expect((link2 as IHyperLinkCustomRange).properties?.url).toBe('#gid=sheet1&range=A1');
+
+            // test with a url without protocol
+            const result3 = calculateByRuntime('=HYPERLINK("google.com", "Google")');
+            const richTextValue3 = RichTextValue.create(result3?.p as IDocumentData);
+            expect(richTextValue3.toPlainText()).toBe('Google');
+            const link3 = richTextValue3.getLinks()[0] as ICustomRange;
+            expect(link3.rangeType).toBe(CustomRangeType.HYPERLINK);
+            expect((link3 as IHyperLinkCustomRange).properties?.url).toBe('https://google.com');
+
+            // test with a range reference not in the current workbook
+            const result4 = calculateByRuntime('=HYPERLINK("#Sheet123!A1", "Go to A1")');
+            const richTextValue4 = RichTextValue.create(result4?.p as IDocumentData);
+            expect(richTextValue4.toPlainText()).toBe('Go to A1');
+            const link4 = richTextValue4.getLinks()[0] as ICustomRange;
+            expect(link4.rangeType).toBe(CustomRangeType.HYPERLINK);
+            expect((link4 as IHyperLinkCustomRange).properties?.url).toBe('#Sheet123!A1');
+
+            // test with an empty URL and label
+            const result5 = calculateByRuntime('=HYPERLINK("")');
+            expect(result5?.v).toBe('');
+            expect(result5?.p).toBeUndefined();
         });
     });
 });

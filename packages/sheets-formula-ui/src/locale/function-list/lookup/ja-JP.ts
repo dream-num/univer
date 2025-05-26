@@ -238,17 +238,17 @@ export default {
         },
     },
     HYPERLINK: {
-        description: 'ネットワーク サーバー、イントラネット、またはインターネット上に格納されているドキュメントを開くために、ショートカットまたはジャンプを作成します。',
-        abstract: 'ネットワーク サーバー、イントラネット、またはインターネット上に格納されているドキュメントを開くために、ショートカットまたはジャンプを作成します。',
+        description: 'セル内にハイパーリンクを作成します。',
+        abstract: 'セル内にハイパーリンクを作成します。',
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/hyperlink-%E9%96%A2%E6%95%B0-333c7ce6-c5ae-4164-9c47-7de9b76f577f',
+                url: 'https://support.google.com/docs/answer/3093313?sjid=14131674310032162335-NC&hl=ja',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            url: { name: 'URL', detail: 'リンクの場所の完全な URL を二重引用符で囲んで指定します。または、URL を含むセルへの参照を指定します。' },
+            linkLabel: { name: 'リンクラベル', detail: 'セルにリンクとして表示するテキストを二重引用符で囲んで指定します。または、ラベルを含むセルへの参照を指定します。' },
         },
     },
     IMAGE: {

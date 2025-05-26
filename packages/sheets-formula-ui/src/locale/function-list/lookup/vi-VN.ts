@@ -229,6 +229,20 @@ export default {
             array2: { name: 'mảng', detail: 'Mảng để nối thêm.' },
         },
     },
+    HYPERLINK: {
+        description: 'Tạo một đường siêu liên kết bên trong ô',
+        abstract: 'Tạo một đường siêu liên kết bên trong ô',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.google.com/docs/answer/3093313?sjid=14131674310032162335-NC&hl=vi',
+            },
+        ],
+        functionParameter: {
+            url: { name: 'url', detail: 'URL đầy đủ về vị trí liên kết được đóng trong dấu ngoặc kép hoặc tham chiếu đến ô có chứa URL này.' },
+            linkLabel: { name: 'nhãn_đường_liên_kết', detail: 'Văn bản cần hiển thị trong ô như là một đường liên kết, được đóng trong dấu ngoặc kép hoặc tham chiếu đến ô có chứa nhãn này.' },
+        },
+    },
     INDEX: {
         description: 'Trả về tham chiếu của ô nằm ở giao cắt của một hàng và cột cụ thể. Nếu tham chiếu được tạo thành từ các vùng chọn không liền kề, bạn có thể chọn vùng chọn để tìm trong đó.',
         abstract: 'Chọn một giá trị từ một tham chiếu hoặc mảng bằng chỉ mục',

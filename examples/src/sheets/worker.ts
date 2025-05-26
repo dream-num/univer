@@ -21,7 +21,6 @@ import { UniverRPCWorkerThreadPlugin } from '@univerjs/rpc';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
 import { UniverRemoteSheetsFormulaPlugin } from '@univerjs/sheets-formula';
-import { UniverSheetsHyperLinkPlugin } from '@univerjs/sheets-hyper-link';
 
 // Univer web worker is also a univer application.
 const univer = new Univer({
@@ -37,7 +36,6 @@ univer.registerPlugin(UniverFormulaEnginePlugin);
 univer.registerPlugin(UniverRPCWorkerThreadPlugin);
 univer.registerPlugin(UniverRemoteSheetsFormulaPlugin);
 univer.registerPlugin(UniverSheetsFilterPlugin);
-univer.registerPlugin(UniverSheetsHyperLinkPlugin);
 
 declare let self: WorkerGlobalScope & typeof globalThis & { univer: Univer };
 self.univer = univer;

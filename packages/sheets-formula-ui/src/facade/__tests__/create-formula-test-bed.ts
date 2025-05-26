@@ -28,7 +28,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
-import { ActiveDirtyManagerService, AstRootNodeFactory, AstTreeBuilder, CalculateController, CalculateFormulaService, DefinedNamesService, DependencyManagerService, FeatureCalculationManagerService, FormulaCurrentConfigService, FormulaDataModel, FormulaDependencyGenerator, FormulaRuntimeService, FunctionNodeFactory, FunctionService, IActiveDirtyManagerService, ICalculateFormulaService, IDefinedNamesService, IDependencyManagerService, IFeatureCalculationManagerService, IFormulaCurrentConfigService, IFormulaRuntimeService, IFunctionService, Interpreter, IOtherFormulaManagerService, ISheetRowFilteredService, ISuperTableService, LambdaNodeFactory, LambdaParameterNodeFactory, Lexer, LexerTreeBuilder, OperatorNodeFactory, OtherFormulaManagerService, PrefixNodeFactory, ReferenceNodeFactory, SheetRowFilteredService, SuffixNodeFactory, SuperTableService, UnionNodeFactory, ValueNodeFactory } from '@univerjs/engine-formula';
+import { ActiveDirtyManagerService, AstRootNodeFactory, AstTreeBuilder, CalculateController, CalculateFormulaService, DefinedNamesService, DependencyManagerService, FeatureCalculationManagerService, FormulaCurrentConfigService, FormulaDataModel, FormulaDependencyGenerator, FormulaRuntimeService, FunctionNodeFactory, FunctionService, HyperlinkEngineFormulaService, IActiveDirtyManagerService, ICalculateFormulaService, IDefinedNamesService, IDependencyManagerService, IFeatureCalculationManagerService, IFormulaCurrentConfigService, IFormulaRuntimeService, IFunctionService, IHyperlinkEngineFormulaService, Interpreter, IOtherFormulaManagerService, ISheetRowFilteredService, ISuperTableService, LambdaNodeFactory, LambdaParameterNodeFactory, Lexer, LexerTreeBuilder, OperatorNodeFactory, OtherFormulaManagerService, PrefixNodeFactory, ReferenceNodeFactory, SheetRowFilteredService, SuffixNodeFactory, SuperTableService, UnionNodeFactory, ValueNodeFactory } from '@univerjs/engine-formula';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
 import {
@@ -158,6 +158,7 @@ function registerFormulaDependencies(injector: Injector) {
     injector.add([LexerTreeBuilder]);
 
     injector.add([IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }]);
+    injector.add([IHyperlinkEngineFormulaService, { useClass: HyperlinkEngineFormulaService }]);
     injector.add([IDependencyManagerService, { useClass: DependencyManagerService }]);
     injector.add([IFormulaRuntimeService, { useClass: FormulaRuntimeService }]);
     injector.add([IFunctionService, { useClass: FunctionService }]);

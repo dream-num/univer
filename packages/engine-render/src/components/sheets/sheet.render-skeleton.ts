@@ -398,6 +398,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
                 const hasUnMergedCell = this._hasUnMergedCellInRow(rowIndex, startColumn, endColumn);
 
                 if (hasUnMergedCell) {
+                    // if `currentCellHeights` is provided, we just need to compare `newHeights` with `currentCellHeights` to figure out if we should update the row height
                     if (currentCellHeights) {
                         const currentAutoHeight = this.worksheet.getRowHeight(rowIndex);
                         let maxPrev = 0;

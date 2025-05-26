@@ -34,6 +34,11 @@ const locale: ILocale = {
         Select: {
             empty: 'Aucun',
         },
+        ColorPicker: {
+            more: 'Plus de couleurs',
+            cancel: 'annuler',
+            confirm: 'ok',
+        },
     },
 };
 

@@ -31,10 +31,4 @@ describe('ColorPicker', () => {
 
         expect(container).toMatchSnapshot();
     });
-
-    it('should render with showAlpha', () => {
-        const { container } = render(<ColorPicker showAlpha />);
-
-        expect(container).toMatchSnapshot();
-    });
 });

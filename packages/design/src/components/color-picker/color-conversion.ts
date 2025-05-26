@@ -114,28 +114,6 @@ export const hsvToHex = (h: number, s: number, v: number): string => {
     return rgbToHex(r, g, b);
 };
 
-export const hsvToHsl = (h: number, s: number, v: number): [number, number, number] => {
-    const l = (2 - s / 100) * v / 2;
-    const sl = l && l < 50 ? s * v / (l * 2) : s + l;
-    return [h, sl, l];
-};
-
-export const hslToHsv = (h: number, s: number, l: number): [number, number, number] => {
-    // Convert S and L to decimal form
-    s /= 100;
-    l /= 100;
-
-    // Calculate V and S for HSV
-    const v = l + s * Math.min(l, 1 - l);
-    const sv = v === 0 ? 0 : 2 * (1 - l / v);
-
-    return [
-        h, // Hue remains the same
-        Math.round(sv * 100), // Convert S back to percentage
-        Math.round(v * 100), // Convert V back to percentage
-    ];
-};
-
 export const parseRgba = (rgba: string): [number, number, number, number] => {
     const match = rgba.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*(\d*\.?\d+))?\)/);
     if (!match) throw new Error('Invalid RGBA string');

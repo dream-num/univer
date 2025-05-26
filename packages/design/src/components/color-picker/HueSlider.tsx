@@ -45,6 +45,7 @@ export function HueSlider({ hsv, onChange, onChanged }: IHueSliderProps) {
     }, [hsv, thumbSize, onChange]);
 
     const handlePointerMove = useCallback((e: PointerEvent) => {
+        e.stopPropagation();
         if (!isDragging) return;
         calculateHue(e.clientX);
     }, [isDragging, calculateHue]);
@@ -74,7 +75,10 @@ export function HueSlider({ hsv, onChange, onChanged }: IHueSliderProps) {
     };
 
     return (
-        <div className="univer-relative univer-w-full univer-select-none">
+        <div
+            data-u-comp="color-picker-hue-slider"
+            className="univer-relative univer-w-full univer-select-none"
+        >
             <div
                 ref={sliderRef}
                 className={`

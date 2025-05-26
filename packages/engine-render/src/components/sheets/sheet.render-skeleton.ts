@@ -456,7 +456,11 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
                 return undefined;
             }
         }
+
+        // TODO@weird94: in future, we should use `getCellRaw` instead of `getCell` to improve performance.
         const cell = this.worksheet.getCell(row, col);
+        const style = this._styles.getStyleByCell(cell);
+
         if (cell?.interceptorAutoHeight) {
             const cellHeight = cell.interceptorAutoHeight();
             if (cellHeight) {
@@ -464,7 +468,8 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             }
         }
 
-        const style = this._styles.getStyleByCell(cell);
+        const sideGap = (cell?.fontRenderExtension?.leftOffset ?? 0) + (cell?.fontRenderExtension?.rightOffset ?? 0);
+
         const { vertexAngle, centerAngle } = convertTextRotation(style?.tr ?? { a: 0 });
         const isRichText = cell?.p || vertexAngle || centerAngle;
 
@@ -480,6 +485,8 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
                 return sum + (columnData[colIndex]?.w ?? defaultColumnWidth);
             }, 0);
         }
+
+        colWidth -= sideGap;
 
         if (isRichText) {
             const modelObject = cell && this._getCellDocumentModel(cell);

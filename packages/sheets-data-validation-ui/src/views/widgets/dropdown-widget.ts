@@ -20,7 +20,7 @@ import type { IMouseEvent, IPointerEvent, SpreadsheetSkeleton, UniverRenderingCo
 import type { ListValidator } from '@univerjs/sheets-data-validation';
 import type { IShowDataValidationDropdownParams } from '../../commands/operations/data-validation.operation';
 import { BooleanNumber, DataValidationRenderMode, DataValidationType, DEFAULT_EMPTY_DOCUMENT_VALUE, DEFAULT_STYLES, DocumentDataModel, HorizontalAlign, ICommandService, Inject, IUniverInstanceService, LocaleService, Tools, UniverInstanceType, VerticalAlign, WrapStrategy } from '@univerjs/core';
-import { CURSOR_TYPE, Documents, DocumentSkeleton, DocumentViewModel, getCurrentTypeOfRenderer, getDocsSkeletonPageSize, IRenderManagerService, Rect } from '@univerjs/engine-render';
+import { CURSOR_TYPE, DocSimpleSkeleton, Documents, DocumentSkeleton, DocumentViewModel, getCurrentTypeOfRenderer, getFontStyleString, IRenderManagerService, Rect, Text } from '@univerjs/engine-render';
 import { getCellValueOrigin, SheetDataValidationModel } from '@univerjs/sheets-data-validation';
 import { ShowDataValidationDropdown } from '../../commands/operations/data-validation.operation';
 import { DROP_DOWN_DEFAULT_COLOR } from '../../const';
@@ -265,22 +265,21 @@ export class DropdownWidget implements IBaseDataValidationWidget {
         vt = vt ?? VerticalAlign.BOTTOM;
         ht = ht ?? DEFAULT_STYLES.ht;
         pd = pd ?? DEFAULT_STYLES.pd;
+        const fontStyle = getFontStyleString(style).fontCache;
 
         if (rule.renderMode === DataValidationRenderMode.ARROW) {
             const { l = DEFAULT_STYLES.pd.l, t = DEFAULT_STYLES.pd.t, r = DEFAULT_STYLES.pd.r, b = DEFAULT_STYLES.pd.b } = pd;
             const realWidth = cellWidth - l - r - ICON_PLACE - 4;
-            const { documentSkeleton, documents, docModel } = createDocuments(valueStr, this._localeService, style);
-
-            if (
-                tb === WrapStrategy.WRAP
-            ) {
-                docModel.updateDocumentDataPageSize(Math.max(realWidth, 1));
-            }
-
-            documentSkeleton.calculate();
-            documentSkeleton.getActualSize();
-            const textLayout = getDocsSkeletonPageSize(documentSkeleton)!;
-            const { height: fontHeight, width: fontWidth } = textLayout;
+            const textSkeleton = new DocSimpleSkeleton(
+                valueStr,
+                fontStyle,
+                Boolean(tb === WrapStrategy.WRAP),
+                realWidth,
+                Infinity
+            );
+            textSkeleton.calculate();
+            const fontWidth = textSkeleton.getTotalWidth();
+            const fontHeight = textSkeleton.getTotalHeight();
             const { paddingTop, paddingLeft } = calcPadding(realWidth, cellHeight - t - b, fontWidth, fontHeight, vt, ht, true);
 
             this._drawDownIcon(ctx, cellBounding, cellWidth, cellHeight, fontHeight, vt, pd);
@@ -296,7 +295,17 @@ export class DropdownWidget implements IBaseDataValidationWidget {
             ctx.beginPath();
             ctx.rect(0, 0, realWidth, fontHeight);
             ctx.clip();
-            documents.render(ctx as UniverRenderingContext);
+            Text.drawWith(ctx, {
+                text: valueStr,
+                fontStyle,
+                width: realWidth,
+                height: fontHeight,
+                color: style?.cl?.rgb,
+                strokeLine: Boolean(style?.st?.s),
+                underline: Boolean(style?.ul?.s),
+                warp: tb === WrapStrategy.WRAP,
+                hAlign: HorizontalAlign.LEFT,
+            }, textSkeleton);
             ctx.translateWithPrecision(paddingLeft, 0);
             ctx.restore();
 
@@ -316,15 +325,17 @@ export class DropdownWidget implements IBaseDataValidationWidget {
             ctx.clip();
 
             const realWidth = cellWidth - (MARGIN_H * 2) - PADDING_H - ICON_PLACE - 4;
-            const { documentSkeleton, documents, docModel } = createDocuments(valueStr, this._localeService, style);
-            if (
-                tb === WrapStrategy.WRAP
-            ) {
-                docModel.updateDocumentDataPageSize(Math.max(realWidth, 1));
-            }
-            documentSkeleton.calculate();
-            const textLayout = getDocsSkeletonPageSize(documentSkeleton)!;
-            const { height: fontHeight, width: fontWidth } = textLayout;
+            const textSkeleton = new DocSimpleSkeleton(
+                valueStr,
+                fontStyle,
+                Boolean(tb === WrapStrategy.WRAP),
+                realWidth,
+                Infinity
+            );
+            textSkeleton.calculate();
+            const fontWidth = textSkeleton.getTotalWidth();
+            const fontHeight = textSkeleton.getTotalHeight();
+
             const { paddingTop, paddingLeft } = calcPadding(realWidth, cellHeight, fontWidth, fontHeight, vt, ht);
 
             ctx.translateWithPrecision(MARGIN_H, paddingTop);
@@ -342,7 +353,18 @@ export class DropdownWidget implements IBaseDataValidationWidget {
             ctx.rect(0, 0, realWidth, fontHeight);
             ctx.clip();
             ctx.translateWithPrecision(paddingLeft, 0);
-            documents.render(ctx as UniverRenderingContext);
+
+            Text.drawWith(ctx, {
+                text: valueStr,
+                fontStyle,
+                width: realWidth,
+                height: fontHeight,
+                color: style?.cl?.rgb,
+                strokeLine: Boolean(style?.st?.s),
+                underline: Boolean(style?.ul?.s),
+                warp: tb === WrapStrategy.WRAP,
+                hAlign: HorizontalAlign.LEFT,
+            }, textSkeleton);
             ctx.restore();
             ctx.translateWithPrecision(realWidth + PADDING_H + 4, (fontHeight - ICON_SIZE) / 2);
             ctx.fillStyle = DROP_DOWN_ICON_COLOR;
@@ -379,7 +401,6 @@ export class DropdownWidget implements IBaseDataValidationWidget {
             endX: _cellBounding.endX - rightOffset,
             startY: _cellBounding.startY + topOffset,
             endY: _cellBounding.endY - downOffset,
-
         };
         const cellWidth = cellBounding.endX - cellBounding.startX;
         const value = getCellValueOrigin(data);
@@ -391,36 +412,26 @@ export class DropdownWidget implements IBaseDataValidationWidget {
 
         if (rule.renderMode === DataValidationRenderMode.ARROW) {
             const realWidth = cellWidth - ICON_PLACE;
-            const { documentSkeleton, docModel } = createDocuments(valueStr, this._localeService, style);
-            if (
-                tb === WrapStrategy.WRAP
-            ) {
-                docModel.updateDocumentDataPageSize(Math.max(realWidth, 1));
-            }
-
-            documentSkeleton.calculate();
-            documentSkeleton.getActualSize();
-            const textLayout = getDocsSkeletonPageSize(documentSkeleton)!;
-            const { height: fontHeight } = textLayout;
-
-            return fontHeight + t + b + MARGIN_V * 2;
+            const skeleton = new DocSimpleSkeleton(
+                valueStr,
+                getFontStyleString(style).fontCache,
+                Boolean(tb === WrapStrategy.WRAP),
+                realWidth,
+                Infinity
+            );
+            skeleton.calculate();
+            return skeleton.getTotalHeight() + t + b + MARGIN_V * 2;
         } else {
-            const realWidth = cellWidth - (MARGIN_H * 2) - PADDING_H - ICON_PLACE;
-            const { documentSkeleton, docModel } = createDocSkeleton(valueStr, this._localeService, style);
-            if (
-                tb === WrapStrategy.WRAP
-            ) {
-                docModel.updateDocumentDataPageSize(Math.max(realWidth, 1));
-            }
-
-            documentSkeleton.calculate();
-            const textLayout = getDocsSkeletonPageSize(documentSkeleton)!;
-
-            const {
-                height: fontHeight,
-            } = textLayout;
-
-            return fontHeight + (MARGIN_V * 2);
+            const realWidth = Math.max(cellWidth - (MARGIN_H * 2) - PADDING_H - ICON_PLACE, 10);
+            const skeleton = new DocSimpleSkeleton(
+                valueStr,
+                getFontStyleString(style).fontCache,
+                Boolean(tb === WrapStrategy.WRAP),
+                realWidth,
+                Infinity
+            );
+            skeleton.calculate();
+            return skeleton.getTotalHeight() + (MARGIN_V * 2);
         }
     }
 
@@ -463,20 +474,21 @@ export class DropdownWidget implements IBaseDataValidationWidget {
                 // + 1 is must, or last character will be cut
                 paddingAll = ICON_PLACE + MARGIN_H * 2 + PADDING_H * 2 + r + l + RADIUS_BG / 2 + 1;
                 break;
-                // default is CUSTOM
+            // default is CUSTOM
             default:
                 paddingAll = ICON_PLACE + MARGIN_H * 2 + PADDING_H * 2 + r + l + RADIUS_BG / 2 + 1;
         }
         const widthForTextLayout = cellWidth - paddingAll;
-        const { documentSkeleton, docModel } = createDocuments(valueStr, this._localeService, style);
-        if (tb === WrapStrategy.WRAP) {
-            docModel.updateDocumentDataPageSize(Math.max(widthForTextLayout, 1));
-        }
 
-        documentSkeleton.calculate();
-        documentSkeleton.getActualSize();
-        const textLayout = getDocsSkeletonPageSize(documentSkeleton)!;
-        return textLayout.width + paddingAll;
+        const skeleton = new DocSimpleSkeleton(
+            valueStr,
+            getFontStyleString(style).fontCache,
+            Boolean(tb === WrapStrategy.WRAP),
+            widthForTextLayout,
+            Infinity
+        );
+        skeleton.calculate();
+        return skeleton.getTotalWidth() + paddingAll;
     }
 
     isHit(position: { x: number; y: number }, info: ICellRenderContext) {

@@ -27,6 +27,7 @@ export interface ILineInfo {
 export class DocSimpleSkeleton {
     private _lineBreaker: LineBreaker;
     private _lines: ILineInfo[] = [];
+    private _dirty = true;
 
     constructor(
         private _text: string,
@@ -39,6 +40,10 @@ export class DocSimpleSkeleton {
     }
 
     calculate() {
+        if (!this._dirty) {
+            return this._lines;
+        }
+        this._dirty = false;
         this._lines = [];
         if (!this._warp) {
             const textSize = FontCache.getMeasureText(this._text, this._fontStyle);
@@ -123,5 +128,9 @@ export class DocSimpleSkeleton {
 
     getTotalWidth() {
         return this._lines.reduce((acc, line) => Math.max(acc, line.width), 0);
+    }
+
+    makeDirty() {
+        this._dirty = true;
     }
 }

@@ -42,6 +42,7 @@ export class Text extends Shape<ITextProps> {
     warp: boolean;
     hAlign: HorizontalAlign;
     vAlign: VerticalAlign;
+    skeleton: DocSimpleSkeleton;
 
     constructor(key: string, props: ITextProps) {
         super(key, props);
@@ -53,11 +54,18 @@ export class Text extends Shape<ITextProps> {
         this.warp = props.warp ?? false;
         this.hAlign = props.hAlign ?? HorizontalAlign.LEFT;
         this.vAlign = props.vAlign ?? VerticalAlign.TOP;
+        this.skeleton = new DocSimpleSkeleton(
+            props.text,
+            props.fontStyle,
+            Boolean(props.warp),
+            props.width,
+            props.height
+        );
     }
 
-    static override drawWith(ctx: UniverRenderingContext, props: ITextProps) {
+    static override drawWith(ctx: UniverRenderingContext, props: ITextProps, _skeleton?: DocSimpleSkeleton) {
         const { text, fontStyle, warp, hAlign, vAlign, width, height, left = 0, top = 0 } = props;
-        const skeleton = new DocSimpleSkeleton(text, fontStyle, Boolean(warp), width, vAlign === VerticalAlign.TOP ? height : Infinity);
+        const skeleton = _skeleton ?? new DocSimpleSkeleton(text, fontStyle, Boolean(warp), width, vAlign === VerticalAlign.TOP ? height : Infinity);
         const lines = skeleton.calculate();
         const totalHeight = skeleton.getTotalHeight();
         const offsetY = vAlign === VerticalAlign.TOP ? 0 : vAlign === VerticalAlign.MIDDLE ? (height - totalHeight) / 2 : height - totalHeight;
@@ -135,7 +143,16 @@ export class Text extends Shape<ITextProps> {
     }
 
     protected override _draw(ctx: UniverRenderingContext) {
-        Text.drawWith(ctx, this);
+        this.skeleton.calculate();
+        Text.drawWith(ctx, this, this.skeleton);
+    }
+
+    override makeDirty(state?: boolean): this | undefined {
+        super.makeDirty(state);
+        if (state) {
+            this.skeleton.makeDirty();
+        }
+        return this;
     }
 
     override toJson() {

@@ -31,13 +31,15 @@ export function getRangesHeight(ranges: IRange[], worksheet: Worksheet) {
     return cellHeights;
 }
 
-const MAX_RANGE_HEIGHT = 200;
+const MAX_RANGE_CELL_COUNT = 10_000;
 
 export function getSuitableRangesInView(ranges: IRange[], skeleton: Nullable<SheetSkeleton>): { suitableRanges: IRange[]; remainingRanges: IRange[] } {
     if (!skeleton) {
         return { suitableRanges: ranges, remainingRanges: [] };
     }
 
+    const colCount = skeleton.worksheet.getColumnCount();
+    const maxRowCount = Math.ceil(MAX_RANGE_CELL_COUNT / colCount);
     const suitableRanges: IRange[] = [];
     const remainingRanges: IRange[] = [];
     const row = skeleton.getOffsetRelativeToRowCol(0, skeleton.scrollY).row;
@@ -74,12 +76,12 @@ export function getSuitableRangesInView(ranges: IRange[], skeleton: Nullable<She
     // Add ranges one by one until total row count reaches MAX_RANGE_HEIGHT
     let totalRowCount = 0;
     for (const item of rangesWithDistance) {
-        if (totalRowCount + item.rowCount <= MAX_RANGE_HEIGHT) {
+        if (totalRowCount + item.rowCount <= maxRowCount) {
             suitableRanges.push(item.range);
             totalRowCount += item.rowCount;
         } else {
             // If adding current range would exceed the limit, check if there's remaining quota to split the range
-            const remainingQuota = MAX_RANGE_HEIGHT - totalRowCount;
+            const remainingQuota = maxRowCount - totalRowCount;
 
             if (remainingQuota > 0) {
                 // Split range: add the part that can fit to suitable, add the rest to remaining
@@ -94,7 +96,7 @@ export function getSuitableRangesInView(ranges: IRange[], skeleton: Nullable<She
 
                 suitableRanges.push(suitablePart);
                 remainingRanges.push(remainingPart);
-                totalRowCount = MAX_RANGE_HEIGHT; // Reached maximum limit
+                totalRowCount = maxRowCount; // Reached maximum limit
             } else {
                 // No remaining quota, add the entire range to remaining
                 remainingRanges.push(item.range);

@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import type { ICellRenderContext, IDocumentData, IPaddingData, IStyleData, Nullable } from '@univerjs/core';
+import type { ICellRenderContext, IPaddingData } from '@univerjs/core';
 import type { IBaseDataValidationWidget } from '@univerjs/data-validation';
 import type { IMouseEvent, IPointerEvent, SpreadsheetSkeleton, UniverRenderingContext, UniverRenderingContext2D } from '@univerjs/engine-render';
 import type { ListValidator } from '@univerjs/sheets-data-validation';
 import type { IShowDataValidationDropdownParams } from '../../commands/operations/data-validation.operation';
-import { BooleanNumber, DataValidationRenderMode, DataValidationType, DEFAULT_EMPTY_DOCUMENT_VALUE, DEFAULT_STYLES, DocumentDataModel, HorizontalAlign, ICommandService, Inject, IUniverInstanceService, LocaleService, Tools, UniverInstanceType, VerticalAlign, WrapStrategy } from '@univerjs/core';
-import { CURSOR_TYPE, DocSimpleSkeleton, Documents, DocumentSkeleton, DocumentViewModel, getCurrentTypeOfRenderer, getFontStyleString, IRenderManagerService, Rect, Text } from '@univerjs/engine-render';
+import { DataValidationRenderMode, DataValidationType, DEFAULT_STYLES, HorizontalAlign, ICommandService, Inject, IUniverInstanceService, LocaleService, UniverInstanceType, VerticalAlign, WrapStrategy } from '@univerjs/core';
+import { CURSOR_TYPE, DocSimpleSkeleton, getCurrentTypeOfRenderer, getFontStyleString, IRenderManagerService, Rect, Text } from '@univerjs/engine-render';
 import { getCellValueOrigin, SheetDataValidationModel } from '@univerjs/sheets-data-validation';
 import { ShowDataValidationDropdown } from '../../commands/operations/data-validation.operation';
 import { DROP_DOWN_DEFAULT_COLOR } from '../../const';
@@ -31,93 +31,17 @@ import { DROP_DOWN_DEFAULT_COLOR } from '../../const';
 const PADDING_H = 4;
 const ICON_SIZE = 4;
 const ICON_PLACE = 14;
+const PADDING_V = 1;
 
 /**
  * margin for Capsule, that means distance between capsule and cell border
  */
 const MARGIN_H = 6;
-const MARGIN_V = 4;
+const MARGIN_V = 3;
 const RADIUS_BG = 8;
 const DROP_DOWN_ICON_COLOR = '#565656';
 
 const downPath = new Path2D('M3.32201 4.84556C3.14417 5.05148 2.85583 5.05148 2.67799 4.84556L0.134292 1.90016C-0.152586 1.56798 0.0505937 1 0.456301 1L5.5437 1C5.94941 1 6.15259 1.56798 5.86571 1.90016L3.32201 4.84556Z');
-
-function convertToDocumentData(text: string, style?: Nullable<IStyleData>) {
-    const contentLength = text.length;
-    const documentData: IDocumentData = {
-        id: 'd',
-        body: {
-            dataStream: `${text}${DEFAULT_EMPTY_DOCUMENT_VALUE}`,
-            textRuns: [
-                {
-                    ts: {
-                        fs: 11,
-                        ff: undefined,
-                        it: BooleanNumber.FALSE,
-                        bl: BooleanNumber.FALSE,
-                        ul: {
-                            s: BooleanNumber.FALSE,
-                        },
-                        st: {
-                            s: BooleanNumber.FALSE,
-                        },
-                        ol: {
-                            s: BooleanNumber.FALSE,
-                        },
-                        cl: undefined,
-                        ...style,
-                        bg: undefined,
-                        bd: undefined,
-                    },
-                    st: 0,
-                    ed: contentLength,
-                },
-            ],
-        },
-        documentStyle: {
-            pageSize: {
-                width: Number.POSITIVE_INFINITY,
-                height: Number.POSITIVE_INFINITY,
-            },
-        },
-    };
-
-    return documentData;
-}
-
-function createDocSkeleton(text: string, localeService: LocaleService, style?: Nullable<IStyleData>) {
-    const documentData = convertToDocumentData(text, style);
-
-    const docModel = new DocumentDataModel(documentData);
-    const docViewModel = new DocumentViewModel(docModel);
-
-    const documentSkeleton = DocumentSkeleton.create(docViewModel, localeService);
-
-    return {
-        documentSkeleton,
-        docModel,
-        docViewModel,
-    };
-}
-
-function createDocuments(text: string, localeService: LocaleService, style?: Nullable<IStyleData>) {
-    const {
-        documentSkeleton,
-        docModel,
-        docViewModel,
-    } = createDocSkeleton(text, localeService, style);
-
-    const documents = new Documents(`DOCUMENTS_${Tools.generateRandomId()}`, documentSkeleton, {
-        pageMarginLeft: 0,
-        pageMarginTop: 0,
-    });
-    return {
-        documents,
-        documentSkeleton,
-        docModel,
-        docViewModel,
-    };
-}
 
 function calcPadding(cellWidth: number, cellHeight: number, fontWidth: number, fontHeight: number, vt: VerticalAlign, ht: HorizontalAlign, margin = true) {
     let paddingTop = 0;
@@ -318,6 +242,7 @@ export class DropdownWidget implements IBaseDataValidationWidget {
                 height: cellHeight - t - b,
             });
         } else {
+            // Capsule
             ctx.save();
             ctx.translateWithPrecision(cellBounding.startX, cellBounding.startY);
             ctx.beginPath();
@@ -335,12 +260,12 @@ export class DropdownWidget implements IBaseDataValidationWidget {
             textSkeleton.calculate();
             const fontWidth = textSkeleton.getTotalWidth();
             const fontHeight = textSkeleton.getTotalHeight();
-
-            const { paddingTop, paddingLeft } = calcPadding(realWidth, cellHeight, fontWidth, fontHeight, vt, ht);
+            const rectHeight = fontHeight + (PADDING_V * 2);
+            const rectWidth = Math.max(cellWidth - MARGIN_H * 2, 1);
+            const { paddingTop, paddingLeft } = calcPadding(rectWidth, cellHeight, fontWidth, rectHeight, vt, ht);
 
             ctx.translateWithPrecision(MARGIN_H, paddingTop);
-            const rectWidth = Math.max(cellWidth - MARGIN_H * 2, 1);
-            const rectHeight = fontHeight;
+
             Rect.drawWith(ctx as UniverRenderingContext, {
                 width: rectWidth,
                 height: rectHeight,
@@ -348,7 +273,7 @@ export class DropdownWidget implements IBaseDataValidationWidget {
                 radius: RADIUS_BG,
             });
             ctx.save();
-            ctx.translateWithPrecision(PADDING_H, 0);
+            ctx.translateWithPrecision(PADDING_H, PADDING_V);
             ctx.beginPath();
             ctx.rect(0, 0, realWidth, fontHeight);
             ctx.clip();
@@ -365,8 +290,9 @@ export class DropdownWidget implements IBaseDataValidationWidget {
                 warp: tb === WrapStrategy.WRAP,
                 hAlign: HorizontalAlign.LEFT,
             }, textSkeleton);
+
             ctx.restore();
-            ctx.translateWithPrecision(realWidth + PADDING_H + 4, (fontHeight - ICON_SIZE) / 2);
+            ctx.translateWithPrecision(realWidth + PADDING_H + 4, ((fontHeight) - ICON_SIZE) / 2);
             ctx.fillStyle = DROP_DOWN_ICON_COLOR;
             ctx.fill(downPath);
             ctx.restore();
@@ -420,7 +346,7 @@ export class DropdownWidget implements IBaseDataValidationWidget {
                 Infinity
             );
             skeleton.calculate();
-            return skeleton.getTotalHeight() + t + b + MARGIN_V * 2;
+            return skeleton.getTotalHeight() + t + b + (MARGIN_V * 2);
         } else {
             const realWidth = Math.max(cellWidth - (MARGIN_H * 2) - PADDING_H - ICON_PLACE, 10);
             const skeleton = new DocSimpleSkeleton(
@@ -431,7 +357,7 @@ export class DropdownWidget implements IBaseDataValidationWidget {
                 Infinity
             );
             skeleton.calculate();
-            return skeleton.getTotalHeight() + (MARGIN_V * 2);
+            return skeleton.getTotalHeight() + (MARGIN_V * 2) + +(PADDING_V * 2);
         }
     }
 

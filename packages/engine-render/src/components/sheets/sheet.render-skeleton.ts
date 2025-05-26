@@ -1397,7 +1397,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
                 style,
             };
         }
-
+        this._calculateOverflowCell(row, col, config as IFontCacheItem);
         this._stylesCache.fontMatrix.setValue(row, col, config as IFontCacheItem);
     }
 
